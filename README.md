@@ -1,84 +1,109 @@
-# Turborepo starter
+# COEQWAL Turborepo
 
-This is an official starter Turborepo.
+The COEQWAL Turborepo is a monorepo for the Collaboratory for Equity in Water Allocation project. It facilitates the development, management, and deployment of applications and packages that support equitable water management decisions by combining community input, computational models, and open data.
 
-## Using this example
+This repository uses Turborepo to streamline development workflows, allowing shared code, efficient builds, and cross-project collaboration.
 
-Run the following command:
+## Stack
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [pnpm](https://pnpm.io/)
+- [Turborepo](https://turbo.build/repo)
+- [Mapbox](https://mapbox.com/)
+- [D3](https://d3js.org/)
+- [MaterialUI](https://mui.com/material-ui/)
+- [SASS](https://sass-lang.com/)
+
+## Installation
+
+### Prerequisites
+
+Node.js: Ensure you have Node.js version 22.x installed. Use nvm or Volta for version management.
 
 ```sh
-npx create-turbo@latest
+nvm install 22.13.0
 ```
 
-## What's inside?
+pnpm: Install pnpm globally using Corepack (included in Node.js 22.x).
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+```sh
+corepack enable
+corepack prepare pnpm@10.0.0 --activate
 ```
 
-### Develop
+### Installating the repo and packages
 
-To develop all apps and packages, run the following command:
+Clone the repository, cd into the repo, and install dependencies.
 
+```sh
+git clone https://github.com/berkeley-gif/coeqwal-website.git
+cd coeqwal-website
+pnpm install
 ```
-cd my-turborepo
+
+## How to run
+
+See package.json for scripts. Here is how to explicitly run the dev script. Note that after running the build scripts, the builds will appear in the .next/ directory of each app. You can run the built app by running `pnpm start` in the app's directory.
+
+### Start all apps in development mode
+
+```sh
 pnpm dev
 ```
 
-### Remote Caching
+### Start a Specific App
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+To run a specific app (e.g., main), navigate to its directory and start it:
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+```sh
+cd apps/main
+pnpm dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Changes from the Standard Turborepo
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+This Turborepo has been customized to meet the needs of the COEQWAL project. Key changes include:
 
+### Global Dependencies:
+
+- next, react, react-dom, and @types/node are installed globally to ensure consistency across apps and reduce duplication.
+- Shared TypeScript configuration (@repo/typescript-config) centralizes TypeScript settings.
+
+### Shared Packages:
+
+- A packages/ui package provides reusable UI components.
+- A packages/types package stores shared TypeScript types.
+
+## Adding a new app
+
+To add a new app
+
+1. create a new directory in the apps/ directory.
+2. run
+
+```sh
+pnpm dlx create-next-app@latest <app name>
 ```
-npx turbo link
+
+You can delete the .gitignore file if you like and just use the turbo repo-wide one.
+
+Run `pnpm dev` and `pnpm build` to make sure the installation works.
+
+3. To match the configuration with the rest of the Turborepo:
+
+```sh
+pnpm remove react react-dom next typescript @types/node @types/react @types/react-dom eslint eslint-config-next @eslint/eslintrc
 ```
 
-## Useful Links
+Run `pnpm dev` and `pnpm build` to make sure the changes are okay.
 
-Learn more about the power of Turborepo:
+```sh
+pnpm add @repo/eslint-config -D --workspace
+```
 
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+Replace eslint.config.mjs with eslint.config.js.
+
+
+
