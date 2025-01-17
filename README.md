@@ -47,7 +47,7 @@ pnpm install
 
 ## How to run
 
-See package.json for scripts. Note that after running the build scripts, the builds will appear in the `.next/` directory of each app. You can run the built app by running `pnpm start` in the app's directory.
+See `package.json` for scripts. Note that after running the build scripts, the builds will appear in the `.next/` directory of each app. You can run the built app by running `pnpm start` in the app's directory.
 
 Here is how to explicitly run the dev script:
 
@@ -59,7 +59,7 @@ pnpm dev
 
 ### Run a specific app only
 
-To run a specific app (e.g., main), navigate to its directory and start it:
+To run a specific app (e.g., `main`), navigate to its directory and start it:
 
 ```sh
 cd apps/main
@@ -82,26 +82,25 @@ This Turborepo has been customized to meet the needs of the COEQWAL project. Key
 
 ## Adding a new app
 
-To add a new app
-
-1. create a new directory in the apps/ directory.
-2. run
+To add a new app, cd into the `apps` directory and run
 
 ```sh
 pnpm dlx create-next-app@latest <app name>
 ```
 
-You can delete the .gitignore file if you like and use the root one.
+This generator should create your directory and install necessary files, configurations, and dependencies. You can delete the .gitignore file if you like and use the root one. Then go to the root level and run:
 
 ```sh
+cd ../
 pnpm install
 ```
 
-Run `pnpm dev` and `pnpm build` to make sure the installation works.
+To make sure everything is linked correctly. Run `pnpm dev` and `pnpm build` to make sure the installation works.
 
 3. To match the configuration with the rest of the Turborepo:
 
 ```sh
+cd apps/<app name>
 pnpm remove react react-dom next typescript @types/node @types/react @types/react-dom eslint eslint-config-next @eslint/eslintrc
 ```
 
