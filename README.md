@@ -1,16 +1,18 @@
 # COEQWAL Turborepo
 
-The COEQWAL Turborepo is a monorepo for the Collaboratory for Equity in Water Allocation project. It facilitates the development, management, and deployment of applications and packages that support equitable water management decisions by combining community input, computational models, and open data.
+The COEQWAL Turborepo is a monorepo for the Collaboratory for Equity in Water Allocation (COEQWAL) project. It facilitates the development, management, and deployment of applications and packages that support equitable water management decisions by combining community input, computational models, and open data.
 
-This repository uses Turborepo to streamline development workflows, allowing shared code, efficient builds, and cross-project collaboration.
+This repository uses Turborepo to streamline development workflows, allowing shared code, efficient builds, and cross-project collaboration. A key concept in a Turborepo is that there is a directory for apps and a directory for packages. Apps are standalone apps that can be developed independently and imported into other apps or built and run separately. Packages are components that can be shared between apps. Both are "workspaces," to use the Turborepo terminology, and can be connected by setting up exports and imports in their respective `package.json` files.
+
+Dependencies and configurations set at the root level are overriden by local dependencies and configurations. For example, if you'd like to set a different linting configuration or a different dependency version for a specific app, you can configure these using that app's `package.json` and configuration files.
 
 ## Stack
 
 - [Next.js](https://nextjs.org/)
 - [React](https://reactjs.org/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [pnpm](https://pnpm.io/)
 - [Turborepo](https://turbo.build/repo)
+- [pnpm](https://pnpm.io/)
 - [Mapbox](https://mapbox.com/)
 - [D3](https://d3js.org/)
 - [MaterialUI](https://mui.com/material-ui/)
@@ -26,7 +28,7 @@ Node.js: Ensure you have Node.js version 22.x installed. Use nvm or Volta for ve
 nvm install 22.13.0
 ```
 
-pnpm: Install pnpm globally using Corepack (included in Node.js 22.x).
+pnpm: Install pnpm using Corepack (included in Node.js 22.x).
 
 ```sh
 corepack enable
@@ -45,15 +47,17 @@ pnpm install
 
 ## How to run
 
-See package.json for scripts. Here is how to explicitly run the dev script. Note that after running the build scripts, the builds will appear in the .next/ directory of each app. You can run the built app by running `pnpm start` in the app's directory.
+See package.json for scripts. Note that after running the build scripts, the builds will appear in the `.next/` directory of each app. You can run the built app by running `pnpm start` in the app's directory.
 
-### Start all apps in development mode
+Here is how to explicitly run the dev script:
+
+### Run all apps in development mode
 
 ```sh
 pnpm dev
 ```
 
-### Start a Specific App
+### Run a specific app only
 
 To run a specific app (e.g., main), navigate to its directory and start it:
 
@@ -66,15 +70,15 @@ pnpm dev
 
 This Turborepo has been customized to meet the needs of the COEQWAL project. Key changes include:
 
-### Global Dependencies:
+### Global dependencies:
 
-- next, react, react-dom, and @types/node are installed globally to ensure consistency across apps and reduce duplication.
-- Shared TypeScript configuration (@repo/typescript-config) centralizes TypeScript settings.
+- `next`, `react`, `react-dom`, all their types, and `typescript`, `@types/node`, and `prettier` are installed globally to ensure consistency across apps and reduce duplication. Compare the dependencies in the root `package.json` with the `package.json` in the individual `apps` and `packages` directories for details.
 
-### Shared Packages:
+### Shared packages:
 
-- A packages/ui package provides reusable UI components.
-- A packages/types package stores shared TypeScript types.
+- The shared `eslint-config`, `typescript-config` and `ui` are standard for Turborepo setups, but these can be customized for the project.
+- Jill is expecting to set up a common Mapbox map package, a shared data package, a common parameters library package, an api package, and a language translation package.
+- The Viz Team should feel free to set up packages to support their common work.
 
 ## Adding a new app
 
@@ -87,7 +91,11 @@ To add a new app
 pnpm dlx create-next-app@latest <app name>
 ```
 
-You can delete the .gitignore file if you like and just use the turbo repo-wide one.
+You can delete the .gitignore file if you like and use the root one.
+
+```sh
+pnpm install
+```
 
 Run `pnpm dev` and `pnpm build` to make sure the installation works.
 
@@ -97,13 +105,30 @@ Run `pnpm dev` and `pnpm build` to make sure the installation works.
 pnpm remove react react-dom next typescript @types/node @types/react @types/react-dom eslint eslint-config-next @eslint/eslintrc
 ```
 
+You can use the `main` app's `package.json` as a guide.
+
+```sh
+pnpm install
+```
+
 Run `pnpm dev` and `pnpm build` to make sure the changes are okay.
+
+Finally, set up eslint using the `eslint-config` package:
 
 ```sh
 pnpm add @repo/eslint-config -D --workspace
 ```
 
-Replace eslint.config.mjs with eslint.config.js.
+Replace eslint.config.mjs with eslint.config.js like in the `main` app.
 
+```sh
+pnpm install
+```
 
+Test
 
+If your installation gets messed up at any point, try
+
+```sh
+rm -rf node_modules .turbo && pnpm install && pnpm build
+```
