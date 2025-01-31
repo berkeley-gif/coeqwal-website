@@ -7,7 +7,8 @@
     "./card": "./src/card.tsx",
     "./code": "./src/code.tsx",
     "./themes": "./src/themes/theme.tsx",
-    "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx"
+    "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
+    "./header": "./src/header.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

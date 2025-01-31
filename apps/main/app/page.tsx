@@ -1,4 +1,4 @@
-import Header from "./components/layout/Header";
+import { Header } from "@repo/ui/header";
 import Image from "next/image";
 import styles from "./page.module.css";
 

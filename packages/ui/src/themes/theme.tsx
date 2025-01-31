@@ -34,8 +34,8 @@ const theme = createTheme({
             main: '#dc004e',
         },
         text: {
-            primary: '#000',
-            secondary: '#666',
+            primary: '#fff',
+            secondary: '#fff',
         },
         divider: '#e0e0e0',
         background: {
@@ -115,7 +115,7 @@ const theme = createTheme({
             fontWeight: 500,
             fontSize: "0.875rem",
             lineHeight: 1.75,
-            letterSpacing: "0.02857rem",
+            letterSpacing: "0.01rem",
             textTransform: "uppercase"
         },
         caption: {
@@ -135,14 +135,63 @@ const theme = createTheme({
         tooltip: 1500,
     },
     components: {
-        MuiButton: {
+        MuiAppBar: {
             styleOverrides: {
-                root: {
+                root: ({ theme }) => ({
+                    backgroundColor: theme.background.transparent,
+                    borderBottom: theme.border.primary,
+                    boxShadow: 'none',
+                })
+            }
+        },
+        MuiButton: {
+            defaultProps: {
+                variant: 'outlined',
+                size: 'small',
+                color: 'inherit',
+            },
+            styleOverrides: {
+                root: ({ theme }) => ({
                     textTransform: 'none',
-                },
+                    border: theme.border.primary,
+                    backgroundColor: theme.background.transparent,
+                    borderRadius: theme.shape.borderRadius * 6,
+                    '&:hover': {
+                        border: theme.border.primary,
+                        backgroundColor: theme.background.transparent,
+                    }
+                }),
             },
         },
     },
 })
+
+theme.border = {
+    primary: '1px solid white'
+} as const;
+
+theme.background = {
+    transparent: 'transparent'
+} as const;
+
+// TypeScript declarations for our custom theme properties
+declare module '@mui/material/styles' {
+    interface Theme {
+        border: {
+            primary: string;
+        }
+        background: {
+            transparent: string;
+        }
+    }
+    interface ThemeOptions {
+        border?: {
+            primary?: string;
+        }
+        background?: {
+            transparent?: string;
+        }
+    }
+}
 
 export default theme
