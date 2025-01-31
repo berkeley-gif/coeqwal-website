@@ -1,20 +1,12 @@
 import { createTheme } from '@mui/material/styles'
-import { Geist, Geist_Mono } from "next/font/google"
-import { Inter } from 'next/font/google'
+import { Geist, Inter } from 'next/font/google'
 
-const inter = Inter({
-    subsets: ['latin'],
-    display: 'swap',
-  })
-
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const geist = Geist({
     subsets: ['latin'],
     display: 'swap',
 })
 
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
+const inter = Inter({
     subsets: ['latin'],
     display: 'swap',
 })
@@ -39,53 +31,53 @@ const theme = createTheme({
         },
         divider: '#e0e0e0',
         background: {
-            default: '#1976d2',
+            default: '#4384cf',
             paper: '#fff',
         },
     },
     typography: {
-        htmlFontSize: 16,
-        fontFamily: `${geistSans.variable}, ${geistMono.variable}, ${inter.style.fontFamily}`,
-        fontSize: 14,
+        htmlFontSize: 20,
+        fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
+        fontSize: 18,
         fontWeightLight: 300,
         fontWeightRegular: 400,
         fontWeightMedium: 500,
         fontWeightBold: 700,
         h1: {
-            fontWeight: 300,
-            fontSize: "6rem",
+            fontSize: '4.236rem',
+            fontWeight: 500,
             lineHeight: 1.167,
-            letterSpacing: "-0.01562rem"
+            letterSpacing: '-0.01562em',
         },
         h2: {
+            fontSize: '2.618rem',
             fontWeight: 300,
-            fontSize: "3.75rem",
             lineHeight: 1.2,
-            letterSpacing: "-0.00833rem"
+            letterSpacing: '-0.00833em',
         },
         h3: {
+            fontSize: '2rem',
             fontWeight: 400,
-            fontSize: "3rem",
             lineHeight: 1.167,
-            letterSpacing: "0rem"
+            letterSpacing: '0em',
         },
         h4: {
+            fontSize: '1.618rem',
             fontWeight: 400,
-            fontSize: "2.125rem",
             lineHeight: 1.235,
-            letterSpacing: "0.00735rem"
+            letterSpacing: '0.00735em',
         },
         h5: {
+            fontSize: '1.25rem',
             fontWeight: 400,
-            fontSize: "1.5rem",
             lineHeight: 1.334,
-            letterSpacing: "0rem"
+            letterSpacing: '0em',
         },
         h6: {
+            fontSize: '1rem',
             fontWeight: 500,
-            fontSize: "1.25rem",
             lineHeight: 1.6,
-            letterSpacing: "0.0075rem"
+            letterSpacing: '0.0075em',
         },
         subtitle1: {
             fontWeight: 400,
@@ -100,29 +92,28 @@ const theme = createTheme({
             letterSpacing: "0.00714rem"
         },
         body1: {
+            fontSize: '1.25rem',
             fontWeight: 400,
-            fontSize: "1rem",
             lineHeight: 1.5,
-            letterSpacing: "0.00938rem"
+            letterSpacing: '0.00938em',
         },
         body2: {
+            fontSize: '1rem',
             fontWeight: 400,
-            fontSize: "0.875rem",
             lineHeight: 1.43,
-            letterSpacing: "0.01071rem"
+            letterSpacing: '0.01071em',
         },
         button: {
+            fontSize: '1.2rem',
             fontWeight: 500,
-            fontSize: "0.875rem",
             lineHeight: 1.75,
-            letterSpacing: "0.01rem",
-            textTransform: "uppercase"
+            textTransform: 'uppercase',
         },
         caption: {
+            fontSize: '0.809rem',
             fontWeight: 400,
-            fontSize: "0.75rem",
             lineHeight: 1.66,
-            letterSpacing: "0.03333rem"
+            letterSpacing: '0.03333em',
         },
     },
     shape: {
@@ -147,7 +138,7 @@ const theme = createTheme({
         MuiButton: {
             defaultProps: {
                 variant: 'outlined',
-                size: 'small',
+                size: 'large',
                 color: 'inherit',
             },
             styleOverrides: {
