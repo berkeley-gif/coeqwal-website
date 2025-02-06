@@ -11,7 +11,10 @@ const inter = Inter({
     display: 'swap',
 })
 
+const baseTheme = createTheme()
+
 const theme = createTheme({
+    ...baseTheme,
     palette: {
         common: {
             black: '#000',
@@ -36,17 +39,17 @@ const theme = createTheme({
         },
     },
     typography: {
-        htmlFontSize: 20,
+        htmlFontSize: 16,
         fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
-        fontSize: 18,
+        fontSize: 16,
         fontWeightLight: 300,
         fontWeightRegular: 400,
         fontWeightMedium: 500,
         fontWeightBold: 700,
         h1: {
-            fontSize: '4.236rem',
-            fontWeight: 500,
-            lineHeight: 1.167,
+            fontSize: 'clamp(2rem, 5vw, 5rem)',
+            fontWeight: 600,
+            lineHeight: 1,
             letterSpacing: '-0.01562em',
         },
         h2: {
@@ -104,7 +107,7 @@ const theme = createTheme({
             letterSpacing: '0.01071em',
         },
         button: {
-            fontSize: '1.2rem',
+            fontSize: '1.25rem',
             fontWeight: 500,
             lineHeight: 1.75,
             textTransform: 'uppercase',
@@ -152,6 +155,25 @@ const theme = createTheme({
                         backgroundColor: theme.background.transparent,
                     }
                 }),
+            },
+        },
+        MuiContainer: {
+            styleOverrides: {
+                root: {
+                    padding: '160px',
+                    [baseTheme.breakpoints.down('xl')]: {
+                        padding: 'calc(160px - 2vw)',
+                    },
+                    [baseTheme.breakpoints.down('lg')]: {
+                        padding: '120px',
+                    },
+                    [baseTheme.breakpoints.down('md')]: {
+                        padding: '80px',
+                    },
+                    [baseTheme.breakpoints.down('sm')]: {
+                        padding: '40px',
+                    },
+                },
             },
         },
     },

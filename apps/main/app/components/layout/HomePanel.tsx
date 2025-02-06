@@ -4,12 +4,20 @@ import Image from 'next/image'
 
 const HomePanel = () => {
   return (
-    <Box sx={{ height: '100vh', width: '100%', p: 16 }}>
+    <Box sx={{ height: '100vh', width: '100%', p: 20 }}>
       <Grid2 container spacing={16}>
         {/* Left side - Text content */}
-        <Grid2 size={6}>
-          <Typography variant="h1" sx={{ maxWidth: 500 }} gutterBottom>
-            Californians are connected by their water.
+        <Grid2 size={{ xs: 12, lg: 6 }} order={{ xs: 2, lg: 1 }}>
+          <Typography
+            variant="h1"
+            sx={{ 
+              whiteSpace: 'pre-wrap', 
+            }}
+            gutterBottom
+          >
+            {`Californians
+are connected
+by their water.`}
           </Typography>
           <Typography variant="body1">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -17,7 +25,7 @@ const HomePanel = () => {
         </Grid2>
         
         {/* Right side - Hero image */}
-        <Grid2 size={6} sx={{ position: 'relative' }}>
+        <Grid2 size={{ xs: 12, lg: 6 }} sx={{ position: 'relative' }} order={{ xs: 1, lg: 2 }}>
           <Image
             src="/images/hero.png"
             alt="Illustration of people living in community in a California landscape with mountains, meadows, forests, and rivers"
