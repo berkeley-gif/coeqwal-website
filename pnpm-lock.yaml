@@ -121,6 +121,9 @@ importers:
       '@turbo/gen':
         specifier: ^1.12.4
         version: 1.13.4(@types/node@22.10.7)(typescript@5.7.3)
+      eslint:
+        specifier: ^9.15.0
+        version: 9.18.0
 
 packages:
 

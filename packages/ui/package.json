@@ -10,11 +10,12 @@
     "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 0",
+    "lint": "pnpm exec eslint . --config=eslint.config.mjs",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
+    "eslint": "^9.15.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@turbo/gen": "^1.12.4"
