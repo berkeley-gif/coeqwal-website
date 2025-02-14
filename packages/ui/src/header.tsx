@@ -1,18 +1,49 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, Stack } from '@mui/material';
+"use client"; // because of useMediaQuery to determine button variant
+
+import { AppBar, Toolbar, Typography, Button, Stack } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
+export const useResponsiveButtonVariant = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  return isMobile ? "text" : "outlined";
+};
 
 export function Header() {
+  const buttonVariant = useResponsiveButtonVariant();
+
   return (
     <AppBar position="fixed">
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
+      <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography variant="h6">COEQWAL</Typography>
-        
         <Stack direction="row" spacing={2}>
-          <Button>EN | SP</Button>
-          <Button>Get Data</Button>
-          <Button>About COEQWAL</Button>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              border: buttonVariant === "text" ? "none" : undefined,
+            }}
+          >
+            EN | SP
+          </Button>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              border: buttonVariant === "text" ? "none" : undefined,
+            }}
+          >
+            Get Data
+          </Button>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              border: buttonVariant === "text" ? "none" : undefined,
+            }}
+          >
+            About COEQWAL
+          </Button>
         </Stack>
       </Toolbar>
     </AppBar>
   );
-} 
+}
