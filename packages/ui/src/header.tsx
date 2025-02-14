@@ -14,7 +14,7 @@ export function Header() {
   const buttonVariant = useResponsiveButtonVariant();
 
   return (
-    <AppBar position="fixed">
+    <AppBar position="fixed" role="banner">
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography variant="h6">COEQWAL</Typography>
         <Stack direction="row" spacing={2}>
@@ -23,6 +23,7 @@ export function Header() {
             sx={{
               border: buttonVariant === "text" ? "none" : undefined,
             }}
+            aria-label="Switch Language"
           >
             EN | SP
           </Button>

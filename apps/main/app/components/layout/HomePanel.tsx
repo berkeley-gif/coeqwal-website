@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const HomePanel = () => {
   return (
-    <Container>
+    <Container role="main">
       <Grid2 container spacing={{ xs: 2, lg: 16 }}>
         {/* Left side - Text content */}
         <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 2, md: 1 }}>
@@ -17,12 +17,13 @@ const HomePanel = () => {
               },
             }}
             gutterBottom
+            aria-level={1}
           >
             {`Californians 
 are connected
 by their water.`}
           </Typography>
-          <Typography variant="body1">
+          <Typography variant="body1" aria-label="Introduction">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -52,6 +53,8 @@ by their water.`}
                 objectFit: "contain",
                 objectPosition: "center",
               }}
+              role="img"
+              aria-hidden="false"
             />
           </Box>
         </Grid2>
