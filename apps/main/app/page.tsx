@@ -1,6 +1,6 @@
-import { Header } from "@repo/ui/header";
-import { HomePanel } from "./components";
-import styles from "./page.module.css";
+import { Header } from "@repo/ui/header"
+import { HomePanel } from "./components"
+import styles from "./page.module.css"
 
 export default function Home() {
   return (
@@ -10,5 +10,5 @@ export default function Home() {
         <HomePanel />
       </main>
     </div>
-  );
+  )
 }

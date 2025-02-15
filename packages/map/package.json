@@ -1,0 +1,21 @@
+{
+  "name": "map",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "lint": "pnpm exec eslint . --config=eslint.config.mjs",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.10.0",
+    "react-map-gl": "^8.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  }
+}

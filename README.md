@@ -13,7 +13,8 @@ Dependencies and configurations set at the root level are overriden by local dep
 - [TypeScript](https://www.typescriptlang.org/)
 - [Turborepo](https://turbo.build/repo)
 - [pnpm](https://pnpm.io/)
-- [Mapbox](https://mapbox.com/)
+- [React-map-gl](https://visgl.github.io/react-map-gl/) (using mapbox)
+    - [Mapbox](https://mapbox.com/)
 - [D3](https://d3js.org/)
 - [MaterialUI](https://mui.com/material-ui/)
 - [SASS](https://sass-lang.com/)
@@ -26,6 +27,7 @@ Node.js: Ensure you have Node.js version 22.x installed. Use nvm or Volta for ve
 
 ```sh
 nvm install 22.13.0
+nvm use 22.13.0
 ```
 
 pnpm: Install pnpm using Corepack (included in Node.js 22.x).
@@ -124,10 +126,27 @@ Replace eslint.config.mjs with eslint.config.js like in the `main` app.
 pnpm install
 ```
 
-Test
+And be sure to test the app by running `pnpm dev` and `pnpm build`.
 
 If your installation gets messed up at any point, try
 
 ```sh
 rm -rf node_modules .turbo && pnpm install && pnpm build
 ```
+
+## Adding a new package
+
+Packages typically wouldn't use Nextjs, but they would use React. There are multiple ways to add a new package, but the most straightforward is to run:
+
+```sh
+pnpm turbo gen workspace --destination packages/my-new-package --type package
+```
+
+This will create a new package in the `packages` directory with a `package.json`. Tasks now are:
+
+- Fill in the scripts and dependencies in the `package.json` file. 
+- Add a `tsconfig.json` file to the package to use the root typescript config. 
+- Add an `eslint.config.mjs` file to the package to use the root eslint config.
+- Finally, set up your `src` directory and files. You can reference the `map` package in order to set up a new package.
+
+

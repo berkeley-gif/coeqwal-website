@@ -1,17 +1,17 @@
-import { createTheme } from "@mui/material/styles";
-import { Geist, Inter } from "next/font/google";
+import { createTheme } from "@mui/material/styles"
+import { Geist, Inter } from "next/font/google"
 
 const geist = Geist({
   subsets: ["latin"],
   display: "swap",
-});
+})
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-});
+})
 
-const baseTheme = createTheme();
+const baseTheme = createTheme()
 
 const theme = createTheme({
   ...baseTheme,
@@ -167,7 +167,7 @@ const theme = createTheme({
           padding: "clamp(2rem, 10vw, 10rem)",
           paddingTop: "calc(clamp(2rem, 10vw, 10rem) + 64px)",
           ...(() => {
-            const paddingValue = "clamp(2rem, 10vw, 10rem)";
+            const paddingValue = "clamp(2rem, 10vw, 10rem)"
             return {
               "@media (min-width: 600px)": {
                 paddingLeft: paddingValue,
@@ -184,40 +184,40 @@ const theme = createTheme({
                 paddingRight: paddingValue,
                 maxWidth: "none",
               },
-            };
+            }
           })(),
         },
       },
     },
   },
-});
+})
 
 theme.border = {
   primary: "1px solid white",
-} as const;
+} as const
 
 theme.background = {
   transparent: "transparent",
-} as const;
+} as const
 
 // TypeScript declarations for our custom theme properties
 declare module "@mui/material/styles" {
   interface Theme {
     border: {
-      primary: string;
-    };
+      primary: string
+    }
     background: {
-      transparent: string;
-    };
+      transparent: string
+    }
   }
   interface ThemeOptions {
     border?: {
-      primary?: string;
-    };
+      primary?: string
+    }
     background?: {
-      transparent?: string;
-    };
+      transparent?: string
+    }
   }
 }
 
-export default theme;
+export default theme

@@ -1,6 +1,6 @@
-import React from "react";
-import { Grid2, Typography, Container, Box } from "@mui/material";
-import Image from "next/image";
+import React from "react"
+import { Grid2, Typography, Container, Box } from "@mui/material"
+import Image from "next/image"
 
 const HomePanel = () => {
   return (
@@ -60,7 +60,7 @@ by their water.`}
         </Grid2>
       </Grid2>
     </Container>
-  );
-};
+  )
+}
 
-export default HomePanel;
+export default HomePanel

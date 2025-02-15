@@ -1,17 +1,17 @@
-"use client"; // because of useMediaQuery to determine button variant
+"use client" // because of useMediaQuery to determine button variant
 
-import { AppBar, Toolbar, Typography, Button, Stack } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
+import { AppBar, Toolbar, Typography, Button, Stack } from "@mui/material"
+import { useTheme } from "@mui/material/styles"
+import useMediaQuery from "@mui/material/useMediaQuery"
 
 export const useResponsiveButtonVariant = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  return isMobile ? "text" : "outlined";
-};
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+  return isMobile ? "text" : "outlined"
+}
 
 export function Header() {
-  const buttonVariant = useResponsiveButtonVariant();
+  const buttonVariant = useResponsiveButtonVariant()
 
   return (
     <AppBar position="fixed" role="banner">
@@ -46,5 +46,5 @@ export function Header() {
         </Stack>
       </Toolbar>
     </AppBar>
-  );
+  )
 }
