@@ -136,17 +136,25 @@ rm -rf node_modules .turbo && pnpm install && pnpm build
 
 ## Adding a new package
 
+Adding a new package to a Turborepo involves creating a new directory for the package, setting up its structure, and configuring it to work with the rest of the monorepo.
+
 Packages typically wouldn't use Nextjs, but they would use React. There are multiple ways to add a new package, but the most straightforward is to run:
 
 ```sh
-pnpm turbo gen workspace --destination packages/my-new-package --type package
+pnpm turbo gen workspace --destination packages/<my-new-package> --type package
 ```
 
 This will create a new package in the `packages` directory with a `package.json`. Tasks now are:
 
 - Fill in the scripts and dependencies in the `package.json` file. 
-- Add a `tsconfig.json` file to the package to use the root typescript config. 
-- Add an `eslint.config.mjs` file to the package to use the root eslint config.
-- Finally, set up your `src` directory and files. You can reference the `map` package in order to set up a new package.
+    - `name` should be `"@repo/<my-new-package>"`
+    - include `"type": "module"`,
+    - scripts should generally be as in the `map` or `i18n` package.
+    - refer to these packages for suggestions for the dependencies and dev dependencies.
+- Add a `tsconfig.json` file to the package to use the shared typescript config. 
+- Add an `eslint.config.mjs` file to the package to use the shared eslint config.
+- Set up your `src` directory.
+- Set up the appropriate exports in the `package.json` file.
+- Set up the appropriate imports in the `package.json` files of the apps that will use the package.
 
 
