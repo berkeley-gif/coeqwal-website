@@ -1,15 +1,18 @@
 "use client" // necessary for useTheme hook (ugh, maybe change this)
 
-import React from "react"
+import React, { useState } from 'react'
 import { Grid2, Typography, Container, Box } from "@mui/material"
-import Image from "next/image"
 import { useTheme } from '@mui/material/styles'
 
-const HomePanel = () => {
+const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
   const theme = useTheme()
 
+  const handleButtonClick = () => {
+    console.log("Button clicked")
+  }
+
   return (
-    <Container style={{ backgroundColor: theme.palette.primary.main }} role="main">
+    <Container style={{ backgroundColor: theme.palette.secondary.main }} role="main">
       <Grid2 container spacing={{ xs: 2, lg: 16 }}>
         {/* Left side - Text content */}
         <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 2, md: 1 }}>
@@ -24,9 +27,7 @@ const HomePanel = () => {
             gutterBottom
             aria-level={1}
           >
-            {`Californians 
-are connected
-by their water.`}
+            {`California water`}
           </Typography>
           <Typography variant="body1" aria-label="Introduction">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
@@ -34,6 +35,7 @@ by their water.`}
             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
             aliquip ex ea commodo consequat.
           </Typography>
+          <button onClick={handleButtonClick}>Change View</button>
         </Grid2>
 
         {/* Right side - Hero image */}
@@ -47,20 +49,7 @@ by their water.`}
               margin: "0 auto",
             }}
           >
-            <Image
-              src="/images/hero.png"
-              alt="Illustration of people living in community in a California landscape with mountains, meadows, forests, and rivers"
-              width={1893}
-              height={1584}
-              style={{
-                width: "100%",
-                height: "auto",
-                objectFit: "contain",
-                objectPosition: "center",
-              }}
-              role="img"
-              aria-hidden="false"
-            />
+
           </Box>
         </Grid2>
       </Grid2>
@@ -68,4 +57,4 @@ by their water.`}
   )
 }
 
-export default HomePanel
+export default CaliforniaWaterPanel
