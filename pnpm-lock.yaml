@@ -57,6 +57,9 @@ importers:
 
   apps/main:
     dependencies:
+      '@repo/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@repo/map':
         specifier: workspace:*
         version: link:../../packages/map

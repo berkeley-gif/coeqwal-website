@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
-    "@repo/map": "workspace:*"
+    "@repo/map": "workspace:*",
+    "@repo/i18n": "workspace:*"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
