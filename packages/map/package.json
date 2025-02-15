@@ -1,8 +1,11 @@
 {
-  "name": "map",
+  "name": "@repo/map",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./src/MapboxMap.tsx"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "lint": "pnpm exec eslint . --config=eslint.config.mjs",

@@ -57,6 +57,9 @@ importers:
 
   apps/main:
     dependencies:
+      '@repo/map':
+        specifier: workspace:*
+        version: link:../../packages/map
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui

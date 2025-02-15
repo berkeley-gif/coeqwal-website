@@ -5,8 +5,8 @@ import Map, { NavigationControl } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export interface MapProps {
-  mapboxToken: string // Store in app's .env file
-  initialViewState: {
+  mapboxToken: string
+  initialViewState?: {
     latitude: number
     longitude: number
     zoom: number
@@ -19,9 +19,7 @@ export interface MapProps {
   attributionControl?: boolean
 }
 
-/**
- * A minimal React component wrapping `react-map-gl`. Props values listed below are defaults.
- *
+/*
  * Usage example:
  * <MapboxMap
  *   mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''}
@@ -44,9 +42,11 @@ export const MapboxMap: React.FC<MapProps> = ({
   mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
   attributionControl = true,
 }) => {
+  console.log("Received mapboxToken:", mapboxToken)
+
   return (
     <Map
-      mapboxApiAccessToken={mapboxToken}
+      mapboxAccessToken={mapboxToken}
       initialViewState={initialViewState}
       minZoom={minZoom}
       mapStyle={mapStyle}
