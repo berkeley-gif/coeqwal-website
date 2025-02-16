@@ -37,9 +37,10 @@ export function TranslationProvider({
 
   // On mount, read the saved locale from localStorage
   useEffect(() => {
-    const savedLocale = typeof window !== "undefined"
-      ? window.localStorage.getItem("userLocale")
-      : null
+    const savedLocale =
+      typeof window !== "undefined"
+        ? window.localStorage.getItem("userLocale")
+        : null
 
     if (savedLocale === "en" || savedLocale === "es") {
       setLocale(savedLocale)
