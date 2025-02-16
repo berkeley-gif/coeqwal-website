@@ -35,6 +35,17 @@ export function TranslationProvider({
   const [locale, setLocale] = useState<Locale>("en")
   const [messages, setMessages] = useState<TranslationSchema>(fallbackMessages)
 
+  // On mount, read the saved locale from localStorage
+  useEffect(() => {
+    const savedLocale = typeof window !== "undefined"
+      ? window.localStorage.getItem("userLocale")
+      : null
+
+    if (savedLocale === "en" || savedLocale === "es") {
+      setLocale(savedLocale)
+    }
+  }, [])
+
   // Fetch chosen locale on locale change
   useEffect(() => {
     async function fetchTranslations() {
@@ -59,6 +70,8 @@ export function TranslationProvider({
       }
     }
 
+    // Whenever locale changes, store it in localStorage and fetch new strings
+    window.localStorage.setItem("userLocale", locale)
     fetchTranslations()
   }, [locale])
 

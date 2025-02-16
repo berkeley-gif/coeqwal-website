@@ -1,4 +1,11 @@
 {
+  "header": {
+    "title": "COEQWAL",
+    "buttons": {
+      "getData": "Get Data",
+      "aboutCOEQWAL": "About COEQWAL"
+    }
+  },
   "homePanel": {
     "title": "Californians are connected by their water.",
     "pg1": "Because of the geography of California, water rarely falls where it is most used.",

@@ -2,8 +2,9 @@
 
 import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
-import useMediaQuery from "@mui/material/useMediaQuery"
+import { useMediaQuery } from "@mui/material"
 import { LanguageSwitcher } from "./language-switcher"
+import { useTranslation } from "@repo/i18n"
 
 export const useResponsiveButtonVariant = () => {
   const theme = useTheme()
@@ -12,6 +13,7 @@ export const useResponsiveButtonVariant = () => {
 }
 
 export function Header() {
+  const { t } = useTranslation()
   const buttonVariant = useResponsiveButtonVariant()
 
   return (
@@ -26,7 +28,7 @@ export function Header() {
               border: buttonVariant === "text" ? "none" : undefined,
             }}
           >
-            Get Data
+            {t("header.buttons.getData")}
           </Button>
           <Button
             variant={buttonVariant}
@@ -34,7 +36,7 @@ export function Header() {
               border: buttonVariant === "text" ? "none" : undefined,
             }}
           >
-            About COEQWAL
+            {t("header.buttons.aboutCOEQWAL")}
           </Button>
         </Stack>
       </Toolbar>
