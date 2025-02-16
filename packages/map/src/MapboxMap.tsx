@@ -73,7 +73,10 @@ export const MapboxMap: React.FC<MapProps> = ({
         )
       }}
     >
-      <NavigationControl position="top-right" />
+      <NavigationControl 
+        position="top-right"
+        style={{ marginTop: "100px" }}
+      />
     </Map>
   )
 }

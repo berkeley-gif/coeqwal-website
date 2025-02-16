@@ -20,14 +20,18 @@ export default function Home() {
               left: 0,
               width: "100%",
               height: "100%",
-              zIndex: -1,
+              pointerEvents: "all"
             }}
           >
             <MapboxMap
               mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
             />
           </div>
-          <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ 
+            position: "relative", 
+            zIndex: 2,
+            pointerEvents: "none"
+          }}>
             <HomePanel />
             <CaliforniaWaterPanel />
           </div>
