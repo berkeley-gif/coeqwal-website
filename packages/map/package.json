@@ -7,18 +7,18 @@
     ".": "./src/MapboxMap.tsx"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --skipLibCheck",
     "lint": "pnpm exec eslint . --config=eslint.config.mjs",
     "check-types": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "eslint": "^9.15.0"
+  },
   "dependencies": {
     "mapbox-gl": "^3.10.0",
     "react-map-gl": "^8.0.1"
-  },
-  "devDependencies": {
-    "eslint": "^9.15.0",
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*"
   }
 }

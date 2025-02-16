@@ -4,7 +4,7 @@ import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { LanguageSwitcher } from "./language-switcher"
-import { useTranslation } from "@repo/i18n"
+import { useUiTranslation } from "../i18n/useUiTranslation"
 
 export const useResponsiveButtonVariant = () => {
   const theme = useTheme()
@@ -13,7 +13,7 @@ export const useResponsiveButtonVariant = () => {
 }
 
 export function Header() {
-  const { t } = useTranslation()
+  const { t } = useUiTranslation()
   const buttonVariant = useResponsiveButtonVariant()
 
   return (

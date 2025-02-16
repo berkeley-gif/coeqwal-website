@@ -7,7 +7,8 @@
     ".": "./index.ts"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json && pnpm run postbuild",
+    "postbuild": "node scripts/copy-locales.js",
     "lint": "pnpm exec eslint . --config=eslint.config.mjs",
     "check-types": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""

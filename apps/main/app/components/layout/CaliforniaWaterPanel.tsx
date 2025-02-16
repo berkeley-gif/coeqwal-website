@@ -1,16 +1,16 @@
 "use client" // necessary for useTheme hook (ugh, maybe change this)
 
 import React, { useRef, useState, useEffect } from "react"
-import { Grid2, Typography, Container, Box } from "@mui/material"
+import { Grid2, Typography, Container, Box, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
-import { useTranslation } from "@repo/i18n"
+import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 
 type CaliforniaWaterPanelProps = Record<string, unknown>
 
 const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const { t } = useMainAppTranslation()
 
   // Detect when the panel enters the viewport and fade out the background color
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -48,6 +48,12 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
         backgroundColor,
         transition: "background-color 3s ease-in-out",
         minHeight: "100vh",
+
+        // Pass pointer events through the panel unless it's a button or icon
+        pointerEvents: "none",
+        "& .MuiButton-root, & .MuiSvgIcon-root": {
+          pointerEvents: "auto",
+        },
       }}
       role="main"
     >
@@ -89,6 +95,7 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
           ></Box>
         </Grid2>
       </Grid2>
+      <Button onClick={() => alert("Clicked!")}>Click me</Button>
     </Container>
   )
 }

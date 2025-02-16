@@ -155,6 +155,7 @@ const theme = createTheme({
           border: theme.border.primary,
           backgroundColor: theme.background.transparent,
           borderRadius: theme.shape.borderRadius * 6,
+          pointerEvents: "auto",
         }),
       },
     },
@@ -165,8 +166,10 @@ const theme = createTheme({
           height: "100vh",
           maxWidth: "none",
           margin: 0,
+          overflow: "hidden",
           padding: "clamp(2rem, 10vw, 10rem)",
           paddingTop: "calc(clamp(2rem, 10vw, 10rem) + 64px)",
+          pointerEvents: "none",
           ...(() => {
             const paddingValue = "clamp(2rem, 10vw, 10rem)"
             return {
@@ -196,6 +199,7 @@ const theme = createTheme({
           color: 'white', // Passive color
           fontSize: 'inherit', // Icons match text font size
           transition: 'color 0.2s ease-in-out',
+          pointerEvents: "auto",
 
           '&:hover, &:focus': {
             color: theme.palette.primary.light, // Active color

@@ -17,6 +17,17 @@ export interface MapProps {
   style?: React.CSSProperties // Inline CSS styling for the map container
   mapStyle?: string // Basemap style URL. Defaults to COEQWAL's custom satellite style
   attributionControl?: boolean
+  scrollZoom?: boolean
+}
+
+type ViewStateChangeEvent = {
+  viewState: {
+    longitude: number
+    latitude: number
+    zoom: number
+    pitch: number
+    bearing: number
+  }
 }
 
 /*
@@ -38,11 +49,11 @@ export const MapboxMap: React.FC<MapProps> = ({
     bearing: 0,
   },
   minZoom = 5.0,
-  style = { width: "100vw", height: "100vh" },
+  style = { width: "100vw", height: "100vh", pointerEvents: "auto" },
   mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
   attributionControl = true,
+  scrollZoom = false,
 }) => {
-  console.log("Received mapboxToken:", mapboxToken)
 
   return (
     <Map
@@ -51,10 +62,18 @@ export const MapboxMap: React.FC<MapProps> = ({
       minZoom={minZoom}
       mapStyle={mapStyle}
       style={style}
-      reuseMaps={true}
+      reuseMaps
       attributionControl={attributionControl}
+      scrollZoom={scrollZoom}
+      dragPan={true}
+      onMove={(evt: ViewStateChangeEvent) => {
+        const { longitude, latitude, zoom, pitch, bearing } = evt.viewState
+        console.log(
+          `Lon: ${longitude}, Lat: ${latitude}, Zoom: ${zoom}, Pitch: ${pitch}, Bearing: ${bearing}`
+        )
+      }}
     >
-      <NavigationControl position="bottom-right" />
+      <NavigationControl position="top-right" />
     </Map>
   )
 }

@@ -7,8 +7,6 @@ import { MapProvider } from "./context/MapContext"
 import { MapboxMap } from "@repo/map"
 
 export default function Home() {
-  // Log the token to verify it's being read correctly
-  console.log("Mapbox Token:", process.env.NEXT_PUBLIC_MAPBOX_TOKEN)
 
   return (
     <div className={styles.page}>

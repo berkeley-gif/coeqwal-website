@@ -4,11 +4,11 @@ import React from "react"
 import { Typography, Container, Box } from "@mui/material"
 import Image from "next/image"
 import { useTheme } from "@mui/material/styles"
-import { useTranslation } from "@repo/i18n"
+import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
 
 const HomePanel = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const { t } = useMainAppTranslation()
 
   return (
     <Container
