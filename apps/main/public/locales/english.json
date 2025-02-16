@@ -12,5 +12,15 @@
     "pg2": "Over the past 150 years, we have built a highly-managed system to distribute water to cities, farms, ecosystems, and communities.",
     "pg3": "We find ourselves in a moment where ecosystems are challenged, human right to water is not always being met, and we are facing the impacts of climate change.",
     "pg4": "Can we reimagine our water system to be more resilient, equitable, and sustainable?"
+  },
+  "CaliforniaWaterPanel": {
+    "title": "Califiornia Water",
+    "pg1": "Most of California's water comes from Winter rains in the north.",
+    "pg2": "Snowpack in the Sierra Nevada mountains creates natural reservoirs that release water throughout the Spring.",
+    "pg3": "Surface water flows into tributaries to the Sacramento and San Joaquin Rivers,",
+    "pg4": "into the Delta,",
+    "pg5": "and then out to the Pacific through the Golden Gate.",
+    "pg6": "Groundwater is stored underground in aquifers and springs throughout the Central Valley and the mountains.",
+    "pg7": "Ancient groundwater is interconnected and replenished by seasonal rains."
   }
 }

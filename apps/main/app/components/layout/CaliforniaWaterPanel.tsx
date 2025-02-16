@@ -3,11 +3,14 @@
 import React, { useRef, useState, useEffect } from "react"
 import { Grid2, Typography, Container, Box } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
+import { useTranslation } from "@repo/i18n"
+import VisibilityIcon from "@mui/icons-material/Visibility"
 
 type CaliforniaWaterPanelProps = Record<string, unknown>
 
 const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   // Detect when the panel enters the viewport and fade out the background color
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -37,10 +40,6 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
     ? "transparent"
     : theme.palette.secondary.main
 
-  const handleButtonClick = () => {
-    console.log("Button clicked")
-  }
-
   return (
     <Container
       ref={panelRef}
@@ -66,15 +65,15 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
             gutterBottom
             aria-level={1}
           >
-            {`California water`}
+            {t("CaliforniaWaterPanel.title")}
           </Typography>
-          <Typography variant="body1" aria-label="Introduction">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </Typography>
-          <button onClick={handleButtonClick}>Change View</button>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg1")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg2")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg3")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg4")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg5")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg6")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">{t("CaliforniaWaterPanel.pg7")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
         </Grid2>
 
         {/* Right side - Hero image */}

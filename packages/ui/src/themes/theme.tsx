@@ -103,6 +103,7 @@ const theme = createTheme({
       fontWeight: 400,
       lineHeight: 1.5,
       letterSpacing: "0.00938em",
+      marginBottom: "1rem",
     },
     body2: {
       fontSize: "1rem",
@@ -187,6 +188,19 @@ const theme = createTheme({
             }
           })(),
         },
+      },
+    },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: 'white', // Passive color
+          fontSize: 'inherit', // Icons match text font size
+          transition: 'color 0.2s ease-in-out',
+
+          '&:hover, &:focus': {
+            color: theme.palette.primary.light, // Active color
+          },
+        }),
       },
     },
   },
