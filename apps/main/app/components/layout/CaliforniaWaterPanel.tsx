@@ -2,11 +2,9 @@
 
 import React, { useRef, useState, useEffect } from "react"
 import { Grid2, Typography, Container, Box } from "@mui/material"
-import { useTheme } from '@mui/material/styles'
+import { useTheme } from "@mui/material/styles"
 
-interface CaliforniaWaterPanelProps {
-  // Add props
-}
+type CaliforniaWaterPanelProps = Record<string, unknown>
 
 const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
   const theme = useTheme()
@@ -19,7 +17,7 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
     const currentRef = panelRef.current
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 } // 10% of the panel must be visible to trigger the fade out
+      { threshold: 0.1 }, // 10% of the panel must be visible to trigger the fade out
     )
 
     if (currentRef) {
@@ -89,9 +87,7 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
               },
               margin: "0 auto",
             }}
-          >
-
-          </Box>
+          ></Box>
         </Grid2>
       </Grid2>
     </Container>

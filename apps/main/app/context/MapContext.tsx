@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useState, ReactNode } from "react"
 
 interface ViewState {
   latitude: number
@@ -13,7 +13,9 @@ interface MapContextProps {
 
 const MapContext = createContext<MapContextProps | undefined>(undefined)
 
-export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const MapProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [viewState, setViewState] = useState<ViewState>({
     latitude: 37.8,
     longitude: -122.4,
@@ -30,7 +32,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 export const useMap = () => {
   const context = useContext(MapContext)
   if (!context) {
-    throw new Error('useMap must be used within a MapProvider')
+    throw new Error("useMap must be used within a MapProvider")
   }
   return context
 }

@@ -1,6 +1,6 @@
-"use client" // because of useMediaQuery to determine button variant
+"use client"
 
-import { AppBar, Toolbar, Typography, Button, Stack } from "@mui/material"
+import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
 
@@ -18,15 +18,6 @@ export function Header() {
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography variant="h6">COEQWAL</Typography>
         <Stack direction="row" spacing={2}>
-          <Button
-            variant={buttonVariant}
-            sx={{
-              border: buttonVariant === "text" ? "none" : undefined,
-            }}
-            aria-label="Switch Language"
-          >
-            EN | SP
-          </Button>
           <Button
             variant={buttonVariant}
             sx={{

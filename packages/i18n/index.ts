@@ -1,2 +1,2 @@
-export { NextIntlClientProvider, useTranslations } from 'next-intl'
-export { getMessages } from './src/index'
+export type { TranslationSchema } from "./src/types"
+export { TranslationProvider, useTranslation } from "./src/TranslationProvider"

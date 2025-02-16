@@ -1,18 +1,25 @@
-"use client" // necessary for useTheme hook (ugh, maybe change this)
+"use client" // Necessary for useTheme hook
 
 import React from "react"
-import { Grid2, Typography, Container, Box } from "@mui/material"
+import { Typography, Container, Box } from "@mui/material"
 import Image from "next/image"
-import { useTheme } from '@mui/material/styles'
+import { useTheme } from "@mui/material/styles"
+import { useTranslation } from "@repo/i18n"
 
 const HomePanel = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   return (
-    <Container style={{ backgroundColor: theme.palette.primary.main }} role="main">
-      <Grid2 container spacing={{ xs: 2, lg: 16 }}>
+    <Container
+      style={{ backgroundColor: theme.palette.primary.main }}
+      role="main"
+    >
+      <Box
+        sx={{ display: "grid", gap: 4, gridTemplateColumns: { md: "1fr 1fr" } }}
+      >
         {/* Left side - Text content */}
-        <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 2, md: 1 }}>
+        <Box>
           <Typography
             variant="h1"
             sx={{
@@ -24,46 +31,40 @@ const HomePanel = () => {
             gutterBottom
             aria-level={1}
           >
-            {`Californians 
-are connected
-by their water.`}
+            {t("homePanel.title")}
           </Typography>
-          <Typography variant="body1" aria-label="Introduction">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
-          </Typography>
-        </Grid2>
+          <Typography variant="body1">{t("homePanel.pg1")}</Typography>
+          <Typography variant="body1">{t("homePanel.pg2")}</Typography>
+          <Typography variant="body1">{t("homePanel.pg3")}</Typography>
+          <Typography variant="body1">{t("homePanel.pg4")}</Typography>
+        </Box>
 
         {/* Right side - Hero image */}
-        <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 1, md: 2 }}>
-          <Box
-            sx={{
-              width: {
-                xs: "80%",
-                md: "100%",
-              },
-              margin: "0 auto",
+        <Box
+          sx={{
+            width: {
+              xs: "80%",
+              md: "100%",
+            },
+            margin: "0 auto",
+          }}
+        >
+          <Image
+            src="/images/hero.png"
+            alt="Illustration of people living in a community in a California landscape with mountains, meadows, forests, and rivers"
+            width={1893}
+            height={1584}
+            style={{
+              width: "100%",
+              height: "auto",
+              objectFit: "contain",
+              objectPosition: "center",
             }}
-          >
-            <Image
-              src="/images/hero.png"
-              alt="Illustration of people living in community in a California landscape with mountains, meadows, forests, and rivers"
-              width={1893}
-              height={1584}
-              style={{
-                width: "100%",
-                height: "auto",
-                objectFit: "contain",
-                objectPosition: "center",
-              }}
-              role="img"
-              aria-hidden="false"
-            />
-          </Box>
-        </Grid2>
-      </Grid2>
+            role="img"
+            aria-hidden="false"
+          />
+        </Box>
+      </Box>
     </Container>
   )
 }

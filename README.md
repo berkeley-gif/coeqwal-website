@@ -14,7 +14,7 @@ Dependencies and configurations set at the root level are overriden by local dep
 - [Turborepo](https://turbo.build/repo)
 - [pnpm](https://pnpm.io/)
 - [React-map-gl](https://visgl.github.io/react-map-gl/) (using mapbox)
-    - [Mapbox](https://mapbox.com/)
+  - [Mapbox](https://mapbox.com/)
 - [D3](https://d3js.org/)
 - [MaterialUI](https://mui.com/material-ui/)
 - [SASS](https://sass-lang.com/)
@@ -146,15 +146,13 @@ pnpm turbo gen workspace --destination packages/<my-new-package> --type package
 
 This will create a new package in the `packages` directory with a `package.json`. Tasks now are:
 
-- Fill in the scripts and dependencies in the `package.json` file. 
-    - `name` should be `"@repo/<my-new-package>"`
-    - include `"type": "module"`,
-    - scripts should generally be as in the `map` or `i18n` package.
-    - refer to these packages for suggestions for the dependencies and dev dependencies.
-- Add a `tsconfig.json` file to the package to use the shared typescript config. 
+- Fill in the scripts and dependencies in the `package.json` file.
+  - `name` should be `"@repo/<my-new-package>"`
+  - include `"type": "module"`,
+  - scripts should generally be as in the `map` or `i18n` package.
+  - refer to these packages for suggestions for the dependencies and dev dependencies.
+- Add a `tsconfig.json` file to the package to use the shared typescript config.
 - Add an `eslint.config.mjs` file to the package to use the shared eslint config.
 - Set up your `src` directory.
 - Set up the appropriate exports in the `package.json` file.
 - Set up the appropriate imports in the `package.json` files of the apps that will use the package.
-
-

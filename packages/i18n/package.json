@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
   "scripts": {
     "build": "tsc --project tsconfig.json && pnpm run postbuild",
     "postbuild": "node scripts/copy-locales.js",
@@ -11,15 +13,9 @@
     "check-types": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "dependencies": {
-    "next-intl": "^3.0.0"
-  },
   "devDependencies": {
     "eslint": "^9.15.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*"
-  },
-  "exports": {
-    ".": "./src/index.ts"
   }
 }
