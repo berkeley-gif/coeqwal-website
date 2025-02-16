@@ -142,6 +142,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@repo/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       react:
         specifier: ^19.0.0
         version: 19.0.0

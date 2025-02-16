@@ -39,7 +39,14 @@ export function TranslationProvider({
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        const response = await fetch(`/locales/${locale}.json`)
+        // Map the "en" or "es" locale to the actual filename
+        const filenameMap: Record<Locale, string> = {
+          en: "english",
+          es: "spanish",
+        }
+
+        // Request the correct JSON file name
+        const response = await fetch(`/locales/${filenameMap[locale]}.json`)
         if (!response.ok) {
           throw new Error(`Could not load locale file for "${locale}"`)
         }

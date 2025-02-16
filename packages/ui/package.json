@@ -1,11 +1,13 @@
 {
   "name": "@repo/ui",
+  "type": "module",
   "version": "0.0.0",
   "private": true,
   "exports": {
     "./header": "./src/header.tsx",
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
+    "./language-switcher": "./src/language-switcher.tsx",
     "./themes": "./src/themes/theme.tsx",
     "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx"
   },
@@ -22,6 +24,7 @@
   },
   "dependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@repo/i18n": "workspace:*"
   }
 }
