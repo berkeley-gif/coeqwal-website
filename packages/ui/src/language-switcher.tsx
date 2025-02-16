@@ -1,34 +1,49 @@
 "use client"
 
+import React from "react"
+import { ToggleButtonGroup, ToggleButton } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
-import {
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-} from "@mui/material"
 
 export function LanguageSwitcher() {
   const { locale, setLocale } = useTranslation()
 
-  const handleChange = (event: SelectChangeEvent) => {
-    setLocale(event.target.value as "en" | "es")
+  const handleChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newLocale: "en" | "es" | null,
+  ) => {
+    // Only update if user picks a valid locale (not null)
+    if (newLocale) {
+      setLocale(newLocale)
+    }
   }
 
   return (
-    <FormControl variant="outlined" size="small">
-      <InputLabel id="language-select-label">Language</InputLabel>
-      <Select
-        labelId="language-select-label"
-        id="language-select"
-        label="Language"
-        value={locale}
-        onChange={handleChange}
+    <ToggleButtonGroup
+      value={locale}
+      exclusive
+      onChange={handleChange}
+      sx={{
+        borderRadius: 999, // capsule shape
+      }}
+    >
+      <ToggleButton
+        value="en"
+        sx={{
+          borderRadius: 999,
+          px: 3,
+        }}
       >
-        <MenuItem value="en">English</MenuItem>
-        <MenuItem value="es">Español</MenuItem>
-      </Select>
-    </FormControl>
+        English
+      </ToggleButton>
+      <ToggleButton
+        value="es"
+        sx={{
+          borderRadius: 999,
+          px: 3,
+        }}
+      >
+        Español
+      </ToggleButton>
+    </ToggleButtonGroup>
   )
 }
