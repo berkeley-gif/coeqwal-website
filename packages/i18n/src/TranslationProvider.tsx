@@ -43,7 +43,8 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        const response = await fetch(`/locales/${locale}.json`)
+        const file = locale === "en" ? "english" : "spanish";
+        const response = await fetch(`/locales/${file}.json`)
         if (!response.ok) {
           throw new Error(`Could not load locale file for "${locale}"`)
         }
