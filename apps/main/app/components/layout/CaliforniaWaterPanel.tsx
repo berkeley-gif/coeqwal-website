@@ -2,15 +2,19 @@
 
 import React, { useRef, useState, useEffect } from "react"
 import { Grid2, Typography, Container, Box, Button } from "@mui/material"
-import { useTheme } from "@mui/material/styles"
+import { useTheme, Theme } from "@mui/material/styles"
+import { useMediaQuery } from "@mui/material"
 import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
 import VisibilityIcon from "@mui/icons-material/Visibility"
+import { paragraphMapViews } from "../../../lib/mapViews"
+import { useMap } from "../../context/MapContext"
 
 type CaliforniaWaterPanelProps = Record<string, unknown>
 
 const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
-  const theme = useTheme()
+  const theme = useTheme<Theme>()
   const { t } = useMainAppTranslation()
+  const { setViewState } = useMap()  // from the map context
 
   // Detect when the panel enters the viewport and fade out the background color
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -39,6 +43,45 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
   const backgroundColor = isVisible
     ? "transparent"
     : theme.palette.secondary.main
+
+  // Identify which breakpoint class is active
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"))
+  const isSm = useMediaQuery(theme.breakpoints.only("sm"))
+  const isMd = useMediaQuery(theme.breakpoints.only("md"))
+  const isLg = useMediaQuery(theme.breakpoints.only("lg"))
+  const isXl = useMediaQuery(theme.breakpoints.only("xl"))
+
+  function getBreakpointKey() {
+    if (isXs) return "xs" as const
+    if (isSm) return "sm" as const
+    if (isMd) return "md" as const
+    if (isLg) return "lg" as const
+    return "xl" as const
+  }
+
+  // Called on each paragraph icon click
+  function handleVisibilityClick(paragraphIndex: number) {
+    const bpKey = getBreakpointKey()
+    const coords = paragraphMapViews[paragraphIndex][bpKey]
+
+    setViewState(prev => ({
+      ...prev,
+      ...coords,
+      // If desired, add map transition (for react-map-gl < v8):
+      // transitionDuration: 1000,
+      // transitionInterpolator: new FlyToInterpolator(),
+    }))
+  }
+
+  const paragraphKeys = [
+    "CaliforniaWaterPanel.pg1",
+    "CaliforniaWaterPanel.pg2",
+    "CaliforniaWaterPanel.pg3",
+    "CaliforniaWaterPanel.pg4",
+    "CaliforniaWaterPanel.pg5",
+    "CaliforniaWaterPanel.pg6",
+    "CaliforniaWaterPanel.pg7",
+  ] as const
 
   return (
     <Container
@@ -73,37 +116,19 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
           >
             {t("CaliforniaWaterPanel.title")}
           </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg1")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg2")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg3")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg4")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg5")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg6")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
-          <Typography variant="body1">
-            {t("CaliforniaWaterPanel.pg7")}
-            <VisibilityIcon sx={{ ml: 1 }} />
-          </Typography>
+          {/* There are 7 paragraphs with their icons */}
+          {paragraphKeys.map((key, i) => (
+            <Typography key={i} variant="body1">
+              {t(key)}
+              <VisibilityIcon
+                sx={{ ml: 1, cursor: "pointer" }}
+                onClick={() => handleVisibilityClick(i)}
+              />
+            </Typography>
+          ))}
         </Grid2>
 
-        {/* Right side - Hero image */}
+        {/* Right side - currently empty */}
         <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 1, md: 2 }}>
           <Box
             sx={{

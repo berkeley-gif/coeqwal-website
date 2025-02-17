@@ -4,6 +4,8 @@ import React, { useRef, useState, useEffect } from "react"
 import Map, { NavigationControl, MapRef, ViewState } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { useTheme, useMediaQuery } from "@mui/material"
+import { Theme } from "@mui/material/styles"
+import { initialMapView, breakpointViews } from "../../../apps/main/lib/mapViews.ts"
 
 export interface MapProps {
   mapboxToken: string
@@ -37,14 +39,8 @@ type ViewStateChangeEvent = {
 
 export const MapboxMap: React.FC<MapProps> = ({
   mapboxToken,
-  initialViewState = {
-    longitude: -129.06368988805684,
-    latitude: 37.46691559581208,
-    zoom: 5.36,
-    pitch: 0,
-    bearing: 0,
-    padding: { top: 0, bottom: 0, left: 0, right: 0 },
-  },
+  // Fallback to shared default
+  initialViewState = initialMapView,
   minZoom = 5.0,
   style = { width: "100vw", height: "100vh", pointerEvents: "auto" },
   mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
@@ -54,12 +50,13 @@ export const MapboxMap: React.FC<MapProps> = ({
   // Prop to control whether we anchor on resize
   responsive = true,
 }) => {
-  // 1. Convert initialViewState to a React state so we can control it.
+  // The controlled view state
   const [viewState, setViewState] = useState<ViewState>(initialViewState)
-  // Ref to the underlying "core" map / interactions
+
+  // Access raw map if needed
   const mapRef = useRef<MapRef>(null)
 
-  const theme = useTheme()
+  const theme = useTheme<Theme>()
   // Example: separate breakpoints for small & medium screens
   const isXs = useMediaQuery(theme.breakpoints.down("sm"))
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
@@ -67,64 +64,21 @@ export const MapboxMap: React.FC<MapProps> = ({
   const isLg = useMediaQuery(theme.breakpoints.only("lg"))
   const isXl = useMediaQuery(theme.breakpoints.only("xl"))
 
-  // When viewport changes, recenter/zoom as desired
+  // On resize, change view
   useEffect(() => {
     if (!responsive) return
 
-    // If size is <= 599px
     if (isXs) {
-      setViewState((prev) => ({
-        ...prev,
-        longitude: -123.32201065632816,
-        latitude: 36.91827613725431,
-        zoom: 5,
-        pitch: 0,
-        bearing: 0,
-      }))
-    }
-    // If size is between 600px and < 900px
-    else if (isSm) {
-      setViewState((prev) => ({
-        ...prev,
-        longitude: -123.32201065632816,
-        latitude: 36.91827613725431,
-        zoom: 5,
-        pitch: 0,
-        bearing: 0,
-      }))
-    }
-    // If size is between 900px and < 1200px
-    else if (isMd) {
-      setViewState((prev) => ({
-        ...prev,
-        longitude: -124.26560803859064,
-        latitude: 37.33091086711717,
-        zoom: 5.5,
-        pitch: 0,
-        bearing: 0,
-      }))
-    }
-    // If size is between 1200px and < 1536px
-    else if (isLg) {
-      setViewState((prev) => ({
-        ...prev,
-        longitude: -122.7281490904835,
-        latitude: 37.33091086711717,
-        zoom: 5.5,
-        pitch: 0,
-        bearing: 0,
-      }))
-    }
-    // If size is >= 1536px (xl or default)
-    else {
-      setViewState((prev) => ({
-        ...prev,
-        longitude: -128.86525814333174,
-        latitude: 37.33091086711717,
-        zoom: 5.5,
-        pitch: 0,
-        bearing: 0,
-      }))
+      setViewState(prev => ({ ...prev, ...breakpointViews.xs }))
+    } else if (isSm) {
+      setViewState(prev => ({ ...prev, ...breakpointViews.sm }))
+    } else if (isMd) {
+      setViewState(prev => ({ ...prev, ...breakpointViews.md }))
+    } else if (isLg) {
+      setViewState(prev => ({ ...prev, ...breakpointViews.lg }))
+    } else {
+      // xl + default
+      setViewState(prev => ({ ...prev, ...breakpointViews.xl }))
     }
   }, [responsive, isXs, isSm, isMd, isLg, isXl])
 
@@ -135,11 +89,12 @@ export const MapboxMap: React.FC<MapProps> = ({
       mapboxAccessToken={mapboxToken}
       mapStyle={mapStyle}
       style={style}
-      // Instead of using initialViewState, supply our controlled values:
+      // Controlled view
       {...viewState}
       minZoom={minZoom}
       attributionControl={attributionControl}
       scrollZoom={scrollZoom}
+      // Let user drag/pan
       dragPan
       // onMove updates our viewState any time the user pans/zooms
       onMove={(evt: { viewState: ViewState }) => {
