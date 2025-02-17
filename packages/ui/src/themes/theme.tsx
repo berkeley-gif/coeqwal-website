@@ -196,12 +196,12 @@ const theme = createTheme({
     MuiSvgIcon: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: 'white', // Passive color
-          fontSize: 'inherit', // Icons match text font size
-          transition: 'color 0.2s ease-in-out',
+          color: "white", // Passive color
+          fontSize: "inherit", // Icons match text font size
+          transition: "color 0.2s ease-in-out",
           pointerEvents: "auto",
 
-          '&:hover, &:focus': {
+          "&:hover, &:focus": {
             color: theme.palette.primary.light, // Active color
           },
         }),

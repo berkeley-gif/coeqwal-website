@@ -73,13 +73,34 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
           >
             {t("CaliforniaWaterPanel.title")}
           </Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg1")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg2")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg3")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg4")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg5")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg6")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
-          <Typography variant="body1">{t("CaliforniaWaterPanel.pg7")}<VisibilityIcon sx={{ ml: 1 }} /></Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg1")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg2")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg3")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg4")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg5")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg6")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
+          <Typography variant="body1">
+            {t("CaliforniaWaterPanel.pg7")}
+            <VisibilityIcon sx={{ ml: 1 }} />
+          </Typography>
         </Grid2>
 
         {/* Right side - Hero image */}

@@ -4,6 +4,8 @@ interface ViewState {
   latitude: number
   longitude: number
   zoom: number
+  pitch: number
+  bearing: number
 }
 
 interface MapContextProps {
@@ -17,9 +19,11 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [viewState, setViewState] = useState<ViewState>({
-    latitude: 37.8,
-    longitude: -122.4,
-    zoom: 8,
+    latitude: 37.46691547475763,
+    longitude: -126.25665892967163,
+    zoom: 5.36,
+    pitch: 0,
+    bearing: 0,
   })
 
   return (

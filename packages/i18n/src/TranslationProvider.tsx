@@ -11,16 +11,16 @@ type LocalTranslationSchema = {
       aboutCOEQWAL: string
     }
   }
-};
+}
 
 // A minimal fallback
 const fallbackMessages: LocalTranslationSchema = {
   header: {
     buttons: {
       getData: "",
-      aboutCOEQWAL: ""
-    }
-  }
+      aboutCOEQWAL: "",
+    },
+  },
 }
 
 interface TranslationContextProps {
@@ -32,18 +32,23 @@ interface TranslationContextProps {
 const TranslationContext = createContext<TranslationContextProps>({
   locale: "en",
   messages: fallbackMessages,
-  setLocale: () => {}
+  setLocale: () => {},
 })
 
-export function TranslationProvider({ children }: { children: React.ReactNode }) {
+export function TranslationProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [locale, setLocale] = useState<Locale>("en")
-  const [messages, setMessages] = useState<LocalTranslationSchema>(fallbackMessages)
+  const [messages, setMessages] =
+    useState<LocalTranslationSchema>(fallbackMessages)
 
   // Fetch chosen locale on locale change
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        const file = locale === "en" ? "english" : "spanish";
+        const file = locale === "en" ? "english" : "spanish"
         const response = await fetch(`/locales/${file}.json`)
         if (!response.ok) {
           throw new Error(`Could not load locale file for "${locale}"`)
@@ -64,7 +69,7 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     <TranslationContext.Provider value={{ locale, messages, setLocale }}>
       {children}
     </TranslationContext.Provider>
-  );
+  )
 }
 
 export function useTranslation() {
@@ -76,16 +81,19 @@ export function useTranslation() {
    */
   function t(key: string): string {
     // Split the key and walk the dictionary object
-    const result = key.split(".").reduce<unknown>((acc, cur) => {
-      if (acc && typeof acc === "object") {
-        return (acc as Record<string, unknown>)[cur]
-      }
-      return undefined
-    }, messages as Record<string, unknown>)
+    const result = key.split(".").reduce<unknown>(
+      (acc, cur) => {
+        if (acc && typeof acc === "object") {
+          return (acc as Record<string, unknown>)[cur]
+        }
+        return undefined
+      },
+      messages as Record<string, unknown>,
+    )
 
     // Only return if the final value is a string
     return typeof result === "string" ? result : ""
   }
 
   return { locale, t, setLocale }
-} 
+}
