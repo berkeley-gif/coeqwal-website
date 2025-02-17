@@ -3,8 +3,21 @@
 import { Header } from "@repo/ui/header"
 import { HomePanel, CaliforniaWaterPanel } from "./components"
 import styles from "./page.module.css"
-import { MapProvider } from "./context/MapContext"
+import { MapProvider, useMap } from "./context/MapContext"
 import { MapboxMap } from "@repo/map"
+
+function MapWrapper() {
+  // Grab context
+  const { viewState, setViewState } = useMap()
+
+  return (
+    <MapboxMap
+      mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
+      viewState={viewState}
+      onViewStateChange={(vs) => setViewState(vs)}
+    />
+  )
+}
 
 export default function Home() {
   return (
@@ -22,10 +35,10 @@ export default function Home() {
               pointerEvents: "all",
             }}
           >
-            <MapboxMap
-              mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
-            />
+            <MapWrapper />
           </div>
+
+          {/* Panels are on top of the map */}
           <div
             style={{
               position: "relative",

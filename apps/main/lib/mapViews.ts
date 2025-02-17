@@ -16,7 +16,10 @@ export const initialMapView = {
 }
 
 // One set of coordinates for each MUI breakpoint.
-export const breakpointViews: Record<"xs"|"sm"|"md"|"lg"|"xl", BreakpointView> = {
+export const breakpointViews: Record<
+  "xs" | "sm" | "md" | "lg" | "xl",
+  BreakpointView
+> = {
   xs: {
     longitude: -123.32201065632816,
     latitude: 36.91827613725431,
@@ -56,19 +59,19 @@ export const breakpointViews: Record<"xs"|"sm"|"md"|"lg"|"xl", BreakpointView> =
 
 // For 7 paragraphs in CaliforniaWaterPanel, each with 5 breakpoints.
 export const paragraphMapViews: Array<
-  Record<"xs"|"sm"|"md"|"lg"|"xl", BreakpointView>
+  Record<"xs" | "sm" | "md" | "lg" | "xl", BreakpointView>
 > = [
   // Paragraph #1
   {
-    xs: { longitude: -120.1, latitude: 37.0,  zoom: 5.2, pitch: 0, bearing: 0 },
+    xs: { longitude: -120.1, latitude: 37.0, zoom: 5.2, pitch: 0, bearing: 0 },
     sm: { longitude: -120.2, latitude: 37.05, zoom: 5.3, pitch: 0, bearing: 0 },
-    md: { longitude: -120.3, latitude: 37.1,  zoom: 5.4, pitch: 0, bearing: 0 },
+    md: { longitude: -120.3, latitude: 37.1, zoom: 5.4, pitch: 0, bearing: 0 },
     lg: { longitude: -120.4, latitude: 37.15, zoom: 5.5, pitch: 0, bearing: 0 },
-    xl: { longitude: -120.5, latitude: 37.2,  zoom: 5.6, pitch: 0, bearing: 0 },
+    xl: { longitude: -120.5, latitude: 37.2, zoom: 5.6, pitch: 0, bearing: 0 },
   },
   // Paragraph #2
   {
-    xs: { longitude: -121.1, latitude: 37.3, zoom: 5,   pitch: 0, bearing: 0 },
+    xs: { longitude: -121.1, latitude: 37.3, zoom: 5, pitch: 0, bearing: 0 },
     sm: { longitude: -121.2, latitude: 37.3, zoom: 5.2, pitch: 0, bearing: 0 },
     md: { longitude: -121.3, latitude: 37.3, zoom: 5.4, pitch: 0, bearing: 0 },
     lg: { longitude: -121.4, latitude: 37.3, zoom: 5.6, pitch: 0, bearing: 0 },
@@ -76,11 +79,11 @@ export const paragraphMapViews: Array<
   },
   // Paragraphs #3–#7
   {
-    xs: { longitude: -122,   latitude: 37.4,  zoom: 5,   pitch: 0, bearing: 0 },
-    sm: { longitude: -122.1, latitude: 37.4,  zoom: 5.2, pitch: 0, bearing: 0 },
-    md: { longitude: -122.2, latitude: 37.4,  zoom: 5.4, pitch: 0, bearing: 0 },
-    lg: { longitude: -122.3, latitude: 37.4,  zoom: 5.6, pitch: 0, bearing: 0 },
-    xl: { longitude: -122.4, latitude: 37.4,  zoom: 5.8, pitch: 0, bearing: 0 },
+    xs: { longitude: -122, latitude: 37.4, zoom: 5, pitch: 0, bearing: 0 },
+    sm: { longitude: -122.1, latitude: 37.4, zoom: 5.2, pitch: 0, bearing: 0 },
+    md: { longitude: -122.2, latitude: 37.4, zoom: 5.4, pitch: 0, bearing: 0 },
+    lg: { longitude: -122.3, latitude: 37.4, zoom: 5.6, pitch: 0, bearing: 0 },
+    xl: { longitude: -122.4, latitude: 37.4, zoom: 5.8, pitch: 0, bearing: 0 },
   },
   {
     xs: { longitude: -123, latitude: 37.6, zoom: 5.1, pitch: 0, bearing: 0 },

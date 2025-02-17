@@ -1,29 +1,48 @@
+"use client" // Required in Next 13's app directory if using hooks
+
 import React, { createContext, useContext, useState, ReactNode } from "react"
 
-interface ViewState {
-  latitude: number
+export interface MinimalViewState {
   longitude: number
+  latitude: number
   zoom: number
-  pitch: number
   bearing: number
+  pitch: number
+  padding?: {
+    top?: number
+    bottom?: number
+    left?: number
+    right?: number
+  }
 }
 
-interface MapContextProps {
-  viewState: ViewState
-  setViewState: React.Dispatch<React.SetStateAction<ViewState>>
+export interface MapContextProps {
+  viewState: MinimalViewState
+  setViewState: React.Dispatch<React.SetStateAction<MinimalViewState>>
 }
 
-const MapContext = createContext<MapContextProps | undefined>(undefined)
+const MapContext = createContext<
+  | {
+      viewState: MinimalViewState
+      setViewState: React.Dispatch<React.SetStateAction<MinimalViewState>>
+    }
+  | undefined
+>(undefined)
 
-export const MapProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [viewState, setViewState] = useState<ViewState>({
-    latitude: 37.46691547475763,
-    longitude: -126.25665892967163,
+export function MapProvider({ children }: { children: ReactNode }) {
+  // Initial map position (like your old initialViewState)
+  const [viewState, setViewState] = useState<MinimalViewState>({
+    longitude: -126.2566589,
+    latitude: 37.4669155,
     zoom: 5.36,
-    pitch: 0,
     bearing: 0,
+    pitch: 0,
+    padding: {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    },
   })
 
   return (
@@ -33,10 +52,10 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({
   )
 }
 
-export const useMap = () => {
-  const context = useContext(MapContext)
-  if (!context) {
-    throw new Error("useMap must be used within a MapProvider")
+export function useMap() {
+  const ctx = useContext(MapContext)
+  if (!ctx) {
+    throw new Error("useMap must be used inside a MapProvider")
   }
-  return context
+  return ctx
 }

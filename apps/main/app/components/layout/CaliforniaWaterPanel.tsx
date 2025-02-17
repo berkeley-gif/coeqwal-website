@@ -9,12 +9,10 @@ import VisibilityIcon from "@mui/icons-material/Visibility"
 import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 
-type CaliforniaWaterPanelProps = Record<string, unknown>
-
-const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
+const CaliforniaWaterPanel: React.FC = () => {
   const theme = useTheme<Theme>()
   const { t } = useMainAppTranslation()
-  const { setViewState } = useMap()  // from the map context
+  const { setViewState } = useMap() // direct from context
 
   // Detect when the panel enters the viewport and fade out the background color
   const panelRef = useRef<HTMLDivElement | null>(null)
@@ -52,11 +50,12 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
   const isXl = useMediaQuery(theme.breakpoints.only("xl"))
 
   function getBreakpointKey() {
-    if (isXs) return "xs" as const
-    if (isSm) return "sm" as const
-    if (isMd) return "md" as const
-    if (isLg) return "lg" as const
-    return "xl" as const
+    if (isXs) return "xs"
+    if (isSm) return "sm"
+    if (isMd) return "md"
+    if (isLg) return "lg"
+    if (isXl) return "xl"
+    return "xl"
   }
 
   // Called on each paragraph icon click
@@ -64,7 +63,7 @@ const CaliforniaWaterPanel: React.FC<CaliforniaWaterPanelProps> = () => {
     const bpKey = getBreakpointKey()
     const coords = paragraphMapViews[paragraphIndex][bpKey]
 
-    setViewState(prev => ({
+    setViewState((prev) => ({
       ...prev,
       ...coords,
       // If desired, add map transition (for react-map-gl < v8):
