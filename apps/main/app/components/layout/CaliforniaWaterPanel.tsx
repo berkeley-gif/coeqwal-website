@@ -9,40 +9,37 @@ import VisibilityIcon from "@mui/icons-material/Visibility"
 import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 
-const CaliforniaWaterPanel: React.FC = () => {
+interface CaliforniaWaterPanelProps {
+  // The parent passes this in so we can call .flyTo() on the map
+  onFlyTo: (longitude: number, latitude: number, zoom?: number) => void
+}
+
+export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelProps) {
   const theme = useTheme<Theme>()
   const { t } = useMainAppTranslation()
-  const { setViewState } = useMap() // direct from context
-
-  // Detect when the panel enters the viewport and fade out the background color
+  const { setViewState } = useMap() // from MapContext
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const currentRef = panelRef.current
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }, // 10% of the panel must be visible to trigger the fade out
+      { threshold: 0.1 }
     )
-
-    if (currentRef) {
-      observer.observe(currentRef)
+    if (panelRef.current) {
+      observer.observe(panelRef.current)
     }
-
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
+      if (panelRef.current) {
+        observer.unobserve(panelRef.current)
       }
     }
   }, [])
 
-  // When the panel is visible, switch the background color to "transparent"
-  // otherwise, use the MUI theme's secondary color
-  const backgroundColor = isVisible
-    ? "transparent"
-    : theme.palette.secondary.main
+  // Ex: fade background color in/out if panel is visible
+  const backgroundColor = isVisible ? "transparent" : theme.palette.secondary.main
 
-  // Identify which breakpoint class is active
+  // Breakpoints
   const isXs = useMediaQuery(theme.breakpoints.down("sm"))
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
   const isMd = useMediaQuery(theme.breakpoints.only("md"))
@@ -63,12 +60,13 @@ const CaliforniaWaterPanel: React.FC = () => {
     const bpKey = getBreakpointKey()
     const coords = paragraphMapViews[paragraphIndex][bpKey]
 
+    // Imperatively fly the map
+    onFlyTo(coords.longitude, coords.latitude, coords.zoom)
+
+    // Optionally also update MapContext so your app state is consistent
     setViewState((prev) => ({
       ...prev,
       ...coords,
-      // If desired, add map transition (for react-map-gl < v8):
-      // transitionDuration: 1000,
-      // transitionInterpolator: new FlyToInterpolator(),
     }))
   }
 
@@ -140,9 +138,15 @@ const CaliforniaWaterPanel: React.FC = () => {
           ></Box>
         </Grid2>
       </Grid2>
-      <Button onClick={() => alert("Clicked!")}>Click me</Button>
+      <Button
+        onClick={() => handleVisibilityClick(0)}
+        sx={{
+          pointerEvents: "auto",
+          mt: 3,
+        }}
+      >
+        Fly to Paragraph 0
+      </Button>
     </Container>
   )
 }
-
-export default CaliforniaWaterPanel
