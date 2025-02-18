@@ -7,10 +7,12 @@ import { MapProvider, useMap } from "./context/MapContext"
 import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
+
+// Use your precipitation bands
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 
-// Wrap the map to connect to the context's viewState
-function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
+// Wrap the map so it uses the context's viewState
+function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef | null> }) {
   const { viewState, setViewState } = useMap()
   return (
     <MapboxMap
@@ -23,59 +25,83 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
 }
 
 export default function Home() {
-  const mapRef = useRef<MapboxMapRef>(null)
+  const mapRef = useRef<MapboxMapRef | null>(null)
 
-  // ANIMATE BANDS CODE
-  // Prevent re-triggering if it's already animating
+  // Track whether we're already animating so we don't double-start
   const [isAnimating, setIsAnimating] = useState(false)
-  // Keep a reference to the interval so we can clear it
-  const animationIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  // Keep the requestAnimationFrame ID to cancel it later
+  const animationFrameIdRef = useRef<number | null>(null)
 
-  // Animate through the bands exactly once
+  // Called from CaliforniaWaterPanel when paragraphIndex === 0
   function onAnimateBands() {
-    // If already running, do nothing
-    if (isAnimating) return
+    if (isAnimating) return // don't restart if still running
     setIsAnimating(true)
 
     const mapboxMap = mapRef.current?.getMap()
     if (!mapboxMap) {
-      console.warn("Map is not ready yet.")
       setIsAnimating(false)
+      console.warn("Map not ready yet.")
       return
     }
 
     if (!mapboxMap.getLayer("precipitable-water")) {
-      console.warn("Layer 'precipitable-water' does not exist.")
       setIsAnimating(false)
+      console.warn("Layer 'precipitable-water' not found.")
       return
     }
 
-    // Enable cross-fade transitions between band changes
-    mapboxMap.setPaintProperty("precipitable-water", "raster-fade-duration", 200)
+    // OPTIONAL: If you'd like a small cross-fade, you can set:
+    // mapboxMap.setPaintProperty("precipitable-water", "raster-fade-duration", 500);
 
-    let currentIndex = 0
-    // Set the initial band
-    mapboxMap.setPaintProperty("precipitable-water", "raster-array-band", PRECIPITATION_BANDS[currentIndex])
+    // We update the band every ~0.5s at 60 FPS => 30 frames
+    const FRAMES_PER_BAND = 30
 
-    const intervalId = setInterval(() => {
-      currentIndex++
-      if (currentIndex < PRECIPITATION_BANDS.length) {
-        mapboxMap.setPaintProperty(
-          "precipitable-water",
-          "raster-array-band",
-          PRECIPITATION_BANDS[currentIndex]
-        )
-      } else {
-        clearInterval(intervalId)
-        animationIntervalRef.current = null
-        setIsAnimating(false)
+    let currentBandIndex = 0
+    let frameCount = 0
+
+    // Set initial band
+    if (!mapboxMap) return
+    mapboxMap.setPaintProperty(
+      "precipitable-water",
+      "raster-array-band",
+      PRECIPITATION_BANDS[currentBandIndex]
+    )
+
+    function animate() {
+      frameCount++
+
+      // Every 30 frames, switch to the next band
+      if (frameCount >= FRAMES_PER_BAND) {
+        frameCount = 0
+        currentBandIndex++
+
+        if (currentBandIndex < PRECIPITATION_BANDS.length) {
+          if (!mapboxMap) return
+          mapboxMap.setPaintProperty(
+            "precipitable-water",
+            "raster-array-band",
+            PRECIPITATION_BANDS[currentBandIndex]
+          )
+        } else {
+          // We're done with all bands, stop
+          if (animationFrameIdRef.current != null) {
+            cancelAnimationFrame(animationFrameIdRef.current)
+          }
+          animationFrameIdRef.current = null
+          setIsAnimating(false)
+          return
+        }
       }
-    }, 400)
 
-    animationIntervalRef.current = intervalId
+      // Request the next animation frame
+      animationFrameIdRef.current = requestAnimationFrame(animate)
+    }
+
+    // Start the frame loop
+    animationFrameIdRef.current = requestAnimationFrame(animate)
   }
 
-  // FLYTO CODE
+  // Called from paragraphs 1+ to fly the map
   function handleFlyTo(longitude: number, latitude: number, zoom?: number) {
     mapRef.current?.flyTo(longitude, latitude, zoom)
   }
@@ -85,7 +111,7 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         <MapProvider>
-          {/* The map is behind everything */}
+          {/* The map behind everything */}
           <div
             style={{
               position: "fixed",
