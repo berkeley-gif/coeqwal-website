@@ -37,17 +37,16 @@ export default function Home() {
     if (isAnimating) return
     setIsAnimating(true)
 
-    // Can specify the number of cycles (fade out -> swap band -> fade in)
-    const totalCycles = 5
-    let cycleCount = 0
+    const totalBands = PRECIPITATION_BANDS.length
     let currentBandIndex = 0
     
     // Each fade will take ~30 frames (0.5s at 60 FPS).
     // Can change these constants to tweak timing.
     const fadeFrames = 30
-    let frame = 0
-    let phase: "FADE_OUT" | "SWAP_BAND" | "FADE_IN" | "WAIT" = "FADE_OUT"
-    const waitFrames = 30 // how many frames to wait after fade in, before next fade out
+    const waitFrames = 30
+    type Phase = "FADE_OUT" | "SWAP_BAND" | "FADE_IN" | "WAIT" | "DONE";
+    let phase: Phase = "FADE_OUT";
+    let frameCount = 0;
 
     // Helper to set raster-opacity
     function setOpacity(opacity: number) {
@@ -67,24 +66,18 @@ export default function Home() {
       )
     }
 
-    function updateOpacity(opacity: number, callback?: () => void) {
-      const rawMap = mapRef.current?.getMap()
-      rawMap?.setPaintProperty("precipitable-water", "raster-opacity", opacity)
-      if (callback && opacity === 0) setTimeout(callback, 1000)
-    }
-
     // The main animation loop
     function animate() {
-      frame++
+      frameCount++
       switch (phase) {
         case "FADE_OUT":
           {
             // Gradually go from 1.0 down to 0.0 over fadeFrames
-            const opacity = Math.max(0, 1 - frame / fadeFrames)
+            const opacity = Math.max(0, 1 - frameCount / fadeFrames)
             setOpacity(opacity)
             if (opacity <= 0) {
               // Fade out done
-              frame = 0
+              frameCount = 0
               phase = "SWAP_BAND"
             }
           }
@@ -94,23 +87,22 @@ export default function Home() {
           {
             // Swap the band
             setBand(currentBandIndex)
-            currentBandIndex = (currentBandIndex + 1) % PRECIPITATION_BANDS.length
-
+            currentBandIndex++
             // Move to FADE_IN next
             phase = "FADE_IN"
+            frameCount = 0
           }
           break
 
         case "FADE_IN":
           {
             // Go from 0.0 up to 1.0 over fadeFrames
-            const opacity = Math.min(1, frame / fadeFrames)
+            const opacity = Math.min(1, frameCount / fadeFrames)
             setOpacity(opacity)
             if (opacity >= 1) {
               // Fade in done
-              frame = 0
+              frameCount = 0
               phase = "WAIT"
-              cycleCount++
             }
           }
           break
@@ -118,21 +110,25 @@ export default function Home() {
         case "WAIT":
           {
             // Hang out for waitFrames
-            if (frame >= waitFrames) {
-              frame = 0
-              // If we haven't reached totalCycles, fade out again
-              if (cycleCount < totalCycles) {
+            if (frameCount >= waitFrames) {
+              frameCount = 0
+              // If we haven't reached totalBands, fade out again
+              if (currentBandIndex < totalBands) {
                 phase = "FADE_OUT"
               } else {
-                // Done with all cycles
-                cancelAnimationFrame(animationIdRef.current!)
-                animationIdRef.current = null
-                setIsAnimating(false)
-                return // Stop
+                phase = "DONE"
               }
             }
-          }
           break
+        }
+
+        case "DONE":
+          {
+            cancelAnimationFrame(animationIdRef.current!)
+            animationIdRef.current = null
+            setIsAnimating(false)
+            return
+          }
       }
       animationIdRef.current = requestAnimationFrame(animate)
     }
