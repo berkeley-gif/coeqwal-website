@@ -7,12 +7,10 @@ import { MapProvider, useMap } from "./context/MapContext"
 import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
-
-// Use your precipitation bands
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 
-// Wrap the map so it uses the context's viewState
-function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef | null> }) {
+// MapWrapper: Wraps MapboxMap with our context so that viewState is shared.
+function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
   const { viewState, setViewState } = useMap()
   return (
     <MapboxMap
@@ -20,71 +18,113 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef | null> }) {
       mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
       viewState={viewState}
       onViewStateChange={(vs) => setViewState(vs)}
+      initialViewState={{
+        longitude: -130.5449,
+        latitude: 28.2790,
+        zoom: 5,
+        pitch: 0,
+        bearing: 0,
+      }}
+      style={{ width: "100%", height: "100%" }}
+      scrollZoom={false}
+      onLoad={(e) => {
+        const map = e.target;
+        // Poll until the "snowfall" layer exists, then force its opacity to 0.
+        const checkSnowfall = () => {
+          if (map.getLayer("snowfall")) {
+            map.setPaintProperty("snowfall", "raster-opacity", 0);
+          } else {
+            setTimeout(checkSnowfall, 100);
+          }
+        };
+        checkSnowfall();
+        // Set the initial precipitation band.
+        if (map.getLayer("precipitable-water")) {
+          map.setPaintProperty(
+            "precipitable-water",
+            "raster-array-band",
+            PRECIPITATION_BANDS[0]
+          );
+          // Optionally set a default opacity transition for the precip layer.
+          map.setPaintProperty("precipitable-water", "raster-opacity-transition", {
+            duration: 2000,
+            delay: 0,
+          });
+        }
+      }}
     />
   )
 }
 
 export default function Home() {
-  const mapRef = useRef<MapboxMapRef | null>(null)
-
-  // Track whether we're already animating so we don't double-start
+  const mapRef = useRef<MapboxMapRef>(null)
   const [isAnimating, setIsAnimating] = useState(false)
-  // Keep the requestAnimationFrame ID to cancel it later
   const animationFrameIdRef = useRef<number | null>(null)
 
-  // Called from CaliforniaWaterPanel when paragraphIndex === 0
+  // Helper: update the snowfall layer opacity with a transition.
+  function updateSnowfallOpacity(opacity: number, duration: number = 2000) {
+    const map = mapRef.current?.getMap()
+    if (map && map.getLayer("snowfall")) {
+      map.setPaintProperty("snowfall", "raster-opacity", opacity, {
+        duration,
+        easing: (t) => t * (2 - t),
+      })
+    }
+  }
+
+  // onAnimateBands: Triggered by CaliforniaWaterPanel's first icon.
+  // It cycles through PRECIPITATION_BANDS once, updating roughly every 30 frames (~0.5s at 60FPS).
+  // When reaching a threshold (here, index 5), it fades in the snowfall layer.
   function onAnimateBands() {
-    if (isAnimating) return // don't restart if still running
+    if (isAnimating) return
     setIsAnimating(true)
 
-    const mapboxMap = mapRef.current?.getMap()
-    if (!mapboxMap) {
-      setIsAnimating(false)
+    const map = mapRef.current?.getMap()
+    if (!map) {
       console.warn("Map not ready yet.")
-      return
-    }
-
-    if (!mapboxMap.getLayer("precipitable-water")) {
       setIsAnimating(false)
+      return
+    }
+    if (!map.getLayer("precipitable-water")) {
       console.warn("Layer 'precipitable-water' not found.")
+      setIsAnimating(false)
       return
     }
 
-    // OPTIONAL: If you'd like a small cross-fade, you can set:
-    // mapboxMap.setPaintProperty("precipitable-water", "raster-fade-duration", 500);
-
-    // We update the band every ~0.5s at 60 FPS => 30 frames
-    const FRAMES_PER_BAND = 30
+    // Ensure snowfall starts at opacity 0.
+    if (map.getLayer("snowfall")) {
+      map.setPaintProperty("snowfall", "raster-opacity", 0)
+    }
 
     let currentBandIndex = 0
-    let frameCount = 0
-
-    // Set initial band
-    if (!mapboxMap) return
-    mapboxMap.setPaintProperty(
+    map.setPaintProperty(
       "precipitable-water",
       "raster-array-band",
       PRECIPITATION_BANDS[currentBandIndex]
     )
 
+    const FRAMES_PER_BAND = 30 // ~0.5 seconds per band at 60 FPS.
+    let frameCount = 0
+    const snowfallThreshold = 5
+    let snowfallAnimated = false
+
     function animate() {
       frameCount++
-
-      // Every 30 frames, switch to the next band
       if (frameCount >= FRAMES_PER_BAND) {
         frameCount = 0
         currentBandIndex++
-
         if (currentBandIndex < PRECIPITATION_BANDS.length) {
-          if (!mapboxMap) return
-          mapboxMap.setPaintProperty(
+          map.setPaintProperty(
             "precipitable-water",
             "raster-array-band",
             PRECIPITATION_BANDS[currentBandIndex]
           )
+          if (currentBandIndex >= snowfallThreshold && !snowfallAnimated) {
+            updateSnowfallOpacity(1, 2000)
+            snowfallAnimated = true
+          }
         } else {
-          // We're done with all bands, stop
-          if (animationFrameIdRef.current != null) {
+          if (animationFrameIdRef.current !== null) {
             cancelAnimationFrame(animationFrameIdRef.current)
           }
           animationFrameIdRef.current = null
@@ -92,16 +132,13 @@ export default function Home() {
           return
         }
       }
-
-      // Request the next animation frame
       animationFrameIdRef.current = requestAnimationFrame(animate)
     }
 
-    // Start the frame loop
     animationFrameIdRef.current = requestAnimationFrame(animate)
   }
 
-  // Called from paragraphs 1+ to fly the map
+  // handleFlyTo: Called from CaliforniaWaterPanel for paragraphs 1+.
   function handleFlyTo(longitude: number, latitude: number, zoom?: number) {
     mapRef.current?.flyTo(longitude, latitude, zoom)
   }
@@ -111,7 +148,7 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         <MapProvider>
-          {/* The map behind everything */}
+          {/* Map container: wrapped in MapProvider */}
           <div
             style={{
               position: "fixed",
@@ -124,8 +161,7 @@ export default function Home() {
           >
             <MapWrapper mapRef={mapRef} />
           </div>
-
-          {/* Panels above the map */}
+          {/* Overlay panels: HomePanel and CaliforniaWaterPanel */}
           <div
             style={{
               position: "relative",
