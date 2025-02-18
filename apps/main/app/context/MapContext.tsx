@@ -30,11 +30,11 @@ const MapContext = createContext<
 >(undefined)
 
 export function MapProvider({ children }: { children: ReactNode }) {
-  // Initial map position (like your old initialViewState)
+  // Initial map position
   const [viewState, setViewState] = useState<MinimalViewState>({
-    longitude: -126.2566589,
+    longitude: -130.5449,
     latitude: 37.4669155,
-    zoom: 5.36,
+    zoom: 5,
     bearing: 0,
     pitch: 0,
     padding: {
