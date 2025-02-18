@@ -6,21 +6,23 @@ import React, {
   forwardRef,
   ForwardRefRenderFunction,
 } from "react"
-import Map, { NavigationControl, MapRef } from "react-map-gl/mapbox"
+import Map, { NavigationControl } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
-import type { ViewStateChangeEvent } from "react-map-gl/mapbox"
+import type { ViewStateChangeEvent, MapRef } from "react-map-gl/mapbox"
 import { MinimalViewState } from "../../../apps/main/app/context/MapContext.tsx"
+import type { Map as MapboxMapType } from "mapbox-gl"
 
 // Methods the parent can call via ref
 export interface MapboxMapRef {
   flyTo: (longitude: number, latitude: number, zoom?: number) => void
+  getMap: () => MapboxMapType | undefined
 }
 
 // Props for our reusable MapboxMap
 export interface MapProps {
   mapboxToken: string
   viewState: MinimalViewState
-  onViewStateChange: (newViewState: MinimalViewState) => void
+  onViewStateChange?: (newViewState: MinimalViewState) => void
   style?: React.CSSProperties
   mapStyle?: string
   minZoom?: number
@@ -41,27 +43,31 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
   },
   ref
 ) => {
-  const mapRef = useRef<MapRef>(null)
+  const internalMapRef = useRef<MapRef>(null)
 
-  // Expose flyTo method to parent component
+  function flyTo(longitude: number, latitude: number, zoom?: number) {
+    const mapInstance = internalMapRef.current?.getMap()
+    if (mapInstance) {
+      mapInstance.flyTo({
+        center: [longitude, latitude],
+        zoom: zoom ?? 5,
+        duration: 2000,
+      })
+    }
+  }
+
+  function getMap(): MapboxMapType | undefined {
+    return internalMapRef.current?.getMap()
+  }
+
   useImperativeHandle(ref, () => ({
-    flyTo(longitude: number, latitude: number, zoom = 10) {
-      const mapInstance = mapRef.current?.getMap()
-      if (mapInstance) {
-        mapInstance.flyTo({
-          center: [longitude, latitude],
-          zoom,
-          speed: 0.8,      // adjust for smoother flight
-          curve: 1.4,      // adjust for more dramatic flight path
-          essential: true, // prevent user interruptions
-        })
-      }
-    },
+    flyTo,
+    getMap,
   }))
 
   return (
     <Map
-      ref={mapRef}
+      ref={internalMapRef}
       reuseMaps
       mapboxAccessToken={mapboxToken}
       mapStyle={mapStyle}
@@ -72,7 +78,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       scrollZoom={scrollZoom}
       dragPan
       onMove={(evt: ViewStateChangeEvent) => {
-        onViewStateChange(evt.viewState)
+        onViewStateChange?.(evt.viewState)
       }}
     >
       <NavigationControl position="top-right" style={{ marginTop: "100px" }} />

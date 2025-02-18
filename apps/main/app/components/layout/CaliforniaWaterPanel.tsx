@@ -1,7 +1,13 @@
 "use client" // necessary for useTheme hook (ugh, maybe change this)
 
-import React, { useRef, useState, useEffect } from "react"
-import { Grid2, Typography, Container, Box, Button } from "@mui/material"
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useImperativeHandle,
+  forwardRef,
+} from "react"
+import { Typography, Container, Box, Button } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
@@ -10,14 +16,17 @@ import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 
 interface CaliforniaWaterPanelProps {
-  // The parent passes this in so we can call .flyTo() on the map
   onFlyTo: (longitude: number, latitude: number, zoom?: number) => void
+  onAnimateBands: () => void
 }
 
-export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelProps) {
+const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
+  { onFlyTo, onAnimateBands }: CaliforniaWaterPanelProps,
+  ref
+) {
   const theme = useTheme<Theme>()
   const { t } = useMainAppTranslation()
-  const { setViewState } = useMap() // from MapContext
+  const { setViewState } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -36,10 +45,8 @@ export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelPr
     }
   }, [])
 
-  // Ex: fade background color in/out if panel is visible
   const backgroundColor = isVisible ? "transparent" : theme.palette.secondary.main
 
-  // Breakpoints
   const isXs = useMediaQuery(theme.breakpoints.down("sm"))
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
   const isMd = useMediaQuery(theme.breakpoints.only("md"))
@@ -55,19 +62,24 @@ export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelPr
     return "xl"
   }
 
-  // Called on each paragraph icon click
+  // This will animate if paragraphIndex === 0, flyto otherwise
   function handleVisibilityClick(paragraphIndex: number) {
-    const bpKey = getBreakpointKey()
-    const coords = paragraphMapViews[paragraphIndex][bpKey]
+    if (paragraphIndex === 0) {
+      // Only animate the bands, no flyTo
+      onAnimateBands()
+    } else {
+      const bpKey = getBreakpointKey()
+      const coords = paragraphMapViews[paragraphIndex][bpKey]
+      onFlyTo(coords.longitude, coords.latitude, coords.zoom)
 
-    // Imperatively fly the map
-    onFlyTo(coords.longitude, coords.latitude, coords.zoom)
-
-    // Optionally also update MapContext so your app state is consistent
-    setViewState((prev) => ({
-      ...prev,
-      ...coords,
-    }))
+      setViewState(prev => ({
+        ...prev,
+        ...coords,
+        transitionDuration: 2000,
+        bearing: 0,
+        pitch: 0,
+      }))
+    }
   }
 
   const paragraphKeys = [
@@ -80,16 +92,15 @@ export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelPr
     "CaliforniaWaterPanel.pg7",
   ] as const
 
+  useImperativeHandle(ref, () => ({})) // If needed, expose methods
+
   return (
     <Container
       ref={panelRef}
-      // Smoothly transition the background color to transparent
       sx={{
         backgroundColor,
         transition: "background-color 3s ease-in-out",
         minHeight: "100vh",
-
-        // Pass pointer events through the panel unless it's a button or icon
         pointerEvents: "none",
         "& .MuiButton-root, & .MuiSvgIcon-root": {
           pointerEvents: "auto",
@@ -97,23 +108,23 @@ export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelPr
       }}
       role="main"
     >
-      <Grid2 container spacing={{ xs: 2, lg: 16 }}>
-        {/* Left side - Text content */}
-        <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 2, md: 1 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 2, lg: 16 },
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }
+        }}
+      >
+        {/* Left side text */}
+        <Box>
           <Typography
             variant="h1"
-            sx={{
-              whiteSpace: {
-                xs: "normal",
-                md: "pre-wrap",
-              },
-            }}
+            sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
             gutterBottom
-            aria-level={1}
           >
             {t("CaliforniaWaterPanel.title")}
           </Typography>
-          {/* There are 7 paragraphs with their icons */}
+
           {paragraphKeys.map((key, i) => (
             <Typography key={i} variant="body1">
               {t(key)}
@@ -123,30 +134,29 @@ export default function CaliforniaWaterPanel({ onFlyTo }: CaliforniaWaterPanelPr
               />
             </Typography>
           ))}
-        </Grid2>
+        </Box>
 
-        {/* Right side - currently empty */}
-        <Grid2 size={{ xs: 12, md: 6 }} order={{ xs: 1, md: 2 }}>
-          <Box
-            sx={{
-              width: {
-                xs: "80%",
-                md: "100%",
-              },
-              margin: "0 auto",
-            }}
-          ></Box>
-        </Grid2>
-      </Grid2>
+        {/* Right side (currently empty) */}
+        <Box
+          sx={{
+            order: { xs: 1, md: 2 },
+            width: { xs: "80%", md: "100%" },
+            margin: "0 auto",
+          }}
+        />
+      </Box>
+
       <Button
         onClick={() => handleVisibilityClick(0)}
-        sx={{
-          pointerEvents: "auto",
-          mt: 3,
-        }}
+        sx={{ pointerEvents: "auto", mt: 3 }}
       >
-        Fly to Paragraph 0
+        Animate bands (Paragraph 0)
       </Button>
     </Container>
   )
-}
+})
+
+// Helps React DevTools identify this component
+CaliforniaWaterPanel.displayName = "CaliforniaWaterPanel"
+
+export default CaliforniaWaterPanel
