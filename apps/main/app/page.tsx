@@ -9,7 +9,7 @@ import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 
-// Renders map inside a <MapProvider> context to get the current context's viewState
+// Wrap the map to connect to the context's viewState
 function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
   const { viewState, setViewState } = useMap()
   return (
@@ -25,120 +25,57 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
 export default function Home() {
   const mapRef = useRef<MapboxMapRef>(null)
 
-
-  // ANIMATION CODE
-  // Track whether we’re in the middle of an animation
+  // ANIMATE BANDS CODE
+  // Prevent re-triggering if it's already animating
   const [isAnimating, setIsAnimating] = useState(false)
-  const animationIdRef = useRef<number | null>(null) // store the requestAnimationFrame ID
+  // Keep a reference to the interval so we can clear it
+  const animationIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Called from the child, to animate the water layer
+  // Animate through the bands exactly once
   function onAnimateBands() {
-    // Prevent restarting if already animating
+    // If already running, do nothing
     if (isAnimating) return
     setIsAnimating(true)
 
-    const totalBands = PRECIPITATION_BANDS.length
-    let currentBandIndex = 0
-    
-    // Each fade will take ~30 frames (0.5s at 60 FPS).
-    // Can change these constants to tweak timing.
-    const fadeFrames = 30
-    const waitFrames = 30
-    type Phase = "FADE_OUT" | "SWAP_BAND" | "FADE_IN" | "WAIT" | "DONE";
-    let phase: Phase = "FADE_OUT";
-    let frameCount = 0;
-
-    // Helper to set raster-opacity
-    function setOpacity(opacity: number) {
-      mapRef.current?.getMap()?.setPaintProperty(
-        "precipitable-water",
-        "raster-opacity",
-        opacity
-      )
+    const mapboxMap = mapRef.current?.getMap()
+    if (!mapboxMap) {
+      console.warn("Map is not ready yet.")
+      setIsAnimating(false)
+      return
     }
 
-    // Helper to set the band
-    function setBand(index: number) {
-      mapRef.current?.getMap()?.setPaintProperty(
-        "precipitable-water",
-        "raster-array-band",
-        String(PRECIPITATION_BANDS[index])
-      )
+    if (!mapboxMap.getLayer("precipitable-water")) {
+      console.warn("Layer 'precipitable-water' does not exist.")
+      setIsAnimating(false)
+      return
     }
 
-    // The main animation loop
-    function animate() {
-      frameCount++
-      switch (phase) {
-        case "FADE_OUT":
-          {
-            // Gradually go from 1.0 down to 0.0 over fadeFrames
-            const opacity = Math.max(0, 1 - frameCount / fadeFrames)
-            setOpacity(opacity)
-            if (opacity <= 0) {
-              // Fade out done
-              frameCount = 0
-              phase = "SWAP_BAND"
-            }
-          }
-          break
+    // Enable cross-fade transitions between band changes
+    mapboxMap.setPaintProperty("precipitable-water", "raster-fade-duration", 200)
 
-        case "SWAP_BAND":
-          {
-            // Swap the band
-            setBand(currentBandIndex)
-            currentBandIndex++
-            // Move to FADE_IN next
-            phase = "FADE_IN"
-            frameCount = 0
-          }
-          break
+    let currentIndex = 0
+    // Set the initial band
+    mapboxMap.setPaintProperty("precipitable-water", "raster-array-band", PRECIPITATION_BANDS[currentIndex])
 
-        case "FADE_IN":
-          {
-            // Go from 0.0 up to 1.0 over fadeFrames
-            const opacity = Math.min(1, frameCount / fadeFrames)
-            setOpacity(opacity)
-            if (opacity >= 1) {
-              // Fade in done
-              frameCount = 0
-              phase = "WAIT"
-            }
-          }
-          break
-
-        case "WAIT":
-          {
-            // Hang out for waitFrames
-            if (frameCount >= waitFrames) {
-              frameCount = 0
-              // If we haven't reached totalBands, fade out again
-              if (currentBandIndex < totalBands) {
-                phase = "FADE_OUT"
-              } else {
-                phase = "DONE"
-              }
-            }
-          break
-        }
-
-        case "DONE":
-          {
-            cancelAnimationFrame(animationIdRef.current!)
-            animationIdRef.current = null
-            setIsAnimating(false)
-            return
-          }
+    const intervalId = setInterval(() => {
+      currentIndex++
+      if (currentIndex < PRECIPITATION_BANDS.length) {
+        mapboxMap.setPaintProperty(
+          "precipitable-water",
+          "raster-array-band",
+          PRECIPITATION_BANDS[currentIndex]
+        )
+      } else {
+        clearInterval(intervalId)
+        animationIntervalRef.current = null
+        setIsAnimating(false)
       }
-      animationIdRef.current = requestAnimationFrame(animate)
-    }
+    }, 400)
 
-    // Kick off the first frame
-    animationIdRef.current = requestAnimationFrame(animate)
+    animationIntervalRef.current = intervalId
   }
 
   // FLYTO CODE
-  // The child calls this to smoothly move the map
   function handleFlyTo(longitude: number, latitude: number, zoom?: number) {
     mapRef.current?.flyTo(longitude, latitude, zoom)
   }
@@ -162,7 +99,7 @@ export default function Home() {
             <MapWrapper mapRef={mapRef} />
           </div>
 
-          {/* Panels above the map, pointerEvents turned off mostly */}
+          {/* Panels above the map */}
           <div
             style={{
               position: "relative",
@@ -171,8 +108,8 @@ export default function Home() {
             }}
           >
             <HomePanel />
-            <CaliforniaWaterPanel 
-              onFlyTo={handleFlyTo} 
+            <CaliforniaWaterPanel
+              onFlyTo={handleFlyTo}
               onAnimateBands={onAnimateBands}
             />
           </div>
