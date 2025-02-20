@@ -9,7 +9,10 @@ import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 
-// MapWrapper: Wraps MapboxMap with our context so that viewState is shared.
+//
+// MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
+// It forces the map to load with the first precipitation band and snowfall opacity set to 0.
+//
 function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
   const { viewState, setViewState } = useMap()
   return (
@@ -29,39 +32,38 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
       scrollZoom={false}
       onLoad={(e) => {
         const map = e.target;
-        // Poll until the "snowfall" layer exists, then force its opacity to 0.
-        const checkSnowfall = () => {
-          if (map.getLayer("snowfall")) {
-            map.setPaintProperty("snowfall", "raster-opacity", 0);
-          } else {
-            setTimeout(checkSnowfall, 100);
-          }
-        };
-        checkSnowfall();
-        // Set the initial precipitation band.
+        // Set the precipitation layer to the first band.
         if (map.getLayer("precipitable-water")) {
           map.setPaintProperty(
             "precipitable-water",
             "raster-array-band",
             PRECIPITATION_BANDS[0]
           );
-          // Optionally set a default opacity transition for the precip layer.
+          // Optionally, set a transition for future band changes.
           map.setPaintProperty("precipitable-water", "raster-opacity-transition", {
             duration: 2000,
             delay: 0,
           });
+        }
+        // Force the snowfall layer to opacity 0.
+        if (map.getLayer("snowfall")) {
+          map.setPaintProperty("snowfall", "raster-opacity", 0);
         }
       }}
     />
   )
 }
 
+//
+// Home component: Uses MapProvider and renders the map & overlay panels.
+// onAnimateBands is triggered by CaliforniaWaterPanel's first icon to animate the precipitation bands.
+//
 export default function Home() {
   const mapRef = useRef<MapboxMapRef>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const animationFrameIdRef = useRef<number | null>(null)
 
-  // Helper: update the snowfall layer opacity with a transition.
+  // Helper: update snowfall opacity with a transition.
   function updateSnowfallOpacity(opacity: number, duration: number = 2000) {
     const map = mapRef.current?.getMap()
     if (map && map.getLayer("snowfall")) {
@@ -73,8 +75,8 @@ export default function Home() {
   }
 
   // onAnimateBands: Triggered by CaliforniaWaterPanel's first icon.
-  // It cycles through PRECIPITATION_BANDS once, updating roughly every 30 frames (~0.5s at 60FPS).
-  // When reaching a threshold (here, index 5), it fades in the snowfall layer.
+  // It cycles through PRECIPITATION_BANDS once (approximately one band every 30 frames, ~0.5s per band).
+  // When the band index reaches 5, it fades in the snowfall layer over 2 seconds.
   function onAnimateBands() {
     if (isAnimating) return
     setIsAnimating(true)
@@ -97,12 +99,7 @@ export default function Home() {
     }
 
     let currentBandIndex = 0
-    map.setPaintProperty(
-      "precipitable-water",
-      "raster-array-band",
-      PRECIPITATION_BANDS[currentBandIndex]
-    )
-
+    // The map should already be showing PRECIPITATION_BANDS[0] on load.
     const FRAMES_PER_BAND = 30 // ~0.5 seconds per band at 60 FPS.
     let frameCount = 0
     const snowfallThreshold = 5
@@ -134,7 +131,6 @@ export default function Home() {
       }
       animationFrameIdRef.current = requestAnimationFrame(animate)
     }
-
     animationFrameIdRef.current = requestAnimationFrame(animate)
   }
 
@@ -148,7 +144,7 @@ export default function Home() {
       <Header />
       <main className={styles.main}>
         <MapProvider>
-          {/* Map container: wrapped in MapProvider */}
+          {/* Map container */}
           <div
             style={{
               position: "fixed",
@@ -161,7 +157,7 @@ export default function Home() {
           >
             <MapWrapper mapRef={mapRef} />
           </div>
-          {/* Overlay panels: HomePanel and CaliforniaWaterPanel */}
+          {/* Overlay panels */}
           <div
             style={{
               position: "relative",

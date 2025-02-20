@@ -1,10 +1,5 @@
 import { createTheme } from "@mui/material/styles"
-import { Geist, Inter } from "next/font/google"
-
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-})
+import { Inter } from "next/font/google"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -99,10 +94,9 @@ const theme = createTheme({
       letterSpacing: "0.00714rem",
     },
     body1: {
-      fontSize: "1.25rem",
+      fontSize: "1.5rem",
       fontWeight: 400,
       lineHeight: 1.5,
-      letterSpacing: "0.00938em",
       marginBottom: "1rem",
     },
     body2: {
