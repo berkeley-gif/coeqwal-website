@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { Header } from "@repo/ui/header"
 import styles from "./page.module.css"
 import { MapProvider, useMap } from "./context/MapContext"
@@ -8,6 +8,8 @@ import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
+import { useTheme, useMediaQuery } from "@mui/material"
+import { breakpointViews } from "../lib/mapViews"
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -15,19 +17,44 @@ import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 //
 function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
   const { viewState, setViewState } = useMap()
+  const theme = useTheme()
+
+  // Basic breakpoint detection
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"))
+  const isSm = useMediaQuery(theme.breakpoints.only("sm"))
+  const isMd = useMediaQuery(theme.breakpoints.only("md"))
+  const isLg = useMediaQuery(theme.breakpoints.only("lg"))
+  const isXl = useMediaQuery(theme.breakpoints.up("xl"))
+
+  // Decide which breakpoint key is active
+  function getBreakpointKey(): "xs" | "sm" | "md" | "lg" | "xl" {
+    if (isXs) return "xs"
+    if (isSm) return "sm"
+    if (isMd) return "md"
+    if (isLg) return "lg"
+    if (isXl) return "xl"
+    return "xl"
+  }
+
+  // Whenever breakpoints change, update the map's view
+  useEffect(() => {
+    const bpKey = getBreakpointKey()
+    // Use the existing "breakpointViews" from mapViews.ts
+    const coords = breakpointViews[bpKey]
+    setViewState((prev) => ({
+      ...prev,
+      ...coords,
+      transitionDuration: 1000,
+    }))
+  }, [isXs, isSm, isMd, isLg, isXl, setViewState])
+
   return (
     <MapboxMap
       ref={props.mapRef}
       mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
       viewState={viewState}
       onViewStateChange={(vs) => setViewState(vs)}
-      initialViewState={{
-        longitude: -130.5449,
-        latitude: 28.2790,
-        zoom: 5,
-        pitch: 0,
-        bearing: 0,
-      }}
+      initialViewState={viewState}
       style={{ width: "100%", height: "100%" }}
       scrollZoom={false}
       onLoad={(e) => {
