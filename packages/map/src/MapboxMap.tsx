@@ -11,6 +11,7 @@ import "mapbox-gl/dist/mapbox-gl.css"
 import type { ViewStateChangeEvent, MapRef } from "react-map-gl/mapbox"
 import { MinimalViewState } from "../../../apps/main/app/context/MapContext.tsx"
 import type { Map as MapboxMapType } from "mapbox-gl"
+import type { MapEvent } from "react-map-gl/mapbox"
 
 // Methods the parent can call via ref
 export interface MapboxMapRef {
@@ -28,6 +29,7 @@ export interface MapProps {
   minZoom?: number
   attributionControl?: boolean
   scrollZoom?: boolean
+  onLoad?: (e: MapEvent) => void
 }
 
 const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
@@ -40,6 +42,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     minZoom = 5.0,
     attributionControl = true,
     scrollZoom = false,
+    onLoad,
   },
   ref
 ) => {
@@ -80,6 +83,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       onMove={(evt: ViewStateChangeEvent) => {
         onViewStateChange?.(evt.viewState)
       }}
+      onLoad={onLoad}
     >
       <NavigationControl position="top-right" style={{ marginTop: "100px" }} />
     </Map>

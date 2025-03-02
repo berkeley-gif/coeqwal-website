@@ -54,7 +54,6 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
       mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
       viewState={viewState}
       onViewStateChange={(vs) => setViewState(vs)}
-      initialViewState={viewState}
       style={{ width: "100%", height: "100%" }}
       scrollZoom={false}
       onLoad={(e) => {
@@ -66,7 +65,7 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
             "raster-array-band",
             PRECIPITATION_BANDS[0]
           );
-          // Optionally, set a transition for future band changes.
+          // Set a transition for future band changes.
           map.setPaintProperty("precipitable-water", "raster-opacity-transition", {
             duration: 2000,
             delay: 0,
