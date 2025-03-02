@@ -93,10 +93,7 @@ export default function Home() {
   function updateSnowfallOpacity(opacity: number, duration: number = 2000) {
     const map = mapRef.current?.getMap()
     if (map && map.getLayer("snowfall")) {
-      map.setPaintProperty("snowfall", "raster-opacity", opacity, {
-        duration,
-        easing: (t) => t * (2 - t),
-      })
+      animateOpacityChange(map, "snowfall", opacity, duration)
     }
   }
 
@@ -163,6 +160,26 @@ export default function Home() {
   // handleFlyTo: Called from CaliforniaWaterPanel for paragraphs 1+.
   function handleFlyTo(longitude: number, latitude: number, zoom?: number) {
     mapRef.current?.flyTo(longitude, latitude, zoom)
+  }
+
+  // Function to animate the opacity change
+  function animateOpacityChange(map, layerId, targetOpacity, duration) {
+    const startOpacity = map.getPaintProperty(layerId, "raster-opacity") || 0;
+    const startTime = performance.now();
+
+    function animate(time) {
+      const elapsed = time - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const currentOpacity = startOpacity + (targetOpacity - startOpacity) * progress;
+
+      map.setPaintProperty(layerId, "raster-opacity", currentOpacity);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    }
+
+    requestAnimationFrame(animate);
   }
 
   return (
