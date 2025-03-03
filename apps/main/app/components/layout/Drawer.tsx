@@ -1,5 +1,5 @@
 import React from 'react';
-import { SwipeableDrawer, Box, List, Divider, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import { SwipeableDrawer, Box, List, Divider, ListItem, ListItemButton, ListItemText, Button } from '@mui/material';
 import { useMainAppTranslation } from '../../../i18n/useMainAppTranslation';
 
 interface DrawerProps {
@@ -30,10 +30,16 @@ const Drawer: React.FC<DrawerProps> = ({ open, onOpen, onClose }) => {
                 <ListItemText primary={item.text} />
               </ListItemButton>
             </ListItem>
-            {index < 3 && <Divider />}
+            <Divider />
           </React.Fragment>
         ))}
       </List>
+      <Button
+        onClick={onClose}
+        style={{ marginTop: '16px', width: '100%' }}
+      >
+        {t("drawerButton.close")}
+      </Button>
     </Box>
   );
 

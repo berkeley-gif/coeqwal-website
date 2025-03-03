@@ -30,6 +30,7 @@
     "climateChange": "Cambio climático"
   },
   "drawerButton": {
-    "learnMore": "Aprender Más"
+    "learnMore": "Aprender Más",
+    "close": "Cerrar"
   }
 }
