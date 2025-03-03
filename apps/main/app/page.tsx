@@ -8,7 +8,7 @@ import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
-import { useTheme, useMediaQuery } from "@mui/material"
+import { useTheme, useMediaQuery, SwipeableDrawer, Button, Box } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
 
 //
@@ -92,6 +92,7 @@ export default function Home() {
   const mapRef = useRef<MapboxMapRef>(null!)
   const [isAnimating, setIsAnimating] = useState(false)
   const animationFrameIdRef = useRef<number | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   // Helper: update snowfall opacity with a transition.
   function updateSnowfallOpacity(opacity: number, duration = 2000) {
@@ -195,6 +196,19 @@ export default function Home() {
     requestAnimationFrame(animate)
   }
 
+  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event &&
+      event.type === "keydown" &&
+      ((event as React.KeyboardEvent).key === "Tab" ||
+        (event as React.KeyboardEvent).key === "Shift")
+    ) {
+      return
+    }
+
+    setDrawerOpen(open)
+  }
+
   return (
     <div className={styles.page}>
       <Header />
@@ -227,6 +241,36 @@ export default function Home() {
               onAnimateBands={onAnimateBands}
             />
           </div>
+          {/* Swipeable Drawer */}
+          <SwipeableDrawer
+            anchor="right"
+            open={drawerOpen}
+            onClose={toggleDrawer(false)}
+            onOpen={toggleDrawer(true)}
+          >
+            <Box
+              sx={{ width: 250 }}
+              role="presentation"
+              onClick={toggleDrawer(false)}
+              onKeyDown={toggleDrawer(false)}
+            >
+              {/* Drawer content */}
+              <div>Drawer Content</div>
+            </Box>
+          </SwipeableDrawer>
+          {/* Button to open the drawer */}
+          <Button
+            onClick={toggleDrawer(true)}
+            style={{
+              position: "fixed",
+              top: "50%",
+              right: 0,
+              transform: "translateY(-50%)",
+              zIndex: 3,
+            }}
+          >
+            Open Drawer
+          </Button>
         </MapProvider>
       </main>
     </div>
