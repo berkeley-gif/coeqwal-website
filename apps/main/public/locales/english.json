@@ -28,5 +28,8 @@
     "howWaterManaged": "How Water is Managed in California",
     "calSim": "CalSim",
     "climateChange": "Climate Change"
+  },
+  "drawerButton": {
+    "learnMore": "Learn More"
   }
 }

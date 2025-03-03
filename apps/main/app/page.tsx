@@ -12,6 +12,7 @@ import { useTheme, useMediaQuery, Button } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
 import { useMainAppTranslation } from "../i18n/useMainAppTranslation"
 import Drawer from './components/layout/Drawer'
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -254,13 +255,12 @@ export default function Home() {
             onClick={toggleDrawer(true)}
             style={{
               position: "fixed",
-              top: "50%",
-              right: 0,
-              transform: "translateY(-50%)",
+              bottom: "50px",
+              right: "50px",
               zIndex: 3,
             }}
           >
-            Open Drawer
+            {t("drawerButton.learnMore")} <ArrowForwardIcon />
           </Button>
         </MapProvider>
       </main>
