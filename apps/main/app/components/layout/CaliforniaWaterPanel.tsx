@@ -14,14 +14,16 @@ import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
+import LearnMoreButton from "@repo/ui/learnMoreButton"
 
 interface CaliforniaWaterPanelProps {
   onFlyTo: (longitude: number, latitude: number, zoom?: number) => void
   onAnimateBands: () => void
+  onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
-  { onFlyTo, onAnimateBands }: CaliforniaWaterPanelProps,
+  { onFlyTo, onAnimateBands, onLearnMoreClick }: CaliforniaWaterPanelProps,
   ref,
 ) {
   const theme = useTheme<Theme>()
@@ -54,7 +56,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
   const isMd = useMediaQuery(theme.breakpoints.only("md"))
   const isLg = useMediaQuery(theme.breakpoints.only("lg"))
-  const isXl = useMediaQuery(theme.breakpoints.only("xl"))
+  const isXl = useMediaQuery(theme.breakpoints.up("xl"))
 
   function getBreakpointKey() {
     if (isXs) return "xs"
@@ -149,12 +151,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         />
       </Box>
 
-      <Button
-        onClick={() => handleVisibilityClick(0)}
-        sx={{ pointerEvents: "auto", mt: 3 }}
-      >
-        Animate bands (Paragraph 0)
-      </Button>
+      <LearnMoreButton onClick={onLearnMoreClick} />
     </Container>
   )
 })

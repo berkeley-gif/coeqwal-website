@@ -4,5 +4,8 @@
       "getData": "Get Data",
       "aboutCOEQWAL": "About COEQWAL"
     }
+  },
+  "drawerButton": {
+    "learnMore": "Learn more"
   }
 }

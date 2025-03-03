@@ -244,6 +244,7 @@ export default function Home() {
             <CaliforniaWaterPanel
               onFlyTo={handleFlyTo}
               onAnimateBands={onAnimateBands}
+              onLearnMoreClick={toggleDrawer(true)}
             />
           </div>
           <Drawer
@@ -251,18 +252,6 @@ export default function Home() {
             onClose={toggleDrawer(false)}
             onOpen={toggleDrawer(true)}
           />
-          {/* Button to open the drawer */}
-          <Button
-            onClick={toggleDrawer(true)}
-            style={{
-              position: "fixed",
-              bottom: "50px",
-              right: "50px",
-              zIndex: 3,
-            }}
-          >
-            {t("drawerButton.learnMore")} <ArrowForwardIcon />
-          </Button>
         </MapProvider>
       </main>
     </div>

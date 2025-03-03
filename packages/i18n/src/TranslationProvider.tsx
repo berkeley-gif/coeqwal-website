@@ -4,34 +4,15 @@ import React, { createContext, useState, useContext, useEffect } from "react"
 
 type Locale = "en" | "es"
 
-type LocalTranslationSchema = {
-  header: {
-    buttons: {
-      getData: string
-      aboutCOEQWAL: string
-    }
-  }
-}
-
-// A minimal fallback
-const fallbackMessages: LocalTranslationSchema = {
-  header: {
-    buttons: {
-      getData: "",
-      aboutCOEQWAL: "",
-    },
-  },
-}
-
 interface TranslationContextProps {
   locale: Locale
-  messages: LocalTranslationSchema
+  messages: Record<string, any> // Use a generic object for messages
   setLocale: (locale: Locale) => void
 }
 
 const TranslationContext = createContext<TranslationContextProps>({
   locale: "en",
-  messages: fallbackMessages,
+  messages: {},
   setLocale: () => {},
 })
 
@@ -41,8 +22,7 @@ export function TranslationProvider({
   children: React.ReactNode
 }) {
   const [locale, setLocale] = useState<Locale>("en")
-  const [messages, setMessages] =
-    useState<LocalTranslationSchema>(fallbackMessages)
+  const [messages, setMessages] = useState<Record<string, any>>({})
 
   // Fetch chosen locale on locale change
   useEffect(() => {
@@ -53,12 +33,10 @@ export function TranslationProvider({
         if (!response.ok) {
           throw new Error(`Could not load locale file for "${locale}"`)
         }
-        const data = (await response.json()) as LocalTranslationSchema
+        const data = await response.json()
         setMessages(data)
       } catch (error) {
         console.error("Error fetching translations:", error)
-        // Provide a fallback or keep existing messages
-        setMessages(fallbackMessages)
       }
     }
 
