@@ -31,7 +31,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    const currentPanelRef = panelRef.current;
+    const currentPanelRef = panelRef.current
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
       { threshold: 0.1 },

@@ -116,14 +116,19 @@ const theme = createTheme({
       lineHeight: 1.66,
       letterSpacing: "0.03333em",
     },
+    listItem: {
+      fontSize: "1.5rem",
+      fontWeight: 400,
+      lineHeight: 1.5,
+    },
   },
   shape: {
     borderRadius: 4,
   },
   zIndex: {
-    appBar: 1100,
     drawer: 1200,
     modal: 1300,
+    appBar: 1400,
     tooltip: 1500,
   },
   components: {
@@ -150,6 +155,25 @@ const theme = createTheme({
           borderRadius: theme.shape.borderRadius * 6,
           pointerEvents: "auto",
         }),
+      },
+    },
+    MuiListItem: {
+      styleOverrides: {
+        root: {
+          padding: "8px 16px",
+        },
+      },
+    },
+    MuiListItemText: {
+      defaultProps: {
+        primaryTypographyProps: {
+          variant: "listItem",
+        },
+      },
+      styleOverrides: {
+        root: {
+          marginBottom: 0,
+        },
       },
     },
     MuiContainer: {
@@ -189,13 +213,13 @@ const theme = createTheme({
     MuiSvgIcon: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: "white", // Passive color
-          fontSize: "inherit", // Icons match text font size
+          color: "inherit",
+          fontSize: "inherit",
           transition: "color 0.2s ease-in-out",
           pointerEvents: "auto",
 
           "&:hover, &:focus": {
-            color: theme.palette.primary.light, // Active color
+            color: theme.palette.primary.light,
           },
         }),
       },
@@ -206,7 +230,7 @@ const theme = createTheme({
           color: baseTheme.palette.text.secondary,
           width: 400,
           top: 60,
-          height: 'calc(100% - 60px)',
+          height: "calc(100% - 65px)",
         },
       },
     },
@@ -223,6 +247,14 @@ theme.background = {
 
 // TypeScript declarations for our custom theme properties
 declare module "@mui/material/styles" {
+  interface TypographyVariants {
+    listItem: React.CSSProperties
+  }
+
+  interface TypographyVariantsOptions {
+    listItem?: React.CSSProperties
+  }
+
   interface Theme {
     border: {
       primary: string
@@ -238,6 +270,12 @@ declare module "@mui/material/styles" {
     background?: {
       transparent?: string
     }
+  }
+}
+
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    listItem: true
   }
 }
 

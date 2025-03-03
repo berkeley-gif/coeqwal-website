@@ -8,6 +8,7 @@
     "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
     "./language-switcher": "./src/language-switcher.tsx",
+    "./customArrowForwardIcon": "./src/customArrowForwardIcon.tsx",
     "./themes": "./src/themes/theme.tsx",
     "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx"
   },

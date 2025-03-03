@@ -11,8 +11,8 @@ import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 import { useTheme, useMediaQuery, Button } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
 import { useMainAppTranslation } from "../i18n/useMainAppTranslation"
-import Drawer from './components/layout/Drawer'
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
+import Drawer from "./components/layout/Drawer"
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -200,18 +200,19 @@ export default function Home() {
     requestAnimationFrame(animate)
   }
 
-  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-    if (
-      event &&
-      event.type === "keydown" &&
-      ((event as React.KeyboardEvent).key === "Tab" ||
-        (event as React.KeyboardEvent).key === "Shift")
-    ) {
-      return
-    }
+  const toggleDrawer =
+    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+      if (
+        event &&
+        event.type === "keydown" &&
+        ((event as React.KeyboardEvent).key === "Tab" ||
+          (event as React.KeyboardEvent).key === "Shift")
+      ) {
+        return
+      }
 
-    setDrawerOpen(open)
-  }
+      setDrawerOpen(open)
+    }
 
   return (
     <div className={styles.page}>
