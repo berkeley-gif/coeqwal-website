@@ -2,13 +2,13 @@ import type { Metadata } from "next"
 import "./globals.css"
 import React from "react"
 import ClientProviders from "./ClientProviders"
+import LanguageProvider from "./LanguageProvider"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
-  description: "Find alternative California water solutions",
+  description: "Alternative California water solutions",
 }
 
-// No "use client" at the top: This is a SERVER component.
 export default function RootLayout({
   children,
 }: {
@@ -17,11 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* 
-          Insert a nested client component that will handle useState,
-          contexts, or any other client-only logic.
-        */}
-        <ClientProviders>{children}</ClientProviders>
+        <LanguageProvider>
+          <ClientProviders>
+            {children}
+          </ClientProviders>
+        </LanguageProvider>
       </body>
     </html>
   )
