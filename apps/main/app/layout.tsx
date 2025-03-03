@@ -1,30 +1,25 @@
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter"
-import ThemeRegistry from "@repo/ui/themes/ThemeRegistry"
 import type { Metadata } from "next"
-import { TranslationProvider } from "@repo/i18n"
-
 import "./globals.css"
+import React from "react"
+import ClientProviders from "./ClientProviders"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
   description: "Find alternative California water solutions",
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const locale = "en"
-
+// No "use client" at the top: This is a SERVER component.
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang={locale}>
+    <html lang="en">
       <body>
-        <AppRouterCacheProvider>
-          <TranslationProvider>
-            <ThemeRegistry>{children}</ThemeRegistry>
-          </TranslationProvider>
-        </AppRouterCacheProvider>
+        {/* 
+          Insert a nested client component that will handle useState,
+          contexts, or any other client-only logic.
+        */}
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   )

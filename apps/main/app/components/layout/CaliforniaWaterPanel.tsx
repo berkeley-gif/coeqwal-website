@@ -1,4 +1,4 @@
-"use client" // necessary for useTheme hook (ugh, maybe change this)
+"use client"
 
 import React, {
   useRef,
@@ -14,7 +14,7 @@ import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
-import LearnMoreButton from "@repo/ui/learnMoreButton"
+import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 
 interface CaliforniaWaterPanelProps {
   onFlyTo: (longitude: number, latitude: number, zoom?: number) => void
@@ -31,6 +31,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   const { setViewState } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
+  const [clientReady, setClientReady] = useState(false)
 
   useEffect(() => {
     const currentPanelRef = panelRef.current
@@ -46,6 +47,10 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         observer.unobserve(currentPanelRef)
       }
     }
+  }, [])
+
+  useEffect(() => {
+    setClientReady(true)
   }, [])
 
   const backgroundColor = isVisible
@@ -113,43 +118,47 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
       }}
       role="main"
     >
-      <Box
-        sx={{
-          display: "grid",
-          gap: { xs: 2, lg: 16 },
-          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-        }}
-      >
-        {/* Left side text */}
-        <Box>
-          <Typography
-            variant="h1"
-            sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
-            gutterBottom
-          >
-            {t("CaliforniaWaterPanel.title")}
-          </Typography>
-
-          {paragraphKeys.map((key, i) => (
-            <Typography key={i} variant="body1">
-              {t(key)}
-              <VisibilityIcon
-                sx={{ ml: 1, cursor: "pointer" }}
-                onClick={() => handleVisibilityClick(i)}
-              />
-            </Typography>
-          ))}
-        </Box>
-
-        {/* Right side (currently empty) */}
+      {!clientReady ? (
+        <Box style={{ minHeight: 200 }} />
+      ) : (
         <Box
           sx={{
-            order: { xs: 1, md: 2 },
-            width: { xs: "80%", md: "100%" },
-            margin: "0 auto",
+            display: "grid",
+            gap: { xs: 2, lg: 16 },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
           }}
-        />
-      </Box>
+        >
+          {/* Left side text */}
+          <Box>
+            <Typography
+              variant="h1"
+              sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
+              gutterBottom
+            >
+              {t("CaliforniaWaterPanel.title")}
+            </Typography>
+
+            {paragraphKeys.map((key, i) => (
+              <Typography key={i} variant="body1">
+                {t(key)}
+                <VisibilityIcon
+                  sx={{ ml: 1, cursor: "pointer" }}
+                  onClick={() => handleVisibilityClick(i)}
+                />
+              </Typography>
+            ))}
+          </Box>
+
+          {/* Right side (currently empty) */}
+          <Box
+            sx={{
+              order: { xs: 1, md: 2 },
+              width: { xs: "80%", md: "100%" },
+              margin: "0 auto",
+            }}
+          />
+        </Box>
+      )}
 
       <LearnMoreButton onClick={onLearnMoreClick} />
     </Container>

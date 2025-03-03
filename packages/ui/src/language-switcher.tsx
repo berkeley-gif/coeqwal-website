@@ -2,10 +2,10 @@
 
 import React from "react"
 import { ToggleButtonGroup, ToggleButton } from "@mui/material"
-import { useTranslation } from "@repo/i18n"
+import { useUiLocale } from "./context/UiLocaleContext"
 
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useTranslation()
+  const { locale, setLocale } = useUiLocale()
 
   const handleChange = (
     _event: React.MouseEvent<HTMLElement>,

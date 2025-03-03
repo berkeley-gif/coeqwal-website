@@ -10,6 +10,13 @@ interface TranslationContextProps {
   setLocale: (locale: Locale) => void
 }
 
+// 1) Accept forcedLocale & an optional onChangeLocale
+interface TranslationProviderProps {
+  children: React.ReactNode
+  forcedLocale: Locale
+  onChangeLocale?: (locale: Locale) => void
+}
+
 const TranslationContext = createContext<TranslationContextProps>({
   locale: "en",
   messages: {},
@@ -18,20 +25,19 @@ const TranslationContext = createContext<TranslationContextProps>({
 
 export function TranslationProvider({
   children,
-}: {
-  children: React.ReactNode
-}) {
-  const [locale, setLocale] = useState<Locale>("en")
+  forcedLocale,
+  onChangeLocale,
+}: TranslationProviderProps) {
   const [messages, setMessages] = useState<Record<string, any>>({})
 
-  // Fetch chosen locale on locale change
+  // 2) On mount or forcedLocale change, fetch the appropriate JSON
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        const file = locale === "en" ? "english" : "spanish"
+        const file = forcedLocale === "en" ? "english" : "spanish"
         const response = await fetch(`/locales/${file}.json`)
         if (!response.ok) {
-          throw new Error(`Could not load locale file for "${locale}"`)
+          throw new Error(`Could not load locale file for "${forcedLocale}"`)
         }
         const data = await response.json()
         setMessages(data)
@@ -41,10 +47,21 @@ export function TranslationProvider({
     }
 
     fetchTranslations()
-  }, [locale])
+  }, [forcedLocale])
+
+  // 3) This setLocale calls onChangeLocale if provided
+  function setLocale(newLocale: Locale) {
+    onChangeLocale?.(newLocale)
+  }
 
   return (
-    <TranslationContext.Provider value={{ locale, messages, setLocale }}>
+    <TranslationContext.Provider
+      value={{
+        locale: forcedLocale,     // no local state for locale
+        messages,                 // updated whenever forcedLocale changes
+        setLocale,                // triggers parent's state
+      }}
+    >
       {children}
     </TranslationContext.Provider>
   )

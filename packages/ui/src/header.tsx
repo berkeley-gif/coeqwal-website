@@ -1,10 +1,13 @@
 "use client"
 
+import React from "react"
 import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { LanguageSwitcher } from "./language-switcher"
-import { useUiTranslation } from "../i18n/useUiTranslation"
+import { useUiLocale } from "./context/UiLocaleContext"
+import en from "../public/locales/english.json"
+import es from "../public/locales/spanish.json"
 
 export const useResponsiveButtonVariant = () => {
   const theme = useTheme()
@@ -13,8 +16,13 @@ export const useResponsiveButtonVariant = () => {
 }
 
 export function Header() {
-  const { t } = useUiTranslation()
   const buttonVariant = useResponsiveButtonVariant()
+  const { locale } = useUiLocale()
+
+  // Determine localized text
+  const text = locale === "en"
+    ? en.header.buttons
+    : es.header.buttons
 
   return (
     <AppBar position="fixed" role="banner">
@@ -28,7 +36,7 @@ export function Header() {
               border: buttonVariant === "text" ? "none" : undefined,
             }}
           >
-            {t("header.buttons.getData")}
+            {text.getData}
           </Button>
           <Button
             variant={buttonVariant}
@@ -36,7 +44,7 @@ export function Header() {
               border: buttonVariant === "text" ? "none" : undefined,
             }}
           >
-            {t("header.buttons.aboutCOEQWAL")}
+            {text.aboutCOEQWAL}
           </Button>
         </Stack>
       </Toolbar>

@@ -11,7 +11,8 @@
     "./learnMoreButton": "./src/learnMoreButton.tsx",
     "./customArrowForwardIcon": "./src/customArrowForwardIcon.tsx",
     "./themes": "./src/themes/theme.tsx",
-    "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx"
+    "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
+    "./context/UiLocaleContext": "./src/context/UiLocaleContext.tsx"
   },
   "scripts": {
     "lint": "pnpm exec eslint . --config=eslint.config.mjs",
