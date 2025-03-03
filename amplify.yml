@@ -11,7 +11,7 @@ applications:
             - pnpm rebuild # Rebuild dependencies that need build scripts
             - npx turbo run build --filter=main
       artifacts:
-        baseDirectory: apps/main/dist
+        baseDirectory: apps/main/.next
         files:
           - '**/*'
       cache:
