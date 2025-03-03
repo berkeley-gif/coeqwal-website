@@ -21,3 +21,7 @@ applications:
           - ~/.cache/pnpm/**/*
       buildPath: /
     appRoot: apps/main
+    environment:
+      variables:
+        NODE_VERSION: 22
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${{ env.NEXT_PUBLIC_MAPBOX_TOKEN }}
