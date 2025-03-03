@@ -5,7 +5,6 @@ applications:
         preBuild:
           commands:
             - corepack enable
-            - npm install -g pnpm
             - pnpm install
         build:
           commands:
