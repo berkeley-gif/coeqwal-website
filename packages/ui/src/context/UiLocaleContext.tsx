@@ -2,12 +2,7 @@
 
 "use client"
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-} from "react"
+import React, { createContext, useContext, useState, useEffect } from "react"
 
 type Locale = "en" | "es" // Expandable!
 
@@ -47,10 +42,12 @@ export function UiLocaleProvider({
   }
 
   return (
-    <UiLocaleContext.Provider value={{
-      locale,
-      setLocale: handleSetLocale,
-    }}>
+    <UiLocaleContext.Provider
+      value={{
+        locale,
+        setLocale: handleSetLocale,
+      }}
+    >
       {children}
     </UiLocaleContext.Provider>
   )

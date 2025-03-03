@@ -4,7 +4,11 @@ import { UiLocaleProvider } from "@repo/ui/context/UiLocaleContext"
 import { TranslationProvider } from "@repo/i18n"
 import ThemeRegistry from "@repo/ui/themes/ThemeRegistry"
 
-export default function ClientProviders({ children }: { children: React.ReactNode }) {
+export default function ClientProviders({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   // Main app's single source of truth
   const [locale, setLocale] = useState<"en" | "es">("en")
 
@@ -15,13 +19,8 @@ export default function ClientProviders({ children }: { children: React.ReactNod
         Pass forcedLocale to TranslationProvider
         so main text & UI share the same "locale"
       */}
-      <TranslationProvider
-        forcedLocale={locale}
-        onChangeLocale={setLocale}
-      >
-        <ThemeRegistry>
-          {children}
-        </ThemeRegistry>
+      <TranslationProvider forcedLocale={locale} onChangeLocale={setLocale}>
+        <ThemeRegistry>{children}</ThemeRegistry>
       </TranslationProvider>
     </UiLocaleProvider>
   )

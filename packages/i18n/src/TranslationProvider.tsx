@@ -57,9 +57,9 @@ export function TranslationProvider({
   return (
     <TranslationContext.Provider
       value={{
-        locale: forcedLocale,     // no local state for locale
-        messages,                 // updated whenever forcedLocale changes
-        setLocale,                // triggers parent's state
+        locale: forcedLocale, // no local state for locale
+        messages, // updated whenever forcedLocale changes
+        setLocale, // triggers parent's state
       }}
     >
       {children}

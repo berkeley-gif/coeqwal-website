@@ -25,7 +25,11 @@ const HomePanel = () => {
         <Box style={{ minHeight: 200 /* or a spinner/skeleton */ }} />
       ) : (
         <Box
-          sx={{ display: "grid", gap: 4, gridTemplateColumns: { md: "1fr 1fr" } }}
+          sx={{
+            display: "grid",
+            gap: 4,
+            gridTemplateColumns: { md: "1fr 1fr" },
+          }}
         >
           {/* Left side - Text content */}
           <Box>

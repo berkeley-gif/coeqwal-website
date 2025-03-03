@@ -20,9 +20,7 @@ export function Header() {
   const { locale } = useUiLocale()
 
   // Determine localized text
-  const text = locale === "en"
-    ? en.header.buttons
-    : es.header.buttons
+  const text = locale === "en" ? en.header.buttons : es.header.buttons
 
   return (
     <AppBar position="fixed" role="banner">

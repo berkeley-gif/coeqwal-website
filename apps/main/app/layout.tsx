@@ -9,7 +9,11 @@ export const metadata: Metadata = {
 }
 
 // No "use client" at the top: This is a SERVER component.
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
       <body>
@@ -17,9 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Insert a nested client component that will handle useState,
           contexts, or any other client-only logic.
         */}
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   )
