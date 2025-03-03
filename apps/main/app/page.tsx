@@ -85,20 +85,19 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
 // onAnimateBands is triggered by CaliforniaWaterPanel's first icon to animate the precipitation bands.
 //
 export default function Home() {
-  const mapRef = useRef<MapboxMapRef>(null)
+  const mapRef = useRef<MapboxMapRef>(null!)
   const [isAnimating, setIsAnimating] = useState(false)
   const animationFrameIdRef = useRef<number | null>(null)
 
   // Helper: update snowfall opacity with a transition.
-  function updateSnowfallOpacity(opacity: number, duration: number = 2000) {
-    const map = mapRef.current?.getMap()
-    if (map && map.getLayer("snowfall")) {
-      animateOpacityChange(map, "snowfall", opacity, duration)
-    }
+  function updateSnowfallOpacity(opacity: number, duration = 2000) {
+    const current = mapRef.current
+    if (!current) return // If no map yet, bail out
+    animateOpacityChange(current, "snowfall", opacity, duration)
   }
 
   // onAnimateBands: Triggered by CaliforniaWaterPanel's first icon.
-  // It cycles through PRECIPITATION_BANDS once (approximately one band every 30 frames, ~0.5s per band).
+  // Cycles through PRECIPITATION_BANDS once.
   // When the band index reaches 5, it fades in the snowfall layer over 2 seconds.
   function onAnimateBands() {
     if (isAnimating) return
@@ -134,14 +133,16 @@ export default function Home() {
         frameCount = 0
         currentBandIndex++
         if (currentBandIndex < PRECIPITATION_BANDS.length) {
-          map.setPaintProperty(
-            "precipitable-water",
-            "raster-array-band",
-            PRECIPITATION_BANDS[currentBandIndex]
-          )
-          if (currentBandIndex >= snowfallThreshold && !snowfallAnimated) {
-            updateSnowfallOpacity(1, 2000)
-            snowfallAnimated = true
+          if (map && currentBandIndex < PRECIPITATION_BANDS.length) {
+            map.setPaintProperty(
+              "precipitable-water",
+              "raster-array-band",
+              PRECIPITATION_BANDS[currentBandIndex]
+            )
+            if (currentBandIndex >= snowfallThreshold && !snowfallAnimated) {
+              updateSnowfallOpacity(1, 2000)
+              snowfallAnimated = true
+            }
           }
         } else {
           if (animationFrameIdRef.current !== null) {
@@ -163,23 +164,29 @@ export default function Home() {
   }
 
   // Function to animate the opacity change
-  function animateOpacityChange(map, layerId, targetOpacity, duration) {
-    const startOpacity = map.getPaintProperty(layerId, "raster-opacity") || 0;
-    const startTime = performance.now();
+  function animateOpacityChange(
+    mapRef: MapboxMapRef,
+    layerId: string,
+    targetOpacity: number,
+    duration: number
+  ): void {
+    const map = mapRef.getMap()
+    if (!map) return // Ensure map is defined before proceeding
 
-    function animate(time) {
-      const elapsed = time - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const currentOpacity = startOpacity + (targetOpacity - startOpacity) * progress;
+    const startOpacity = (map.getPaintProperty(layerId, "raster-opacity") ?? 0) as number;
+    const startTime = performance.now()
 
-      map.setPaintProperty(layerId, "raster-opacity", currentOpacity);
+    function animate(time: number) {
+      const elapsed = time - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const currentOpacity = startOpacity + (targetOpacity - startOpacity) * progress
 
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
+      map?.setPaintProperty(layerId, "raster-opacity", currentOpacity)
+
+      if (progress < 1) requestAnimationFrame(animate)
     }
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(animate)
   }
 
   return (

@@ -13,10 +13,12 @@ import { MinimalViewState } from "../../../apps/main/app/context/MapContext.tsx"
 import type { Map as MapboxMapType } from "mapbox-gl"
 import type { MapEvent } from "react-map-gl/mapbox"
 
-// Methods the parent can call via ref
+// Custom mapbox map interface
+// Mapbox map methods the parent can call via ref
+// We put convenience methods here, and can add more as desired
 export interface MapboxMapRef {
-  flyTo: (longitude: number, latitude: number, zoom?: number) => void
-  getMap: () => MapboxMapType | undefined
+  getMap: () => MapboxMapType | undefined  // Return the map instance, can be used to call further methods
+  flyTo: (longitude: number, latitude: number, zoom?: number) => void // Convenience method
 }
 
 // Props for our reusable MapboxMap
