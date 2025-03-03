@@ -22,5 +22,11 @@
     "pg5": "and then out to the Pacific through the Golden Gate.",
     "pg6": "Groundwater is stored underground in aquifers and springs throughout the Central Valley and the mountains.",
     "pg7": "Ancient groundwater is interconnected and replenished by seasonal rains."
+  },
+  "drawerLinks": {
+    "howWaterMoves": "How Water Moves Through California",
+    "howWaterManaged": "How Water is Managed in California",
+    "calSim": "CalSim",
+    "climateChange": "Climate Change"
   }
 }

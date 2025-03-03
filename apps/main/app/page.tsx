@@ -8,8 +8,9 @@ import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
-import { useTheme, useMediaQuery, SwipeableDrawer, Button, Box } from "@mui/material"
+import { useTheme, useMediaQuery, SwipeableDrawer, Button, Box, List, Divider, ListItem, ListItemButton, ListItemText } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
+import { useMainAppTranslation } from "../i18n/useMainAppTranslation"
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -93,6 +94,7 @@ export default function Home() {
   const [isAnimating, setIsAnimating] = useState(false)
   const animationFrameIdRef = useRef<number | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const { t } = useMainAppTranslation()
 
   // Helper: update snowfall opacity with a transition.
   function updateSnowfallOpacity(opacity: number, duration = 2000) {
@@ -209,6 +211,32 @@ export default function Home() {
     setDrawerOpen(open)
   }
 
+  const drawerList = () => (
+    <Box
+      role="presentation"
+      onClick={toggleDrawer(false)}
+      onKeyDown={toggleDrawer(false)}
+    >
+      <List>
+        {[
+          { text: t("drawerLinks.howWaterMoves"), href: "#how-water-moves" },
+          { text: t("drawerLinks.howWaterManaged"), href: "#how-water-managed" },
+          { text: t("drawerLinks.calSim"), href: "#calsim" },
+          { text: t("drawerLinks.climateChange"), href: "#climate-change" },
+        ].map((item, index) => (
+          <React.Fragment key={`${item.text}-${index}`}>
+            <ListItem disablePadding>
+              <ListItemButton component="a" href={item.href}>
+                <ListItemText primary={item.text} />
+              </ListItemButton>
+            </ListItem>
+            {index < 4 && <Divider />}
+          </React.Fragment>
+        ))}
+      </List>
+    </Box>
+  )
+
   return (
     <div className={styles.page}>
       <Header />
@@ -247,16 +275,13 @@ export default function Home() {
             open={drawerOpen}
             onClose={toggleDrawer(false)}
             onOpen={toggleDrawer(true)}
+            slotProps={{
+              backdrop: {
+                invisible: true, // Disable backdrop darkening
+              },
+            }}
           >
-            <Box
-              sx={{ width: 250 }}
-              role="presentation"
-              onClick={toggleDrawer(false)}
-              onKeyDown={toggleDrawer(false)}
-            >
-              {/* Drawer content */}
-              <div>Drawer Content</div>
-            </Box>
+            {drawerList()}
           </SwipeableDrawer>
           {/* Button to open the drawer */}
           <Button

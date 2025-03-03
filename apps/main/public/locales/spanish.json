@@ -22,5 +22,11 @@
     "pg5": "y luego desemboca en el Pacífico a través del Golden Gate.",
     "pg6": "El agua subterránea se almacena bajo tierra en acuíferos y manantiales a lo largo del Valle Central y las montañas.",
     "pg7": "El agua subterránea antigua está interconectada y se recarga con las lluvias estacionales."
+  },
+  "drawerLinks": {
+    "howWaterMoves": "Cómo se mueve el agua a través de California",
+    "howWaterManaged": "Cómo se gestiona el agua en California",
+    "calSim": "CalSim",
+    "climateChange": "Cambio climático"
   }
 }

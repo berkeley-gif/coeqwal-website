@@ -24,7 +24,7 @@ const theme = createTheme({
     },
     text: {
       primary: "#fff",
-      secondary: "#fff",
+      secondary: "#11273f",
     },
     divider: "#e0e0e0",
     background: {
@@ -198,6 +198,16 @@ const theme = createTheme({
             color: theme.palette.primary.light, // Active color
           },
         }),
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          color: baseTheme.palette.text.secondary,
+          width: 400,
+          top: 60,
+          height: 'calc(100% - 60px)',
+        },
       },
     },
   },
