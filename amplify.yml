@@ -1,0 +1,23 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - npm install -g pnpm
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild # Rebuild dependencies that need build scripts
+            - npx turbo run build --filter=main
+      artifacts:
+        baseDirectory: apps/main/dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - ~/.cache/pnpm/**/*
+      buildPath: /
+    appRoot: apps/main
