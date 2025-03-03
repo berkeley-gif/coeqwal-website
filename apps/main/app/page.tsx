@@ -8,9 +8,10 @@ import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
-import { useTheme, useMediaQuery, SwipeableDrawer, Button, Box, List, Divider, ListItem, ListItemButton, ListItemText } from "@mui/material"
+import { useTheme, useMediaQuery, Button } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
 import { useMainAppTranslation } from "../i18n/useMainAppTranslation"
+import Drawer from './components/layout/Drawer'
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -211,32 +212,6 @@ export default function Home() {
     setDrawerOpen(open)
   }
 
-  const drawerList = () => (
-    <Box
-      role="presentation"
-      onClick={toggleDrawer(false)}
-      onKeyDown={toggleDrawer(false)}
-    >
-      <List>
-        {[
-          { text: t("drawerLinks.howWaterMoves"), href: "#how-water-moves" },
-          { text: t("drawerLinks.howWaterManaged"), href: "#how-water-managed" },
-          { text: t("drawerLinks.calSim"), href: "#calsim" },
-          { text: t("drawerLinks.climateChange"), href: "#climate-change" },
-        ].map((item, index) => (
-          <React.Fragment key={`${item.text}-${index}`}>
-            <ListItem disablePadding>
-              <ListItemButton component="a" href={item.href}>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            </ListItem>
-            {index < 4 && <Divider />}
-          </React.Fragment>
-        ))}
-      </List>
-    </Box>
-  )
-
   return (
     <div className={styles.page}>
       <Header />
@@ -269,20 +244,11 @@ export default function Home() {
               onAnimateBands={onAnimateBands}
             />
           </div>
-          {/* Swipeable Drawer */}
-          <SwipeableDrawer
-            anchor="right"
+          <Drawer
             open={drawerOpen}
             onClose={toggleDrawer(false)}
             onOpen={toggleDrawer(true)}
-            slotProps={{
-              backdrop: {
-                invisible: true, // Disable backdrop darkening
-              },
-            }}
-          >
-            {drawerList()}
-          </SwipeableDrawer>
+          />
           {/* Button to open the drawer */}
           <Button
             onClick={toggleDrawer(true)}
