@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef, useState, useEffect, useCallback } from "react"
 import { Header } from "@repo/ui/header"
 import styles from "./page.module.css"
 import { MapProvider, useMap } from "./context/MapContext"
@@ -26,15 +26,15 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
   const isLg = useMediaQuery(theme.breakpoints.only("lg"))
   const isXl = useMediaQuery(theme.breakpoints.up("xl"))
 
-  // Decide which breakpoint key is active
-  function getBreakpointKey(): "xs" | "sm" | "md" | "lg" | "xl" {
+  // Memoize getBreakpointKey
+  const getBreakpointKey = useCallback((): "xs" | "sm" | "md" | "lg" | "xl" => {
     if (isXs) return "xs"
     if (isSm) return "sm"
     if (isMd) return "md"
     if (isLg) return "lg"
     if (isXl) return "xl"
     return "xl"
-  }
+  }, [isXs, isSm, isMd, isLg, isXl])
 
   // Whenever breakpoints change, update the map's view
   useEffect(() => {
@@ -46,7 +46,7 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
       ...coords,
       transitionDuration: 1000,
     }))
-  }, [isXs, isSm, isMd, isLg, isXl, setViewState])
+  }, [isXs, isSm, isMd, isLg, isXl, setViewState, getBreakpointKey])
 
   return (
     <MapboxMap
@@ -57,23 +57,27 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
       style={{ width: "100%", height: "100%" }}
       scrollZoom={false}
       onLoad={(e) => {
-        const map = e.target;
+        const map = e.target
         // Set the precipitation layer to the first band.
         if (map.getLayer("precipitable-water")) {
           map.setPaintProperty(
             "precipitable-water",
             "raster-array-band",
-            PRECIPITATION_BANDS[0]
-          );
+            PRECIPITATION_BANDS[0],
+          )
           // Set a transition for future band changes.
-          map.setPaintProperty("precipitable-water", "raster-opacity-transition", {
-            duration: 2000,
-            delay: 0,
-          });
+          map.setPaintProperty(
+            "precipitable-water",
+            "raster-opacity-transition",
+            {
+              duration: 2000,
+              delay: 0,
+            },
+          )
         }
         // Force the snowfall layer to opacity 0.
         if (map.getLayer("snowfall")) {
-          map.setPaintProperty("snowfall", "raster-opacity", 0);
+          map.setPaintProperty("snowfall", "raster-opacity", 0)
         }
       }}
     />
@@ -137,7 +141,7 @@ export default function Home() {
             map.setPaintProperty(
               "precipitable-water",
               "raster-array-band",
-              PRECIPITATION_BANDS[currentBandIndex]
+              PRECIPITATION_BANDS[currentBandIndex],
             )
             if (currentBandIndex >= snowfallThreshold && !snowfallAnimated) {
               updateSnowfallOpacity(1, 2000)
@@ -168,18 +172,20 @@ export default function Home() {
     mapRef: MapboxMapRef,
     layerId: string,
     targetOpacity: number,
-    duration: number
+    duration: number,
   ): void {
     const map = mapRef.getMap()
     if (!map) return // Ensure map is defined before proceeding
 
-    const startOpacity = (map.getPaintProperty(layerId, "raster-opacity") ?? 0) as number;
+    const startOpacity = (map.getPaintProperty(layerId, "raster-opacity") ??
+      0) as number
     const startTime = performance.now()
 
     function animate(time: number) {
       const elapsed = time - startTime
       const progress = Math.min(elapsed / duration, 1)
-      const currentOpacity = startOpacity + (targetOpacity - startOpacity) * progress
+      const currentOpacity =
+        startOpacity + (targetOpacity - startOpacity) * progress
 
       map?.setPaintProperty(layerId, "raster-opacity", currentOpacity)
 

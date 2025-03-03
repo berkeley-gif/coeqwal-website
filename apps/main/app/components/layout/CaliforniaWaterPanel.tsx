@@ -22,7 +22,7 @@ interface CaliforniaWaterPanelProps {
 
 const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   { onFlyTo, onAnimateBands }: CaliforniaWaterPanelProps,
-  ref
+  ref,
 ) {
   const theme = useTheme<Theme>()
   const { t } = useMainAppTranslation()
@@ -31,21 +31,24 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
+    const currentPanelRef = panelRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     )
-    if (panelRef.current) {
-      observer.observe(panelRef.current)
+    if (currentPanelRef) {
+      observer.observe(currentPanelRef)
     }
     return () => {
-      if (panelRef.current) {
-        observer.unobserve(panelRef.current)
+      if (currentPanelRef) {
+        observer.unobserve(currentPanelRef)
       }
     }
   }, [])
 
-  const backgroundColor = isVisible ? "transparent" : theme.palette.secondary.main
+  const backgroundColor = isVisible
+    ? "transparent"
+    : theme.palette.secondary.main
 
   const isXs = useMediaQuery(theme.breakpoints.down("sm"))
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
@@ -72,7 +75,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
       const coords = paragraphMapViews[paragraphIndex][bpKey]
       onFlyTo(coords.longitude, coords.latitude, coords.zoom)
 
-      setViewState(prev => ({
+      setViewState((prev) => ({
         ...prev,
         ...coords,
         transitionDuration: 2000,
@@ -112,7 +115,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         sx={{
           display: "grid",
           gap: { xs: 2, lg: 16 },
-          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
         }}
       >
         {/* Left side text */}

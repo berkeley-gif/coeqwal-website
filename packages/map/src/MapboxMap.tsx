@@ -1,4 +1,4 @@
-"use client"
+"use client" // necessary for mapbox-gl
 
 import React, {
   useRef,
@@ -17,7 +17,7 @@ import type { MapEvent } from "react-map-gl/mapbox"
 // Mapbox map methods the parent can call via ref
 // We put convenience methods here, and can add more as desired
 export interface MapboxMapRef {
-  getMap: () => MapboxMapType | undefined  // Return the map instance, can be used to call further methods
+  getMap: () => MapboxMapType | undefined // Return the map instance, can be used to call further methods
   flyTo: (longitude: number, latitude: number, zoom?: number) => void // Convenience method
 }
 
@@ -46,7 +46,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     scrollZoom = false,
     onLoad,
   },
-  ref
+  ref,
 ) => {
   const internalMapRef = useRef<MapRef>(null)
 
