@@ -8,12 +8,9 @@ import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
-import { useTheme, useMediaQuery, Button } from "@mui/material"
+import { useTheme, useMediaQuery } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
-import { useMainAppTranslation } from "../i18n/useMainAppTranslation"
 import Drawer from "./components/layout/Drawer"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
-
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
 // It forces the map to load with the first precipitation band and snowfall opacity set to 0.
@@ -96,7 +93,6 @@ export default function Home() {
   const [isAnimating, setIsAnimating] = useState(false)
   const animationFrameIdRef = useRef<number | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { t } = useMainAppTranslation()
 
   // Helper: update snowfall opacity with a transition.
   function updateSnowfallOpacity(opacity: number, duration = 2000) {

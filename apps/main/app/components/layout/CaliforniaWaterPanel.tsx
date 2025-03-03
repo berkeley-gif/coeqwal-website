@@ -7,7 +7,7 @@ import React, {
   useImperativeHandle,
   forwardRef,
 } from "react"
-import { Typography, Container, Box, Button } from "@mui/material"
+import { Typography, Container, Box } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
