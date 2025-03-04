@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import "./globals.css"
 import React from "react"
 import ClientProviders from "./ClientProviders"
-import LanguageProvider from "./LanguageProvider"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -17,11 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <LanguageProvider>
-          <ClientProviders>
-            {children}
-          </ClientProviders>
-        </LanguageProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
       </body>
     </html>
   )

@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useRef, useState, useEffect, useCallback } from "react"
+import { ClientSideHead } from "./components/ClientSideHeader"
 import { Header } from "@repo/ui/header"
 import styles from "./page.module.css"
 import { MapProvider, useMap } from "./context/MapContext"
@@ -211,45 +212,46 @@ export default function Home() {
     }
 
   return (
-    <div className={styles.page}>
-      <Header />
-      <main className={styles.main}>
-        <MapProvider>
-          {/* Map container */}
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "all",
-            }}
-          >
-            <MapWrapper mapRef={mapRef} />
-          </div>
-          {/* Overlay panels */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 2,
-              pointerEvents: "none",
-            }}
-          >
-            <HomePanel />
-            <CaliforniaWaterPanel
-              onFlyTo={handleFlyTo}
-              onAnimateBands={onAnimateBands}
-              onLearnMoreClick={toggleDrawer(true)}
+    <>
+      <ClientSideHead />
+      <div className={styles.page}>
+        <Header />
+        <main className={styles.main}>
+          <MapProvider>
+            <div
+              style={{
+                position: "fixed",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                pointerEvents: "all",
+              }}
+            >
+              <MapWrapper mapRef={mapRef} />
+            </div>
+            <div
+              style={{
+                position: "relative",
+                zIndex: 2,
+                pointerEvents: "none",
+              }}
+            >
+              <HomePanel />
+              <CaliforniaWaterPanel
+                onFlyTo={handleFlyTo}
+                onAnimateBands={onAnimateBands}
+                onLearnMoreClick={toggleDrawer(true)}
+              />
+            </div>
+            <Drawer
+              open={drawerOpen}
+              onClose={toggleDrawer(false)}
+              onOpen={toggleDrawer(true)}
             />
-          </div>
-          <Drawer
-            open={drawerOpen}
-            onClose={toggleDrawer(false)}
-            onOpen={toggleDrawer(true)}
-          />
-        </MapProvider>
-      </main>
-    </div>
+          </MapProvider>
+        </main>
+      </div>
+    </>
   )
 }
