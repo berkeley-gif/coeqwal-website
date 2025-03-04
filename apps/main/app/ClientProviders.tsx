@@ -13,17 +13,31 @@ export default function ClientProviders({
   const [locale, setLocale] = useState<"en" | "es" | null>(null)
 
   useEffect(() => {
+    // Read from local storage
+    const storedLocale = localStorage.getItem("USER_LOCALE")
+    if (storedLocale === "en" || storedLocale === "es") {
+      setLocale(storedLocale as "en" | "es")
+      return
+    }
+
+    // Otherwise, check browser
     const userLang = navigator.language.slice(0, 2)
-    // Only accept 'en' or 'es'; default to 'en' if unknown
     setLocale(userLang === "es" ? "es" : "en")
   }, [])
+
+  // Whenever "locale" changes, store in local storage
+  useEffect(() => {
+    if (locale) {
+      localStorage.setItem("USER_LOCALE", locale)
+    }
+  }, [locale])
 
   // Until we know the language, render a skeleton or placeholder.
   // This matches the server-rendered HTML (which also shows skeleton).
   if (locale === null) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        Loading…
+        {/* Loading message could go here if needed */}
       </div>
     )
   }
