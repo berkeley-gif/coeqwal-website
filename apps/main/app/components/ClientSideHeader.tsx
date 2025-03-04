@@ -7,12 +7,18 @@ export function ClientSideHead() {
   const { locale } = useUiLocale()
 
   // Default to English
-  const [title, setTitle] = useState("COEQWAL – Collaboratory for Equity in Water Allocation")
-  const [description, setDescription] = useState("Alternative California water solutions")
+  const [title, setTitle] = useState(
+    "COEQWAL – Collaboratory for Equity in Water Allocation",
+  )
+  const [description, setDescription] = useState(
+    "Alternative California water solutions",
+  )
 
   useEffect(() => {
     if (locale === "es") {
-      setTitle("COEQWAL – Colaboratorio para la Equidad en la Asignación de Agua")
+      setTitle(
+        "COEQWAL – Colaboratorio para la Equidad en la Asignación de Agua",
+      )
       setDescription("Soluciones alternativas de agua en California")
     } else {
       setTitle("COEQWAL – Collaboratory for Equity in Water Allocation")

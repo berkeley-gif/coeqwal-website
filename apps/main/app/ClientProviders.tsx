@@ -36,7 +36,14 @@ export default function ClientProviders({
   // This matches the server-rendered HTML (which also shows skeleton).
   if (locale === null) {
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {/* Loading message could go here if needed */}
       </div>
     )

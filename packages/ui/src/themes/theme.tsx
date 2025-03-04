@@ -229,7 +229,7 @@ const theme = createTheme({
         paper: {
           color: baseTheme.palette.text.secondary,
           width: 400,
-          top: 60,
+          top: 65,
           height: "calc(100% - 65px)",
         },
       },
