@@ -35,10 +35,19 @@ export function LanguageSwitcher() {
           px: 3,
           color: theme.palette.text.primary,
           fontSize: theme.typography.button.fontSize,
-          fontWeight: locale === "en" ? theme.typography.fontWeightBold : theme.typography.button.fontWeight,
-          backgroundColor: locale === "en" ? alpha(theme.palette.primary.main, 0.8) : "transparent",
-          '&:hover': {
-            backgroundColor: locale === "en" ? alpha(theme.palette.primary.light, 0.8) : "transparent",
+          fontWeight:
+            locale === "en"
+              ? theme.typography.fontWeightBold
+              : theme.typography.button.fontWeight,
+          backgroundColor:
+            locale === "en"
+              ? alpha(theme.palette.primary.main, 0.8)
+              : "transparent",
+          "&:hover": {
+            backgroundColor:
+              locale === "en"
+                ? alpha(theme.palette.primary.light, 0.8)
+                : "transparent",
           },
         }}
       >
@@ -51,10 +60,19 @@ export function LanguageSwitcher() {
           px: 3,
           color: theme.palette.text.primary,
           fontSize: theme.typography.button.fontSize,
-          fontWeight: locale === "es" ? theme.typography.fontWeightBold : theme.typography.button.fontWeight,
-          backgroundColor: locale === "es" ? alpha(theme.palette.primary.main, 0.8) : "transparent",
-          '&:hover': {
-            backgroundColor: locale === "es" ? alpha(theme.palette.primary.light, 0.8) : "transparent",
+          fontWeight:
+            locale === "es"
+              ? theme.typography.fontWeightBold
+              : theme.typography.button.fontWeight,
+          backgroundColor:
+            locale === "es"
+              ? alpha(theme.palette.primary.main, 0.8)
+              : "transparent",
+          "&:hover": {
+            backgroundColor:
+              locale === "es"
+                ? alpha(theme.palette.primary.light, 0.8)
+                : "transparent",
           },
         }}
       >
