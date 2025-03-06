@@ -3,6 +3,7 @@ import "./globals.css"
 import React from "react"
 import ClientProviders from "./ClientProviders"
 
+// default, server-side metadata
 export const metadata: Metadata = {
   title: "COEQWAL",
   description: "Alternative California water solutions",

@@ -22,11 +22,9 @@ export function LearnMoreButton({ onClick, ...props }: LearnMoreButtonProps) {
       onClick={onClick}
       {...props}
       sx={{
-        position: "absolute",
-        left: "50px",
-        bottom: "50px",
         zIndex: 3,
-        ...props.sx, // Allow additional styles to be passed in
+        mt: 2,
+        ...props.sx,
       }}
     >
       {text} <CustomArrowForwardIcon />

@@ -3,9 +3,11 @@
 import React from "react"
 import { ToggleButtonGroup, ToggleButton } from "@mui/material"
 import { useUiLocale } from "./context/UiLocaleContext"
+import { useTheme, alpha } from "@mui/material/styles"
 
 export function LanguageSwitcher() {
   const { locale, setLocale } = useUiLocale()
+  const theme = useTheme()
 
   const handleChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -31,6 +33,13 @@ export function LanguageSwitcher() {
         sx={{
           borderRadius: 999,
           px: 3,
+          color: theme.palette.text.primary,
+          fontSize: theme.typography.button.fontSize,
+          fontWeight: locale === "en" ? theme.typography.fontWeightBold : theme.typography.button.fontWeight,
+          backgroundColor: locale === "en" ? alpha(theme.palette.primary.main, 0.8) : "transparent",
+          '&:hover': {
+            backgroundColor: locale === "en" ? alpha(theme.palette.primary.light, 0.8) : "transparent",
+          },
         }}
       >
         English
@@ -40,6 +49,13 @@ export function LanguageSwitcher() {
         sx={{
           borderRadius: 999,
           px: 3,
+          color: theme.palette.text.primary,
+          fontSize: theme.typography.button.fontSize,
+          fontWeight: locale === "es" ? theme.typography.fontWeightBold : theme.typography.button.fontWeight,
+          backgroundColor: locale === "es" ? alpha(theme.palette.primary.main, 0.8) : "transparent",
+          '&:hover': {
+            backgroundColor: locale === "es" ? alpha(theme.palette.primary.light, 0.8) : "transparent",
+          },
         }}
       >
         Español

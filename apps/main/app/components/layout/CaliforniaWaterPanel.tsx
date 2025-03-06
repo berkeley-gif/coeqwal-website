@@ -147,6 +147,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
                 />
               </Typography>
             ))}
+            <LearnMoreButton onClick={onLearnMoreClick} />
           </Box>
 
           {/* Right side (currently empty) */}
@@ -159,8 +160,6 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
           />
         </Box>
       )}
-
-      <LearnMoreButton onClick={onLearnMoreClick} />
     </Container>
   )
 })
