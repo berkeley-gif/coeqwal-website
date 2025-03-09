@@ -107,7 +107,6 @@ const theme = createTheme({
     button: {
       fontSize: "1rem",
       fontWeight: 500,
-      lineHeight: 1.75,
       textTransform: "uppercase",
     },
     caption: {
@@ -154,6 +153,7 @@ const theme = createTheme({
           backgroundColor: theme.background.transparent,
           borderRadius: theme.shape.borderRadius * 6,
           pointerEvents: "auto",
+          margin: "0.5rem",
         }),
       },
     },

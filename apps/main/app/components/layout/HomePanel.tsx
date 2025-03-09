@@ -27,8 +27,8 @@ const HomePanel = () => {
         <Box
           sx={{
             display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
             gap: 4,
-            gridTemplateColumns: { md: "1fr 1fr" },
           }}
         >
           {/* Left side - Text content */}
