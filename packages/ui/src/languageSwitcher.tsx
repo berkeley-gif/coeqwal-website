@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
       exclusive
       onChange={handleChange}
       sx={{
-        borderRadius: 999, // capsule shape
+        borderRadius: 999, // pill shape
       }}
     >
       <ToggleButton
@@ -43,6 +43,9 @@ export function LanguageSwitcher() {
             locale === "en"
               ? alpha(theme.palette.primary.main, 0.8)
               : "transparent",
+          textTransform: "none",
+          lineHeight: 1,
+          margin: "0.25rem 0",
           "&:hover": {
             backgroundColor:
               locale === "en"
@@ -68,6 +71,9 @@ export function LanguageSwitcher() {
             locale === "es"
               ? alpha(theme.palette.primary.main, 0.8)
               : "transparent",
+          textTransform: "none",
+          lineHeight: 1,
+          margin: "0.25rem 0.25rem 0.25rem 0",
           "&:hover": {
             backgroundColor:
               locale === "es"

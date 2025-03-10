@@ -176,6 +176,11 @@ const theme = createTheme({
       defaultProps: {
         variant: "pill",
       },
+      styleOverrides: {
+        root: {
+          margin: "0.25rem !important",
+        },
+      },
     },
     MuiListItem: {
       styleOverrides: {

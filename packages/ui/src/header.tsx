@@ -3,7 +3,7 @@
 import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
-import { LanguageSwitcher } from "./language-switcher"
+import { LanguageSwitcher } from "./languageSwitcher"
 import { useUiLocale } from "./context/UiLocaleContext"
 import en from "../public/locales/english.json"
 import es from "../public/locales/spanish.json"

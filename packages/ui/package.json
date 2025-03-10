@@ -5,9 +5,8 @@
   "private": true,
   "exports": {
     "./header": "./src/header.tsx",
-    "./button": "./src/button.tsx",
     "./card": "./src/card.tsx",
-    "./language-switcher": "./src/language-switcher.tsx",
+    "./languageSwitcher": "./src/languageSwitcher.tsx",
     "./learnMoreButton": "./src/learnMoreButton.tsx",
     "./customArrowForwardIcon": "./src/customArrowForwardIcon.tsx",
     "./themes": "./src/themes/theme.tsx",
