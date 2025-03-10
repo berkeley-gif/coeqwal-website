@@ -34,7 +34,14 @@ const HomePanel = () => {
           }}
         >
           {/* Left side - Text content */}
-          <Box>
+          <Box
+              sx={{
+                maxWidth: {
+                  xs: "normal",
+                  md: locale === "en" ? "500px" : "normal",
+                },
+              }}
+          >
             <Typography
               variant="h1"
               sx={{
@@ -50,7 +57,6 @@ const HomePanel = () => {
             </Typography>
             <Typography variant="body1">{t("homePanel.pg1")}</Typography>
             <Typography variant="body1">{t("homePanel.pg2")}</Typography>
-            <Typography variant="body1">{t("homePanel.pg3")}</Typography>
           </Box>
 
           {/* Right side - Hero image */}

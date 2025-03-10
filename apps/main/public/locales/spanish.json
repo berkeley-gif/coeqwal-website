@@ -8,13 +8,12 @@
   },
   "homePanel": {
     "title": "Los californianos están conectados por su agua.",
-    "pg1": "Debido a la geografía de California, el agua rara vez cae donde más se usa.",
-    "pg2": "Durante los últimos 150 años, hemos construido un sistema altamente gestionado para distribuir agua a ciudades, granjas, ecosistemas y comunidades.",
-    "pg3": "Nos encontramos en un momento en el que los ecosistemas están en peligro, el derecho humano al agua no siempre se garantiza y enfrentamos los impactos del cambio climático."
+    "pg1": "Durante los últimos 150 años, hemos construido un sistema altamente gestionado para distribuir agua a ciudades, granjas, ecosistemas y comunidades. Nos encontramos en un momento en el que los ecosistemas están en peligro, el derecho humano al agua no siempre se garantiza y enfrentamos los impactos del cambio climático.",
+    "pg2": "El proyecto COEQWAL apoya una mayor participación en la gestión del agua en California al demostrar cómo funciona el sistema hídrico y ofrecer alternativas de gestión del agua basadas en datos."
   },
   "CaliforniaWaterPanel": {
     "title": "Agua de California",
-    "pg1": "La mayor parte del agua de California proviene de las lluvias invernales en el norte.",
+    "pg1": "Debido a la geografía de California, el agua rara vez cae donde más se usa. La mayor parte del agua de California proviene de las lluvias invernales en el norte.",
     "pg2": "La capa de nieve en las montañas de la Sierra Nevada crea reservorios naturales que liberan agua durante la primavera.",
     "pg3": "El agua superficial fluye hacia los afluentes de los ríos Sacramento y San Joaquín,",
     "pg4": "hacia el Delta,",

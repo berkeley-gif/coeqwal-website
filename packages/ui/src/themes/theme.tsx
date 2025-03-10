@@ -107,15 +107,19 @@ const theme = createTheme({
       letterSpacing: "0.00714rem",
     },
     body1: {
+      fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
       fontSize: "1.3333rem",
       fontWeight: 400,
-      lineHeight: 1.5,
-      marginBottom: "1rem",
+      lineHeight: 1.6,
+      marginBottom: "1.125rem",
+      letterSpacing: "0.01071em",
     },
     body2: {
-      fontSize: "1rem",
+      fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
+      fontSize: "1.625rem",
       fontWeight: 400,
       lineHeight: 1.43,
+      marginBottom: "1.125rem",
       letterSpacing: "0.01071em",
     },
     button: {
