@@ -49,7 +49,6 @@ const HomePanel = () => {
             <Typography variant="body1">{t("homePanel.pg1")}</Typography>
             <Typography variant="body1">{t("homePanel.pg2")}</Typography>
             <Typography variant="body1">{t("homePanel.pg3")}</Typography>
-            <Typography variant="body1">{t("homePanel.pg4")}</Typography>
           </Box>
 
           {/* Right side - Hero image */}

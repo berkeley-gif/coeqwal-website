@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import "@repo/ui/styles/fonts.css"
 import React from "react"
 import ClientProviders from "./ClientProviders"
 

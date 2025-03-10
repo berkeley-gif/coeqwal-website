@@ -1,6 +1,12 @@
 import { createTheme } from "@mui/material/styles"
-import { Inter } from "next/font/google"
+import { Inter, Figtree } from "next/font/google"
+
 const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+})
+
+const figtree = Figtree({
   subsets: ["latin"],
   display: "swap",
 })
@@ -34,13 +40,14 @@ const theme = createTheme({
   },
   typography: {
     htmlFontSize: 16,
-    fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
+    fontFamily: `RM-Neue, ${figtree.style.fontFamily}, Arial, sans-serif`,
     fontSize: 16,
     fontWeightLight: 300,
     fontWeightRegular: 400,
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
+      fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
       fontSize: "clamp(2rem, 5vw, 5rem)",
       fontWeight: 600,
       lineHeight: 1,

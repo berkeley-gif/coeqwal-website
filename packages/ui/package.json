@@ -12,7 +12,8 @@
     "./customArrowForwardIcon": "./src/customArrowForwardIcon.tsx",
     "./themes": "./src/themes/theme.tsx",
     "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
-    "./context/UiLocaleContext": "./src/context/UiLocaleContext.tsx"
+    "./context/UiLocaleContext": "./src/context/UiLocaleContext.tsx",
+    "./styles/fonts.css": "./src/themes/fonts.css"
   },
   "scripts": {
     "lint": "pnpm exec eslint . --config=eslint.config.mjs",
