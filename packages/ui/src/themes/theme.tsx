@@ -54,10 +54,11 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "clamp(2rem, 5vw, 5rem)",
+      fontSize: "clamp(2rem, 5vw, 4.6875rem)",
       fontWeight: 600,
-      lineHeight: 1,
-      letterSpacing: "-0.01562em",
+      lineHeight: 0.95,
+      letterSpacing: "-0.01562rem",
+      paddingBottom: "1.25rem",
       [baseTheme.breakpoints.down("md")]: {
         lineHeight: 1.2,
         fontSize: "3.2rem",
@@ -210,7 +211,7 @@ const theme = createTheme({
           margin: 0,
           overflow: "hidden",
           padding: "clamp(2rem, 10vw, 10rem)",
-          paddingTop: "calc(clamp(2rem, 10vw, 10rem) + 64px)",
+          // paddingTop: "calc(clamp(2rem, 10vw, 10rem) + 64px)",
           pointerEvents: "none",
           ...(() => {
             const paddingValue = "clamp(2rem, 10vw, 10rem)"

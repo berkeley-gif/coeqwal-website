@@ -214,11 +214,12 @@ export default function Home() {
   return (
     <>
       <ClientSideHead />
-      <div className={styles.page}>
+      <div className={"main-site"}>
         <Header />
-        <main className={styles.main}>
+        <main>
           <MapProvider>
             <div
+              className={"map-wrapper"}
               style={{
                 position: "fixed",
                 top: 0,
@@ -231,6 +232,7 @@ export default function Home() {
               <MapWrapper mapRef={mapRef} />
             </div>
             <div
+              className={"vertical-panels"}
               style={{
                 position: "relative",
                 zIndex: 2,
