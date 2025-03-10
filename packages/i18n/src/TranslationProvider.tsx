@@ -3,10 +3,11 @@
 import React, { createContext, useState, useContext, useEffect } from "react"
 
 type Locale = "en" | "es"
+type NestedMessages = { [key: string]: string | NestedMessages }
 
 interface TranslationContextProps {
   locale: Locale
-  messages: Record<string, any> // Use a generic object for messages
+  messages: NestedMessages
   setLocale: (locale: Locale) => void
 }
 
@@ -28,7 +29,7 @@ export function TranslationProvider({
   forcedLocale,
   onChangeLocale,
 }: TranslationProviderProps) {
-  const [messages, setMessages] = useState<Record<string, any>>({})
+  const [messages, setMessages] = useState<NestedMessages>({})
 
   // 2) On mount or forcedLocale change, fetch the appropriate JSON
   useEffect(() => {

@@ -5,13 +5,13 @@ import { Typography, Container, Box } from "@mui/material"
 import Image from "next/image"
 import { useTheme } from "@mui/material/styles"
 import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
-import { useUiLocale } from "@repo/ui/context/UiLocaleContext"
+// import { useUiLocale } from "@repo/ui/context/UiLocaleContext"
 import Grid from "@mui/material/Grid2"
 
 const HomePanel = () => {
   const theme = useTheme()
   const { t } = useMainAppTranslation()
-  const { locale } = useUiLocale()
+  // const { locale } = useUiLocale()
   const [clientReady, setClientReady] = useState(false)
 
   useEffect(() => {

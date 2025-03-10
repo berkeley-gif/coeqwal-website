@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect, useCallback } from "react"
 import { ClientSideHead } from "./components/ClientSideHeader"
 import { Header } from "@repo/ui/header"
-import styles from "./page.module.css"
+// import styles from "./page.module.css"
 import { MapProvider, useMap } from "./context/MapContext"
 import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
