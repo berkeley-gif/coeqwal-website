@@ -8,8 +8,10 @@
   },
   "homePanel": {
     "title": "Californians are connected by their water.",
-    "pg1": "Over the past 150 years, we have built a highly-managed system to distribute water to cities, farms, ecosystems, and communities. We find ourselves in a moment where ecosystems are challenged, human right to water is not always being met, and we are facing the impacts of climate change.",
-    "pg2": "The COEQWAL project supports increased participation in California’s water management by demonstrating how the water system works and offering data-driven water management alternatives."
+    "pg1": "Water sustains our communities. The COEQWAL project helps Californians navigate the state’s complex water system by illustrating how it works and exploring data-driven ways water can be distributed."
+  },
+  "introInterstitial": {
+    "pg1": "Over the past 150 years, we have built a highly-managed system to distribute water to cities, farms, ecosystems, and communities. We find ourselves in a moment where ecosystems are challenged, human right to water is not always being met, and we are facing the impacts of climate change."
   },
   "CaliforniaWaterPanel": {
     "title": "California Water",

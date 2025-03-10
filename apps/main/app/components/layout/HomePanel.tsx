@@ -27,32 +27,32 @@ const HomePanel = () => {
       {!clientReady ? (
         <Box style={{ minHeight: 200 /* or a spinner/skeleton */ }} />
       ) : (
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           {/* Left side - Text content */}
           <Grid size={5}>
             <Box
               sx={{
-                maxWidth: {
-                  xs: "normal",
-                  md: locale === "en" ? "500px" : "normal",
-                },
+                // maxWidth: {
+                //   xs: "normal",
+                //   md: locale === "en" ? "500px" : "normal",
+                // },
               }}
             >
               <Typography
                 variant="h1"
                 sx={{
-                  maxWidth: {
-                    xs: "normal",
-                    md: locale === "en" ? "480px" : "normal",
-                  },
+                  // maxWidth: {
+                  //   xs: "normal",
+                  //   md: locale === "en" ? "500px" : "normal",
+                  // },
+                  marginTop: "40vh",
                 }}
                 gutterBottom
                 aria-level={1}
               >
                 {t("homePanel.title")}
               </Typography>
-              <Typography variant="body1">{t("homePanel.pg1")}</Typography>
-              <Typography variant="body1">{t("homePanel.pg2")}</Typography>
+              <Typography variant="body2">{t("homePanel.pg1")}</Typography>
             </Box>
           </Grid>
 
@@ -77,6 +77,7 @@ const HomePanel = () => {
                   height: "auto",
                   objectFit: "contain",
                   objectPosition: "center",
+                  marginTop: "10vh",
                 }}
                 role="img"
                 aria-hidden="false"

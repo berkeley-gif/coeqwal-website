@@ -54,11 +54,11 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "clamp(2rem, 5vw, 4.6875rem)",
+      fontSize: "clamp(2rem, 5vw, 5rem)",
       fontWeight: 600,
       lineHeight: 0.95,
       letterSpacing: "-0.01562rem",
-      marginBottom: "2rem !important",
+      marginBottom: "3rem !important",
       [baseTheme.breakpoints.down("md")]: {
         lineHeight: 1.2,
         fontSize: "3.2rem",
@@ -116,7 +116,7 @@ const theme = createTheme({
     },
     body2: {
       fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "1.625rem",
+      fontSize: "1.3333rem",
       fontWeight: 400,
       lineHeight: 1.43,
       marginBottom: "1.125rem",
@@ -210,11 +210,10 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           width: "100%",
-          height: "100vh",
+          minHeight: "100vh",
           maxWidth: "none",
           margin: 0,
-          overflow: "hidden",
-          padding: "clamp(2rem, 10vw, 10rem)",
+          paddingLeft: "clamp(2rem, 10vw, 10rem)",
           // paddingTop: "calc(clamp(2rem, 10vw, 10rem) + 64px)",
           pointerEvents: "none",
           ...(() => {
@@ -222,17 +221,17 @@ const theme = createTheme({
             return {
               "@media (min-width: 600px)": {
                 paddingLeft: paddingValue,
-                paddingRight: paddingValue,
+                // paddingRight: paddingValue,
                 maxWidth: "none",
               },
               "@media (min-width: 960px)": {
                 paddingLeft: paddingValue,
-                paddingRight: paddingValue,
+                // paddingRight: paddingValue,
                 maxWidth: "none",
               },
               "@media (min-width: 1280px)": {
                 paddingLeft: paddingValue,
-                paddingRight: paddingValue,
+                // paddingRight: paddingValue,
                 maxWidth: "none",
               },
             }
