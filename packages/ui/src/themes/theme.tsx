@@ -13,6 +13,12 @@ const figtree = Figtree({
 
 const baseTheme = createTheme()
 
+declare module '@mui/material/Button' {
+  interface ButtonPropsVariantOverrides {
+    pill: true;
+  }
+}
+
 const theme = createTheme({
   ...baseTheme,
   palette: {
@@ -148,20 +154,27 @@ const theme = createTheme({
       },
     },
     MuiButton: {
+      variants: [
+        {
+          props: { variant: "outlined" },
+          style: {
+            border: "1px solid",
+            borderColor: "currentColor",
+          },
+        },
+        {
+          props: { variant: "pill" },
+          style: {
+            border: "1px solid",
+            borderColor: "currentColor",
+            borderRadius: "999px",
+            paddingInline: "24px",
+            textTransform: "none",
+          },
+        },
+      ],
       defaultProps: {
-        variant: "outlined",
-        size: "large",
-        color: "inherit",
-      },
-      styleOverrides: {
-        root: ({ theme }) => ({
-          textTransform: "none",
-          border: theme.border.primary,
-          backgroundColor: theme.background.transparent,
-          borderRadius: theme.shape.borderRadius * 6,
-          pointerEvents: "auto",
-          margin: "0.5rem",
-        }),
+        variant: "pill",
       },
     },
     MuiListItem: {

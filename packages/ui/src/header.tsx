@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
@@ -12,7 +11,7 @@ import es from "../public/locales/spanish.json"
 export const useResponsiveButtonVariant = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  return isMobile ? "text" : "outlined"
+  return isMobile ? "text" : "pill"
 }
 
 export function Header() {
