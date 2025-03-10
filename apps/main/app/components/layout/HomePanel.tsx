@@ -31,12 +31,14 @@ const HomePanel = () => {
           {/* Left side - Text content */}
           <Grid size={5}>
             <Box
-              sx={{
-                // maxWidth: {
-                //   xs: "normal",
-                //   md: locale === "en" ? "500px" : "normal",
-                // },
-              }}
+              sx={
+                {
+                  // maxWidth: {
+                  //   xs: "normal",
+                  //   md: locale === "en" ? "500px" : "normal",
+                  // },
+                }
+              }
             >
               <Typography
                 variant="h1"

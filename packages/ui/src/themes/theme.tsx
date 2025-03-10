@@ -274,19 +274,19 @@ theme.background = {
 // TYPESCRIPT CUSTOMIZATIONS
 
 // Custom palette colors
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface Palette {
-    interstitial: Palette['primary']
+    interstitial: Palette["primary"]
   }
   interface PaletteOptions {
-    interstitial?: PaletteOptions['primary']
+    interstitial?: PaletteOptions["primary"]
   }
 }
 
 // Custom button variants
-declare module '@mui/material/Button' {
+declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
-    pill: true;
+    pill: true
   }
 }
 
@@ -324,6 +324,5 @@ declare module "@mui/material/styles" {
     }
   }
 }
-
 
 export default theme

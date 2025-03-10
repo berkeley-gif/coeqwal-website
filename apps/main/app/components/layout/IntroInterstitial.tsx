@@ -20,7 +20,7 @@ const IntroInterstitial = () => {
     >
       <Typography
         sx={{
-            maxWidth: "800px",
+          maxWidth: "800px",
         }}
         variant="h3"
       >
