@@ -12,6 +12,8 @@ import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 import { useTheme, useMediaQuery } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
 import Drawer from "./components/layout/Drawer"
+import IntroInterstitial from "./components/layout/IntroInterstitial"
+
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
 // It forces the map to load with the first precipitation band and snowfall opacity set to 0.
@@ -240,6 +242,7 @@ export default function Home() {
               }}
             >
               <HomePanel />
+              <IntroInterstitial />
               <CaliforniaWaterPanel
                 onFlyTo={handleFlyTo}
                 onAnimateBands={onAnimateBands}

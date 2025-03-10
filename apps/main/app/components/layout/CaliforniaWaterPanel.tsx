@@ -129,7 +129,11 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
           }}
         >
           {/* Left side text */}
-          <Box>
+          <Box
+            sx={{
+              marginTop: "150px",
+            }}
+          >
             <Typography
               variant="h1"
               sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}

@@ -13,12 +13,6 @@ const figtree = Figtree({
 
 const baseTheme = createTheme()
 
-declare module '@mui/material/Button' {
-  interface ButtonPropsVariantOverrides {
-    pill: true;
-  }
-}
-
 const theme = createTheme({
   ...baseTheme,
   palette: {
@@ -33,6 +27,9 @@ const theme = createTheme({
     },
     secondary: {
       main: "#11273f",
+    },
+    interstitial: {
+      main: "#154f89",
     },
     text: {
       primary: "#fff",
@@ -71,10 +68,10 @@ const theme = createTheme({
       letterSpacing: "-0.00833em",
     },
     h3: {
+      fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
       fontSize: "2rem",
       fontWeight: 400,
       lineHeight: 1.167,
-      letterSpacing: "0em",
     },
     h4: {
       fontSize: "1.618rem",
@@ -214,24 +211,24 @@ const theme = createTheme({
           maxWidth: "none",
           margin: 0,
           paddingLeft: "clamp(2rem, 10vw, 10rem)",
-          // paddingTop: "calc(clamp(2rem, 10vw, 10rem) + 64px)",
+          paddingRight: "clamp(2rem, 10vw, 10rem)",
           pointerEvents: "none",
           ...(() => {
             const paddingValue = "clamp(2rem, 10vw, 10rem)"
             return {
               "@media (min-width: 600px)": {
                 paddingLeft: paddingValue,
-                // paddingRight: paddingValue,
+                paddingRight: paddingValue,
                 maxWidth: "none",
               },
               "@media (min-width: 960px)": {
                 paddingLeft: paddingValue,
-                // paddingRight: paddingValue,
+                paddingRight: paddingValue,
                 maxWidth: "none",
               },
               "@media (min-width: 1280px)": {
                 paddingLeft: paddingValue,
-                // paddingRight: paddingValue,
+                paddingRight: paddingValue,
                 maxWidth: "none",
               },
             }
@@ -274,7 +271,33 @@ theme.background = {
   transparent: "transparent",
 } as const
 
-// TypeScript declarations for our custom theme properties
+// TYPESCRIPT CUSTOMIZATIONS
+
+// Custom palette colors
+declare module '@mui/material/styles' {
+  interface Palette {
+    interstitial: Palette['primary']
+  }
+  interface PaletteOptions {
+    interstitial?: PaletteOptions['primary']
+  }
+}
+
+// Custom button variants
+declare module '@mui/material/Button' {
+  interface ButtonPropsVariantOverrides {
+    pill: true;
+  }
+}
+
+// Custom typography variants
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    listItem: true
+  }
+}
+
+// Custom theme properties
 declare module "@mui/material/styles" {
   interface TypographyVariants {
     listItem: React.CSSProperties
@@ -302,10 +325,5 @@ declare module "@mui/material/styles" {
   }
 }
 
-declare module "@mui/material/Typography" {
-  interface TypographyPropsVariantOverrides {
-    listItem: true
-  }
-}
 
 export default theme
