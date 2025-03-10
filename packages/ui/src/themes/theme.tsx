@@ -58,7 +58,7 @@ const theme = createTheme({
       fontWeight: 600,
       lineHeight: 0.95,
       letterSpacing: "-0.01562rem",
-      paddingBottom: "1.25rem",
+      marginBottom: "2rem !important",
       [baseTheme.breakpoints.down("md")]: {
         lineHeight: 1.2,
         fontSize: "3.2rem",
