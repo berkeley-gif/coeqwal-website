@@ -152,8 +152,8 @@ turborepo-root/
 │   │   │   ├── index.tsx          # Entry point of storyline-2
 │
 │── packages/
-│   ├── ui/                        # Shared UI components (optional)
-│   ├── map/               # Shared map provider & hooks
+│   ├── ui/                        # Shared UI components
+│   ├── map/                       # Shared map provider & hooks
 ```
 
 ## Adding a new package
