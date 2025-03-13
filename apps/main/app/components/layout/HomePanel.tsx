@@ -7,7 +7,7 @@ import { useTheme } from "@mui/material/styles"
 import Grid from "@mui/material/Grid2"
 import { useTranslation } from "@repo/i18n"
 
-const HomePanel = () => {
+const HomePanel: React.FC = () => {
   const theme = useTheme()
   const { t } = useTranslation()
 

@@ -13,7 +13,6 @@ import { useTheme, useMediaQuery } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
 import Drawer from "./components/layout/Drawer"
 import IntroInterstitial from "./components/layout/IntroInterstitial"
-import { useTranslation } from "@repo/i18n"
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -97,7 +96,6 @@ export default function Home() {
   const [isAnimating, setIsAnimating] = useState(false)
   const animationFrameIdRef = useRef<number | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { t, locale } = useTranslation()
 
   // Helper: update snowfall opacity with a transition.
   function updateSnowfallOpacity(opacity: number, duration = 2000) {
@@ -243,7 +241,7 @@ export default function Home() {
                 pointerEvents: "none",
               }}
             >
-              <HomePanel t={t} locale={locale} />
+              <HomePanel />
               <IntroInterstitial />
               <CaliforniaWaterPanel
                 onFlyTo={handleFlyTo}

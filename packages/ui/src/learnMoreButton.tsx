@@ -5,7 +5,6 @@ import { Button, ButtonProps } from "@mui/material"
 import CustomArrowForwardIcon from "./customArrowForwardIcon"
 import { useTranslation } from "@repo/i18n"
 
-
 interface LearnMoreButtonProps extends ButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }

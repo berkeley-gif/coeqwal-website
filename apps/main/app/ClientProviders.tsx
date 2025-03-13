@@ -21,8 +21,16 @@ export default function ClientProviders({
   if (!clientReady) {
     // Render a skeleton or placeholder while the client is not ready
     return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p>Loading...</p> {/* could replace this with a more sophisticated loading component */}
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <p>Loading...</p>{" "}
+        {/* could replace this with a more sophisticated loading component */}
       </div>
     )
   }

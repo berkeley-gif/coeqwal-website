@@ -29,11 +29,8 @@ const TranslationContext = createContext<TranslationContextProps>({
   setLocale: () => {},
 })
 
-export function TranslationProvider({
-  children,
-}: TranslationProviderProps) {
+export function TranslationProvider({ children }: TranslationProviderProps) {
   const [locale, setLocale] = useState<Locale>("en")
-
   const [messages, setMessages] = useState<NestedMessages>({})
 
   useEffect(() => {
