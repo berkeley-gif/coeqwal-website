@@ -12,7 +12,9 @@
     "pg1": "El agua sostiene a nuestras comunidades. El proyecto COEQWAL ayuda a los californianos a comprender el complejo sistema hídrico del estado al ilustrar cómo funciona y explorar formas basadas en datos para su distribución."
   },
   "introInterstitial": {
-    "pg1": "Durante los últimos 150 años, hemos construido un sistema altamente gestionado para distribuir agua a ciudades, granjas, ecosistemas y comunidades. Nos encontramos en un momento en el que los ecosistemas están en peligro, el derecho humano al agua no siempre se garantiza y enfrentamos los impactos del cambio climático."
+    "paragraphs": {
+      "pg1": "Durante los últimos 150 años, hemos construido un sistema altamente gestionado para distribuir agua a ciudades, granjas, ecosistemas y comunidades. Nos encontramos en un momento en el que los ecosistemas están en peligro, el derecho humano al agua no siempre se garantiza y enfrentamos los impactos del cambio climático."
+    }
   },
   "CaliforniaWaterPanel": {
     "title": "Agua de California",
