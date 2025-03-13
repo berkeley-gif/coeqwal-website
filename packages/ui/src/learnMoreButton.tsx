@@ -11,12 +11,9 @@ interface LearnMoreButtonProps extends ButtonProps {
 }
 
 export function LearnMoreButton({ onClick, ...props }: LearnMoreButtonProps) {
-  const { t, locale } = useTranslation()
+  const { t } = useTranslation()
 
-  console.log("LearnMoreButton locale:", locale)
-  console.log("LearnMoreButton text:", t("drawerButton.learnMore"))
-
-  const text = t("drawerButton.learnMore") || "Learn More"
+  const text = t("learnMore") || "Learn More"
 
   return (
     <Button
