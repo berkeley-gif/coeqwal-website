@@ -16,13 +16,15 @@
   },
   "CaliforniaWaterPanel": {
     "title": "Agua de California",
-    "pg1": "Debido a la geografía de California, el agua rara vez cae donde más se usa. La mayor parte del agua de California proviene de las lluvias invernales en el norte.",
-    "pg2": "La capa de nieve en las montañas de la Sierra Nevada crea reservorios naturales que liberan agua durante la primavera.",
-    "pg3": "El agua superficial fluye hacia los afluentes de los ríos Sacramento y San Joaquín,",
-    "pg4": "hacia el Delta,",
-    "pg5": "y luego desemboca en el Pacífico a través del Golden Gate.",
-    "pg6": "El agua subterránea se almacena bajo tierra en acuíferos y manantiales a lo largo del Valle Central y las montañas.",
-    "pg7": "El agua subterránea antigua está interconectada y se recarga con las lluvias estacionales."
+    "paragraphs": {
+      "pg1": "Debido a la geografía de California, el agua rara vez cae donde más se usa. La mayor parte del agua de California proviene de las lluvias invernales en el norte.",
+      "pg2": "La capa de nieve en las montañas de la Sierra Nevada crea reservorios naturales que liberan agua durante la primavera.",
+      "pg3": "El agua superficial fluye hacia los afluentes de los ríos Sacramento y San Joaquín,",
+      "pg4": "hacia el Delta,",
+      "pg5": "y luego desemboca en el Pacífico a través del Golden Gate.",
+      "pg6": "El agua subterránea se almacena bajo tierra en acuíferos y manantiales a lo largo del Valle Central y las montañas.",
+      "pg7": "El agua subterránea antigua está interconectada y se recarga con las lluvias estacionales."
+    }
   },
   "drawerLinks": {
     "howWaterMoves": "Cómo se mueve el agua a través de California",

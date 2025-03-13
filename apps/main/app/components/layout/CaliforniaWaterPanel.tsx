@@ -27,7 +27,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   ref,
 ) {
   const theme = useTheme<Theme>()
-  const { t } = useTranslation()
+  const { t, isLoading } = useTranslation()
   const { setViewState } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -92,17 +92,37 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     }
   }
 
-  const paragraphKeys = [
-    "CaliforniaWaterPanel.pg1",
-    "CaliforniaWaterPanel.pg2",
-    "CaliforniaWaterPanel.pg3",
-    "CaliforniaWaterPanel.pg4",
-    "CaliforniaWaterPanel.pg5",
-    "CaliforniaWaterPanel.pg6",
-    "CaliforniaWaterPanel.pg7",
-  ] as const
-
+  // Use a more direct approach to get the paragraphs
+  let paragraphKeys: string[] = [];
+  
+  // Only try to get paragraph keys if not loading
+  if (!isLoading) {
+    // Manually create keys for the paragraphs
+    for (let i = 1; i <= 7; i++) {
+      paragraphKeys.push(`pg${i}`);
+    }
+  }
+  
+  // IMPORTANT: Always call hooks in the same order
   useImperativeHandle(ref, () => ({})) // If needed, expose methods
+  
+  // Now we can conditionally return based on loading state
+  if (isLoading) {
+    // Return a placeholder that doesn't interfere with the IntersectionObserver
+    return (
+      <Container
+        ref={panelRef}
+        sx={{
+          backgroundColor,
+          transition: "background-color 3s ease-in-out",
+          minHeight: "100vh",
+        }}
+        role="main"
+      >
+        <Box style={{ minHeight: 200 }} />
+      </Container>
+    );
+  }
 
   return (
     <Container
@@ -144,7 +164,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
 
             {paragraphKeys.map((key, i) => (
               <Typography key={i} variant="body1">
-                {t(key)}
+                {t(`CaliforniaWaterPanel.paragraphs.${key}`)}
                 <VisibilityIcon
                   sx={{ ml: 1, cursor: "pointer" }}
                   onClick={() => handleVisibilityClick(i)}

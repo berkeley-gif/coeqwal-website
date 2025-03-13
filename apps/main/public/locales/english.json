@@ -16,13 +16,15 @@
   },
   "CaliforniaWaterPanel": {
     "title": "California Water",
-    "pg1": "Because of the geography of California, water rarely falls where it is most used. Most of California's water comes from Winter rains in the north.",
-    "pg2": "Snowpack in the Sierra Nevada mountains creates natural reservoirs that release water throughout the Spring.",
-    "pg3": "Surface water flows into tributaries to the Sacramento and San Joaquin Rivers,",
-    "pg4": "into the Delta,",
-    "pg5": "and then out to the Pacific through the Golden Gate.",
-    "pg6": "Groundwater is stored underground in aquifers and springs throughout the Central Valley and the mountains.",
-    "pg7": "Ancient groundwater is interconnected and replenished by seasonal rains."
+    "paragraphs": {
+      "pg1": "Because of the geography of California, water rarely falls where it is most used. Most of California's water comes from Winter rains in the north.",
+      "pg2": "Snowpack in the Sierra Nevada mountains creates natural reservoirs that release water throughout the Spring.",
+      "pg3": "Surface water flows into tributaries to the Sacramento and San Joaquin Rivers,",
+      "pg4": "into the Delta,",
+      "pg5": "and then out to the Pacific through the Golden Gate.",
+      "pg6": "Groundwater is stored underground in aquifers and springs throughout the Central Valley and the mountains.",
+      "pg7": "Ancient groundwater is interconnected and replenished by seasonal rains."
+    }
   },
   "drawerLinks": {
     "howWaterMoves": "How Water Moves Through California",

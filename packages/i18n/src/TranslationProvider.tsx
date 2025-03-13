@@ -90,6 +90,13 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
     }
   }, [locale]);
 
+  console.log('Loaded translations for locale:', locale, messages);
+  if (typeof messages.CaliforniaWaterPanel === 'object' && messages.CaliforniaWaterPanel !== null) {
+    console.log('CaliforniaWaterPanel.paragraphs:', messages.CaliforniaWaterPanel.paragraphs);
+  } else {
+    console.log('CaliforniaWaterPanel is not an object or is null:', messages.CaliforniaWaterPanel);
+  }
+
   function handleSetLocale(newLocale: Locale) {
     setLocale(newLocale)
   }
@@ -109,7 +116,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 }
 
 export function useTranslation() {
-  const { locale, messages, setLocale } = useContext(TranslationContext)
+  const { locale, messages, setLocale, isLoading } = useContext(TranslationContext)
 
   /**
    * Helper to traverse nested translation keys (e.g. "header.buttons.getData").
@@ -131,5 +138,5 @@ export function useTranslation() {
     return typeof result === "string" ? result : ""
   }
 
-  return { locale, t, setLocale }
+  return { locale, t, setLocale, isLoading }
 }
