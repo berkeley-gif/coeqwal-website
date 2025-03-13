@@ -5,8 +5,6 @@ import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { LanguageSwitcher } from "./languageSwitcher"
 import { useTranslation } from "@repo/i18n"
-import en from "../public/locales/english.json"
-import es from "../public/locales/spanish.json"
 
 export const useResponsiveButtonVariant = () => {
   const theme = useTheme()
@@ -15,10 +13,7 @@ export const useResponsiveButtonVariant = () => {
 }
 
 export function Header() {
-  const { t, locale } = useTranslation() || { t: (key: string) => key, locale: "en" }
-
-  // Determine localized text
-  const text = locale === "en" ? en.header.buttons : es.header.buttons
+  const { t } = useTranslation()
 
   const buttonVariant = useResponsiveButtonVariant()
 
