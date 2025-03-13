@@ -1,3 +1,5 @@
+// wrappers for client-side components
+
 "use client"
 import React from "react"
 import { UiLocaleProvider } from "@repo/ui/context/UiLocaleContext"

@@ -27,18 +27,24 @@ export function TranslationProvider({
   onChangeLocale,
 }: TranslationProviderProps) {
   const [locale, setLocale] = useState<Locale>(() => {
-    const storedLocale = localStorage.getItem("USER_LOCALE")
-    if (storedLocale === "en" || storedLocale === "es") {
-      return storedLocale as Locale
+    if (typeof window !== "undefined" && localStorage) {
+      const storedLocale = localStorage.getItem("USER_LOCALE")
+      if (storedLocale === "en" || storedLocale === "es") {
+        return storedLocale as Locale
+      }
+      const userLang = navigator.language.slice(0, 2)
+      return userLang === "es" ? "es" : "en"
     }
-    const userLang = navigator.language.slice(0, 2)
-    return userLang === "es" ? "es" : "en"
+    // Default to 'en' if localStorage is not available (e.g., during SSR)
+    return "en"
   })
 
   const [messages, setMessages] = useState<NestedMessages>({})
 
   useEffect(() => {
-    localStorage.setItem("USER_LOCALE", locale)
+    if (typeof window !== "undefined" && localStorage) {
+      localStorage.setItem("USER_LOCALE", locale)
+    }
   }, [locale])
 
   useEffect(() => {
