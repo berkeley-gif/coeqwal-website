@@ -11,10 +11,8 @@ interface TranslationContextProps {
   setLocale: (locale: Locale) => void
 }
 
-// 1) Accept forcedLocale & an optional onChangeLocale
 interface TranslationProviderProps {
   children: React.ReactNode
-  forcedLocale: Locale
   onChangeLocale?: (locale: Locale) => void
 }
 
@@ -26,19 +24,30 @@ const TranslationContext = createContext<TranslationContextProps>({
 
 export function TranslationProvider({
   children,
-  forcedLocale,
   onChangeLocale,
 }: TranslationProviderProps) {
+  const [locale, setLocale] = useState<Locale>(() => {
+    const storedLocale = localStorage.getItem("USER_LOCALE")
+    if (storedLocale === "en" || storedLocale === "es") {
+      return storedLocale as Locale
+    }
+    const userLang = navigator.language.slice(0, 2)
+    return userLang === "es" ? "es" : "en"
+  })
+
   const [messages, setMessages] = useState<NestedMessages>({})
 
-  // 2) On mount or forcedLocale change, fetch the appropriate JSON
+  useEffect(() => {
+    localStorage.setItem("USER_LOCALE", locale)
+  }, [locale])
+
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        const file = forcedLocale === "en" ? "english" : "spanish"
+        const file = locale === "en" ? "english" : "spanish"
         const response = await fetch(`/locales/${file}.json`)
         if (!response.ok) {
-          throw new Error(`Could not load locale file for "${forcedLocale}"`)
+          throw new Error(`Could not load locale file for "${locale}"`)
         }
         const data = await response.json()
         setMessages(data)
@@ -48,19 +57,19 @@ export function TranslationProvider({
     }
 
     fetchTranslations()
-  }, [forcedLocale])
+  }, [locale])
 
-  // 3) This setLocale calls onChangeLocale if provided
-  function setLocale(newLocale: Locale) {
+  function handleSetLocale(newLocale: Locale) {
+    setLocale(newLocale)
     onChangeLocale?.(newLocale)
   }
 
   return (
     <TranslationContext.Provider
       value={{
-        locale: forcedLocale, // no local state for locale
-        messages, // updated whenever forcedLocale changes
-        setLocale, // triggers parent's state
+        locale,
+        messages,
+        setLocale: handleSetLocale,
       }}
     >
       {children}
