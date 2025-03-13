@@ -12,7 +12,7 @@ import {
   Button,
 } from "@mui/material"
 import CustomArrowForwardIcon from "@repo/ui/customArrowForwardIcon"
-import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
+import { useTranslation } from "@repo/i18n"
 
 interface DrawerProps {
   open: boolean
@@ -21,7 +21,7 @@ interface DrawerProps {
 }
 
 const Drawer: React.FC<DrawerProps> = ({ open, onOpen, onClose }) => {
-  const { t } = useMainAppTranslation()
+  const { t } = useTranslation()
 
   const drawerList = () => (
     <Box role="presentation" onClick={onClose} onKeyDown={onClose}>

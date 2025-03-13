@@ -10,7 +10,7 @@ import React, {
 import { Typography, Container, Box } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
-import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
+import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
@@ -27,7 +27,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   ref,
 ) {
   const theme = useTheme<Theme>()
-  const { t } = useMainAppTranslation()
+  const { t } = useTranslation()
   const { setViewState } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)

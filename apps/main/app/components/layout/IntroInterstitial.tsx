@@ -1,11 +1,11 @@
 import React from "react"
 import { useTheme } from "@mui/material/styles"
 import { Box, Typography } from "@mui/material"
-import { useMainAppTranslation } from "../../../i18n/useMainAppTranslation"
+import { useTranslation } from "@repo/i18n"
 
 const IntroInterstitial = () => {
   const theme = useTheme()
-  const { t } = useMainAppTranslation()
+  const { t } = useTranslation()
 
   return (
     <Box
