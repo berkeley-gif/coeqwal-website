@@ -2,11 +2,11 @@
 
 import React from "react"
 import { ToggleButtonGroup, ToggleButton } from "@mui/material"
-import { useUiLocale } from "./context/UiLocaleContext"
+import { useTranslation } from "@repo/i18n"
 import { useTheme, alpha } from "@mui/material/styles"
 
 export function LanguageSwitcher() {
-  const { locale, setLocale } = useUiLocale()
+  const { locale, setLocale } = useTranslation()
   const theme = useTheme()
 
   const handleChange = (

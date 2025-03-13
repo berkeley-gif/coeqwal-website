@@ -1,9 +1,10 @@
 // wrappers for client-side components
+// so that layout.tsx doesn't need to be a client component
+// and can use SSR
 
 "use client"
-import React from "react"
-import { UiLocaleProvider } from "@repo/ui/context/UiLocaleContext"
-import { TranslationProvider, useTranslation } from "@repo/i18n"
+import React, { useState, useEffect } from "react"
+import { TranslationProvider } from "@repo/i18n"
 import ThemeRegistry from "@repo/ui/themes/ThemeRegistry"
 
 export default function ClientProviders({
@@ -11,21 +12,24 @@ export default function ClientProviders({
 }: {
   children: React.ReactNode
 }) {
+  const [clientReady, setClientReady] = useState(false)
+
+  useEffect(() => {
+    setClientReady(true)
+  }, [])
+
+  if (!clientReady) {
+    // Render a skeleton or placeholder while the client is not ready
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p>Loading...</p> {/* could replace this with a more sophisticated loading component */}
+      </div>
+    )
+  }
+
   return (
     <TranslationProvider>
-      <LocaleProviderWrapper>
-        <ThemeRegistry>{children}</ThemeRegistry>
-      </LocaleProviderWrapper>
+      <ThemeRegistry>{children}</ThemeRegistry>
     </TranslationProvider>
-  )
-}
-
-function LocaleProviderWrapper({ children }: { children: React.ReactNode }) {
-  const { locale, setLocale } = useTranslation()
-
-  return (
-    <UiLocaleProvider externalLocale={locale} externalSetLocale={setLocale}>
-      {children}
-    </UiLocaleProvider>
   )
 }

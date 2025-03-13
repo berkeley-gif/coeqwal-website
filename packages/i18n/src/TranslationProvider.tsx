@@ -2,6 +2,14 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react"
 
+/**
+ * TranslationProvider is a context provider that manages the application's locale and translation messages.
+ * It initializes the locale based on the user's preference stored in local storage or the browser's language settings (defaults to "en").
+ * The provider fetches the appropriate translation JSON file based on the current locale and updates the context with the translations.
+ * It also provides a function to change the locale (handleSetLocale), which updates both the local state and the parent's state if an onChangeLocale function is in the parent.
+ * The useTranslation hook allows components to access the current locale, translation messages, and a function to change the locale.
+ */
+
 type Locale = "en" | "es"
 type NestedMessages = { [key: string]: string | NestedMessages }
 
@@ -13,7 +21,6 @@ interface TranslationContextProps {
 
 interface TranslationProviderProps {
   children: React.ReactNode
-  onChangeLocale?: (locale: Locale) => void
 }
 
 const TranslationContext = createContext<TranslationContextProps>({
@@ -24,25 +31,25 @@ const TranslationContext = createContext<TranslationContextProps>({
 
 export function TranslationProvider({
   children,
-  onChangeLocale,
 }: TranslationProviderProps) {
-  const [locale, setLocale] = useState<Locale>(() => {
-    if (typeof window !== "undefined" && localStorage) {
-      const storedLocale = localStorage.getItem("USER_LOCALE")
-      if (storedLocale === "en" || storedLocale === "es") {
-        return storedLocale as Locale
-      }
-      const userLang = navigator.language.slice(0, 2)
-      return userLang === "es" ? "es" : "en"
-    }
-    // Default to 'en' if localStorage is not available (e.g., during SSR)
-    return "en"
-  })
+  const [locale, setLocale] = useState<Locale>("en")
 
   const [messages, setMessages] = useState<NestedMessages>({})
 
   useEffect(() => {
-    if (typeof window !== "undefined" && localStorage) {
+    if (typeof window !== "undefined") {
+      const storedLocale = localStorage.getItem("USER_LOCALE")
+      if (storedLocale === "en" || storedLocale === "es") {
+        setLocale(storedLocale as Locale)
+      } else {
+        const userLang = navigator.language.slice(0, 2)
+        setLocale(userLang === "es" ? "es" : "en")
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (locale) {
       localStorage.setItem("USER_LOCALE", locale)
     }
   }, [locale])
@@ -62,12 +69,13 @@ export function TranslationProvider({
       }
     }
 
-    fetchTranslations()
+    if (locale) {
+      fetchTranslations()
+    }
   }, [locale])
 
   function handleSetLocale(newLocale: Locale) {
     setLocale(newLocale)
-    onChangeLocale?.(newLocale)
   }
 
   return (
@@ -87,7 +95,7 @@ export function useTranslation() {
   const { locale, messages, setLocale } = useContext(TranslationContext)
 
   /**
-   * Helper to traverse translation keys (e.g. "header.buttons.getData").
+   * Helper to traverse nested translation keys (e.g. "header.buttons.getData").
    * Returns an empty string if not found or not a string.
    */
   function t(key: string): string {
