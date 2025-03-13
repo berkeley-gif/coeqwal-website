@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useState, useContext, useEffect } from "react"
+import React, { createContext, useState, useContext, useEffect, useRef } from "react"
 
 /**
  * TranslationProvider is a context provider that manages the application's locale and translation messages.
@@ -17,6 +17,7 @@ interface TranslationContextProps {
   locale: Locale
   messages: NestedMessages
   setLocale: (locale: Locale) => void
+  isLoading: boolean
 }
 
 interface TranslationProviderProps {
@@ -27,6 +28,7 @@ const TranslationContext = createContext<TranslationContextProps>({
   locale: "en",
   messages: {},
   setLocale: () => {},
+  isLoading: true
 })
 
 export function TranslationProvider({ children }: TranslationProviderProps) {
@@ -45,6 +47,11 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
   });
   
   const [messages, setMessages] = useState<NestedMessages>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const cachedMessages = useRef<Record<Locale, NestedMessages>>({
+    en: {},
+    es: {}
+  });
 
   useEffect(() => {
     if (locale && typeof window !== 'undefined') {
@@ -55,22 +62,33 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
   useEffect(() => {
     async function fetchTranslations() {
       try {
-        const file = locale === "en" ? "english" : "spanish"
-        const response = await fetch(`/locales/${file}.json`)
-        if (!response.ok) {
-          throw new Error(`Could not load locale file for "${locale}"`)
+        // Check if we already have the translations for this locale
+        if (Object.keys(cachedMessages.current[locale]).length > 0) {
+          setMessages(cachedMessages.current[locale]);
+          setIsLoading(false);
+          return;
         }
-        const data = await response.json()
-        setMessages(data)
+        
+        setIsLoading(true);
+        const file = locale === "en" ? "english" : "spanish";
+        const response = await fetch(`/locales/${file}.json`);
+        if (!response.ok) {
+          throw new Error(`Could not load locale file for "${locale}"`);
+        }
+        const data = await response.json();
+        cachedMessages.current[locale] = data;
+        setMessages(data);
       } catch (error) {
-        console.error("Error fetching translations:", error)
+        console.error("Error fetching translations:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
     if (locale) {
-      fetchTranslations()
+      fetchTranslations();
     }
-  }, [locale])
+  }, [locale]);
 
   function handleSetLocale(newLocale: Locale) {
     setLocale(newLocale)
@@ -82,6 +100,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
         locale,
         messages,
         setLocale: handleSetLocale,
+        isLoading
       }}
     >
       {children}
