@@ -30,26 +30,27 @@ const TranslationContext = createContext<TranslationContextProps>({
 })
 
 export function TranslationProvider({ children }: TranslationProviderProps) {
-  const [locale, setLocale] = useState<Locale>("en")
-  const [messages, setMessages] = useState<NestedMessages>({})
+  const [locale, setLocale] = useState<Locale>(() => {
+    if (typeof window === 'undefined') return 'en'; // Default for SSR
+    
+    try {
+      const stored = localStorage.getItem("USER_LOCALE");
+      if (stored === "en" || stored === "es") return stored as Locale;
+      
+      const browserLang = navigator.language.slice(0, 2);
+      return browserLang === "es" ? "es" : "en";
+    } catch (e) {
+      return 'en'; // Fallback if localStorage access fails
+    }
+  });
+  
+  const [messages, setMessages] = useState<NestedMessages>({});
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedLocale = localStorage.getItem("USER_LOCALE")
-      if (storedLocale === "en" || storedLocale === "es") {
-        setLocale(storedLocale as Locale)
-      } else {
-        const userLang = navigator.language.slice(0, 2)
-        setLocale(userLang === "es" ? "es" : "en")
-      }
+    if (locale && typeof window !== 'undefined') {
+      localStorage.setItem("USER_LOCALE", locale);
     }
-  }, [])
-
-  useEffect(() => {
-    if (locale) {
-      localStorage.setItem("USER_LOCALE", locale)
-    }
-  }, [locale])
+  }, [locale]);
 
   useEffect(() => {
     async function fetchTranslations() {
