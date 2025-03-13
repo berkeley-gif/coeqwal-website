@@ -27,11 +27,9 @@ export default function ClientProviders({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          backgroundColor: "var(--primary-background-color)",
         }}
-      >
-        <p>Loading...</p>{" "}
-        {/* could replace this with a more sophisticated loading component */}
-      </div>
+      />
     )
   }
 
