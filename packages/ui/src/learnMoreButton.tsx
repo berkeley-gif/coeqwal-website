@@ -3,19 +3,20 @@
 import React from "react"
 import { Button, ButtonProps } from "@mui/material"
 import CustomArrowForwardIcon from "./customArrowForwardIcon"
-import en from "../public/locales/english.json"
-import es from "../public/locales/spanish.json"
-import { useUiLocale } from "./context/UiLocaleContext"
+import { useTranslation } from "@repo/i18n"
+
 
 interface LearnMoreButtonProps extends ButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 export function LearnMoreButton({ onClick, ...props }: LearnMoreButtonProps) {
-  const { locale } = useUiLocale()
+  const { t, locale } = useTranslation()
 
-  const text =
-    locale === "en" ? en.drawerButton.learnMore : es.drawerButton.learnMore
+  console.log("LearnMoreButton locale:", locale)
+  console.log("LearnMoreButton text:", t("drawerButton.learnMore"))
+
+  const text = t("drawerButton.learnMore") || "Learn More"
 
   return (
     <Button
