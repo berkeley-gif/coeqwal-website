@@ -56,14 +56,15 @@ const HomePanel: React.FC = () => {
           </Box>
         </Grid>
 
-        <Grid size={6}>
+        <Grid size={6} sx={{ position: 'relative' }}>
           <Box
             sx={{
-              width: {
-                xs: "80%",
-                md: "100%",
-              },
-              margin: "0 auto",
+              position: 'absolute',
+              top: "40px",
+              left: "-40px",
+              width: '112%',
+              height: 'auto',
+              margin: '0 auto',
             }}
           >
             <Image

@@ -116,7 +116,7 @@ const theme = createTheme({
       fontSize: "1.3rem",
       fontWeight: 400,
       lineHeight: 1.43,
-      marginRight: "50px",
+      marginRight: "70px",
       marginBottom: "1.125rem",
     },
     button: {
