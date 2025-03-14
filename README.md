@@ -134,6 +134,28 @@ If your installation gets messed up at any point, try
 rm -rf node_modules .turbo && pnpm install && pnpm build
 ```
 
+### Example: adding a storyline
+
+```
+turborepo-root/
+│── apps/
+│   ├── main-app/                  # Main Next.js application
+│   │   ├── pages/
+│   │   │   ├── index.tsx          # Main homepage
+│   │   │   ├── storylines/        # Dynamic import for storylines
+│   │   │   │   ├── [slug].tsx     # Dynamically loads a storyline
+│   ├── storyline-1/               # Standalone Next.js app for storyline 1
+│   │   ├── pages/
+│   │   │   ├── index.tsx          # Entry point of storyline-1
+│   ├── storyline-2/               # Standalone Next.js app for storyline 2
+│   │   ├── pages/
+│   │   │   ├── index.tsx          # Entry point of storyline-2
+│
+│── packages/
+│   ├── ui/                        # Shared UI components
+│   ├── map/                       # Shared map provider & hooks
+```
+
 ## Adding a new package
 
 Adding a new package to a Turborepo involves creating a new directory for the package, setting up its structure, and configuring it to work with the rest of the monorepo.
