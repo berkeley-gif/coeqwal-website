@@ -96,9 +96,16 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
 
   if (!isLoading) {
     try {
-      const paragraphs = messages.CaliforniaWaterPanel?.paragraphs
-      if (paragraphs && typeof paragraphs === "object") {
-        paragraphKeys = Object.keys(paragraphs)
+      const californiaWaterPanel = messages.CaliforniaWaterPanel
+      if (
+        californiaWaterPanel &&
+        typeof californiaWaterPanel === "object" &&
+        "paragraphs" in californiaWaterPanel
+      ) {
+        const paragraphs = californiaWaterPanel.paragraphs
+        if (paragraphs && typeof paragraphs === "object") {
+          paragraphKeys = Object.keys(paragraphs)
+        }
       }
     } catch (e) {
       console.error("Error accessing paragraph keys:", e)
