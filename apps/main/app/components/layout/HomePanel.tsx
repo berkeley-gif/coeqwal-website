@@ -9,7 +9,25 @@ import { useTranslation } from "@repo/i18n"
 
 const HomePanel: React.FC = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const { t, messages } = useTranslation()
+
+  let paragraphKeys: string[] = []
+
+  try {
+    const homePanel = messages.homePanel
+    if (
+      homePanel &&
+      typeof homePanel === "object" &&
+      "paragraphs" in homePanel
+    ) {
+      const paragraphs = homePanel.paragraphs
+      if (paragraphs && typeof paragraphs === "object") {
+        paragraphKeys = Object.keys(paragraphs)
+      }
+    }
+  } catch (e) {
+    console.error("Error accessing paragraph keys:", e)
+  }
 
   return (
     <Container
@@ -29,7 +47,11 @@ const HomePanel: React.FC = () => {
             >
               {t("homePanel.title")}
             </Typography>
-            <Typography variant="body2">{t("homePanel.pg1")}</Typography>
+            {paragraphKeys.map((key, i) => (
+              <Typography key={i} variant="body2">
+                {t(`homePanel.paragraphs.${key}`)}
+              </Typography>
+            ))}
           </Box>
         </Grid>
 

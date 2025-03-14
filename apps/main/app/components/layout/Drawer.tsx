@@ -21,28 +21,38 @@ interface DrawerProps {
 }
 
 const Drawer: React.FC<DrawerProps> = ({ open, onOpen, onClose }) => {
-  const { t } = useTranslation()
+  const { t, messages } = useTranslation()
+
+  let linkKeys: string[] = []
+
+  try {
+    const drawerLinks = messages.drawerLinks
+    if (
+      drawerLinks &&
+      typeof drawerLinks === "object" &&
+      "links" in drawerLinks
+    ) {
+      const links = drawerLinks.links
+      if (links && typeof links === "object") {
+        linkKeys = Object.keys(links)
+      }
+    }
+  } catch (e) {
+    console.error("Error accessing link keys:", e)
+  }
 
   const drawerList = () => (
     <Box role="presentation" onClick={onClose} onKeyDown={onClose}>
       <List>
-        {[
-          { text: t("drawerLinks.howWaterMoves"), href: "#how-water-moves" },
-          {
-            text: t("drawerLinks.howWaterManaged"),
-            href: "#how-water-managed",
-          },
-          { text: t("drawerLinks.calSim"), href: "#calsim" },
-          { text: t("drawerLinks.climateChange"), href: "#climate-change" },
-        ].map((item, index) => (
-          <React.Fragment key={`${item.text}-${index}`}>
+        {linkKeys.map((key, index) => (
+          <React.Fragment key={`${key}-${index}`}>
             <ListItem disablePadding>
               <ListItemButton
                 component="a"
-                href={item.href}
+                href={`#${key}`}
                 sx={{ color: "text.secondary" }}
               >
-                <ListItemText primary={item.text} />
+                <ListItemText primary={t(`drawerLinks.links.${key}`)} />
                 <CustomArrowForwardIcon />
               </ListItemButton>
             </ListItem>

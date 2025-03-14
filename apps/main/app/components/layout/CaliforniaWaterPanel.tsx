@@ -92,21 +92,21 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     }
   }
 
-  let paragraphKeys: string[] = [];
-  
+  let paragraphKeys: string[] = []
+
   if (!isLoading) {
     try {
-      const paragraphs = messages.CaliforniaWaterPanel?.paragraphs;
-      if (paragraphs && typeof paragraphs === 'object') {
-        paragraphKeys = Object.keys(paragraphs);
+      const paragraphs = messages.CaliforniaWaterPanel?.paragraphs
+      if (paragraphs && typeof paragraphs === "object") {
+        paragraphKeys = Object.keys(paragraphs)
       }
     } catch (e) {
-      console.error("Error accessing paragraph keys:", e);
+      console.error("Error accessing paragraph keys:", e)
     }
   }
-  
+
   useImperativeHandle(ref, () => ({})) // If needed, expose methods
-  
+
   if (isLoading) {
     // Return a placeholder that doesn't interfere with the IntersectionObserver
     return (
@@ -121,7 +121,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
       >
         <Box style={{ minHeight: 200 }} />
       </Container>
-    );
+    )
   }
 
   return (

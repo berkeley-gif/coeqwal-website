@@ -9,7 +9,9 @@
   "learnMore": "Learn more",
   "homePanel": {
     "title": "Californians are connected by their water.",
-    "pg1": "Water sustains our communities. The COEQWAL project helps Californians navigate the state’s complex water system by illustrating how it works and exploring data-driven ways water can be distributed."
+    "paragraphs": {
+      "pg1": "Water sustains our communities. The COEQWAL project helps Californians navigate the state’s complex water system by illustrating how it works and exploring data-driven ways water can be distributed."
+    }
   },
   "introInterstitial": {
     "paragraphs": {
@@ -29,10 +31,12 @@
     }
   },
   "drawerLinks": {
-    "howWaterMoves": "How Water Moves Through California",
-    "howWaterManaged": "How Water is Managed in California",
-    "calSim": "CalSim",
-    "climateChange": "Climate Change"
+    "links": {  
+      "howWaterMoves": "How Water Moves Through California",
+      "howWaterManaged": "How Water is Managed in California",
+      "calSim": "CalSim",
+      "climateChange": "Climate Change"
+    }
   },
   "drawerButton": {
     "close": "Close"
