@@ -112,12 +112,12 @@ const theme = createTheme({
       letterSpacing: "0.01071em",
     },
     body2: {
-      fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "1.3333rem",
+      fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
+      fontSize: "1.3rem",
       fontWeight: 400,
       lineHeight: 1.43,
+      marginRight: "50px",
       marginBottom: "1.125rem",
-      letterSpacing: "0.01071em",
     },
     button: {
       fontSize: "1rem",
