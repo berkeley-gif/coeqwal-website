@@ -27,7 +27,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   ref,
 ) {
   const theme = useTheme<Theme>()
-  const { t, isLoading } = useTranslation()
+  const { t, isLoading, messages } = useTranslation()
   const { setViewState } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -92,21 +92,21 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     }
   }
 
-  // Use a more direct approach to get the paragraphs
   let paragraphKeys: string[] = [];
   
-  // Only try to get paragraph keys if not loading
   if (!isLoading) {
-    // Manually create keys for the paragraphs
-    for (let i = 1; i <= 7; i++) {
-      paragraphKeys.push(`pg${i}`);
+    try {
+      const paragraphs = messages.CaliforniaWaterPanel?.paragraphs;
+      if (paragraphs && typeof paragraphs === 'object') {
+        paragraphKeys = Object.keys(paragraphs);
+      }
+    } catch (e) {
+      console.error("Error accessing paragraph keys:", e);
     }
   }
   
-  // IMPORTANT: Always call hooks in the same order
   useImperativeHandle(ref, () => ({})) // If needed, expose methods
   
-  // Now we can conditionally return based on loading state
   if (isLoading) {
     // Return a placeholder that doesn't interfere with the IntersectionObserver
     return (

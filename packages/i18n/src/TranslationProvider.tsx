@@ -138,5 +138,5 @@ export function useTranslation() {
     return typeof result === "string" ? result : ""
   }
 
-  return { locale, t, setLocale, isLoading }
+  return { locale, t, setLocale, isLoading, messages }
 }

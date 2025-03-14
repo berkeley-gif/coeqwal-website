@@ -5,15 +5,21 @@ import { useTranslation } from "@repo/i18n"
 
 const IntroInterstitial = () => {
   const theme = useTheme()
-  const { t, isLoading } = useTranslation()
+  const { t, isLoading, messages } = useTranslation()
   
   let paragraphKeys: string[] = [];
   
-  // Only try to get paragraph keys if not loading
   if (!isLoading) {
-    // Manually create keys for the paragraphs
-    for (let i = 1; i <= 1; i++) {  // todo: fix
-      paragraphKeys.push(`pg${i}`);
+    try {
+      const introInterstitial = messages.introInterstitial;
+      if (introInterstitial && typeof introInterstitial === 'object' && 'paragraphs' in introInterstitial) {
+        const paragraphs = introInterstitial.paragraphs;
+        if (paragraphs && typeof paragraphs === 'object') {
+          paragraphKeys = Object.keys(paragraphs);
+        }
+      }
+    } catch (e) {
+      console.error("Error accessing paragraph keys:", e);
     }
   }
   
