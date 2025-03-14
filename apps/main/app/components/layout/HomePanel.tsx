@@ -35,12 +35,13 @@ const HomePanel: React.FC = () => {
       role="main"
     >
       <Grid container spacing={2}>
-        <Grid size={5}>
+        <Grid size={6}>
           <Box>
             <Typography
               variant="h1"
               sx={{
                 marginTop: "40vh",
+                paddingRight: "50px"
               }}
               gutterBottom
               aria-level={1}
@@ -55,7 +56,7 @@ const HomePanel: React.FC = () => {
           </Box>
         </Grid>
 
-        <Grid size={7}>
+        <Grid size={6}>
           <Box
             sx={{
               width: {
