@@ -96,22 +96,6 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
     }
   }, [locale])
 
-  console.log("Loaded translations for locale:", locale, messages)
-  if (
-    typeof messages.CaliforniaWaterPanel === "object" &&
-    messages.CaliforniaWaterPanel !== null
-  ) {
-    console.log(
-      "CaliforniaWaterPanel.paragraphs:",
-      messages.CaliforniaWaterPanel.paragraphs,
-    )
-  } else {
-    console.log(
-      "CaliforniaWaterPanel is not an object or is null:",
-      messages.CaliforniaWaterPanel,
-    )
-  }
-
   function handleSetLocale(newLocale: Locale) {
     setLocale(newLocale)
   }
