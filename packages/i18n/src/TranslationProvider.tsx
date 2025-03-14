@@ -47,7 +47,7 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
 
       const browserLang = navigator.language.slice(0, 2)
       return browserLang === "es" ? "es" : "en"
-    } catch (e) {
+    } catch {
       return "en" // Fallback if localStorage access fails
     }
   })
