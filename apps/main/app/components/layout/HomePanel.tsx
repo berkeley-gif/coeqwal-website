@@ -41,7 +41,7 @@ const HomePanel: React.FC = () => {
               variant="h1"
               sx={{
                 marginTop: "40vh",
-                paddingRight: "50px"
+                paddingRight: "50px",
               }}
               gutterBottom
               aria-level={1}
@@ -56,15 +56,15 @@ const HomePanel: React.FC = () => {
           </Box>
         </Grid>
 
-        <Grid size={6} sx={{ position: 'relative' }}>
+        <Grid size={6} sx={{ position: "relative" }}>
           <Box
             sx={{
-              position: 'absolute',
+              position: "absolute",
               top: "40px",
               left: "-40px",
-              width: '112%',
-              height: 'auto',
-              margin: '0 auto',
+              width: "112%",
+              height: "auto",
+              margin: "0 auto",
             }}
           >
             <Image

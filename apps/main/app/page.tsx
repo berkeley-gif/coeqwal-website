@@ -84,7 +84,7 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
         }
 
         // Add terrain setup here
-        console.log("🔍 Available Sources:", map.getStyle()?.sources);
+        console.log("🔍 Available Sources:", map.getStyle()?.sources)
 
         // Set the terrain using the existing terrain-rgb source
         try {
@@ -93,24 +93,24 @@ function MapWrapper(props: { mapRef: React.RefObject<MapboxMapRef> }) {
             type: "raster-dem",
             url: "mapbox://mapbox.mapbox-terrain-dem-v1",
             tileSize: 512,
-            maxzoom: 14
-          });
-          
+            maxzoom: 14,
+          })
+
           // Use the dedicated source for terrain
           map.setTerrain({
             source: "terrain-dem",
-            exaggeration: 3
-          });
-          console.log("✅ Terrain enabled using dedicated 'terrain-dem' source");
-          
+            exaggeration: 3,
+          })
+          console.log("✅ Terrain enabled using dedicated 'terrain-dem' source")
+
           // Remove the sky layer
           if (map.getLayer("sky")) {
-            map.removeLayer("sky");
+            map.removeLayer("sky")
           }
         } catch (error) {
-          console.error("❌ Error setting terrain:", error);
+          console.error("❌ Error setting terrain:", error)
           if (error instanceof Error) {
-            console.error(error.message);
+            console.error(error.message)
           }
         }
       }}
