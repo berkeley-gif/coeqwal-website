@@ -6,18 +6,19 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  useCallback,
 } from "react"
 import { Typography, Container, Box } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
-import { paragraphMapViews } from "../../../lib/mapViews"
+import { paragraphMapViews, initialMapView } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 
 interface CaliforniaWaterPanelProps {
-  onFlyTo: (longitude: number, latitude: number, zoom?: number) => void
+  onFlyTo: (longitude: number, latitude: number, zoom?: number, pitch?: number, bearing?: number) => void
   onAnimateBands: () => void
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
@@ -33,10 +34,24 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   const [isVisible, setIsVisible] = useState(false)
   const [clientReady, setClientReady] = useState(false)
 
+  // Memoize the onFlyTo function
+  const memoizedOnFlyTo = useCallback(onFlyTo, [])
+
   useEffect(() => {
     const currentPanelRef = panelRef.current
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting)
+        if (entry.isIntersecting) {
+          memoizedOnFlyTo(
+            initialMapView.longitude,
+            initialMapView.latitude,
+            initialMapView.zoom,
+            initialMapView.pitch,
+            initialMapView.bearing
+          )
+        }
+      },
       { threshold: 0.1 },
     )
     if (currentPanelRef) {
@@ -47,7 +62,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         observer.unobserve(currentPanelRef)
       }
     }
-  }, [])
+  }, [memoizedOnFlyTo])
 
   useEffect(() => {
     setClientReady(true)
