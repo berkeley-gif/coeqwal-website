@@ -1,19 +1,11 @@
 "use client"
 
-import React, {
-  useRef,
-  useState,
-  useEffect,
-  useImperativeHandle,
-  forwardRef,
-  useCallback,
-} from "react"
+import React, { useRef, forwardRef, useCallback } from "react"
 import { Typography, Container, Box } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
-import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
-import { paragraphMapViews, initialMapView } from "../../../lib/mapViews"
+import { initialMapView } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 
@@ -22,134 +14,43 @@ interface BaselinePanelProps {
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-const BaselinePanel = forwardRef(function BaselinePanel(
-  { onFlyTo, onLearnMoreClick }: BaselinePanelProps,
-  ref,
-) {
+const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(({
+  onFlyTo,
+  onLearnMoreClick
+}, ref) => {
   const theme = useTheme<Theme>()
-  const { t, isLoading, messages } = useTranslation()
+  const { t, messages } = useTranslation()
   const { setViewState } = useMap()
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const [isVisible, setIsVisible] = useState(false)
-  const [clientReady, setClientReady] = useState(false)
 
-  // Memoize the onFlyTo function
+  // Memoize the onFlyTo function to ensure it does not cause re-renders
   const memoizedOnFlyTo = useCallback(onFlyTo, [])
 
-  useEffect(() => {
-    const currentPanelRef = panelRef.current
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          memoizedOnFlyTo(
-            initialMapView.longitude,
-            initialMapView.latitude,
-            initialMapView.zoom,
-            initialMapView.pitch,
-            initialMapView.bearing
-          )
-        }
-      },
-      { threshold: 0.1 },
+  // Function to handle visibility icon click
+  const handleVisibilityClick = useCallback(() => {
+    memoizedOnFlyTo(
+      initialMapView.longitude,
+      initialMapView.latitude,
+      initialMapView.zoom,
+      initialMapView.pitch,
+      initialMapView.bearing
     )
-    if (currentPanelRef) {
-      observer.observe(currentPanelRef)
-    }
-    return () => {
-      if (currentPanelRef) {
-        observer.unobserve(currentPanelRef)
-      }
-    }
   }, [memoizedOnFlyTo])
 
-  useEffect(() => {
-    setClientReady(true)
-  }, [])
-
-  const backgroundColor = isVisible
-    ? "transparent"
-    : theme.palette.secondary.main
-
-  const isXs = useMediaQuery(theme.breakpoints.down("sm"))
-  const isSm = useMediaQuery(theme.breakpoints.only("sm"))
-  const isMd = useMediaQuery(theme.breakpoints.only("md"))
-  const isLg = useMediaQuery(theme.breakpoints.only("lg"))
-  const isXl = useMediaQuery(theme.breakpoints.up("xl"))
-
-  function getBreakpointKey() {
-    if (isXs) return "xs"
-    if (isSm) return "sm"
-    if (isMd) return "md"
-    if (isLg) return "lg"
-    if (isXl) return "xl"
-    return "xl"
-  }
-
-  // This will animate if paragraphIndex === 0, flyto otherwise
-  function handleVisibilityClick(paragraphIndex: number) {
-    if (paragraphIndex === 0) {
-
-    } else {
-      const bpKey = getBreakpointKey()
-      const coords = paragraphMapViews[paragraphIndex][bpKey]
-      onFlyTo(coords.longitude, coords.latitude, coords.zoom)
-
-      setViewState((prev) => ({
-        ...prev,
-        ...coords,
-        transitionDuration: 2000,
-        bearing: 0,
-        pitch: 0,
-      }))
-    }
-  }
-
   let paragraphKeys: string[] = []
-
-  if (!isLoading) {
-    try {
-      const BaselinePanel = messages.BaselinePanel
-      if (
-        BaselinePanel &&
-        typeof BaselinePanel === "object" &&
-        "paragraphs" in BaselinePanel
-      ) {
-        const paragraphs = BaselinePanel.paragraphs
-        if (paragraphs && typeof paragraphs === "object") {
-          paragraphKeys = Object.keys(paragraphs)
-        }
-      }
-    } catch (e) {
-      console.error("Error accessing paragraph keys:", e)
+  if (messages.BaselinePanel && typeof messages.BaselinePanel === "object" && "paragraphs" in messages.BaselinePanel) {
+    const paragraphs = messages.BaselinePanel.paragraphs
+    if (paragraphs && typeof paragraphs === "object") {
+      paragraphKeys = Object.keys(paragraphs)
     }
-  }
-
-  useImperativeHandle(ref, () => ({})) // If needed, expose methods
-
-  if (isLoading) {
-    // Return a placeholder that doesn't interfere with the IntersectionObserver
-    return (
-      <Container
-        ref={panelRef}
-        sx={{
-          backgroundColor,
-          transition: "background-color 3s ease-in-out",
-          minHeight: "100vh",
-        }}
-        role="main"
-      >
-        <Box style={{ minHeight: 200 }} />
-      </Container>
-    )
   }
 
   return (
     <Container
-      ref={panelRef}
+      ref={ref}
       sx={{
-        backgroundColor,
-        transition: "background-color 3s ease-in-out",
+        backgroundColor: theme.palette.secondary.main,
         minHeight: "100vh",
+        transition: "background-color 3s ease-in-out",
         pointerEvents: "none",
         "& .MuiButton-root, & .MuiSvgIcon-root": {
           pointerEvents: "auto",
@@ -157,52 +58,30 @@ const BaselinePanel = forwardRef(function BaselinePanel(
       }}
       role="main"
     >
-      {!clientReady ? (
-        <Box style={{ minHeight: 200 }} />
-      ) : (
+      <Box
+        sx={{
+          display: "grid",
+          gap: { xs: 2, lg: 16 },
+          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+        }}
+      >
         <Box
           sx={{
-            display: "grid",
-            gap: { xs: 2, lg: 16 },
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            marginTop: "150px",
           }}
         >
-          {/* Left side text */}
-          <Box
-            sx={{
-              marginTop: "150px",
-            }}
-          >
-            <Typography
-              variant="h1"
-              sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
-              gutterBottom
-            >
-              {t("BaselinePanel.title")}
+          {paragraphKeys.map((key, i) => (
+            <Typography key={i} variant="body1">
+              {t(`BaselinePanel.paragraphs.${key}`)}
+              <VisibilityIcon
+                sx={{ ml: 1, cursor: "pointer" }}
+                onClick={handleVisibilityClick}
+              />
             </Typography>
-
-            {paragraphKeys.map((key, i) => (
-              <Typography key={i} variant="body1">
-                {t(`BaselinePanel.paragraphs.${key}`)}
-                <VisibilityIcon
-                  sx={{ ml: 1, cursor: "pointer" }}
-                  onClick={() => handleVisibilityClick(i)}
-                />
-              </Typography>
-            ))}
-            <LearnMoreButton onClick={onLearnMoreClick} />
-          </Box>
-
-          {/* Right side (currently empty) */}
-          <Box
-            sx={{
-              order: { xs: 1, md: 2 },
-              width: { xs: "80%", md: "100%" },
-              margin: "0 auto",
-            }}
-          />
+          ))}
+          <LearnMoreButton onClick={onLearnMoreClick} />
         </Box>
-      )}
+      </Box>
     </Container>
   )
 })
