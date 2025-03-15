@@ -16,6 +16,7 @@ import { paragraphMapViews, initialMapView } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 import { ViewState } from "@repo/map"
+import { usePrecipitationAnimation } from "../../hooks/usePrecipitationAnimation"
 
 interface CaliforniaWaterPanelProps {
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -27,10 +28,15 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
 ) {
   const theme = useTheme<Theme>()
   const { t, isLoading, messages } = useTranslation()
-  const { flyTo, animatePrecipitationBands, setViewState } = useMap()
+  const { flyTo, setViewState, mapRef, isMapLoaded } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [clientReady, setClientReady] = useState(false)
+
+  const { animatePrecipitationBands } = usePrecipitationAnimation(
+    mapRef,
+    isMapLoaded,
+  )
 
   useEffect(() => {
     const currentPanelRef = panelRef.current
