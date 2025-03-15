@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/MapboxMap.tsx"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/MapboxMap.tsx"
+    }
   },
   "scripts": {
     "build": "tsc --skipLibCheck",
@@ -15,6 +18,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/mapbox-gl": "^2.7.18",
     "eslint": "^9.15.0"
   },
   "dependencies": {

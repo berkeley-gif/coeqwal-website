@@ -84,7 +84,6 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       mapStyle={mapStyle}
       style={style}
       {...viewState}
-      transitionDuration={viewState.transitionDuration}
       minZoom={minZoom}
       attributionControl={attributionControl}
       scrollZoom={scrollZoom}

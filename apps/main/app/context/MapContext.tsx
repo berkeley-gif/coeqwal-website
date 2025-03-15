@@ -143,10 +143,12 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
   // Add this helper function in the MapProvider function
   function updateSnowfallOpacity(
-    map: any, // You can type this more specifically if desired
+    map: ReturnType<MapboxMapRef["getMap"]>, // Typed as return type of getMap method
     targetOpacity: number,
     duration: number = 2000,
   ) {
+    if (!map) return // Early return if map is undefined
+
     const startOpacity = (map.getPaintProperty("snowfall", "raster-opacity") ??
       0) as number
     const startTime = performance.now()
@@ -157,9 +159,12 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const currentOpacity =
         startOpacity + (targetOpacity - startOpacity) * progress
 
-      map.setPaintProperty("snowfall", "raster-opacity", currentOpacity)
+      if (map) {
+        // Check if map still exists
+        map.setPaintProperty("snowfall", "raster-opacity", currentOpacity)
+      }
 
-      if (progress < 1) requestAnimationFrame(animate)
+      if (progress < 1 && map) requestAnimationFrame(animate)
     }
 
     requestAnimationFrame(animate)

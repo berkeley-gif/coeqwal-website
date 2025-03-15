@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useRef, forwardRef, useCallback, useEffect } from "react"
+import React, { useRef, forwardRef, useEffect } from "react"
 import { Typography, Container, Box } from "@mui/material"
-import { useTheme, Theme } from "@mui/material/styles"
+// import { useTheme, Theme } from "@mui/material/styles"
 import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import { initialMapView } from "../../../lib/mapViews"
@@ -24,13 +24,15 @@ const BaselinePanel = forwardRef<
   HTMLDivElement,
   Omit<BaselinePanelProps, "onFlyTo">
 >(({ onLearnMoreClick }, ref) => {
-  const theme = useTheme<Theme>()
   const { t, messages } = useTranslation()
-  const { flyTo, setViewState } = useMap()
+  const { flyTo } = useMap()
   const panelRef = useRef<HTMLDivElement>(null)
 
   // Setup IntersectionObserver
   useEffect(() => {
+    // Capture ref value to use in cleanup
+    const currentPanelRef = panelRef.current
+
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
@@ -49,13 +51,13 @@ const BaselinePanel = forwardRef<
       },
     )
 
-    if (panelRef.current) {
-      observer.observe(panelRef.current)
+    if (currentPanelRef) {
+      observer.observe(currentPanelRef)
     }
 
     return () => {
-      if (panelRef.current) {
-        observer.unobserve(panelRef.current)
+      if (currentPanelRef) {
+        observer.unobserve(currentPanelRef)
       }
     }
   }, [flyTo])

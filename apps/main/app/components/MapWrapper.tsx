@@ -2,9 +2,8 @@
 
 import React, { useCallback, useEffect } from "react"
 import { useMap } from "../context/MapContext"
-import { MapboxMap } from "@repo/map"
+import { MapboxMap, MinimalViewState } from "@repo/map"
 import { useTheme, useMediaQuery } from "@mui/material"
-import { PRECIPITATION_BANDS } from "../../lib/mapPrecipitationAnimationBands"
 import { breakpointViews } from "../../lib/mapViews"
 
 export default function MapWrapper() {
@@ -32,7 +31,7 @@ export default function MapWrapper() {
   useEffect(() => {
     const bpKey = getBreakpointKey()
     const coords = breakpointViews[bpKey]
-    setViewState((prev) => ({
+    setViewState((prev: MinimalViewState) => ({
       ...prev,
       ...coords,
       transitionDuration: 1000,
@@ -47,11 +46,8 @@ export default function MapWrapper() {
       onViewStateChange={(vs) => setViewState(vs)}
       style={{ width: "100%", height: "100%" }}
       scrollZoom={false}
-      onLoad={(e) => {
+      onLoad={() => {
         setMapLoaded(true)
-        const map = e.target
-        // Set the precipitation layer to the first band...
-        // Rest of your initialization code...
       }}
     />
   )

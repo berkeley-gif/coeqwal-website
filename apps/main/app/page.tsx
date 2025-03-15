@@ -3,7 +3,6 @@
 import React, { useState } from "react"
 import { ClientSideHead } from "./components/ClientSideHeader"
 import { Header } from "@repo/ui/header"
-import { useMap } from "./context/MapContext"
 import HomePanel from "./components/layout/HomePanel"
 import Drawer from "./components/layout/Drawer"
 import IntroInterstitial from "./components/layout/IntroInterstitial"
