@@ -1,6 +1,6 @@
 # @repo/map
 
-A wrapper around react-map-gl/mapbox that provides a safer and more convenient API for working with Mapbox maps.
+A wrapper around `react-map-gl/mapbox` that provides a safer and more convenient API for working with Mapbox maps.
 
 ## Features
 
@@ -11,16 +11,19 @@ A wrapper around react-map-gl/mapbox that provides a safer and more convenient A
 
 ## Installation
 
+To install the package, run the following command from the monorepo root:
+
 ```bash
-# From the monorepo root
 pnpm add @repo/map
 ```
 
 ## Basic Usage
 
+Here's a basic example of how to use the `MapboxMap` component:
+
 ```tsx
 import { MapboxMap } from "@repo/map"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import type { MapboxMapRef } from "@repo/map"
 
 export default function MyMapComponent() {
@@ -106,10 +109,10 @@ mapRef.current?.flyTo(-122.4, 37.8, 14)
 
 ## Best Practices
 
-1. **Prefer `withMap` over `getMap`** when possible for safer code
-2. **Handle map loading state** appropriately, especially for operations that require the map to be fully loaded
-3. **Use TypeScript** to get full benefits of type checking
-4. **Consider memoizing callbacks** that use map operations for better performance
+1. **Prefer `withMap` over `getMap`** when possible for safer code.
+2. **Handle map loading state** appropriately, especially for operations that require the map to be fully loaded.
+3. **Use TypeScript** to get full benefits of type checking.
+4. **Consider memoizing callbacks** that use map operations for better performance.
 
 ## Extending the API
 
