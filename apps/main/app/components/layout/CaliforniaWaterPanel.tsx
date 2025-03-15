@@ -6,6 +6,8 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
+  useMemo,
+  useCallback,
 } from "react"
 import { Typography, Container, Box } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
@@ -60,9 +62,9 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     setClientReady(true)
   }, [])
 
-  const backgroundColor = isVisible
-    ? "transparent"
-    : theme.palette.secondary.main
+  const backgroundColor = useMemo(() => {
+    return isVisible ? "transparent" : theme.palette.secondary.main;
+  }, [isVisible, theme.palette.secondary.main]);
 
   const isXs = useMediaQuery(theme.breakpoints.down("sm"))
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
@@ -79,7 +81,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     return "xl"
   }
 
-  function handleVisibilityClick(paragraphIndex: number) {
+  const handleVisibilityClick = useCallback((paragraphIndex: number) => {
     if (paragraphIndex === 0) {
       animatePrecipitationBands()
     } else {
@@ -95,7 +97,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         pitch: 0,
       }))
     }
-  }
+  }, [animatePrecipitationBands, flyTo, getBreakpointKey, paragraphMapViews, setViewState])
 
   let paragraphKeys: string[] = []
 
@@ -180,6 +182,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
                 <VisibilityIcon
                   sx={{ ml: 1, cursor: "pointer" }}
                   onClick={() => handleVisibilityClick(i)}
+                  aria-label={`map view ${i}`}
                 />
               </Typography>
             ))}

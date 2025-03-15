@@ -1,5 +1,10 @@
 "use client"
 
+/**
+ * This component is used to wrap the MapboxMap component.
+ * It is used to handle the map's view state and breakpoints.
+ */
+
 import React, { useCallback, useEffect } from "react"
 import { useMap } from "../context/MapContext"
 import { MapboxMap, ViewState } from "@repo/map"
