@@ -43,15 +43,6 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting)
-        if (entry.isIntersecting) {
-          flyTo(
-            initialMapView.longitude,
-            initialMapView.latitude,
-            initialMapView.zoom,
-            initialMapView.pitch,
-            initialMapView.bearing,
-          )
-        }
       },
       { threshold: 0.1 },
     )
@@ -63,7 +54,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         observer.unobserve(currentPanelRef)
       }
     }
-  }, [flyTo])
+  }, [setIsVisible])
 
   useEffect(() => {
     setClientReady(true)
