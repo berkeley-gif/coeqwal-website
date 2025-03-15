@@ -28,40 +28,6 @@ const BaselinePanel = forwardRef<
   const { flyTo } = useMap()
   const panelRef = useRef<HTMLDivElement>(null)
 
-  // Setup IntersectionObserver
-  useEffect(() => {
-    // Capture ref value to use in cleanup
-    const currentPanelRef = panelRef.current
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        if (entry.isIntersecting) {
-          flyTo(
-            initialMapView.longitude,
-            initialMapView.latitude,
-            initialMapView.zoom,
-            initialMapView.pitch,
-            initialMapView.bearing,
-          )
-        }
-      },
-      {
-        rootMargin: "100px",
-      },
-    )
-
-    if (currentPanelRef) {
-      observer.observe(currentPanelRef)
-    }
-
-    return () => {
-      if (currentPanelRef) {
-        observer.unobserve(currentPanelRef)
-      }
-    }
-  }, [flyTo])
-
   let paragraphKeys: string[] = []
   if (
     messages.BaselinePanel &&
