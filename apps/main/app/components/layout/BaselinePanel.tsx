@@ -10,13 +10,20 @@ import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 
 interface BaselinePanelProps {
-  onFlyTo: (longitude: number, latitude: number, zoom?: number, pitch?: number, bearing?: number) => void
+  onFlyTo: (
+    longitude: number,
+    latitude: number,
+    zoom?: number,
+    pitch?: number,
+    bearing?: number,
+  ) => void
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-const BaselinePanel = forwardRef<HTMLDivElement, Omit<BaselinePanelProps, 'onFlyTo'>>(({
-  onLearnMoreClick
-}, ref) => {
+const BaselinePanel = forwardRef<
+  HTMLDivElement,
+  Omit<BaselinePanelProps, "onFlyTo">
+>(({ onLearnMoreClick }, ref) => {
   const theme = useTheme<Theme>()
   const { t, messages } = useTranslation()
   const { flyTo, setViewState } = useMap()
@@ -24,20 +31,23 @@ const BaselinePanel = forwardRef<HTMLDivElement, Omit<BaselinePanelProps, 'onFly
 
   // Setup IntersectionObserver
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const entry = entries[0]
-      if (entry.isIntersecting) {
-        flyTo(
-          initialMapView.longitude,
-          initialMapView.latitude,
-          initialMapView.zoom,
-          initialMapView.pitch,
-          initialMapView.bearing
-        )
-      }
-    }, {
-      rootMargin: '100px'
-    })
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry.isIntersecting) {
+          flyTo(
+            initialMapView.longitude,
+            initialMapView.latitude,
+            initialMapView.zoom,
+            initialMapView.pitch,
+            initialMapView.bearing,
+          )
+        }
+      },
+      {
+        rootMargin: "100px",
+      },
+    )
 
     if (panelRef.current) {
       observer.observe(panelRef.current)
@@ -51,7 +61,11 @@ const BaselinePanel = forwardRef<HTMLDivElement, Omit<BaselinePanelProps, 'onFly
   }, [flyTo])
 
   let paragraphKeys: string[] = []
-  if (messages.BaselinePanel && typeof messages.BaselinePanel === "object" && "paragraphs" in messages.BaselinePanel) {
+  if (
+    messages.BaselinePanel &&
+    typeof messages.BaselinePanel === "object" &&
+    "paragraphs" in messages.BaselinePanel
+  ) {
     const paragraphs = messages.BaselinePanel.paragraphs
     if (paragraphs && typeof paragraphs === "object") {
       paragraphKeys = Object.keys(paragraphs)
@@ -83,25 +97,27 @@ const BaselinePanel = forwardRef<HTMLDivElement, Omit<BaselinePanelProps, 'onFly
             marginTop: "150px",
           }}
         >
-             <Typography
-              variant="h1"
-              sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
-              gutterBottom
-            >
-              {t("BaselinePanel.title")}
-            </Typography>
+          <Typography
+            variant="h1"
+            sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
+            gutterBottom
+          >
+            {t("BaselinePanel.title")}
+          </Typography>
           {paragraphKeys.map((key, i) => (
             <Typography key={i} variant="body1">
               {t(`BaselinePanel.paragraphs.${key}`)}
               <VisibilityIcon
                 sx={{ ml: 1, cursor: "pointer" }}
-                onClick={() => flyTo(
-                  initialMapView.longitude,
-                  initialMapView.latitude,
-                  initialMapView.zoom,
-                  initialMapView.pitch,
-                  initialMapView.bearing
-                )}
+                onClick={() =>
+                  flyTo(
+                    initialMapView.longitude,
+                    initialMapView.latitude,
+                    initialMapView.zoom,
+                    initialMapView.pitch,
+                    initialMapView.bearing,
+                  )
+                }
               />
             </Typography>
           ))}

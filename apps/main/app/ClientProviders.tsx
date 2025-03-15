@@ -37,9 +37,7 @@ export default function ClientProviders({
   return (
     <TranslationProvider>
       <ThemeRegistry>
-        <MapProvider>
-          {children}
-        </MapProvider>
+        <MapProvider>{children}</MapProvider>
       </ThemeRegistry>
     </TranslationProvider>
   )

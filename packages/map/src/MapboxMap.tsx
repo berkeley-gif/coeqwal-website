@@ -9,19 +9,19 @@ import React, {
 import Map, { NavigationControl } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 import type { ViewStateChangeEvent, MapRef } from "react-map-gl/mapbox"
-import { MinimalViewState } from "../../../apps/main/app/context/MapContext.tsx"
+import { MinimalViewState } from "./types.js"
 import type { Map as MapboxMapType } from "mapbox-gl"
 import type { MapEvent } from "react-map-gl/mapbox"
 
 // Custom mapbox map interface
-// Mapbox map methods the parent can call via ref
-// We put convenience methods here, and can add more as desired
+// Convenience methods the parent can call via ref
 export interface MapboxMapRef {
-  getMap: () => MapboxMapType | undefined // Return the map instance, can be used to call further methods
-  flyTo: (longitude: number, latitude: number, zoom?: number) => void // Convenience method
+  getMap: () => MapboxMapType | undefined // Return the mapbox-gl instance, can be used to call further methods
+  flyTo: (longitude: number, latitude: number, zoom?: number) => void
+  withMap: <T>(callback: (map: MapboxMapType) => T, fallback?: T) => T
 }
 
-// Props for our reusable MapboxMap
+// Props
 export interface MapProps {
   mapboxToken: string
   viewState: MinimalViewState
@@ -65,9 +65,15 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     return internalMapRef.current?.getMap()
   }
 
+  function withMap<T>(callback: (map: MapboxMapType) => T, fallback?: T): T {
+    const map = getMap()
+    return map ? callback(map) : (fallback as T)
+  }
+
   useImperativeHandle(ref, () => ({
     flyTo,
     getMap,
+    withMap,
   }))
 
   return (
@@ -78,6 +84,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       mapStyle={mapStyle}
       style={style}
       {...viewState}
+      transitionDuration={viewState.transitionDuration}
       minZoom={minZoom}
       attributionControl={attributionControl}
       scrollZoom={scrollZoom}

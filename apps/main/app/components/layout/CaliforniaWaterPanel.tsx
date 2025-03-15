@@ -16,6 +16,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility"
 import { paragraphMapViews, initialMapView } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
+import { MinimalViewState } from "@repo/map"
 
 interface CaliforniaWaterPanelProps {
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
@@ -43,7 +44,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
             initialMapView.latitude,
             initialMapView.zoom,
             initialMapView.pitch,
-            initialMapView.bearing
+            initialMapView.bearing,
           )
         }
       },
@@ -90,7 +91,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
       const coords = paragraphMapViews[paragraphIndex][bpKey]
       flyTo(coords.longitude, coords.latitude, coords.zoom)
 
-      setViewState((prev) => ({
+      setViewState((prev: MinimalViewState) => ({
         ...prev,
         ...coords,
         transitionDuration: 2000,
