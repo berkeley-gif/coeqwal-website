@@ -7,12 +7,14 @@ import { Header } from "@repo/ui/header"
 import { MapProvider, useMap } from "./context/MapContext"
 import { MapboxMap, MapboxMapRef } from "@repo/map"
 import HomePanel from "./components/layout/HomePanel"
+import Drawer from "./components/layout/Drawer"
+import IntroInterstitial from "./components/layout/IntroInterstitial"
 import CaliforniaWaterPanel from "./components/layout/CaliforniaWaterPanel"
+import BaselinePanel from "./components/layout/BaselinePanel"
 import { PRECIPITATION_BANDS } from "../lib/mapPrecipitationAnimationBands"
 import { useTheme, useMediaQuery } from "@mui/material"
 import { breakpointViews } from "../lib/mapViews"
-import Drawer from "./components/layout/Drawer"
-import IntroInterstitial from "./components/layout/IntroInterstitial"
+
 
 //
 // MapWrapper: Wraps MapboxMap with our context so the viewState is shared.
@@ -284,6 +286,10 @@ export default function Home() {
               open={drawerOpen}
               onClose={toggleDrawer(false)}
               onOpen={toggleDrawer(true)}
+            />
+            <BaselinePanel                 
+              onFlyTo={handleFlyTo}
+              onLearnMoreClick={toggleDrawer(true)}
             />
           </MapProvider>
         </main>

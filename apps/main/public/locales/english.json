@@ -40,5 +40,11 @@
   },
   "drawerButton": {
     "close": "Close"
+  },
+  "BaselinePanel": {
+    "title": "Baseline",
+    "paragraphs": {
+      "pg1": "Baseline text."
+    }
   }
 }
