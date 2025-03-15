@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, forwardRef, useCallback } from "react"
+import React, { useRef, forwardRef, useCallback, useEffect } from "react"
 import { Typography, Container, Box } from "@mui/material"
 import { useTheme, Theme } from "@mui/material/styles"
 import { useTranslation } from "@repo/i18n"
@@ -14,27 +14,41 @@ interface BaselinePanelProps {
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(({
-  onFlyTo,
+const BaselinePanel = forwardRef<HTMLDivElement, Omit<BaselinePanelProps, 'onFlyTo'>>(({
   onLearnMoreClick
 }, ref) => {
   const theme = useTheme<Theme>()
   const { t, messages } = useTranslation()
-  const { setViewState } = useMap()
+  const { flyTo, setViewState } = useMap()
+  const panelRef = useRef<HTMLDivElement>(null)
 
-  // Memoize the onFlyTo function to ensure it does not cause re-renders
-  const memoizedOnFlyTo = useCallback(onFlyTo, [])
+  // Setup IntersectionObserver
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0]
+      if (entry.isIntersecting) {
+        flyTo(
+          initialMapView.longitude,
+          initialMapView.latitude,
+          initialMapView.zoom,
+          initialMapView.pitch,
+          initialMapView.bearing
+        )
+      }
+    }, {
+      rootMargin: '100px'
+    })
 
-  // Function to handle visibility icon click
-  const handleVisibilityClick = useCallback(() => {
-    memoizedOnFlyTo(
-      initialMapView.longitude,
-      initialMapView.latitude,
-      initialMapView.zoom,
-      initialMapView.pitch,
-      initialMapView.bearing
-    )
-  }, [memoizedOnFlyTo])
+    if (panelRef.current) {
+      observer.observe(panelRef.current)
+    }
+
+    return () => {
+      if (panelRef.current) {
+        observer.unobserve(panelRef.current)
+      }
+    }
+  }, [flyTo])
 
   let paragraphKeys: string[] = []
   if (messages.BaselinePanel && typeof messages.BaselinePanel === "object" && "paragraphs" in messages.BaselinePanel) {
@@ -81,7 +95,13 @@ const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(({
               {t(`BaselinePanel.paragraphs.${key}`)}
               <VisibilityIcon
                 sx={{ ml: 1, cursor: "pointer" }}
-                onClick={handleVisibilityClick}
+                onClick={() => flyTo(
+                  initialMapView.longitude,
+                  initialMapView.latitude,
+                  initialMapView.zoom,
+                  initialMapView.pitch,
+                  initialMapView.bearing
+                )}
               />
             </Typography>
           ))}

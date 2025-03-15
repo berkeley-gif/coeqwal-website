@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react"
 import { TranslationProvider } from "@repo/i18n"
 import ThemeRegistry from "@repo/ui/themes/ThemeRegistry"
+import { MapProvider } from "./context/MapContext"
 
 export default function ClientProviders({
   children,
@@ -35,7 +36,11 @@ export default function ClientProviders({
 
   return (
     <TranslationProvider>
-      <ThemeRegistry>{children}</ThemeRegistry>
+      <ThemeRegistry>
+        <MapProvider>
+          {children}
+        </MapProvider>
+      </ThemeRegistry>
     </TranslationProvider>
   )
 }

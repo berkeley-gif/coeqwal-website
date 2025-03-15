@@ -18,24 +18,19 @@ import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 
 interface CaliforniaWaterPanelProps {
-  onFlyTo: (longitude: number, latitude: number, zoom?: number, pitch?: number, bearing?: number) => void
-  onAnimateBands: () => void
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
-  { onFlyTo, onAnimateBands, onLearnMoreClick }: CaliforniaWaterPanelProps,
+  { onLearnMoreClick }: CaliforniaWaterPanelProps,
   ref,
 ) {
   const theme = useTheme<Theme>()
   const { t, isLoading, messages } = useTranslation()
-  const { setViewState } = useMap()
+  const { flyTo, animatePrecipitationBands, setViewState } = useMap()
   const panelRef = useRef<HTMLDivElement | null>(null)
   const [isVisible, setIsVisible] = useState(false)
   const [clientReady, setClientReady] = useState(false)
-
-  // Memoize the onFlyTo function
-  const memoizedOnFlyTo = useCallback(onFlyTo, [])
 
   useEffect(() => {
     const currentPanelRef = panelRef.current
@@ -43,7 +38,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
       ([entry]) => {
         setIsVisible(entry.isIntersecting)
         if (entry.isIntersecting) {
-          memoizedOnFlyTo(
+          flyTo(
             initialMapView.longitude,
             initialMapView.latitude,
             initialMapView.zoom,
@@ -62,7 +57,7 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
         observer.unobserve(currentPanelRef)
       }
     }
-  }, [memoizedOnFlyTo])
+  }, [flyTo])
 
   useEffect(() => {
     setClientReady(true)
@@ -87,15 +82,13 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
     return "xl"
   }
 
-  // This will animate if paragraphIndex === 0, flyto otherwise
   function handleVisibilityClick(paragraphIndex: number) {
     if (paragraphIndex === 0) {
-      // Only animate the bands, no flyTo
-      onAnimateBands()
+      animatePrecipitationBands()
     } else {
       const bpKey = getBreakpointKey()
       const coords = paragraphMapViews[paragraphIndex][bpKey]
-      onFlyTo(coords.longitude, coords.latitude, coords.zoom)
+      flyTo(coords.longitude, coords.latitude, coords.zoom)
 
       setViewState((prev) => ({
         ...prev,
