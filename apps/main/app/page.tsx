@@ -281,15 +281,15 @@ export default function Home() {
                 onAnimateBands={onAnimateBands}
                 onLearnMoreClick={toggleDrawer(true)}
               />
+             <BaselinePanel                 
+              onFlyTo={handleFlyTo}
+              onLearnMoreClick={toggleDrawer(true)}
+            />
             </div>
             <Drawer
               open={drawerOpen}
               onClose={toggleDrawer(false)}
               onOpen={toggleDrawer(true)}
-            />
-            <BaselinePanel                 
-              onFlyTo={handleFlyTo}
-              onLearnMoreClick={toggleDrawer(true)}
             />
           </MapProvider>
         </main>

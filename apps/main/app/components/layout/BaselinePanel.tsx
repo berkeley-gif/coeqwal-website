@@ -48,9 +48,8 @@ const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(({
     <Container
       ref={ref}
       sx={{
-        backgroundColor: theme.palette.secondary.main,
+        backgroundColor: "transparent",
         minHeight: "100vh",
-        transition: "background-color 3s ease-in-out",
         pointerEvents: "none",
         "& .MuiButton-root, & .MuiSvgIcon-root": {
           pointerEvents: "auto",
@@ -70,6 +69,13 @@ const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(({
             marginTop: "150px",
           }}
         >
+             <Typography
+              variant="h1"
+              sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
+              gutterBottom
+            >
+              {t("BaselinePanel.title")}
+            </Typography>
           {paragraphKeys.map((key, i) => (
             <Typography key={i} variant="body1">
               {t(`BaselinePanel.paragraphs.${key}`)}
