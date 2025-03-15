@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect } from "react"
 import { useMap } from "../context/MapContext"
-import { MapboxMap, MinimalViewState } from "@repo/map"
+import { MapboxMap, ViewState } from "@repo/map"
 import { useTheme, useMediaQuery } from "@mui/material"
 import { breakpointViews } from "../../lib/mapViews"
 
@@ -31,7 +31,7 @@ export default function MapWrapper() {
   useEffect(() => {
     const bpKey = getBreakpointKey()
     const coords = breakpointViews[bpKey]
-    setViewState((prev: MinimalViewState) => ({
+    setViewState((prev: ViewState) => ({
       ...prev,
       ...coords,
       transitionDuration: 1000,
