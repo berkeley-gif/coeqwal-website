@@ -26,6 +26,19 @@ export default function Home() {
       setDrawerOpen(open)
     }
 
+  const onFlyTo = (
+    longitude: number,
+    latitude: number,
+    zoom?: number,
+    pitch?: number,
+    bearing?: number,
+  ) => {
+    // Implement flyTo logic here
+    console.log(
+      `Flying to: ${longitude}, ${latitude}, zoom: ${zoom}, pitch: ${pitch}, bearing: ${bearing}`,
+    )
+  }
+
   return (
     <>
       <ClientSideHead />
@@ -56,7 +69,10 @@ export default function Home() {
             <HomePanel />
             <IntroInterstitial />
             <CaliforniaWaterPanel onLearnMoreClick={toggleDrawer(true)} />
-            <BaselinePanel onLearnMoreClick={toggleDrawer(true)} />
+            <BaselinePanel
+              onLearnMoreClick={toggleDrawer(true)}
+              onFlyTo={onFlyTo}
+            />
           </div>
           <Drawer
             open={drawerOpen}
