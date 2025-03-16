@@ -2,7 +2,6 @@
 
 import React, { forwardRef } from "react"
 import { Typography, Container, Box } from "@mui/material"
-import { useTheme, Theme } from "@mui/material/styles"
 import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import { initialMapView } from "../../../lib/mapViews"
@@ -22,7 +21,6 @@ interface BaselinePanelProps {
 
 const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(
   ({ onLearnMoreClick }, ref) => {
-    const theme = useTheme<Theme>()
     const { t, messages } = useTranslation()
     const { flyTo } = useMap()
 

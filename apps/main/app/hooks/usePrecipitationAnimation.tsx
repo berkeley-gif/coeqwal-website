@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from "react"
+import { useRef, useCallback, useEffect } from "react"
 import type { MapboxMapRef } from "@repo/map"
 import { PRECIPITATION_BANDS } from "../../lib/mapPrecipitationAnimationBands"
 
@@ -7,8 +7,6 @@ export function usePrecipitationAnimation(
   isMapLoaded: boolean,
 ) {
   const animationFrameIdRef = useRef<number | null>(null)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [currentBandIndex, setCurrentBandIndex] = useState(0)
   const frameCounter = useRef(0)
 
   useEffect(() => {
@@ -16,7 +14,11 @@ export function usePrecipitationAnimation(
       mapRef.current.withMap((mapboxMap) => {
         const map = mapboxMap.getMap() as mapboxgl.Map
         if (map.getLayer("precipitable-water")) {
-          map.setPaintProperty("precipitable-water", "raster-array-band", PRECIPITATION_BANDS[0])
+          map.setPaintProperty(
+            "precipitable-water",
+            "raster-array-band",
+            PRECIPITATION_BANDS[0],
+          )
         }
       })
     }
@@ -36,33 +38,30 @@ export function usePrecipitationAnimation(
         map.setPaintProperty("snowfall", "raster-opacity", 0)
       }
 
+      let currentBandIndex = 0
+
       function animate() {
         frameCounter.current += 1
 
         if (frameCounter.current >= 30) {
-          setCurrentBandIndex((prevIndex) => {
-            const nextIndex = prevIndex + 1
+          currentBandIndex += 1
 
-            if (nextIndex >= PRECIPITATION_BANDS.length) {
-              if (animationFrameIdRef.current !== null) {
-                cancelAnimationFrame(animationFrameIdRef.current)
-              }
-              setIsAnimating(false)
-              return 0
+          if (currentBandIndex >= PRECIPITATION_BANDS.length) {
+            if (animationFrameIdRef.current !== null) {
+              cancelAnimationFrame(animationFrameIdRef.current)
             }
+            return
+          }
 
-            map.setPaintProperty(
-              "precipitable-water",
-              "raster-array-band",
-              PRECIPITATION_BANDS[nextIndex],
-            )
+          map.setPaintProperty(
+            "precipitable-water",
+            "raster-array-band",
+            PRECIPITATION_BANDS[currentBandIndex],
+          )
 
-            if (nextIndex === 3) {
-              updateSnowfallOpacity(map, 1, 2000, t => t * (2 - t))
-            }
-
-            return nextIndex
-          })
+          if (currentBandIndex === 3) {
+            updateSnowfallOpacity(map, 1, 2000, (t) => t * (2 - t))
+          }
 
           frameCounter.current = 0
         }
@@ -70,7 +69,6 @@ export function usePrecipitationAnimation(
         animationFrameIdRef.current = requestAnimationFrame(animate)
       }
 
-      setIsAnimating(true)
       animationFrameIdRef.current = requestAnimationFrame(animate)
     })
 
@@ -85,9 +83,10 @@ export function usePrecipitationAnimation(
     map: mapboxgl.Map,
     targetOpacity: number,
     duration: number = 2000,
-    easing: (t: number) => number = t => t * (2 - t) // easing function
+    easing: (t: number) => number = (t) => t * (2 - t), // easing function
   ) {
-    const startOpacity = (map.getPaintProperty("snowfall", "raster-opacity") ?? 0) as number
+    const startOpacity = (map.getPaintProperty("snowfall", "raster-opacity") ??
+      0) as number
     const startTime = performance.now()
 
     function animate(time: number) {

@@ -14,7 +14,7 @@ import { useTheme, Theme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
-import { paragraphMapViews, initialMapView } from "../../../lib/mapViews"
+import { paragraphMapViews } from "../../../lib/mapViews"
 import { useMap } from "../../context/MapContext"
 import { LearnMoreButton } from "@repo/ui/learnMoreButton"
 import { ViewState } from "@repo/map"
@@ -63,8 +63,8 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   }, [])
 
   const backgroundColor = useMemo(() => {
-    return isVisible ? "transparent" : theme.palette.secondary.main;
-  }, [isVisible, theme.palette.secondary.main]);
+    return isVisible ? "transparent" : theme.palette.secondary.main
+  }, [isVisible, theme.palette.secondary.main])
 
   const isXs = useMediaQuery(theme.breakpoints.down("sm"))
   const isSm = useMediaQuery(theme.breakpoints.only("sm"))
@@ -72,32 +72,44 @@ const CaliforniaWaterPanel = forwardRef(function CaliforniaWaterPanel(
   const isLg = useMediaQuery(theme.breakpoints.only("lg"))
   const isXl = useMediaQuery(theme.breakpoints.up("xl"))
 
-  function getBreakpointKey() {
-    if (isXs) return "xs"
-    if (isSm) return "sm"
-    if (isMd) return "md"
-    if (isLg) return "lg"
-    if (isXl) return "xl"
-    return "xl"
-  }
+  const handleVisibilityClick = useCallback(
+    (paragraphIndex: number) => {
+      function getBreakpointKey() {
+        if (isXs) return "xs"
+        if (isSm) return "sm"
+        if (isMd) return "md"
+        if (isLg) return "lg"
+        if (isXl) return "xl"
+        return "xl"
+      }
 
-  const handleVisibilityClick = useCallback((paragraphIndex: number) => {
-    if (paragraphIndex === 0) {
-      animatePrecipitationBands()
-    } else {
-      const bpKey = getBreakpointKey()
-      const coords = paragraphMapViews[paragraphIndex][bpKey]
-      flyTo(coords.longitude, coords.latitude, coords.zoom)
+      if (paragraphIndex === 0) {
+        animatePrecipitationBands()
+      } else {
+        const bpKey = getBreakpointKey()
+        const coords = paragraphMapViews[paragraphIndex][bpKey]
+        flyTo(coords.longitude, coords.latitude, coords.zoom)
 
-      setViewState((prev: ViewState) => ({
-        ...prev,
-        ...coords,
-        transitionDuration: 2000,
-        bearing: 0,
-        pitch: 0,
-      }))
-    }
-  }, [animatePrecipitationBands, flyTo, getBreakpointKey, paragraphMapViews, setViewState])
+        setViewState((prev: ViewState) => ({
+          ...prev,
+          ...coords,
+          transitionDuration: 2000,
+          bearing: 0,
+          pitch: 0,
+        }))
+      }
+    },
+    [
+      animatePrecipitationBands,
+      flyTo,
+      isXs,
+      isSm,
+      isMd,
+      isLg,
+      isXl,
+      setViewState,
+    ],
+  )
 
   let paragraphKeys: string[] = []
 
