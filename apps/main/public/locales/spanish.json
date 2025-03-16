@@ -31,7 +31,7 @@
     }
   },
   "BaselinePanel": {
-    "title": " Línea base",
+    "title": "Línea base",
     "paragraphs": {
       "pg1": "Texto de línea base."
     }
