@@ -30,6 +30,12 @@
       "pg7": "El agua subterránea antigua está interconectada y se recarga con las lluvias estacionales."
     }
   },
+  "BaselinePanel": {
+    "title": " Línea base",
+    "paragraphs": {
+      "pg1": "Texto de línea base."
+    }
+  },
   "drawerLinks": {
     "links": {
       "howWaterMoves": "Cómo se mueve el agua a través de California",
