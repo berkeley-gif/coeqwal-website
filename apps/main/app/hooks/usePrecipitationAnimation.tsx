@@ -57,7 +57,7 @@ export function usePrecipitationAnimation(
               PRECIPITATION_BANDS[nextIndex],
             )
 
-            if (nextIndex === 5) {
+            if (nextIndex === 3) {
               updateSnowfallOpacity(map, 1, 2000, t => t * (2 - t))
             }
 
