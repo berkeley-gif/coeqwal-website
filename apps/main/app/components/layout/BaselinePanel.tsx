@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useRef, forwardRef, useEffect } from "react"
+import React, { forwardRef } from "react"
 import { Typography, Container, Box } from "@mui/material"
-// import { useTheme, Theme } from "@mui/material/styles"
+import { useTheme, Theme } from "@mui/material/styles"
 import { useTranslation } from "@repo/i18n"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import { initialMapView } from "../../../lib/mapViews"
@@ -20,81 +20,80 @@ interface BaselinePanelProps {
   onLearnMoreClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
-const BaselinePanel = forwardRef<
-  HTMLDivElement,
-  Omit<BaselinePanelProps, "onFlyTo">
->(({ onLearnMoreClick }, ref) => {
-  const { t, messages } = useTranslation()
-  const { flyTo } = useMap()
-  const panelRef = useRef<HTMLDivElement>(null)
+const BaselinePanel = forwardRef<HTMLDivElement, BaselinePanelProps>(
+  ({ onLearnMoreClick }, ref) => {
+    const theme = useTheme<Theme>()
+    const { t, messages } = useTranslation()
+    const { flyTo } = useMap()
 
-  let paragraphKeys: string[] = []
-  if (
-    messages.BaselinePanel &&
-    typeof messages.BaselinePanel === "object" &&
-    "paragraphs" in messages.BaselinePanel
-  ) {
-    const paragraphs = messages.BaselinePanel.paragraphs
-    if (paragraphs && typeof paragraphs === "object") {
-      paragraphKeys = Object.keys(paragraphs)
+    let paragraphKeys: string[] = []
+    if (
+      messages.BaselinePanel &&
+      typeof messages.BaselinePanel === "object" &&
+      "paragraphs" in messages.BaselinePanel
+    ) {
+      const paragraphs = messages.BaselinePanel.paragraphs
+      if (paragraphs && typeof paragraphs === "object") {
+        paragraphKeys = Object.keys(paragraphs)
+      }
     }
-  }
 
-  return (
-    <Container
-      ref={ref}
-      sx={{
-        backgroundColor: "transparent",
-        minHeight: "100vh",
-        pointerEvents: "none",
-        "& .MuiButton-root, & .MuiSvgIcon-root": {
-          pointerEvents: "auto",
-        },
-      }}
-      role="main"
-    >
-      <Box
+    return (
+      <Container
+        ref={ref}
         sx={{
-          display: "grid",
-          gap: { xs: 2, lg: 16 },
-          gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+          backgroundColor: "transparent",
+          minHeight: "100vh",
+          pointerEvents: "none",
+          "& .MuiButton-root, & .MuiSvgIcon-root": {
+            pointerEvents: "auto",
+          },
         }}
+        role="main"
       >
         <Box
           sx={{
-            marginTop: "150px",
+            display: "grid",
+            gap: { xs: 2, lg: 16 },
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
           }}
         >
-          <Typography
-            variant="h1"
-            sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
-            gutterBottom
+          <Box
+            sx={{
+              marginTop: "150px",
+            }}
           >
-            {t("BaselinePanel.title")}
-          </Typography>
-          {paragraphKeys.map((key, i) => (
-            <Typography key={i} variant="body1">
-              {t(`BaselinePanel.paragraphs.${key}`)}
-              <VisibilityIcon
-                sx={{ ml: 1, cursor: "pointer" }}
-                onClick={() =>
-                  flyTo(
-                    initialMapView.longitude,
-                    initialMapView.latitude,
-                    initialMapView.zoom,
-                    initialMapView.pitch,
-                    initialMapView.bearing,
-                  )
-                }
-              />
+            <Typography
+              variant="h1"
+              sx={{ whiteSpace: { xs: "normal", md: "pre-wrap" } }}
+              gutterBottom
+            >
+              {t("BaselinePanel.title")}
             </Typography>
-          ))}
-          <LearnMoreButton onClick={onLearnMoreClick} />
+            {paragraphKeys.map((key, i) => (
+              <Typography key={i} variant="body1">
+                {t(`BaselinePanel.paragraphs.${key}`)}
+                <VisibilityIcon
+                  sx={{ ml: 1, cursor: "pointer" }}
+                  onClick={() =>
+                    flyTo(
+                      initialMapView.longitude,
+                      initialMapView.latitude,
+                      initialMapView.zoom,
+                      initialMapView.pitch,
+                      initialMapView.bearing,
+                    )
+                  }
+                />
+              </Typography>
+            ))}
+            <LearnMoreButton onClick={onLearnMoreClick} />
+          </Box>
         </Box>
-      </Box>
-    </Container>
-  )
-})
+      </Container>
+    )
+  },
+)
 
 // Helps React DevTools identify this component
 BaselinePanel.displayName = "BaselinePanel"
