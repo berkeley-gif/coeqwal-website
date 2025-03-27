@@ -1,0 +1,2 @@
+# Ignore geo-data package
+packages/geo-data/**/* 

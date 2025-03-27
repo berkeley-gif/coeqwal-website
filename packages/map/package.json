@@ -1,0 +1,28 @@
+{
+  "name": "@repo/map",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/MapboxMap.tsx"
+    }
+  },
+  "scripts": {
+    "build": "tsc --skipLibCheck",
+    "lint": "pnpm exec eslint . --config=eslint.config.mjs",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/mapbox-gl": "^2.7.18",
+    "eslint": "^9.15.0"
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.10.0",
+    "react-map-gl": "^8.0.1"
+  }
+}

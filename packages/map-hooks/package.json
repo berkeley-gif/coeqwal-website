@@ -1,0 +1,30 @@
+{
+  "name": "@repo/map-hooks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "lint": "pnpm exec eslint . --config=eslint.config.mjs",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "dependencies": {
+    "@repo/geo-data": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "mapbox-gl": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/mapbox-gl": "^2.0.0",
+    "@types/react": "^18.0.0",
+    "eslint": "^9.15.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  }
+}

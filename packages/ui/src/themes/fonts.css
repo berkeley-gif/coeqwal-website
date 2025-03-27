@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'RM-Neue-SemiBold';
+  src: url('/fonts/RM-Neue-TRIAL/RMNeueTRIAL-SemiBold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'RM-Neue';
+  src: url('/fonts/RM-Neue-TRIAL/RMNeueTRIAL-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}

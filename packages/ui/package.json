@@ -1,0 +1,33 @@
+{
+  "name": "@repo/ui",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./header": "./src/header.tsx",
+    "./card": "./src/card.tsx",
+    "./languageSwitcher": "./src/languageSwitcher.tsx",
+    "./learnMoreButton": "./src/learnMoreButton.tsx",
+    "./customArrowForwardIcon": "./src/customArrowForwardIcon.tsx",
+    "./themes": "./src/themes/theme.tsx",
+    "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
+    "./context/UiLocaleContext": "./src/context/UiLocaleContext.tsx",
+    "./styles/fonts.css": "./src/themes/fonts.css"
+  },
+  "scripts": {
+    "lint": "pnpm exec eslint . --config=eslint.config.mjs",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@turbo/gen": "^1.12.4"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@repo/i18n": "workspace:*"
+  }
+}
