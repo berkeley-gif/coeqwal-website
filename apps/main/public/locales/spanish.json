@@ -1,50 +1,9 @@
 {
-  "header": {
-    "title": "COEQWAL",
-    "buttons": {
-      "getData": "Obtener Datos",
-      "aboutCOEQWAL": "Acerca de COEQWAL"
-    }
-  },
-  "learnMore": "Aprender más",
-  "homePanel": {
-    "title": "Los californianos están conectados por su agua.",
-    "paragraphs": {
-      "pg1": "El agua sostiene a nuestras comunidades. El proyecto COEQWAL ayuda a los californianos a comprender el complejo sistema hídrico del estado al ilustrar cómo funciona y explorar formas basadas en datos para su distribución."
-    }
-  },
-  "introInterstitial": {
-    "paragraphs": {
-      "pg1": "Texto intersticial."
-    }
+  "heroPanel": {
+    "title": "Los californianos están conectados por su agua",
+    "content": "Desde las montañas hasta la costa y de norte a sur, los californianos dependen de uno de los sistemas de agua más grandes y complejos del mundo. El proyecto COEQWAL ayuda a los californianos a comprender cómo funciona este sistema y explora los beneficios y compensaciones de diferentes operaciones, tanto ahora como bajo futuras condiciones climáticas."
   },
   "CaliforniaWaterPanel": {
-    "title": "Agua de California",
-    "paragraphs": {
-      "pg1": "Debido a la geografía de California, el agua rara vez cae donde más se usa. La mayor parte del agua de California proviene de las lluvias invernales en el norte.",
-      "pg2": "La capa de nieve en las montañas de la Sierra Nevada crea reservorios naturales que liberan agua durante la primavera.",
-      "pg3": "El agua superficial fluye hacia los afluentes de los ríos Sacramento y San Joaquín, hacia el Delta, y luego desemboca en el Pacífico a través del Golden Gate.",
-      "pg4": "El agua subterránea se almacena bajo tierra en acuíferos y manantiales a lo largo del Valle Central y las montañas. El agua subterránea está interconectada y se recarga con las lluvias estacionales."
-    }
-  },
-  "BaselinePanel": {
-    "title": "Línea base",
-    "paragraphs": {
-      "pg1": "Para determinar cómo distribuir el agua en California, las agencias estatales y federales utilizan un modelo computacional llamado CalSim. Aquí están todos los lugares donde CalSim anticipa una cantidad de agua.",
-      "pg2": "Aquí están todos los lugares donde CalSim anticipa un flujo de agua.",
-      "pg3": "El modelo se usa para simular el movimiento del agua a través del sistema hídrico del estado. Tiene en cuenta el agua natural disponible proveniente de la lluvia y el deshielo, así como la manera en que se opera el sistema de agua.",
-      "pg4": "El agua que entra al sistema se llama afluencia."
-    }
-  },
-  "drawerLinks": {
-    "links": {
-      "howWaterMoves": "Cómo se mueve el agua a través de California",
-      "howWaterManaged": "Cómo se gestiona el agua en California",
-      "calSim": "CalSim",
-      "climateChange": "Cambio climático"
-    }
-  },
-  "drawerButton": {
-    "close": "Cerrar"
+    "title": "Agua California"
   }
 }

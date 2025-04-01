@@ -74,7 +74,7 @@ This Turborepo has been customized to meet the needs of the COEQWAL project. Key
 
 ### Global dependencies:
 
-- `next`, `react`, `react-dom`, all their types, and `typescript`, `@types/node`, and `prettier` are installed globally to ensure consistency across apps and reduce duplication. Compare the dependencies in the root `package.json` with the `package.json` in the individual `apps` and `packages` directories for details.
+- `react`, `react-dom`, all their types, and `typescript`, `@types/node`, and `prettier` are installed globally to ensure consistency across apps and reduce duplication. Compare the dependencies in the root `package.json` with the `package.json` in the individual `apps` and `packages` directories for details.
 
 ### Shared packages:
 

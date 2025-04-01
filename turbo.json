@@ -5,33 +5,20 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "dist/**", "!.next/cache/**"],
-      "env": [
-        "NEXT_PUBLIC_MAPBOX_TOKEN"
-      ]
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"],
-      "inputs": [
-        "**/*.ts",
-        "**/*.tsx",
-        "**/*.js",
-        "**/*.jsx",
-        "eslint.config.*"
-      ],
-      "env": [
-        "NEXT_PUBLIC_MAPBOX_TOKEN"
-      ]
+      "dependsOn": ["^lint"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
     "dev": {
       "cache": false,
-      "persistent": true,
-      "env": [
-        "NEXT_PUBLIC_MAPBOX_TOKEN"
-      ]
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

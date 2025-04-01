@@ -1,238 +1,300 @@
-import { createTheme } from "@mui/material/styles"
-import { Inter, Figtree } from "next/font/google"
+import { createTheme, alpha } from "@mui/material/styles"
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-})
+// TODO:
+// - Add a custom theme property for the header height
+// - Transitions
 
-const figtree = Figtree({
-  subsets: ["latin"],
-  display: "swap",
-})
+/* ========================================================
+ TOC
+ ========================================================
+ 1. Global theme values
+    - Palette
+    - Border radius
+    - Border styles
+    - Shadows
+    - Z-Index
 
-const baseTheme = createTheme()
+ 2. Theme configuration
+    - Base theme
+    - Palette
+    - Typography
+    - Shape
+    - Component overrides
+    
+ 3. Custom theme properties
+    - Border
+    - Background
+    - Shadows
+    - Border radius
+    
+ 4. Global Component Styles
+ 
+ 5. TypeScript customizations
+    - Custom palette extensions
+    - Custom theme properties
+    - Component variants
+ ========================================================
 
-const theme = createTheme({
-  ...baseTheme,
+
+ 1. Global theme values
+ ======================================================== 
+ Change these values to update the theme across the site
+ */
+
+const themeValues = {
+  // Palette colors
   palette: {
-    common: {
-      black: "#000",
-      white: "#fff",
+    black: "#000000",
+    white: "#FFFFFF",
+    neutral: {
+      light: "#AAAAAA",
+      medium: "#888888",
+      dark: "#666666",
     },
-    primary: {
-      main: "#1976d2",
-      light: "#42a5f5",
-      dark: "#1565c0",
+    colors: {
+      primary: "#AAAAAA",
+      secondary: "#888888",
+      tertiary: "#666666",
     },
-    secondary: {
-      main: "#11273f",
+    pop: {
+      main: "#FF5733", // Orange for operations
+      light: "#FF8866",
+      dark: "#CC4422",
     },
-    interstitial: {
-      main: "#154f89",
+    cool: {
+      main: "#3498DB", // Cool blue for outcomes
+      light: "#5DADE2",
+      dark: "#2874A6",
     },
-    text: {
-      primary: "#fff",
-      secondary: "#11273f",
-    },
-    divider: "#e0e0e0",
-    background: {
-      default: "#4384cf",
-      paper: "#fff",
-    },
-  },
-  typography: {
-    htmlFontSize: 16,
-    fontFamily: `RM-Neue, ${figtree.style.fontFamily}, Arial, sans-serif`,
-    fontSize: 16,
-    fontWeightLight: 300,
-    fontWeightRegular: 400,
-    fontWeightMedium: 500,
-    fontWeightBold: 700,
-    h1: {
-      fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "clamp(2rem, 5vw, 5rem)",
-      fontWeight: 600,
-      lineHeight: 0.95,
-      letterSpacing: "-0.01562rem",
-      marginBottom: "2rem !important",
-      [baseTheme.breakpoints.down("md")]: {
-        lineHeight: 1.2,
-        fontSize: "3.2rem",
-      },
-    },
-    h2: {
-      fontSize: "2.618rem",
-      fontWeight: 300,
-      lineHeight: 1.2,
-      letterSpacing: "-0.00833em",
-    },
-    h3: {
-      fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "2rem",
-      fontWeight: 400,
-      lineHeight: 1.167,
-    },
-    h4: {
-      fontSize: "1.618rem",
-      fontWeight: 400,
-      lineHeight: 1.235,
-      letterSpacing: "0.00735em",
-    },
-    h5: {
-      fontSize: "1.25rem",
-      fontWeight: 400,
-      lineHeight: 1.334,
-      letterSpacing: "0em",
-    },
-    h6: {
-      fontSize: "1rem",
-      fontWeight: 500,
-      lineHeight: 1.6,
-      letterSpacing: "0.0075em",
-    },
-    subtitle1: {
-      fontWeight: 400,
-      fontSize: "1rem",
-      lineHeight: 1.75,
-      letterSpacing: "0.00938rem",
-    },
-    subtitle2: {
-      fontWeight: 500,
-      fontSize: "0.875rem",
-      lineHeight: 1.57,
-      letterSpacing: "0.00714rem",
-    },
-    body1: {
-      fontFamily: `RM-Neue-SemiBold, ${figtree.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "1.3333rem",
-      fontWeight: 400,
-      lineHeight: 1.6,
-      marginBottom: "1.125rem",
-      letterSpacing: "0.01071em",
-    },
-    body2: {
-      fontFamily: `${inter.style.fontFamily}, Arial, sans-serif`,
-      fontSize: "1.3rem",
-      fontWeight: 400,
-      lineHeight: "1.43rem",
-      marginBottom: "0 !important",
-    },
-    button: {
-      fontSize: "1rem",
-      fontWeight: 500,
-      textTransform: "uppercase",
-    },
-    caption: {
-      fontSize: "0.809rem",
-      fontWeight: 400,
-      lineHeight: 1.66,
-      letterSpacing: "0.03333em",
-    },
-    listItem: {
-      fontSize: "1.5rem",
-      fontWeight: 400,
-      lineHeight: 1.5,
+    climate: {
+      main: "#27AE60", // Green for climate
+      light: "#58D68D",
+      dark: "#1E8449",
     },
   },
-  shape: {
-    borderRadius: 4,
+
+  // Border radius values
+  borderRadius: {
+    pill: "999px",
+    rounded: "8px",
+    card: "12px",
+    standard: "4px",
+    none: "0px",
   },
+
+  // Border styles
+  border: {
+    standard: "1px solid",
+    none: "none",
+    thin: "0.5px solid",
+    thick: "2px solid",
+  },
+
+  // Shadows
+  shadow: {
+    none: "none",
+  },
+
+  // Z-index values
   zIndex: {
     drawer: 1200,
     modal: 1300,
     appBar: 1400,
     tooltip: 1500,
   },
+}
+
+/* ========================================================
+ 2. Theme configuration
+ ======================================================== */
+
+const baseTheme = createTheme()
+
+// Create theme with predefined values
+const theme = createTheme({
+  ...baseTheme,
+  // Palette (some are fixed MUI theme properties, some are custom)
+  palette: {
+    common: {
+      black: themeValues.palette.black,
+      white: themeValues.palette.white,
+    },
+    primary: {
+      main: themeValues.palette.black,
+      light: themeValues.palette.neutral.light,
+      dark: themeValues.palette.neutral.dark,
+    },
+    secondary: {
+      main: themeValues.palette.white,
+      light: themeValues.palette.neutral.light,
+      dark: themeValues.palette.neutral.dark,
+    },
+    neutral: {
+      main: themeValues.palette.neutral.medium,
+      light: themeValues.palette.neutral.light,
+      dark: themeValues.palette.neutral.dark,
+    },
+    pop: {
+      main: themeValues.palette.pop.main,
+      light: themeValues.palette.pop.light,
+      dark: themeValues.palette.pop.dark,
+    },
+    cool: {
+      main: themeValues.palette.cool.main,
+      light: themeValues.palette.cool.light,
+      dark: themeValues.palette.cool.dark,
+    },
+    climate: {
+      main: themeValues.palette.climate.main,
+      light: themeValues.palette.climate.light,
+      dark: themeValues.palette.climate.dark,
+    },
+    background: {
+      default: themeValues.palette.white,
+      paper: themeValues.palette.neutral.light,
+    },
+    interstitial: {
+      main: themeValues.palette.neutral.light,
+    },
+    text: {
+      primary: themeValues.palette.black,
+      secondary: themeValues.palette.white,
+    },
+    divider: themeValues.palette.black,
+  },
+  // Type family, sizes, and weights
+  typography: {
+    fontFamily: `"Lato", Arial, sans-serif`,
+    htmlFontSize: 16,
+    fontSize: 16,
+    fontWeightLight: 300,
+    fontWeightRegular: 400,
+    fontWeightMedium: 500,
+    fontWeightBold: 700,
+    h1: {
+      fontSize: "4rem",
+    },
+    h2: {
+      fontSize: "3.333rem",
+    },
+    h3: {
+      fontSize: "2.778rem",
+    },
+    h4: {
+      fontSize: "2.315rem",
+    },
+    h5: {
+      fontSize: "1.929rem",
+    },
+    h6: {
+      fontSize: "1.608rem",
+    },
+    body1: {
+      fontSize: "1.2857rem",
+    },
+    body2: {
+      fontSize: "1.2rem",
+    },
+    subtitle1: {
+      fontSize: "1.0714rem",
+    },
+    subtitle2: {
+      fontSize: "0.8929rem",
+    },
+    button: {
+      fontSize: "1.0714rem",
+    },
+    caption: {
+      fontSize: "0.8929rem",
+    },
+    overline: {
+      fontSize: "0.8929rem",
+    },
+  },
+  shape: {
+    borderRadius: parseInt(themeValues.borderRadius.standard, 10),
+  },
+  // Z-index
+  zIndex: themeValues.zIndex,
+  // Components customizations
   components: {
     MuiAppBar: {
       styleOverrides: {
         root: ({ theme }) => ({
           backgroundColor: theme.background.transparent,
-          borderBottom: theme.border.primary,
-          boxShadow: "none",
+          borderBottom: theme.border.standard,
+          color: theme.palette.text.primary,
+          borderRadius: theme.borderRadius.none,
         }),
+      },
+      defaultProps: {
+        elevation: 0,
       },
     },
     MuiButton: {
       variants: [
         {
+          props: { variant: "contained" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
+        },
+        {
           props: { variant: "outlined" },
-          style: {
-            border: "1px solid",
-            borderColor: "currentColor",
-          },
+          style: ({ theme }) => ({
+            border: theme.border.standard,
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
         },
         {
           props: { variant: "pill" },
-          style: {
-            border: "1px solid",
-            borderColor: "currentColor",
-            borderRadius: "999px",
-            paddingInline: "24px",
+          style: ({ theme }) => ({
+            border: theme.border.standard,
             textTransform: "none",
-          },
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
+        },
+        {
+          props: { variant: "text" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+          }),
         },
       ],
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.borderRadius.pill,
+          boxShadow: "none",
+        }),
+      },
       defaultProps: {
-        variant: "pill",
-      },
-      styleOverrides: {
-        root: {
-          margin: "0.25rem !important",
-        },
+        variant: "contained",
       },
     },
-    MuiListItem: {
+    MuiDivider: {
       styleOverrides: {
-        root: {
-          padding: "8px 16px",
-        },
+        root: ({ theme }) => ({
+          borderColor: theme.border.standard,
+        }),
       },
     },
-    MuiListItemText: {
-      defaultProps: {
-        primaryTypographyProps: {
-          variant: "listItem",
-        },
-      },
+    MuiOutlinedInput: {
       styleOverrides: {
-        root: {
-          marginBottom: 0,
-        },
-      },
-    },
-    MuiContainer: {
-      styleOverrides: {
-        root: {
-          width: "100%",
-          minHeight: "100vh",
-          maxWidth: "none",
-          margin: 0,
-          paddingLeft: "clamp(2rem, 10vw, 10rem)",
-          paddingRight: "clamp(2rem, 10vw, 10rem)",
-          pointerEvents: "none",
-          ...(() => {
-            const paddingValue = "clamp(2rem, 10vw, 10rem)"
-            return {
-              "@media (min-width: 600px)": {
-                paddingLeft: paddingValue,
-                paddingRight: paddingValue,
-                maxWidth: "none",
-              },
-              "@media (min-width: 960px)": {
-                paddingLeft: paddingValue,
-                paddingRight: paddingValue,
-                maxWidth: "none",
-              },
-              "@media (min-width: 1280px)": {
-                paddingLeft: paddingValue,
-                paddingRight: paddingValue,
-                maxWidth: "none",
-              },
-            }
-          })(),
-        },
+        root: ({ theme }) => ({
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.border.standard,
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.border.standard,
+          },
+        }),
       },
     },
     MuiSvgIcon: {
@@ -242,7 +304,6 @@ const theme = createTheme({
           fontSize: "inherit",
           transition: "color 0.2s ease-in-out",
           pointerEvents: "auto",
-
           "&:hover, &:focus": {
             color: theme.palette.primary.light,
           },
@@ -251,34 +312,170 @@ const theme = createTheme({
     },
     MuiDrawer: {
       styleOverrides: {
-        paper: {
-          color: baseTheme.palette.text.secondary,
+        paper: ({ theme }) => ({
+          color: theme.palette.text.secondary,
           width: 400,
-          top: 65,
-          height: "calc(100% - 65px)",
-        },
+          top: 65, // Clear header height
+          height: "calc(100% - 64px)", // Subtract header height
+        }),
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.borderRadius.pill,
+          padding: "5px 15px", // to account for border width
+          textTransform: "none",
+          backgroundColor: theme.palette.primary.light, // Default background for unselected
+          color: theme.palette.primary.contrastText, // Default text color for unselected
+          boxShadow: "none",
+          "&:hover": {
+            backgroundColor: alpha(theme.palette.primary.light, 0.7), // Hover
+          },
+          "&.Mui-selected": {
+            backgroundColor: "transparent", // Background for selected
+            color: theme.palette.primary.main, // Text color for selected
+            "&:hover": {
+              backgroundColor: theme.palette.action.hover,
+            },
+          },
+        }),
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderRadius: theme.borderRadius.card,
+        }),
       },
     },
   },
 })
 
+/* ========================================================
+ 3. Custom theme properties
+ ======================================================== */
+
+// Apply border styles with colors from palette
 theme.border = {
-  primary: "1px solid white",
-} as const
+  standard: `${themeValues.border.standard} ${theme.palette.primary.main}`,
+  none: themeValues.border.none,
+  thin: `${themeValues.border.thin} ${theme.palette.primary.main}`,
+  thick: `${themeValues.border.thick} ${theme.palette.primary.main}`,
+  bottom: `border-bottom: ${themeValues.border.standard} ${theme.palette.primary.main}`,
+  top: `border-top: ${themeValues.border.standard} ${theme.palette.primary.main}`,
+  left: `border-left: ${themeValues.border.standard} ${theme.palette.primary.main}`,
+  right: `border-right: ${themeValues.border.standard} ${theme.palette.primary.main}`,
+  all: `border: ${themeValues.border.standard} ${theme.palette.primary.main}`,
+}
 
 theme.background = {
   transparent: "transparent",
-} as const
+}
 
-// TYPESCRIPT CUSTOMIZATIONS
+theme.borderRadius = themeValues.borderRadius
+
+// Global styles for common components
+const { components } = theme
+if (components) {
+  // Apply standard border to Divider
+  if (!components.MuiDivider) {
+    components.MuiDivider = {}
+  }
+  components.MuiDivider.styleOverrides = {
+    ...components.MuiDivider?.styleOverrides,
+    root: {
+      borderColor: theme.palette.divider,
+    },
+  }
+
+  // Apply standard border to TextField
+  if (!components.MuiOutlinedInput) {
+    components.MuiOutlinedInput = {}
+  }
+  components.MuiOutlinedInput.styleOverrides = {
+    ...components.MuiOutlinedInput?.styleOverrides,
+    root: {
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: theme.palette.divider,
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: theme.palette.divider,
+      },
+    },
+  }
+}
+
+export default theme
+
+/* ========================================================
+ 5. TypeScript customizations
+ ======================================================== */
 
 // Custom palette colors
 declare module "@mui/material/styles" {
+  // Custom palette colors
   interface Palette {
     interstitial: Palette["primary"]
+    neutral: Palette["primary"]
+    pop: Palette["primary"]
+    cool: Palette["primary"]
+    climate: Palette["primary"]
   }
   interface PaletteOptions {
     interstitial?: PaletteOptions["primary"]
+    neutral?: PaletteOptions["primary"]
+    pop?: PaletteOptions["primary"]
+    cool?: PaletteOptions["primary"]
+    climate?: PaletteOptions["primary"]
+  }
+
+  // Custom theme properties
+  interface Theme {
+    border: {
+      standard: string
+      none: string
+      thin: string
+      thick: string
+      bottom: string
+      top: string
+      left: string
+      right: string
+      all: string
+    }
+    background: {
+      transparent: string
+    }
+    borderRadius: {
+      pill: string
+      rounded: string
+      card: string
+      standard: string
+      none: string
+    }
+  }
+  interface ThemeOptions {
+    border?: {
+      standard?: string
+      none?: string
+      thin?: string
+      thick?: string
+      bottom?: string
+      top?: string
+      left?: string
+      right?: string
+      all?: string
+    }
+    background?: {
+      transparent?: string
+    }
+    borderRadius?: {
+      pill?: string
+      rounded?: string
+      card?: string
+      standard?: string
+      none?: string
+    }
   }
 }
 
@@ -288,40 +485,3 @@ declare module "@mui/material/Button" {
     pill: true
   }
 }
-
-// Custom typography variants
-declare module "@mui/material/Typography" {
-  interface TypographyPropsVariantOverrides {
-    listItem: true
-  }
-}
-
-// Custom theme properties
-declare module "@mui/material/styles" {
-  interface TypographyVariants {
-    listItem: React.CSSProperties
-  }
-
-  interface TypographyVariantsOptions {
-    listItem?: React.CSSProperties
-  }
-
-  interface Theme {
-    border: {
-      primary: string
-    }
-    background: {
-      transparent: string
-    }
-  }
-  interface ThemeOptions {
-    border?: {
-      primary?: string
-    }
-    background?: {
-      transparent?: string
-    }
-  }
-}
-
-export default theme

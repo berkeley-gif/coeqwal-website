@@ -2,35 +2,29 @@
   "name": "coeqwal-website",
   "private": true,
   "scripts": {
-    "build": "turbo build",
-    "dev": "turbo dev",
-    "lint": "turbo run lint --filter=!./packages/geo-data",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "clean": "rm -rf .turbo",
-    "really-clean": "rm -rf node_modules .turbo && pnpm install && pnpm build"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,scss,json}\"",
+    "clean": "rm -rf node_modules .turbo && pnpm install && pnpm build",
+    "check-types": "turbo run check-types"
   },
   "dependencies": {
-    "@emotion/cache": "^11.14.0",
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.4",
-    "@mui/material": "^6.4.1",
-    "@mui/material-nextjs": "^6.3.1",
-    "next": "^15.1.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sass": "^1.86.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:^",
-    "@types/node": "22",
-    "@types/react": "^19.0.7",
-    "@types/react-dom": "^19.0.3",
-    "prettier": "^3.4.2",
-    "turbo": "^2.3.3",
-    "typescript": "5.7.3"
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "turbo": "^2.4.4",
+    "typescript": "5.8.2"
   },
-  "packageManager": "pnpm@10.0.0+sha512.b8fef5494bd3fe4cbd4edabd0745df2ee5be3e4b0b8b08fa643aa3e4c6702ccc0f00d68fa8a8c9858a735a0032485a44990ed2810526c875e416f001b17df12b",
+  "packageManager": "pnpm@10.0.0",
   "engines": {
-    "node": "22.13.0"
+    "node": "22.x"
   }
 }

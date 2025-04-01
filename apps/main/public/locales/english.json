@@ -1,50 +1,9 @@
 {
-  "header": {
-    "title": "COEQWAL",
-    "buttons": {
-      "getData": "Get Data",
-      "aboutCOEQWAL": "About COEQWAL"
-    }
-  },
-  "learnMore": "Learn more",
-  "homePanel": {
-    "title": "Californians are connected by their water.",
-    "paragraphs": {
-      "pg1": "Water sustains our communities. The COEQWAL project helps Californians navigate the state’s complex water system by illustrating how it works and exploring data-driven ways water can be distributed."
-    }
-  },
-  "introInterstitial": {
-    "paragraphs": {
-      "pg1": "Interstitial text."
-    }
+  "heroPanel": {
+    "title": "Californians are connected\u00A0by\u00A0their water",
+    "content": "From mountains to coast and north to south, Californians rely on one of the world's largest and most complex water systems. The COEQWAL project helps Californians understand how this system works and explores the benefits and trade-offs of different operations, now and under future climate conditions."
   },
   "CaliforniaWaterPanel": {
-    "title": "California Water",
-    "paragraphs": {
-      "pg1": "Because of the geography of California, water rarely falls where it is most used. Most of California's water comes from Winter rains in the north.",
-      "pg2": "Snowpack in the Sierra Nevada mountains creates natural reservoirs that release water throughout the Spring.",
-      "pg3": "Surface water flows into tributaries to the Sacramento and San Joaquin Rivers, into the Delta, and then out to the Pacific through the Golden Gate.",
-      "pg4": "Groundwater is stored underground in aquifers and springs throughout the Central Valley and the mountains. Groundwater is interconnected and replenished by seasonal rains."
-    }
-  },
-  "drawerLinks": {
-    "links": {  
-      "howWaterMoves": "How Water Moves Through California",
-      "howWaterManaged": "How Water is Managed in California",
-      "calSim": "CalSim",
-      "climateChange": "Climate Change"
-    }
-  },
-  "drawerButton": {
-    "close": "Close"
-  },
-  "BaselinePanel": {
-    "title": "Modeling water",
-    "paragraphs": {
-      "pg1": "To figure out how to allocate water across California, state and federal agencies use a computer model called CalSim. Here are all the places where CalSim anticipates an amount of water. We call the points nodes and the lines arcs. We can think of nodes as places where water amounts can be measured, and arcs as the channels that carry water. Thinking of the nodes types as inflow, storage, flow, groundwater, and deliveries can help us understand the data.",
-      "pg2": "We can zoom in and inspect each node, and also see what is connected upstream and downstream.",
-      "pg3": "Aggregating nodes within basins can show us where the water goes.",
-      "pg4": "Compare where the water goes under the three different scenarios."
-    }
+    "title": "California Water"
   }
 }

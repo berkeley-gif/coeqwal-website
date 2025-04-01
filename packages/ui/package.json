@@ -1,33 +1,40 @@
 {
   "name": "@repo/ui",
-  "type": "module",
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./header": "./src/header.tsx",
-    "./card": "./src/card.tsx",
-    "./languageSwitcher": "./src/languageSwitcher.tsx",
-    "./learnMoreButton": "./src/learnMoreButton.tsx",
-    "./customArrowForwardIcon": "./src/customArrowForwardIcon.tsx",
-    "./themes": "./src/themes/theme.tsx",
+    ".": "./src/components/index.ts",
     "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
-    "./context/UiLocaleContext": "./src/context/UiLocaleContext.tsx",
-    "./styles/fonts.css": "./src/themes/fonts.css"
+    "./themes/theme": "./src/themes/theme.tsx",
+    "./mui": "./src/mui-components.tsx",
+    "./panels": "./src/components/panels/index.ts",
+    "./locales/*": "./locales/*.json"
   },
   "scripts": {
-    "lint": "pnpm exec eslint . --config=eslint.config.mjs",
+    "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "peerDependencies": {
+    "@types/node": ">=22.13.10",
+    "@types/react": ">=19.0.10",
+    "@types/react-dom": ">=19.0.4",
+    "eslint": ">=9.22.0",
+    "react": ">=19",
+    "react-dom": ">=19",
+    "typescript": ">=5.8.2"
   },
   "devDependencies": {
-    "eslint": "^9.15.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@turbo/gen": "^1.12.4"
+    "@turbo/gen": "^2.4.4"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
     "@repo/i18n": "workspace:*"
   }
 }

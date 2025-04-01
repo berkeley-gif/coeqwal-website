@@ -1,0 +1,10 @@
+{
+  "header": {
+    "title": "COEQWAL",
+    "buttons": {
+      "getData": "Get Data",
+      "aboutCOEQWAL": "About COEQWAL"
+    }
+  },
+  "learnMore": "Learn more"
+}
