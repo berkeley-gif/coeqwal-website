@@ -1,12 +1,22 @@
 "use client"
 
 import React, { createContext, useContext, useRef, useState } from "react"
+import type { MapboxMapRef } from "../src/MapboxMap"
 import type { MapRef } from "react-map-gl/mapbox"
 import { ViewState } from "../src/types.js"
-import type { Map as MapboxGLMap, AnyLayer, AnySourceData } from "mapbox-gl"
+// Import proper types from mapbox-gl
+import type {
+  Map as MapboxGLMap,
+  LayerSpecification,
+  SourceSpecification,
+} from "mapbox-gl"
+
+// Types for paint and layout properties
+type PaintProperty = string | number | boolean | object
+type LayoutProperty = string | number | boolean | object
 
 interface MapContextValue {
-  mapRef: React.RefObject<MapRef | null>
+  mapRef: React.RefObject<MapboxMapRef | null>
   viewState: ViewState
   setViewState: (viewState: ViewState) => void
 }
@@ -16,7 +26,7 @@ const MapContext = createContext<MapContextValue | null>(null)
 export const MapProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const mapRef = useRef<MapRef>(null)
+  const mapRef = useRef<MapboxMapRef | null>(null)
   const [viewState, setViewState] = useState<ViewState>({
     longitude: -122.4,
     latitude: 37.8,
@@ -43,7 +53,13 @@ export const useMap = () => {
   // Helper to get the underlying Mapbox GL map instance
   const getMapInstance = (): MapboxGLMap | null => {
     if (!mapRef.current) return null
-    return mapRef.current.getMap()
+
+    // First get the react-map-gl MapRef
+    const reactMapRef = mapRef.current.getMap()
+    if (!reactMapRef) return null
+
+    // In react-map-gl v8, the MapRef.getMap() already returns the mapbox-gl Map instance
+    return reactMapRef as unknown as MapboxGLMap
   }
 
   return {
@@ -67,19 +83,14 @@ export const useMap = () => {
     flyTo: (
       longitude: number,
       latitude: number,
-      zoom: number,
+      zoom?: number,
       pitch?: number,
       bearing?: number,
     ) => {
       if (!mapRef.current) return
 
-      mapRef.current.flyTo({
-        center: [longitude, latitude],
-        zoom: zoom,
-        pitch: pitch ?? viewState.pitch,
-        bearing: bearing ?? viewState.bearing,
-        duration: 2000,
-      })
+      // Call flyTo directly with the separate parameters
+      mapRef.current.flyTo(longitude, latitude, zoom, pitch, bearing)
     },
 
     // Add/remove layers
@@ -87,8 +98,8 @@ export const useMap = () => {
       layerId: string,
       source: string,
       type: string,
-      paint: Record<string, any>,
-      layout?: Record<string, any>,
+      paint: Record<string, PaintProperty>,
+      layout?: Record<string, LayoutProperty>,
     ) => {
       const map = getMapInstance()
       if (!map) return
@@ -97,10 +108,10 @@ export const useMap = () => {
         map.addLayer({
           id: layerId,
           source,
-          type: type as any,
+          type: type as LayerSpecification["type"],
           paint,
           layout,
-        } as AnyLayer)
+        } as LayerSpecification)
       }
     },
 
@@ -114,7 +125,7 @@ export const useMap = () => {
     },
 
     // Source management
-    addSource: (sourceId: string, source: AnySourceData) => {
+    addSource: (sourceId: string, source: SourceSpecification) => {
       const map = getMapInstance()
       if (!map) return
 
@@ -133,18 +144,33 @@ export const useMap = () => {
     },
 
     // Style properties
-    setPaintProperty: (layerId: string, property: string, value: any) => {
+    setPaintProperty: (
+      layerId: string,
+      property: string,
+      value: PaintProperty,
+    ) => {
       const map = getMapInstance()
       if (!map) return
 
+      // Use type assertion for the property name - direct cast to any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map.setPaintProperty(layerId, property as any, value)
     },
 
-    setLayoutProperty: (layerId: string, property: string, value: any) => {
+    setLayoutProperty: (
+      layerId: string,
+      property: string,
+      value: LayoutProperty,
+    ) => {
       const map = getMapInstance()
       if (!map) return
 
+      // Use type assertion for the property name - direct cast to any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map.setLayoutProperty(layerId, property as any, value)
     },
+
+    // Get direct access to the map
+    getMap: getMapInstance,
   }
 }

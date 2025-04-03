@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useEffect } from "react"
+import { useRef, useEffect } from "react"
 import { MapboxMap, type MapProps, type MapboxMapRef } from "./MapboxMap"
 import { useMap } from "../context/MapContext"
 import type { ViewState } from "./types"
@@ -16,19 +16,8 @@ export function Map(props: MapProps) {
   // Connect the map ref to the context
   useEffect(() => {
     if (mapRef.current) {
-      // For React-map-gl v8, update the contextMapRef to point to our MapRef
-      contextMapRef.current = {
-        getMap: () => mapRef.current?.getMap(),
-        flyTo: (
-          longitude: number,
-          latitude: number,
-          zoom?: number,
-          pitch?: number,
-          bearing?: number,
-        ) => {
-          mapRef.current?.flyTo(longitude, latitude, zoom, pitch, bearing)
-        },
-      } as any
+      // Now we can directly assign without type casting
+      contextMapRef.current = mapRef.current
     }
   }, [contextMapRef, mapRef])
 
