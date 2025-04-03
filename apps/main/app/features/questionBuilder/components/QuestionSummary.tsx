@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
   SearchIcon,
+  MenuItem,
 } from "@repo/ui/mui"
 import { Card } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
@@ -995,9 +996,9 @@ const QuestionSummary: React.FC = () => {
                 }}
               >
                 {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
+                  <MenuItem key={option.value} value={option.value}>
                     {option.label}
-                  </option>
+                  </MenuItem>
                 ))}
               </TextField>
 
@@ -1014,9 +1015,9 @@ const QuestionSummary: React.FC = () => {
                 }}
               >
                 {chartTypeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
+                  <MenuItem key={option.value} value={option.value}>
                     {option.label}
-                  </option>
+                  </MenuItem>
                 ))}
               </TextField>
 

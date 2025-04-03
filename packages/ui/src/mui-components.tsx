@@ -33,6 +33,7 @@ export {
   FormControlLabel,
   TextField,
   IconButton,
+  MenuItem,
 
   // Feedback components
   Snackbar,
