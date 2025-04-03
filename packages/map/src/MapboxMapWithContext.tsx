@@ -18,7 +18,7 @@ export function Map(props: MapProps) {
     if (mapRef.current) {
       // Update the context map reference
       // This allows any component using useMap() to access the map
-      Object.defineProperty(contextMapRef, 'current', {
+      Object.defineProperty(contextMapRef, "current", {
         get: () => mapRef.current?.getMap(),
       })
     }

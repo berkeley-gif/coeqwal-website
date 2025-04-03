@@ -1,7 +1,7 @@
 // Primary Map API (context-based with full map access)
 export { Map } from "./MapboxMapWithContext"
 export { MapProvider, useMap } from "../context/MapContext"
-export { Marker, Popup } from "./MapboxMap"  
+export { Marker, Popup } from "./MapboxMap"
 
 // Types
 export type { ViewState } from "./types"

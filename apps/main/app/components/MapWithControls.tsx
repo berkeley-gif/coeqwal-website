@@ -15,18 +15,13 @@ const WATER_COLORS = [
 
 const MapControls = () => {
   const [colorIndex, setColorIndex] = useState(0)
-  const { 
-    flyTo, 
-    setPaintProperty, 
-    viewState,
-    withMap
-  } = useMap()
+  const { flyTo, setPaintProperty, viewState, withMap } = useMap()
 
   // Handle changing water color
   const changeWaterColor = () => {
     const nextIndex = (colorIndex + 1) % WATER_COLORS.length
     setColorIndex(nextIndex)
-    
+
     // Use direct access to map methods
     setPaintProperty("water", "fill-color", WATER_COLORS[nextIndex])
   }
@@ -39,11 +34,11 @@ const MapControls = () => {
   ]
 
   return (
-    <Box 
-      sx={{ 
-        position: "absolute", 
-        top: 200, 
-        right: 20, 
+    <Box
+      sx={{
+        position: "absolute",
+        top: 200,
+        right: 20,
         zIndex: 10,
         bgcolor: "rgba(255, 255, 255, 0.8)",
         p: 2,
@@ -51,23 +46,24 @@ const MapControls = () => {
         boxShadow: 2,
       }}
     >
-      <Typography variant="h6" gutterBottom>Map Controls</Typography>
-      
+      <Typography variant="h6" gutterBottom>
+        Map Controls
+      </Typography>
+
       {/* Current view state display */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2">
-          Long: {viewState.longitude.toFixed(2)}, 
-          Lat: {viewState.latitude.toFixed(2)}, 
-          Zoom: {viewState.zoom.toFixed(1)}
+          Long: {viewState.longitude.toFixed(2)}, Lat:{" "}
+          {viewState.latitude.toFixed(2)}, Zoom: {viewState.zoom.toFixed(1)}
         </Typography>
       </Box>
-      
+
       {/* Location buttons */}
       <Box sx={{ mb: 2 }}>
-        {locations.map(location => (
-          <Button 
+        {locations.map((location) => (
+          <Button
             key={location.name}
-            variant="outlined" 
+            variant="outlined"
             size="small"
             sx={{ mr: 1, mb: 1 }}
             onClick={() => flyTo(location.coords[0], location.coords[1], 10)}
@@ -76,13 +72,9 @@ const MapControls = () => {
           </Button>
         ))}
       </Box>
-      
+
       {/* Map styling */}
-      <Button 
-        variant="contained" 
-        onClick={changeWaterColor}
-        size="small"
-      >
+      <Button variant="contained" onClick={changeWaterColor} size="small">
         Change Water Color
       </Button>
     </Box>

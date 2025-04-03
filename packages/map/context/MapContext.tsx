@@ -36,27 +36,36 @@ export const useMap = () => {
   if (!context) {
     throw new Error("useMap must be used within a MapProvider")
   }
-  
+
   const { mapRef, viewState, setViewState } = context
-  
+
   return {
     // Expose the map ref for direct access
     mapRef,
-    
+
     // View state management
     viewState,
     setViewState,
-    
+
     // Direct map access with safety
-    withMap: <T = void>(callback: (map: mapboxgl.Map) => T, fallback?: T): T => {
+    withMap: <T = void,>(
+      callback: (map: mapboxgl.Map) => T,
+      fallback?: T,
+    ): T => {
       const map = mapRef.current
       return map ? callback(map as unknown as mapboxgl.Map) : (fallback as T)
     },
-    
+
     // Common map operations
-    flyTo: (longitude: number, latitude: number, zoom?: number, pitch?: number, bearing?: number) => {
+    flyTo: (
+      longitude: number,
+      latitude: number,
+      zoom?: number,
+      pitch?: number,
+      bearing?: number,
+    ) => {
       if (!mapRef.current) return
-      
+
       mapRef.current.flyTo({
         center: [longitude, latitude],
         zoom: zoom ?? viewState.zoom,
@@ -65,11 +74,17 @@ export const useMap = () => {
         duration: 2000,
       })
     },
-    
+
     // Add/remove layers
-    addLayer: (layerId: string, source: string, type: string, paint: Record<string, any>, layout?: Record<string, any>) => {
+    addLayer: (
+      layerId: string,
+      source: string,
+      type: string,
+      paint: Record<string, any>,
+      layout?: Record<string, any>,
+    ) => {
       if (!mapRef.current) return
-      
+
       const map = mapRef.current as unknown as mapboxgl.Map
       if (!map.getLayer(layerId)) {
         map.addLayer({
@@ -81,48 +96,48 @@ export const useMap = () => {
         })
       }
     },
-    
+
     removeLayer: (layerId: string) => {
       if (!mapRef.current) return
-      
+
       const map = mapRef.current as unknown as mapboxgl.Map
       if (map.getLayer(layerId)) {
         map.removeLayer(layerId)
       }
     },
-    
+
     // Source management
     addSource: (sourceId: string, source: mapboxgl.AnySourceData) => {
       if (!mapRef.current) return
-      
+
       const map = mapRef.current as unknown as mapboxgl.Map
       if (!map.getSource(sourceId)) {
         map.addSource(sourceId, source)
       }
     },
-    
+
     removeSource: (sourceId: string) => {
       if (!mapRef.current) return
-      
+
       const map = mapRef.current as unknown as mapboxgl.Map
       if (map.getSource(sourceId)) {
         map.removeSource(sourceId)
       }
     },
-    
+
     // Style properties
     setPaintProperty: (layerId: string, property: string, value: any) => {
       if (!mapRef.current) return
-      
+
       const map = mapRef.current as unknown as mapboxgl.Map
       map.setPaintProperty(layerId, property as any, value)
     },
-    
+
     setLayoutProperty: (layerId: string, property: string, value: any) => {
       if (!mapRef.current) return
-      
+
       const map = mapRef.current as unknown as mapboxgl.Map
       map.setLayoutProperty(layerId, property as any, value)
-    }
+    },
   }
 }
