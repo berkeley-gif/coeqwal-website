@@ -21,7 +21,7 @@ const PanelRoot = styled(Box, {
   flexDirection: "column",
   position: "relative",
   scrollSnapAlign: fullHeight ? "start" : "none",
-  alignItems: "flex-start",
+  alignItems: "stretch",
   textAlign: "left",
 
   // Background variants

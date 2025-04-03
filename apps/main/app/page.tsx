@@ -16,7 +16,15 @@ const MapWithControls = dynamic(() => import("./components/MapWithControls"), {
 const QuestionBuilderPanel = dynamic(
   () => import("./features/questionBuilder/QuestionBuilderPanel"),
   {
-    ssr: true, // We still want SSR for this component
+    ssr: true,
+  },
+)
+
+// Dynamic import the ScenarioResults panel
+const ScenarioResultsPanel = dynamic(
+  () => import("./features/scenarioResults/ScenarioResultsPanel"),
+  {
+    ssr: true,
   },
 )
 
@@ -48,6 +56,7 @@ export default function Home() {
             }}
           />
           <QuestionBuilderPanel />
+          <ScenarioResultsPanel />
         </Box>
       </Box>
     </>
