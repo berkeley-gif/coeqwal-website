@@ -903,13 +903,13 @@ const QuestionSummary: React.FC = () => {
   }
 
   // Handle dropdown changes
-  const handleSortChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleSortChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSort(event.target.value)
   }
 
-  const handleChartTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChartTypeChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     setChartType(event.target.value)
   }
 
@@ -1026,11 +1026,7 @@ const QuestionSummary: React.FC = () => {
                 ))}
               </TextField>
 
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={toggleFilters}
-              >
+              <Button variant="outlined" size="small" onClick={toggleFilters}>
                 Hide
               </Button>
             </Box>
