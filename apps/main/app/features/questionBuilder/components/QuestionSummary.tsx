@@ -1,7 +1,14 @@
 "use client"
 
-import React, { useMemo } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import React, { useMemo, useState } from "react"
+import {
+  Box,
+  Typography,
+  useTheme,
+  TextField,
+  Button,
+  SearchIcon,
+} from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 
@@ -11,7 +18,7 @@ import { ColoredText } from "./ui"
 //     deliveries: "to",
 //     flows: "to",
 //     storage: "for",
-//     "groundwater levels": "for",
+//     groundwater levels: "for",
 //   },
 //   properNouns: [
 //     "California",
@@ -49,6 +56,17 @@ const QuestionSummary: React.FC = () => {
     formatOperationText,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
+
+  // State for dropdown menus
+  const [timeFrame, setTimeFrame] = useState("annual")
+  const [location, setLocation] = useState("all")
+  // State to track if filters are shown or hidden
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Function to toggle filters visibility
+  const toggleFilters = () => {
+    setShowFilters(!showFilters)
+  }
 
   // Expensive calculation?
   const summary = useMemo(() => {
@@ -876,17 +894,155 @@ const QuestionSummary: React.FC = () => {
     p: theme.spacing(2),
     position: "sticky",
     top: 0,
-    zIndex: 100,
+    zIndex: 1000,
     backgroundColor: theme.palette.common.white,
     borderBottom: `1px solid ${theme.palette.divider}`,
     width: "100%",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   }
+
+  // Button styles for pill-shaped search button
+  const searchButtonStyles = {
+    borderRadius: 24,
+    px: 3,
+    py: 1,
+    bgcolor: theme.palette.cool.main,
+    color: "white",
+    fontWeight: "medium",
+    textTransform: "none",
+    mb: 4,
+    "&:hover": {
+      bgcolor: theme.palette.cool.dark,
+    },
+  }
+
+  // Handle dropdown changes
+  const handleTimeFrameChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setTimeFrame(event.target.value)
+  }
+
+  const handleLocationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLocation(event.target.value)
+  }
+
+  // Time frame options
+  const timeFrameOptions = [
+    { value: "annual", label: "Annual Average" },
+    { value: "monthly", label: "Monthly" },
+    { value: "daily", label: "Daily" },
+    { value: "wet-years", label: "Wet Years" },
+    { value: "dry-years", label: "Dry Years" },
+  ]
+
+  // Location options
+  const locationOptions = [
+    { value: "all", label: "All Locations" },
+    { value: "delta", label: "Delta" },
+    { value: "sacramento-valley", label: "Sacramento Valley" },
+    { value: "san-joaquin-valley", label: "San Joaquin Valley" },
+    { value: "bay-area", label: "Bay Area" },
+    { value: "southern-california", label: "Southern California" },
+  ]
 
   return (
     <Box sx={containerStyles}>
-      <Typography variant="h2" mt={8} mb={8}>
+      <Typography variant="h2" mt={8} mb={4}>
         {summary}
       </Typography>
+
+      {!showFilters ? (
+        // Pill-shaped search button when filters are hidden
+        <Button
+          variant="contained"
+          disableElevation
+          onClick={toggleFilters}
+          sx={searchButtonStyles}
+          startIcon={<SearchIcon />}
+        >
+          Search
+        </Button>
+      ) : (
+        // Dropdown menus when filters are shown
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            mb: 4,
+            p: 2,
+            backgroundColor: `${theme.palette.cool.light}`,
+            border: `2px solid ${theme.palette.divider}`,
+            borderRadius: 2,
+            boxShadow: "inset 0 0 5px rgba(0,0,0,0.1)",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{ mr: 2, fontWeight: "bold", alignSelf: "center" }}
+          >
+            Filters:
+          </Typography>
+          <TextField
+            select
+            label="Time Frame"
+            value={timeFrame}
+            onChange={handleTimeFrameChange}
+            variant="outlined"
+            size="small"
+            sx={{
+              minWidth: 180,
+              backgroundColor: theme.palette.common.white,
+              "& .MuiOutlinedInput-root": {
+                borderColor: theme.palette.primary.main,
+              },
+            }}
+            SelectProps={{
+              native: true,
+            }}
+          >
+            {timeFrameOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </TextField>
+
+          <TextField
+            select
+            label="Location"
+            value={location}
+            onChange={handleLocationChange}
+            variant="outlined"
+            size="small"
+            sx={{
+              minWidth: 180,
+              backgroundColor: theme.palette.common.white,
+              "& .MuiOutlinedInput-root": {
+                borderColor: theme.palette.primary.main,
+              },
+            }}
+            SelectProps={{
+              native: true,
+            }}
+          >
+            {locationOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </TextField>
+
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={toggleFilters}
+            sx={{ alignSelf: "center" }}
+          >
+            Hide
+          </Button>
+        </Box>
+      )}
     </Box>
   )
 }
