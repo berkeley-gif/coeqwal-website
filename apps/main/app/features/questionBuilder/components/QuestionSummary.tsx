@@ -993,9 +993,6 @@ const QuestionSummary: React.FC = () => {
                   minWidth: 180,
                   backgroundColor: theme.palette.common.white,
                 }}
-                SelectProps={{
-                  native: true,
-                }}
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -1014,9 +1011,6 @@ const QuestionSummary: React.FC = () => {
                 sx={{
                   minWidth: 180,
                   backgroundColor: theme.palette.common.white,
-                }}
-                SelectProps={{
-                  native: true,
                 }}
               >
                 {chartTypeOptions.map((option) => (
