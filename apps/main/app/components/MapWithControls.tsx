@@ -44,6 +44,7 @@ const MapControls = () => {
         p: 2,
         borderRadius: 2,
         boxShadow: 2,
+        pointerEvents: "auto",
       }}
     >
       <Typography variant="h6" gutterBottom>
