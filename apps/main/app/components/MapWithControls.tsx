@@ -66,7 +66,13 @@ const MapControls = () => {
             variant="outlined"
             size="small"
             sx={{ mr: 1, mb: 1 }}
-            onClick={() => flyTo(location.coords[0], location.coords[1], 10)}
+            onClick={() => {
+              const lng = location.coords[0];
+              const lat = location.coords[1];
+              if (typeof lng === 'number' && typeof lat === 'number') {
+                flyTo(lng, lat, 10);
+              }
+            }}
           >
             {location.name}
           </Button>
@@ -106,6 +112,8 @@ export default function MapWithControls() {
             pitch: 0,
           }}
           mapStyle="mapbox://styles/mapbox/streets-v11"
+          scrollZoom={true}
+          style={{ width: "100%", height: "100%" }}
         />
         <MapControls />
       </Box>

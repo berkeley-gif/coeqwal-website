@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useRef, useState } from "react"
 import type { MapRef } from "react-map-gl/mapbox"
 import { ViewState } from "../src/types.js"
+import type { Map as MapboxGLMap, AnyLayer, AnySourceData } from "mapbox-gl"
 
 interface MapContextValue {
   mapRef: React.RefObject<MapRef | null>
@@ -38,6 +39,12 @@ export const useMap = () => {
   }
 
   const { mapRef, viewState, setViewState } = context
+  
+  // Helper to get the underlying Mapbox GL map instance
+  const getMapInstance = (): MapboxGLMap | null => {
+    if (!mapRef.current) return null;
+    return mapRef.current.getMap();
+  };
 
   return {
     // Expose the map ref for direct access
@@ -48,19 +55,16 @@ export const useMap = () => {
     setViewState,
 
     // Direct map access with safety
-    withMap: <T = void,>(
-      callback: (map: mapboxgl.Map) => T,
-      fallback?: T,
-    ): T => {
-      const map = mapRef.current
-      return map ? callback(map as unknown as mapboxgl.Map) : (fallback as T)
+    withMap: <T = void,>(callback: (map: MapboxGLMap) => T, fallback?: T): T => {
+      const map = getMapInstance();
+      return map ? callback(map) : (fallback as T)
     },
 
     // Common map operations
     flyTo: (
       longitude: number,
       latitude: number,
-      zoom?: number,
+      zoom: number,
       pitch?: number,
       bearing?: number,
     ) => {
@@ -68,7 +72,7 @@ export const useMap = () => {
 
       mapRef.current.flyTo({
         center: [longitude, latitude],
-        zoom: zoom ?? viewState.zoom,
+        zoom: zoom,
         pitch: pitch ?? viewState.pitch,
         bearing: bearing ?? viewState.bearing,
         duration: 2000,
@@ -83,9 +87,9 @@ export const useMap = () => {
       paint: Record<string, any>,
       layout?: Record<string, any>,
     ) => {
-      if (!mapRef.current) return
+      const map = getMapInstance();
+      if (!map) return;
 
-      const map = mapRef.current as unknown as mapboxgl.Map
       if (!map.getLayer(layerId)) {
         map.addLayer({
           id: layerId,
@@ -93,33 +97,33 @@ export const useMap = () => {
           type: type as any,
           paint,
           layout,
-        })
+        } as AnyLayer)
       }
     },
 
     removeLayer: (layerId: string) => {
-      if (!mapRef.current) return
+      const map = getMapInstance();
+      if (!map) return;
 
-      const map = mapRef.current as unknown as mapboxgl.Map
       if (map.getLayer(layerId)) {
         map.removeLayer(layerId)
       }
     },
 
     // Source management
-    addSource: (sourceId: string, source: mapboxgl.AnySourceData) => {
-      if (!mapRef.current) return
+    addSource: (sourceId: string, source: AnySourceData) => {
+      const map = getMapInstance();
+      if (!map) return;
 
-      const map = mapRef.current as unknown as mapboxgl.Map
       if (!map.getSource(sourceId)) {
         map.addSource(sourceId, source)
       }
     },
 
     removeSource: (sourceId: string) => {
-      if (!mapRef.current) return
+      const map = getMapInstance();
+      if (!map) return;
 
-      const map = mapRef.current as unknown as mapboxgl.Map
       if (map.getSource(sourceId)) {
         map.removeSource(sourceId)
       }
@@ -127,16 +131,16 @@ export const useMap = () => {
 
     // Style properties
     setPaintProperty: (layerId: string, property: string, value: any) => {
-      if (!mapRef.current) return
+      const map = getMapInstance();
+      if (!map) return;
 
-      const map = mapRef.current as unknown as mapboxgl.Map
       map.setPaintProperty(layerId, property as any, value)
     },
 
     setLayoutProperty: (layerId: string, property: string, value: any) => {
-      if (!mapRef.current) return
+      const map = getMapInstance();
+      if (!map) return;
 
-      const map = mapRef.current as unknown as mapboxgl.Map
       map.setLayoutProperty(layerId, property as any, value)
     },
   }

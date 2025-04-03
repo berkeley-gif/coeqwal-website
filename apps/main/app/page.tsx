@@ -29,7 +29,15 @@ export default function Home() {
       <MapWithControls />
 
       {/* Main Content */}
-      <Box sx={{ zIndex: 1, position: "relative" }}>
+      <Box sx={{ 
+        zIndex: 1, 
+        position: "relative",
+        // Apply pointer-events auto only to specific UI elements
+        pointerEvents: "none",
+        '& > *': { 
+          pointerEvents: "auto", 
+        },
+      }}>
         <Header />
         <Box component="main">
           <HeroPanel

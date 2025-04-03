@@ -10,10 +10,6 @@
     "./context": {
       "types": "./context/MapContext.tsx",
       "default": "./context/MapContext.tsx"
-    },
-    "./hooks": {
-      "types": "./hooks/useMapInteractions.ts",
-      "default": "./hooks/useMapInteractions.ts"
     }
   },
   "scripts": {
