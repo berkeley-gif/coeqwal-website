@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useRef, useState } from "react"
 import type { MapboxMapRef } from "../src/MapboxMap"
-import type { MapRef } from "react-map-gl/mapbox"
 import { ViewState } from "../src/types.js"
 // Import proper types from mapbox-gl
 import type {

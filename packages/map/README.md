@@ -186,3 +186,9 @@ withMap((map) => {
 3. **Use withMap for advanced cases** requiring direct map access
 4. **Keep map state within context** for consistent application state
 5. **Set mapStyle at initialization** for best performance
+
+## TypeScript Support
+
+This package provides full TypeScript definitions. Types for the mapbox-gl API are
+imported directly from the mapbox-gl package, which provides its own type definitions
+starting from v2.0.
