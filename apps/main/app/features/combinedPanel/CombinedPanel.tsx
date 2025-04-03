@@ -361,7 +361,11 @@ const CombinedPanelContent = memo(() => {
       <Divider sx={{ my: 4 }} />
 
       {/* Scenario Results Section */}
-      <Box sx={{ width: "100%" }} data-section="scenario-results">
+      <Box
+        sx={{ width: "100%" }}
+        data-section="scenario-results"
+        id="scenario-results"
+      >
         {/* Header row */}
         <Box sx={{ p: theme.spacing(2) }}>
           <Typography variant="h4" gutterBottom>

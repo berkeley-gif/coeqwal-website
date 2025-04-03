@@ -912,20 +912,24 @@ const QuestionSummary: React.FC = () => {
     setLocation(event.target.value)
   }
 
-  // Handler for search button click - scroll to scenario results
+  // Handler for search button click - show filters and scroll to results
   const handleSearchClick = () => {
     // Toggle filters
     toggleFilters()
 
-    // Scroll to scenario results section
-    const scenarioResultsSection = document.querySelector(
-      '[data-section="scenario-results"]',
-    )
-    if (scenarioResultsSection) {
-      // Use setTimeout to ensure the DOM has updated after the toggleFilters call
-      setTimeout(() => {
-        scenarioResultsSection.scrollIntoView({ behavior: "smooth" })
-      }, 100)
+    // Get the scenario results element
+    const element = document.getElementById("scenario-results")
+    if (element) {
+      // Use smooth scrolling
+      // Increase offset to account for sticky header + QuestionSummary height
+      const headerOffset = 280
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.scrollY - headerOffset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      })
     }
   }
 
@@ -961,24 +965,13 @@ const QuestionSummary: React.FC = () => {
             variant="contained"
             disableElevation
             onClick={handleSearchClick}
-            sx={{
-              borderRadius: 24,
-              px: 3,
-              py: 1,
-              textTransform: "none",
-              backgroundColor: "black",
-              color: "white",
-              "&:hover": {
-                backgroundColor: "rgba(0, 0, 0, 0.8)",
-              },
-            }}
             startIcon={<SearchIcon />}
           >
             Search
           </Button>
         </Box>
       ) : (
-        // Dropdown menus when filters are shown
+        // Dropdown menus when filters are shown - right aligned
         <Box
           sx={{
             display: "flex",
