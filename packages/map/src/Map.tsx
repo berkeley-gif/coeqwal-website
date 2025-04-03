@@ -1,5 +1,5 @@
 "use client"
-       
+
 import React, { useRef, useEffect } from "react"
 import { MapboxMap, type MapProps, type MapboxMapRef } from "./MapboxMap"
 import { useMap } from "../context/MapContext"
@@ -24,13 +24,13 @@ export function Map(props: MapProps) {
           latitude: number,
           zoom?: number,
           pitch?: number,
-          bearing?: number
+          bearing?: number,
         ) => {
-          mapRef.current?.flyTo(longitude, latitude, zoom, pitch, bearing);
+          mapRef.current?.flyTo(longitude, latitude, zoom, pitch, bearing)
         },
-      } as any;
+      } as any
     }
-  }, [contextMapRef, mapRef]);
+  }, [contextMapRef, mapRef])
 
   return (
     <MapboxMap

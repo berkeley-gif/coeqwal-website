@@ -39,12 +39,12 @@ export const useMap = () => {
   }
 
   const { mapRef, viewState, setViewState } = context
-  
+
   // Helper to get the underlying Mapbox GL map instance
   const getMapInstance = (): MapboxGLMap | null => {
-    if (!mapRef.current) return null;
-    return mapRef.current.getMap();
-  };
+    if (!mapRef.current) return null
+    return mapRef.current.getMap()
+  }
 
   return {
     // Expose the map ref for direct access
@@ -55,8 +55,11 @@ export const useMap = () => {
     setViewState,
 
     // Direct map access with safety
-    withMap: <T = void,>(callback: (map: MapboxGLMap) => T, fallback?: T): T => {
-      const map = getMapInstance();
+    withMap: <T = void,>(
+      callback: (map: MapboxGLMap) => T,
+      fallback?: T,
+    ): T => {
+      const map = getMapInstance()
       return map ? callback(map) : (fallback as T)
     },
 
@@ -87,8 +90,8 @@ export const useMap = () => {
       paint: Record<string, any>,
       layout?: Record<string, any>,
     ) => {
-      const map = getMapInstance();
-      if (!map) return;
+      const map = getMapInstance()
+      if (!map) return
 
       if (!map.getLayer(layerId)) {
         map.addLayer({
@@ -102,8 +105,8 @@ export const useMap = () => {
     },
 
     removeLayer: (layerId: string) => {
-      const map = getMapInstance();
-      if (!map) return;
+      const map = getMapInstance()
+      if (!map) return
 
       if (map.getLayer(layerId)) {
         map.removeLayer(layerId)
@@ -112,8 +115,8 @@ export const useMap = () => {
 
     // Source management
     addSource: (sourceId: string, source: AnySourceData) => {
-      const map = getMapInstance();
-      if (!map) return;
+      const map = getMapInstance()
+      if (!map) return
 
       if (!map.getSource(sourceId)) {
         map.addSource(sourceId, source)
@@ -121,8 +124,8 @@ export const useMap = () => {
     },
 
     removeSource: (sourceId: string) => {
-      const map = getMapInstance();
-      if (!map) return;
+      const map = getMapInstance()
+      if (!map) return
 
       if (map.getSource(sourceId)) {
         map.removeSource(sourceId)
@@ -131,15 +134,15 @@ export const useMap = () => {
 
     // Style properties
     setPaintProperty: (layerId: string, property: string, value: any) => {
-      const map = getMapInstance();
-      if (!map) return;
+      const map = getMapInstance()
+      if (!map) return
 
       map.setPaintProperty(layerId, property as any, value)
     },
 
     setLayoutProperty: (layerId: string, property: string, value: any) => {
-      const map = getMapInstance();
-      if (!map) return;
+      const map = getMapInstance()
+      if (!map) return
 
       map.setLayoutProperty(layerId, property as any, value)
     },

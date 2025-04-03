@@ -8,7 +8,7 @@ import { useTranslation } from "@repo/i18n"
 import { HeroPanel, TwoColumnPanel } from "@repo/ui"
 
 // Dynamic import components that use client-side features
-const MapWithControls = dynamic(() => import("./components/MapWithControls"), {
+const MapContainer = dynamic(() => import("./components/MapContainer"), {
   ssr: false, // Disable server-side rendering
 })
 
@@ -24,30 +24,35 @@ export default function Home() {
   const { t } = useTranslation()
 
   return (
-    <Box sx={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden" }}>
-      {/* Background Map Layer - placed first in DOM */}
-      <Box sx={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
-        <MapWithControls />
-      </Box>
-
-      {/* Main Content Layer - UI components with pointer events */}
-      <Box 
-        sx={{ 
-          position: "absolute", 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          zIndex: 1,
-          pointerEvents: "none", // Make wrapper transparent to pointer events
-          overflow: "auto",      // Allow scrolling
+    <>
+      {/* Background Map Layer - fixed position with full pointer events */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "all",
+          zIndex: 0,
         }}
       >
-        {/* Each UI component gets pointer-events: auto */}
+        <MapContainer />
+      </Box>
+
+      {/* Main Content - positioned with pointer-events none */}
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 10,
+          pointerEvents: "none",
+        }}
+      >
+        {/* Each interactive UI element gets pointer-events auto */}
         <Box sx={{ pointerEvents: "auto" }}>
           <Header />
         </Box>
-        
+
         <Box component="main">
           <Box sx={{ pointerEvents: "auto" }}>
             <HeroPanel
@@ -55,7 +60,7 @@ export default function Home() {
               content={t("heroPanel.content")}
             />
           </Box>
-          
+
           <Box sx={{ pointerEvents: "auto" }}>
             <TwoColumnPanel
               leftTitle={t("CaliforniaWaterPanel.title")}
@@ -76,6 +81,6 @@ export default function Home() {
           </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   )
 }

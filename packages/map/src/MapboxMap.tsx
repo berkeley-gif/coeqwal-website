@@ -141,7 +141,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     mapboxToken,
     viewState,
     onViewStateChange,
-    style = { width: "100vw", height: "100vh" },
+    style = { width: "100vw", height: "100vh", pointerEvents: "auto" },
     mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
     minZoom = 5.0,
     attributionControl = true,
