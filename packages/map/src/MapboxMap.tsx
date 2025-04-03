@@ -12,7 +12,7 @@ import Map, { NavigationControl, Marker, Popup } from "react-map-gl/mapbox"
 import type { MapRef } from "react-map-gl/mapbox"
 import type { ViewStateChangeEvent } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
-import { ViewState } from "./types.js"
+import { ViewState } from "./types.js" // TODO: this responsive plan for the map needs refinement
 
 // Re-export any components and types that should be available to consumers
 export { Marker, Popup }

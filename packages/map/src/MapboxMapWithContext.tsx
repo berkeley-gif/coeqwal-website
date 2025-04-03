@@ -5,7 +5,8 @@ import { MapboxMap, type MapProps, type MapboxMapRef } from "./MapboxMap"
 import { useMap } from "../context/MapContext"
 import type { ViewState } from "./types"
 
-export function MapboxMapWithContext(props: MapProps) {
+// Primary map component that connects to the MapContext
+export function Map(props: MapProps) {
   const mapRef = useRef<MapboxMapRef>(null)
   const { mapRef: contextMapRef, viewState, setViewState } = useMap()
 
@@ -15,8 +16,11 @@ export function MapboxMapWithContext(props: MapProps) {
   // Connect the map ref to the context
   useEffect(() => {
     if (mapRef.current) {
-      // @ts-expect-error - Updating the ref TODO: figure this out
-      contextMapRef.current = mapRef.current
+      // Update the context map reference
+      // This allows any component using useMap() to access the map
+      Object.defineProperty(contextMapRef, 'current', {
+        get: () => mapRef.current?.getMap(),
+      })
     }
   }, [contextMapRef])
 
@@ -26,7 +30,7 @@ export function MapboxMapWithContext(props: MapProps) {
       {...props}
       viewState={finalViewState}
       onViewStateChange={(newViewState: ViewState) => {
-        // Update context
+        // Update context view state
         setViewState(newViewState)
         // Call original handler if provided
         props.onViewStateChange?.(newViewState)
