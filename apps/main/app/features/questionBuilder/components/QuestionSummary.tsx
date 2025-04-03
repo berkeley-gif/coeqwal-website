@@ -9,6 +9,7 @@ import {
   Button,
   SearchIcon,
 } from "@repo/ui/mui"
+import { Card } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 
@@ -58,8 +59,8 @@ const QuestionSummary: React.FC = () => {
   } = useQuestionBuilderHelpers()
 
   // State for dropdown menus
-  const [timeFrame, setTimeFrame] = useState("annual")
-  const [location, setLocation] = useState("all")
+  const [sortBy, setSort] = useState("lorem")
+  const [chartType, setChartType] = useState("sed")
   // State to track if filters are shown or hidden
   const [showFilters, setShowFilters] = useState(false)
 
@@ -902,14 +903,14 @@ const QuestionSummary: React.FC = () => {
   }
 
   // Handle dropdown changes
-  const handleTimeFrameChange = (
+  const handleSortChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    setTimeFrame(event.target.value)
+    setSort(event.target.value)
   }
 
-  const handleLocationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLocation(event.target.value)
+  const handleChartTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChartType(event.target.value)
   }
 
   // Handler for search button click - show filters and scroll to results
@@ -933,23 +934,23 @@ const QuestionSummary: React.FC = () => {
     }
   }
 
-  // Time frame options
-  const timeFrameOptions = [
-    { value: "annual", label: "Annual Average" },
-    { value: "monthly", label: "Monthly" },
-    { value: "daily", label: "Daily" },
-    { value: "wet-years", label: "Wet Years" },
-    { value: "dry-years", label: "Dry Years" },
+  // Sort options
+  const sortOptions = [
+    { value: "lorem", label: "Lorem ipsum" },
+    { value: "dolor", label: "Dolor sit amet" },
+    { value: "consectetur", label: "Consectetur adipiscing" },
+    { value: "adipiscing", label: "Adipiscing elit" },
+    { value: "eiusmod", label: "Eiusmod tempor" },
   ]
 
-  // Location options
-  const locationOptions = [
-    { value: "all", label: "All Locations" },
-    { value: "delta", label: "Delta" },
-    { value: "sacramento-valley", label: "Sacramento Valley" },
-    { value: "san-joaquin-valley", label: "San Joaquin Valley" },
-    { value: "bay-area", label: "Bay Area" },
-    { value: "southern-california", label: "Southern California" },
+  // Chart type options
+  const chartTypeOptions = [
+    { value: "sed", label: "Sed do eiusmod" },
+    { value: "tempor", label: "Tempor incididunt" },
+    { value: "labore", label: "Labore et dolore" },
+    { value: "magna", label: "Magna aliqua" },
+    { value: "ut-enim", label: "Ut enim ad minim" },
+    { value: "veniam", label: "Veniam quis nostrud" },
   ]
 
   return (
@@ -958,99 +959,84 @@ const QuestionSummary: React.FC = () => {
         {summary}
       </Typography>
 
-      {!showFilters ? (
-        // Pill-shaped search button when filters are hidden - right aligned
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={handleSearchClick}
-            startIcon={<SearchIcon />}
-          >
-            Search
-          </Button>
-        </Box>
-      ) : (
-        // Dropdown menus when filters are shown - right aligned
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            mb: 4,
-            p: 2,
-            backgroundColor: `${theme.palette.cool.light}`,
-            border: `2px solid ${theme.palette.divider}`,
-            borderRadius: 2,
-            boxShadow: "inset 0 0 5px rgba(0,0,0,0.1)",
-            justifyContent: "flex-end",
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            sx={{ mr: 2, fontWeight: "bold", alignSelf: "center" }}
-          >
-            Filters:
-          </Typography>
-          <TextField
-            select
-            label="Time Frame"
-            value={timeFrame}
-            onChange={handleTimeFrameChange}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 180,
-              backgroundColor: theme.palette.common.white,
-              "& .MuiOutlinedInput-root": {
-                borderColor: theme.palette.primary.main,
-              },
-            }}
-            SelectProps={{
-              native: true,
-            }}
-          >
-            {timeFrameOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </TextField>
+      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        {!showFilters ? (
+          // Pill-shaped search button when filters are hidden
+          <Card sx={{ width: "auto" }}>
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={handleSearchClick}
+              startIcon={<SearchIcon />}
+            >
+              Search
+            </Button>
+          </Card>
+        ) : (
+          // Dropdown menus when filters are shown
+          <Card sx={{ width: "auto" }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                alignItems: "center",
+              }}
+            >
+              <TextField
+                select
+                label="Sort scenarios by"
+                value={sortBy}
+                onChange={handleSortChange}
+                variant="outlined"
+                size="small"
+                sx={{
+                  minWidth: 180,
+                  backgroundColor: theme.palette.common.white,
+                }}
+                SelectProps={{
+                  native: true,
+                }}
+              >
+                {sortOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
 
-          <TextField
-            select
-            label="Location"
-            value={location}
-            onChange={handleLocationChange}
-            variant="outlined"
-            size="small"
-            sx={{
-              minWidth: 180,
-              backgroundColor: theme.palette.common.white,
-              "& .MuiOutlinedInput-root": {
-                borderColor: theme.palette.primary.main,
-              },
-            }}
-            SelectProps={{
-              native: true,
-            }}
-          >
-            {locationOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </TextField>
+              <TextField
+                select
+                label="Chart type:"
+                value={chartType}
+                onChange={handleChartTypeChange}
+                variant="outlined"
+                size="small"
+                sx={{
+                  minWidth: 180,
+                  backgroundColor: theme.palette.common.white,
+                }}
+                SelectProps={{
+                  native: true,
+                }}
+              >
+                {chartTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
 
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={toggleFilters}
-            sx={{ alignSelf: "center" }}
-          >
-            Hide
-          </Button>
-        </Box>
-      )}
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={toggleFilters}
+              >
+                Hide
+              </Button>
+            </Box>
+          </Card>
+        )}
+      </Box>
     </Box>
   )
 }
