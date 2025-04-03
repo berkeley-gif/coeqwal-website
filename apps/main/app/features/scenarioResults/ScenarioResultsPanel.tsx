@@ -4,6 +4,7 @@ import React from "react"
 import { Typography, Box, useTheme } from "@repo/ui/mui"
 import { BasePanel } from "@repo/ui"
 import { ScenarioCard } from "./components"
+import { QuestionBuilderProvider } from "../questionBuilder/context/QuestionBuilderContext"
 
 // Content component for the scenario results
 const ScenarioResultsContent = () => {
@@ -53,7 +54,11 @@ const ScenarioResultsContent = () => {
 }
 
 export function ScenarioResultsPanel() {
-  return <ScenarioResultsContent />
+  return (
+    <QuestionBuilderProvider>
+      <ScenarioResultsContent />
+    </QuestionBuilderProvider>
+  )
 }
 
 export default ScenarioResultsPanel
