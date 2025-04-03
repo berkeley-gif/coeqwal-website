@@ -343,7 +343,7 @@ const QuestionSummary: React.FC = () => {
       const regionSelections = outcomesBySection.region || []
       const metricSelections = outcomesBySection.metric || []
 
-      // In swapped mode, we'll handle regions separately and group types and metrics by direction
+      // In swapped mode, we'll regions separately and group types and metrics by direction
       if (swapped) {
         // Process regions first - these don't have directions
         let regionPart = null
@@ -901,21 +901,6 @@ const QuestionSummary: React.FC = () => {
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   }
 
-  // Button styles for pill-shaped search button
-  const searchButtonStyles = {
-    borderRadius: 24,
-    px: 3,
-    py: 1,
-    bgcolor: theme.palette.cool.main,
-    color: "white",
-    fontWeight: "medium",
-    textTransform: "none",
-    mb: 4,
-    "&:hover": {
-      bgcolor: theme.palette.cool.dark,
-    },
-  }
-
   // Handle dropdown changes
   const handleTimeFrameChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -925,6 +910,23 @@ const QuestionSummary: React.FC = () => {
 
   const handleLocationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocation(event.target.value)
+  }
+
+  // Handler for search button click - scroll to scenario results
+  const handleSearchClick = () => {
+    // Toggle filters
+    toggleFilters()
+
+    // Scroll to scenario results section
+    const scenarioResultsSection = document.querySelector(
+      '[data-section="scenario-results"]',
+    )
+    if (scenarioResultsSection) {
+      // Use setTimeout to ensure the DOM has updated after the toggleFilters call
+      setTimeout(() => {
+        scenarioResultsSection.scrollIntoView({ behavior: "smooth" })
+      }, 100)
+    }
   }
 
   // Time frame options
@@ -953,16 +955,28 @@ const QuestionSummary: React.FC = () => {
       </Typography>
 
       {!showFilters ? (
-        // Pill-shaped search button when filters are hidden
-        <Button
-          variant="contained"
-          disableElevation
-          onClick={toggleFilters}
-          sx={searchButtonStyles}
-          startIcon={<SearchIcon />}
-        >
-          Search
-        </Button>
+        // Pill-shaped search button when filters are hidden - right aligned
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="contained"
+            disableElevation
+            onClick={handleSearchClick}
+            sx={{
+              borderRadius: 24,
+              px: 3,
+              py: 1,
+              textTransform: "none",
+              backgroundColor: "black",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+              },
+            }}
+            startIcon={<SearchIcon />}
+          >
+            Search
+          </Button>
+        </Box>
       ) : (
         // Dropdown menus when filters are shown
         <Box
@@ -975,6 +989,7 @@ const QuestionSummary: React.FC = () => {
             border: `2px solid ${theme.palette.divider}`,
             borderRadius: 2,
             boxShadow: "inset 0 0 5px rgba(0,0,0,0.1)",
+            justifyContent: "flex-end",
           }}
         >
           <Typography
