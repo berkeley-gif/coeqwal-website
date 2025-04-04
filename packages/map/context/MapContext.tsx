@@ -50,15 +50,11 @@ export const useMap = () => {
   const { mapRef, viewState, setViewState } = context
 
   // Helper to get the underlying Mapbox GL map instance
+  // Simplified for react-map-gl v8
   const getMapInstance = (): MapboxGLMap | null => {
     if (!mapRef.current) return null
-
-    // First get the react-map-gl MapRef
-    const reactMapRef = mapRef.current.getMap()
-    if (!reactMapRef) return null
-
-    // In react-map-gl v8, the MapRef.getMap() already returns the mapbox-gl Map instance
-    return reactMapRef as unknown as MapboxGLMap
+    // In react-map-gl v8, we need to cast through unknown first to avoid type errors
+    return mapRef.current.getMap() as unknown as MapboxGLMap
   }
 
   return {
@@ -151,7 +147,7 @@ export const useMap = () => {
       const map = getMapInstance()
       if (!map) return
 
-      // Use type assertion for the property name - direct cast to any
+      // Use type assertion for the property name
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map.setPaintProperty(layerId, property as any, value)
     },
@@ -164,7 +160,7 @@ export const useMap = () => {
       const map = getMapInstance()
       if (!map) return
 
-      // Use type assertion for the property name - direct cast to any
+      // Use type assertion for the property name
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map.setLayoutProperty(layerId, property as any, value)
     },

@@ -16,7 +16,6 @@ import { ViewState } from "./types.js" // TODO: this responsive plan for the map
 
 // Re-export any components and types that should be available to consumers
 export { Marker, Popup }
-export type { MapRef }
 
 export interface MarkerProperties {
   longitude: number
@@ -187,17 +186,18 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     pitch?: number,
     bearing?: number,
   ) {
-    const mapInstance = internalMapRef.current?.getMap() as mapboxgl.Map
-    if (mapInstance) {
-      mapInstance.flyTo({
-        center: [longitude, latitude],
-        zoom: zoom ?? 5,
-        pitch: pitch ?? 0,
-        bearing: bearing ?? 0,
-        duration: 3000, // Reduced from 6000ms to 2500ms for faster transitions
-        easing: (t) => t, // Linear easing - constant speed
-      })
-    }
+    // Simplified for react-map-gl v8
+    const mapInstance = internalMapRef.current
+    if (!mapInstance) return
+
+    mapInstance.flyTo({
+      center: [longitude, latitude],
+      zoom: zoom ?? 5,
+      pitch: pitch ?? 0,
+      bearing: bearing ?? 0,
+      duration: 3000,
+      easing: (t) => t, // Linear easing - constant speed
+    })
   }
 
   function getMap(): MapRef | undefined {

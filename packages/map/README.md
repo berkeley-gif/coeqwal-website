@@ -192,3 +192,9 @@ withMap((map) => {
 This package provides full TypeScript definitions. Types for the mapbox-gl API are
 imported directly from the mapbox-gl package, which provides its own type definitions
 starting from v2.0.
+
+Version Compatibility:
+
+- Compatible with react-map-gl v8.x
+- Compatible with mapbox-gl v3.x
+- No need for @types/mapbox-gl (mapbox-gl includes its own types)
