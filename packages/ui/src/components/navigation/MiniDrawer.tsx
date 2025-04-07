@@ -12,6 +12,7 @@ import {
   ListItemText,
   Divider,
   styled,
+  Typography,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
@@ -126,49 +127,89 @@ export function MiniDrawer({
           px: 0,
         })}
       >
-        {items.map((item, index) => (
-          <ListItem
-            key={index}
-            disablePadding
-            sx={{
-              display: "block",
-              padding: 0,
-              width: "176px",
-            }}
-          >
-            <ListItemButton
-              onClick={item.onClick}
+        {items.map((item, index) => {
+          // Array of background colors to cycle through
+          const bgColors = [
+            "#D2E6E7",
+            "#9ACBCF",
+            "#71BFB3",
+            "#4D9CA0",
+            "#2C6E91",
+            "#1A3F6B",
+          ]
+
+          // Get color based on index (cycling through the array)
+          const bgColor = bgColors[index % bgColors.length]
+
+          // Determine if this is a dark color that needs white text
+          const isDarkColor =
+            bgColor === "#132C10" ||
+            bgColor === "#244A25" ||
+            bgColor === "#247061"
+
+          return (
+            <ListItem
+              key={index}
+              disablePadding
               sx={{
-                alignItems: "flex-start",
-                padding: (theme) => theme.spacing(2, 2),
-                width: "100%",
+                display: "block",
+                padding: 0,
+                width: "176px",
               }}
             >
-              <ListItemIcon
+              <ListItemButton
+                onClick={item.onClick}
                 sx={{
-                  minWidth: 36,
-                  height: 24,
+                  padding: (theme) => theme.spacing(2, 2),
+                  width: "100%",
+                  backgroundColor: bgColor,
+                  color: isDarkColor ? "#FFFFFF" : "#000000",
+                  "&:hover": {
+                    backgroundColor: `${bgColor}dd`,
+                    boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
+                  },
                   display: "flex",
-                  alignItems: "center",
+                  flexDirection: "column",
                   justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                slotProps={{
-                  primary: {
-                    sx: {
-                      fontWeight: 500,
-                      lineHeight: 1.2,
+                <ListItemIcon
+                  sx={{
+                    minWidth: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "inherit",
+                    mb: 1,
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+
+                <ListItemText
+                  primary={item.text}
+                  slotProps={{
+                    primary: {
+                      variant: "body2",
+                      sx: {
+                        fontWeight: 500,
+                        lineHeight: 1.2,
+                        overflow: "hidden",
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 3,
+                        width: "100%",
+                        textAlign: "center",
+                      },
                     },
-                  },
-                }}
-              />
-            </ListItemButton>
-          </ListItem>
-        ))}
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          )
+        })}
       </List>
 
       {footer && (
