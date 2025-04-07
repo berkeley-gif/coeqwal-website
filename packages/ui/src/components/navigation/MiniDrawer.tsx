@@ -116,12 +116,56 @@ export function MiniDrawer({
 
       <Divider />
 
-      <List>
+      <List
+        sx={(theme) => ({
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: theme.spacing(1.5),
+          my: theme.spacing(3),
+          px: 0,
+        })}
+      >
         {items.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton onClick={item.onClick}>
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+          <ListItem
+            key={index}
+            disablePadding
+            sx={{
+              display: "block",
+              padding: 0,
+              width: "176px",
+            }}
+          >
+            <ListItemButton
+              onClick={item.onClick}
+              sx={{
+                alignItems: "flex-start",
+                padding: (theme) => theme.spacing(2, 2),
+                width: "100%",
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 36,
+                  height: 24,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      fontWeight: 500,
+                      lineHeight: 1.2,
+                    },
+                  },
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}

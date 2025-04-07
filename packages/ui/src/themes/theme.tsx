@@ -44,7 +44,7 @@ const themeValues = {
   layout: {
     headerHeight: 64,
     drawer: {
-      width: 240,
+      width: 226,
       closedWidth: 64,
     },
   },
@@ -87,6 +87,7 @@ const themeValues = {
     card: "12px",
     standard: "4px",
     none: "0px",
+    navigation: "16px", // For navigation elements like sidebar items
   },
 
   // Border styles
@@ -418,9 +419,25 @@ const theme = createTheme({
               },
 
               "& .MuiListItemButton-root": {
-                minHeight: 48,
+                minHeight: 96,
                 justifyContent: ownerState.open ? "initial" : "center",
                 padding: theme.spacing(0, 2.5),
+                borderRadius: theme.borderRadius.navigation,
+                mx: 1,
+                my: 0.5,
+                overflow: "hidden",
+                transition: theme.transitions.create(
+                  ["background-color", "color", "padding", "margin"],
+                  {
+                    duration: theme.transitions.duration.shortest,
+                  },
+                ),
+                "&:hover": {
+                  backgroundColor: theme.palette.action.hover,
+                },
+                "&:active": {
+                  backgroundColor: theme.palette.action.selected,
+                },
               },
 
               "& .MuiListItemIcon-root": {
@@ -523,7 +540,14 @@ declare module "@mui/material/styles" {
     background: {
       transparent: string
     }
-    borderRadius: typeof themeValues.borderRadius
+    borderRadius: {
+      pill: string
+      rounded: string
+      card: string
+      standard: string
+      none: string
+      navigation: string
+    }
   }
 
   interface ThemeOptions {
