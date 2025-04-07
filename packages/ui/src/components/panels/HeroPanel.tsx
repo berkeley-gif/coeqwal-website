@@ -28,7 +28,7 @@ export function HeroPanel({
         backgroundPosition: "center",
         position: "relative",
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: "center",
         ...panelProps.sx,
       }}
     >
@@ -36,8 +36,9 @@ export function HeroPanel({
         sx={{
           display: "flex",
           flexDirection: "column",
-          height: "auto",
+          height: "100%",
           maxWidth: "770px",
+          textAlign: "left",
         }}
       >
         <Typography variant="h1" gutterBottom>
