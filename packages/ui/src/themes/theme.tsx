@@ -249,6 +249,7 @@ const theme = createTheme({
     },
     body2: {
       fontSize: "1.2rem",
+      lineHeight: 1.1,
     },
     subtitle1: {
       fontSize: "1.0714rem",
@@ -420,8 +421,11 @@ const theme = createTheme({
 
               "& .MuiListItemButton-root": {
                 minHeight: 96,
-                justifyContent: ownerState.open ? "initial" : "center",
-                padding: theme.spacing(0, 2.5),
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                padding: theme.spacing(2),
                 borderRadius: theme.borderRadius.navigation,
                 mx: 1,
                 my: 0.5,

@@ -7,10 +7,12 @@ import {
   Header,
   MiniDrawer,
   VerticalDivider,
-  HomeIcon,
-  LocationOnIcon,
-  SearchIcon,
-  SettingsIcon,
+  OpacityIcon,
+  EngineeringIcon,
+  ReportProblemIcon,
+  SwapHorizIcon,
+  BarChartIcon,
+  SlideshowIcon,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { HeroPanel, TwoColumnPanel } from "@repo/ui"
@@ -36,32 +38,32 @@ export default function Home() {
   const navigationItems = [
     {
       text: "How water moves through California",
-      icon: <HomeIcon />,
+      icon: <OpacityIcon />,
       onClick: () => console.log("Water moves through California clicked"),
     },
     {
       text: "Managing California's water",
-      icon: <LocationOnIcon />,
+      icon: <EngineeringIcon />,
       onClick: () => console.log("Managing California's water clicked"),
     },
     {
       text: "Challenges",
-      icon: <SearchIcon />,
+      icon: <ReportProblemIcon />,
       onClick: () => console.log("Challenges clicked"),
     },
     {
       text: "Alternative scenarios",
-      icon: <SettingsIcon />,
+      icon: <SwapHorizIcon />,
       onClick: () => console.log("Alternative scenarios clicked"),
     },
     {
       text: "Alternative scenario data",
-      icon: <SettingsIcon />,
+      icon: <BarChartIcon />,
       onClick: () => console.log("Alternative scenario data clicked"),
     },
     {
       text: "Alternative scenario presentation tools",
-      icon: <SettingsIcon />,
+      icon: <SlideshowIcon />,
       onClick: () =>
         console.log("Alternative scenario presentation tools clicked"),
     },

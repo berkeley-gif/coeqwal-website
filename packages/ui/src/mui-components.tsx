@@ -56,6 +56,11 @@ import HomeIcon from "@mui/icons-material/Home"
 import SettingsIcon from "@mui/icons-material/Settings"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
+import OpacityIcon from "@mui/icons-material/Opacity"
+import EngineeringIcon from "@mui/icons-material/Engineering"
+import ReportProblemIcon from "@mui/icons-material/ReportProblem"
+import BarChartIcon from "@mui/icons-material/BarChart"
+import SlideshowIcon from "@mui/icons-material/Slideshow"
 
 // Export individually imported icons
 export {
@@ -69,6 +74,11 @@ export {
   ArrowCircleDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  OpacityIcon,
+  EngineeringIcon,
+  ReportProblemIcon,
+  BarChartIcon,
+  SlideshowIcon,
 }
 
 // Export the full icons library for access to other icons as needed
