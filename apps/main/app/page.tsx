@@ -88,7 +88,7 @@ export default function Home() {
         sx={{
           pointerEvents: "none",
           position: "relative",
-          zIndex: 20,
+          zIndex: 10,
         }}
       >
         <Box sx={{ pointerEvents: "auto" }}>
@@ -105,7 +105,7 @@ export default function Home() {
       <Box
         sx={{
           position: "relative",
-          zIndex: 10,
+          zIndex: 20,
           pointerEvents: "none",
           marginLeft: drawerOpen ? "240px" : "64px", // TODO:Adjust margin
           transition: "margin 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",

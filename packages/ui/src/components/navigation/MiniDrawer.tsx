@@ -47,9 +47,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
+  padding: theme.spacing(1),
 }))
 
 // Styled Drawer component applying the mixins
@@ -59,15 +57,16 @@ const StyledDrawer = styled(MuiDrawer, {
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
-  }),
+
+  "& .MuiDrawer-paper": {
+    backgroundColor: theme.palette.common.white,
+    top: 0,
+    height: "100vh",
+    borderRadius: 0,
+    paddingTop: 65, // todo: incorporate into theme with headerHeight variable
+    // Apply correct transition mixin based on open state
+    ...(open ? openedMixin(theme) : closedMixin(theme)),
+  },
 }))
 
 export interface MiniDrawerItem {

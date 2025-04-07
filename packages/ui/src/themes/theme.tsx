@@ -1,7 +1,6 @@
 import { createTheme, alpha } from "@mui/material/styles"
 
 // TODO:
-// - Add a custom theme property for the header height
 // - Transitions
 
 /* ========================================================
@@ -13,6 +12,7 @@ import { createTheme, alpha } from "@mui/material/styles"
     - Border styles
     - Shadows
     - Z-Index
+    - Layout dimensions
 
  2. Theme configuration
     - Base theme
@@ -24,12 +24,9 @@ import { createTheme, alpha } from "@mui/material/styles"
  3. Custom theme properties
     - Border
     - Background
-    - Shadows
     - Border radius
     
- 4. Global Component Styles
- 
- 5. TypeScript customizations
+ 4. TypeScript customizations
     - Custom palette extensions
     - Custom theme properties
     - Component variants
@@ -42,6 +39,11 @@ import { createTheme, alpha } from "@mui/material/styles"
  */
 
 const themeValues = {
+  // Layout dimensions
+  layout: {
+    headerHeight: 64,
+  },
+
   // Palette colors
   palette: {
     black: "#000000",
@@ -110,9 +112,28 @@ const themeValues = {
 
 const baseTheme = createTheme()
 
-// Create theme with predefined values
+// Helper to create border strings
+const createBorderStyles = (borderType: string, color: string) => {
+  return {
+    standard: `${borderType} ${color}`,
+    none: themeValues.border.none,
+    thin: `${themeValues.border.thin} ${color}`,
+    thick: `${themeValues.border.thick} ${color}`,
+    bottom: `border-bottom: ${borderType} ${color}`,
+    top: `border-top: ${borderType} ${color}`,
+    left: `border-left: ${borderType} ${color}`,
+    right: `border-right: ${borderType} ${color}`,
+    all: `border: ${borderType} ${color}`,
+  }
+}
+
+// Create theme
 const theme = createTheme({
   ...baseTheme,
+  // Custom layout values
+  layout: {
+    headerHeight: themeValues.layout.headerHeight,
+  },
   // Palette (some are fixed MUI theme properties, some are custom)
   palette: {
     common: {
@@ -173,9 +194,11 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontSize: "4rem",
+      lineHeight: 1.1,
     },
     h2: {
       fontSize: "3.333rem",
+      lineHeight: 1.2,
     },
     h3: {
       fontSize: "2.778rem",
@@ -225,6 +248,7 @@ const theme = createTheme({
           borderBottom: theme.border.standard,
           color: theme.palette.text.primary,
           borderRadius: theme.borderRadius.none,
+          boxShadow: "none",
         }),
       },
       defaultProps: {
@@ -281,7 +305,7 @@ const theme = createTheme({
     MuiDivider: {
       styleOverrides: {
         root: ({ theme }) => ({
-          borderColor: theme.border.standard,
+          borderColor: theme.palette.divider,
         }),
       },
     },
@@ -315,12 +339,13 @@ const theme = createTheme({
         paper: ({ theme }) => ({
           color: theme.palette.text.secondary,
           width: 400,
-          top: 65, // Clear header height
-          height: "calc(100% - 64px)", // Subtract header height
+          top: theme.layout.headerHeight, // Use consistent header height
+          height: `calc(100% - ${theme.layout.headerHeight}px)`, // Use consistent header height
         }),
       },
     },
     MuiToggleButton: {
+      // Like the language switcher
       styleOverrides: {
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
@@ -357,17 +382,10 @@ const theme = createTheme({
  ======================================================== */
 
 // Apply border styles with colors from palette
-theme.border = {
-  standard: `${themeValues.border.standard} ${theme.palette.primary.main}`,
-  none: themeValues.border.none,
-  thin: `${themeValues.border.thin} ${theme.palette.primary.main}`,
-  thick: `${themeValues.border.thick} ${theme.palette.primary.main}`,
-  bottom: `border-bottom: ${themeValues.border.standard} ${theme.palette.primary.main}`,
-  top: `border-top: ${themeValues.border.standard} ${theme.palette.primary.main}`,
-  left: `border-left: ${themeValues.border.standard} ${theme.palette.primary.main}`,
-  right: `border-right: ${themeValues.border.standard} ${theme.palette.primary.main}`,
-  all: `border: ${themeValues.border.standard} ${theme.palette.primary.main}`,
-}
+theme.border = createBorderStyles(
+  themeValues.border.standard,
+  theme.palette.primary.main,
+)
 
 theme.background = {
   transparent: "transparent",
@@ -375,44 +393,13 @@ theme.background = {
 
 theme.borderRadius = themeValues.borderRadius
 
-// Global styles for common components
-const { components } = theme
-if (components) {
-  // Apply standard border to Divider
-  if (!components.MuiDivider) {
-    components.MuiDivider = {}
-  }
-  components.MuiDivider.styleOverrides = {
-    ...components.MuiDivider?.styleOverrides,
-    root: {
-      borderColor: theme.palette.divider,
-    },
-  }
-
-  // Apply standard border to TextField
-  if (!components.MuiOutlinedInput) {
-    components.MuiOutlinedInput = {}
-  }
-  components.MuiOutlinedInput.styleOverrides = {
-    ...components.MuiOutlinedInput?.styleOverrides,
-    root: {
-      "& .MuiOutlinedInput-notchedOutline": {
-        borderColor: theme.palette.divider,
-      },
-      "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: theme.palette.divider,
-      },
-    },
-  }
-}
-
 export default theme
 
 /* ========================================================
- 5. TypeScript customizations
+ 4. TypeScript customizations
  ======================================================== */
 
-// Custom palette colors
+// Custom palette colors and theme properties
 declare module "@mui/material/styles" {
   // Custom palette colors
   interface Palette {
@@ -430,51 +417,20 @@ declare module "@mui/material/styles" {
     climate?: PaletteOptions["primary"]
   }
 
-  // Custom theme properties
   interface Theme {
-    border: {
-      standard: string
-      none: string
-      thin: string
-      thick: string
-      bottom: string
-      top: string
-      left: string
-      right: string
-      all: string
+    layout: {
+      headerHeight: number
     }
+    border: ReturnType<typeof createBorderStyles>
     background: {
       transparent: string
     }
-    borderRadius: {
-      pill: string
-      rounded: string
-      card: string
-      standard: string
-      none: string
-    }
+    borderRadius: typeof themeValues.borderRadius
   }
+
   interface ThemeOptions {
-    border?: {
-      standard?: string
-      none?: string
-      thin?: string
-      thick?: string
-      bottom?: string
-      top?: string
-      left?: string
-      right?: string
-      all?: string
-    }
-    background?: {
-      transparent?: string
-    }
-    borderRadius?: {
-      pill?: string
-      rounded?: string
-      card?: string
-      standard?: string
-      none?: string
+    layout?: {
+      headerHeight?: number
     }
   }
 }

@@ -23,14 +23,14 @@ const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
     buttons: {
-      getData: "Get Data",
+      getData: "Raw Data",
       about: "About COEQWAL",
     },
   },
   es: {
     title: "COEQWAL",
     buttons: {
-      getData: "Obtener Datos",
+      getData: "Datos sin procesar",
       about: "Sobre COEQWAL",
     },
   },
@@ -48,7 +48,18 @@ export function Header() {
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
   return (
-    <AppBar position="fixed" role="banner">
+    <AppBar
+      position="fixed"
+      sx={{
+        zIndex: theme.zIndex.appBar,
+        backgroundColor: theme.background.transparent,
+        borderBottom: theme.border.standard,
+        color: theme.palette.text.primary,
+        borderRadius: theme.borderRadius.none,
+        boxShadow: "none",
+      }}
+      elevation={0}
+    >
       <Toolbar sx={{ justifyContent: "space-between" }}>
         <Typography variant="h6">{componentText.title}</Typography>
         <Stack direction="row" spacing={2} alignItems="center">

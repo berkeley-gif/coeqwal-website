@@ -45,7 +45,7 @@ export {
   useMediaQuery,
 } from "@mui/material"
 
-// Add imports for icons
+// Import and re-export specific commonly used icons
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 import SearchIcon from "@mui/icons-material/Search"
@@ -54,7 +54,10 @@ import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp"
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown"
 import HomeIcon from "@mui/icons-material/Home"
 import SettingsIcon from "@mui/icons-material/Settings"
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
+import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 
+// Export individually imported icons
 export {
   HomeIcon,
   LocationOnIcon,
@@ -64,7 +67,12 @@ export {
   ExpandMoreIcon,
   ArrowCircleUpIcon,
   ArrowCircleDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 }
+
+// Export the full icons library for access to other icons as needed
+export * as icons from "@mui/icons-material"
 
 // Styles and themes
 export { useTheme, alpha, styled } from "@mui/material/styles"
