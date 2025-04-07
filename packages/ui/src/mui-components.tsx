@@ -52,11 +52,16 @@ import SearchIcon from "@mui/icons-material/Search"
 import LocationOnIcon from "@mui/icons-material/LocationOn"
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp"
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown"
+import HomeIcon from "@mui/icons-material/Home"
+import SettingsIcon from "@mui/icons-material/Settings"
+
 export {
+  HomeIcon,
+  LocationOnIcon,
+  SearchIcon,
+  SettingsIcon,
   SwapHorizIcon,
   ExpandMoreIcon,
-  SearchIcon,
-  LocationOnIcon,
   ArrowCircleUpIcon,
   ArrowCircleDownIcon,
 }

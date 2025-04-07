@@ -6,3 +6,4 @@ export { default as CustomArrowForwardIcon } from "./customArrowForwardIcon"
 
 export * from "../mui-components"
 export * from "./panels/index"
+export * from "./navigation/index"

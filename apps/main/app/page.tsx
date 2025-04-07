@@ -1,9 +1,16 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import dynamic from "next/dynamic"
 import { Box } from "@repo/ui/mui"
-import { Header } from "@repo/ui"
+import {
+  Header,
+  MiniDrawer,
+  HomeIcon,
+  LocationOnIcon,
+  SearchIcon,
+  SettingsIcon,
+} from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { HeroPanel, TwoColumnPanel } from "@repo/ui"
 
@@ -22,6 +29,42 @@ const CombinedPanel = dynamic(
 
 export default function Home() {
   const { t } = useTranslation()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // Navigation items for the secondary navigation drawer on the left
+  const navigationItems = [
+    {
+      text: "How water moves through California",
+      icon: <HomeIcon />,
+      onClick: () => console.log("Water moves through California clicked"),
+    },
+    {
+      text: "Managing California's water",
+      icon: <LocationOnIcon />,
+      onClick: () => console.log("Managing California's water clicked"),
+    },
+    {
+      text: "Challenges",
+      icon: <SearchIcon />,
+      onClick: () => console.log("Challenges clicked"),
+    },
+    {
+      text: "Alternative scenarios",
+      icon: <SettingsIcon />,
+      onClick: () => console.log("Alternative scenarios clicked"),
+    },
+    {
+      text: "Alternative scenario data",
+      icon: <SettingsIcon />,
+      onClick: () => console.log("Alternative scenario data clicked"),
+    },
+    {
+      text: "Alternative scenario presentation tools",
+      icon: <SettingsIcon />,
+      onClick: () =>
+        console.log("Alternative scenario presentation tools clicked"),
+    },
+  ]
 
   return (
     <>
@@ -40,12 +83,24 @@ export default function Home() {
         <MapContainer />
       </Box>
 
+      {/* Navigation Drawer */}
+      <Box sx={{ pointerEvents: "auto", position: "relative", zIndex: 20 }}>
+        <MiniDrawer
+          items={navigationItems}
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          position="left"
+        />
+      </Box>
+
       {/* Main Content - positioned with pointer-events none */}
       <Box
         sx={{
           position: "relative",
           zIndex: 10,
           pointerEvents: "none",
+          marginLeft: drawerOpen ? "240px" : "64px", // TODO:Adjust margin
+          transition: "margin 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
         }}
       >
         {/* Each interactive UI element gets pointer-events auto */}
@@ -53,7 +108,12 @@ export default function Home() {
           <Header />
         </Box>
 
-        <Box component="main">
+        <Box
+          component="main"
+          sx={{
+            position: "relative",
+          }}
+        >
           <Box sx={{ pointerEvents: "auto" }}>
             <HeroPanel
               title={t("heroPanel.title")}
