@@ -6,6 +6,7 @@ import { Box } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
+  VerticalDivider,
   HomeIcon,
   LocationOnIcon,
   SearchIcon,
@@ -100,6 +101,9 @@ export default function Home() {
           />
         </Box>
       </Box>
+
+      {/* Custom Vertical Divider for Drawer Border */}
+      <VerticalDivider left={drawerOpen ? 240 : 64} animated />
 
       {/* Main Content - positioned with pointer-events none */}
       <Box

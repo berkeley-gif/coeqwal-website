@@ -410,6 +410,7 @@ const theme = createTheme({
                 height: "100vh",
                 borderRadius: 0,
                 paddingTop: theme.layout.headerHeight,
+                border: "none",
 
                 ...(ownerState.open
                   ? drawerMixins.opened
