@@ -20,6 +20,7 @@ import { createTheme, alpha } from "@mui/material/styles"
     - Typography
     - Shape
     - Component overrides
+    - Global styles
     
  3. Custom theme properties
     - Border
@@ -42,6 +43,10 @@ const themeValues = {
   // Layout dimensions
   layout: {
     headerHeight: 64,
+    drawer: {
+      width: 240,
+      closedWidth: 64,
+    },
   },
 
   // Palette colors
@@ -127,12 +132,38 @@ const createBorderStyles = (borderType: string, color: string) => {
   }
 }
 
+// Helper to create drawer transition mixins
+const createDrawerMixins = (theme: any, width: number, closedWidth: number) => {
+  return {
+    opened: {
+      width: width,
+      transition: theme.transitions.create("width", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+      }),
+      overflowX: "hidden",
+    },
+    closed: {
+      transition: theme.transitions.create("width", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
+      overflowX: "hidden",
+      width: `${closedWidth}px`,
+    },
+  }
+}
+
 // Create theme
 const theme = createTheme({
   ...baseTheme,
   // Custom layout values
   layout: {
     headerHeight: themeValues.layout.headerHeight,
+    drawer: {
+      width: themeValues.layout.drawer.width,
+      closedWidth: themeValues.layout.drawer.closedWidth,
+    },
   },
   // Palette (some are fixed MUI theme properties, some are custom)
   palette: {
@@ -241,6 +272,22 @@ const theme = createTheme({
   zIndex: themeValues.zIndex,
   // Components customizations
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        "*, *::before, *::after": {
+          boxSizing: "border-box",
+        },
+        "html, body": {
+          margin: 0,
+          padding: 0,
+          height: "100%",
+        },
+        body: {
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+        },
+      },
+    },
     MuiAppBar: {
       styleOverrides: {
         root: ({ theme }) => ({
@@ -339,9 +386,55 @@ const theme = createTheme({
         paper: ({ theme }) => ({
           color: theme.palette.text.secondary,
           width: 400,
-          top: theme.layout.headerHeight, // Use consistent header height
-          height: `calc(100% - ${theme.layout.headerHeight}px)`, // Use consistent header height
+          top: theme.layout.headerHeight,
+          height: `calc(100% - ${theme.layout.headerHeight}px)`,
         }),
+        root: ({ theme, ownerState }) => {
+          const drawerMixins = createDrawerMixins(
+            theme,
+            theme.layout.drawer.width,
+            theme.layout.drawer.closedWidth,
+          )
+
+          return {
+            width: theme.layout.drawer.width,
+            flexShrink: 0,
+            whiteSpace: "nowrap",
+
+            "&.MiniDrawer-docked": {
+              zIndex: theme.zIndex.drawer,
+
+              "& .MuiDrawer-paper.MiniDrawer-paper": {
+                backgroundColor: theme.palette.common.white,
+                top: 0,
+                height: "100vh",
+                borderRadius: 0,
+                paddingTop: theme.layout.headerHeight,
+
+                ...(ownerState.open
+                  ? drawerMixins.opened
+                  : drawerMixins.closed),
+              },
+
+              "& .MuiListItemButton-root": {
+                minHeight: 48,
+                justifyContent: ownerState.open ? "initial" : "center",
+                padding: theme.spacing(0, 2.5),
+              },
+
+              "& .MuiListItemIcon-root": {
+                minWidth: 0,
+                marginRight: ownerState.open ? theme.spacing(3) : "auto",
+                justifyContent: "center",
+              },
+
+              "& .MuiListItemText-root": {
+                opacity: ownerState.open ? 1 : 0,
+                whiteSpace: "nowrap",
+              },
+            },
+          }
+        },
       },
     },
     MuiToggleButton: {
@@ -420,6 +513,10 @@ declare module "@mui/material/styles" {
   interface Theme {
     layout: {
       headerHeight: number
+      drawer: {
+        width: number
+        closedWidth: number
+      }
     }
     border: ReturnType<typeof createBorderStyles>
     background: {
@@ -431,6 +528,10 @@ declare module "@mui/material/styles" {
   interface ThemeOptions {
     layout?: {
       headerHeight?: number
+      drawer?: {
+        width?: number
+        closedWidth?: number
+      }
     }
   }
 }

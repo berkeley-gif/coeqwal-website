@@ -12,61 +12,16 @@ import {
   ListItemText,
   Divider,
   styled,
-  Theme,
-  CSSObject,
   useTheme,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
-
-// Width values for the drawer
-const drawerWidth = 240
-const closedWidth = 64
-
-// Mixin for opened state
-const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
-  }),
-  overflowX: "hidden",
-})
-
-// Mixin for closed state
-const closedMixin = (theme: Theme): CSSObject => ({
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: "hidden",
-  width: `${closedWidth}px`,
-})
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
   padding: theme.spacing(1),
-}))
-
-// Styled Drawer component applying the mixins
-const StyledDrawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-
-  "& .MuiDrawer-paper": {
-    backgroundColor: theme.palette.common.white,
-    top: 0,
-    height: "100vh",
-    borderRadius: 0,
-    paddingTop: 65, // todo: incorporate into theme with headerHeight variable
-    // Apply correct transition mixin based on open state
-    ...(open ? openedMixin(theme) : closedMixin(theme)),
-  },
 }))
 
 export interface MiniDrawerItem {
@@ -114,10 +69,11 @@ export function MiniDrawer({
   }
 
   return (
-    <StyledDrawer
+    <MuiDrawer
       variant="permanent"
       anchor={position}
       open={open}
+      className="MiniDrawer-docked"
       classes={{
         paper: "MiniDrawer-paper",
       }}
@@ -147,27 +103,9 @@ export function MiniDrawer({
       <List>
         {items.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? "initial" : "center",
-                px: 2.5,
-              }}
-              onClick={item.onClick}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : "auto",
-                  justifyContent: "center",
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.text}
-                sx={{ opacity: open ? 1 : 0, whiteSpace: "nowrap" }}
-              />
+            <ListItemButton onClick={item.onClick}>
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.text} />
             </ListItemButton>
           </ListItem>
         ))}
@@ -179,6 +117,6 @@ export function MiniDrawer({
           <Box sx={{ p: open ? 2 : 1 }}>{footer}</Box>
         </>
       )}
-    </StyledDrawer>
+    </MuiDrawer>
   )
 }

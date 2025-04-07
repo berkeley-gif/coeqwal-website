@@ -270,8 +270,7 @@ Node Code: ${tooltipNodeCode}`
                 height: `${scaledSize}px`,
                 borderRadius: "50%",
                 border: "1px solid white",
-                boxShadow: "0 0 0 1px rgba(0,0,0,0.8)", // Enhanced white outline
-                boxSizing: "border-box",
+                boxShadow: "0 0 0 1px rgba(0,0,0,0.8)", // To enhance white outline
                 cursor: "pointer", // Add pointer cursor
               }}
               title={tooltipContent}
