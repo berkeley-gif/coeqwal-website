@@ -12,7 +12,6 @@ import {
   ListItemText,
   Divider,
   styled,
-  useTheme,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
@@ -25,20 +24,33 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }))
 
 export interface MiniDrawerItem {
+  /** Text to display for the drawer item */
   text: string
+  /** Icon to display for the drawer item */
   icon: React.ReactNode
+  /** Optional click handler for the drawer item */
   onClick?: () => void
 }
 
 export interface MiniDrawerProps {
+  /** Array of items to display in the drawer */
   items: MiniDrawerItem[]
+  /** Whether the drawer is open (controlled mode) */
   open?: boolean
+  /** Callback when open state changes (controlled mode) */
   onOpenChange?: (open: boolean) => void
+  /** Position of the drawer */
   position?: "left" | "right"
+  /** Optional custom header component */
   header?: React.ReactNode
+  /** Optional footer component */
   footer?: React.ReactNode
 }
 
+/**
+ * Mini drawer that can collapse to icons-only mode
+ * Uses special styling defined in the theme
+ */
 export function MiniDrawer({
   items,
   open: controlledOpen,
@@ -52,6 +64,7 @@ export function MiniDrawer({
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
 
+  // Toggle handlers for drawer state
   const handleDrawerOpen = () => {
     if (isControlled) {
       onOpenChange?.(true)
@@ -68,6 +81,19 @@ export function MiniDrawer({
     }
   }
 
+  // Determine which direction icon to use based on open state and position
+  const toggleIcon = open ? (
+    position === "left" ? (
+      <ChevronLeftIcon />
+    ) : (
+      <ChevronRightIcon />
+    )
+  ) : position === "left" ? (
+    <ChevronRightIcon />
+  ) : (
+    <ChevronLeftIcon />
+  )
+
   return (
     <MuiDrawer
       variant="permanent"
@@ -83,17 +109,7 @@ export function MiniDrawer({
       ) : (
         <DrawerHeader>
           <IconButton onClick={open ? handleDrawerClose : handleDrawerOpen}>
-            {open ? (
-              position === "left" ? (
-                <ChevronLeftIcon />
-              ) : (
-                <ChevronRightIcon />
-              )
-            ) : position === "left" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
+            {toggleIcon}
           </IconButton>
         </DrawerHeader>
       )}

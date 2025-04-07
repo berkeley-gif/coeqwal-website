@@ -32,7 +32,7 @@ export default function Home() {
   const { t } = useTranslation()
   const [drawerOpen, setDrawerOpen] = useState(true)
 
-  // Navigation items for the secondary navigation drawer on the left
+  // Navigation items for the sidebar drawer
   const navigationItems = [
     {
       text: "How water moves through California",
@@ -69,7 +69,7 @@ export default function Home() {
 
   return (
     <>
-      {/* Background Map Layer - fixed position with full pointer events */}
+      {/* ===== Background Map Layer ===== */}
       <Box
         sx={{
           position: "fixed",
@@ -84,7 +84,7 @@ export default function Home() {
         <MapContainer />
       </Box>
 
-      {/* Navigation Drawer */}
+      {/* ===== Navigation Sidebar ===== */}
       <Box
         sx={{
           pointerEvents: "none",
@@ -102,30 +102,44 @@ export default function Home() {
         </Box>
       </Box>
 
-      {/* Custom Vertical Divider for Drawer Border */}
-      <VerticalDivider left={drawerOpen ? 240 : 64} animated />
+      {/* ===== Drawer "border" ===== */}
+      <VerticalDivider
+        left={(theme) =>
+          drawerOpen
+            ? theme.layout.drawer.width
+            : theme.layout.drawer.closedWidth
+        }
+        animated
+      />
 
-      {/* Main Content - positioned with pointer-events none */}
+      {/* ===== Main Content Area ===== */}
       <Box
-        sx={{
+        sx={(theme) => ({
           position: "relative",
           zIndex: 20,
           pointerEvents: "none",
-          marginLeft: drawerOpen ? "240px" : "64px", // TODO:Adjust margin
-          transition: "margin 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-        }}
+          marginLeft: drawerOpen
+            ? `${theme.layout.drawer.width}px`
+            : `${theme.layout.drawer.closedWidth}px`,
+          transition: theme.transitions.create("margin", {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.standard,
+          }),
+        })}
       >
-        {/* Each interactive UI element gets pointer-events auto */}
+        {/* Header - Enable pointer events */}
         <Box sx={{ pointerEvents: "auto" }}>
           <Header />
         </Box>
 
+        {/* Main content sections */}
         <Box
           component="main"
           sx={{
             position: "relative",
           }}
         >
+          {/* Hero Panel */}
           <Box sx={{ pointerEvents: "auto" }}>
             <HeroPanel
               title={t("heroPanel.title")}
@@ -133,6 +147,7 @@ export default function Home() {
             />
           </Box>
 
+          {/* Two Column Panel */}
           <Box sx={{ pointerEvents: "auto" }}>
             <TwoColumnPanel
               leftTitle={t("CaliforniaWaterPanel.title")}
@@ -147,7 +162,7 @@ export default function Home() {
             />
           </Box>
 
-          {/* Combined panel with question builder and scenario results */}
+          {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }}>
             <CombinedPanel />
           </Box>
