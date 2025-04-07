@@ -29,7 +29,7 @@ const CombinedPanel = dynamic(
 
 export default function Home() {
   const { t } = useTranslation()
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(true)
 
   // Navigation items for the secondary navigation drawer on the left
   const navigationItems = [
@@ -84,13 +84,21 @@ export default function Home() {
       </Box>
 
       {/* Navigation Drawer */}
-      <Box sx={{ pointerEvents: "auto", position: "relative", zIndex: 20 }}>
-        <MiniDrawer
-          items={navigationItems}
-          open={drawerOpen}
-          onOpenChange={setDrawerOpen}
-          position="left"
-        />
+      <Box
+        sx={{
+          pointerEvents: "none",
+          position: "relative",
+          zIndex: 20,
+        }}
+      >
+        <Box sx={{ pointerEvents: "auto" }}>
+          <MiniDrawer
+            items={navigationItems}
+            open={drawerOpen}
+            onOpenChange={setDrawerOpen}
+            position="left"
+          />
+        </Box>
       </Box>
 
       {/* Main Content - positioned with pointer-events none */}

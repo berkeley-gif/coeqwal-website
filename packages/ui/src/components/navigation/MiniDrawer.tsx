@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import {
   Box,
-  Drawer,
+  Drawer as MuiDrawer,
   IconButton,
   List,
   ListItem,
@@ -12,6 +12,9 @@ import {
   ListItemText,
   Divider,
   styled,
+  Theme,
+  CSSObject,
+  useTheme,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
@@ -20,6 +23,26 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 const drawerWidth = 240
 const closedWidth = 64
 
+// Mixin for opened state
+const openedMixin = (theme: Theme): CSSObject => ({
+  width: drawerWidth,
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: "hidden",
+})
+
+// Mixin for closed state
+const closedMixin = (theme: Theme): CSSObject => ({
+  transition: theme.transitions.create("width", {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: "hidden",
+  width: `${closedWidth}px`,
+})
+
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -27,6 +50,24 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   padding: theme.spacing(0, 1),
   // necessary for content to be below app bar
   ...theme.mixins.toolbar,
+}))
+
+// Styled Drawer component applying the mixins
+const StyledDrawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  ...(open && {
+    ...openedMixin(theme),
+    "& .MuiDrawer-paper": openedMixin(theme),
+  }),
+  ...(!open && {
+    ...closedMixin(theme),
+    "& .MuiDrawer-paper": closedMixin(theme),
+  }),
 }))
 
 export interface MiniDrawerItem {
@@ -74,31 +115,30 @@ export function MiniDrawer({
   }
 
   return (
-    <Drawer
-      sx={{
-        width: open ? drawerWidth : closedWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: open ? drawerWidth : closedWidth,
-          boxSizing: "border-box",
-          overflowX: "hidden",
-          transition: (theme) =>
-            theme.transitions.create("width", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-        },
-      }}
+    <StyledDrawer
       variant="permanent"
       anchor={position}
       open={open}
+      classes={{
+        paper: "MiniDrawer-paper",
+      }}
     >
       {header ? (
         header
       ) : (
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {position === "left" ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          <IconButton onClick={open ? handleDrawerClose : handleDrawerOpen}>
+            {open ? (
+              position === "left" ? (
+                <ChevronLeftIcon />
+              ) : (
+                <ChevronRightIcon />
+              )
+            ) : position === "left" ? (
+              <ChevronRightIcon />
+            ) : (
+              <ChevronLeftIcon />
+            )}
           </IconButton>
         </DrawerHeader>
       )}
@@ -140,24 +180,6 @@ export function MiniDrawer({
           <Box sx={{ p: open ? 2 : 1 }}>{footer}</Box>
         </>
       )}
-
-      {/* Toggle button when closed */}
-      {!open && (
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 16,
-            left: 0,
-            right: 0,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <IconButton onClick={handleDrawerOpen}>
-            {position === "left" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-        </Box>
-      )}
-    </Drawer>
+    </StyledDrawer>
   )
 }
