@@ -1,14 +1,14 @@
 import type { Metadata } from "next"
-import { Lato } from "next/font/google"
+import { Inter_Tight } from "next/font/google"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { MapProvider } from "@repo/map"
 import "./globals.css"
 
-const lato = Lato({
+const interTight = Inter_Tight({
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
 })
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lato.className}`}>
+      <body className={`${interTight.className}`}>
         <TranslationProvider initialLocale="en">
           <ThemeRegistry>
             <MapProvider>{children}</MapProvider>

@@ -164,7 +164,7 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: `"Lato", Arial, sans-serif`,
+    fontFamily: `"Inter Tight", Arial, sans-serif`,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
