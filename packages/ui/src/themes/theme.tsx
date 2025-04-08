@@ -232,29 +232,38 @@ const theme = createTheme({
       fontSize: "4rem",
       fontWeight: 700,
       lineHeight: 1.1,
+      fontFamily: `"Inter Tight", Arial, sans-serif`,
     },
     h2: {
       fontSize: "3.333rem",
       lineHeight: 1.2,
+      fontFamily: `"Inter Tight", Arial, sans-serif`,
     },
     h3: {
       fontSize: "2.778rem",
+      fontFamily: `"Inter Tight", Arial, sans-serif`,
     },
     h4: {
       fontSize: "2.315rem",
+      fontFamily: `"Inter Tight", Arial, sans-serif`,
     },
     h5: {
       fontSize: "1.929rem",
+      fontFamily: `"Inter Tight", Arial, sans-serif`,
     },
     h6: {
-      fontSize: "1.608rem",
+      fontSize: "1.2rem",
+      fontFamily: `"Inter Tight", Arial, sans-serif`,
     },
     body1: {
       fontSize: "1.2857rem",
+      fontFamily: `"Inter", Arial, sans-serif`,
     },
     body2: {
       fontSize: "1.2rem",
       lineHeight: 1.1,
+      fontWeight: 500,
+      fontFamily: `"Inter", Arial, sans-serif`,
     },
     subtitle1: {
       fontSize: "1.0714rem",

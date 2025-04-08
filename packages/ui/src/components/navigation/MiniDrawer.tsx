@@ -205,17 +205,13 @@ export function MiniDrawer({
                   primary={item.text}
                   slotProps={{
                     primary: {
-                      variant: "body2",
+                      variant: "h6",
                       sx: {
-                        fontWeight: 500,
-                        lineHeight: 1.2,
+                        lineHeight: 1.1,
                         whiteSpace: "normal",
                         overflowWrap: "break-word",
                         wordBreak: "break-word",
                         color: "inherit",
-                        marginTop: "auto",
-                        textAlign: "left",
-                        width: "100%",
                       },
                     },
                   }}

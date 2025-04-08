@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import {
   Inter_Tight,
+  Inter,
   Lexend,
   Nokora,
   Roboto,
@@ -27,6 +28,13 @@ const interTight = Inter_Tight({
   display: "swap",
   weight: ["400", "500", "700"],
   variable: "--font-inter-tight",
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "700"],
+  variable: "--font-inter",
 })
 
 const lexend = Lexend({
@@ -102,6 +110,7 @@ const workSans = Work_Sans({
 // Mapping of font names to font instances
 const fontMap = {
   interTight,
+  inter,
   lexend,
   nokora,
   roboto,
@@ -117,6 +126,7 @@ const fontMap = {
 // Mapping of font variable names to CSS font family names
 const fontFamilyMap = {
   interTight: "Inter Tight",
+  inter: "Inter",
   lexend: "Lexend",
   nokora: "Nokora",
   roboto: "Roboto",

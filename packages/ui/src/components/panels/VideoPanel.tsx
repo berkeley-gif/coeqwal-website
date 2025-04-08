@@ -89,7 +89,7 @@ export function VideoPanel({
           {title}
         </Typography>
 
-        <Typography variant="body1">{content}</Typography>
+        <Typography variant="body2">{content}</Typography>
 
         {children}
       </Box>
