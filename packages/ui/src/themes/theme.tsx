@@ -151,6 +151,10 @@ const createDrawerMixins = (theme: any, width: number, closedWidth: number) => {
       }),
       overflowX: "hidden",
       width: `${closedWidth}px`,
+      // In closed state, icons are centered
+      "& .MuiListItemIcon-root": {
+        margin: "0 auto",
+      },
     },
   }
 }
@@ -446,8 +450,9 @@ const theme = createTheme({
 
               "& .MuiListItemIcon-root": {
                 minWidth: 0,
-                marginRight: ownerState.open ? theme.spacing(3) : "auto",
+                marginRight: ownerState.open ? theme.spacing(3) : 0,
                 justifyContent: "center",
+                alignSelf: ownerState.open ? "flex-start" : "center",
               },
 
               "& .MuiListItemText-root": {
