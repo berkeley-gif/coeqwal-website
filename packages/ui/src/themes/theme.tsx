@@ -450,9 +450,9 @@ const theme = createTheme({
 
               "& .MuiListItemIcon-root": {
                 minWidth: 0,
-                marginRight: ownerState.open ? theme.spacing(3) : 0,
+                marginRight: ownerState.open ? theme.spacing(3) : "auto",
+                marginLeft: ownerState.open ? 0 : "auto",
                 justifyContent: "center",
-                alignSelf: ownerState.open ? "flex-start" : "center",
               },
 
               "& .MuiListItemText-root": {
