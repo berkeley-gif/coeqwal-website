@@ -379,10 +379,10 @@ const theme = createTheme({
         root: ({ theme }) => ({
           color: "inherit",
           fontSize: "inherit",
-          transition: "color 0.2s ease-in-out",
+          transition: "none",
           pointerEvents: "auto",
           "&:hover, &:focus": {
-            color: theme.palette.primary.light,
+            color: "inherit",
           },
         }),
       },
