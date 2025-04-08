@@ -19,7 +19,7 @@ import "./globals.css"
 
 // Font configuration
 // To try a different font, change the ACTIVE_FONT value
-const ACTIVE_FONT = "interTight" // Options: interTight, lexend, nokora, roboto, montserrat, openSans, poppins, nunito, rubik, sourceSans, workSans
+const ACTIVE_FONT = "interTight"
 
 // Define font instances
 const interTight = Inter_Tight({

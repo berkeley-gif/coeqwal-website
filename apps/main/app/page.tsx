@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import dynamic from "next/dynamic"
 import { Box } from "@repo/ui/mui"
 import {
@@ -31,7 +31,25 @@ export default function Home() {
   const { t } = useTranslation()
   const [drawerOpen, setDrawerOpen] = useState(true)
 
+  // Reference to the video element for autoplay handling
+  const videoRef = useRef<HTMLVideoElement>(null)
+
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
+
+  // Ensure video plays when component mounts (helps with browser autoplay restrictions)
+  useEffect(() => {
+    const playVideo = async () => {
+      if (videoRef.current) {
+        try {
+          await videoRef.current.play()
+        } catch (err) {
+          console.error("Video autoplay failed:", err)
+        }
+      }
+    }
+
+    playVideo()
+  }, [])
 
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
@@ -57,7 +75,7 @@ export default function Home() {
           width: "100%",
           height: "100%",
           pointerEvents: "all",
-          zIndex: 0,
+          zIndex: -1,
         }}
       >
         <MapContainer />
@@ -120,11 +138,74 @@ export default function Home() {
             position: "relative",
           }}
         >
-          {/* Hero Panel */}
-          <Box sx={{ pointerEvents: "auto", position: "relative" }}>
+          {/* Hero Panel with Video Background */}
+          <Box
+            sx={{
+              pointerEvents: "auto",
+              position: "relative",
+              zIndex: 5,
+              height: "100vh",
+              overflow: "hidden",
+            }}
+          >
+            {/* Video Background */}
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: 0,
+              }}
+            >
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/video/poster.jpg"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  minWidth: "100%",
+                  minHeight: "100%",
+                  width: "auto",
+                  height: "auto",
+                  transform: "translateX(-50%) translateY(-50%)",
+                  objectFit: "cover",
+                }}
+                ref={videoRef}
+              >
+                <source src="/video/background.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+
+              {/* Video overlay
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "black",
+                  opacity: 0.5
+                }}
+              />
+              */}
+            </Box>
+
+            {/* Hero content */}
             <HeroPanel
               title={t("heroPanel.title")}
               content={t("heroPanel.content")}
+              sx={{
+                background: "transparent",
+                position: "relative",
+                zIndex: 1,
+              }}
             />
 
             {/* Scroll Down Button */}

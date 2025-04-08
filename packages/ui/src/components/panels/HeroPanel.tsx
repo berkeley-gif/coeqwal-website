@@ -29,6 +29,7 @@ export function HeroPanel({
         position: "relative",
         display: "flex",
         justifyContent: "center",
+        overflow: "hidden",
         ...panelProps.sx,
       }}
     >
@@ -39,6 +40,8 @@ export function HeroPanel({
           height: "100%",
           maxWidth: "770px",
           textAlign: "left",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Typography variant="h1" gutterBottom>
