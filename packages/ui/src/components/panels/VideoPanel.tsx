@@ -10,6 +10,7 @@ interface VideoPanelProps extends BasePanelProps {
   videoSrc: string
   posterSrc: string
   overlayOpacity?: number
+  verticalAlignment?: "top" | "center" | "bottom"
   children?: React.ReactNode
 }
 
@@ -26,6 +27,7 @@ interface VideoPanelProps extends BasePanelProps {
  *   videoSrc="/videos/background.mp4"
  *   posterSrc="/videos/poster.jpg"
  *   overlayOpacity={0.5}
+ *   verticalAlignment="center"
  * />
  */
 export function VideoPanel({
@@ -34,6 +36,7 @@ export function VideoPanel({
   videoSrc,
   posterSrc,
   overlayOpacity = 0.5,
+  verticalAlignment = "top",
   children,
   ...panelProps
 }: VideoPanelProps) {
@@ -41,6 +44,7 @@ export function VideoPanel({
     <BasePanel
       fullHeight={true}
       paddingVariant="wide"
+      background="dark"
       {...panelProps}
       sx={{
         backgroundSize: "cover",
@@ -49,6 +53,8 @@ export function VideoPanel({
         display: "flex",
         justifyContent: "center",
         overflow: "hidden",
+        backgroundColor: "transparent",
+        height: "100%",
         ...panelProps.sx,
       }}
     >
@@ -69,6 +75,14 @@ export function VideoPanel({
           textAlign: "left",
           position: "relative",
           zIndex: 2, // Ensure content is above video
+          justifyContent:
+            verticalAlignment === "top"
+              ? "flex-start"
+              : verticalAlignment === "bottom"
+                ? "flex-end"
+                : "center",
+          paddingTop: verticalAlignment === "top" ? "2rem" : 0,
+          paddingBottom: verticalAlignment === "bottom" ? "2rem" : 0,
         }}
       >
         <Typography variant="h1" gutterBottom>

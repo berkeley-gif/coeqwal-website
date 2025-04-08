@@ -136,9 +136,7 @@ export default function Home() {
               videoSrc="/video/background.mp4"
               posterSrc="/video/poster.jpg"
               overlayOpacity={0}
-              sx={{
-                height: "100%",
-              }}
+              verticalAlignment="bottom"
             />
 
             {/* Scroll Down Button */}
