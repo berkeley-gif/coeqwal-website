@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Button, ButtonProps } from "@mui/material"
-import CustomArrowForwardIcon from "./customArrowForwardIcon"
+import CustomArrowForwardIcon from "./CustomArrowForwardIcon"
 
 interface LearnMoreButtonProps extends ButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void

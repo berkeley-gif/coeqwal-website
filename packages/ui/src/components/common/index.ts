@@ -1,2 +1,1 @@
-// Common components
-export * from "./ScrollDownIcon"
+export * from "./Card"

@@ -157,15 +157,15 @@ export default function Home() {
                   },
                 }}
               >
-                <KeyboardArrowDownIcon 
-                  fontSize="large" 
-                  sx={{ 
+                <KeyboardArrowDownIcon
+                  fontSize="large"
+                  sx={{
                     fontSize: 36,
                     color: "white",
                     "&:hover": {
-                      color: "white"
-                    }
-                  }} 
+                      color: "white",
+                    },
+                  }}
                 />
               </Box>
             </Box>
