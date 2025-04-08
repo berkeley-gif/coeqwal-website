@@ -8,7 +8,6 @@ import {
   MiniDrawer,
   VerticalDivider,
   SettingsIcon,
-  EngineeringIcon,
   ReportProblemIcon,
   SwapHorizIcon,
   BarChartIcon,
@@ -34,38 +33,57 @@ export default function Home() {
   const { t } = useTranslation()
   const [drawerOpen, setDrawerOpen] = useState(true)
 
+  // Function to scroll to an element by ID with smooth animation
+  const scrollToSection = (elementId: string) => {
+    const element = document.getElementById(elementId)
+    if (element) {
+      // Apply scroll margin to account for header height
+      element.style.scrollMarginTop = "64px"
+
+      // Use the native scrollIntoView with smooth behavior
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+
+      // On mobile or smaller screens, close the drawer after navigation
+      if (window.innerWidth < 960) {
+        setDrawerOpen(false)
+      }
+    }
+  }
+
   // Navigation items for the sidebar drawer
   const navigationItems = [
     {
       text: "How water moves through California",
       icon: <WaterIcon />,
-      onClick: () => console.log("Water moves through California clicked"),
+      onClick: () => scrollToSection("california-water-panel"),
     },
     {
       text: "Managing California's water",
       icon: <SettingsIcon />,
-      onClick: () => console.log("Managing California's water clicked"),
+      onClick: () => scrollToSection("managing-water"),
     },
     {
       text: "Challenges",
       icon: <ReportProblemIcon />,
-      onClick: () => console.log("Challenges clicked"),
+      onClick: () => scrollToSection("challenges"),
     },
     {
       text: "Alternative scenarios",
       icon: <SwapHorizIcon />,
-      onClick: () => console.log("Alternative scenarios clicked"),
+      onClick: () => scrollToSection("alternative-scenarios"),
     },
     {
       text: "Alternative scenario data",
       icon: <BarChartIcon />,
-      onClick: () => console.log("Alternative scenario data clicked"),
+      onClick: () => scrollToSection("scenario-data"),
     },
     {
       text: "Alternative scenario presentation tools",
       icon: <SlideshowIcon />,
-      onClick: () =>
-        console.log("Alternative scenario presentation tools clicked"),
+      onClick: () => scrollToSection("presentation-tools"),
     },
   ]
 
@@ -152,7 +170,7 @@ export default function Home() {
           </Box>
 
           {/* Two Column Panel */}
-          <Box sx={{ pointerEvents: "auto" }}>
+          <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
             <TwoColumnPanel
               leftTitle={t("CaliforniaWaterPanel.title")}
               leftContent={<div>Content</div>}

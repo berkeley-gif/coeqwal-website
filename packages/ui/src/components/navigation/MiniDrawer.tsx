@@ -161,6 +161,7 @@ export function MiniDrawer({
             >
               <ListItemButton
                 onClick={item.onClick}
+                disableRipple={true}
                 sx={(theme) => ({
                   width: "100%",
                   backgroundColor: bgColor,

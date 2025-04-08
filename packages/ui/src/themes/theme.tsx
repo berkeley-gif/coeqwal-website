@@ -441,16 +441,32 @@ const theme = createTheme({
                     "padding",
                     "margin",
                     "align-items",
+                    "transform",
+                    "box-shadow",
                   ],
                   {
                     duration: theme.transitions.duration.shortest,
                   },
                 ),
+                "& .MuiTouchRipple-root": {
+                  display: "none",
+                },
+                "&.Mui-focusVisible": {
+                  backgroundColor: "transparent",
+                },
                 "&:hover": {
-                  backgroundColor: theme.palette.action.hover,
+                  backgroundColor: `${theme.palette.action.hover}cc`,
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+
+                  // Ensure icon color is preserved on hover
+                  "& .MuiListItemIcon-root .MuiSvgIcon-root": {
+                    color: "inherit",
+                  },
                 },
                 "&:active": {
-                  backgroundColor: theme.palette.action.selected,
+                  transform: "translateY(0px)",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
                 },
               },
 
@@ -461,6 +477,15 @@ const theme = createTheme({
                 transition: theme.transitions.create("justify-content", {
                   duration: theme.transitions.duration.shortest,
                 }),
+
+                // Prevent icon color change on hover
+                "& .MuiSvgIcon-root": {
+                  color: "inherit",
+                  transition: "none", // Disable color transition
+                  "&:hover, &:focus": {
+                    color: "inherit", // Keep the same color on hover/focus
+                  },
+                },
               },
 
               "& .MuiListItemText-root": {
