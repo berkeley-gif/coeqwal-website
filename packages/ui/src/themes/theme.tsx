@@ -151,10 +151,6 @@ const createDrawerMixins = (theme: any, width: number, closedWidth: number) => {
       }),
       overflowX: "hidden",
       width: `${closedWidth}px`,
-      // In closed state, icons are centered
-      "& .MuiListItemIcon-root": {
-        margin: "0 auto",
-      },
     },
   }
 }
@@ -282,6 +278,10 @@ const theme = createTheme({
       styleOverrides: {
         "*, *::before, *::after": {
           boxSizing: "border-box",
+        },
+        "html, body, *": {
+          margin: 0,
+          padding: 0,
         },
         "html, body": {
           margin: 0,
@@ -428,14 +428,20 @@ const theme = createTheme({
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                alignItems: "flex-start",
+                alignItems: ownerState.open ? "flex-start" : "center",
                 padding: theme.spacing(2),
                 borderRadius: theme.borderRadius.navigation,
                 mx: 1,
                 my: 0.5,
                 overflow: "hidden",
                 transition: theme.transitions.create(
-                  ["background-color", "color", "padding", "margin"],
+                  [
+                    "background-color",
+                    "color",
+                    "padding",
+                    "margin",
+                    "align-items",
+                  ],
                   {
                     duration: theme.transitions.duration.shortest,
                   },
@@ -449,10 +455,12 @@ const theme = createTheme({
               },
 
               "& .MuiListItemIcon-root": {
-                minWidth: 0,
-                marginRight: ownerState.open ? theme.spacing(3) : "auto",
-                marginLeft: ownerState.open ? 0 : "auto",
-                justifyContent: "center",
+                width: "100%",
+                display: "flex",
+                justifyContent: ownerState.open ? "flex-start" : "center",
+                transition: theme.transitions.create("justify-content", {
+                  duration: theme.transitions.duration.shortest,
+                }),
               },
 
               "& .MuiListItemText-root": {
