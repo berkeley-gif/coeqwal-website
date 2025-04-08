@@ -24,7 +24,6 @@ export const VideoBackground: FC<VideoBackgroundProps> = ({
       if (videoRef.current) {
         try {
           await videoRef.current.play()
-          console.log("Video is playing")
         } catch (err) {
           console.error("Error playing video:", err)
         }
