@@ -1,4 +1,4 @@
-import { createTheme, alpha } from "@mui/material/styles"
+import { createTheme, alpha, Theme } from "@mui/material/styles"
 
 // TODO:
 // - Transitions
@@ -134,7 +134,11 @@ const createBorderStyles = (borderType: string, color: string) => {
 }
 
 // Helper to create drawer transition mixins
-const createDrawerMixins = (theme: any, width: number, closedWidth: number) => {
+const createDrawerMixins = (
+  theme: Theme,
+  width: number,
+  closedWidth: number,
+) => {
   return {
     opened: {
       width: width,
@@ -226,6 +230,7 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontSize: "4rem",
+      fontWeight: 700,
       lineHeight: 1.1,
     },
     h2: {
@@ -376,7 +381,7 @@ const theme = createTheme({
     },
     MuiSvgIcon: {
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: () => ({
           color: "inherit",
           fontSize: "inherit",
           transition: "none",
