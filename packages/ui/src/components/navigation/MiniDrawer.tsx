@@ -108,7 +108,16 @@ export function MiniDrawer({
         header
       ) : (
         <DrawerHeader>
-          <IconButton onClick={open ? handleDrawerClose : handleDrawerOpen}>
+          <IconButton
+            onClick={open ? handleDrawerClose : handleDrawerOpen}
+            sx={(theme) => ({
+              transition: theme.transitions.create(["transform"], {
+                duration: theme.transitions.duration.leavingScreen,
+                easing: theme.transitions.easing.sharp,
+              }),
+              transform: open ? "rotate(0deg)" : "rotate(180deg)", // Rotate based on state
+            })}
+          >
             {toggleIcon}
           </IconButton>
         </DrawerHeader>

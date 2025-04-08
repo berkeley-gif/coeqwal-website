@@ -51,7 +51,7 @@ export function VerticalDivider({
         ...(animated && {
           transition: theme.transitions.create("left", {
             easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.standard,
+            duration: theme.transitions.duration.leavingScreen,
           }),
         }),
         zIndex: zIndex ?? theme.zIndex.drawer + 1,

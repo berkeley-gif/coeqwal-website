@@ -125,7 +125,9 @@ export default function Home() {
             : `${theme.layout.drawer.closedWidth}px`,
           transition: theme.transitions.create("margin", {
             easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.standard,
+            duration: drawerOpen
+              ? theme.transitions.duration.enteringScreen
+              : theme.transitions.duration.leavingScreen,
           }),
         })}
       >
