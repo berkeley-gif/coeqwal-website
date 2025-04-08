@@ -43,10 +43,8 @@ export default function Home() {
         block: "start",
       })
       
-      // On mobile or smaller screens, close the drawer after navigation
-      if (window.innerWidth < 960) {
-        setDrawerOpen(false)
-      }
+      // Close the drawer after navigation
+      setDrawerOpen(false)
     }
   }
 
