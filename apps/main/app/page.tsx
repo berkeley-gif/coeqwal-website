@@ -37,15 +37,12 @@ export default function Home() {
   const scrollToSection = (elementId: string) => {
     const element = document.getElementById(elementId)
     if (element) {
-      // Apply scroll margin to account for header height
-      element.style.scrollMarginTop = "64px"
-
       // Use the native scrollIntoView with smooth behavior
-      element.scrollIntoView({
-        behavior: "smooth",
+      element.scrollIntoView({ 
+        behavior: "smooth", 
         block: "start",
       })
-
+      
       // On mobile or smaller screens, close the drawer after navigation
       if (window.innerWidth < 960) {
         setDrawerOpen(false)
