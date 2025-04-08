@@ -144,8 +144,8 @@ export default function Home() {
             >
               <Box
                 sx={{
-                  width: 40,
-                  height: 40,
+                  width: 56,
+                  height: 56,
                   borderRadius: "50%",
                   backgroundColor: "rgba(0, 0, 0, 0.2)",
                   display: "flex",
@@ -157,7 +157,7 @@ export default function Home() {
                   },
                 }}
               >
-                <KeyboardArrowDownIcon fontSize="large" />
+                <KeyboardArrowDownIcon fontSize="large" sx={{ fontSize: 36 }} />
               </Box>
             </Box>
           </Box>
