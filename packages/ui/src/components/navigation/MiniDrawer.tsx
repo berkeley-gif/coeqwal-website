@@ -167,7 +167,10 @@ export function MiniDrawer({
                   sx={(theme) => ({
                     minWidth: "auto",
                     color: theme.palette.common.white,
-                    marginBottom: theme.spacing(3),
+                    marginBottom: theme.spacing(2),
+                    "& .MuiSvgIcon-root": {
+                      fontSize: 32,
+                    },
                   })}
                 >
                   {item.icon}

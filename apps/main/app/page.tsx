@@ -2,12 +2,12 @@
 
 import React, { useState } from "react"
 import dynamic from "next/dynamic"
-import { Box } from "@repo/ui/mui"
+import { Box, WaterIcon } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
   VerticalDivider,
-  OpacityIcon,
+  SettingsIcon,
   EngineeringIcon,
   ReportProblemIcon,
   SwapHorizIcon,
@@ -38,12 +38,12 @@ export default function Home() {
   const navigationItems = [
     {
       text: "How water moves through California",
-      icon: <OpacityIcon />,
+      icon: <WaterIcon />,
       onClick: () => console.log("Water moves through California clicked"),
     },
     {
       text: "Managing California's water",
-      icon: <EngineeringIcon />,
+      icon: <SettingsIcon />,
       onClick: () => console.log("Managing California's water clicked"),
     },
     {
