@@ -32,17 +32,59 @@ const CombinedPanel = dynamic(
 export default function Home() {
   const { t } = useTranslation()
   const [drawerOpen, setDrawerOpen] = useState(true)
+  const [activeSection, setActiveSection] = useState("")
+
+  // Function to check which section is currently visible
+  const checkActiveSection = () => {
+    const sectionIds = [
+      "california-water-panel",
+      "managing-water",
+      "challenges",
+      "alternative-scenarios",
+      "scenario-data",
+      "presentation-tools",
+    ]
+
+    // Find the first section that's currently visible in the viewport
+    for (const id of sectionIds) {
+      const element = document.getElementById(id)
+      if (element) {
+        const rect = element.getBoundingClientRect()
+        // Check if the element is at least partially visible in the viewport
+        if (rect.top <= 100 && rect.bottom >= 100) {
+          setActiveSection(id)
+          return
+        }
+      }
+    }
+
+    // If no section is active (e.g., at the very top of the page)
+    setActiveSection("")
+  }
+
+  // Add scroll listener
+  React.useEffect(() => {
+    window.addEventListener("scroll", checkActiveSection)
+    checkActiveSection()
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("scroll", checkActiveSection)
+    }
+  }, [])
 
   // Function to scroll to an element by ID with smooth animation
   const scrollToSection = (elementId: string) => {
     const element = document.getElementById(elementId)
     if (element) {
       // Use the native scrollIntoView with smooth behavior
-      element.scrollIntoView({ 
-        behavior: "smooth", 
+      element.scrollIntoView({
+        behavior: "smooth",
         block: "start",
       })
-      
+
+      setActiveSection(elementId)
+
       // Close the drawer after navigation
       setDrawerOpen(false)
     }
@@ -54,31 +96,37 @@ export default function Home() {
       text: "How water moves through California",
       icon: <WaterIcon />,
       onClick: () => scrollToSection("california-water-panel"),
+      active: activeSection === "california-water-panel",
     },
     {
       text: "Managing California's water",
       icon: <SettingsIcon />,
       onClick: () => scrollToSection("managing-water"),
+      active: activeSection === "managing-water",
     },
     {
       text: "Challenges",
       icon: <ReportProblemIcon />,
       onClick: () => scrollToSection("challenges"),
+      active: activeSection === "challenges",
     },
     {
       text: "Alternative scenarios",
       icon: <SwapHorizIcon />,
       onClick: () => scrollToSection("alternative-scenarios"),
+      active: activeSection === "alternative-scenarios",
     },
     {
       text: "Alternative scenario data",
       icon: <BarChartIcon />,
       onClick: () => scrollToSection("scenario-data"),
+      active: activeSection === "scenario-data",
     },
     {
       text: "Alternative scenario presentation tools",
       icon: <SlideshowIcon />,
       onClick: () => scrollToSection("presentation-tools"),
+      active: activeSection === "presentation-tools",
     },
   ]
 

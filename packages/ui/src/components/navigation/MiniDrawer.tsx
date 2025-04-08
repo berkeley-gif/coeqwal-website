@@ -30,6 +30,8 @@ export interface MiniDrawerItem {
   icon: React.ReactNode
   /** Optional click handler for the drawer item */
   onClick?: () => void
+  /** Whether this item is currently active */
+  active?: boolean
 }
 
 export interface MiniDrawerProps {
@@ -169,8 +171,21 @@ export function MiniDrawer({
                   "&:hover": {
                     backgroundColor: `${bgColor}dd`,
                     boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
+                    transform: "translateY(-2px)",
                   },
+                  // Apply hover styling when item is active
+                  ...(item.active && {
+                    backgroundColor: `${bgColor}dd`,
+                    boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
+                    transform: "translateY(-2px)",
+                  }),
                   minHeight: 96,
+                  transition: theme.transitions.create(
+                    ["background-color", "box-shadow", "transform"],
+                    {
+                      duration: theme.transitions.duration.shortest,
+                    },
+                  ),
                 })}
               >
                 <ListItemIcon
