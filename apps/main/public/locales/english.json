@@ -3,6 +3,14 @@
     "title": "Californians are connected\u00A0by\u00A0their water",
     "content": "From mountains to coast and north to south, Californians share water through one of the largest and most complex water conveyance systems in the world. The COEQWAL project helps people understand how this system works and explores different ways water can be distributed to serve our communities, now and under future climate conditions."
   },
+  "secondaryNavigation": {
+    "californiaWater": "How water moves through California",
+    "managingWater": "Managing California water",
+    "challenges": "Challenges",
+    "alternativeScenarios": "Alternative scenarios",
+    "scenarioData": "Alternative scenario data",
+    "presentationTools": "Alternative scenario presentation tools"
+  },
   "CaliforniaWaterPanel": {
     "title": "California Water"
   }

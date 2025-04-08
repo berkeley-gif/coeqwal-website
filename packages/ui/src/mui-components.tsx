@@ -47,6 +47,7 @@ export {
 
 // Import and re-export specific commonly used icons
 import WaterIcon from "@mui/icons-material/Water"
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 import SearchIcon from "@mui/icons-material/Search"
@@ -66,6 +67,7 @@ import SlideshowIcon from "@mui/icons-material/Slideshow"
 // Export individually imported icons
 export {
   WaterIcon,
+  KeyboardArrowDownIcon,
   HomeIcon,
   LocationOnIcon,
   SearchIcon,

@@ -3,7 +3,12 @@
 import React, { useState } from "react"
 import dynamic from "next/dynamic"
 import { Box } from "@repo/ui/mui"
-import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
+import {
+  Header,
+  MiniDrawer,
+  VerticalDivider,
+  KeyboardArrowDownIcon,
+} from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { HeroPanel, TwoColumnPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
@@ -34,8 +39,12 @@ export default function Home() {
     setDrawerOpen(false)
   }
 
-  // Get navigation items with the current active section
-  const navigationItems = getNavigationItems(activeSection, handleSectionClick)
+  // Get navigation items with the current active section and translation function
+  const navigationItems = getNavigationItems(
+    activeSection,
+    handleSectionClick,
+    t,
+  )
 
   return (
     <>
@@ -112,11 +121,45 @@ export default function Home() {
           }}
         >
           {/* Hero Panel */}
-          <Box sx={{ pointerEvents: "auto" }}>
+          <Box sx={{ pointerEvents: "auto", position: "relative" }}>
             <HeroPanel
               title={t("heroPanel.title")}
               content={t("heroPanel.content")}
             />
+
+            {/* Scroll Down Button */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 20,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 10,
+                cursor: "pointer",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+              onClick={() => scrollToSection("california-water-panel")}
+            >
+              <Box
+                sx={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(0, 0, 0, 0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.3)",
+                  },
+                }}
+              >
+                <KeyboardArrowDownIcon fontSize="large" />
+              </Box>
+            </Box>
           </Box>
 
           {/* Two Column Panel */}
