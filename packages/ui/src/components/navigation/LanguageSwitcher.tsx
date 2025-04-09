@@ -20,7 +20,14 @@ export function LanguageSwitcher() {
   return (
     <ToggleButtonGroup value={locale} exclusive onChange={handleChange}>
       <ToggleButton value="en">English</ToggleButton>
-      <ToggleButton value="es">Español</ToggleButton>
+      <ToggleButton
+        value="es"
+        sx={{
+          borderLeft: "1px solid black",
+        }}
+      >
+        Español
+      </ToggleButton>
     </ToggleButtonGroup>
   )
 }

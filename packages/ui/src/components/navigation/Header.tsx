@@ -40,7 +40,8 @@ const translations: TranslationsMap = {
 export function Header() {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const buttonVariant = isMobile ? "text" : "contained"
+  const buttonVariant = isMobile ? "text" : "header"
+  const buttonStyle = {} // No need for additional styles since they're in the theme
   const { locale, isLoading } = useTranslation()
 
   // Use 'en' as default until client-side hydration is complete
@@ -66,10 +67,12 @@ export function Header() {
           <Logo />
         </Box>
         <Stack direction="row" spacing={2} alignItems="center">
-          <Button variant={buttonVariant}>
+          <Button variant={buttonVariant} color="secondary" sx={buttonStyle}>
             {componentText.buttons.getData}
           </Button>
-          <Button variant={buttonVariant}>{componentText.buttons.about}</Button>
+          <Button variant={buttonVariant} color="secondary" sx={buttonStyle}>
+            {componentText.buttons.about}
+          </Button>
           <LanguageSwitcher />
         </Stack>
       </Toolbar>

@@ -177,12 +177,12 @@ const theme = createTheme({
       white: themeValues.palette.white,
     },
     primary: {
-      main: themeValues.palette.black,
+      main: themeValues.palette.white,
       light: themeValues.palette.neutral.light,
       dark: themeValues.palette.neutral.dark,
     },
     secondary: {
-      main: themeValues.palette.white,
+      main: themeValues.palette.black,
       light: themeValues.palette.neutral.light,
       dark: themeValues.palette.neutral.dark,
     },
@@ -348,6 +348,20 @@ const theme = createTheme({
             textTransform: "none",
             borderRadius: theme.borderRadius.pill,
             boxShadow: "none",
+          }),
+        },
+        {
+          props: { variant: "header" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.pill,
+            boxShadow: "none",
+            border: "none",
+            backgroundColor: theme.palette.secondary.main,
+            color: theme.palette.common.white,
+            "&:hover": {
+              backgroundColor: alpha(theme.palette.secondary.main, 0.9),
+            },
           }),
         },
         {
@@ -518,18 +532,27 @@ const theme = createTheme({
           borderRadius: theme.borderRadius.pill,
           padding: "5px 15px", // to account for border width
           textTransform: "none",
-          backgroundColor: theme.palette.primary.light, // Default background for unselected
+          backgroundColor: "transparent", // Default background for unselected
           color: theme.palette.primary.contrastText, // Default text color for unselected
           boxShadow: "none",
           "&:hover": {
-            backgroundColor: alpha(theme.palette.primary.light, 0.7), // Hover
+            backgroundColor: theme.palette.common.white, // White hover background
           },
           "&.Mui-selected": {
-            backgroundColor: "transparent", // Background for selected
-            color: theme.palette.primary.main, // Text color for selected
+            backgroundColor: theme.palette.primary.main, // Background for selected
+            color: theme.palette.primary.contrastText, // Text color for selected
             "&:hover": {
-              backgroundColor: theme.palette.action.hover,
+              backgroundColor: theme.palette.common.white, // White hover background when selected
             },
+          },
+        }),
+      },
+    },
+    MuiToggleButtonGroup: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
+            borderLeft: `${themeValues.border.standard} ${theme.palette.divider}`, // divider line
           },
         }),
       },
@@ -621,5 +644,6 @@ declare module "@mui/material/styles" {
 declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     pill: true
+    header: true
   }
 }

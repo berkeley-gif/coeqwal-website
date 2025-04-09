@@ -109,7 +109,11 @@ export function MiniDrawer({
       {header ? (
         header
       ) : (
-        <DrawerHeader>
+        <DrawerHeader
+          sx={{
+            borderTop: "2px solid black",
+          }}
+        >
           <IconButton
             onClick={open ? handleDrawerClose : handleDrawerOpen}
             sx={(theme) => ({
@@ -132,8 +136,8 @@ export function MiniDrawer({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: theme.spacing(1.5),
-          my: theme.spacing(1.5),
+          gap: theme.spacing(1),
+          my: theme.spacing(1),
           px: 0,
         })}
       >
