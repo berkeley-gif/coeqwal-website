@@ -5,7 +5,7 @@ import { BasePanel, BasePanelProps } from "./index"
 import { VideoBackground } from "../common/VideoBackground"
 
 // Create an extended interface that doesn't conflict with BasePanelProps
-interface VideoPanelProps extends Omit<BasePanelProps, 'content'> {
+interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
   title: string
   content: string | string[]
   videoSrc: string
@@ -20,7 +20,7 @@ interface VideoPanelProps extends Omit<BasePanelProps, 'content'> {
  *
  * A full-height panel with video background, title, and content.
  * Extends the basic panel functionality to include a video background.
- * 
+ *
  * Content can be provided as:
  * - A single string
  * - An array of paragraph strings
@@ -49,9 +49,9 @@ export function VideoPanel({
   ...panelProps
 }: VideoPanelProps) {
   // Handle content as either string or array
-  const contentParagraphs = Array.isArray(content) 
-    ? content 
-    : content.split(/\n\n+/);
+  const contentParagraphs = Array.isArray(content)
+    ? content
+    : content.split(/\n\n+/)
 
   return (
     <BasePanel
@@ -103,9 +103,9 @@ export function VideoPanel({
         </Typography>
 
         {contentParagraphs.map((paragraph, index) => (
-          <Typography 
-            key={index} 
-            variant="body2" 
+          <Typography
+            key={index}
+            variant="body2"
             sx={{ mb: index < contentParagraphs.length - 1 ? 2 : 0 }}
           >
             {paragraph}

@@ -98,12 +98,13 @@ const QuestionBuilderContent = memo(
               maxWidth: "calc(100% - 200px)", // Leave room for the climate card
             }}
           >
-            <Typography variant="h4" gutterBottom>
+            <Typography variant="h2" gutterBottom>
               Alternative scenarios
             </Typography>
             <Typography variant="body1">
-              Search our collection of scenarios. You can discover scenarios
-              that show the effects of different operations or outcomes.
+              Search our collection of hello hello scenarios. You can discover
+              scenarios that show the effects of different operations or
+              outcomes.
               <br />
               For a detailed search for scenarios by outcome, use our outcome
               search tool.

@@ -170,7 +170,7 @@ export function useTranslation() {
     if (result === undefined) {
       return ""
     }
-    
+
     // Return the value as is
     return result as T
   }
