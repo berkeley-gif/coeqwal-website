@@ -1,10 +1,11 @@
 "use client"
 
-import { AppBar, Toolbar, Typography, Stack, Button } from "@mui/material"
+import { AppBar, Toolbar, Typography, Stack, Button, Box } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
+import { Logo } from "../common/Logo"
 
 type HeaderTranslations = {
   title: string
@@ -61,7 +62,9 @@ export function Header() {
       elevation={0}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Typography variant="h6">{componentText.title}</Typography>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Logo />
+        </Box>
         <Stack direction="row" spacing={2} alignItems="center">
           <Button variant={buttonVariant}>
             {componentText.buttons.getData}
