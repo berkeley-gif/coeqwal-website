@@ -1,19 +1,7 @@
 /* Adobe Fonts */
 @import url("https://use.typekit.net/rxm7kha.css");
 
-/* Define CSS variables for Adobe fonts */
+/* Define CSS variable for Adobe font */
 :root {
   --font-akzidenz-grotesk-next-pro: "akzidenz-grotesk-next-pro";
-  --font-aktiv-grotesk: "aktiv-grotesk";
-  --font-acumin-pro: "acumin-pro";
-  --font-neue-haas-grotesk-display: "neue-haas-grotesk-display";
-  --font-neue-haas-grotesk-text: "neue-haas-grotesk-text";
-  --font-neue-haas-unica: "neue-haas-unica";
-  --font-trade-gothic-next: "trade-gothic-next";
-  --font-peridot-pe-variable: "peridot-pe-variable";
-  --font-tt-commons-pro: "tt-commons-pro";
-  --font-arial-nova: "arial-nova";
-  --font-swiss-721-bt: "swiss-721-bt";
-  --font-swiss-721-bt-no2: "swiss-721-bt-no2";
-  --font-univers-next-pro: "univers-next-pro";
 } 

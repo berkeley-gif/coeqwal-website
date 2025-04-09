@@ -78,6 +78,7 @@ export function ThemeRegistry({
         },
         button: {
           ...baseTheme.typography.button,
+          fontFamily: `"${fontFamily}"`,
           letterSpacing: "normal",
         },
         caption: {
