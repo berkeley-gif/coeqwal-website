@@ -9,16 +9,4 @@
 /* Add a direct font-family rule as additional backup */
 body, button, input, select, textarea {
   font-family: var(--font-akzidenz-grotesk-next-pro);
-}
-
-/* Add font styles directly for debugging purposes */
-@font-face {
-  font-family: 'akzidenz-grotesk-next-pro-debug';
-  font-display: swap; /* This helps with FOUT (Flash of Unstyled Text) */
-  src: local('akzidenz-grotesk-next-pro');
-}
-
-/* Force all elements to use the font */
-* {
-  font-family: "akzidenz-grotesk-next-pro", sans-serif !important;
 } 
