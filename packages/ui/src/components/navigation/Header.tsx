@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Toolbar, Typography, Stack, Button, Box } from "@mui/material"
+import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
@@ -62,7 +62,7 @@ export function Header() {
       elevation={0}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
           <Logo />
         </Box>
         <Stack direction="row" spacing={2} alignItems="center">
