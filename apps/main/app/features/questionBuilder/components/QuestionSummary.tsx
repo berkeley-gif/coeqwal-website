@@ -900,7 +900,6 @@ const QuestionSummary: React.FC = () => {
     backgroundColor: theme.palette.common.white,
     borderBottom: `1px solid ${theme.palette.divider}`,
     width: "100%",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
   }
 
   // Handle dropdown changes

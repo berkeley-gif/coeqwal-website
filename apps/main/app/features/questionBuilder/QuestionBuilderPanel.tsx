@@ -264,7 +264,6 @@ const QuestionBuilderContent = ({
               zIndex: 1000,
               backgroundColor: theme.palette.common.white,
               borderBottom: `1px solid ${theme.palette.divider}`,
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
             }}
           >
             {showSummary && <QuestionSummary />}
