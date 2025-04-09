@@ -4,9 +4,10 @@ import { Box, Typography } from "@mui/material"
 import { BasePanel, BasePanelProps } from "./index"
 import { VideoBackground } from "../common/VideoBackground"
 
-interface VideoPanelProps extends BasePanelProps {
+// Create an extended interface that doesn't conflict with BasePanelProps
+interface VideoPanelProps extends Omit<BasePanelProps, 'content'> {
   title: string
-  content: string
+  content: string | string[]
   videoSrc: string
   posterSrc: string
   overlayOpacity?: number
@@ -19,11 +20,18 @@ interface VideoPanelProps extends BasePanelProps {
  *
  * A full-height panel with video background, title, and content.
  * Extends the basic panel functionality to include a video background.
+ * 
+ * Content can be provided as:
+ * - A single string
+ * - An array of paragraph strings
  *
  * @example
  * <VideoPanel
  *   title="COEQWAL la la la"
- *   content="Paragraph paragraph paragraph"
+ *   content={[
+ *     "First paragraph",
+ *     "Second paragraph"
+ *   ]}
  *   videoSrc="/videos/background.mp4"
  *   posterSrc="/videos/poster.jpg"
  *   overlayOpacity={0.5}
@@ -40,6 +48,11 @@ export function VideoPanel({
   children,
   ...panelProps
 }: VideoPanelProps) {
+  // Handle content as either string or array
+  const contentParagraphs = Array.isArray(content) 
+    ? content 
+    : content.split(/\n\n+/);
+
   return (
     <BasePanel
       fullHeight={true}
@@ -89,7 +102,15 @@ export function VideoPanel({
           {title}
         </Typography>
 
-        <Typography variant="body2">{content}</Typography>
+        {contentParagraphs.map((paragraph, index) => (
+          <Typography 
+            key={index} 
+            variant="body2" 
+            sx={{ mb: index < contentParagraphs.length - 1 ? 2 : 0 }}
+          >
+            {paragraph}
+          </Typography>
+        ))}
 
         {children}
       </Box>

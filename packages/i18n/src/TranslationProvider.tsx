@@ -152,9 +152,9 @@ export function useTranslation() {
 
   /**
    * Helper to traverse nested translation keys (e.g. "header.buttons.getData").
-   * Returns an empty string if not found or not a string.
+   * Returns empty string if not found.
    */
-  function t(key: string): string {
+  function t<T = string>(key: string): T | string {
     // Split the key and walk the dictionary object
     const result = key.split(".").reduce<unknown>(
       (acc, cur) => {
@@ -166,8 +166,13 @@ export function useTranslation() {
       messages as Record<string, unknown>,
     )
 
-    // Only return if the final value is a string
-    return typeof result === "string" ? result : ""
+    // For existing code expecting strings
+    if (result === undefined) {
+      return ""
+    }
+    
+    // Return the value as is
+    return result as T
   }
 
   return { locale, t, setLocale, isLoading, messages }

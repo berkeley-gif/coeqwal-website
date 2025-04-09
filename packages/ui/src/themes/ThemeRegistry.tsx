@@ -21,6 +21,39 @@ export function ThemeRegistry({ children, fontFamily }: ThemeRegistryProps) {
       typography: {
         ...baseTheme.typography,
         fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        // Also update variant-specific font families
+        body1: {
+          ...baseTheme.typography.body1,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        body2: {
+          ...baseTheme.typography.body2,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        h1: {
+          ...baseTheme.typography.h1,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        h2: {
+          ...baseTheme.typography.h2,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        h3: {
+          ...baseTheme.typography.h3,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        h4: {
+          ...baseTheme.typography.h4,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        h5: {
+          ...baseTheme.typography.h5,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
+        h6: {
+          ...baseTheme.typography.h6,
+          fontFamily: `"${fontFamily}", Arial, sans-serif`,
+        },
       },
     })
   }, [fontFamily])

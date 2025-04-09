@@ -20,7 +20,7 @@ import "./globals.css"
 
 // Font configuration
 // To try a different font, change the ACTIVE_FONT value
-const ACTIVE_FONT = "interTight"
+const ACTIVE_FONT = "lexend"
 
 // Define font instances
 const interTight = Inter_Tight({

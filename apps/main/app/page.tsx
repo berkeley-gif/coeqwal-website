@@ -132,7 +132,7 @@ export default function Home() {
           >
             <VideoPanel
               title={t("heroPanel.title")}
-              content={t("heroPanel.content")}
+              content={t<string[]>("heroPanel.content") || []}
               videoSrc="/video/background.mp4"
               posterSrc="/video/poster.jpg"
               overlayOpacity={0}
