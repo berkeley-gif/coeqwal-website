@@ -1,7 +1,10 @@
 {
   "heroPanel": {
     "title": "Los californianos están conectados por su agua",
-    "content": "Desde las montañas hasta la costa, y de norte a sur, los californianos comparten el agua a través de uno de los sistemas de transporte de agua más grandes y complejos del mundo. El proyecto COEQWAL ayuda a las personas a entender cómo funciona este sistema y explora diferentes formas de distribuir el agua para servir a nuestras comunidades, tanto ahora como bajo las condiciones climáticas del futuro."
+    "content": [
+      "Desde las montañas hasta la costa, y de norte a sur, los californianos comparten el agua a través de uno de los sistemas de transporte más grandes y complejos del mundo. La mayor parte del agua de California cae lejos de donde se necesita. Fluye—a través de ríos, túneles y canales—hacia ciudades, campos agrícolas y ecosistemas en todo el estado.",
+      "El proyecto COEQWAL te ayuda a entender cómo se mueve el agua en California, cómo podrían ser las alternativas y cómo podríamos adaptar el sistema ante un clima cambiante."
+    ]
   },
   "secondaryNavigation": {
     "californiaWater": "Cómo se mueve el agua en California",
