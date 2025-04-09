@@ -6,56 +6,79 @@ interface FontLoaderProps {
   kitId: string
 }
 
+// Define interfaces for the non-standard properties
+interface TypekitConfig {
+  kitId: string
+  scriptTimeout: number
+  async: boolean
+}
+
 /**
  * Client component for loading Adobe Fonts
  * This avoids hydration errors by only running the font loading code on the client side
  */
 export function FontLoader({ kitId }: FontLoaderProps) {
   useEffect(() => {
-    // Load Adobe Fonts using Typekit script
-    ;(function (d) {
-      const config = {
+    // Using a function that wraps the Typekit loading code
+    const loadTypekit = () => {
+      const config: TypekitConfig = {
         kitId,
         scriptTimeout: 3000,
         async: true,
       }
 
-      const h = d.documentElement
-      const t = setTimeout(() => {
-        h.className =
-          h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive"
+      // Get document element for class manipulation
+      const docEl = document.documentElement
+
+      // Create timeout that sets inactive class if load fails
+      const timeout = setTimeout(() => {
+        docEl.className =
+          docEl.className.replace(/\bwf-loading\b/g, "") + " wf-inactive"
       }, config.scriptTimeout)
 
-      const tk = d.createElement("script")
-      let f = false
-      const s = d.getElementsByTagName("script")[0] || null
+      // Add loading class
+      docEl.className += " wf-loading"
 
-      h.className += " wf-loading"
-      tk.src = `https://use.typekit.net/${config.kitId}.js`
-      tk.async = true
+      // Create script element
+      const script = document.createElement("script")
+      script.src = `https://use.typekit.net/${config.kitId}.js`
+      script.async = true
 
-      // Use any type to handle non-standard properties
-      ;(tk as any).onload = (tk as any).onreadystatechange = function () {
-        const a = (this as any).readyState
-        if (f || (a && a !== "complete" && a !== "loaded")) return
-        f = true
-        clearTimeout(t)
+      let loaded = false
+
+      // Handle the script load event
+      script.onload = () => {
+        if (loaded) return
+        loaded = true
+        clearTimeout(timeout)
+
         try {
-          // Typekit is added by the script
-          ;(window as any).Typekit.load(config)
+          // Safely access Typekit global
+          const typekitWindow = window as unknown as {
+            Typekit?: { load: (config: TypekitConfig) => void }
+          }
+          if (typekitWindow.Typekit) {
+            typekitWindow.Typekit.load(config)
+          }
         } catch (e) {
           console.error("Error loading Adobe Fonts:", e)
         }
       }
 
-      // Only insert if s exists and has a parent
-      if (s && s.parentNode) {
-        s.parentNode.insertBefore(tk, s)
+      // Find first script element to insert before
+      const firstScript = document.getElementsByTagName("script")[0]
+
+      // Insert the script element
+      if (firstScript && firstScript.parentNode) {
+        firstScript.parentNode.insertBefore(script, firstScript)
       } else {
         // Fallback - append to head
-        document.head.appendChild(tk)
+        document.head.appendChild(script)
       }
-    })(document)
+    }
+
+    // Execute the function
+    loadTypekit()
   }, [kitId]) // Only run when kitId changes
 
   // This component doesn't render anything
