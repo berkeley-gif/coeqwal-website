@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@mui/material"
+import { Grid } from "@mui/material"
 import { BasePanel, BasePanelProps } from "./index"
 import { VideoBackground } from "../common/VideoBackground"
 
@@ -59,7 +60,7 @@ export function VideoPanel({
   return (
     <BasePanel
       fullHeight={true}
-      paddingVariant="wide"
+      paddingVariant="none"
       background="dark"
       {...panelProps}
       sx={{
@@ -87,7 +88,7 @@ export function VideoPanel({
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          maxWidth: "770px",
+          width: "100%",
           textAlign: "left",
           position: "relative",
           zIndex: 2, // Ensure content is above video
@@ -101,27 +102,42 @@ export function VideoPanel({
           paddingBottom: verticalAlignment === "bottom" ? "2rem" : 0,
         }}
       >
-        <Typography variant="h1" gutterBottom>
-          {title}
-        </Typography>
-
         <Box
           sx={(theme) => ({
             backgroundColor: paragraphBgColor || theme.background.paragraph,
-            borderRadius: theme.borderRadius.standard,
-            padding: theme.spacing(3),
-            marginLeft: theme.spacing(-3), // Negative margin to align with title
+            borderRadius: theme.borderRadius.none,
+            padding: theme.spacing(12),
           })}
         >
-          {contentParagraphs.map((paragraph, index) => (
-            <Typography
-              key={index}
-              variant="body2"
-              sx={{ mb: index < contentParagraphs.length - 1 ? 2 : 0 }}
-            >
-              {paragraph}
-            </Typography>
-          ))}
+          <Grid
+            container
+            spacing={4}
+            sx={(theme) => ({
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+              gap: theme.spacing(4),
+            })}
+          >
+            {/* Title (Left Column) */}
+            <Grid>
+              <Typography variant="h1" sx={{ marginBottom: 0 }}>
+                {title}
+              </Typography>
+            </Grid>
+
+            {/* Paragraphs (Right Column) */}
+            <Grid>
+              {contentParagraphs.map((paragraph, index) => (
+                <Typography
+                  key={index}
+                  variant="body2"
+                  sx={{ mb: index < contentParagraphs.length - 1 ? 2 : 0 }}
+                >
+                  {paragraph}
+                </Typography>
+              ))}
+            </Grid>
+          </Grid>
         </Box>
 
         {children}

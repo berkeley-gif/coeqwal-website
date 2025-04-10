@@ -227,9 +227,9 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "4rem",
+      fontSize: "4.8rem",
       fontWeight: 700,
-      lineHeight: 1.1,
+      lineHeight: 1,
       letterSpacing: "normal",
     },
     h2: {
@@ -258,8 +258,8 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     body2: {
-      fontSize: "1.5rem",
-      lineHeight: 1.16,
+      fontSize: "1.4rem",
+      lineHeight: 1.2,
       fontWeight: 400,
       letterSpacing: "0.016rem",
     },
