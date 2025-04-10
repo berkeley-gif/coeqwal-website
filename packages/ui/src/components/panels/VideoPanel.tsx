@@ -108,12 +108,12 @@ export function VideoPanel({
             }}
           >
             {/* Title (Left Column) */}
-            <Box sx={{ width: "auto" }}>
+            <Box>
               <Typography variant="h1">{title}</Typography>
             </Box>
 
             {/* Paragraphs (Right Column) */}
-            <Box sx={{ flex: 1 }}>
+            <Box>
               {contentParagraphs.map((paragraph, index) => (
                 <Typography
                   key={index}
