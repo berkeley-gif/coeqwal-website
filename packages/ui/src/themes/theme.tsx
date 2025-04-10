@@ -593,6 +593,7 @@ theme.border = createBorderStyles(
 
 theme.background = {
   transparent: "transparent",
+  paragraph: "rgba(154, 203, 207, 0.5)",
 }
 
 theme.borderRadius = themeValues.borderRadius
@@ -632,6 +633,7 @@ declare module "@mui/material/styles" {
     border: ReturnType<typeof createBorderStyles>
     background: {
       transparent: string
+      paragraph: string
     }
     borderRadius: {
       pill: string

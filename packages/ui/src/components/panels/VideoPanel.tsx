@@ -12,6 +12,7 @@ interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
   posterSrc: string
   overlayOpacity?: number
   verticalAlignment?: "top" | "center" | "bottom"
+  paragraphBgColor?: string
   children?: React.ReactNode
 }
 
@@ -36,6 +37,7 @@ interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
  *   posterSrc="/videos/poster.jpg"
  *   overlayOpacity={0.5}
  *   verticalAlignment="center"
+ *   paragraphBgColor="rgba(154, 203, 207, 0.5)"
  * />
  */
 export function VideoPanel({
@@ -45,6 +47,7 @@ export function VideoPanel({
   posterSrc,
   overlayOpacity = 0.5,
   verticalAlignment = "top",
+  paragraphBgColor,
   children,
   ...panelProps
 }: VideoPanelProps) {
@@ -102,15 +105,24 @@ export function VideoPanel({
           {title}
         </Typography>
 
-        {contentParagraphs.map((paragraph, index) => (
-          <Typography
-            key={index}
-            variant="body2"
-            sx={{ mb: index < contentParagraphs.length - 1 ? 2 : 0 }}
-          >
-            {paragraph}
-          </Typography>
-        ))}
+        <Box
+          sx={(theme) => ({
+            backgroundColor: paragraphBgColor || theme.background.paragraph,
+            borderRadius: theme.borderRadius.standard,
+            padding: theme.spacing(3),
+            marginLeft: theme.spacing(-3), // Negative margin to align with title
+          })}
+        >
+          {contentParagraphs.map((paragraph, index) => (
+            <Typography
+              key={index}
+              variant="body2"
+              sx={{ mb: index < contentParagraphs.length - 1 ? 2 : 0 }}
+            >
+              {paragraph}
+            </Typography>
+          ))}
+        </Box>
 
         {children}
       </Box>
