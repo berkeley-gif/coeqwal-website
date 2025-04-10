@@ -62,6 +62,28 @@ importers:
         specifier: workspace:*
         version: link:../../packages/typescript-config
 
+  apps/storyline-flow:
+    dependencies:
+      '@repo/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@repo/map':
+        specifier: workspace:*
+        version: link:../../packages/map
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      next:
+        specifier: ^15.2.1
+        version: 15.2.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+
   packages/eslint-config:
     devDependencies:
       '@eslint/js':

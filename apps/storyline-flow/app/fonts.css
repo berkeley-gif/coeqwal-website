@@ -1,0 +1,12 @@
+/* Adobe Fonts */
+@import url("https://use.typekit.net/rxm7kha.css");
+
+/* Define CSS variable for Adobe font with fallbacks */
+:root {
+  --font-akzidenz-grotesk-next-pro: "akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+/* Add a direct font-family rule as additional backup */
+body, button, input, select, textarea {
+  font-family: var(--font-akzidenz-grotesk-next-pro);
+} 

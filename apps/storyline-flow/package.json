@@ -1,0 +1,21 @@
+{
+  "name": "storyline-flow",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@repo/ui": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/map": "workspace:*",
+    "next": "^15.2.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
+  }
+}
