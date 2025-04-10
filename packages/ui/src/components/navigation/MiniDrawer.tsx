@@ -84,17 +84,8 @@ export function MiniDrawer({
   }
 
   // Determine which direction icon to use based on open state and position
-  const toggleIcon = open ? (
-    position === "left" ? (
-      <ChevronLeftIcon />
-    ) : (
-      <ChevronRightIcon />
-    )
-  ) : position === "left" ? (
-    <ChevronRightIcon />
-  ) : (
-    <ChevronLeftIcon />
-  )
+  const toggleIcon =
+    position === "left" ? <ChevronLeftIcon /> : <ChevronRightIcon />
 
   return (
     <MuiDrawer
@@ -118,10 +109,14 @@ export function MiniDrawer({
             onClick={open ? handleDrawerClose : handleDrawerOpen}
             sx={(theme) => ({
               transition: theme.transitions.create(["transform"], {
-                duration: theme.transitions.duration.leavingScreen,
-                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.shorter,
               }),
-              transform: open ? "rotate(0deg)" : "rotate(180deg)", // Rotate based on state
+              ...(position === "left" && {
+                transform: open ? "rotate(0deg)" : "rotate(180deg)",
+              }),
+              ...(position === "right" && {
+                transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              }),
             })}
           >
             {toggleIcon}
