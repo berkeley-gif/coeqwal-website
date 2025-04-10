@@ -108,10 +108,8 @@ export function VideoPanel({
             }}
           >
             {/* Title (Left Column) */}
-            <Box sx={{ width: 'auto' }}>
-              <Typography variant="h1">
-                {title}
-              </Typography>
+            <Box sx={{ width: "auto" }}>
+              <Typography variant="h1">{title}</Typography>
             </Box>
 
             {/* Paragraphs (Right Column) */}
