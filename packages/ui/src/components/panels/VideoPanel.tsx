@@ -91,14 +91,7 @@ export function VideoPanel({
           textAlign: "left",
           position: "relative",
           zIndex: 2, // Ensure content is above video
-          justifyContent:
-            verticalAlignment === "top"
-              ? "flex-start"
-              : verticalAlignment === "bottom"
-                ? "flex-end"
-                : "center",
-          paddingTop: verticalAlignment === "top" ? "2rem" : 0,
-          paddingBottom: verticalAlignment === "bottom" ? "2rem" : 0,
+          justifyContent: "flex-end", // Align content to the bottom
         }}
       >
         <Box
@@ -106,6 +99,7 @@ export function VideoPanel({
             backgroundColor: paragraphBgColor || theme.background.paragraph,
             borderRadius: theme.borderRadius.none,
             padding: theme.spacing(12),
+            paddingBottom: theme.spacing(16),
           })}
         >
           <Box
