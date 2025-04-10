@@ -6,7 +6,6 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-import { alpha } from "@mui/material/styles"
 
 type HeaderTranslations = {
   title: string

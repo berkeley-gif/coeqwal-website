@@ -1,5 +1,4 @@
 import { createTheme, Theme } from "@mui/material/styles"
-import { alpha } from "@mui/material/styles"
 
 // TODO:
 // - Transitions
