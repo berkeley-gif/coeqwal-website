@@ -85,9 +85,8 @@ const themeValues = {
     pill: "999px",
     rounded: "8px",
     card: "12px",
-    standard: "4px",
+    standard: "24px",
     none: "0px",
-    navigation: "16px", // For navigation elements like sidebar items
   },
 
   // Border styles
@@ -472,7 +471,7 @@ const theme = createTheme({
                 justifyContent: "space-between",
                 alignItems: ownerState.open ? "flex-start" : "center",
                 padding: theme.spacing(2),
-                borderRadius: theme.borderRadius.navigation,
+                borderRadius: theme.borderRadius.standard,
                 mx: 1,
                 my: 0.5,
                 overflow: "hidden",
@@ -593,7 +592,7 @@ theme.border = createBorderStyles(
 
 theme.background = {
   transparent: "transparent",
-  paragraph: "rgba(154, 203, 207, 0.5)",
+  paragraph: "rgba(0, 0, 0, 0.2)",
 }
 
 theme.borderRadius = themeValues.borderRadius
@@ -641,7 +640,6 @@ declare module "@mui/material/styles" {
       card: string
       standard: string
       none: string
-      navigation: string
     }
   }
 
