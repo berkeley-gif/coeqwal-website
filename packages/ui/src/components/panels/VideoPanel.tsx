@@ -3,6 +3,7 @@
 import { Box, Typography } from "@mui/material"
 import { BasePanel, BasePanelProps } from "./index"
 import { VideoBackground } from "../common/VideoBackground"
+import theme from "../../themes/theme"
 
 // Create an extended interface that doesn't conflict with BasePanelProps
 interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
@@ -11,7 +12,6 @@ interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
   videoSrc: string
   posterSrc: string
   overlayOpacity?: number
-  verticalAlignment?: "top" | "center" | "bottom"
   paragraphBgColor?: string
   children?: React.ReactNode
 }
@@ -35,8 +35,7 @@ interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
  *   ]}
  *   videoSrc="/videos/background.mp4"
  *   posterSrc="/videos/poster.jpg"
- *   overlayOpacity={0.5}
- *   verticalAlignment="center"
+ *   overlayOpacity={1}
  *   paragraphBgColor="rgba(154, 203, 207, 0.5)"
  * />
  */
@@ -45,8 +44,7 @@ export function VideoPanel({
   content,
   videoSrc,
   posterSrc,
-  overlayOpacity = 0.5,
-  verticalAlignment = "top",
+  overlayOpacity = 1,
   paragraphBgColor,
   children,
   ...panelProps
@@ -92,14 +90,14 @@ export function VideoPanel({
           position: "relative",
           zIndex: 2, // Ensure content is above video
           justifyContent: "flex-end", // Align content to the bottom
+          paddingBottom: theme.spacing(12),
         }}
       >
         <Box
           sx={(theme) => ({
             backgroundColor: paragraphBgColor || theme.background.paragraph,
             borderRadius: theme.borderRadius.none,
-            padding: theme.spacing(12),
-            paddingBottom: theme.spacing(16),
+            padding: theme.spacing(8, 12),
           })}
         >
           <Box

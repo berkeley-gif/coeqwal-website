@@ -1,4 +1,4 @@
-import { createTheme, alpha, Theme } from "@mui/material/styles"
+import { createTheme, Theme } from "@mui/material/styles"
 
 // TODO:
 // - Transitions
@@ -585,7 +585,7 @@ theme.border = createBorderStyles(
 
 theme.background = {
   transparent: "transparent",
-  paragraph: "rgba(0, 0, 0, 0.2)",
+  paragraph: "rgba(0, 0, 0, 0.4)",
 }
 
 theme.borderRadius = themeValues.borderRadius
