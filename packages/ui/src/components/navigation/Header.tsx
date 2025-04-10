@@ -6,6 +6,7 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
+import { alpha } from "@mui/material/styles"
 
 type HeaderTranslations = {
   title: string
@@ -40,7 +41,7 @@ const translations: TranslationsMap = {
 export function Header() {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const buttonVariant = isMobile ? "text" : "header"
+  const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {} // No need for additional styles since they're in the theme
   const { locale, isLoading } = useTranslation()
 
@@ -67,10 +68,28 @@ export function Header() {
           <Logo />
         </Box>
         <Stack direction="row" spacing={2} alignItems="center">
-          <Button variant={buttonVariant} color="secondary" sx={buttonStyle}>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              ...buttonStyle,
+              backgroundColor: theme.palette.secondary.main,
+              "&:hover": {
+                backgroundColor: alpha(theme.palette.secondary.main, 0.9),
+              },
+            }}
+          >
             {componentText.buttons.getData}
           </Button>
-          <Button variant={buttonVariant} color="secondary" sx={buttonStyle}>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              ...buttonStyle,
+              backgroundColor: theme.palette.secondary.main,
+              "&:hover": {
+                backgroundColor: alpha(theme.palette.secondary.main, 0.9),
+              },
+            }}
+          >
             {componentText.buttons.about}
           </Button>
           <LanguageSwitcher />

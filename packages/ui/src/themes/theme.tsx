@@ -220,7 +220,6 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: `"Inter Tight"`,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -231,45 +230,37 @@ const theme = createTheme({
       fontSize: "4rem",
       fontWeight: 700,
       lineHeight: 1.1,
-      fontFamily: `"Inter Tight"`,
       letterSpacing: "normal",
     },
     h2: {
       fontSize: "3.333rem",
       lineHeight: 1.2,
-      fontFamily: `"Inter Tight"`,
       letterSpacing: "normal",
     },
     h3: {
       fontSize: "2.778rem",
-      fontFamily: `"Inter Tight"`,
       letterSpacing: "normal",
     },
     h4: {
       fontSize: "2.315rem",
-      fontFamily: `"Inter Tight"`,
       letterSpacing: "normal",
     },
     h5: {
       fontSize: "1.929rem",
-      fontFamily: `"Inter Tight"`,
       letterSpacing: "normal",
     },
     h6: {
       fontSize: "1.2rem",
-      fontFamily: `"Inter Tight"`,
       letterSpacing: "normal",
     },
     body1: {
       fontSize: "1.2857rem",
-      fontFamily: `"Inter"`,
       letterSpacing: "normal",
     },
     body2: {
       fontSize: "1.2rem",
       lineHeight: 1.1,
       fontWeight: 500,
-      fontFamily: `"Inter"`,
       letterSpacing: "normal",
     },
     subtitle1: {
@@ -364,26 +355,28 @@ const theme = createTheme({
           }),
         },
         {
-          props: { variant: "header" },
+          props: { variant: "standard" }, // This is our standard button
           style: ({ theme }) => ({
             textTransform: "none",
             borderRadius: theme.borderRadius.pill,
             boxShadow: "none",
             border: "none",
-            backgroundColor: theme.palette.secondary.main,
+            padding: "6px 16px",
+            minWidth: 64,
+            lineHeight: 1.75,
+            fontSize: "1.0714rem",
+            fontWeight: 500,
             color: theme.palette.common.white,
             "&:hover": {
-              backgroundColor: alpha(theme.palette.secondary.main, 0.9),
+              opacity: 0.9,
             },
           }),
         },
         {
           props: { variant: "text" },
-          style: ({ theme }) => ({
+          style: {
             textTransform: "none",
-            borderRadius: theme.borderRadius.pill,
-            boxShadow: "none",
-          }),
+          },
         },
       ],
       styleOverrides: {
@@ -393,7 +386,7 @@ const theme = createTheme({
         }),
       },
       defaultProps: {
-        variant: "contained",
+        variant: "standard",
       },
     },
     MuiDivider: {
@@ -658,6 +651,6 @@ declare module "@mui/material/styles" {
 declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     pill: true
-    header: true
+    standard: true
   }
 }
