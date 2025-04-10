@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { MapProvider } from "@repo/map"
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" className={FONT_VARIABLE}>
@@ -37,7 +37,7 @@ export default function RootLayout({
             <MapProvider>{children}</MapProvider>
           </ThemeRegistry>
         </TranslationProvider>
-    </body>
+      </body>
     </html>
-  );
+  )
 }
