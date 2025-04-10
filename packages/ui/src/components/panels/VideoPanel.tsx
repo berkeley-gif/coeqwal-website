@@ -1,7 +1,6 @@
 "use client"
 
 import { Box, Typography } from "@mui/material"
-import { Grid } from "@mui/material"
 import { BasePanel, BasePanelProps } from "./index"
 import { VideoBackground } from "../common/VideoBackground"
 
@@ -109,24 +108,22 @@ export function VideoPanel({
             padding: theme.spacing(12),
           })}
         >
-          <Grid
-            container
-            spacing={4}
-            sx={(theme) => ({
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-              gap: theme.spacing(4),
-            })}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: { xs: 4, md: 12 },
+            }}
           >
             {/* Title (Left Column) */}
-            <Grid>
+            <Box>
               <Typography variant="h1" sx={{ marginBottom: 0 }}>
                 {title}
               </Typography>
-            </Grid>
+            </Box>
 
             {/* Paragraphs (Right Column) */}
-            <Grid>
+            <Box>
               {contentParagraphs.map((paragraph, index) => (
                 <Typography
                   key={index}
@@ -136,8 +133,8 @@ export function VideoPanel({
                   {paragraph}
                 </Typography>
               ))}
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         </Box>
 
         {children}
