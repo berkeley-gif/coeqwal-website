@@ -258,10 +258,10 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     body2: {
-      fontSize: "1.2rem",
-      lineHeight: 1.1,
-      fontWeight: 500,
-      letterSpacing: "normal",
+      fontSize: "1.5rem",
+      lineHeight: 1.16,
+      fontWeight: 400,
+      letterSpacing: "0.016rem",
     },
     subtitle1: {
       fontSize: "1.0714rem",

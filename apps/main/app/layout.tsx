@@ -6,18 +6,6 @@ import "./globals.css"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/FontLoader"
 
-// Font configuration
-const FONT_FAMILY = "akzidenz-grotesk-next-pro"
-const FONT_VARIABLE = "--font-akzidenz-grotesk-next-pro"
-
-// Font weights for akzidenzNextPro
-const fontWeights = {
-  light: 300,
-  regular: 400,
-  medium: 500,
-  bold: 700,
-}
-
 export const metadata: Metadata = {
   title: "COEQWAL",
   description: "Alternative California water solutions",
@@ -29,12 +17,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={FONT_VARIABLE}>
+    <html lang="en">
       <body>
         {/* FontLoader is a client component that will handle loading Adobe Fonts */}
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
-          <ThemeRegistry fontFamily={FONT_FAMILY} fontWeights={fontWeights}>
+          <ThemeRegistry>
             <MapProvider>{children}</MapProvider>
           </ThemeRegistry>
         </TranslationProvider>
