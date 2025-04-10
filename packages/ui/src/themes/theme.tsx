@@ -1,4 +1,5 @@
 import { createTheme, Theme } from "@mui/material/styles"
+import { alpha } from "@mui/material/styles"
 
 // TODO:
 // - Transitions
@@ -227,7 +228,7 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "4.8rem",
+      fontSize: "4.6rem",
       fontWeight: 700,
       lineHeight: 1,
       letterSpacing: "normal",
@@ -258,8 +259,8 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     body2: {
-      fontSize: "1.4rem",
-      lineHeight: 1.2,
+      fontSize: "1.36rem",
+      lineHeight: 1.3,
       fontWeight: 400,
       letterSpacing: "0.016rem",
     },
@@ -367,7 +368,9 @@ const theme = createTheme({
             fontSize: "1.0714rem",
             fontWeight: 500,
             color: theme.palette.common.white,
+            backgroundColor: theme.palette.common.black,
             "&:hover": {
+              backgroundColor: "#333333",
               opacity: 0.9,
             },
           }),
@@ -586,6 +589,11 @@ theme.border = createBorderStyles(
 theme.background = {
   transparent: "transparent",
   paragraph: "rgba(0, 0, 0, 0.4)",
+  overlay: {
+    light: "rgba(0, 0, 0, 0.2)",
+    medium: "rgba(0, 0, 0, 0.4)", // Same as paragraph background
+    dark: "rgba(0, 0, 0, 0.8)",
+  },
 }
 
 theme.borderRadius = themeValues.borderRadius
@@ -626,6 +634,11 @@ declare module "@mui/material/styles" {
     background: {
       transparent: string
       paragraph: string
+      overlay: {
+        light: string
+        medium: string
+        dark: string
+      }
     }
     borderRadius: {
       pill: string

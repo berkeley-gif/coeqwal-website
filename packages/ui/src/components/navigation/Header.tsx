@@ -72,10 +72,6 @@ export function Header() {
             variant={buttonVariant}
             sx={{
               ...buttonStyle,
-              backgroundColor: theme.palette.secondary.main,
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.secondary.main, 0.9),
-              },
             }}
           >
             {componentText.buttons.getData}
@@ -84,10 +80,6 @@ export function Header() {
             variant={buttonVariant}
             sx={{
               ...buttonStyle,
-              backgroundColor: theme.palette.secondary.main,
-              "&:hover": {
-                backgroundColor: alpha(theme.palette.secondary.main, 0.9),
-              },
             }}
           >
             {componentText.buttons.about}
