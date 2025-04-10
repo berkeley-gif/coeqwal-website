@@ -68,18 +68,28 @@ cd apps/main
 pnpm dev
 ```
 
+### Build script sequence
+
+To build, and before I push to GitHub, I run:
+
+```sh
+pnpm format
+pnpm lint
+pnpm build
+```
+
 ## Changes from the Standard Turborepo
 
 This Turborepo has been customized to meet the needs of the COEQWAL project. Key changes include:
 
 ### Global dependencies:
 
-- `react`, `react-dom`, all their types, and `typescript`, `@types/node`, and `prettier` are installed globally to ensure consistency across apps and reduce duplication. Compare the dependencies in the root `package.json` with the `package.json` in the individual `apps` and `packages` directories for details.
+- `react`, `react-dom`, all their types, and `typescript`, `@types/node`, and `prettier` are installed at the root to ensure consistency across apps and reduce duplication. Compare the dependencies in the root `package.json` with the `package.json` in the individual `apps` and `packages` directories for details. Note that apps must install `next` (because packages wouldn't use next, so it doesn't make sense to install it at the root...maybe). We need to keep the `next` versions in sync.
 
 ### Shared packages:
 
 - The shared `eslint-config`, `typescript-config` and `ui` are standard for Turborepo setups, but these can be customized for the project.
-- Jill is expecting to set up a common Mapbox map package, a shared data package, a common parameters library package, an api package, and a language translation package.
+- We have `ui`, `i18n`, and `map` packages. We can set up a shared data package, a common parameters library package, an api package, and a viz/D3 package.
 - The Viz Team should feel free to set up packages to support their common work.
 
 ## Adding a new app
@@ -90,7 +100,7 @@ To add a new app, cd into the `apps` directory and run
 pnpm dlx create-next-app@latest <app name>
 ```
 
-This generator should create your directory and install necessary files, configurations, and dependencies. You can delete the .gitignore file if you like and use the root one. Then go to the root level and run:
+This generator should create your directory and install necessary files, configurations, and dependencies. Then go to the root level and run:
 
 ```sh
 cd ../
@@ -103,7 +113,7 @@ To make sure everything is linked correctly. Run `pnpm dev` and `pnpm build` to 
 
 ```sh
 cd apps/<app name>
-pnpm remove react react-dom next typescript @types/node @types/react @types/react-dom eslint eslint-config-next @eslint/eslintrc
+pnpm remove react react-dom typescript @types/node @types/react @types/react-dom eslint eslint-config-next @eslint/eslintrc
 ```
 
 You can use the `main` app's `package.json` as a guide.
@@ -132,28 +142,6 @@ If your installation gets messed up at any point, try
 
 ```sh
 rm -rf node_modules .turbo && pnpm install && pnpm build
-```
-
-### Example: adding a storyline
-
-```
-turborepo-root/
-│── apps/
-│   ├── main-app/                  # Main Next.js application
-│   │   ├── pages/
-│   │   │   ├── index.tsx          # Main homepage
-│   │   │   ├── storylines/        # Dynamic import for storylines
-│   │   │   │   ├── [slug].tsx     # Dynamically loads a storyline
-│   ├── storyline-1/               # Standalone Next.js app for storyline 1
-│   │   ├── pages/
-│   │   │   ├── index.tsx          # Entry point of storyline-1
-│   ├── storyline-2/               # Standalone Next.js app for storyline 2
-│   │   ├── pages/
-│   │   │   ├── index.tsx          # Entry point of storyline-2
-│
-│── packages/
-│   ├── ui/                        # Shared UI components
-│   ├── map/                       # Shared map provider & hooks
 ```
 
 ## Adding a new package
