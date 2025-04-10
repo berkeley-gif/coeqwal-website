@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
 import { MapProvider } from "@repo/map"
-import "./globals.css"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/helpers/FontLoader"
 
@@ -21,7 +20,7 @@ export default function RootLayout({
       <body>
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
-          <ThemeRegistry>
+          <ThemeRegistry theme="story">
             <MapProvider>{children}</MapProvider>
           </ThemeRegistry>
         </TranslationProvider>

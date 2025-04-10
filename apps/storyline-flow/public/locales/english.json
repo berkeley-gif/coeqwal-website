@@ -1,1 +1,14 @@
-{}
+{
+    "opener": {
+        "title": "How Water Flows Through California",
+        "subtitle": "Why California’s Water Is Unique",
+        "p1": "All living things need water to survive.",
+        "p2": "However, in California, most of our water falls far from where most people live, work and farm.",
+        "throughline": "To address this mismatch, we have transformed the way water moves across our state."
+    },
+    "precipitation": {
+        "title": "Where and When Water Falls",
+        "p1": "Nearly all of California’s rain and snow falls in winter \u2014 a short period lasting less than 100 days.",
+        "p2": "The vast majority of precipitation consistently falls in the northern part of the state."
+    }
+}

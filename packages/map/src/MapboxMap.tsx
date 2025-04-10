@@ -132,6 +132,9 @@ export interface MapProps {
   minZoom?: number
   attributionControl?: boolean
   scrollZoom?: boolean
+  navigationControl?: boolean
+  interactive?: boolean
+  dragPan?: boolean
   onLoad?: () => void
 }
 
@@ -145,6 +148,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     minZoom = 5.0,
     attributionControl = true,
     scrollZoom = false,
+    navigationControl = true,
+    interactive = true,
+    dragPan = true,
     onLoad,
   },
   ref,
@@ -231,14 +237,15 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       minZoom={minZoom}
       attributionControl={attributionControl}
       scrollZoom={scrollZoom}
-      dragPan
+      dragPan={dragPan}
+      interactive={interactive}
       onClick={() => setSelectedMarker(null)}
       onMove={(evt: ViewStateChangeEvent) => {
         onViewStateChange?.(evt.viewState)
       }}
       onLoad={handleMapLoad}
     >
-      <NavigationControl position="top-right" style={{ marginTop: "100px" }} />
+      {(navigationControl) && <NavigationControl position="top-right" style={{ marginTop: "100px" }} />}
       {markers.map((marker, index) => {
         // Calculate scaled size based on current zoom level
         const currentZoom = viewState.zoom || 5

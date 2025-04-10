@@ -45,6 +45,10 @@ export {
   useMediaQuery,
 } from "@mui/material"
 
+export type {
+  BoxProps
+} from "@mui/material"
+
 // Import and re-export specific commonly used icons
 import WaterIcon from "@mui/icons-material/Water"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"

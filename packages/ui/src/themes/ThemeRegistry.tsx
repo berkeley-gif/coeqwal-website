@@ -4,16 +4,23 @@ import * as React from "react"
 import { ThemeProvider } from "@mui/material/styles"
 import CssBaseline from "@mui/material/CssBaseline"
 import baseTheme from "./theme"
+import storyTheme from "./storyTheme"
 
 interface ThemeRegistryProps {
-  children: React.ReactNode
+  theme?: string,
+  children: React.ReactNode,
 }
 
-export function ThemeRegistry({ children }: ThemeRegistryProps) {
+export function ThemeRegistry({
+  theme="base",
+  children,
+}: ThemeRegistryProps) {
+  const themeToUse = (theme === "story") ? storyTheme : baseTheme
+
   return (
-    <ThemeProvider theme={baseTheme}>
-      <CssBaseline />
+    <ThemeProvider theme={themeToUse}>
       {children}
+      <CssBaseline />
     </ThemeProvider>
   )
 }
