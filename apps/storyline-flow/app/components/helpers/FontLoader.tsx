@@ -71,7 +71,7 @@ export function FontLoader({ kitId, timeout = 3000 }: FontLoaderProps) {
           }
         }
 
-        script.onerror = (e) => {
+        script.onerror = () => {
           reject(new Error("Failed to load Typekit script"))
         }
       })
