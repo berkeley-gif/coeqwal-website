@@ -45,14 +45,18 @@ const PanelRoot = styled(Box, {
     paddingVariant === "none"
       ? `96px 0 0 0`
       : paddingVariant === "narrow"
-        ? `96px ${theme.spacing(4)}`
+        ? `${theme.spacing(4)}`
         : paddingVariant === "wide"
           ? `96px ${theme.spacing(12)}`
           : `96px ${theme.spacing(6)}`,
 
   [theme.breakpoints.down("md")]: {
     padding:
-      paddingVariant === "none" ? `96px 0 0 0` : `96px ${theme.spacing(3)}`,
+      paddingVariant === "none" 
+        ? `96px 0 0 0` 
+        : paddingVariant === "narrow"
+          ? `${theme.spacing(3)}`
+          : `96px ${theme.spacing(3)}`,
   },
 }))
 
