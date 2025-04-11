@@ -1,16 +1,7 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  TextField,
-  Button,
-  SearchIcon,
-  MenuItem,
-} from "@repo/ui/mui"
-import { Card } from "@repo/ui"
+import React, { useMemo } from "react"
+import { Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 
@@ -44,7 +35,14 @@ import { ColoredText } from "./ui"
 const isDeltaOutflow = (text: string) =>
   text.toLowerCase().includes("delta outflow")
 
-const QuestionSummary: React.FC = () => {
+// QuestionSummary component props
+interface QuestionSummaryProps {
+  wasScrolled?: boolean
+}
+
+const QuestionSummary: React.FC<QuestionSummaryProps> = ({
+  wasScrolled = false,
+}) => {
   const theme = useTheme()
   const {
     state: {
@@ -59,17 +57,6 @@ const QuestionSummary: React.FC = () => {
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
 
-  // State for dropdown menus
-  const [sortBy, setSort] = useState("lorem")
-  const [chartType, setChartType] = useState("sed")
-  // State to track if filters are shown or hidden
-  const [showFilters, setShowFilters] = useState(false)
-
-  // Function to toggle filters visibility
-  const toggleFilters = () => {
-    setShowFilters(!showFilters)
-  }
-
   // Expensive calculation?
   const summary = useMemo(() => {
     // OPERATIONS FORMATTING LOGIC
@@ -78,7 +65,7 @@ const QuestionSummary: React.FC = () => {
     const getOperationsPart = () => {
       if (selectedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>operations</ColoredText>
+          <ColoredText color={theme.palette.pop.main}>decisions</ColoredText>
         )
       }
 
@@ -163,7 +150,7 @@ const QuestionSummary: React.FC = () => {
       // Handle empty array case to prevent reduce error
       if (formattedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>operations</ColoredText>
+          <ColoredText color={theme.palette.pop.main}>decisions</ColoredText>
         )
       }
 
@@ -805,7 +792,9 @@ const QuestionSummary: React.FC = () => {
           result = swapped ? (
             <ColoredText color={theme.palette.cool.main}>outcomes</ColoredText>
           ) : (
-            <ColoredText color={theme.palette.cool.main}>outcomes</ColoredText>
+            <ColoredText color={theme.palette.cool.main}>
+              water availability
+            </ColoredText>
           )
         }
 
@@ -855,7 +844,8 @@ const QuestionSummary: React.FC = () => {
         return (
           <>
             How does {needsArticle ? "a " : ""}
-            {operationsPart} affect {outcomePart}
+            {operationsPart}{" "}
+            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
         )
@@ -863,7 +853,8 @@ const QuestionSummary: React.FC = () => {
         // Multiple operations
         return (
           <>
-            How do {operationsPart} affect {outcomePart}
+            How do {operationsPart}{" "}
+            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
         )
@@ -871,7 +862,8 @@ const QuestionSummary: React.FC = () => {
         // No operations selected
         return (
           <>
-            How do changes in {operationsPart} affect {outcomePart}
+            How do our {operationsPart}{" "}
+            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
         )
@@ -891,144 +883,45 @@ const QuestionSummary: React.FC = () => {
     formatOutcomeText,
   ])
 
-  // Container styles
-  const containerStyles = {
-    p: theme.spacing(2),
-    position: "sticky",
-    top: 0,
-    zIndex: 1000,
-    backgroundColor: theme.palette.common.white,
-    borderBottom: `1px solid ${theme.palette.divider}`,
-    width: "100%",
-  }
-
-  // Handle dropdown changes
-  const handleSortChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSort(event.target.value)
-  }
-
-  const handleChartTypeChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setChartType(event.target.value)
-  }
-
-  // Handler for search button click - show filters and scroll to results
-  const handleSearchClick = () => {
-    // Toggle filters
-    toggleFilters()
-
-    // Get the scenario results element
-    const element = document.getElementById("scenario-results")
-    if (element) {
-      // Use smooth scrolling
-      // Increase offset to account for sticky header + QuestionSummary height
-      const headerOffset = 280
-      const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.scrollY - headerOffset
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      })
-    }
-  }
-
-  // Sort options
-  const sortOptions = [
-    { value: "lorem", label: "Lorem ipsum" },
-    { value: "dolor", label: "Dolor sit amet" },
-    { value: "consectetur", label: "Consectetur adipiscing" },
-    { value: "adipiscing", label: "Adipiscing elit" },
-    { value: "eiusmod", label: "Eiusmod tempor" },
-  ]
-
-  // Chart type options
-  const chartTypeOptions = [
-    { value: "sed", label: "Sed do eiusmod" },
-    { value: "tempor", label: "Tempor incididunt" },
-    { value: "labore", label: "Labore et dolore" },
-    { value: "magna", label: "Magna aliqua" },
-    { value: "ut-enim", label: "Ut enim ad minim" },
-    { value: "veniam", label: "Veniam quis nostrud" },
-  ]
-
+  // Container styles are now merged into Typography
   return (
-    <Box sx={containerStyles}>
-      <Typography variant="h2" mt={8} mb={4}>
+    <div
+      style={{
+        backgroundColor: wasScrolled ? "white" : "transparent",
+        width: "100%",
+        position: "relative",
+        zIndex: 1000,
+        padding: wasScrolled ? "0" : 0,
+        transition: "background-color 0.3s ease, padding 0.3s ease",
+        maxWidth: "none !important",
+      }}
+    >
+      <Typography
+        variant="h1"
+        sx={(theme) => ({
+          mt: theme.spacing(wasScrolled ? 1 : 4),
+          mb: 0,
+          lineHeight: theme.typography.h1.lineHeight,
+          textAlign: "center",
+          fontWeight: 500,
+          width: "100%",
+          margin: "0 auto",
+          fontSize: wasScrolled ? "3.33rem" : "7rem",
+          backgroundColor: "white",
+          paddingTop: wasScrolled ? "140px" : "72px",
+          paddingBottom: wasScrolled ? "40px" : "32px",
+          paddingLeft: "0",
+          paddingRight: "0",
+          boxShadow: wasScrolled ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
+          transition:
+            "font-size 0.3s ease, padding 0.3s ease, margin 0.3s ease, box-shadow 0.3s ease",
+          maxWidth: "none !important",
+        })}
+      >
         {summary}
       </Typography>
-
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        {!showFilters ? (
-          // Pill-shaped search button when filters are hidden
-          <Card sx={{ width: "auto" }}>
-            <Button
-              variant="contained"
-              disableElevation
-              onClick={handleSearchClick}
-              startIcon={<SearchIcon />}
-            >
-              Search
-            </Button>
-          </Card>
-        ) : (
-          // Dropdown menus when filters are shown
-          <Card sx={{ width: "auto" }}>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                alignItems: "center",
-              }}
-            >
-              <TextField
-                select
-                label="Sort scenarios by"
-                value={sortBy}
-                onChange={handleSortChange}
-                variant="outlined"
-                size="small"
-                sx={{
-                  minWidth: 180,
-                  backgroundColor: theme.palette.common.white,
-                }}
-              >
-                {sortOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              <TextField
-                select
-                label="Chart type:"
-                value={chartType}
-                onChange={handleChartTypeChange}
-                variant="outlined"
-                size="small"
-                sx={{
-                  minWidth: 180,
-                  backgroundColor: theme.palette.common.white,
-                }}
-              >
-                {chartTypeOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              <Button variant="outlined" size="small" onClick={toggleFilters}>
-                Hide
-              </Button>
-            </Box>
-          </Card>
-        )}
-      </Box>
-    </Box>
+    </div>
   )
 }
 
-export default React.memo(QuestionSummary)
+export default QuestionSummary

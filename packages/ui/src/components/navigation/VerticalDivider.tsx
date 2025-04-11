@@ -5,10 +5,17 @@ import { useTheme, Theme } from "@mui/material/styles"
 
 interface VerticalDividerProps {
   /**
-   * The horizontal position where the divider should start.
+   * The horizontal position where the divider should start from the left.
    * Can be a fixed value or a function that receives the theme and returns a value.
+   * Use either left or right, not both.
    */
-  left: number | string | ((theme: Theme) => number | string)
+  left?: number | string | ((theme: Theme) => number | string)
+  /**
+   * The horizontal position where the divider should start from the right.
+   * Can be a fixed value or a function that receives the theme and returns a value.
+   * Use either left or right, not both.
+   */
+  right?: number | string | ((theme: Theme) => number | string)
   /** Optional top position override. Default is headerHeight from theme. */
   top?: number | string
   /** Optional color override. Default is theme's divider color. */
@@ -25,6 +32,7 @@ interface VerticalDividerProps {
  */
 export function VerticalDivider({
   left,
+  right,
   top,
   color,
   animated = true,
@@ -36,23 +44,29 @@ export function VerticalDivider({
   const topPosition = top ?? theme.layout.headerHeight
   const heightCalc = `calc(100vh - ${typeof topPosition === "number" ? topPosition : theme.layout.headerHeight}px)`
 
-  // Resolve the left position if it's a function
+  // Resolve the position if it's a function
   const leftPosition = typeof left === "function" ? left(theme) : left
+  const rightPosition = typeof right === "function" ? right(theme) : right
 
   return (
     <Box
       sx={{
         position: "fixed",
         top: topPosition,
-        left: leftPosition,
+        ...(left !== undefined
+          ? { left: leftPosition }
+          : { right: rightPosition }),
         width: "1px",
         height: heightCalc,
         backgroundColor: color ?? theme.palette.divider,
         ...(animated && {
-          transition: theme.transitions.create("left", {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
+          transition: theme.transitions.create(
+            left !== undefined ? "left" : "right",
+            {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen,
+            },
+          ),
         }),
         zIndex: zIndex ?? theme.zIndex.drawer + 1,
         pointerEvents: "none",

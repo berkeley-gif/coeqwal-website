@@ -12,16 +12,33 @@ import {
   ListItemText,
   Divider,
   styled,
+  Typography,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 
+// Create a more flexible DrawerHeader component
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-end",
   padding: theme.spacing(1),
+  // Let the justifyContent be set by props
 }))
+
+// Create a separate component for the title
+// const DrawerTitle = styled(Typography)(({ theme }) => ({
+//   fontWeight: 700,
+//   fontSize: "0.95rem",
+//   color: theme.palette.common.white,
+//   backgroundColor: theme.palette.primary.main,
+//   padding: theme.spacing(0.5, 1.5),
+//   borderRadius: theme.shape.borderRadius,
+//   marginLeft: theme.spacing(2),
+//   marginRight: theme.spacing(1),
+//   flexGrow: 1,
+//   display: "inline-block",
+//   maxWidth: "fit-content",
+// }))
 
 export interface MiniDrawerItem {
   /** Text to display for the drawer item */
@@ -47,6 +64,8 @@ export interface MiniDrawerProps {
   header?: React.ReactNode
   /** Optional footer component */
   footer?: React.ReactNode
+  /** Optional title to display in the drawer */
+  title?: string
 }
 
 /**
@@ -60,6 +79,7 @@ export function MiniDrawer({
   position = "left",
   header,
   footer,
+  title = "Navigation",
 }: MiniDrawerProps) {
   // Use controlled or uncontrolled open state
   const [internalOpen, setInternalOpen] = useState(false)
@@ -102,9 +122,31 @@ export function MiniDrawer({
       ) : (
         <DrawerHeader
           sx={{
-            borderTop: "2px solid black",
+            borderTop: "2px solid #ddd",
+            flexDirection: position === "left" ? "row" : "row-reverse",
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            borderBottom: "1px solid #ddd",
+            padding: 0,
           }}
         >
+          {open && (
+            <Typography
+              variant="body2"
+              sx={(theme) => ({
+                fontWeight: theme.typography.fontWeightBold,
+                padding: theme.spacing(1.5, 2),
+                backgroundColor: "#2C6E91",
+                color: theme.palette.common.white,
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                flexGrow: 1,
+              })}
+            >
+              {title}
+            </Typography>
+          )}
+
           <IconButton
             onClick={open ? handleDrawerClose : handleDrawerOpen}
             sx={(theme) => ({

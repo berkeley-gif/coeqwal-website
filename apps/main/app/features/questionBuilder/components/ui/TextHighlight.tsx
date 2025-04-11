@@ -20,9 +20,10 @@ export const HighlightText: React.FC<HighlightTextProps> = ({
     <span
       style={{
         backgroundColor: bgcolor,
-        borderRadius: theme.shape.borderRadius,
+        borderRadius: "16px",
         padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
         color: theme.palette.common.white,
+        opacity: 0.95,
       }}
     >
       {children}

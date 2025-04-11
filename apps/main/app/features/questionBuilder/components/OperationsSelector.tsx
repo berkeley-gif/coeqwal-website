@@ -73,15 +73,15 @@ const OperationsSelector: React.FC = () => {
           <>
             {" "}
             <HighlightText bgcolor={theme.palette.pop.main}>
-              operations
+              decisions
             </HighlightText>
             &nbsp;could we consider?
           </>
         ) : (
           <>
-            How do changes in{" "}
+            How do{" "}
             <HighlightText bgcolor={theme.palette.pop.main}>
-              operations
+              decisions
             </HighlightText>
           </>
         )}

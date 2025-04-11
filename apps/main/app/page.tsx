@@ -2,16 +2,15 @@
 
 import React, { useState } from "react"
 import dynamic from "next/dynamic"
-import { Box } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
   VerticalDivider,
   KeyboardArrowDownIcon,
-  TransitionDiv,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { TwoColumnPanel, VideoPanel } from "@repo/ui"
+import { HeroQuestionsPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 
@@ -30,7 +29,7 @@ const CombinedPanel = dynamic(
 
 export default function Home() {
   const { t } = useTranslation()
-  const [drawerOpen, setDrawerOpen] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
 
@@ -38,6 +37,23 @@ export default function Home() {
   const handleSectionClick = (sectionId: string) => {
     scrollToSection(sectionId)
     setDrawerOpen(false)
+  }
+
+  // Direct scroll to combined panel with offset
+  const scrollToQuestionBuilder = () => {
+    const element = document.getElementById("combined-panel-container")
+    if (element) {
+      // Calculate the element's position relative to the document
+      const rect = element.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const offset = rect.top + scrollTop + 120 // Reduced from 200px to 120px
+
+      // Scroll to the calculated position
+      window.scrollTo({
+        top: offset,
+        behavior: "smooth",
+      })
+    }
   }
 
   // Get navigation items with the current active section and translation function
@@ -77,14 +93,15 @@ export default function Home() {
             items={navigationItems}
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
-            position="left"
+            position="right"
+            title="Learn"
           />
         </Box>
       </Box>
 
       {/* ===== Drawer "border" ===== */}
       <VerticalDivider
-        left={(theme) =>
+        right={(theme) =>
           drawerOpen
             ? theme.layout.drawer.width
             : theme.layout.drawer.closedWidth
@@ -94,11 +111,12 @@ export default function Home() {
 
       {/* ===== Main Content Area ===== */}
       <Box
+        className="no-scroll-snap"
         sx={(theme) => ({
           position: "relative",
           zIndex: 20,
           pointerEvents: "none",
-          marginLeft: drawerOpen
+          marginRight: drawerOpen
             ? `${theme.layout.drawer.width}px`
             : `${theme.layout.drawer.closedWidth}px`,
           transition: theme.transitions.create("margin", {
@@ -111,7 +129,7 @@ export default function Home() {
       >
         {/* Header - Enable pointer events */}
         <Box sx={{ pointerEvents: "auto" }}>
-          <Header />
+          <Header drawerOpen={drawerOpen} drawerPosition="right" />
         </Box>
 
         {/* Main content sections */}
@@ -121,7 +139,7 @@ export default function Home() {
             position: "relative",
           }}
         >
-          {/* Hero Panel with Video Background */}
+          {/* Hero Questions Panel */}
           <Box
             sx={{
               pointerEvents: "auto",
@@ -131,6 +149,22 @@ export default function Home() {
               overflow: "hidden",
             }}
           >
+            <HeroQuestionsPanel
+              headlines={[
+                "How do reservoir operations affect Delta outflow?",
+                "What scenarios improve salmon survival?",
+                "Can we balance urban and agricultural needs in a hotter and drier future?",
+                "Which policies help meet environmental goals?",
+                "How do flow changes impact water availability?",
+              ]}
+              verticalAlignment="center"
+              background="light"
+              sx={{
+                backgroundColor: "rgb(191, 218, 220)",
+              }}
+            />
+
+            {/* Original VideoPanel - commented out for future reference 
             <VideoPanel
               title={t("heroPanel.title")}
               content={t<string[]>("heroPanel.content") || []}
@@ -138,8 +172,9 @@ export default function Home() {
               posterSrc="/video/poster.jpg"
               overlayOpacity={0}
             />
+            */}
 
-            {/* Scroll Down Button */}
+            {/* Content and Scroll Down Button */}
             <Box
               sx={{
                 position: "absolute",
@@ -151,11 +186,25 @@ export default function Home() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                maxWidth: "600px",
+                textAlign: "center",
               }}
-              onClick={() => scrollToSection("california-water-panel")}
+              onClick={() => scrollToQuestionBuilder()}
             >
-              <Box
+              <Typography
+                variant="h5"
                 sx={{
+                  color: "rgba(0, 0, 0, 0.8)",
+                  marginBottom: 6,
+                  textShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)",
+                }}
+              >
+                Water connects us. Explore California&apos;s water system and
+                discover possibilities for the future of water in our state.
+              </Typography>
+
+              <Box
+                sx={(theme) => ({
                   width: 56,
                   height: 56,
                   borderRadius: "50%",
@@ -163,32 +212,26 @@ export default function Home() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "white",
+                  color: theme.palette.common.white,
                   "&:hover": {
                     backgroundColor: "rgba(0, 0, 0, 0.3)",
                   },
-                }}
+                })}
               >
                 <KeyboardArrowDownIcon
                   fontSize="large"
-                  sx={{
-                    fontSize: 36,
-                    color: "white",
+                  sx={(theme) => ({
+                    color: theme.palette.common.white,
                     "&:hover": {
-                      color: "white",
+                      color: theme.palette.common.white,
                     },
-                  }}
+                  })}
                 />
               </Box>
             </Box>
           </Box>
 
-          {/* Transition div between video panel and two-column panel */}
-          <Box sx={{ pointerEvents: "auto" }}>
-            <TransitionDiv color="rgb(154, 203, 207)" height={60} />
-          </Box>
-
-          {/* Two Column Panel */}
+          {/* Two Column Panel 
           <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
             <TwoColumnPanel
               leftTitle={t("CaliforniaWaterPanel.title")}
@@ -201,10 +244,10 @@ export default function Home() {
                 },
               }}
             />
-          </Box>
+          </Box> */}
 
           {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto" }}>
+          <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">
             <CombinedPanel />
           </Box>
         </Box>

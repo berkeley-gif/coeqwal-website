@@ -1,9 +1,9 @@
 export const OPERATION_THEMES = [
   {
     id: "sgma",
-    title: "Theme 1: Sustainable Groundwater Management Act (SGMA) compliance",
+    title: "Groundwater and agricultural water use",
     options: [
-      "Groundwater pumping limits in the San Joaquin valley",
+      "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)",
       "Modified crop mix statewide",
       "Reduced crop acreage in the San Joaquin valley",
       "Combinations of modified/reduced crop acreage with groundwater pumping",
@@ -12,7 +12,7 @@ export const OPERATION_THEMES = [
   },
   {
     id: "flows",
-    title: "Theme 2: Changing flow regimes in Central Valley rivers",
+    title: "Changing flows in Central Valley rivers",
     options: [
       {
         id: "removing-flow-reqs",
@@ -23,13 +23,13 @@ export const OPERATION_THEMES = [
         ],
       },
       "Functional flows based on a seasonal water budget",
-      "Supporting a Sacramento River salmon flow scenario",
+      "Supporting Sacramento River salmon",
       "Alt 3",
     ],
   },
   {
     id: "drinking-water",
-    title: "Theme 3: Prioritizing drinking water availability",
+    title: "Prioritizing drinking water",
     options: [
       "Meeting critical needs in vulnerable communities",
       "Meeting functional thresholds in vulnerable communities",
@@ -38,7 +38,7 @@ export const OPERATION_THEMES = [
   },
   {
     id: "regulations",
-    title: "Theme 4: Alternatives to current regulations",
+    title: "Regulation alternatives",
     options: [
       "Relaxing Delta salinity requirements",
       "Relaxing Delta outflow requirements",
@@ -48,7 +48,7 @@ export const OPERATION_THEMES = [
   },
   {
     id: "infrastructure",
-    title: "Theme 5: Infrastructure",
+    title: "Changing infrastructure",
     options: [
       {
         id: "delta-conveyance",

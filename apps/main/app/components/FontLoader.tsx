@@ -42,7 +42,7 @@ export function FontLoader({ kitId, timeout = 3000 }: FontLoaderProps) {
           if (typekitWindow.Typekit) {
             typekitWindow.Typekit.load(config)
           }
-        } catch (e) {
+        } catch {
           // Silently fail and let fallback fonts work
         }
       }
