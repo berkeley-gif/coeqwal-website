@@ -13,10 +13,13 @@
     "@repo/ui": "workspace:*",
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
-    "next": "^15.2.1"
+    "@repo/motion": "workspace:*",
+    "next": "^15.2.1",
+    "lodash": "^4.17.21"  
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@types/lodash": "^4.17.16"
   }
 }

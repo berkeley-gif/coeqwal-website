@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useRef } from "react"
-import { Map } from "@repo/map"
+import { Map, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { stateMapViewState } from "./components/helpers/mapViews"
 import "./main.css"
@@ -10,20 +10,28 @@ import SectionWaterSource from "./components/02WaterSource"
 
 export default function Provider() {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { flyTo, withMap, getMap } = useMap();
+
 
   return (
     <>
-      <div id="map-container">
-        <Map
-          mapboxToken={mapboxToken}
-          viewState={stateMapViewState}
-          mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
+      <div id='map-container'>
+        <Map mapboxToken={mapboxToken} viewState={stateMapViewState}
+          mapStyle="mapbox://styles/mapbox/dark-v11"
           scrollZoom={false}
           navigationControl={false}
           dragPan={false}
           interactive={false}
-        />
+          onLoad={() => {
+            console.log('yoooo fly attempt 1')
+            flyTo(
+              stateMapViewState.longitude,
+              stateMapViewState.latitude,
+              12, stateMapViewState.pitch, stateMapViewState.bearing
+            )
+          }}
+          />
       </div>
       <div
         ref={containerRef}
