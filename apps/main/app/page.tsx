@@ -8,6 +8,7 @@ import {
   MiniDrawer,
   VerticalDivider,
   KeyboardArrowDownIcon,
+  TransitionDiv,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { TwoColumnPanel, VideoPanel } from "@repo/ui"
@@ -180,6 +181,14 @@ export default function Home() {
                 />
               </Box>
             </Box>
+          </Box>
+
+          {/* Transition div between video panel and two-column panel */}
+          <Box sx={{ pointerEvents: "auto" }}>
+            <TransitionDiv 
+              color="rgb(154, 203, 207)" 
+              height={60} 
+            />
           </Box>
 
           {/* Two Column Panel */}

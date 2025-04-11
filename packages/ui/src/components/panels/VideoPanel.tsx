@@ -66,7 +66,7 @@ export function VideoPanel({
         position: "relative",
         display: "flex",
         justifyContent: "center",
-        overflow: "hidden",
+        overflow: "visible",
         backgroundColor: "transparent",
         height: "100%",
         ...panelProps.sx,
@@ -88,8 +88,8 @@ export function VideoPanel({
           width: "100%",
           textAlign: "left",
           position: "relative",
-          zIndex: 2, // Ensure content is above video
-          justifyContent: "flex-end", // Align content to the bottom
+          zIndex: 2,
+          justifyContent: "flex-end",
           paddingBottom: theme.spacing(12),
         }}
       >
