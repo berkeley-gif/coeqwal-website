@@ -222,7 +222,7 @@ const theme = createTheme({
       primary: themeValues.palette.black,
       secondary: themeValues.palette.white,
     },
-    divider: themeValues.palette.black,
+    divider: themeValues.palette.white,
   },
   // Type family, sizes, and weights
   typography: {
@@ -236,7 +236,7 @@ const theme = createTheme({
     h1: {
       fontSize: "7rem",
       fontWeight: 700,
-      lineHeight: 1,
+      lineHeight: 1.1,
       letterSpacing: "normal",
     },
     h2: {
