@@ -111,7 +111,7 @@ const CombinedPanelContent = () => {
           top: theme.layout.headerHeight,
           zIndex: 1000,
           width: "100%",
-          maxWidth: "none",
+          maxWidth: "none !important",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -123,11 +123,10 @@ const CombinedPanelContent = () => {
       >
         <Box
           sx={{
-            width: "auto",
-            maxWidth: "none",
-            transform: hasClickedScroll ? "scale(0.7)" : "scale(1)",
-            transformOrigin: "center top",
-            transition: "transform 0.3s ease",
+            width: "100%",
+            maxWidth: "none !important",
+            position: "relative",
+            zIndex: 995,
           }}
         >
           <QuestionSummary wasScrolled={hasClickedScroll} />
@@ -144,7 +143,7 @@ const CombinedPanelContent = () => {
             transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
             transition: "all 0.5s ease",
             transitionDelay: "0.2s",
-            zIndex: 10,
+            zIndex: 2500,
           }}
         >
           <Card

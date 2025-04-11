@@ -886,13 +886,17 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
   // Container styles are now merged into Typography
   return (
-    <div style={{ 
-      backgroundColor: wasScrolled ? "white" : "transparent", 
-      width: "100%",
-      position: "relative",
-      zIndex: 1000,
-      padding: wasScrolled ? "0 32px" : 0,
-    }}>
+    <div
+      style={{
+        backgroundColor: wasScrolled ? "white" : "transparent",
+        width: "100%",
+        position: "relative",
+        zIndex: 1000,
+        padding: wasScrolled ? "0" : 0,
+        transition: "background-color 0.3s ease, padding 0.3s ease",
+        maxWidth: "none !important",
+      }}
+    >
       <Typography
         variant="h1"
         sx={(theme) => ({
@@ -901,18 +905,18 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
           lineHeight: theme.typography.h1.lineHeight,
           textAlign: "center",
           fontWeight: 500,
-          width: "auto",
+          width: "100%",
           margin: "0 auto",
-          fontSize: wasScrolled ? "4rem" : "7rem",
-          transition: "all 0.3s ease",
-          position: "relative",
-          zIndex: 1000,
+          fontSize: wasScrolled ? "3.33rem" : "7rem",
           backgroundColor: "white",
-          paddingTop: wasScrolled ? "60px" : "32px",
-          paddingBottom: wasScrolled ? "60px" : "32px",
-          paddingLeft: wasScrolled ? "32px" : "0",
-          paddingRight: wasScrolled ? "32px" : "0",
+          paddingTop: wasScrolled ? "140px" : "72px",
+          paddingBottom: wasScrolled ? "40px" : "32px",
+          paddingLeft: "0",
+          paddingRight: "0",
           boxShadow: wasScrolled ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
+          transition:
+            "font-size 0.3s ease, padding 0.3s ease, margin 0.3s ease, box-shadow 0.3s ease",
+          maxWidth: "none !important",
         })}
       >
         {summary}
