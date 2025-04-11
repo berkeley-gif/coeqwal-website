@@ -13,6 +13,7 @@ import {
   alpha,
   RadioGroup,
   Box,
+  KeyboardArrowDownIcon,
 } from "@repo/ui/mui"
 import { BasePanel, Card } from "@repo/ui"
 import {
@@ -70,59 +71,139 @@ const QuestionBuilderContent = ({
   const showQuestionBuilder = searchMode !== "detailed"
 
   return (
-    <BasePanel
-      fullHeight={false} // Allow panel to be taller than viewport - updated from CombinedPanel
-      background="light"
-      paddingVariant="narrow"
-      sx={{
-        width: "100%", // Updated from CombinedPanel
-        maxWidth: "100%", // Prevent horizontal scrollbar
-      }}
-    >
-      {/* Row 1: Question summary at the top */}
-      {showQuestionBuilder && showSummary && (
+    <Box sx={{ width: "100%" }}>
+      {/* Full height hero section with centered question summary */}
+      <Box
+        sx={(theme) => ({
+          height: "100vh",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          backgroundColor: theme.palette.background.default,
+        })}
+      >
+        {/* Sticky Question Summary */}
+        {showQuestionBuilder && showSummary && (
+          <Box
+            sx={{
+              position: "sticky",
+              top: (theme) => theme.layout.headerHeight,
+              zIndex: 1000,
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: (theme) => theme.spacing(4),
+            }}
+          >
+            <QuestionSummary />
+          </Box>
+        )}
+
+        {/* Scroll indicator at the bottom - matching HeroQuestionsPanel style */}
         <Box
           sx={{
-            position: "sticky",
-            top: (theme) => theme.layout.headerHeight,
-            zIndex: 1000,
-            backgroundColor: theme.palette.common.white,
-            borderBottom: `1px solid ${theme.palette.divider}`,
-            marginBottom: (theme) => theme.spacing(3),
+            position: "absolute",
+            bottom: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 10,
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            maxWidth: "600px",
+            textAlign: "center",
+          }}
+          onClick={() => {
+            const contentElement = document.getElementById(
+              "question-builder-content",
+            )
+            if (contentElement) {
+              contentElement.scrollIntoView({ behavior: "smooth" })
+            }
           }}
         >
-          <QuestionSummary />
-        </Box>
-      )}
+          <Typography
+            variant="h5"
+            sx={{
+              color: "rgba(0, 0, 0, 0.8)",
+              marginBottom: 6,
+              textShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)",
+            }}
+          >
+            Californians share water through one of the largest and most complex
+            conveyance systems in the world.
+          </Typography>
 
-      {/* Row 2: Climate checkbox */}
-      {showQuestionBuilder && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-          <Card>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={includeClimate}
-                  onChange={() => toggleClimate()}
-                  color="primary"
-                  sx={{
-                    color: theme.palette.text.primary,
-                    "&.Mui-checked": {
-                      color: theme.palette.text.primary,
-                    },
-                  }}
-                />
-              }
-              label="Include climate futures"
+          <Box
+            sx={(theme) => ({
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              backgroundColor: "rgba(0, 0, 0, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: theme.palette.common.white,
+              "&:hover": {
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
+              },
+            })}
+          >
+            <KeyboardArrowDownIcon
+              fontSize="large"
+              sx={(theme) => ({
+                color: theme.palette.common.white,
+                "&:hover": {
+                  color: theme.palette.common.white,
+                },
+              })}
             />
-          </Card>
+          </Box>
         </Box>
-      )}
+      </Box>
 
-      {/* Only show the question builder if not in detailed mode */}
-      {showQuestionBuilder && (
-        <>
-          {/* Row 3: Question builder */}
+      {/* Question builder content below the fold */}
+      <BasePanel
+        id="question-builder-content"
+        fullHeight={false}
+        background="light"
+        paddingVariant="narrow"
+        sx={{
+          width: "100%",
+          maxWidth: "100%",
+        }}
+      >
+        {/* Climate checkbox */}
+        {showQuestionBuilder && (
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+            <Card>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeClimate}
+                    onChange={() => toggleClimate()}
+                    color="primary"
+                    sx={{
+                      color: theme.palette.text.primary,
+                      "&.Mui-checked": {
+                        color: theme.palette.text.primary,
+                      },
+                    }}
+                  />
+                }
+                label="Include climate futures"
+              />
+            </Card>
+          </Box>
+        )}
+
+        {/* Only show the question builder if not in detailed mode */}
+        {showQuestionBuilder && (
           <Grid
             container
             spacing={2}
@@ -191,19 +272,19 @@ const QuestionBuilderContent = ({
               {includeClimate && <ClimateSelector />}
             </Grid>
           </Grid>
-        </>
-      )}
+        )}
 
-      {/* Placeholder content for detailed search mode */}
-      {!showQuestionBuilder && (
-        <Grid sx={{ p: 4 }}>
-          <Typography variant="h5">Detailed Outcome-Based Search</Typography>
-          <Typography>
-            This is where the water needs interface would go.
-          </Typography>
-        </Grid>
-      )}
-    </BasePanel>
+        {/* Placeholder content for detailed search mode */}
+        {!showQuestionBuilder && (
+          <Grid sx={{ p: 4 }}>
+            <Typography variant="h5">Detailed Outcome-Based Search</Typography>
+            <Typography>
+              This is where the water needs interface would go.
+            </Typography>
+          </Grid>
+        )}
+      </BasePanel>
+    </Box>
   )
 }
 

@@ -900,11 +900,9 @@ const QuestionSummary: React.FC = () => {
   // Container styles
   const containerStyles = {
     p: theme.spacing(2),
-    position: "sticky",
-    top: 0,
+    position: "relative",
     zIndex: 1000,
-    backgroundColor: theme.palette.common.white,
-    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: "transparent",
     width: "100%",
   }
 
@@ -977,7 +975,17 @@ const QuestionSummary: React.FC = () => {
         {summary}
       </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          opacity: 0,
+          transition: "opacity 0.3s ease",
+          "&:hover": {
+            opacity: 1,
+          },
+        }}
+      >
         {!showFilters ? (
           // Pill-shaped search button when filters are hidden
           <Card sx={{ width: "auto" }}>
