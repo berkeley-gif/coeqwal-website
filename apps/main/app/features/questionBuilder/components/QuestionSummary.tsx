@@ -896,12 +896,14 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         fontWeight: 500,
         width: "auto",
         margin: "0 auto",
-        fontSize: "3.33rem",
-        transition: "margin 0.3s ease",
+        fontSize: wasScrolled ? "4rem" : "7rem",
+        transition: "all 0.3s ease",
         // Add necessary styles from containerStyles
         position: "relative",
         zIndex: 1000,
         backgroundColor: "transparent",
+        paddingTop: "32px",
+        paddingBottom: "32px",
       })}
     >
       {summary}
