@@ -84,7 +84,6 @@ const QuestionBuilderContent = ({
         container
         spacing={2}
         sx={{
-          p: theme.spacing(2),
           display: "flex",
           alignItems: "flex-end",
           width: "100%",
@@ -271,7 +270,6 @@ const QuestionBuilderContent = ({
             spacing={2}
             sx={{
               width: "100%",
-              p: theme.spacing(2),
               display: "flex",
             }}
           >
