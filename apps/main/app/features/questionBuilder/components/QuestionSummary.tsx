@@ -66,7 +66,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       if (selectedOperations.length === 0) {
         return (
           <ColoredText color={theme.palette.pop.main}>
-            our decisions
+            decisions
           </ColoredText>
         )
       }
@@ -153,7 +153,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       if (formattedOperations.length === 0) {
         return (
           <ColoredText color={theme.palette.pop.main}>
-            our decisions
+            decisions
           </ColoredText>
         )
       }
@@ -866,7 +866,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         // No operations selected
         return (
           <>
-            How do {operationsPart}{" "}
+            How do our {operationsPart}{" "}
             <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
