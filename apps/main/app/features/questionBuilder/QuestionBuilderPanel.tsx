@@ -101,14 +101,10 @@ const QuestionBuilderContent = ({
           }}
         >
           <Typography variant="h4" gutterBottom>
-            Explore Possible Futures for California Water
+            Explore Options for California Water
           </Typography>
           <Typography variant="body1">
-            Search our collection of scenarios. You can discover scenarios that
-            show the effects of different operations or outcomes.
-            <br />
-            For a detailed search for scenarios by outcome, use our outcome
-            search tool.
+            Search our collection of water management scenarios to see how different decisions — like reservoir rules or delivery priorities — shape outcomes across California.
           </Typography>
 
           {/* Radio Buttons for Search Options */}
