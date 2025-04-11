@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react"
 import {
   Grid,
   Typography,
-  Checkbox,
-  FormControlLabel,
   IconButton,
   useTheme,
   SwapHorizIcon,
@@ -15,7 +13,7 @@ import {
   Box,
   KeyboardArrowDownIcon,
 } from "@repo/ui/mui"
-import { BasePanel, Card } from "@repo/ui"
+import { BasePanel } from "@repo/ui"
 import {
   QuestionSummary,
   OperationsSelector,
@@ -34,7 +32,6 @@ const QuestionBuilderContent = ({
   const theme = useTheme()
   const {
     state: { includeClimate, swapped },
-    toggleClimate,
     toggleSwap,
   } = useQuestionBuilderHelpers()
 
@@ -54,11 +51,11 @@ const QuestionBuilderContent = ({
   }, [searchMode, swapped, toggleSwap])
 
   // Handle radio button change
-  const handleSearchModeChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setSearchMode(event.target.value)
-  }
+  // const handleSearchModeChange = (
+  //   event: React.ChangeEvent<HTMLInputElement>,
+  // ) => {
+  //   setSearchMode(event.target.value)
+  // }
 
   // Handle swap icon click - sync with radio buttons
   const handleSwapClick = () => {

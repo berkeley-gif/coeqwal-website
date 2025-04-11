@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 
@@ -881,7 +881,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     theme.palette.climate.main,
     formatOperationText,
     formatOutcomeText,
-    wasScrolled,
   ])
 
   // Container styles are now merged into Typography

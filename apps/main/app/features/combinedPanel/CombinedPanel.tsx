@@ -6,8 +6,6 @@ import {
   Typography,
   useTheme,
   Divider,
-  Checkbox,
-  FormControlLabel,
   IconButton,
   SwapHorizIcon,
   Grid,
@@ -31,7 +29,6 @@ const CombinedPanelContent = () => {
   const theme = useTheme()
   const {
     state: { includeClimate, swapped },
-    toggleClimate,
     toggleSwap,
   } = useQuestionBuilderHelpers()
 

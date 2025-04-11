@@ -75,6 +75,12 @@ export function HeroQuestionsPanel({
           alignItems: "center",
           margin: "0 auto",
           padding: { xs: theme.spacing(1), md: theme.spacing(2) },
+          justifyContent:
+            verticalAlignment === "top"
+              ? "flex-start"
+              : verticalAlignment === "bottom"
+                ? "flex-end"
+                : "center",
         })}
       >
         <TransitionHeadline

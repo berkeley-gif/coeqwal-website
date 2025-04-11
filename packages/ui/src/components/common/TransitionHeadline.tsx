@@ -78,7 +78,7 @@ export function TransitionHeadline({
           align="center"
           color={color}
           className={className}
-          sx={(theme) => ({
+          sx={() => ({
             transition: "all 0.5s ease-in-out",
             height: "auto",
             minHeight: 0,

@@ -10,7 +10,7 @@ import {
   KeyboardArrowDownIcon,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
+import { HeroQuestionsPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 
@@ -65,21 +65,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Global style override to completely disable scroll snap behavior */}
-      <style jsx global>{`
-        html,
-        body,
-        div,
-        main,
-        section,
-        article {
-          scroll-snap-type: none !important;
-          scroll-snap-align: none !important;
-          scroll-snap-stop: none !important;
-          overscroll-behavior: auto !important;
-        }
-      `}</style>
-
       {/* ===== Background Map Layer ===== */}
       <Box
         sx={{

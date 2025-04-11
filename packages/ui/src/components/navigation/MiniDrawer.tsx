@@ -26,19 +26,19 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }))
 
 // Create a separate component for the title
-const DrawerTitle = styled(Typography)(({ theme }) => ({
-  fontWeight: 700,
-  fontSize: "0.95rem",
-  color: theme.palette.common.white,
-  backgroundColor: theme.palette.primary.main,
-  padding: theme.spacing(0.5, 1.5),
-  borderRadius: theme.shape.borderRadius,
-  marginLeft: theme.spacing(2),
-  marginRight: theme.spacing(1),
-  flexGrow: 1,
-  display: "inline-block",
-  maxWidth: "fit-content",
-}))
+// const DrawerTitle = styled(Typography)(({ theme }) => ({
+//   fontWeight: 700,
+//   fontSize: "0.95rem",
+//   color: theme.palette.common.white,
+//   backgroundColor: theme.palette.primary.main,
+//   padding: theme.spacing(0.5, 1.5),
+//   borderRadius: theme.shape.borderRadius,
+//   marginLeft: theme.spacing(2),
+//   marginRight: theme.spacing(1),
+//   flexGrow: 1,
+//   display: "inline-block",
+//   maxWidth: "fit-content",
+// }))
 
 export interface MiniDrawerItem {
   /** Text to display for the drawer item */
