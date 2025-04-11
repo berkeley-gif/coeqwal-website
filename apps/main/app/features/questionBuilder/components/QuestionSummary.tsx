@@ -78,7 +78,9 @@ const QuestionSummary: React.FC = () => {
     const getOperationsPart = () => {
       if (selectedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>operations</ColoredText>
+          <ColoredText color={theme.palette.pop.main}>
+            our decisions
+          </ColoredText>
         )
       }
 
@@ -163,7 +165,9 @@ const QuestionSummary: React.FC = () => {
       // Handle empty array case to prevent reduce error
       if (formattedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>operations</ColoredText>
+          <ColoredText color={theme.palette.pop.main}>
+            our decisions
+          </ColoredText>
         )
       }
 
@@ -805,7 +809,9 @@ const QuestionSummary: React.FC = () => {
           result = swapped ? (
             <ColoredText color={theme.palette.cool.main}>outcomes</ColoredText>
           ) : (
-            <ColoredText color={theme.palette.cool.main}>outcomes</ColoredText>
+            <ColoredText color={theme.palette.cool.main}>
+              water availability
+            </ColoredText>
           )
         }
 
@@ -871,7 +877,7 @@ const QuestionSummary: React.FC = () => {
         // No operations selected
         return (
           <>
-            How do changes in {operationsPart} affect {outcomePart}
+            How do {operationsPart} affect {outcomePart}
             {climatePart}?
           </>
         )

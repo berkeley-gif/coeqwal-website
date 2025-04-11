@@ -92,24 +92,24 @@ const QuestionBuilderContent = ({
         }}
       >
         {/* Left: Title and description */}
-        <Grid
+        {/* <Grid
           sx={{
             flex: 1,
             width: "100%",
             maxWidth: "calc(100% - 200px)", // Leave room for the climate card
           }}
-        >
-          <Typography variant="h4" gutterBottom>
+        > */}
+        {/* <Typography variant="h4" gutterBottom>
             Explore Options for California Water
           </Typography>
           <Typography variant="body1">
             Search our collection of water management scenarios to see how
             different decisions — like reservoir rules or delivery priorities —
             shape outcomes across California.
-          </Typography>
+          </Typography> */}
 
-          {/* Radio Buttons for Search Options */}
-          <RadioGroup
+        {/* Radio Buttons for Search Options
+           <RadioGroup
             name="search-type"
             value={searchMode}
             onChange={handleSearchModeChange}
@@ -215,8 +215,8 @@ const QuestionBuilderContent = ({
                 />
               </Grid>
             </Grid>
-          </RadioGroup>
-        </Grid>
+          </RadioGroup> */}
+        {/* </Grid>  */}
 
         {/* Right: Climate checkbox */}
         {showQuestionBuilder && (

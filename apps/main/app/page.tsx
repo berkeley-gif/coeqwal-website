@@ -135,7 +135,7 @@ export default function Home() {
               headlines={[
                 "How do reservoir operations affect Delta outflow?",
                 "What scenarios improve salmon survival?",
-                "Can we balance urban and agricultural needs?",
+                "Can we balance urban and agricultural needs in a hotter and drier future?",
                 "Which policies help meet environmental goals?",
                 "How do flow changes impact water availability?",
               ]}
