@@ -79,7 +79,7 @@ const OperationsSelector: React.FC = () => {
           </>
         ) : (
           <>
-            How do {" "}
+            How do{" "}
             <HighlightText bgcolor={theme.palette.pop.main}>
               decisions
             </HighlightText>

@@ -65,9 +65,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     const getOperationsPart = () => {
       if (selectedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>
-            decisions
-          </ColoredText>
+          <ColoredText color={theme.palette.pop.main}>decisions</ColoredText>
         )
       }
 
@@ -152,9 +150,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       // Handle empty array case to prevent reduce error
       if (formattedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>
-            decisions
-          </ColoredText>
+          <ColoredText color={theme.palette.pop.main}>decisions</ColoredText>
         )
       }
 

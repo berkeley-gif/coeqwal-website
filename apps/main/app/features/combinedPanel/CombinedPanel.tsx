@@ -288,16 +288,41 @@ const CombinedPanelContent = () => {
             <Typography variant="h5" sx={{ mt: 0.5, mb: 2 }}>
               {swapped ? "which" : "affect"}
             </Typography>
-            <IconButton onClick={handleSwapClick}>
-              <SwapHorizIcon />
-            </IconButton>
-            <Typography
-              variant="caption"
-              onClick={handleSwapClick}
-              sx={{ cursor: "pointer" }}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
             >
-              switch
-            </Typography>
+              <IconButton
+                onClick={handleSwapClick}
+                sx={{
+                  bgcolor: "black",
+                  color: "white",
+                  width: 64,
+                  height: 64,
+                  "&:hover": {
+                    bgcolor: "#333",
+                  },
+                }}
+              >
+                <SwapHorizIcon fontSize="large" />
+              </IconButton>
+              <Typography
+                variant="button"
+                onClick={handleSwapClick}
+                sx={{
+                  cursor: "pointer",
+                  mt: 1,
+                  fontWeight: "medium",
+                  fontSize: "1rem",
+                  textTransform: "none",
+                }}
+              >
+                switch
+              </Typography>
+            </Box>
           </Grid>
 
           {/* Column 3: Outcomes or operations text */}
