@@ -123,8 +123,6 @@ const CombinedPanelContent = () => {
       >
         <Box
           sx={{
-            width: "100%",
-            maxWidth: "1200px",
             transform: hasClickedScroll ? "scale(0.7)" : "scale(1)",
             transformOrigin: "center top",
             transition: "transform 0.3s ease",
@@ -249,7 +247,6 @@ const CombinedPanelContent = () => {
         paddingVariant="narrow"
         sx={{
           width: "100%",
-          maxWidth: "100%",
           position: "relative",
         }}
       >

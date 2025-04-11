@@ -904,7 +904,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
           lineHeight: theme.typography.h1.lineHeight,
           textAlign: "center",
           fontWeight: 500,
-          width: "100%",
+          width: "auto",
           margin: "0 auto",
           transition: "margin 0.3s ease",
         })}

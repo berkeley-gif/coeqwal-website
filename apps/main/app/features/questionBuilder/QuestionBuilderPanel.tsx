@@ -92,7 +92,6 @@ const QuestionBuilderContent = ({
               position: "sticky",
               top: (theme) => theme.layout.headerHeight,
               zIndex: 1000,
-              width: "100%",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
@@ -175,7 +174,6 @@ const QuestionBuilderContent = ({
         paddingVariant="narrow"
         sx={{
           width: "100%",
-          maxWidth: "100%",
         }}
       >
         {/* Only show the question builder if not in detailed mode */}
