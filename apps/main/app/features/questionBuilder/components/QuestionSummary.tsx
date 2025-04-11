@@ -861,7 +861,8 @@ const QuestionSummary: React.FC = () => {
         return (
           <>
             How does {needsArticle ? "a " : ""}
-            {operationsPart} affect {outcomePart}
+            {operationsPart}{" "}
+            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
         )
@@ -869,7 +870,8 @@ const QuestionSummary: React.FC = () => {
         // Multiple operations
         return (
           <>
-            How do {operationsPart} affect {outcomePart}
+            How do {operationsPart}{" "}
+            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
         )
@@ -877,7 +879,8 @@ const QuestionSummary: React.FC = () => {
         // No operations selected
         return (
           <>
-            How do {operationsPart} affect {outcomePart}
+            How do {operationsPart}{" "}
+            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
             {climatePart}?
           </>
         )
@@ -968,7 +971,6 @@ const QuestionSummary: React.FC = () => {
           textAlign: "center",
           fontWeight: 500,
           width: "100%",
-          maxWidth: "96%",
           margin: "0 auto",
         })}
       >
