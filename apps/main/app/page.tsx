@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import dynamic from "next/dynamic"
-import { Box } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
@@ -77,6 +77,7 @@ export default function Home() {
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
             position="right"
+            title="Learn"
           />
         </Box>
       </Box>
@@ -138,7 +139,6 @@ export default function Home() {
                 "Which policies help meet environmental goals?",
                 "How do flow changes impact water quality?",
               ]}
-              content="Water connects us. Explore California's water system and discover possibilities for the future of water in our state."
               verticalAlignment="center"
               background="light"
               sx={{
@@ -156,7 +156,7 @@ export default function Home() {
             />
             */}
 
-            {/* Scroll Down Button */}
+            {/* Content and Scroll Down Button */}
             <Box
               sx={{
                 position: "absolute",
@@ -168,9 +168,23 @@ export default function Home() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                maxWidth: "600px",
+                textAlign: "center",
               }}
               onClick={() => scrollToSection("california-water-panel")}
             >
+              <Typography
+                variant="h5"
+                sx={{
+                  color: "rgba(0, 0, 0, 0.8)",
+                  marginBottom: 6,
+                  textShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)",
+                }}
+              >
+                Water connects us. Explore California&apos;s water system and
+                discover possibilities for the future of water in our state.
+              </Typography>
+
               <Box
                 sx={{
                   width: 56,

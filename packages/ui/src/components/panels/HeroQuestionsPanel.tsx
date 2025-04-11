@@ -7,7 +7,7 @@ import { TransitionHeadline } from "../common/TransitionHeadline"
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
   headlines?: string[] // Array of headlines
-  content: string
+  content?: string // Content optional
   backgroundImage?: string
   verticalAlignment?: "top" | "center" | "bottom"
   children?: React.ReactNode
@@ -84,18 +84,21 @@ export function HeroQuestionsPanel({
           headlines={headlinesArray}
           transitionInterval={transitionInterval}
           variant="h1"
-          sx={{ marginBottom: 3 }}
+          sx={{ marginBottom: content ? 3 : 0 }}
         />
-        <Typography
-          variant="h5"
-          align="center"
-          sx={{
-            maxWidth: { xs: "100%", md: "80%" },
-            margin: "0 auto",
-          }}
-        >
-          {content}
-        </Typography>
+
+        {content && (
+          <Typography
+            variant="h5"
+            align="center"
+            sx={{
+              maxWidth: { xs: "100%", md: "80%" },
+              margin: "0 auto",
+            }}
+          >
+            {content}
+          </Typography>
+        )}
 
         {children}
       </Box>
