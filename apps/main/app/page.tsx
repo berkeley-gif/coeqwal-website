@@ -39,13 +39,19 @@ export default function Home() {
     setDrawerOpen(false)
   }
 
-  // Direct scroll to combined panel
+  // Direct scroll to combined panel with offset
   const scrollToQuestionBuilder = () => {
     const element = document.getElementById("combined-panel-container")
     if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
+      // Calculate the element's position relative to the document
+      const rect = element.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const offset = rect.top + scrollTop + 120 // Reduced from 200px to 120px
+
+      // Scroll to the calculated position
+      window.scrollTo({
+        top: offset,
+        behavior: "smooth"
       })
     }
   }
