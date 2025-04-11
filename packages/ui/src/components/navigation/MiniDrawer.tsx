@@ -122,7 +122,7 @@ export function MiniDrawer({
       ) : (
         <DrawerHeader
           sx={{
-            borderTop: "2px solid black",
+            borderTop: "2px solid #ddd",
             justifyContent: "space-between",
             flexDirection: position === "left" ? "row" : "row-reverse",
             backgroundColor: "rgba(255, 255, 255, 0.9)",
