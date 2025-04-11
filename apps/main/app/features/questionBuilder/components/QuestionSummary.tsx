@@ -44,12 +44,14 @@ import { ColoredText } from "./ui"
 const isDeltaOutflow = (text: string) =>
   text.toLowerCase().includes("delta outflow")
 
-// At the top of the file, add the interface
+// QuestionSummary component props
 interface QuestionSummaryProps {
-  wasScrolled?: boolean;
+  wasScrolled?: boolean
 }
 
-const QuestionSummary: React.FC<QuestionSummaryProps> = ({ wasScrolled = false }) => {
+const QuestionSummary: React.FC<QuestionSummaryProps> = ({
+  wasScrolled = false,
+}) => {
   const theme = useTheme()
   const {
     state: {
@@ -972,35 +974,34 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({ wasScrolled = false }
       <Typography
         variant="h1"
         sx={(theme) => ({
-          mt: 0,
-          mb: 0,
+          mt: theme.spacing(wasScrolled ? 1 : 4), // Reduced top margin when scrolled
+          mb: theme.spacing(wasScrolled ? 1 : 4), // Reduced bottom margin when scrolled
           lineHeight: theme.typography.h1.lineHeight,
           textAlign: "center",
           fontWeight: 500,
           width: "100%",
           margin: "0 auto",
+          transition: "margin 0.3s ease", // Smooth transition for margin changes
         })}
       >
         {summary}
       </Typography>
 
+      {/* Search button - hidden initially, visible after scroll */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "flex-end",
-          opacity: 0,
-          position: "absolute",
-          top: "50%",
-          right: 0,
-          transform: "translateY(-50%)",
-          height: 0,
-          overflow: "hidden",
-          transition: "opacity 0.3s ease",
-          "&:hover": {
-            opacity: 1,
-            height: "auto",
-            overflow: "visible",
-          },
+          alignItems: "center",
+          position: "relative",
+          opacity: wasScrolled ? 1 : 0,
+          visibility: wasScrolled ? "visible" : "hidden",
+          height: wasScrolled ? "auto" : "0",
+          overflow: wasScrolled ? "visible" : "hidden",
+          transform: wasScrolled ? "translateY(0)" : "translateY(-10px)",
+          transition: "all 0.5s ease",
+          transitionDelay: "0.2s", // Slightly longer delay for a more polished appearance
+          marginTop: wasScrolled ? theme.spacing(1) : 0,
         }}
       >
         {!showFilters ? (
