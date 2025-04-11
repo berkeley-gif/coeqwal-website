@@ -902,11 +902,12 @@ const QuestionSummary: React.FC = () => {
 
   // Container styles
   const containerStyles = {
-    p: theme.spacing(2),
     position: "relative",
     zIndex: 1000,
     backgroundColor: "transparent",
     width: "100%",
+    padding: 0,
+    margin: 0,
   }
 
   // Handle dropdown changes
@@ -965,8 +966,8 @@ const QuestionSummary: React.FC = () => {
       <Typography
         variant="h1"
         sx={(theme) => ({
-          mt: theme.spacing(4),
-          mb: theme.spacing(4),
+          mt: 0,
+          mb: 0,
           lineHeight: theme.typography.h1.lineHeight,
           textAlign: "center",
           fontWeight: 500,
@@ -982,9 +983,17 @@ const QuestionSummary: React.FC = () => {
           display: "flex",
           justifyContent: "flex-end",
           opacity: 0,
+          position: "absolute",
+          top: "50%",
+          right: 0,
+          transform: "translateY(-50%)",
+          height: 0,
+          overflow: "hidden",
           transition: "opacity 0.3s ease",
           "&:hover": {
             opacity: 1,
+            height: "auto",
+            overflow: "visible",
           },
         }}
       >
