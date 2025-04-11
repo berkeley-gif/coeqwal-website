@@ -132,8 +132,14 @@ export default function Home() {
             }}
           >
             <HeroQuestionsPanel
-              title={t("heroPanel.title")}
-              content="Explore California's water system and the tradeoffs shaping our future"
+              headlines={[
+                "How do reservoir operations affect Delta outflow?",
+                "What scenarios improve salmon survival?",
+                "Can we balance urban and agricultural needs?",
+                "Which policies help meet environmental goals?",
+                "How do flow changes impact water quality?",
+              ]}
+              content="Water connects us. Explore California's water system and discover possibilities for the future of water in our state."
               verticalAlignment="center"
               background="light"
               sx={{
@@ -184,7 +190,6 @@ export default function Home() {
                 <KeyboardArrowDownIcon
                   fontSize="large"
                   sx={{
-                    fontSize: 36,
                     color: "white",
                     "&:hover": {
                       color: "white",
@@ -193,11 +198,6 @@ export default function Home() {
                 />
               </Box>
             </Box>
-          </Box>
-
-          {/* Transition div between video panel and two-column panel */}
-          <Box sx={{ pointerEvents: "auto" }}>
-            <TransitionDiv color="rgb(154, 203, 207)" height={60} />
           </Box>
 
           {/* Two Column Panel */}

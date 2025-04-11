@@ -2,24 +2,31 @@
 
 import { Box, Typography } from "@mui/material"
 import { BasePanel, BasePanelProps } from "./index"
+import { TransitionHeadline } from "../common/TransitionHeadline"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
-  title: string
+  title?: string // Title optional
+  headlines?: string[] // Array of headlines
   content: string
   backgroundImage?: string
   verticalAlignment?: "top" | "center" | "bottom"
   children?: React.ReactNode
+  transitionInterval?: number // Interval for headline transitions
 }
 
 /**
  * HeroQuestionsPanel Component
  *
- * A full-height panel with title and content, designed to showcase questions.
- * Optionally includes a background image.
+ * A full-height panel with transitioning headlines and content.
+ * Designed to showcase questions or prompts that change over time.
  *
  * @example
  * <HeroQuestionsPanel
- *   title="How can we balance California's water needs?"
+ *   headlines={[
+ *     "How can we balance California's water needs?",
+ *     "What scenarios improve salmon survival?",
+ *     "Can we meet urban and agricultural demand?"
+ *   ]}
  *   content="Explore scenarios across the state's water system"
  *   backgroundImage="/images/hero-background.jpg"
  *   verticalAlignment="center"
@@ -27,12 +34,18 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
  */
 export function HeroQuestionsPanel({
   title,
+  headlines = [],
   content,
   backgroundImage,
   verticalAlignment = "center",
   children,
+  transitionInterval = 4000,
   ...panelProps
 }: HeroQuestionsPanelProps) {
+  // Use title as a single headline if headlines array is empty
+  const headlinesArray =
+    headlines.length > 0 ? headlines : title ? [title] : [""]
+
   return (
     <BasePanel
       fullHeight={true}
@@ -67,23 +80,16 @@ export function HeroQuestionsPanel({
           padding: { xs: theme.spacing(2), md: theme.spacing(4) },
         })}
       >
-        <Typography
+        <TransitionHeadline
+          headlines={headlinesArray}
+          transitionInterval={transitionInterval}
           variant="h1"
-          gutterBottom
-          align="center"
-          sx={{
-            fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4.6rem" },
-            fontWeight: 500,
-          }}
-        >
-          {title}
-        </Typography>
-
+          sx={{ marginBottom: 3 }}
+        />
         <Typography
           variant="body1"
           align="center"
           sx={{
-            fontSize: { xs: "1.1rem", sm: "1.2rem", md: "1.2857rem" },
             maxWidth: { xs: "100%", md: "80%" },
             margin: "0 auto",
           }}
