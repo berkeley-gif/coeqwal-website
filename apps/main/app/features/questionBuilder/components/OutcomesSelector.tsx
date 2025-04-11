@@ -21,7 +21,15 @@
  */
 
 import React from "react"
-import { Typography, Box, useTheme, Paper, LocationOnIcon } from "@repo/ui/mui"
+import {
+  Typography,
+  Box,
+  useTheme,
+  Paper,
+  LocationOnIcon,
+  Checkbox,
+  FormControlLabel,
+} from "@repo/ui/mui"
 import { Card } from "@repo/ui"
 import { OUTCOME_CATEGORIES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
@@ -31,9 +39,10 @@ import { HighlightText } from "./ui"
 const OutcomesSelector: React.FC = () => {
   const theme = useTheme()
   const {
-    state: { swapped, selectedOutcomes, showMap },
+    state: { swapped, selectedOutcomes, showMap, includeClimate },
     handleOutcomeChange,
     toggleMap,
+    toggleClimate,
   } = useQuestionBuilderHelpers()
 
   // Handle option change with section context
@@ -76,24 +85,52 @@ const OutcomesSelector: React.FC = () => {
 
   return (
     <Card>
-      <Typography variant="h5">
-        {swapped ? (
-          <>
-            To change{" "}
-            <HighlightText bgcolor={theme.palette.cool.main}>
-              outcomes
-            </HighlightText>
-          </>
-        ) : (
-          <>
-            {" "}
-            <HighlightText bgcolor={theme.palette.cool.main}>
-              outcomes
-            </HighlightText>
-            &nbsp;&nbsp;?
-          </>
-        )}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography variant="h5">
+          {swapped ? (
+            <>
+              To change{" "}
+              <HighlightText bgcolor={theme.palette.cool.main}>
+                outcomes
+              </HighlightText>
+            </>
+          ) : (
+            <>
+              {" "}
+              <HighlightText bgcolor={theme.palette.cool.main}>
+                outcomes
+              </HighlightText>
+              &nbsp;&nbsp;?
+            </>
+          )}
+        </Typography>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={includeClimate}
+              onChange={() => toggleClimate()}
+              color="primary"
+              size="small"
+              sx={{
+                color: theme.palette.text.primary,
+                "&.Mui-checked": {
+                  color: theme.palette.text.primary,
+                },
+              }}
+            />
+          }
+          label="Include climate futures"
+          sx={{ ml: 0 }}
+        />
+      </Box>
 
       {/* Outcome categories */}
       <Box sx={{ mt: 3 }}>

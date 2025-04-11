@@ -51,7 +51,7 @@ export default function Home() {
       // Scroll to the calculated position
       window.scrollTo({
         top: offset,
-        behavior: "smooth"
+        behavior: "smooth",
       })
     }
   }

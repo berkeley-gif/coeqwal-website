@@ -178,30 +178,6 @@ const QuestionBuilderContent = ({
           maxWidth: "100%",
         }}
       >
-        {/* Climate checkbox */}
-        {showQuestionBuilder && (
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-            <Card>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeClimate}
-                    onChange={() => toggleClimate()}
-                    color="primary"
-                    sx={{
-                      color: theme.palette.text.primary,
-                      "&.Mui-checked": {
-                        color: theme.palette.text.primary,
-                      },
-                    }}
-                  />
-                }
-                label="Include climate futures"
-              />
-            </Card>
-          </Box>
-        )}
-
         {/* Only show the question builder if not in detailed mode */}
         {showQuestionBuilder && (
           <Grid

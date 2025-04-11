@@ -166,27 +166,7 @@ const CombinedPanelContent = memo(() => {
           position: "relative",
         }}
       >
-        {/* Climate checkbox */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
-          <Card>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={includeClimate}
-                  onChange={() => toggleClimate()}
-                  color="primary"
-                  sx={{
-                    color: theme.palette.text.primary,
-                    "&.Mui-checked": {
-                      color: theme.palette.text.primary,
-                    },
-                  }}
-                />
-              }
-              label="Include climate futures"
-            />
-          </Card>
-        </Box>
+        {/* Climate checkbox - Removed as it's now in OutcomesSelector */}
 
         {/* Question builder operation & outcome interface */}
         <Grid
