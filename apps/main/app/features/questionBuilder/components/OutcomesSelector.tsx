@@ -98,14 +98,14 @@ const OutcomesSelector: React.FC = () => {
             <>
               To change{" "}
               <HighlightText bgcolor={theme.palette.cool.main}>
-                outcomes
+                water availability
               </HighlightText>
             </>
           ) : (
             <>
               {" "}
               <HighlightText bgcolor={theme.palette.cool.main}>
-                outcomes
+                water availability
               </HighlightText>
               &nbsp;&nbsp;?
             </>
