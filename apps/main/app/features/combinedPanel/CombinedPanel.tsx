@@ -1,6 +1,6 @@
 "use client"
 
-import React, { memo, useState } from "react"
+import React, { useState } from "react"
 import {
   Box,
   Typography,
@@ -25,7 +25,7 @@ import { useQuestionBuilderHelpers } from "../questionBuilder/hooks/useQuestionB
 import { KeyboardArrowDownIcon } from "@repo/ui/mui"
 
 // Content component that uses the context
-const CombinedPanelContent = memo(() => {
+const CombinedPanelContent = () => {
   const theme = useTheme()
   const {
     state: { includeClimate, swapped },
@@ -89,7 +89,7 @@ const CombinedPanelContent = memo(() => {
             transition: "transform 0.3s ease",
           }}
         >
-          <QuestionSummary />
+          <QuestionSummary wasScrolled={hasClickedScroll} />
         </Box>
       </Box>
 
@@ -283,7 +283,7 @@ const CombinedPanelContent = memo(() => {
       </BasePanel>
     </Box>
   )
-})
+}
 
 // For debugging in React DevTools
 CombinedPanelContent.displayName = "CombinedPanelContent"

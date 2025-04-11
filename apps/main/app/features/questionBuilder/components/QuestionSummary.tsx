@@ -44,7 +44,12 @@ import { ColoredText } from "./ui"
 const isDeltaOutflow = (text: string) =>
   text.toLowerCase().includes("delta outflow")
 
-const QuestionSummary: React.FC = () => {
+// At the top of the file, add the interface
+interface QuestionSummaryProps {
+  wasScrolled?: boolean;
+}
+
+const QuestionSummary: React.FC<QuestionSummaryProps> = ({ wasScrolled = false }) => {
   const theme = useTheme()
   const {
     state: {
@@ -898,6 +903,7 @@ const QuestionSummary: React.FC = () => {
     theme.palette.climate.main,
     formatOperationText,
     formatOutcomeText,
+    wasScrolled,
   ])
 
   // Container styles
@@ -1068,4 +1074,4 @@ const QuestionSummary: React.FC = () => {
   )
 }
 
-export default React.memo(QuestionSummary)
+export default QuestionSummary
