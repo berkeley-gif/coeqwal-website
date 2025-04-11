@@ -884,34 +884,28 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     wasScrolled,
   ])
 
-  // Container styles
-  const containerStyles = {
-    position: "relative",
-    zIndex: 1000,
-    backgroundColor: "transparent",
-    width: "100%",
-    padding: 0,
-    margin: 0,
-  }
-
+  // Container styles are now merged into Typography
   return (
-    <Box sx={containerStyles}>
-      <Typography
-        variant="h1"
-        sx={(theme) => ({
-          mt: theme.spacing(wasScrolled ? 1 : 4),
-          mb: theme.spacing(wasScrolled ? 1 : 4),
-          lineHeight: theme.typography.h1.lineHeight,
-          textAlign: "center",
-          fontWeight: 500,
-          width: "auto",
-          margin: "0 auto",
-          transition: "margin 0.3s ease",
-        })}
-      >
-        {summary}
-      </Typography>
-    </Box>
+    <Typography
+      variant="h1"
+      sx={(theme) => ({
+        mt: theme.spacing(wasScrolled ? 1 : 4),
+        mb: 0,
+        lineHeight: theme.typography.h1.lineHeight,
+        textAlign: "center",
+        fontWeight: 500,
+        width: "auto",
+        margin: "0 auto",
+        fontSize: "3.33rem",
+        transition: "margin 0.3s ease",
+        // Add necessary styles from containerStyles
+        position: "relative",
+        zIndex: 1000,
+        backgroundColor: "transparent",
+      })}
+    >
+      {summary}
+    </Typography>
   )
 }
 

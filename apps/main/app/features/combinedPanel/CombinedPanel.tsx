@@ -111,10 +111,11 @@ const CombinedPanelContent = () => {
           top: theme.layout.headerHeight,
           zIndex: 1000,
           width: "100%",
+          maxWidth: "none",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          padding: theme.spacing(2),
+          padding: theme.spacing(2, 0, 0, 0),
           backgroundColor: "rgba(255, 255, 255, 0.98)",
           backdropFilter: "blur(8px)",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
@@ -123,6 +124,8 @@ const CombinedPanelContent = () => {
       >
         <Box
           sx={{
+            width: "auto",
+            maxWidth: "none",
             transform: hasClickedScroll ? "scale(0.7)" : "scale(1)",
             transformOrigin: "center top",
             transition: "transform 0.3s ease",
