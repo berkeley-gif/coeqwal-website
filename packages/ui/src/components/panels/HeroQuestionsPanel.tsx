@@ -66,18 +66,15 @@ export function HeroQuestionsPanel({
         sx={(theme) => ({
           display: "flex",
           flexDirection: "column",
-          height: "100%",
+          height: "auto",
           width: "100%",
           maxWidth: "96%",
           textAlign: "center",
           position: "relative",
           zIndex: 1,
-          justifyContent: "center",
           alignItems: "center",
           margin: "0 auto",
-          paddingTop: verticalAlignment === "top" ? "2rem" : 0,
-          paddingBottom: verticalAlignment === "bottom" ? "2rem" : 0,
-          padding: { xs: theme.spacing(2), md: theme.spacing(4) },
+          padding: { xs: theme.spacing(1), md: theme.spacing(2) },
         })}
       >
         <TransitionHeadline
@@ -92,7 +89,7 @@ export function HeroQuestionsPanel({
             variant="h5"
             align="center"
             sx={{
-              maxWidth: { xs: "100%", md: "80%" },
+              //   maxWidth: { xs: "100%", md: "80%" },
               margin: "0 auto",
             }}
           >

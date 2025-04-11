@@ -39,6 +39,17 @@ export default function Home() {
     setDrawerOpen(false)
   }
 
+  // Direct scroll to combined panel
+  const scrollToQuestionBuilder = () => {
+    const element = document.getElementById("combined-panel-container")
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }
+
   // Get navigation items with the current active section and translation function
   const navigationItems = getNavigationItems(
     activeSection,
@@ -171,7 +182,7 @@ export default function Home() {
                 maxWidth: "600px",
                 textAlign: "center",
               }}
-              onClick={() => scrollToSection("california-water-panel")}
+              onClick={() => scrollToQuestionBuilder()}
             >
               <Typography
                 variant="h5"
@@ -229,7 +240,7 @@ export default function Home() {
           </Box> */}
 
           {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto" }}>
+          <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">
             <CombinedPanel />
           </Box>
         </Box>

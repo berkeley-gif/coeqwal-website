@@ -64,7 +64,14 @@ export function TransitionHeadline({
   if (!headlines || headlines.length === 0) return null
 
   return (
-    <Box sx={{ overflow: "hidden", ...sx }}>
+    <Box
+      sx={{
+        overflow: "hidden",
+        height: "auto",
+        minHeight: 0,
+        ...sx,
+      }}
+    >
       <Fade in={isVisible} timeout={500}>
         <Typography
           variant={variant}
@@ -72,16 +79,11 @@ export function TransitionHeadline({
           color={color}
           className={className}
           sx={(theme) => ({
-            transition: "opacity 0.5s ease-in-out",
-            // Calculate min height based on font size and line count
-            minHeight: {
-              xs: `calc(${theme.typography[variant].fontSize} * 3)`,
-              sm: `calc(${theme.typography[variant].fontSize} * 3)`,
-              md: `calc(${theme.typography[variant].fontSize} * 3)`,
-            },
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            transition: "all 0.5s ease-in-out",
+            height: "auto",
+            minHeight: 0,
+            // Remove any fixed calculations that prevent shrinking
+            display: "block",
           })}
         >
           {headlines[currentIndex]}
