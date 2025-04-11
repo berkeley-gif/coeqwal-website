@@ -11,6 +11,8 @@ import {
   IconButton,
   SwapHorizIcon,
   Grid,
+  Button,
+  SearchIcon,
 } from "@repo/ui/mui"
 import { BasePanel, Card } from "@repo/ui"
 import { QuestionBuilderProvider } from "../questionBuilder/context/QuestionBuilderContext"
@@ -78,6 +80,7 @@ const CombinedPanelContent = () => {
           backgroundColor: "rgba(255, 255, 255, 0.98)",
           backdropFilter: "blur(8px)",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+          overflow: "visible",
         }}
       >
         <Box
@@ -90,6 +93,48 @@ const CombinedPanelContent = () => {
           }}
         >
           <QuestionSummary wasScrolled={hasClickedScroll} />
+        </Box>
+        
+        {/* Search button - only visible after scroll */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: -28,
+            right: theme.spacing(2),
+            opacity: hasClickedScroll ? 1 : 0,
+            visibility: hasClickedScroll ? "visible" : "hidden",
+            transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
+            transition: "all 0.5s ease",
+            transitionDelay: "0.2s",
+            zIndex: 10,
+          }}
+        >
+          <Card sx={{ 
+            width: "auto", 
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            borderRadius: "20px",
+          }}>
+            <Button
+              variant="standard"  // Use the standard variant from the theme
+              disableElevation
+              onClick={() => {
+                // Scroll to scenario results
+                const element = document.getElementById("scenario-results")
+                if (element) {
+                  const headerOffset = 100
+                  const elementPosition = element.getBoundingClientRect().top
+                  const offsetPosition = elementPosition + window.scrollY - headerOffset
+                  window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                  })
+                }
+              }}
+              startIcon={<SearchIcon />}
+            >
+              Search
+            </Button>
+          </Card>
         </Box>
       </Box>
 
