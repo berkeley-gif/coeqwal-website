@@ -185,10 +185,7 @@ export default function Home() {
 
           {/* Transition div between video panel and two-column panel */}
           <Box sx={{ pointerEvents: "auto" }}>
-            <TransitionDiv 
-              color="rgb(154, 203, 207)" 
-              height={60} 
-            />
+            <TransitionDiv color="rgb(154, 203, 207)" height={60} />
           </Box>
 
           {/* Two Column Panel */}

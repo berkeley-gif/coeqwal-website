@@ -103,7 +103,9 @@ const QuestionBuilderContent = ({
             Explore Options for California Water
           </Typography>
           <Typography variant="body1">
-            Search our collection of water management scenarios to see how different decisions — like reservoir rules or delivery priorities — shape outcomes across California.
+            Search our collection of water management scenarios to see how
+            different decisions — like reservoir rules or delivery priorities —
+            shape outcomes across California.
           </Typography>
 
           {/* Radio Buttons for Search Options */}

@@ -42,7 +42,8 @@ import { createTheme, Theme } from "@mui/material/styles"
 const themeValues = {
   // Typography
   fontFamily: {
-    primary: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    primary:
+      '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions

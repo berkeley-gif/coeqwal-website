@@ -245,7 +245,12 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       }}
       onLoad={handleMapLoad}
     >
-      {(navigationControl) && <NavigationControl position="top-right" style={{ marginTop: "100px" }} />}
+      {navigationControl && (
+        <NavigationControl
+          position="top-right"
+          style={{ marginTop: "100px" }}
+        />
+      )}
       {markers.map((marker, index) => {
         // Calculate scaled size based on current zoom level
         const currentZoom = viewState.zoom || 5

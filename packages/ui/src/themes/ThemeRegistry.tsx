@@ -7,15 +7,15 @@ import baseTheme from "./theme"
 import storyTheme from "./storyTheme"
 
 interface ThemeRegistryProps {
-  theme?: string,
-  children: React.ReactNode,
+  theme?: string
+  children: React.ReactNode
 }
 
 export function ThemeRegistry({
-  theme="base",
+  theme = "base",
   children,
 }: ThemeRegistryProps) {
-  const themeToUse = (theme === "story") ? storyTheme : baseTheme
+  const themeToUse = theme === "story" ? storyTheme : baseTheme
 
   return (
     <ThemeProvider theme={themeToUse}>
