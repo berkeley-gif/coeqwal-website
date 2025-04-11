@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import {
   Box,
   Typography,
@@ -35,8 +35,39 @@ const CombinedPanelContent = () => {
     toggleSwap,
   } = useQuestionBuilderHelpers()
 
-  // Track if the scroll button has been clicked
+  // Track if the scroll button has been clicked or if the user has scrolled manually
   const [hasClickedScroll, setHasClickedScroll] = useState(false)
+
+  // Reference to the element we want to observe
+  const questionBuilderRef = useRef(null)
+  const stickyHeaderRef = useRef(null)
+
+  // Set up the IntersectionObserver to detect when the operation/outcome selectors are visible
+  useEffect(() => {
+    // Skip if we've already triggered the transition
+    if (hasClickedScroll) return
+
+    const options = {
+      rootMargin: "-100px 0px", // Trigger a bit before the element comes into view
+      threshold: 0.1, // Trigger when at least 10% of the target is visible
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      // If the question builder content is intersecting with the viewport
+      if (entries[0]?.isIntersecting) {
+        setHasClickedScroll(true)
+        observer.disconnect() // Only need to trigger once
+      }
+    }, options)
+
+    // Start observing the question builder content
+    if (questionBuilderRef.current) {
+      observer.observe(questionBuilderRef.current)
+    }
+
+    // Cleanup
+    return () => observer.disconnect()
+  }, [hasClickedScroll])
 
   // Create demo scenario data
   const scenarios = Array.from({ length: 9 }, (_, index) => ({
@@ -52,8 +83,11 @@ const CombinedPanelContent = () => {
     const contentElement = document.getElementById("feature-content-anchor")
     if (contentElement) {
       const yOffset = -100 // Add an offset to see more content
-      const y = contentElement.getBoundingClientRect().top + window.pageYOffset + yOffset
-      window.scrollTo({ top: y, behavior: 'smooth' })
+      const y =
+        contentElement.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset
+      window.scrollTo({ top: y, behavior: "smooth" })
     }
   }
 
@@ -71,6 +105,7 @@ const CombinedPanelContent = () => {
     >
       {/* Sticky header that will hold QuestionSummary */}
       <Box
+        ref={stickyHeaderRef}
         sx={{
           position: "sticky",
           top: theme.layout.headerHeight,
@@ -97,7 +132,7 @@ const CombinedPanelContent = () => {
         >
           <QuestionSummary wasScrolled={hasClickedScroll} />
         </Box>
-        
+
         {/* Search button - only visible after scroll */}
         <Box
           sx={{
@@ -112,12 +147,14 @@ const CombinedPanelContent = () => {
             zIndex: 10,
           }}
         >
-          <Card sx={{ 
-            width: "auto", 
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            borderRadius: "20px",
-            overflow: "hidden",
-          }}>
+          <Card
+            sx={{
+              width: "auto",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              borderRadius: "20px",
+              overflow: "hidden",
+            }}
+          >
             <Button
               variant="standard"
               disableElevation
@@ -127,10 +164,11 @@ const CombinedPanelContent = () => {
                 if (element) {
                   const headerOffset = 100
                   const elementPosition = element.getBoundingClientRect().top
-                  const offsetPosition = elementPosition + window.scrollY - headerOffset
+                  const offsetPosition =
+                    elementPosition + window.scrollY - headerOffset
                   window.scrollTo({
                     top: offsetPosition,
-                    behavior: "smooth"
+                    behavior: "smooth",
                   })
                 }
               }}
@@ -216,10 +254,14 @@ const CombinedPanelContent = () => {
         }}
       >
         {/* Anchor point for scrolling (placed at the top) */}
-        <div id="feature-content-anchor" style={{ position: "relative", top: "-50px" }}></div>
-        
-        {/* Question builder operation & outcome interface */}
+        <div
+          id="feature-content-anchor"
+          style={{ position: "relative", top: "-50px" }}
+        ></div>
+
+        {/* Question builder operation & outcome interface - add ref for observation */}
         <Grid
+          ref={questionBuilderRef}
           container
           spacing={2}
           sx={{

@@ -93,24 +93,24 @@ const OutcomesSelector: React.FC = () => {
           flexWrap: "wrap",
         }}
       >
-      <Typography variant="h5">
-        {swapped ? (
-          <>
-            To change{" "}
-            <HighlightText bgcolor={theme.palette.cool.main}>
-              outcomes
-            </HighlightText>
-          </>
-        ) : (
-          <>
-            {" "}
-            <HighlightText bgcolor={theme.palette.cool.main}>
-              outcomes
-            </HighlightText>
-            &nbsp;&nbsp;?
-          </>
-        )}
-      </Typography>
+        <Typography variant="h5">
+          {swapped ? (
+            <>
+              To change{" "}
+              <HighlightText bgcolor={theme.palette.cool.main}>
+                outcomes
+              </HighlightText>
+            </>
+          ) : (
+            <>
+              {" "}
+              <HighlightText bgcolor={theme.palette.cool.main}>
+                outcomes
+              </HighlightText>
+              &nbsp;&nbsp;?
+            </>
+          )}
+        </Typography>
 
         <FormControlLabel
           control={

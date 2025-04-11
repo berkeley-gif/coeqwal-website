@@ -50,14 +50,34 @@ a {
   }
 } */
 
-/* Add disable scroll snap on html, body and all containers */
-html, 
-body,
-#__next,
-main,
-div {
+/* Global CSS to remove scroll snapping while preserving component behavior */
+html, body {
   scroll-snap-type: none !important;
-  overscroll-behavior: auto !important;
+  -ms-scroll-snap-type: none !important;
+  scrollbar-width: auto !important;
+  -webkit-overflow-scrolling: auto !important;
+}
+
+:root {
+  --scroll-behavior: auto !important;
+  scroll-behavior: auto !important;
+}
+
+* {
+  scroll-margin: 0 !important;
+  scroll-padding: 0 !important;
+  scroll-snap-margin: 0 !important;
+  scroll-snap-padding: 0 !important;
+}
+
+/* Add class to disable scroll snap */
+.no-scroll-snap,
+.no-scroll-snap * {
+  scroll-snap-type: none !important;
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+  scroll-margin: 0 !important;
+  scroll-padding: 0 !important;
 }
 
 /* Basic map styles - keep simple */

@@ -67,14 +67,19 @@ export default function Home() {
     <>
       {/* Global style override to completely disable scroll snap behavior */}
       <style jsx global>{`
-        html, body, div, main, section, article {
+        html,
+        body,
+        div,
+        main,
+        section,
+        article {
           scroll-snap-type: none !important;
           scroll-snap-align: none !important;
           scroll-snap-stop: none !important;
           overscroll-behavior: auto !important;
         }
       `}</style>
-      
+
       {/* ===== Background Map Layer ===== */}
       <Box
         sx={{
@@ -121,6 +126,7 @@ export default function Home() {
 
       {/* ===== Main Content Area ===== */}
       <Box
+        className="no-scroll-snap"
         sx={(theme) => ({
           position: "relative",
           zIndex: 20,
