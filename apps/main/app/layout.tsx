@@ -18,8 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
+      </head>
       <body>
-        {/* FontLoader is a client component that will handle loading Adobe Fonts */}
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
           <ThemeRegistry>

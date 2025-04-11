@@ -40,6 +40,11 @@ import { createTheme, Theme } from "@mui/material/styles"
  */
 
 const themeValues = {
+  // Typography
+  fontFamily: {
+    primary: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  },
+
   // Layout dimensions
   layout: {
     headerHeight: 64,
@@ -220,6 +225,7 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
+    fontFamily: themeValues.fontFamily.primary,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -292,25 +298,28 @@ const theme = createTheme({
   // Components customizations
   components: {
     MuiCssBaseline: {
-      styleOverrides: {
-        "*, *::before, *::after": {
-          boxSizing: "border-box",
-        },
-        "html, body, *": {
-          margin: 0,
-          padding: 0,
-          letterSpacing: "normal",
-        },
-        "html, body": {
-          margin: 0,
-          padding: 0,
-          height: "100%",
-        },
-        body: {
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-        },
-      },
+      styleOverrides: `
+        @import url("https://use.typekit.net/rxm7kha.css");
+        *, *::before, *::after {
+          box-sizing: border-box;
+        }
+        html, body, * {
+          margin: 0;
+          padding: 0;
+          letter-spacing: normal;
+        }
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          font-family: ${themeValues.fontFamily.primary};
+        }
+        body {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          font-family: ${themeValues.fontFamily.primary};
+        }
+      `,
     },
     MuiAppBar: {
       styleOverrides: {
