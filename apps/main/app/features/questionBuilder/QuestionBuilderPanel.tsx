@@ -79,193 +79,49 @@ const QuestionBuilderContent = ({
         maxWidth: "100%", // Prevent horizontal scrollbar
       }}
     >
-      {/* Row 1: Headline & climate checkbox */}
-      <Grid
-        container
-        spacing={2}
-        sx={{
-          display: "flex",
-          alignItems: "flex-end",
-          width: "100%",
-          maxWidth: "100%",
-          margin: 0,
-        }}
-      >
-        {/* Left: Title and description */}
-        {/* <Grid
+      {/* Row 1: Question summary at the top */}
+      {showQuestionBuilder && showSummary && (
+        <Box
           sx={{
-            flex: 1,
-            width: "100%",
-            maxWidth: "calc(100% - 200px)", // Leave room for the climate card
+            position: "sticky",
+            top: (theme) => theme.layout.headerHeight,
+            zIndex: 1000,
+            backgroundColor: theme.palette.common.white,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            marginBottom: (theme) => theme.spacing(3),
           }}
-        > */}
-        {/* <Typography variant="h4" gutterBottom>
-            Explore Options for California Water
-          </Typography>
-          <Typography variant="body1">
-            Search our collection of water management scenarios to see how
-            different decisions — like reservoir rules or delivery priorities —
-            shape outcomes across California.
-          </Typography> */}
+        >
+          <QuestionSummary />
+        </Box>
+      )}
 
-        {/* Radio Buttons for Search Options
-           <RadioGroup
-            name="search-type"
-            value={searchMode}
-            onChange={handleSearchModeChange}
-            sx={{ width: "100%" }}
-          >
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                mt: 2,
-                width: "100%",
-                display: "flex",
-              }}
-            >
-              <Grid>
-                <FormControlLabel
-                  value="operations"
-                  control={
-                    <Radio
-                      sx={{
-                        color: "black",
-                        "&.Mui-checked": {
-                          color: "black",
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      component="span"
-                      sx={{
-                        backgroundColor: alpha(theme.palette.pop.main, 0.15),
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        color: theme.palette.pop.main,
-                        fontWeight: "medium",
-                      }}
-                    >
-                      understand the effects of operations
-                    </Typography>
-                  }
-                />
-              </Grid>
-              <Grid>
-                <FormControlLabel
-                  value="outcomes"
-                  control={
-                    <Radio
-                      sx={{
-                        color: "black",
-                        "&.Mui-checked": {
-                          color: "black",
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      component="span"
-                      sx={{
-                        backgroundColor: alpha(theme.palette.cool.main, 0.15),
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        color: theme.palette.cool.main,
-                        fontWeight: "medium",
-                      }}
-                    >
-                      find scenarios that change outcomes
-                    </Typography>
-                  }
-                />
-              </Grid>
-              <Grid>
-                <FormControlLabel
-                  value="detailed"
-                  control={
-                    <Radio
-                      sx={{
-                        color: "black",
-                        "&.Mui-checked": {
-                          color: "black",
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography
-                      component="span"
-                      sx={{
-                        backgroundColor: alpha(theme.palette.cool.dark, 0.15),
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        color: theme.palette.cool.dark,
-                        fontWeight: "medium",
-                      }}
-                    >
-                      detailed outcome-based search
-                    </Typography>
-                  }
-                />
-              </Grid>
-            </Grid>
-          </RadioGroup> */}
-        {/* </Grid>  */}
-
-        {/* Right: Climate checkbox */}
-        {showQuestionBuilder && (
-          <Grid
-            sx={{
-              width: "auto",
-              marginLeft: "auto",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Card>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeClimate}
-                    onChange={() => toggleClimate()}
-                    color="primary"
-                    sx={{
+      {/* Row 2: Climate checkbox */}
+      {showQuestionBuilder && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <Card>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={includeClimate}
+                  onChange={() => toggleClimate()}
+                  color="primary"
+                  sx={{
+                    color: theme.palette.text.primary,
+                    "&.Mui-checked": {
                       color: theme.palette.text.primary,
-                      "&.Mui-checked": {
-                        color: theme.palette.text.primary,
-                      },
-                    }}
-                  />
-                }
-                label="Include climate futures"
-              />
-            </Card>
-          </Grid>
-        )}
-      </Grid>
+                    },
+                  }}
+                />
+              }
+              label="Include climate futures"
+            />
+          </Card>
+        </Box>
+      )}
 
       {/* Only show the question builder if not in detailed mode */}
       {showQuestionBuilder && (
         <>
-          {/* Row 2: Question summary - now with sticky positioning */}
-          <Box
-            sx={{
-              position: "sticky",
-              top: (theme) => theme.layout.headerHeight,
-              zIndex: 1000,
-              backgroundColor: theme.palette.common.white,
-              borderBottom: `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            {showSummary && <QuestionSummary />}
-          </Box>
-
           {/* Row 3: Question builder */}
           <Grid
             container

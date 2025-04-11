@@ -961,7 +961,19 @@ const QuestionSummary: React.FC = () => {
 
   return (
     <Box sx={containerStyles}>
-      <Typography variant="h2" mt={8} mb={4}>
+      <Typography
+        variant="h1"
+        sx={(theme) => ({
+          mt: theme.spacing(4),
+          mb: theme.spacing(4),
+          lineHeight: theme.typography.h1.lineHeight,
+          textAlign: "center",
+          fontWeight: 500,
+          width: "100%",
+          maxWidth: "96%",
+          margin: "0 auto",
+        })}
+      >
         {summary}
       </Typography>
 
