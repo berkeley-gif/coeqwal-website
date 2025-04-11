@@ -11,7 +11,7 @@ import {
   TransitionDiv,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { TwoColumnPanel, VideoPanel } from "@repo/ui"
+import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 
@@ -121,7 +121,7 @@ export default function Home() {
             position: "relative",
           }}
         >
-          {/* Hero Panel with Video Background */}
+          {/* Hero Questions Panel */}
           <Box
             sx={{
               pointerEvents: "auto",
@@ -131,6 +131,17 @@ export default function Home() {
               overflow: "hidden",
             }}
           >
+            <HeroQuestionsPanel
+              title={t("heroPanel.title")}
+              content="Explore California's water system and the tradeoffs shaping our future"
+              verticalAlignment="center"
+              background="light"
+              sx={{
+                backgroundColor: "rgb(191, 218, 220)",
+              }}
+            />
+
+            {/* Original VideoPanel - commented out for future reference 
             <VideoPanel
               title={t("heroPanel.title")}
               content={t<string[]>("heroPanel.content") || []}
@@ -138,6 +149,7 @@ export default function Home() {
               posterSrc="/video/poster.jpg"
               overlayOpacity={0}
             />
+            */}
 
             {/* Scroll Down Button */}
             <Box

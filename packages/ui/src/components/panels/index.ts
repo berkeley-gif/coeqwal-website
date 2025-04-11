@@ -1,5 +1,6 @@
 export { BasePanel } from "./BasePanel"
 export type { BasePanelProps } from "./BasePanel"
 export { HeroPanel } from "./HeroPanel"
+export { HeroQuestionsPanel } from "./HeroQuestionsPanel"
 export { TwoColumnPanel } from "./TwoColumnPanel"
 export { VideoPanel } from "./VideoPanel"
