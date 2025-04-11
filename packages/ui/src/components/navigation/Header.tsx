@@ -20,6 +20,11 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
+interface HeaderProps {
+  drawerOpen?: boolean
+  drawerPosition?: "left" | "right"
+}
+
 const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
@@ -37,11 +42,14 @@ const translations: TranslationsMap = {
   },
 }
 
-export function Header() {
+export function Header({ 
+  drawerOpen = false, 
+  drawerPosition = "right" 
+}: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const buttonVariant = isMobile ? "text" : "standard"
-  const buttonStyle = {} // No need for additional styles since they're in the theme
+  const buttonStyle = {}
   const { locale, isLoading } = useTranslation()
 
   // Use 'en' as default until client-side hydration is complete
@@ -66,7 +74,29 @@ export function Header() {
         <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
           <Logo />
         </Box>
-        <Stack direction="row" spacing={2} alignItems="center">
+        <Stack 
+          direction="row" 
+          spacing={2} 
+          alignItems="center"
+          sx={(theme) => ({
+            // If drawer is on the right side
+            ...(drawerPosition === "right" && {
+              paddingRight: drawerOpen 
+                ? `calc(${theme.layout.drawer.width}px + 16px)` // Wide padding when drawer is open
+                : `calc(${theme.layout.drawer.closedWidth}px + 16px)`, // Narrower padding when drawer is closed
+            }),
+            // If drawer is on the left side
+            ...(drawerPosition === "left" && {
+              paddingRight: "16px", // Fixed padding for left drawer
+            }),
+            transition: theme.transitions.create("padding", {
+              easing: theme.transitions.easing.sharp,
+              duration: drawerOpen
+                ? theme.transitions.duration.enteringScreen
+                : theme.transitions.duration.leavingScreen,
+            }),
+          })}
+        >
           <Button
             variant={buttonVariant}
             sx={{

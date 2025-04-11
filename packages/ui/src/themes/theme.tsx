@@ -234,7 +234,7 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "4.6rem",
+      fontSize: "7rem",
       fontWeight: 700,
       lineHeight: 1,
       letterSpacing: "normal",
@@ -254,7 +254,7 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     h5: {
-      fontSize: "1.929rem",
+      fontSize: "1.8rem",
       letterSpacing: "normal",
     },
     h6: {

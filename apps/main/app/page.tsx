@@ -8,7 +8,6 @@ import {
   MiniDrawer,
   VerticalDivider,
   KeyboardArrowDownIcon,
-  TransitionDiv,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
@@ -30,7 +29,7 @@ const CombinedPanel = dynamic(
 
 export default function Home() {
   const { t } = useTranslation()
-  const [drawerOpen, setDrawerOpen] = useState(true)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
 
@@ -77,14 +76,14 @@ export default function Home() {
             items={navigationItems}
             open={drawerOpen}
             onOpenChange={setDrawerOpen}
-            position="left"
+            position="right"
           />
         </Box>
       </Box>
 
       {/* ===== Drawer "border" ===== */}
       <VerticalDivider
-        left={(theme) =>
+        right={(theme) =>
           drawerOpen
             ? theme.layout.drawer.width
             : theme.layout.drawer.closedWidth
@@ -98,7 +97,7 @@ export default function Home() {
           position: "relative",
           zIndex: 20,
           pointerEvents: "none",
-          marginLeft: drawerOpen
+          marginRight: drawerOpen
             ? `${theme.layout.drawer.width}px`
             : `${theme.layout.drawer.closedWidth}px`,
           transition: theme.transitions.create("margin", {
@@ -111,7 +110,7 @@ export default function Home() {
       >
         {/* Header - Enable pointer events */}
         <Box sx={{ pointerEvents: "auto" }}>
-          <Header />
+          <Header drawerOpen={drawerOpen} drawerPosition="right" />
         </Box>
 
         {/* Main content sections */}

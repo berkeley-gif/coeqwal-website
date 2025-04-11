@@ -68,7 +68,7 @@ export function HeroQuestionsPanel({
           flexDirection: "column",
           height: "100%",
           width: "100%",
-          maxWidth: { xs: "90%", sm: "80%", md: "770px" },
+          maxWidth: { xs: "90%", sm: "80%", md: "80%" },
           textAlign: "center",
           position: "relative",
           zIndex: 1,
@@ -87,7 +87,7 @@ export function HeroQuestionsPanel({
           sx={{ marginBottom: 3 }}
         />
         <Typography
-          variant="body1"
+          variant="h5"
           align="center"
           sx={{
             maxWidth: { xs: "100%", md: "80%" },
