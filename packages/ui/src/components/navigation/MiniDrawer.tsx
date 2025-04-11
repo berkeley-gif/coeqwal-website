@@ -123,7 +123,6 @@ export function MiniDrawer({
         <DrawerHeader
           sx={{
             borderTop: "2px solid #ddd",
-            justifyContent: "space-between",
             flexDirection: position === "left" ? "row" : "row-reverse",
             backgroundColor: "rgba(255, 255, 255, 0.9)",
             borderBottom: "1px solid #ddd",
@@ -137,7 +136,7 @@ export function MiniDrawer({
                 fontWeight: theme.typography.fontWeightBold,
                 padding: theme.spacing(1.5, 2),
                 backgroundColor: "#2C6E91",
-                color: "white",
+                color: theme.palette.common.white,
                 height: "100%",
                 display: "flex",
                 alignItems: "center",

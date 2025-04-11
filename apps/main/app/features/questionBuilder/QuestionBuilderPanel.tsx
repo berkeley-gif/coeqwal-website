@@ -257,7 +257,7 @@ const QuestionBuilderContent = ({
           <Box
             sx={{
               position: "sticky",
-              top: 0,
+              top: (theme) => theme.layout.headerHeight,
               zIndex: 1000,
               backgroundColor: theme.palette.common.white,
               borderBottom: `1px solid ${theme.palette.divider}`,

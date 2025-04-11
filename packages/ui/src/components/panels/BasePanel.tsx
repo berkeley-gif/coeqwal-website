@@ -43,20 +43,20 @@ const PanelRoot = styled(Box, {
   // Padding variants with fixed top padding
   padding:
     paddingVariant === "none"
-      ? `96px 0 0 0`
+      ? `${theme.layout.headerHeight}px 0 0 0`
       : paddingVariant === "narrow"
-        ? `${theme.spacing(4)}`
+        ? `${theme.layout.headerHeight}px ${theme.spacing(4)}`
         : paddingVariant === "wide"
-          ? `96px ${theme.spacing(12)}`
-          : `96px ${theme.spacing(6)}`,
+          ? `${theme.layout.headerHeight}px ${theme.spacing(12)}`
+          : `${theme.layout.headerHeight}px ${theme.spacing(6)}`,
 
   [theme.breakpoints.down("md")]: {
     padding:
       paddingVariant === "none"
-        ? `96px 0 0 0`
+        ? `${theme.layout.headerHeight}px 0 0 0`
         : paddingVariant === "narrow"
-          ? `${theme.spacing(3)}`
-          : `96px ${theme.spacing(3)}`,
+          ? `${theme.layout.headerHeight}px ${theme.spacing(3)}`
+          : `${theme.layout.headerHeight}px ${theme.spacing(3)}`,
   },
 }))
 

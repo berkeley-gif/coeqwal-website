@@ -68,7 +68,7 @@ export function HeroQuestionsPanel({
           flexDirection: "column",
           height: "100%",
           width: "100%",
-          maxWidth: { xs: "90%", sm: "80%", md: "80%" },
+          maxWidth: "96%",
           textAlign: "center",
           position: "relative",
           zIndex: 1,

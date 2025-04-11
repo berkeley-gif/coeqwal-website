@@ -137,7 +137,7 @@ export default function Home() {
                 "What scenarios improve salmon survival?",
                 "Can we balance urban and agricultural needs?",
                 "Which policies help meet environmental goals?",
-                "How do flow changes impact water quality?",
+                "How do flow changes impact water availability?",
               ]}
               verticalAlignment="center"
               background="light"
@@ -186,7 +186,7 @@ export default function Home() {
               </Typography>
 
               <Box
-                sx={{
+                sx={(theme) => ({
                   width: 56,
                   height: 56,
                   borderRadius: "50%",
@@ -194,26 +194,26 @@ export default function Home() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "white",
+                  color: theme.palette.common.white,
                   "&:hover": {
                     backgroundColor: "rgba(0, 0, 0, 0.3)",
                   },
-                }}
+                })}
               >
                 <KeyboardArrowDownIcon
                   fontSize="large"
-                  sx={{
-                    color: "white",
+                  sx={(theme) => ({
+                    color: theme.palette.common.white,
                     "&:hover": {
-                      color: "white",
+                      color: theme.palette.common.white,
                     },
-                  }}
+                  })}
                 />
               </Box>
             </Box>
           </Box>
 
-          {/* Two Column Panel */}
+          {/* Two Column Panel 
           <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
             <TwoColumnPanel
               leftTitle={t("CaliforniaWaterPanel.title")}
@@ -226,7 +226,7 @@ export default function Home() {
                 },
               }}
             />
-          </Box>
+          </Box> */}
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }}>
