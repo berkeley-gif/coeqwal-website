@@ -50,6 +50,16 @@ a {
   }
 } */
 
+/* Add disable scroll snap on html, body and all containers */
+html, 
+body,
+#__next,
+main,
+div {
+  scroll-snap-type: none !important;
+  overscroll-behavior: auto !important;
+}
+
 /* Basic map styles - keep simple */
 .mapboxgl-map {
   width: 100%;

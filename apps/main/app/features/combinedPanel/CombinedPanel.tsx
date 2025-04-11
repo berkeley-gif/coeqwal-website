@@ -48,9 +48,12 @@ const CombinedPanelContent = () => {
   const scrollToContent = () => {
     setHasClickedScroll(true)
 
-    const contentElement = document.getElementById("question-builder-content")
+    // Use a more precise approach with anchors and offsets
+    const contentElement = document.getElementById("feature-content-anchor")
     if (contentElement) {
-      contentElement.scrollIntoView({ behavior: "smooth" })
+      const yOffset = -100 // Add an offset to see more content
+      const y = contentElement.getBoundingClientRect().top + window.pageYOffset + yOffset
+      window.scrollTo({ top: y, behavior: 'smooth' })
     }
   }
 
@@ -113,9 +116,10 @@ const CombinedPanelContent = () => {
             width: "auto", 
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             borderRadius: "20px",
+            overflow: "hidden",
           }}>
             <Button
-              variant="standard"  // Use the standard variant from the theme
+              variant="standard"
               disableElevation
               onClick={() => {
                 // Scroll to scenario results
@@ -211,8 +215,9 @@ const CombinedPanelContent = () => {
           position: "relative",
         }}
       >
-        {/* Climate checkbox - Removed as it's now in OutcomesSelector */}
-
+        {/* Anchor point for scrolling (placed at the top) */}
+        <div id="feature-content-anchor" style={{ position: "relative", top: "-50px" }}></div>
+        
         {/* Question builder operation & outcome interface */}
         <Grid
           container

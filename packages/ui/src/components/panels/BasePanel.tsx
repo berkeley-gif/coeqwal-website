@@ -20,7 +20,6 @@ const PanelRoot = styled(Box, {
   display: "flex",
   flexDirection: "column",
   position: "relative",
-  scrollSnapAlign: fullHeight ? "start" : "none",
   alignItems: "stretch",
   textAlign: "left",
 

@@ -65,6 +65,16 @@ export default function Home() {
 
   return (
     <>
+      {/* Global style override to completely disable scroll snap behavior */}
+      <style jsx global>{`
+        html, body, div, main, section, article {
+          scroll-snap-type: none !important;
+          scroll-snap-align: none !important;
+          scroll-snap-stop: none !important;
+          overscroll-behavior: auto !important;
+        }
+      `}</style>
+      
       {/* ===== Background Map Layer ===== */}
       <Box
         sx={{
