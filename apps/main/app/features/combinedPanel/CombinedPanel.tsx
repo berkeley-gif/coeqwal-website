@@ -116,8 +116,7 @@ const CombinedPanelContent = () => {
           justifyContent: "center",
           alignItems: "center",
           padding: theme.spacing(2, 0, 0, 0),
-          backgroundColor: "rgba(255, 255, 255, 0.98)",
-          backdropFilter: "blur(8px)",
+          backgroundColor: "#FFFFFF",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
           overflow: "visible",
         }}
