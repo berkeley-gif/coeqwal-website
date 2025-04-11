@@ -42,9 +42,9 @@ const translations: TranslationsMap = {
   },
 }
 
-export function Header({ 
-  drawerOpen = false, 
-  drawerPosition = "right" 
+export function Header({
+  drawerOpen = false,
+  drawerPosition = "right",
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -74,14 +74,14 @@ export function Header({
         <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
           <Logo />
         </Box>
-        <Stack 
-          direction="row" 
-          spacing={2} 
+        <Stack
+          direction="row"
+          spacing={2}
           alignItems="center"
           sx={(theme) => ({
             // If drawer is on the right side
             ...(drawerPosition === "right" && {
-              paddingRight: drawerOpen 
+              paddingRight: drawerOpen
                 ? `calc(${theme.layout.drawer.width}px + 16px)` // Wide padding when drawer is open
                 : `calc(${theme.layout.drawer.closedWidth}px + 16px)`, // Narrower padding when drawer is closed
             }),
