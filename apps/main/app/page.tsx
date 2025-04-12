@@ -13,8 +13,9 @@ import { useTranslation } from "@repo/i18n"
 import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
-import { useMap } from "@repo/map"
+import { useMap, MapTransitions } from "@repo/map"
 import type { ViewState, MapboxMapRef } from "@repo/map"
+import {} from "@repo/map"
 
 // Dynamic import components that use client-side features
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
@@ -404,7 +405,7 @@ export default function Home() {
                       onClick={handleUncontrolledFlyTo}
                       sx={{ textTransform: "none" }}
                     >
-                      Uncontrolled FlyTo
+                      Uncontrolled FlyTo (Default Transition)
                     </Button>
 
                     <Typography
@@ -420,7 +421,7 @@ export default function Home() {
                       onClick={handleControlledFlyTo}
                       sx={{ textTransform: "none" }}
                     >
-                      Controlled FlyTo
+                      Controlled FlyTo (Default Transition)
                     </Button>
 
                     <Typography
@@ -446,6 +447,9 @@ export default function Home() {
                     >
                       4. Context-based FlyTo (used in the existing app):
                     </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      Using default transition with a simple easing function:
+                    </Typography>
                     <Button
                       variant="standard"
                       color="primary"
@@ -470,33 +474,123 @@ export default function Home() {
                     >
                       San Luis Reservoir
                     </Button>
-                  </Box>
-                </Box>
-              }
-              rightContent={
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  <Typography variant="h6">
-                    Current Controlled Camera:
-                  </Typography>
-                  <Typography>
-                    Longitude: {controlledViewState.longitude.toFixed(4)}
-                  </Typography>
-                  <Typography>
-                    Latitude: {controlledViewState.latitude.toFixed(4)}
-                  </Typography>
-                  <Typography>
-                    Zoom: {controlledViewState.zoom.toFixed(1)}
-                  </Typography>
-                  <Typography>
-                    Bearing: {controlledViewState.bearing}°
-                  </Typography>
-                  <Typography>Pitch: {controlledViewState.pitch}°</Typography>
 
-                  <Typography variant="body2" sx={{ mt: 2 }}>
-                    This panel demonstrates how to display and update the
-                    current camera state. When you click "Controlled FlyTo",
-                    these values will update as the map animates.
-                  </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      sx={{ mt: 4, mb: 1 }}
+                    >
+                      5. Transition Styles Demo:
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      Transitions control how the camera moves between
+                      locations, including duration, easing functions, pitch,
+                      and bearing effects:
+                    </Typography>
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                      Try different camera transitions to the Delta area:
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => mapRef.current?.flyTo(-121.5, 38.05, 10)}
+                        sx={{ textTransform: "none" }}
+                      >
+                        Default
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() =>
+                          mapRef.current?.flyTo(
+                            -121.5,
+                            38.05,
+                            10,
+                            undefined,
+                            undefined,
+                            undefined,
+                            MapTransitions.SMOOTH,
+                          )
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        Smooth
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() =>
+                          mapRef.current?.flyTo(
+                            -121.5,
+                            38.05,
+                            10,
+                            undefined,
+                            undefined,
+                            undefined,
+                            MapTransitions.DRAMATIC,
+                          )
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        Dramatic
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() =>
+                          mapRef.current?.flyTo(
+                            -121.5,
+                            38.05,
+                            10,
+                            undefined,
+                            undefined,
+                            undefined,
+                            MapTransitions.AERIAL,
+                          )
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        Aerial
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() =>
+                          mapRef.current?.flyTo(
+                            -121.5,
+                            38.05,
+                            10,
+                            undefined,
+                            undefined,
+                            undefined,
+                            MapTransitions.CINEMATIC,
+                          )
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        Cinematic
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() =>
+                          mapRef.current?.flyTo(
+                            -121.5,
+                            38.05,
+                            10,
+                            undefined,
+                            undefined,
+                            undefined,
+                            MapTransitions.QUICK,
+                          )
+                        }
+                        sx={{ textTransform: "none" }}
+                      >
+                        Quick
+                      </Button>
+                    </Box>
+                  </Box>
                 </Box>
               }
               background="transparent"

@@ -23,6 +23,16 @@ export { Marker, Popup }
 // 2) CUSTOM INTERFACES & TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Define a type for transition options
+export interface TransitionOptions {
+  duration?: number
+  easing?: (t: number) => number
+  pitch?: number
+  bearing?: number
+  minZoom?: number
+  maxZoom?: number
+}
+
 /** MarkerProperties: Info needed to render markers & tooltips */
 export interface MarkerProperties {
   longitude: number
@@ -61,6 +71,7 @@ export interface MapboxMapRef {
     pitch?: number,
     bearing?: number,
     duration?: number,
+    transition?: TransitionOptions,
   ) => void
 
   // 2.4) setMarkers
@@ -93,6 +104,56 @@ export interface MapProps extends Omit<MapboxMapProps, "onViewStateChange"> {
   viewState?: ViewState
   initialViewState?: ViewState
   onMove?: (evt: { viewState: ViewState }) => void
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2.5) TRANSITION PRESETS
+// ─────────────────────────────────────────────────────────────────────────────
+export const MapTransitions: Record<string, TransitionOptions> = {
+  SMOOTH: {
+    duration: 2000,
+    easing: (t: number) => t * (2 - t), // Ease out quad
+    pitch: undefined,
+    bearing: undefined,
+    minZoom: undefined, // Will use map's current zoom if not specified
+    maxZoom: undefined,
+  },
+  DRAMATIC: {
+    duration: 3500,
+    easing: (t: number) => {
+      // Custom curve that zooms out slightly then in
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+    },
+    pitch: undefined,
+    bearing: undefined,
+    minZoom: 2, // How far to zoom out during transition
+    maxZoom: undefined,
+  },
+  AERIAL: {
+    duration: 2800,
+    easing: (t: number) => 1 - Math.pow(1 - t, 3), // Ease out cubic
+    pitch: 60, // High pitch for 3D perspective
+    bearing: undefined,
+    minZoom: undefined,
+    maxZoom: undefined,
+  },
+  CINEMATIC: {
+    duration: 4000,
+    easing: (t: number) =>
+      t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, // Ease in-out quad
+    bearing: 30, // Slight rotation
+    pitch: 45,
+    minZoom: undefined,
+    maxZoom: undefined,
+  },
+  QUICK: {
+    duration: 800,
+    easing: (t: number) => t * t, // Ease in quad
+    pitch: undefined,
+    bearing: undefined,
+    minZoom: undefined,
+    maxZoom: undefined,
+  },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -180,6 +241,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     pitch?: number,
     bearing?: number,
     duration = 2000,
+    transition?: TransitionOptions,
   ) {
     console.log(
       `[MapboxMap] flyTo called to [${longitude}, ${latitude}], zoom: ${zoom}, duration: ${duration}ms`,
@@ -192,14 +254,40 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     }
 
     try {
-      // Use MapRef's flyTo method (imperative).
-      mapInstance.flyTo({
+      // Use transition preset or fallback to provided parameters
+      const effectiveDuration = transition?.duration ?? duration
+
+      // Default easing function (quadratic ease-out)
+      const defaultEasing = (t: number) => t * (2 - t)
+
+      // Only include easing if it's a function
+      const easingFn =
+        typeof transition?.easing === "function"
+          ? transition.easing
+          : defaultEasing
+
+      // Build flyTo options
+      const flyToOptions: any = {
         center: [longitude, latitude],
         zoom: zoom ?? 5,
-        pitch: pitch ?? 0,
-        bearing: bearing ?? 0,
-        duration: duration,
-      })
+        pitch: pitch ?? transition?.pitch ?? 0,
+        bearing: bearing ?? transition?.bearing ?? 0,
+        duration: effectiveDuration,
+        easing: easingFn,
+        essential: true, // Make animations essential for accessibility
+      }
+
+      // Only add optional zoom constraints if they're defined
+      if (transition?.minZoom !== undefined) {
+        flyToOptions.minZoom = transition.minZoom
+      }
+
+      if (transition?.maxZoom !== undefined) {
+        flyToOptions.maxZoom = transition.maxZoom
+      }
+
+      // Use MapRef's flyTo method with our options
+      mapInstance.flyTo(flyToOptions)
 
       console.log("[MapboxMap] Imperative flyTo called successfully")
     } catch (error) {
