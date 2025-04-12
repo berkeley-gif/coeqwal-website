@@ -7,6 +7,7 @@ import React, {
   ForwardRefRenderFunction,
   useCallback,
   useState,
+  useEffect,
 } from "react"
 import Map, { NavigationControl, Marker, Popup } from "react-map-gl/mapbox"
 import type { MapRef, ViewStateChangeEvent } from "react-map-gl/mapbox"
@@ -59,6 +60,7 @@ export interface MapboxMapRef {
     zoom?: number,
     pitch?: number,
     bearing?: number,
+    duration?: number,
   ) => void
 
   // 2.4) setMarkers
@@ -177,39 +179,42 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     zoom?: number,
     pitch?: number,
     bearing?: number,
+    duration = 2000,
   ) {
-    console.log("flyTo called, isControlled:", isControlled)
+    console.log(
+      `[MapboxMap] flyTo called to [${longitude}, ${latitude}], zoom: ${zoom}, duration: ${duration}ms`,
+    )
 
-    if (isControlled && onViewStateChange) {
-      onViewStateChange({
-        longitude,
-        latitude,
-        zoom,
-        bearing,
-        pitch,
-        transitionDuration: 3000,
-      })
-    } else {
-      const mapInstance = internalMapRef.current
-      if (!mapInstance) return
+    const mapInstance = internalMapRef.current
+    if (!mapInstance) {
+      console.error("[MapboxMap] Map instance not available for flyTo")
+      return
+    }
 
-      // Imperative flyTo
+    try {
+      // Use MapRef's flyTo method (imperative).
       mapInstance.flyTo({
         center: [longitude, latitude],
-        zoom,
-        pitch,
-        bearing,
-        duration: 3000,
+        zoom: zoom ?? 5,
+        pitch: pitch ?? 0,
+        bearing: bearing ?? 0,
+        duration: duration / 1000,
       })
 
-      // Update local state if uncontrolled
-      setInternalViewState({
-        longitude,
-        latitude,
-        zoom,
-        bearing,
-        pitch,
-      })
+      console.log("[MapboxMap] Imperative flyTo called successfully")
+    } catch (error) {
+      console.error("[MapboxMap] Error during flyTo:", error)
+
+      // If something goes wrong, you can still do a fallback:
+      if (isControlled && onViewStateChange) {
+        onViewStateChange({
+          longitude,
+          latitude,
+          zoom: zoom ?? 5,
+          bearing: bearing ?? 0,
+          pitch: pitch ?? 0,
+        })
+      }
     }
   }
 
@@ -253,6 +258,47 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     withMap,
     setMarkers,
   }))
+
+  useEffect(() => {
+    const mapInstance = internalMapRef.current
+    if (!mapInstance) return
+
+    // Cast to the raw MapboxGL Map
+    const rawMap = mapInstance.getMap()
+
+    // This callback fires after every move, including flyTo
+    const handleMoveEnd = () => {
+      const center = rawMap.getCenter()
+      const zoom = rawMap.getZoom()
+      const bearing = rawMap.getBearing()
+      const pitch = rawMap.getPitch()
+
+      console.log(
+        "[MapboxMap] moveend final camera:",
+        center,
+        zoom,
+        bearing,
+        pitch,
+      )
+
+      // Store the final position in the parent's state:
+      if (isControlled && onViewStateChange) {
+        onViewStateChange({
+          longitude: center.lng,
+          latitude: center.lat,
+          zoom,
+          bearing,
+          pitch,
+        })
+      }
+    }
+
+    rawMap.on("moveend", handleMoveEnd)
+
+    return () => {
+      rawMap.off("moveend", handleMoveEnd)
+    }
+  }, [isControlled, onViewStateChange, internalMapRef])
 
   // ───────────────────────────────────────────────────────────────────────────
   // 9) RENDER: MAP + CONTROLS + MARKERS + POPUP

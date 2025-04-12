@@ -48,7 +48,7 @@ export default function Home() {
   const handleUncontrolledFlyTo = useCallback(() => {
     // Imperative call on ref-based API
     if (uncontrolledRef.current) {
-      uncontrolledRef.current.flyTo(-120, 37, 7)
+      uncontrolledRef.current.flyTo(-120, 37, 7, 0, 0, 2000)
     }
   }, [])
 
@@ -67,16 +67,12 @@ export default function Home() {
   })
 
   const handleControlledFlyTo = () => {
-    // Update the state to trigger a map animation
-    setControlledViewState({
-      ...controlledViewState,
-      longitude: -121.5,
-      latitude: 38.05,
-      zoom: 10,
-      bearing: 0,
-      pitch: 0,
-      transitionDuration: 3000,
-    })
+    // Instead of relying on viewState transitions, use the flyTo method
+    if (mapRef.current) {
+      // Call the flyTo method directly with a duration
+      console.log("Using direct flyTo method for controlled mode")
+      mapRef.current.flyTo(-121.5, 38.05, 10, 0, 0, 2000)
+    }
   }
 
   // ────────────────────────────────────────────────────────────────────────

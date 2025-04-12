@@ -24,6 +24,7 @@ interface MapContextValue {
     zoom?: number,
     pitch?: number,
     bearing?: number,
+    duration?: number,
   ) => void
 }
 
@@ -45,8 +46,15 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
         mapRef,
         viewState,
         setViewState,
-        flyTo: (longitude, latitude, zoom, pitch, bearing) => {
-          mapRef.current?.flyTo(longitude, latitude, zoom, pitch, bearing)
+        flyTo: (longitude, latitude, zoom, pitch, bearing, duration) => {
+          mapRef.current?.flyTo(
+            longitude,
+            latitude,
+            zoom,
+            pitch,
+            bearing,
+            duration,
+          )
         },
       }}
     >
@@ -95,11 +103,12 @@ export const useMap = () => {
       zoom?: number,
       pitch?: number,
       bearing?: number,
+      duration?: number,
     ) => {
       if (!mapRef.current) return
 
       // Call flyTo directly with the separate parameters
-      mapRef.current.flyTo(longitude, latitude, zoom, pitch, bearing)
+      mapRef.current.flyTo(longitude, latitude, zoom, pitch, bearing, duration)
     },
 
     // Add/remove layers
