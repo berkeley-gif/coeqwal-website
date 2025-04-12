@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import dynamic from "next/dynamic"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, Button } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
@@ -10,9 +10,10 @@ import {
   KeyboardArrowDownIcon,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { HeroQuestionsPanel } from "@repo/ui"
+import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
+import { useMap } from "@repo/map"
 
 // Dynamic import components that use client-side features
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
@@ -32,6 +33,7 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
+  const { mapRef } = useMap()
 
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
@@ -53,6 +55,23 @@ export default function Home() {
         top: offset,
         behavior: "smooth",
       })
+    }
+  }
+
+  // Simple flyTo function that works with uncontrolled maps
+  const flyToLocation = (longitude: number, latitude: number, zoom: number) => {
+    if (mapRef.current) {
+      console.log("Using controlled mode flyTo");
+      const newState = {
+        longitude,
+        latitude,
+        zoom: zoom ?? 5,
+        bearing: 0,
+        pitch: 0,
+        transitionDuration: 3000,
+      };
+      console.log("Calling onViewStateChange with:", newState);
+      mapRef.current.flyTo(longitude, latitude, zoom);
     }
   }
 
@@ -231,11 +250,45 @@ export default function Home() {
             </Box>
           </Box>
 
-          {/* Two Column Panel 
+          {/* Two Column Panel with flyTo buttons */}
           <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
             <TwoColumnPanel
               leftTitle={t("CaliforniaWaterPanel.title")}
-              leftContent={<div>Content</div>}
+              leftContent={
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="body1">
+                    Explore key water features across California by selecting locations below.
+                  </Typography>
+                  
+                  {/* FlyTo buttons */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
+                    <Button 
+                      variant="standard" 
+                      color="primary"
+                      onClick={() => flyToLocation(-121.50, 38.05, 10)}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Sacramento-San Joaquin Delta
+                    </Button>
+                    <Button 
+                      variant="standard" 
+                      color="primary"
+                      onClick={() => flyToLocation(-122.42, 40.72, 12)}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Shasta Dam
+                    </Button>
+                    <Button 
+                      variant="standard" 
+                      color="primary"
+                      onClick={() => flyToLocation(-121.1, 37.06, 12)}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      San Luis Reservoir
+                    </Button>
+                  </Box>
+                </Box>
+              }
               background="transparent"
               sx={{
                 color: (theme) => theme.palette.text.secondary,
@@ -244,7 +297,7 @@ export default function Home() {
                 },
               }}
             />
-          </Box> */}
+          </Box>
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">

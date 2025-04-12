@@ -123,25 +123,33 @@ export interface MapboxMapRef {
 }
 
 // Props
-export interface MapProps {
-  mapboxToken: string
-  viewState: ViewState
-  onViewStateChange?: (newViewState: ViewState) => void
-  style?: React.CSSProperties
-  mapStyle?: string
-  minZoom?: number
-  attributionControl?: boolean
-  scrollZoom?: boolean
-  navigationControl?: boolean
-  interactive?: boolean
-  dragPan?: boolean
-  onLoad?: () => void
+export interface MapboxMapProps {
+  mapboxToken: string;
+  viewState?: ViewState;
+  initialViewState?: ViewState;
+  onViewStateChange?: (viewState: ViewState) => void;
+  style?: React.CSSProperties;
+  mapStyle?: string;
+  minZoom?: number;
+  attributionControl?: boolean;
+  scrollZoom?: boolean;
+  navigationControl?: boolean;
+  interactive?: boolean;
+  dragPan?: boolean;
+  onLoad?: () => void;
 }
 
-const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
+export interface MapProps extends Omit<MapboxMapProps, 'onViewStateChange'> {
+  viewState?: ViewState;
+  initialViewState?: ViewState;
+  onMove?: (evt: { viewState: ViewState }) => void;
+}
+
+const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   {
     mapboxToken,
-    viewState,
+    viewState, // Usage tells the package to use external state/controlled approach
+    initialViewState, // Usage tells the package to use internal state/uncontrolled approach
     onViewStateChange,
     style = { width: "100vw", height: "100vh", pointerEvents: "auto" },
     mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
@@ -160,6 +168,20 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
   const [selectedMarker, setSelectedMarker] = useState<MarkerProperties | null>(
     null,
   )
+  
+  // Track if we're in controlled mode
+  const isControlled = viewState !== undefined;
+  
+  // For uncontrolled mode internal state
+  const [internalViewState, setInternalViewState] = useState<ViewState>(
+    initialViewState || {
+      longitude: -122.4,
+      latitude: 37.8,
+      zoom: 8,
+      bearing: 0,
+      pitch: 0,
+    }
+  );
 
   // Calculate marker size based on zoom level
   const getScaledMarkerSize = useCallback((baseSize: number, zoom: number) => {
@@ -185,6 +207,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     onLoad?.() // Notify the parent component or context
   }, [onLoad])
 
+  // Single method that works in both modes!
   function flyTo(
     longitude: number,
     latitude: number,
@@ -192,19 +215,55 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
     pitch?: number,
     bearing?: number,
   ) {
-    // Simplified for react-map-gl v8
-    const mapInstance = internalMapRef.current
-    if (!mapInstance) return
-
-    mapInstance.flyTo({
-      center: [longitude, latitude],
-      zoom: zoom ?? 5,
-      pitch: pitch ?? 0,
-      bearing: bearing ?? 0,
-      duration: 3000,
-      easing: (t) => t, // Linear easing - constant speed
-    })
+    console.log("flyTo called, isControlled:", isControlled);
+    if (isControlled && onViewStateChange) {
+      // Controlled mode: update through state
+      onViewStateChange({
+        longitude,
+        latitude,
+        zoom: zoom ?? 5,
+        bearing: bearing ?? 0,
+        pitch: pitch ?? 0,
+        transitionDuration: 3000,
+      });
+    } else {
+      // Uncontrolled mode: use imperative API
+      const mapInstance = internalMapRef.current;
+      if (!mapInstance) return;
+      
+      // V8 uses this format
+      mapInstance.flyTo({
+        center: [longitude, latitude],
+        zoom: zoom ?? 5,
+        pitch: pitch ?? 0,
+        bearing: bearing ?? 0,
+        duration: 3000,
+      });
+      
+      // Also update internal state for uncontrolled mode
+      setInternalViewState({
+        longitude,
+        latitude,
+        zoom: zoom ?? 5,
+        bearing: bearing ?? 0,
+        pitch: pitch ?? 0,
+      });
+    }
   }
+
+  // Handle view state changes
+  const handleViewStateChange = (evt: ViewStateChangeEvent) => {
+    console.log('ViewStateChangeEvent:', evt);  // Log the entire event
+    const newViewState = evt.viewState;
+    
+    // In controlled mode, notify parent
+    if (isControlled && onViewStateChange) {
+      onViewStateChange(newViewState);
+    } else {
+      // In uncontrolled mode, track internally
+      setInternalViewState(newViewState);
+    }
+  };
 
   function getMap(): MapRef | undefined {
     return internalMapRef.current ?? undefined
@@ -231,18 +290,20 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       ref={internalMapRef}
       reuseMaps
       mapboxAccessToken={mapboxToken}
+      longitude={isControlled ? viewState.longitude : (initialViewState?.longitude || internalViewState.longitude)}
+      latitude={isControlled ? viewState.latitude : (initialViewState?.latitude || internalViewState.latitude)}
+      zoom={isControlled ? viewState.zoom : (initialViewState?.zoom || internalViewState.zoom)}
+      bearing={isControlled ? (viewState.bearing || 0) : (initialViewState?.bearing || internalViewState.bearing || 0)}
+      pitch={isControlled ? (viewState.pitch || 0) : (initialViewState?.pitch || internalViewState.pitch || 0)}
+      onMove={handleViewStateChange}
       mapStyle={mapStyle}
       style={style}
-      {...viewState}
       minZoom={minZoom}
       attributionControl={attributionControl}
       scrollZoom={scrollZoom}
       dragPan={dragPan}
       interactive={interactive}
       onClick={() => setSelectedMarker(null)}
-      onMove={(evt: ViewStateChangeEvent) => {
-        onViewStateChange?.(evt.viewState)
-      }}
       onLoad={handleMapLoad}
     >
       {navigationControl && (
@@ -253,7 +314,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapProps> = (
       )}
       {markers.map((marker, index) => {
         // Calculate scaled size based on current zoom level
-        const currentZoom = viewState.zoom || 5
+        const currentZoom = viewState?.zoom || 5
         const baseSize = marker.size || 10
         const scaledSize = getScaledMarkerSize(baseSize, currentZoom)
 
@@ -339,4 +400,4 @@ Node Code: ${tooltipNodeCode}`
   )
 }
 
-export const MapboxMap = forwardRef<MapboxMapRef, MapProps>(MapboxMapBase)
+export const MapboxMap = forwardRef<MapboxMapRef, MapboxMapProps>(MapboxMapBase)

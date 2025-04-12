@@ -18,14 +18,13 @@ interface MapContextValue {
   mapRef: React.RefObject<MapboxMapRef | null>
   viewState: ViewState
   setViewState: (viewState: ViewState) => void
+  flyTo: (longitude: number, latitude: number, zoom?: number, pitch?: number, bearing?: number) => void
 }
 
 const MapContext = createContext<MapContextValue | null>(null)
 
-export const MapProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const mapRef = useRef<MapboxMapRef | null>(null)
+export function MapProvider({ children }: { children: React.ReactNode }) {
+  const mapRef = useRef<MapboxMapRef>(null)
   const [viewState, setViewState] = useState<ViewState>({
     longitude: -122.4,
     latitude: 37.8,
@@ -35,7 +34,16 @@ export const MapProvider: React.FC<{ children: React.ReactNode }> = ({
   })
 
   return (
-    <MapContext.Provider value={{ mapRef, viewState, setViewState }}>
+    <MapContext.Provider
+      value={{
+        mapRef,
+        viewState,
+        setViewState,
+        flyTo: (longitude, latitude, zoom, pitch, bearing) => {
+          mapRef.current?.flyTo(longitude, latitude, zoom, pitch, bearing)
+        },
+      }}
+    >
       {children}
     </MapContext.Provider>
   )
