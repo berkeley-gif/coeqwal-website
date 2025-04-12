@@ -394,10 +394,10 @@ export default function Home() {
                       1. Uncontrolled (Ref-based) Approach:
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="standard"
                       color="primary"
                       onClick={handleUncontrolledFlyTo}
-                      sx={{ textTransform: "none" }}
+                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       Uncontrolled FlyTo (Default Transition)
                     </Button>
@@ -410,10 +410,10 @@ export default function Home() {
                       2. Controlled (State-based) Approach:
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="standard"
                       color="primary"
                       onClick={handleControlledFlyTo}
-                      sx={{ textTransform: "none" }}
+                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       Controlled FlyTo (Default Transition)
                     </Button>
@@ -426,10 +426,10 @@ export default function Home() {
                       3. Add Map Layer (withMap):
                     </Typography>
                     <Button
-                      variant="contained"
+                      variant="standard"
                       color="primary"
                       onClick={handleAddLayer}
-                      sx={{ textTransform: "none" }}
+                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       Add Water Features Heatmap
                     </Button>
@@ -448,7 +448,7 @@ export default function Home() {
                       variant="standard"
                       color="primary"
                       onClick={() => flyToLocation(-121.5, 38.05, 10)}
-                      sx={{ textTransform: "none" }}
+                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       Sacramento-San Joaquin Delta
                     </Button>
@@ -456,7 +456,7 @@ export default function Home() {
                       variant="standard"
                       color="primary"
                       onClick={() => flyToLocation(-122.42, 40.72, 12)}
-                      sx={{ textTransform: "none" }}
+                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       Shasta Dam
                     </Button>
@@ -464,7 +464,7 @@ export default function Home() {
                       variant="standard"
                       color="primary"
                       onClick={() => flyToLocation(-121.1, 37.06, 12)}
-                      sx={{ textTransform: "none" }}
+                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       San Luis Reservoir
                     </Button>
