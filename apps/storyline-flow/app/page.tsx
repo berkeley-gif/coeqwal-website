@@ -25,7 +25,6 @@ export default function Provider() {
           dragPan={false}
           interactive={false}
           onLoad={() => {
-            console.log("yoooo fly attempt 1")
             flyTo(
               stateMapViewState.longitude,
               stateMapViewState.latitude,

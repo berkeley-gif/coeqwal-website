@@ -243,10 +243,6 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     duration = 2000,
     transition?: TransitionOptions,
   ) {
-    console.log(
-      `[MapboxMap] flyTo called to [${longitude}, ${latitude}], zoom: ${zoom}, duration: ${duration}ms`,
-    )
-
     const mapInstance = internalMapRef.current
     if (!mapInstance) {
       console.error("[MapboxMap] Map instance not available for flyTo")
@@ -288,8 +284,6 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
 
       // Use MapRef's flyTo method with our options
       mapInstance.flyTo(flyToOptions)
-
-      console.log("[MapboxMap] Imperative flyTo called successfully")
     } catch (error) {
       console.error("[MapboxMap] Error during flyTo:", error)
 
@@ -326,7 +320,6 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   // 7) MAP EVENT HANDLERS
   // ───────────────────────────────────────────────────────────────────────────
   const handleViewStateChange = (evt: ViewStateChangeEvent) => {
-    console.log("ViewStateChangeEvent:", evt)
     const newViewState = evt.viewState
 
     if (isControlled && onViewStateChange) {
@@ -359,15 +352,6 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       const bearing = rawMap.getBearing()
       const pitch = rawMap.getPitch()
 
-      console.log(
-        "[MapboxMap] moveend final camera:",
-        center,
-        zoom,
-        bearing,
-        pitch,
-      )
-
-      // Always notify parent of final position (even if 'viewState' prop is not set)
       if (onViewStateChange) {
         onViewStateChange({
           longitude: center.lng,

@@ -27,7 +27,6 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   // Test button with context mapRef
   const testFlyTo = useCallback(() => {
     if (refToUse.current) {
-      console.log("Testing flyTo via context ref")
       refToUse.current.flyTo(-121.5, 38.05, 10)
     }
 

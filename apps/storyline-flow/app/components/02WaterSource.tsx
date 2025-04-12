@@ -25,8 +25,6 @@ function Precipitation() {
 
   const initFlyTo = useCallback(() => {
     if (map) {
-      console.log("fly attempt 2")
-      console.log("zoom should be 5.8", map.getZoom())
       flyTo(
         stateMapViewState.longitude,
         stateMapViewState.latitude,
@@ -41,11 +39,9 @@ function Precipitation() {
     ref,
     (isIntersecting) => {
       if (isIntersecting && !hasIntersected) {
-        console.log("into view")
         initFlyTo()
         setHasIntersected(true)
       } else if (!isIntersecting && hasIntersected) {
-        console.log("out of view")
         setHasIntersected(false)
       }
     },

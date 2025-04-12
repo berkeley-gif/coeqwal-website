@@ -71,7 +71,6 @@ export default function Home() {
     // Instead of relying on viewState transitions, use the flyTo method
     if (mapRef.current) {
       // Call the flyTo method directly with a duration
-      console.log("Using direct flyTo method for controlled mode")
       mapRef.current.flyTo(-121.5, 38.05, 10, 0, 0, 2000)
     }
   }
@@ -156,10 +155,6 @@ export default function Home() {
             "heatmap-opacity": 0.8,
           },
         })
-
-        console.log("Added water-heatmap layer")
-      } else {
-        console.log("water-heatmap layer already exists")
       }
     })
   }
@@ -167,7 +162,6 @@ export default function Home() {
   // Simple flyTo function that works with context mapRef
   const flyToLocation = (longitude: number, latitude: number, zoom: number) => {
     if (mapRef.current) {
-      console.log("Using context map flyTo")
       mapRef.current.flyTo(longitude, latitude, zoom)
     }
   }
