@@ -13,9 +13,16 @@ import type { MapRef, ViewStateChangeEvent } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { ViewState } from "./types.js" // TODO: this responsive plan for the map needs refinement
 
-// Re-export any components and types that should be available to consumers
+// ─────────────────────────────────────────────────────────────────────────────
+// 1) RE-EXPORTS
+// ─────────────────────────────────────────────────────────────────────────────
 export { Marker, Popup }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 2) CUSTOM INTERFACES & TYPES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** MarkerProperties: Info needed to render markers & tooltips */
 export interface MarkerProperties {
   longitude: number
   latitude: number
@@ -35,76 +42,17 @@ export interface MarkerProperties {
 }
 
 /**
- * MapboxMapRef: Interface for interacting with the Mapbox map instance
- *
- * This interface provides three primary methods for safely working with the map:
- *
- * 1. withMap: A functional approach to reference the map that automatically handles null checking.
- *    This is the recommended pattern for most map operations.
- *
- *    Example:
- *    ```
- *    // Get source data with a fallback if map or source doesn't exist
- *    const data = mapRef.current?.withMap(
- *      map => map.getSource('mySource')?.getData(),
- *      defaultData
- *    )
- *
- *    // Perform an operation with no return value
- *    mapRef.current?.withMap(map => {
- *      map.setPaintProperty('myLayer', 'fill-color', 'red');
- *    })
- *    ```
- *
- * 2. getMap: Direct access to the underlying Mapbox GL map instance.
- *    Use this when you need to store the map reference or check its existence.
- *
- *    Example:
- *    ```
- *    const map = mapRef.current?.getMap();
- *    if (map && map.isStyleLoaded()) {
- *      // Do something that requires style to be loaded
- *    }
- *    ```
- *
- * 3. flyTo: Convenience method for camera animations.
- *    Handles null checking internally, so it's safe to call directly.
- *
- *    Example:
- *    ```
- *    // Fly to San Francisco
- *    mapRef.current?.flyTo(-122.4194, 37.7749, 12)
- *    ```
+ * MapboxMapRef: Interface for working with the underlying map instance.
+ * Provides three main methods (withMap, getMap, flyTo) plus setMarkers.
  */
 export interface MapboxMapRef {
-  /**
-   * Safely executes a callback function with the map instance if available.
-   * If the map is not available, returns the provided fallback value instead.
-   *
-   * @param callback - Function to execute with the map instance
-   * @param fallback - Optional value to return if map is unavailable
-   * @returns The result of the callback, or the fallback value
-   */
+  // 2.1) withMap
   withMap: <T = void>(callback: (map: MapRef) => T, fallback?: T) => T
 
-  /**
-   * Gets the underlying Mapbox GL map instance.
-   * May return undefined if the map is not yet initialized.
-   *
-   * @returns The Mapbox map instance or undefined
-   */
+  // 2.2) getMap
   getMap: () => MapRef | undefined
 
-  /**
-   * Animates the map to fly to a specified location.
-   * Safe to call directly - handles null checking internally.
-   *
-   * @param longitude - Destination longitude
-   * @param latitude - Destination latitude
-   * @param zoom - Optional zoom level (defaults to 5)
-   * @param pitch - Optional pitch angle in degrees (0-60)
-   * @param bearing - Optional bearing angle in degrees
-   */
+  // 2.3) flyTo
   flyTo: (
     longitude: number,
     latitude: number,
@@ -113,43 +61,51 @@ export interface MapboxMapRef {
     bearing?: number,
   ) => void
 
-  /**
-   * Sets the markers to be displayed on the map.
-   *
-   * @param markers - Array of marker properties
-   */
-  setMarkers: (markers: Array<MarkerProperties>) => void
+  // 2.4) setMarkers
+  setMarkers: (markers: MarkerProperties[]) => void
 }
 
-// Props
+/**
+ * MapboxMapProps: React props for the MapboxMap component.
+ * Supports both controlled (viewState + onViewStateChange) 
+ * and uncontrolled modes (initialViewState).
+ */
 export interface MapboxMapProps {
-  mapboxToken: string;
-  viewState?: ViewState;
-  initialViewState?: ViewState;
-  onViewStateChange?: (viewState: ViewState) => void;
-  style?: React.CSSProperties;
-  mapStyle?: string;
-  minZoom?: number;
-  attributionControl?: boolean;
-  scrollZoom?: boolean;
-  navigationControl?: boolean;
-  interactive?: boolean;
-  dragPan?: boolean;
-  onLoad?: () => void;
+  mapboxToken: string
+  viewState?: ViewState
+  initialViewState?: ViewState
+  onViewStateChange?: (viewState: ViewState) => void
+  style?: React.CSSProperties
+  mapStyle?: string
+  minZoom?: number
+  attributionControl?: boolean
+  scrollZoom?: boolean
+  navigationControl?: boolean
+  interactive?: boolean
+  dragPan?: boolean
+  onLoad?: () => void
 }
 
-export interface MapProps extends Omit<MapboxMapProps, 'onViewStateChange'> {
-  viewState?: ViewState;
-  initialViewState?: ViewState;
-  onMove?: (evt: { viewState: ViewState }) => void;
+// (Used by the higher-level Map component)
+export interface MapProps extends Omit<MapboxMapProps, "onViewStateChange"> {
+  viewState?: ViewState
+  initialViewState?: ViewState
+  onMove?: (evt: { viewState: ViewState }) => void
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 3) FORWARD-REF COMPONENT DEFINITION (MapboxMapBase)
+// ─────────────────────────────────────────────────────────────────────────────
 const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   {
     mapboxToken,
-    viewState, // Usage tells the package to use external state/controlled approach
-    initialViewState, // Usage tells the package to use internal state/uncontrolled approach
+
+    // Controlled/uncontrolled camera management
+    viewState,
+    initialViewState,
     onViewStateChange,
+
+    // Map configuration
     style = { width: "100vw", height: "100vh", pointerEvents: "auto" },
     mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
     minZoom = 5.0,
@@ -162,16 +118,21 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   },
   ref,
 ) => {
+  // ───────────────────────────────────────────────────────────────────────────
+  // 4) REFS & STATE
+  // ───────────────────────────────────────────────────────────────────────────
   const internalMapRef = useRef<MapRef>(null)
+
+  // Marker management
   const [markers, setMarkersState] = useState<MarkerProperties[]>([])
   const [selectedMarker, setSelectedMarker] = useState<MarkerProperties | null>(
     null,
   )
-  
-  // Track if we're in controlled mode
-  const isControlled = viewState !== undefined;
-  
-  // For uncontrolled mode internal state
+
+  // Check if we're in controlled mode
+  const isControlled = viewState !== undefined
+
+  // For uncontrolled, track local camera state
   const [internalViewState, setInternalViewState] = useState<ViewState>(
     initialViewState || {
       longitude: -122.4,
@@ -179,34 +140,37 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       zoom: 8,
       bearing: 0,
       pitch: 0,
-    }
-  );
+    },
+  )
 
-  // Calculate marker size based on zoom level
+  // ───────────────────────────────────────────────────────────────────────────
+  // 5) HELPER CALLBACKS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // Dynamically adjust marker size depending on the zoom
   const getScaledMarkerSize = useCallback((baseSize: number, zoom: number) => {
-    // Define zoom bounds
-    const minZoom = 4
-    const maxZoom = 12
-    const minScale = 0.8 // Keep small at low zoom
-    const maxScale = 1.2 // remember: adjust size here
+    const min = 4
+    const max = 12
+    const minScale = 0.8
+    const maxScale = 1.2
 
-    // Clamp zoom to defined range
-    const clampedZoom = Math.max(minZoom, Math.min(zoom, maxZoom))
-
-    // Calculate scale factor (linear interpolation between minScale and maxScale)
-    const zoomRatio = (clampedZoom - minZoom) / (maxZoom - minZoom)
-    const scaleFactor = minScale + zoomRatio * (maxScale - minScale)
-
-    // Apply scale to base size
+    const clampedZoom = Math.max(min, Math.min(zoom, max))
+    const ratio = (clampedZoom - min) / (max - min)
+    const scaleFactor = minScale + ratio * (maxScale - minScale)
     return Math.round(baseSize * scaleFactor)
   }, [])
 
+  // Fired when the map finishes loading
   const handleMapLoad = useCallback(() => {
     console.log("Map loaded")
-    onLoad?.() // Notify the parent component or context
+    onLoad?.()
   }, [onLoad])
 
-  // Single method that works in both modes!
+  // ───────────────────────────────────────────────────────────────────────────
+  // 6) IMPERATIVE METHODS (exposed via ref)
+  // ───────────────────────────────────────────────────────────────────────────
+
+  // Single flyTo that works in both controlled & uncontrolled modes
   function flyTo(
     longitude: number,
     latitude: number,
@@ -214,9 +178,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     pitch?: number,
     bearing?: number,
   ) {
-    console.log("flyTo called, isControlled:", isControlled);
+    console.log("flyTo called, isControlled:", isControlled)
+
     if (isControlled && onViewStateChange) {
-      // Controlled mode: update through state
       onViewStateChange({
         longitude,
         latitude,
@@ -224,59 +188,65 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
         bearing,
         pitch,
         transitionDuration: 3000,
-      });
+      })
     } else {
-      // Uncontrolled mode: use imperative API
-      const mapInstance = internalMapRef.current;
-      if (!mapInstance) return;
-      
-      // V8 uses this format
+      const mapInstance = internalMapRef.current
+      if (!mapInstance) return
+
+      // Imperative flyTo
       mapInstance.flyTo({
         center: [longitude, latitude],
         zoom,
         pitch,
         bearing,
         duration: 3000,
-      });
-      
-      // Also update internal state for uncontrolled mode
+      })
+
+      // Update local state if uncontrolled
       setInternalViewState({
         longitude,
         latitude,
         zoom,
         bearing,
         pitch,
-      });
+      })
     }
   }
 
-  // Handle view state changes
-  const handleViewStateChange = (evt: ViewStateChangeEvent) => {
-    console.log('ViewStateChangeEvent:', evt);  // Log the entire event
-    const newViewState = evt.viewState;
-    
-    // In controlled mode, notify parent
-    if (isControlled && onViewStateChange) {
-      onViewStateChange(newViewState);
-    } else {
-      // In uncontrolled mode, track internally
-      setInternalViewState(newViewState);
-    }
-  };
-
+  // Returns the underlying MapRef
   function getMap(): MapRef | undefined {
     return internalMapRef.current ?? undefined
   }
 
+  // Safely work with the map instance (null-check included)
   function withMap<T = void>(callback: (map: MapRef) => T, fallback?: T): T {
     const map = getMap()
     return map ? callback(map) : (fallback as T)
   }
 
+  // Update the entire markers array
   function setMarkers(newMarkers: MarkerProperties[]) {
     setMarkersState(newMarkers)
   }
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // 7) MAP EVENT HANDLERS
+  // ───────────────────────────────────────────────────────────────────────────
+  const handleViewStateChange = (evt: ViewStateChangeEvent) => {
+    console.log("ViewStateChangeEvent:", evt)
+    const newViewState = evt.viewState
+
+    if (isControlled && onViewStateChange) {
+      onViewStateChange(newViewState)
+    } else {
+      setInternalViewState(newViewState)
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // 8) USE IMPERATIVE HANDLE
+  //    Connects custom methods (flyTo, getMap, etc.) to the forwarded ref
+  // ───────────────────────────────────────────────────────────────────────────
   useImperativeHandle(ref, () => ({
     flyTo,
     getMap,
@@ -284,6 +254,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     setMarkers,
   }))
 
+  // ───────────────────────────────────────────────────────────────────────────
+  // 9) RENDER: MAP + CONTROLS + MARKERS + POPUP
+  // ───────────────────────────────────────────────────────────────────────────
   return (
     <Map
       ref={internalMapRef}
@@ -326,25 +299,20 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       onClick={() => setSelectedMarker(null)}
     >
       {navigationControl && (
-        <NavigationControl
-          position="top-right"
-          style={{ marginTop: "100px" }}
-        />
+        <NavigationControl position="top-right" style={{ marginTop: "100px" }} />
       )}
+
+      {/* Render all markers */}
       {markers.map((marker, index) => {
-        // Calculate scaled size based on current zoom level
         const currentZoom = viewState?.zoom ?? internalViewState.zoom
         const baseSize = marker.size ?? 10
         const scaledSize = getScaledMarkerSize(baseSize, currentZoom)
 
-        // Create tooltip content from marker properties
         const tooltipId = marker.id || ""
         const tooltipComment =
           marker.Comment || marker.properties?.Comment || ""
         const tooltipNodeCode =
           marker.nodeCode || marker.properties?.["node-code"] || ""
-
-        // Create tooltip content
         const tooltipContent = `ID: ${tooltipId}
 Comment: ${tooltipComment}
 Node Code: ${tooltipNodeCode}`
@@ -362,13 +330,12 @@ Node Code: ${tooltipNodeCode}`
                 height: `${scaledSize}px`,
                 borderRadius: "50%",
                 border: "1px solid white",
-                boxShadow: "0 0 0 1px rgba(0,0,0,0.8)", // To enhance white outline
-                cursor: "pointer", // Add pointer cursor
+                boxShadow: "0 0 0 1px rgba(0,0,0,0.8)",
+                cursor: "pointer",
               }}
               title={tooltipContent}
               onClick={(e) => {
-                e.stopPropagation() // Prevent map click from firing
-                // Toggle marker selection
+                e.stopPropagation()
                 setSelectedMarker(
                   selectedMarker?.id === marker.id ? null : marker,
                 )
@@ -377,6 +344,8 @@ Node Code: ${tooltipNodeCode}`
           </Marker>
         )
       })}
+
+      {/* Popup for selected marker */}
       {selectedMarker && (
         <Popup
           longitude={selectedMarker.longitude}
@@ -385,7 +354,7 @@ Node Code: ${tooltipNodeCode}`
           closeOnClick={false}
           onClose={() => setSelectedMarker(null)}
           anchor="bottom"
-          offset={15} // Add offset to accommodate the triangle pointer
+          offset={15}
           style={{ zIndex: 10 }}
         >
           <div style={{ padding: "5px", fontFamily: "Arial, sans-serif" }}>
@@ -419,4 +388,7 @@ Node Code: ${tooltipNodeCode}`
   )
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 10) EXPORT THE FINAL COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
 export const MapboxMap = forwardRef<MapboxMapRef, MapboxMapProps>(MapboxMapBase)
