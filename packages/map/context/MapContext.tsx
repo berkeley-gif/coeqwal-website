@@ -18,7 +18,13 @@ interface MapContextValue {
   mapRef: React.RefObject<MapboxMapRef | null>
   viewState: ViewState
   setViewState: (viewState: ViewState) => void
-  flyTo: (longitude: number, latitude: number, zoom?: number, pitch?: number, bearing?: number) => void
+  flyTo: (
+    longitude: number,
+    latitude: number,
+    zoom?: number,
+    pitch?: number,
+    bearing?: number,
+  ) => void
 }
 
 const MapContext = createContext<MapContextValue | null>(null)

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
 import { Box, Typography, Button } from "@repo/ui/mui"
 import {
@@ -14,6 +14,7 @@ import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import { useMap } from "@repo/map"
+import type { ViewState, MapboxMapRef } from "@repo/map"
 
 // Dynamic import components that use client-side features
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
@@ -33,7 +34,146 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
-  const { mapRef } = useMap()
+  const { mapRef, withMap } = useMap()
+
+  // ────────────────────────────────────────────────────────────────────────
+  // 1) UNCONTROLLED EXAMPLE
+  //    Using a local ref for direct imperative control
+  //    Using initialViewState, no explicit React state for camera
+  // ────────────────────────────────────────────────────────────────────────
+
+  // For the uncontrolled map, we'll store its ref so we can call flyTo
+  const uncontrolledRef = useRef<MapboxMapRef | null>(null)
+
+  const handleUncontrolledFlyTo = useCallback(() => {
+    // Imperative call on ref-based API
+    if (uncontrolledRef.current) {
+      uncontrolledRef.current.flyTo(-120, 37, 7)
+    }
+  }, [])
+
+  // ────────────────────────────────────────────────────────────────────────
+  // 2) CONTROLLED EXAMPLE
+  //    Using a local React state that we pass as viewState
+  // ────────────────────────────────────────────────────────────────────────
+
+  // For controlled usage, we keep a local piece of state for camera
+  const [controlledViewState, setControlledViewState] = useState<ViewState>({
+    longitude: -119,
+    latitude: 36,
+    zoom: 5,
+    bearing: 0,
+    pitch: 0,
+  })
+
+  const handleControlledFlyTo = () => {
+    // Update the state to trigger a map animation
+    setControlledViewState({
+      ...controlledViewState,
+      longitude: -121.5,
+      latitude: 38.05,
+      zoom: 10,
+      bearing: 0,
+      pitch: 0,
+      transitionDuration: 3000,
+    })
+  }
+
+  // ────────────────────────────────────────────────────────────────────────
+  // 3) LAYER ADDING EXAMPLE
+  //    Using withMap from the context
+  // ────────────────────────────────────────────────────────────────────────
+  const handleAddLayer = () => {
+    withMap((map) => {
+      // Example: Add a simple heatmap layer if it doesn't exist
+      if (!map.getSource("water-features")) {
+        map.addSource("water-features", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: [-121.5, 38.05],
+                },
+                properties: {
+                  name: "Sacramento-San Joaquin Delta",
+                  importance: 10,
+                },
+              },
+              {
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: [-122.42, 40.72],
+                },
+                properties: {
+                  name: "Shasta Dam",
+                  importance: 8,
+                },
+              },
+              {
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: [-121.1, 37.06],
+                },
+                properties: {
+                  name: "San Luis Reservoir",
+                  importance: 6,
+                },
+              },
+            ],
+          },
+        })
+      }
+
+      if (!map.getLayer("water-heatmap")) {
+        map.addLayer({
+          id: "water-heatmap",
+          type: "heatmap",
+          source: "water-features",
+          paint: {
+            "heatmap-weight": ["get", "importance"],
+            "heatmap-intensity": 0.8,
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0,
+              "rgba(0, 0, 255, 0)",
+              0.2,
+              "royalblue",
+              0.4,
+              "cyan",
+              0.6,
+              "lime",
+              0.8,
+              "yellow",
+              1,
+              "red",
+            ],
+            "heatmap-radius": 30,
+            "heatmap-opacity": 0.8,
+          },
+        })
+
+        console.log("Added water-heatmap layer")
+      } else {
+        console.log("water-heatmap layer already exists")
+      }
+    })
+  }
+
+  // Simple flyTo function that works with context mapRef
+  const flyToLocation = (longitude: number, latitude: number, zoom: number) => {
+    if (mapRef.current) {
+      console.log("Using context map flyTo")
+      mapRef.current.flyTo(longitude, latitude, zoom)
+    }
+  }
 
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
@@ -58,23 +198,6 @@ export default function Home() {
     }
   }
 
-  // Simple flyTo function that works with uncontrolled maps
-  const flyToLocation = (longitude: number, latitude: number, zoom: number) => {
-    if (mapRef.current) {
-      console.log("Using controlled mode flyTo");
-      const newState = {
-        longitude,
-        latitude,
-        zoom: zoom ?? 5,
-        bearing: 0,
-        pitch: 0,
-        transitionDuration: 3000,
-      };
-      console.log("Calling onViewStateChange with:", newState);
-      mapRef.current.flyTo(longitude, latitude, zoom);
-    }
-  }
-
   // Get navigation items with the current active section and translation function
   const navigationItems = getNavigationItems(
     activeSection,
@@ -96,7 +219,13 @@ export default function Home() {
           zIndex: -1,
         }}
       >
-        <MapContainer />
+        <MapContainer
+          uncontrolledRef={uncontrolledRef}
+          viewState={controlledViewState}
+          onViewStateChange={(newViewState) =>
+            setControlledViewState(newViewState)
+          }
+        />
       </Box>
 
       {/* ===== Navigation Sidebar ===== */}
@@ -250,43 +379,128 @@ export default function Home() {
             </Box>
           </Box>
 
-          {/* Two Column Panel with flyTo buttons */}
+          {/* Two Column Panel with map controls */}
           <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
             <TwoColumnPanel
-              leftTitle={t("CaliforniaWaterPanel.title")}
+              leftTitle="Map Controls Demo"
               leftContent={
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   <Typography variant="body1">
-                    Explore key water features across California by selecting locations below.
+                    This panel demonstrates different ways to interact with the
+                    map:
                   </Typography>
-                  
-                  {/* FlyTo buttons */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
-                    <Button 
-                      variant="standard" 
+
+                  {/* Map Interaction Examples */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                      mt: 2,
+                    }}
+                  >
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      1. Uncontrolled (Ref-based) Approach:
+                    </Typography>
+                    <Button
+                      variant="contained"
                       color="primary"
-                      onClick={() => flyToLocation(-121.50, 38.05, 10)}
-                      sx={{ textTransform: 'none' }}
+                      onClick={handleUncontrolledFlyTo}
+                      sx={{ textTransform: "none" }}
+                    >
+                      Uncontrolled FlyTo
+                    </Button>
+
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      sx={{ mt: 2 }}
+                    >
+                      2. Controlled (State-based) Approach:
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleControlledFlyTo}
+                      sx={{ textTransform: "none" }}
+                    >
+                      Controlled FlyTo
+                    </Button>
+
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      sx={{ mt: 2 }}
+                    >
+                      3. Add Map Layer (withMap):
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleAddLayer}
+                      sx={{ textTransform: "none" }}
+                    >
+                      Add Water Features Heatmap
+                    </Button>
+
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      sx={{ mt: 2 }}
+                    >
+                      4. Context-based FlyTo (used in the existing app):
+                    </Typography>
+                    <Button
+                      variant="standard"
+                      color="primary"
+                      onClick={() => flyToLocation(-121.5, 38.05, 10)}
+                      sx={{ textTransform: "none" }}
                     >
                       Sacramento-San Joaquin Delta
                     </Button>
-                    <Button 
-                      variant="standard" 
+                    <Button
+                      variant="standard"
                       color="primary"
                       onClick={() => flyToLocation(-122.42, 40.72, 12)}
-                      sx={{ textTransform: 'none' }}
+                      sx={{ textTransform: "none" }}
                     >
                       Shasta Dam
                     </Button>
-                    <Button 
-                      variant="standard" 
+                    <Button
+                      variant="standard"
                       color="primary"
                       onClick={() => flyToLocation(-121.1, 37.06, 12)}
-                      sx={{ textTransform: 'none' }}
+                      sx={{ textTransform: "none" }}
                     >
                       San Luis Reservoir
                     </Button>
                   </Box>
+                </Box>
+              }
+              rightContent={
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <Typography variant="h6">
+                    Current Controlled Camera:
+                  </Typography>
+                  <Typography>
+                    Longitude: {controlledViewState.longitude.toFixed(4)}
+                  </Typography>
+                  <Typography>
+                    Latitude: {controlledViewState.latitude.toFixed(4)}
+                  </Typography>
+                  <Typography>
+                    Zoom: {controlledViewState.zoom.toFixed(1)}
+                  </Typography>
+                  <Typography>
+                    Bearing: {controlledViewState.bearing}°
+                  </Typography>
+                  <Typography>Pitch: {controlledViewState.pitch}°</Typography>
+
+                  <Typography variant="body2" sx={{ mt: 2 }}>
+                    This panel demonstrates how to display and update the
+                    current camera state. When you click "Controlled FlyTo",
+                    these values will update as the map animates.
+                  </Typography>
                 </Box>
               }
               background="transparent"

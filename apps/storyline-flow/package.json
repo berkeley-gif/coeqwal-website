@@ -15,7 +15,7 @@
     "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",
     "next": "^15.2.1",
-    "lodash": "^4.17.21"  
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

@@ -67,7 +67,7 @@ export interface MapboxMapRef {
 
 /**
  * MapboxMapProps: React props for the MapboxMap component.
- * Supports both controlled (viewState + onViewStateChange) 
+ * Supports both controlled (viewState + onViewStateChange)
  * and uncontrolled modes (initialViewState).
  */
 export interface MapboxMapProps {
@@ -263,30 +263,14 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       reuseMaps
       mapboxAccessToken={mapboxToken}
       longitude={
-        isControlled
-          ? viewState?.longitude
-          : internalViewState.longitude
+        isControlled ? viewState?.longitude : internalViewState.longitude
       }
-      latitude={
-        isControlled
-          ? viewState?.latitude
-          : internalViewState.latitude
-      }
-      zoom={
-        isControlled
-          ? viewState?.zoom
-          : internalViewState.zoom
-      }
+      latitude={isControlled ? viewState?.latitude : internalViewState.latitude}
+      zoom={isControlled ? viewState?.zoom : internalViewState.zoom}
       bearing={
-        isControlled
-          ? viewState?.bearing || 0
-          : internalViewState.bearing
+        isControlled ? viewState?.bearing || 0 : internalViewState.bearing
       }
-      pitch={
-        isControlled
-          ? viewState?.pitch || 0
-          : internalViewState.pitch
-      }
+      pitch={isControlled ? viewState?.pitch || 0 : internalViewState.pitch}
       onMove={handleViewStateChange}
       mapStyle={mapStyle}
       style={style}
@@ -299,7 +283,10 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       onClick={() => setSelectedMarker(null)}
     >
       {navigationControl && (
-        <NavigationControl position="top-right" style={{ marginTop: "100px" }} />
+        <NavigationControl
+          position="top-right"
+          style={{ marginTop: "100px" }}
+        />
       )}
 
       {/* Render all markers */}
