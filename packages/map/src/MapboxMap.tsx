@@ -9,8 +9,7 @@ import React, {
   useState,
 } from "react"
 import Map, { NavigationControl, Marker, Popup } from "react-map-gl/mapbox"
-import type { MapRef } from "react-map-gl/mapbox"
-import type { ViewStateChangeEvent } from "react-map-gl/mapbox"
+import type { MapRef, ViewStateChangeEvent } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { ViewState } from "./types.js" // TODO: this responsive plan for the map needs refinement
 
@@ -164,7 +163,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   ref,
 ) => {
   const internalMapRef = useRef<MapRef>(null)
-  const [markers, setMarkersState] = useState<Array<MarkerProperties>>([])
+  const [markers, setMarkersState] = useState<MarkerProperties[]>([])
   const [selectedMarker, setSelectedMarker] = useState<MarkerProperties | null>(
     null,
   )
@@ -221,9 +220,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       onViewStateChange({
         longitude,
         latitude,
-        zoom: zoom ?? 5,
-        bearing: bearing ?? 0,
-        pitch: pitch ?? 0,
+        zoom,
+        bearing,
+        pitch,
         transitionDuration: 3000,
       });
     } else {
@@ -234,9 +233,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       // V8 uses this format
       mapInstance.flyTo({
         center: [longitude, latitude],
-        zoom: zoom ?? 5,
-        pitch: pitch ?? 0,
-        bearing: bearing ?? 0,
+        zoom,
+        pitch,
+        bearing,
         duration: 3000,
       });
       
@@ -244,9 +243,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       setInternalViewState({
         longitude,
         latitude,
-        zoom: zoom ?? 5,
-        bearing: bearing ?? 0,
-        pitch: pitch ?? 0,
+        zoom,
+        bearing,
+        pitch,
       });
     }
   }
@@ -274,7 +273,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     return map ? callback(map) : (fallback as T)
   }
 
-  function setMarkers(newMarkers: Array<MarkerProperties>) {
+  function setMarkers(newMarkers: MarkerProperties[]) {
     setMarkersState(newMarkers)
   }
 
@@ -290,11 +289,31 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       ref={internalMapRef}
       reuseMaps
       mapboxAccessToken={mapboxToken}
-      longitude={isControlled ? viewState.longitude : (initialViewState?.longitude || internalViewState.longitude)}
-      latitude={isControlled ? viewState.latitude : (initialViewState?.latitude || internalViewState.latitude)}
-      zoom={isControlled ? viewState.zoom : (initialViewState?.zoom || internalViewState.zoom)}
-      bearing={isControlled ? (viewState.bearing || 0) : (initialViewState?.bearing || internalViewState.bearing || 0)}
-      pitch={isControlled ? (viewState.pitch || 0) : (initialViewState?.pitch || internalViewState.pitch || 0)}
+      longitude={
+        isControlled
+          ? viewState?.longitude
+          : internalViewState.longitude
+      }
+      latitude={
+        isControlled
+          ? viewState?.latitude
+          : internalViewState.latitude
+      }
+      zoom={
+        isControlled
+          ? viewState?.zoom
+          : internalViewState.zoom
+      }
+      bearing={
+        isControlled
+          ? viewState?.bearing || 0
+          : internalViewState.bearing
+      }
+      pitch={
+        isControlled
+          ? viewState?.pitch || 0
+          : internalViewState.pitch
+      }
       onMove={handleViewStateChange}
       mapStyle={mapStyle}
       style={style}
@@ -303,8 +322,8 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       scrollZoom={scrollZoom}
       dragPan={dragPan}
       interactive={interactive}
-      onClick={() => setSelectedMarker(null)}
       onLoad={handleMapLoad}
+      onClick={() => setSelectedMarker(null)}
     >
       {navigationControl && (
         <NavigationControl
@@ -314,8 +333,8 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       )}
       {markers.map((marker, index) => {
         // Calculate scaled size based on current zoom level
-        const currentZoom = viewState?.zoom || 5
-        const baseSize = marker.size || 10
+        const currentZoom = viewState?.zoom ?? internalViewState.zoom
+        const baseSize = marker.size ?? 10
         const scaledSize = getScaledMarkerSize(baseSize, currentZoom)
 
         // Create tooltip content from marker properties
@@ -332,7 +351,7 @@ Node Code: ${tooltipNodeCode}`
 
         return (
           <Marker
-            key={index}
+            key={String(marker.id) + index}
             longitude={marker.longitude}
             latitude={marker.latitude}
           >

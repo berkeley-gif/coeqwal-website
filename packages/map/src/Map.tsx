@@ -5,32 +5,27 @@ import { MapboxMap, type MapboxMapProps, type MapboxMapRef } from "./MapboxMap"
 import { useMap } from "../context/MapContext"
 import type { ViewState } from "./types"
 
-// Primary map component that connects to the MapContext
-export function Map({ 
-  viewState, 
+// High-level context-based map
+export function Map({
+  viewState,
   initialViewState,
   onMove,
-  ...otherProps 
+  ...otherProps
 }: MapProps) {
   const mapRef = useRef<MapboxMapRef>(null)
-  const { mapRef: contextMapRef, setViewState } = useMap()
+  const { mapRef: ctxMapRef, setViewState } = useMap()
 
-  // Connect the map ref to the context
+  // Connect local ref to the context so other components can call useMap()
   useEffect(() => {
     if (mapRef.current) {
-      contextMapRef.current = mapRef.current
+      ctxMapRef.current = mapRef.current
     }
-  }, [contextMapRef, mapRef])
+  }, [ctxMapRef])
 
-  // Handle view state changes
-  const handleViewStateChange = (newViewState: ViewState) => {
-    // Update context view state
-    setViewState(newViewState)
-    
-    // Call provided onMove handler if using controlled mode
-    if (onMove) {
-      onMove({ viewState: newViewState })
-    }
+  // Whenever the map changes in controlled mode, handle it
+  const handleViewStateChange = (newState: ViewState) => {
+    setViewState(newState)
+    onMove?.({ viewState: newState })
   }
 
   return (
@@ -44,8 +39,10 @@ export function Map({
   )
 }
 
-export interface MapProps extends Omit<MapboxMapProps, 'onViewStateChange'> {
-  viewState?: ViewState;
-  initialViewState?: ViewState;
-  onMove?: (evt: { viewState: ViewState }) => void;
+export interface MapProps extends Omit<MapboxMapProps, "onViewStateChange"> {
+  // For controlled usage
+  viewState?: ViewState
+  initialViewState?: ViewState
+  // Custom callback
+  onMove?: (evt: { viewState: ViewState }) => void
 }
