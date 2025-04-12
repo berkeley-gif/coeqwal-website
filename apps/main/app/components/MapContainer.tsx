@@ -16,23 +16,10 @@ interface MapContainerProps {
   onViewStateChange?: (newViewState: ViewState) => void
 }
 
-export default function MapContainer({
-  uncontrolledRef,
-  viewState,
-  onViewStateChange,
-}: MapContainerProps) {
+export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
 
   const { mapRef } = useMap()
-
-  // State for the map view
-  const [viewStateState, setViewStateState] = useState({
-    longitude: -122.4,
-    latitude: 37.8,
-    zoom: 8,
-    bearing: 0,
-    pitch: 0,
-  })
 
   // We'll use the context mapRef since we can't directly forward external refs to the Map component
   const refToUse = mapRef
@@ -73,16 +60,6 @@ export default function MapContainer({
     }
   }, [testFlyTo])
 
-  // Handle view state changes
-  const handleViewStateChange = ({
-    viewState: newViewState,
-  }: {
-    viewState: ViewState
-  }) => {
-    setViewStateState(newViewState)
-    onViewStateChange?.(newViewState)
-  }
-
   return (
     <Box
       sx={{
@@ -94,8 +71,13 @@ export default function MapContainer({
     >
       <Map
         mapboxToken={mapboxToken}
-        viewState={viewState || viewStateState}
-        onMove={handleViewStateChange}
+        initialViewState={{
+          longitude: -122.4,
+          latitude: 37.8,
+          zoom: 8,
+          bearing: 0,
+          pitch: 0,
+        }}
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
         scrollZoom={true}
         interactive={true}

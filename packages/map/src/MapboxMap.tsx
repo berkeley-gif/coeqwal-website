@@ -198,7 +198,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
         zoom: zoom ?? 5,
         pitch: pitch ?? 0,
         bearing: bearing ?? 0,
-        duration: duration / 1000,
+        duration: duration,
       })
 
       console.log("[MapboxMap] Imperative flyTo called successfully")
@@ -263,10 +263,8 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     const mapInstance = internalMapRef.current
     if (!mapInstance) return
 
-    // Cast to the raw MapboxGL Map
     const rawMap = mapInstance.getMap()
 
-    // This callback fires after every move, including flyTo
     const handleMoveEnd = () => {
       const center = rawMap.getCenter()
       const zoom = rawMap.getZoom()
@@ -281,8 +279,8 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
         pitch,
       )
 
-      // Store the final position in the parent's state:
-      if (isControlled && onViewStateChange) {
+      // Always notify parent of final position (even if 'viewState' prop is not set)
+      if (onViewStateChange) {
         onViewStateChange({
           longitude: center.lng,
           latitude: center.lat,
