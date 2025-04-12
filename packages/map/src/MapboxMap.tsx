@@ -340,35 +340,36 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     setMarkers,
   }))
 
-  useEffect(() => {
-    const mapInstance = internalMapRef.current
-    if (!mapInstance) return
+  // Maybe use later:
+  // useEffect(() => { 
+  //   const mapInstance = internalMapRef.current
+  //   if (!mapInstance) return
 
-    const rawMap = mapInstance.getMap()
+  //   const rawMap = mapInstance.getMap()
 
-    const handleMoveEnd = () => {
-      const center = rawMap.getCenter()
-      const zoom = rawMap.getZoom()
-      const bearing = rawMap.getBearing()
-      const pitch = rawMap.getPitch()
+  //   const handleMoveEnd = () => {
+  //     const center = rawMap.getCenter()
+  //     const zoom = rawMap.getZoom()
+  //     const bearing = rawMap.getBearing()
+  //     const pitch = rawMap.getPitch()
 
-      if (onViewStateChange) {
-        onViewStateChange({
-          longitude: center.lng,
-          latitude: center.lat,
-          zoom,
-          bearing,
-          pitch,
-        })
-      }
-    }
+  //     if (onViewStateChange) {
+  //       onViewStateChange({
+  //         longitude: center.lng,
+  //         latitude: center.lat,
+  //         zoom,
+  //         bearing,
+  //         pitch,
+  //       })
+  //     }
+  //   }
 
-    rawMap.on("moveend", handleMoveEnd)
+  //   rawMap.on("moveend", handleMoveEnd)
 
-    return () => {
-      rawMap.off("moveend", handleMoveEnd)
-    }
-  }, [isControlled, onViewStateChange, internalMapRef])
+  //   return () => {
+  //     rawMap.off("moveend", handleMoveEnd)
+  //   }
+  // }, [isControlled, onViewStateChange, internalMapRef])
 
   // ───────────────────────────────────────────────────────────────────────────
   // 9) RENDER: MAP + CONTROLS + MARKERS + POPUP
