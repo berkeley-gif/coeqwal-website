@@ -13,7 +13,6 @@
     "@repo/ui": "workspace:*",
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
-    "@repo/motion": "workspace:*",
     "next": "^15.2.1",
     "lodash": "^4.17.21"
   },
