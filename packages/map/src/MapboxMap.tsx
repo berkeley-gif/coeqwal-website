@@ -7,7 +7,7 @@ import React, {
   ForwardRefRenderFunction,
   useCallback,
   useState,
-  useEffect,
+  // useEffect,
 } from "react"
 import Map, { NavigationControl, Marker, Popup } from "react-map-gl/mapbox"
 import type { MapRef, ViewStateChangeEvent } from "react-map-gl/mapbox"
@@ -57,13 +57,13 @@ export interface MarkerProperties {
  * Provides three main methods (withMap, getMap, flyTo) plus setMarkers.
  */
 export interface MapboxMapRef {
-  // 2.1) withMap
+  // withMap
   withMap: <T = void>(callback: (map: MapRef) => T, fallback?: T) => T
 
-  // 2.2) getMap
+  // getMap
   getMap: () => MapRef | undefined
 
-  // 2.3) flyTo
+  // flyTo
   flyTo: (
     longitude: number,
     latitude: number,
@@ -74,7 +74,7 @@ export interface MapboxMapRef {
     transition?: TransitionOptions,
   ) => void
 
-  // 2.4) setMarkers
+  // setMarkers
   setMarkers: (markers: MarkerProperties[]) => void
 }
 
@@ -240,7 +240,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     zoom?: number,
     pitch?: number,
     bearing?: number,
-    duration = 2000,
+    duration?: number,
     transition?: TransitionOptions,
   ) {
     const mapInstance = internalMapRef.current
@@ -249,8 +249,18 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
       return
     }
 
+    // Validate coordinates to prevent NaN errors
+    if (isNaN(longitude) || isNaN(latitude)) {
+      console.error("[MapboxMap] Invalid coordinates for flyTo:", {
+        longitude,
+        latitude,
+      })
+      return
+    }
+
     try {
-      // Use transition preset or fallback to provided parameters
+      // Use transition preset or fallback to provided parameters,
+      // but never override the coordinates
       const effectiveDuration = transition?.duration ?? duration
 
       // Default easing function (quadratic ease-out)
@@ -262,15 +272,32 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
           ? transition.easing
           : defaultEasing
 
-      // Build flyTo options
-      const flyToOptions: any = {
-        center: [longitude, latitude],
+      const flyToOptions: {
+        center: [number, number]
+        zoom?: number
+        pitch?: number
+        bearing?: number
+        duration?: number
+        easing?: (t: number) => number
+        essential?: boolean
+        minZoom?: number
+        maxZoom?: number
+      } = {
+        center: [longitude, latitude], // Always use the direct coordinates
         zoom: zoom ?? 5,
         pitch: pitch ?? transition?.pitch ?? 0,
         bearing: bearing ?? transition?.bearing ?? 0,
-        duration: effectiveDuration,
-        easing: easingFn,
         essential: true, // Make animations essential for accessibility
+      }
+
+      // Only add duration if it's valid
+      if (typeof effectiveDuration === "number" && !isNaN(effectiveDuration)) {
+        flyToOptions.duration = effectiveDuration
+      }
+
+      // Only include easing if we have a duration
+      if (flyToOptions.duration) {
+        flyToOptions.easing = easingFn
       }
 
       // Only add optional zoom constraints if they're defined
@@ -287,11 +314,11 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     } catch (error) {
       console.error("[MapboxMap] Error during flyTo:", error)
 
-      // If something goes wrong, you can still do a fallback:
+      // If something goes wrong, fallback:
       if (isControlled && onViewStateChange) {
         onViewStateChange({
-          longitude,
-          latitude,
+          longitude: longitude,
+          latitude: latitude,
           zoom: zoom ?? 5,
           bearing: bearing ?? 0,
           pitch: pitch ?? 0,
@@ -341,7 +368,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   }))
 
   // Maybe use later:
-  // useEffect(() => { 
+  // useEffect(() => {
   //   const mapInstance = internalMapRef.current
   //   if (!mapInstance) return
 

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useEffect, useCallback } from "react"
 import { Map } from "@repo/map"
 import { useMap } from "@repo/map"
 import type { MutableRefObject } from "react" // MutableRefObject is not deprecated

@@ -107,7 +107,6 @@ export const useMap = () => {
     ) => {
       if (!mapRef.current) return
 
-      // Call flyTo directly with the separate parameters
       mapRef.current.flyTo(longitude, latitude, zoom, pitch, bearing, duration)
     },
 

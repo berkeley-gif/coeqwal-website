@@ -35,7 +35,7 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
-  const { mapRef, withMap } = useMap()
+  const { mapRef } = useMap()
 
   // ────────────────────────────────────────────────────────────────────────
   // 1) UNCONTROLLED EXAMPLE
@@ -49,7 +49,7 @@ export default function Home() {
   const handleUncontrolledFlyTo = useCallback(() => {
     // Imperative call on ref-based API
     if (uncontrolledRef.current) {
-      uncontrolledRef.current.flyTo(-120, 37, 7, 0, 0, 2000)
+      uncontrolledRef.current.flyTo(-120, 37, 7)
     }
   }, [])
 
@@ -68,10 +68,9 @@ export default function Home() {
   })
 
   const handleControlledFlyTo = () => {
-    // Instead of relying on viewState transitions, use the flyTo method
+    // Use the flyTo method directly
     if (mapRef.current) {
-      // Call the flyTo method directly with a duration
-      mapRef.current.flyTo(-121.5, 38.05, 10, 0, 0, 2000)
+      mapRef.current.flyTo(-121.5, 38.05, 10)
     }
   }
 
@@ -79,85 +78,87 @@ export default function Home() {
   // 3) LAYER ADDING EXAMPLE
   //    Using withMap from the context
   // ────────────────────────────────────────────────────────────────────────
-  const handleAddLayer = () => {
-    withMap((map) => {
-      // Example: Add a simple heatmap layer if it doesn't exist
-      if (!map.getSource("water-features")) {
-        map.addSource("water-features", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [-121.5, 38.05],
-                },
-                properties: {
-                  name: "Sacramento-San Joaquin Delta",
-                  importance: 10,
-                },
-              },
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [-122.42, 40.72],
-                },
-                properties: {
-                  name: "Shasta Dam",
-                  importance: 8,
-                },
-              },
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [-121.1, 37.06],
-                },
-                properties: {
-                  name: "San Luis Reservoir",
-                  importance: 6,
-                },
-              },
-            ],
-          },
-        })
-      }
 
-      if (!map.getLayer("water-heatmap")) {
-        map.addLayer({
-          id: "water-heatmap",
-          type: "heatmap",
-          source: "water-features",
-          paint: {
-            "heatmap-weight": ["get", "importance"],
-            "heatmap-intensity": 0.8,
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0,
-              "rgba(0, 0, 255, 0)",
-              0.2,
-              "royalblue",
-              0.4,
-              "cyan",
-              0.6,
-              "lime",
-              0.8,
-              "yellow",
-              1,
-              "red",
-            ],
-            "heatmap-radius": 30,
-            "heatmap-opacity": 0.8,
-          },
-        })
-      }
-    })
-  }
+  // This is fake! Fake data for now.
+  // const handleAddLayer = () => {
+  //   withMap((map) => {
+  //     // Example: Add a simple heatmap layer if it doesn't exist
+  //     if (!map.getSource("water-features")) {
+  //       map.addSource("water-features", {
+  //         type: "geojson",
+  //         data: {
+  //           type: "FeatureCollection",
+  //           features: [
+  //             {
+  //               type: "Feature",
+  //               geometry: {
+  //                 type: "Point",
+  //                 coordinates: [-121.5, 38.05],
+  //               },
+  //               properties: {
+  //                 name: "Sacramento-San Joaquin Delta",
+  //                 importance: 10,
+  //               },
+  //             },
+  //             {
+  //               type: "Feature",
+  //               geometry: {
+  //                 type: "Point",
+  //                 coordinates: [-122.42, 40.72],
+  //               },
+  //               properties: {
+  //                 name: "Shasta Dam",
+  //                 importance: 8,
+  //               },
+  //             },
+  //             {
+  //               type: "Feature",
+  //               geometry: {
+  //                 type: "Point",
+  //                 coordinates: [-121.1, 37.06],
+  //               },
+  //               properties: {
+  //                 name: "San Luis Reservoir",
+  //                 importance: 6,
+  //               },
+  //             },
+  //           ],
+  //         },
+  //       })
+  //     }
+
+  //     if (!map.getLayer("water-heatmap")) {
+  //       map.addLayer({
+  //         id: "water-heatmap",
+  //         type: "heatmap",
+  //         source: "water-features",
+  //         paint: {
+  //           "heatmap-weight": ["get", "importance"],
+  //           "heatmap-intensity": 0.8,
+  //           "heatmap-color": [
+  //             "interpolate",
+  //             ["linear"],
+  //             ["heatmap-density"],
+  //             0,
+  //             "rgba(0, 0, 255, 0)",
+  //             0.2,
+  //             "royalblue",
+  //             0.4,
+  //             "cyan",
+  //             0.6,
+  //             "lime",
+  //             0.8,
+  //             "yellow",
+  //             1,
+  //             "red",
+  //           ],
+  //           "heatmap-radius": 30,
+  //           "heatmap-opacity": 0.8,
+  //         },
+  //       })
+  //     }
+  //   })
+  // }
 
   // Simple flyTo function that works with context mapRef
   const flyToLocation = (longitude: number, latitude: number, zoom: number) => {
@@ -418,7 +419,7 @@ export default function Home() {
                       Controlled FlyTo (Default Transition)
                     </Button>
 
-                    <Typography
+                    {/* <Typography
                       variant="subtitle1"
                       fontWeight="bold"
                       sx={{ mt: 2 }}
@@ -432,7 +433,7 @@ export default function Home() {
                       sx={{ textTransform: "none", alignSelf: "flex-start" }}
                     >
                       Add Water Features Heatmap
-                    </Button>
+                    </Button> */}
 
                     <Typography
                       variant="subtitle1"
