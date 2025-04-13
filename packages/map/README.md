@@ -21,9 +21,10 @@ This guide shows how to set up and use the Mapbox-based map in a monorepo struct
 • The `apps/main` directory (or your chosen app folder) consumes the map package and renders the map on a page.
 
 Example key files and their roles:
-- `packages/map/src/MapboxMap.tsx`: The main MapboxMap component that manages the raw Mapbox GL map instance.  
-- `packages/map/context/MapContext.tsx`: Provides the `MapProvider` and `useMap` hook.  
-- `apps/main/app/page.tsx`: Example Next.js page that demonstrates usage of the map.  
+
+- `packages/map/src/MapboxMap.tsx`: The main MapboxMap component that manages the raw Mapbox GL map instance.
+- `packages/map/context/MapContext.tsx`: Provides the `MapProvider` and `useMap` hook.
+- `apps/main/app/page.tsx`: Example Next.js page that demonstrates usage of the map.
 - `apps/main/app/components/MapContainer.tsx`: A convenient wrapper for the map with test features.
 
 ---
@@ -31,9 +32,11 @@ Example key files and their roles:
 ## 2. Installation & Setup
 
 In your project’s root folder, ensure dependencies are installed by running:
+
 ```bash
 pnpm install
 ```
+
 (Or your preferred package manager command.)
 
 Then, wrap your application with the `MapProvider` so other components can access the map context:
@@ -42,13 +45,15 @@ Then, wrap your application with the `MapProvider` so other components can acces
 import React from "react"
 import { MapProvider } from "@repo/map"
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html>
       <body>
-        <MapProvider>
-          {children}
-        </MapProvider>
+        <MapProvider>{children}</MapProvider>
       </body>
     </html>
   )
@@ -213,18 +218,23 @@ The map supports custom transitions (duration, easing, pitch, bearing) via the o
 
 If you need lower-level access to methods like `addLayer`, `addSource`, or raw map events, you have two approaches:
 
-1. Call `withMap` on the reference:  
+1. Call `withMap` on the reference:
+
    ```ts
    mapRef.current?.withMap((map) => {
-     map.addLayer({ /* layer definition */ })
+     map.addLayer({
+       /* layer definition */
+     })
    })
    ```
 
-2. Use the `withMap` function from the `useMap` hook:  
+2. Use the `withMap` function from the `useMap` hook:
    ```ts
    const { withMap } = useMap()
    withMap((mapInstance) => {
-     mapInstance.addLayer({ /* layer definition */ })
+     mapInstance.addLayer({
+       /* layer definition */
+     })
    })
    ```
 
@@ -234,7 +244,7 @@ Both let you work with the Mapbox GL instance once it’s loaded.
 
 ## 7. Summary
 
-By combining `MapProvider`, the `Map` component, and hooks like `useMap`, you can easily integrate a Mapbox-powered map into your Next.js or React application. You have full flexibility over camera control (controlled vs. uncontrolled), transitions, and raw map features.  
+By combining `MapProvider`, the `Map` component, and hooks like `useMap`, you can easily integrate a Mapbox-powered map into your Next.js or React application. You have full flexibility over camera control (controlled vs. uncontrolled), transitions, and raw map features.
 
 This setup is well-suited for monorepos, allowing you to maintain reusable components in a `packages/map` folder while consuming them cleanly in multiple apps like `apps/main`.
 
