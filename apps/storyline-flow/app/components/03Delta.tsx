@@ -10,6 +10,7 @@ import { stateMapViewState } from "./helpers/mapViews"
 import { Marker, Popup } from "@repo/map"
 import Bird from "./vis/Bird"
 import Grass from "./vis/Grass"
+import Image from "next/image"
 
 type MarkerType = {
   name: string
@@ -56,10 +57,8 @@ function Delta() {
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
   const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
   const { mapRef } = useMap() // from our context
-  const [toStick, setToStick] = useState(true)
 
   function moveToDelta() {
-    setToStick(true)
     if (mapRef.current) {
       mapRef.current?.flyTo(-121.8427, 37.708, 9)
       const markerToAdd = prepareMarkers(markers)
@@ -68,7 +67,6 @@ function Delta() {
   }
 
   function moveBackToCA() {
-    setToStick(false)
     if (mapRef.current) {
       mapRef.current?.flyTo(
         stateMapViewState.longitude,
@@ -112,7 +110,13 @@ function Delta() {
             >
               <div className="popup">
                 <h3>{data.name}</h3>
-                <img width="100%" src="/sealtester.jpg" />
+                <Image
+                  src="/sealtester.png"
+                  alt="Seal"
+                  width={470}
+                  height={300}
+                  style={{ objectFit: "cover" }}
+                />
                 <p>{data.caption}</p>
               </div>
             </Popup>

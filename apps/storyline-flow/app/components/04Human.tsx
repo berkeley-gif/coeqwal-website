@@ -1,4 +1,5 @@
 import React, { useRef } from "react"
+import Image from "next/image"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import SectionContainer from "./helpers/SectionContainer"
 import { useMap } from "@repo/map"
@@ -73,7 +74,13 @@ function Irrigation() {
             <Typography variant="body1">{content.p2}</Typography>
           </Box>
           <Box className="paragraph">
-            <img src="/economy/mining.jpg" alt="Irrigation" />
+            <Image
+              src="/economy/mining.jpg"
+              alt="Irrigation"
+              width={1000}
+              height={600}
+              style={{ objectFit: "cover" }}
+            />
           </Box>
         </Box>
       </SectionContainer>
@@ -93,7 +100,13 @@ function Drinking() {
             <Typography variant="body1">{content.p2}</Typography>
           </Box>
           <Box className="paragraph">
-            <img src="/economy/water.jpg" alt="Irrigation" />
+            <Image
+              src="/economy/water.jpg"
+              alt="Drinking"
+              width={1000}
+              height={700}
+              style={{ objectFit: "cover" }}
+            />
           </Box>
         </Box>
       </SectionContainer>

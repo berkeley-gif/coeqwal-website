@@ -9,7 +9,7 @@ import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
 import { useInViewVisibility } from "../hooks/useInViewVisbility"
 import PrecipitationBar from "./vis/PrecipitationBar"
-import Image from 'next/image'
+import Image from "next/image"
 
 type MarkerType = {
   id: string
@@ -95,9 +95,15 @@ function Variability() {
                 onClose={() => setPopupInfo(null)}
               >
                 <div className="popup">
-                    <h3>{data.name}</h3>
-                    <img src={`/variability/${data.image}`} alt={data.caption} width={'100%'} />
-                    <p>{data.caption}</p>
+                  <h3>{data.name}</h3>
+                  <Image
+                    src={`/variability/${data.image}`}
+                    alt={data.caption}
+                    width={470}
+                    height={300}
+                    style={{ objectFit: "cover" }}
+                  />
+                  <p>{data.caption}</p>
                 </div>
               </Popup>
             )}
@@ -210,8 +216,14 @@ function Snowpack() {
         <Box className="paragraph">
           <Typography variant="body1">{content.p3}</Typography>
         </Box>
-        <div className="paragraph">
-          <img src="/mockup.png" alt="Snowpack" />
+        <div className="paragraph image-container">
+          <Image
+            src="/mockup.png"
+            alt="Snowpack"
+            width={1000}
+            height={588}
+            style={{ objectFit: "cover" }}
+          />
         </div>
       </Box>
     </SectionContainer>

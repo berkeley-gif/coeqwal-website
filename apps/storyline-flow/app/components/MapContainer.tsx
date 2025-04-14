@@ -1,17 +1,13 @@
-import React, { useEffect, useCallback } from "react"
+import React, { useEffect } from "react"
 import { Map, useMap } from "@repo/map"
 import type { MapboxMapRef } from "@repo/map"
 import { stateMapViewState } from "./helpers/mapViews"
 
 interface MapContainerProps {
   uncontrolledRef?: React.RefObject<MapboxMapRef | null>
-  onMapLoaded?: () => void
 }
 
-export default function MapContainer({
-  uncontrolledRef,
-  onMapLoaded,
-}: MapContainerProps) {
+export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const { mapRef } = useMap() // from our context
 

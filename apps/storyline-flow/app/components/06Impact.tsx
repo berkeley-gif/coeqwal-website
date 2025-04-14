@@ -5,9 +5,10 @@ import population from "../../public/data/city_population.json" assert { type: "
 import { LibraryBooksIcon } from "@repo/ui/mui"
 import Pictogram from "./vis/Pictogram"
 import PeopleIcon from "./helpers/PeopleIcon"
-import { useEffect, useMemo } from "react"
+import { useMemo } from "react"
 import RiceIcon from "./helpers/RiceIcon"
 import AlmondIcon from "./helpers/AlmondIcon"
+import Image from "next/image"
 
 function SectionImpact() {
   return (
@@ -23,19 +24,12 @@ function SectionImpact() {
   )
 }
 
-interface CityProps {
-  pastPopulation: number
-  currentPopulation: number
-  title: string
-  cities: string[]
-}
-
 function City() {
   const content = storyline.impact
-  const norcal = ["sanfrancisco", "sanjose"]
-  const socal = ["losangeles", "sandiego"]
 
   const data = useMemo(() => {
+    const norcal = ["sanfrancisco", "sanjose"]
+    const socal = ["losangeles", "sandiego"]
     const norCal = norcal.reduce(
       (acc, city) => {
         const cityData = population[city as keyof typeof population]
@@ -75,7 +69,7 @@ function City() {
         title: "SoCal",
       },
     }
-  }, [population])
+  }, [])
 
   return (
     <SectionContainer id="city">
@@ -183,7 +177,13 @@ function Salmon() {
             </Typography>
           </Box>
           <div className="paragraph">
-            <img src="/impact/salmon.jpg" alt="Salmon" />
+            <Image
+              src="/impact/salmon.jpg"
+              alt="Salmon"
+              width={1000}
+              height={600}
+              style={{ objectFit: "cover" }}
+            />
           </div>
         </Box>
       </SectionContainer>
@@ -219,7 +219,13 @@ function Delta() {
             <Typography variant="body1">{content.p5}</Typography>
           </Box>
           <div className="paragraph">
-            <img src="/impact/delta.jpg" alt="Delta" />
+            <Image
+              src="/impact/delta.jpg"
+              alt="Delta"
+              width={1000}
+              height={600}
+              style={{ objectFit: "cover" }}
+            />
           </div>
         </Box>
       </SectionContainer>
@@ -253,7 +259,13 @@ function Groundwater() {
             </Typography>
           </Box>
           <div className="paragraph">
-            <img src="/impact/groundwater.jpg" alt="Groundwater" />
+            <Image
+              src="/impact/groundwater.jpg"
+              alt="Groundwater"
+              width={1000}
+              height={600}
+              style={{ objectFit: "cover" }}
+            />
           </div>
           <Box className="paragraph">
             <Typography variant="body1">{content.p3}</Typography>
@@ -292,7 +304,13 @@ function Drinking() {
             </Typography>
           </Box>
           <div className="paragraph">
-            <img src="/impact/drinking-water.jpg" alt="Drinking" />
+            <Image
+              src="/impact/drinking-water.jpg"
+              alt="Drinking"
+              width={1000}
+              height={600}
+              style={{ objectFit: "cover" }}
+            />
           </div>
         </Box>
       </SectionContainer>
@@ -325,7 +343,13 @@ function Climate() {
             <Typography variant="body1">{content.p3}</Typography>
           </Box>
           <div className="paragraph">
-            <img src="/impact/climate-change.jpg" alt="Climate" />
+            <Image
+              src="/impact/climate-change.jpg"
+              alt="Climate"
+              width={1000}
+              height={600}
+              style={{ objectFit: "cover" }}
+            />
           </div>
         </Box>
       </SectionContainer>
