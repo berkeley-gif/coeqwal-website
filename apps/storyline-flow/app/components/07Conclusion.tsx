@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, Typography } from "@repo/ui/mui"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import AnimatedWaves from "./helpers/AnimatedWave"

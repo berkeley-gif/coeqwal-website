@@ -1,8 +1,13 @@
-import React from "react"
+"use client"
+
+import React, { useRef } from "react"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import { Box, Typography } from "@repo/ui/mui"
 import { LibraryBooksIcon } from "@repo/ui/mui"
 import SectionContainer from "./helpers/SectionContainer"
+import { MapTransitions, useMap } from "@repo/map"
+import { stateMapViewState } from "./helpers/mapViews"
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 
 function SectionTransformation() {
   return (
@@ -16,10 +21,38 @@ function SectionTransformation() {
 // Use waterdrop for dams
 function Transformation() {
   const content = storyline.transformation
+  const viewState = stateMapViewState
+  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
+  const { mapRef } = useMap()
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    mapRef.current?.setMotionChildren(null)
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveTo()
+      } 
+    },
+    { threshold: 0.5 },
+  )
 
   return (
     <SectionContainer id="transformation">
       <Box
+        ref={ref}
         className="container"
         height="100vh"
         sx={{ justifyContent: "center" }}

@@ -71,6 +71,25 @@
     cursor: pointer;
 }
 
+.impact-marker{
+    width: 10rem;
+    height: 10rem;
+    background-color: transparent;
+    border: 10px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.city-marker{
+    width: 5rem;
+    height: 5rem;
+    background-color: transparent;
+    border: 7px solid #fff;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
 .mapboxgl-popup-content{
     color: #000;
 }

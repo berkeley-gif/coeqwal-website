@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import * as d3 from "d3"
 import { motion } from "@repo/motion"
@@ -221,7 +223,7 @@ function Bars({
                 <VisibleIcon
                   delay={4.5 + idx * 0.1}
                   animation={animate ? "visible" : "hidden"}
-                  transform={`translate(-0.5em, ${d.anomaly < 0 ? "0.9em" : "-2em"})`}
+                  transform={`translate(-0.45em, ${d.anomaly < 0 ? "0.7em" : "-1.7em"})`}
                 />
               )}
             </g>

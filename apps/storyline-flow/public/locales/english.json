@@ -30,7 +30,7 @@
     "p1": "Across our planet, gravity drives freshwater flow from mountains to the sea.",
     "p2": "Within California, snowmelt drains from northern peaks and the western slope of the Sierra into small mountain creeks.",
     "p3": "Some water seeps underground, replenishing aquifers.",
-    "p4": "Streams flow downslope toward the Central Valley into the state's two largest rivers: the Sacramento and San Joaquin.",
+    "p4": "Streams flow downslope toward the Central Valley into the state's two largest rivers \u2014 the Sacramento and San Joaquin.",
     "valley": {
       "p1": "The Sacramento and San Joaquin Rivers define the Central Valley.",
       "p2": "During winter floods, water spills onto floodplains, forming vast wetlands.",
@@ -88,7 +88,7 @@
       "p1": "Since the buildout of California’s water system, our population has doubled.",
       "p2": "Our agricultural productivity has grown.",
       "p3": "Our economy has skyrocketed.",
-      "p4": "Our water supply has been central to the state's grouwth and vitatlity.",
+      "p4": "Our water supply has been central to the state's growth and vitality.",
       "transition": "There are also costs."
     },
     "salmon": {

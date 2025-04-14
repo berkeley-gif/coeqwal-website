@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect } from "react"
 import { Map, useMap } from "@repo/map"
 import type { MapboxMapRef } from "@repo/map"
@@ -28,9 +30,6 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
       interactive={false}
       navigationControl={false}
       dragPan={false}
-      onLoad={() => {
-        console.log("heyo")
-      }}
     />
   )
 }

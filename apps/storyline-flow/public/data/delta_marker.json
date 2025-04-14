@@ -1,27 +1,27 @@
 [
   {
     "name": "Sacramento-San Joaquin Delta",
-    "caption": "A vast inland river delta and estuary in Northern California.",
+    "caption": "Caption placeholder. A vast inland river delta and estuary in Northern California.",
     "coordinates": [-121.4905, 38.1041]
   },
   {
     "name": "Antioch Bridge",
-    "caption": "A bridge crossing the San Joaquin River, connecting Antioch and Sherman Island.",
+    "caption": "Caption placeholder. A bridge crossing the San Joaquin River, connecting Antioch and Sherman Island.",
     "coordinates": [-121.7645, 38.0453]
   },
   {
     "name": "Rio Vista",
-    "caption": "A small city located along the Sacramento River in the Delta region.",
+    "caption": "Caption placeholder. A small city located along the Sacramento River in the Delta region.",
     "coordinates": [-121.6911, 38.1552]
   },
   {
     "name": "Isleton",
-    "caption": "A historic town known for its Chinese and Japanese heritage.",
+    "caption": "Caption placeholder. A historic town known for its Chinese and Japanese heritage.",
     "coordinates": [-121.6116, 38.1627]
   },
   {
     "name": "Sherman Island",
-    "caption": "An island in the Sacramento-San Joaquin River Delta popular for windsurfing.",
+    "caption": "Caption placeholder. An island in the Sacramento-San Joaquin River Delta popular for windsurfing.",
     "coordinates": [-121.74, 38.045]
   }
 ]

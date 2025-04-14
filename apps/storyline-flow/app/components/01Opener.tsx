@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, Typography } from "@repo/ui/mui"
 import SectionContainer from "./helpers/SectionContainer"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
@@ -14,7 +16,7 @@ function Opener() {
       <Box
         ref={sectionRef}
         className="container"
-        height="120vh"
+        height="100vh"
         sx={{ justifyContent: "center" }}
       >
         <Box sx={{ marginBottom: "5rem" }}>

@@ -78,6 +78,10 @@ export interface MapboxMapRef {
   // setMarkers
   setMarkers: (markers: MarkerProperties[]) => void
   setMotionChildren: (children: React.ReactNode) => void
+
+  // layers
+  addSource: (sourceId: string, style: mapboxgl.SourceSpecification) => void
+  addLayer: (layer: mapboxgl.Layer) => void
 }
 
 /**
@@ -351,6 +355,26 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     setMotionChildrenState(children)
   }
 
+  function addSource(
+    sourceId: string,
+    style: mapboxgl.SourceSpecification,
+  ): void {
+    if (!internalMapRef.current) return
+    const mapInstance = internalMapRef.current.getMap()
+    const sources = Object.keys(mapInstance?.getStyle().sources)
+    if (sources.includes(sourceId)) return
+    //internalMapRef.current?.addSource(sourceId, style) //this doesn't work
+    mapInstance?.addSource(sourceId, style)
+  }
+
+  function addLayer(layer: mapboxgl.Layer): void {
+    if (!internalMapRef.current) return
+    const mapInstance = internalMapRef.current.getMap()
+    const layers = mapInstance?.getStyle().layers.map((d) => d.id)
+    if (layers.includes(layer.id)) return
+    internalMapRef.current?.getMap()?.addLayer(layer)
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // 7) MAP EVENT HANDLERS
   // ───────────────────────────────────────────────────────────────────────────
@@ -374,6 +398,8 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     withMap,
     setMarkers,
     setMotionChildren,
+    addSource,
+    addLayer,
   }))
 
   // Maybe use later:
@@ -488,7 +514,7 @@ Node Code: ${tooltipNodeCode}`
         )
       })}
 
-      {/* Popup for selected marker */}
+      {/*Popup for selected marker*/}
       {selectedMarker && (
         <Popup
           longitude={selectedMarker.longitude}

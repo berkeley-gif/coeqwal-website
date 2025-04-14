@@ -10,3 +10,5 @@ export type { MapProps, MarkerProperties } from "./MapboxMap"
 // Legacy ref-based API (for advanced cases)
 export { MapboxMap } from "./MapboxMap"
 export type { MapboxMapRef } from "./MapboxMap"
+
+export type { Layer } from "mapbox-gl"

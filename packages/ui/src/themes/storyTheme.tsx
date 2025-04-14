@@ -10,7 +10,7 @@ const storyTheme = createTheme({
     },
     body1: {
       ...baseTheme.typography.body1,
-      fontSize: "1.5rem",
+      fontSize: "1.8rem",
       lineHeight: 1.5,
     },
   },

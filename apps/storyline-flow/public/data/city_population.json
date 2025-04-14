@@ -12,7 +12,8 @@
       "2020": "883305",
       "2024": "808988"
     },
-    "city": "San Francisco"
+    "city": "San Francisco",
+    "coordinates": [-122.4194, 37.7749]
   },
   "sandiego": {
     "population": {
@@ -24,7 +25,8 @@
       "1990": "1114540",
       "2024": "1388320"
     },
-    "city": "San Diego"
+    "city": "San Diego",
+    "coordinates": [-117.1611, 32.7157]
   },
   "losangeles": {
     "population": {
@@ -38,13 +40,15 @@
       "2020": "3898747",
       "2024": "3820914"
     },
-    "city": "Los Angeles"
+    "city": "Los Angeles",
+    "coordinates": [-118.2426, 34.0549]
   },
   "sanjose": {
     "population": {
       "1940": "61003",
       "2024": "969655"
     },
-    "city": "San Jose"
+    "city": "San Jose",
+    "coordinates": [-121.8853, 37.3387]
   }
 }

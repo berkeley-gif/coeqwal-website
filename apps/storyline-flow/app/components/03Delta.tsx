@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
@@ -5,7 +7,7 @@ import markers from "../../public/data/delta_marker.json" assert { type: "json" 
 import { useRef, useState } from "react"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { motion } from "@repo/motion"
-import { stateMapViewState } from "./helpers/mapViews"
+import { deltaMapViewState } from "./helpers/mapViews"
 
 import { Marker, Popup } from "@repo/map"
 import Bird from "./vis/Bird"
@@ -37,7 +39,7 @@ function Transition() {
       <Box
         ref={ref}
         className="container-center"
-        height="120vh"
+        height="130vh"
         width="100vw"
         sx={{ backgroundColor: "#031a35", width: "100vw" }}
       >
@@ -60,21 +62,20 @@ function Delta() {
 
   function moveToDelta() {
     if (mapRef.current) {
-      mapRef.current?.flyTo(-121.8427, 37.708, 9)
+      mapRef.current?.flyTo(
+        deltaMapViewState.longitude,
+        deltaMapViewState.latitude,
+        deltaMapViewState.zoom,
+      )
       const markerToAdd = prepareMarkers(markers)
       mapRef.current?.setMotionChildren(markerToAdd)
     }
   }
 
   function moveBackToCA() {
-    if (mapRef.current) {
-      mapRef.current?.flyTo(
-        stateMapViewState.longitude,
-        stateMapViewState.latitude,
-        stateMapViewState.zoom,
-      )
-      mapRef.current?.setMotionChildren(null)
-    }
+    if (!mapRef.current?.getMap()) return
+    //mapRef.current?.flyTo(stateMapViewState.longitude, stateMapViewState.latitude, stateMapViewState.zoom,)
+    mapRef.current?.setMotionChildren(null)
   }
 
   function prepareMarkers(points: MarkerType[] = markers) {
@@ -111,7 +112,7 @@ function Delta() {
               <div className="popup">
                 <h3>{data.name}</h3>
                 <Image
-                  src="/sealtester.png"
+                  src="/sealtester.jpg"
                   alt="Seal"
                   width={470}
                   height={300}
@@ -130,10 +131,8 @@ function Delta() {
     ref,
     (isIntersecting) => {
       if (isIntersecting) {
-        console.log("into Delta")
         moveToDelta()
       } else {
-        console.log("away from Delta")
         moveBackToCA()
       }
     },
@@ -141,7 +140,10 @@ function Delta() {
   )
 
   return (
-    <Box id="delta" style={{ height: "100%", zIndex: 1 }}>
+    <Box
+      id="delta"
+      style={{ height: "100%", zIndex: 1, pointerEvents: "none" }}
+    >
       <Box
         ref={ref}
         className="container"

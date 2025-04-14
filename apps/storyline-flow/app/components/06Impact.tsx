@@ -1,20 +1,49 @@
+"use client"
+
 import { Box, Typography } from "@repo/ui/mui"
 import SectionContainer from "./helpers/SectionContainer"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import population from "../../public/data/city_population.json" assert { type: "json" }
+import impactMarker from "../../public/data/impact_marker.json" assert { type: "json" }
 import { LibraryBooksIcon } from "@repo/ui/mui"
 import Pictogram from "./vis/Pictogram"
 import PeopleIcon from "./helpers/PeopleIcon"
-import { useMemo } from "react"
+import { useMemo, useRef } from "react"
 import RiceIcon from "./helpers/RiceIcon"
 import AlmondIcon from "./helpers/AlmondIcon"
 import Image from "next/image"
+import {
+  cityMapViewState,
+  impactMapViewState,
+  valleyMapViewState,
+} from "./helpers/mapViews"
+import { MapTransitions, Marker, useMap } from "@repo/map"
+import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
+import { motion } from "@repo/motion"
+
+interface Point {
+  latitude: number
+  longitude: number
+}
+
+const getMarker = (point: Point) => (
+  <Marker latitude={point.latitude} longitude={point.longitude}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0 }} // Define exit animation
+      transition={{ duration: 0.5 }}
+      className="impact-marker"
+    ></motion.div>
+  </Marker>
+)
 
 function SectionImpact() {
   return (
     <>
       <City />
       <Agriculture />
+      <Transition />
       <Salmon />
       <Delta />
       <Groundwater />
@@ -26,6 +55,55 @@ function SectionImpact() {
 
 function City() {
   const content = storyline.impact
+  const viewState = cityMapViewState
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    const markers = markersToAdd()
+    mapRef.current?.setMotionChildren(markers)
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveTo()
+      }
+    },
+    { threshold: 0.5 },
+  )
+
+  const markersToAdd = () => {
+    return Object.entries(population).map(([key, chunk]) => {
+      const [longitude, latitude] = chunk["coordinates"]
+      return (
+        <Marker
+          latitude={latitude as number}
+          longitude={longitude as number}
+          key={key}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }} // Define exit animation
+            transition={{ duration: 0.5 }}
+            className="city-marker"
+          ></motion.div>
+        </Marker>
+      )
+    })
+  }
 
   const data = useMemo(() => {
     const norcal = ["sanfrancisco", "sanjose"]
@@ -74,6 +152,7 @@ function City() {
   return (
     <SectionContainer id="city">
       <Box
+        ref={ref}
         className="container"
         height="100vh"
         sx={{ justifyContent: "center" }}
@@ -112,10 +191,38 @@ function City() {
 
 function Agriculture() {
   const content = storyline.impact
+  const viewState = valleyMapViewState
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    mapRef.current?.setMotionChildren(null)
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveTo()
+      }
+    },
+    { threshold: 0.5 },
+  )
 
   return (
     <SectionContainer id="agriculture">
       <Box
+        ref={ref}
         className="container"
         height="100vh"
         sx={{ justifyContent: "center" }}
@@ -129,7 +236,7 @@ function Agriculture() {
             totalValue={24}
             unit={1}
             Icon={AlmondIcon}
-            title={"Almond"}
+            title={"Mockup"}
             rowCount={10}
             size={55}
             reversed
@@ -141,7 +248,7 @@ function Agriculture() {
             totalValue={34.11}
             unit={1}
             Icon={RiceIcon}
-            title={"Rice"}
+            title={"Mockup"}
             rowCount={10}
             size={55}
             reversed
@@ -152,12 +259,71 @@ function Agriculture() {
   )
 }
 
+function Transition() {
+  const content = storyline.impact.benefits
+
+  return (
+    <SectionContainer id="transition">
+      <Box
+        className="container"
+        height="100vh"
+        sx={{ justifyContent: "center" }}
+      >
+        <Box className="paragraph">
+          <Typography variant="body1" gutterBottom>
+            {content.p3}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            {content.p4}
+          </Typography>
+        </Box>
+        <Box className="paragraph">
+          <Typography variant="body1" gutterBottom sx={{ fontWeight: "bold" }}>
+            {content.transition}
+          </Typography>
+        </Box>
+      </Box>
+    </SectionContainer>
+  )
+}
+
 function Salmon() {
   const content = storyline.impact.salmon
+  const marker = impactMarker.salmon
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveToSalmon() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      impactMapViewState.salmon.longitude,
+      impactMapViewState.salmon.latitude,
+      impactMapViewState.salmon.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    const markerToAdd = getMarker(marker)
+    mapRef.current?.setMotionChildren(markerToAdd)
+    //mapRef.current?.setMotionChildren("salmon")
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveToSalmon()
+      } 
+    },
+    { threshold: 0.5 },
+  )
+
   return (
     <>
       <SectionContainer id="salmon">
         <Box
+          ref={ref}
           className="container"
           height="100vh"
           sx={{ justifyContent: "center" }}
@@ -193,11 +359,42 @@ function Salmon() {
 
 function Delta() {
   const content = storyline.impact.delta
+  const marker = impactMarker.delta
+  const viewState = impactMapViewState.delta
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveToDelta() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    const markerToAdd = getMarker(marker)
+    mapRef.current?.setMotionChildren(markerToAdd)
+    //mapRef.current?.setMotionChildren("salmon")
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveToDelta()
+      } 
+    },
+    { threshold: 0.5 },
+  )
 
   return (
     <>
       <SectionContainer id="delta">
         <Box
+          ref={ref}
           className="container"
           height="100vh"
           sx={{ justifyContent: "center" }}
@@ -235,11 +432,42 @@ function Delta() {
 
 function Groundwater() {
   const content = storyline.impact.groundwater
+  const marker = impactMarker.groundwater
+  const viewState = impactMapViewState.groundwater
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    const markerToAdd = getMarker(marker)
+    mapRef.current?.setMotionChildren(markerToAdd)
+    //mapRef.current?.setMotionChildren("salmon")
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveTo()
+      } 
+    },
+    { threshold: 0.5 },
+  )
 
   return (
     <>
       <SectionContainer id="groundwater">
         <Box
+          ref={ref}
           className="container"
           height="100vh"
           sx={{ justifyContent: "center" }}
@@ -278,13 +506,44 @@ function Groundwater() {
 
 function Drinking() {
   const content = storyline.impact.drinking
+  const marker = impactMarker.drinkingwater
+  const viewState = impactMapViewState.drinkingwater
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    const markerToAdd = getMarker(marker)
+    mapRef.current?.setMotionChildren(markerToAdd)
+    //mapRef.current?.setMotionChildren("salmon")
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveTo()
+      } 
+    },
+    { threshold: 0.5 },
+  )
 
   return (
     <>
       <SectionContainer id="drinking">
         <Box
+          ref={ref}
           className="container"
-          height="50vh"
+          height="90vh"
           sx={{ justifyContent: "center" }}
         >
           <Box className="paragraph">
@@ -320,11 +579,42 @@ function Drinking() {
 
 function Climate() {
   const content = storyline.impact.climate
+  const marker = impactMarker.climate
+  const viewState = impactMapViewState.climate
+  const ref = useRef<HTMLDivElement>(null)
+  const { mapRef } = useMap()
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      viewState.longitude,
+      viewState.latitude,
+      viewState.zoom,
+      0,
+      0,
+      3500,
+      MapTransitions.SMOOTH,
+    )
+    const markerToAdd = getMarker(marker)
+    mapRef.current?.setMotionChildren(markerToAdd)
+    //mapRef.current?.setMotionChildren("salmon")
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        moveTo()
+      } 
+    },
+    { threshold: 0.5 },
+  )
 
   return (
     <>
       <SectionContainer id="climate">
         <Box
+          ref={ref}
           className="container"
           height="100vh"
           sx={{ justifyContent: "center" }}

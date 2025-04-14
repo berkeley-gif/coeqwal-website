@@ -1,15 +1,18 @@
+"use client"
+
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import markers from "../../public/data/variability_marker.json" assert { type: "json" }
 import SectionContainer from "./helpers/SectionContainer"
 import { Box, Typography } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Marker, Popup, useMap } from "@repo/map"
 import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
 import { useInViewVisibility } from "../hooks/useInViewVisbility"
 import PrecipitationBar from "./vis/PrecipitationBar"
 import Image from "next/image"
+import { Layer } from "@repo/map"
 
 type MarkerType = {
   id: string
@@ -17,6 +20,20 @@ type MarkerType = {
   coordinates: number[]
   caption: string
   image: string
+  anchor: string
+}
+
+const riverLayerStyle = {
+  type: "line",
+  layout: {
+    "line-cap": "round",
+    "line-join": "round",
+  },
+  paint: {
+    "line-color": "#9acbcf",
+    "line-width": 3,
+    "line-opacity": 0,
+  },
 }
 
 function SectionWaterSource() {
@@ -26,17 +43,70 @@ function SectionWaterSource() {
       <Variability />
       <Snowpack />
       <WaterFlow />
-      <Valley />
     </>
   )
 }
 
 function Precipitation() {
   const content = storyline.precipitation
+  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
+  const { mapRef } = useMap() // from our context
+
+  function loadPrecipitation() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    mapRef.current?.addSource("precipitation", {
+      type: "raster",
+      url: "mapbox://coeqwal.82rnru99",
+      tileSize: 256,
+    })
+    mapRef.current?.addLayer({
+      id: "precipitation-layer",
+      type: "raster",
+      source: "precipitation",
+      paint: {
+        "raster-opacity": 0,
+      },
+    })
+    mapRef.current
+      ?.getMap()
+      ?.getMap()
+      ?.setPaintProperty("precipitation-layer", "raster-opacity", 1)
+  }
+
+  function unloadPrecipitation() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
+    if (!layers.includes("precipitation-layer")) return
+    mapRef.current
+      ?.getMap()
+      ?.getMap()
+      ?.setPaintProperty("precipitation-layer", "raster-opacity", 0)
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        loadPrecipitation()
+      } else {
+        unloadPrecipitation()
+      }
+    },
+    {
+      threshold: 0.5,
+    },
+  )
 
   return (
     <SectionContainer id="variability">
-      <Box className="container" height="90vh">
+      <Box
+        ref={ref}
+        className="container"
+        height="100vh"
+        sx={{ justifyContent: "center" }}
+      >
         <Box className="paragraph">
           <Typography variant="h3" gutterBottom>
             {content.title}
@@ -51,7 +121,6 @@ function Precipitation() {
   )
 }
 
-//TODO: fix the public folder
 function Variability() {
   const content = storyline.variability
   const visRef = useInViewVisibility()
@@ -89,8 +158,8 @@ function Variability() {
               <Popup
                 latitude={data.coordinates[1] as number}
                 longitude={data.coordinates[0] as number}
-                anchor="left"
-                closeOnClick={false}
+                anchor={data.anchor as mapboxgl.Anchor}
+                closeOnClick={true}
                 offset={{ bottom: [0, -10] }}
                 onClose={() => setPopupInfo(null)}
               >
@@ -233,50 +302,122 @@ function Snowpack() {
 //TODO: add river shapefile
 function WaterFlow() {
   const content = storyline.flow
+  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
+  const { mapRef } = useMap() // from our context
 
-  return (
-    <SectionContainer id="water-flow">
-      <Box className="container" height="100vh">
-        <Box className="paragraph">
-          <Typography variant="h3" gutterBottom>
-            {content.title}
-          </Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content.p1}</Typography>
-          <Typography variant="body1">{content.p2}</Typography>
-          <Typography variant="body1">{content.p3}</Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content.p4}</Typography>
-        </Box>
-        <Box className="paragraph"></Box>
-      </Box>
-    </SectionContainer>
+  function loadRivers() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    mapRef.current?.addSource("river-sac", {
+      type: "geojson",
+      data: "/rivers/SacramentoRiver_wo.geojson",
+    })
+    mapRef.current?.addLayer({
+      id: "river-sac-layer",
+      source: "river-sac",
+      ...riverLayerStyle,
+    } as Layer)
+    mapRef.current?.addSource("river-sanjoaquin", {
+      type: "geojson",
+      data: "/rivers/SanJoaquinRiver.geojson",
+    })
+    mapRef.current?.addLayer({
+      id: "river-sanjoaquin-layer",
+      source: "river-sanjoaquin",
+      ...riverLayerStyle,
+    } as Layer)
+    mapRef.current
+      ?.getMap()
+      ?.getMap()
+      ?.setPaintProperty("river-sac-layer", "line-opacity", 1)
+    mapRef.current
+      ?.getMap()
+      ?.getMap()
+      ?.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
+  }
+
+  function unloadRivers() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
+    if (!layers.includes("river-sac-layer")) return
+    mapRef.current
+      ?.getMap()
+      ?.getMap()
+      ?.setPaintProperty("river-sac-layer", "line-opacity", 0)
+    mapRef.current
+      ?.getMap()
+      ?.getMap()
+      ?.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
+  }
+
+  const closeMapViewState = {
+    latitude: 38.8309,
+    longitude: -124.8652,
+    zoom: 7,
+  }
+
+  function moveTo() {
+    if (!mapRef.current?.getMap()) return
+    mapRef.current?.flyTo(
+      closeMapViewState.longitude,
+      closeMapViewState.latitude,
+      closeMapViewState.zoom,
+      0,
+      0,
+      3500,
+    )
+  }
+
+  useIntersectionObserver(
+    ref,
+    (isIntersecting) => {
+      if (isIntersecting) {
+        loadRivers()
+        moveTo()
+      } else {
+        unloadRivers()
+      }
+    },
+    { threshold: 0 },
   )
-}
-
-//TODO: figure out the visual support
-function Valley() {
-  const content = storyline.flow
 
   return (
-    <SectionContainer id="valley">
-      <Box className="container" height="100vh">
-        <Box className="paragraph">
-          <Typography variant="body1">{content.valley.p1}</Typography>
+    <>
+      <SectionContainer id="water-flow">
+        <Box ref={ref} className="container" height="100vh">
+          <Box className="paragraph">
+            <Typography variant="h3" gutterBottom>
+              {content.title}
+            </Typography>
+          </Box>
+          <Box className="paragraph">
+            <Typography variant="body1">{content.p1}</Typography>
+            <Typography variant="body1">{content.p2}</Typography>
+            <Typography variant="body1">{content.p3}</Typography>
+          </Box>
+          <Box className="paragraph">
+            <Typography variant="body1">{content.p4}</Typography>
+          </Box>
         </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content.valley.p2}</Typography>
-          <Typography variant="body1">{content.valley.p3}</Typography>
-          <Typography variant="body1">{content.valley.p4}</Typography>
+      </SectionContainer>
+      <SectionContainer id="valley">
+        <Box className="container" height="100vh">
+          <Box className="paragraph">
+            <Typography variant="body1">{content.valley.p1}</Typography>
+          </Box>
+          <Box className="paragraph">
+            <Typography variant="body1">{content.valley.p2}</Typography>
+            <Typography variant="body1">{content.valley.p3}</Typography>
+            <Typography variant="body1">{content.valley.p4}</Typography>
+          </Box>
+          <Box className="paragraph">
+            <Typography variant="body1">{content.transition.p1}</Typography>
+            <Typography variant="body1">{content.transition.p2}</Typography>
+          </Box>
         </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content.transition.p1}</Typography>
-          <Typography variant="body1">{content.transition.p2}</Typography>
-        </Box>
-      </Box>
-    </SectionContainer>
+      </SectionContainer>
+    </>
   )
 }
 

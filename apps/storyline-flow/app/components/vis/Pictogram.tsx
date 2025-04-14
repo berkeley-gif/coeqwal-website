@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useRef, useEffect, useState } from "react"
 import { Box } from "@repo/ui/mui"
 import { motion } from "@repo/motion"

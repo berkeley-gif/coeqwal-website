@@ -1,0 +1,27 @@
+{
+  "salmon": {
+    "longitude": -122.2358,
+    "latitude": 40.1786,
+    "name": "Red Bluff"
+  },
+  "delta": {
+    "longitude": -121.64,
+    "latitude": 38.1106,
+    "name": "Sacremento-San Joaquin Delta"
+  },
+  "groundwater": {
+    "longitude": -119.6817,
+    "latitude": 36.0794,
+    "name": "Lake Tulare"
+  },
+  "drinkingwater": {
+    "longitude": -118.987,
+    "latitude": 36.0583,
+    "name": "East Porterville"
+  },
+  "climate": {
+    "longitude": -122.1628,
+    "latitude": 37.8422,
+    "name": "Sherman Island"
+  }
+}
