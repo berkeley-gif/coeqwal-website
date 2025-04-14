@@ -9,7 +9,7 @@
     "./components": "./components/index.ts"
   },
   "scripts": {
-    "build": "tsc --skipLibCheck --declaration",
+    "build": "tsc --skipLibCheck",
     "lint": "pnpm exec eslint . --config=eslint.config.mjs",
     "check-types": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
