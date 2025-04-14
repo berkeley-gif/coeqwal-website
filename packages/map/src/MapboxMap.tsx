@@ -13,6 +13,7 @@ import Map, { NavigationControl, Marker, Popup } from "react-map-gl/mapbox"
 import type { MapRef, ViewStateChangeEvent } from "react-map-gl/mapbox"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { ViewState } from "./types.js" // TODO: this responsive plan for the map needs refinement
+import { AnimatePresence } from "@repo/motion"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1) RE-EXPORTS
@@ -76,6 +77,7 @@ export interface MapboxMapRef {
 
   // setMarkers
   setMarkers: (markers: MarkerProperties[]) => void
+  setMotionChildren: (children: React.ReactNode) => void
 }
 
 /**
@@ -191,6 +193,8 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
   const [selectedMarker, setSelectedMarker] = useState<MarkerProperties | null>(
     null,
   )
+  const [motionChildren, setMotionChildrenState] =
+    useState<React.ReactNode>(null)
 
   // Check if we're in controlled mode
   const isControlled = viewState !== undefined
@@ -343,6 +347,10 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     setMarkersState(newMarkers)
   }
 
+  function setMotionChildren(children: React.ReactNode) {
+    setMotionChildrenState(children)
+  }
+
   // ───────────────────────────────────────────────────────────────────────────
   // 7) MAP EVENT HANDLERS
   // ───────────────────────────────────────────────────────────────────────────
@@ -365,6 +373,7 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
     getMap,
     withMap,
     setMarkers,
+    setMotionChildren,
   }))
 
   // Maybe use later:
@@ -432,6 +441,9 @@ const MapboxMapBase: ForwardRefRenderFunction<MapboxMapRef, MapboxMapProps> = (
           style={{ marginTop: "100px" }}
         />
       )}
+
+      {/* Render motion children */}
+      <AnimatePresence>{motionChildren}</AnimatePresence>
 
       {/* Render all markers */}
       {markers.map((marker, index) => {

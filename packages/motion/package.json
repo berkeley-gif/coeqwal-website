@@ -1,16 +1,12 @@
 {
-  "name": "@repo/map",
+  "name": "@repo/motion",
   "version": "0.0.0",
   "private": true,
   "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./context": {
-      "types": "./context/MapContext.tsx",
-      "default": "./context/MapContext.tsx"
-    }
+    ".": "./src/index.ts",
+    "./variants": "./variants/index.ts",
+    "./hooks": "./hooks/index.ts",
+    "./components": "./components/index.ts"
   },
   "scripts": {
     "build": "tsc --skipLibCheck --declaration",
@@ -30,10 +26,9 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/motion": "workspace:*"
+    "@repo/ui": "workspace:*"
   },
   "dependencies": {
-    "mapbox-gl": "^3.10.0",
-    "react-map-gl": "^8.0.1"
+    "framer-motion": "^12.4.10"
   }
 }

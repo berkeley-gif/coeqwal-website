@@ -1,0 +1,17 @@
+.pictogram-line{
+    stroke: #ffffff;
+    stroke-width: 7px
+}
+
+.pictogram-label{
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-anchor: end;
+    dominant-baseline: middle
+}
+
+.pictogram-city-label{
+    font-size: 1.2rem;
+    text-anchor: end;
+    dominant-baseline: middle
+}

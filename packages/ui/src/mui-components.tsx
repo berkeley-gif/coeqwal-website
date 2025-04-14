@@ -40,6 +40,7 @@ export {
   Alert,
   AlertTitle,
   Tooltip,
+  CircularProgress,
 
   // Utility components
   useMediaQuery,
@@ -65,6 +66,7 @@ import EngineeringIcon from "@mui/icons-material/Engineering"
 import ReportProblemIcon from "@mui/icons-material/ReportProblem"
 import BarChartIcon from "@mui/icons-material/BarChart"
 import SlideshowIcon from "@mui/icons-material/Slideshow"
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"
 
 // Export individually imported icons
 export {
@@ -85,6 +87,7 @@ export {
   ReportProblemIcon,
   BarChartIcon,
   SlideshowIcon,
+  LibraryBooksIcon,
 }
 
 // Export the full icons library for access to other icons as needed

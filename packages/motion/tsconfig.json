@@ -1,0 +1,13 @@
+{
+  "extends": "@repo/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext"
+  },
+  "include": ["src", "components", "hooks", "variants"],
+  "exclude": ["node_modules", "dist"]
+}

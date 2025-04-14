@@ -4,8 +4,7 @@ import storyline from "../../public/locales/english.json" assert { type: "json" 
 import { useRef } from "react"
 
 //TODO: replace the paddingBottom
-//TODO: try if merging container Box and SectionContainer works
-//TODO: replace useParagraphVisibility with useScrollOpacity
+//TODO: rewrite json import as json fetch
 function Opener() {
   const content = storyline.opener
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -19,10 +18,10 @@ function Opener() {
         sx={{ justifyContent: "center" }}
       >
         <Box sx={{ marginBottom: "5rem" }}>
-          <Typography variant="h1" gutterBottom>
+          <Typography variant="h2" gutterBottom>
             {content.title}
           </Typography>
-          <Typography variant="h2" gutterBottom>
+          <Typography variant="h3" gutterBottom>
             {content.subtitle}
           </Typography>
         </Box>

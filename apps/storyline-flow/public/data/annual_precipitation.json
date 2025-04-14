@@ -1,0 +1,50 @@
+{
+  "description": {
+    "title": "California October-September Precipitation",
+    "missing": -99,
+    "units": "Inches",
+    "base_period": "2014-2023"
+  },
+  "data": {
+    "201409": {
+      "value": 12.39,
+      "anomaly": -8.13
+    },
+    "201509": {
+      "value": 16.78,
+      "anomaly": -3.74
+    },
+    "201609": {
+      "value": 22.72,
+      "anomaly": 2.2
+    },
+    "201709": {
+      "value": 35.02,
+      "anomaly": 14.5
+    },
+    "201809": {
+      "value": 15.82,
+      "anomaly": -4.7
+    },
+    "201909": {
+      "value": 28.37,
+      "anomaly": 7.85
+    },
+    "202009": {
+      "value": 15.64,
+      "anomaly": -4.88
+    },
+    "202109": {
+      "value": 11.13,
+      "anomaly": -9.39
+    },
+    "202209": {
+      "value": 16.42,
+      "anomaly": -4.1
+    },
+    "202309": {
+      "value": 30.89,
+      "anomaly": 10.37
+    }
+  }
+}

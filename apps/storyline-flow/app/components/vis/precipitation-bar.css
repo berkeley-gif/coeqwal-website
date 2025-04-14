@@ -1,0 +1,42 @@
+.axis{
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+text{
+    fill: #fff;
+}
+
+.axis-label{
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.x-axis-ticks {
+    text-anchor: end;
+    dominant-baseline: middle;
+    font-size: 1.2rem;
+}
+
+.y-axis-ticks {
+    text-anchor: end;
+    dominant-baseline: middle;
+    font-size: 1rem;
+}
+
+.tooltip{
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    white-space: nowrap;
+    font-size: 1rem;
+    z-index: 1000;
+}
+
+.bars{
+    cursor: pointer;
+    pointer-events: auto;
+}

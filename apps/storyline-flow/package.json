@@ -7,19 +7,21 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint --max-warnings 0"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",
-    "next": "^15.2.1",
-    "lodash": "^4.17.21"
+    "@repo/ui": "workspace:*",
+    "d3": "^7.9.0",
+    "lodash": "^4.17.21",
+    "next": "^15.2.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/d3": "^7.4.3",
     "@types/lodash": "^4.17.16"
   }
 }
