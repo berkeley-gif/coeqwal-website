@@ -11,181 +11,242 @@ A unified Map API for COEQWAL applications providing easy state sharing and full
 
 ## Quick Start Guide
 
-```jsx
-import { Map, MapProvider, useMap } from "@repo/map"
+This guide shows how to set up and use the Mapbox-based map in a monorepo structure, using the included context and components for integration into your Next.js or React apps.
 
-// In your parent component:
-function MapApplication() {
+---
+
+## 1. Project Structure
+
+• The `packages/map` directory contains the core map functionality (MapboxMap base component, context provider, and hooks).  
+• The `apps/main` directory (or your chosen app folder) consumes the map package and renders the map on a page.
+
+Example key files and their roles:
+
+- `packages/map/src/MapboxMap.tsx`: The main MapboxMap component that manages the raw Mapbox GL map instance.
+- `packages/map/context/MapContext.tsx`: Provides the `MapProvider` and `useMap` hook.
+- `apps/main/app/page.tsx`: Example Next.js page that demonstrates usage of the map.
+- `apps/main/app/components/MapContainer.tsx`: A convenient wrapper for the map with test features.
+
+---
+
+## 2. Installation & Setup
+
+In your project’s root folder, ensure dependencies are installed by running:
+
+```bash
+pnpm install
+```
+
+(Or your preferred package manager command.)
+
+Then, wrap your application with the `MapProvider` so other components can access the map context:
+
+```tsx
+import React from "react"
+import { MapProvider } from "@repo/map"
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <MapProvider>
+    <html>
+      <body>
+        <MapProvider>{children}</MapProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+---
+
+## 3. Creating a Map Container
+
+Use the provided `Map` component (`MapboxMap`) inside a container that sets up the token, style, etc. You can optionally sync an external ref to share the instance. For instance:
+
+```tsx
+import React, { useEffect, useCallback } from "react"
+import { Box } from "@mui/material"
+import { Map, useMap } from "@repo/map"
+import type { MapboxMapRef } from "@repo/map"
+
+interface MapContainerProps {
+  uncontrolledRef?: React.RefObject<MapboxMapRef | null>
+}
+
+export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  const { mapRef } = useMap() // from our context
+
+  const refToUse = mapRef
+
+  // Example: direct flyTo test button
+  const testFlyTo = useCallback(() => {
+    if (refToUse.current) {
+      refToUse.current.flyTo(-121.5, 38.05, 10)
+    }
+    if (uncontrolledRef && refToUse.current) {
+      uncontrolledRef.current = refToUse.current
+    }
+  }, [refToUse, uncontrolledRef])
+
+  useEffect(() => {
+    if (uncontrolledRef && refToUse.current) {
+      uncontrolledRef.current = refToUse.current
+    }
+  }, [uncontrolledRef, refToUse])
+
+  return (
+    <Box sx={{ width: "100%", height: "100%", position: "relative" }}>
       <Map
-        mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
-        viewState={{
+        mapboxToken={mapboxToken}
+        mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
+        initialViewState={{
           longitude: -122.4,
           latitude: 37.8,
-          zoom: 10,
-          pitch: 0,
+          zoom: 8,
           bearing: 0,
+          pitch: 0,
         }}
-        mapStyle="mapbox://styles/mapbox/streets-v11"
+        style={{ width: "100%", height: "100%" }}
       />
-      <MapControls />
-    </MapProvider>
+    </Box>
   )
 }
+```
 
-// In any child component:
-function MapControls() {
-  const { flyTo, setPaintProperty, viewState } = useMap()
+---
+
+## 4. Using the Map in a Page
+
+In your Next.js page (e.g., `app/page.tsx`), you can either control the map’s view state locally or let it manage its own. Below is a pair of examples:
+
+### Uncontrolled Map (Ref-based)
+
+```tsx
+"use client"
+import React, { useRef } from "react"
+import { Button } from "@mui/material"
+import MapContainer from "./components/MapContainer"
+import type { MapboxMapRef } from "@repo/map"
+
+export default function Home() {
+  const uncontrolledRef = useRef<MapboxMapRef | null>(null)
+  const handleFlyTo = () => {
+    if (uncontrolledRef.current) {
+      uncontrolledRef.current.flyTo(-120, 37, 7)
+    }
+  }
 
   return (
-    <div>
-      <div>Current zoom: {viewState.zoom.toFixed(2)}</div>
-      <button onClick={() => flyTo(-122.4, 37.8, 12)}>Fly to SF</button>
-      <button
-        onClick={() => setPaintProperty("water", "fill-color", "#0080ff")}
-      >
-        Change Water Color
-      </button>
-    </div>
+    <>
+      <Button onClick={handleFlyTo}>Fly Uncontrolled</Button>
+      <MapContainer uncontrolledRef={uncontrolledRef} />
+    </>
   )
 }
 ```
 
-## Core API Components
+### Controlled Map (State-based)
 
-### MapProvider
+```tsx
+"use client"
+import React, { useState } from "react"
+import { Button } from "@mui/material"
+import { useMap, ViewState } from "@repo/map"
+import MapContainer from "./components/MapContainer"
 
-Establishes the context for map state sharing across components.
+export default function Home() {
+  const { mapRef } = useMap()
+  const [viewState, setViewState] = useState<ViewState>({
+    longitude: -119,
+    latitude: 36,
+    zoom: 5,
+    bearing: 0,
+    pitch: 0,
+  })
 
-```jsx
-<MapProvider>
-  <Map mapboxToken={token} />
-  <YourComponents />
-</MapProvider>
-```
-
-### Map Component
-
-The main map component that displays the map and connects to the context.
-
-```jsx
-<Map
-  mapboxToken={token} // Required: Mapbox access token
-  viewState={viewState} // Optional: Initial view state
-  onViewStateChange={setViewState} // Optional: View state change handler
-  mapStyle="mapbox://styles/..." // Optional: Map style URL
-/>
-```
-
-### useMap Hook
-
-Access the map functionality from any component within the MapProvider:
-
-```jsx
-const {
-  // View state
-  viewState, // Current map view (longitude, latitude, zoom, etc.)
-  setViewState, // Update the view state
-
-  // Direct map methods
-  withMap, // Safe access to map instance
-
-  // Convenience methods
-  flyTo, // Navigate to a location
-  addLayer, // Add a map layer
-  removeLayer, // Remove a map layer
-  addSource, // Add a data source
-  removeSource, // Remove a data source
-  setPaintProperty, // Set layer paint property
-  setLayoutProperty, // Set layer layout property
-} = useMap()
-```
-
-## Direct Map Access with withMap
-
-When you need to use Mapbox GL methods not covered by convenience functions:
-
-```jsx
-const { withMap } = useMap()
-
-// Add a heatmap layer
-withMap((map) => {
-  if (!map.getSource("earthquakes")) {
-    map.addSource("earthquakes", {
-      type: "geojson",
-      data: "https://example.com/earthquakes.geojson",
-    })
+  const handleFlyTo = () => {
+    if (mapRef.current) {
+      // calls the underlying Mapbox "flyTo"
+      mapRef.current.flyTo(-121.5, 38.05, 10, 0, 0, 2000)
+    }
   }
 
-  if (!map.getLayer("earthquakes-heat")) {
-    map.addLayer({
-      id: "earthquakes-heat",
-      type: "heatmap",
-      source: "earthquakes",
-      paint: {
-        "heatmap-weight": [
-          "interpolate",
-          ["linear"],
-          ["get", "mag"],
-          0,
-          0,
-          6,
-          1,
-        ],
-        "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 0, 1, 9, 3],
-        "heatmap-color": [
-          "interpolate",
-          ["linear"],
-          ["heatmap-density"],
-          0,
-          "rgba(0,0,255,0)",
-          0.2,
-          "rgb(0,0,255)",
-          0.4,
-          "rgb(0,255,255)",
-          0.6,
-          "rgb(0,255,0)",
-          0.8,
-          "rgb(255,255,0)",
-          1,
-          "rgb(255,0,0)",
-        ],
-        "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 0, 2, 9, 20],
-        "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 7, 1, 9, 0],
-      },
-    })
+  return (
+    <>
+      <Button onClick={handleFlyTo}>Fly Controlled</Button>
+      <MapContainer />
+    </>
+  )
+}
+```
+
+---
+
+## 5. Advanced Transitions
+
+The map supports custom transitions (duration, easing, pitch, bearing) via the optional `transition` parameter. In the main app, you can see an example like:
+
+```tsx
+<Button
+  variant="outlined"
+  size="small"
+  onClick={() =>
+    mapRef.current?.flyTo(
+      -121.5,
+      38.05,
+      10,
+      undefined,
+      undefined,
+      undefined,
+      MapTransitions.SMOOOTH, // custom transition
+    )
   }
-})
+>
+  Smooth
+</Button>
 ```
 
-## Warning: Avoid Direct mapboxgl Imports
+`MapTransitions` is a collection of presets that define duration, easing, pitch, bearing, etc. You can create your own or directly pass your own `TransitionOptions` object.
 
-Please avoid using a direct import of mapboxgl:
+---
 
-```jsx
-// DON'T DO THIS:
-import mapboxgl from "mapbox-gl"
-```
+## 6. Working with Mapbox GL Features
 
-Instead, use the `withMap` method from useMap for safe access:
+If you need lower-level access to methods like `addLayer`, `addSource`, or raw map events, you have two approaches:
 
-```jsx
-// DO THIS:
-const { withMap } = useMap()
+1. Call `withMap` on the reference:
 
-withMap((map) => {
-  // Safe access to map instance
-})
-```
+   ```ts
+   mapRef.current?.withMap((map) => {
+     map.addLayer({
+       /* layer definition */
+     })
+   })
+   ```
 
-## Best Practices
+2. Use the `withMap` function from the `useMap` hook:
+   ```ts
+   const { withMap } = useMap()
+   withMap((mapInstance) => {
+     mapInstance.addLayer({
+       /* layer definition */
+     })
+   })
+   ```
 
-1. **Always use MapProvider at the root** of components using the map
-2. **Prefer useMap convenience methods** when available
-3. **Use withMap for advanced cases** requiring direct map access
-4. **Keep map state within context** for consistent application state
-5. **Set mapStyle at initialization** for best performance
+Both let you work with the Mapbox GL instance once it’s loaded.
+
+---
+
+## 7. Summary
+
+By combining `MapProvider`, the `Map` component, and hooks like `useMap`, you can easily integrate a Mapbox-powered map into your Next.js or React application. You have full flexibility over camera control (controlled vs. uncontrolled), transitions, and raw map features.
+
+This setup is well-suited for monorepos, allowing you to maintain reusable components in a `packages/map` folder while consuming them cleanly in multiple apps like `apps/main`.
 
 ## TypeScript Support
 
