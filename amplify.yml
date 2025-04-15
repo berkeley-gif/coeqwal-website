@@ -9,9 +9,9 @@ applications:
         build:
           commands:
             - pnpm rebuild
-            - npx turbo run build --filter=${APP_NAME}
+            - npx turbo run build --filter=main
       artifacts:
-        baseDirectory: apps/${APP_NAME}/out
+        baseDirectory: apps/main/out
         files:
           - '**/*'
       cache:
@@ -19,7 +19,7 @@ applications:
           - node_modules/**/*
           - ~/.cache/pnpm/**/*
       buildPath: /
-    appRoot: apps/${APP_NAME}
+    appRoot: apps/main
     environment:
       variables:
         NODE_VERSION: 22
