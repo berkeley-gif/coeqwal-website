@@ -37,6 +37,23 @@
       "under": "bajo",
       "increase": "aumentar",
       "decrease": "disminuir"
+    },
+    "operationsSelector": {
+      "title": "¿Cómo afectan {{decisions}}",
+      "swappedTitle": "¿qué {{decisions}} podríamos considerar?",
+      "searchPlaceholder": "Escribe para buscar...",
+      "searchOperations": "Buscar operaciones",
+      "comingSoon": "Próximamente"
+    },
+    "outcomesSelector": {
+      "title": "{{waterAvailability}} ?",
+      "swappedTitle": "Para cambiar {{waterAvailability}}",
+      "includeClimate": "Incluir futuros climáticos",
+      "chooseLocation": "Elegir ubicación en el mapa",
+      "mapPlaceholder": "Placeholder del Mapa"
+    },
+    "sectionAccordion": {
+      "comingSoon": "Próximamente"
     }
   }
 }

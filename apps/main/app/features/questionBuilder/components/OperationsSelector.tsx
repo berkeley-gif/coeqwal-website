@@ -27,9 +27,11 @@ import { OPERATION_THEMES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { HighlightText } from "./ui"
+import { useTranslation } from "@repo/i18n"
 
 const OperationsSelector: React.FC = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const {
     state: { swapped, selectedOperations },
     handleOperationChange,
@@ -92,8 +94,8 @@ const OperationsSelector: React.FC = () => {
           }
 
           // Check subtypes if they exist
-          if (option.subtypes) {
-            const subtype = option.subtypes.find((sub) => sub.id === optionId)
+          if ('subtypes' in option && option.subtypes) {
+            const subtype = option.subtypes.find((sub: { id: string }) => sub.id === optionId)
             if (subtype) {
               // Only allow changes for active options and subtypes
               if (option.active && subtype.active) {
@@ -117,16 +119,25 @@ const OperationsSelector: React.FC = () => {
           <>
             {" "}
             <HighlightText bgcolor={theme.palette.pop.main}>
-              decisions
+              {t("questionBuilder.defaultTerms.decisions")}
             </HighlightText>
-            &nbsp;could we consider?
+            &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")}
           </>
         ) : (
           <>
-            How do{" "}
-            <HighlightText bgcolor={theme.palette.pop.main}>
-              decisions
-            </HighlightText>
+            {/* Parse the title string and replace the decisions placeholder with the highlighted component */}
+            {t("questionBuilder.operationsSelector.title")
+              .split("{{decisions}}")
+              .map((part, index, array) => (
+                <React.Fragment key={index}>
+                  {part}
+                  {index < array.length - 1 && (
+                    <HighlightText bgcolor={theme.palette.pop.main}>
+                      {t("questionBuilder.defaultTerms.decisions")}
+                    </HighlightText>
+                  )}
+                </React.Fragment>
+              ))}
           </>
         )}
       </Typography>
@@ -148,11 +159,11 @@ const OperationsSelector: React.FC = () => {
         <Box sx={searchBoxStyles}>
           <SearchIcon sx={searchIconStyles} />
           <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-            Search operations
+            {t("questionBuilder.operationsSelector.searchOperations")}
           </Typography>
           <TextField
             size="small"
-            placeholder="Type to search..."
+            placeholder={t("questionBuilder.operationsSelector.searchPlaceholder")}
             sx={textFieldStyles}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

@@ -17,6 +17,7 @@ import {
   ArrowCircleDownIcon,
 } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
+import { useTranslation } from "@repo/i18n"
 
 // Define type for nested options
 interface OptionType {
@@ -49,6 +50,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   noDirectionControls = [],
 }) => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const {
     isInvalidCombination,
     getInvalidCombinationMessage,
@@ -198,7 +200,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             fontStyle: isActive ? "normal" : "italic",
           }}
         >
-          {optionLabel} {!isActive && "(Coming Soon)"}
+          {optionLabel} {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
         </Typography>
       </Box>
     )
@@ -222,7 +224,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
       !isActive || (section ? isInvalidCombination(section, optionId) : false)
 
     const tooltipMessage = !isActive
-      ? "Coming soon"
+      ? t("questionBuilder.sectionAccordion.comingSoon")
       : isDisabled
         ? getInvalidCombinationMessage(section || "", optionId)
         : ""
@@ -258,7 +260,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
               fontStyle: isActive ? "normal" : "italic",
             }}
           >
-            {optionLabel} {!isActive && "(Coming Soon)"}
+            {optionLabel} {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
           </Typography>
         }
         sx={{
@@ -298,7 +300,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             fontStyle: allInactive ? "italic" : "normal",
           }}
         >
-          {title} {allInactive && "(Coming Soon)"}
+          {title} {allInactive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={accordionDetailsStyles}>
@@ -337,7 +339,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                           fontStyle: isActive ? "normal" : "italic",
                         }}
                       >
-                        {optionObj.label} {!isActive && "(Coming Soon)"}
+                        {optionObj.label} {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
                       </Typography>
                     ) : (
                       renderCheckbox(optionObj.id, optionObj.label, isActive)
