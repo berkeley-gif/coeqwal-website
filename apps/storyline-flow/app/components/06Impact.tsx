@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import SectionContainer from "./helpers/SectionContainer"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import population from "../../public/data/city_population.json" assert { type: "json" }
@@ -184,6 +184,11 @@ function City() {
             labels={data.socal.cities}
           />
         </div>
+        <Typography variant="body2" gutterBottom sx={{ fontStyle: "italic" }}>
+          {
+            "*Grayed out icons represent population in 1940s. Filled icons show the population growth by 2024. One icon represents 50,000 people."
+          }
+        </Typography>
       </Box>
     </SectionContainer>
   )
@@ -314,7 +319,7 @@ function Salmon() {
     (isIntersecting) => {
       if (isIntersecting) {
         moveToSalmon()
-      } 
+      }
     },
     { threshold: 0.5 },
   )
@@ -329,8 +334,12 @@ function Salmon() {
           sx={{ justifyContent: "center" }}
         >
           <Box className="paragraph">
-            <Typography variant="body1">{content.p1}</Typography>
-            <Typography variant="body1">{content.p2}</Typography>
+            <Typography variant="body1">
+              {content.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
+            <Typography variant="body1">
+              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
             <Typography variant="body1">
               {content.p31}{" "}
               <span style={{ fontWeight: "bold" }}>
@@ -385,7 +394,7 @@ function Delta() {
     (isIntersecting) => {
       if (isIntersecting) {
         moveToDelta()
-      } 
+      }
     },
     { threshold: 0.5 },
   )
@@ -411,7 +420,8 @@ function Delta() {
             </Typography>
             <Typography variant="body1">{content.p2}</Typography>
             <Typography variant="body1">
-              {content.p3} {content.p4}
+              {content.p3} {content.p4}{" "}
+              <VisibilityIcon sx={{ verticalAlign: "middle" }} />
             </Typography>
             <Typography variant="body1">{content.p5}</Typography>
           </Box>
@@ -458,7 +468,7 @@ function Groundwater() {
     (isIntersecting) => {
       if (isIntersecting) {
         moveTo()
-      } 
+      }
     },
     { threshold: 0.5 },
   )
@@ -532,7 +542,7 @@ function Drinking() {
     (isIntersecting) => {
       if (isIntersecting) {
         moveTo()
-      } 
+      }
     },
     { threshold: 0.5 },
   )
@@ -605,7 +615,7 @@ function Climate() {
     (isIntersecting) => {
       if (isIntersecting) {
         moveTo()
-      } 
+      }
     },
     { threshold: 0.5 },
   )
@@ -629,7 +639,9 @@ function Climate() {
               />{" "}
               {content.p12}
             </Typography>
-            <Typography variant="body1">{content.p2}</Typography>
+            <Typography variant="body1">
+              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
             <Typography variant="body1">{content.p3}</Typography>
           </Box>
           <div className="paragraph">

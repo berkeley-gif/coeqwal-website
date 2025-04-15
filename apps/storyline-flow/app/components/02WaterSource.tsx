@@ -3,7 +3,7 @@
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import markers from "../../public/data/variability_marker.json" assert { type: "json" }
 import SectionContainer from "./helpers/SectionContainer"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { useState, useCallback, useRef } from "react"
 import { Marker, Popup, useMap } from "@repo/map"
@@ -393,7 +393,9 @@ function WaterFlow() {
           </Box>
           <Box className="paragraph">
             <Typography variant="body1">{content.p1}</Typography>
-            <Typography variant="body1">{content.p2}</Typography>
+            <Typography variant="body1">
+              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
             <Typography variant="body1">{content.p3}</Typography>
           </Box>
           <Box className="paragraph">
@@ -407,8 +409,14 @@ function WaterFlow() {
             <Typography variant="body1">{content.valley.p1}</Typography>
           </Box>
           <Box className="paragraph">
-            <Typography variant="body1">{content.valley.p2}</Typography>
-            <Typography variant="body1">{content.valley.p3}</Typography>
+            <Typography variant="body1">
+              {content.valley.p2}{" "}
+              <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
+            <Typography variant="body1">
+              {content.valley.p3}{" "}
+              <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
             <Typography variant="body1">{content.valley.p4}</Typography>
           </Box>
           <Box className="paragraph">

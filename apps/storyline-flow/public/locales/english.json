@@ -9,7 +9,7 @@
   "precipitation": {
     "title": "Where and When Water Falls",
     "p1": "The vast majority of California’s rain and snow falls in the northern part of the state.",
-    "p2": "Like clockwork, we expect nearly all of out precipitation in winter \u2014 a short period lasting less than 100 days."
+    "p2": "Like clockwork, we expect nearly all of our precipitation in winter \u2014 a short period lasting less than 100 days."
   },
   "variability": {
     "p1": "What’s less predictable is how much rain and snow we get in any year.",
@@ -64,7 +64,7 @@
     },
     "drinking": {
       "p1": "Growing cities and towns needed reliable water for drinking, sanitation and businesses.",
-      "p2": "Leaders of major coastal cities, found ways to import water from distant sources.",
+      "p2": "Leaders of major coastal cities found ways to import water from distant sources.",
       "p3": "It required water rights and major investments as water infrastructure began to crisscross the state."
     }
   },

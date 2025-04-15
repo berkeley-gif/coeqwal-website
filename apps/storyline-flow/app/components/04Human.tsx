@@ -5,7 +5,7 @@ import Image from "next/image"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import SectionContainer from "./helpers/SectionContainer"
 import { MapTransitions, Marker, useMap } from "@repo/map"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { stateMapViewState } from "./helpers/mapViews"
 import { Layer } from "@repo/map"
@@ -92,8 +92,12 @@ function Header() {
         </Box>
         <Box className="paragraph">
           <Typography variant="body1">{content.p1}</Typography>
-          <Typography variant="body1">{content.p2}</Typography>
-          <Typography variant="body1">{content.p3}</Typography>
+          <Typography variant="body1">
+            {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+          </Typography>
+          <Typography variant="body1">
+            {content.p3} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+          </Typography>
           <Typography variant="body1">{content.p4}</Typography>
         </Box>
       </Box>
@@ -110,7 +114,9 @@ function Irrigation() {
       <SectionContainer id="irrigation">
         <Box className="container" height="100vh">
           <Box ref={ref} className="paragraph">
-            <Typography variant="body1">{content.p1}</Typography>
+            <Typography variant="body1">
+              {content.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
             <Typography variant="body1">{content.p2}</Typography>
           </Box>
           <Box className="paragraph">
@@ -203,8 +209,13 @@ function Drinking() {
       <SectionContainer id="drinking">
         <Box ref={ref} className="container" height="100vh">
           <Box className="paragraph">
-            <Typography variant="body1">{content.p1}</Typography>
-            <Typography variant="body1">{content.p2}</Typography>
+            <Typography variant="body1">
+              {content.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
+            <Typography variant="body1">
+              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+            </Typography>
+            <Typography variant="body1">{content.p3}</Typography>
           </Box>
           <Box className="paragraph">
             <Image

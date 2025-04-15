@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { LibraryBooksIcon } from "@repo/ui/mui"
 import SectionContainer from "./helpers/SectionContainer"
 import { MapTransitions, useMap } from "@repo/map"
@@ -44,7 +44,7 @@ function Transformation() {
     (isIntersecting) => {
       if (isIntersecting) {
         moveTo()
-      } 
+      }
     },
     { threshold: 0.5 },
   )
@@ -77,18 +77,21 @@ function Transformation() {
           <Typography variant="body1">
             {content.p21}{" "}
             <span style={{ fontWeight: "bold" }}>{content.p22}</span>{" "}
-            {content.p23}
+            {content.p23} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
           </Typography>
           <Typography variant="body1">
             {content.p31}{" "}
             <span style={{ fontWeight: "bold" }}>{content.p32}</span>{" "}
-            {content.p33}
+            {content.p33} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
           </Typography>
           <Typography variant="body1">
             {content.p41}{" "}
             <span style={{ fontWeight: "bold" }}>{content.p42}</span>{" "}
-            {content.p43}
+            {content.p43} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
           </Typography>
+        </Box>
+        <Box className="paragraph">
+          <Typography variant="body1">{content.transition}</Typography>
         </Box>
       </Box>
     </SectionContainer>

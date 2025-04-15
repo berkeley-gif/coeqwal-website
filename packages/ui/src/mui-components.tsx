@@ -67,6 +67,7 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem"
 import BarChartIcon from "@mui/icons-material/BarChart"
 import SlideshowIcon from "@mui/icons-material/Slideshow"
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"
+import VisibilityIcon from "@mui/icons-material/Visibility"
 
 // Export individually imported icons
 export {
@@ -88,6 +89,7 @@ export {
   BarChartIcon,
   SlideshowIcon,
   LibraryBooksIcon,
+  VisibilityIcon,
 }
 
 // Export the full icons library for access to other icons as needed
