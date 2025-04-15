@@ -26,7 +26,7 @@
     "scenarioSingular": "escenario",
     "scenarioPlural": "escenarios",
     "defaultTerms": {
-      "decisions": "las decisiones",
+      "decisions": "decisiones",
       "waterAvailability": "la disponibilidad de agua",
       "outcomes": "los resultados"
     },
@@ -39,8 +39,8 @@
       "decrease": "disminuir"
     },
     "operationsSelector": {
-      "title": "¿Cómo afectan {{decisions}}",
-      "swappedTitle": "¿qué {{decisions}} podríamos considerar?",
+      "title": "¿Cómo afectan las decisiones",
+      "swappedTitle": "¿qué decisiones podríamos considerar?",
       "searchPlaceholder": "Escribe para buscar...",
       "searchOperations": "Buscar operaciones",
       "comingSoon": "Próximamente"
