@@ -1,30 +1,18 @@
 export const OPERATION_THEMES = [
   {
-    id: "sgma",
-    title: "Groundwater and agricultural water use",
+    id: "baseline",
+    title: "Current operations and emerging policies",
     options: [
+      "Current operations",
+      "Current operations with Temporary Urgent Change Petitions (TUCPs)",
       "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)",
-      "Modified crop mix statewide",
-      "Reduced crop acreage in the San Joaquin valley",
-      "Combinations of modified/reduced crop acreage with groundwater pumping",
-      "Increased Sacramento basin pumping",
     ],
   },
   {
     id: "flows",
     title: "Changing flows in Central Valley rivers",
     options: [
-      {
-        id: "removing-flow-reqs",
-        label: "Removing tributary flow requirements",
-        subtypes: [
-          { id: "sjr-flow-reqs", label: "San Joaquin River" },
-          { id: "sac-flow-reqs", label: "Sacramento River" },
-        ],
-      },
-      "Functional flows based on a seasonal water budget",
-      "Supporting Sacramento River salmon",
-      "Alt 3",
+      "Increasing flows in tributaries and Delta outflow (Alternative 1)",
     ],
   },
   {
