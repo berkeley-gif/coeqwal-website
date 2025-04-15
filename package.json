@@ -4,6 +4,8 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:main": "pnpm --filter main dev",
+    "dev:storyline": "pnpm --filter storyline-flow dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,scss,json}\"",
     "clean": "rm -rf node_modules .turbo && pnpm install && pnpm build",
