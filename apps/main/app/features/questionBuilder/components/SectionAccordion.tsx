@@ -57,8 +57,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   } = useQuestionBuilderHelpers()
 
   // Check if all options in this section are inactive
-  const allInactive = options.every((option) => 
-    typeof option === "object" && option.active === false
+  const allInactive = options.every(
+    (option) => typeof option === "object" && option.active === false,
   )
 
   // Styles for accordion components
@@ -131,8 +131,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         <IconButton
           size="medium"
           onClick={() => {
-            if (!isActive) return;
-            
+            if (!isActive) return
+
             // If not selected, select it with increase direction
             if (!isSelected) {
               onOptionChange(optionId, true)
@@ -162,8 +162,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         <IconButton
           size="medium"
           onClick={() => {
-            if (!isActive) return;
-            
+            if (!isActive) return
+
             // If not selected, select it with decrease direction
             if (!isSelected) {
               onOptionChange(optionId, true)
@@ -190,12 +190,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           <ArrowCircleDownIcon fontSize="medium" />
         </IconButton>
 
-        <Typography 
-          variant="body2" 
-          sx={{ 
+        <Typography
+          variant="body2"
+          sx={{
             marginLeft: theme.spacing(1),
-            color: isActive ? 'text.primary' : 'text.disabled',
-            fontStyle: isActive ? 'normal' : 'italic',
+            color: isActive ? "text.primary" : "text.disabled",
+            fontStyle: isActive ? "normal" : "italic",
           }}
         >
           {optionLabel} {!isActive && "(Coming Soon)"}
@@ -218,11 +218,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     }
 
     // Check if this option should be disabled
-    const isDisabled = !isActive || (section ? isInvalidCombination(section, optionId) : false)
+    const isDisabled =
+      !isActive || (section ? isInvalidCombination(section, optionId) : false)
 
-    const tooltipMessage = !isActive 
-      ? "Coming soon" 
-      : isDisabled 
+    const tooltipMessage = !isActive
+      ? "Coming soon"
+      : isDisabled
         ? getInvalidCombinationMessage(section || "", optionId)
         : ""
 
@@ -232,14 +233,16 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           <Checkbox
             size="small"
             checked={selectedOptions.includes(optionId)}
-            onChange={(e) =>
-              onOptionChange(optionId, e.target.checked)
-            }
+            onChange={(e) => onOptionChange(optionId, e.target.checked)}
             disabled={isDisabled}
             sx={{
-              color: isActive ? theme.palette.text.primary : "rgba(0, 0, 0, 0.26)",
+              color: isActive
+                ? theme.palette.text.primary
+                : "rgba(0, 0, 0, 0.26)",
               "&.Mui-checked": {
-                color: isActive ? theme.palette.text.primary : "rgba(0, 0, 0, 0.26)",
+                color: isActive
+                  ? theme.palette.text.primary
+                  : "rgba(0, 0, 0, 0.26)",
               },
               "&.Mui-disabled": {
                 color: "rgba(0, 0, 0, 0.26)",
@@ -248,11 +251,11 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           />
         }
         label={
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: isActive ? 'text.primary' : 'text.disabled',
-              fontStyle: isActive ? 'normal' : 'italic',
+          <Typography
+            variant="body2"
+            sx={{
+              color: isActive ? "text.primary" : "text.disabled",
+              fontStyle: isActive ? "normal" : "italic",
             }}
           >
             {optionLabel} {!isActive && "(Coming Soon)"}
@@ -314,7 +317,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             } else {
               // Handle object options with active property
               const optionObj = option as OptionType
-              const isActive = optionObj.active !== false; // Default to true if not specified
+              const isActive = optionObj.active !== false // Default to true if not specified
               const hasSubtypes =
                 optionObj.subtypes && optionObj.subtypes.length > 0
               const hideCheckbox = noParentCheckbox.includes(optionObj.id)
@@ -330,8 +333,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                           ...parentLabelStyles,
                           ml: 0,
                           mb: 0.5,
-                          color: isActive ? 'text.primary' : 'text.disabled',
-                          fontStyle: isActive ? 'normal' : 'italic',
+                          color: isActive ? "text.primary" : "text.disabled",
+                          fontStyle: isActive ? "normal" : "italic",
                         }}
                       >
                         {optionObj.label} {!isActive && "(Coming Soon)"}
@@ -345,12 +348,18 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                   {hasSubtypes && (
                     <Box sx={nestedOptionStyles}>
                       {optionObj.subtypes?.map((subtype) => {
-                        const isSubtypeActive = subtype.active !== false && isActive;
+                        const isSubtypeActive =
+                          subtype.active !== false && isActive
                         return (
                           <Box key={subtype.id} sx={{ mb: 0.5 }}>
-                            {renderCheckbox(subtype.id, subtype.label, isSubtypeActive, true)}
+                            {renderCheckbox(
+                              subtype.id,
+                              subtype.label,
+                              isSubtypeActive,
+                              true,
+                            )}
                           </Box>
-                        );
+                        )
                       })}
                     </Box>
                   )}

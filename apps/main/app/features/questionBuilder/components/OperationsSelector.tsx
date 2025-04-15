@@ -34,7 +34,7 @@ const OperationsSelector: React.FC = () => {
     state: { swapped, selectedOperations },
     handleOperationChange,
   } = useQuestionBuilderHelpers()
-  
+
   const [searchTerm, setSearchTerm] = useState("")
 
   // Common styles
@@ -69,42 +69,45 @@ const OperationsSelector: React.FC = () => {
   }
 
   // Handle option change while respecting active status
-  const handleOptionChangeWithActiveCheck = (optionId: string, checked: boolean) => {
+  const handleOptionChangeWithActiveCheck = (
+    optionId: string,
+    checked: boolean,
+  ) => {
     // Find the option in all themes
     for (const theme of OPERATION_THEMES) {
       // Check main options
       for (const option of theme.options) {
         if (typeof option === "string" && option === optionId) {
           // Legacy string options are always active
-          handleOperationChange(optionId, checked);
-          return;
+          handleOperationChange(optionId, checked)
+          return
         } else if (typeof option === "object") {
           // Check if this is the option we're looking for
           if (option.id === optionId) {
             // Only allow changes for active options
             if (option.active) {
-              handleOperationChange(optionId, checked);
+              handleOperationChange(optionId, checked)
             }
-            return;
+            return
           }
-          
+
           // Check subtypes if they exist
           if (option.subtypes) {
-            const subtype = option.subtypes.find(sub => sub.id === optionId);
+            const subtype = option.subtypes.find((sub) => sub.id === optionId)
             if (subtype) {
               // Only allow changes for active options and subtypes
               if (option.active && subtype.active) {
-                handleOperationChange(optionId, checked);
+                handleOperationChange(optionId, checked)
               }
-              return;
+              return
             }
           }
         }
       }
     }
-    
+
     // If we get here, we didn't find the option - fall back to default handler
-    handleOperationChange(optionId, checked);
+    handleOperationChange(optionId, checked)
   }
 
   return (
