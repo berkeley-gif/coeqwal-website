@@ -1,0 +1,27 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - corepack enable
+            - pnpm install
+        build:
+          commands:
+            - pnpm rebuild
+            - npx turbo run build --filter=${APP_NAME}
+      artifacts:
+        baseDirectory: apps/${APP_NAME}/out
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - ~/.cache/pnpm/**/*
+      buildPath: /
+    appRoot: apps/${APP_NAME}
+    environment:
+      variables:
+        NODE_VERSION: 22
+        APP_NAME: storyline-flow
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${{ env.NEXT_PUBLIC_MAPBOX_TOKEN }}

@@ -79,102 +79,97 @@ export default function Home() {
   //    Using withMap from the context
   // ────────────────────────────────────────────────────────────────────────
 
-
   const handleAddLayer = () => {
-      // Example: Add a simple heatmap layer
-        addSource("water-features", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [-121.5, 38.05],
-                },
-                properties: {
-                  name: "Sacramento-San Joaquin Delta",
-                  importance: 10,
-                },
-              },
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [-122.42, 40.72],
-                },
-                properties: {
-                  name: "Shasta Dam",
-                  importance: 8,
-                },
-              },
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [-121.1, 37.06],
-                },
-                properties: {
-                  name: "San Luis Reservoir",
-                  importance: 6,
-                },
-              },
-            ],
-          },
-        })
-
-        addLayer(
-          "water-heatmap",
-          "water-features",
-          "heatmap",
+    // Example: Add a simple heatmap layer
+    addSource("water-features", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: [
           {
-            "heatmap-weight": ["get", "importance"],
-            "heatmap-intensity": 0.8,
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0,
-              "rgba(0, 0, 255, 0)",
-              0.2,
-              "royalblue",
-              0.4,
-              "cyan",
-              0.6,
-              "lime",
-              0.8,
-              "yellow",
-              1,
-              "red",
-            ],
-            "heatmap-radius": 30,
-          type: "heatmap",
-          source: "water-features",
-          paint: {
-            "heatmap-weight": ["get", "importance"],
-            "heatmap-intensity": 0.8,
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0,
-              "rgba(0, 0, 255, 0)",
-              0.2,
-              "royalblue",
-              0.4,
-              "cyan",
-              0.6,
-              "lime",
-              0.8,
-              "yellow",
-              1,
-              "red",
-            ],
-            "heatmap-radius": 30,
-            "heatmap-opacity": 0.8,
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [-121.5, 38.05],
+            },
+            properties: {
+              name: "Sacramento-San Joaquin Delta",
+              importance: 10,
+            },
           },
-        })
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [-122.42, 40.72],
+            },
+            properties: {
+              name: "Shasta Dam",
+              importance: 8,
+            },
+          },
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [-121.1, 37.06],
+            },
+            properties: {
+              name: "San Luis Reservoir",
+              importance: 6,
+            },
+          },
+        ],
+      },
+    })
+
+    addLayer("water-heatmap", "water-features", "heatmap", {
+      "heatmap-weight": ["get", "importance"],
+      "heatmap-intensity": 0.8,
+      "heatmap-color": [
+        "interpolate",
+        ["linear"],
+        ["heatmap-density"],
+        0,
+        "rgba(0, 0, 255, 0)",
+        0.2,
+        "royalblue",
+        0.4,
+        "cyan",
+        0.6,
+        "lime",
+        0.8,
+        "yellow",
+        1,
+        "red",
+      ],
+      "heatmap-radius": 30,
+      type: "heatmap",
+      source: "water-features",
+      paint: {
+        "heatmap-weight": ["get", "importance"],
+        "heatmap-intensity": 0.8,
+        "heatmap-color": [
+          "interpolate",
+          ["linear"],
+          ["heatmap-density"],
+          0,
+          "rgba(0, 0, 255, 0)",
+          0.2,
+          "royalblue",
+          0.4,
+          "cyan",
+          0.6,
+          "lime",
+          0.8,
+          "yellow",
+          1,
+          "red",
+        ],
+        "heatmap-radius": 30,
+        "heatmap-opacity": 0.8,
+      },
+    })
   }
 
   // Simple flyTo function that works with context mapRef
