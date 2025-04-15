@@ -11,7 +11,7 @@ applications:
             - pnpm rebuild
             - npx turbo run build --filter=storyline-flow
       artifacts:
-        baseDirectory: apps/storyline-flow/out
+        baseDirectory: apps/storyline-flow/.next
         files:
           - '**/*'
       cache:
