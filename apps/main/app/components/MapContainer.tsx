@@ -43,22 +43,6 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
     }
   }, [uncontrolledRef, refToUse])
 
-  useEffect(() => {
-    // Add a test button to the DOM
-    const button = document.createElement("button")
-    button.textContent = "Test Direct flyTo"
-    button.style.position = "fixed"
-    button.style.top = "10px"
-    button.style.left = "10px"
-    button.style.zIndex = "9999"
-    button.onclick = testFlyTo
-    document.body.appendChild(button)
-
-    return function cleanup() {
-      document.body.removeChild(button)
-    }
-  }, [testFlyTo])
-
   return (
     <Box
       sx={{
