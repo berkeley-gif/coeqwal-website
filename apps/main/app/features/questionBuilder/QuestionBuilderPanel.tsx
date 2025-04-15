@@ -188,7 +188,7 @@ const QuestionBuilderContent = ({
               {swapped ? <OutcomesSelector /> : <OperationsSelector />}
             </Grid>
 
-            {/* Column 2: Action verb & switch - aligned to top */}
+            {/* Column 2: Action verb & switch */}
             <Grid
               sx={{
                 flex: "0 0 auto",

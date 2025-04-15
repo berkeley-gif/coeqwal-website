@@ -280,9 +280,6 @@ const CombinedPanelContent = () => {
               paddingTop: theme.spacing(2.5),
             }}
           >
-            <Typography variant="h5" sx={{ mt: 0.5, mb: 2 }}>
-              {swapped ? "which" : "affect"}
-            </Typography>
             <Box
               sx={{
                 display: "flex",

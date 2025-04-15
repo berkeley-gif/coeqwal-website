@@ -305,9 +305,9 @@ export default function Home() {
               headlines={[
                 "How do reservoir operations affect Delta water quality?",
                 "Which water futures support salmon survival?",
-                "How do we deliver water to cities and farms in a hotter, drier future?",
+                "How do cities and farms share water in a hotter, drier future?",
                 "Which policies help meet environmental goals?",
-                "How do flow changes impact water availability?",
+                "What happens if we let our rivers run?",
               ]}
               verticalAlignment="center"
               background="light"

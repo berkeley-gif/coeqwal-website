@@ -22,7 +22,7 @@
     "pluralVerb": "do",
     "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
     "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} under {{climate}}?",
-    "swappedFormat": "To {{outcome}}, which {{operation}} {{scenarioText}} could we consider?",
+    "swappedFormat": "To change {{outcome}}, which {{operation}} could we consider?",
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
     "defaultTerms": {

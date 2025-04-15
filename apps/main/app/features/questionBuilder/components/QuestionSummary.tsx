@@ -697,7 +697,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
         // If no selections, show default
         if (parts.length === 0) {
-          return <>{t("questionBuilder.defaultTerms.outcomes")}</>
+          return (
+            <ColoredText color={theme.palette.cool.main}>
+              {t("questionBuilder.defaultTerms.waterAvailability")}
+            </ColoredText>
+          )
         }
 
         // Join with " and " between sections (no "and" before region)
@@ -786,11 +790,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
         // Default to "outcomes" if nothing is selected
         if (!result) {
-          result = swapped ? (
-            <ColoredText color={theme.palette.cool.main}>
-              {t("questionBuilder.defaultTerms.outcomes")}
-            </ColoredText>
-          ) : (
+          result = (
             <ColoredText color={theme.palette.cool.main}>
               {t("questionBuilder.defaultTerms.waterAvailability")}
             </ColoredText>
