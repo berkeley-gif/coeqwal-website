@@ -24,6 +24,19 @@
     "questionFormatWithClimate": "¿Cómo {{verb}} {{operation}} {{outcome}} bajo {{climate}}?",
     "swappedFormat": "Para {{outcome}}, ¿qué {{scenarioText}} de {{operation}} podríamos considerar?",
     "scenarioSingular": "escenario",
-    "scenarioPlural": "escenarios"
+    "scenarioPlural": "escenarios",
+    "defaultTerms": {
+      "decisions": "las decisiones",
+      "waterAvailability": "la disponibilidad de agua",
+      "outcomes": "los resultados"
+    },
+    "connectors": {
+      "and": "y",
+      "in": "en",
+      "to": "a",
+      "under": "bajo",
+      "increase": "aumentar",
+      "decrease": "disminuir"
+    }
   }
 }

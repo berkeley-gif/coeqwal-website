@@ -24,6 +24,19 @@
     "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} under {{climate}}?",
     "swappedFormat": "To {{outcome}}, which {{operation}} {{scenarioText}} could we consider?",
     "scenarioSingular": "scenario",
-    "scenarioPlural": "scenarios"
+    "scenarioPlural": "scenarios",
+    "defaultTerms": {
+      "decisions": "decisions",
+      "waterAvailability": "water availability",
+      "outcomes": "outcomes"
+    },
+    "connectors": {
+      "and": "and",
+      "in": "in",
+      "to": "to",
+      "under": "under",
+      "increase": "increase",
+      "decrease": "decrease"
+    }
   }
 }
