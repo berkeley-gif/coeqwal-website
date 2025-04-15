@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, ReactNode } from "react"
 import { Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
+import { useTranslation } from "@repo/i18n"
 
 // TODO: define formatting rules as a configuration object
 // const FORMATTING_RULES = {
@@ -44,6 +45,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
   wasScrolled = false,
 }) => {
   const theme = useTheme()
+  const { t, locale } = useTranslation()
   const {
     state: {
       swapped,
@@ -54,8 +56,38 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       operationDirections,
     },
     formatOperationText,
+    getOperationShortText,
+    shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
+
+  // TranslatedQuestion component to handle React elements in translations
+  const TranslatedQuestion = ({ 
+    translationKey, 
+    values 
+  }: { 
+    translationKey: string, 
+    values: Record<string, ReactNode> 
+  }) => {
+    const template = t(translationKey);
+    
+    // Split the template on placeholder patterns
+    const parts = template.split(/{{(.*?)}}/g);
+    
+    return (
+      <>
+        {parts.map((part, i) => {
+          // Even indices are plain text, odd indices are placeholder keys
+          if (i % 2 === 0) {
+            return <React.Fragment key={`text-${i}`}>{part}</React.Fragment>;
+          } else {
+            // Return the corresponding React node for the placeholder key
+            return <React.Fragment key={`placeholder-${i}`}>{values[part] || ''}</React.Fragment>;
+          }
+        })}
+      </>
+    );
+  };
 
   // Expensive calculation?
   const summary = useMemo(() => {
@@ -109,7 +141,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       regularOptions.forEach((op) => {
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
-            {formatOperationText(op)}
+            {getOperationShortText(op)}
           </ColoredText>,
         )
       })
@@ -132,8 +164,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       if (conveyanceSubtypes.length > 0) {
         const conveyanceText =
           conveyanceSubtypes.length === 1
-            ? `Delta conveyance tunnel operating at ${conveyanceSubtypes[0]}`
-            : `Delta conveyance tunnel operating at ${conveyanceSubtypes.join(" and ")}`
+            ? `conveyance tunnel (${conveyanceSubtypes[0]})`
+            : `conveyance tunnel (${conveyanceSubtypes.join(", ")})`
 
         formattedOperations.push(
           <ColoredText key="conveyance" color={theme.palette.pop.main}>
@@ -820,14 +852,19 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     // Change question structure based on number of operations
     if (swapped) {
       // Determine if we need singular or plural form of "scenario"
-      const scenarioText =
-        selectedOperations.length === 1 ? "scenario" : "scenarios"
+      const scenarioText = selectedOperations.length === 1 
+        ? t("questionBuilder.scenarioSingular")
+        : t("questionBuilder.scenarioPlural")
 
       return (
-        <>
-          To {outcomePart}, which {operationsPart} {scenarioText} could we
-          consider{climatePart}?
-        </>
+        <TranslatedQuestion 
+          translationKey="questionBuilder.swappedFormat"
+          values={{
+            outcome: outcomePart,
+            operation: operationsPart,
+            scenarioText: scenarioText
+          }}
+        />
       )
     } else {
       // Special case for Delta conveyance - always use "does" regardless of how many capacities
@@ -839,35 +876,41 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       // Check if we need to add "a" before "Delta conveyance tunnel"
       const needsArticle = onlyDeltaConveyance
 
-      // Use "does" if only one operation or if it's only Delta conveyance (any number of capacities)
-      if (selectedOperations.length === 1 || onlyDeltaConveyance) {
-        return (
-          <>
-            How does {needsArticle ? "a " : ""}
-            {operationsPart}{" "}
-            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
-            {climatePart}?
-          </>
-        )
-      } else if (selectedOperations.length > 1) {
-        // Multiple operations
-        return (
-          <>
-            How do {operationsPart}{" "}
-            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
-            {climatePart}?
-          </>
-        )
-      } else {
-        // No operations selected
-        return (
-          <>
-            How do our {operationsPart}{" "}
-            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
-            {climatePart}?
-          </>
-        )
-      }
+      // Use t function to determine correct verb based on plurality
+      const verb = shouldUseDo() 
+        ? t("questionBuilder.pluralVerb") 
+        : t("questionBuilder.singularVerb")
+
+      const formatString = includeClimate 
+        ? "questionBuilder.questionFormatWithClimate" 
+        : "questionBuilder.questionFormat"
+        
+      // Create the operation element with conditional article
+      const operation = (
+        <React.Fragment key="operation">
+          {needsArticle && locale === "en" && "a "}
+          {operationsPart}
+        </React.Fragment>
+      )
+      
+      // Create element for outcome with wrapped span for nowrap styling
+      const outcome = (
+        <span key="outcome" style={{ whiteSpace: "nowrap" }}>
+          {outcomePart}
+        </span>
+      )
+
+      return (
+        <TranslatedQuestion 
+          translationKey={formatString}
+          values={{
+            verb,
+            operation,
+            outcome,
+            climate: selectedClimate
+          }}
+        />
+      )
     }
   }, [
     swapped,
@@ -879,8 +922,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     theme.palette.cool.main,
     theme.palette.pop.main,
     theme.palette.climate.main,
-    formatOperationText,
+    getOperationShortText,
+    shouldUseDo,
     formatOutcomeText,
+    t,
+    locale
   ])
 
   // Container styles are now merged into Typography

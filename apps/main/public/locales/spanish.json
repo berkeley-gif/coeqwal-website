@@ -16,5 +16,14 @@
   },
   "CaliforniaWaterPanel": {
     "title": "Agua California"
+  },
+  "questionBuilder": {
+    "singularVerb": "afecta",
+    "pluralVerb": "afectan",
+    "questionFormat": "¿Cómo {{verb}} {{operation}} {{outcome}}?",
+    "questionFormatWithClimate": "¿Cómo {{verb}} {{operation}} {{outcome}} bajo {{climate}}?",
+    "swappedFormat": "Para {{outcome}}, ¿qué {{scenarioText}} de {{operation}} podríamos considerar?",
+    "scenarioSingular": "escenario",
+    "scenarioPlural": "escenarios"
   }
 }

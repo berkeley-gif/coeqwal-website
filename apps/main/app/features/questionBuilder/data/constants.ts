@@ -40,6 +40,7 @@ export const OPERATION_THEMES = [
         id: "current-operations",
         label: "Current operations",
         shortText: "current operations",
+        isSingular: false,
         active: true,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -52,6 +53,7 @@ export const OPERATION_THEMES = [
         label:
           "Current operations with Temporary Urgent Change Petitions (TUCPs)",
         shortText: "TUCPs",
+        isSingular: false,
         active: true,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -64,6 +66,7 @@ export const OPERATION_THEMES = [
         label:
           "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)",
         shortText: "SGMA compliance",
+        isSingular: true,
         active: true,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -82,6 +85,7 @@ export const OPERATION_THEMES = [
         label:
           "Increasing flows in tributaries and Delta outflow (Alternative 1)",
         shortText: "increased flows",
+        isSingular: true,
         active: true,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -99,6 +103,7 @@ export const OPERATION_THEMES = [
         id: "critical-needs",
         label: "Meeting critical needs in vulnerable communities",
         shortText: "critical needs",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -110,6 +115,7 @@ export const OPERATION_THEMES = [
         id: "functional-thresholds",
         label: "Meeting functional thresholds in vulnerable communities",
         shortText: "func. thresholds",
+        isSingular: false,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -121,6 +127,7 @@ export const OPERATION_THEMES = [
         id: "drinking-water-priority",
         label: "Prioritizing drinking water in vulnerable communities",
         shortText: "drinking priority",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -138,6 +145,7 @@ export const OPERATION_THEMES = [
         id: "relax-salinity",
         label: "Relaxing Delta salinity requirements",
         shortText: "salinity reqs",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -149,6 +157,7 @@ export const OPERATION_THEMES = [
         id: "relax-outflow",
         label: "Relaxing Delta outflow requirements",
         shortText: "outflow reqs",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -160,6 +169,7 @@ export const OPERATION_THEMES = [
         id: "relax-shasta-carryover",
         label: "Relaxing Shasta reservoir carryover requirements",
         shortText: "Shasta carryover",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -171,6 +181,7 @@ export const OPERATION_THEMES = [
         id: "relax-omr",
         label: "Relaxing Old and Middle River (Sacramento basin) requirements",
         shortText: "OMR reqs",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -188,6 +199,7 @@ export const OPERATION_THEMES = [
         id: "delta-conveyance",
         label: "Delta conveyance tunnel",
         shortText: "conveyance tunnel",
+        isSingular: true,
         active: false,
         compatibleWith: {
           outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
@@ -199,18 +211,21 @@ export const OPERATION_THEMES = [
             id: "dct-3000cfs",
             label: "3000cfs",
             shortText: "3000cfs tunnel",
+            isSingular: true,
             active: false,
           },
           {
             id: "dct-4500cfs",
             label: "4500cfs",
             shortText: "4500cfs tunnel",
+            isSingular: true,
             active: false,
           },
           {
             id: "dct-6000cfs",
             label: "6000cfs",
             shortText: "6000cfs tunnel",
+            isSingular: true,
             active: false,
           },
         ],

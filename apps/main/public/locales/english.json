@@ -16,5 +16,14 @@
   },
   "CaliforniaWaterPanel": {
     "title": "California Water"
+  },
+  "questionBuilder": {
+    "singularVerb": "does",
+    "pluralVerb": "do",
+    "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
+    "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} under {{climate}}?",
+    "swappedFormat": "To {{outcome}}, which {{operation}} {{scenarioText}} could we consider?",
+    "scenarioSingular": "scenario",
+    "scenarioPlural": "scenarios"
   }
 }
