@@ -22,7 +22,7 @@ import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 interface OptionType {
   id: string
   label: string
-  active: boolean
+  active?: boolean
   subtypes?: OptionType[]
 }
 
@@ -55,6 +55,11 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     state: { swapped, operationDirections },
     handleOperationDirectionChange,
   } = useQuestionBuilderHelpers()
+
+  // Check if all options in this section are inactive
+  const allInactive = options.every((option) => 
+    typeof option === "object" && option.active === false
+  )
 
   // Styles for accordion components
   const accordionStyles = {
@@ -101,7 +106,6 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
 
   const activeArrowStyle = {
     color: theme.palette.pop.main,
-    // Add a subtle glow effect
     filter: "drop-shadow(0px 0px 2px rgba(255, 87, 51, 0.5))",
   }
 
@@ -110,13 +114,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   }
 
   // Calculate left padding to align with accordion title
-  // Account for expand icon width (24px) + some spacing
   const checkboxLeftPadding = theme.spacing(1.5)
 
   // Function to render direction arrows for operations in swapped mode
   const renderDirectionControls = (
     optionId: string,
     optionLabel: string,
+    isActive: boolean = true,
     isSubtype?: boolean,
   ) => {
     const isSelected = selectedOptions.includes(optionId)
@@ -127,6 +131,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         <IconButton
           size="medium"
           onClick={() => {
+            if (!isActive) return;
+            
             // If not selected, select it with increase direction
             if (!isSelected) {
               onOptionChange(optionId, true)
@@ -146,7 +152,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             ...(isSelected && currentDirection === "increase"
               ? activeArrowStyle
               : inactiveArrowStyle),
+            opacity: isActive ? 1 : 0.5,
           }}
+          disabled={!isActive}
         >
           <ArrowCircleUpIcon fontSize="medium" />
         </IconButton>
@@ -154,6 +162,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         <IconButton
           size="medium"
           onClick={() => {
+            if (!isActive) return;
+            
             // If not selected, select it with decrease direction
             if (!isSelected) {
               onOptionChange(optionId, true)
@@ -173,13 +183,22 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             ...(isSelected && currentDirection === "decrease"
               ? activeArrowStyle
               : inactiveArrowStyle),
+            opacity: isActive ? 1 : 0.5,
           }}
+          disabled={!isActive}
         >
           <ArrowCircleDownIcon fontSize="medium" />
         </IconButton>
 
-        <Typography variant="body2" sx={{ marginLeft: theme.spacing(1) }}>
-          {optionLabel}
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            marginLeft: theme.spacing(1),
+            color: isActive ? 'text.primary' : 'text.disabled',
+            fontStyle: isActive ? 'normal' : 'italic',
+          }}
+        >
+          {optionLabel} {!isActive && "(Coming Soon)"}
         </Typography>
       </Box>
     )
@@ -189,20 +208,23 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   const renderCheckbox = (
     optionId: string,
     optionLabel: string,
+    isActive: boolean = true,
     isSubtype?: boolean,
   ) => {
-    // If in swapped mode and this is outcomes section, show direction arrows
+    // If in swapped mode and this is operations section, show direction arrows
     // unless this option is in the noDirectionControls list
     if (swapped && isOperations && !noDirectionControls.includes(optionId)) {
-      return renderDirectionControls(optionId, optionLabel, isSubtype)
+      return renderDirectionControls(optionId, optionLabel, isActive, isSubtype)
     }
 
     // Check if this option should be disabled
-    const isDisabled = section ? isInvalidCombination(section, optionId) : false
+    const isDisabled = !isActive || (section ? isInvalidCombination(section, optionId) : false)
 
-    const tooltipMessage = isDisabled
-      ? getInvalidCombinationMessage(section || "", optionId)
-      : ""
+    const tooltipMessage = !isActive 
+      ? "Coming soon" 
+      : isDisabled 
+        ? getInvalidCombinationMessage(section || "", optionId)
+        : ""
 
     const checkbox = (
       <FormControlLabel
@@ -215,9 +237,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             }
             disabled={isDisabled}
             sx={{
-              color: theme.palette.text.primary,
+              color: isActive ? theme.palette.text.primary : "rgba(0, 0, 0, 0.26)",
               "&.Mui-checked": {
-                color: theme.palette.text.primary,
+                color: isActive ? theme.palette.text.primary : "rgba(0, 0, 0, 0.26)",
               },
               "&.Mui-disabled": {
                 color: "rgba(0, 0, 0, 0.26)",
@@ -225,7 +247,17 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             }}
           />
         }
-        label={<Typography variant="body2">{optionLabel}</Typography>}
+        label={
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: isActive ? 'text.primary' : 'text.disabled',
+              fontStyle: isActive ? 'normal' : 'italic',
+            }}
+          >
+            {optionLabel} {!isActive && "(Coming Soon)"}
+          </Typography>
+        }
         sx={{
           alignItems: "flex-start",
           "& .MuiCheckbox-root": {
@@ -247,11 +279,6 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     )
   }
 
-  // Check if all options in this section are inactive
-  const allInactive = options.every((option) => 
-    typeof option === "object" && option.active === false
-  );
-
   return (
     <Accordion sx={accordionStyles}>
       <AccordionSummary
@@ -265,6 +292,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           sx={{
             color: allInactive ? "text.disabled" : "text.primary",
             fontWeight: "medium",
+            fontStyle: allInactive ? "italic" : "normal",
           }}
         >
           {title} {allInactive && "(Coming Soon)"}
@@ -280,12 +308,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
               // Handle legacy string options (assuming they're active)
               return (
                 <Box component="li" key={index} sx={{ mb: 0.5 }}>
-                  {renderCheckbox(option, option)}
+                  {renderCheckbox(option, option, true)}
                 </Box>
               )
             } else {
               // Handle object options with active property
               const optionObj = option as OptionType
+              const isActive = optionObj.active !== false; // Default to true if not specified
               const hasSubtypes =
                 optionObj.subtypes && optionObj.subtypes.length > 0
               const hideCheckbox = noParentCheckbox.includes(optionObj.id)
@@ -299,25 +328,30 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                         variant="body2"
                         sx={{
                           ...parentLabelStyles,
-                          ml: 0, // Align with other options since we have padding on the ul
+                          ml: 0,
                           mb: 0.5,
+                          color: isActive ? 'text.primary' : 'text.disabled',
+                          fontStyle: isActive ? 'normal' : 'italic',
                         }}
                       >
-                        {optionObj.label}
+                        {optionObj.label} {!isActive && "(Coming Soon)"}
                       </Typography>
                     ) : (
-                      renderCheckbox(optionObj.id, optionObj.label)
+                      renderCheckbox(optionObj.id, optionObj.label, isActive)
                     )}
                   </Box>
 
                   {/* Subtypes - always shown when parent accordion is open */}
                   {hasSubtypes && (
                     <Box sx={nestedOptionStyles}>
-                      {optionObj.subtypes?.map((subtype) => (
-                        <Box key={subtype.id} sx={{ mb: 0.5 }}>
-                          {renderCheckbox(subtype.id, subtype.label)}
-                        </Box>
-                      ))}
+                      {optionObj.subtypes?.map((subtype) => {
+                        const isSubtypeActive = subtype.active !== false && isActive;
+                        return (
+                          <Box key={subtype.id} sx={{ mb: 0.5 }}>
+                            {renderCheckbox(subtype.id, subtype.label, isSubtypeActive, true)}
+                          </Box>
+                        );
+                      })}
                     </Box>
                   )}
                 </Box>
