@@ -3,35 +3,35 @@ export const OPERATION_THEMES = [
     id: "baseline",
     title: "Current operations and emerging policies",
     options: [
-      "Current operations",
-      "Current operations with Temporary Urgent Change Petitions (TUCPs)",
-      "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)",
+      { id: "current-operations", label: "Current operations", active: true },
+      { id: "tucp-operations", label: "Current operations with Temporary Urgent Change Petitions (TUCPs)", active: true },
+      { id: "sgma-compliance", label: "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)", active: true },
     ],
   },
   {
     id: "flows",
     title: "Changing flows in Central Valley rivers",
     options: [
-      "Increasing flows in tributaries and Delta outflow (Alternative 1)",
+      { id: "increased-flows-alt1", label: "Increasing flows in tributaries and Delta outflow (Alternative 1)", active: true },
     ],
   },
   {
     id: "drinking-water",
     title: "Prioritizing drinking water",
     options: [
-      "Meeting critical needs in vulnerable communities",
-      "Meeting functional thresholds in vulnerable communities",
-      "Prioritizing drinking water in vulnerable communities",
+      { id: "critical-needs", label: "Meeting critical needs in vulnerable communities", active: false },
+      { id: "functional-thresholds", label: "Meeting functional thresholds in vulnerable communities", active: false },
+      { id: "drinking-water-priority", label: "Prioritizing drinking water in vulnerable communities", active: false },
     ],
   },
   {
     id: "regulations",
     title: "Regulation alternatives",
     options: [
-      "Relaxing Delta salinity requirements",
-      "Relaxing Delta outflow requirements",
-      "Relaxing Shasta reservoir carryover requirements",
-      "Relaxing Old and Middle River (Sacramento basin) requirements",
+      { id: "relax-salinity", label: "Relaxing Delta salinity requirements", active: false },
+      { id: "relax-outflow", label: "Relaxing Delta outflow requirements", active: false },
+      { id: "relax-shasta-carryover", label: "Relaxing Shasta reservoir carryover requirements", active: false },
+      { id: "relax-omr", label: "Relaxing Old and Middle River (Sacramento basin) requirements", active: false },
     ],
   },
   {
@@ -41,10 +41,11 @@ export const OPERATION_THEMES = [
       {
         id: "delta-conveyance",
         label: "Delta conveyance tunnel",
+        active: false,
         subtypes: [
-          { id: "dct-3000cfs", label: "3000cfs" },
-          { id: "dct-4500cfs", label: "4500cfs" },
-          { id: "dct-6000cfs", label: "6000cfs" },
+          { id: "dct-3000cfs", label: "3000cfs", active: false },
+          { id: "dct-4500cfs", label: "4500cfs", active: false },
+          { id: "dct-6000cfs", label: "6000cfs", active: false },
         ],
       },
     ],

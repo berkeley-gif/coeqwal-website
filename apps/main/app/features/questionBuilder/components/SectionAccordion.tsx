@@ -19,23 +19,19 @@ import {
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 
 // Define type for nested options
-type OptionType =
-  | string
-  | {
-      id: string
-      label: string
-      subtypes?: Array<{
-        id: string
-        label: string
-      }>
-    }
+interface OptionType {
+  id: string
+  label: string
+  active: boolean
+  subtypes?: OptionType[]
+}
 
 // Define props for the SectionAccordion component
 interface SectionAccordionProps {
   title: string
-  options: OptionType[]
+  options: (OptionType | string)[]
   selectedOptions: string[]
-  onOptionChange: (option: string, checked: boolean, subtype?: boolean) => void
+  onOptionChange: (optionId: string, checked: boolean) => void
   section?: string // Optional section identifier
   noParentCheckbox?: string[] // Optional array of parent IDs that should not have checkboxes
   isOperations?: boolean // Whether this is the operations section
@@ -133,12 +129,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           onClick={() => {
             // If not selected, select it with increase direction
             if (!isSelected) {
-              onOptionChange(optionId, true, isSubtype)
+              onOptionChange(optionId, true)
               handleOperationDirectionChange(optionId, "increase")
             }
             // If selected and already "increase", deselect it
             else if (currentDirection === "increase") {
-              onOptionChange(optionId, false, isSubtype)
+              onOptionChange(optionId, false)
             }
             // If selected but not "increase", change direction to increase
             else {
@@ -160,12 +156,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           onClick={() => {
             // If not selected, select it with decrease direction
             if (!isSelected) {
-              onOptionChange(optionId, true, isSubtype)
+              onOptionChange(optionId, true)
               handleOperationDirectionChange(optionId, "decrease")
             }
             // If selected and already "decrease", deselect it
             else if (currentDirection === "decrease") {
-              onOptionChange(optionId, false, isSubtype)
+              onOptionChange(optionId, false)
             }
             // If selected but not "decrease", change direction to decrease
             else {
@@ -215,7 +211,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             size="small"
             checked={selectedOptions.includes(optionId)}
             onChange={(e) =>
-              onOptionChange(optionId, e.target.checked, isSubtype)
+              onOptionChange(optionId, e.target.checked)
             }
             disabled={isDisabled}
             sx={{
@@ -251,6 +247,11 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     )
   }
 
+  // Check if all options in this section are inactive
+  const allInactive = options.every((option) => 
+    typeof option === "object" && option.active === false
+  );
+
   return (
     <Accordion sx={accordionStyles}>
       <AccordionSummary
@@ -259,8 +260,14 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         id={`${title.toLowerCase().replace(/\s+/g, "-")}-header`}
         sx={accordionSummaryStyles}
       >
-        <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-          {title}
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: allInactive ? "text.disabled" : "text.primary",
+            fontWeight: "medium",
+          }}
+        >
+          {title} {allInactive && "(Coming Soon)"}
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={accordionDetailsStyles}>
@@ -269,61 +276,53 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           sx={{ listStyle: "none", pl: checkboxLeftPadding, m: 0 }}
         >
           {options.map((option, index) => {
-            // Handle string options (backwards compatibility)
             if (typeof option === "string") {
+              // Handle legacy string options (assuming they're active)
               return (
                 <Box component="li" key={index} sx={{ mb: 0.5 }}>
                   {renderCheckbox(option, option)}
                 </Box>
               )
-            }
+            } else {
+              // Handle object options with active property
+              const optionObj = option as OptionType
+              const hasSubtypes =
+                optionObj.subtypes && optionObj.subtypes.length > 0
+              const hideCheckbox = noParentCheckbox.includes(optionObj.id)
 
-            // Handle object options with potential subtypes
-            const optionObj = option as {
-              id: string
-              label: string
-              subtypes?: Array<{
-                id: string
-                label: string
-              }>
-            }
+              return (
+                <Box component="li" key={optionObj.id}>
+                  {/* Parent option */}
+                  <Box sx={{ mb: 0.5 }}>
+                    {hideCheckbox ? (
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          ...parentLabelStyles,
+                          ml: 0, // Align with other options since we have padding on the ul
+                          mb: 0.5,
+                        }}
+                      >
+                        {optionObj.label}
+                      </Typography>
+                    ) : (
+                      renderCheckbox(optionObj.id, optionObj.label)
+                    )}
+                  </Box>
 
-            const hasSubtypes =
-              optionObj.subtypes && optionObj.subtypes.length > 0
-            const hideCheckbox = noParentCheckbox.includes(optionObj.id)
-
-            return (
-              <Box component="li" key={optionObj.id}>
-                {/* Parent option */}
-                <Box sx={{ mb: 0.5 }}>
-                  {hideCheckbox ? (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        ...parentLabelStyles,
-                        ml: 0, // Align with other options since we have padding on the ul
-                        mb: 0.5,
-                      }}
-                    >
-                      {optionObj.label}
-                    </Typography>
-                  ) : (
-                    renderCheckbox(optionObj.id, optionObj.label)
+                  {/* Subtypes - always shown when parent accordion is open */}
+                  {hasSubtypes && (
+                    <Box sx={nestedOptionStyles}>
+                      {optionObj.subtypes?.map((subtype) => (
+                        <Box key={subtype.id} sx={{ mb: 0.5 }}>
+                          {renderCheckbox(subtype.id, subtype.label)}
+                        </Box>
+                      ))}
+                    </Box>
                   )}
                 </Box>
-
-                {/* Subtypes - always shown when parent accordion is open */}
-                {hasSubtypes && (
-                  <Box sx={nestedOptionStyles}>
-                    {optionObj.subtypes?.map((subtype) => (
-                      <Box key={subtype.id} sx={{ mb: 0.5 }}>
-                        {renderCheckbox(subtype.id, subtype.label, true)}
-                      </Box>
-                    ))}
-                  </Box>
-                )}
-              </Box>
-            )
+              )
+            }
           })}
         </Box>
       </AccordionDetails>
