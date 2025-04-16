@@ -73,7 +73,9 @@
     },
     "ui": {
       "switch": "switch",
-      "clearSelection": "Clear selection"
+      "clearSelection": "Clear selection",
+      "clearOperations": "Clear operations",
+      "clearOutcomes": "Clear outcomes"
     },
     "operationsSelector": {
       "title": "How do {{decisions}} affect",

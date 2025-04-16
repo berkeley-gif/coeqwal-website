@@ -73,7 +73,9 @@
     },
     "ui": {
       "switch": "cambiar",
-      "clearSelection": "Borrar selección"
+      "clearSelection": "Borrar selección",
+      "clearOperations": "Borrar operaciones",
+      "clearOutcomes": "Borrar resultados"
     },
     "operationsSelector": {
       "title": "¿Cómo afectan {{decisions}}",

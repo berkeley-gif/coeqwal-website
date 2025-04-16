@@ -46,7 +46,7 @@ const OutcomesSelector: React.FC = () => {
     handleOutcomeChange,
     toggleMap,
     toggleClimate,
-    resetSelections,
+    resetOutcomes,
   } = useQuestionBuilderHelpers()
 
   // Handle option change with section context
@@ -132,7 +132,7 @@ const OutcomesSelector: React.FC = () => {
           variant="contained"
           color="primary"
           size="medium"
-          onClick={resetSelections}
+          onClick={resetOutcomes}
           sx={{
             textTransform: "none",
             borderRadius: 2,
@@ -142,7 +142,7 @@ const OutcomesSelector: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          {t("questionBuilder.ui.clearSelection")}
+          {t("questionBuilder.ui.clearOutcomes")}
         </Button>
       </Box>
       

@@ -35,7 +35,7 @@ const OperationsSelector: React.FC = () => {
   const {
     state: { swapped, selectedOperations },
     handleOperationChange,
-    resetSelections,
+    resetOperations,
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -240,7 +240,7 @@ const OperationsSelector: React.FC = () => {
           variant="contained"
           color="primary"
           size="medium"
-          onClick={resetSelections}
+          onClick={resetOperations}
           sx={{
             textTransform: "none",
             borderRadius: 2,
@@ -250,7 +250,7 @@ const OperationsSelector: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          {t("questionBuilder.ui.clearSelection")}
+          {t("questionBuilder.ui.clearOperations")}
         </Button>
       </Box>
 

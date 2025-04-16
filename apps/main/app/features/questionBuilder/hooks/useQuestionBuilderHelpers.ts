@@ -296,6 +296,24 @@ export const useQuestionBuilderHelpers = () => {
     dispatch(questionBuilderActions.reset())
   }, [dispatch])
 
+  // Reset only operations
+  const resetOperations = useCallback(() => {
+    // Clear all selected operations
+    state.selectedOperations.forEach(operation => {
+      dispatch(questionBuilderActions.deselectOperation(operation))
+    })
+  }, [dispatch, state.selectedOperations])
+
+  // Reset only outcomes
+  const resetOutcomes = useCallback(() => {
+    // Clear all selected outcomes by section
+    Object.entries(state.outcomesBySection).forEach(([section, options]) => {
+      options.forEach(option => {
+        dispatch(questionBuilderActions.deselectOutcome(option, section))
+      })
+    })
+  }, [dispatch, state.outcomesBySection])
+
   // Format utilities
   const formatOperationText = useCallback(
     (text: string) => {
@@ -653,6 +671,8 @@ export const useQuestionBuilderHelpers = () => {
     toggleSwap,
     toggleMap,
     resetSelections,
+    resetOperations,
+    resetOutcomes,
     // Validation helpers
     isInvalidCombination,
     getInvalidCombinationMessage,
