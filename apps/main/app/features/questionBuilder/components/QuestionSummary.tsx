@@ -36,6 +36,14 @@ import { useTranslation } from "@repo/i18n"
 const isDeltaOutflow = (text: string) =>
   text.toLowerCase().includes("delta outflow")
 
+// Check if a text is a Delta salinity type
+const isDeltaSalinity = (text: string) =>
+  text.toLowerCase().includes("delta salinity")
+
+// Helper to check if a text is either Delta outflow or Delta salinity
+const isDeltaOutcomeType = (text: string) =>
+  isDeltaOutflow(text) || isDeltaSalinity(text)
+
 // QuestionSummary component props
 interface QuestionSummaryProps {
   wasScrolled?: boolean // Keeping prop for backward compatibility but not using it
@@ -173,14 +181,12 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
       // Format each type of operation
       const formattedOperations: React.ReactNode[] = []
-
-      // Regular operations don't need direction indicators - these come from outcome directions
-
+      
       // Handle regular operations
       regularOptions.forEach((op) => {
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
-            {getOperationShortText(op)}
+            {getOperationShortText(op)}{swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
       })
@@ -194,7 +200,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
         formattedOperations.push(
           <ColoredText key="flow-reqs" color={theme.palette.pop.main}>
-            {flowText}
+            {flowText}{swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
       }
@@ -208,7 +214,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
         formattedOperations.push(
           <ColoredText key="conveyance" color={theme.palette.pop.main}>
-            {conveyanceText}
+            {conveyanceText}{swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
       }
@@ -271,7 +277,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
     // Format type selections - handle colored text and join with "and"
     const formatTypeSection = (typeSelections: string[]) => {
       // Filter out Delta outflow (handled separately)
-      const filteredTypes = typeSelections.filter((t) => !isDeltaOutflow(t))
+      const filteredTypes = typeSelections.filter((t) => !isDeltaOutcomeType(t))
 
       if (filteredTypes.length === 0) return null
 
@@ -362,12 +368,31 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
       })
     }
 
-    // Extract and format Delta outflow separately
-    const formatDeltaOutflow = (typeSelections: string[]) => {
+    // Extract and format Delta outcomes (outflow and salinity) separately
+    const formatDeltaOutcomes = (typeSelections: string[]) => {
+      // Find Delta outflow and Delta salinity
       const deltaOutflow = typeSelections.find((t) => isDeltaOutflow(t))
-      if (!deltaOutflow) return null
-
-      return createColoredText(formatOutcomeText(deltaOutflow, "type"))
+      const deltaSalinity = typeSelections.find((t) => isDeltaSalinity(t))
+      
+      // Return null if neither exists
+      if (!deltaOutflow && !deltaSalinity) return null
+      
+      // Format each if they exist
+      const formattedOutflow = deltaOutflow ? createColoredText(formatOutcomeText(deltaOutflow, "type")) : null
+      const formattedSalinity = deltaSalinity ? createColoredText(formatOutcomeText(deltaSalinity, "type")) : null
+      
+      // Return based on which ones exist
+      if (formattedOutflow && formattedSalinity) {
+        // If both exist, join them with "and"
+        return (
+          <>
+            {formattedOutflow} {t("questionBuilder.connectors.and")} {formattedSalinity}
+          </>
+        )
+      } else {
+        // Return whichever one exists
+        return formattedOutflow || formattedSalinity
+      }
     }
 
     // Format region selections - prefix with "in" and join with "and"
@@ -526,7 +551,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         // Process type selections
         typeSelections.forEach((type) => {
           // Skip delivery subtypes and Delta outflow - they're handled separately
-          if (isDeltaOutflow(type) || type.endsWith("-deliveries")) return
+          if (isDeltaOutcomeType(type) || type.endsWith("-deliveries")) return
 
           // Get formatted text without direction
           const formattedText = formatOutcomeText(type, "type")
@@ -873,7 +898,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         // Format each section
         const formattedType = formatTypeSection(typeSelections)
         const formattedRegion = formatRegionSection(regionSelections)
-        const deltaOutflow = formatDeltaOutflow(typeSelections)
+        const deltaOutflow = formatDeltaOutcomes(typeSelections)
 
         // Determine if we have any non-metric selections
         const hasNonMetricSelections = Boolean(formattedType || formattedRegion)
@@ -888,21 +913,32 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         let result = null
 
         // Build result based on which sections are present
-        // First handle type and Delta outflow together
-        if (formattedType || deltaOutflow) {
-          if (formattedType && deltaOutflow) {
+        // First handle regular types (without Delta outflow or salinity)
+        if (formattedType) {
+          result = formattedType
+          
+          // Add region if present (regions come after type)
+          if (formattedRegion) {
             result = (
               <>
-                {formattedType} {t("questionBuilder.connectors.and")} {deltaOutflow}
+                {result} {formattedRegion}
               </>
             )
-          } else if (formattedType) {
-            result = formattedType
-          } else {
-            result = deltaOutflow
           }
-
-          // Add region if present (regions always come after type+deltaOutflow)
+          
+          // Add Delta outcomes (outflow and/or salinity) at the end if they exist
+          if (deltaOutflow) {
+            result = (
+              <>
+                {result} {t("questionBuilder.connectors.and")} {deltaOutflow}
+              </>
+            )
+          }
+        } else if (deltaOutflow) {
+          // If only Delta outcomes (no other types)
+          result = deltaOutflow
+          
+          // Add region if present
           if (formattedRegion) {
             result = (
               <>
@@ -911,7 +947,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
             )
           }
         } else if (formattedRegion) {
-          // Start with region if no type
+          // Start with region if no type or Delta outflow
           if (metricSelections.length === 0) {
             // Add "outcomes" prefix if no metrics
             result = <>{t("questionBuilder.defaultTerms.outcomes")}</>
@@ -979,7 +1015,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         } else {
           return (
             <>
-              For {outcomePart}, which {operationsPart} could we consider?
+              To {outcomePart}, which {operationsPart} could we consider?
             </>
           )
         }
