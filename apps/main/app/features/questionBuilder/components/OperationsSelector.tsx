@@ -31,7 +31,7 @@ import { useTranslation } from "@repo/i18n"
 
 const OperationsSelector: React.FC = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const {
     state: { swapped, selectedOperations },
     handleOperationChange,
@@ -118,6 +118,7 @@ const OperationsSelector: React.FC = () => {
         {swapped ? (
           <>
             {" "}
+            {locale === "es" && "¿qué "}
             <HighlightText bgcolor={theme.palette.pop.main}>
               {t("questionBuilder.defaultTerms.decisions")}
             </HighlightText>

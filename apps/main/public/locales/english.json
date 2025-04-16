@@ -40,7 +40,7 @@
     },
     "operationsSelector": {
       "title": "How do {{decisions}} affect",
-      "swappedTitle": "{{decisions}} could we consider?",
+      "swappedTitle": "could we consider?",
       "searchPlaceholder": "Type to search...",
       "searchOperations": "Search operations",
       "comingSoon": "Coming Soon"
