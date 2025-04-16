@@ -138,7 +138,7 @@ const CombinedPanelContent = () => {
           sx={{
             position: "absolute",
             bottom: -28,
-            right: `calc(${theme.spacing(4)} + 180px + 32px)`, // Search button position + estimated width + 32px gap
+            right: `calc(${theme.spacing(4)} + 180px + 32px)`, // Position 32px to the left of search button
             opacity: hasClickedScroll ? 1 : 0,
             visibility: hasClickedScroll ? "visible" : "hidden",
             transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
@@ -171,7 +171,7 @@ const CombinedPanelContent = () => {
               }
               label={t("questionBuilder.outcomesSelector.includeClimate")}
               sx={{ 
-                m: 0,
+                margin: 0,
                 "& .MuiTypography-root": {
                   fontSize: "1rem",
                   fontWeight: 500,
