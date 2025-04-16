@@ -75,7 +75,8 @@
       "switch": "cambiar",
       "clearSelection": "Borrar selección",
       "clearOperations": "Borrar operaciones",
-      "clearOutcomes": "Borrar resultados"
+      "clearOutcomes": "Borrar resultados",
+      "clearSelections": "Borrar selecciones"
     },
     "operationsSelector": {
       "title": "¿Cómo afectan {{decisions}}",

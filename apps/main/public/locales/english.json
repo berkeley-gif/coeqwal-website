@@ -75,7 +75,8 @@
       "switch": "switch",
       "clearSelection": "Clear selection",
       "clearOperations": "Clear operations",
-      "clearOutcomes": "Clear outcomes"
+      "clearOutcomes": "Clear outcomes",
+      "clearSelections": "Clear selections"
     },
     "operationsSelector": {
       "title": "How do {{decisions}} affect",

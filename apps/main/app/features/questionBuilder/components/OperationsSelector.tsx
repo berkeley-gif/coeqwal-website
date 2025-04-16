@@ -250,7 +250,7 @@ const OperationsSelector: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          {t("questionBuilder.ui.clearOperations")}
+          {t("questionBuilder.ui.clearSelections")}
         </Button>
       </Box>
 

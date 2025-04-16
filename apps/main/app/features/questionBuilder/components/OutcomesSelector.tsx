@@ -142,7 +142,7 @@ const OutcomesSelector: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          {t("questionBuilder.ui.clearOutcomes")}
+          {t("questionBuilder.ui.clearSelections")}
         </Button>
       </Box>
       
