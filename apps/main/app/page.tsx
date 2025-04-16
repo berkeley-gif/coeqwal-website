@@ -395,7 +395,7 @@ export default function Home() {
               alignItems: "center",
               justifyContent: "center",
               textAlign: "left",
-              py: 12,
+              py: 18,
               pointerEvents: "auto",
             }}
           >
