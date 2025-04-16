@@ -394,26 +394,45 @@ export default function Home() {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              textAlign: "center",
+              textAlign: "left",
               py: 12,
+              pointerEvents: "auto",
             }}
           >
-            <Box maxWidth="800px">
-              <Typography variant="h5" color="white" paragraph>
-                {t("interstitial.content.0")}
+            <Box maxWidth="900px">
+              <Typography
+                variant="h3"
+                color="white"
+                paragraph
+                sx={{ fontWeight: 300 }}
+              >
+                <Box component="span" sx={{ fontWeight: 700 }}>
+                  From mountains to coast and north to south,
+                </Box>
+                {" " +
+                  t("interstitial.content.0").split(
+                    "From mountains to coast and north to south,",
+                  )[1]}
               </Typography>
-              <Typography variant="h5" color="white">
+              <Typography variant="h3" color="white" sx={{ fontWeight: 200 }}>
                 {t("interstitial.content.1")}
               </Typography>
             </Box>
           </BasePanel>
 
           {/* Two Column Panel with map controls */}
-          <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
+          <Box sx={{ pointerEvents: "none" }} id="california-water-panel">
             <TwoColumnPanel
               leftTitle="Map Controls Demo"
               leftContent={
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Box
+                  sx={{
+                    pointerEvents: "auto",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 2,
+                  }}
+                >
                   <Typography variant="body1">
                     This panel demonstrates different ways to interact with the
                     map:
