@@ -12,6 +12,7 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
   verticalAlignment?: "top" | "center" | "bottom"
   children?: React.ReactNode
   transitionInterval?: number // Interval for headline transitions
+  includeHeaderSpacing?: boolean
 }
 
 /**
@@ -40,6 +41,7 @@ export function HeroQuestionsPanel({
   verticalAlignment = "center",
   children,
   transitionInterval = 4000,
+  includeHeaderSpacing = true,
   ...panelProps
 }: HeroQuestionsPanelProps) {
   // Use title as a single headline if headlines array is empty
@@ -50,6 +52,7 @@ export function HeroQuestionsPanel({
     <BasePanel
       fullHeight={true}
       paddingVariant="wide"
+      includeHeaderSpacing={includeHeaderSpacing}
       {...panelProps}
       sx={{
         backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",

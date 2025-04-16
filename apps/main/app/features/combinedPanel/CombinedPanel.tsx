@@ -244,6 +244,7 @@ const CombinedPanelContent = () => {
         fullHeight={false}
         background="light"
         paddingVariant="narrow"
+        includeHeaderSpacing={false}
         sx={{
           width: "100%",
           position: "relative",

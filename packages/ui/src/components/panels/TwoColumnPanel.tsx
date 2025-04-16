@@ -13,6 +13,7 @@ interface TwoColumnPanelProps extends BasePanelProps {
     left?: GridProps
     right?: GridProps
   }
+  includeHeaderSpacing?: boolean
 }
 
 export function TwoColumnPanel({
@@ -22,10 +23,15 @@ export function TwoColumnPanel({
   rightTitle,
   reversed = false,
   columnProps = {},
+  includeHeaderSpacing = true,
   ...panelProps
 }: TwoColumnPanelProps) {
   return (
-    <BasePanel paddingVariant="wide" {...panelProps}>
+    <BasePanel
+      paddingVariant="wide"
+      includeHeaderSpacing={includeHeaderSpacing}
+      {...panelProps}
+    >
       <Grid container spacing={4}>
         <Grid
           sx={{

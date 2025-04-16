@@ -313,6 +313,7 @@ export default function Home() {
               }
               verticalAlignment="center"
               background="light"
+              includeHeaderSpacing={true}
               sx={{
                 backgroundColor: "rgb(191, 218, 220)",
               }}
@@ -381,7 +382,8 @@ export default function Home() {
           <BasePanel
             fullHeight={false}
             background="dark"
-            paddingVariant="wide"
+            paddingVariant="very-wide"
+            includeHeaderSpacing={false}
             sx={{
               backgroundColor: "rgb(44, 110, 145)",
               display: "flex",
@@ -392,10 +394,7 @@ export default function Home() {
             }}
           >
             <Box maxWidth="900px">
-              <Typography
-                variant="h4"
-                color="white"
-              >
+              <Typography variant="h4" color="white">
                 <Box component="span" sx={{ fontWeight: 600 }}>
                   {t("interstitial.boldText")}
                 </Box>
@@ -632,6 +631,7 @@ export default function Home() {
                 </Box>
               }
               background="transparent"
+              includeHeaderSpacing={true}
               sx={{
                 color: (theme) => theme.palette.text.secondary,
                 "& .MuiTypography-root": {
