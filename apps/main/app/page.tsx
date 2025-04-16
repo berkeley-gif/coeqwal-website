@@ -308,9 +308,12 @@ export default function Home() {
               }
               verticalAlignment="center"
               background="light"
-              includeHeaderSpacing={true}
+              includeHeaderSpacing={false}
               sx={{
                 backgroundColor: "rgb(191, 218, 220)",
+                "& > div": {  // Target the inner Box component
+                  marginTop: "-15vh", // Move headlines up by 15% of viewport height
+                }
               }}
             />
 
