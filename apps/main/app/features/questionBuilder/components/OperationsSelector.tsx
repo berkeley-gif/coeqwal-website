@@ -38,70 +38,72 @@ const OperationsSelector: React.FC = () => {
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
-  
+
   // Track expanded accordions
   const [expandedAccordions, setExpandedAccordions] = useState<string[]>([])
-  
+
   // Determine which accordions should be forced open because they contain selected options
   const forcedOpenAccordions = useMemo(() => {
-    const forced: string[] = [];
-    
+    const forced: string[] = []
+
     // Find which theme contains each selected operation
-    selectedOperations.forEach(opId => {
+    selectedOperations.forEach((opId) => {
       for (const theme of OPERATION_THEMES) {
         // Check if this operation is in this theme
-        let isInTheme = false;
-        
+        let isInTheme = false
+
         for (const option of theme.options) {
-          if (typeof option === 'string') {
+          if (typeof option === "string") {
             if (option === opId) {
-              isInTheme = true;
-              break;
+              isInTheme = true
+              break
             }
-          } else if (typeof option === 'object') {
+          } else if (typeof option === "object") {
             if (option.id === opId) {
-              isInTheme = true;
-              break;
+              isInTheme = true
+              break
             }
-            
+
             // Check subtypes if they exist
-            if ('subtypes' in option && Array.isArray(option.subtypes)) {
-              const hasSubtype = option.subtypes.some((sub: {id: string}) => sub.id === opId);
+            if ("subtypes" in option && Array.isArray(option.subtypes)) {
+              const hasSubtype = option.subtypes.some(
+                (sub: { id: string }) => sub.id === opId,
+              )
               if (hasSubtype) {
-                isInTheme = true;
-                break;
+                isInTheme = true
+                break
               }
             }
           }
         }
-        
+
         if (isInTheme) {
-          forced.push(theme.id);
-          break;
+          forced.push(theme.id)
+          break
         }
       }
-    });
-    
-    return forced;
-  }, [selectedOperations]);
-  
+    })
+
+    return forced
+  }, [selectedOperations])
+
   // Handle accordion expansion change
   const handleAccordionChange = (themeId: string, isExpanded: boolean) => {
-    setExpandedAccordions(prev => {
+    setExpandedAccordions((prev) => {
       // If expanding, add to expanded list
       if (isExpanded) {
-        return [...prev, themeId];
+        return [...prev, themeId]
       }
-      
+
       // If collapsing, only allow if not in forced open list
       if (!forcedOpenAccordions.includes(themeId)) {
-        return prev.filter(id => id !== themeId);
+        return prev.filter((id) => id !== themeId)
       }
-      
+
       // Otherwise keep as is
-      return prev;
-    });
-  };
+      return prev
+    })
+  }
 
   // Common styles
   const searchBoxStyles = {
@@ -140,45 +142,49 @@ const OperationsSelector: React.FC = () => {
     checked: boolean,
   ) => {
     // First, check if the option is active before proceeding
-    let isActive = false;
-    
+    let isActive = false
+
     // Find the option in all themes to check its active status
     for (const theme of OPERATION_THEMES) {
       for (const option of theme.options) {
         if (typeof option === "string" && option === optionId) {
           // Legacy string options are always active
-          isActive = true;
-          break;
+          isActive = true
+          break
         } else if (typeof option === "object" && option.id === optionId) {
-          isActive = option.active !== false; // Default to true if not specified
-          break;
-        } else if (typeof option === "object" && "subtypes" in option && option.subtypes) {
+          isActive = option.active !== false // Default to true if not specified
+          break
+        } else if (
+          typeof option === "object" &&
+          "subtypes" in option &&
+          option.subtypes
+        ) {
           // Check subtypes if they exist
-          const subtype = option.subtypes.find(sub => sub.id === optionId);
+          const subtype = option.subtypes.find((sub) => sub.id === optionId)
           if (subtype) {
-            isActive = option.active !== false && subtype.active !== false;
-            break;
+            isActive = option.active !== false && subtype.active !== false
+            break
           }
         }
       }
-      if (isActive) break; // No need to check other themes if found
+      if (isActive) break // No need to check other themes if found
     }
-    
+
     // Don't allow changes for inactive options
-    if (!isActive) return;
-    
+    if (!isActive) return
+
     // For radio-like behavior in operations
     if (checked) {
       // Deselect all current selections
-      selectedOperations.forEach(operation => {
-        handleOperationChange(operation, false);
-      });
-      
+      selectedOperations.forEach((operation) => {
+        handleOperationChange(operation, false)
+      })
+
       // Then select only the new option
-      handleOperationChange(optionId, true);
+      handleOperationChange(optionId, true)
     } else {
       // Allow deselection normally
-      handleOperationChange(optionId, false);
+      handleOperationChange(optionId, false)
     }
   }
 
@@ -226,7 +232,9 @@ const OperationsSelector: React.FC = () => {
             noParentCheckbox={["delta-conveyance"]}
             isOperations={true}
             isExpanded={expandedAccordions.includes(theme.id)}
-            onAccordionChange={(isExpanded) => handleAccordionChange(theme.id, isExpanded)}
+            onAccordionChange={(isExpanded) =>
+              handleAccordionChange(theme.id, isExpanded)
+            }
           />
         ))}
 

@@ -48,7 +48,6 @@ export default function Home() {
   // For the uncontrolled map, we'll store its ref so we can call flyTo
   const uncontrolledRef = useRef<MapboxMapRef | null>(null)
 
-
   // ────────────────────────────────────────────────────────────────────────
   // 2) CONTROLLED EXAMPLE
   //    Using a local React state that we pass as viewState
@@ -595,12 +594,12 @@ export default function Home() {
                 minHeight: "30vh",
               }}
             >
-              <Typography 
-                variant="h4" 
-                sx={{ 
+              <Typography
+                variant="h4"
+                sx={{
                   fontStyle: "italic",
                   color: "white",
-                  textAlign: "center"
+                  textAlign: "center",
                 }}
               >
                 (to be continued)

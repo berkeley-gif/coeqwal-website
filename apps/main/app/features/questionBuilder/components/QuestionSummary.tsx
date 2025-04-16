@@ -41,16 +41,18 @@ interface QuestionSummaryProps {
   wasScrolled?: boolean // Keeping prop for backward compatibility but not using it
 }
 
-const QuestionSummary: React.FC<QuestionSummaryProps> = ({ 
-  // wasScrolled is ignored
-}) => {
+const QuestionSummary: React.FC<QuestionSummaryProps> = (
+  {
+    // wasScrolled is ignored
+  },
+) => {
   const theme = useTheme()
   const { t, locale } = useTranslation()
   const containerRef = React.useRef<HTMLDivElement>(null)
   const textRef = React.useRef<HTMLElement>(null)
   const [fontSize, setFontSize] = React.useState("4.8rem")
   const [isOverflowing, setIsOverflowing] = React.useState(false)
-  
+
   const {
     state: {
       swapped,
@@ -64,34 +66,34 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
-  
+
   // Calculate font size based on number of selections
   const calculatedFontSize = useMemo(() => {
     // Count total selections
-    const operationsCount = selectedOperations.length;
+    const operationsCount = selectedOperations.length
     const outcomesCount = Object.values(outcomesBySection).reduce(
-      (count, section) => count + (section ? section.length : 0), 
-      0
-    );
-    
-    const totalSelections = operationsCount + outcomesCount;
-    
+      (count, section) => count + (section ? section.length : 0),
+      0,
+    )
+
+    const totalSelections = operationsCount + outcomesCount
+
     // Default large size
-    if (totalSelections <= 1) return "4.8rem";
-    
+    if (totalSelections <= 1) return "4.8rem"
+
     // Medium size
-    if (totalSelections <= 3) return "4.2rem";
-    
+    if (totalSelections <= 3) return "4.2rem"
+
     // Medium-small size
-    if (totalSelections <= 5) return "3.6rem";
-    
+    if (totalSelections <= 5) return "3.6rem"
+
     // Small size
-    if (totalSelections <= 7) return "3.2rem";
-    
+    if (totalSelections <= 7) return "3.2rem"
+
     // Extra small size
-    return "2.8rem";
-  }, [selectedOperations, outcomesBySection]);
-  
+    return "2.8rem"
+  }, [selectedOperations, outcomesBySection])
+
   // Expensive calculation for the summary text
   const summary = useMemo(() => {
     // TranslatedQuestion component to handle React elements in translations
@@ -228,6 +230,29 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       // Join operations with "and"
       return formattedOperations.reduce((result, op, index) => {
         if (index === 0) return op
+
+        // If this is the last item and there are more than 2 total items, use ", and"
+        if (
+          index === formattedOperations.length - 1 &&
+          formattedOperations.length > 2
+        ) {
+          return (
+            <>
+              {result}, {t("questionBuilder.connectors.and")} {op}
+            </>
+          )
+        }
+
+        // If there are more than 2 items and this isn't the last one, use comma
+        if (formattedOperations.length > 2) {
+          return (
+            <>
+              {result}, {op}
+            </>
+          )
+        }
+
+        // Default case (2 items): use simple "and"
         return (
           <>
             {result} {t("questionBuilder.connectors.and")} {op}
@@ -306,6 +331,29 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
       return formattedElements.reduce((result, element, index) => {
         if (index === 0) return element
+
+        // If this is the last item and there are more than 2 total items, use ", and"
+        if (
+          index === formattedElements.length - 1 &&
+          formattedElements.length > 2
+        ) {
+          return (
+            <>
+              {result}, {t("questionBuilder.connectors.and")} {element}
+            </>
+          )
+        }
+
+        // If there are more than 2 items and this isn't the last one, use comma
+        if (formattedElements.length > 2) {
+          return (
+            <>
+              {result}, {element}
+            </>
+          )
+        }
+
+        // Default case (2 items): use simple "and"
         return (
           <>
             {result} {t("questionBuilder.connectors.and")} {element}
@@ -353,6 +401,29 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
       return formattedRegions.reduce((result, region, index) => {
         if (index === 0) return region
+
+        // If this is the last item and there are more than 2 total items, use ", and"
+        if (
+          index === formattedRegions.length - 1 &&
+          formattedRegions.length > 2
+        ) {
+          return (
+            <>
+              {result}, {t("questionBuilder.connectors.and")} {region}
+            </>
+          )
+        }
+
+        // If there are more than 2 items and this isn't the last one, use comma
+        if (formattedRegions.length > 2) {
+          return (
+            <>
+              {result}, {region}
+            </>
+          )
+        }
+
+        // Default case (2 items): use simple "and"
         return (
           <>
             {result} {t("questionBuilder.connectors.and")} {region}
@@ -750,13 +821,46 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         // Join with " and " between sections (no "and" before region)
         return parts.reduce(
           (prev, curr, idx) => {
-            // Don't add "and" before the region part (it already has "in" which flows naturally)
-            const needsAnd = idx > 0 && curr.type !== "region"
+            // Don't add "and" before the region part (it always starts with "in")
+            const needsConnector = idx > 0 && curr.type !== "region"
+
+            // Last item with more than 2 parts (excluding region which doesn't need a connector)
+            const isLastItem = idx === parts.length - 1
+            const totalPartsWithConnectors = parts.filter(
+              (p) => p.type !== "region",
+            ).length
+            const useCurlyAnd =
+              isLastItem && totalPartsWithConnectors > 1 && needsConnector
+
+            // If it's the region or first item, no connector needed
+            if (!needsConnector) {
+              return (
+                <>
+                  {prev} {curr.content}
+                </>
+              )
+            }
+
+            // If there are more than 2 parts needing connectors
+            if (totalPartsWithConnectors > 2) {
+              if (useCurlyAnd) {
+                return (
+                  <>
+                    {prev}, {t("questionBuilder.connectors.and")} {curr.content}
+                  </>
+                )
+              }
+              return (
+                <>
+                  {prev}, {curr.content}
+                </>
+              )
+            }
+
+            // Default: use simple "and"
             return (
               <>
-                {prev}
-                {needsAnd ? " and " : " "}
-                {curr.content}
+                {prev} {t("questionBuilder.connectors.and")} {curr.content}
               </>
             )
           },
@@ -899,11 +1003,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       )
 
       // Create element for outcome with wrapped span for nowrap styling
-      const outcome = (
-        <span key="outcome">
-          {outcomePart}
-        </span>
-      )
+      const outcome = <span key="outcome">{outcomePart}</span>
 
       // Create the climate element with green highlighting
       const climate = (
@@ -940,59 +1040,59 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     t,
     locale,
   ])
-  
+
   // Update font size based on text overflow using ResizeObserver
   React.useEffect(() => {
-    if (!containerRef.current || !textRef.current) return;
-    
+    if (!containerRef.current || !textRef.current) return
+
     // Create a function to check for overflow
     const checkForOverflow = () => {
-      if (!containerRef.current || !textRef.current) return;
-      
+      if (!containerRef.current || !textRef.current) return
+
       // Reset to maximum size to get true width measurement
-      textRef.current.style.fontSize = "4.8rem";
-      
+      textRef.current.style.fontSize = "4.8rem"
+
       // Get measurements
-      const containerWidth = containerRef.current.clientWidth - 60; // More padding buffer
-      const textWidth = textRef.current.scrollWidth;
-      
-      const currentlyOverflowing = textWidth > containerWidth;
-      setIsOverflowing(currentlyOverflowing);
-      
+      const containerWidth = containerRef.current.clientWidth - 60 // More padding buffer
+      const textWidth = textRef.current.scrollWidth
+
+      const currentlyOverflowing = textWidth > containerWidth
+      setIsOverflowing(currentlyOverflowing)
+
       // If overflowing, calculate the right size
       if (currentlyOverflowing) {
-        const ratio = containerWidth / textWidth;
+        const ratio = containerWidth / textWidth
         // More conservative buffer for safety (0.9 instead of 0.95)
-        const newSize = Math.max(2.2, 4.8 * ratio * 0.9);
-        setFontSize(`${newSize}rem`);
+        const newSize = Math.max(2.2, 4.8 * ratio * 0.9)
+        setFontSize(`${newSize}rem`)
       } else {
         // No overflow, use maximum size
-        setFontSize("4.8rem");
+        setFontSize("4.8rem")
       }
-    };
-    
+    }
+
     // Use ResizeObserver for more reliable size detection
     const resizeObserver = new ResizeObserver(() => {
       // Add a small delay to ensure DOM is ready
-      setTimeout(checkForOverflow, 100); // Longer delay for more reliable measurements
-    });
-    
+      setTimeout(checkForOverflow, 100) // Longer delay for more reliable measurements
+    })
+
     // Observe both container and text element
-    resizeObserver.observe(containerRef.current);
-    resizeObserver.observe(textRef.current);
-    
+    resizeObserver.observe(containerRef.current)
+    resizeObserver.observe(textRef.current)
+
     // Run once immediately after mounting
-    setTimeout(checkForOverflow, 100);
-    
+    setTimeout(checkForOverflow, 100)
+
     // Also run again after a longer delay to ensure accurate measurements
-    setTimeout(checkForOverflow, 500);
-    
+    setTimeout(checkForOverflow, 500)
+
     // Clean up observer
     return () => {
-      resizeObserver.disconnect();
-    };
-  }, [summary]);
-  
+      resizeObserver.disconnect()
+    }
+  }, [summary])
+
   // Container styles now use fixed values instead of conditional wasScrolled styles
   return (
     <div

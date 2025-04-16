@@ -6,7 +6,11 @@ import {
   questionBuilderActions,
 } from "../context/QuestionBuilderContext"
 import { OPERATION_THEMES } from "../data/constants"
-import { CANONICAL_OUTCOME_TYPES, CANONICAL_REGIONS, OUTCOME_CATEGORIES } from "../data/constants"
+import {
+  CANONICAL_OUTCOME_TYPES,
+  CANONICAL_REGIONS,
+  OUTCOME_CATEGORIES,
+} from "../data/constants"
 
 /**
  * Custom hook that provides helper functions for question builder components
@@ -408,30 +412,36 @@ export const useQuestionBuilderHelpers = () => {
 
   const formatOutcomeText = useCallback((text: string, section: string) => {
     // First, look up the proper label from the constants
-    let formattedText = text;
-    
+    let formattedText = text
+
     // Check if this is an ID that needs to be mapped to a label
     if (section === "type") {
       // Look in CANONICAL_OUTCOME_TYPES for matching ID
-      const matchingType = CANONICAL_OUTCOME_TYPES.find(type => type.id === text);
+      const matchingType = CANONICAL_OUTCOME_TYPES.find(
+        (type) => type.id === text,
+      )
       if (matchingType) {
-        formattedText = matchingType.label;
+        formattedText = matchingType.label
       }
     } else if (section === "region") {
       // Look in CANONICAL_REGIONS for matching ID
-      const matchingRegion = CANONICAL_REGIONS.find(region => region.id === text);
+      const matchingRegion = CANONICAL_REGIONS.find(
+        (region) => region.id === text,
+      )
       if (matchingRegion) {
-        formattedText = matchingRegion.label;
+        formattedText = matchingRegion.label
       }
     } else if (section === "metric") {
       // Look in OUTCOME_CATEGORIES for the metric section
-      const metricCategory = OUTCOME_CATEGORIES.find(cat => cat.id === "metric");
+      const metricCategory = OUTCOME_CATEGORIES.find(
+        (cat) => cat.id === "metric",
+      )
       if (metricCategory) {
-        const matchingMetric = metricCategory.options.find(option => 
-          typeof option === 'object' && option.id === text
-        );
-        if (matchingMetric && typeof matchingMetric === 'object') {
-          formattedText = matchingMetric.label;
+        const matchingMetric = metricCategory.options.find(
+          (option) => typeof option === "object" && option.id === text,
+        )
+        if (matchingMetric && typeof matchingMetric === "object") {
+          formattedText = matchingMetric.label
         }
       }
     }
@@ -468,7 +478,9 @@ export const useQuestionBuilderHelpers = () => {
 
         // Keep capitalization for proper nouns in regions
         if (
-          !properNounPrefixes.some((prefix) => formattedText.startsWith(`in ${prefix}`)) &&
+          !properNounPrefixes.some((prefix) =>
+            formattedText.startsWith(`in ${prefix}`),
+          ) &&
           formattedText !== "in the Delta" &&
           formattedText !== "in all regions"
         ) {

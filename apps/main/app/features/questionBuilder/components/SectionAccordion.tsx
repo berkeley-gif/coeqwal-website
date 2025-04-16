@@ -86,11 +86,14 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   )
 
   // Handle accordion expansion change
-  const handleAccordionChange = (event: React.SyntheticEvent, expanded: boolean) => {
+  const handleAccordionChange = (
+    event: React.SyntheticEvent,
+    expanded: boolean,
+  ) => {
     if (onAccordionChange) {
-      onAccordionChange(expanded);
+      onAccordionChange(expanded)
     }
-  };
+  }
 
   // Styles for accordion components
   const accordionStyles = {

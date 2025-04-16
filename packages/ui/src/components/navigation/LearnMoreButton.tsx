@@ -34,10 +34,11 @@ export function LearnMoreButton({
   ...props
 }: LearnMoreButtonProps) {
   const { locale, isLoading } = useTranslation()
-  
+
   // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
-  const componentText = translations[safeLocale as keyof TranslationsMap] || translations.en
+  const componentText =
+    translations[safeLocale as keyof TranslationsMap] || translations.en
 
   return (
     <Button onClick={onClick} endIcon={<CustomArrowForwardIcon />} {...props}>
