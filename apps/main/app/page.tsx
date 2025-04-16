@@ -8,6 +8,7 @@ import {
   MiniDrawer,
   VerticalDivider,
   KeyboardArrowDownIcon,
+  VisibilityIcon,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { TwoColumnPanel, HeroQuestionsPanel, BasePanel } from "@repo/ui"
@@ -400,7 +401,11 @@ export default function Home() {
                 </Box>
                 {" " + t("interstitial.part1")}
               </Typography>
-              <Typography variant="body2" color="white" sx={{ fontWeight: 300 }}>
+              <Typography
+                variant="body2"
+                color="white"
+                sx={{ fontWeight: 300 }}
+              >
                 {t("interstitial.part2")}
               </Typography>
             </Box>
@@ -417,39 +422,165 @@ export default function Home() {
               }}
             >
               {/* Custom two-column layout */}
-              <Box sx={{
-                display: "flex",
-                flexDirection: { xs: "column", md: "row" },
-                width: "100%",
-              }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", md: "row" },
+                  width: "100%",
+                }}
+              >
                 {/* Left column */}
-                <Box sx={{ 
-                  width: { xs: "100%", md: "50%" },
-                  pr: { md: 4 },
-                }}>
+                <Box
+                  sx={{
+                    width: { xs: "100%", md: "50%" },
+                    pr: { md: 4 },
+                  }}
+                >
                   <Typography variant="h2" sx={{ mb: 1 }}>
                     California Water
                   </Typography>
-                  
-                  <Stack spacing={2}>
-                    <Typography variant="body1">
-                      Most of California&apos;s water falls in the winter as rain and snow in northern California and the Sierra Nevada. This precipitation – highly variable from year to year – is the state's primary water supply.
-                    </Typography>
-                    
-                    <Typography variant="body1">
-                      Snowpack serves as a natural reservoir, releasing water throughout the spring. As rainfall and melting snow flows from the mountains into rivers of the Central Valley, some of it seeps underground and replenishes large aquifers.
-                    </Typography>
 
-                    <Typography variant="body1">
-                      The Sacramento River - California&apos;s largest - flows from the north and joins with the San Joaquin River, flowing up from the south, in the Delta. These flows create one of the most ecologically rich estuaries on the West Coast before flowing out to the San Francisco Bay and Pacific Ocean. In the Delta, freshwater mixes with saltwater, creating a shifting salinity balance shaped by the amount of flow and the tides.
-                    </Typography>
-                    
-                    <Typography variant="body1">
-                      Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, we have transformed how water moves through California.
-                    </Typography>
+                  <Stack spacing={2}>
+                    <Box
+                      sx={{
+                        cursor: "pointer",
+                        p: 1,
+                        borderRadius: 1,
+                        transition: "background-color 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                        },
+                        "&:hover .MuiSvgIcon-root": {
+                          color: "#42a5f5",
+                          transform: "scale(1.2)",
+                        },
+                        "&:active": {
+                          backgroundColor: "rgba(25, 118, 210, 0.16)",
+                        },
+                      }}
+                      onClick={() => console.log("Clicked paragraph 1")}
+                    >
+                      <Typography variant="body1">
+                        Most of California&apos;s water falls in the winter as
+                        rain and snow in northern California and the Sierra
+                        Nevada. This precipitation – highly variable from year
+                        to year – is the state's primary water supply.
+                        <VisibilityIcon
+                          sx={{
+                            ml: 1,
+                            verticalAlign: "middle",
+                          }}
+                        />
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        cursor: "pointer",
+                        p: 1,
+                        borderRadius: 1,
+                        transition: "background-color 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                        },
+                        "&:hover .MuiSvgIcon-root": {
+                          color: "#42a5f5",
+                          transform: "scale(1.2)",
+                        },
+                        "&:active": {
+                          backgroundColor: "rgba(25, 118, 210, 0.16)",
+                        },
+                      }}
+                      onClick={() => console.log("Clicked paragraph 2")}
+                    >
+                      <Typography variant="body1">
+                        Snowpack serves as a natural reservoir, releasing water
+                        throughout the spring. As rainfall and melting snow
+                        flows from the mountains into rivers of the Central
+                        Valley, some of it seeps underground and replenishes
+                        large aquifers.
+                        <VisibilityIcon
+                          sx={{
+                            ml: 1,
+                            verticalAlign: "middle",
+                          }}
+                        />
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        cursor: "pointer",
+                        p: 1,
+                        borderRadius: 1,
+                        transition: "background-color 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                        },
+                        "&:hover .MuiSvgIcon-root": {
+                          color: "#42a5f5",
+                          transform: "scale(1.2)",
+                        },
+                        "&:active": {
+                          backgroundColor: "rgba(25, 118, 210, 0.16)",
+                        },
+                      }}
+                      onClick={() => console.log("Clicked paragraph 3")}
+                    >
+                      <Typography variant="body1">
+                        The Sacramento River - California&apos;s largest - flows
+                        from the north and joins with the San Joaquin River,
+                        flowing up from the south, in the Delta. These flows
+                        create one of the most ecologically rich estuaries on
+                        the West Coast before flowing out to the San Francisco
+                        Bay and Pacific Ocean. In the Delta, freshwater mixes
+                        with saltwater, creating a shifting salinity balance
+                        shaped by the amount of flow and the tides.
+                        <VisibilityIcon
+                          sx={{
+                            ml: 1,
+                            verticalAlign: "middle",
+                          }}
+                        />
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{
+                        cursor: "pointer",
+                        p: 1,
+                        borderRadius: 1,
+                        transition: "background-color 0.3s ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(25, 118, 210, 0.08)",
+                        },
+                        "&:hover .MuiSvgIcon-root": {
+                          color: "#42a5f5",
+                          transform: "scale(1.2)",
+                        },
+                        "&:active": {
+                          backgroundColor: "rgba(25, 118, 210, 0.16)",
+                        },
+                      }}
+                      onClick={() => console.log("Clicked paragraph 4")}
+                    >
+                      <Typography variant="body1">
+                        Although California has an abundance of water, most of
+                        our water falls far from where most people live, work,
+                        and farm. To supply water to agriculture and a growing
+                        population in drier parts of the state, we have
+                        transformed how water moves through California.
+                        <VisibilityIcon
+                          sx={{
+                            ml: 1,
+                            verticalAlign: "middle",
+                          }}
+                        />
+                      </Typography>
+                    </Box>
                   </Stack>
                 </Box>
-                
+
                 {/* Right column (empty) */}
                 <Box sx={{ width: { xs: "100%", md: "50%" } }} />
               </Box>
