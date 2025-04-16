@@ -38,11 +38,11 @@ const isDeltaOutflow = (text: string) =>
 
 // QuestionSummary component props
 interface QuestionSummaryProps {
-  wasScrolled?: boolean
+  wasScrolled?: boolean // Keeping prop for backward compatibility but not using it
 }
 
-const QuestionSummary: React.FC<QuestionSummaryProps> = ({
-  wasScrolled = false,
+const QuestionSummary: React.FC<QuestionSummaryProps> = ({ 
+  // wasScrolled is ignored
 }) => {
   const theme = useTheme()
   const { t, locale } = useTranslation()
@@ -909,38 +909,35 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     locale,
   ])
 
-  // Container styles are now merged into Typography
+  // Container styles now use fixed values instead of conditional wasScrolled styles
   return (
     <div
       style={{
-        backgroundColor: wasScrolled ? "white" : "transparent",
+        backgroundColor: "transparent",
         width: "100%",
         position: "relative",
         zIndex: 1000,
-        padding: wasScrolled ? "0" : 0,
-        transition: "background-color 0.3s ease, padding 0.3s ease",
+        padding: 0,
         maxWidth: "none !important",
       }}
     >
       <Typography
         variant="h2"
         sx={(theme) => ({
-          mt: theme.spacing(wasScrolled ? 1 : 4),
+          mt: theme.spacing(4),
           mb: 0,
-          lineHeight: theme.typography.h1.lineHeight,
+          lineHeight: theme.typography.h2.lineHeight,
           textAlign: "center",
           fontWeight: 500,
           width: "100%",
           margin: "0 auto",
-          fontSize: wasScrolled ? "3.33rem" : "7rem",
+          fontSize: "4.8rem",
           backgroundColor: "white",
-          paddingTop: wasScrolled ? "140px" : "72px",
-          paddingBottom: wasScrolled ? "40px" : "32px",
+          paddingTop: "72px",
+          paddingBottom: "32px",
           paddingLeft: "0",
           paddingRight: "0",
-          boxShadow: wasScrolled ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
-          transition:
-            "font-size 0.3s ease, padding 0.3s ease, margin 0.3s ease, box-shadow 0.3s ease",
+          boxShadow: "none",
           maxWidth: "none !important",
         })}
       >
