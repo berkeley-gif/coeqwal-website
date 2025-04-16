@@ -1006,16 +1006,27 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
       // Create inline custom component
       const createCustomSwappedFormat = () => {
+        // Create the climate element with green highlighting if climate is enabled
+        const climateElement = includeClimate ? (
+          <>
+            {" "}
+            {locale === 'es' ? 'con' : 'with'}{" "}
+            <ColoredText color={theme.palette.climate.main}>
+              {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
+            </ColoredText>
+          </>
+        ) : null;
+
         if (locale === 'es') {
           return (
             <>
-              Para {outcomePart}, ¿qué {operationsPart} podríamos considerar?
+              Para {outcomePart}{climateElement}, ¿qué {operationsPart} podríamos considerar?
             </>
           )
         } else {
           return (
             <>
-              To {outcomePart}, which {operationsPart} could we consider?
+              To {outcomePart}{climateElement}, which {operationsPart} could we consider?
             </>
           )
         }
@@ -1026,6 +1037,31 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         return createCustomSwappedFormat()
       }
 
+      // Create the climate element with green highlighting if climate is enabled
+      const climateElement = includeClimate ? (
+        <ColoredText color={theme.palette.climate.main}>
+          {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
+        </ColoredText>
+      ) : null;
+
+      // If no outcomes are selected, use the default format with climate if enabled
+      if (includeClimate) {
+        if (locale === 'es') {
+          return (
+            <>
+              Para cambiar {outcomePart} con {climateElement}, ¿qué {operationsPart} podríamos considerar?
+            </>
+          )
+        } else {
+          return (
+            <>
+              To change {outcomePart} with {climateElement}, which {operationsPart} could we consider?
+            </>
+          )
+        }
+      }
+
+      // Default format without climate
       return (
         <TranslatedQuestion
           translationKey="questionBuilder.swappedFormat"
