@@ -280,6 +280,25 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     isActive: boolean = true,
     // isSubtype?: boolean,
   ) => {
+    // Disable all metrics in both swapped and unswapped modes
+    if (section === "metric") {
+      return (
+        <Box sx={{ display: "flex", alignItems: "flex-start", mb: 0.5 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: "text.disabled", // Always disabled color
+              fontStyle: "italic",
+              ml: 1,
+            }}
+          >
+            {getLocalizedLabel(option)}{" "}
+            {t("questionBuilder.sectionAccordion.comingSoon")}
+          </Typography>
+        </Box>
+      )
+    }
+
     // Only outcomes (except regions) should have direction arrows in swapped mode
     // Operations should always have checkboxes regardless of swapped mode
     if (swapped && !isOperations && !noDirectionControls.includes(optionId)) {
@@ -370,7 +389,14 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         expandIcon={<ExpandMoreIcon />}
         aria-controls={`${title.toLowerCase().replace(/\s+/g, "-")}-content`}
         id={`${title.toLowerCase().replace(/\s+/g, "-")}-header`}
-        sx={accordionSummaryStyles}
+        sx={{
+          ...accordionSummaryStyles,
+          // Disable the metrics accordion
+          ...(section === "metric" ? {
+            opacity: 0.6,
+            pointerEvents: "none"
+          } : {})
+        }}
       >
         {swapped && isOperations ? (
           // In swapped mode for operations, make the summary title selectable
