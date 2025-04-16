@@ -62,7 +62,7 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
           pitch: 0,
         }}
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
-        scrollZoom={true}
+        scrollZoom={false}
         interactive={true}
         dragPan={true}
         style={{ width: "100%", height: "100%" }}

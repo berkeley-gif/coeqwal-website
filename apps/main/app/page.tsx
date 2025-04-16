@@ -336,14 +336,13 @@ export default function Home() {
                 left: "50%",
                 transform: "translateX(-50%)",
                 zIndex: 10,
-                cursor: "pointer",
+                cursor: "default",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 maxWidth: "900px",
                 textAlign: "center",
               }}
-              onClick={() => scrollToQuestionBuilder()}
             >
               <Typography
                 variant="h5"
@@ -366,18 +365,12 @@ export default function Home() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: theme.palette.common.white,
-                  "&:hover": {
-                    backgroundColor: "rgba(0, 0, 0, 0.3)",
-                  },
                 })}
               >
                 <KeyboardArrowDownIcon
                   fontSize="large"
                   sx={(theme) => ({
                     color: theme.palette.common.white,
-                    "&:hover": {
-                      color: theme.palette.common.white,
-                    },
                   })}
                 />
               </Box>
@@ -395,7 +388,6 @@ export default function Home() {
               alignItems: "center",
               justifyContent: "center",
               textAlign: "left",
-              py: 18,
               pointerEvents: "auto",
             }}
           >
@@ -418,11 +410,11 @@ export default function Home() {
           {/* Two Column Panel with map controls */}
           <Box sx={{ pointerEvents: "none" }} id="california-water-panel">
             <TwoColumnPanel
-              leftTitle="Map Controls Demo"
+              leftTitle="California Water"
               leftContent={
                 <Box
                   sx={{
-                    pointerEvents: "auto",
+                    pointerEvents: "none",
                     display: "flex",
                     flexDirection: "column",
                     gap: 2,
