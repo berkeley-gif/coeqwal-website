@@ -340,7 +340,7 @@ export default function Home() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                maxWidth: "600px",
+                maxWidth: "900px",
                 textAlign: "center",
               }}
               onClick={() => scrollToQuestionBuilder()}
@@ -353,8 +353,7 @@ export default function Home() {
                   textShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)",
                 }}
               >
-                Water connects us. Explore California&apos;s water system and
-                discover possibilities for the future of water in our state.
+                {t("heroPanel.scrollText")}
               </Typography>
 
               <Box

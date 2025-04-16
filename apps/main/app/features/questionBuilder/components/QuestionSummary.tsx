@@ -685,7 +685,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         if (metricPart && decreaseMetricGroup) {
           metricPart = (
             <>
-              {metricPart} {t("questionBuilder.connectors.and")} {decreaseMetricGroup}
+              {metricPart} {t("questionBuilder.connectors.and")}{" "}
+              {decreaseMetricGroup}
             </>
           )
         } else if (decreaseMetricGroup) {

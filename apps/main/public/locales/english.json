@@ -11,7 +11,9 @@
       "How do cities and farms share water in a hotter, drier future?",
       "Which policies help meet environmental goals?",
       "What happens if we let our rivers run?"
-    ]
+    ],
+    "scrollText": "Water connects us. Explore California's water system and discover possibilities for the future of water in our state.",
+    "combinedPanelScrollText": "Californians share water through one of the largest and most complex conveyance systems in the world."
   },
   "secondaryNavigation": {
     "californiaWater": "How water moves through California",

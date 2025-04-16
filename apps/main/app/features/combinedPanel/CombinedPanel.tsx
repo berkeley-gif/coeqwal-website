@@ -208,8 +208,7 @@ const CombinedPanelContent = () => {
             textShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)",
           }}
         >
-          Californians share water through one of the largest and most complex
-          conveyance systems in the world.
+          {t("heroPanel.combinedPanelScrollText")}
         </Typography>
 
         {/* Scroll button */}
