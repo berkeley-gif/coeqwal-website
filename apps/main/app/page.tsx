@@ -588,6 +588,32 @@ export default function Home() {
             </BasePanel>
           </Box>
 
+          {/* To Be Continued Panel */}
+          <Box sx={{ pointerEvents: "auto" }}>
+            <BasePanel
+              background="transparent"
+              paddingVariant="wide"
+              includeHeaderSpacing={false}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "30vh",
+              }}
+            >
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontStyle: "italic",
+                  color: "white",
+                  textAlign: "center"
+                }}
+              >
+                (to be continued)
+              </Typography>
+            </BasePanel>
+          </Box>
+
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">
             <CombinedPanel />
