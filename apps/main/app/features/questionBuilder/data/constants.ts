@@ -140,6 +140,20 @@ export const OPERATION_THEMES = [
           climateOptions: ["hist_adj"],
         },
       },
+      {
+        id: "tucp-sgma-operations",
+        label: "Current operations with TUCPs and SGMA",
+        labelEs: "Operaciones actuales con TUCPs y SGMA",
+        shortText: "TUCPs and SGMA",
+        shortTextEs: "TUCPs y SGMA",
+        isSingular: false,
+        active: true,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
     ],
   },
   {
@@ -153,7 +167,7 @@ export const OPERATION_THEMES = [
           "Increasing flows in tributaries and Delta outflow (Alternative 1)",
         labelEs:
           "Aumento de flujos en afluentes y flujo de salida del Delta (Alternativa 1)",
-        shortText: "increased flows",
+        shortText: "increasing flows",
         shortTextEs: "flujos aumentados",
         isSingular: true,
         active: true,
