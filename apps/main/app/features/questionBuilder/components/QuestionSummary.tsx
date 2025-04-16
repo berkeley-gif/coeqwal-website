@@ -5,7 +5,6 @@ import { Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
-import { CLIMATE_OPTIONS } from "../data/constants"
 
 // TODO: define formatting rules as a configuration object
 // const FORMATTING_RULES = {
@@ -56,46 +55,45 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       outcomesBySection,
       operationDirections,
     },
-    formatOperationText,
     getOperationShortText,
     shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
 
-  // TranslatedQuestion component to handle React elements in translations
-  const TranslatedQuestion = ({
-    translationKey,
-    values,
-  }: {
-    translationKey: string
-    values: Record<string, ReactNode>
-  }) => {
-    const template = t(translationKey)
-
-    // Split the template on placeholder patterns
-    const parts = template.split(/{{(.*?)}}/g)
-
-    return (
-      <>
-        {parts.map((part, i) => {
-          // Even indices are plain text, odd indices are placeholder keys
-          if (i % 2 === 0) {
-            return <React.Fragment key={`text-${i}`}>{part}</React.Fragment>
-          } else {
-            // Return the corresponding React node for the placeholder key
-            return (
-              <React.Fragment key={`placeholder-${i}`}>
-                {values[part] || ""}
-              </React.Fragment>
-            )
-          }
-        })}
-      </>
-    )
-  }
-
   // Expensive calculation?
   const summary = useMemo(() => {
+    // TranslatedQuestion component to handle React elements in translations
+    const TranslatedQuestion = ({
+      translationKey,
+      values,
+    }: {
+      translationKey: string
+      values: Record<string, ReactNode>
+    }) => {
+      const template = t(translationKey)
+
+      // Split the template on placeholder patterns
+      const parts = template.split(/{{(.*?)}}/g)
+
+      return (
+        <>
+          {parts.map((part, i) => {
+            // Even indices are plain text, odd indices are placeholder keys
+            if (i % 2 === 0) {
+              return <React.Fragment key={`text-${i}`}>{part}</React.Fragment>
+            } else {
+              // Return the corresponding React node for the placeholder key
+              return (
+                <React.Fragment key={`placeholder-${i}`}>
+                  {values[part] || ""}
+                </React.Fragment>
+              )
+            }
+          })}
+        </>
+      )
+    }
+
     // OPERATIONS FORMATTING LOGIC
 
     // Helper function to generate operations part
@@ -683,6 +681,17 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
           }
         }
 
+        // Combine increase and decrease metric parts if both exist
+        if (metricPart && decreaseMetricGroup) {
+          metricPart = (
+            <>
+              {metricPart} {t("questionBuilder.connectors.and")} {decreaseMetricGroup}
+            </>
+          )
+        } else if (decreaseMetricGroup) {
+          metricPart = decreaseMetricGroup
+        }
+
         // Now build the final summary combining all three sections
         interface SummaryPart {
           content: React.ReactNode
@@ -810,18 +819,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       // Use the translated label for the selected climate ID
       return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
     }
-
-    const climatePart = includeClimate ? (
-      <>
-        {" "}
-        {t("questionBuilder.connectors.under")}{" "}
-        <ColoredText color={theme.palette.climate.main}>
-          {getClimateLabel()}
-        </ColoredText>
-      </>
-    ) : (
-      ""
-    )
 
     // Change question structure based on number of operations
     if (swapped) {

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useCallback } from "react"
+import React, { useEffect } from "react"
 import { Map } from "@repo/map"
 import { useMap } from "@repo/map"
 import type { MutableRefObject } from "react" // MutableRefObject is not deprecated
@@ -25,16 +25,16 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const refToUse = mapRef
 
   // Test button with context mapRef
-  const testFlyTo = useCallback(() => {
-    if (refToUse.current) {
-      refToUse.current.flyTo(-121.5, 38.05, 10)
-    }
+  // const testFlyTo = useCallback(() => {
+  //   if (refToUse.current) {
+  //     refToUse.current.flyTo(-121.5, 38.05, 10)
+  //   }
 
-    // Also update the uncontrolled ref if provided
-    if (uncontrolledRef && refToUse.current) {
-      uncontrolledRef.current = refToUse.current
-    }
-  }, [refToUse, uncontrolledRef])
+  //   // Also update the uncontrolled ref if provided
+  //   if (uncontrolledRef && refToUse.current) {
+  //     uncontrolledRef.current = refToUse.current
+  //   }
+  // }, [refToUse, uncontrolledRef])
 
   // After Map is mounted, set the uncontrolledRef to point to the same Map instance
   useEffect(() => {

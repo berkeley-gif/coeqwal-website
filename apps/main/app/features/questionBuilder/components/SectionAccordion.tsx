@@ -141,7 +141,6 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     optionId: string,
     option: OptionType | string,
     isActive: boolean = true,
-    isSubtype?: boolean,
   ) => {
     const isSelected = selectedOptions.includes(optionId)
     const currentDirection = operationDirections[optionId] || "increase"
@@ -231,12 +230,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     optionId: string,
     option: OptionType | string,
     isActive: boolean = true,
-    isSubtype?: boolean,
+    // isSubtype?: boolean,
   ) => {
     // If in swapped mode and this is operations section, show direction arrows
     // unless this option is in the noDirectionControls list
     if (swapped && isOperations && !noDirectionControls.includes(optionId)) {
-      return renderDirectionControls(optionId, option, isActive, isSubtype)
+      return renderDirectionControls(optionId, option, isActive)
     }
 
     const optionLabel = getLocalizedLabel(option)
@@ -386,7 +385,6 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                               subtype.id,
                               subtype,
                               isSubtypeActive,
-                              true,
                             )}
                           </Box>
                         )
