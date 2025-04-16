@@ -239,6 +239,40 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     )
   }
 
+  // Function to render option with bullet in swapped mode
+  const renderBulletOption = (
+    optionId: string,
+    option: OptionType | string,
+    isActive: boolean = true,
+  ) => {
+    const optionLabel = getLocalizedLabel(option)
+
+    return (
+      <Box sx={{ display: "flex", alignItems: "flex-start", mb: 0.5 }}>
+        <Box
+          sx={{
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            bgcolor: "text.primary",
+            mt: 1,
+            mr: 1.5,
+          }}
+        />
+        <Typography
+          variant="subtitle1"
+          sx={{
+            color: isActive ? "text.primary" : "text.disabled",
+            fontStyle: isActive ? "normal" : "italic",
+          }}
+        >
+          {optionLabel}{" "}
+          {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+        </Typography>
+      </Box>
+    )
+  }
+
   // Function to render a checkbox with potential tooltip
   const renderCheckbox = (
     optionId: string,
@@ -250,6 +284,11 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     // Operations should always have checkboxes regardless of swapped mode
     if (swapped && !isOperations && !noDirectionControls.includes(optionId)) {
       return renderDirectionControls(optionId, option, isActive)
+    }
+
+    // In swapped mode for operations, render bullets instead of checkboxes for options
+    if (swapped && isOperations) {
+      return renderBulletOption(optionId, option, isActive)
     }
 
     const optionLabel = getLocalizedLabel(option)
@@ -333,18 +372,73 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         id={`${title.toLowerCase().replace(/\s+/g, "-")}-header`}
         sx={accordionSummaryStyles}
       >
-        <Typography
-          variant="subtitle1"
-          sx={{
-            color: allInactive ? "text.disabled" : "text.primary",
-            fontWeight: "medium",
-            fontStyle: allInactive ? "italic" : "normal",
-          }}
-        >
-          {getLocalizedTitle()}{" "}
-          {allInactive &&
-            `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
-        </Typography>
+        {swapped && isOperations ? (
+          // In swapped mode for operations, make the summary title selectable
+          <FormControlLabel
+            control={
+              <Checkbox
+                size="small"
+                // Determine if any option in this theme is selected
+                checked={options.some((opt) => {
+                  const optId = typeof opt === "string" ? opt : opt.id
+                  return selectedOptions.includes(optId)
+                })}
+                onChange={(e) => {
+                  // When checked, select the first active option in this theme
+                  // When unchecked, deselect all options in this theme
+                  const firstActiveOption = options.find((opt) => {
+                    if (typeof opt === "string") return true
+                    return opt.active !== false
+                  })
+
+                  if (firstActiveOption) {
+                    const optId =
+                      typeof firstActiveOption === "string"
+                        ? firstActiveOption
+                        : firstActiveOption.id
+
+                    onOptionChange(optId, e.target.checked)
+                  }
+                }}
+                sx={{
+                  color: theme.palette.text.primary,
+                  "&.Mui-checked": {
+                    color: theme.palette.text.primary,
+                  },
+                }}
+              />
+            }
+            label={
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: allInactive ? "text.disabled" : "text.primary",
+                  fontWeight: "medium",
+                  fontStyle: allInactive ? "italic" : "normal",
+                }}
+              >
+                {getLocalizedTitle()}{" "}
+                {allInactive &&
+                  `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+              </Typography>
+            }
+            sx={{ margin: 0 }}
+          />
+        ) : (
+          // Regular non-selectable title for other cases
+          <Typography
+            variant="subtitle1"
+            sx={{
+              color: allInactive ? "text.disabled" : "text.primary",
+              fontWeight: "medium",
+              fontStyle: allInactive ? "italic" : "normal",
+            }}
+          >
+            {getLocalizedTitle()}{" "}
+            {allInactive &&
+              `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+          </Typography>
+        )}
       </AccordionSummary>
       <AccordionDetails sx={accordionDetailsStyles}>
         <Box

@@ -1028,17 +1028,37 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           </>
         ) : null
 
+        // Check if we only have region selections (no type or metric selections)
+        const onlyRegionSelected =
+          (!outcomesBySection.type || outcomesBySection.type.length === 0) &&
+          outcomesBySection.region &&
+          outcomesBySection.region.length > 0 &&
+          (!outcomesBySection.metric || outcomesBySection.metric.length === 0)
+
+        // If only regions are selected, we need to include "change water availability"
+        const outcomeContent = onlyRegionSelected ? (
+          <>
+            {locale === "es" ? "cambiar " : "change "}
+            <ColoredText color={theme.palette.cool.main}>
+              {t("questionBuilder.defaultTerms.waterAvailability")}
+            </ColoredText>{" "}
+            {outcomePart}
+          </>
+        ) : (
+          outcomePart
+        )
+
         if (locale === "es") {
           return (
             <>
-              Para {outcomePart}
+              Para {outcomeContent}
               {climateElement}, ¿qué {operationsPart} podríamos considerar?
             </>
           )
         } else {
           return (
             <>
-              To {outcomePart}
+              To {outcomeContent}
               {climateElement}, which {operationsPart} could we consider?
             </>
           )
