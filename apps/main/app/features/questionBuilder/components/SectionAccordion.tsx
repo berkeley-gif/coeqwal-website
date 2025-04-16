@@ -115,7 +115,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   // Label styles
   const parentLabelStyles = {
     fontWeight: "medium",
-    fontSize: theme.typography.body2.fontSize,
+    fontSize: theme.typography.subtitle1.fontSize,
   }
 
   // Arrow button styles
@@ -211,7 +211,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         </IconButton>
 
         <Typography
-          variant="body2"
+          variant="subtitle1"
           sx={{
             marginLeft: theme.spacing(1),
             color: isActive ? "text.primary" : "text.disabled",
@@ -275,7 +275,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         }
         label={
           <Typography
-            variant="body2"
+            variant="subtitle1"
             sx={{
               color: isActive ? "text.primary" : "text.disabled",
               fontStyle: isActive ? "normal" : "italic",
@@ -355,7 +355,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                   <Box sx={{ mb: 0.5 }}>
                     {hideCheckbox ? (
                       <Typography
-                        variant="body2"
+                        variant="subtitle1"
                         sx={{
                           ...parentLabelStyles,
                           ml: 0,

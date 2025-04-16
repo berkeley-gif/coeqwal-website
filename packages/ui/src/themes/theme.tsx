@@ -272,7 +272,7 @@ const theme = createTheme({
       fontSize: "1.6rem",
     },
     subtitle1: {
-      fontSize: "1.0714rem",
+      fontSize: "1.2rem",
       letterSpacing: "normal",
     },
     subtitle2: {

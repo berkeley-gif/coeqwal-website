@@ -106,14 +106,14 @@ const CombinedPanelContent = () => {
         ref={stickyHeaderRef}
         sx={{
           position: "sticky",
-          top: theme.layout.headerHeight,
+          top: 0,
           zIndex: 1000,
           width: "100%",
           maxWidth: "none !important",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          padding: theme.spacing(2, 0, 0, 0),
+          paddingTop: `${theme.layout.headerHeight}px`,
           backgroundColor: "#FFFFFF",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
           overflow: "visible",
@@ -176,6 +176,14 @@ const CombinedPanelContent = () => {
           </Card>
         </Box>
       </Box>
+
+      {/* Initial spacer to create the centering effect */}
+      <Box
+        sx={(theme) => ({
+          height: "65px",
+          backgroundColor: theme.palette.background.default,
+        })}
+      />
 
       {/* Main content */}
       <BasePanel
