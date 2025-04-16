@@ -241,7 +241,7 @@ const OperationsSelector: React.FC = () => {
         {/* Search operations section */}
         <Box sx={searchBoxStyles}>
           <SearchIcon sx={searchIconStyles} />
-          <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
             {t("questionBuilder.operationsSelector.searchOperations")}
           </Typography>
           <TextField

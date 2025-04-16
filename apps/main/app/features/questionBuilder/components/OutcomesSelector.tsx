@@ -168,7 +168,7 @@ const OutcomesSelector: React.FC = () => {
                 >
                   <LocationOnIcon sx={locationIconStyles} />
                   <Typography
-                    variant="body2"
+                    variant="subtitle1"
                     sx={{
                       fontWeight: "medium",
                       color: theme.palette.text.primary,

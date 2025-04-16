@@ -48,18 +48,19 @@
     "search": "Search"
   },
   "questionBuilder": {
+    "defaultTerms": {
+      "waterAvailability": "water availability",
+      "outcomes": "outcomes",
+      "decisions": "management decisions"
+    },
+    "scenarioSingular": "scenario",
+    "scenarioPlural": "scenarios",
     "singularVerb": "does",
     "pluralVerb": "do",
     "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
-    "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} under {{climate}}?",
+    "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} with {{climate}}?",
     "swappedFormat": "To change {{outcome}}, which {{operation}} could we consider?",
-    "scenarioSingular": "scenario",
-    "scenarioPlural": "scenarios",
-    "defaultTerms": {
-      "decisions": "decisions",
-      "waterAvailability": "water availability",
-      "outcomes": "outcomes"
-    },
+    "swappedFormatNoChange": "For {{outcome}}, which {{operation}} could we consider?",
     "connectors": {
       "and": "and",
       "in": "in",

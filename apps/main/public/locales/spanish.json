@@ -48,18 +48,19 @@
     "search": "Buscar"
   },
   "questionBuilder": {
-    "singularVerb": "afecta",
-    "pluralVerb": "afectan",
-    "questionFormat": "¿Cómo {{verb}} {{operation}} {{outcome}}?",
-    "questionFormatWithClimate": "¿Cómo {{verb}} {{operation}} {{outcome}} bajo {{climate}}?",
-    "swappedFormat": "Para cambiar {{outcome}}, ¿qué {{operation}} podríamos considerar?",
+    "defaultTerms": {
+      "waterAvailability": "disponibilidad de agua",
+      "outcomes": "resultados",
+      "decisions": "decisiones de gestión"
+    },
     "scenarioSingular": "escenario",
     "scenarioPlural": "escenarios",
-    "defaultTerms": {
-      "decisions": "las decisiones",
-      "waterAvailability": "la disponibilidad de agua",
-      "outcomes": "los resultados"
-    },
+    "singularVerb": "afecta",
+    "pluralVerb": "afectan",
+    "questionFormat": "¿Cómo {{verb}} {{operation}} a {{outcome}}?",
+    "questionFormatWithClimate": "¿Cómo {{verb}} {{operation}} a {{outcome}} con {{climate}}?",
+    "swappedFormat": "Para cambiar {{outcome}}, ¿qué {{operation}} podríamos considerar?",
+    "swappedFormatNoChange": "Para {{outcome}}, ¿qué {{operation}} podríamos considerar?",
     "connectors": {
       "and": "y",
       "in": "en",
