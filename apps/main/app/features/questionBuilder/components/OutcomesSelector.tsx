@@ -150,6 +150,7 @@ const OutcomesSelector: React.FC = () => {
           <Box key={category.id}>
             <SectionAccordion
               title={category.title}
+              titleEs={category.titleEs}
               options={category.options}
               selectedOptions={selectedOutcomes}
               onOptionChange={(

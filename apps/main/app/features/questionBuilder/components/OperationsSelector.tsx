@@ -151,6 +151,7 @@ const OperationsSelector: React.FC = () => {
           <SectionAccordion
             key={theme.id}
             title={theme.title}
+            titleEs={theme.titleEs}
             options={theme.options}
             selectedOptions={selectedOperations}
             onOptionChange={handleOptionChangeWithActiveCheck}
