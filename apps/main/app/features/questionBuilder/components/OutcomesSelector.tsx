@@ -27,8 +27,6 @@ import {
   useTheme,
   Paper,
   LocationOnIcon,
-  Checkbox,
-  FormControlLabel,
   Button,
 } from "@repo/ui/mui"
 import { Card } from "@repo/ui"
@@ -46,7 +44,6 @@ const OutcomesSelector: React.FC = () => {
       swapped,
       selectedOutcomes,
       showMap,
-      includeClimate,
       isExploratoryMode,
     },
     handleOutcomeChange,
@@ -77,10 +74,10 @@ const OutcomesSelector: React.FC = () => {
     toggleMap()
   }, [exitExploratoryMode, toggleMap])
 
-  const toggleClimateWithExit = useCallback(() => {
-    exitExploratoryMode()
-    toggleClimate()
-  }, [exitExploratoryMode, toggleClimate])
+  // const toggleClimateWithExit = useCallback(() => {
+  //   exitExploratoryMode()
+  //   toggleClimate()
+  // }, [exitExploratoryMode, toggleClimate])
 
   const resetOutcomesWithExit = useCallback(() => {
     exitExploratoryMode()

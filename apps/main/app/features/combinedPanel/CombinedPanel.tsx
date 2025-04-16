@@ -78,20 +78,20 @@ const CombinedPanelContent = () => {
   }))
 
   // Function to handle scrolling to content
-  const scrollToContent = () => {
-    setHasClickedScroll(true)
+  // const scrollToContent = () => {
+  //   setHasClickedScroll(true)
 
-    // Use a more precise approach with anchors and offsets
-    const contentElement = document.getElementById("feature-content-anchor")
-    if (contentElement) {
-      const yOffset = -100 // Add an offset to see more content
-      const y =
-        contentElement.getBoundingClientRect().top +
-        window.pageYOffset +
-        yOffset
-      window.scrollTo({ top: y, behavior: "smooth" })
-    }
-  }
+  //   // Use a more precise approach with anchors and offsets
+  //   const contentElement = document.getElementById("feature-content-anchor")
+  //   if (contentElement) {
+  //     const yOffset = -100 // Add an offset to see more content
+  //     const y =
+  //       contentElement.getBoundingClientRect().top +
+  //       window.pageYOffset +
+  //       yOffset
+  //     window.scrollTo({ top: y, behavior: "smooth" })
+  //   }
+  // }
 
   // Handle swap icon click
   const handleSwapClick = () => {
