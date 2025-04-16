@@ -99,11 +99,17 @@ const OutcomesSelector: React.FC = () => {
           {swapped ? (
             <>
               {/* Use JSX directly - the t function can't handle React elements as params */}
-              {t("questionBuilder.outcomesSelector.swappedTitle").split("{{waterAvailability}}")[0]}
+              {
+                t("questionBuilder.outcomesSelector.swappedTitle").split(
+                  "{{waterAvailability}}",
+                )[0]
+              }
               <HighlightText bgcolor={theme.palette.cool.main}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </HighlightText>
-              {t("questionBuilder.outcomesSelector.swappedTitle").split("{{waterAvailability}}")[1] || ""}
+              {t("questionBuilder.outcomesSelector.swappedTitle").split(
+                "{{waterAvailability}}",
+              )[1] || ""}
             </>
           ) : (
             <>
@@ -111,7 +117,9 @@ const OutcomesSelector: React.FC = () => {
               <HighlightText bgcolor={theme.palette.cool.main}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </HighlightText>
-              &nbsp;&nbsp;{t("questionBuilder.outcomesSelector.title").split("{{waterAvailability}}")[1] || ""}
+              {t("questionBuilder.outcomesSelector.title").split(
+                "{{waterAvailability}}",
+              )[1] || ""}
             </>
           )}
         </Typography>
@@ -144,7 +152,11 @@ const OutcomesSelector: React.FC = () => {
               title={category.title}
               options={category.options}
               selectedOptions={selectedOutcomes}
-              onOptionChange={(option: string, checked: boolean, subtype?: boolean) =>
+              onOptionChange={(
+                option: string,
+                checked: boolean,
+                subtype?: boolean,
+              ) =>
                 handleOutcomeOptionChange(option, checked, category.id, subtype)
               }
               section={category.id}

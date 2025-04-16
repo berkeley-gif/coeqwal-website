@@ -94,8 +94,10 @@ const OperationsSelector: React.FC = () => {
           }
 
           // Check subtypes if they exist
-          if ('subtypes' in option && option.subtypes) {
-            const subtype = option.subtypes.find((sub: { id: string }) => sub.id === optionId)
+          if ("subtypes" in option && option.subtypes) {
+            const subtype = option.subtypes.find(
+              (sub: { id: string }) => sub.id === optionId,
+            )
             if (subtype) {
               // Only allow changes for active options and subtypes
               if (option.active && subtype.active) {
@@ -118,7 +120,7 @@ const OperationsSelector: React.FC = () => {
         {swapped ? (
           <>
             {" "}
-            {locale === "es" && "¿qué "}
+            {locale === "es" ? "¿qué " : "which "}
             <HighlightText bgcolor={theme.palette.pop.main}>
               {t("questionBuilder.defaultTerms.decisions")}
             </HighlightText>
@@ -164,7 +166,9 @@ const OperationsSelector: React.FC = () => {
           </Typography>
           <TextField
             size="small"
-            placeholder={t("questionBuilder.operationsSelector.searchPlaceholder")}
+            placeholder={t(
+              "questionBuilder.operationsSelector.searchPlaceholder",
+            )}
             sx={textFieldStyles}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}

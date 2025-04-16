@@ -46,7 +46,7 @@
       "comingSoon": "Coming Soon"
     },
     "outcomesSelector": {
-      "title": "{{waterAvailability}} ?",
+      "title": "{{waterAvailability}}?",
       "swappedTitle": "To change {{waterAvailability}}",
       "includeClimate": "Include climate futures",
       "chooseLocation": "Choose location on map",

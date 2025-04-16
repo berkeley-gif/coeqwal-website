@@ -200,7 +200,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             fontStyle: isActive ? "normal" : "italic",
           }}
         >
-          {optionLabel} {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+          {optionLabel}{" "}
+          {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
         </Typography>
       </Box>
     )
@@ -260,7 +261,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
               fontStyle: isActive ? "normal" : "italic",
             }}
           >
-            {optionLabel} {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+            {optionLabel}{" "}
+            {!isActive &&
+              `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
           </Typography>
         }
         sx={{
@@ -300,7 +303,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             fontStyle: allInactive ? "italic" : "normal",
           }}
         >
-          {title} {allInactive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+          {title}{" "}
+          {allInactive &&
+            `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
         </Typography>
       </AccordionSummary>
       <AccordionDetails sx={accordionDetailsStyles}>
@@ -339,7 +344,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                           fontStyle: isActive ? "normal" : "italic",
                         }}
                       >
-                        {optionObj.label} {!isActive && `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
+                        {optionObj.label}{" "}
+                        {!isActive &&
+                          `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
                       </Typography>
                     ) : (
                       renderCheckbox(optionObj.id, optionObj.label, isActive)
