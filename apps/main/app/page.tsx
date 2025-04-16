@@ -10,7 +10,7 @@ import {
   KeyboardArrowDownIcon,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { TwoColumnPanel, HeroQuestionsPanel } from "@repo/ui"
+import { TwoColumnPanel, HeroQuestionsPanel, BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import { useMap, MapTransitions } from "@repo/map"
@@ -383,6 +383,31 @@ export default function Home() {
               </Box>
             </Box>
           </Box>
+
+          {/* Interstitial Panel */}
+          <BasePanel
+            fullHeight={false}
+            background="dark"
+            paddingVariant="wide"
+            sx={{
+              backgroundColor: "rgb(44, 110, 145)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textAlign: "center",
+              py: 12,
+              px: 12,
+            }}
+          >
+            <Box maxWidth="800px">
+              <Typography variant="body1" color="white" paragraph>
+                {t("heroPanel.content.0")}
+              </Typography>
+              <Typography variant="body1" color="white">
+                {t("heroPanel.content.1")}
+              </Typography>
+            </Box>
+          </BasePanel>
 
           {/* Two Column Panel with map controls */}
           <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
