@@ -283,7 +283,7 @@ const CombinedPanelContent = () => {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "flex-start",
-              paddingTop: theme.spacing(2.5),
+              paddingTop: theme.spacing(0),
             }}
           >
             <Box

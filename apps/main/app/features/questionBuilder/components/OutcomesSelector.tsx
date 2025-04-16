@@ -186,30 +186,6 @@ const OutcomesSelector: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Include climate checkbox */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={includeClimate}
-              onChange={() => toggleClimateWithExit()}
-              size="small"
-            />
-          }
-          label={
-            <Typography variant="body2">
-              {t("questionBuilder.outcomesSelector.includeClimate")}
-            </Typography>
-          }
-        />
-      </Box>
-
       {/* Outcome categories */}
       <Box sx={{ mt: 3 }}>
         {OUTCOME_CATEGORIES.map((category) => (
