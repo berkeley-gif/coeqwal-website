@@ -302,13 +302,15 @@ export default function Home() {
             }}
           >
             <HeroQuestionsPanel
-              headlines={[
-                "How do reservoir operations affect Delta water quality?",
-                "Which water futures support salmon survival?",
-                "How do cities and farms share water in a hotter, drier future?",
-                "Which policies help meet environmental goals?",
-                "What happens if we let our rivers run?",
-              ]}
+              headlines={
+                (t("heroPanel.headlines") as string[]) || [
+                  "How do reservoir operations affect Delta water quality?",
+                  "Which water futures support salmon survival?",
+                  "How do cities and farms share water in a hotter, drier future?",
+                  "Which policies help meet environmental goals?",
+                  "What happens if we let our rivers run?",
+                ]
+              }
               verticalAlignment="center"
               background="light"
               sx={{
