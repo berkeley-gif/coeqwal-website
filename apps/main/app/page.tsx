@@ -396,15 +396,14 @@ export default function Home() {
               justifyContent: "center",
               textAlign: "center",
               py: 12,
-              px: 12,
             }}
           >
             <Box maxWidth="800px">
-              <Typography variant="body1" color="white" paragraph>
-                {t("heroPanel.content.0")}
+              <Typography variant="h5" color="white" paragraph>
+                {t("interstitial.content.0")}
               </Typography>
-              <Typography variant="body1" color="white">
-                {t("heroPanel.content.1")}
+              <Typography variant="h5" color="white">
+                {t("interstitial.content.1")}
               </Typography>
             </Box>
           </BasePanel>
