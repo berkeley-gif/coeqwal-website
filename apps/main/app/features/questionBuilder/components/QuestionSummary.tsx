@@ -183,7 +183,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
       regularOptions.forEach((op) => {
         // Get the direction for this operation
         const direction = operationDirections[op] || "increase"
-        
+
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
             {getOperationShortText(op, direction)}
@@ -687,6 +687,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         // Create groups for increase and decrease for metric outcomes
         const increaseMetricOutcomes: React.ReactNode[] = []
         const decreaseMetricOutcomes: React.ReactNode[] = []
+        const affectMetricOutcomes: React.ReactNode[] = []
 
         // Process metric selections
         metricSelections.forEach((metric) => {
@@ -712,6 +713,16 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
                 </ColoredText>,
               )
             }
+          } else {
+            // FALLBACK: If no direction is set, use the "affect" group
+            affectMetricOutcomes.push(
+              <ColoredText
+                key={`affect-${metric}`}
+                color={theme.palette.cool.main}
+              >
+                {formattedText}
+              </ColoredText>,
+            )
           }
         })
 
@@ -783,19 +794,77 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           }
         }
 
+        // Format the "affect" type group for outcomes with no direction
+        let affectTypeGroup = null
+        if (affectTypeOutcomes.length > 0) {
+          if (affectTypeOutcomes.length === 1) {
+            affectTypeGroup = (
+              <>
+                <ColoredText color={theme.palette.cool.main}>
+                  {t("questionBuilder.connectors.affect")}
+                </ColoredText>{" "}
+                {affectTypeOutcomes[0]}
+              </>
+            )
+          } else {
+            affectTypeGroup = (
+              <>
+                <ColoredText color={theme.palette.cool.main}>
+                  {t("questionBuilder.connectors.affect")}
+                </ColoredText>{" "}
+                {affectTypeOutcomes.reduce((prev, curr, idx) => (
+                  <>
+                    {prev}
+                    {idx > 0 && idx === affectTypeOutcomes.length - 1
+                      ? ` ${t("questionBuilder.connectors.and")} `
+                      : idx > 0
+                        ? ", "
+                        : ""}
+                    {curr}
+                  </>
+                ))}
+              </>
+            )
+          }
+        }
+
         // Combine the type groups
         let typePart = null
-        if (increaseTypeGroup && decreaseTypeGroup) {
+        if (increaseTypeGroup && decreaseTypeGroup && affectTypeGroup) {
+          typePart = (
+            <>
+              {increaseTypeGroup} {t("questionBuilder.connectors.and")}{" "}
+              {decreaseTypeGroup} {t("questionBuilder.connectors.and")}{" "}
+              {affectTypeGroup}
+            </>
+          )
+        } else if (increaseTypeGroup && decreaseTypeGroup) {
           typePart = (
             <>
               {increaseTypeGroup} {t("questionBuilder.connectors.and")}{" "}
               {decreaseTypeGroup}
             </>
           )
+        } else if (increaseTypeGroup && affectTypeGroup) {
+          typePart = (
+            <>
+              {increaseTypeGroup} {t("questionBuilder.connectors.and")}{" "}
+              {affectTypeGroup}
+            </>
+          )
+        } else if (decreaseTypeGroup && affectTypeGroup) {
+          typePart = (
+            <>
+              {decreaseTypeGroup} {t("questionBuilder.connectors.and")}{" "}
+              {affectTypeGroup}
+            </>
+          )
         } else if (increaseTypeGroup) {
           typePart = increaseTypeGroup
         } else if (decreaseTypeGroup) {
           typePart = decreaseTypeGroup
+        } else if (affectTypeGroup) {
+          typePart = affectTypeGroup
         }
 
         // Combine the metric groups
@@ -846,16 +915,64 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           }
         }
 
+        // Format the affect metric group
+        let affectMetricGroup = null
+        if (affectMetricOutcomes.length > 0) {
+          if (affectMetricOutcomes.length === 1) {
+            affectMetricGroup = affectMetricOutcomes[0]
+          } else {
+            affectMetricGroup = (
+              <>
+                {affectMetricOutcomes.reduce((prev, curr, idx) => (
+                  <>
+                    {prev}
+                    {idx > 0 && idx === affectMetricOutcomes.length - 1
+                      ? ` ${t("questionBuilder.connectors.and")} `
+                      : idx > 0
+                        ? ", "
+                        : ""}
+                    {curr}
+                  </>
+                ))}
+              </>
+            )
+          }
+        }
+
         // Combine increase and decrease metric parts if both exist
-        if (metricPart && decreaseMetricGroup) {
+        if (metricPart && decreaseMetricGroup && affectMetricGroup) {
+          metricPart = (
+            <>
+              {metricPart} {t("questionBuilder.connectors.and")}{" "}
+              {decreaseMetricGroup} {t("questionBuilder.connectors.and")}{" "}
+              {affectMetricGroup}
+            </>
+          )
+        } else if (metricPart && decreaseMetricGroup) {
           metricPart = (
             <>
               {metricPart} {t("questionBuilder.connectors.and")}{" "}
               {decreaseMetricGroup}
             </>
           )
+        } else if (metricPart && affectMetricGroup) {
+          metricPart = (
+            <>
+              {metricPart} {t("questionBuilder.connectors.and")}{" "}
+              {affectMetricGroup}
+            </>
+          )
+        } else if (decreaseMetricGroup && affectMetricGroup) {
+          metricPart = (
+            <>
+              {decreaseMetricGroup} {t("questionBuilder.connectors.and")}{" "}
+              {affectMetricGroup}
+            </>
+          )
         } else if (decreaseMetricGroup) {
           metricPart = decreaseMetricGroup
+        } else if (affectMetricGroup) {
+          metricPart = affectMetricGroup
         }
 
         // Now build the final summary combining all three sections
@@ -1206,7 +1323,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
   React.useEffect(() => {
     // This is now handled by the calculatedFontSize memo value
     // The ResizeObserver may not be needed anymore since we calculate size based on selection count
-    
     // We can remove this effect entirely or keep it for a transition period
     // No need to update fontSize state since it's not used anymore
   }, [summary])

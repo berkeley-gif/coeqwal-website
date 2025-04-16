@@ -300,7 +300,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
 
     // Only outcomes (except regions) should have direction arrows in swapped mode
     // Operations and regions should always have checkboxes regardless of swapped mode
-    if (swapped && !isOperations && section !== "region" && !noDirectionControls.includes(optionId)) {
+    if (
+      swapped &&
+      !isOperations &&
+      section !== "region" &&
+      !noDirectionControls.includes(optionId)
+    ) {
       return renderDirectionControls(optionId, option, isActive)
     }
 
@@ -391,10 +396,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
         sx={{
           ...accordionSummaryStyles,
           // Disable the metrics accordion
-          ...(section === "metric" ? {
-            opacity: 0.6,
-            pointerEvents: "none"
-          } : {})
+          ...(section === "metric"
+            ? {
+                opacity: 0.6,
+                pointerEvents: "none",
+              }
+            : {}),
         }}
       >
         {swapped && isOperations ? (
@@ -437,9 +444,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
               <Typography
                 variant="subtitle1"
                 sx={{
-                  color: allInactive || section === "metric" ? "text.disabled" : "text.primary",
+                  color:
+                    allInactive || section === "metric"
+                      ? "text.disabled"
+                      : "text.primary",
                   fontWeight: "medium",
-                  fontStyle: allInactive || section === "metric" ? "italic" : "normal",
+                  fontStyle:
+                    allInactive || section === "metric" ? "italic" : "normal",
                 }}
               >
                 {getLocalizedTitle()}{" "}
@@ -454,9 +465,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           <Typography
             variant="subtitle1"
             sx={{
-              color: allInactive || section === "metric" ? "text.disabled" : "text.primary",
+              color:
+                allInactive || section === "metric"
+                  ? "text.disabled"
+                  : "text.primary",
               fontWeight: "medium",
-              fontStyle: allInactive || section === "metric" ? "italic" : "normal",
+              fontStyle:
+                allInactive || section === "metric" ? "italic" : "normal",
             }}
           >
             {getLocalizedTitle()}{" "}
