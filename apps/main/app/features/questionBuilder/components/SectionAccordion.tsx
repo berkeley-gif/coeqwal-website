@@ -23,6 +23,8 @@ import { useTranslation } from "@repo/i18n"
 interface OptionType {
   id: string
   label: string
+  labelEs?: string
+  titleEs?: string
   active?: boolean
   subtypes?: OptionType[]
 }
@@ -30,6 +32,7 @@ interface OptionType {
 // Define props for the SectionAccordion component
 interface SectionAccordionProps {
   title: string
+  titleEs?: string
   options: (OptionType | string)[]
   selectedOptions: string[]
   onOptionChange: (optionId: string, checked: boolean) => void
@@ -41,6 +44,7 @@ interface SectionAccordionProps {
 
 const SectionAccordion: React.FC<SectionAccordionProps> = ({
   title,
+  titleEs,
   options,
   selectedOptions,
   onOptionChange,
@@ -50,13 +54,27 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   noDirectionControls = [],
 }) => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const {
     isInvalidCombination,
     getInvalidCombinationMessage,
     state: { swapped, operationDirections },
     handleOperationDirectionChange,
   } = useQuestionBuilderHelpers()
+
+  // Helper function to get the translated label based on locale
+  const getLocalizedLabel = (option: OptionType | string): string => {
+    if (typeof option === "string") {
+      return option
+    }
+
+    return locale === "es" && option.labelEs ? option.labelEs : option.label
+  }
+
+  // Helper function to get the translated title based on locale
+  const getLocalizedTitle = (): string => {
+    return locale === "es" && titleEs ? titleEs : title
+  }
 
   // Check if all options in this section are inactive
   const allInactive = options.every(
@@ -121,12 +139,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   // Function to render direction arrows for operations in swapped mode
   const renderDirectionControls = (
     optionId: string,
-    optionLabel: string,
+    option: OptionType | string,
     isActive: boolean = true,
     isSubtype?: boolean,
   ) => {
     const isSelected = selectedOptions.includes(optionId)
     const currentDirection = operationDirections[optionId] || "increase"
+    const optionLabel = getLocalizedLabel(option)
 
     return (
       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -210,15 +229,17 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   // Function to render a checkbox with potential tooltip
   const renderCheckbox = (
     optionId: string,
-    optionLabel: string,
+    option: OptionType | string,
     isActive: boolean = true,
     isSubtype?: boolean,
   ) => {
     // If in swapped mode and this is operations section, show direction arrows
     // unless this option is in the noDirectionControls list
     if (swapped && isOperations && !noDirectionControls.includes(optionId)) {
-      return renderDirectionControls(optionId, optionLabel, isActive, isSubtype)
+      return renderDirectionControls(optionId, option, isActive, isSubtype)
     }
+
+    const optionLabel = getLocalizedLabel(option)
 
     // Check if this option should be disabled
     const isDisabled =
@@ -303,7 +324,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
             fontStyle: allInactive ? "italic" : "normal",
           }}
         >
-          {title}{" "}
+          {getLocalizedTitle()}{" "}
           {allInactive &&
             `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
         </Typography>
@@ -344,12 +365,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                           fontStyle: isActive ? "normal" : "italic",
                         }}
                       >
-                        {optionObj.label}{" "}
+                        {getLocalizedLabel(optionObj)}{" "}
                         {!isActive &&
                           `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
                       </Typography>
                     ) : (
-                      renderCheckbox(optionObj.id, optionObj.label, isActive)
+                      renderCheckbox(optionObj.id, optionObj, isActive)
                     )}
                   </Box>
 
@@ -363,7 +384,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
                           <Box key={subtype.id} sx={{ mb: 0.5 }}>
                             {renderCheckbox(
                               subtype.id,
-                              subtype.label,
+                              subtype,
                               isSubtypeActive,
                               true,
                             )}
