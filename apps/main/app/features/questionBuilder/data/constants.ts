@@ -7,7 +7,7 @@ export const CANONICAL_OUTCOME_TYPES = [
   },
   {
     id: "deliveries_urban",
-    label: "municipal deliveries",
+    label: "urban deliveries",
     labelEs: "entregas municipales",
   },
   {
