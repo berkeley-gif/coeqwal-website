@@ -403,19 +403,14 @@ export default function Home() {
               <Typography
                 variant="h4"
                 color="white"
-                paragraph
-                sx={{ fontWeight: 300 }}
               >
                 <Box component="span" sx={{ fontWeight: 600 }}>
-                  From mountains to coast and north to south,
+                  {t("interstitial.boldText")}
                 </Box>
-                {" " +
-                  t("interstitial.content.0").split(
-                    "From mountains to coast and north to south,",
-                  )[1]}
+                {" " + t("interstitial.part1")}
               </Typography>
               <Typography variant="h4" color="white" sx={{ fontWeight: 300 }}>
-                {t("interstitial.content.1")}
+                {t("interstitial.part2")}
               </Typography>
             </Box>
           </BasePanel>
