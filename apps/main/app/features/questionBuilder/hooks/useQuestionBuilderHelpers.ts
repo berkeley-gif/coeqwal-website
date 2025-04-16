@@ -383,7 +383,7 @@ export const useQuestionBuilderHelpers = () => {
 
   // Get operation's short text
   const getOperationShortText = useCallback(
-    (operationId: string) => {
+    (operationId: string, direction?: "increase" | "decrease") => {
       // Use Spanish if that's the current locale
       const useSpanish = locale === "es"
 
