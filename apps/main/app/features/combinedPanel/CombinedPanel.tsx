@@ -172,7 +172,7 @@ const CombinedPanelContent = () => {
               }}
               startIcon={<SearchIcon />}
             >
-              Search
+              {t("scenarioResults.search")}
             </Button>
           </Card>
         </Box>

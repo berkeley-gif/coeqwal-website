@@ -19,7 +19,8 @@
   },
   "scenarioResults": {
     "title": "Resultados de Escenarios",
-    "description": "Ver y comparar resultados de diferentes escenarios de gestión del agua."
+    "description": "Ver y comparar resultados de diferentes escenarios de gestión del agua.",
+    "search": "Buscar"
   },
   "questionBuilder": {
     "singularVerb": "afecta",

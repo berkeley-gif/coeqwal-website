@@ -19,7 +19,8 @@
   },
   "scenarioResults": {
     "title": "Scenario Results",
-    "description": "View and compare results from different water management scenarios."
+    "description": "View and compare results from different water management scenarios.",
+    "search": "Search"
   },
   "questionBuilder": {
     "singularVerb": "does",
