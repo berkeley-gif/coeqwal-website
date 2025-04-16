@@ -48,12 +48,6 @@ export default function Home() {
   // For the uncontrolled map, we'll store its ref so we can call flyTo
   const uncontrolledRef = useRef<MapboxMapRef | null>(null)
 
-  const handleUncontrolledFlyTo = useCallback(() => {
-    // Imperative call on ref-based API
-    if (uncontrolledRef.current) {
-      uncontrolledRef.current.flyTo(-120, 37, 7)
-    }
-  }, [])
 
   // ────────────────────────────────────────────────────────────────────────
   // 2) CONTROLLED EXAMPLE

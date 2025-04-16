@@ -22,7 +22,6 @@ import {
   ClimateSelector,
 } from "../questionBuilder/components"
 import { useQuestionBuilderHelpers } from "../questionBuilder/hooks/useQuestionBuilderHelpers"
-import { KeyboardArrowDownIcon } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 
 // Content component that uses the context
@@ -175,66 +174,6 @@ const CombinedPanelContent = () => {
               {t("scenarioResults.search")}
             </Button>
           </Card>
-        </Box>
-      </Box>
-
-      {/* Initial spacer to create the centering effect */}
-      <Box
-        sx={(theme) => ({
-          height: "calc(50vh - 100px)",
-          backgroundColor: theme.palette.background.default,
-        })}
-      />
-
-      {/* Hero message */}
-      <Box
-        sx={(theme) => ({
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          padding: theme.spacing(4),
-          marginBottom: theme.spacing(8),
-          backgroundColor: theme.palette.background.default,
-        })}
-      >
-        <Typography
-          variant="h5"
-          sx={{
-            color: "rgba(0, 0, 0, 0.8)",
-            marginBottom: theme.spacing(6),
-            maxWidth: "600px",
-            textShadow: "0px 0px 10px rgba(255, 255, 255, 0.5)",
-          }}
-        >
-          {t("heroPanel.combinedPanelScrollText")}
-        </Typography>
-
-        {/* Scroll button */}
-        <Box
-          onClick={scrollToContent}
-          sx={{
-            width: 56,
-            height: 56,
-            borderRadius: "50%",
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: theme.palette.common.white,
-            cursor: "pointer",
-            "&:hover": {
-              backgroundColor: "rgba(0, 0, 0, 0.3)",
-            },
-          }}
-        >
-          <KeyboardArrowDownIcon
-            fontSize="large"
-            sx={{
-              color: theme.palette.common.white,
-            }}
-          />
         </Box>
       </Box>
 
