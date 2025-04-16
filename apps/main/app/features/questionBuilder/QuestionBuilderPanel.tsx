@@ -177,74 +177,76 @@ const QuestionBuilderContent = ({
       >
         {/* Only show the question builder if not in detailed mode */}
         {showQuestionBuilder && (
-          <Grid
-            container
-            spacing={2}
-            sx={{
-              width: "100%",
-              display: "flex",
-            }}
-          >
-            {/* Column 1: Operations or outcome text */}
-            <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-              {swapped ? <OutcomesSelector /> : <OperationsSelector />}
-            </Grid>
-
-            {/* Column 2: Action verb & switch */}
+          <>
             <Grid
+              container
+              spacing={2}
               sx={{
-                flex: "0 0 auto",
+                width: "100%",
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                paddingTop: theme.spacing(2.5),
               }}
             >
-              <Typography variant="h5" sx={{ mt: 0.5, mb: 2 }}>
-                {swapped ? "which" : "affect"}
-              </Typography>
-              <IconButton onClick={handleSwapClick}>
-                <SwapHorizIcon />
-              </IconButton>
-              <Typography
-                variant="caption"
-                onClick={handleSwapClick}
-                sx={{ cursor: "pointer" }}
+              {/* Column 1: Operations or outcome text */}
+              <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
+                {swapped ? <OutcomesSelector /> : <OperationsSelector />}
+              </Grid>
+
+              {/* Column 2: Action verb & switch */}
+              <Grid
+                sx={{
+                  flex: "0 0 auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  paddingTop: theme.spacing(2.5),
+                }}
               >
-                {t("questionBuilder.ui.switch")}
-              </Typography>
-            </Grid>
+                <Typography variant="h5" sx={{ mt: 0.5, mb: 2 }}>
+                  {swapped ? "which" : "affect"}
+                </Typography>
+                <IconButton onClick={handleSwapClick}>
+                  <SwapHorizIcon />
+                </IconButton>
+                <Typography
+                  variant="caption"
+                  onClick={handleSwapClick}
+                  sx={{ cursor: "pointer" }}
+                >
+                  {t("questionBuilder.ui.switch")}
+                </Typography>
+              </Grid>
 
-            {/* Column 3: Outcomes or operations text */}
-            <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-              {swapped ? <OperationsSelector /> : <OutcomesSelector />}
-            </Grid>
+              {/* Column 3: Outcomes or operations text */}
+              <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
+                {swapped ? <OperationsSelector /> : <OutcomesSelector />}
+              </Grid>
 
-            {/* Column 4: "with" label */}
-            <Grid
-              sx={{
-                flex: "0 0 auto",
-                alignSelf: "flex-start",
-                display: includeClimate ? "block" : "none",
-              }}
-            >
-              <Typography variant="h5" sx={{ mt: 3 }}>
-                {t("questionBuilder.connectors.with")}
-              </Typography>
-            </Grid>
+              {/* Column 4: "with" label */}
+              <Grid
+                sx={{
+                  flex: "0 0 auto",
+                  alignSelf: "flex-start",
+                  display: includeClimate ? "block" : "none",
+                }}
+              >
+                <Typography variant="h5" sx={{ mt: 3 }}>
+                  {t("questionBuilder.connectors.with")}
+                </Typography>
+              </Grid>
 
-            {/* Column 5: "climate" label */}
-            <Grid
-              sx={{
-                flex: 1,
-                alignSelf: "flex-start",
-                display: includeClimate ? "block" : "none",
-              }}
-            >
-              {includeClimate && <ClimateSelector />}
+              {/* Column 5: "climate" label */}
+              <Grid
+                sx={{
+                  flex: 1,
+                  alignSelf: "flex-start",
+                  display: includeClimate ? "block" : "none",
+                }}
+              >
+                {includeClimate && <ClimateSelector />}
+              </Grid>
             </Grid>
-          </Grid>
+          </>
         )}
 
         {/* Placeholder content for detailed search mode */}

@@ -291,6 +291,11 @@ export const useQuestionBuilderHelpers = () => {
     dispatch(questionBuilderActions.toggleMap())
   }, [dispatch])
 
+  // Reset all selections
+  const resetSelections = useCallback(() => {
+    dispatch(questionBuilderActions.reset())
+  }, [dispatch])
+
   // Format utilities
   const formatOperationText = useCallback(
     (text: string) => {
@@ -647,6 +652,7 @@ export const useQuestionBuilderHelpers = () => {
     handleOutcomeChange,
     toggleSwap,
     toggleMap,
+    resetSelections,
     // Validation helpers
     isInvalidCombination,
     getInvalidCombinationMessage,

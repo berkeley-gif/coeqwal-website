@@ -21,7 +21,7 @@
  */
 
 import React, { useState, useMemo } from "react"
-import { Typography, Box, useTheme, TextField, SearchIcon } from "@repo/ui/mui"
+import { Typography, Box, useTheme, TextField, SearchIcon, Button } from "@repo/ui/mui"
 import { Card } from "@repo/ui"
 import { OPERATION_THEMES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
@@ -35,6 +35,7 @@ const OperationsSelector: React.FC = () => {
   const {
     state: { swapped, selectedOperations },
     handleOperationChange,
+    resetSelections,
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -196,34 +197,62 @@ const OperationsSelector: React.FC = () => {
 
   return (
     <Card>
-      <Typography variant="h5">
-        {swapped ? (
-          <>
-            {" "}
-            {locale === "es" ? "¿qué " : "which "}
-            <HighlightText bgcolor={theme.palette.pop.main}>
-              {t("questionBuilder.defaultTerms.decisions")}
-            </HighlightText>
-            &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")}
-          </>
-        ) : (
-          <>
-            {/* Parse the title string and replace the decisions placeholder with the highlighted component */}
-            {t("questionBuilder.operationsSelector.title")
-              .split("{{decisions}}")
-              .map((part, index, array) => (
-                <React.Fragment key={index}>
-                  {part}
-                  {index < array.length - 1 && (
-                    <HighlightText bgcolor={theme.palette.pop.main}>
-                      {t("questionBuilder.defaultTerms.decisions")}
-                    </HighlightText>
-                  )}
-                </React.Fragment>
-              ))}
-          </>
-        )}
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h5">
+          {swapped ? (
+            <>
+              {" "}
+              {locale === "es" ? "¿qué " : "which "}
+              <HighlightText bgcolor={theme.palette.pop.main}>
+                {t("questionBuilder.defaultTerms.decisions")}
+              </HighlightText>
+              &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")}
+            </>
+          ) : (
+            <>
+              {/* Parse the title string and replace the decisions placeholder with the highlighted component */}
+              {t("questionBuilder.operationsSelector.title")
+                .split("{{decisions}}")
+                .map((part, index, array) => (
+                  <React.Fragment key={index}>
+                    {part}
+                    {index < array.length - 1 && (
+                      <HighlightText bgcolor={theme.palette.pop.main}>
+                        {t("questionBuilder.defaultTerms.decisions")}
+                      </HighlightText>
+                    )}
+                  </React.Fragment>
+                ))}
+            </>
+          )}
+        </Typography>
+        
+        {/* Clear Selection Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          size="medium"
+          onClick={resetSelections}
+          sx={{
+            textTransform: "none",
+            borderRadius: 2,
+            minWidth: "150px",
+            px: 2,
+            py: 0.75,
+            fontWeight: 500,
+          }}
+        >
+          {t("questionBuilder.ui.clearSelection")}
+        </Button>
+      </Box>
 
       {/* Operation categories */}
       <Box sx={{ mt: 3 }}>

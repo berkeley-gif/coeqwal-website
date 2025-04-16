@@ -72,7 +72,8 @@
       "with": "con"
     },
     "ui": {
-      "switch": "cambiar"
+      "switch": "cambiar",
+      "clearSelection": "Borrar selección"
     },
     "operationsSelector": {
       "title": "¿Cómo afectan {{decisions}}",

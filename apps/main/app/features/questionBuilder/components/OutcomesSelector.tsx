@@ -29,6 +29,7 @@ import {
   LocationOnIcon,
   Checkbox,
   FormControlLabel,
+  Button,
 } from "@repo/ui/mui"
 import { Card } from "@repo/ui"
 import { OUTCOME_CATEGORIES } from "../data/constants"
@@ -45,6 +46,7 @@ const OutcomesSelector: React.FC = () => {
     handleOutcomeChange,
     toggleMap,
     toggleClimate,
+    resetSelections,
   } = useQuestionBuilderHelpers()
 
   // Handle option change with section context
@@ -93,6 +95,7 @@ const OutcomesSelector: React.FC = () => {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
+          mb: 2,
         }}
       >
         <Typography variant="h5">
@@ -123,6 +126,48 @@ const OutcomesSelector: React.FC = () => {
             </>
           )}
         </Typography>
+        
+        {/* Clear Selection Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          size="medium"
+          onClick={resetSelections}
+          sx={{
+            textTransform: "none",
+            borderRadius: 2,
+            minWidth: "150px",
+            px: 2,
+            py: 0.75,
+            fontWeight: 500,
+          }}
+        >
+          {t("questionBuilder.ui.clearSelection")}
+        </Button>
+      </Box>
+      
+      {/* Include climate checkbox */}
+      <Box 
+        sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          mb: 2 
+        }}
+      >
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={includeClimate}
+              onChange={() => toggleClimate()}
+              size="small"
+            />
+          }
+          label={
+            <Typography variant="body2">
+              {t("questionBuilder.outcomesSelector.includeClimate")}
+            </Typography>
+          }
+        />
       </Box>
 
       {/* Outcome categories */}

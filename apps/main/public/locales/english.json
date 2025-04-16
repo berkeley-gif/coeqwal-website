@@ -72,7 +72,8 @@
       "with": "with"
     },
     "ui": {
-      "switch": "switch"
+      "switch": "switch",
+      "clearSelection": "Clear selection"
     },
     "operationsSelector": {
       "title": "How do {{decisions}} affect",
