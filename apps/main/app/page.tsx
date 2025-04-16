@@ -438,7 +438,7 @@ export default function Home() {
                   }}
                 >
                   <Typography variant="h2" sx={{ mb: 1 }}>
-                    California Water
+                    {t("californiaWater.title")}
                   </Typography>
 
                   <Stack spacing={1}>
@@ -462,10 +462,7 @@ export default function Home() {
                       onClick={() => console.log("Clicked paragraph 1")}
                     >
                       <Typography variant="body1">
-                        Most of California&apos;s water falls in the winter as
-                        rain and snow in northern California and the Sierra
-                        Nevada. This precipitation – highly variable from year
-                        to year – is the state's primary water supply.
+                        {t("californiaWater.paragraph1")}
                         <VisibilityIcon
                           sx={{
                             ml: 1,
@@ -495,11 +492,7 @@ export default function Home() {
                       onClick={() => console.log("Clicked paragraph 2")}
                     >
                       <Typography variant="body1">
-                        Snowpack serves as a natural reservoir, releasing water
-                        throughout the spring. As rainfall and melting snow
-                        flows from the mountains into rivers of the Central
-                        Valley, some of it seeps underground and replenishes
-                        large aquifers.
+                        {t("californiaWater.paragraph2")}
                         <VisibilityIcon
                           sx={{
                             ml: 1,
@@ -529,14 +522,7 @@ export default function Home() {
                       onClick={() => console.log("Clicked paragraph 3")}
                     >
                       <Typography variant="body1">
-                        The Sacramento River - California&apos;s largest - flows
-                        from the north and joins with the San Joaquin River,
-                        flowing up from the south, in the Delta. These flows
-                        create one of the most ecologically rich estuaries on
-                        the West Coast before flowing out to the San Francisco
-                        Bay and Pacific Ocean. In the Delta, freshwater mixes
-                        with saltwater, creating a shifting salinity balance
-                        shaped by the amount of flow and the tides.
+                        {t("californiaWater.paragraph3")}
                         <VisibilityIcon
                           sx={{
                             ml: 1,
@@ -566,11 +552,7 @@ export default function Home() {
                       onClick={() => console.log("Clicked paragraph 4")}
                     >
                       <Typography variant="body1">
-                        Although California has an abundance of water, most of
-                        our water falls far from where most people live, work,
-                        and farm. To supply water to agriculture and a growing
-                        population in drier parts of the state, we have
-                        transformed how water moves through California.
+                        {t("californiaWater.paragraph4")}
                         <VisibilityIcon
                           sx={{
                             ml: 1,
@@ -582,7 +564,7 @@ export default function Home() {
                   </Stack>
 
                   <Box sx={{ mt: 3 }}>
-                    <LearnMoreButton 
+                    <LearnMoreButton
                       onClick={() => setDrawerOpen(true)}
                       variant="outlined"
                       sx={{
@@ -591,8 +573,8 @@ export default function Home() {
                         backgroundColor: "transparent",
                         "&:hover": {
                           borderColor: "white",
-                          backgroundColor: "rgba(255, 255, 255, 0.1)"
-                        }
+                          backgroundColor: "rgba(255, 255, 255, 0.1)",
+                        },
                       }}
                     />
                   </Box>
