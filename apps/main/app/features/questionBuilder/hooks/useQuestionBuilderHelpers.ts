@@ -291,6 +291,13 @@ export const useQuestionBuilderHelpers = () => {
     dispatch(questionBuilderActions.toggleMap())
   }, [dispatch])
 
+  const setExploratoryMode = useCallback(
+    (isExploratoryMode: boolean) => {
+      dispatch(questionBuilderActions.setExploratoryMode(isExploratoryMode))
+    },
+    [dispatch],
+  )
+
   // Reset all selections
   const resetSelections = useCallback(() => {
     dispatch(questionBuilderActions.reset())
@@ -299,7 +306,7 @@ export const useQuestionBuilderHelpers = () => {
   // Reset only operations
   const resetOperations = useCallback(() => {
     // Clear all selected operations
-    state.selectedOperations.forEach(operation => {
+    state.selectedOperations.forEach((operation) => {
       dispatch(questionBuilderActions.deselectOperation(operation))
     })
   }, [dispatch, state.selectedOperations])
@@ -308,7 +315,7 @@ export const useQuestionBuilderHelpers = () => {
   const resetOutcomes = useCallback(() => {
     // Clear all selected outcomes by section
     Object.entries(state.outcomesBySection).forEach(([section, options]) => {
-      options.forEach(option => {
+      options.forEach((option) => {
         dispatch(questionBuilderActions.deselectOutcome(option, section))
       })
     })
@@ -670,6 +677,7 @@ export const useQuestionBuilderHelpers = () => {
     handleOutcomeChange,
     toggleSwap,
     toggleMap,
+    setExploratoryMode,
     resetSelections,
     resetOperations,
     resetOutcomes,

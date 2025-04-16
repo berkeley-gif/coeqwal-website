@@ -20,7 +20,7 @@
  * Different text formats based on the "swapped" state
  */
 
-import React from "react"
+import React, { useCallback } from "react"
 import {
   Typography,
   Box,
@@ -42,22 +42,50 @@ const OutcomesSelector: React.FC = () => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
-    state: { swapped, selectedOutcomes, showMap, includeClimate },
+    state: {
+      swapped,
+      selectedOutcomes,
+      showMap,
+      includeClimate,
+      isExploratoryMode,
+    },
     handleOutcomeChange,
     toggleMap,
     toggleClimate,
     resetOutcomes,
+    setExploratoryMode,
   } = useQuestionBuilderHelpers()
 
-  // Handle option change with section context
-  const handleOutcomeOptionChange = (
-    option: string,
-    checked: boolean,
-    section: string,
-    subtype?: boolean,
-  ) => {
-    handleOutcomeChange(option, checked, section, subtype)
-  }
+  // Exit exploratory mode when interacting with this component
+  const exitExploratoryMode = useCallback(() => {
+    if (isExploratoryMode) {
+      setExploratoryMode(false)
+    }
+  }, [isExploratoryMode, setExploratoryMode])
+
+  // Wrap handlers to exit exploratory mode
+  const handleOutcomeOptionChangeWithExit = useCallback(
+    (option: string, checked: boolean, section: string, subtype?: boolean) => {
+      exitExploratoryMode()
+      handleOutcomeChange(option, checked, section, subtype)
+    },
+    [exitExploratoryMode, handleOutcomeChange],
+  )
+
+  const toggleMapWithExit = useCallback(() => {
+    exitExploratoryMode()
+    toggleMap()
+  }, [exitExploratoryMode, toggleMap])
+
+  const toggleClimateWithExit = useCallback(() => {
+    exitExploratoryMode()
+    toggleClimate()
+  }, [exitExploratoryMode, toggleClimate])
+
+  const resetOutcomesWithExit = useCallback(() => {
+    exitExploratoryMode()
+    resetOutcomes()
+  }, [exitExploratoryMode, resetOutcomes])
 
   // Common styles
   const mapToggleStyles = {
@@ -126,13 +154,13 @@ const OutcomesSelector: React.FC = () => {
             </>
           )}
         </Typography>
-        
+
         {/* Clear Selection Button */}
         <Button
           variant="contained"
           color="primary"
           size="medium"
-          onClick={resetOutcomes}
+          onClick={resetOutcomesWithExit}
           sx={{
             textTransform: "none",
             borderRadius: 2,
@@ -157,20 +185,20 @@ const OutcomesSelector: React.FC = () => {
           {t("questionBuilder.ui.clearSelections")}
         </Button>
       </Box>
-      
+
       {/* Include climate checkbox */}
-      <Box 
-        sx={{ 
-          display: "flex", 
-          alignItems: "center", 
-          mb: 2 
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: 2,
         }}
       >
         <FormControlLabel
           control={
             <Checkbox
               checked={includeClimate}
-              onChange={() => toggleClimate()}
+              onChange={() => toggleClimateWithExit()}
               size="small"
             />
           }
@@ -196,7 +224,12 @@ const OutcomesSelector: React.FC = () => {
                 checked: boolean,
                 subtype?: boolean,
               ) =>
-                handleOutcomeOptionChange(option, checked, category.id, subtype)
+                handleOutcomeOptionChangeWithExit(
+                  option,
+                  checked,
+                  category.id,
+                  subtype,
+                )
               }
               section={category.id}
               isOperations={false}
@@ -220,7 +253,7 @@ const OutcomesSelector: React.FC = () => {
                   sx={mapToggleStyles}
                   onClick={(e) => {
                     e.stopPropagation() // Prevent accordion from toggling
-                    toggleMap()
+                    toggleMapWithExit()
                   }}
                 >
                   <LocationOnIcon sx={locationIconStyles} />

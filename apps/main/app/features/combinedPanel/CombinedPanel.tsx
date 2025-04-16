@@ -34,6 +34,7 @@ const CombinedPanelContent = () => {
     state: { includeClimate, swapped },
     toggleSwap,
     toggleClimate,
+    setExploratoryMode,
   } = useQuestionBuilderHelpers()
 
   // Track if the scroll button has been clicked or if the user has scrolled manually
@@ -200,6 +201,9 @@ const CombinedPanelContent = () => {
             color="primary"
             disableElevation
             onClick={() => {
+              // Enter exploratory mode - shrink the question summary
+              setExploratoryMode(true)
+
               // Scroll to scenario results
               const element = document.getElementById("scenario-results")
               if (element) {

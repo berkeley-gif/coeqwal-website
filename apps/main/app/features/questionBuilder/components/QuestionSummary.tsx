@@ -66,14 +66,20 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
       selectedOperations,
       outcomesBySection,
       operationDirections,
+      isExploratoryMode,
     },
     getOperationShortText,
     shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
 
-  // Calculate font size based on number of selections
+  // Calculate font size based on number of selections and exploratory mode
   const calculatedFontSize = useMemo(() => {
+    // If in exploratory mode, use smaller font
+    if (isExploratoryMode) {
+      return "2.2rem" // Smaller text for exploratory mode
+    }
+
     // Count total selections
     const operationsCount = selectedOperations.length
     const outcomesCount = Object.values(outcomesBySection).reduce(
@@ -97,7 +103,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
     // Extra small size
     return "2.8rem"
-  }, [selectedOperations, outcomesBySection])
+  }, [selectedOperations, outcomesBySection, isExploratoryMode])
 
   // Expensive calculation for the summary text
   const summary = useMemo(() => {
@@ -1317,6 +1323,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
     formatOutcomeText,
     t,
     locale,
+    isExploratoryMode,
   ])
 
   // Update font size based on text overflow using ResizeObserver
@@ -1327,7 +1334,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
     // No need to update fontSize state since it's not used anymore
   }, [summary])
 
-  // Container styles now use fixed values instead of conditional wasScrolled styles
+  // Update container styles to be relative to exploratory mode
   return (
     <div
       style={{
@@ -1352,12 +1359,12 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           margin: "0 auto",
           fontSize: calculatedFontSize, // Using the calculated font size
           backgroundColor: "white",
-          paddingTop: "72px",
-          paddingBottom: "32px",
+          paddingTop: isExploratoryMode ? "20px" : "72px", // Reduce padding in exploratory mode
+          paddingBottom: isExploratoryMode ? "12px" : "32px", // Reduce padding in exploratory mode
           paddingLeft: "0",
           paddingRight: "0",
           boxShadow: "none",
-          transition: "font-size 0.75s ease-in-out",
+          transition: "font-size 0.75s ease-in-out, padding 0.75s ease-in-out",
           maxWidth: "none !important",
         })}
       >

@@ -13,6 +13,7 @@ export interface QuestionBuilderState {
   selectedOutcomes: string[]
   outcomesBySection: Record<string, string[]>
   showMap: boolean
+  isExploratoryMode: boolean
 }
 
 // Define actions
@@ -29,6 +30,7 @@ type Action =
     }
   | { type: "SELECT_OUTCOME"; payload: { option: string; section: string } }
   | { type: "DESELECT_OUTCOME"; payload: { option: string; section: string } }
+  | { type: "SET_EXPLORATORY_MODE"; payload: boolean }
   | { type: "RESET" }
 
 // Initial state
@@ -46,6 +48,7 @@ const initialState: QuestionBuilderState = {
     metric: [],
   },
   showMap: false,
+  isExploratoryMode: false,
 }
 
 // Create reducer
@@ -125,6 +128,11 @@ const questionBuilderReducer = (
         outcomesBySection: updatedOutcomesBySection,
       }
     }
+    case "SET_EXPLORATORY_MODE":
+      return {
+        ...state,
+        isExploratoryMode: action.payload,
+      }
     case "RESET":
       return initialState
     default:
@@ -199,6 +207,11 @@ export const questionBuilderActions = {
     ({
       type: "DESELECT_OUTCOME",
       payload: { option, section },
+    }) as const,
+  setExploratoryMode: (isExploratoryMode: boolean) =>
+    ({
+      type: "SET_EXPLORATORY_MODE",
+      payload: isExploratoryMode,
     }) as const,
   reset: () => ({ type: "RESET" }) as const,
 }

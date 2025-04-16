@@ -20,8 +20,15 @@
  * Data model is more complex (nested themes with options)
  */
 
-import React, { useState, useMemo } from "react"
-import { Typography, Box, useTheme, TextField, SearchIcon, Button } from "@repo/ui/mui"
+import React, { useState, useMemo, useCallback } from "react"
+import {
+  Typography,
+  Box,
+  useTheme,
+  TextField,
+  SearchIcon,
+  Button,
+} from "@repo/ui/mui"
 import { Card } from "@repo/ui"
 import { OPERATION_THEMES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
@@ -33,15 +40,37 @@ const OperationsSelector: React.FC = () => {
   const theme = useTheme()
   const { t, locale } = useTranslation()
   const {
-    state: { swapped, selectedOperations },
+    state: { swapped, selectedOperations, isExploratoryMode },
     handleOperationChange,
     resetOperations,
+    setExploratoryMode,
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
 
   // Track expanded accordions
   const [expandedAccordions, setExpandedAccordions] = useState<string[]>([])
+
+  // Exit exploratory mode when interacting with this component
+  const exitExploratoryMode = useCallback(() => {
+    if (isExploratoryMode) {
+      setExploratoryMode(false)
+    }
+  }, [isExploratoryMode, setExploratoryMode])
+
+  // Update handlers to exit exploratory mode
+  const handleOperationChangeWithExitMode = useCallback(
+    (optionId: string, checked: boolean) => {
+      exitExploratoryMode()
+      handleOperationChange(optionId, checked)
+    },
+    [exitExploratoryMode, handleOperationChange],
+  )
+
+  const handleResetWithExitMode = useCallback(() => {
+    exitExploratoryMode()
+    resetOperations()
+  }, [exitExploratoryMode, resetOperations])
 
   // Determine which accordions should be forced open because they contain selected options
   const forcedOpenAccordions = useMemo(() => {
@@ -177,20 +206,20 @@ const OperationsSelector: React.FC = () => {
     // In swapped mode, allow multiple selections
     if (swapped) {
       // Simply toggle the selection state
-      handleOperationChange(optionId, checked)
+      handleOperationChangeWithExitMode(optionId, checked)
     } else {
       // In unswapped mode, keep the radio-like behavior (only one selection)
       if (checked) {
         // Deselect all current selections
         selectedOperations.forEach((operation) => {
-          handleOperationChange(operation, false)
+          handleOperationChangeWithExitMode(operation, false)
         })
 
         // Then select only the new option
-        handleOperationChange(optionId, true)
+        handleOperationChangeWithExitMode(optionId, true)
       } else {
         // Allow deselection normally
-        handleOperationChange(optionId, false)
+        handleOperationChangeWithExitMode(optionId, false)
       }
     }
   }
@@ -234,13 +263,13 @@ const OperationsSelector: React.FC = () => {
             </>
           )}
         </Typography>
-        
+
         {/* Clear Selection Button */}
         <Button
           variant="contained"
           color="primary"
           size="medium"
-          onClick={resetOperations}
+          onClick={handleResetWithExitMode}
           sx={{
             textTransform: "none",
             borderRadius: 2,
