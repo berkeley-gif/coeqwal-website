@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
-import { Box, Typography, Button } from "@repo/ui/mui"
+import { Box, Typography, Button, Stack } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
@@ -394,251 +394,66 @@ export default function Home() {
             }}
           >
             <Box maxWidth="900px">
-              <Typography variant="h4" color="white">
+              <Typography variant="body2" color="white">
                 <Box component="span" sx={{ fontWeight: 600 }}>
                   {t("interstitial.boldText")}
                 </Box>
                 {" " + t("interstitial.part1")}
               </Typography>
-              <Typography variant="h4" color="white" sx={{ fontWeight: 300 }}>
+              <Typography variant="body2" color="white" sx={{ fontWeight: 300 }}>
                 {t("interstitial.part2")}
               </Typography>
             </Box>
           </BasePanel>
 
-          {/* Two Column Panel with map controls */}
-          <Box sx={{ pointerEvents: "none" }} id="california-water-panel">
-            <TwoColumnPanel
-              leftTitle="California Water"
-              leftContent={
-                <Box
-                  sx={{
-                    pointerEvents: "none",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 2,
-                  }}
-                >
-                  <Typography variant="body1">
-                    This panel demonstrates different ways to interact with the
-                    map:
-                  </Typography>
-
-                  {/* Map Interaction Examples */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                      mt: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      1. Uncontrolled (Ref-based) Approach:
-                    </Typography>
-                    <Button
-                      variant="standard"
-                      color="primary"
-                      onClick={handleUncontrolledFlyTo}
-                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
-                    >
-                      Uncontrolled FlyTo (Default Transition)
-                    </Button>
-
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ mt: 2 }}
-                    >
-                      2. Controlled (State-based) Approach:
-                    </Typography>
-                    <Button
-                      variant="standard"
-                      color="primary"
-                      onClick={handleControlledFlyTo}
-                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
-                    >
-                      Controlled FlyTo (Default Transition)
-                    </Button>
-
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ mt: 2 }}
-                    >
-                      3. Add Map Layer (withMap):
-                    </Typography>
-                    <Button
-                      variant="standard"
-                      color="primary"
-                      onClick={handleAddLayer}
-                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
-                    >
-                      Add Water Features Heatmap
-                    </Button>
-
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ mt: 2 }}
-                    >
-                      4. Context-based FlyTo (used in the existing app):
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      Using default transition with a simple easing function:
-                    </Typography>
-                    <Button
-                      variant="standard"
-                      color="primary"
-                      onClick={() => flyToLocation(-121.5, 38.05, 10)}
-                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
-                    >
-                      Sacramento-San Joaquin Delta
-                    </Button>
-                    <Button
-                      variant="standard"
-                      color="primary"
-                      onClick={() => flyToLocation(-122.42, 40.72, 12)}
-                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
-                    >
-                      Shasta Dam
-                    </Button>
-                    <Button
-                      variant="standard"
-                      color="primary"
-                      onClick={() => flyToLocation(-121.1, 37.06, 12)}
-                      sx={{ textTransform: "none", alignSelf: "flex-start" }}
-                    >
-                      San Luis Reservoir
-                    </Button>
-
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ mt: 4, mb: 1 }}
-                    >
-                      5. Transition Styles Demo:
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      Transitions control how the camera moves between
-                      locations, including duration, easing functions, pitch,
-                      and bearing effects:
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 2 }}>
-                      Try different camera transitions to the Delta area:
-                    </Typography>
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => mapRef.current?.flyTo(-121.5, 38.05, 10)}
-                        sx={{ textTransform: "none" }}
-                      >
-                        Default
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() =>
-                          mapRef.current?.flyTo(
-                            -121.5,
-                            38.05,
-                            10,
-                            undefined,
-                            undefined,
-                            undefined,
-                            MapTransitions.SMOOTH,
-                          )
-                        }
-                        sx={{ textTransform: "none" }}
-                      >
-                        Smooth
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() =>
-                          mapRef.current?.flyTo(
-                            -121.5,
-                            38.05,
-                            10,
-                            undefined,
-                            undefined,
-                            undefined,
-                            MapTransitions.DRAMATIC,
-                          )
-                        }
-                        sx={{ textTransform: "none" }}
-                      >
-                        Dramatic
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() =>
-                          mapRef.current?.flyTo(
-                            -121.5,
-                            38.05,
-                            10,
-                            undefined,
-                            undefined,
-                            undefined,
-                            MapTransitions.AERIAL,
-                          )
-                        }
-                        sx={{ textTransform: "none" }}
-                      >
-                        Aerial
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() =>
-                          mapRef.current?.flyTo(
-                            -121.5,
-                            38.05,
-                            10,
-                            undefined,
-                            undefined,
-                            undefined,
-                            MapTransitions.CINEMATIC,
-                          )
-                        }
-                        sx={{ textTransform: "none" }}
-                      >
-                        Cinematic
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() =>
-                          mapRef.current?.flyTo(
-                            -121.5,
-                            38.05,
-                            10,
-                            undefined,
-                            undefined,
-                            undefined,
-                            MapTransitions.QUICK,
-                          )
-                        }
-                        sx={{ textTransform: "none" }}
-                      >
-                        Quick
-                      </Button>
-                    </Box>
-                  </Box>
-                </Box>
-              }
+          {/* Custom California Water panel with two columns */}
+          <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
+            <BasePanel
               background="transparent"
+              paddingVariant="wide"
               includeHeaderSpacing={true}
               sx={{
                 color: (theme) => theme.palette.text.secondary,
-                "& .MuiTypography-root": {
-                  color: "inherit",
-                },
               }}
-            />
+            >
+              {/* Custom two-column layout */}
+              <Box sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                width: "100%",
+              }}>
+                {/* Left column */}
+                <Box sx={{ 
+                  width: { xs: "100%", md: "50%" },
+                  pr: { md: 4 },
+                }}>
+                  <Typography variant="h2" sx={{ mb: 1 }}>
+                    California Water
+                  </Typography>
+                  
+                  <Stack spacing={2}>
+                    <Typography variant="body1">
+                      Most of California&apos;s water falls in the winter as rain and snow in northern California and the Sierra Nevada. This precipitation – highly variable from year to year – is the state's primary water supply.
+                    </Typography>
+                    
+                    <Typography variant="body1">
+                      Snowpack serves as a natural reservoir, releasing water throughout the spring. As rainfall and melting snow flows from the mountains into rivers of the Central Valley, some of it seeps underground and replenishes large aquifers.
+                    </Typography>
+
+                    <Typography variant="body1">
+                      The Sacramento River - California&apos;s largest - flows from the north and joins with the San Joaquin River, flowing up from the south, in the Delta. These flows create one of the most ecologically rich estuaries on the West Coast before flowing out to the San Francisco Bay and Pacific Ocean. In the Delta, freshwater mixes with saltwater, creating a shifting salinity balance shaped by the amount of flow and the tides.
+                    </Typography>
+                    
+                    <Typography variant="body1">
+                      Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, we have transformed how water moves through California.
+                    </Typography>
+                  </Stack>
+                </Box>
+                
+                {/* Right column (empty) */}
+                <Box sx={{ width: { xs: "100%", md: "50%" } }} />
+              </Box>
+            </BasePanel>
           </Box>
 
           {/* Combined Panel */}
