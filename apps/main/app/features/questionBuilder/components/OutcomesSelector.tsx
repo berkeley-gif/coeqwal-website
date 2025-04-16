@@ -123,25 +123,6 @@ const OutcomesSelector: React.FC = () => {
             </>
           )}
         </Typography>
-
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={includeClimate}
-              onChange={() => toggleClimate()}
-              color="primary"
-              size="small"
-              sx={{
-                color: theme.palette.text.primary,
-                "&.Mui-checked": {
-                  color: theme.palette.text.primary,
-                },
-              }}
-            />
-          }
-          label={t("questionBuilder.outcomesSelector.includeClimate")}
-          sx={{ ml: 0 }}
-        />
       </Box>
 
       {/* Outcome categories */}

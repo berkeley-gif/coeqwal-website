@@ -11,6 +11,8 @@ import {
   Grid,
   Button,
   SearchIcon,
+  FormControlLabel,
+  Checkbox,
 } from "@repo/ui/mui"
 import { BasePanel, Card } from "@repo/ui"
 import { QuestionBuilderProvider } from "../questionBuilder/context/QuestionBuilderContext"
@@ -31,6 +33,7 @@ const CombinedPanelContent = () => {
   const {
     state: { includeClimate, swapped },
     toggleSwap,
+    toggleClimate,
   } = useQuestionBuilderHelpers()
 
   // Track if the scroll button has been clicked or if the user has scrolled manually
@@ -130,12 +133,12 @@ const CombinedPanelContent = () => {
           <QuestionSummary wasScrolled={hasClickedScroll} />
         </Box>
 
-        {/* Search button - only visible after scroll */}
+        {/* Climate checkbox in a small card - only visible after scroll */}
         <Box
           sx={{
             position: "absolute",
             bottom: -28,
-            right: theme.spacing(2),
+            right: `calc(${theme.spacing(4)} + 180px + 32px)`, // Search button position + estimated width + 32px gap
             opacity: hasClickedScroll ? 1 : 0,
             visibility: hasClickedScroll ? "visible" : "hidden",
             transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
@@ -146,34 +149,84 @@ const CombinedPanelContent = () => {
         >
           <Card
             sx={{
-              width: "auto",
+              padding: theme.spacing(0.5, 2),
+              borderRadius: "999px",
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              borderRadius: "20px",
-              overflow: "hidden",
             }}
           >
-            <Button
-              variant="standard"
-              disableElevation
-              onClick={() => {
-                // Scroll to scenario results
-                const element = document.getElementById("scenario-results")
-                if (element) {
-                  const headerOffset = 100
-                  const elementPosition = element.getBoundingClientRect().top
-                  const offsetPosition =
-                    elementPosition + window.scrollY - headerOffset
-                  window.scrollTo({
-                    top: offsetPosition,
-                    behavior: "smooth",
-                  })
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={includeClimate}
+                  onChange={() => toggleClimate()}
+                  color="primary"
+                  size="small"
+                  sx={{
+                    color: theme.palette.text.primary,
+                    "&.Mui-checked": {
+                      color: theme.palette.text.primary,
+                    },
+                  }}
+                />
+              }
+              label={t("questionBuilder.outcomesSelector.includeClimate")}
+              sx={{ 
+                m: 0,
+                "& .MuiTypography-root": {
+                  fontSize: "1rem",
+                  fontWeight: 500,
                 }
               }}
-              startIcon={<SearchIcon />}
-            >
-              {t("scenarioResults.search")}
-            </Button>
+            />
           </Card>
+        </Box>
+
+        {/* Search button - only visible after scroll */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: -28,
+            right: theme.spacing(4),
+            opacity: hasClickedScroll ? 1 : 0,
+            visibility: hasClickedScroll ? "visible" : "hidden",
+            transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
+            transition: "all 0.5s ease",
+            transitionDelay: "0.2s",
+            zIndex: 2500,
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            disableElevation
+            onClick={() => {
+              // Scroll to scenario results
+              const element = document.getElementById("scenario-results")
+              if (element) {
+                const headerOffset = 100
+                const elementPosition = element.getBoundingClientRect().top
+                const offsetPosition =
+                  elementPosition + window.scrollY - headerOffset
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: "smooth",
+                })
+              }
+            }}
+            startIcon={<SearchIcon />}
+            sx={{
+              borderRadius: "999px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              padding: theme.spacing(1, 2),
+              bgcolor: "black",
+              color: "white",
+              "&:hover": {
+                bgcolor: "#333",
+              },
+            }}
+          >
+            {t("scenarioResults.search")}
+          </Button>
         </Box>
       </Box>
 
