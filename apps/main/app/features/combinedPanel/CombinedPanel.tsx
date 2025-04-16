@@ -23,10 +23,12 @@ import {
 } from "../questionBuilder/components"
 import { useQuestionBuilderHelpers } from "../questionBuilder/hooks/useQuestionBuilderHelpers"
 import { KeyboardArrowDownIcon } from "@repo/ui/mui"
+import { useTranslation } from "@repo/i18n"
 
 // Content component that uses the context
 const CombinedPanelContent = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const {
     state: { includeClimate, swapped },
     toggleSwap,
@@ -313,7 +315,7 @@ const CombinedPanelContent = () => {
                   textTransform: "none",
                 }}
               >
-                switch
+                {t("questionBuilder.ui.switch")}
               </Typography>
             </Box>
           </Grid>
@@ -332,7 +334,7 @@ const CombinedPanelContent = () => {
             }}
           >
             <Typography variant="h5" sx={{ mt: 3 }}>
-              with
+              {t("questionBuilder.connectors.with")}
             </Typography>
           </Grid>
 
@@ -360,11 +362,10 @@ const CombinedPanelContent = () => {
           {/* Header row */}
           <Box sx={{ p: theme.spacing(2) }}>
             <Typography variant="h4" gutterBottom>
-              Scenario Results
+              {t("scenarioResults.title")}
             </Typography>
             <Typography variant="body1">
-              View and compare results from different water management
-              scenarios.
+              {t("scenarioResults.description")}
             </Typography>
           </Box>
 

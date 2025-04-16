@@ -17,6 +17,10 @@
   "CaliforniaWaterPanel": {
     "title": "Agua California"
   },
+  "scenarioResults": {
+    "title": "Resultados de Escenarios",
+    "description": "Ver y comparar resultados de diferentes escenarios de gestión del agua."
+  },
   "questionBuilder": {
     "singularVerb": "afecta",
     "pluralVerb": "afectan",
@@ -36,7 +40,11 @@
       "to": "a",
       "under": "bajo",
       "increase": "aumentar",
-      "decrease": "disminuir"
+      "decrease": "disminuir",
+      "with": "con"
+    },
+    "ui": {
+      "switch": "cambiar"
     },
     "operationsSelector": {
       "title": "¿Cómo afectan {{decisions}}",
@@ -51,6 +59,14 @@
       "includeClimate": "Incluir futuros climáticos",
       "chooseLocation": "Elegir ubicación en el mapa",
       "mapPlaceholder": "Placeholder del Mapa"
+    },
+    "climateSelector": {
+      "title": "clima",
+      "options": {
+        "hist_adj": "condiciones actuales",
+        "cc50": "futuro moderadamente más caluroso y seco",
+        "cc95": "futuro severamente más caluroso y seco"
+      }
     },
     "sectionAccordion": {
       "comingSoon": "Próximamente"

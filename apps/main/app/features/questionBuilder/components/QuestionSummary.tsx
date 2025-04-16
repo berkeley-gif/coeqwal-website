@@ -807,16 +807,14 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
     // Find the climate label for the selected climate ID
     const getClimateLabel = () => {
-      // Find the climate option with the matching ID
-      const climateOption = CLIMATE_OPTIONS.find((option: { id: string; label: string }) => option.id === selectedClimate);
-      // Return the label if found, otherwise return the ID as fallback
-      return climateOption?.label || selectedClimate;
+      // Use the translated label for the selected climate ID
+      return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
     }
 
     const climatePart = includeClimate ? (
       <>
         {" "}
-        under{" "}
+        {t("questionBuilder.connectors.under")}{" "}
         <ColoredText color={theme.palette.climate.main}>
           {getClimateLabel()}
         </ColoredText>
@@ -877,6 +875,13 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         </span>
       )
 
+      // Create the climate element with green highlighting
+      const climate = (
+        <ColoredText color={theme.palette.climate.main}>
+          {getClimateLabel()}
+        </ColoredText>
+      )
+
       return (
         <TranslatedQuestion
           translationKey={formatString}
@@ -884,7 +889,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
             verb,
             operation,
             outcome,
-            climate: getClimateLabel(),
+            climate,
           }}
         />
       )

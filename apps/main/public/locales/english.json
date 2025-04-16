@@ -17,6 +17,10 @@
   "CaliforniaWaterPanel": {
     "title": "California Water"
   },
+  "scenarioResults": {
+    "title": "Scenario Results",
+    "description": "View and compare results from different water management scenarios."
+  },
   "questionBuilder": {
     "singularVerb": "does",
     "pluralVerb": "do",
@@ -36,7 +40,11 @@
       "to": "to",
       "under": "under",
       "increase": "increase",
-      "decrease": "decrease"
+      "decrease": "decrease",
+      "with": "with"
+    },
+    "ui": {
+      "switch": "switch"
     },
     "operationsSelector": {
       "title": "How do {{decisions}} affect",
@@ -51,6 +59,14 @@
       "includeClimate": "Include climate futures",
       "chooseLocation": "Choose location on map",
       "mapPlaceholder": "Map Placeholder"
+    },
+    "climateSelector": {
+      "title": "climate",
+      "options": {
+        "hist_adj": "current conditions",
+        "cc50": "a moderately hotter and dryer future",
+        "cc95": "a severely hotter and dryer future"
+      }
     },
     "sectionAccordion": {
       "comingSoon": "Coming Soon"
