@@ -555,6 +555,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         // Create groups for increase and decrease for type outcomes
         const increaseTypeOutcomes: React.ReactNode[] = []
         const decreaseTypeOutcomes: React.ReactNode[] = []
+        const affectTypeOutcomes: React.ReactNode[] = []
 
         // Process type selections
         typeSelections.forEach((type) => {
@@ -585,6 +586,17 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
                 </ColoredText>,
               )
             }
+          } else {
+            // FALLBACK: If no direction is set (like when switching from unswapped to swapped),
+            // create a neutral "affect" group
+            affectTypeOutcomes.push(
+              <ColoredText
+                key={`affect-${type}`}
+                color={theme.palette.cool.main}
+              >
+                {formattedText}
+              </ColoredText>,
+            )
           }
         })
 
@@ -630,6 +642,16 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
                 </ColoredText>,
               )
             }
+          } else {
+            // FALLBACK: If no direction is set, use the "affect" group
+            affectTypeOutcomes.push(
+              <ColoredText
+                key={`affect-${fullId}`}
+                color={theme.palette.cool.main}
+              >
+                {subtypeText}
+              </ColoredText>,
+            )
           }
         })
 
@@ -652,6 +674,13 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
                 </ColoredText>,
               )
             }
+          } else {
+            // FALLBACK: If no direction is set, use the "affect" group
+            affectTypeOutcomes.push(
+              <ColoredText key={`affect-delta`} color={theme.palette.cool.main}>
+                {formattedText}
+              </ColoredText>,
+            )
           }
         }
 
