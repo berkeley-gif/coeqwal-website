@@ -401,12 +401,12 @@ export default function Home() {
           >
             <Box maxWidth="900px">
               <Typography
-                variant="h3"
+                variant="h4"
                 color="white"
                 paragraph
                 sx={{ fontWeight: 300 }}
               >
-                <Box component="span" sx={{ fontWeight: 700 }}>
+                <Box component="span" sx={{ fontWeight: 600 }}>
                   From mountains to coast and north to south,
                 </Box>
                 {" " +
@@ -414,7 +414,7 @@ export default function Home() {
                     "From mountains to coast and north to south,",
                   )[1]}
               </Typography>
-              <Typography variant="h3" color="white" sx={{ fontWeight: 200 }}>
+              <Typography variant="h4" color="white" sx={{ fontWeight: 300 }}>
                 {t("interstitial.content.1")}
               </Typography>
             </Box>
