@@ -396,19 +396,21 @@ export default function Home() {
             }}
           >
             <Box maxWidth="900px">
-              <Typography variant="body2" color="white">
-                <Box component="span" sx={{ fontWeight: 600 }}>
-                  {t("interstitial.boldText")}
-                </Box>
-                {" " + t("interstitial.part1")}
-              </Typography>
-              <Typography
-                variant="body2"
-                color="white"
-                sx={{ fontWeight: 300 }}
-              >
-                {t("interstitial.part2")}
-              </Typography>
+              <Stack spacing={2}>
+                <Typography variant="body2" color="white">
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    {t("interstitial.boldText")}
+                  </Box>
+                  {" " + t("interstitial.part1")}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="white"
+                  sx={{ fontWeight: 300 }}
+                >
+                  {t("interstitial.part2")}
+                </Typography>
+              </Stack>
             </Box>
           </BasePanel>
 

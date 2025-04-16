@@ -923,7 +923,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       }}
     >
       <Typography
-        variant="h1"
+        variant="h2"
         sx={(theme) => ({
           mt: theme.spacing(wasScrolled ? 1 : 4),
           mb: 0,

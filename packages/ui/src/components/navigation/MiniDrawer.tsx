@@ -127,26 +127,9 @@ export function MiniDrawer({
             backgroundColor: "rgba(255, 255, 255, 0.9)",
             borderBottom: "1px solid #ddd",
             padding: 0,
+            justifyContent: "center",
           }}
         >
-          {open && (
-            <Typography
-              variant="body2"
-              sx={(theme) => ({
-                fontWeight: theme.typography.fontWeightBold,
-                padding: theme.spacing(1.5, 2),
-                backgroundColor: "#2C6E91",
-                color: theme.palette.common.white,
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                flexGrow: 1,
-              })}
-            >
-              {title}
-            </Typography>
-          )}
-
           <IconButton
             onClick={open ? handleDrawerClose : handleDrawerOpen}
             sx={(theme) => ({
@@ -159,6 +142,7 @@ export function MiniDrawer({
               ...(position === "right" && {
                 transform: open ? "rotate(180deg)" : "rotate(0deg)",
               }),
+              margin: theme.spacing(1),
             })}
           >
             {toggleIcon}
