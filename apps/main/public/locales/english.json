@@ -16,5 +16,61 @@
   },
   "CaliforniaWaterPanel": {
     "title": "California Water"
+  },
+  "scenarioResults": {
+    "title": "Scenario Results",
+    "description": "View and compare results from different water management scenarios.",
+    "search": "Search"
+  },
+  "questionBuilder": {
+    "singularVerb": "does",
+    "pluralVerb": "do",
+    "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
+    "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} under {{climate}}?",
+    "swappedFormat": "To change {{outcome}}, which {{operation}} could we consider?",
+    "scenarioSingular": "scenario",
+    "scenarioPlural": "scenarios",
+    "defaultTerms": {
+      "decisions": "decisions",
+      "waterAvailability": "water availability",
+      "outcomes": "outcomes"
+    },
+    "connectors": {
+      "and": "and",
+      "in": "in",
+      "to": "to",
+      "under": "under",
+      "increase": "increase",
+      "decrease": "decrease",
+      "with": "with"
+    },
+    "ui": {
+      "switch": "switch"
+    },
+    "operationsSelector": {
+      "title": "How do {{decisions}} affect",
+      "swappedTitle": "could we consider?",
+      "searchPlaceholder": "Type to search...",
+      "searchOperations": "Search operations",
+      "comingSoon": "Coming Soon"
+    },
+    "outcomesSelector": {
+      "title": "{{waterAvailability}}?",
+      "swappedTitle": "To change {{waterAvailability}}",
+      "includeClimate": "Include climate futures",
+      "chooseLocation": "Choose location on map",
+      "mapPlaceholder": "Map Placeholder"
+    },
+    "climateSelector": {
+      "title": "climate",
+      "options": {
+        "hist_adj": "current conditions",
+        "cc50": "a moderately hotter and dryer future",
+        "cc95": "a severely hotter and dryer future"
+      }
+    },
+    "sectionAccordion": {
+      "comingSoon": "Coming Soon"
+    }
   }
 }

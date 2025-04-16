@@ -22,6 +22,7 @@ import {
 } from "./components"
 import { QuestionBuilderProvider } from "./context/QuestionBuilderContext"
 import { useQuestionBuilderHelpers } from "./hooks/useQuestionBuilderHelpers"
+import { useTranslation } from "@repo/i18n"
 
 // Content component that uses the context
 const QuestionBuilderContent = ({
@@ -30,6 +31,7 @@ const QuestionBuilderContent = ({
   showSummary: boolean
 }) => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const {
     state: { includeClimate, swapped },
     toggleSwap,
@@ -188,7 +190,7 @@ const QuestionBuilderContent = ({
               {swapped ? <OutcomesSelector /> : <OperationsSelector />}
             </Grid>
 
-            {/* Column 2: Action verb & switch - aligned to top */}
+            {/* Column 2: Action verb & switch */}
             <Grid
               sx={{
                 flex: "0 0 auto",
@@ -210,7 +212,7 @@ const QuestionBuilderContent = ({
                 onClick={handleSwapClick}
                 sx={{ cursor: "pointer" }}
               >
-                switch
+                {t("questionBuilder.ui.switch")}
               </Typography>
             </Grid>
 
@@ -228,7 +230,7 @@ const QuestionBuilderContent = ({
               }}
             >
               <Typography variant="h5" sx={{ mt: 3 }}>
-                with
+                {t("questionBuilder.connectors.with")}
               </Typography>
             </Grid>
 

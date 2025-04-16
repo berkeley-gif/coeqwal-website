@@ -35,7 +35,7 @@ type Action =
 const initialState: QuestionBuilderState = {
   swapped: false,
   includeClimate: false,
-  selectedClimate: CLIMATE_OPTIONS[0] || "current conditions",
+  selectedClimate: CLIMATE_OPTIONS[0]?.id || "hist_adj",
   selectedOperations: [],
   operationDirections: {},
   selectedOutcomes: [],

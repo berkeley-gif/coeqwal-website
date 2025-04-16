@@ -8,7 +8,6 @@ import {
   SlideshowIcon,
 } from "@repo/ui"
 
-// Define the interface here to avoid import issues
 interface NavItem {
   text: string
   icon: React.ReactNode

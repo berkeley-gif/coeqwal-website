@@ -35,9 +35,11 @@ import { OUTCOME_CATEGORIES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { HighlightText } from "./ui"
+import { useTranslation } from "@repo/i18n"
 
 const OutcomesSelector: React.FC = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const {
     state: { swapped, selectedOutcomes, showMap, includeClimate },
     handleOutcomeChange,
@@ -96,18 +98,28 @@ const OutcomesSelector: React.FC = () => {
         <Typography variant="h5">
           {swapped ? (
             <>
-              To change{" "}
+              {/* Use JSX directly - the t function can't handle React elements as params */}
+              {
+                t("questionBuilder.outcomesSelector.swappedTitle").split(
+                  "{{waterAvailability}}",
+                )[0]
+              }
               <HighlightText bgcolor={theme.palette.cool.main}>
-                water availability
+                {t("questionBuilder.defaultTerms.waterAvailability")}
               </HighlightText>
+              {t("questionBuilder.outcomesSelector.swappedTitle").split(
+                "{{waterAvailability}}",
+              )[1] || ""}
             </>
           ) : (
             <>
               {" "}
               <HighlightText bgcolor={theme.palette.cool.main}>
-                water availability
+                {t("questionBuilder.defaultTerms.waterAvailability")}
               </HighlightText>
-              &nbsp;&nbsp;?
+              {t("questionBuilder.outcomesSelector.title").split(
+                "{{waterAvailability}}",
+              )[1] || ""}
             </>
           )}
         </Typography>
@@ -127,7 +139,7 @@ const OutcomesSelector: React.FC = () => {
               }}
             />
           }
-          label="Include climate futures"
+          label={t("questionBuilder.outcomesSelector.includeClimate")}
           sx={{ ml: 0 }}
         />
       </Box>
@@ -138,9 +150,14 @@ const OutcomesSelector: React.FC = () => {
           <Box key={category.id}>
             <SectionAccordion
               title={category.title}
+              titleEs={category.titleEs}
               options={category.options}
               selectedOptions={selectedOutcomes}
-              onOptionChange={(option, checked, subtype) =>
+              onOptionChange={(
+                option: string,
+                checked: boolean,
+                subtype?: boolean,
+              ) =>
                 handleOutcomeOptionChange(option, checked, category.id, subtype)
               }
               section={category.id}
@@ -176,7 +193,7 @@ const OutcomesSelector: React.FC = () => {
                       color: theme.palette.text.primary,
                     }}
                   >
-                    Choose location on map
+                    {t("questionBuilder.outcomesSelector.chooseLocation")}
                   </Typography>
                 </Box>
 
@@ -184,7 +201,7 @@ const OutcomesSelector: React.FC = () => {
                 {showMap && (
                   <Paper elevation={3} sx={mapPlaceholderStyles}>
                     <Typography variant="body1" color="text.primary">
-                      Map Placeholder
+                      {t("questionBuilder.outcomesSelector.mapPlaceholder")}
                     </Typography>
                   </Paper>
                 )}

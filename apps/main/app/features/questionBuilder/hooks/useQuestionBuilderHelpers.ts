@@ -5,6 +5,7 @@ import {
   useQuestionBuilder,
   questionBuilderActions,
 } from "../context/QuestionBuilderContext"
+import { OPERATION_THEMES } from "../data/constants"
 
 /**
  * Custom hook that provides helper functions for question builder components
@@ -320,6 +321,90 @@ export const useQuestionBuilderHelpers = () => {
     return text.charAt(0).toLowerCase() + text.slice(1)
   }, [])
 
+  // Get operation's short text
+  const getOperationShortText = useCallback(
+    (operationId: string) => {
+      // Find the operation in OPERATION_THEMES
+      for (const theme of OPERATION_THEMES) {
+        for (const option of theme.options) {
+          // Check if this is the main option we're looking for
+          if (option.id === operationId && option.shortText) {
+            return option.shortText
+          }
+
+          // Check if it's a subtype
+          if ("subtypes" in option && option.subtypes) {
+            for (const subtype of option.subtypes) {
+              if (subtype.id === operationId && subtype.shortText) {
+                return subtype.shortText
+              }
+            }
+          }
+        }
+      }
+
+      // Fallback to formatOperationText if no shortText is found
+      return formatOperationText(operationId)
+    },
+    [formatOperationText],
+  )
+
+  // Get operation's grammatical number (singular/plural)
+  const isOperationSingular = useCallback((operationId: string) => {
+    // Find the operation in OPERATION_THEMES
+    for (const theme of OPERATION_THEMES) {
+      for (const option of theme.options) {
+        // Check if this is the main option we're looking for
+        if (option.id === operationId) {
+          // Return isSingular if defined, default to true
+          return "isSingular" in option ? option.isSingular : true
+        }
+
+        // Check if it's a subtype
+        if ("subtypes" in option && option.subtypes) {
+          for (const subtype of option.subtypes) {
+            if (subtype.id === operationId) {
+              // Subtypes default to the parent's isSingular if defined
+              return "isSingular" in subtype
+                ? subtype.isSingular
+                : "isSingular" in option
+                  ? option.isSingular
+                  : true
+            }
+          }
+        }
+      }
+    }
+
+    // Default to true (singular) if not found
+    return true
+  }, [])
+
+  // Helper to determine if we should use "do" or "does" based on selected operations
+  const shouldUseDo = useCallback(() => {
+    // Special case for Delta conveyance with any number of subtypes - always use "does"
+    const onlyDeltaConveyance =
+      state.selectedOperations.every(
+        (op) => op === "delta-conveyance" || op.startsWith("dct-"),
+      ) && state.selectedOperations.some((op) => op.startsWith("dct-"))
+
+    if (onlyDeltaConveyance) return false // Use "does"
+
+    // When no operations are selected, we show "decisions" which is plural,
+    // so we should use "do"
+    if (state.selectedOperations.length === 0) {
+      return true // Use "do" for the default "decisions" text
+    }
+
+    // If only one operation, check if it's singular or plural
+    if (state.selectedOperations.length === 1 && state.selectedOperations[0]) {
+      return !isOperationSingular(state.selectedOperations[0])
+    }
+
+    // Multiple operations always use "do"
+    return state.selectedOperations.length > 1
+  }, [state.selectedOperations, isOperationSingular])
+
   const formatOutcomeText = useCallback((text: string, section: string) => {
     let formattedText = text
 
@@ -410,6 +495,9 @@ export const useQuestionBuilderHelpers = () => {
     getInvalidCombinationMessage,
     // Formatting utilities
     formatOperationText,
+    getOperationShortText,
+    isOperationSingular,
+    shouldUseDo,
     formatOutcomeText,
   }
 }

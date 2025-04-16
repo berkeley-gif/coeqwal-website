@@ -1,50 +1,329 @@
+export const CANONICAL_OUTCOME_TYPES = [
+  { id: "deliveries", label: "deliveries", labelEs: "entregas" },
+  {
+    id: "deliveries_agricultural",
+    label: "agricultural deliveries",
+    labelEs: "entregas agrícolas",
+  },
+  {
+    id: "deliveries_urban",
+    label: "municipal deliveries",
+    labelEs: "entregas municipales",
+  },
+  {
+    id: "deliveries_refuge",
+    label: "managed wetland deliveries",
+    labelEs: "entregas para humedales gestionados",
+  },
+  { id: "storage", label: "storage", labelEs: "almacenamiento" },
+  { id: "channel_flows", label: "channel flows", labelEs: "flujos de canal" },
+  { id: "streamflow", label: "streamflow", labelEs: "caudal" },
+  {
+    id: "Delta outflow",
+    label: "Delta outflow",
+    labelEs: "flujo de salida del Delta",
+  },
+  {
+    id: "Delta salinity",
+    label: "Delta salinity",
+    labelEs: "salinidad del Delta",
+  },
+  {
+    id: "groundwater_levels",
+    label: "groundwater levels",
+    labelEs: "niveles de agua subterránea",
+  },
+  {
+    id: "deep_percolation",
+    label: "deep percolation",
+    labelEs: "percolación profunda",
+  },
+  {
+    id: "groundwater_pumping",
+    label: "groundwater pumping",
+    labelEs: "bombeo de agua subterránea",
+  },
+  {
+    id: "groundwater_pumping_agricultural",
+    label: "agricultural groundwater pumping",
+    labelEs: "bombeo agrícola de agua subterránea",
+  },
+  {
+    id: "groundwater_pumping_urban",
+    label: "urban groundwater pumping",
+    labelEs: "bombeo urbano de agua subterránea",
+  },
+  { id: "shortage", label: "shortage", labelEs: "escasez" },
+]
+
+export const CANONICAL_REGIONS = [
+  {
+    id: "Sacramento Valley",
+    label: "Sacramento Valley",
+    labelEs: "Valle de Sacramento",
+  },
+  { id: "Delta", label: "Delta", labelEs: "Delta" },
+  {
+    id: "San Joaquin Valley",
+    label: "San Joaquin Valley",
+    labelEs: "Valle de San Joaquín",
+  },
+]
+
+export const CANONICAL_CLIMATE_OPTIONS = [
+  {
+    id: "hist_adj",
+    label: "current conditions",
+    labelEs: "condiciones actuales",
+  },
+  {
+    id: "cc50",
+    label: "a moderately hotter and dryer future",
+    labelEs: "futuro moderadamente más caluroso y seco",
+  },
+  {
+    id: "cc95",
+    label: "a severely hotter and dryer future",
+    labelEs: "futuro severamente más caluroso y seco",
+  },
+]
+
 export const OPERATION_THEMES = [
   {
     id: "baseline",
     title: "Current operations and emerging policies",
+    titleEs: "Operaciones actuales y políticas emergentes",
     options: [
-      "Current operations",
-      "Current operations with Temporary Urgent Change Petitions (TUCPs)",
-      "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)",
+      {
+        id: "current-operations",
+        label: "Current operations",
+        labelEs: "Operaciones actuales",
+        shortText: "current operations",
+        shortTextEs: "operaciones actuales",
+        isSingular: false,
+        active: true,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj", "cc50", "cc95"],
+        },
+      },
+      {
+        id: "tucp-operations",
+        label:
+          "Current operations with Temporary Urgent Change Petitions (TUCPs)",
+        labelEs:
+          "Operaciones actuales con Peticiones de Cambio Urgente Temporal (TUCPs)",
+        shortText: "TUCPs",
+        shortTextEs: "TUCPs",
+        isSingular: false,
+        active: true,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
+      {
+        id: "sgma-compliance",
+        label:
+          "Limiting groundwater pumping in the San Joaquin valley (SGMA compliance)",
+        labelEs:
+          "Limitación del bombeo de agua subterránea en el valle de San Joaquín (cumplimiento de SGMA)",
+        shortText: "SGMA compliance",
+        shortTextEs: "cumplimiento de SGMA",
+        isSingular: true,
+        active: true,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
     ],
   },
   {
     id: "flows",
     title: "Changing flows in Central Valley rivers",
+    titleEs: "Cambio de flujos en los ríos del Valle Central",
     options: [
-      "Increasing flows in tributaries and Delta outflow (Alternative 1)",
+      {
+        id: "increased-flows-alt1",
+        label:
+          "Increasing flows in tributaries and Delta outflow (Alternative 1)",
+        labelEs:
+          "Aumento de flujos en afluentes y flujo de salida del Delta (Alternativa 1)",
+        shortText: "increased flows",
+        shortTextEs: "flujos aumentados",
+        isSingular: true,
+        active: true,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
     ],
   },
   {
     id: "drinking-water",
     title: "Prioritizing drinking water",
+    titleEs: "Priorización del agua potable",
     options: [
-      "Meeting critical needs in vulnerable communities",
-      "Meeting functional thresholds in vulnerable communities",
-      "Prioritizing drinking water in vulnerable communities",
+      {
+        id: "critical-needs",
+        label: "Meeting critical needs in vulnerable communities",
+        labelEs: "Satisfacer necesidades críticas en comunidades vulnerables",
+        shortText: "critical needs",
+        shortTextEs: "necesidades críticas",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
+      {
+        id: "functional-thresholds",
+        label: "Meeting functional thresholds in vulnerable communities",
+        labelEs: "Cumplir umbrales funcionales en comunidades vulnerables",
+        shortText: "func. thresholds",
+        shortTextEs: "umbrales func.",
+        isSingular: false,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
+      {
+        id: "drinking-water-priority",
+        label: "Prioritizing drinking water in vulnerable communities",
+        labelEs: "Priorizar el agua potable en comunidades vulnerables",
+        shortText: "drinking priority",
+        shortTextEs: "prioridad de agua potable",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
     ],
   },
   {
     id: "regulations",
     title: "Regulation alternatives",
+    titleEs: "Alternativas de regulación",
     options: [
-      "Relaxing Delta salinity requirements",
-      "Relaxing Delta outflow requirements",
-      "Relaxing Shasta reservoir carryover requirements",
-      "Relaxing Old and Middle River (Sacramento basin) requirements",
+      {
+        id: "relax-salinity",
+        label: "Relaxing Delta salinity requirements",
+        labelEs: "Relajar los requisitos de salinidad del Delta",
+        shortText: "salinity reqs",
+        shortTextEs: "requisitos de salinidad",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
+      {
+        id: "relax-outflow",
+        label: "Relaxing Delta outflow requirements",
+        labelEs: "Relajar los requisitos de flujo de salida del Delta",
+        shortText: "outflow reqs",
+        shortTextEs: "requisitos de flujo",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
+      {
+        id: "relax-shasta-carryover",
+        label: "Relaxing Shasta reservoir carryover requirements",
+        labelEs: "Relajar los requisitos de reserva del embalse de Shasta",
+        shortText: "Shasta carryover",
+        shortTextEs: "reserva de Shasta",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
+      {
+        id: "relax-omr",
+        label: "Relaxing Old and Middle River (Sacramento basin) requirements",
+        labelEs:
+          "Relajar los requisitos de Old y Middle River (cuenca del Sacramento)",
+        shortText: "OMR reqs",
+        shortTextEs: "requisitos de OMR",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj"],
+        },
+      },
     ],
   },
   {
     id: "infrastructure",
     title: "Changing infrastructure",
+    titleEs: "Cambio de infraestructura",
     options: [
       {
         id: "delta-conveyance",
         label: "Delta conveyance tunnel",
+        labelEs: "Túnel de transporte del Delta",
+        shortText: "conveyance tunnel",
+        shortTextEs: "túnel de transporte",
+        isSingular: true,
+        active: false,
+        compatibleWith: {
+          outcomeTypes: CANONICAL_OUTCOME_TYPES.map((type) => type.id),
+          regions: CANONICAL_REGIONS.map((region) => region.id),
+          climateOptions: ["hist_adj", "cc50", "cc95"],
+        },
         subtypes: [
-          { id: "dct-3000cfs", label: "3000cfs" },
-          { id: "dct-4500cfs", label: "4500cfs" },
-          { id: "dct-6000cfs", label: "6000cfs" },
+          {
+            id: "dct-3000cfs",
+            label: "3000cfs",
+            labelEs: "3000cfs",
+            shortText: "3000cfs tunnel",
+            shortTextEs: "túnel de 3000cfs",
+            isSingular: true,
+            active: false,
+          },
+          {
+            id: "dct-4500cfs",
+            label: "4500cfs",
+            labelEs: "4500cfs",
+            shortText: "4500cfs tunnel",
+            shortTextEs: "túnel de 4500cfs",
+            isSingular: true,
+            active: false,
+          },
+          {
+            id: "dct-6000cfs",
+            label: "6000cfs",
+            labelEs: "6000cfs",
+            shortText: "6000cfs tunnel",
+            shortTextEs: "túnel de 6000cfs",
+            isSingular: true,
+            active: false,
+          },
         ],
       },
     ],
@@ -55,54 +334,102 @@ export const OUTCOME_CATEGORIES = [
   {
     id: "type",
     title: "By type",
+    titleEs: "Por tipo",
     options: [
       {
         id: "deliveries",
         label: "deliveries",
+        labelEs: "entregas",
         subtypes: [
-          { id: "agricultural-deliveries", label: "agricultural" },
-          { id: "municipal-deliveries", label: "municipal" },
-          { id: "wetland-deliveries", label: "managed wetland" },
+          {
+            id: "deliveries_agricultural",
+            label: "agricultural",
+            labelEs: "agrícolas",
+          },
+          {
+            id: "deliveries_urban",
+            label: "municipal",
+            labelEs: "municipales",
+          },
+          {
+            id: "deliveries_refuge",
+            label: "managed wetland",
+            labelEs: "humedales gestionados",
+          },
         ],
       },
-      "flows",
-      "Delta outflow",
-      "storage",
-      "groundwater levels",
+      ...CANONICAL_OUTCOME_TYPES.filter(
+        (outcome) =>
+          ![
+            "deliveries",
+            "deliveries_agricultural",
+            "deliveries_urban",
+            "deliveries_refuge",
+          ].includes(outcome.id),
+      ),
     ],
   },
   {
     id: "region",
     title: "By region",
-    options: [
-      "Sacramento Valley",
-      "Delta",
-      "San Joaquin Valley",
-      "Southern California",
-      "Coastal regions",
-      "All regions",
-    ],
+    titleEs: "Por región",
+    options: [...CANONICAL_REGIONS],
     hasMap: true,
   },
   {
     id: "metric",
     title: "By metric",
+    titleEs: "Por métrica",
     options: [
-      "Needs-based equity",
-      "Burden-sharing equity",
-      "Economic burden",
-      "Drinking water shortages",
-      "Supply ratio",
-      "Probability of Winter run Chinook salmon quasi-extinction",
-      "Probability of achieving the doubling goal",
-      "Percent change in Winter run Chinook salmon spawner abundance",
-      "Net present value of production",
+      {
+        id: "Needs-based equity",
+        label: "Needs-based equity",
+        labelEs: "Equidad basada en necesidades",
+      },
+      {
+        id: "Burden-sharing equity",
+        label: "Burden-sharing equity",
+        labelEs: "Equidad en el reparto de cargas",
+      },
+      {
+        id: "Economic burden",
+        label: "Economic burden",
+        labelEs: "Carga económica",
+      },
+      {
+        id: "Drinking water shortages",
+        label: "Drinking water shortages",
+        labelEs: "Escasez de agua potable",
+      },
+      {
+        id: "Supply ratio",
+        label: "Supply ratio",
+        labelEs: "Ratio de suministro",
+      },
+      {
+        id: "Probability of Winter run Chinook salmon quasi-extinction",
+        label: "Probability of Winter run Chinook salmon quasi-extinction",
+        labelEs:
+          "Probabilidad de cuasi-extinción del salmón Chinook de carrera invernal",
+      },
+      {
+        id: "Probability of achieving the doubling goal",
+        label: "Probability of achieving the doubling goal",
+        labelEs: "Probabilidad de lograr el objetivo de duplicación",
+      },
+      {
+        id: "Percent change in Winter run Chinook salmon spawner abundance",
+        label: "Percent change in Winter run Chinook salmon spawner abundance",
+        labelEs:
+          "Cambio porcentual en la abundancia de desovadores de salmón Chinook de carrera invernal",
+      },
+      {
+        id: "Net present value of production",
+        label: "Net present value of production",
+        labelEs: "Valor presente neto de la producción",
+      },
     ],
   },
 ]
 
-export const CLIMATE_OPTIONS = [
-  "current conditions",
-  "a hotter and dryer future climate",
-  "highly variable future climate conditions",
-]
+export const CLIMATE_OPTIONS = [...CANONICAL_CLIMATE_OPTIONS]

@@ -1,9 +1,10 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, ReactNode } from "react"
 import { Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
+import { useTranslation } from "@repo/i18n"
 
 // TODO: define formatting rules as a configuration object
 // const FORMATTING_RULES = {
@@ -44,6 +45,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
   wasScrolled = false,
 }) => {
   const theme = useTheme()
+  const { t, locale } = useTranslation()
   const {
     state: {
       swapped,
@@ -53,19 +55,54 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       outcomesBySection,
       operationDirections,
     },
-    formatOperationText,
+    getOperationShortText,
+    shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
 
   // Expensive calculation?
   const summary = useMemo(() => {
+    // TranslatedQuestion component to handle React elements in translations
+    const TranslatedQuestion = ({
+      translationKey,
+      values,
+    }: {
+      translationKey: string
+      values: Record<string, ReactNode>
+    }) => {
+      const template = t(translationKey)
+
+      // Split the template on placeholder patterns
+      const parts = template.split(/{{(.*?)}}/g)
+
+      return (
+        <>
+          {parts.map((part, i) => {
+            // Even indices are plain text, odd indices are placeholder keys
+            if (i % 2 === 0) {
+              return <React.Fragment key={`text-${i}`}>{part}</React.Fragment>
+            } else {
+              // Return the corresponding React node for the placeholder key
+              return (
+                <React.Fragment key={`placeholder-${i}`}>
+                  {values[part] || ""}
+                </React.Fragment>
+              )
+            }
+          })}
+        </>
+      )
+    }
+
     // OPERATIONS FORMATTING LOGIC
 
     // Helper function to generate operations part
     const getOperationsPart = () => {
       if (selectedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>decisions</ColoredText>
+          <ColoredText color={theme.palette.pop.main}>
+            {t("questionBuilder.defaultTerms.decisions")}
+          </ColoredText>
         )
       }
 
@@ -109,7 +146,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       regularOptions.forEach((op) => {
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
-            {formatOperationText(op)}
+            {getOperationShortText(op)}
           </ColoredText>,
         )
       })
@@ -132,8 +169,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       if (conveyanceSubtypes.length > 0) {
         const conveyanceText =
           conveyanceSubtypes.length === 1
-            ? `Delta conveyance tunnel operating at ${conveyanceSubtypes[0]}`
-            : `Delta conveyance tunnel operating at ${conveyanceSubtypes.join(" and ")}`
+            ? `conveyance tunnel (${conveyanceSubtypes[0]})`
+            : `conveyance tunnel (${conveyanceSubtypes.join(", ")})`
 
         formattedOperations.push(
           <ColoredText key="conveyance" color={theme.palette.pop.main}>
@@ -150,7 +187,9 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       // Handle empty array case to prevent reduce error
       if (formattedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>decisions</ColoredText>
+          <ColoredText color={theme.palette.pop.main}>
+            {t("questionBuilder.defaultTerms.decisions")}
+          </ColoredText>
         )
       }
 
@@ -159,7 +198,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         if (index === 0) return op
         return (
           <>
-            {result} and {op}
+            {result} {t("questionBuilder.connectors.and")} {op}
           </>
         )
       })
@@ -237,7 +276,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         if (index === 0) return element
         return (
           <>
-            {result} and {element}
+            {result} {t("questionBuilder.connectors.and")} {element}
           </>
         )
       })
@@ -284,7 +323,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         if (index === 0) return region
         return (
           <>
-            {result} and {region}
+            {result} {t("questionBuilder.connectors.and")} {region}
           </>
         )
       })
@@ -311,7 +350,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
           if (index === 0) return prev
           return (
             <>
-              {prev} and {curr}
+              {prev} {t("questionBuilder.connectors.and")} {curr}
             </>
           )
         })
@@ -319,7 +358,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
       // Add "and" prefix if there are other selections
       if (hasOtherSelections) {
-        return <>and {result}</>
+        return (
+          <>
+            {t("questionBuilder.connectors.and")} {result}
+          </>
+        )
       }
 
       return result
@@ -514,7 +557,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
             increaseTypeGroup = (
               <>
                 <ColoredText color={theme.palette.cool.main}>
-                  increase
+                  {t("questionBuilder.connectors.increase")}
                 </ColoredText>{" "}
                 {increaseTypeOutcomes[0]}
               </>
@@ -523,13 +566,13 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
             increaseTypeGroup = (
               <>
                 <ColoredText color={theme.palette.cool.main}>
-                  increase
+                  {t("questionBuilder.connectors.increase")}
                 </ColoredText>{" "}
                 {increaseTypeOutcomes.reduce((prev, curr, idx) => (
                   <>
                     {prev}
                     {idx > 0 && idx === increaseTypeOutcomes.length - 1
-                      ? " and "
+                      ? ` ${t("questionBuilder.connectors.and")} `
                       : idx > 0
                         ? ", "
                         : ""}
@@ -548,7 +591,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
             decreaseTypeGroup = (
               <>
                 <ColoredText color={theme.palette.cool.main}>
-                  decrease
+                  {t("questionBuilder.connectors.decrease")}
                 </ColoredText>{" "}
                 {decreaseTypeOutcomes[0]}
               </>
@@ -557,81 +600,13 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
             decreaseTypeGroup = (
               <>
                 <ColoredText color={theme.palette.cool.main}>
-                  decrease
+                  {t("questionBuilder.connectors.decrease")}
                 </ColoredText>{" "}
                 {decreaseTypeOutcomes.reduce((prev, curr, idx) => (
                   <>
                     {prev}
                     {idx > 0 && idx === decreaseTypeOutcomes.length - 1
-                      ? " and "
-                      : idx > 0
-                        ? ", "
-                        : ""}
-                    {curr}
-                  </>
-                ))}
-              </>
-            )
-          }
-        }
-
-        // Format the increase metric group
-        let increaseMetricGroup = null
-        if (increaseMetricOutcomes.length > 0) {
-          if (increaseMetricOutcomes.length === 1) {
-            increaseMetricGroup = (
-              <>
-                <ColoredText color={theme.palette.cool.main}>
-                  increase
-                </ColoredText>{" "}
-                {increaseMetricOutcomes[0]}
-              </>
-            )
-          } else {
-            increaseMetricGroup = (
-              <>
-                <ColoredText color={theme.palette.cool.main}>
-                  increase
-                </ColoredText>{" "}
-                {increaseMetricOutcomes.reduce((prev, curr, idx) => (
-                  <>
-                    {prev}
-                    {idx > 0 && idx === increaseMetricOutcomes.length - 1
-                      ? " and "
-                      : idx > 0
-                        ? ", "
-                        : ""}
-                    {curr}
-                  </>
-                ))}
-              </>
-            )
-          }
-        }
-
-        // Format the decrease metric group
-        let decreaseMetricGroup = null
-        if (decreaseMetricOutcomes.length > 0) {
-          if (decreaseMetricOutcomes.length === 1) {
-            decreaseMetricGroup = (
-              <>
-                <ColoredText color={theme.palette.cool.main}>
-                  decrease
-                </ColoredText>{" "}
-                {decreaseMetricOutcomes[0]}
-              </>
-            )
-          } else {
-            decreaseMetricGroup = (
-              <>
-                <ColoredText color={theme.palette.cool.main}>
-                  decrease
-                </ColoredText>{" "}
-                {decreaseMetricOutcomes.reduce((prev, curr, idx) => (
-                  <>
-                    {prev}
-                    {idx > 0 && idx === decreaseMetricOutcomes.length - 1
-                      ? " and "
+                      ? ` ${t("questionBuilder.connectors.and")} `
                       : idx > 0
                         ? ", "
                         : ""}
@@ -648,7 +623,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         if (increaseTypeGroup && decreaseTypeGroup) {
           typePart = (
             <>
-              {increaseTypeGroup} and {decreaseTypeGroup}
+              {increaseTypeGroup} {t("questionBuilder.connectors.and")}{" "}
+              {decreaseTypeGroup}
             </>
           )
         } else if (increaseTypeGroup) {
@@ -659,14 +635,59 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
         // Combine the metric groups
         let metricPart = null
-        if (increaseMetricGroup && decreaseMetricGroup) {
+        if (increaseMetricOutcomes.length > 0) {
+          if (increaseMetricOutcomes.length === 1) {
+            metricPart = increaseMetricOutcomes[0]
+          } else {
+            metricPart = (
+              <>
+                {increaseMetricOutcomes.reduce((prev, curr, idx) => (
+                  <>
+                    {prev}
+                    {idx > 0 && idx === increaseMetricOutcomes.length - 1
+                      ? ` ${t("questionBuilder.connectors.and")} `
+                      : idx > 0
+                        ? ", "
+                        : ""}
+                    {curr}
+                  </>
+                ))}
+              </>
+            )
+          }
+        }
+
+        // Format the decrease metric group
+        let decreaseMetricGroup = null
+        if (decreaseMetricOutcomes.length > 0) {
+          if (decreaseMetricOutcomes.length === 1) {
+            decreaseMetricGroup = decreaseMetricOutcomes[0]
+          } else {
+            decreaseMetricGroup = (
+              <>
+                {decreaseMetricOutcomes.reduce((prev, curr, idx) => (
+                  <>
+                    {prev}
+                    {idx > 0 && idx === decreaseMetricOutcomes.length - 1
+                      ? ` ${t("questionBuilder.connectors.and")} `
+                      : idx > 0
+                        ? ", "
+                        : ""}
+                    {curr}
+                  </>
+                ))}
+              </>
+            )
+          }
+        }
+
+        // Combine increase and decrease metric parts if both exist
+        if (metricPart && decreaseMetricGroup) {
           metricPart = (
             <>
-              {increaseMetricGroup} and {decreaseMetricGroup}
+              {metricPart} {t("questionBuilder.connectors.and")} {decreaseMetricGroup}
             </>
           )
-        } else if (increaseMetricGroup) {
-          metricPart = increaseMetricGroup
         } else if (decreaseMetricGroup) {
           metricPart = decreaseMetricGroup
         }
@@ -687,12 +708,9 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
         // If no selections, show default
         if (parts.length === 0) {
           return (
-            <>
-              change{" "}
-              <ColoredText color={theme.palette.cool.main}>
-                outcomes
-              </ColoredText>
-            </>
+            <ColoredText color={theme.palette.cool.main}>
+              {t("questionBuilder.defaultTerms.waterAvailability")}
+            </ColoredText>
           )
         }
 
@@ -748,14 +766,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
           // Start with region if no type
           if (metricSelections.length === 0) {
             // Add "outcomes" prefix if no metrics
-            result = (
-              <>
-                <ColoredText color={theme.palette.cool.main}>
-                  outcomes
-                </ColoredText>{" "}
-                {formattedRegion}
-              </>
-            )
+            result = <>{t("questionBuilder.defaultTerms.outcomes")}</>
           } else {
             result = formattedRegion
           }
@@ -779,7 +790,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
           if (result) {
             result = (
               <>
-                {result} and {deltaOutflow}
+                {result} {t("questionBuilder.connectors.and")} {deltaOutflow}
               </>
             )
           } else {
@@ -789,11 +800,9 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
 
         // Default to "outcomes" if nothing is selected
         if (!result) {
-          result = swapped ? (
-            <ColoredText color={theme.palette.cool.main}>outcomes</ColoredText>
-          ) : (
+          result = (
             <ColoredText color={theme.palette.cool.main}>
-              water availability
+              {t("questionBuilder.defaultTerms.waterAvailability")}
             </ColoredText>
           )
         }
@@ -805,29 +814,29 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     const operationsPart = getOperationsPart()
     const outcomePart = getOutcomesPart()
 
-    const climatePart = includeClimate ? (
-      <>
-        {" "}
-        under{" "}
-        <ColoredText color={theme.palette.climate.main}>
-          {selectedClimate}
-        </ColoredText>
-      </>
-    ) : (
-      ""
-    )
+    // Find the climate label for the selected climate ID
+    const getClimateLabel = () => {
+      // Use the translated label for the selected climate ID
+      return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
+    }
 
     // Change question structure based on number of operations
     if (swapped) {
       // Determine if we need singular or plural form of "scenario"
       const scenarioText =
-        selectedOperations.length === 1 ? "scenario" : "scenarios"
+        selectedOperations.length === 1
+          ? t("questionBuilder.scenarioSingular")
+          : t("questionBuilder.scenarioPlural")
 
       return (
-        <>
-          To {outcomePart}, which {operationsPart} {scenarioText} could we
-          consider{climatePart}?
-        </>
+        <TranslatedQuestion
+          translationKey="questionBuilder.swappedFormat"
+          values={{
+            outcome: outcomePart,
+            operation: operationsPart,
+            scenarioText: scenarioText,
+          }}
+        />
       )
     } else {
       // Special case for Delta conveyance - always use "does" regardless of how many capacities
@@ -839,35 +848,48 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
       // Check if we need to add "a" before "Delta conveyance tunnel"
       const needsArticle = onlyDeltaConveyance
 
-      // Use "does" if only one operation or if it's only Delta conveyance (any number of capacities)
-      if (selectedOperations.length === 1 || onlyDeltaConveyance) {
-        return (
-          <>
-            How does {needsArticle ? "a " : ""}
-            {operationsPart}{" "}
-            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
-            {climatePart}?
-          </>
-        )
-      } else if (selectedOperations.length > 1) {
-        // Multiple operations
-        return (
-          <>
-            How do {operationsPart}{" "}
-            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
-            {climatePart}?
-          </>
-        )
-      } else {
-        // No operations selected
-        return (
-          <>
-            How do our {operationsPart}{" "}
-            <span style={{ whiteSpace: "nowrap" }}>affect {outcomePart}</span>
-            {climatePart}?
-          </>
-        )
-      }
+      // Use t function to determine correct verb based on plurality
+      const verb = shouldUseDo()
+        ? t("questionBuilder.pluralVerb")
+        : t("questionBuilder.singularVerb")
+
+      const formatString = includeClimate
+        ? "questionBuilder.questionFormatWithClimate"
+        : "questionBuilder.questionFormat"
+
+      // Create the operation element with conditional article
+      const operation = (
+        <React.Fragment key="operation">
+          {needsArticle && locale === "en" && "a "}
+          {operationsPart}
+        </React.Fragment>
+      )
+
+      // Create element for outcome with wrapped span for nowrap styling
+      const outcome = (
+        <span key="outcome" style={{ whiteSpace: "nowrap" }}>
+          {outcomePart}
+        </span>
+      )
+
+      // Create the climate element with green highlighting
+      const climate = (
+        <ColoredText color={theme.palette.climate.main}>
+          {getClimateLabel()}
+        </ColoredText>
+      )
+
+      return (
+        <TranslatedQuestion
+          translationKey={formatString}
+          values={{
+            verb,
+            operation,
+            outcome,
+            climate,
+          }}
+        />
+      )
     }
   }, [
     swapped,
@@ -879,8 +901,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     theme.palette.cool.main,
     theme.palette.pop.main,
     theme.palette.climate.main,
-    formatOperationText,
+    getOperationShortText,
+    shouldUseDo,
     formatOutcomeText,
+    t,
+    locale,
   ])
 
   // Container styles are now merged into Typography

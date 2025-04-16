@@ -27,9 +27,17 @@ import { Card as CardComponent } from "@repo/ui"
 import { CLIMATE_OPTIONS } from "../data/constants"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { HighlightText } from "./ui"
+import { useTranslation } from "@repo/i18n"
+
+// Define the climate option interface
+interface ClimateOption {
+  id: string
+  label: string
+}
 
 const ClimateSelector: React.FC = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const {
     state: { selectedClimate },
     setClimate,
@@ -59,7 +67,7 @@ const ClimateSelector: React.FC = () => {
     <CardComponent>
       <Typography variant="h5">
         <HighlightText bgcolor={theme.palette.climate.main}>
-          climate
+          {t("questionBuilder.climateSelector.title")}
         </HighlightText>
       </Typography>
 
@@ -70,13 +78,17 @@ const ClimateSelector: React.FC = () => {
           onChange={handleClimateChange}
           name="climate-options"
         >
-          {CLIMATE_OPTIONS.map((option, index) => (
-            <Box key={index} sx={{ mb: 0.5 }}>
+          {CLIMATE_OPTIONS.map((option: ClimateOption, index) => (
+            <Box key={option.id || index} sx={{ mb: 0.5 }}>
               <FormControlLabel
                 control={<Radio size="small" sx={radioStyles} />}
-                label={<Typography variant="body2">{option}</Typography>}
+                label={
+                  <Typography variant="body2">
+                    {t(`questionBuilder.climateSelector.options.${option.id}`)}
+                  </Typography>
+                }
                 sx={formControlStyles}
-                value={option}
+                value={option.id}
               />
             </Box>
           ))}

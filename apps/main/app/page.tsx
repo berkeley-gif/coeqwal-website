@@ -303,11 +303,11 @@ export default function Home() {
           >
             <HeroQuestionsPanel
               headlines={[
-                "How do reservoir operations affect Delta outflow?",
-                "What scenarios improve salmon survival?",
-                "Can we balance urban and agricultural needs in a hotter and drier future?",
+                "How do reservoir operations affect Delta water quality?",
+                "Which water futures support salmon survival?",
+                "How do cities and farms share water in a hotter, drier future?",
                 "Which policies help meet environmental goals?",
-                "How do flow changes impact water availability?",
+                "What happens if we let our rivers run?",
               ]}
               verticalAlignment="center"
               background="light"
