@@ -75,43 +75,47 @@ const OperationsSelector: React.FC = () => {
     optionId: string,
     checked: boolean,
   ) => {
-    // Find the option in all themes
+    // First, check if the option is active before proceeding
+    let isActive = false;
+    
+    // Find the option in all themes to check its active status
     for (const theme of OPERATION_THEMES) {
-      // Check main options
       for (const option of theme.options) {
         if (typeof option === "string" && option === optionId) {
           // Legacy string options are always active
-          handleOperationChange(optionId, checked)
-          return
-        } else if (typeof option === "object") {
-          // Check if this is the option we're looking for
-          if (option.id === optionId) {
-            // Only allow changes for active options
-            if (option.active) {
-              handleOperationChange(optionId, checked)
-            }
-            return
-          }
-
+          isActive = true;
+          break;
+        } else if (typeof option === "object" && option.id === optionId) {
+          isActive = option.active !== false; // Default to true if not specified
+          break;
+        } else if (typeof option === "object" && "subtypes" in option && option.subtypes) {
           // Check subtypes if they exist
-          if ("subtypes" in option && option.subtypes) {
-            const subtype = option.subtypes.find(
-              (sub: { id: string }) => sub.id === optionId,
-            )
-            if (subtype) {
-              // Only allow changes for active options and subtypes
-              if (option.active && subtype.active) {
-                handleOperationChange(optionId, checked)
-              }
-              return
-            }
+          const subtype = option.subtypes.find(sub => sub.id === optionId);
+          if (subtype) {
+            isActive = option.active !== false && subtype.active !== false;
+            break;
           }
         }
       }
+      if (isActive) break; // No need to check other themes if found
     }
-
-    // If we get here, we didn't find the option - fall back to default handler
-    handleOperationChange(optionId, checked)
+    
+    // Don't allow changes for inactive options
+    if (!isActive) return;
+    
+    // For radio-like behavior in operations
+    if (checked) {
+      // Deselect all current selections
+      selectedOperations.forEach(operation => {
+        handleOperationChange(operation, false);
+      });
+      
+      // Then select only the new option
+      handleOperationChange(optionId, true);
+    } else {
+      // Allow deselection normally
+      handleOperationChange(optionId, false);
+    }
   }
 
   return (
@@ -156,6 +160,7 @@ const OperationsSelector: React.FC = () => {
             selectedOptions={selectedOperations}
             onOptionChange={handleOptionChangeWithActiveCheck}
             noParentCheckbox={["delta-conveyance"]}
+            isOperations={true}
           />
         ))}
 
