@@ -292,74 +292,101 @@ export const useQuestionBuilderHelpers = () => {
   }, [dispatch])
 
   // Format utilities
-  const formatOperationText = useCallback((text: string) => {
-    // First, check if we should use Spanish
-    const useSpanish = locale === 'es';
-    
-    // Find the operation in OPERATION_THEMES to get its label/labelEs
-    let translatedText = text;
-    
-    // Look through all themes and options
-    for (const theme of OPERATION_THEMES) {
-      for (const option of theme.options) {
-        // Skip string options (legacy)
-        if (typeof option === 'string') continue;
-        
-        // Check if this is the operation we're looking for
-        if (option.id === text) {
-          // Use the Spanish label if available and Spanish is selected
-          translatedText = useSpanish && option.labelEs ? option.labelEs : option.label;
-          break;
-        }
-        
-        // Check subtypes if they exist
-        if ('subtypes' in option && Array.isArray(option.subtypes)) {
-          const subtype = option.subtypes.find((sub: {id: string, labelEs?: string, label: string}) => sub.id === text);
-          if (subtype) {
-            translatedText = useSpanish && subtype.labelEs ? subtype.labelEs : subtype.label;
-            break;
+  const formatOperationText = useCallback(
+    (text: string) => {
+      // First, check if we should use Spanish
+      const useSpanish = locale === "es"
+
+      // Find the operation in OPERATION_THEMES to get its label/labelEs
+      let translatedText = text
+
+      // Look through all themes and options
+      for (const theme of OPERATION_THEMES) {
+        for (const option of theme.options) {
+          // Skip string options (legacy)
+          if (typeof option === "string") continue
+
+          // Check if this is the operation we're looking for
+          if (option.id === text) {
+            // Use the Spanish label if available and Spanish is selected
+            translatedText =
+              useSpanish && option.labelEs ? option.labelEs : option.label
+            break
+          }
+
+          // Check subtypes if they exist
+          if ("subtypes" in option && Array.isArray(option.subtypes)) {
+            const subtype = option.subtypes.find(
+              (sub: { id: string; labelEs?: string; label: string }) =>
+                sub.id === text,
+            )
+            if (subtype) {
+              translatedText =
+                useSpanish && subtype.labelEs ? subtype.labelEs : subtype.label
+              break
+            }
           }
         }
       }
-    }
-    
-    // Special formatting for parent options with IDs (fallback if not found above)
-    const specialCases: Record<string, string> = {
-      "removing-flow-reqs": useSpanish ? "eliminar requisitos de flujo de afluentes" : "removing tributary flow requirements",
-      "delta-conveyance": useSpanish ? "túnel de transporte del Delta" : "Delta conveyance tunnel",
-    }
 
-    // Check if the text is a special case
-    if (text in specialCases) {
-      return specialCases[text]
-    }
-
-    // List of prefixes that indicate proper nouns that should keep capitalization
-    const properNounPrefixes = [
-      "Alt ", "California", "Sacramento", "San Joaquin", "Central Valley",
-      "Bay Area", "Project", "CVP", "SWP", "Delta", "SGMA", "TUCPs",
-      // Spanish additions
-      "Valle de Sacramento", "Valle de San Joaquín", "Valle Central", 
-      "Alternativa ", "Bahía", "Proyecto", "Túnel"
-    ]
-
-    // Keep original case for proper nouns
-    for (const prefix of properNounPrefixes) {
-      if (translatedText.startsWith(prefix)) {
-        return translatedText
+      // Special formatting for parent options with IDs (fallback if not found above)
+      const specialCases: Record<string, string> = {
+        "removing-flow-reqs": useSpanish
+          ? "eliminar requisitos de flujo de afluentes"
+          : "removing tributary flow requirements",
+        "delta-conveyance": useSpanish
+          ? "túnel de transporte del Delta"
+          : "Delta conveyance tunnel",
       }
-    }
 
-    // Otherwise, make first letter lowercase
-    return translatedText.charAt(0).toLowerCase() + translatedText.slice(1)
-  }, [locale])
+      // Check if the text is a special case
+      if (text in specialCases) {
+        return specialCases[text]
+      }
+
+      // List of prefixes that indicate proper nouns that should keep capitalization
+      const properNounPrefixes = [
+        "Alt ",
+        "California",
+        "Sacramento",
+        "San Joaquin",
+        "Central Valley",
+        "Bay Area",
+        "Project",
+        "CVP",
+        "SWP",
+        "Delta",
+        "SGMA",
+        "TUCPs",
+        // Spanish additions
+        "Valle de Sacramento",
+        "Valle de San Joaquín",
+        "Valle Central",
+        "Alternativa ",
+        "Bahía",
+        "Proyecto",
+        "Túnel",
+      ]
+
+      // Keep original case for proper nouns
+      for (const prefix of properNounPrefixes) {
+        if (translatedText.startsWith(prefix)) {
+          return translatedText
+        }
+      }
+
+      // Otherwise, make first letter lowercase
+      return translatedText.charAt(0).toLowerCase() + translatedText.slice(1)
+    },
+    [locale],
+  )
 
   // Get operation's short text
   const getOperationShortText = useCallback(
     (operationId: string) => {
       // Use Spanish if that's the current locale
-      const useSpanish = locale === 'es';
-      
+      const useSpanish = locale === "es"
+
       // Find the operation in OPERATION_THEMES
       for (const theme of OPERATION_THEMES) {
         for (const option of theme.options) {
@@ -367,9 +394,9 @@ export const useQuestionBuilderHelpers = () => {
           if (option.id === operationId) {
             // Return shortText or shortTextEs based on locale
             if (useSpanish && option.shortTextEs) {
-              return option.shortTextEs;
+              return option.shortTextEs
             }
-            return option.shortText || formatOperationText(operationId);
+            return option.shortText || formatOperationText(operationId)
           }
 
           // Check if it's a subtype
@@ -378,9 +405,9 @@ export const useQuestionBuilderHelpers = () => {
               if (subtype.id === operationId) {
                 // Return Spanish short text if available and Spanish is selected
                 if (useSpanish && subtype.shortTextEs) {
-                  return subtype.shortTextEs;
+                  return subtype.shortTextEs
                 }
-                return subtype.shortText || formatOperationText(operationId);
+                return subtype.shortText || formatOperationText(operationId)
               }
             }
           }
@@ -449,127 +476,166 @@ export const useQuestionBuilderHelpers = () => {
     return state.selectedOperations.length > 1
   }, [state.selectedOperations, isOperationSingular])
 
-  const formatOutcomeText = useCallback((text: string, section: string) => {
-    // First, look up the proper label from the constants based on current locale
-    let formattedText = text
-    
-    // Use the proper translation based on locale
-    const useSpanish = locale === 'es'
-    
-    // Check if this is an ID that needs to be mapped to a label
-    if (section === "type") {
-      // Look in CANONICAL_OUTCOME_TYPES for matching ID
-      const matchingType = CANONICAL_OUTCOME_TYPES.find(type => type.id === text)
-      if (matchingType) {
-        // Use Spanish label if available and Spanish is selected
-        formattedText = useSpanish && matchingType.labelEs 
-          ? matchingType.labelEs 
-          : matchingType.label
-      }
-    } else if (section === "region") {
-      // Look in CANONICAL_REGIONS for matching ID
-      const matchingRegion = CANONICAL_REGIONS.find(region => region.id === text)
-      if (matchingRegion) {
-        formattedText = useSpanish && matchingRegion.labelEs
-          ? matchingRegion.labelEs
-          : matchingRegion.label
-      }
-    } else if (section === "metric") {
-      // Look in OUTCOME_CATEGORIES for the metric section
-      const metricCategory = OUTCOME_CATEGORIES.find(cat => cat.id === "metric")
-      if (metricCategory) {
-        const matchingMetric = metricCategory.options.find(option => 
-          typeof option === 'object' && option.id === text
+  const formatOutcomeText = useCallback(
+    (text: string, section: string) => {
+      // First, look up the proper label from the constants based on current locale
+      let formattedText = text
+
+      // Use the proper translation based on locale
+      const useSpanish = locale === "es"
+
+      // Check if this is an ID that needs to be mapped to a label
+      if (section === "type") {
+        // Look in CANONICAL_OUTCOME_TYPES for matching ID
+        const matchingType = CANONICAL_OUTCOME_TYPES.find(
+          (type) => type.id === text,
         )
-        if (matchingMetric && typeof matchingMetric === 'object') {
-          formattedText = useSpanish && matchingMetric.labelEs
-            ? matchingMetric.labelEs
-            : matchingMetric.label
-        }
-      }
-    }
-
-    // Special case for "The Delta" - format as "the Delta"
-    if (formattedText === "The Delta") {
-      formattedText = "the Delta"
-    }
-    // Spanish equivalent
-    else if (formattedText === "El Delta") {
-      formattedText = "el Delta"
-    }
-
-    // Special case for "All regions" - format as "all regions"
-    else if (formattedText === "All regions") {
-      formattedText = "all regions"
-    }
-    // Spanish equivalent
-    else if (formattedText === "Todas las regiones") {
-      formattedText = "todas las regiones"
-    }
-
-    // Apply section-specific formatting rules
-    switch (section) {
-      case "region": {
-        // Add "in" prefix for region selections (or "en" for Spanish)
-        formattedText = useSpanish 
-          ? `en ${formattedText}`
-          : `in ${formattedText}`
-
-        // List of prefixes that indicate proper nouns that should keep capitalization
-        const properNounPrefixes = [
-          "California", "Delta", "Sacramento", "San Joaquin", "Central Valley",
-          "Bay Area", "Northern", "Southern", "Eastern", "Western",
-          // Spanish equivalents
-          "Valle de Sacramento", "Valle de San Joaquín", "Valle Central",
-          "Norte", "Sur", "Este", "Oeste", "Área de la Bahía"
-        ]
-
-        // Keep capitalization for proper nouns in regions
-        const regionStart = useSpanish ? "en " : "in "
-        if (
-          !properNounPrefixes.some((prefix) => formattedText.startsWith(`${regionStart}${prefix}`)) &&
-          formattedText !== (useSpanish ? "en el Delta" : "in the Delta") &&
-          formattedText !== (useSpanish ? "en todas las regiones" : "in all regions")
-        ) {
+        if (matchingType) {
+          // Use Spanish label if available and Spanish is selected
           formattedText =
-            formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
+            useSpanish && matchingType.labelEs
+              ? matchingType.labelEs
+              : matchingType.label
         }
-        break
-      }
-
-      case "type": {
-        // For type outcomes, just make sure first letter is lowercase unless proper noun
-        const properNouns = [
-          "California", "Delta", "Sacramento", "San Joaquin",
-          // Spanish additions
-          "El Delta", "Valle de Sacramento", "Valle de San Joaquín"
-        ]
-        
-        if (!properNouns.some((prefix) => formattedText.startsWith(prefix))) {
+      } else if (section === "region") {
+        // Look in CANONICAL_REGIONS for matching ID
+        const matchingRegion = CANONICAL_REGIONS.find(
+          (region) => region.id === text,
+        )
+        if (matchingRegion) {
           formattedText =
-            formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
+            useSpanish && matchingRegion.labelEs
+              ? matchingRegion.labelEs
+              : matchingRegion.label
         }
-        break
+      } else if (section === "metric") {
+        // Look in OUTCOME_CATEGORIES for the metric section
+        const metricCategory = OUTCOME_CATEGORIES.find(
+          (cat) => cat.id === "metric",
+        )
+        if (metricCategory) {
+          const matchingMetric = metricCategory.options.find(
+            (option) => typeof option === "object" && option.id === text,
+          )
+          if (matchingMetric && typeof matchingMetric === "object") {
+            formattedText =
+              useSpanish && matchingMetric.labelEs
+                ? matchingMetric.labelEs
+                : matchingMetric.label
+          }
+        }
       }
 
-      case "metric": {
-        // Similar to type
-        const properNouns = [
-          "California", "Delta", "Sacramento", "San Joaquin",
-          // Spanish additions
-          "El Delta", "Valle de Sacramento", "Valle de San Joaquín"
-        ]
-        
-        if (!properNouns.some((prefix) => formattedText.startsWith(prefix))) {
-          formattedText =
-            formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
-        }
-        break
+      // Special case for "The Delta" - format as "the Delta"
+      if (formattedText === "The Delta") {
+        formattedText = "the Delta"
       }
-    }
+      // Spanish equivalent
+      else if (formattedText === "El Delta") {
+        formattedText = "el Delta"
+      }
 
-    return formattedText
-  }, [locale])
+      // Special case for "All regions" - format as "all regions"
+      else if (formattedText === "All regions") {
+        formattedText = "all regions"
+      }
+      // Spanish equivalent
+      else if (formattedText === "Todas las regiones") {
+        formattedText = "todas las regiones"
+      }
+
+      // Apply section-specific formatting rules
+      switch (section) {
+        case "region": {
+          // Add "in" prefix for region selections (or "en" for Spanish)
+          formattedText = useSpanish
+            ? `en ${formattedText}`
+            : `in ${formattedText}`
+
+          // List of prefixes that indicate proper nouns that should keep capitalization
+          const properNounPrefixes = [
+            "California",
+            "Delta",
+            "Sacramento",
+            "San Joaquin",
+            "Central Valley",
+            "Bay Area",
+            "Northern",
+            "Southern",
+            "Eastern",
+            "Western",
+            // Spanish equivalents
+            "Valle de Sacramento",
+            "Valle de San Joaquín",
+            "Valle Central",
+            "Norte",
+            "Sur",
+            "Este",
+            "Oeste",
+            "Área de la Bahía",
+          ]
+
+          // Keep capitalization for proper nouns in regions
+          const regionStart = useSpanish ? "en " : "in "
+          if (
+            !properNounPrefixes.some((prefix) =>
+              formattedText.startsWith(`${regionStart}${prefix}`),
+            ) &&
+            formattedText !== (useSpanish ? "en el Delta" : "in the Delta") &&
+            formattedText !==
+              (useSpanish ? "en todas las regiones" : "in all regions")
+          ) {
+            formattedText =
+              formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
+          }
+          break
+        }
+
+        case "type": {
+          // For type outcomes, just make sure first letter is lowercase unless proper noun
+          const properNouns = [
+            "California",
+            "Delta",
+            "Sacramento",
+            "San Joaquin",
+            // Spanish additions
+            "El Delta",
+            "Valle de Sacramento",
+            "Valle de San Joaquín",
+          ]
+
+          if (!properNouns.some((prefix) => formattedText.startsWith(prefix))) {
+            formattedText =
+              formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
+          }
+          break
+        }
+
+        case "metric": {
+          // Similar to type
+          const properNouns = [
+            "California",
+            "Delta",
+            "Sacramento",
+            "San Joaquin",
+            // Spanish additions
+            "El Delta",
+            "Valle de Sacramento",
+            "Valle de San Joaquín",
+          ]
+
+          if (!properNouns.some((prefix) => formattedText.startsWith(prefix))) {
+            formattedText =
+              formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
+          }
+          break
+        }
+      }
+
+      return formattedText
+    },
+    [locale],
+  )
 
   return {
     state,

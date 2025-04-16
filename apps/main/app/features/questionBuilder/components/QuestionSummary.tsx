@@ -181,12 +181,13 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
       // Format each type of operation
       const formattedOperations: React.ReactNode[] = []
-      
+
       // Handle regular operations
       regularOptions.forEach((op) => {
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
-            {getOperationShortText(op)}{swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
+            {getOperationShortText(op)}
+            {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
       })
@@ -200,7 +201,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
         formattedOperations.push(
           <ColoredText key="flow-reqs" color={theme.palette.pop.main}>
-            {flowText}{swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
+            {flowText}
+            {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
       }
@@ -214,7 +216,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
 
         formattedOperations.push(
           <ColoredText key="conveyance" color={theme.palette.pop.main}>
-            {conveyanceText}{swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
+            {conveyanceText}
+            {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
       }
@@ -373,20 +376,25 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
       // Find Delta outflow and Delta salinity
       const deltaOutflow = typeSelections.find((t) => isDeltaOutflow(t))
       const deltaSalinity = typeSelections.find((t) => isDeltaSalinity(t))
-      
+
       // Return null if neither exists
       if (!deltaOutflow && !deltaSalinity) return null
-      
+
       // Format each if they exist
-      const formattedOutflow = deltaOutflow ? createColoredText(formatOutcomeText(deltaOutflow, "type")) : null
-      const formattedSalinity = deltaSalinity ? createColoredText(formatOutcomeText(deltaSalinity, "type")) : null
-      
+      const formattedOutflow = deltaOutflow
+        ? createColoredText(formatOutcomeText(deltaOutflow, "type"))
+        : null
+      const formattedSalinity = deltaSalinity
+        ? createColoredText(formatOutcomeText(deltaSalinity, "type"))
+        : null
+
       // Return based on which ones exist
       if (formattedOutflow && formattedSalinity) {
         // If both exist, join them with "and"
         return (
           <>
-            {formattedOutflow} {t("questionBuilder.connectors.and")} {formattedSalinity}
+            {formattedOutflow} {t("questionBuilder.connectors.and")}{" "}
+            {formattedSalinity}
           </>
         )
       } else {
@@ -916,7 +924,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         // First handle regular types (without Delta outflow or salinity)
         if (formattedType) {
           result = formattedType
-          
+
           // Add region if present (regions come after type)
           if (formattedRegion) {
             result = (
@@ -925,7 +933,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
               </>
             )
           }
-          
+
           // Add Delta outcomes (outflow and/or salinity) at the end if they exist
           if (deltaOutflow) {
             result = (
@@ -937,7 +945,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         } else if (deltaOutflow) {
           // If only Delta outcomes (no other types)
           result = deltaOutflow
-          
+
           // Add region if present
           if (formattedRegion) {
             result = (
@@ -948,12 +956,15 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           }
         } else if (formattedRegion) {
           // Start with region if no type or Delta outflow
-          if (metricSelections.length === 0) {
-            // Add "outcomes" prefix if no metrics
-            result = <>{t("questionBuilder.defaultTerms.outcomes")}</>
-          } else {
-            result = formattedRegion
-          }
+          // Always use water availability instead of outcomes
+          result = (
+            <>
+              <ColoredText color={theme.palette.cool.main}>
+                {t("questionBuilder.defaultTerms.waterAvailability")}
+              </ColoredText>{" "}
+              {formattedRegion}
+            </>
+          )
         }
 
         // Add metrics if present
@@ -998,10 +1009,10 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         selectedOperations.length === 1
           ? t("questionBuilder.scenarioSingular")
           : t("questionBuilder.scenarioPlural")
-          
+
       // Check if any outcomes are selected
       const hasOutcomes = Object.values(outcomesBySection).some(
-        section => section && section.length > 0
+        (section) => section && section.length > 0,
       )
 
       // Create inline custom component
@@ -1010,23 +1021,25 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         const climateElement = includeClimate ? (
           <>
             {" "}
-            {locale === 'es' ? 'con' : 'with'}{" "}
+            {locale === "es" ? "con" : "with"}{" "}
             <ColoredText color={theme.palette.climate.main}>
               {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
             </ColoredText>
           </>
-        ) : null;
+        ) : null
 
-        if (locale === 'es') {
+        if (locale === "es") {
           return (
             <>
-              Para {outcomePart}{climateElement}, ¿qué {operationsPart} podríamos considerar?
+              Para {outcomePart}
+              {climateElement}, ¿qué {operationsPart} podríamos considerar?
             </>
           )
         } else {
           return (
             <>
-              To {outcomePart}{climateElement}, which {operationsPart} could we consider?
+              To {outcomePart}
+              {climateElement}, which {operationsPart} could we consider?
             </>
           )
         }
@@ -1042,20 +1055,22 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         <ColoredText color={theme.palette.climate.main}>
           {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
         </ColoredText>
-      ) : null;
+      ) : null
 
       // If no outcomes are selected, use the default format with climate if enabled
       if (includeClimate) {
-        if (locale === 'es') {
+        if (locale === "es") {
           return (
             <>
-              Para cambiar {outcomePart} con {climateElement}, ¿qué {operationsPart} podríamos considerar?
+              Para cambiar {outcomePart} con {climateElement}, ¿qué{" "}
+              {operationsPart} podríamos considerar?
             </>
           )
         } else {
           return (
             <>
-              To change {outcomePart} with {climateElement}, which {operationsPart} could we consider?
+              To change {outcomePart} with {climateElement}, which{" "}
+              {operationsPart} could we consider?
             </>
           )
         }

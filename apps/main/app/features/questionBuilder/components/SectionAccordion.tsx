@@ -246,9 +246,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     isActive: boolean = true,
     // isSubtype?: boolean,
   ) => {
-    // If in swapped mode and this is operations section, show direction arrows
-    // unless this option is in the noDirectionControls list
-    if (swapped && isOperations && !noDirectionControls.includes(optionId)) {
+    // Only outcomes (except regions) should have direction arrows in swapped mode
+    // Operations should always have checkboxes regardless of swapped mode
+    if (swapped && !isOperations && !noDirectionControls.includes(optionId)) {
       return renderDirectionControls(optionId, option, isActive)
     }
 

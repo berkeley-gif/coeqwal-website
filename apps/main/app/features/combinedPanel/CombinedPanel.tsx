@@ -170,12 +170,12 @@ const CombinedPanelContent = () => {
                 />
               }
               label={t("questionBuilder.outcomesSelector.includeClimate")}
-              sx={{ 
+              sx={{
                 margin: 0,
                 "& .MuiTypography-root": {
                   fontSize: "1rem",
                   fontWeight: 500,
-                }
+                },
               }}
             />
           </Card>

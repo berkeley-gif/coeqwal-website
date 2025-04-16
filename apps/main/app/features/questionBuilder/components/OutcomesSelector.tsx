@@ -142,7 +142,7 @@ const OutcomesSelector: React.FC = () => {
                 handleOutcomeOptionChange(option, checked, category.id, subtype)
               }
               section={category.id}
-              isOperations={swapped && category.id !== "region"}
+              isOperations={false}
               noDirectionControls={category.id === "type" ? ["deliveries"] : []}
               noParentCheckbox={category.id === "type" ? ["deliveries"] : []}
             />
