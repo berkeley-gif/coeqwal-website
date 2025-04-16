@@ -140,6 +140,18 @@ const OutcomesSelector: React.FC = () => {
             px: 2,
             py: 0.75,
             fontWeight: 500,
+            "&:hover": {
+              backgroundColor: "white",
+              color: theme.palette.primary.main,
+              borderColor: theme.palette.primary.main,
+              border: "1px solid",
+            },
+            "&:active": {
+              backgroundColor: "white",
+              color: theme.palette.primary.main,
+              borderColor: theme.palette.primary.main,
+              border: "1px solid",
+            },
           }}
         >
           {t("questionBuilder.ui.clearSelections")}
