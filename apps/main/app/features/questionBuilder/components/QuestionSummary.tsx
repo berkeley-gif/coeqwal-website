@@ -888,10 +888,21 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         let result = null
 
         // Build result based on which sections are present
-        if (formattedType) {
-          result = formattedType
+        // First handle type and Delta outflow together
+        if (formattedType || deltaOutflow) {
+          if (formattedType && deltaOutflow) {
+            result = (
+              <>
+                {formattedType} {t("questionBuilder.connectors.and")} {deltaOutflow}
+              </>
+            )
+          } else if (formattedType) {
+            result = formattedType
+          } else {
+            result = deltaOutflow
+          }
 
-          // Add region if present
+          // Add region if present (regions always come after type+deltaOutflow)
           if (formattedRegion) {
             result = (
               <>
@@ -919,19 +930,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
             )
           } else {
             result = formattedMetric
-          }
-        }
-
-        // Add Delta outflow at the end if it exists
-        if (deltaOutflow) {
-          if (result) {
-            result = (
-              <>
-                {result} {t("questionBuilder.connectors.and")} {deltaOutflow}
-              </>
-            )
-          } else {
-            result = deltaOutflow
           }
         }
 

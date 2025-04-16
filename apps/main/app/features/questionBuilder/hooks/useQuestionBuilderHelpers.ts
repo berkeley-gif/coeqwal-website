@@ -11,12 +11,14 @@ import {
   CANONICAL_REGIONS,
   OUTCOME_CATEGORIES,
 } from "../data/constants"
+import { useTranslation } from "@repo/i18n"
 
 /**
  * Custom hook that provides helper functions for question builder components
  */
 export const useQuestionBuilderHelpers = () => {
   const { state, dispatch } = useQuestionBuilder()
+  const { locale } = useTranslation()
 
   // Climate-related helpers
   const toggleClimate = useCallback(() => {
@@ -291,10 +293,40 @@ export const useQuestionBuilderHelpers = () => {
 
   // Format utilities
   const formatOperationText = useCallback((text: string) => {
-    // Special formatting for parent options with IDs
+    // First, check if we should use Spanish
+    const useSpanish = locale === 'es';
+    
+    // Find the operation in OPERATION_THEMES to get its label/labelEs
+    let translatedText = text;
+    
+    // Look through all themes and options
+    for (const theme of OPERATION_THEMES) {
+      for (const option of theme.options) {
+        // Skip string options (legacy)
+        if (typeof option === 'string') continue;
+        
+        // Check if this is the operation we're looking for
+        if (option.id === text) {
+          // Use the Spanish label if available and Spanish is selected
+          translatedText = useSpanish && option.labelEs ? option.labelEs : option.label;
+          break;
+        }
+        
+        // Check subtypes if they exist
+        if ('subtypes' in option && Array.isArray(option.subtypes)) {
+          const subtype = option.subtypes.find((sub: {id: string, labelEs?: string, label: string}) => sub.id === text);
+          if (subtype) {
+            translatedText = useSpanish && subtype.labelEs ? subtype.labelEs : subtype.label;
+            break;
+          }
+        }
+      }
+    }
+    
+    // Special formatting for parent options with IDs (fallback if not found above)
     const specialCases: Record<string, string> = {
-      "removing-flow-reqs": "removing tributary flow requirements",
-      "delta-conveyance": "Delta conveyance tunnel",
+      "removing-flow-reqs": useSpanish ? "eliminar requisitos de flujo de afluentes" : "removing tributary flow requirements",
+      "delta-conveyance": useSpanish ? "túnel de transporte del Delta" : "Delta conveyance tunnel",
     }
 
     // Check if the text is a special case
@@ -304,44 +336,51 @@ export const useQuestionBuilderHelpers = () => {
 
     // List of prefixes that indicate proper nouns that should keep capitalization
     const properNounPrefixes = [
-      "Alt ",
-      "California",
-      "Sacramento",
-      "San Joaquin",
-      "Central Valley",
-      "Bay Area",
-      "Project",
-      "CVP",
-      "SWP",
+      "Alt ", "California", "Sacramento", "San Joaquin", "Central Valley",
+      "Bay Area", "Project", "CVP", "SWP", "Delta", "SGMA", "TUCPs",
+      // Spanish additions
+      "Valle de Sacramento", "Valle de San Joaquín", "Valle Central", 
+      "Alternativa ", "Bahía", "Proyecto", "Túnel"
     ]
 
     // Keep original case for proper nouns
     for (const prefix of properNounPrefixes) {
-      if (text.startsWith(prefix)) {
-        return text
+      if (translatedText.startsWith(prefix)) {
+        return translatedText
       }
     }
 
     // Otherwise, make first letter lowercase
-    return text.charAt(0).toLowerCase() + text.slice(1)
-  }, [])
+    return translatedText.charAt(0).toLowerCase() + translatedText.slice(1)
+  }, [locale])
 
   // Get operation's short text
   const getOperationShortText = useCallback(
     (operationId: string) => {
+      // Use Spanish if that's the current locale
+      const useSpanish = locale === 'es';
+      
       // Find the operation in OPERATION_THEMES
       for (const theme of OPERATION_THEMES) {
         for (const option of theme.options) {
           // Check if this is the main option we're looking for
-          if (option.id === operationId && option.shortText) {
-            return option.shortText
+          if (option.id === operationId) {
+            // Return shortText or shortTextEs based on locale
+            if (useSpanish && option.shortTextEs) {
+              return option.shortTextEs;
+            }
+            return option.shortText || formatOperationText(operationId);
           }
 
           // Check if it's a subtype
           if ("subtypes" in option && option.subtypes) {
             for (const subtype of option.subtypes) {
-              if (subtype.id === operationId && subtype.shortText) {
-                return subtype.shortText
+              if (subtype.id === operationId) {
+                // Return Spanish short text if available and Spanish is selected
+                if (useSpanish && subtype.shortTextEs) {
+                  return subtype.shortTextEs;
+                }
+                return subtype.shortText || formatOperationText(operationId);
               }
             }
           }
@@ -351,7 +390,7 @@ export const useQuestionBuilderHelpers = () => {
       // Fallback to formatOperationText if no shortText is found
       return formatOperationText(operationId)
     },
-    [formatOperationText],
+    [formatOperationText, locale],
   )
 
   // Get operation's grammatical number (singular/plural)
@@ -411,37 +450,41 @@ export const useQuestionBuilderHelpers = () => {
   }, [state.selectedOperations, isOperationSingular])
 
   const formatOutcomeText = useCallback((text: string, section: string) => {
-    // First, look up the proper label from the constants
+    // First, look up the proper label from the constants based on current locale
     let formattedText = text
-
+    
+    // Use the proper translation based on locale
+    const useSpanish = locale === 'es'
+    
     // Check if this is an ID that needs to be mapped to a label
     if (section === "type") {
       // Look in CANONICAL_OUTCOME_TYPES for matching ID
-      const matchingType = CANONICAL_OUTCOME_TYPES.find(
-        (type) => type.id === text,
-      )
+      const matchingType = CANONICAL_OUTCOME_TYPES.find(type => type.id === text)
       if (matchingType) {
-        formattedText = matchingType.label
+        // Use Spanish label if available and Spanish is selected
+        formattedText = useSpanish && matchingType.labelEs 
+          ? matchingType.labelEs 
+          : matchingType.label
       }
     } else if (section === "region") {
       // Look in CANONICAL_REGIONS for matching ID
-      const matchingRegion = CANONICAL_REGIONS.find(
-        (region) => region.id === text,
-      )
+      const matchingRegion = CANONICAL_REGIONS.find(region => region.id === text)
       if (matchingRegion) {
-        formattedText = matchingRegion.label
+        formattedText = useSpanish && matchingRegion.labelEs
+          ? matchingRegion.labelEs
+          : matchingRegion.label
       }
     } else if (section === "metric") {
       // Look in OUTCOME_CATEGORIES for the metric section
-      const metricCategory = OUTCOME_CATEGORIES.find(
-        (cat) => cat.id === "metric",
-      )
+      const metricCategory = OUTCOME_CATEGORIES.find(cat => cat.id === "metric")
       if (metricCategory) {
-        const matchingMetric = metricCategory.options.find(
-          (option) => typeof option === "object" && option.id === text,
+        const matchingMetric = metricCategory.options.find(option => 
+          typeof option === 'object' && option.id === text
         )
-        if (matchingMetric && typeof matchingMetric === "object") {
-          formattedText = matchingMetric.label
+        if (matchingMetric && typeof matchingMetric === 'object') {
+          formattedText = useSpanish && matchingMetric.labelEs
+            ? matchingMetric.labelEs
+            : matchingMetric.label
         }
       }
     }
@@ -450,39 +493,43 @@ export const useQuestionBuilderHelpers = () => {
     if (formattedText === "The Delta") {
       formattedText = "the Delta"
     }
+    // Spanish equivalent
+    else if (formattedText === "El Delta") {
+      formattedText = "el Delta"
+    }
 
     // Special case for "All regions" - format as "all regions"
     else if (formattedText === "All regions") {
       formattedText = "all regions"
     }
+    // Spanish equivalent
+    else if (formattedText === "Todas las regiones") {
+      formattedText = "todas las regiones"
+    }
 
     // Apply section-specific formatting rules
     switch (section) {
       case "region": {
-        // Add "in" prefix for region selections
-        formattedText = `in ${formattedText}`
+        // Add "in" prefix for region selections (or "en" for Spanish)
+        formattedText = useSpanish 
+          ? `en ${formattedText}`
+          : `in ${formattedText}`
 
         // List of prefixes that indicate proper nouns that should keep capitalization
         const properNounPrefixes = [
-          "California",
-          "Delta",
-          "Sacramento",
-          "San Joaquin",
-          "Central Valley",
-          "Bay Area",
-          "Northern",
-          "Southern",
-          "Eastern",
-          "Western",
+          "California", "Delta", "Sacramento", "San Joaquin", "Central Valley",
+          "Bay Area", "Northern", "Southern", "Eastern", "Western",
+          // Spanish equivalents
+          "Valle de Sacramento", "Valle de San Joaquín", "Valle Central",
+          "Norte", "Sur", "Este", "Oeste", "Área de la Bahía"
         ]
 
         // Keep capitalization for proper nouns in regions
+        const regionStart = useSpanish ? "en " : "in "
         if (
-          !properNounPrefixes.some((prefix) =>
-            formattedText.startsWith(`in ${prefix}`),
-          ) &&
-          formattedText !== "in the Delta" &&
-          formattedText !== "in all regions"
+          !properNounPrefixes.some((prefix) => formattedText.startsWith(`${regionStart}${prefix}`)) &&
+          formattedText !== (useSpanish ? "en el Delta" : "in the Delta") &&
+          formattedText !== (useSpanish ? "en todas las regiones" : "in all regions")
         ) {
           formattedText =
             formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
@@ -492,11 +539,13 @@ export const useQuestionBuilderHelpers = () => {
 
       case "type": {
         // For type outcomes, just make sure first letter is lowercase unless proper noun
-        if (
-          !["California", "Delta", "Sacramento", "San Joaquin"].some((prefix) =>
-            formattedText.startsWith(prefix),
-          )
-        ) {
+        const properNouns = [
+          "California", "Delta", "Sacramento", "San Joaquin",
+          // Spanish additions
+          "El Delta", "Valle de Sacramento", "Valle de San Joaquín"
+        ]
+        
+        if (!properNouns.some((prefix) => formattedText.startsWith(prefix))) {
           formattedText =
             formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
         }
@@ -505,11 +554,13 @@ export const useQuestionBuilderHelpers = () => {
 
       case "metric": {
         // Similar to type
-        if (
-          !["California", "Delta", "Sacramento", "San Joaquin"].some((prefix) =>
-            formattedText.startsWith(prefix),
-          )
-        ) {
+        const properNouns = [
+          "California", "Delta", "Sacramento", "San Joaquin",
+          // Spanish additions
+          "El Delta", "Valle de Sacramento", "Valle de San Joaquín"
+        ]
+        
+        if (!properNouns.some((prefix) => formattedText.startsWith(prefix))) {
           formattedText =
             formattedText.charAt(0).toLowerCase() + formattedText.slice(1)
         }
@@ -518,7 +569,7 @@ export const useQuestionBuilderHelpers = () => {
     }
 
     return formattedText
-  }, [])
+  }, [locale])
 
   return {
     state,
