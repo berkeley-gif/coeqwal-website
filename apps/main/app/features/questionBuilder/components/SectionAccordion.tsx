@@ -40,6 +40,8 @@ interface SectionAccordionProps {
   noParentCheckbox?: string[] // Optional array of parent IDs that should not have checkboxes
   isOperations?: boolean // Whether this is the operations section
   noDirectionControls?: string[] // Optional array of option IDs that should not have direction controls
+  isExpanded?: boolean // Controls whether the accordion is expanded
+  onAccordionChange?: (isExpanded: boolean) => void // Called when expansion state changes
 }
 
 const SectionAccordion: React.FC<SectionAccordionProps> = ({
@@ -52,6 +54,8 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   noParentCheckbox = [],
   isOperations = false,
   noDirectionControls = [],
+  isExpanded,
+  onAccordionChange,
 }) => {
   const theme = useTheme()
   const { t, locale } = useTranslation()
@@ -80,6 +84,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   const allInactive = options.every(
     (option) => typeof option === "object" && option.active === false,
   )
+
+  // Handle accordion expansion change
+  const handleAccordionChange = (event: React.SyntheticEvent, expanded: boolean) => {
+    if (onAccordionChange) {
+      onAccordionChange(expanded);
+    }
+  };
 
   // Styles for accordion components
   const accordionStyles = {
@@ -308,7 +319,11 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   }
 
   return (
-    <Accordion sx={accordionStyles}>
+    <Accordion
+      sx={accordionStyles}
+      expanded={isExpanded}
+      onChange={handleAccordionChange}
+    >
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls={`${title.toLowerCase().replace(/\s+/g, "-")}-content`}

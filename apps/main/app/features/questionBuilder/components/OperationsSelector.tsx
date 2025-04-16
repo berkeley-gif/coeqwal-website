@@ -20,7 +20,7 @@
  * Data model is more complex (nested themes with options)
  */
 
-import React, { useState } from "react"
+import React, { useState, useMemo } from "react"
 import { Typography, Box, useTheme, TextField, SearchIcon } from "@repo/ui/mui"
 import { Card } from "@repo/ui"
 import { OPERATION_THEMES } from "../data/constants"
@@ -38,6 +38,70 @@ const OperationsSelector: React.FC = () => {
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
+  
+  // Track expanded accordions
+  const [expandedAccordions, setExpandedAccordions] = useState<string[]>([])
+  
+  // Determine which accordions should be forced open because they contain selected options
+  const forcedOpenAccordions = useMemo(() => {
+    const forced: string[] = [];
+    
+    // Find which theme contains each selected operation
+    selectedOperations.forEach(opId => {
+      for (const theme of OPERATION_THEMES) {
+        // Check if this operation is in this theme
+        let isInTheme = false;
+        
+        for (const option of theme.options) {
+          if (typeof option === 'string') {
+            if (option === opId) {
+              isInTheme = true;
+              break;
+            }
+          } else if (typeof option === 'object') {
+            if (option.id === opId) {
+              isInTheme = true;
+              break;
+            }
+            
+            // Check subtypes if they exist
+            if ('subtypes' in option && Array.isArray(option.subtypes)) {
+              const hasSubtype = option.subtypes.some((sub: {id: string}) => sub.id === opId);
+              if (hasSubtype) {
+                isInTheme = true;
+                break;
+              }
+            }
+          }
+        }
+        
+        if (isInTheme) {
+          forced.push(theme.id);
+          break;
+        }
+      }
+    });
+    
+    return forced;
+  }, [selectedOperations]);
+  
+  // Handle accordion expansion change
+  const handleAccordionChange = (themeId: string, isExpanded: boolean) => {
+    setExpandedAccordions(prev => {
+      // If expanding, add to expanded list
+      if (isExpanded) {
+        return [...prev, themeId];
+      }
+      
+      // If collapsing, only allow if not in forced open list
+      if (!forcedOpenAccordions.includes(themeId)) {
+        return prev.filter(id => id !== themeId);
+      }
+      
+      // Otherwise keep as is
+      return prev;
+    });
+  };
 
   // Common styles
   const searchBoxStyles = {
@@ -161,6 +225,8 @@ const OperationsSelector: React.FC = () => {
             onOptionChange={handleOptionChangeWithActiveCheck}
             noParentCheckbox={["delta-conveyance"]}
             isOperations={true}
+            isExpanded={expandedAccordions.includes(theme.id)}
+            onAccordionChange={(isExpanded) => handleAccordionChange(theme.id, isExpanded)}
           />
         ))}
 
