@@ -292,8 +292,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
               ml: 1,
             }}
           >
-            {getLocalizedLabel(option)}{" "}
-            {t("questionBuilder.sectionAccordion.comingSoon")}
+            {getLocalizedLabel(option)}
           </Typography>
         </Box>
       )
@@ -438,13 +437,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
               <Typography
                 variant="subtitle1"
                 sx={{
-                  color: allInactive ? "text.disabled" : "text.primary",
+                  color: allInactive || section === "metric" ? "text.disabled" : "text.primary",
                   fontWeight: "medium",
-                  fontStyle: allInactive ? "italic" : "normal",
+                  fontStyle: allInactive || section === "metric" ? "italic" : "normal",
                 }}
               >
                 {getLocalizedTitle()}{" "}
-                {allInactive &&
+                {(allInactive || section === "metric") &&
                   `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
               </Typography>
             }
@@ -455,13 +454,13 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
           <Typography
             variant="subtitle1"
             sx={{
-              color: allInactive ? "text.disabled" : "text.primary",
+              color: allInactive || section === "metric" ? "text.disabled" : "text.primary",
               fontWeight: "medium",
-              fontStyle: allInactive ? "italic" : "normal",
+              fontStyle: allInactive || section === "metric" ? "italic" : "normal",
             }}
           >
             {getLocalizedTitle()}{" "}
-            {allInactive &&
+            {(allInactive || section === "metric") &&
               `(${t("questionBuilder.sectionAccordion.comingSoon")})`}
           </Typography>
         )}
