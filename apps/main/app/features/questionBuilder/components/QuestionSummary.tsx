@@ -1353,7 +1353,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           mt: theme.spacing(4),
           mb: 0,
           lineHeight: theme.typography.h2.lineHeight,
-          textAlign: "center",
+          textAlign: "left",
           fontWeight: 500,
           width: "100%",
           margin: "0 auto",
@@ -1361,8 +1361,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
           backgroundColor: "white",
           paddingTop: isExploratoryMode ? "20px" : "72px", // Reduce padding in exploratory mode
           paddingBottom: isExploratoryMode ? "12px" : "32px", // Reduce padding in exploratory mode
-          paddingLeft: "0",
-          paddingRight: "0",
+          paddingLeft: "5%",
+          paddingRight: "5%",
           boxShadow: "none",
           transition: "font-size 0.75s ease-in-out, padding 0.75s ease-in-out",
           maxWidth: "none !important",
