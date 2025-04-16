@@ -5,6 +5,7 @@ import { Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
+import { CLIMATE_OPTIONS } from "../data/constants"
 
 // TODO: define formatting rules as a configuration object
 // const FORMATTING_RULES = {
@@ -804,12 +805,20 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
     const operationsPart = getOperationsPart()
     const outcomePart = getOutcomesPart()
 
+    // Find the climate label for the selected climate ID
+    const getClimateLabel = () => {
+      // Find the climate option with the matching ID
+      const climateOption = CLIMATE_OPTIONS.find((option: { id: string; label: string }) => option.id === selectedClimate);
+      // Return the label if found, otherwise return the ID as fallback
+      return climateOption?.label || selectedClimate;
+    }
+
     const climatePart = includeClimate ? (
       <>
         {" "}
         under{" "}
         <ColoredText color={theme.palette.climate.main}>
-          {selectedClimate}
+          {getClimateLabel()}
         </ColoredText>
       </>
     ) : (
@@ -875,7 +884,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = ({
             verb,
             operation,
             outcome,
-            climate: selectedClimate,
+            climate: getClimateLabel(),
           }}
         />
       )

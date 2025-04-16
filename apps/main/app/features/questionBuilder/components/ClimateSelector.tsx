@@ -28,6 +28,12 @@ import { CLIMATE_OPTIONS } from "../data/constants"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { HighlightText } from "./ui"
 
+// Define the climate option interface
+interface ClimateOption {
+  id: string;
+  label: string;
+}
+
 const ClimateSelector: React.FC = () => {
   const theme = useTheme()
   const {
@@ -70,13 +76,13 @@ const ClimateSelector: React.FC = () => {
           onChange={handleClimateChange}
           name="climate-options"
         >
-          {CLIMATE_OPTIONS.map((option, index) => (
-            <Box key={index} sx={{ mb: 0.5 }}>
+          {CLIMATE_OPTIONS.map((option: ClimateOption, index) => (
+            <Box key={option.id || index} sx={{ mb: 0.5 }}>
               <FormControlLabel
                 control={<Radio size="small" sx={radioStyles} />}
-                label={<Typography variant="body2">{option}</Typography>}
+                label={<Typography variant="body2">{option.label}</Typography>}
                 sx={formControlStyles}
-                value={option}
+                value={option.id}
               />
             </Box>
           ))}

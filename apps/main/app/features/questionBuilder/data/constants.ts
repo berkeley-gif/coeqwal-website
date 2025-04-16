@@ -27,8 +27,8 @@ export const CANONICAL_REGIONS = [
 
 export const CANONICAL_CLIMATE_OPTIONS = [
   { id: "hist_adj", label: "current conditions" },
-  { id: "cc50", label: "a hotter and dryer future climate" },
-  { id: "cc95", label: "highly variable future climate conditions" },
+  { id: "cc50", label: "moderately hotter and dryer future" },
+  { id: "cc95", label: "severely hotter and dryer future" },
 ]
 
 export const OPERATION_THEMES = [
