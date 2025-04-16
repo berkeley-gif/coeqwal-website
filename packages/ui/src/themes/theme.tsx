@@ -266,7 +266,7 @@ const theme = createTheme({
     body1: {
       fontSize: "1.4rem",
       letterSpacing: "normal",
-      lineHeight: 1.6,
+      lineHeight: 1.4,
     },
     body2: {
       fontSize: "1.6rem",

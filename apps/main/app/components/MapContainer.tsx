@@ -55,9 +55,9 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
       <Map
         mapboxToken={mapboxToken}
         initialViewState={{
-          longitude: -122.4,
-          latitude: 37.8,
-          zoom: 8,
+          longitude: -126.037,
+          latitude: 37.962,
+          zoom: 5.83,
           bearing: 0,
           pitch: 0,
         }}

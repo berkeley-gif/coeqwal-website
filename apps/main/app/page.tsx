@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
-import { Box, Typography, Button, Stack } from "@repo/ui/mui"
+import { Box, Typography, Stack } from "@repo/ui/mui"
 import {
   Header,
   MiniDrawer,
@@ -11,10 +11,10 @@ import {
   VisibilityIcon,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { TwoColumnPanel, HeroQuestionsPanel, BasePanel } from "@repo/ui"
+import { HeroQuestionsPanel, BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
-import { useMap, MapTransitions } from "@repo/map"
+import { useMap } from "@repo/map"
 import type { ViewState, MapboxMapRef } from "@repo/map"
 import {} from "@repo/map"
 
@@ -61,19 +61,19 @@ export default function Home() {
 
   // For controlled usage, we keep a local piece of state for camera
   const [controlledViewState, setControlledViewState] = useState<ViewState>({
-    longitude: -119,
-    latitude: 36,
-    zoom: 5,
+    longitude: -126.037,
+    latitude: 37.962,
+    zoom: 5.83,
     bearing: 0,
     pitch: 0,
   })
 
-  const handleControlledFlyTo = () => {
-    // Use the flyTo method directly
-    if (mapRef.current) {
-      mapRef.current.flyTo(-121.5, 38.05, 10)
-    }
-  }
+  // const handleControlledFlyTo = () => {
+  //   // Use the flyTo method directly
+  //   if (mapRef.current) {
+  //     mapRef.current.flyTo(-121.5, 38.05, 10)
+  //   }
+  // }
 
   // ────────────────────────────────────────────────────────────────────────
   // 3) LAYER ADDING EXAMPLE
@@ -440,7 +440,7 @@ export default function Home() {
                     California Water
                   </Typography>
 
-                  <Stack spacing={2}>
+                  <Stack spacing={1}>
                     <Box
                       sx={{
                         cursor: "pointer",
