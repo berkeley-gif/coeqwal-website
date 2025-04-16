@@ -962,6 +962,33 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
         selectedOperations.length === 1
           ? t("questionBuilder.scenarioSingular")
           : t("questionBuilder.scenarioPlural")
+          
+      // Check if any outcomes are selected
+      const hasOutcomes = Object.values(outcomesBySection).some(
+        section => section && section.length > 0
+      )
+
+      // Create inline custom component
+      const createCustomSwappedFormat = () => {
+        if (locale === 'es') {
+          return (
+            <>
+              Para {outcomePart}, ¿qué {operationsPart} podríamos considerar?
+            </>
+          )
+        } else {
+          return (
+            <>
+              For {outcomePart}, which {operationsPart} could we consider?
+            </>
+          )
+        }
+      }
+
+      // Use custom format if outcomes are selected, otherwise use translation
+      if (hasOutcomes) {
+        return createCustomSwappedFormat()
+      }
 
       return (
         <TranslatedQuestion

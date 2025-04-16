@@ -51,7 +51,7 @@
     "defaultTerms": {
       "waterAvailability": "water availability",
       "outcomes": "outcomes",
-      "decisions": "management decisions"
+      "decisions": "decisions"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
