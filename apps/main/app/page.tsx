@@ -9,6 +9,7 @@ import {
   VerticalDivider,
   KeyboardArrowDownIcon,
   VisibilityIcon,
+  LearnMoreButton,
 } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { HeroQuestionsPanel, BasePanel } from "@repo/ui"
@@ -416,7 +417,7 @@ export default function Home() {
             <BasePanel
               background="transparent"
               paddingVariant="wide"
-              includeHeaderSpacing={true}
+              includeHeaderSpacing={false}
               sx={{
                 color: (theme) => theme.palette.text.secondary,
               }}
@@ -579,6 +580,22 @@ export default function Home() {
                       </Typography>
                     </Box>
                   </Stack>
+
+                  <Box sx={{ mt: 3 }}>
+                    <LearnMoreButton 
+                      onClick={() => setDrawerOpen(true)}
+                      variant="outlined"
+                      sx={{
+                        borderColor: "white",
+                        color: "white",
+                        backgroundColor: "transparent",
+                        "&:hover": {
+                          borderColor: "white",
+                          backgroundColor: "rgba(255, 255, 255, 0.1)"
+                        }
+                      }}
+                    />
+                  </Box>
                 </Box>
 
                 {/* Right column (empty) */}
