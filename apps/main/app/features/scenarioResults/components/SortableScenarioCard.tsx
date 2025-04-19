@@ -8,6 +8,9 @@ interface SortableScenarioCardProps {
   scenarioNumber: number
   data?: string | null
   metricType?: string
+  isExpanded?: boolean
+  onExpand?: () => void
+  style?: React.CSSProperties
 }
 
 const SortableScenarioCard = React.memo(
@@ -17,6 +20,9 @@ const SortableScenarioCard = React.memo(
     scenarioNumber,
     data,
     metricType,
+    isExpanded = false,
+    onExpand,
+    style: externalStyle = {},
   }: SortableScenarioCardProps) => {
     const {
       attributes,
@@ -35,6 +41,7 @@ const SortableScenarioCard = React.memo(
       zIndex: isDragging ? 10 : 1,
       opacity: isDragging ? 0.8 : 1,
       position: "relative" as const,
+      ...externalStyle,
     }
 
     return (
@@ -61,11 +68,34 @@ const SortableScenarioCard = React.memo(
         >
           ⋮⋮
         </div>
+        <div
+          onClick={onExpand}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "40px",
+            zIndex: 2,
+            cursor: "pointer",
+            color: "rgba(0, 0, 0, 0.5)",
+            padding: "4px",
+            borderRadius: "4px",
+            background: "rgba(255, 255, 255, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "20px",
+            height: "20px",
+            fontWeight: "bold",
+          }}
+        >
+          {isExpanded ? "↓" : "↔"}
+        </div>
         <ScenarioCard
           title={title}
           scenarioNumber={scenarioNumber}
           data={data}
           metricType={metricType}
+          expanded={isExpanded}
         />
       </div>
     )

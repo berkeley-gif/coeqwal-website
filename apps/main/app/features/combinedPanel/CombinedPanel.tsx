@@ -97,6 +97,9 @@ const CombinedPanelContent = () => {
   >([])
   // State for controlling the order of scenario cards
   const [scenarioOrder, setScenarioOrder] = useState<string[]>([])
+  // State to track which card is expanded (if any)
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
+
   // Currently selected metric type to display
   const [selectedMetric, setSelectedMetric] = useState<string>("DELTA_OUTFLOW")
   // Loading state
@@ -350,6 +353,11 @@ const CombinedPanelContent = () => {
         return arrayMove(items, oldIndex, newIndex)
       })
     }
+  }
+
+  // Handle card expansion toggle
+  const handleCardExpand = (cardId: string) => {
+    setExpandedCardId(expandedCardId === cardId ? null : cardId)
   }
 
   return (
@@ -677,7 +685,8 @@ const CombinedPanelContent = () => {
               >
                 <span style={{ marginRight: "5px", fontSize: "16px" }}>💡</span>
                 Tip: You can drag and drop cards using the handle (⋮⋮) to
-                reorder and compare them side by side.
+                reorder them. Click the expand button (↔) to view a card in
+                full width for better visualization.
               </Typography>
             )}
           </Box>
@@ -701,8 +710,8 @@ const CombinedPanelContent = () => {
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "1fr", // 1 column on mobile
-                  sm: "repeat(2, 1fr)", // 2 columns on tablet
-                  md: "repeat(3, 1fr)", // 3 columns on desktop (3x3 grid)
+                  sm: expandedCardId ? "1fr" : "repeat(2, 1fr)", // 1 column when a card is expanded, otherwise 2
+                  md: expandedCardId ? "1fr" : "repeat(3, 1fr)", // 1 column when a card is expanded, otherwise 3
                 },
                 gap: theme.spacing(4),
               }}
@@ -726,6 +735,12 @@ const CombinedPanelContent = () => {
                         title={item.title}
                         data={item.data}
                         metricType={item.metricType}
+                        isExpanded={expandedCardId === item.id}
+                        onExpand={() => handleCardExpand(item.id)}
+                        style={{
+                          gridColumn:
+                            expandedCardId === item.id ? "1 / -1" : "auto",
+                        }}
                       />
                     )
                   })}

@@ -10,6 +10,7 @@ interface ScenarioCardProps {
   scenarioNumber: number
   data?: string | null
   metricType?: string
+  expanded?: boolean
 }
 
 const ScenarioCard: React.FC<ScenarioCardProps> = ({
@@ -17,6 +18,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   scenarioNumber,
   data,
   metricType = "DELTA_OUTFLOW",
+  expanded = false,
 }) => {
   const theme = useTheme()
 
@@ -83,9 +85,10 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   return (
     <Card
       sx={{
-        height: "350px",
+        height: expanded ? "450px" : "350px",
+        width: "100%",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: expanded ? "row" : "column",
         alignItems: "flex-start",
         p: theme.spacing(2),
         pt: theme.spacing(4),
@@ -98,16 +101,31 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         position: "relative",
       }}
     >
-      <Typography variant="h6" sx={{ mb: 1 }}>
-        {title || `Scenario ${scenarioNumber}`}
-      </Typography>
+      <Box
+        sx={{
+          width: expanded ? "30%" : "100%",
+          pr: expanded ? 3 : 0,
+          borderRight: expanded ? `1px solid ${theme.palette.divider}` : "none",
+        }}
+      >
+        <Typography variant="h6" sx={{ mb: 1 }}>
+          {title || `Scenario ${scenarioNumber}`}
+        </Typography>
+        {expanded && (
+          <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
+            {metricType
+              ? `Displaying: ${formattedMetricName}`
+              : "No metric selected"}
+          </Typography>
+        )}
+      </Box>
 
       {parsedData ? (
         <Box
           sx={{
-            width: "100%",
-            height: "280px",
-            mt: 1,
+            width: expanded ? "70%" : "100%",
+            height: expanded ? "400px" : "280px",
+            mt: expanded ? 0 : 1,
             overflow: "hidden",
             flexGrow: 1,
             display: "flex",
@@ -116,11 +134,12 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         >
           <DecileBarChart
             data={parsedData}
-            title={formattedMetricName}
+            title={expanded ? "" : formattedMetricName}
             yAxisLabel={metricUnits}
             colorScheme="blues"
             responsive={true}
-            showValues={true}
+            showValues={expanded ? true : false}
+            height={expanded ? 400 : 280}
           />
         </Box>
       ) : (
@@ -131,6 +150,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
             alignItems: "center",
             justifyContent: "center",
             height: "180px",
+            width: expanded ? "70%" : "100%",
           }}
         >
           <Typography variant="body1" color="textSecondary" align="center">
