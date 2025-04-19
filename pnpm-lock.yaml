@@ -275,6 +275,18 @@ importers:
         specifier: ^2.4.4
         version: 2.4.4(@types/node@22.13.17)(typescript@5.8.2)
 
+  packages/viz:
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      eslint:
+        specifier: ^9.15.0
+        version: 9.23.0
+
 packages:
 
   '@babel/code-frame@7.26.2':
