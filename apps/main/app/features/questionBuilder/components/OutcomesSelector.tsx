@@ -40,12 +40,7 @@ const OutcomesSelector: React.FC = () => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
-    state: {
-      swapped,
-      selectedOutcomes,
-      showMap,
-      isExploratoryMode,
-    },
+    state: { swapped, selectedOutcomes, showMap, isExploratoryMode },
     handleOutcomeChange,
     toggleMap,
     toggleClimate,

@@ -39,6 +39,8 @@ const CombinedPanelContent = () => {
 
   // Track if the scroll button has been clicked or if the user has scrolled manually
   const [hasClickedScroll, setHasClickedScroll] = useState(false)
+  // State to store the loaded scenario data
+  const [scenarioData, setScenarioData] = useState(null)
 
   // Reference to the element we want to observe
   const questionBuilderRef = useRef(null)
@@ -96,6 +98,22 @@ const CombinedPanelContent = () => {
   // Handle swap icon click
   const handleSwapClick = () => {
     toggleSwap()
+  }
+
+  // Function to fetch the scenario data
+  const fetchScenarioData = async () => {
+    try {
+      const response = await fetch(
+        "/scenario_data/categorized_deciles/coeqwal_s0011_adjBL_wTUCP_DV_v0.0_DELTA_OUTFLOW.json",
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch scenario data")
+      }
+      const data = await response.json()
+      setScenarioData(data)
+    } catch (error) {
+      console.error("Error fetching scenario data:", error)
+    }
   }
 
   return (
@@ -203,6 +221,9 @@ const CombinedPanelContent = () => {
             onClick={() => {
               // Enter exploratory mode - shrink the question summary
               setExploratoryMode(true)
+
+              // Fetch the scenario data
+              fetchScenarioData()
 
               // Scroll to scenario results
               const element = document.getElementById("scenario-results")
@@ -386,7 +407,16 @@ const CombinedPanelContent = () => {
               gap: theme.spacing(3),
             }}
           >
-            {scenarios.map((scenario) => (
+            {/* First scenario card with data */}
+            <ScenarioCard
+              key="scenario-1"
+              scenarioNumber={1}
+              title="Scenario 1"
+              data={scenarioData ? JSON.stringify(scenarioData, null, 2) : null}
+            />
+
+            {/* Remaining cards */}
+            {scenarios.slice(1).map((scenario) => (
               <ScenarioCard
                 key={scenario.id}
                 scenarioNumber={scenario.id}

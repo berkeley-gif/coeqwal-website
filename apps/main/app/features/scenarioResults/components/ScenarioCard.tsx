@@ -7,12 +7,13 @@ import { Card } from "@repo/ui"
 interface ScenarioCardProps {
   title?: string
   scenarioNumber: number
-  // Add more
+  data?: string | null
 }
 
 const ScenarioCard: React.FC<ScenarioCardProps> = ({
   title,
   scenarioNumber,
+  data,
 }) => {
   const theme = useTheme()
 
@@ -22,8 +23,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         height: "220px",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: "flex-start",
         p: theme.spacing(2),
         transition: "all 0.2s ease-in-out",
         "&:hover": {
@@ -35,9 +35,24 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
       <Typography variant="h6" gutterBottom>
         {title || `Scenario ${scenarioNumber}`}
       </Typography>
-      <Typography variant="body2" color="textSecondary">
-        Click to view details
-      </Typography>
+
+      {data ? (
+        <pre
+          style={{
+            fontSize: "12px",
+            width: "100%",
+            overflow: "auto",
+            textAlign: "left",
+            marginTop: theme.spacing(2),
+          }}
+        >
+          {data}
+        </pre>
+      ) : (
+        <Typography variant="body2" color="textSecondary">
+          Click to view details
+        </Typography>
+      )}
     </Card>
   )
 }
