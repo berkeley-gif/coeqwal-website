@@ -45,7 +45,6 @@ export interface TimeSeriesChartProps extends ChartConfig {
   showPoints?: boolean
 }
 
-// Types for scenario comparison data
 export interface ScenarioComparisonData {
   scenario: string
   value: number

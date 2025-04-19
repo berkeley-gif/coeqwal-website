@@ -27,7 +27,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Parse data into consistent format
+  // Parse data
   const decileData: DecileData[] = useMemo(() => {
     try {
       return parseDecileData(data)
@@ -51,7 +51,6 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
         .attr("width", width)
         .attr("height", height)
 
-      // Add a "no data" message
       svg
         .append("text")
         .attr("x", width / 2)
@@ -64,7 +63,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
       return
     }
 
-    // Get actual dimensions from container if responsive
+    // Get dimensions from container (for responsive)
     let chartWidth = width
     let chartHeight = height
 
