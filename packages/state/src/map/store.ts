@@ -5,6 +5,8 @@ import { immer } from "zustand/middleware/immer"
 import { RefObject } from "react"
 import { ViewState, MapboxMapRef, MapState } from "./types"
 
+// TODO: Add proper cleanup
+
 // We'll store the map instance outside the store for direct access
 // This avoids issues with read-only properties
 let mapInstance: MapboxMapRef | null = null
@@ -14,6 +16,7 @@ export const useMapStore = create<MapState>()(
   immer((set, get) => ({
     // Initial state
     mapRef: null,
+    mapInstance: null,
     viewState: {
       longitude: -126.037,
       latitude: 37.962,
@@ -21,6 +24,7 @@ export const useMapStore = create<MapState>()(
       bearing: 0,
       pitch: 0,
     },
+    registerMapInstance: (instance) => set({ mapInstance: instance }),
   })),
 )
 
