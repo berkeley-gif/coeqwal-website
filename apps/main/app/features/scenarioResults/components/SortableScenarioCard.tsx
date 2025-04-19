@@ -41,11 +41,13 @@ const SortableScenarioCard = React.memo(
       zIndex: isDragging ? 10 : 1,
       opacity: isDragging ? 0.8 : 1,
       position: "relative" as const,
+      gridColumn: isExpanded ? "1 / -1" : "auto",
+      order: isExpanded ? -1 : 0,
       ...externalStyle,
     }
 
     return (
-      <div ref={setNodeRef} style={style}>
+      <div ref={setNodeRef} style={style} data-expanded={isExpanded}>
         <div
           style={{
             position: "absolute",

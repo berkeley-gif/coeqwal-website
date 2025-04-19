@@ -97,8 +97,8 @@ const CombinedPanelContent = () => {
   >([])
   // State for controlling the order of scenario cards
   const [scenarioOrder, setScenarioOrder] = useState<string[]>([])
-  // State to track which card is expanded (if any)
-  const [expandedCardId, setExpandedCardId] = useState<string | null>(null)
+  // State to track which cards are expanded (multiple can be expanded at once)
+  const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(new Set())
 
   // Currently selected metric type to display
   const [selectedMetric, setSelectedMetric] = useState<string>("DELTA_OUTFLOW")
@@ -357,7 +357,16 @@ const CombinedPanelContent = () => {
 
   // Handle card expansion toggle
   const handleCardExpand = (cardId: string) => {
-    setExpandedCardId(expandedCardId === cardId ? null : cardId)
+    // Toggle the expansion state of the clicked card
+    setExpandedCardIds((prevIds) => {
+      const newIds = new Set(prevIds)
+      if (newIds.has(cardId)) {
+        newIds.delete(cardId)
+      } else {
+        newIds.add(cardId)
+      }
+      return newIds
+    })
   }
 
   return (
@@ -685,8 +694,9 @@ const CombinedPanelContent = () => {
               >
                 <span style={{ marginRight: "5px", fontSize: "16px" }}>💡</span>
                 Tip: You can drag and drop cards using the handle (⋮⋮) to
-                reorder them. Click the expand button (↔) to view a card in
-                full width for better visualization.
+                reorder them. Click the expand button (↔) to view cards in full
+                width for better visualization. Multiple cards can be expanded
+                at once.
               </Typography>
             )}
           </Box>
@@ -710,10 +720,15 @@ const CombinedPanelContent = () => {
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "1fr", // 1 column on mobile
-                  sm: expandedCardId ? "1fr" : "repeat(2, 1fr)", // 1 column when a card is expanded, otherwise 2
-                  md: expandedCardId ? "1fr" : "repeat(3, 1fr)", // 1 column when a card is expanded, otherwise 3
+                  sm: "repeat(2, 1fr)", // Always 2 columns on tablet
+                  md: "repeat(3, 1fr)", // Always 3 columns on desktop
                 },
                 gap: theme.spacing(4),
+                // Add rule for expanded items to take up full width
+                "& > div[data-expanded='true']": {
+                  gridColumn: "1 / -1",
+                  order: -1,
+                },
               }}
             >
               {scenarioDataItems.length > 0 && !isLoading ? (
@@ -727,6 +742,8 @@ const CombinedPanelContent = () => {
                     )
                     if (!item) return null
 
+                    const isExpanded = expandedCardIds.has(item.id)
+
                     return (
                       <SortableScenarioCard
                         key={`sortable-scenario-${item.id}`}
@@ -735,12 +752,8 @@ const CombinedPanelContent = () => {
                         title={item.title}
                         data={item.data}
                         metricType={item.metricType}
-                        isExpanded={expandedCardId === item.id}
+                        isExpanded={isExpanded}
                         onExpand={() => handleCardExpand(item.id)}
-                        style={{
-                          gridColumn:
-                            expandedCardId === item.id ? "1 / -1" : "auto",
-                        }}
                       />
                     )
                   })}

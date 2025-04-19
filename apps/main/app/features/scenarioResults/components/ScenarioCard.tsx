@@ -92,9 +92,9 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         alignItems: "flex-start",
         p: theme.spacing(2),
         pt: theme.spacing(4),
-        transition: "all 0.2s ease-in-out",
+        transition: "all 0.3s ease-in-out",
         "&:hover": {
-          transform: "translateY(-4px)",
+          transform: expanded ? "none" : "translateY(-4px)",
           boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
         },
         overflow: "auto",
@@ -106,6 +106,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
           width: expanded ? "30%" : "100%",
           pr: expanded ? 3 : 0,
           borderRight: expanded ? `1px solid ${theme.palette.divider}` : "none",
+          height: expanded ? "auto" : "auto",
         }}
       >
         <Typography variant="h6" sx={{ mb: 1 }}>
@@ -139,7 +140,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
             colorScheme="blues"
             responsive={true}
             showValues={expanded ? true : false}
-            height={expanded ? 400 : 280}
+            height={expanded ? 400 : 250}
           />
         </Box>
       ) : (
