@@ -154,15 +154,25 @@ Packages typically wouldn't use Nextjs, but they could use React. There are mult
 pnpm turbo gen workspace --destination packages/<my-new-package> --type package
 ```
 
+- `Name` should be `@repo/<package-name>`.
+- In 99% of cases you'll want to select `eslint-config` and `typescript-config` as devDependencies.
+
 This will create a new package in the `packages` directory with a `package.json`. Tasks now are:
 
 - Fill in the scripts and dependencies in the `package.json` file.
   - `name` should be `"@repo/<my-new-package>"`
   - include `"type": "module"`,
-  - scripts should generally be as in the `map` or `i18n` package.
+  - scripts and dependencies should generally be as in the `map` or `i18n` package. Note that you should write in `eslint": "^9.15.0` as a devDependency. I haven't automated that yet.
   - refer to these packages for suggestions for the dependencies and dev dependencies.
-- Add a `tsconfig.json` file to the package to use the shared typescript config.
-- Add an `eslint.config.mjs` file to the package to use the shared eslint config.
+- Add a `tsconfig.json` file to the package to use the shared typescript config (copy from `i18n package`).
+- Add an `eslint.config.mjs` file to the package to use the shared eslint config (copy from `i18n package`).
 - Set up your `src` directory.
 - Set up the appropriate exports in the `package.json` file.
 - Set up the appropriate imports in the `package.json` files of the apps that will use the package.
+- Run
+
+```sh
+pnpm install
+```
+
+at the root level to make sure all new packages and workspace import/exports are installed.
