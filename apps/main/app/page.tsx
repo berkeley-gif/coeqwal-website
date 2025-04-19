@@ -16,12 +16,20 @@ import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import { useMap } from "@repo/map"
 import type { ViewState, MapboxMapRef } from "@repo/map"
-import {} from "@repo/map"
+import { useMapStore, mapActions } from "@repo/state/map"
 
 // Dynamic import components that use client-side features
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
   ssr: false, // Disable server-side rendering
 })
+
+// Dynamic import the map state display
+const MapStateDisplay = dynamic(
+  () => import("./features/mapControls/MapStateDisplay"),
+  {
+    ssr: false,
+  },
+)
 
 // Dynamic import the combined panel
 const CombinedPanel = dynamic(
@@ -45,7 +53,9 @@ export default function Home() {
   // ────────────────────────────────────────────────────────────────────────
 
   // For the uncontrolled map, we'll store its ref so we can call flyTo
-  const uncontrolledRef = useRef<MapboxMapRef | null>(null)
+  const uncontrolledRef = useRef<MapboxMapRef | null>(
+    null,
+  ) as React.RefObject<MapboxMapRef>
 
   // ────────────────────────────────────────────────────────────────────────
   // 2) CONTROLLED EXAMPLE
@@ -224,6 +234,9 @@ export default function Home() {
             setControlledViewState(newViewState)
           }
         />
+
+        {/* Map State Display */}
+        <MapStateDisplay />
       </Box>
 
       {/* ===== Navigation Sidebar ===== */}
@@ -495,6 +508,17 @@ export default function Home() {
                           sx={{
                             ml: 1,
                             verticalAlign: "middle",
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+
+                            mapActions.flyTo(
+                              -122.305, // longitude
+                              37.075, // latitude
+                              7.82, // zoom
+                              60, // pitch
+                              45, // bearing
+                            )
                           }}
                         />
                       </Typography>

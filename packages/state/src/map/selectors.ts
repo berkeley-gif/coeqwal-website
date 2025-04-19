@@ -17,7 +17,7 @@ export function useMapControls() {
 }
 
 // Hook for connecting a map component to the store
-export function useMapConnection() {
+export function useMapState() {
   const mapRef = useRef<MapboxMapRef>(null)
   const viewState = useViewState()
 

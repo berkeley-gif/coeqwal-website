@@ -5,6 +5,10 @@ import { immer } from "zustand/middleware/immer"
 import { RefObject } from "react"
 import { ViewState, MapboxMapRef, MapState } from "./types"
 
+// We'll store the map instance outside the store for direct access
+// This avoids issues with read-only properties
+let mapInstance: MapboxMapRef | null = null
+
 // Note: Zustand v5 syntax
 export const useMapStore = create<MapState>()(
   immer((set, get) => ({
@@ -25,15 +29,53 @@ export const mapActions = {
   setMapRef: (ref: RefObject<MapboxMapRef>) =>
     useMapStore.setState({ mapRef: ref }),
 
+  // Register the actual map instance for direct access
+  registerMapInstance: (instance: MapboxMapRef) => {
+    mapInstance = instance
+  },
+
   setViewState: (viewState: ViewState) =>
     useMapStore.setState((state) => {
       state.viewState = viewState
     }),
 
-  flyTo: (lng: number, lat: number, zoom: number) => {
-    const { mapRef } = useMapStore.getState()
-    if (mapRef?.current) {
-      mapRef.current.flyTo(lng, lat, zoom)
+  flyTo: (
+    longitude: number,
+    latitude: number,
+    zoom: number,
+    pitch?: number,
+    bearing?: number,
+    duration?: number,
+  ) => {
+    // First try the directly registered instance
+    if (mapInstance) {
+      mapInstance.flyTo(longitude, latitude, zoom, pitch, bearing, duration)
     }
+    // Fall back to the ref if necessary
+    else {
+      const { mapRef } = useMapStore.getState()
+      if (mapRef?.current) {
+        mapRef.current.flyTo(
+          longitude,
+          latitude,
+          zoom,
+          pitch,
+          bearing,
+          duration,
+        )
+      }
+    }
+
+    // Update our state
+    useMapStore.setState((state) => {
+      state.viewState = {
+        ...state.viewState,
+        longitude,
+        latitude,
+        zoom,
+        ...(pitch !== undefined ? { pitch } : {}),
+        ...(bearing !== undefined ? { bearing } : {}),
+      }
+    })
   },
 }
