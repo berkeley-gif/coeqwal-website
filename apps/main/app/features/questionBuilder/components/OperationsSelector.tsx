@@ -203,25 +203,8 @@ const OperationsSelector: React.FC = () => {
     // Don't allow changes for inactive options
     if (!isActive) return
 
-    // In swapped mode, allow multiple selections
-    if (swapped) {
-      // Simply toggle the selection state
-      handleOperationChangeWithExitMode(optionId, checked)
-    } else {
-      // In unswapped mode, keep the radio-like behavior (only one selection)
-      if (checked) {
-        // Deselect all current selections
-        selectedOperations.forEach((operation) => {
-          handleOperationChangeWithExitMode(operation, false)
-        })
-
-        // Then select only the new option
-        handleOperationChangeWithExitMode(optionId, true)
-      } else {
-        // Allow deselection normally
-        handleOperationChangeWithExitMode(optionId, false)
-      }
-    }
+    // Always use checkbox behavior - allow multiple selections regardless of swapped state
+    handleOperationChangeWithExitMode(optionId, checked)
   }
 
   return (

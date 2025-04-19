@@ -26,12 +26,32 @@ import {
 import { useQuestionBuilderHelpers } from "../questionBuilder/hooks/useQuestionBuilderHelpers"
 import { useTranslation } from "@repo/i18n"
 
+// Type for scenario data
+interface ScenarioDataItem {
+  id: string
+  title: string
+  data: string | null
+}
+
+// Operation to scenario ID mapping
+const operationToScenarioId: Record<string, string> = {
+  "removing-flow-reqs": "s0011",
+  "sjr-flow-reqs": "s0012",
+  "sac-flow-reqs": "s0013",
+  "delta-conveyance": "s0014",
+  "dct-3000cfs": "s0015",
+  "dct-6000cfs": "s0016",
+  "storage-expansion": "s0017",
+  "new-storage": "s0018",
+  "groundwater-recharge": "s0019",
+}
+
 // Content component that uses the context
 const CombinedPanelContent = () => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
-    state: { includeClimate, swapped },
+    state: { includeClimate, swapped, selectedOperations },
     toggleSwap,
     toggleClimate,
     setExploratoryMode,
@@ -39,8 +59,12 @@ const CombinedPanelContent = () => {
 
   // Track if the scroll button has been clicked or if the user has scrolled manually
   const [hasClickedScroll, setHasClickedScroll] = useState(false)
-  // State to store the loaded scenario data
-  const [scenarioData, setScenarioData] = useState(null)
+  // State to store the loaded scenario data for each operation
+  const [scenarioDataItems, setScenarioDataItems] = useState<
+    ScenarioDataItem[]
+  >([])
+  // Loading state
+  const [isLoading, setIsLoading] = useState(false)
 
   // Reference to the element we want to observe
   const questionBuilderRef = useRef(null)
@@ -73,46 +97,83 @@ const CombinedPanelContent = () => {
     return () => observer.disconnect()
   }, [hasClickedScroll])
 
-  // Create demo scenario data
-  const scenarios = Array.from({ length: 9 }, (_, index) => ({
-    id: index + 1,
-    title: `Scenario ${index + 1}`,
-  }))
-
-  // Function to handle scrolling to content
-  // const scrollToContent = () => {
-  //   setHasClickedScroll(true)
-
-  //   // Use a more precise approach with anchors and offsets
-  //   const contentElement = document.getElementById("feature-content-anchor")
-  //   if (contentElement) {
-  //     const yOffset = -100 // Add an offset to see more content
-  //     const y =
-  //       contentElement.getBoundingClientRect().top +
-  //       window.pageYOffset +
-  //       yOffset
-  //     window.scrollTo({ top: y, behavior: "smooth" })
-  //   }
-  // }
-
   // Handle swap icon click
   const handleSwapClick = () => {
     toggleSwap()
   }
 
-  // Function to fetch the scenario data
-  const fetchScenarioData = async () => {
+  // Get operation title from its ID
+  const getOperationTitle = (operationId: string): string => {
+    // Create a mapping of operation IDs to human-readable titles
+    const operationTitles: Record<string, string> = {
+      "removing-flow-reqs": "Removing Flow Requirements",
+      "sjr-flow-reqs": "San Joaquin River Flow Requirements",
+      "sac-flow-reqs": "Sacramento River Flow Requirements",
+      "delta-conveyance": "Delta Conveyance Tunnel",
+      "dct-3000cfs": "Delta Conveyance (3000 CFS)",
+      "dct-6000cfs": "Delta Conveyance (6000 CFS)",
+      "storage-expansion": "Storage Expansion",
+      "new-storage": "New Storage",
+      "groundwater-recharge": "Groundwater Recharge",
+    }
+
+    return operationTitles[operationId] || `Operation ${operationId}`
+  }
+
+  // Function to fetch the scenario data for a specific operation
+  const fetchScenarioDataForOperation = async (
+    operationId: string,
+  ): Promise<ScenarioDataItem | null> => {
+    // Get the scenario ID for this operation
+    const scenarioId = operationToScenarioId[operationId] || "s0011" // Default to s0011 if no mapping exists
+
     try {
       const response = await fetch(
-        "/scenario_data/categorized_deciles/coeqwal_s0011_adjBL_wTUCP_DV_v0.0_DELTA_OUTFLOW.json",
+        `/scenario_data/categorized_deciles/coeqwal_${scenarioId}_adjBL_wTUCP_DV_v0.0_DELTA_OUTFLOW.json`,
       )
+
       if (!response.ok) {
-        throw new Error("Failed to fetch scenario data")
+        console.error(`Failed to fetch data for operation ${operationId}`)
+        return null
       }
+
       const data = await response.json()
-      setScenarioData(data)
+
+      return {
+        id: operationId,
+        title: getOperationTitle(operationId),
+        data: JSON.stringify(data, null, 2),
+      }
+    } catch (error) {
+      console.error(`Error fetching data for operation ${operationId}:`, error)
+      return null
+    }
+  }
+
+  // Function to fetch all scenario data
+  const fetchAllScenarioData = async () => {
+    setIsLoading(true)
+
+    try {
+      // For now, if no operations are selected, fetch the default scenario
+      if (selectedOperations.length === 0) {
+        const defaultData =
+          await fetchScenarioDataForOperation("removing-flow-reqs")
+        setScenarioDataItems(defaultData ? [defaultData] : [])
+        return
+      }
+
+      // Fetch data for each selected operation
+      const dataPromises = selectedOperations.map(fetchScenarioDataForOperation)
+      const results = await Promise.all(dataPromises)
+
+      // Filter out null results and update state
+      setScenarioDataItems(results.filter(Boolean) as ScenarioDataItem[])
     } catch (error) {
       console.error("Error fetching scenario data:", error)
+      setScenarioDataItems([])
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -222,8 +283,8 @@ const CombinedPanelContent = () => {
               // Enter exploratory mode - shrink the question summary
               setExploratoryMode(true)
 
-              // Fetch the scenario data
-              fetchScenarioData()
+              // Fetch the scenario data for all selected operations
+              fetchAllScenarioData()
 
               // Scroll to scenario results
               const element = document.getElementById("scenario-results")
@@ -394,7 +455,14 @@ const CombinedPanelContent = () => {
             </Typography>
           </Box>
 
-          {/* 3x3 Grid of Cards using CSS Grid */}
+          {/* Loading indicator */}
+          {isLoading && (
+            <Box sx={{ p: theme.spacing(2), textAlign: "center" }}>
+              <Typography>Loading scenario data...</Typography>
+            </Box>
+          )}
+
+          {/* Scenario Cards Grid */}
           <Box
             sx={{
               p: theme.spacing(2),
@@ -407,22 +475,36 @@ const CombinedPanelContent = () => {
               gap: theme.spacing(3),
             }}
           >
-            {/* First scenario card with data */}
-            <ScenarioCard
-              key="scenario-1"
-              scenarioNumber={1}
-              title="Scenario 1"
-              data={scenarioData ? JSON.stringify(scenarioData, null, 2) : null}
-            />
-
-            {/* Remaining cards */}
-            {scenarios.slice(1).map((scenario) => (
+            {/* Display a card for each operation with data */}
+            {scenarioDataItems.map((item, index) => (
               <ScenarioCard
-                key={scenario.id}
-                scenarioNumber={scenario.id}
-                title={scenario.title}
+                key={`scenario-${item.id}`}
+                scenarioNumber={index + 1}
+                title={item.title}
+                data={item.data}
               />
             ))}
+
+            {/* If no data yet, show placeholder cards */}
+            {scenarioDataItems.length === 0 && !isLoading && (
+              <>
+                <ScenarioCard
+                  key="scenario-placeholder-1"
+                  scenarioNumber={1}
+                  title="Scenario 1"
+                />
+                <ScenarioCard
+                  key="scenario-placeholder-2"
+                  scenarioNumber={2}
+                  title="Scenario 2"
+                />
+                <ScenarioCard
+                  key="scenario-placeholder-3"
+                  scenarioNumber={3}
+                  title="Scenario 3"
+                />
+              </>
+            )}
           </Box>
         </Box>
       </BasePanel>
