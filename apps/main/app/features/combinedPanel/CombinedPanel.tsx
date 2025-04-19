@@ -16,7 +16,10 @@ import {
 } from "@repo/ui/mui"
 import { BasePanel, Card } from "@repo/ui"
 import { QuestionBuilderProvider } from "../questionBuilder/context/QuestionBuilderContext"
-import { ScenarioCard } from "../scenarioResults/components"
+import {
+  ScenarioCard,
+  SortableScenarioCard,
+} from "../scenarioResults/components"
 import {
   QuestionSummary,
   OperationsSelector,
@@ -25,6 +28,12 @@ import {
 } from "../questionBuilder/components"
 import { useQuestionBuilderHelpers } from "../questionBuilder/hooks/useQuestionBuilderHelpers"
 import { useTranslation } from "@repo/i18n"
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core"
+import {
+  arrayMove,
+  SortableContext,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable"
 
 // Type for scenario data
 interface ScenarioDataItem {
@@ -86,6 +95,8 @@ const CombinedPanelContent = () => {
   const [scenarioDataItems, setScenarioDataItems] = useState<
     ScenarioDataItem[]
   >([])
+  // State for controlling the order of scenario cards
+  const [scenarioOrder, setScenarioOrder] = useState<string[]>([])
   // Currently selected metric type to display
   const [selectedMetric, setSelectedMetric] = useState<string>("DELTA_OUTFLOW")
   // Loading state
@@ -301,7 +312,13 @@ const CombinedPanelContent = () => {
       if (selectedOperations.length === 0) {
         const defaultData =
           await fetchScenarioDataForOperation("removing-flow-reqs")
-        setScenarioDataItems(defaultData ? [defaultData] : [])
+        if (defaultData) {
+          setScenarioDataItems([defaultData])
+          setScenarioOrder([defaultData.id])
+        } else {
+          setScenarioDataItems([])
+          setScenarioOrder([])
+        }
         return
       }
 
@@ -310,12 +327,28 @@ const CombinedPanelContent = () => {
       const results = await Promise.all(dataPromises)
 
       // Filter out null results and update state
-      setScenarioDataItems(results.filter(Boolean) as ScenarioDataItem[])
+      const filteredResults = results.filter(Boolean) as ScenarioDataItem[]
+      setScenarioDataItems(filteredResults)
+      setScenarioOrder(filteredResults.map((item) => item.id))
     } catch (error) {
       console.error("Error fetching scenario data:", error)
       setScenarioDataItems([])
+      setScenarioOrder([])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Handle drag end event for reordering scenario cards
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      setScenarioOrder((items) => {
+        const oldIndex = items.indexOf(active.id.toString())
+        const newIndex = items.indexOf(over.id.toString())
+        return arrayMove(items, oldIndex, newIndex)
+      })
     }
   }
 
@@ -632,6 +665,21 @@ const CombinedPanelContent = () => {
             <Typography variant="body1" gutterBottom>
               {t("scenarioResults.description")}
             </Typography>
+            {scenarioDataItems.length > 1 && (
+              <Typography
+                variant="body2"
+                sx={{
+                  mt: 1,
+                  fontStyle: "italic",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <span style={{ marginRight: "5px", fontSize: "16px" }}>💡</span>
+                Tip: You can drag and drop cards using the handle (⋮⋮) to
+                reorder and compare them side by side.
+              </Typography>
+            )}
           </Box>
 
           {/* Loading indicator */}
@@ -641,59 +689,77 @@ const CombinedPanelContent = () => {
             </Box>
           )}
 
-          {/* Scenario Cards Grid */}
-          <Box
-            sx={{
-              p: theme.spacing(2),
-              pb: theme.spacing(6),
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr", // 1 column on mobile
-                sm: "repeat(2, 1fr)", // 2 columns on tablet
-                md: "repeat(3, 1fr)", // 3 columns on desktop (3x3 grid)
-              },
-              gap: theme.spacing(4),
-            }}
+          {/* Scenario Cards Grid with Drag and Drop */}
+          <DndContext
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {/* Display a card for each operation with data */}
-            {scenarioDataItems.map((item, index) => (
-              <ScenarioCard
-                key={`scenario-${item.id}`}
-                scenarioNumber={index + 1}
-                title={item.title}
-                data={item.data}
-                metricType={item.metricType}
-              />
-            ))}
-
-            {/* If no data yet, show placeholder cards */}
-            {scenarioDataItems.length === 0 && !isLoading && (
-              <Box
-                sx={{
-                  gridColumn: "1 / -1",
-                  p: theme.spacing(4),
-                  textAlign: "center",
-                  border: "1px dashed #ccc",
-                  borderRadius: "8px",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  No scenario data available
-                </Typography>
-                <Typography variant="body1">
-                  {selectedOperations.length === 0
-                    ? "Please select at least one operation and click Search"
-                    : `No data found for the selected operations with metric: ${selectedMetric}`}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ mt: 2, color: "text.secondary" }}
+            <Box
+              sx={{
+                p: theme.spacing(2),
+                pb: theme.spacing(6),
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr", // 1 column on mobile
+                  sm: "repeat(2, 1fr)", // 2 columns on tablet
+                  md: "repeat(3, 1fr)", // 3 columns on desktop (3x3 grid)
+                },
+                gap: theme.spacing(4),
+              }}
+            >
+              {scenarioDataItems.length > 0 && !isLoading ? (
+                <SortableContext
+                  items={scenarioOrder}
+                  strategy={rectSortingStrategy}
                 >
-                  Try selecting different operations or another metric
-                </Typography>
-              </Box>
-            )}
-          </Box>
+                  {scenarioOrder.map((itemId) => {
+                    const item = scenarioDataItems.find(
+                      (item) => item.id === itemId,
+                    )
+                    if (!item) return null
+
+                    return (
+                      <SortableScenarioCard
+                        key={`sortable-scenario-${item.id}`}
+                        id={item.id}
+                        scenarioNumber={scenarioOrder.indexOf(item.id) + 1}
+                        title={item.title}
+                        data={item.data}
+                        metricType={item.metricType}
+                      />
+                    )
+                  })}
+                </SortableContext>
+              ) : (
+                !isLoading && (
+                  <Box
+                    sx={{
+                      gridColumn: "1 / -1",
+                      p: theme.spacing(4),
+                      textAlign: "center",
+                      border: "1px dashed #ccc",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    <Typography variant="h6" gutterBottom>
+                      No scenario data available
+                    </Typography>
+                    <Typography variant="body1">
+                      {selectedOperations.length === 0
+                        ? "Please select at least one operation and click Search"
+                        : `No data found for the selected operations with metric: ${selectedMetric}`}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ mt: 2, color: "text.secondary" }}
+                    >
+                      Try selecting different operations or another metric
+                    </Typography>
+                  </Box>
+                )
+              )}
+            </Box>
+          </DndContext>
         </Box>
       </BasePanel>
     </Box>

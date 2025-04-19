@@ -88,12 +88,14 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         flexDirection: "column",
         alignItems: "flex-start",
         p: theme.spacing(2),
+        pt: theme.spacing(4),
         transition: "all 0.2s ease-in-out",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
         },
         overflow: "auto",
+        position: "relative",
       }}
     >
       <Typography variant="h6" sx={{ mb: 1 }}>
