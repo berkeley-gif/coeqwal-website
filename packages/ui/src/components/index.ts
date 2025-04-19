@@ -1,22 +1,27 @@
+/**
+ * Custom components exports file.
+ * Organized by category for ease of use.
+ */
+
+// Navigation components
 export { Header } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { LearnMoreButton } from "./navigation/LearnMoreButton"
-export { Card } from "./common/Card"
+export { MiniDrawer } from "./navigation/MiniDrawer"
+export { VerticalDivider } from "./navigation/VerticalDivider"
+export { ScrollDownIcon } from "./navigation/ScrollDownIcon"
 export { default as CustomArrowForwardIcon } from "./navigation/CustomArrowForwardIcon"
 
-export * from "../mui-components"
-export * from "./panels/index"
-export * from "./navigation/index"
-export * from "./common/index"
-
+// Common components
+export { Card } from "./common/Card"
+export { Logo } from "./common/Logo"
 export { TransitionDiv } from "./common/TransitionDiv"
+export { TransitionHeadline } from "./common/TransitionHeadline"
+export { VideoBackground } from "./common/VideoBackground"
 
-export { MiniDrawer, VerticalDivider, ScrollDownIcon } from "./navigation/index"
-
-export {
-  BasePanel,
-  HeroPanel,
-  TwoColumnPanel,
-  VideoPanel,
-} from "./panels/index"
-export type { BasePanelProps } from "./panels/index"
+// Panel components
+export { BasePanel } from "./panels/BasePanel"
+export { HeroPanel } from "./panels/HeroPanel"
+export { HeroQuestionsPanel } from "./panels/HeroQuestionsPanel"
+export { TwoColumnPanel } from "./panels/TwoColumnPanel"
+export { VideoPanel } from "./panels/VideoPanel"

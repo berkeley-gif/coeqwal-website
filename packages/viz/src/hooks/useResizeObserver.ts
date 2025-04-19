@@ -28,17 +28,21 @@ export function useResizeObserver<T extends HTMLElement>(
       if (!Array.isArray(entries) || !entries.length) return
 
       const entry = entries[0]
+      if (!entry) return // Exit if entry is undefined
 
       // Get dimensions from content rect or bounding client rect
       let width, height
 
-      if ("contentRect" in entry) {
+      if ("contentRect" in entry && entry.contentRect) {
         width = entry.contentRect.width
         height = entry.contentRect.height
-      } else {
+      } else if (entry.target) {
         const rect = (entry.target as HTMLElement).getBoundingClientRect()
         width = rect.width
         height = rect.height
+      } else {
+        // Exit if we can't get dimensions
+        return
       }
 
       setDimensions({ width, height })

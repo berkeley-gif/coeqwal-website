@@ -1,7 +1,7 @@
 "use client"
 
 import { Grid, GridProps, Typography } from "@mui/material"
-import { BasePanel, BasePanelProps } from "./index"
+import { BasePanel, type BasePanelProps } from "./BasePanel"
 
 interface TwoColumnPanelProps extends BasePanelProps {
   leftContent?: React.ReactNode

@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@mui/material"
-import { BasePanel, BasePanelProps } from "./index"
+import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { VideoBackground } from "../common/VideoBackground"
 import theme from "../../themes/theme"
 

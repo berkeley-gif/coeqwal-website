@@ -6,7 +6,7 @@ import {
   SwapHorizIcon,
   BarChartIcon,
   SlideshowIcon,
-} from "@repo/ui"
+} from "@repo/ui/mui"
 
 interface NavItem {
   text: string

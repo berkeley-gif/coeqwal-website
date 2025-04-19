@@ -1,7 +1,0 @@
-export * from "./MiniDrawer"
-export * from "./VerticalDivider"
-export * from "./Header"
-export * from "./LanguageSwitcher"
-export * from "./LearnMoreButton"
-export * from "./CustomArrowForwardIcon"
-export * from "./ScrollDownIcon"

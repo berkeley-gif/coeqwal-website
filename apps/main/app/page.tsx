@@ -2,15 +2,14 @@
 
 import React, { useState, useRef } from "react"
 import dynamic from "next/dynamic"
-import { Box, Typography, Stack } from "@repo/ui/mui"
 import {
-  Header,
-  MiniDrawer,
-  VerticalDivider,
+  Box,
+  Typography,
+  Stack,
   KeyboardArrowDownIcon,
   VisibilityIcon,
-  LearnMoreButton,
-} from "@repo/ui"
+} from "@repo/ui/mui"
+import { Header, MiniDrawer, VerticalDivider, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { HeroQuestionsPanel, BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
