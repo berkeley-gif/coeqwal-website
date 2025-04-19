@@ -31,10 +31,12 @@ interface ScenarioDataItem {
   id: string
   title: string
   data: string | null
+  metricType?: string
 }
 
 // Operation to scenario ID mapping
 const operationToScenarioId: Record<string, string> = {
+  "current-operations": "baseline",
   "removing-flow-reqs": "s0011",
   "sjr-flow-reqs": "s0012",
   "sac-flow-reqs": "s0013",
@@ -45,6 +47,27 @@ const operationToScenarioId: Record<string, string> = {
   "new-storage": "s0018",
   "groundwater-recharge": "s0019",
 }
+
+// Available metrics for visualization
+const AVAILABLE_METRICS = [
+  "DELTA_OUTFLOW",
+  "EXPORTS",
+  "SOD_URBAN",
+  "NOD_URBAN",
+  "SOD_AG",
+  "NOD_AG",
+  "SJR_FLOW",
+  "SAC_FLOW",
+  "STORAGE",
+  "TOTAL",
+  "INFLOW",
+  "CHANNEL",
+  "PUMPING",
+  "ELEVATION",
+  "REFUGE",
+  "SHORTAGE",
+  "X2",
+]
 
 // Content component that uses the context
 const CombinedPanelContent = () => {
@@ -63,6 +86,8 @@ const CombinedPanelContent = () => {
   const [scenarioDataItems, setScenarioDataItems] = useState<
     ScenarioDataItem[]
   >([])
+  // Currently selected metric type to display
+  const [selectedMetric, setSelectedMetric] = useState<string>("DELTA_OUTFLOW")
   // Loading state
   const [isLoading, setIsLoading] = useState(false)
 
@@ -127,14 +152,114 @@ const CombinedPanelContent = () => {
     // Get the scenario ID for this operation
     const scenarioId = operationToScenarioId[operationId] || "s0011" // Default to s0011 if no mapping exists
 
+    // Log which operation and file pattern we're looking for
+    console.log(
+      `Looking for data for operation: ${operationId} (scenario ID: ${scenarioId}) with metric: ${selectedMetric}`,
+    )
+
     try {
-      const response = await fetch(
-        `/scenario_data/categorized_deciles/coeqwal_${scenarioId}_adjBL_wTUCP_DV_v0.0_DELTA_OUTFLOW.json`,
+      // Special case for current-operations/baseline
+      if (operationId === "current-operations") {
+        // Try multiple baseline naming patterns
+        const baselinePatterns = [
+          `/scenario_data/categorized_deciles/baseline_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/baseline_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/coeqwal_baseline_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/current_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/existing_${selectedMetric}.json`,
+          // Add more patterns that match the naming conventions in your data
+          `/scenario_data/categorized_deciles/coeqwal_baseline_adjBL_wTUCP_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/coeqwal_baseline_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/baseline_adjBL_wTUCP_DV_v0.0_${selectedMetric}.json`,
+        ]
+
+        // Try each pattern
+        for (const pattern of baselinePatterns) {
+          try {
+            const response = await fetch(pattern)
+            if (response.ok) {
+              const data = await response.json()
+              return {
+                id: operationId,
+                title: "Current Operations",
+                data: JSON.stringify(data, null, 2),
+                metricType: selectedMetric,
+              }
+            }
+          } catch (e) {
+            // Silently continue to next pattern
+          }
+        }
+
+        // If no baseline file found, try using s0011 as a substitute for current operations
+        // This is a common convention where s0011 represents the baseline or near-baseline scenario
+        console.warn(
+          `No baseline file found, using s0011 as substitute for current operations`,
+        )
+
+        try {
+          const response = await fetch(
+            `/scenario_data/categorized_deciles/coeqwal_s0011_adjBL_wTUCP_DV_v0.0_${selectedMetric}.json`,
+          )
+
+          if (response.ok) {
+            const data = await response.json()
+            return {
+              id: operationId,
+              title: "Current Operations (s0011)",
+              data: JSON.stringify(data, null, 2),
+              metricType: selectedMetric,
+            }
+          }
+        } catch {
+          // Silently handle errors
+        }
+
+        // If we reach here, none of the patterns worked
+        console.error(
+          `No data file found for current operations with metric ${selectedMetric}`,
+        )
+        return null
+      }
+
+      // Regular operation scenario handling
+      // Try to fetch the data for the selected metric
+      let response = await fetch(
+        `/scenario_data/categorized_deciles/coeqwal_${scenarioId}_adjBL_wTUCP_DV_v0.0_${selectedMetric}.json`,
       )
 
+      // If file doesn't exist, try different file naming patterns
       if (!response.ok) {
-        console.error(`Failed to fetch data for operation ${operationId}`)
-        return null
+        // List of common patterns to try
+        const patterns = [
+          `/scenario_data/categorized_deciles/${scenarioId}_adj_SGMApump_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/coeqwal_${scenarioId}_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/${scenarioId}_DV_v0.0_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/coeqwal_${scenarioId}_${selectedMetric}.json`,
+          `/scenario_data/categorized_deciles/${scenarioId}_${selectedMetric}.json`,
+        ]
+
+        // Try each pattern
+        let patternFound = false
+        for (const pattern of patterns) {
+          try {
+            const patternResponse = await fetch(pattern)
+            if (patternResponse.ok) {
+              response = patternResponse
+              patternFound = true
+              break
+            }
+          } catch (e) {
+            // Silently continue to next pattern
+          }
+        }
+
+        if (!patternFound) {
+          console.error(
+            `No data file found for operation ${operationId} with metric ${selectedMetric}`,
+          )
+          return null
+        }
       }
 
       const data = await response.json()
@@ -143,6 +268,7 @@ const CombinedPanelContent = () => {
         id: operationId,
         title: getOperationTitle(operationId),
         data: JSON.stringify(data, null, 2),
+        metricType: selectedMetric,
       }
     } catch (error) {
       console.error(`Error fetching data for operation ${operationId}:`, error)
@@ -154,8 +280,24 @@ const CombinedPanelContent = () => {
   const fetchAllScenarioData = async () => {
     setIsLoading(true)
 
+    console.log("Checking available metrics for operations...")
+
+    // Check if s0011 file exists for different metrics as a test
+    const testMetrics = ["DELTA_OUTFLOW", "SOD_URBAN", "EXPORTS"]
+    for (const metric of testMetrics) {
+      const testUrl = `/scenario_data/categorized_deciles/coeqwal_s0011_adjBL_wTUCP_DV_v0.0_${metric}.json`
+      try {
+        const response = await fetch(testUrl, { method: "HEAD" })
+        console.log(
+          `File check: ${testUrl} - ${response.ok ? "EXISTS" : "NOT FOUND"}`,
+        )
+      } catch (e) {
+        console.log(`File check error: ${testUrl} - ${(e as Error).message}`)
+      }
+    }
+
     try {
-      // For now, if no operations are selected, fetch the default scenario
+      // If no operations are selected, fetch the default scenario
       if (selectedOperations.length === 0) {
         const defaultData =
           await fetchScenarioDataForOperation("removing-flow-reqs")
@@ -447,10 +589,47 @@ const CombinedPanelContent = () => {
         >
           {/* Header row */}
           <Box sx={{ p: theme.spacing(2) }}>
-            <Typography variant="h4" gutterBottom>
-              {t("scenarioResults.title")}
-            </Typography>
-            <Typography variant="body1">
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h4">{t("scenarioResults.title")}</Typography>
+
+              {/* Metric selector */}
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Typography variant="body1" sx={{ mr: 2 }}>
+                  Metric:
+                </Typography>
+                <select
+                  value={selectedMetric}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    setSelectedMetric(e.target.value)
+                    // Refetch data with the new metric when changed
+                    if (scenarioDataItems.length > 0) {
+                      fetchAllScenarioData()
+                    }
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    fontSize: "1rem",
+                    minWidth: "180px",
+                  }}
+                >
+                  {AVAILABLE_METRICS.map((metric) => (
+                    <option key={metric} value={metric}>
+                      {metric.replace(/_/g, " ")}
+                    </option>
+                  ))}
+                </select>
+              </Box>
+            </Box>
+            <Typography variant="body1" gutterBottom>
               {t("scenarioResults.description")}
             </Typography>
           </Box>
@@ -466,13 +645,14 @@ const CombinedPanelContent = () => {
           <Box
             sx={{
               p: theme.spacing(2),
+              pb: theme.spacing(6),
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr", // 1 column on mobile
                 sm: "repeat(2, 1fr)", // 2 columns on tablet
                 md: "repeat(3, 1fr)", // 3 columns on desktop (3x3 grid)
               },
-              gap: theme.spacing(3),
+              gap: theme.spacing(4),
             }}
           >
             {/* Display a card for each operation with data */}
@@ -482,28 +662,36 @@ const CombinedPanelContent = () => {
                 scenarioNumber={index + 1}
                 title={item.title}
                 data={item.data}
+                metricType={item.metricType}
               />
             ))}
 
             {/* If no data yet, show placeholder cards */}
             {scenarioDataItems.length === 0 && !isLoading && (
-              <>
-                <ScenarioCard
-                  key="scenario-placeholder-1"
-                  scenarioNumber={1}
-                  title="Scenario 1"
-                />
-                <ScenarioCard
-                  key="scenario-placeholder-2"
-                  scenarioNumber={2}
-                  title="Scenario 2"
-                />
-                <ScenarioCard
-                  key="scenario-placeholder-3"
-                  scenarioNumber={3}
-                  title="Scenario 3"
-                />
-              </>
+              <Box
+                sx={{
+                  gridColumn: "1 / -1",
+                  p: theme.spacing(4),
+                  textAlign: "center",
+                  border: "1px dashed #ccc",
+                  borderRadius: "8px",
+                }}
+              >
+                <Typography variant="h6" gutterBottom>
+                  No scenario data available
+                </Typography>
+                <Typography variant="body1">
+                  {selectedOperations.length === 0
+                    ? "Please select at least one operation and click Search"
+                    : `No data found for the selected operations with metric: ${selectedMetric}`}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 2, color: "text.secondary" }}
+                >
+                  Try selecting different operations or another metric
+                </Typography>
+              </Box>
             )}
           </Box>
         </Box>

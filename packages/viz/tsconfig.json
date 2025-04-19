@@ -6,7 +6,9 @@
     "emitDeclarationOnly": true,
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
-    "module": "ESNext"
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "esModuleInterop": true
   },
   "include": ["src/**/*", "hooks/**/*", "context/**/*"],
   "exclude": ["node_modules", "dist"]
