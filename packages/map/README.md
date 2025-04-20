@@ -417,7 +417,7 @@ export function MapComponent() {
 
   return (
     <Map
-      mapboxAccessToken={mapboxToken}
+      mapboxToken={mapboxToken}
       // other props...
     />
   )

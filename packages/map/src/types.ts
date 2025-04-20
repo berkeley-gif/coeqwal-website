@@ -3,6 +3,9 @@ import type { Map as MapboxMap } from "mapbox-gl"
 // import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox'
 import type { ReactNode, RefObject, CSSProperties } from "react"
 
+// Import MarkerProperties type
+import { MarkerProperties } from "./markers"
+
 /**
  * Reference to Mapbox GL map instance wrapper
  */
@@ -214,6 +217,18 @@ export interface MapOperationsAPI {
    * Set a layout property for a layer
    */
   setLayoutProperty: (id: string, property: string, value: StyleValue) => void
+
+  /**
+   * Set markers on the map
+   * @param markers Array of marker properties to display on the map
+   */
+  setMarkers?: (markers: MarkerProperties[]) => void
+
+  /**
+   * Set React motion children to be rendered with AnimatePresence
+   * @param children React nodes to render with motion/animation
+   */
+  setMotionChildren?: (children: ReactNode) => void
 }
 
 /**
@@ -229,7 +244,7 @@ export type StateManagementMode = "uncontrolled" | "react" | "zustand"
  */
 export interface MapProps {
   /** Mapbox access token (required) */
-  mapboxAccessToken: string
+  mapboxToken: string
 
   /** Map style URL */
   mapStyle?: string
@@ -274,3 +289,78 @@ export interface MapProps {
    */
   [key: string]: unknown
 }
+
+/**
+ * Predefined map view transitions
+ */
+export const MapTransitions = {
+  /**
+   * Smooth transition with medium duration
+   */
+  SMOOTH: {
+    duration: 2000,
+    easing: (t: number) => t * (2 - t), // Ease out quad
+    essential: true,
+  },
+
+  /**
+   * Quick transition with shorter duration
+   */
+  QUICK: {
+    duration: 1000,
+    easing: (t: number) => t * (2 - t),
+    essential: true,
+  },
+
+  /**
+   * Gradual transition with longer duration
+   */
+  GRADUAL: {
+    duration: 3500,
+    easing: (t: number) => t * (2 - t),
+    essential: true,
+  },
+
+  /**
+   * Linear transition without easing
+   */
+  LINEAR: {
+    duration: 2000,
+    easing: (t: number) => t,
+    essential: true,
+  },
+
+  /**
+   * Dramatic transition that zooms out slightly then in
+   */
+  DRAMATIC: {
+    duration: 3500,
+    easing: (t: number) => {
+      // Custom curve that zooms out slightly then in
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+    },
+    essential: true,
+  },
+
+  /**
+   * Aerial view transition with high pitch
+   */
+  AERIAL: {
+    duration: 2800,
+    easing: (t: number) => 1 - Math.pow(1 - t, 3), // Ease out cubic
+    essential: true,
+    pitch: 60, // High pitch for 3D perspective
+  },
+
+  /**
+   * Cinematic transition with rotation and tilt
+   */
+  CINEMATIC: {
+    duration: 4000,
+    easing: (t: number) =>
+      t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, // Ease in-out quad
+    essential: true,
+    bearing: 30, // Slight rotation
+    pitch: 45, // Tilt
+  },
+} as const

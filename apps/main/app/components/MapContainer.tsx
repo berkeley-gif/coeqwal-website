@@ -37,7 +37,7 @@ export default function MapContainer({
     // for the actions to use directly
     if (mapRef.current && !initialized.current) {
       // Register the map instance with our custom actions
-      mapActions.registerMapInstance(mapRef.current)
+      mapActions.registerMapInstance(mapRef.current as any)
       initialized.current = true
     }
   }, [uncontrolledRef, mapRef])
@@ -46,7 +46,11 @@ export default function MapContainer({
   useEffect(() => {
     if (viewState && onViewStateChange) {
       // Only sync if component is controlled (has both props)
-      mapState.onViewStateChange(viewState)
+      mapState.onViewStateChange({
+        ...viewState,
+        bearing: viewState.bearing ?? 0,
+        pitch: viewState.pitch ?? 0,
+      })
     }
   }, [viewState, onViewStateChange, mapState])
 
@@ -60,13 +64,17 @@ export default function MapContainer({
       }}
     >
       <Map
-        mapboxAccessToken={mapboxToken}
+        mapboxToken={mapboxToken}
         // Prefer global state from Zustand, fall back to local state
         viewState={mapState.viewState}
         initialViewState={mapState.viewState}
-        onMove={(evt) => {
+        onMove={(evt: { viewState: ViewState }) => {
           // Update global state first
-          mapState.onViewStateChange(evt.viewState)
+          mapState.onViewStateChange({
+            ...evt.viewState,
+            bearing: evt.viewState.bearing ?? 0,
+            pitch: evt.viewState.pitch ?? 0,
+          })
 
           // For backward compatibility, also update local state
           if (onViewStateChange) {

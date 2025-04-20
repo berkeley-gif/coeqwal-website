@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useRef, useMemo } from "react"
+import { createContext, useContext, useRef, useMemo, useState } from "react"
 import {
   MapboxMapRef,
   ViewState,
@@ -15,6 +15,10 @@ import type {
   LayerSpecification,
   PaddingOptions,
 } from "mapbox-gl"
+import type { MarkerProperties } from "../src/markers"
+import type { ReactNode } from "react"
+import { MarkersLayer } from "../src/markers"
+import { AnimatePresence } from "@repo/motion"
 
 // Default value for the context (used for type safety)
 const defaultMapOperations: MapOperationsAPI = {
@@ -30,6 +34,8 @@ const defaultMapOperations: MapOperationsAPI = {
   setLayerProperty: () => {},
   setPaintProperty: () => {},
   setLayoutProperty: () => {},
+  setMarkers: () => {},
+  setMotionChildren: () => {},
 }
 
 // Create the context with default values
@@ -47,6 +53,10 @@ type MapProviderProps = React.PropsWithChildren
 export const MapProvider = ({ children }: MapProviderProps) => {
   // Create a ref to store the map instance
   const mapRef = useRef<MapboxMapRef | null>(null)
+
+  // Add state for markers and motion children
+  const [markers, setMarkersState] = useState<MarkerProperties[]>([])
+  const [motionChildren, setMotionChildrenState] = useState<ReactNode>(null)
 
   const mapOperations = useMemo<MapOperationsAPI>(() => {
     return {
@@ -368,11 +378,36 @@ export const MapProvider = ({ children }: MapProviderProps) => {
           }
         }
       },
+
+      /**
+       * Set markers on the map
+       * @param newMarkers Array of marker properties to display
+       */
+      setMarkers: (newMarkers: MarkerProperties[]) => {
+        setMarkersState(newMarkers)
+      },
+
+      /**
+       * Set React motion children to be rendered with AnimatePresence
+       * @param children React nodes to render with motion/animation
+       */
+      setMotionChildren: (newChildren: ReactNode) => {
+        setMotionChildrenState(newChildren)
+      },
     }
   }, [])
 
   return (
-    <MapContext.Provider value={mapOperations}>{children}</MapContext.Provider>
+    <MapContext.Provider value={mapOperations}>
+      {children}
+      {/* Render markers if any are set */}
+      {markers && markers.length > 0 && (
+        <MarkersLayer markers={markers} showPopups={true} />
+      )}
+
+      {/* Render any motion children with AnimatePresence */}
+      <AnimatePresence>{motionChildren}</AnimatePresence>
+    </MapContext.Provider>
   )
 }
 
