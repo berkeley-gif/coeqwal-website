@@ -1,193 +1,171 @@
 "use client"
 
-import React, { createContext, useContext, useRef, useState } from "react"
-import type { MapboxMapRef } from "../src/MapboxMap"
-import { ViewState } from "../src/types.js"
-// Import proper types from mapbox-gl
-import type {
-  Map as MapboxGLMap,
-  LayerSpecification,
-  SourceSpecification,
-} from "mapbox-gl"
+import { createContext, useContext, useRef, useMemo, useCallback } from "react"
+import { MapOperationsAPI, MapboxMapRef } from "../src/types"
 
-// Types for paint and layout properties
-type PaintProperty = string | number | boolean | object
-type LayoutProperty = string | number | boolean | object
+/**
+ * MapContext provides access to map operations from any component in the tree.
+ *
+ * It exposes:
+ * - Direct map access via mapRef
+ * - Helper methods for common operations
+ *
+ * Usage:
+ * const { flyTo, addLayer } = useMap();
+ */
+const MapContext = createContext<MapOperationsAPI | null>(null)
 
-interface MapContextValue {
-  mapRef: React.RefObject<MapboxMapRef | null>
-  viewState: ViewState
-  setViewState: (viewState: ViewState) => void
-  flyTo: (
-    longitude: number,
-    latitude: number,
-    zoom?: number,
-    pitch?: number,
-    bearing?: number,
-    duration?: number,
-  ) => void
+export interface MapProviderProps {
+  children: React.ReactNode
 }
 
-const MapContext = createContext<MapContextValue | null>(null)
-
-export function MapProvider({ children }: { children: React.ReactNode }) {
+export function MapProvider({ children }: MapProviderProps) {
+  // Create a ref to store the map instance
   const mapRef = useRef<MapboxMapRef>(null)
-  const [viewState, setViewState] = useState<ViewState>({
-    longitude: -122.4,
-    latitude: 37.8,
-    zoom: 10,
-    bearing: 0,
-    pitch: 0,
-  })
+
+  // Navigation helpers
+  const flyTo = useCallback(
+    (
+      longitude: number,
+      latitude: number,
+      zoom: number,
+      options?: { pitch?: number; bearing?: number; duration?: number },
+    ) => {
+      if (!mapRef.current?.getMap()) return
+
+      const map = mapRef.current.getMap()
+      map?.flyTo({
+        center: [longitude, latitude],
+        zoom,
+        pitch: options?.pitch,
+        bearing: options?.bearing,
+        duration: options?.duration,
+      })
+    },
+    [],
+  )
+
+  // Layer and source helpers
+  const addSource = useCallback(
+    (id: string, source: { type: string; [key: string]: any }) => {
+      if (!mapRef.current?.getMap()) return
+
+      const map = mapRef.current.getMap()
+      if (map && !map.getSource(id)) {
+        map.addSource(id, { ...source, id })
+      }
+    },
+    [],
+  )
+
+  const removeSource = useCallback((id: string) => {
+    if (!mapRef.current?.getMap()) return
+
+    const map = mapRef.current.getMap()
+    if (map && map.getSource(id)) {
+      // Remove any layers using this source first
+      map.getStyle().layers.forEach((layer: any) => {
+        if (layer.source === id) {
+          map.removeLayer(layer.id)
+        }
+      })
+      map.removeSource(id)
+    }
+  }, [])
+
+  const addLayer = useCallback(
+    (
+      id: string,
+      source: string,
+      type: string,
+      paint?: Record<string, any>,
+      layout?: Record<string, any>,
+    ) => {
+      if (!mapRef.current?.getMap()) return
+
+      const map = mapRef.current.getMap()
+      if (map && !map.getLayer(id)) {
+        map.addLayer({
+          id,
+          source,
+          type: type as any,
+          paint,
+          layout,
+        })
+      }
+    },
+    [],
+  )
+
+  const removeLayer = useCallback((id: string) => {
+    if (!mapRef.current?.getMap()) return
+
+    const map = mapRef.current.getMap()
+    if (map && map.getLayer(id)) {
+      map.removeLayer(id)
+    }
+  }, [])
+
+  // Styling helpers
+  const setLayerVisibility = useCallback((id: string, visible: boolean) => {
+    if (!mapRef.current?.getMap()) return
+
+    const map = mapRef.current.getMap()
+    if (map && map.getLayer(id)) {
+      map.setLayoutProperty(id, "visibility", visible ? "visible" : "none")
+    }
+  }, [])
+
+  const setLayerProperty = useCallback(
+    (id: string, property: string, value: any) => {
+      if (!mapRef.current?.getMap()) return
+
+      const map = mapRef.current.getMap()
+      if (map && map.getLayer(id)) {
+        // Determine if it's a paint or layout property
+        if (property.startsWith("paint.")) {
+          map.setPaintProperty(id, property.substring(6), value)
+        } else if (property.startsWith("layout.")) {
+          map.setLayoutProperty(id, property.substring(7), value)
+        }
+      }
+    },
+    [],
+  )
+
+  // Memoize all operations to prevent unnecessary re-renders
+  const mapOperations = useMemo<MapOperationsAPI>(
+    () => ({
+      mapRef,
+      flyTo,
+      addSource,
+      removeSource,
+      addLayer,
+      removeLayer,
+      setLayerVisibility,
+      setLayerProperty,
+    }),
+    [
+      flyTo,
+      addSource,
+      removeSource,
+      addLayer,
+      removeLayer,
+      setLayerVisibility,
+      setLayerProperty,
+    ],
+  )
 
   return (
-    <MapContext.Provider
-      value={{
-        mapRef,
-        viewState,
-        setViewState,
-        flyTo: (longitude, latitude, zoom, pitch, bearing, duration) => {
-          mapRef.current?.flyTo(
-            longitude,
-            latitude,
-            zoom,
-            pitch,
-            bearing,
-            duration,
-          )
-        },
-      }}
-    >
-      {children}
-    </MapContext.Provider>
+    <MapContext.Provider value={mapOperations}>{children}</MapContext.Provider>
   )
 }
 
-export const useMap = () => {
+// Hook to use the map anywhere in the component tree
+export function useMap() {
   const context = useContext(MapContext)
   if (!context) {
     throw new Error("useMap must be used within a MapProvider")
   }
-
-  const { mapRef, viewState, setViewState } = context
-
-  // Helper to get the underlying Mapbox GL map instance
-  // Simplified for react-map-gl v8
-  const getMapInstance = (): MapboxGLMap | null => {
-    if (!mapRef.current) return null
-    // In react-map-gl v8, we need to cast through unknown first to avoid type errors
-    return mapRef.current.getMap() as unknown as MapboxGLMap
-  }
-
-  return {
-    // Expose the map ref for direct access
-    mapRef,
-
-    // View state management
-    viewState,
-    setViewState,
-
-    // Direct map access with safety
-    withMap: <T = void,>(
-      callback: (map: MapboxGLMap) => T,
-      fallback?: T,
-    ): T => {
-      const map = getMapInstance()
-      return map ? callback(map) : (fallback as T)
-    },
-
-    // Common map operations
-    flyTo: (
-      longitude: number,
-      latitude: number,
-      zoom?: number,
-      pitch?: number,
-      bearing?: number,
-      duration?: number,
-    ) => {
-      if (!mapRef.current) return
-
-      mapRef.current.flyTo(longitude, latitude, zoom, pitch, bearing, duration)
-    },
-
-    // Add/remove layers
-    addLayer: (
-      layerId: string,
-      source: string,
-      type: string,
-      paint: Record<string, PaintProperty>,
-      layout?: Record<string, LayoutProperty>,
-    ) => {
-      const map = getMapInstance()
-      if (!map) return
-
-      if (!map.getLayer(layerId)) {
-        map.addLayer({
-          id: layerId,
-          source,
-          type: type as LayerSpecification["type"],
-          paint,
-          layout,
-        } as LayerSpecification)
-      }
-    },
-
-    removeLayer: (layerId: string) => {
-      const map = getMapInstance()
-      if (!map) return
-
-      if (map.getLayer(layerId)) {
-        map.removeLayer(layerId)
-      }
-    },
-
-    // Source management
-    addSource: (sourceId: string, source: SourceSpecification) => {
-      const map = getMapInstance()
-      if (!map) return
-
-      if (!map.getSource(sourceId)) {
-        map.addSource(sourceId, source)
-      }
-    },
-
-    removeSource: (sourceId: string) => {
-      const map = getMapInstance()
-      if (!map) return
-
-      if (map.getSource(sourceId)) {
-        map.removeSource(sourceId)
-      }
-    },
-
-    // Style properties
-    setPaintProperty: (
-      layerId: string,
-      property: string,
-      value: PaintProperty,
-    ) => {
-      const map = getMapInstance()
-      if (!map) return
-
-      // Use type assertion for the property name
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map.setPaintProperty(layerId, property as any, value)
-    },
-
-    setLayoutProperty: (
-      layerId: string,
-      property: string,
-      value: LayoutProperty,
-    ) => {
-      const map = getMapInstance()
-      if (!map) return
-
-      // Use type assertion for the property name
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map.setLayoutProperty(layerId, property as any, value)
-    },
-
-    // Get direct access to the map
-    getMap: getMapInstance,
-  }
+  return context
 }

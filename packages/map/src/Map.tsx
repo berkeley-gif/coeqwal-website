@@ -1,48 +1,123 @@
 "use client"
 
 import { useRef, useEffect } from "react"
-import { MapboxMap, type MapboxMapProps, type MapboxMapRef } from "./MapboxMap"
+import { Map as ReactMapGL } from "react-map-gl/mapbox"
+import { MapboxMapRef } from "./types"
 import { useMap } from "../context/MapContext"
-import type { ViewState } from "./types"
 
-// High-level context-based map
+/**
+ * A simple wrapper around ReactMapGL that connects to our MapContext.
+ *
+ * Features:
+ * - Automatically registers with context for global access
+ * - Supports all ReactMapGL props
+ * - Provides consistent styling defaults
+ */
+export interface MapProps {
+  /** Map style URL */
+  mapStyle?: string
+  /** Initial position */
+  initialViewState?: {
+    longitude: number
+    latitude: number
+    zoom: number
+    pitch?: number
+    bearing?: number
+  }
+  /** Map container width */
+  width?: string | number
+  /** Map container height */
+  height?: string | number
+  /** Map container style */
+  style?: React.CSSProperties
+  /** Map children (markers, popups, etc) */
+  children?: React.ReactNode
+  /** Called when map is loaded */
+  onLoad?: () => void
+  /** Any other ReactMapGL props */
+  [key: string]: any
+}
+
 export function Map({
-  viewState,
-  initialViewState,
-  onMove,
-  ...otherProps
+  mapStyle = "mapbox://styles/mapbox/streets-v12",
+  initialViewState = {
+    longitude: -98.5,
+    latitude: 39.8,
+    zoom: 3,
+  },
+  width = "100%",
+  height = "100%",
+  style,
+  onLoad,
+  children,
+  ...rest
 }: MapProps) {
-  const mapRef = useRef<MapboxMapRef>(null)
-  const { mapRef: ctxMapRef, setViewState } = useMap()
+  // Get the context ref and register this map instance
+  const { mapRef: contextMapRef } = useMap()
+  const internalMapRef = useRef<MapboxMapRef>(null)
 
-  // Connect local ref to the context so other components can call useMap()
+  // Create a container style that includes width and height
+  const containerStyle = {
+    width,
+    height,
+    borderRadius: "4px",
+    ...style,
+  }
+
+  // Connect internal ref to context ref
   useEffect(() => {
-    if (mapRef.current) {
-      ctxMapRef.current = mapRef.current
-    }
-  }, [ctxMapRef])
+    if (internalMapRef.current) {
+      // Provide custom methods for our MapboxMapRef
+      internalMapRef.current.getMap = () => {
+        // Access the internal mapbox instance
+        return (internalMapRef.current as any)?._getMap() || null
+      }
 
-  // Whenever the map changes in controlled mode, handle it
-  const handleViewStateChange = (newState: ViewState) => {
-    setViewState(newState)
-    onMove?.({ viewState: newState })
+      // Store reference in context ref
+      ;(contextMapRef as any).current = internalMapRef.current
+    }
+
+    // Cleanup
+    return () => {
+      if (contextMapRef) {
+        ;(contextMapRef as any).current = null
+      }
+    }
+  }, [contextMapRef])
+
+  // Handle map load with extended functionality
+  const handleLoad = () => {
+    // Call user's onLoad handler if provided
+    onLoad?.()
   }
 
   return (
-    <MapboxMap
-      ref={mapRef}
-      {...otherProps}
-      viewState={viewState}
+    <ReactMapGL
+      mapStyle={mapStyle}
       initialViewState={initialViewState}
-      onViewStateChange={handleViewStateChange}
-    />
-  )
-}
+      style={containerStyle}
+      reuseMaps
+      attributionControl={false}
+      ref={internalMapRef as any}
+      onLoad={handleLoad}
+      {...rest}
+    >
+      {/* Attribution in consistent position */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "4px",
+          right: "4px",
+          fontSize: "10px",
+          backgroundColor: "rgba(255, 255, 255, 0.7)",
+          padding: "2px 5px",
+          borderRadius: "3px",
+        }}
+      >
+        © Mapbox © OpenStreetMap
+      </div>
 
-export interface MapProps extends Omit<MapboxMapProps, "onViewStateChange"> {
-  // For controlled usage
-  viewState?: ViewState
-  initialViewState?: ViewState
-  // Custom callback
-  onMove?: (evt: { viewState: ViewState }) => void
+      {children}
+    </ReactMapGL>
+  )
 }

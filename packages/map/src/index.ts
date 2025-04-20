@@ -1,14 +1,28 @@
-// Primary Map API (context-based with full map access)
+// Main component
 export { Map } from "./Map"
+
+// Hooks
+export { useLocalMapState } from "./hooks/useLocalMapState"
+
+// Context
 export { MapProvider, useMap } from "../context/MapContext"
-export { Marker, Popup, MapTransitions } from "./MapboxMap"
 
 // Types
-export type { ViewState } from "./types"
-export type { MapProps, MarkerProperties } from "./MapboxMap"
+export type {
+  ViewState,
+  MapboxMapRef,
+  MapProps,
+  MapSource,
+  MapLayer,
+  MapOperationsAPI,
+} from "./types"
 
-// Legacy ref-based API (for advanced cases)
-export { MapboxMap } from "./MapboxMap"
-export type { MapboxMapRef } from "./MapboxMap"
-
-export type { Layer } from "mapbox-gl"
+// Re-export some ReactMapGL components for convenience
+export {
+  Marker,
+  Popup,
+  NavigationControl,
+  GeolocateControl,
+  Source,
+  Layer,
+} from "react-map-gl/mapbox"
