@@ -86,7 +86,7 @@ export function Map({
 
   return (
     <ReactMapGL
-      mapboxToken={mapboxToken}
+      mapboxAccessToken={mapboxToken}
       mapStyle={mapStyle}
       initialViewState={initialViewState}
       style={containerStyle}

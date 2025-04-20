@@ -8,17 +8,10 @@ import { Box } from "@repo/ui/mui"
 import { useMapState, mapActions } from "@repo/state/map"
 
 interface MapContainerProps {
-  // Props for backward compatibility
   uncontrolledRef?: React.RefObject<MapboxMapRef>
-  viewState?: ViewState
-  onViewStateChange?: (newViewState: ViewState) => void
 }
 
-export default function MapContainer({
-  uncontrolledRef,
-  viewState,
-  onViewStateChange,
-}: MapContainerProps) {
+export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const { mapRef } = useMap()
   const mapState = useMapState()
@@ -42,18 +35,6 @@ export default function MapContainer({
     }
   }, [uncontrolledRef, mapRef])
 
-  // For backward compatibility only - update global state when local state changes
-  useEffect(() => {
-    if (viewState && onViewStateChange) {
-      // Only sync if component is controlled (has both props)
-      mapState.onViewStateChange({
-        ...viewState,
-        bearing: viewState.bearing ?? 0,
-        pitch: viewState.pitch ?? 0,
-      })
-    }
-  }, [viewState, onViewStateChange, mapState])
-
   return (
     <Box
       sx={{
@@ -65,21 +46,14 @@ export default function MapContainer({
     >
       <Map
         mapboxToken={mapboxToken}
-        // Prefer global state from Zustand, fall back to local state
         viewState={mapState.viewState}
         initialViewState={mapState.viewState}
-        onMove={(evt: { viewState: ViewState }) => {
-          // Update global state first
+        onMoveEnd={(evt: { viewState: ViewState }) => {
           mapState.onViewStateChange({
             ...evt.viewState,
             bearing: evt.viewState.bearing ?? 0,
             pitch: evt.viewState.pitch ?? 0,
           })
-
-          // For backward compatibility, also update local state
-          if (onViewStateChange) {
-            onViewStateChange(evt.viewState)
-          }
         }}
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
         scrollZoom={false}
