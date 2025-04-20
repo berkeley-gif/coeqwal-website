@@ -16,10 +16,7 @@ import {
 } from "@repo/ui/mui"
 import { BasePanel, Card } from "@repo/ui"
 import { QuestionBuilderProvider } from "../questionBuilder/context/QuestionBuilderContext"
-import {
-  ScenarioCard,
-  SortableScenarioCard,
-} from "../scenarioResults/components"
+import { SortableScenarioCard } from "../scenarioResults/components"
 import {
   QuestionSummary,
   OperationsSelector,
@@ -305,8 +302,8 @@ const CombinedPanelContent = () => {
         console.log(
           `File check: ${testUrl} - ${response.ok ? "EXISTS" : "NOT FOUND"}`,
         )
-      } catch (e) {
-        console.log(`File check error: ${testUrl} - ${(e as Error).message}`)
+      } catch {
+        console.log(`File check error: ${testUrl}`)
       }
     }
 

@@ -43,7 +43,6 @@ const OutcomesSelector: React.FC = () => {
     state: { swapped, selectedOutcomes, showMap, isExploratoryMode },
     handleOutcomeChange,
     toggleMap,
-    toggleClimate,
     resetOutcomes,
     setExploratoryMode,
   } = useQuestionBuilderHelpers()
@@ -68,11 +67,6 @@ const OutcomesSelector: React.FC = () => {
     exitExploratoryMode()
     toggleMap()
   }, [exitExploratoryMode, toggleMap])
-
-  // const toggleClimateWithExit = useCallback(() => {
-  //   exitExploratoryMode()
-  //   toggleClimate()
-  // }, [exitExploratoryMode, toggleClimate])
 
   const resetOutcomesWithExit = useCallback(() => {
     exitExploratoryMode()
