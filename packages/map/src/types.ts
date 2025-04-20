@@ -200,4 +200,6 @@ export interface MapOperationsAPI {
   // Styling
   setLayerVisibility: (id: string, visible: boolean) => void
   setLayerProperty: (id: string, property: string, value: StyleValue) => void
+  setPaintProperty: (id: string, property: string, value: StyleValue) => void
+  setLayoutProperty: (id: string, property: string, value: StyleValue) => void
 }
