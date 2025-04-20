@@ -31,7 +31,7 @@ Example key files and their roles:
 
 ## 2. Installation & Setup
 
-In your project’s root folder, ensure dependencies are installed by running:
+In your project's root folder, ensure dependencies are installed by running:
 
 ```bash
 pnpm install
@@ -121,7 +121,7 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
 
 ## 4. Using the Map in a Page
 
-In your Next.js page (e.g., `app/page.tsx`), you can either control the map’s view state locally or let it manage its own. Below is a pair of examples:
+In your Next.js page (e.g., `app/page.tsx`), you can either control the map's view state locally or let it manage its own. Below is a pair of examples:
 
 ### Uncontrolled Map (Ref-based)
 
@@ -238,7 +238,7 @@ If you need lower-level access to methods like `addLayer`, `addSource`, or raw m
    })
    ```
 
-Both let you work with the Mapbox GL instance once it’s loaded.
+Both let you work with the Mapbox GL instance once it's loaded.
 
 ---
 
@@ -259,3 +259,144 @@ Version Compatibility:
 - Compatible with react-map-gl v8.x
 - Compatible with mapbox-gl v3.x
 - No need for @types/mapbox-gl (mapbox-gl includes its own types)
+
+## Map Navigation
+
+### Using the flyTo Method
+
+The `flyTo` method provides a smooth animated transition to a specific location on the map. It supports two calling patterns:
+
+#### Pattern 1: Individual Coordinates
+
+```typescript
+flyTo(
+  longitude: number,
+  latitude: number,
+  zoom: number,
+  pitch?: number,
+  bearing?: number,
+  transitionOptions?: { duration?: number, easing?: Function, essential?: boolean }
+)
+```
+
+Example usage:
+
+```typescript
+// Basic usage with just coordinates and zoom
+mapOperations.flyTo(-122.4, 37.8, 12)
+
+// With camera angle (pitch and bearing)
+mapOperations.flyTo(-122.4, 37.8, 12, 60, 45)
+
+// With transition options
+mapOperations.flyTo(-122.4, 37.8, 12, 60, 45, {
+  duration: 3000, // Animation duration in milliseconds
+  essential: true, // Whether this animation is considered essential
+  easing: (t) => t * t, // Custom easing function
+})
+
+// You can also skip camera angles and just provide transition options
+mapOperations.flyTo(-122.4, 37.8, 12, {
+  duration: 3000,
+})
+```
+
+#### Pattern 2: ViewState Object
+
+```typescript
+flyTo(viewState: { longitude: number, latitude: number, zoom: number, pitch?: number, bearing?: number, transitionOptions?: object })
+```
+
+Example usage:
+
+```typescript
+// Flying to a location with a view state object
+mapOperations.flyTo({
+  longitude: -122.4,
+  latitude: 37.8,
+  zoom: 12,
+  pitch: 60, // Camera tilt in degrees
+  bearing: 45, // Map rotation in degrees
+  transitionOptions: {
+    duration: 3000, // Animation duration in milliseconds
+    easing: (t) => t * t, // Custom easing function
+  },
+})
+```
+
+### Using the fitBounds Method
+
+The `fitBounds` method adjusts the map view to fit a specific geographic bounds. It's ideal when you need to ensure that certain geographic features are entirely visible.
+
+#### Pattern 1: Bounds Array
+
+```typescript
+fitBounds(
+  bounds: [[number, number], [number, number]], // [[sw_lng, sw_lat], [ne_lng, ne_lat]]
+  pitch?: number,
+  bearing?: number,
+  padding?: number | { top: number, bottom: number, left: number, right: number },
+  transitionOptions?: { duration?: number, easing?: Function, essential?: boolean }
+)
+```
+
+Example usage:
+
+```typescript
+// Basic usage
+const sanFranciscoBounds = [
+  [-122.5, 37.7],
+  [-122.3, 37.9],
+] // [[sw_lng, sw_lat], [ne_lng, ne_lat]]
+mapOperations.fitBounds(sanFranciscoBounds)
+
+// With camera angle
+mapOperations.fitBounds(sanFranciscoBounds, 60, 45)
+
+// With padding (pixels around the bounds)
+mapOperations.fitBounds(sanFranciscoBounds, 60, 45, 100) // 100px on all sides
+
+// With custom padding per side
+mapOperations.fitBounds(sanFranciscoBounds, 60, 45, {
+  top: 100,
+  bottom: 50,
+  left: 50,
+  right: 50,
+})
+
+// With transition options
+mapOperations.fitBounds(sanFranciscoBounds, 60, 45, 100, {
+  duration: 3000,
+  essential: true,
+})
+
+// You can also use just transition options without camera angles
+mapOperations.fitBounds(sanFranciscoBounds, null, null, 100, {
+  duration: 3000,
+})
+```
+
+#### Pattern 2: ViewState Object with Bounds
+
+```typescript
+fitBounds(viewState: { bounds: [[number, number], [number, number]], pitch?: number, bearing?: number, transitionOptions?: object })
+```
+
+Example usage:
+
+```typescript
+// Fitting bounds with a view state object
+mapOperations.fitBounds({
+  bounds: [
+    [-122.5, 37.7],
+    [-122.3, 37.9],
+  ],
+  pitch: 60,
+  bearing: 45,
+  transitionOptions: {
+    duration: 3000,
+  },
+})
+```
+
+Both methods provide smooth camera transitions with full control over animation settings and camera parameters.

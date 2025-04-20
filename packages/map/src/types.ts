@@ -1,4 +1,3 @@
-// Import proper types from mapbox-gl
 import type { Map as MapboxMap } from "mapbox-gl"
 // Import types from ReactMapGL possibly in the future
 // import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox'
@@ -106,24 +105,68 @@ export interface MapOperationsAPI {
   withMap: (callback: (map: MapboxMap) => void) => void
 
   /**
-   * Fly to a location on the map
+   * Fly to a location on the map with smooth animation
    * @overload
    */
   flyTo: {
     /**
      * Fly to a location using individual coordinates and options
+     * @param longitude The longitude to fly to
+     * @param latitude The latitude to fly to
+     * @param zoom The zoom level to fly to
+     * @param pitch Optional camera pitch in degrees
+     * @param bearing Optional camera bearing in degrees
+     * @param transitionOptions Optional animation settings
      */
     (
       longitude: number,
       latitude: number,
       zoom: number,
+      pitch?: number,
+      bearing?: number,
       transitionOptions?: ViewStateTransitionOptions,
     ): void
 
     /**
      * Fly to a location using a ViewState object
+     * @param viewState The view state to fly to (must include longitude, latitude, zoom)
      */
-    (viewState: ViewState): void
+    (viewState: Omit<ViewState, "bounds">): void
+  }
+
+  /**
+   * Fit the map view to a bounding box with smooth animation
+   * @overload
+   */
+  fitBounds: {
+    /**
+     * Fit bounds using a bounds array and options
+     * @param bounds The bounds to fit the map view to [[sw_lng, sw_lat], [ne_lng, ne_lat]]
+     * @param pitch Optional camera pitch in degrees
+     * @param bearing Optional camera bearing in degrees
+     * @param padding Optional padding to apply around the bounds (in pixels)
+     * @param transitionOptions Optional animation settings
+     */
+    (
+      bounds: [[number, number], [number, number]],
+      pitch?: number,
+      bearing?: number,
+      padding?:
+        | number
+        | { top: number; bottom: number; left: number; right: number },
+      transitionOptions?: ViewStateTransitionOptions,
+    ): void
+
+    /**
+     * Fit bounds using a ViewState object with bounds
+     * @param viewState The view state (must include bounds)
+     */
+    (
+      viewState: Pick<
+        ViewState,
+        "bounds" | "pitch" | "bearing" | "transitionOptions"
+      >,
+    ): void
   }
 
   /**
