@@ -37,7 +37,7 @@ export default function MapContainer({
     // for the actions to use directly
     if (mapRef.current && !initialized.current) {
       // Register the map instance with our custom actions
-      mapActions.registerMapInstance(mapRef.current as any)
+      mapActions.registerMapInstance(mapRef.current)
       initialized.current = true
     }
   }, [uncontrolledRef, mapRef])

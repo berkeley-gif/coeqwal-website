@@ -8,6 +8,11 @@ import type { MapboxMapRef, MapProps } from "./types"
 // Create a proper interface that extends the expected MapRef type
 interface InternalMapRef extends MapRef, MapboxMapRef {}
 
+// Custom props for ReactMapGL that include our custom prop
+type ReactMapGLProps = React.ComponentProps<typeof ReactMapGL> & {
+  mapboxToken?: string
+}
+
 /**
  * Map component that wraps ReactMapGL with context integration
  *

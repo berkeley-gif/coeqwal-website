@@ -54,20 +54,27 @@ export const mapActions = {
   ) => {
     // First try the directly registered instance
     if (mapInstance) {
-      mapInstance.flyTo(longitude, latitude, zoom, pitch, bearing, duration)
+      const map = mapInstance.getMap()
+      map.flyTo({
+        center: [longitude, latitude],
+        zoom,
+        pitch,
+        bearing,
+        duration,
+      })
     }
     // Fall back to the ref if necessary
     else {
       const { mapRef } = useMapStore.getState()
       if (mapRef?.current) {
-        mapRef.current.flyTo(
-          longitude,
-          latitude,
+        const map = mapRef.current.getMap()
+        map.flyTo({
+          center: [longitude, latitude],
           zoom,
           pitch,
           bearing,
           duration,
-        )
+        })
       }
     }
 

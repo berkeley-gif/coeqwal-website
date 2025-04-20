@@ -1,27 +1,13 @@
 // Types for the map module
 import { RefObject } from "react"
+import type {
+  MapboxMapRef as MapPackageMapboxMapRef,
+  ViewState as MapPackageViewState,
+} from "../../../map/src/types"
 
-export interface ViewState {
-  longitude: number
-  latitude: number
-  zoom: number
-  bearing: number
-  pitch: number
-}
-
-// Define a proper interface for MapboxMapRef
-export interface MapboxMapRef {
-  getMap: () => unknown
-  flyTo: (
-    longitude: number,
-    latitude: number,
-    zoom: number,
-    pitch?: number,
-    bearing?: number,
-    duration?: number,
-  ) => void
-  [key: string]: unknown
-}
+// Re-export the types from map package
+export type ViewState = MapPackageViewState
+export type MapboxMapRef = MapPackageMapboxMapRef
 
 // Map state interface
 export interface MapState {
