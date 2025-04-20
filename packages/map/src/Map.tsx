@@ -2,48 +2,26 @@
 
 import { useRef, useEffect } from "react"
 import { Map as ReactMapGL } from "react-map-gl/mapbox"
-import { MapboxMapRef } from "./types"
 import { useMap } from "../context/MapContext"
+import type { MapboxMapRef, MapProps, ViewState } from "./types"
 
 /**
- * A simple wrapper around ReactMapGL that connects to our MapContext.
+ * Map component that wraps ReactMapGL with context integration
  *
  * Features:
- * - Automatically registers with context for global access
- * - Supports all ReactMapGL props
+ * - Automatically connects to MapContext
+ * - Supports both controlled and uncontrolled view state
+ * - Passes through all ReactMapGL props
  * - Provides consistent styling defaults
  */
-export interface MapProps {
-  /** Map style URL */
-  mapStyle?: string
-  /** Initial position */
-  initialViewState?: {
-    longitude: number
-    latitude: number
-    zoom: number
-    pitch?: number
-    bearing?: number
-  }
-  /** Map container width */
-  width?: string | number
-  /** Map container height */
-  height?: string | number
-  /** Map container style */
-  style?: React.CSSProperties
-  /** Map children (markers, popups, etc) */
-  children?: React.ReactNode
-  /** Called when map is loaded */
-  onLoad?: () => void
-  /** Any other ReactMapGL props */
-  [key: string]: any
-}
-
 export function Map({
-  mapStyle = "mapbox://styles/mapbox/streets-v12",
+  mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
   initialViewState = {
-    longitude: -98.5,
-    latitude: 39.8,
-    zoom: 3,
+    longitude: -126.037,
+    latitude: 37.962,
+    zoom: 5.83,
+    bearing: 0,
+    pitch: 0,
   },
   width = "100%",
   height = "100%",
@@ -52,32 +30,33 @@ export function Map({
   children,
   ...rest
 }: MapProps) {
-  // Get the context ref and register this map instance
+  // Get the context ref to share map instance
   const { mapRef: contextMapRef } = useMap()
+
+  // Internal ref for direct map access
   const internalMapRef = useRef<MapboxMapRef>(null)
 
-  // Create a container style that includes width and height
+  // Container style with defaults
   const containerStyle = {
     width,
     height,
-    borderRadius: "4px",
     ...style,
   }
 
   // Connect internal ref to context ref
   useEffect(() => {
     if (internalMapRef.current) {
-      // Provide custom methods for our MapboxMapRef
+      // Extend with custom methods
       internalMapRef.current.getMap = () => {
         // Access the internal mapbox instance
         return (internalMapRef.current as any)?._getMap() || null
       }
 
-      // Store reference in context ref
+      // Share with context
       ;(contextMapRef as any).current = internalMapRef.current
     }
 
-    // Cleanup
+    // Cleanup on unmount
     return () => {
       if (contextMapRef) {
         ;(contextMapRef as any).current = null
@@ -85,7 +64,7 @@ export function Map({
     }
   }, [contextMapRef])
 
-  // Handle map load with extended functionality
+  // Handle map load with safety
   const handleLoad = () => {
     // Call user's onLoad handler if provided
     onLoad?.()
@@ -102,7 +81,7 @@ export function Map({
       onLoad={handleLoad}
       {...rest}
     >
-      {/* Attribution in consistent position */}
+      {/* Consistent attribution positioning */}
       <div
         style={{
           position: "absolute",
