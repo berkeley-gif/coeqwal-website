@@ -1,9 +1,6 @@
 // Main component
 export { Map } from "./Map"
 
-// Hooks
-export { useLocalMapState } from "./hooks/useLocalMapState"
-
 // Context
 export { MapProvider, useMap } from "../context/MapContext"
 
@@ -15,6 +12,7 @@ export type {
   MapSource,
   MapLayer,
   MapOperationsAPI,
+  ViewStateTransitionOptions,
 } from "./types"
 
 // Re-export some ReactMapGL components for convenience
@@ -26,9 +24,3 @@ export {
   Source,
   Layer,
 } from "react-map-gl/mapbox"
-
-// Export types
-export * from "./types"
-
-// Export context and hooks
-export * from "../context/MapContext"
