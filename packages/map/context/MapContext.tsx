@@ -18,7 +18,7 @@ import type {
 
 // Default value for the context (used for type safety)
 const defaultMapOperations: MapOperationsAPI = {
-  mapRef: { current: null! } as React.RefObject<MapboxMapRef>,
+  mapRef: { current: null },
   withMap: () => {},
   flyTo: (() => {}) as MapOperationsAPI["flyTo"],
   fitBounds: () => {},
@@ -50,7 +50,7 @@ export const MapProvider = ({ children }: MapProviderProps) => {
 
   const mapOperations = useMemo<MapOperationsAPI>(() => {
     return {
-      mapRef: mapRef as React.RefObject<MapboxMapRef>,
+      mapRef,
       withMap: (callback: (map: MapboxMap) => void) => {
         if (mapRef.current) {
           try {
@@ -319,20 +319,18 @@ export const MapProvider = ({ children }: MapProviderProps) => {
           if (map.getLayer(id)) {
             try {
               // Try setting as a paint property first
-              // @ts-expect-error: Dynamic property access requires type assertion
               map.setPaintProperty(
                 id,
                 property as keyof PaintSpecification,
-                value,
+                value as unknown as PaintSpecification[keyof PaintSpecification],
               )
             } catch {
               try {
                 // If that fails, try as a layout property
-                // @ts-expect-error: Dynamic property access requires type assertion
                 map.setLayoutProperty(
                   id,
                   property as keyof LayoutSpecification,
-                  value,
+                  value as unknown as LayoutSpecification[keyof LayoutSpecification],
                 )
               } catch (error) {
                 console.error(
@@ -349,11 +347,10 @@ export const MapProvider = ({ children }: MapProviderProps) => {
         if (mapRef.current) {
           const map = mapRef.current.getMap()
           if (map.getLayer(id)) {
-            // @ts-expect-error: Dynamic property access requires type assertion
             map.setPaintProperty(
               id,
               property as keyof PaintSpecification,
-              value,
+              value as unknown as PaintSpecification[keyof PaintSpecification],
             )
           }
         }
@@ -363,11 +360,10 @@ export const MapProvider = ({ children }: MapProviderProps) => {
         if (mapRef.current) {
           const map = mapRef.current.getMap()
           if (map.getLayer(id)) {
-            // @ts-expect-error: Dynamic property access requires type assertion
             map.setLayoutProperty(
               id,
               property as keyof LayoutSpecification,
-              value,
+              value as unknown as LayoutSpecification[keyof LayoutSpecification],
             )
           }
         }

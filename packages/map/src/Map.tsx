@@ -1,9 +1,12 @@
 "use client"
 
 import { useRef, useEffect } from "react"
-import { Map as ReactMapGL } from "react-map-gl/mapbox"
+import { Map as ReactMapGL, MapRef } from "react-map-gl/mapbox"
 import { useMap } from "../context/MapContext"
-import type { MapboxMapRef, MapProps, ViewState } from "./types"
+import type { MapboxMapRef, MapProps } from "./types"
+
+// Create a proper interface that extends the expected MapRef type
+interface InternalMapRef extends MapRef, MapboxMapRef {}
 
 /**
  * Map component that wraps ReactMapGL with context integration
@@ -35,7 +38,7 @@ export function Map({
   const { mapRef: contextMapRef } = useMap()
 
   // Internal ref for direct map access
-  const internalMapRef = useRef<MapboxMapRef>(null)
+  const internalMapRef = useRef<InternalMapRef>(null)
 
   // Container style with defaults
   const containerStyle = {
@@ -47,20 +50,25 @@ export function Map({
   // Connect internal ref to context ref
   useEffect(() => {
     if (internalMapRef.current) {
-      // Extend with custom methods
-      internalMapRef.current.getMap = () => {
-        // Access the internal mapbox instance
-        return (internalMapRef.current as any)?._getMap() || null
-      }
+      // MapRef already has getMap() that returns the Mapbox instance
+      // We just need to ensure it's available before assigning to context
+      const mapInstance = internalMapRef.current
 
       // Share with context
-      ;(contextMapRef as any).current = internalMapRef.current
+      contextMapRef.current = {
+        getMap: () => {
+          if (!mapInstance) {
+            throw new Error("Map instance not available")
+          }
+          return mapInstance.getMap()
+        },
+      }
     }
 
     // Cleanup on unmount
     return () => {
       if (contextMapRef) {
-        ;(contextMapRef as any).current = null
+        contextMapRef.current = null
       }
     }
   }, [contextMapRef])
@@ -79,7 +87,7 @@ export function Map({
       style={containerStyle}
       reuseMaps
       attributionControl={false}
-      ref={internalMapRef as any}
+      ref={internalMapRef}
       onLoad={handleLoad}
       {...rest}
     >

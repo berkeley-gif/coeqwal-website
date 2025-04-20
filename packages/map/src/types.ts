@@ -97,7 +97,7 @@ export interface MapOperationsAPI {
   /**
    * Reference to the map instance
    */
-  mapRef: RefObject<MapboxMapRef>
+  mapRef: RefObject<MapboxMapRef | null>
 
   /**
    * Execute a callback with the map instance if available
