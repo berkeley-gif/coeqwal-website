@@ -13,19 +13,20 @@ let mapInstance: MapboxMapRef | null = null
 
 // Note: Zustand v5 syntax
 export const useMapStore = create<MapState>()(
-  immer((set, get) => ({
-    // Initial state
-    mapRef: null,
-    mapInstance: null,
-    viewState: {
-      longitude: -126.037,
-      latitude: 37.962,
-      zoom: 5.83,
-      bearing: 0,
-      pitch: 0,
-    },
-    registerMapInstance: (instance) => set({ mapInstance: instance }),
-  })),
+  immer(
+    () =>
+      ({
+        // Initial state
+        mapRef: null,
+        viewState: {
+          longitude: -126.037,
+          latitude: 37.962,
+          zoom: 5.83,
+          bearing: 0,
+          pitch: 0,
+        },
+      }) as MapState,
+  ),
 )
 
 // Actions

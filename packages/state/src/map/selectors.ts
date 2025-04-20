@@ -2,7 +2,7 @@
 
 import { useMapStore, mapActions } from "./store"
 import { ViewState, MapboxMapRef } from "./types"
-import { useCallback, useRef, useEffect } from "react"
+import { useCallback, useRef, useEffect, RefObject } from "react"
 
 // Hook for accessing view state (camera position)
 export function useViewState() {
@@ -23,7 +23,7 @@ export function useMapState() {
 
   // Connect the mapRef to the store on mount
   useEffect(() => {
-    mapActions.setMapRef(mapRef as any)
+    mapActions.setMapRef(mapRef as RefObject<MapboxMapRef>)
   }, [])
 
   // Handler for map view state changes

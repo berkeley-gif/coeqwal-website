@@ -9,8 +9,19 @@ export interface ViewState {
   pitch: number
 }
 
-// Use Record<string, any> for now
-export type MapboxMapRef = Record<string, any>
+// Define a proper interface for MapboxMapRef
+export interface MapboxMapRef {
+  getMap: () => unknown
+  flyTo: (
+    longitude: number,
+    latitude: number,
+    zoom: number,
+    pitch?: number,
+    bearing?: number,
+    duration?: number,
+  ) => void
+  [key: string]: unknown
+}
 
 // Map state interface
 export interface MapState {
