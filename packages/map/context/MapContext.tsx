@@ -1,22 +1,27 @@
 "use client"
 
-import { createContext, useContext, useRef, useCallback } from "react"
-import type { Map as MapboxMap } from "mapbox-gl"
+import { createContext, useContext, useRef, useMemo } from "react"
 import {
   MapboxMapRef,
   ViewState,
-  MapLayerType,
-  MapSource,
-  StyleValue,
   MapOperationsAPI,
   ViewStateTransitionOptions,
 } from "../src/types"
+import type {
+  Map as MapboxMap,
+  SourceSpecification,
+  PaintSpecification,
+  LayoutSpecification,
+  LayerSpecification,
+  PaddingOptions,
+} from "mapbox-gl"
 
 // Default value for the context (used for type safety)
-const defaultValue: MapOperationsAPI = {
-  mapRef: { current: null as unknown as MapboxMapRef }, // Cast to satisfy type check
+const defaultMapOperations: MapOperationsAPI = {
+  mapRef: { current: null! } as React.RefObject<MapboxMapRef>,
   withMap: () => {},
-  flyTo: (() => {}) as any, // Cast to satisfy overloaded function type
+  flyTo: (() => {}) as MapOperationsAPI["flyTo"],
+  fitBounds: () => {},
   addSource: () => {},
   removeSource: () => {},
   addLayer: () => {},
@@ -27,233 +32,351 @@ const defaultValue: MapOperationsAPI = {
   setLayoutProperty: () => {},
 }
 
-// Create the context
-const MapContext = createContext<MapOperationsAPI>(defaultValue)
+// Create the context with default values
+const MapContext = createContext<MapOperationsAPI>(defaultMapOperations)
+
+/**
+ * Props for the MapProvider component
+ */
+type MapProviderProps = React.PropsWithChildren
 
 /**
  * Provider component for the Map context
  * Wraps map-related components and provides access to map operations
  */
-export function MapProvider({ children }: { children: React.ReactNode }) {
+export const MapProvider = ({ children }: MapProviderProps) => {
   // Create a ref to store the map instance
   const mapRef = useRef<MapboxMapRef | null>(null)
 
-  // Helper to safely execute operations with the map instance
-  const withMap = useCallback((callback: (map: MapboxMap) => void) => {
-    const map = mapRef.current?.getMap()
-    if (map) {
-      callback(map)
-    } else {
-      console.warn("Map operation attempted before map was loaded")
-    }
-  }, [])
-
-  // Flyto with overload (because we can either use a ViewState object or individual coordinates and values)
-  const flyTo = useCallback(
-    function flyTo(
-      longitudeOrViewState: number | ViewState,
-      latitude?: number,
-      zoom?: number,
-      transitionOptions?: ViewStateTransitionOptions,
-    ): void {
-      withMap((map) => {
-        // Check if first argument is a ViewState object
-        if (typeof longitudeOrViewState === "object") {
-          const viewState = longitudeOrViewState
-          const options = viewState.transitionOptions || {}
-
-          // Apply common transition options with defaults
-          const commonOptions = {
-            duration: options.duration || 2000,
-            easing: options.easing,
-            essential: options.essential ?? true,
-            // Common camera settings from ViewState
-            bearing: viewState.bearing,
-            pitch: viewState.pitch,
+  const mapOperations = useMemo<MapOperationsAPI>(() => {
+    return {
+      mapRef: mapRef as React.RefObject<MapboxMapRef>,
+      withMap: (callback: (map: MapboxMap) => void) => {
+        if (mapRef.current) {
+          try {
+            callback(mapRef.current.getMap())
+          } catch (error) {
+            console.error("Error executing map callback:", error)
           }
+        } else {
+          console.warn("Map is not initialized")
+        }
+      },
 
-          // Check if bounds are specified instead of center point
-          if (viewState.bounds) {
-            // Use fitBounds instead of flyTo when bounds are specified
-            map.fitBounds(viewState.bounds, {
-              ...commonOptions,
-              padding: 50, // Add some padding around the bounds
-              linear: false, // Use non-linear interpolation
-              offset: [0, 0], // No offset from center
-              maxZoom: viewState.zoom, // Optional constraint on max zoom
-            })
-          } else {
-            // Use standard flyTo when center point is specified
+      /**
+       * Implementation of the flyTo method that supports two calling patterns:
+       * - With coordinates: flyTo(longitude, latitude, zoom, pitch?, bearing?, transitionOptions?)
+       * - With ViewState: flyTo(viewState) - without bounds
+       */
+      flyTo: (function () {
+        // Implementation for coordinates-based flyTo
+        function flyToCoordinates(
+          longitude: number,
+          latitude: number,
+          zoom: number,
+          pitch?: number,
+          bearing?: number,
+          transitionOptions?: ViewStateTransitionOptions,
+        ): void {
+          if (mapRef.current) {
+            const map = mapRef.current.getMap()
+
             map.flyTo({
-              ...commonOptions,
+              center: [longitude, latitude],
+              zoom,
+              pitch,
+              bearing,
+              duration: transitionOptions?.duration,
+              easing: transitionOptions?.easing,
+              essential: transitionOptions?.essential,
+            })
+          }
+        }
+
+        // Implementation for ViewState-based flyTo
+        function flyToViewState(viewState: Omit<ViewState, "bounds">): void {
+          if (mapRef.current) {
+            const map = mapRef.current.getMap()
+            const options = viewState.transitionOptions || {}
+
+            map.flyTo({
               center: [viewState.longitude, viewState.latitude],
               zoom: viewState.zoom,
+              pitch: viewState.pitch,
+              bearing: viewState.bearing,
+              duration: options.duration,
+              easing: options.easing,
+              essential: options.essential,
             })
           }
         }
-        // Handle coordinates version
-        else if (typeof latitude === "number" && typeof zoom === "number") {
-          const options = transitionOptions || {}
 
-          map.flyTo({
-            center: [longitudeOrViewState, latitude],
-            zoom: zoom,
-            duration: options.duration || 2000,
-            easing: options.easing,
-            essential: options.essential ?? true,
-          })
-        } else {
-          console.warn("Invalid arguments to flyTo method")
-        }
-      })
-    },
-    [withMap],
-  )
-
-  // Source operations
-  const addSource = useCallback(
-    (id: string, source: Omit<MapSource, "id">) => {
-      withMap((map) => {
-        if (!map.getSource(id)) {
-          map.addSource(id, { id, ...source } as any)
-        }
-      })
-    },
-    [withMap],
-  )
-
-  const removeSource = useCallback(
-    (id: string) => {
-      withMap((map) => {
-        // Check if source exists
-        if (map.getSource(id)) {
-          // Remove all layers that use this source
-          map.getStyle().layers.forEach((layer) => {
-            if (layer.source === id) {
-              map.removeLayer(layer.id)
+        // Router function that dispatches to the appropriate implementation
+        return function (
+          arg1: number | Omit<ViewState, "bounds">,
+          arg2?: number,
+          arg3?: number,
+          arg4?: number | ViewStateTransitionOptions,
+          arg5?: number,
+          arg6?: ViewStateTransitionOptions,
+        ) {
+          // ViewState pattern
+          if (typeof arg1 === "object") {
+            return flyToViewState(arg1)
+          }
+          // Coordinates pattern
+          else if (
+            typeof arg1 === "number" &&
+            typeof arg2 === "number" &&
+            typeof arg3 === "number"
+          ) {
+            // Handle different signature variations
+            if (typeof arg4 === "number") {
+              // Case where arg4 is pitch, arg5 is bearing, arg6 is transitionOptions
+              return flyToCoordinates(arg1, arg2, arg3, arg4, arg5, arg6)
+            } else {
+              // Case where arg4 is transitionOptions (pitch/bearing skipped)
+              return flyToCoordinates(
+                arg1,
+                arg2,
+                arg3,
+                undefined,
+                undefined,
+                arg4,
+              )
             }
-          })
-          // Then remove the source
-          map.removeSource(id)
+          }
         }
-      })
-    },
-    [withMap],
-  )
+      })() as MapOperationsAPI["flyTo"],
 
-  // Layer operations
-  const addLayer = useCallback(
-    (
-      id: string,
-      source: string,
-      type: MapLayerType,
-      paint?: Record<string, StyleValue>,
-      layout?: Record<string, StyleValue>,
-    ) => {
-      withMap((map) => {
-        if (!map.getLayer(id)) {
-          map.addLayer({
-            id,
-            source,
-            type,
-            paint,
-            layout,
-          })
+      /**
+       * Implementation of the fitBounds method that supports two calling patterns:
+       * - With bounds array: fitBounds(bounds, pitch?, bearing?, padding?, transitionOptions?)
+       * - With ViewState: fitBounds(viewState) - must include bounds
+       */
+      fitBounds: (function () {
+        // Implementation for bounds array-based fitBounds
+        function fitBoundsArray(
+          bounds: [[number, number], [number, number]],
+          pitch?: number,
+          bearing?: number,
+          padding?: number | PaddingOptions,
+          transitionOptions?: ViewStateTransitionOptions,
+        ): void {
+          if (mapRef.current) {
+            const map = mapRef.current.getMap()
+
+            map.fitBounds(bounds, {
+              padding: padding ?? 50,
+              pitch,
+              bearing,
+              duration: transitionOptions?.duration,
+              easing: transitionOptions?.easing,
+              essential: transitionOptions?.essential,
+            })
+          }
         }
-      })
-    },
-    [withMap],
-  )
 
-  const removeLayer = useCallback(
-    (id: string) => {
-      withMap((map) => {
-        if (map.getLayer(id)) {
-          map.removeLayer(id)
+        // Implementation for ViewState-based fitBounds
+        function fitBoundsViewState(
+          viewState: Pick<
+            ViewState,
+            "bounds" | "pitch" | "bearing" | "transitionOptions"
+          >,
+        ): void {
+          if (mapRef.current && viewState.bounds) {
+            const map = mapRef.current.getMap()
+            const options = viewState.transitionOptions || {}
+
+            map.fitBounds(viewState.bounds, {
+              padding: 50,
+              pitch: viewState.pitch,
+              bearing: viewState.bearing,
+              duration: options.duration,
+              easing: options.easing,
+              essential: options.essential,
+            })
+          }
         }
-      })
-    },
-    [withMap],
-  )
 
-  // Styling operations
-  const setLayerVisibility = useCallback(
-    (id: string, visible: boolean) => {
-      withMap((map) => {
-        if (map.getLayer(id)) {
-          map.setLayoutProperty(id, "visibility", visible ? "visible" : "none")
+        // Router function that dispatches to the appropriate implementation
+        return function (
+          arg1:
+            | [[number, number], [number, number]]
+            | Pick<
+                ViewState,
+                "bounds" | "pitch" | "bearing" | "transitionOptions"
+              >,
+          arg2?: number,
+          arg3?: number,
+          arg4?:
+            | number
+            | { top: number; bottom: number; left: number; right: number }
+            | ViewStateTransitionOptions,
+          arg5?: ViewStateTransitionOptions,
+        ) {
+          // ViewState pattern with bounds
+          if (typeof arg1 === "object" && !Array.isArray(arg1)) {
+            return fitBoundsViewState(arg1)
+          }
+          // Bounds array pattern
+          else if (
+            Array.isArray(arg1) &&
+            arg1.length === 2 &&
+            Array.isArray(arg1[0]) &&
+            Array.isArray(arg1[1])
+          ) {
+            // Handle different signature variations
+            if (
+              typeof arg4 === "object" &&
+              !Array.isArray(arg4) &&
+              arg4 !== null &&
+              ("duration" in arg4 || "easing" in arg4 || "essential" in arg4)
+            ) {
+              // Case where arg4 is transitionOptions (padding skipped)
+              return fitBoundsArray(arg1, arg2, arg3, undefined, arg4)
+            } else {
+              // Standard case or case where arg4 is padding, arg5 is transitionOptions
+              return fitBoundsArray(
+                arg1,
+                arg2,
+                arg3,
+                arg4 as number | PaddingOptions,
+                arg5,
+              )
+            }
+          }
         }
-      })
-    },
-    [withMap],
-  )
+      })() as MapOperationsAPI["fitBounds"],
 
-  const setLayerProperty = useCallback(
-    (id: string, property: string, value: StyleValue) => {
-      withMap((map) => {
-        if (map.getLayer(id)) {
-          // Determine if this is a paint or layout property
-          const isPaint = property.startsWith("paint.")
-          const isLayout = property.startsWith("layout.")
+      addSource: (id, source) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (!map.getSource(id)) {
+            map.addSource(id, {
+              type: source.type,
+              ...source,
+            } as SourceSpecification)
+          }
+        }
+      },
 
-          if (isPaint) {
-            const paintProp = property.replace("paint.", "")
-            map.setPaintProperty(id, paintProp as any, value)
-          } else if (isLayout) {
-            const layoutProp = property.replace("layout.", "")
-            map.setLayoutProperty(id, layoutProp as any, value)
-          } else {
-            console.warn(
-              `Unknown property type for ${property}. Use paint.* or layout.* prefix.`,
+      removeSource: (id) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (map.getSource(id)) {
+            // Remove all layers that use this source first
+            map.getStyle().layers.forEach((layer) => {
+              if (layer.source === id) {
+                map.removeLayer(layer.id)
+              }
+            })
+            map.removeSource(id)
+          }
+        }
+      },
+
+      addLayer: (id, source, type, paint = {}, layout = {}) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (!map.getLayer(id)) {
+            map.addLayer({
+              id,
+              type,
+              source,
+              paint,
+              layout,
+            } as LayerSpecification)
+          }
+        }
+      },
+
+      removeLayer: (id) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (map.getLayer(id)) {
+            map.removeLayer(id)
+          }
+        }
+      },
+
+      setLayerVisibility: (id, visible) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (map.getLayer(id)) {
+            map.setLayoutProperty(
+              id,
+              "visibility",
+              visible ? "visible" : "none",
             )
           }
         }
-      })
-    },
-    [withMap],
-  )
+      },
 
-  const setPaintProperty = useCallback(
-    (id: string, property: string, value: StyleValue) => {
-      withMap((map) => {
-        if (map.getLayer(id)) {
-          map.setPaintProperty(id, property as any, value)
+      setLayerProperty: (id, property, value) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (map.getLayer(id)) {
+            try {
+              // Try setting as a paint property first
+              // @ts-expect-error: Dynamic property access requires type assertion
+              map.setPaintProperty(
+                id,
+                property as keyof PaintSpecification,
+                value,
+              )
+            } catch {
+              try {
+                // If that fails, try as a layout property
+                // @ts-expect-error: Dynamic property access requires type assertion
+                map.setLayoutProperty(
+                  id,
+                  property as keyof LayoutSpecification,
+                  value,
+                )
+              } catch (error) {
+                console.error(
+                  `Failed to set property ${property} on layer ${id}:`,
+                  error,
+                )
+              }
+            }
+          }
         }
-      })
-    },
-    [withMap],
-  )
+      },
 
-  const setLayoutProperty = useCallback(
-    (id: string, property: string, value: StyleValue) => {
-      withMap((map) => {
-        if (map.getLayer(id)) {
-          map.setLayoutProperty(id, property as any, value)
+      setPaintProperty: (id, property, value) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (map.getLayer(id)) {
+            // @ts-expect-error: Dynamic property access requires type assertion
+            map.setPaintProperty(
+              id,
+              property as keyof PaintSpecification,
+              value,
+            )
+          }
         }
-      })
-    },
-    [withMap],
-  )
+      },
 
-  // Construct the context value
-  const mapOperationsAPI: MapOperationsAPI = {
-    mapRef: mapRef as React.RefObject<MapboxMapRef>,
-    withMap,
-    flyTo,
-    addSource,
-    removeSource,
-    addLayer,
-    removeLayer,
-    setLayerVisibility,
-    setLayerProperty,
-    setPaintProperty,
-    setLayoutProperty,
-  }
+      setLayoutProperty: (id, property, value) => {
+        if (mapRef.current) {
+          const map = mapRef.current.getMap()
+          if (map.getLayer(id)) {
+            // @ts-expect-error: Dynamic property access requires type assertion
+            map.setLayoutProperty(
+              id,
+              property as keyof LayoutSpecification,
+              value,
+            )
+          }
+        }
+      },
+    }
+  }, [])
 
   return (
-    <MapContext.Provider value={mapOperationsAPI}>
-      {children}
-    </MapContext.Provider>
+    <MapContext.Provider value={mapOperations}>{children}</MapContext.Provider>
   )
 }
 
@@ -270,3 +393,5 @@ export function useMap(): MapOperationsAPI {
 
   return context
 }
+
+export default MapContext
