@@ -87,7 +87,7 @@ export function Map({
       style={containerStyle}
       reuseMaps
       attributionControl={false}
-      ref={internalMapRef}
+      ref={internalMapRef as React.RefObject<MapRef>}
       onLoad={handleLoad}
       {...rest}
     >

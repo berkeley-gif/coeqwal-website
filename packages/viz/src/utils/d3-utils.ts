@@ -7,7 +7,9 @@ import { DecileData } from "../types"
 /**
  * Parses data from various formats into DecileData format
  */
-export function parseDecileData(rawData: any): DecileData[] {
+export function parseDecileData(
+  rawData: DecileData[] | Record<string, unknown> | unknown,
+): DecileData[] {
   // Handle array data format
   if (Array.isArray(rawData)) {
     return rawData.map((value, index) => ({
@@ -19,12 +21,13 @@ export function parseDecileData(rawData: any): DecileData[] {
   // Handle object with quantile keys (q10, q20, etc.)
   if (typeof rawData === "object" && rawData !== null) {
     const decileData: DecileData[] = []
+    const data = rawData as Record<string, unknown>
 
     // Check for quantile keys in the format q10, q20, etc.
     const quantilePattern = /^q(\d+)$/
     let hasQuantileKeys = false
 
-    for (const key in rawData) {
+    for (const key in data) {
       const match = key.match(quantilePattern)
       if (match && match[1]) {
         hasQuantileKeys = true
@@ -33,7 +36,7 @@ export function parseDecileData(rawData: any): DecileData[] {
         const decile = percentile / 10
         decileData.push({
           decile,
-          value: typeof rawData[key] === "number" ? rawData[key] : 0,
+          value: typeof data[key] === "number" ? (data[key] as number) : 0,
         })
       }
     }
@@ -44,7 +47,7 @@ export function parseDecileData(rawData: any): DecileData[] {
 
     // Try to find decile keys directly (decile1, decile2, etc.)
     let hasDecileKeys = false
-    for (const key in rawData) {
+    for (const key in data) {
       if (key.toLowerCase().includes("decile")) {
         hasDecileKeys = true
         const decileMatch = key.match(/\d+/)
@@ -52,7 +55,7 @@ export function parseDecileData(rawData: any): DecileData[] {
           const decileNum = parseInt(decileMatch[0], 10)
           decileData.push({
             decile: decileNum,
-            value: typeof rawData[key] === "number" ? rawData[key] : 0,
+            value: typeof data[key] === "number" ? (data[key] as number) : 0,
           })
         }
       }
@@ -63,8 +66,9 @@ export function parseDecileData(rawData: any): DecileData[] {
     }
 
     // Try to find decile data in nested structure
-    if (rawData.data && Array.isArray(rawData.data)) {
-      return parseDecileData(rawData.data)
+    const objData = data as { data?: unknown }
+    if (objData.data && Array.isArray(objData.data)) {
+      return parseDecileData(objData.data)
     }
   }
 
@@ -131,16 +135,16 @@ export function calculateChartDimensions(
  * Safely accesses a value from a nested object structure
  */
 export function getNestedValue(
-  obj: any,
+  obj: Record<string, unknown>,
   path: string,
-  defaultValue: any = undefined,
-): any {
+  defaultValue: unknown = undefined,
+): unknown {
   const keys = path.split(".")
-  let current = obj
+  let current: unknown = obj
 
   for (const key of keys) {
     if (current === undefined || current === null) return defaultValue
-    current = current[key]
+    current = (current as Record<string, unknown>)[key]
   }
 
   return current !== undefined ? current : defaultValue

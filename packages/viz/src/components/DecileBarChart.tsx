@@ -65,7 +65,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
 
     // Get dimensions from container (for responsive)
     let chartWidth = width
-    let chartHeight = height
+    const chartHeight = height
 
     if (responsive && containerRef.current) {
       const containerWidth = containerRef.current.clientWidth
@@ -90,8 +90,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
     // Sort data by decile
     const sortedData = [...decileData].sort((a, b) => a.decile - b.decile)
 
-    // Get min and max values for scaling
-    const minValue = d3.min(sortedData, (d) => d.value) || 0
+    // Get max value for scaling
     const maxValue = d3.max(sortedData, (d) => d.value) || 100
 
     // Create a single bar with segments
