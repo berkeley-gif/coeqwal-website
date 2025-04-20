@@ -2,62 +2,175 @@
 import type { Map as MapboxMap } from "mapbox-gl"
 // Import types from ReactMapGL possibly in the future
 // import type { MapRef, MapMouseEvent } from 'react-map-gl/mapbox'
+import type { ReactNode, RefObject, CSSProperties } from "react"
 
-// Core view state type with backward compatibility
+/**
+ * Reference to Mapbox GL map instance wrapper
+ */
+export interface MapboxMapRef {
+  getMap: () => MapboxMap
+}
+
+/**
+ * Animation options for view state transitions (just below)
+ */
+export interface ViewStateTransitionOptions {
+  duration?: number
+  easing?: (t: number) => number
+  essential?: boolean
+}
+
+/**
+ * View state for the map
+ */
 export interface ViewState {
   longitude: number
   latitude: number
   zoom: number
   bearing?: number
   pitch?: number
-  // Additional properties for backward compatibility
-  // TODO: remove duplicates
-  transitionDuration?: number
-  transitionEasing?: (t: number) => number
-  bounds?: [[number, number], [number, number]] // [southwest, northeast] corners
-  animationOptions?: {
-    duration?: number
-    easing?: (t: number) => number
-  }
+  // Optional bounds parameter - alternative to center coordinates
+  bounds?: [[number, number], [number, number]] // [southwest, northeast] corners bc viewports differ
+  // Optional transition parameters
+  transitionOptions?: ViewStateTransitionOptions
 }
 
-// Modern replacement for deprecated Expression
+/**
+ * Supported layer types from Mapbox GL
+ */
+export type MapLayerType =
+  | "fill"
+  | "line"
+  | "circle"
+  | "symbol"
+  | "heatmap"
+  | "fill-extrusion"
+  | "raster"
+  | "hillshade"
+  | "background"
+  | "sky"
+
+/**
+ * Style values for Mapbox GL layers
+ */
 export type StyleValue =
   | string
   | number
   | boolean
-  | Array<unknown>
+  | Array<string | number | boolean>
   | Record<string, unknown>
 
 /**
- * Our own interface for the map ref
- * Provides access to the underlying map instance and utility methods
+ * Type for generic map source data
  */
-export interface MapboxMapRef {
-  getMap(): MapboxMap | null
+export type MapSourceData =
+  | GeoJSON.FeatureCollection
+  | GeoJSON.Feature
+  | string // URL to GeoJSON file
+  | Record<string, unknown> // Tile source options or other source config
 
-  // Get current view state
-  getViewState(): ViewState
+/**
+ * Source definition for the map
+ */
+export interface MapSource {
+  id: string
+  type: "vector" | "raster" | "raster-dem" | "geojson" | "image" | "video"
+  data?: MapSourceData
+  [key: string]: unknown
+}
 
-  // Fit map to geographic bounds
-  fitBounds(
-    bounds: [[number, number], [number, number]],
-    options?: { padding?: number; maxZoom?: number },
-  ): void
+/**
+ * Map layer definition
+ */
+export interface MapLayer {
+  id: string
+  source: string
+  type: MapLayerType
+  paint?: Record<string, StyleValue>
+  layout?: Record<string, StyleValue>
+  [key: string]: unknown
+}
 
-  // Jump to location without animation
-  jumpTo(viewState: Partial<ViewState>): void
+/**
+ * Core operations API for the map context
+ */
+export interface MapOperationsAPI {
+  /**
+   * Reference to the map instance
+   */
+  mapRef: RefObject<MapboxMapRef>
 
-  // Check if map has finished loading
-  isLoaded(): boolean
+  /**
+   * Execute a callback with the map instance if available
+   */
+  withMap: (callback: (map: MapboxMap) => void) => void
 
-  // Check if a specific source has loaded
-  isSourceLoaded(sourceId: string): boolean
+  /**
+   * Fly to a location on the map
+   * @overload
+   */
+  flyTo: {
+    /**
+     * Fly to a location using individual coordinates and options
+     */
+    (
+      longitude: number,
+      latitude: number,
+      zoom: number,
+      transitionOptions?: ViewStateTransitionOptions,
+    ): void
 
-  // Check if a specific layer exists
-  hasLayer(layerId: string): boolean
+    /**
+     * Fly to a location using a ViewState object
+     */
+    (viewState: ViewState): void
+  }
 
-  // We could add more helper methods here in the future
+  /**
+   * Add a source to the map
+   */
+  addSource: (id: string, source: Omit<MapSource, "id">) => void
+
+  /**
+   * Remove a source from the map
+   */
+  removeSource: (id: string) => void
+
+  /**
+   * Add a layer to the map
+   */
+  addLayer: (
+    id: string,
+    source: string,
+    type: MapLayerType,
+    paint?: Record<string, StyleValue>,
+    layout?: Record<string, StyleValue>,
+  ) => void
+
+  /**
+   * Remove a layer from the map
+   */
+  removeLayer: (id: string) => void
+
+  /**
+   * Set the visibility of a layer
+   */
+  setLayerVisibility: (id: string, visible: boolean) => void
+
+  /**
+   * Set a property for a layer (can set both paint and layout properties here, or separately below)
+   */
+  setLayerProperty: (id: string, property: string, value: StyleValue) => void
+
+  /**
+   * Set a paint property for a layer
+   */
+  setPaintProperty: (id: string, property: string, value: StyleValue) => void
+
+  /**
+   * Set a layout property for a layer
+   */
+  setLayoutProperty: (id: string, property: string, value: StyleValue) => void
 }
 
 /**
@@ -68,7 +181,9 @@ export interface MapboxMapRef {
  */
 export type StateManagementMode = "uncontrolled" | "react" | "zustand"
 
-// MapProps for our base Map component
+/**
+ * MapProps for our base Map component
+ */
 export interface MapProps {
   /** Mapbox access token */
   mapboxAccessToken?: string
@@ -86,7 +201,7 @@ export interface MapProps {
   height?: string | number
 
   /** Map container style */
-  style?: React.CSSProperties
+  style?: CSSProperties
 
   /**
    * Map children - such as:
@@ -96,7 +211,7 @@ export interface MapProps {
    * - GeolocateControl
    * - Sources and Layers
    */
-  children?: React.ReactNode
+  children?: ReactNode
 
   /** Called when map is loaded */
   onLoad?: () => void
@@ -115,91 +230,4 @@ export interface MapProps {
    * - terrain
    */
   [key: string]: unknown
-}
-
-// Type for generic map source
-export type MapSourceData =
-  | GeoJSON.FeatureCollection
-  | GeoJSON.Feature
-  | string // URL to GeoJSON file
-  | Record<string, unknown> // Tile source options or other source config
-
-// Map source definition
-export interface MapSource {
-  id: string
-  type: string
-  data?: MapSourceData
-  [key: string]: unknown
-}
-
-// Map layer types supported by Mapbox
-export type MapLayerType =
-  | "fill"
-  | "line"
-  | "circle"
-  | "symbol"
-  | "heatmap"
-  | "fill-extrusion"
-  | "raster"
-  | "hillshade"
-  | "background"
-  | "sky"
-
-// Map layer definition
-export interface MapLayer {
-  id: string
-  source: string
-  type: MapLayerType
-  paint?: Record<string, StyleValue>
-  layout?: Record<string, StyleValue>
-  [key: string]: unknown
-}
-
-// Map Operations API
-export interface MapOperationsAPI {
-  // The map ref for direct access
-  mapRef: React.RefObject<MapboxMapRef>
-
-  /**
-   * Safely execute a callback with the map instance
-   *
-   * This handles null checking and provides a cleaner way to work
-   * with the map directly when needed.
-   *
-   * @example
-   * withMap(map => {
-   *   map.setPaintProperty('layer-id', 'fill-color', '#ff0000');
-   * });
-   */
-  withMap: (callback: (map: MapboxMap) => void) => void
-
-  // Navigation
-  flyTo: (
-    longitude: number,
-    latitude: number,
-    zoom: number,
-    options?: {
-      pitch?: number
-      bearing?: number
-      duration?: number
-    },
-  ) => void
-
-  // Layers and sources
-  addSource: (id: string, source: Omit<MapSource, "id">) => void
-  removeSource: (id: string) => void
-  addLayer: (
-    id: string,
-    source: string,
-    type: MapLayerType,
-    paint?: Record<string, StyleValue>,
-    layout?: Record<string, StyleValue>,
-  ) => void
-  removeLayer: (id: string) => void
-
-  // Styling
-  setLayerVisibility: (id: string, visible: boolean) => void
-  setLayerProperty: (id: string, property: string, value: StyleValue) => void
-  setPaintProperty: (id: string, property: string, value: StyleValue) => void
-  setLayoutProperty: (id: string, property: string, value: StyleValue) => void
 }

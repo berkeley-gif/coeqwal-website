@@ -1,171 +1,272 @@
 "use client"
 
-import { createContext, useContext, useRef, useMemo, useCallback } from "react"
-import { MapOperationsAPI, MapboxMapRef } from "../src/types"
+import { createContext, useContext, useRef, useCallback } from "react"
+import type { Map as MapboxMap } from "mapbox-gl"
+import {
+  MapboxMapRef,
+  ViewState,
+  MapLayerType,
+  MapSource,
+  StyleValue,
+  MapOperationsAPI,
+  ViewStateTransitionOptions,
+} from "../src/types"
 
-/**
- * MapContext provides access to map operations from any component in the tree.
- *
- * It exposes:
- * - Direct map access via mapRef
- * - Helper methods for common operations
- *
- * Usage:
- * const { flyTo, addLayer } = useMap();
- */
-const MapContext = createContext<MapOperationsAPI | null>(null)
-
-export interface MapProviderProps {
-  children: React.ReactNode
+// Default value for the context (used for type safety)
+const defaultValue: MapOperationsAPI = {
+  mapRef: { current: null as unknown as MapboxMapRef }, // Cast to satisfy type check
+  withMap: () => {},
+  flyTo: (() => {}) as any, // Cast to satisfy overloaded function type
+  addSource: () => {},
+  removeSource: () => {},
+  addLayer: () => {},
+  removeLayer: () => {},
+  setLayerVisibility: () => {},
+  setLayerProperty: () => {},
+  setPaintProperty: () => {},
+  setLayoutProperty: () => {},
 }
 
-export function MapProvider({ children }: MapProviderProps) {
+// Create the context
+const MapContext = createContext<MapOperationsAPI>(defaultValue)
+
+/**
+ * Provider component for the Map context
+ * Wraps map-related components and provides access to map operations
+ */
+export function MapProvider({ children }: { children: React.ReactNode }) {
   // Create a ref to store the map instance
-  const mapRef = useRef<MapboxMapRef>(null)
+  const mapRef = useRef<MapboxMapRef | null>(null)
 
-  // Navigation helpers
-  const flyTo = useCallback(
-    (
-      longitude: number,
-      latitude: number,
-      zoom: number,
-      options?: { pitch?: number; bearing?: number; duration?: number },
-    ) => {
-      if (!mapRef.current?.getMap()) return
-
-      const map = mapRef.current.getMap()
-      map?.flyTo({
-        center: [longitude, latitude],
-        zoom,
-        pitch: options?.pitch,
-        bearing: options?.bearing,
-        duration: options?.duration,
-      })
-    },
-    [],
-  )
-
-  // Layer and source helpers
-  const addSource = useCallback(
-    (id: string, source: { type: string; [key: string]: any }) => {
-      if (!mapRef.current?.getMap()) return
-
-      const map = mapRef.current.getMap()
-      if (map && !map.getSource(id)) {
-        map.addSource(id, { ...source, id })
-      }
-    },
-    [],
-  )
-
-  const removeSource = useCallback((id: string) => {
-    if (!mapRef.current?.getMap()) return
-
-    const map = mapRef.current.getMap()
-    if (map && map.getSource(id)) {
-      // Remove any layers using this source first
-      map.getStyle().layers.forEach((layer: any) => {
-        if (layer.source === id) {
-          map.removeLayer(layer.id)
-        }
-      })
-      map.removeSource(id)
+  // Helper to safely execute operations with the map instance
+  const withMap = useCallback((callback: (map: MapboxMap) => void) => {
+    const map = mapRef.current?.getMap()
+    if (map) {
+      callback(map)
+    } else {
+      console.warn("Map operation attempted before map was loaded")
     }
   }, [])
 
+  // Flyto with overload (because we can either use a ViewState object or individual coordinates and values)
+  const flyTo = useCallback(
+    function flyTo(
+      longitudeOrViewState: number | ViewState,
+      latitude?: number,
+      zoom?: number,
+      transitionOptions?: ViewStateTransitionOptions,
+    ): void {
+      withMap((map) => {
+        // Check if first argument is a ViewState object
+        if (typeof longitudeOrViewState === "object") {
+          const viewState = longitudeOrViewState
+          const options = viewState.transitionOptions || {}
+
+          // Apply common transition options with defaults
+          const commonOptions = {
+            duration: options.duration || 2000,
+            easing: options.easing,
+            essential: options.essential ?? true,
+            // Common camera settings from ViewState
+            bearing: viewState.bearing,
+            pitch: viewState.pitch,
+          }
+
+          // Check if bounds are specified instead of center point
+          if (viewState.bounds) {
+            // Use fitBounds instead of flyTo when bounds are specified
+            map.fitBounds(viewState.bounds, {
+              ...commonOptions,
+              padding: 50, // Add some padding around the bounds
+              linear: false, // Use non-linear interpolation
+              offset: [0, 0], // No offset from center
+              maxZoom: viewState.zoom, // Optional constraint on max zoom
+            })
+          } else {
+            // Use standard flyTo when center point is specified
+            map.flyTo({
+              ...commonOptions,
+              center: [viewState.longitude, viewState.latitude],
+              zoom: viewState.zoom,
+            })
+          }
+        }
+        // Handle coordinates version
+        else if (typeof latitude === "number" && typeof zoom === "number") {
+          const options = transitionOptions || {}
+
+          map.flyTo({
+            center: [longitudeOrViewState, latitude],
+            zoom: zoom,
+            duration: options.duration || 2000,
+            easing: options.easing,
+            essential: options.essential ?? true,
+          })
+        } else {
+          console.warn("Invalid arguments to flyTo method")
+        }
+      })
+    },
+    [withMap],
+  )
+
+  // Source operations
+  const addSource = useCallback(
+    (id: string, source: Omit<MapSource, "id">) => {
+      withMap((map) => {
+        if (!map.getSource(id)) {
+          map.addSource(id, { id, ...source } as any)
+        }
+      })
+    },
+    [withMap],
+  )
+
+  const removeSource = useCallback(
+    (id: string) => {
+      withMap((map) => {
+        // Check if source exists
+        if (map.getSource(id)) {
+          // Remove all layers that use this source
+          map.getStyle().layers.forEach((layer) => {
+            if (layer.source === id) {
+              map.removeLayer(layer.id)
+            }
+          })
+          // Then remove the source
+          map.removeSource(id)
+        }
+      })
+    },
+    [withMap],
+  )
+
+  // Layer operations
   const addLayer = useCallback(
     (
       id: string,
       source: string,
-      type: string,
-      paint?: Record<string, any>,
-      layout?: Record<string, any>,
+      type: MapLayerType,
+      paint?: Record<string, StyleValue>,
+      layout?: Record<string, StyleValue>,
     ) => {
-      if (!mapRef.current?.getMap()) return
-
-      const map = mapRef.current.getMap()
-      if (map && !map.getLayer(id)) {
-        map.addLayer({
-          id,
-          source,
-          type: type as any,
-          paint,
-          layout,
-        })
-      }
+      withMap((map) => {
+        if (!map.getLayer(id)) {
+          map.addLayer({
+            id,
+            source,
+            type,
+            paint,
+            layout,
+          })
+        }
+      })
     },
-    [],
+    [withMap],
   )
 
-  const removeLayer = useCallback((id: string) => {
-    if (!mapRef.current?.getMap()) return
+  const removeLayer = useCallback(
+    (id: string) => {
+      withMap((map) => {
+        if (map.getLayer(id)) {
+          map.removeLayer(id)
+        }
+      })
+    },
+    [withMap],
+  )
 
-    const map = mapRef.current.getMap()
-    if (map && map.getLayer(id)) {
-      map.removeLayer(id)
-    }
-  }, [])
-
-  // Styling helpers
-  const setLayerVisibility = useCallback((id: string, visible: boolean) => {
-    if (!mapRef.current?.getMap()) return
-
-    const map = mapRef.current.getMap()
-    if (map && map.getLayer(id)) {
-      map.setLayoutProperty(id, "visibility", visible ? "visible" : "none")
-    }
-  }, [])
+  // Styling operations
+  const setLayerVisibility = useCallback(
+    (id: string, visible: boolean) => {
+      withMap((map) => {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, "visibility", visible ? "visible" : "none")
+        }
+      })
+    },
+    [withMap],
+  )
 
   const setLayerProperty = useCallback(
-    (id: string, property: string, value: any) => {
-      if (!mapRef.current?.getMap()) return
+    (id: string, property: string, value: StyleValue) => {
+      withMap((map) => {
+        if (map.getLayer(id)) {
+          // Determine if this is a paint or layout property
+          const isPaint = property.startsWith("paint.")
+          const isLayout = property.startsWith("layout.")
 
-      const map = mapRef.current.getMap()
-      if (map && map.getLayer(id)) {
-        // Determine if it's a paint or layout property
-        if (property.startsWith("paint.")) {
-          map.setPaintProperty(id, property.substring(6), value)
-        } else if (property.startsWith("layout.")) {
-          map.setLayoutProperty(id, property.substring(7), value)
+          if (isPaint) {
+            const paintProp = property.replace("paint.", "")
+            map.setPaintProperty(id, paintProp as any, value)
+          } else if (isLayout) {
+            const layoutProp = property.replace("layout.", "")
+            map.setLayoutProperty(id, layoutProp as any, value)
+          } else {
+            console.warn(
+              `Unknown property type for ${property}. Use paint.* or layout.* prefix.`,
+            )
+          }
         }
-      }
+      })
     },
-    [],
+    [withMap],
   )
 
-  // Memoize all operations to prevent unnecessary re-renders
-  const mapOperations = useMemo<MapOperationsAPI>(
-    () => ({
-      mapRef,
-      flyTo,
-      addSource,
-      removeSource,
-      addLayer,
-      removeLayer,
-      setLayerVisibility,
-      setLayerProperty,
-    }),
-    [
-      flyTo,
-      addSource,
-      removeSource,
-      addLayer,
-      removeLayer,
-      setLayerVisibility,
-      setLayerProperty,
-    ],
+  const setPaintProperty = useCallback(
+    (id: string, property: string, value: StyleValue) => {
+      withMap((map) => {
+        if (map.getLayer(id)) {
+          map.setPaintProperty(id, property as any, value)
+        }
+      })
+    },
+    [withMap],
   )
+
+  const setLayoutProperty = useCallback(
+    (id: string, property: string, value: StyleValue) => {
+      withMap((map) => {
+        if (map.getLayer(id)) {
+          map.setLayoutProperty(id, property as any, value)
+        }
+      })
+    },
+    [withMap],
+  )
+
+  // Construct the context value
+  const mapOperationsAPI: MapOperationsAPI = {
+    mapRef: mapRef as React.RefObject<MapboxMapRef>,
+    withMap,
+    flyTo,
+    addSource,
+    removeSource,
+    addLayer,
+    removeLayer,
+    setLayerVisibility,
+    setLayerProperty,
+    setPaintProperty,
+    setLayoutProperty,
+  }
 
   return (
-    <MapContext.Provider value={mapOperations}>{children}</MapContext.Provider>
+    <MapContext.Provider value={mapOperationsAPI}>
+      {children}
+    </MapContext.Provider>
   )
 }
 
-// Hook to use the map anywhere in the component tree
-export function useMap() {
+/**
+ * Hook to access map operations anywhere in the component tree
+ * Must be used within a MapProvider
+ */
+export function useMap(): MapOperationsAPI {
   const context = useContext(MapContext)
+
   if (!context) {
     throw new Error("useMap must be used within a MapProvider")
   }
+
   return context
 }

@@ -26,3 +26,9 @@ export {
   Source,
   Layer,
 } from "react-map-gl/mapbox"
+
+// Export types
+export * from "./types"
+
+// Export context and hooks
+export * from "../context/MapContext"
