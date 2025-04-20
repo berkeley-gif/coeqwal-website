@@ -197,7 +197,7 @@ const CombinedPanelContent = () => {
                 metricType: selectedMetric,
               }
             }
-          } catch (e) {
+          } catch {
             // Silently continue to next pattern
           }
         }
@@ -260,7 +260,7 @@ const CombinedPanelContent = () => {
               patternFound = true
               break
             }
-          } catch (e) {
+          } catch {
             // Silently continue to next pattern
           }
         }

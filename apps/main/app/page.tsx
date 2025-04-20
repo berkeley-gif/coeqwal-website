@@ -14,9 +14,8 @@ import { useTranslation } from "@repo/i18n"
 import { HeroQuestionsPanel, BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
-import { useMap } from "@repo/map"
 import type { ViewState, MapboxMapRef } from "@repo/map"
-import { useMapStore, mapActions } from "@repo/state/map"
+import { mapActions } from "@repo/state/map"
 
 // Dynamic import components that use client-side features
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
@@ -44,7 +43,6 @@ export default function Home() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
-  const { mapRef, addSource, addLayer } = useMap()
 
   // ────────────────────────────────────────────────────────────────────────
   // 1) UNCONTROLLED EXAMPLE
@@ -71,139 +69,10 @@ export default function Home() {
     pitch: 0,
   })
 
-  // const handleControlledFlyTo = () => {
-  //   // Use the flyTo method directly
-  //   if (mapRef.current) {
-  //     mapRef.current.flyTo(-121.5, 38.05, 10)
-  //   }
-  // }
-
-  // ────────────────────────────────────────────────────────────────────────
-  // 3) LAYER ADDING EXAMPLE
-  //    Using withMap from the context
-  // ────────────────────────────────────────────────────────────────────────
-
-  const handleAddLayer = () => {
-    // Example: Add a simple heatmap layer
-    addSource("water-features", {
-      type: "geojson",
-      data: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [-121.5, 38.05],
-            },
-            properties: {
-              name: "Sacramento-San Joaquin Delta",
-              importance: 10,
-            },
-          },
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [-122.42, 40.72],
-            },
-            properties: {
-              name: "Shasta Dam",
-              importance: 8,
-            },
-          },
-          {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: [-121.1, 37.06],
-            },
-            properties: {
-              name: "San Luis Reservoir",
-              importance: 6,
-            },
-          },
-        ],
-      },
-    })
-
-    addLayer("water-heatmap", "water-features", "heatmap", {
-      "heatmap-weight": ["get", "importance"],
-      "heatmap-intensity": 0.8,
-      "heatmap-color": [
-        "interpolate",
-        ["linear"],
-        ["heatmap-density"],
-        0,
-        "rgba(0, 0, 255, 0)",
-        0.2,
-        "royalblue",
-        0.4,
-        "cyan",
-        0.6,
-        "lime",
-        0.8,
-        "yellow",
-        1,
-        "red",
-      ],
-      "heatmap-radius": 30,
-      type: "heatmap",
-      source: "water-features",
-      paint: {
-        "heatmap-weight": ["get", "importance"],
-        "heatmap-intensity": 0.8,
-        "heatmap-color": [
-          "interpolate",
-          ["linear"],
-          ["heatmap-density"],
-          0,
-          "rgba(0, 0, 255, 0)",
-          0.2,
-          "royalblue",
-          0.4,
-          "cyan",
-          0.6,
-          "lime",
-          0.8,
-          "yellow",
-          1,
-          "red",
-        ],
-        "heatmap-radius": 30,
-        "heatmap-opacity": 0.8,
-      },
-    })
-  }
-
-  // Simple flyTo function that works with context mapRef
-  const flyToLocation = (longitude: number, latitude: number, zoom: number) => {
-    if (mapRef.current) {
-      mapRef.current.flyTo(longitude, latitude, zoom)
-    }
-  }
-
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
     scrollToSection(sectionId)
     setDrawerOpen(false)
-  }
-
-  // Direct scroll to combined panel with offset
-  const scrollToQuestionBuilder = () => {
-    const element = document.getElementById("combined-panel-container")
-    if (element) {
-      // Calculate the element's position relative to the document
-      const rect = element.getBoundingClientRect()
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      const offset = rect.top + scrollTop + 120 // Reduced from 200px to 120px
-
-      // Scroll to the calculated position
-      window.scrollTo({
-        top: offset,
-        behavior: "smooth",
-      })
-    }
   }
 
   // Get navigation items with the current active section and translation function
