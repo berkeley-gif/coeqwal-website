@@ -228,8 +228,8 @@ export type StateManagementMode = "uncontrolled" | "react" | "zustand"
  * MapProps for our base Map component
  */
 export interface MapProps {
-  /** Mapbox access token */
-  mapboxAccessToken?: string
+  /** Mapbox access token (required) */
+  mapboxAccessToken: string
 
   /** Map style URL */
   mapStyle?: string

@@ -400,3 +400,47 @@ mapOperations.fitBounds({
 ```
 
 Both methods provide smooth camera transitions with full control over animation settings and camera parameters.
+
+## Mapbox Access Token
+
+The map package requires a Mapbox access token to function. There are several ways to provide this token:
+
+### 1. Per-component token (recommended)
+
+Pass the token directly to each Map component. This approach allows using different tokens for different maps:
+
+```tsx
+import { Map } from "@repo/map"
+
+export function MapComponent() {
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+
+  return (
+    <Map
+      mapboxAccessToken={mapboxToken}
+      // other props...
+    />
+  )
+}
+```
+
+### 2. Environment variable
+
+Set the `MAPBOX_TOKEN` or `NEXT_PUBLIC_MAPBOX_TOKEN` environment variable. This is automatically picked up by react-map-gl:
+
+```bash
+# In .env.local
+NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
+```
+
+### 3. Global token
+
+Set the token globally (not recommended for most applications):
+
+```tsx
+// In _app.tsx or similar entry point
+import mapboxgl from "mapbox-gl"
+mapboxgl.accessToken = "your_mapbox_token_here"
+```
+
+For security reasons, we recommend using the per-component approach with environment variables, rather than hardcoding tokens in your source code.

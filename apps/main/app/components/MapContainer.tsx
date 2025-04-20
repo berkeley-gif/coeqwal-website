@@ -60,7 +60,7 @@ export default function MapContainer({
       }}
     >
       <Map
-        mapboxToken={mapboxToken}
+        mapboxAccessToken={mapboxToken}
         // Prefer global state from Zustand, fall back to local state
         viewState={mapState.viewState}
         initialViewState={mapState.viewState}

@@ -15,6 +15,7 @@ import type { MapboxMapRef, MapProps, ViewState } from "./types"
  * - Provides consistent styling defaults
  */
 export function Map({
+  mapboxAccessToken,
   mapStyle = "mapbox://styles/digijill/cl122pj52001415qofin7bb1c",
   initialViewState = {
     longitude: -126.037,
@@ -72,6 +73,7 @@ export function Map({
 
   return (
     <ReactMapGL
+      mapboxAccessToken={mapboxAccessToken}
       mapStyle={mapStyle}
       initialViewState={initialViewState}
       style={containerStyle}
