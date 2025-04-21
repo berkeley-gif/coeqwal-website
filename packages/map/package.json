@@ -7,9 +7,9 @@
       "types": "./index.ts",
       "default": "./index.ts"
     },
-    "./context": {
-      "types": "./context/MapContext.tsx",
-      "default": "./context/MapContext.tsx"
+    "./client": {
+      "types": "./client.ts",
+      "default": "./client.ts"
     }
   },
   "scripts": {

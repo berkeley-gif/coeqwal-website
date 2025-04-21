@@ -1,13 +1,11 @@
 // packages/map/index.ts
 
-// ✅ Default export: main Map component
-export { default } from "./src/Map"
+// ✅ Export the wrapper as the default MapProvider
+export { MapProviderClientWrapper as MapProvider } from "./src/context/MapProviderClientWrapper"
+export { useMap } from "./src/context/MapContext"
 
-// ✅ Named export for Map component (if needed by others)
+// Export Map component
 export { default as Map } from "./src/Map"
-
-// 🧠 Map context and hooks
-export { MapProvider, useMap } from "./src/context/MapContext"
 
 // 📍 Marker components
 export {
@@ -18,7 +16,6 @@ export {
   MarkersLayer,
 } from "./src/markers"
 
-// 🧠 Marker types
 export type { MarkerProperties } from "./src/markers"
 
 // 📐 Core map types and interfaces
@@ -35,7 +32,6 @@ export type {
   MapProps,
 } from "./src/types"
 
-// ✅ ⬅️ Add this line to fix the import error
 export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"
 
 // 🔁 Predefined transitions

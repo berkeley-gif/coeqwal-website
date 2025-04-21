@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
-import { MapProviderClientWrapper } from "./components/MapProviderClientWrapper"
+import { MapProvider } from "@repo/map/client"
 import "./globals.css"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/FontLoader"
@@ -37,7 +37,7 @@ export default function RootLayout({
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
           <ThemeRegistry>
-            <MapProviderClientWrapper>{children}</MapProviderClientWrapper>
+            <MapProvider>{children}</MapProvider>
           </ThemeRegistry>
         </TranslationProvider>
       </body>

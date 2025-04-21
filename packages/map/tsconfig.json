@@ -1,6 +1,10 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@repo/map/client": ["./client"]
+    },
     "outDir": "dist",
     "skipLibCheck": true,
     "emitDeclarationOnly": true,

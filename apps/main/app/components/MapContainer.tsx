@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import Map, { useMap } from "@repo/map" // 👈 default + named import
+import { Map, useMap } from "@repo/map"
 import type { ViewState } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useMapState, mapActions } from "@repo/state/map"
