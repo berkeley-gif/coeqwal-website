@@ -1,39 +1,81 @@
 // packages/map/src/context/MapContext.tsx
 "use client"
 
-import { createContext, useContext, useRef, useState } from "react"
-import type { ReactNode } from "react"
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useCallback,
+  type ReactNode,
+} from "react"
 import type { MapRef } from "react-map-gl/mapbox"
 import type {
   MapOperationsAPI,
-  StyleValue,
   MapLayerType,
   SourceSpecification,
+  StyleValue,
+  OverlayEntry,
 } from "../types"
 
 const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 
-export function MapProvider({ children }: { children: ReactNode }) {
+export function MapProvider({
+  children,
+  initialOverlays = {},
+}: {
+  children: ReactNode
+  initialOverlays?: Record<string, ReactNode>
+}) {
+  // Stores the map instance
   const mapRef = useRef<MapRef | null>(null)
-  const [motionChildren, setMotionChildren] = useState<ReactNode | null>(null)
 
+  // Stores custom overlay ReactNodes, like Framer Motion markers or tooltips
+  const overlays = useRef<Record<string, OverlayEntry>>(
+    Object.entries(initialOverlays).reduce((acc, [k, el]) => {
+      acc[k] = { element: el }
+      return acc
+    }, {} as Record<string, OverlayEntry>),
+  )
+
+  const [, forceUpdate] = useState(0) // Used to re-render when overlays change
+
+  // Universal overlay setter
+  const setOverlay = useCallback(
+    (key: string, element: ReactNode | null, style?: React.CSSProperties) => {
+      if (element === null) {
+        delete overlays.current[key]
+      } else {
+        overlays.current[key] = { element, style }
+      }
+      forceUpdate((n) => n + 1)
+    },
+    [],
+  )
+
+  // Shorthand for Framer Motion users
+  const setMotionChildren = useCallback(
+    (element: ReactNode | null, style?: React.CSSProperties) => {
+      setOverlay("motion", element, style)
+    },
+    [setOverlay],
+  )
+
+  // Safely run map operations after checking map is loaded
   const withMap = (callback: (map: MapRef) => void) => {
-    if (mapRef.current) {
-      callback(mapRef.current)
-    } else {
-      console.warn("withMap called but mapRef is null")
-    }
+    if (mapRef.current) callback(mapRef.current)
+    else console.warn("withMap called but mapRef is null")
   }
 
   const contextValue: MapOperationsAPI = {
     mapRef,
     withMap,
-    motionChildren,
+    overlays,
+    setOverlay,
     setMotionChildren,
 
     flyTo: (...args: any[]) => {
       if (!mapRef.current) return
-
       if (typeof args[0] === "object") {
         const viewState = args[0]
         mapRef.current.flyTo({
@@ -46,15 +88,15 @@ export function MapProvider({ children }: { children: ReactNode }) {
           essential: viewState.transitionOptions?.essential ?? true,
         })
       } else {
-        const [lng, lat, zoom, pitch = 0, bearing = 0, transitionOptions = {}] = args
+        const [lng, lat, zoom, pitch = 0, bearing = 0, options = {}] = args
         mapRef.current.flyTo({
           center: [lng, lat],
           zoom,
           pitch,
           bearing,
-          duration: transitionOptions.duration ?? 2000,
-          easing: transitionOptions.easing,
-          essential: transitionOptions.essential ?? true,
+          duration: options.duration ?? 2000,
+          easing: options.easing,
+          essential: options.essential ?? true,
         })
       }
     },
@@ -68,8 +110,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       if (!map || map.getSource(id)) return
       try {
         map.addSource(id, source)
-      } catch (error) {
-        console.error(`Failed to add source '${id}':`, error)
+      } catch (err) {
+        console.error(`Failed to add source '${id}':`, err)
       }
     },
 
@@ -81,22 +123,21 @@ export function MapProvider({ children }: { children: ReactNode }) {
           if (layer.source === id) map.removeLayer(layer.id)
         })
         map.removeSource(id)
-      } catch (error) {
-        console.error(`Failed to remove source '${id}':`, error)
+      } catch (err) {
+        console.error(`Failed to remove source '${id}':`, err)
       }
     },
 
     addLayer: (id, source, type, paint, layout) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
-
       try {
         const layer: any = { id, source, type }
         if (paint) layer.paint = paint
         if (layout) layer.layout = layout
         map.addLayer(layer)
-      } catch (error) {
-        console.error(`Failed to add layer '${id}':`, error)
+      } catch (err) {
+        console.error(`Failed to add layer '${id}':`, err)
       }
     },
 
@@ -105,8 +146,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       if (!map || !map.getLayer(id)) return
       try {
         map.removeLayer(id)
-      } catch (error) {
-        console.error(`Failed to remove layer '${id}':`, error)
+      } catch (err) {
+        console.error(`Failed to remove layer '${id}':`, err)
       }
     },
 
@@ -114,9 +155,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
       try {
-        map.setLayoutProperty(id, "visibility" as any, visible ? "visible" : "none")
-      } catch (error) {
-        console.error(`Failed to set visibility for layer '${id}':`, error)
+        map.setLayoutProperty(id, "visibility", visible ? "visible" : "none")
+      } catch (err) {
+        console.error(`Failed to set visibility for layer '${id}':`, err)
       }
     },
 
@@ -125,36 +166,34 @@ export function MapProvider({ children }: { children: ReactNode }) {
       if (!map || !map.getLayer(id)) return
       try {
         if (property.startsWith("paint-")) {
-          const paintProp = property.replace("paint-", "")
-          map.setPaintProperty(id, paintProp as any, value)
+          map.setPaintProperty(id, property.replace("paint-", ""), value)
         } else if (property.startsWith("layout-")) {
-          const layoutProp = property.replace("layout-", "")
-          map.setLayoutProperty(id, layoutProp as any, value)
+          map.setLayoutProperty(id, property.replace("layout-", ""), value)
         } else {
           console.warn(`Unknown property type: ${property}`)
         }
-      } catch (error) {
-        console.error(`Failed to set property '${property}' for layer '${id}':`, error)
+      } catch (err) {
+        console.error(`Failed to set property '${property}' on '${id}':`, err)
       }
     },
 
-    setPaintProperty: (id, property, value) => {
+    setPaintProperty: (id, prop, value) => {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
       try {
-        map.setPaintProperty(id, property as any, value)
-      } catch (error) {
-        console.error(`Failed to set paint property '${property}' for layer '${id}':`, error)
+        map.setPaintProperty(id, prop, value)
+      } catch (err) {
+        console.error(`Failed to set paint property '${prop}' on '${id}':`, err)
       }
     },
 
-    setLayoutProperty: (id, property, value) => {
+    setLayoutProperty: (id, prop, value) => {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
       try {
-        map.setLayoutProperty(id, property as any, value)
-      } catch (error) {
-        console.error(`Failed to set layout property '${property}' for layer '${id}':`, error)
+        map.setLayoutProperty(id, prop, value)
+      } catch (err) {
+        console.error(`Failed to set layout property '${prop}' on '${id}':`, err)
       }
     },
 
