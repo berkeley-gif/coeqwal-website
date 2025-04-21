@@ -391,14 +391,17 @@ export default function Home() {
                           }}
                           onClick={(e) => {
                             e.stopPropagation()
-
-                            mapActions.flyTo(
-                              -122.305, // longitude
-                              37.075, // latitude
-                              7.82, // zoom
-                              60, // pitch
-                              45, // bearing
-                            )
+                          
+                            console.log("👁 flyTo clicked", mapRef.current)
+                          
+                            mapRef.current?.flyTo({
+                              center: [-122.305, 37.075],
+                              zoom: 7.82,
+                              pitch: 60,
+                              bearing: 45,
+                              duration: 3000, // Optional
+                              essential: true,
+                            })
                           }}
                         />
                       </Typography>
