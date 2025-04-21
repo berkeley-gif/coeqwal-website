@@ -8,6 +8,6 @@
     "moduleResolution": "bundler",
     "module": "ESNext"
   },
-  "include": ["src/**/*", "hooks/**/*", "context/**/*"],
+  "include": ["src/**/*", "hooks/**/*", "src/context/**/*"],
   "exclude": ["node_modules", "dist"]
 }

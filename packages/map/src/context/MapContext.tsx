@@ -9,7 +9,7 @@ import type {
   StyleValue,
   MapLayerType,
   SourceSpecification,
-} from "../src/types"
+} from "../types"
 
 const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 

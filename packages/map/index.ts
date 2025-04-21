@@ -7,7 +7,7 @@ export { default } from "./src/Map"
 export { default as Map } from "./src/Map"
 
 // 🧠 Map context and hooks
-export { MapProvider, useMap } from "./context/MapContext"
+export { MapProvider, useMap } from "./src/context/MapContext"
 
 // 📍 Marker components
 export {

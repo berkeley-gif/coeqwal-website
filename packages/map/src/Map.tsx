@@ -4,7 +4,7 @@
 import { useCallback, useEffect } from "react"
 import MapboxGL, { MapRef } from "react-map-gl/mapbox"
 import type { MapProps } from "./types"
-import { useMap } from "../context/MapContext"
+import { useMap } from "./context/MapContext"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export default function Map(props: MapProps) {

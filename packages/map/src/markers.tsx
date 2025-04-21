@@ -5,7 +5,7 @@ import {
   Marker as ReactMapGLMarker,
   Popup as ReactMapGLPopup,
 } from "react-map-gl/mapbox"
-import { useMap } from "../context/MapContext"
+import { useMap } from "./context/MapContext"
 
 // Re-export the base components
 export const Marker = ReactMapGLMarker
