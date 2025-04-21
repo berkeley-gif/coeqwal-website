@@ -1,7 +1,15 @@
-"use client"
+// packages/map/index.ts
 
-export { Map } from "./src/Map"
-export { useMap, MapProvider } from "./context/MapContext"
+// ✅ Default export: main Map component
+export { default } from "./src/Map"
+
+// ✅ Named export for Map component (if needed by others)
+export { default as Map } from "./src/Map"
+
+// 🧠 Map context and hooks
+export { MapProvider, useMap } from "./context/MapContext"
+
+// 📍 Marker components
 export {
   Marker,
   Popup,
@@ -10,9 +18,11 @@ export {
   MarkersLayer,
 } from "./src/markers"
 
-// Export all types as well
+// 🧠 Marker types
+export type { MarkerProperties } from "./src/markers"
+
+// 📐 Core map types and interfaces
 export type {
-  MapboxMapRef,
   ViewState,
   ViewStateTransitionOptions,
   MapLayerType,
@@ -25,11 +35,13 @@ export type {
   MapProps,
 } from "./src/types"
 
-// Export map transitions
+// 🔁 Predefined transitions
 export { MapTransitions } from "./src/types"
 
-// Export marker types
-export type { MarkerProperties } from "./src/markers"
-
-// Export Layer for typing
-export type Layer = mapboxgl.Layer
+// 🧰 Re-export Mapbox GL components from ReactMapGL for convenience
+export {
+  NavigationControl,
+  GeolocateControl,
+  Source,
+  Layer,
+} from "react-map-gl/mapbox"

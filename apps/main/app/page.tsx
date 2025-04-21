@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import dynamic from "next/dynamic"
 import {
   Box,
@@ -16,6 +16,7 @@ import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { ViewState, MapboxMapRef } from "@repo/map"
 import { mapActions } from "@repo/state/map"
+import { useMap } from "@repo/map"
 
 // Dynamic import components that use client-side features
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
@@ -40,6 +41,22 @@ const CombinedPanel = dynamic(
 
 export default function Home() {
   const { t } = useTranslation()
+  const { mapRef } = useMap()
+
+  useEffect(() => {
+    console.log("✅ useEffect in page.tsx running")
+
+    const interval = setInterval(() => {
+      if (mapRef?.current) {
+        const center = mapRef.current.getMap().getCenter()
+        console.log("✅ mapRef is now available:", center)
+      } else {
+        console.log("❌ mapRef is still null")
+      }
+    }, 2000) // every 2 seconds
+
+    return () => clearInterval(interval)
+  }, [mapRef])
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)

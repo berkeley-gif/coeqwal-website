@@ -4,8 +4,8 @@
   "private": true,
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./index.ts",
+      "default": "./index.ts"
     },
     "./context": {
       "types": "./context/MapContext.tsx",

@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { Map } from "@repo/map"
-import { useMap } from "@repo/map"
+import Map, { useMap } from "@repo/map" // 👈 default + named import
 import type { MapboxMapRef, ViewState } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useMapState, mapActions } from "@repo/state/map"
@@ -15,25 +14,38 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const { mapRef } = useMap()
   const mapState = useMapState()
-
-  // Keep track of whether the map is initialized
   const initialized = useRef(false)
 
-  // Once the map is mounted, register it with our actions
+  // 🟢 Render log
+  console.log("📦 MapContainer rendered")
+
+  // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
-    // Connect uncontrolledRef to the context mapRef
-    if (uncontrolledRef && mapRef.current) {
-      uncontrolledRef.current = mapRef.current
+    console.log("🚀 MapContainer useEffect running")
+
+    const ref = mapRef?.current
+    if (!ref) {
+      console.warn("❌ mapRef.current is null in MapContainer")
+      return
     }
 
-    // For our state management, just register the map instance
-    // for the actions to use directly
-    if (mapRef.current && !initialized.current) {
-      // Register the map instance with our custom actions
-      mapActions.registerMapInstance(mapRef.current)
-      initialized.current = true
+    if (uncontrolledRef) {
+      uncontrolledRef.current = ref
+      console.log("🔗 uncontrolledRef assigned")
     }
-  }, [uncontrolledRef, mapRef])
+
+    if (!initialized.current) {
+      mapActions.registerMapInstance(ref)
+      initialized.current = true
+      console.log("📌 map instance registered with mapActions")
+    }
+
+    const interval = setInterval(() => {
+      console.log("🕵️ Polling mapRef:", mapRef.current)
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [mapRef, uncontrolledRef])
 
   return (
     <Box
@@ -57,8 +69,8 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
         }}
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
         scrollZoom={false}
-        interactive={true}
-        dragPan={true}
+        interactive
+        dragPan
         style={{ width: "100%", height: "100%" }}
       />
     </Box>

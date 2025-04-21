@@ -32,5 +32,6 @@ export function MapProviderClientWrapper({
 }: {
   children: ReactNode
 }) {
+  console.log("🟢 MapProviderClientWrapper mounted")
   return <MapProvider>{children}</MapProvider>
 }

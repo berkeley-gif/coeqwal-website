@@ -241,6 +241,9 @@ importers:
 
   packages/state:
     dependencies:
+      '@repo/map':
+        specifier: workspace:*
+        version: link:../map
       immer:
         specifier: ^10.1.1
         version: 10.1.1
