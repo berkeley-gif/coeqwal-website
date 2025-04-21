@@ -1,5 +1,13 @@
 import type { MapRef } from "react-map-gl/mapbox"
 import type { ReactNode, RefObject, CSSProperties } from "react"
+import type {
+  GeoJSONSourceSpecification,
+  VectorSourceSpecification,
+  RasterSourceSpecification,
+  RasterDEMSourceSpecification,
+  ImageSourceSpecification,
+  VideoSourceSpecification,
+} from "mapbox-gl"
 import { MarkerProperties } from "./markers"
 
 /**
@@ -49,6 +57,14 @@ export type MapSourceData =
   | string
   | Record<string, unknown>
 
+export type SourceSpecification =
+  | GeoJSONSourceSpecification
+  | VectorSourceSpecification
+  | RasterSourceSpecification
+  | RasterDEMSourceSpecification
+  | ImageSourceSpecification
+  | VideoSourceSpecification
+
 export interface MapSource {
   id: string
   type: "vector" | "raster" | "raster-dem" | "geojson" | "image" | "video"
@@ -96,7 +112,7 @@ export interface MapOperationsAPI {
       >,
     ): void
   }
-  addSource: (id: string, source: Omit<MapSource, "id">) => void
+  addSource: (id: string, source: SourceSpecification) => void
   removeSource: (id: string) => void
   addLayer: (
     id: string,

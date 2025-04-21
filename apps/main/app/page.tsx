@@ -391,9 +391,9 @@ export default function Home() {
                           }}
                           onClick={(e) => {
                             e.stopPropagation()
-                          
+
                             console.log("👁 flyTo clicked", mapRef.current)
-                          
+
                             mapRef.current?.flyTo({
                               center: [-122.305, 37.075],
                               zoom: 7.82,
