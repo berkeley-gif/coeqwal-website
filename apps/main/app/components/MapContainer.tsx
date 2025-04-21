@@ -2,12 +2,12 @@
 
 import { useEffect, useRef } from "react"
 import Map, { useMap } from "@repo/map" // 👈 default + named import
-import type { MapboxMapRef, ViewState } from "@repo/map"
+import type { ViewState } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useMapState, mapActions } from "@repo/state/map"
 
 interface MapContainerProps {
-  uncontrolledRef?: React.RefObject<MapboxMapRef>
+  uncontrolledRef?: React.RefObject<any>
 }
 
 export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
@@ -58,15 +58,8 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
     >
       <Map
         mapboxToken={mapboxToken}
-        viewState={mapState.viewState}
-        initialViewState={mapState.viewState}
-        onMoveEnd={(evt: { viewState: ViewState }) => {
-          mapState.onViewStateChange({
-            ...evt.viewState,
-            bearing: evt.viewState.bearing ?? 0,
-            pitch: evt.viewState.pitch ?? 0,
-          })
-        }}
+        initialViewState={mapState.viewState} // Start uncontrolled
+        // 🔁 Remove viewState for now to stay in uncontrolled mode
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
         scrollZoom={false}
         interactive

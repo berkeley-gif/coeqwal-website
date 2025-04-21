@@ -23,8 +23,36 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const contextValue: MapOperationsAPI = {
     mapRef,
     withMap,
-    flyTo: () => {
-      throw new Error("flyTo not implemented yet")
+    flyTo: (...args: any[]) => {
+      if (!mapRef.current) {
+        console.warn("flyTo called but mapRef is null")
+        return
+      }
+
+      if (typeof args[0] === "object") {
+        const viewState = args[0]
+        mapRef.current.flyTo({
+          center: [viewState.longitude, viewState.latitude],
+          zoom: viewState.zoom,
+          bearing: viewState.bearing ?? 0,
+          pitch: viewState.pitch ?? 0,
+          duration: viewState.transitionOptions?.duration ?? 4000,
+          easing: viewState.transitionOptions?.easing,
+          essential: viewState.transitionOptions?.essential ?? true,
+        })
+      } else {
+        const [lng, lat, zoom, pitch = 0, bearing = 0, transitionOptions = {}] =
+          args
+        mapRef.current.flyTo({
+          center: [lng, lat],
+          zoom,
+          pitch,
+          bearing,
+          duration: transitionOptions.duration ?? 2000,
+          easing: transitionOptions.easing,
+          essential: transitionOptions.essential ?? true,
+        })
+      }
     },
     fitBounds: () => {
       throw new Error("fitBounds not implemented yet")
@@ -63,7 +91,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
 
   console.log("🟢 MapProvider mounted")
 
-  return <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
+  return (
+    <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
+  )
 }
 
 export function useMap(): MapOperationsAPI {

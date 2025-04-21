@@ -113,13 +113,7 @@ export default function Home() {
           zIndex: -1,
         }}
       >
-        <MapContainer
-          uncontrolledRef={uncontrolledRef}
-          viewState={controlledViewState}
-          onViewStateChange={(newViewState) =>
-            setControlledViewState(newViewState)
-          }
-        />
+        <MapContainer uncontrolledRef={uncontrolledRef} />
 
         {/* Map State Display */}
         <MapStateDisplay />

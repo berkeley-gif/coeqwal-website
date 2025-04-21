@@ -69,16 +69,42 @@ export interface MapOperationsAPI {
   mapRef: RefObject<MapRef | null>
   withMap: (callback: (map: MapRef) => void) => void
   flyTo: {
-    (longitude: number, latitude: number, zoom: number, pitch?: number, bearing?: number, transitionOptions?: ViewStateTransitionOptions): void
+    (
+      longitude: number,
+      latitude: number,
+      zoom: number,
+      pitch?: number,
+      bearing?: number,
+      transitionOptions?: ViewStateTransitionOptions,
+    ): void
     (viewState: Omit<ViewState, "bounds">): void
   }
   fitBounds: {
-    (bounds: [[number, number], [number, number]], pitch?: number, bearing?: number, padding?: number | { top: number; bottom: number; left: number; right: number }, transitionOptions?: ViewStateTransitionOptions): void
-    (viewState: Pick<ViewState, "bounds" | "pitch" | "bearing" | "transitionOptions">): void
+    (
+      bounds: [[number, number], [number, number]],
+      pitch?: number,
+      bearing?: number,
+      padding?:
+        | number
+        | { top: number; bottom: number; left: number; right: number },
+      transitionOptions?: ViewStateTransitionOptions,
+    ): void
+    (
+      viewState: Pick<
+        ViewState,
+        "bounds" | "pitch" | "bearing" | "transitionOptions"
+      >,
+    ): void
   }
   addSource: (id: string, source: Omit<MapSource, "id">) => void
   removeSource: (id: string) => void
-  addLayer: (id: string, source: string, type: MapLayerType, paint?: Record<string, StyleValue>, layout?: Record<string, StyleValue>) => void
+  addLayer: (
+    id: string,
+    source: string,
+    type: MapLayerType,
+    paint?: Record<string, StyleValue>,
+    layout?: Record<string, StyleValue>,
+  ) => void
   removeLayer: (id: string) => void
   setLayerVisibility: (id: string, visible: boolean) => void
   setLayerProperty: (id: string, property: string, value: StyleValue) => void
@@ -127,7 +153,8 @@ export const MapTransitions = {
   },
   DRAMATIC: {
     duration: 3500,
-    easing: (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+    easing: (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
     essential: true,
   },
   AERIAL: {
@@ -138,7 +165,8 @@ export const MapTransitions = {
   },
   CINEMATIC: {
     duration: 4000,
-    easing: (t: number) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+    easing: (t: number) =>
+      t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
     essential: true,
     bearing: 30,
     pitch: 45,

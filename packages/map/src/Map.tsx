@@ -11,15 +11,18 @@ export default function Map(props: MapProps) {
   const { mapRef } = useMap()
 
   // Ref callback assigns map instance immediately
-  const assignMapRef = useCallback((instance: MapRef | null) => {
-    if (instance) {
-      mapRef.current = instance
-      console.log("✅ mapRef.current assigned immediately:", instance)
-    } else {
-      console.log("🧹 Map unmounted – clearing context ref")
-      mapRef.current = null
-    }
-  }, [mapRef])
+  const assignMapRef = useCallback(
+    (instance: MapRef | null) => {
+      if (instance) {
+        mapRef.current = instance
+        console.log("✅ mapRef.current assigned immediately:", instance)
+      } else {
+        console.log("🧹 Map unmounted – clearing context ref")
+        mapRef.current = null
+      }
+    },
+    [mapRef],
+  )
 
   useEffect(() => {
     console.log("🧩 Map useEffect mounted – mapRef:", mapRef.current)

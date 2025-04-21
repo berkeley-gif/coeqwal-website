@@ -35,6 +35,9 @@ export type {
   MapProps,
 } from "./src/types"
 
+// ✅ ⬅️ Add this line to fix the import error
+export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"
+
 // 🔁 Predefined transitions
 export { MapTransitions } from "./src/types"
 
