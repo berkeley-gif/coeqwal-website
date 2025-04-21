@@ -1,6 +1,7 @@
+// packages/map/src/context/MapContext.tsx
 "use client"
 
-import { createContext, useContext, useRef } from "react"
+import { createContext, useContext, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import type { MapRef } from "react-map-gl/mapbox"
 import type {
@@ -14,6 +15,7 @@ const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 
 export function MapProvider({ children }: { children: ReactNode }) {
   const mapRef = useRef<MapRef | null>(null)
+  const [motionChildren, setMotionChildren] = useState<ReactNode | null>(null)
 
   const withMap = (callback: (map: MapRef) => void) => {
     if (mapRef.current) {
@@ -26,11 +28,11 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const contextValue: MapOperationsAPI = {
     mapRef,
     withMap,
+    motionChildren,
+    setMotionChildren,
+
     flyTo: (...args: any[]) => {
-      if (!mapRef.current) {
-        console.warn("flyTo called but mapRef is null")
-        return
-      }
+      if (!mapRef.current) return
 
       if (typeof args[0] === "object") {
         const viewState = args[0]
@@ -44,8 +46,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
           essential: viewState.transitionOptions?.essential ?? true,
         })
       } else {
-        const [lng, lat, zoom, pitch = 0, bearing = 0, transitionOptions = {}] =
-          args
+        const [lng, lat, zoom, pitch = 0, bearing = 0, transitionOptions = {}] = args
         mapRef.current.flyTo({
           center: [lng, lat],
           zoom,
@@ -57,115 +58,72 @@ export function MapProvider({ children }: { children: ReactNode }) {
         })
       }
     },
+
     fitBounds: () => {
       throw new Error("fitBounds not implemented yet")
     },
-    addSource: (id: string, source: SourceSpecification) => {
-      if (!mapRef.current) {
-        console.warn("addSource called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    addSource: (id, source) => {
+      const map = mapRef.current?.getMap()
+      if (!map || map.getSource(id)) return
       try {
-        if (map.getSource(id)) return
         map.addSource(id, source)
       } catch (error) {
         console.error(`Failed to add source '${id}':`, error)
       }
     },
-    removeSource: (id: string) => {
-      if (!mapRef.current) {
-        console.warn("removeSource called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    removeSource: (id) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getSource(id)) return
       try {
-        if (!map.getSource(id)) return
         map.getStyle().layers.forEach((layer) => {
-          if (layer.source === id) {
-            map.removeLayer(layer.id)
-          }
+          if (layer.source === id) map.removeLayer(layer.id)
         })
         map.removeSource(id)
       } catch (error) {
         console.error(`Failed to remove source '${id}':`, error)
       }
     },
-    addLayer: (
-      id: string,
-      source: string,
-      type: MapLayerType,
-      paint?: Record<string, StyleValue>,
-      layout?: Record<string, StyleValue>,
-    ) => {
-      if (!mapRef.current) {
-        console.warn("addLayer called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
+    addLayer: (id, source, type, paint, layout) => {
+      const map = mapRef.current?.getMap()
+      if (!map || map.getLayer(id) || !map.getSource(source)) return
 
       try {
-        if (map.getLayer(id)) return
-        if (!map.getSource(source)) return
-
         const layer: any = { id, source, type }
         if (paint) layer.paint = paint
         if (layout) layer.layout = layout
-
         map.addLayer(layer)
       } catch (error) {
         console.error(`Failed to add layer '${id}':`, error)
       }
     },
-    removeLayer: (id: string) => {
-      if (!mapRef.current) {
-        console.warn("removeLayer called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    removeLayer: (id) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getLayer(id)) return
       try {
-        if (!map.getLayer(id)) return
         map.removeLayer(id)
       } catch (error) {
         console.error(`Failed to remove layer '${id}':`, error)
       }
     },
-    setLayerVisibility: (id: string, visible: boolean) => {
-      if (!mapRef.current) {
-        console.warn("setLayerVisibility called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    setLayerVisibility: (id, visible) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getLayer(id)) return
       try {
-        if (!map.getLayer(id)) return
-        map.setLayoutProperty(
-          id,
-          "visibility" as any,
-          visible ? "visible" : "none",
-        )
+        map.setLayoutProperty(id, "visibility" as any, visible ? "visible" : "none")
       } catch (error) {
         console.error(`Failed to set visibility for layer '${id}':`, error)
       }
     },
-    setLayerProperty: (id: string, property: string, value: StyleValue) => {
-      if (!mapRef.current) {
-        console.warn("setLayerProperty called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    setLayerProperty: (id, property, value) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getLayer(id)) return
       try {
-        if (!map.getLayer(id)) return
         if (property.startsWith("paint-")) {
           const paintProp = property.replace("paint-", "")
           map.setPaintProperty(id, paintProp as any, value)
@@ -176,70 +134,38 @@ export function MapProvider({ children }: { children: ReactNode }) {
           console.warn(`Unknown property type: ${property}`)
         }
       } catch (error) {
-        console.error(
-          `Failed to set property '${property}' for layer '${id}':`,
-          error,
-        )
+        console.error(`Failed to set property '${property}' for layer '${id}':`, error)
       }
     },
-    setPaintProperty: (id: string, property: string, value: StyleValue) => {
-      if (!mapRef.current) {
-        console.warn("setPaintProperty called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    setPaintProperty: (id, property, value) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getLayer(id)) return
       try {
-        if (!map.getLayer(id)) return
         map.setPaintProperty(id, property as any, value)
       } catch (error) {
-        console.error(
-          `Failed to set paint property '${property}' for layer '${id}':`,
-          error,
-        )
+        console.error(`Failed to set paint property '${property}' for layer '${id}':`, error)
       }
     },
-    setLayoutProperty: (id: string, property: string, value: StyleValue) => {
-      if (!mapRef.current) {
-        console.warn("setLayoutProperty called but mapRef is null")
-        return
-      }
 
-      const map = mapRef.current.getMap()
-
+    setLayoutProperty: (id, property, value) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getLayer(id)) return
       try {
-        if (!map.getLayer(id)) return
         map.setLayoutProperty(id, property as any, value)
       } catch (error) {
-        console.error(
-          `Failed to set layout property '${property}' for layer '${id}':`,
-          error,
-        )
+        console.error(`Failed to set layout property '${property}' for layer '${id}':`, error)
       }
     },
+
     setMarkers: () => {
       throw new Error("setMarkers not implemented yet")
     },
-    setMotionChildren: () => {
-      throw new Error("setMotionChildren not implemented yet")
-    },
   }
 
-  return (
-    <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
-  )
+  return <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
 }
 
-/**
- * useMap()
- *
- * This is the preferred way to interact with the map.
- * All methods in the context wrap the raw Mapbox map API and include safety checks.
- *
- * Avoid accessing `mapRef.current?.getMap()?.addSource(...)` directly unless absolutely necessary.
- * Instead, use `useMap().addSource(...)` for better safety, logging, and future flexibility.
- */
 export function useMap(): MapOperationsAPI {
   const context = useContext(MapContext)
   if (!context) {
