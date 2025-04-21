@@ -1,4 +1,3 @@
-// packages/map/context/MapContext.tsx
 "use client"
 
 import { createContext, useContext, useRef } from "react"
@@ -14,7 +13,6 @@ import type {
 const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 
 export function MapProvider({ children }: { children: ReactNode }) {
-  // ✅ This ref is now directly a MapRef from react-map-gl
   const mapRef = useRef<MapRef | null>(null)
 
   const withMap = (callback: (map: MapRef) => void) => {
@@ -71,15 +69,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if source already exists
-        if (map.getSource(id)) {
-          console.warn(`Source '${id}' already exists`)
-          return
-        }
-
-        // Add the source
+        if (map.getSource(id)) return
         map.addSource(id, source)
-        console.log(`Source '${id}' added successfully`)
       } catch (error) {
         console.error(`Failed to add source '${id}':`, error)
       }
@@ -93,22 +84,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if source exists
-        if (!map.getSource(id)) {
-          console.warn(`Source '${id}' does not exist`)
-          return
-        }
-
-        // Remove any layers that use this source first
+        if (!map.getSource(id)) return
         map.getStyle().layers.forEach((layer) => {
           if (layer.source === id) {
             map.removeLayer(layer.id)
           }
         })
-
-        // Remove the source
         map.removeSource(id)
-        console.log(`Source '${id}' removed successfully`)
       } catch (error) {
         console.error(`Failed to remove source '${id}':`, error)
       }
@@ -128,27 +110,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if layer already exists
-        if (map.getLayer(id)) {
-          console.warn(`Layer '${id}' already exists`)
-          return
-        }
+        if (map.getLayer(id)) return
+        if (!map.getSource(source)) return
 
-        // Check if source exists
-        if (!map.getSource(source)) {
-          console.warn(`Source '${source}' does not exist`)
-          return
-        }
+        const layer: any = { id, source, type }
+        if (paint) layer.paint = paint
+        if (layout) layer.layout = layout
 
-        // Add the layer
-        map.addLayer({
-          id,
-          source,
-          type,
-          paint,
-          layout,
-        })
-        console.log(`Layer '${id}' added successfully`)
+        map.addLayer(layer)
       } catch (error) {
         console.error(`Failed to add layer '${id}':`, error)
       }
@@ -162,15 +131,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if layer exists
-        if (!map.getLayer(id)) {
-          console.warn(`Layer '${id}' does not exist`)
-          return
-        }
-
-        // Remove the layer
+        if (!map.getLayer(id)) return
         map.removeLayer(id)
-        console.log(`Layer '${id}' removed successfully`)
       } catch (error) {
         console.error(`Failed to remove layer '${id}':`, error)
       }
@@ -184,20 +146,11 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if layer exists
-        if (!map.getLayer(id)) {
-          console.warn(`Layer '${id}' does not exist`)
-          return
-        }
-
-        // Set layer visibility
+        if (!map.getLayer(id)) return
         map.setLayoutProperty(
           id,
           "visibility" as any,
           visible ? "visible" : "none",
-        )
-        console.log(
-          `Layer '${id}' visibility set to ${visible ? "visible" : "none"}`,
         )
       } catch (error) {
         console.error(`Failed to set visibility for layer '${id}':`, error)
@@ -212,21 +165,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if layer exists
-        if (!map.getLayer(id)) {
-          console.warn(`Layer '${id}' does not exist`)
-          return
-        }
-
-        // Determine if it's a paint or layout property based on property name
+        if (!map.getLayer(id)) return
         if (property.startsWith("paint-")) {
           const paintProp = property.replace("paint-", "")
           map.setPaintProperty(id, paintProp as any, value)
-          console.log(`Paint property '${paintProp}' set for layer '${id}'`)
         } else if (property.startsWith("layout-")) {
           const layoutProp = property.replace("layout-", "")
           map.setLayoutProperty(id, layoutProp as any, value)
-          console.log(`Layout property '${layoutProp}' set for layer '${id}'`)
         } else {
           console.warn(`Unknown property type: ${property}`)
         }
@@ -246,15 +191,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if layer exists
-        if (!map.getLayer(id)) {
-          console.warn(`Layer '${id}' does not exist`)
-          return
-        }
-
-        // Set paint property
+        if (!map.getLayer(id)) return
         map.setPaintProperty(id, property as any, value)
-        console.log(`Paint property '${property}' set for layer '${id}'`)
       } catch (error) {
         console.error(
           `Failed to set paint property '${property}' for layer '${id}':`,
@@ -271,15 +209,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current.getMap()
 
       try {
-        // Check if layer exists
-        if (!map.getLayer(id)) {
-          console.warn(`Layer '${id}' does not exist`)
-          return
-        }
-
-        // Set layout property
+        if (!map.getLayer(id)) return
         map.setLayoutProperty(id, property as any, value)
-        console.log(`Layout property '${property}' set for layer '${id}'`)
       } catch (error) {
         console.error(
           `Failed to set layout property '${property}' for layer '${id}':`,
@@ -295,13 +226,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
     },
   }
 
-  console.log("🟢 MapProvider mounted")
-
   return (
     <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
   )
 }
 
+/**
+ * useMap()
+ *
+ * This is the preferred way to interact with the map.
+ * All methods in the context wrap the raw Mapbox map API and include safety checks.
+ *
+ * Avoid accessing `mapRef.current?.getMap()?.addSource(...)` directly unless absolutely necessary.
+ * Instead, use `useMap().addSource(...)` for better safety, logging, and future flexibility.
+ */
 export function useMap(): MapOperationsAPI {
   const context = useContext(MapContext)
   if (!context) {
