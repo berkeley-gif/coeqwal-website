@@ -32,10 +32,13 @@ export function MapProvider({
 
   // Stores custom overlay ReactNodes, like Framer Motion markers or tooltips
   const overlays = useRef<Record<string, OverlayEntry>>(
-    Object.entries(initialOverlays).reduce((acc, [k, el]) => {
-      acc[k] = { element: el }
-      return acc
-    }, {} as Record<string, OverlayEntry>),
+    Object.entries(initialOverlays).reduce(
+      (acc, [k, el]) => {
+        acc[k] = { element: el }
+        return acc
+      },
+      {} as Record<string, OverlayEntry>,
+    ),
   )
 
   const [, forceUpdate] = useState(0) // Used to re-render when overlays change
@@ -193,7 +196,10 @@ export function MapProvider({
       try {
         map.setLayoutProperty(id, prop, value)
       } catch (err) {
-        console.error(`Failed to set layout property '${prop}' on '${id}':`, err)
+        console.error(
+          `Failed to set layout property '${prop}' on '${id}':`,
+          err,
+        )
       }
     },
 
@@ -202,7 +208,9 @@ export function MapProvider({
     },
   }
 
-  return <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
+  return (
+    <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
+  )
 }
 
 export function useMap(): MapOperationsAPI {

@@ -1,3 +1,5 @@
+// packages/map/src/types.ts
+
 import type { MapRef } from "react-map-gl/mapbox"
 import type { ReactNode, RefObject, CSSProperties } from "react"
 import type {
@@ -10,18 +12,14 @@ import type {
 } from "mapbox-gl"
 import { MarkerProperties } from "./markers"
 
-/**
- * Animation options for view state transitions (just below)
- */
+/** Optional transition options when moving the map view */
 export interface ViewStateTransitionOptions {
   duration?: number
   easing?: (t: number) => number
   essential?: boolean
 }
 
-/**
- * View state for the map
- */
+/** The map’s current or target view state */
 export interface ViewState {
   longitude: number
   latitude: number
@@ -32,6 +30,7 @@ export interface ViewState {
   transitionOptions?: ViewStateTransitionOptions
 }
 
+/** All supported Mapbox layer types */
 export type MapLayerType =
   | "fill"
   | "line"
@@ -44,6 +43,7 @@ export type MapLayerType =
   | "background"
   | "sky"
 
+/** Style values for paint and layout properties */
 export type StyleValue =
   | string
   | number
@@ -51,12 +51,14 @@ export type StyleValue =
   | Array<string | number | boolean>
   | Record<string, unknown>
 
+/** Data that can be passed as a GeoJSON source */
 export type MapSourceData =
   | GeoJSON.FeatureCollection
   | GeoJSON.Feature
   | string
   | Record<string, unknown>
 
+/** All supported source specification types */
 export type SourceSpecification =
   | GeoJSONSourceSpecification
   | VectorSourceSpecification
@@ -65,6 +67,7 @@ export type SourceSpecification =
   | ImageSourceSpecification
   | VideoSourceSpecification
 
+/** Wrapper for a source definition */
 export interface MapSource {
   id: string
   type: "vector" | "raster" | "raster-dem" | "geojson" | "image" | "video"
@@ -72,6 +75,7 @@ export interface MapSource {
   [key: string]: unknown
 }
 
+/** Wrapper for a layer definition */
 export interface MapLayer {
   id: string
   source: string
@@ -81,9 +85,17 @@ export interface MapLayer {
   [key: string]: unknown
 }
 
+/** Individual overlay entry rendered in the overlay portal */
+export interface OverlayEntry {
+  element: ReactNode
+  style?: CSSProperties
+}
+
+/** The public context API for interacting with the map */
 export interface MapOperationsAPI {
   mapRef: RefObject<MapRef | null>
   withMap: (callback: (map: MapRef) => void) => void
+
   flyTo: {
     (
       longitude: number,
@@ -95,6 +107,7 @@ export interface MapOperationsAPI {
     ): void
     (viewState: Omit<ViewState, "bounds">): void
   }
+
   fitBounds: {
     (
       bounds: [[number, number], [number, number]],
@@ -112,6 +125,7 @@ export interface MapOperationsAPI {
       >,
     ): void
   }
+
   addSource: (id: string, source: SourceSpecification) => void
   removeSource: (id: string) => void
   addLayer: (
@@ -126,12 +140,23 @@ export interface MapOperationsAPI {
   setLayerProperty: (id: string, property: string, value: StyleValue) => void
   setPaintProperty: (id: string, property: string, value: StyleValue) => void
   setLayoutProperty: (id: string, property: string, value: StyleValue) => void
+
+  // Overlay system
+  overlays: RefObject<Record<string, OverlayEntry>>
+  setOverlay: (
+    key: string,
+    element: ReactNode | null,
+    style?: CSSProperties,
+  ) => void
+  setMotionChildren: (element: ReactNode | null, style?: CSSProperties) => void
+
   setMarkers?: (markers: MarkerProperties[]) => void
-  setMotionChildren?: (children: ReactNode) => void
 }
 
+/** State management mode if we later support React/zustand control */
 export type StateManagementMode = "uncontrolled" | "react" | "zustand"
 
+/** Props accepted by the Map component */
 export interface MapProps {
   mapboxToken: string
   mapStyle?: string
@@ -146,6 +171,7 @@ export interface MapProps {
   [key: string]: unknown
 }
 
+/** Named presets for animated transitions */
 export const MapTransitions = {
   SMOOTH: {
     duration: 2000,
