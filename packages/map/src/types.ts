@@ -89,22 +89,10 @@ export interface OverlayEntry {
   style?: CSSProperties
 }
 
-/** Marker format used for animated scenario markers */
-export interface ScenarioMarker {
-  id: string | number
-  longitude: number
-  latitude: number
-  content: ReactNode
-}
-
 /** The public context API for interacting with the map */
 export interface MapOperationsAPI {
   mapRef: RefObject<MapRef | null>
   withMap: (callback: (map: MapRef) => void) => void
-
-  // ✅ Updated: animated marker array
-  scenarioMarkers: ScenarioMarker[]
-  setScenarioMarkers: (markers: ScenarioMarker[]) => void
 
   flyTo: {
     (

@@ -1,30 +1,20 @@
 "use client"
 
 import MapboxGL, { MapRef, Marker as MapboxMarker } from "react-map-gl/mapbox"
-import { useCallback, useEffect } from "react"
+import { useCallback } from "react"
 import { useMap } from "./context/MapContext"
 import type { MapProps } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export default function Map(props: MapProps) {
-  let mapRef = null
-  let scenarioMarkers = null
-
-  try {
-    const ctx = useMap()
-    mapRef = ctx.mapRef
-    scenarioMarkers = ctx.scenarioMarkers
-  } catch (err) {
-    console.warn(
-      "⚠️ useMap failed in <Map />, possibly outside MapProvider",
-      err,
-    )
-  }
+  const { mapRef, markers = [] } = useMap()
 
   console.log("🌀 Rendering <Map />")
 
   const assignMapRef = useCallback(
     (instance: MapRef | null) => {
+      if (!mapRef) return
+
       if (instance) {
         mapRef.current = instance
         console.log("✅ mapRef assigned to context")
@@ -36,11 +26,6 @@ export default function Map(props: MapProps) {
     [mapRef],
   )
 
-  useEffect(() => {
-    console.log("📦 Map mounted with mapRef:", mapRef?.current)
-    console.log("🧪 scenarioMarkers from context:", scenarioMarkers)
-  }, [mapRef, scenarioMarkers])
-
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <MapboxGL
@@ -50,16 +35,15 @@ export default function Map(props: MapProps) {
         style={{ position: "absolute", inset: 0, ...props.style }}
       />
 
-      {mapRef?.current &&
-        scenarioMarkers?.map((marker) => (
-          <MapboxMarker
-            key={marker.id}
-            longitude={marker.longitude}
-            latitude={marker.latitude}
-          >
-            {marker.content}
-          </MapboxMarker>
-        ))}
+      {markers.map((marker, idx) => (
+        <MapboxMarker
+          key={marker.id ?? idx}
+          longitude={marker.longitude}
+          latitude={marker.latitude}
+        >
+          {marker.content}
+        </MapboxMarker>
+      ))}
     </div>
   )
 }

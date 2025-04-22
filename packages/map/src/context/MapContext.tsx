@@ -1,66 +1,93 @@
 // packages/map/src/context/MapContext.tsx
 "use client"
 
-import {
-  createContext,
-  useContext,
-  useRef,
-  useCallback,
-  useState,
-  type ReactNode,
-} from "react"
-import type { MapRef } from "react-map-gl/mapbox"
-import type {
-  MapOperationsAPI,
-  MapLayerType,
-  SourceSpecification,
-  StyleValue,
-} from "../types"
+import { createContext, useContext, useRef, type ReactNode } from "react"
+import type { LayerSpecification, MapRef } from "react-map-gl/mapbox"
+import type { MapOperationsAPI, MapLayerType, StyleValue } from "../types"
+
+type FlyToArgs =
+  | [
+      options: {
+        longitude: number
+        latitude: number
+        zoom: number
+        bearing?: number
+        pitch?: number
+        transitionOptions?: {
+          duration?: number
+          easing?: (t: number) => number
+          essential?: boolean
+        }
+      },
+    ]
+  | [
+      lng: number,
+      lat: number,
+      zoom: number,
+      pitch?: number,
+      bearing?: number,
+      options?: {
+        duration?: number
+        easing?: (t: number) => number
+        essential?: boolean
+      },
+    ]
 
 const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 
 export function MapProvider({ children }: { children: ReactNode }) {
   const mapRef = useRef<MapRef | null>(null)
 
-  const [scenarioMarkers, _setScenarioMarkers] = useState<
-    React.ReactNode[] | null
-  >(null)
-
-  const setScenarioMarkers = useCallback(
-    (markers: React.ReactNode[] | null) => {
-      _setScenarioMarkers(markers)
-    },
-    [],
-  )
-
   const contextValue: MapOperationsAPI = {
     mapRef,
-    scenarioMarkers,
-    setScenarioMarkers,
 
     withMap: (callback) => {
       if (mapRef.current) callback(mapRef.current)
       else console.warn("withMap called but mapRef is null")
     },
 
-    flyTo: (...args: any[]) => {
+    flyTo: (...args: FlyToArgs) => {
       if (!mapRef.current) return
-      if (typeof args[0] === "object") {
-        const viewState = args[0]
+
+      if (
+        args.length === 1 &&
+        typeof args[0] === "object" &&
+        "longitude" in args[0] &&
+        "latitude" in args[0] &&
+        "zoom" in args[0]
+      ) {
+        const {
+          longitude,
+          latitude,
+          zoom,
+          bearing = 0,
+          pitch = 0,
+          transitionOptions = {},
+        } = args[0]
         mapRef.current.flyTo({
-          center: [viewState.longitude, viewState.latitude],
-          zoom: viewState.zoom,
-          bearing: viewState.bearing ?? 0,
-          pitch: viewState.pitch ?? 0,
-          duration: viewState.transitionOptions?.duration ?? 4000,
+          center: [longitude, latitude],
+          zoom,
+          bearing,
+          pitch,
+          duration: transitionOptions.duration ?? 4000,
           easing:
-            typeof viewState.transitionOptions?.easing === "function"
-              ? viewState.transitionOptions.easing
+            typeof transitionOptions.easing === "function"
+              ? transitionOptions.easing
               : (t) => t,
-          essential: viewState.transitionOptions?.essential ?? true,
+          essential: transitionOptions.essential ?? true,
         })
-      } else {
-        const [lng, lat, zoom, pitch = 0, bearing = 0, options = {}] = args
+      } else if (
+        args.length >= 3 &&
+        typeof args[0] === "number" &&
+        typeof args[1] === "number"
+      ) {
+        const lng = args[0]
+        const lat = args[1]
+        const zoom = args[2]
+        const pitch = args[3] ?? 0
+        const bearing = args[4] ?? 0
+        const options = args[5] ?? {}
+
         mapRef.current.flyTo({
           center: [lng, lat],
           zoom,
@@ -71,6 +98,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
             typeof options.easing === "function" ? options.easing : (t) => t,
           essential: options.essential ?? true,
         })
+      } else {
+        console.warn("⚠️ flyTo was called with unexpected arguments", args)
       }
     },
 
@@ -101,13 +130,23 @@ export function MapProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    addLayer: (id, source, type, paint, layout) => {
+    addLayer: (
+      id: string,
+      source: string,
+      type: MapLayerType,
+      paint?: Record<string, StyleValue>,
+      layout?: Record<string, StyleValue>,
+    ) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
       try {
-        const layer: any = { id, source, type }
-        if (paint) layer.paint = paint
-        if (layout) layer.layout = layout
+        const layer = {
+          id,
+          source,
+          type,
+          ...(paint ? { paint } : {}),
+          ...(layout ? { layout } : {}),
+        } as LayerSpecification
         map.addLayer(layer)
       } catch (err) {
         console.error(`Failed to add layer '${id}':`, err)
@@ -139,9 +178,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
       if (!map || !map.getLayer(id)) return
       try {
         if (property.startsWith("paint-")) {
-          map.setPaintProperty(id, property.replace("paint-", ""), value)
+          const paintProp = property.replace("paint-", "")
+          // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
+          map.setPaintProperty(id, paintProp, value)
         } else if (property.startsWith("layout-")) {
-          map.setLayoutProperty(id, property.replace("layout-", ""), value)
+          const layoutProp = property.replace("layout-", "")
+          // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
+          map.setLayoutProperty(id, layoutProp, value)
         } else {
           console.warn(`Unknown property type: ${property}`)
         }
@@ -154,6 +197,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
       try {
+        // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
         map.setPaintProperty(id, prop, value)
       } catch (err) {
         console.error(`Failed to set paint property '${prop}' on '${id}':`, err)
@@ -164,6 +208,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
       try {
+        // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
         map.setLayoutProperty(id, prop, value)
       } catch (err) {
         console.error(
