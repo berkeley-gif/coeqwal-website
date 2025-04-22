@@ -8,7 +8,19 @@ import type {
   ImageSourceSpecification,
   VideoSourceSpecification,
 } from "mapbox-gl"
-import { MarkerProperties } from "./markers"
+
+/** Marker properties used across the map package */
+export interface MarkerProperties {
+  longitude: number
+  latitude: number
+  id?: string | number
+  color?: string
+  size?: number
+  title?: string
+  description?: string
+  content?: ReactNode
+  properties?: Record<string, unknown>
+}
 
 /** Optional transition options when moving the map view */
 export interface ViewStateTransitionOptions {
@@ -17,7 +29,7 @@ export interface ViewStateTransitionOptions {
   essential?: boolean
 }
 
-/** The map’s current or target view state */
+/** The map's current or target view state */
 export interface ViewState {
   longitude: number
   latitude: number
@@ -93,6 +105,7 @@ export interface OverlayEntry {
 export interface MapOperationsAPI {
   mapRef: RefObject<MapRef | null>
   withMap: (callback: (map: MapRef) => void) => void
+  markers?: MarkerProperties[]
 
   flyTo: {
     (

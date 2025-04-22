@@ -1,9 +1,8 @@
-// packages/map/src/context/MapContext.tsx
 "use client"
 
-import { createContext, useContext, useRef, type ReactNode } from "react"
+import { createContext, useContext, useRef, useState, type ReactNode } from "react"
 import type { LayerSpecification, MapRef } from "react-map-gl/mapbox"
-import type { MapOperationsAPI, MapLayerType, StyleValue } from "../types"
+import type { MapOperationsAPI, MapLayerType, StyleValue, MarkerProperties } from "../types"
 
 type FlyToArgs =
   | [
@@ -37,9 +36,11 @@ const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 
 export function MapProvider({ children }: { children: ReactNode }) {
   const mapRef = useRef<MapRef | null>(null)
+  const [markers, setMarkersState] = useState<MarkerProperties[]>([])
 
   const contextValue: MapOperationsAPI = {
     mapRef,
+    markers,
 
     withMap: (callback) => {
       if (mapRef.current) callback(mapRef.current)
@@ -218,8 +219,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    setMarkers: () => {
-      throw new Error("setMarkers not implemented yet")
+    setMarkers: (newMarkers) => {
+      setMarkersState(newMarkers)
     },
   }
 

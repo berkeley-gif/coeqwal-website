@@ -1,9 +1,10 @@
 "use client"
 
-import MapboxGL, { MapRef, Marker as MapboxMarker } from "react-map-gl/mapbox"
+import { MapRef, Marker } from "react-map-gl/mapbox"
+import MapboxGL from "react-map-gl/mapbox"
 import { useCallback } from "react"
 import { useMap } from "./context/MapContext"
-import type { MapProps } from "./types"
+import type { MapProps, MarkerProperties } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export default function Map(props: MapProps) {
@@ -35,14 +36,14 @@ export default function Map(props: MapProps) {
         style={{ position: "absolute", inset: 0, ...props.style }}
       />
 
-      {markers.map((marker, idx) => (
-        <MapboxMarker
+      {markers.map((marker: MarkerProperties, idx: number) => (
+        <Marker
           key={marker.id ?? idx}
           longitude={marker.longitude}
           latitude={marker.latitude}
         >
           {marker.content}
-        </MapboxMarker>
+        </Marker>
       ))}
     </div>
   )
