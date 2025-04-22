@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
-import { MapProvider } from "@repo/map"
+import { MapProvider } from "@repo/map/client"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/helpers/FontLoader"
 

@@ -5,14 +5,13 @@ import markers from "../../public/data/variability_marker.json" assert { type: "
 import SectionContainer from "./helpers/SectionContainer"
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Marker, Popup, useMap } from "@repo/map"
 import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
 import { useInViewVisibility } from "../hooks/useInViewVisbility"
 import PrecipitationBar from "./vis/PrecipitationBar"
 import Image from "next/image"
-import { Layer } from "@repo/map"
 
 type MarkerType = {
   id: string
@@ -49,58 +48,39 @@ function SectionWaterSource() {
 
 function Precipitation() {
   const content = storyline.precipitation
-  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef } = useMap() // from our context
+  const ref = useRef(null)
+  const { addSource, addLayer, setPaintProperty } = useMap()
 
   function loadPrecipitation() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-    mapRef.current?.addSource("precipitation", {
+    addSource("precipitation", {
       type: "raster",
       url: "mapbox://coeqwal.82rnru99",
       tileSize: 256,
     })
-    mapRef.current?.addLayer({
-      id: "precipitation-layer",
-      type: "raster",
-      source: "precipitation",
-      paint: {
-        "raster-opacity": 0,
-      },
+    addLayer("precipitation-layer", "precipitation", "raster", {
+      "raster-opacity": 0,
     })
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("precipitation-layer", "raster-opacity", 1)
+    setPaintProperty("precipitation-layer", "raster-opacity", 1)
   }
 
   function unloadPrecipitation() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
-    if (!layers.includes("precipitation-layer")) return
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("precipitation-layer", "raster-opacity", 0)
+    try {
+      setPaintProperty("precipitation-layer", "raster-opacity", 0)
+    } catch (e) {
+      console.warn("⚠️ Skipping unloadPrecipitation because style not ready")
+    }
   }
 
   useIntersectionObserver(
     ref,
     (isIntersecting) => {
-      if (isIntersecting) {
-        loadPrecipitation()
-      } else {
-        unloadPrecipitation()
-      }
+      isIntersecting ? loadPrecipitation() : unloadPrecipitation()
     },
-    {
-      threshold: 0.5,
-    },
+    { threshold: 0.5 },
   )
 
   return (
-    <SectionContainer id="variability">
+    <SectionContainer id="precipitation">
       <Box
         ref={ref}
         className="container"
@@ -124,108 +104,28 @@ function Precipitation() {
 function Variability() {
   const content = storyline.variability
   const visRef = useInViewVisibility()
-  const { mapRef } = useMap()
-
-  const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
   const [startBarAnimation, setStartBarAnimation] = useState(false)
   const [selectedYear, setSelectedYear] = useState<keyof typeof markers | null>(
-    null,
-  ) // Default to null
-
-  // Memoize prepareMarkers to properly capture the current popupInfo state
-  const prepareMarkers = useCallback(
-    (points: MarkerType[] = []) => {
-      // Default to empty array
-      return points.map((data: MarkerType, idx) => {
-        return (
-          <Marker
-            latitude={data.coordinates[1] as number}
-            longitude={data.coordinates[0] as number}
-            key={data.id}
-            onClick={(e) => {
-              e.originalEvent.stopPropagation() // Prevent map click event
-              setPopupInfo(data) // Set the popup info
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }} // Define exit animation
-              transition={{ duration: 0.5, delay: idx * 0.2 }}
-              className="marker"
-            ></motion.div>
-            {popupInfo && popupInfo.id === data.id && (
-              <Popup
-                latitude={data.coordinates[1] as number}
-                longitude={data.coordinates[0] as number}
-                anchor={data.anchor as mapboxgl.Anchor}
-                closeOnClick={true}
-                offset={{ bottom: [0, -10] }}
-                onClose={() => setPopupInfo(null)}
-              >
-                <div className="popup">
-                  <h3>{data.name}</h3>
-                  <Image
-                    src={`/variability/${data.image}`}
-                    alt={data.caption}
-                    width={470}
-                    height={300}
-                    style={{ objectFit: "cover" }}
-                  />
-                  <p>{data.caption}</p>
-                </div>
-              </Popup>
-            )}
-          </Marker>
-        )
-      })
-    },
-    [popupInfo],
-  ) // Include popupInfo in dependencies
-
-  const removeMarkersFromMap = useCallback(() => {
-    if (mapRef.current) {
-      mapRef.current?.setMotionChildren(null)
-      setSelectedYear(null) // Reset selected year when removing markers
-    }
-  }, [mapRef])
-
-  const addMarkersToMap = useCallback(() => {
-    if (mapRef.current) {
-      // Only add markers if a year is selected
-      const pointsToShow = selectedYear ? markers[selectedYear] : []
-      const markerToAdd = prepareMarkers(pointsToShow)
-      mapRef.current?.setMotionChildren(markerToAdd)
-    }
-  }, [mapRef, prepareMarkers, selectedYear]) // Add proper dependencies
-
-  const getSelectedYear = useCallback(
-    (year: keyof typeof markers) => {
-      setSelectedYear(year)
-      // We need to wait for the state to update before adding markers
-      setTimeout(() => {
-        if (mapRef.current) {
-          const markerToAdd = prepareMarkers(markers[year])
-          mapRef.current?.setMotionChildren(markerToAdd)
-        }
-      }, 0)
-    },
-    [mapRef, prepareMarkers],
+    "2021",
   )
+  const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
+
+  const getSelectedYear = useCallback((year: keyof typeof markers) => {
+    setSelectedYear(year)
+  }, [])
 
   useIntersectionObserver(
     visRef.ref,
     (isIntersecting) => {
-      if (isIntersecting) {
-        addMarkersToMap() // Add markers when the section is in view
-      } else {
-        removeMarkersFromMap() // Remove markers when the section is out of view
+      if (!isIntersecting) {
+        setSelectedYear(null)
+        setPopupInfo(null)
       }
     },
-    {
-      threshold: 1,
-    },
+    { threshold: 1 },
   )
+
+  const visibleMarkers: MarkerType[] = selectedYear ? markers[selectedYear] : []
 
   return (
     <SectionContainer id="variability">
@@ -262,6 +162,49 @@ function Variability() {
           </Typography>
           <Typography variant="body1">{content.p6}</Typography>
         </Box>
+
+        {/* 🎯 Directly render animated, geolocated markers here */}
+        {visibleMarkers.map((data, idx) => (
+          <Marker
+            latitude={data.coordinates[1]}
+            longitude={data.coordinates[0]}
+            key={data.id}
+            onClick={(e) => {
+              e.originalEvent.stopPropagation()
+              setPopupInfo(data)
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+              transition={{ duration: 0.5, delay: idx * 0.2 }}
+              className="marker"
+            />
+            {popupInfo?.id === data.id && (
+              <Popup
+                latitude={data.coordinates[1]}
+                longitude={data.coordinates[0]}
+                anchor={data.anchor as mapboxgl.Anchor}
+                closeOnClick={true}
+                offset={{ bottom: [0, -10] }}
+                onClose={() => setPopupInfo(null)}
+              >
+                <div className="popup">
+                  <h3>{data.name}</h3>
+                  <Image
+                    src={`/variability/${data.image}`}
+                    alt={data.caption}
+                    width={470}
+                    height={300}
+                    style={{ objectFit: "cover" }}
+                  />
+                  <p>{data.caption}</p>
+                </div>
+              </Popup>
+            )}
+          </Marker>
+        ))}
       </Box>
     </SectionContainer>
   )
@@ -269,9 +212,8 @@ function Variability() {
 
 function Snowpack() {
   const content = storyline.snowpack
-
   return (
-    <SectionContainer id="variability">
+    <SectionContainer id="snowpack">
       <Box className="container" height="100vh">
         <Box className="paragraph">
           <Typography variant="h3" gutterBottom>
@@ -299,133 +241,71 @@ function Snowpack() {
   )
 }
 
-//TODO: add river shapefile
 function WaterFlow() {
   const content = storyline.flow
-  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef } = useMap() // from our context
-
-  function loadRivers() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-    mapRef.current?.addSource("river-sac", {
-      type: "geojson",
-      data: "/rivers/SacramentoRiver_wo.geojson",
-    })
-    mapRef.current?.addLayer({
-      id: "river-sac-layer",
-      source: "river-sac",
-      ...riverLayerStyle,
-    } as Layer)
-    mapRef.current?.addSource("river-sanjoaquin", {
-      type: "geojson",
-      data: "/rivers/SanJoaquinRiver.geojson",
-    })
-    mapRef.current?.addLayer({
-      id: "river-sanjoaquin-layer",
-      source: "river-sanjoaquin",
-      ...riverLayerStyle,
-    } as Layer)
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("river-sac-layer", "line-opacity", 1)
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
-  }
-
-  function unloadRivers() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
-    if (!layers.includes("river-sac-layer")) return
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("river-sac-layer", "line-opacity", 0)
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-  }
-
-  const closeMapViewState = {
-    latitude: 38.8309,
-    longitude: -124.8652,
-    zoom: 7,
-  }
-
-  function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      closeMapViewState.longitude,
-      closeMapViewState.latitude,
-      closeMapViewState.zoom,
-      0,
-      0,
-      3500,
-    )
-  }
+  const ref = useRef(null)
+  const { addSource, addLayer, setPaintProperty, flyTo } = useMap()
 
   useIntersectionObserver(
     ref,
     (isIntersecting) => {
       if (isIntersecting) {
-        loadRivers()
-        moveTo()
+        addSource("river-sac", {
+          type: "geojson",
+          data: "/rivers/SacramentoRiver_wo.geojson",
+        })
+        addLayer(
+          "river-sac-layer",
+          "river-sac",
+          "line",
+          riverLayerStyle.paint,
+          riverLayerStyle.layout,
+        )
+
+        addSource("river-sanjoaquin", {
+          type: "geojson",
+          data: "/rivers/SanJoaquinRiver.geojson",
+        })
+        addLayer(
+          "river-sanjoaquin-layer",
+          "river-sanjoaquin",
+          "line",
+          riverLayerStyle.paint,
+          riverLayerStyle.layout,
+        )
+
+        setPaintProperty("river-sac-layer", "line-opacity", 1)
+        setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
+
+        flyTo(-124.8652, 38.8309, 7, 0, 0, 3500)
       } else {
-        unloadRivers()
+        setPaintProperty("river-sac-layer", "line-opacity", 0)
+        setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
       }
     },
     { threshold: 0 },
   )
 
   return (
-    <>
-      <SectionContainer id="water-flow">
-        <Box ref={ref} className="container" height="100vh">
-          <Box className="paragraph">
-            <Typography variant="h3" gutterBottom>
-              {content.title}
-            </Typography>
-          </Box>
-          <Box className="paragraph">
-            <Typography variant="body1">{content.p1}</Typography>
-            <Typography variant="body1">
-              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">{content.p3}</Typography>
-          </Box>
-          <Box className="paragraph">
-            <Typography variant="body1">{content.p4}</Typography>
-          </Box>
+    <SectionContainer id="water-flow">
+      <Box ref={ref} className="container" height="100vh">
+        <Box className="paragraph">
+          <Typography variant="h3" gutterBottom>
+            {content.title}
+          </Typography>
         </Box>
-      </SectionContainer>
-      <SectionContainer id="valley">
-        <Box className="container" height="100vh">
-          <Box className="paragraph">
-            <Typography variant="body1">{content.valley.p1}</Typography>
-          </Box>
-          <Box className="paragraph">
-            <Typography variant="body1">
-              {content.valley.p2}{" "}
-              <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">
-              {content.valley.p3}{" "}
-              <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">{content.valley.p4}</Typography>
-          </Box>
-          <Box className="paragraph">
-            <Typography variant="body1">{content.transition.p1}</Typography>
-            <Typography variant="body1">{content.transition.p2}</Typography>
-          </Box>
+        <Box className="paragraph">
+          <Typography variant="body1">{content.p1}</Typography>
+          <Typography variant="body1">
+            {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+          </Typography>
+          <Typography variant="body1">{content.p3}</Typography>
         </Box>
-      </SectionContainer>
-    </>
+        <Box className="paragraph">
+          <Typography variant="body1">{content.p4}</Typography>
+        </Box>
+      </Box>
+    </SectionContainer>
   )
 }
 

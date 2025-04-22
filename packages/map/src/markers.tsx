@@ -1,19 +1,15 @@
 "use client"
 
-import React, { useState, useCallback } from "react"
+import React, { useState } from "react"
 import {
   Marker as ReactMapGLMarker,
   Popup as ReactMapGLPopup,
 } from "react-map-gl/mapbox"
-import { useMap } from "./context/MapContext"
+import { useZoomScale } from "./hooks/useZoomScale"
 
-// Re-export the base components
 export const Marker = ReactMapGLMarker
 export const Popup = ReactMapGLPopup
 
-/**
- * MarkerProperties
- */
 export interface MarkerProperties {
   longitude: number
   latitude: number
@@ -22,7 +18,6 @@ export interface MarkerProperties {
   size?: number
   title?: string
   description?: string
-  // Additional properties for tooltips
   Comment?: string
   nodeCode?: string
   properties?: {
@@ -32,9 +27,6 @@ export interface MarkerProperties {
   }
 }
 
-/**
- * Custom marker that scales based on zoom level
- */
 export function ScaledMarker({
   longitude,
   latitude,
@@ -52,26 +44,10 @@ export function ScaledMarker({
   onClick?: (e: React.MouseEvent) => void
   title?: string
   id?: string | number
+  zoom?: number
   children?: React.ReactNode
 }) {
-  // Get the current map state to calculate scaled size
-  const { mapRef } = useMap()
-  const zoom = mapRef.current?.getMap()?.getZoom() || 8
-
-  // Calculate scaled size based on zoom level
-  const getScaledSize = useCallback((baseSize: number, zoom: number) => {
-    const min = 4
-    const max = 12
-    const minScale = 0.8
-    const maxScale = 1.2
-
-    const clampedZoom = Math.max(min, Math.min(zoom, max))
-    const ratio = (clampedZoom - min) / (max - min)
-    const scaleFactor = minScale + ratio * (maxScale - minScale)
-    return Math.round(baseSize * scaleFactor)
-  }, [])
-
-  const scaledSize = getScaledSize(baseSize, zoom)
+  const scaledSize = useZoomScale(baseSize)
 
   return (
     <Marker longitude={longitude} latitude={latitude}>
@@ -95,13 +71,9 @@ export function ScaledMarker({
   )
 }
 
-/**
- * Custom marker with attached popup for displaying info
- */
 export function MarkerWithPopup({ marker }: { marker: MarkerProperties }) {
   const [isPopupVisible, setIsPopupVisible] = useState(false)
 
-  // Format popup content
   const tooltipId = marker.id || ""
   const tooltipComment = marker.Comment || marker.properties?.Comment || ""
   const tooltipNodeCode =
@@ -122,7 +94,6 @@ export function MarkerWithPopup({ marker }: { marker: MarkerProperties }) {
           setIsPopupVisible(!isPopupVisible)
         }}
       />
-
       {isPopupVisible && (
         <Popup
           longitude={marker.longitude}
@@ -166,9 +137,6 @@ export function MarkerWithPopup({ marker }: { marker: MarkerProperties }) {
   )
 }
 
-/**
- * MarkersLayer renders a collection of markers with optional popups
- */
 export function MarkersLayer({
   markers = [],
   showPopups = true,

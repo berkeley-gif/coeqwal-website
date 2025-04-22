@@ -1,5 +1,3 @@
-// packages/map/src/types.ts
-
 import type { MapRef } from "react-map-gl/mapbox"
 import type { ReactNode, RefObject, CSSProperties } from "react"
 import type {
@@ -91,10 +89,22 @@ export interface OverlayEntry {
   style?: CSSProperties
 }
 
+/** Marker format used for animated scenario markers */
+export interface ScenarioMarker {
+  id: string | number
+  longitude: number
+  latitude: number
+  content: ReactNode
+}
+
 /** The public context API for interacting with the map */
 export interface MapOperationsAPI {
   mapRef: RefObject<MapRef | null>
   withMap: (callback: (map: MapRef) => void) => void
+
+  // ✅ Updated: animated marker array
+  scenarioMarkers: ScenarioMarker[]
+  setScenarioMarkers: (markers: ScenarioMarker[]) => void
 
   flyTo: {
     (
@@ -141,15 +151,16 @@ export interface MapOperationsAPI {
   setPaintProperty: (id: string, property: string, value: StyleValue) => void
   setLayoutProperty: (id: string, property: string, value: StyleValue) => void
 
-  // Overlay system
-  overlays: RefObject<Record<string, OverlayEntry>>
-  setOverlay: (
+  // Optional overlay portal system
+  overlays?: RefObject<Record<string, OverlayEntry>>
+  setOverlay?: (
     key: string,
     element: ReactNode | null,
     style?: CSSProperties,
   ) => void
-  setMotionChildren: (element: ReactNode | null, style?: CSSProperties) => void
+  setMotionChildren?: (element: ReactNode | null, style?: CSSProperties) => void
 
+  // Optional legacy marker support
   setMarkers?: (markers: MarkerProperties[]) => void
 }
 

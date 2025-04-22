@@ -5,8 +5,8 @@ import {
   createContext,
   useContext,
   useRef,
-  useState,
   useCallback,
+  useState,
   type ReactNode,
 } from "react"
 import type { MapRef } from "react-map-gl/mapbox"
@@ -15,67 +15,33 @@ import type {
   MapLayerType,
   SourceSpecification,
   StyleValue,
-  OverlayEntry,
 } from "../types"
 
 const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 
-export function MapProvider({
-  children,
-  initialOverlays = {},
-}: {
-  children: ReactNode
-  initialOverlays?: Record<string, ReactNode>
-}) {
-  // Stores the map instance
+export function MapProvider({ children }: { children: ReactNode }) {
   const mapRef = useRef<MapRef | null>(null)
 
-  // Stores custom overlay ReactNodes, like Framer Motion markers or tooltips
-  const overlays = useRef<Record<string, OverlayEntry>>(
-    Object.entries(initialOverlays).reduce(
-      (acc, [k, el]) => {
-        acc[k] = { element: el }
-        return acc
-      },
-      {} as Record<string, OverlayEntry>,
-    ),
-  )
+  const [scenarioMarkers, _setScenarioMarkers] = useState<
+    React.ReactNode[] | null
+  >(null)
 
-  const [, forceUpdate] = useState(0) // Used to re-render when overlays change
-
-  // Universal overlay setter
-  const setOverlay = useCallback(
-    (key: string, element: ReactNode | null, style?: React.CSSProperties) => {
-      if (element === null) {
-        delete overlays.current[key]
-      } else {
-        overlays.current[key] = { element, style }
-      }
-      forceUpdate((n) => n + 1)
+  const setScenarioMarkers = useCallback(
+    (markers: React.ReactNode[] | null) => {
+      _setScenarioMarkers(markers)
     },
     [],
   )
 
-  // Shorthand for Framer Motion users
-  const setMotionChildren = useCallback(
-    (element: ReactNode | null, style?: React.CSSProperties) => {
-      setOverlay("motion", element, style)
-    },
-    [setOverlay],
-  )
-
-  // Safely run map operations after checking map is loaded
-  const withMap = (callback: (map: MapRef) => void) => {
-    if (mapRef.current) callback(mapRef.current)
-    else console.warn("withMap called but mapRef is null")
-  }
-
   const contextValue: MapOperationsAPI = {
     mapRef,
-    withMap,
-    overlays,
-    setOverlay,
-    setMotionChildren,
+    scenarioMarkers,
+    setScenarioMarkers,
+
+    withMap: (callback) => {
+      if (mapRef.current) callback(mapRef.current)
+      else console.warn("withMap called but mapRef is null")
+    },
 
     flyTo: (...args: any[]) => {
       if (!mapRef.current) return
@@ -87,7 +53,10 @@ export function MapProvider({
           bearing: viewState.bearing ?? 0,
           pitch: viewState.pitch ?? 0,
           duration: viewState.transitionOptions?.duration ?? 4000,
-          easing: viewState.transitionOptions?.easing,
+          easing:
+            typeof viewState.transitionOptions?.easing === "function"
+              ? viewState.transitionOptions.easing
+              : (t) => t,
           essential: viewState.transitionOptions?.essential ?? true,
         })
       } else {
@@ -98,7 +67,8 @@ export function MapProvider({
           pitch,
           bearing,
           duration: options.duration ?? 2000,
-          easing: options.easing,
+          easing:
+            typeof options.easing === "function" ? options.easing : (t) => t,
           essential: options.essential ?? true,
         })
       }
@@ -216,6 +186,7 @@ export function MapProvider({
 export function useMap(): MapOperationsAPI {
   const context = useContext(MapContext)
   if (!context) {
+    console.warn("⚠️ useMap was called outside of a MapProvider!")
     throw new Error("useMap must be used within a MapProvider")
   }
   return context

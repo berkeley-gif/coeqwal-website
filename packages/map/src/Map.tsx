@@ -1,14 +1,27 @@
-// packages/map/src/Map.tsx
 "use client"
 
-import MapboxGL, { MapRef } from "react-map-gl/mapbox"
+import MapboxGL, { MapRef, Marker as MapboxMarker } from "react-map-gl/mapbox"
 import { useCallback, useEffect } from "react"
 import { useMap } from "./context/MapContext"
 import type { MapProps } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export default function Map(props: MapProps) {
-  const { mapRef, overlays } = useMap()
+  let mapRef = null
+  let scenarioMarkers = null
+
+  try {
+    const ctx = useMap()
+    mapRef = ctx.mapRef
+    scenarioMarkers = ctx.scenarioMarkers
+  } catch (err) {
+    console.warn(
+      "⚠️ useMap failed in <Map />, possibly outside MapProvider",
+      err,
+    )
+  }
+
+  console.log("🌀 Rendering <Map />")
 
   const assignMapRef = useCallback(
     (instance: MapRef | null) => {
@@ -24,8 +37,9 @@ export default function Map(props: MapProps) {
   )
 
   useEffect(() => {
-    console.log("📦 Map mounted with mapRef:", mapRef.current)
-  }, [mapRef])
+    console.log("📦 Map mounted with mapRef:", mapRef?.current)
+    console.log("🧪 scenarioMarkers from context:", scenarioMarkers)
+  }, [mapRef, scenarioMarkers])
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -36,21 +50,16 @@ export default function Map(props: MapProps) {
         style={{ position: "absolute", inset: 0, ...props.style }}
       />
 
-      {/* Render all overlays */}
-      {Object.entries(overlays.current).map(([key, { element, style }]) => (
-        <div
-          key={key}
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 10,
-            pointerEvents: "auto",
-            ...style,
-          }}
-        >
-          {element}
-        </div>
-      ))}
+      {mapRef?.current &&
+        scenarioMarkers?.map((marker) => (
+          <MapboxMarker
+            key={marker.id}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+          >
+            {marker.content}
+          </MapboxMarker>
+        ))}
     </div>
   )
 }
