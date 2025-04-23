@@ -236,7 +236,11 @@ export interface MapOperationsAPI {
     element: ReactNode | null,
     style?: CSSProperties,
   ) => void
+  
+  // Motion children system for dynamic markers and overlays
   setMotionChildren?: (element: ReactNode | null, style?: CSSProperties) => void
+  motionChildren?: ReactNode | null
+  motionChildrenStyle?: CSSProperties
 
   // Optional legacy marker support
   setMarkers?: (markers: MarkerProperties[]) => void

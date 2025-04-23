@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type ReactNode,
+  type CSSProperties,
 } from "react"
 import type { LayerSpecification, MapRef } from "react-map-gl/mapbox"
 import type {
@@ -48,6 +49,8 @@ const MapContext = createContext<MapOperationsAPI | undefined>(undefined)
 export function MapProvider({ children }: { children: ReactNode }) {
   const mapRef = useRef<MapRef | null>(null)
   const [markers, setMarkersState] = useState<MarkerProperties[]>([])
+  const [motionChildren, setMotionChildrenState] = useState<ReactNode | null>(null)
+  const [motionChildrenStyle, setMotionChildrenStyle] = useState<CSSProperties | undefined>(undefined)
 
   const contextValue: MapOperationsAPI = {
     mapRef,
@@ -233,10 +236,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
     setMarkers: (newMarkers) => {
       setMarkersState(newMarkers)
     },
+
+    setMotionChildren: (element, style) => {
+      setMotionChildrenState(element)
+      setMotionChildrenStyle(style)
+    },
+    
+    motionChildren,
+    motionChildrenStyle,
   }
 
   return (
-    <MapContext.Provider value={contextValue}>{children}</MapContext.Provider>
+    <MapContext.Provider value={contextValue}>
+      {children}
+    </MapContext.Provider>
   )
 }
 

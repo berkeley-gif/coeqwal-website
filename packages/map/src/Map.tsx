@@ -8,7 +8,7 @@ import type { MapProps, MarkerProperties } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export default function Map(props: MapProps) {
-  const { mapRef, markers = [] } = useMap()
+  const { mapRef, markers = [], motionChildren, motionChildrenStyle } = useMap()
 
   console.log("🌀 Rendering <Map />")
 
@@ -36,6 +36,7 @@ export default function Map(props: MapProps) {
         style={{ position: "absolute", inset: 0, ...props.style }}
       />
 
+      {/* Render standard markers from context */}
       {markers.map((marker: MarkerProperties, idx: number) => (
         <Marker
           key={marker.id ?? idx}
@@ -45,6 +46,24 @@ export default function Map(props: MapProps) {
           {marker.content}
         </Marker>
       ))}
+
+      {/* Render motion children (dynamic markers) */}
+      {motionChildren && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 10,
+            pointerEvents: "none",
+            ...motionChildrenStyle,
+          }}
+        >
+          {motionChildren}
+        </div>
+      )}
     </div>
   )
 }
