@@ -1,8 +1,19 @@
 "use client"
 
-import { createContext, useContext, useRef, useState, type ReactNode } from "react"
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react"
 import type { LayerSpecification, MapRef } from "react-map-gl/mapbox"
-import type { MapOperationsAPI, MapLayerType, StyleValue, MarkerProperties } from "../types"
+import type {
+  MapOperationsAPI,
+  MapLayerType,
+  StyleValue,
+  MarkerProperties,
+} from "../types"
 
 type FlyToArgs =
   | [

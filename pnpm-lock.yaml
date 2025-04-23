@@ -57,6 +57,9 @@ importers:
       '@repo/map':
         specifier: workspace:*
         version: link:../../packages/map
+      '@repo/motion':
+        specifier: workspace:*
+        version: link:../../packages/motion
       '@repo/state':
         specifier: workspace:*
         version: link:../../packages/state

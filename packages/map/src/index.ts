@@ -4,20 +4,27 @@ export { useMap } from "./context/MapContext"
 export { default as Map } from "./Map"
 
 // Export Marker and Popup directly from react-map-gl
-export { Marker, Popup, NavigationControl, GeolocateControl, Source, Layer } from "react-map-gl/mapbox"
+export {
+  Marker,
+  Popup,
+  NavigationControl,
+  GeolocateControl,
+  Source,
+  Layer,
+} from "react-map-gl/mapbox"
 
-export type { 
-  ViewState, 
-  ViewStateTransitionOptions, 
-  MapLayerType, 
-  StyleValue, 
-  MapSourceData, 
-  MapSource, 
-  MapLayer, 
-  MapOperationsAPI, 
-  StateManagementMode, 
+export type {
+  ViewState,
+  ViewStateTransitionOptions,
+  MapLayerType,
+  StyleValue,
+  MapSourceData,
+  MapSource,
+  MapLayer,
+  MapOperationsAPI,
+  StateManagementMode,
   MapProps,
-  MarkerProperties 
+  MarkerProperties,
 } from "./types"
 
 export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"

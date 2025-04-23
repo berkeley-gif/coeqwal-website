@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { Map, useMap } from "@repo/map"
-import type { ViewState } from "@repo/map"
+import { useEffect, useRef, useState } from "react"
+import { Map, useMap, Marker } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useMapState, mapActions } from "@repo/state/map"
+import AnimatedMarker from "./AnimatedMarker"
+import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
 
 interface MapContainerProps {
   uncontrolledRef?: React.RefObject<any>
@@ -16,8 +17,19 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapState = useMapState()
   const initialized = useRef(false)
 
+  // Use utilities to manage markers
+  const [markers, setMarkers] = useState(WATER_FEATURES)
+  const [filterType, setFilterType] = useState<string | null>(null)
+
+  // Filter markers if a type is selected
+  const filteredMarkers = filterType
+    ? filterMarkersByType(markers, filterType)
+    : markers
+
   // 🟢 Render log
-  console.log("📦 MapContainer rendered")
+  console.log("📦 MapContainer rendered", {
+    markerCount: filteredMarkers.length,
+  })
 
   // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
@@ -47,6 +59,20 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
     return () => clearInterval(interval)
   }, [mapRef, uncontrolledRef])
 
+  // Example of how to add markers programmatically
+  const addCustomMarker = () => {
+    const newMarker = {
+      id: `custom-${Date.now()}`,
+      longitude: -119.5 + (Math.random() * 2 - 1),
+      latitude: 38.5 + (Math.random() * 2 - 1),
+      color: "#FF9800",
+      title: "Custom Marker",
+      properties: { type: "custom" },
+    }
+
+    setMarkers((prev) => [...prev, newMarker])
+  }
+
   return (
     <Box
       sx={{
@@ -65,7 +91,32 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
         interactive
         dragPan
         style={{ width: "100%", height: "100%" }}
-      />
+      >
+        {/* Standard markers rendered using our utility & AnimatedMarker */}
+        {filteredMarkers.map((marker) => (
+          <Marker
+            key={marker.id}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+          >
+            <AnimatedMarker
+              id={marker.id}
+              color={marker.color}
+              size={24}
+              onClick={() => {
+                console.log(`Clicked marker ${marker.id}: ${marker.title}`)
+
+                // Example of flying to marker on click
+                mapRef.current?.flyTo({
+                  center: [marker.longitude, marker.latitude],
+                  zoom: 10,
+                  duration: 2000,
+                })
+              }}
+            />
+          </Marker>
+        ))}
+      </Map>
     </Box>
   )
 }
