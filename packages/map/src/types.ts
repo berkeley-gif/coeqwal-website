@@ -184,6 +184,11 @@ export interface MapOperationsAPI {
   withMap: (callback: (map: MapRef) => void) => void
   markers?: MarkerProperties[]
 
+  // Map style helpers
+  getStyle: () => { sources: Record<string, any>; layers: Array<any> }
+  hasSource: (id: string) => boolean
+  hasLayer: (id: string) => boolean
+
   flyTo: {
     (
       longitude: number,
@@ -219,7 +224,7 @@ export interface MapOperationsAPI {
   addLayer: (
     id: string,
     source: string,
-    type: MapLayerType,
+    type: MapLayerType | string,
     paint?: Record<string, StyleValue>,
     layout?: Record<string, StyleValue>,
   ) => void

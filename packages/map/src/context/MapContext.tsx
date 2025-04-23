@@ -65,6 +65,42 @@ export function MapProvider({ children }: { children: ReactNode }) {
       else console.warn("withMap called but mapRef is null")
     },
 
+    getStyle: () => {
+      const map = mapRef.current?.getMap()
+      if (!map) {
+        console.warn("getStyle called but map is null")
+        return { sources: {}, layers: [] }
+      }
+      try {
+        return map.getStyle()
+      } catch (err) {
+        console.error("Failed to get map style:", err)
+        return { sources: {}, layers: [] }
+      }
+    },
+
+    hasSource: (id: string) => {
+      const map = mapRef.current?.getMap()
+      if (!map) return false
+      try {
+        return !!map.getSource(id)
+      } catch (err) {
+        console.error(`Failed to check if source '${id}' exists:`, err)
+        return false
+      }
+    },
+
+    hasLayer: (id: string) => {
+      const map = mapRef.current?.getMap()
+      if (!map) return false
+      try {
+        return !!map.getLayer(id)
+      } catch (err) {
+        console.error(`Failed to check if layer '${id}' exists:`, err)
+        return false
+      }
+    },
+
     flyTo: (...args: FlyToArgs) => {
       if (!mapRef.current) return
 
@@ -152,7 +188,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
     addLayer: (
       id: string,
       source: string,
-      type: MapLayerType,
+      type: MapLayerType | string,
       paint?: Record<string, StyleValue>,
       layout?: Record<string, StyleValue>,
     ) => {

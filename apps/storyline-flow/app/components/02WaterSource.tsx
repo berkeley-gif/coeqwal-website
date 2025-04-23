@@ -49,7 +49,8 @@ function SectionWaterSource() {
 function Precipitation() {
   const content = storyline.precipitation
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef, addSource, addLayer, setPaintProperty } = useMap() // 👈 methods are in MapContext in the map package
+  const { mapRef, addSource, addLayer, setPaintProperty, getStyle } = useMap() // 👈 methods are in MapContext in the map package
+
   function loadPrecipitation() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
@@ -76,10 +77,11 @@ function Precipitation() {
   }
 
   function unloadPrecipitation() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
+    // const mapInst = mapRef.current?.getMap()
+    // if (!mapInst) return
     
-    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
+    // const layers = mapInst.getStyle().layers.map((layer) => layer.id)
+    const layers = getStyle().layers.map(layer => layer.id)
     if (!layers.includes("precipitation-layer")) return
     
     // mapRef.current
@@ -317,7 +319,7 @@ function Snowpack() {
 function WaterFlow() {
   const content = storyline.flow
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef, addSource, addLayer, setPaintProperty, flyTo } = useMap() // 👈
+  const { mapRef, addSource, addLayer, setPaintProperty, flyTo, getStyle } = useMap() // 👈
 
   function loadRivers() {
     const mapInst = mapRef.current?.getMap()
@@ -353,7 +355,7 @@ function WaterFlow() {
       riverLayerStyle.layout
     )
 
-        // mapRef.current
+    // mapRef.current
     //   ?.getMap()
     //   ?.getMap()
     //   ?.setPaintProperty("river-sac-layer", "line-opacity", 1)
@@ -369,10 +371,14 @@ function WaterFlow() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
     
-    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
+    // const mapInst = mapRef.current?.getMap()
+    // if (!mapInst) return
+    // const layers = mapInst.getStyle().layers.map((layer) => layer.id)
+
+    const layers = getStyle().layers.map(layer => layer.id)
     if (!layers.includes("river-sac-layer")) return
     
-        // mapRef.current
+    // mapRef.current
     //   ?.getMap()
     //   ?.getMap()
     //   ?.setPaintProperty("river-sac-layer", "line-opacity", 0)
