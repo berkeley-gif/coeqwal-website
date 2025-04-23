@@ -6,7 +6,7 @@ import SectionContainer from "./helpers/SectionContainer"
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { useState, useCallback, useRef } from "react"
-import { Marker, Popup, useMap } from "@repo/map"
+import { Marker, Popup, useMap, MapLayerType } from "@repo/map"
 import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
 import { useInViewVisibility } from "../hooks/useInViewVisbility"
@@ -49,43 +49,44 @@ function SectionWaterSource() {
 function Precipitation() {
   const content = storyline.precipitation
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef } = useMap() // from our context
-
+  const { mapRef, addSource, addLayer, setPaintProperty } = useMap() // 👈 methods are in MapContext in the map package
   function loadPrecipitation() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
     // mapRef.current?.addSource("precipitation", {
-    mapInst.addSource("precipitation", {
+    addSource("precipitation", {
       type: "raster",
       url: "mapbox://coeqwal.82rnru99",
       tileSize: 256,
     })
     //mapRef.current?.addLayer({
-    mapInst.addLayer({
-      id: "precipitation-layer",
-      type: "raster",
-      source: "precipitation",
-      paint: {
+    addLayer(
+      "precipitation-layer",
+      "precipitation",
+      "raster" as MapLayerType,
+      {
         "raster-opacity": 0,
-      },
-    })
+      }
+    )
     // mapRef.current
     // ?.getMap()
     // ?.getMap()
     // ?.setPaintProperty("precipitation-layer", "raster-opacity", 1)
-    mapInst.setPaintProperty("precipitation-layer", "raster-opacity", 1)
+    setPaintProperty("precipitation-layer", "raster-opacity", 1)
   }
 
   function unloadPrecipitation() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
+    
     const layers = mapInst.getStyle().layers.map((layer) => layer.id)
     if (!layers.includes("precipitation-layer")) return
+    
     // mapRef.current
     // ?.getMap()
     // ?.getMap()
     // ?.setPaintProperty("precipitation-layer", "raster-opacity", 0)
-    mapInst.setPaintProperty("precipitation-layer", "raster-opacity", 0)
+    setPaintProperty("precipitation-layer", "raster-opacity", 0)
   }
 
   useIntersectionObserver(
@@ -128,7 +129,7 @@ function Variability() {
   const content = storyline.variability
   const visRef = useInViewVisibility()
   // const { mapRef } = useMap()
-  const { mapRef, setMotionChildren } = useMap() // setMotionChildren is now defined in the context
+  const { mapRef, setMotionChildren } = useMap() // 👈
 
   const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
   const [startBarAnimation, setStartBarAnimation] = useState(false)
@@ -316,37 +317,43 @@ function Snowpack() {
 function WaterFlow() {
   const content = storyline.flow
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef } = useMap() // from our context
+  const { mapRef, addSource, addLayer, setPaintProperty, flyTo } = useMap() // 👈
 
   function loadRivers() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
 
     // mapRef.current?.addSource("river-sac", {
-    mapInst.addSource("river-sac", {
+    addSource("river-sac", {
       type: "geojson",
       data: "/rivers/SacramentoRiver_wo.geojson",
     })
+
     // mapRef.current?.addLayer({
-    mapInst.addLayer({
-      id: "river-sac-layer",
-      source: "river-sac",
-      ...riverLayerStyle,
-    } as any) // Use 'any' as a temporary workaround for the type issue
+    addLayer(
+      "river-sac-layer",
+      "river-sac",
+      riverLayerStyle.type,
+      riverLayerStyle.paint,
+      riverLayerStyle.layout
+    )
+
     // mapRef.current?.addSource("river-sanjoaquin", {
-    mapInst.addSource("river-sanjoaquin", {
+    addSource("river-sanjoaquin", {
       type: "geojson",
       data: "/rivers/SanJoaquinRiver.geojson",
     })
 
     // mapRef.current?.addLayer({
-    mapInst.addLayer({
-      id: "river-sanjoaquin-layer",
-      source: "river-sanjoaquin",
-      ...riverLayerStyle,
-    } as any) // Use 'any' as a temporary workaround for the type issue
+    addLayer(
+      "river-sanjoaquin-layer",
+      "river-sanjoaquin",
+      riverLayerStyle.type,
+      riverLayerStyle.paint,
+      riverLayerStyle.layout
+    )
 
-    // mapRef.current
+        // mapRef.current
     //   ?.getMap()
     //   ?.getMap()
     //   ?.setPaintProperty("river-sac-layer", "line-opacity", 1)
@@ -354,18 +361,18 @@ function WaterFlow() {
     //   ?.getMap()
     //   ?.getMap()
     //   ?.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
-
-    mapInst.setPaintProperty("river-sac-layer", "line-opacity", 1)
-    mapInst.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
+    setPaintProperty("river-sac-layer", "line-opacity", 1)
+    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
   }
 
   function unloadRivers() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
+    
     const layers = mapInst.getStyle().layers.map((layer) => layer.id)
     if (!layers.includes("river-sac-layer")) return
-
-    // mapRef.current
+    
+        // mapRef.current
     //   ?.getMap()
     //   ?.getMap()
     //   ?.setPaintProperty("river-sac-layer", "line-opacity", 0)
@@ -373,8 +380,8 @@ function WaterFlow() {
     //   ?.getMap()
     //   ?.getMap()
     //   ?.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-    mapInst.setPaintProperty("river-sac-layer", "line-opacity", 0)
-    mapInst.setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
+    setPaintProperty("river-sac-layer", "line-opacity", 0)
+    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
   }
 
   const closeMapViewState = {
@@ -385,7 +392,8 @@ function WaterFlow() {
 
   function moveTo() {
     if (!mapRef.current?.getMap()) return
-    // mapRef.current?.flyTo(
+    
+        // mapRef.current?.flyTo(
     //   closeMapViewState.longitude,
     //   closeMapViewState.latitude,
     //   closeMapViewState.zoom,
@@ -393,11 +401,13 @@ function WaterFlow() {
     //   0,
     //   3500,
     // )
-    // Use the object syntax for flyTo
-    mapRef.current.flyTo({
-      center: [closeMapViewState.longitude, closeMapViewState.latitude],
+    flyTo({
+      longitude: closeMapViewState.longitude,
+      latitude: closeMapViewState.latitude,
       zoom: closeMapViewState.zoom,
-      duration: 3500,
+      transitionOptions: {
+        duration: 3500
+      }
     })
   }
 
