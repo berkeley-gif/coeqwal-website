@@ -7,6 +7,16 @@ import type {
   RasterDEMSourceSpecification,
   ImageSourceSpecification,
   VideoSourceSpecification,
+  LineLayerSpecification,
+  FillLayerSpecification,
+  CircleLayerSpecification,
+  SymbolLayerSpecification,
+  RasterLayerSpecification,
+  HeatmapLayerSpecification,
+  FillExtrusionLayerSpecification,
+  HillshadeLayerSpecification,
+  BackgroundLayerSpecification,
+  SkyLayerSpecification,
 } from "mapbox-gl"
 
 /** Marker properties used across the map package */
@@ -94,6 +104,73 @@ export interface MapLayer {
   layout?: Record<string, StyleValue>
   [key: string]: unknown
 }
+
+/**
+ * Helper types for easier layer creation without type assertions
+ */
+
+// Line layer style helpers
+export type LineCapType = "butt" | "round" | "square"
+export type LineJoinType = "bevel" | "round" | "miter"
+
+export interface LineLayerStyle {
+  type: "line"
+  layout?: {
+    "line-cap"?: LineCapType
+    "line-join"?: LineJoinType
+    "line-miter-limit"?: number
+    "line-round-limit"?: number
+    visibility?: "visible" | "none"
+    [key: string]: any
+  }
+  paint?: {
+    "line-color"?: string
+    "line-opacity"?: number
+    "line-width"?: number
+    "line-gap-width"?: number
+    "line-dasharray"?: number[]
+    [key: string]: any
+  }
+}
+
+// Fill layer style helpers
+export interface FillLayerStyle {
+  type: "fill"
+  layout?: {
+    visibility?: "visible" | "none"
+    [key: string]: any
+  }
+  paint?: {
+    "fill-color"?: string
+    "fill-opacity"?: number
+    "fill-outline-color"?: string
+    [key: string]: any
+  }
+}
+
+// Circle layer style helpers
+export interface CircleLayerStyle {
+  type: "circle"
+  layout?: {
+    visibility?: "visible" | "none"
+    [key: string]: any
+  }
+  paint?: {
+    "circle-color"?: string
+    "circle-opacity"?: number
+    "circle-radius"?: number
+    "circle-stroke-width"?: number
+    "circle-stroke-color"?: string
+    [key: string]: any
+  }
+}
+
+// Union of all layer styles for easy usage
+export type MapLayerStyle =
+  | LineLayerStyle
+  | FillLayerStyle
+  | CircleLayerStyle
+  | { type: MapLayerType; [key: string]: any }
 
 /** Individual overlay entry rendered in the overlay portal */
 export interface OverlayEntry {

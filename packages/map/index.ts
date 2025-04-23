@@ -7,14 +7,18 @@ export { useMap } from "./src/context/MapContext"
 // Export Map component
 export { default as Map } from "./src/Map"
 
-// Marker components
+// Export Marker and Popup directly from react-map-gl
 export {
   Marker,
   Popup,
-  ScaledMarker,
-  MarkerWithPopup,
-  MarkersLayer,
-} from "./src/markers"
+  NavigationControl,
+  GeolocateControl,
+  Source,
+  Layer,
+} from "react-map-gl/mapbox"
+
+// Marker components
+export { ScaledMarker, MarkerWithPopup, MarkersLayer } from "./src/markers"
 
 export type { MarkerProperties } from "./src/markers"
 
@@ -30,17 +34,16 @@ export type {
   MapOperationsAPI,
   StateManagementMode,
   MapProps,
+  // Export new layer style types
+  LineLayerStyle,
+  FillLayerStyle,
+  CircleLayerStyle,
+  MapLayerStyle,
+  LineCapType,
+  LineJoinType,
 } from "./src/types"
 
 export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"
 
 // Predefined transitions
 export { MapTransitions } from "./src/types"
-
-// Re-export Mapbox GL components from ReactMapGL for convenience
-export {
-  NavigationControl,
-  GeolocateControl,
-  Source,
-  Layer,
-} from "react-map-gl/mapbox"
