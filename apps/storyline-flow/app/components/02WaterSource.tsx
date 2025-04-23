@@ -12,7 +12,6 @@ import { opacityVariants } from "@repo/motion/variants"
 import { useInViewVisibility } from "../hooks/useInViewVisbility"
 import PrecipitationBar from "./vis/PrecipitationBar"
 import Image from "next/image"
-import { Layer } from "@repo/map"
 
 type MarkerType = {
   id: string
@@ -128,7 +127,8 @@ function Precipitation() {
 function Variability() {
   const content = storyline.variability
   const visRef = useInViewVisibility()
-  const { mapRef } = useMap()
+  // const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap() // setMotionChildren is now defined in the context
 
   const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
   const [startBarAnimation, setStartBarAnimation] = useState(false)
@@ -188,33 +188,42 @@ function Variability() {
   ) // Include popupInfo in dependencies
 
   const removeMarkersFromMap = useCallback(() => {
-    if (mapRef.current) {
-      mapRef.current?.setMotionChildren(null)
+    // if (mapRef.current) {
+    //   mapRef.current?.setMotionChildren(null)
+    if (setMotionChildren) {
+      setMotionChildren(null)
       setSelectedYear(null) // Reset selected year when removing markers
     }
-  }, [mapRef])
+    // }, [mapRef])
+  }, [setMotionChildren])
 
   const addMarkersToMap = useCallback(() => {
-    if (mapRef.current) {
+    // if (mapRef.current) {
+    if (setMotionChildren) {
       // Only add markers if a year is selected
       const pointsToShow = selectedYear ? markers[selectedYear] : []
       const markerToAdd = prepareMarkers(pointsToShow)
-      mapRef.current?.setMotionChildren(markerToAdd)
+      // mapRef.current?.setMotionChildren(markerToAdd)
+      setMotionChildren(markerToAdd)
     }
-  }, [mapRef, prepareMarkers, selectedYear]) // Add proper dependencies
+    // }, [mapRef, prepareMarkers, selectedYear])
+  }, [setMotionChildren, prepareMarkers, selectedYear])
 
   const getSelectedYear = useCallback(
     (year: keyof typeof markers) => {
       setSelectedYear(year)
       // We need to wait for the state to update before adding markers
       setTimeout(() => {
-        if (mapRef.current) {
+        // if (mapRef.current) {
+        if (setMotionChildren) {
           const markerToAdd = prepareMarkers(markers[year])
-          mapRef.current?.setMotionChildren(markerToAdd)
+          // mapRef.current?.setMotionChildren(markerToAdd)
+          setMotionChildren(markerToAdd)
         }
       }, 0)
     },
-    [mapRef, prepareMarkers],
+    // [mapRef, prepareMarkers],
+    [setMotionChildren, prepareMarkers],
   )
 
   useIntersectionObserver(
@@ -323,7 +332,7 @@ function WaterFlow() {
       id: "river-sac-layer",
       source: "river-sac",
       ...riverLayerStyle,
-    } as Layer)
+    } as any) // Use 'any' as a temporary workaround for the type issue
     // mapRef.current?.addSource("river-sanjoaquin", {
     mapInst.addSource("river-sanjoaquin", {
       type: "geojson",
@@ -335,7 +344,7 @@ function WaterFlow() {
       id: "river-sanjoaquin-layer",
       source: "river-sanjoaquin",
       ...riverLayerStyle,
-    } as Layer)
+    } as any) // Use 'any' as a temporary workaround for the type issue
 
     // mapRef.current
     //   ?.getMap()

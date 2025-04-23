@@ -1,7 +1,6 @@
 "use client"
 
-import { MapRef, Marker } from "react-map-gl/mapbox"
-import MapboxGL from "react-map-gl/mapbox"
+import { MapRef, Marker, Map as MapboxGLMap } from "react-map-gl/mapbox"
 import { useCallback } from "react"
 import { useMap } from "./context/MapContext"
 import type { MapProps, MarkerProperties } from "./types"
@@ -29,41 +28,29 @@ export default function Map(props: MapProps) {
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <MapboxGL
+      <MapboxGLMap
         {...props}
         ref={assignMapRef}
         mapboxAccessToken={props.mapboxToken}
         style={{ position: "absolute", inset: 0, ...props.style }}
-      />
+      >
+        {/* Render standard markers from context */}
+        {markers.map((marker: MarkerProperties, idx: number) => (
+          <Marker
+            key={marker.id ?? idx}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+          >
+            {marker.content}
+          </Marker>
+        ))}
 
-      {/* Render standard markers from context */}
-      {markers.map((marker: MarkerProperties, idx: number) => (
-        <Marker
-          key={marker.id ?? idx}
-          longitude={marker.longitude}
-          latitude={marker.latitude}
-        >
-          {marker.content}
-        </Marker>
-      ))}
+        {/* Render children (which can include markers) */}
+        {props.children}
 
-      {/* Render motion children (dynamic markers) */}
-      {motionChildren && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 10,
-            pointerEvents: "none",
-            ...motionChildrenStyle,
-          }}
-        >
-          {motionChildren}
-        </div>
-      )}
+        {/* Render motion children */}
+        {motionChildren}
+      </MapboxGLMap>
     </div>
   )
 }

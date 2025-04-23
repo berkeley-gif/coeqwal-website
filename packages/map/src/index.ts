@@ -13,6 +13,9 @@ export {
   Layer,
 } from "react-map-gl/mapbox"
 
+// Export types for mapbox-gl layers
+export type { LayerProps } from "react-map-gl/mapbox"
+
 export type {
   ViewState,
   ViewStateTransitionOptions,
@@ -25,6 +28,13 @@ export type {
   StateManagementMode,
   MapProps,
   MarkerProperties,
+  // Export layer style types
+  LineLayerStyle,
+  FillLayerStyle,
+  CircleLayerStyle,
+  MapLayerStyle,
+  LineCapType,
+  LineJoinType,
 } from "./types"
 
 export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"
