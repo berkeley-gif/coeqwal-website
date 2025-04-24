@@ -14,7 +14,7 @@ import { useTranslation } from "@repo/i18n"
 import { HeroQuestionsPanel, BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
-import type { ViewState, MapboxMapRef } from "@repo/map"
+import type { MapboxMapRef } from "@repo/map"
 import { useMap } from "@repo/map"
 
 // Dynamic import components that use client-side features

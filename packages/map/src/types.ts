@@ -8,7 +8,7 @@ import type {
   ImageSourceSpecification,
   VideoSourceSpecification,
   PropertyValueSpecification,
-  StyleSpecification
+  StyleSpecification,
 } from "mapbox-gl"
 
 /** Marker properties used across the map package */
@@ -108,14 +108,16 @@ export interface LineLayerStyle {
     "line-miter-limit": PropertyValueSpecification<number>
     "line-round-limit": PropertyValueSpecification<number>
     visibility: PropertyValueSpecification<"visible" | "none">
-  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  }> &
+    Record<string, PropertyValueSpecification<string | number | boolean>>
   paint?: Partial<{
     "line-color": PropertyValueSpecification<string>
     "line-opacity": PropertyValueSpecification<number>
     "line-width": PropertyValueSpecification<number>
     "line-gap-width": PropertyValueSpecification<number>
     "line-dasharray": PropertyValueSpecification<number[]>
-  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  }> &
+    Record<string, PropertyValueSpecification<string | number | boolean>>
 }
 
 // Fill layer style helpers
@@ -123,12 +125,14 @@ export interface FillLayerStyle {
   type: "fill"
   layout?: Partial<{
     visibility: PropertyValueSpecification<"visible" | "none">
-  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  }> &
+    Record<string, PropertyValueSpecification<string | number | boolean>>
   paint?: Partial<{
     "fill-color": PropertyValueSpecification<string>
     "fill-opacity": PropertyValueSpecification<number>
     "fill-outline-color": PropertyValueSpecification<string>
-  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  }> &
+    Record<string, PropertyValueSpecification<string | number | boolean>>
 }
 
 // Circle layer style helpers
@@ -136,14 +140,16 @@ export interface CircleLayerStyle {
   type: "circle"
   layout?: Partial<{
     visibility: PropertyValueSpecification<"visible" | "none">
-  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  }> &
+    Record<string, PropertyValueSpecification<string | number | boolean>>
   paint?: Partial<{
     "circle-color": PropertyValueSpecification<string>
     "circle-opacity": PropertyValueSpecification<number>
     "circle-radius": PropertyValueSpecification<number>
     "circle-stroke-width": PropertyValueSpecification<number>
     "circle-stroke-color": PropertyValueSpecification<string>
-  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  }> &
+    Record<string, PropertyValueSpecification<string | number | boolean>>
 }
 
 // Union of all layer styles for easy usage
@@ -151,7 +157,10 @@ export type MapLayerStyle =
   | LineLayerStyle
   | FillLayerStyle
   | CircleLayerStyle
-  | { type: MapLayerType } & Record<string, PropertyValueSpecification<string | number | boolean>>
+  | ({ type: MapLayerType } & Record<
+      string,
+      PropertyValueSpecification<string | number | boolean>
+    >)
 
 /** Individual overlay entry rendered in the overlay portal */
 export interface OverlayEntry {
@@ -166,7 +175,9 @@ export interface MapOperationsAPI {
   markers?: MarkerProperties[]
 
   // Map style helpers
-  getStyle: () => StyleSpecification | { sources: Record<string, never>; layers: never[] }
+  getStyle: () =>
+    | StyleSpecification
+    | { sources: Record<string, never>; layers: never[] }
   hasSource: (id: string) => boolean
   hasLayer: (id: string) => boolean
 
@@ -227,6 +238,18 @@ export interface MapOperationsAPI {
   setMotionChildren?: (element: ReactNode | null, style?: CSSProperties) => void
   motionChildren?: ReactNode | null
   motionChildrenStyle?: CSSProperties
+
+  // Named motion children system (preferred over legacy setMotionChildren)
+  setNamedMotionChild?: (
+    key: string,
+    element: ReactNode | null,
+    style?: CSSProperties,
+  ) => void
+  namedMotionChildren?: Record<
+    string,
+    { element: ReactNode; style?: CSSProperties; isVisible: boolean }
+  >
+  getAllVisibleMotionChildren?: () => ReactNode[]
 
   // Optional legacy marker support
   setMarkers?: (markers: MarkerProperties[]) => void

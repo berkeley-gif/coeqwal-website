@@ -57,21 +57,21 @@ function City() {
   const content = storyline.impact
   const viewState = cityMapViewState
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markers = markersToAdd()
-    mapRef.current?.setMotionChildren(markers)
+    if (setMotionChildren) {
+      setMotionChildren(markers)
+    }
   }
 
   useIntersectionObserver(
@@ -198,20 +198,20 @@ function Agriculture() {
   const content = storyline.impact
   const viewState = valleyMapViewState
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    mapRef.current?.setMotionChildren(null)
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
+    if (setMotionChildren) {
+      setMotionChildren(null)
+    }
   }
 
   useIntersectionObserver(
@@ -296,22 +296,24 @@ function Salmon() {
   const content = storyline.impact.salmon
   const marker = impactMarker.salmon
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveToSalmon() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      impactMapViewState.salmon.longitude,
-      impactMapViewState.salmon.latitude,
-      impactMapViewState.salmon.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [
+        impactMapViewState.salmon.longitude,
+        impactMapViewState.salmon.latitude,
+      ],
+      zoom: impactMapViewState.salmon.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
+    }
   }
 
   useIntersectionObserver(
@@ -371,22 +373,21 @@ function Delta() {
   const marker = impactMarker.delta
   const viewState = impactMapViewState.delta
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveToDelta() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
+    }
   }
 
   useIntersectionObserver(
@@ -445,22 +446,21 @@ function Groundwater() {
   const marker = impactMarker.groundwater
   const viewState = impactMapViewState.groundwater
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
+    }
   }
 
   useIntersectionObserver(
@@ -519,22 +519,21 @@ function Drinking() {
   const marker = impactMarker.drinkingwater
   const viewState = impactMapViewState.drinkingwater
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
+    }
   }
 
   useIntersectionObserver(
@@ -592,22 +591,21 @@ function Climate() {
   const marker = impactMarker.climate
   const viewState = impactMapViewState.climate
   const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
+    }
   }
 
   useIntersectionObserver(

@@ -9,8 +9,6 @@ import "mapbox-gl/dist/mapbox-gl.css"
 export default function Map(props: MapProps) {
   const { mapRef, markers = [], motionChildren } = useMap() // Todo: incorporate motionChildrenStyle
 
-  console.log("🌀 Rendering <Map />")
-
   const assignMapRef = useCallback(
     (instance: MapRef | null) => {
       if (!mapRef) return

@@ -31,7 +31,7 @@ export const useMapStore = create<MapState>()(
 
 // Actions
 export const mapActions = {
-  setMapRef: (ref: RefObject<MapboxMapRef>) =>
+  setMapRef: (ref: RefObject<MapboxMapRef | null>) =>
     useMapStore.setState({ mapRef: ref }),
 
   // Register the actual map instance for direct access

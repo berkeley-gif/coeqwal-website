@@ -18,16 +18,16 @@ export function useMapControls() {
 
 // Hook for connecting a map component to the store
 export function useMapState(): {
-  mapRef: RefObject<MapboxMapRef>
+  mapRef: RefObject<MapboxMapRef | null>
   viewState: ViewState
   onViewStateChange: (newViewState: ViewState) => void
 } {
-  const mapRef = useRef<MapboxMapRef>(null)
+  const mapRef = useRef<MapboxMapRef | null>(null)
   const viewState = useViewState()
 
   // Connect the mapRef to the store on mount
   useEffect(() => {
-    mapActions.setMapRef(mapRef as RefObject<MapboxMapRef>)
+    mapActions.setMapRef(mapRef)
   }, [])
 
   // Handler for map view state changes

@@ -4,11 +4,10 @@ import React, { useRef } from "react"
 import Image from "next/image"
 import storyline from "../../public/locales/english.json" assert { type: "json" }
 import SectionContainer from "./helpers/SectionContainer"
-import { MapTransitions, Marker, useMap } from "@repo/map"
+import { Marker, useMap, MapTransitions } from "@repo/map"
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { stateMapViewState } from "./helpers/mapViews"
-import { Layer } from "@repo/map"
 import { motion } from "@repo/motion"
 
 const riverLayerStyle = {
@@ -67,11 +66,10 @@ function Header() {
     (isInterSecting) => {
       if (isInterSecting && mapRef.current) {
         console.log("hello")
-        mapRef.current?.flyTo(
-          stateMapViewState.longitude,
-          stateMapViewState.latitude,
-          stateMapViewState.zoom,
-        )
+        mapRef.current?.flyTo({
+          center: [stateMapViewState.longitude, stateMapViewState.latitude],
+          zoom: stateMapViewState.zoom,
+        })
       }
     },
     { threshold: 0 },
@@ -138,7 +136,8 @@ function Drinking() {
   const content = storyline.economy.drinking
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
   const viewState = stateMapViewState
-  const { mapRef } = useMap()
+  const { mapRef, addSource, addLayer, setPaintProperty, setMotionChildren } =
+    useMap()
   const markers = [
     { longitude: -114.596, latitude: 33.61, caption: "Colorado River" },
     { longitude: -118.3951, latitude: 37.3686, caption: "Lake Mead" },
@@ -146,49 +145,59 @@ function Drinking() {
   ]
 
   function loadRivers() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-    mapRef.current?.addSource("river-combined", {
-      type: "geojson",
-      data: "/rivers/combinedRivers.geojson",
-    })
-    mapRef.current?.addLayer({
-      id: "river-combined-layer",
-      source: "river-combined",
-      ...riverLayerStyle,
-    } as Layer)
+    if (!mapRef.current) return
 
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("river-combined-layer", "line-opacity", 1)
+    // Add source if it doesn't exist
+    if (addSource) {
+      addSource("river-combined", {
+        type: "geojson",
+        data: "/rivers/combinedRivers.geojson",
+      })
+    }
+
+    // Add layer if it doesn't exist
+    if (addLayer) {
+      addLayer(
+        "river-combined-layer",
+        "river-combined",
+        riverLayerStyle.type,
+        riverLayerStyle.paint,
+        riverLayerStyle.layout,
+      )
+    }
+
+    // Set opacity
+    if (setPaintProperty) {
+      setPaintProperty("river-combined-layer", "line-opacity", 1)
+    }
   }
 
   function unloadRivers() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-    const layers = mapInst.getStyle().layers.map((layer) => layer.id)
-    if (!layers.includes("river-combined-layer")) return
-    mapRef.current
-      ?.getMap()
-      ?.getMap()
-      ?.setPaintProperty("river-combined-layer", "line-opacity", 0)
-    mapRef.current?.setMotionChildren(null)
+    if (!mapRef.current) return
+
+    if (setPaintProperty) {
+      setPaintProperty("river-combined-layer", "line-opacity", 0)
+    }
+
+    if (setMotionChildren) {
+      setMotionChildren(null)
+    }
   }
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
     const markerToAdd = markers.map((point, idx) => getMarker(point, idx))
-    mapRef.current?.setMotionChildren(markerToAdd)
+
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
+    }
   }
 
   useIntersectionObserver(

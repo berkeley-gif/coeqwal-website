@@ -58,24 +58,26 @@ function Delta() {
   const content = storyline.delta
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
   const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
-  const { mapRef } = useMap() // from our context
+  const { mapRef, flyTo, setMotionChildren } = useMap() // from our context
 
   function moveToDelta() {
-    if (mapRef.current) {
-      mapRef.current?.flyTo(
-        deltaMapViewState.longitude,
-        deltaMapViewState.latitude,
-        deltaMapViewState.zoom,
-      )
-      const markerToAdd = prepareMarkers(markers)
-      mapRef.current?.setMotionChildren(markerToAdd)
+    flyTo({
+      longitude: deltaMapViewState.longitude,
+      latitude: deltaMapViewState.latitude,
+      zoom: deltaMapViewState.zoom,
+    })
+    const markerToAdd = prepareMarkers(markers)
+    if (setMotionChildren) {
+      setMotionChildren(markerToAdd)
     }
   }
 
   function moveBackToCA() {
     if (!mapRef.current?.getMap()) return
-    //mapRef.current?.flyTo(stateMapViewState.longitude, stateMapViewState.latitude, stateMapViewState.zoom,)
-    mapRef.current?.setMotionChildren(null)
+    //flyTo(stateMapViewState)
+    if (setMotionChildren) {
+      setMotionChildren(null)
+    }
   }
 
   function prepareMarkers(points: MarkerType[] = markers) {

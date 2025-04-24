@@ -40,14 +40,14 @@ export type {
   LineJoinType,
 } from "./types"
 
-// Import Layer first
 import { Layer } from "react-map-gl/mapbox"
 
-// Re-export Layer component type, proper way to define a component type
-export { Layer as MapboxLayer }
+// Export Layer type correctly using typeof
+export type MapboxLayer = typeof Layer
 
 // Export transitions
 export { MapTransitions } from "./types"
+export { createFlyToOptions, createFlyToContextOptions } from "./transitions"
 
 // Marker components
 export { ScaledMarker, MarkerWithPopup, MarkersLayer } from "./markers"

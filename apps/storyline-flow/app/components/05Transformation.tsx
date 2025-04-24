@@ -23,20 +23,20 @@ function Transformation() {
   const content = storyline.transformation
   const viewState = stateMapViewState
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef } = useMap()
+  const { mapRef, setMotionChildren } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    mapRef.current?.setMotionChildren(null)
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      ...MapTransitions.SMOOTH,
+    })
+
+    if (setMotionChildren) {
+      setMotionChildren(null)
+    }
   }
 
   useIntersectionObserver(

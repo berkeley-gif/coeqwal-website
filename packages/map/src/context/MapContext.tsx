@@ -16,6 +16,13 @@ import type {
   MarkerProperties,
 } from "../types"
 
+// Default transition to use when no transition is specified
+const DEFAULT_TRANSITION = {
+  duration: 2000,
+  easing: (t: number) => t * (2 - t), // ease-out-quad
+  essential: true,
+}
+
 type FlyToArgs =
   | [
       options: {
@@ -117,19 +124,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
           zoom,
           bearing = 0,
           pitch = 0,
-          transitionOptions = {},
+          transitionOptions = DEFAULT_TRANSITION,
         } = args[0]
         mapRef.current.flyTo({
           center: [longitude, latitude],
           zoom,
           bearing,
           pitch,
-          duration: transitionOptions.duration ?? 4000,
+          duration: transitionOptions.duration ?? DEFAULT_TRANSITION.duration,
           easing:
             typeof transitionOptions.easing === "function"
               ? transitionOptions.easing
-              : (t) => t,
-          essential: transitionOptions.essential ?? true,
+              : DEFAULT_TRANSITION.easing,
+          essential:
+            transitionOptions.essential ?? DEFAULT_TRANSITION.essential,
         })
       } else if (
         args.length >= 3 &&
@@ -141,17 +149,19 @@ export function MapProvider({ children }: { children: ReactNode }) {
         const zoom = args[2]
         const pitch = args[3] ?? 0
         const bearing = args[4] ?? 0
-        const options = args[5] ?? {}
+        const options = args[5] ?? DEFAULT_TRANSITION
 
         mapRef.current.flyTo({
           center: [lng, lat],
           zoom,
           pitch,
           bearing,
-          duration: options.duration ?? 2000,
+          duration: options.duration ?? DEFAULT_TRANSITION.duration,
           easing:
-            typeof options.easing === "function" ? options.easing : (t) => t,
-          essential: options.essential ?? true,
+            typeof options.easing === "function"
+              ? options.easing
+              : DEFAULT_TRANSITION.easing,
+          essential: options.essential ?? DEFAULT_TRANSITION.essential,
         })
       } else {
         console.warn("⚠️ flyTo was called with unexpected arguments", args)
