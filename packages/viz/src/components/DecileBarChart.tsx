@@ -1,5 +1,5 @@
 "use client"
-
+// mockup for now
 import React, { useRef, useEffect, useMemo } from "react"
 import * as d3 from "d3"
 import { DecileChartProps, DecileData } from "../types"

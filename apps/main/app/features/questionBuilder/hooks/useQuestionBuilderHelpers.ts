@@ -694,4 +694,3 @@ export const useQuestionBuilderHelpers = () => {
     formatOutcomeText,
   }
 }
-

@@ -39,7 +39,10 @@ interface SourceConfig {
  * ], [visible]);
  * ```
  */
-export function useMapLayers(layers: LayerConfig[], dependencies: React.DependencyList = []) {
+export function useMapLayers(
+  layers: LayerConfig[],
+  dependencies: React.DependencyList = [],
+) {
   const {
     addLayer,
     removeLayer,
@@ -48,6 +51,14 @@ export function useMapLayers(layers: LayerConfig[], dependencies: React.Dependen
     hasLayer,
   } = useMap()
   const layerIds = useRef<string[]>([])
+  
+  // Store dependencies in a ref to avoid the ESLint warning
+  const depsRef = useRef(dependencies)
+  // Update ref when dependencies change
+  depsRef.current = dependencies
+  
+  // Create a stable dependency value that changes when dependencies change
+  const depsString = JSON.stringify(depsRef.current)
 
   useEffect(() => {
     // Track added layers for cleanup
@@ -89,8 +100,16 @@ export function useMapLayers(layers: LayerConfig[], dependencies: React.Dependen
         layerIds.current = layerIds.current.filter((layerId) => layerId !== id)
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layers, addLayer, removeLayer, setPaintProperty, setLayoutProperty, hasLayer, ...dependencies])
+  }, [
+    layers,
+    addLayer,
+    removeLayer,
+    setPaintProperty,
+    setLayoutProperty,
+    hasLayer,
+    // Use a dependency that changes when any of the external dependencies change
+    depsString
+  ])
 
   return layerIds.current
 }
@@ -118,6 +137,14 @@ export function useMapSources(
 ) {
   const { addSource, removeSource, hasSource } = useMap()
   const sourceIds = useRef<string[]>([])
+  
+  // Store dependencies in a ref to avoid the ESLint warning
+  const depsRef = useRef(dependencies)
+  // Update ref when dependencies change
+  depsRef.current = dependencies
+  
+  // Create a stable dependency value that changes when dependencies change
+  const depsString = JSON.stringify(depsRef.current)
 
   useEffect(() => {
     // Track added sources for cleanup
@@ -153,8 +180,7 @@ export function useMapSources(
         )
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sources, addSource, removeSource, hasSource, ...dependencies])
+  }, [sources, addSource, removeSource, hasSource, depsString])
 
   return sourceIds.current
 }
