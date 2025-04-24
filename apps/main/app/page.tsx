@@ -60,30 +60,10 @@ export default function Home() {
 
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
 
-  // ────────────────────────────────────────────────────────────────────────
-  // 1) UNCONTROLLED EXAMPLE
-  //    Using a local ref for direct imperative control
-  //    Using initialViewState, no explicit React state for camera
-  // ────────────────────────────────────────────────────────────────────────
-
   // For the uncontrolled map, we'll store its ref so we can call flyTo
   const uncontrolledRef = useRef<MapboxMapRef | null>(
     null,
   ) as React.RefObject<MapboxMapRef>
-
-  // ────────────────────────────────────────────────────────────────────────
-  // 2) CONTROLLED EXAMPLE
-  //    Using a local React state that we pass as viewState
-  // ────────────────────────────────────────────────────────────────────────
-
-  // For controlled usage, we keep a local piece of state for camera
-  const [controlledViewState, setControlledViewState] = useState<ViewState>({
-    longitude: -126.037,
-    latitude: 37.962,
-    zoom: 5.83,
-    bearing: 0,
-    pitch: 0,
-  })
 
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {

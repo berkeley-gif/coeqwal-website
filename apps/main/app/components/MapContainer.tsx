@@ -18,7 +18,7 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const initialized = useRef(false)
 
   // Use utilities to manage markers
-  const [markers, setMarkers] = useState(WATER_FEATURES)
+  const [markers] = useState(WATER_FEATURES)
   const [filterType] = useState<string | null>(null)
   // const [filterType, setFilterType] = useState<string | null>(null) // Uncomment when needed
 
