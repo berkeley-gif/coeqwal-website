@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Map, useMap, Marker } from "@repo/map"
+import { Map, useMap, Marker, MapRef } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useMapState, mapActions } from "@repo/state/map"
 import AnimatedMarker from "./AnimatedMarker"
 import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
 
 interface MapContainerProps {
-  uncontrolledRef?: React.RefObject<any>
+  uncontrolledRef?: React.RefObject<MapRef | null>
 }
 
 export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
@@ -19,7 +19,8 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
 
   // Use utilities to manage markers
   const [markers, setMarkers] = useState(WATER_FEATURES)
-  const [filterType, setFilterType] = useState<string | null>(null)
+  const [filterType] = useState<string | null>(null)
+  // const [filterType, setFilterType] = useState<string | null>(null) // Uncomment when needed
 
   // Filter markers if a type is selected
   const filteredMarkers = filterType
@@ -60,18 +61,18 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   }, [mapRef, uncontrolledRef])
 
   // Example of how to add markers programmatically
-  const addCustomMarker = () => {
-    const newMarker = {
-      id: `custom-${Date.now()}`,
-      longitude: -119.5 + (Math.random() * 2 - 1),
-      latitude: 38.5 + (Math.random() * 2 - 1),
-      color: "#FF9800",
-      title: "Custom Marker",
-      properties: { type: "custom" },
-    }
+  // const addCustomMarker = () => {
+  //   const newMarker = {
+  //     id: `custom-${Date.now()}`,
+  //     longitude: -119.5 + (Math.random() * 2 - 1),
+  //     latitude: 38.5 + (Math.random() * 2 - 1),
+  //     color: "#FF9800",
+  //     title: "Custom Marker",
+  //     properties: { type: "custom" },
+  //   }
 
-    setMarkers((prev) => [...prev, newMarker])
-  }
+  //   setMarkers((prev) => [...prev, newMarker])
+  // }
 
   return (
     <Box
