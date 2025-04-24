@@ -43,8 +43,8 @@ export type {
 // Import Layer first
 import { Layer } from "react-map-gl/mapbox"
 
-// Export MapboxLayer as typeof
-export type MapboxLayer = typeof Layer
+// Re-export Layer component type, proper way to define a component type
+export { Layer as MapboxLayer }
 
 // Export transitions
 export { MapTransitions } from "./types"

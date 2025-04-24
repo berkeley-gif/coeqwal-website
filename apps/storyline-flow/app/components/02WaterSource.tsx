@@ -6,7 +6,7 @@ import SectionContainer from "./helpers/SectionContainer"
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { useState, useCallback, useRef } from "react"
-import { Marker, Popup, useMap, MapLayerType } from "@repo/map"
+import { Marker, Popup, useMap } from "@repo/map"
 import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
 import { useInViewVisibility } from "../hooks/useInViewVisbility"
@@ -126,7 +126,7 @@ function Variability() {
   const content = storyline.variability
   const visRef = useInViewVisibility()
   // const { mapRef } = useMap()
-  const { mapRef, setMotionChildren } = useMap() // 👈
+  const { setMotionChildren } = useMap() // 👈
 
   const [popupInfo, setPopupInfo] = useState<MarkerType | null>(null)
   const [startBarAnimation, setStartBarAnimation] = useState(false)

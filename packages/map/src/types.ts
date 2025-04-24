@@ -7,16 +7,8 @@ import type {
   RasterDEMSourceSpecification,
   ImageSourceSpecification,
   VideoSourceSpecification,
-  LineLayerSpecification,
-  FillLayerSpecification,
-  CircleLayerSpecification,
-  SymbolLayerSpecification,
-  RasterLayerSpecification,
-  HeatmapLayerSpecification,
-  FillExtrusionLayerSpecification,
-  HillshadeLayerSpecification,
-  BackgroundLayerSpecification,
-  SkyLayerSpecification,
+  PropertyValueSpecification,
+  StyleSpecification
 } from "mapbox-gl"
 
 /** Marker properties used across the map package */
@@ -64,12 +56,7 @@ export type MapLayerType =
   | "sky"
 
 /** Style values for paint and layout properties */
-export type StyleValue =
-  | string
-  | number
-  | boolean
-  | Array<string | number | boolean>
-  | Record<string, unknown>
+export type StyleValue = PropertyValueSpecification<string | number | boolean>
 
 /** Data that can be passed as a GeoJSON source */
 export type MapSourceData =
@@ -115,54 +102,48 @@ export type LineJoinType = "bevel" | "round" | "miter"
 
 export interface LineLayerStyle {
   type: "line"
-  layout?: {
-    "line-cap"?: LineCapType
-    "line-join"?: LineJoinType
-    "line-miter-limit"?: number
-    "line-round-limit"?: number
-    visibility?: "visible" | "none"
-    [key: string]: any
-  }
-  paint?: {
-    "line-color"?: string
-    "line-opacity"?: number
-    "line-width"?: number
-    "line-gap-width"?: number
-    "line-dasharray"?: number[]
-    [key: string]: any
-  }
+  layout?: Partial<{
+    "line-cap": PropertyValueSpecification<LineCapType>
+    "line-join": PropertyValueSpecification<LineJoinType>
+    "line-miter-limit": PropertyValueSpecification<number>
+    "line-round-limit": PropertyValueSpecification<number>
+    visibility: PropertyValueSpecification<"visible" | "none">
+  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  paint?: Partial<{
+    "line-color": PropertyValueSpecification<string>
+    "line-opacity": PropertyValueSpecification<number>
+    "line-width": PropertyValueSpecification<number>
+    "line-gap-width": PropertyValueSpecification<number>
+    "line-dasharray": PropertyValueSpecification<number[]>
+  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
 }
 
 // Fill layer style helpers
 export interface FillLayerStyle {
   type: "fill"
-  layout?: {
-    visibility?: "visible" | "none"
-    [key: string]: any
-  }
-  paint?: {
-    "fill-color"?: string
-    "fill-opacity"?: number
-    "fill-outline-color"?: string
-    [key: string]: any
-  }
+  layout?: Partial<{
+    visibility: PropertyValueSpecification<"visible" | "none">
+  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  paint?: Partial<{
+    "fill-color": PropertyValueSpecification<string>
+    "fill-opacity": PropertyValueSpecification<number>
+    "fill-outline-color": PropertyValueSpecification<string>
+  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
 }
 
 // Circle layer style helpers
 export interface CircleLayerStyle {
   type: "circle"
-  layout?: {
-    visibility?: "visible" | "none"
-    [key: string]: any
-  }
-  paint?: {
-    "circle-color"?: string
-    "circle-opacity"?: number
-    "circle-radius"?: number
-    "circle-stroke-width"?: number
-    "circle-stroke-color"?: string
-    [key: string]: any
-  }
+  layout?: Partial<{
+    visibility: PropertyValueSpecification<"visible" | "none">
+  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
+  paint?: Partial<{
+    "circle-color": PropertyValueSpecification<string>
+    "circle-opacity": PropertyValueSpecification<number>
+    "circle-radius": PropertyValueSpecification<number>
+    "circle-stroke-width": PropertyValueSpecification<number>
+    "circle-stroke-color": PropertyValueSpecification<string>
+  }> & Record<string, PropertyValueSpecification<string | number | boolean>>
 }
 
 // Union of all layer styles for easy usage
@@ -170,7 +151,7 @@ export type MapLayerStyle =
   | LineLayerStyle
   | FillLayerStyle
   | CircleLayerStyle
-  | { type: MapLayerType; [key: string]: any }
+  | { type: MapLayerType } & Record<string, PropertyValueSpecification<string | number | boolean>>
 
 /** Individual overlay entry rendered in the overlay portal */
 export interface OverlayEntry {
@@ -185,7 +166,7 @@ export interface MapOperationsAPI {
   markers?: MarkerProperties[]
 
   // Map style helpers
-  getStyle: () => { sources: Record<string, any>; layers: Array<any> }
+  getStyle: () => StyleSpecification | { sources: Record<string, never>; layers: never[] }
   hasSource: (id: string) => boolean
   hasLayer: (id: string) => boolean
 
