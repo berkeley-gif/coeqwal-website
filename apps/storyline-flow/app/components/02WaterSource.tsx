@@ -61,14 +61,9 @@ function Precipitation() {
       tileSize: 256,
     })
     //mapRef.current?.addLayer({
-    addLayer(
-      "precipitation-layer",
-      "precipitation",
-      "raster" as MapLayerType,
-      {
-        "raster-opacity": 0,
-      }
-    )
+    addLayer("precipitation-layer", "precipitation", "raster", {
+      "raster-opacity": 0,
+    })
     // mapRef.current
     // ?.getMap()
     // ?.getMap()
@@ -79,11 +74,11 @@ function Precipitation() {
   function unloadPrecipitation() {
     // const mapInst = mapRef.current?.getMap()
     // if (!mapInst) return
-    
+
     // const layers = mapInst.getStyle().layers.map((layer) => layer.id)
-    const layers = getStyle().layers.map(layer => layer.id)
+    const layers = getStyle().layers.map((layer) => layer.id)
     if (!layers.includes("precipitation-layer")) return
-    
+
     // mapRef.current
     // ?.getMap()
     // ?.getMap()
@@ -319,7 +314,8 @@ function Snowpack() {
 function WaterFlow() {
   const content = storyline.flow
   const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const { mapRef, addSource, addLayer, setPaintProperty, flyTo, getStyle } = useMap() // 👈
+  const { mapRef, addSource, addLayer, setPaintProperty, flyTo, getStyle } =
+    useMap() // 👈
 
   function loadRivers() {
     const mapInst = mapRef.current?.getMap()
@@ -337,7 +333,7 @@ function WaterFlow() {
       "river-sac",
       riverLayerStyle.type,
       riverLayerStyle.paint,
-      riverLayerStyle.layout
+      riverLayerStyle.layout,
     )
 
     // mapRef.current?.addSource("river-sanjoaquin", {
@@ -352,7 +348,7 @@ function WaterFlow() {
       "river-sanjoaquin",
       riverLayerStyle.type,
       riverLayerStyle.paint,
-      riverLayerStyle.layout
+      riverLayerStyle.layout,
     )
 
     // mapRef.current
@@ -370,14 +366,14 @@ function WaterFlow() {
   function unloadRivers() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
-    
+
     // const mapInst = mapRef.current?.getMap()
     // if (!mapInst) return
     // const layers = mapInst.getStyle().layers.map((layer) => layer.id)
 
-    const layers = getStyle().layers.map(layer => layer.id)
+    const layers = getStyle().layers.map((layer) => layer.id)
     if (!layers.includes("river-sac-layer")) return
-    
+
     // mapRef.current
     //   ?.getMap()
     //   ?.getMap()
@@ -398,8 +394,8 @@ function WaterFlow() {
 
   function moveTo() {
     if (!mapRef.current?.getMap()) return
-    
-        // mapRef.current?.flyTo(
+
+    // mapRef.current?.flyTo(
     //   closeMapViewState.longitude,
     //   closeMapViewState.latitude,
     //   closeMapViewState.zoom,
@@ -412,8 +408,8 @@ function WaterFlow() {
       latitude: closeMapViewState.latitude,
       zoom: closeMapViewState.zoom,
       transitionOptions: {
-        duration: 3500
-      }
+        duration: 3500,
+      },
     })
   }
 

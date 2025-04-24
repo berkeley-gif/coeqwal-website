@@ -5,7 +5,7 @@ import { ViewState, MapboxMapRef } from "./types"
 import { useCallback, useRef, useEffect, RefObject } from "react"
 
 // Hook for accessing view state (camera position)
-export function useViewState() {
+export function useViewState(): ViewState {
   return useMapStore((state) => state.viewState)
 }
 
@@ -17,7 +17,11 @@ export function useMapControls() {
 }
 
 // Hook for connecting a map component to the store
-export function useMapState() {
+export function useMapState(): {
+  mapRef: RefObject<MapboxMapRef>
+  viewState: ViewState
+  onViewStateChange: (newViewState: ViewState) => void
+} {
   const mapRef = useRef<MapboxMapRef>(null)
   const viewState = useViewState()
 

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
-import { useMap } from '../context/MapContext'
-import type { MapLayerType } from '../types'
+import { useEffect, useRef } from "react"
+import { useMap } from "../context/MapContext"
+import type { MapLayerType } from "../types"
 
 interface LayerConfig {
   id: string
@@ -12,7 +12,7 @@ interface LayerConfig {
 
 interface SourceConfig {
   id: string
-  type: 'geojson' | 'vector' | 'raster' | 'image' | 'video'
+  type: "geojson" | "vector" | "raster" | "image" | "video"
   data?: any
   url?: string
   tiles?: string[]
@@ -21,7 +21,7 @@ interface SourceConfig {
 
 /**
  * Hook for declarative layer management
- * 
+ *
  * @param layers - Array of layer configurations
  * @param dependencies - Array of dependencies for when to update layers
  * @example
@@ -41,29 +41,26 @@ interface SourceConfig {
  * ], [visible]);
  * ```
  */
-export function useMapLayers(
-  layers: LayerConfig[],
-  dependencies: any[] = []
-) {
-  const { addLayer, removeLayer, setPaintProperty, setLayoutProperty, hasLayer } = useMap()
+export function useMapLayers(layers: LayerConfig[], dependencies: any[] = []) {
+  const {
+    addLayer,
+    removeLayer,
+    setPaintProperty,
+    setLayoutProperty,
+    hasLayer,
+  } = useMap()
   const layerIds = useRef<string[]>([])
-  
+
   useEffect(() => {
     // Track added layers for cleanup
     const addedLayers: string[] = []
-    
+
     // Add layers
     layers.forEach((layer) => {
       if (!hasLayer(layer.id)) {
         // Add the layer
-        addLayer(
-          layer.id,
-          layer.source,
-          layer.type,
-          layer.paint,
-          layer.layout
-        )
-        
+        addLayer(layer.id, layer.source, layer.type, layer.paint, layer.layout)
+
         // Track for cleanup
         addedLayers.push(layer.id)
       } else {
@@ -73,7 +70,7 @@ export function useMapLayers(
             setPaintProperty(layer.id, key, value)
           })
         }
-        
+
         if (layer.layout) {
           Object.entries(layer.layout).forEach(([key, value]) => {
             setLayoutProperty(layer.id, key, value)
@@ -81,27 +78,27 @@ export function useMapLayers(
         }
       }
     })
-    
+
     // Store all tracked layers
     layerIds.current = [...layerIds.current, ...addedLayers]
-    
+
     // Cleanup on unmount or dependencies change
     return () => {
-      addedLayers.forEach(id => {
+      addedLayers.forEach((id) => {
         removeLayer(id)
-        
+
         // Remove from tracking
-        layerIds.current = layerIds.current.filter(layerId => layerId !== id)
+        layerIds.current = layerIds.current.filter((layerId) => layerId !== id)
       })
     }
   }, dependencies)
-  
+
   return layerIds.current
 }
 
 /**
  * Hook for declarative source management
- * 
+ *
  * @param sources - Array of source configurations
  * @param dependencies - Array of dependencies for when to update sources
  * @example
@@ -118,44 +115,46 @@ export function useMapLayers(
  */
 export function useMapSources(
   sources: SourceConfig[],
-  dependencies: any[] = []
+  dependencies: any[] = [],
 ) {
   const { addSource, removeSource, hasSource } = useMap()
   const sourceIds = useRef<string[]>([])
-  
+
   useEffect(() => {
     // Track added sources for cleanup
     const addedSources: string[] = []
-    
+
     // Add sources
     sources.forEach((source) => {
       if (!hasSource(source.id)) {
         // Extract relevant properties for the source configuration
         const { id, ...sourceConfig } = source
-        
+
         // Add the source
         addSource(id, sourceConfig as any)
-        
+
         // Track for cleanup
         addedSources.push(id)
       }
     })
-    
+
     // Store all tracked sources
     sourceIds.current = [...sourceIds.current, ...addedSources]
-    
+
     // Cleanup on unmount or dependencies change
     return () => {
       // We must remove sources in reverse order of how they were added
       // to avoid dependency issues (layers using sources)
-      [...addedSources].reverse().forEach(id => {
+      ;[...addedSources].reverse().forEach((id) => {
         removeSource(id)
-        
+
         // Remove from tracking
-        sourceIds.current = sourceIds.current.filter(sourceId => sourceId !== id)
+        sourceIds.current = sourceIds.current.filter(
+          (sourceId) => sourceId !== id,
+        )
       })
     }
   }, dependencies)
-  
+
   return sourceIds.current
-} 
+}
