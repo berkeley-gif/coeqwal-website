@@ -413,6 +413,7 @@ export const useQuestionBuilderHelpers = () => {
 
   // Get operation's short text
   const getOperationShortText = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (operationId: string, direction?: string) => {
       // direction parameter is kept for compatibility with call sites but not used
       // Use Spanish if that's the current locale

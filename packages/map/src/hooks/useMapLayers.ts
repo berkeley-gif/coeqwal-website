@@ -39,10 +39,7 @@ interface SourceConfig {
  * ], [visible]);
  * ```
  */
-export function useMapLayers(
-  layers: LayerConfig[],
-  dependencies: React.DependencyList = [],
-) {
+export function useMapLayers(layers: LayerConfig[], dependencies: React.DependencyList = []) {
   const {
     addLayer,
     removeLayer,
@@ -92,16 +89,8 @@ export function useMapLayers(
         layerIds.current = layerIds.current.filter((layerId) => layerId !== id)
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    layers,
-    addLayer,
-    removeLayer,
-    setPaintProperty,
-    setLayoutProperty,
-    hasLayer,
-    ...dependencies,
-  ])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layers, addLayer, removeLayer, setPaintProperty, setLayoutProperty, hasLayer, ...dependencies])
 
   return layerIds.current
 }
@@ -164,7 +153,7 @@ export function useMapSources(
         )
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sources, addSource, removeSource, hasSource, ...dependencies])
 
   return sourceIds.current
