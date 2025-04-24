@@ -7,7 +7,7 @@ import type { MapProps, MarkerProperties } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 export default function Map(props: MapProps) {
-  const { mapRef, markers = [], motionChildren, motionChildrenStyle } = useMap()
+  const { mapRef, markers = [], motionChildren } = useMap() // Todo: incorporate motionChildrenStyle
 
   console.log("🌀 Rendering <Map />")
 

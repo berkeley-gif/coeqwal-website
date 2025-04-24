@@ -1,22 +1,20 @@
 import { useEffect, useRef } from "react"
 import { useMap } from "../context/MapContext"
-import type { MapLayerType } from "../types"
+import type { MapLayerType, StyleValue, SourceSpecification } from "../types"
 
 interface LayerConfig {
   id: string
   source: string
   type: string | MapLayerType
-  paint?: Record<string, any>
-  layout?: Record<string, any>
+  paint?: Record<string, StyleValue>
+  layout?: Record<string, StyleValue>
 }
 
 interface SourceConfig {
   id: string
   type: "geojson" | "vector" | "raster" | "image" | "video"
-  data?: any
-  url?: string
-  tiles?: string[]
-  [key: string]: any
+  // Additional properties allowed by the SourceSpecification
+  [key: string]: unknown
 }
 
 /**
@@ -41,7 +39,7 @@ interface SourceConfig {
  * ], [visible]);
  * ```
  */
-export function useMapLayers(layers: LayerConfig[], dependencies: any[] = []) {
+export function useMapLayers(layers: LayerConfig[], dependencies: React.DependencyList = []) {
   const {
     addLayer,
     removeLayer,
@@ -91,7 +89,7 @@ export function useMapLayers(layers: LayerConfig[], dependencies: any[] = []) {
         layerIds.current = layerIds.current.filter((layerId) => layerId !== id)
       })
     }
-  }, dependencies)
+  }, [...dependencies])
 
   return layerIds.current
 }
@@ -115,7 +113,7 @@ export function useMapLayers(layers: LayerConfig[], dependencies: any[] = []) {
  */
 export function useMapSources(
   sources: SourceConfig[],
-  dependencies: any[] = [],
+  dependencies: React.DependencyList = [],
 ) {
   const { addSource, removeSource, hasSource } = useMap()
   const sourceIds = useRef<string[]>([])
@@ -131,7 +129,7 @@ export function useMapSources(
         const { id, ...sourceConfig } = source
 
         // Add the source
-        addSource(id, sourceConfig as any)
+        addSource(id, sourceConfig as SourceSpecification)
 
         // Track for cleanup
         addedSources.push(id)
@@ -154,7 +152,7 @@ export function useMapSources(
         )
       })
     }
-  }, dependencies)
+  }, [...dependencies])
 
   return sourceIds.current
 }
