@@ -413,7 +413,8 @@ export const useQuestionBuilderHelpers = () => {
 
   // Get operation's short text
   const getOperationShortText = useCallback(
-    (operationId: string) => {
+    (operationId: string, direction?: string) => {
+      // direction parameter is kept for compatibility with call sites but not used
       // Use Spanish if that's the current locale
       const useSpanish = locale === "es"
 
@@ -430,7 +431,7 @@ export const useQuestionBuilderHelpers = () => {
           }
 
           // Check if it's a subtype
-          if ("subtypes" in option && option.subtypes) {
+          if ("subtypes" in option && Array.isArray(option.subtypes)) {
             for (const subtype of option.subtypes) {
               if (subtype.id === operationId) {
                 // Return Spanish short text if available and Spanish is selected
@@ -692,3 +693,4 @@ export const useQuestionBuilderHelpers = () => {
     formatOutcomeText,
   }
 }
+
