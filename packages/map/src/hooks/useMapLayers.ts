@@ -51,12 +51,12 @@ export function useMapLayers(
     hasLayer,
   } = useMap()
   const layerIds = useRef<string[]>([])
-  
+
   // Store dependencies in a ref to avoid the ESLint warning
   const depsRef = useRef(dependencies)
   // Update ref when dependencies change
   depsRef.current = dependencies
-  
+
   // Create a stable dependency value that changes when dependencies change
   const depsString = JSON.stringify(depsRef.current)
 
@@ -108,7 +108,7 @@ export function useMapLayers(
     setLayoutProperty,
     hasLayer,
     // Use a dependency that changes when any of the external dependencies change
-    depsString
+    depsString,
   ])
 
   return layerIds.current
@@ -137,12 +137,12 @@ export function useMapSources(
 ) {
   const { addSource, removeSource, hasSource } = useMap()
   const sourceIds = useRef<string[]>([])
-  
+
   // Store dependencies in a ref to avoid the ESLint warning
   const depsRef = useRef(dependencies)
   // Update ref when dependencies change
   depsRef.current = dependencies
-  
+
   // Create a stable dependency value that changes when dependencies change
   const depsString = JSON.stringify(depsRef.current)
 

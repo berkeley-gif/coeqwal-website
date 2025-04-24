@@ -1,11 +1,33 @@
+:root{
+    --primary-color: #031a35;
+    --testing-color: #036352;
+}
+
+/* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
+html{
+    position: relative;
+}
+
+#meta-container{
+    pointer-events: none;
+}
+
 #map-container{
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: all;
+    pointer-events: auto;
     z-index: 0;
+}
+
+#story-container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    z-index: 1;
+    pointer-events: auto;
 }
 
 #loader{
@@ -14,7 +36,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #0f253e;
+    background-color: var(--primary-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -23,16 +45,17 @@
 
 
 #holder{
-    width: calc(100vw - 2px)
+    width: calc(100% - 1px)
 }
 
-
 .container{
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     padding-left: 5rem;
-    width: 100%;
+    padding-right: 5rem;
+    width: max-content;
 }
 
 .container-center{
@@ -48,14 +71,6 @@
     margin-bottom: 3rem;
 }
 
-.story-container{
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 1;
-    pointer-events: auto;
-}
-
 .image-container {
     position: relative;
     width: 100%;
@@ -66,7 +81,7 @@
     width: 2rem;
     height: 2rem;
     background-color: transparent;
-    border: 5px solid #fff;
+    border: 5px solid #F2F0EF;
     border-radius: 50%;
     cursor: pointer;
 }
@@ -75,7 +90,7 @@
     width: 10rem;
     height: 10rem;
     background-color: transparent;
-    border: 10px solid #fff;
+    border: 10px solid #F2F0EF;
     border-radius: 50%;
     cursor: pointer;
 }
@@ -84,7 +99,7 @@
     width: 5rem;
     height: 5rem;
     background-color: transparent;
-    border: 7px solid #fff;
+    border: 7px solid #F2F0EF;
     border-radius: 50%;
     cursor: pointer;
 }

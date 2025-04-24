@@ -1,35 +1,13 @@
 "use client"
 
-import React, { useRef } from "react"
-import Image from "next/image"
-import storyline from "../../public/locales/english.json" assert { type: "json" }
-import SectionContainer from "./helpers/SectionContainer"
-import { Marker, useMap, MapTransitions } from "@repo/map"
+import { useMap } from "@repo/map"
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
-import { stateMapViewState } from "./helpers/mapViews"
-import { motion } from "@repo/motion"
+import { riverLayerStyle } from "./helpers/mapLayerStyle"
+import useStory from "../story/useStory"
+import useActiveSection from "../hooks/useActiveSection"
 
-const riverLayerStyle = {
-  type: "line",
-  layout: {
-    "line-cap": "round",
-    "line-join": "round",
-  },
-  paint: {
-    "line-color": "#9acbcf",
-    "line-width": 3,
-    "line-opacity": 0,
-  },
-}
-
-interface Point {
-  latitude: number
-  longitude: number
-  caption?: string
-}
-
-const getMarker = (point: Point, idx: number) => (
+/*const getMarker = (point: Point, idx: number) => (
   <Marker latitude={point.latitude} longitude={point.longitude} key={idx}>
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
@@ -39,16 +17,11 @@ const getMarker = (point: Point, idx: number) => (
       className="impact-marker"
     ></motion.div>
   </Marker>
-)
+)*/
 
 function SectionHuman() {
   return (
     <>
-      <SectionContainer id="temporary-holder">
-        <Box className="container" height="50vh">
-          <Box className="paragraph" height="50vh"></Box>
-        </Box>
-      </SectionContainer>
       <Header />
       <Irrigation />
       <Drinking />
@@ -57,187 +30,116 @@ function SectionHuman() {
 }
 
 function Header() {
-  const content = storyline.economy
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap() // from our context
-
-  useIntersectionObserver(
-    ref,
-    (isInterSecting) => {
-      if (isInterSecting && mapRef.current) {
-        console.log("hello")
-        mapRef.current?.flyTo({
-          center: [stateMapViewState.longitude, stateMapViewState.latitude],
-          zoom: stateMapViewState.zoom,
-        })
-      }
-    },
-    { threshold: 0 },
-  )
+  const { storyline } = useStory()
+  const content = storyline?.economy
+  const sectionRef = useActiveSection("goldrush", { amount: 0.5 })
 
   return (
-    <SectionContainer id="economy">
-      <Box
-        ref={ref}
-        className="container"
-        height="100vh"
-        sx={{ justifyContent: "center" }}
-      >
-        <Box className="paragraph">
-          <Typography variant="h3" gutterBottom>
-            {content.title}
-          </Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content.p1}</Typography>
-          <Typography variant="body1">
-            {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-          </Typography>
-          <Typography variant="body1">
-            {content.p3} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-          </Typography>
-          <Typography variant="body1">{content.p4}</Typography>
-        </Box>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="h3" gutterBottom>
+          {content?.title}
+        </Typography>
       </Box>
-    </SectionContainer>
+      <Box className="paragraph">
+        <Typography variant="body1">{content?.p1}</Typography>
+        <Typography variant="body1">
+          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+      </Box>
+    </Box>
   )
 }
 
 function Irrigation() {
-  const content = storyline.economy.irrigation
-  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
+  const { storyline } = useStory()
+  const content = storyline?.economy.irrigation
+  const sectionRef = useActiveSection("irrigation", { amount: 0.5 })
 
   return (
-    <>
-      <SectionContainer id="irrigation">
-        <Box className="container" height="100vh">
-          <Box ref={ref} className="paragraph">
-            <Typography variant="body1">
-              {content.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">{content.p2}</Typography>
-          </Box>
-          <Box className="paragraph">
-            <Image
-              src="/economy/mining.jpg"
-              alt="Irrigation"
-              width={1000}
-              height={600}
-              style={{ objectFit: "cover" }}
-            />
-          </Box>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
+      <Box ref={sectionRef} className="paragraph">
+        <Typography variant="body1">
+          {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">{content?.p2}</Typography>
+      </Box>
+    </Box>
   )
 }
 
 function Drinking() {
-  const content = storyline.economy.drinking
-  const ref = useRef<HTMLDivElement>(null) // Reference to the component's container
-  const viewState = stateMapViewState
-  const { mapRef, addSource, addLayer, setPaintProperty, setMotionChildren } =
-    useMap()
+  const { storyline } = useStory()
+  const content = storyline?.economy.drinking
+  const sectionRef = useActiveSection("drinking", { amount: 0.5 })
+  const { mapRef, addSource, addLayer, setPaintProperty } = useMap()
+
+  function loadRivers() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+
+    addSource("river-combined", {
+      type: "geojson",
+      data: "/rivers/combinedRivers.geojson",
+    })
+
+    addLayer(
+      "river-combined-layer",
+      "river-combined",
+      riverLayerStyle.type,
+      riverLayerStyle.paint,
+      riverLayerStyle.layout,
+    )
+
+    setPaintProperty("river-combined-layer", "line-opacity", 1)
+  }
+
+  function unLoadRivers() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+
+    setPaintProperty("river-combined-layer", "line-opacity", 0)
+  }
+
+  /*
   const markers = [
     { longitude: -114.596, latitude: 33.61, caption: "Colorado River" },
     { longitude: -118.3951, latitude: 37.3686, caption: "Lake Mead" },
     { longitude: -119.7862, latitude: 37.9481, caption: "Lake Powell" },
   ]
-
-  function loadRivers() {
-    if (!mapRef.current) return
-
-    // Add source if it doesn't exist
-    if (addSource) {
-      addSource("river-combined", {
-        type: "geojson",
-        data: "/rivers/combinedRivers.geojson",
-      })
-    }
-
-    // Add layer if it doesn't exist
-    if (addLayer) {
-      addLayer(
-        "river-combined-layer",
-        "river-combined",
-        riverLayerStyle.type,
-        riverLayerStyle.paint,
-        riverLayerStyle.layout,
-      )
-    }
-
-    // Set opacity
-    if (setPaintProperty) {
-      setPaintProperty("river-combined-layer", "line-opacity", 1)
-    }
-  }
-
-  function unloadRivers() {
-    if (!mapRef.current) return
-
-    if (setPaintProperty) {
-      setPaintProperty("river-combined-layer", "line-opacity", 0)
-    }
-
-    if (setMotionChildren) {
-      setMotionChildren(null)
-    }
-  }
-
-  function moveTo() {
-    if (!mapRef.current) return
-
-    mapRef.current.flyTo({
-      center: [viewState.longitude, viewState.latitude],
-      zoom: viewState.zoom,
-      ...MapTransitions.SMOOTH,
-    })
-
-    const markerToAdd = markers.map((point, idx) => getMarker(point, idx))
-
-    if (setMotionChildren) {
-      setMotionChildren(markerToAdd)
-    }
-  }
+  */
 
   useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        loadRivers()
-        moveTo()
-      } else {
-        unloadRivers()
-      }
-    },
-    { threshold: 0 },
+    sectionRef,
+    ["drinking"],
+    ["irrigation"],
+    loadRivers,
+    unLoadRivers,
+    { threshold: 0.5 },
   )
 
   return (
-    <>
-      <SectionContainer id="drinking">
-        <Box ref={ref} className="container" height="100vh">
-          <Box className="paragraph">
-            <Typography variant="body1">
-              {content.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">
-              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">{content.p3}</Typography>
-          </Box>
-          <Box className="paragraph">
-            <Image
-              src="/economy/water.jpg"
-              alt="Drinking"
-              width={1000}
-              height={700}
-              style={{ objectFit: "cover" }}
-            />
-          </Box>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">
+          {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">
+          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">{content?.p3}</Typography>
+      </Box>
+    </Box>
   )
 }
 
