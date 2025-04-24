@@ -89,7 +89,8 @@ export function useMapLayers(layers: LayerConfig[], dependencies: React.Dependen
         layerIds.current = layerIds.current.filter((layerId) => layerId !== id)
       })
     }
-  }, [...dependencies])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layers, addLayer, removeLayer, setPaintProperty, setLayoutProperty, hasLayer, ...dependencies])
 
   return layerIds.current
 }
@@ -152,7 +153,8 @@ export function useMapSources(
         )
       })
     }
-  }, [...dependencies])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sources, addSource, removeSource, hasSource, ...dependencies])
 
   return sourceIds.current
 }
