@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
-import { MapProvider } from "@repo/map/client"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/FontLoader"
+import ClientDynamicMapProvider from "./components/ClientDynamicMapProvider"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -24,7 +24,7 @@ export default function RootLayout({
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
           <ThemeRegistry>
-            <MapProvider>{children}</MapProvider>
+            <ClientDynamicMapProvider>{children}</ClientDynamicMapProvider>
           </ThemeRegistry>
         </TranslationProvider>
       </body>

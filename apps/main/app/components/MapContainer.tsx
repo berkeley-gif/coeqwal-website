@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Map, useMap, Marker, MapRef } from "@repo/map"
 import { Box } from "@repo/ui/mui"
-import { useMapState, mapActions } from "@repo/state/map"
+import { useMapStore, mapActions } from "@repo/state/map"
 import AnimatedMarker from "./AnimatedMarker"
 import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
 
@@ -14,7 +14,7 @@ interface MapContainerProps {
 export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const { mapRef } = useMap()
-  const mapState = useMapState()
+  const mapState = useMapStore()
   const initialized = useRef(false)
 
   // Use utilities to manage markers
@@ -29,6 +29,9 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
 
   // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === 'undefined') return;
+    
     console.log("🚀 MapContainer useEffect running")
 
     const ref = mapRef?.current
@@ -47,12 +50,6 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
       initialized.current = true
       console.log("📌 map instance registered with mapActions")
     }
-
-    const interval = setInterval(() => {
-      console.log("🕵️ Polling mapRef:", mapRef.current)
-    }, 3000)
-
-    return () => clearInterval(interval)
   }, [mapRef, uncontrolledRef])
 
   // Example of how to add markers programmatically
