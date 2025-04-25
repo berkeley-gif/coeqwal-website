@@ -17,10 +17,10 @@ applications:
             - NODE_DEBUG=fs,http,net npx turbo run build --filter=main
             - echo "Build completed! Checking output directory..."
             - ls -la apps/main
-            - echo "Showing .next directory contents:"
-            - ls -la apps/main/.next
+            - echo "Showing out directory contents:"
+            - ls -la apps/main/out
       artifacts:
-        baseDirectory: apps/main/.next
+        baseDirectory: apps/main/out
         files:
           - '**/*'
       cache:

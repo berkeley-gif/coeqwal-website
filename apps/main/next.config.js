@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Remove swcMinify as it's no longer recognized in Next.js 15
+  output: 'export',  // Enable static export
   transpilePackages: [
     "@repo/map",
     "@repo/state",
@@ -10,7 +10,10 @@ const nextConfig = {
     "@repo/i18n",
     "@repo/eslint-config",
     "@repo/typescript-config"
-  ]
+  ],
+  images: {
+    unoptimized: true  // Required for static export
+  }
 }
 
 export default nextConfig
