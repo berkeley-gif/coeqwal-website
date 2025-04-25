@@ -11,8 +11,12 @@ applications:
             - pnpm install
         build:
           commands:
-            - pnpm rebuild
-            - npx turbo run build --filter=main
+            - export NODE_OPTIONS="--max-old-space-size=6144"
+            - echo "Starting build with more memory..."
+            - NODE_DEBUG=fs,module,http npx turbo run build --filter=main
+            - echo "Build completed successfully! Checking output..."
+            - du -sh apps/main/out
+            - ls -la apps/main/out
       artifacts:
         baseDirectory: apps/main/out
         files:
