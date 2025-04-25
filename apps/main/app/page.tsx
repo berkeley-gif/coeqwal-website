@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import dynamic from "next/dynamic"
 import {
   Box,
   Typography,
@@ -16,25 +15,9 @@ import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
 import { useMap } from "@repo/map"
-
-// Lazy loading
-const MapContainer = dynamic(() => import("./components/MapContainer"), {
-  ssr: false,
-})
-
-const MapStateDisplay = dynamic(
-  () => import("./features/mapControls/MapStateDisplay"),
-  {
-    ssr: false,
-  },
-)
-
-const CombinedPanel = dynamic(
-  () => import("./features/combinedPanel/CombinedPanel"),
-  {
-    ssr: true, // will still be code-split, loading separately from the main bundle
-  },
-)
+import MapContainer from "./components/MapContainer"
+import MapStateDisplay from "./features/mapControls/MapStateDisplay"
+import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 
 export default function Home() {
   const { t } = useTranslation()

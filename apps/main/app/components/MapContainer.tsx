@@ -29,6 +29,9 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
 
   // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
+    // Only run in browser
+    if (typeof window === "undefined") return
+
     console.log("🚀 MapContainer useEffect running")
 
     const ref = mapRef?.current
@@ -47,12 +50,6 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
       initialized.current = true
       console.log("📌 map instance registered with mapActions")
     }
-
-    const interval = setInterval(() => {
-      console.log("🕵️ Polling mapRef:", mapRef.current)
-    }, 3000)
-
-    return () => clearInterval(interval)
   }, [mapRef, uncontrolledRef])
 
   // Example of how to add markers programmatically

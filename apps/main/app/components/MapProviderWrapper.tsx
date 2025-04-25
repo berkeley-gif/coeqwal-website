@@ -34,3 +34,6 @@ export function MapProviderClientWrapper({
 }) {
   return <MapProvider>{children}</MapProvider>
 }
+
+// Add default export for dynamic import
+export default MapProviderClientWrapper
