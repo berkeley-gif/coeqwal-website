@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  swcMinify: true,
+  // Remove swcMinify as it's no longer recognized in Next.js 15
   transpilePackages: [
     "@repo/map",
     "@repo/state",
@@ -10,11 +10,7 @@ const nextConfig = {
     "@repo/i18n",
     "@repo/eslint-config",
     "@repo/typescript-config"
-  ],
-  // Enable all optimizations but keep SSR approach
-  experimental: {
-    serverActions: true,
-  }
+  ]
 }
 
 export default nextConfig
