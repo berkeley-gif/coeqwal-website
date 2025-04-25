@@ -11,13 +11,12 @@ applications:
             - pnpm install
         build:
           commands:
-            - npm install -g pnpm
-            - pnpm install
-            - pnpm run build # The turbo build builds all packages (first)
-            # Then build the main app
-            - cd apps/main && pnpm run build
+            # Set environment variables
             - export DEBUG=next*
             - export NODE_OPTIONS="--max-old-space-size=6144 --trace-warnings"
+            # First build only the packages (no apps)
+            - NODE_DEBUG=fs,http,net npx turbo run build --filter="./packages/*"
+            # Then build the main app which depends on the built packages
             - NODE_DEBUG=fs,http,net npx turbo run build --filter=main
             - echo "Build completed successfully! Checking output..."
             - du -sh apps/main/out
