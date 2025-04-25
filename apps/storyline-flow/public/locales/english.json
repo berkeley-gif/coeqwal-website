@@ -7,17 +7,17 @@
     "throughline": "To address this mismatch, we have transformed the way water moves across our state."
   },
   "precipitation": {
-    "title": "Where and When Water Falls",
+    "title": "Where and When Precipitation Falls",
     "p1": "The vast majority of California’s rain and snow falls in the northern part of the state.",
-    "p2": "Like clockwork, we expect nearly all of our precipitation in winter \u2014 a short period lasting less than 100 days."
+    "p2": "Like clockwork, we expect nearly all of our precipitation in winter \u2014 a short period lasting less than 100 days.",
+    "p3": "What’s less predictable is how much rain and snow we get in any year.",
+    "p4": "It varies by a lot, especially the farther south you go."
   },
   "variability": {
-    "p1": "What’s less predictable is how much rain and snow we get in any year.",
-    "p2": "It varies by a lot, especially the farther south you go.",
-    "p3": "California farmers, anglers, and water buffs agonize over flip-flop between wet and dry years.",
-    "p4": "We worry about droughts, then floods, then droughts \u2014 back and forth.",
-    "p5": "California rarely experiences an “average” year of precipitation.",
-    "p6": "Yet we need water every day of the year, all across the state."
+    "p1": "California farmers, anglers, and water buffs agonize over flip-flop between wet and dry years.",
+    "p2": "We worry about droughts, then floods, then droughts \u2014 back and forth.",
+    "p3": "California rarely experiences an “average” year of precipitation.",
+    "p4": "Yet we need water every day of the year, all across the state."
   },
   "snowpack": {
     "title": "The Snowpack Advantage: Nature’s Water Storage",
@@ -26,7 +26,7 @@
     "p3": "As snow melts in late spring, it feeds rivers and keeps many flowing through our dry summer."
   },
   "flow": {
-    "title": "Water Flows from the Sierra to the California Delta",
+    "title": "Water Flows from the Sierra to the Delta",
     "p1": "Across our planet, gravity drives freshwater flow from mountains to the sea.",
     "p2": "Within California, snowmelt drains from northern peaks and the western slope of the Sierra into small mountain creeks.",
     "p3": "Some water seeps underground, replenishing aquifers.",
@@ -38,38 +38,37 @@
       "p4": "In the dry summer, the groundwater then feeds rivers with a cool source of water."
     },
     "transition": {
-      "p1": "The Sacramento and San Joaquin Rivers meet in the San Francisco-Bay Delta, where freshwater and saltwater mix.",
+      "p1": "The Sacramento and San Joaquin Rivers meet in the Sacramento-San Joaquin Delta, where freshwater and saltwater mix.",
       "p2": "This dynamic convergence of water supports an abundance of life."
     }
   },
   "delta": {
-    "p11": "The California Delta forms",
+    "p11": "The Sacramento-San Joaquin Delta forms",
     "p12": "the heart of our water system",
     "p13": ".",
-    "p2": "For thoursands of years, California's water supported a remarkable diversity of life.",
+    "p2": "For thousands of years, California's water supported a remarkable diversity of life.",
     "p3": "Central Valley rivers teamed with salmon.",
-    "p4": "Its welands hosted millions of migratory birds.",
+    "p4": "Its wetlands hosted millions of migratory birds.",
     "p5": "And Indigenous Peoples thrived.",
-    "transition": "Calfironia's water system looks very different today."
+    "transition": "California's water system looks very different today."
   },
   "economy": {
     "title": "A growing economy demanded more water",
     "p1": "The Gold Rush brought thousands of European settlers to California.",
     "p2": "Miners diverted rivers to find gold. ",
-    "p3": "Irrigation allowed farms to feed the growing population.",
-    "p4": "Especially in southern California, water demand soon outpaced local supplies.",
     "irrigation": {
       "p1": "Settlers built dams and canals, drained wetlands, and pumped groundwater to expand Central Valley farms.",
       "p2": "As the scale of irrigation increased, agriculture became a powerhouse of the state's economy."
     },
     "drinking": {
-      "p1": "Growing cities and towns needed reliable water for drinking, sanitation and businesses.",
-      "p2": "Leaders of major coastal cities found ways to import water from distant sources.",
+      "p1": "Growing communities and towns needed reliable water for drinking, sanitation and businesses.",
+      "p2": "Leaders of major coastal communities found ways to import water from distant sources.",
       "p3": "It required water rights and major investments as water infrastructure began to crisscross the state."
     }
   },
   "transformation": {
-    "subtitle": "Today, California has one of the largest constructed water systems in the world.",
+    "subtitle1": "Today, California has one of the largest",
+    "subtitle2": "constructed water systems in the world.",
     "p11": "Our water infrastructure",
     "p12": "stores and transports water over thousands of miles from wetter to drier parts of the state.",
     "p21": "Our water system",
@@ -80,7 +79,7 @@
     "p33": "freshwater from rivers as they flow into the Delta.",
     "p41": "And it",
     "p42": "delivers",
-    "p43": "water to agricultural lands and cities, especially in southern California.",
+    "p43": "water to agricultural lands and communities, especially in southern California.",
     "transition": "Over the past 175 years, the timing and pathways of California's water flows have been transformed by our water infrastructure."
   },
   "impact": {
@@ -99,8 +98,8 @@
       "p33": "have crashed."
     },
     "delta": {
-      "p11": "California's Delta",
-      "p12": "is the hub of our water system.",
+      "p11": "Sacramento-San Joaquin Delta",
+      "p12": "is the heart of our water system.",
       "p2": "At this meeting point of major rivers with the San Francisco Bay, we’re attempting to manage a complex, dynamic nexus of water.",
       "p3": "The water system is highly managed.",
       "p4": "The ecosystem is highly altered. ",
@@ -122,24 +121,23 @@
     "climate": {
       "p11": "Climate change",
       "p12": "makes matters worse.",
-      "p2": "We’re already seeing reduced winter snowpack, more extreme droughts, and sea level rise pushing saltwater far into the Delta.",
+      "p2": "We’re already seeing reduced winter snowpack, more extreme droughts, and sea level rise pushing saltwater farther into the Delta.",
       "p3": "Saltwater intrusion threatens agriculture and the water supply for nearly 27 million people."
     }
   },
   "conclusion": {
-    "subtitle": "All Californians are connected to the state's natural water flows.",
-    "caption": "We all need clean water, healthy food, and vibrant ecosystems.",
+    "subtitle": "All Californians are connected through water",
+    "caption": "We all need clean drinking water, healthy food, and vibrant ecosystems.",
     "p11": "Yet, as we",
     "p12": "move water",
-    "p13": "to cities and farms,",
+    "p13": "to communities and farms,",
     "p14": "we ",
     "p15": "take water",
     "p16": "from our rivers, wetlands, and the Delta.",
-    "p2": "Our ecosystems are now under severe stress.",
-    "p3": "As our water system developed, decisions favored those with the most wealth and power.",
-    "p4": "That left others without reliable access to water.",
-    "p51": "Our water system was not designed to address today's diverse water uses,",
-    "p52": "manage our groundwater, or mitigate impacts of climate change...",
+    "p2": "As our water system developed, decisions favored those with the most wealth and power.",
+    "p3": "That left others without reliable access to water.",
+    "p41": "Our water system was not designed to meet the needs of today's diverse water uses,",
+    "p42": "manage our groundwater, or mitigate impacts of climate change...",
     "transition": {
       "subtitle": "That doesn't mean we're stuck.",
       "p11": "Even with limits to our water supply,",
@@ -147,8 +145,8 @@
       "p2": "COEQWAL allows us to imagine alternative water futures for California."
     },
     "ending": {
-      "p11": "Explore future water scenarios",
-      "p12": "to see how we can manage water for all Californians."
+      "p11": "Explore water scenarios",
+      "p12": "to understand how we can manage water for all Californians."
     }
   }
 }

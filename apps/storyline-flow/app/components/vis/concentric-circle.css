@@ -1,0 +1,9 @@
+.cc-circle{
+    stroke: #f2f0ef;
+    stroke-width: 3.5px;
+}
+
+text {
+    fill: #f2f0ef;
+    dominant-baseline: middle;
+}

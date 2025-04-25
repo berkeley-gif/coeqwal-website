@@ -6,7 +6,7 @@ const storyTheme = createTheme({
   typography: {
     ...baseTheme.typography,
     allVariants: {
-      color: baseTheme.palette.common.white,
+      color: "#f2f0ef",
     },
     body1: {
       ...baseTheme.typography.body1,

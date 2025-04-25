@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import * as d3 from "d3"
 import { motion } from "@repo/motion"
-import rawData from "../../../public/data/annual_precipitation.json" assert { type: "json" }
-import mapData from "../../../public/data/variability_marker.json" assert { type: "json" }
+//import rawData from "data/annual_precipitation.json" assert { type: "json" }
 import { debounce } from "lodash"
 import {
   axisVariants,
@@ -14,6 +13,8 @@ import {
 } from "@repo/motion/variants"
 import { VisibleIcon } from "../helpers/Icons"
 import "./precipitation-bar.css"
+import { MarkerType } from "../helpers/types"
+import { useFetchData } from "../../hooks/useFetchData"
 
 interface PrecipitationDatum {
   year: number
@@ -21,36 +22,25 @@ interface PrecipitationDatum {
   value: number
 }
 
-const data: PrecipitationDatum[] = Object.entries(rawData.data)
-  .filter(([key]) => {
-    const year = parseInt(key.substring(0, 4))
-    return year >= 2014 && year <= 2023
-  })
-  .map(([key, value]) => ({
-    year: parseInt(key.substring(0, 4)),
-    anomaly: value.anomaly,
-    value: value.value,
-  }))
-
-const average = parseFloat(d3.mean(data, (d) => d.value)?.toFixed(2) || "0.00")
-const yearLabels = Object.keys(mapData).map((key) => parseInt(key))
-
-const yExtents = d3.extent(data, (d) => d.anomaly) as [number, number]
-const yTicks = d3.ticks(yExtents[0], yExtents[1], 7).map((d) => ({
-  value: d,
-  label: d > 0 ? `+${d}` : d,
-}))
 const margin = { top: 20, right: 80, bottom: 30, left: 180 }
+const FIXED_HEIGHT = 500
+const LABEL_HEIGHT = 50
 
+//TODO: possible make the height a fixed number
 function PrecipitationBar({
+  mapData,
   startAnimation,
   getSelectedYear,
 }: {
+  mapData: Record<string, MarkerType[]>
   startAnimation: boolean
-  getSelectedYear: (year: keyof typeof mapData) => void
+  getSelectedYear: (year: string) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [dimensions, setDimensions] = useState({
+    width: 0,
+    height: FIXED_HEIGHT,
+  })
   const [tooltip, setTooltip] = useState<{
     visible: boolean
     x: number
@@ -58,13 +48,14 @@ function PrecipitationBar({
     data: PrecipitationDatum | null
   }>({ visible: false, x: 0, y: 0, data: null })
   //const isInView = useInView(containerRef, { once: true, amount: 0.5 });
+  const [data, setData] = useState<PrecipitationDatum[]>([])
 
   useEffect(() => {
     const handleResize = debounce((entries: ResizeObserverEntry[]) => {
       for (const entry of entries) {
         if (entry.target === containerRef.current) {
-          const { width, height } = entry.contentRect
-          setDimensions({ width, height })
+          const { width } = entry.contentRect
+          setDimensions({ width, height: FIXED_HEIGHT })
         }
       }
     }, 300) // Debounce with a delay of 300ms
@@ -83,6 +74,50 @@ function PrecipitationBar({
     }
   }, [])
 
+  useFetchData(
+    "/data/annual_precipitation.json",
+    (rawData: { description: string; data: Record<string, object> }) => {
+      const processedData = Object.entries(rawData.data)
+        .filter(([key]) => {
+          const year = parseInt(key.substring(0, 4))
+          return year >= 2014 && year <= 2023
+        })
+        .map(([key, value]) => {
+          const typedValue = value as { value: number; anomaly: number }
+          return {
+            year: parseInt(key.substring(0, 4)),
+            anomaly: typedValue.anomaly,
+            value: typedValue.value,
+          }
+        })
+      setData(processedData)
+    },
+  )
+
+  const yearLabels = useMemo(() => {
+    if (!mapData) return []
+    return Object.keys(mapData).map((key) => parseInt(key))
+  }, [mapData])
+
+  const average = useMemo(() => {
+    return parseFloat(d3.mean(data, (d) => d.value)?.toFixed(2) || "0.00")
+  }, [data])
+
+  const yExtents = useMemo(() => {
+    if (data.length === 0) return [0, 0]
+    //return [-15, 15]
+    return d3.extent(data, (d) => d.anomaly) as [number, number]
+  }, [data])
+
+  const yTicks = useMemo(() => {
+    return d3
+      .ticks(yExtents[0] as number, yExtents[1] as number, 5)
+      .map((d) => ({
+        value: d,
+        label: d > 0 ? `+${d}` : `${d}`,
+      }))
+  }, [yExtents])
+
   const xScale = useMemo(() => {
     return d3
       .scaleBand<number>()
@@ -90,7 +125,7 @@ function PrecipitationBar({
       .range([margin.left, dimensions.width - margin.right])
       .paddingInner(0.1)
       .paddingOuter(0.5)
-  }, [dimensions.width])
+  }, [dimensions.width, data])
 
   const yScale = useMemo(() => {
     return d3
@@ -98,10 +133,13 @@ function PrecipitationBar({
       .domain(yExtents)
       .range([dimensions.height - margin.bottom, margin.top])
       .nice()
-  }, [dimensions.height])
+  }, [dimensions.height, yExtents])
 
   return (
-    <div ref={containerRef} style={{ height: "100%", width: "100%" }}>
+    <div
+      ref={containerRef}
+      style={{ height: FIXED_HEIGHT, width: "100%", padding: " 2rem 0 " }}
+    >
       {tooltip.visible && tooltip.data && (
         <div
           className="tooltip"
@@ -117,16 +155,21 @@ function PrecipitationBar({
       )}
       <svg width={dimensions.width} height={dimensions.height}>
         <YAxis
+          yTicks={yTicks}
+          yExtents={yExtents as [number, number]}
+          average={average}
           yScale={yScale}
           dimensions={dimensions}
           animate={startAnimation}
         />
         <Bars
+          data={data}
           xScale={xScale}
           yScale={yScale}
           animate={startAnimation}
           setTooltip={setTooltip}
           containerRef={containerRef}
+          yearLabels={yearLabels}
           getSelectedYear={getSelectedYear}
         />
         <XAxis
@@ -140,13 +183,16 @@ function PrecipitationBar({
 }
 
 function Bars({
+  data,
   xScale,
   yScale,
   setTooltip,
   containerRef,
+  yearLabels,
   animate,
   getSelectedYear,
 }: {
+  data: PrecipitationDatum[]
   xScale: d3.ScaleBand<number>
   yScale: d3.ScaleLinear<number, number>
   setTooltip: React.Dispatch<
@@ -158,8 +204,9 @@ function Bars({
     }>
   >
   containerRef: React.RefObject<HTMLDivElement | null>
+  yearLabels: number[]
   animate: boolean
-  getSelectedYear: (year: keyof typeof mapData) => void
+  getSelectedYear: (year: string) => void
 }) {
   const barWidth = xScale.bandwidth() * 0.6
   return (
@@ -170,30 +217,7 @@ function Bars({
         const yPos = d.anomaly < 0 ? yScale(0) : yScale(d.anomaly)
         const cursorStyle = yearLabels.includes(d.year) ? "pointer" : "default"
         return (
-          <g
-            key={idx}
-            className="bars"
-            style={{ cursor: cursorStyle }}
-            onMouseMove={(e) => {
-              if (containerRef.current) {
-                const rect = containerRef.current.getBoundingClientRect()
-                setTooltip({
-                  visible: true,
-                  x: e.clientX - rect.left + 20,
-                  y: e.clientY - rect.top + 20,
-                  data: d,
-                })
-              }
-            }}
-            onClick={() => {
-              if (yearLabels.includes(d.year)) {
-                getSelectedYear(d.year.toString() as keyof typeof mapData)
-              }
-            }}
-            onMouseLeave={() =>
-              setTooltip((prev) => ({ ...prev, visible: false }))
-            }
-          >
+          <g key={idx} className="bars">
             <motion.rect
               x={xPos}
               width={barWidth}
@@ -227,6 +251,37 @@ function Bars({
                 />
               )}
             </g>
+            <rect
+              x={xPos - 2} // consider stroke-width
+              y={d.anomaly < 0 ? yPos : yPos - LABEL_HEIGHT} // Covers the entire height of the chart
+              width={barWidth + 4}
+              height={
+                d.anomaly < 0
+                  ? barHeight + LABEL_HEIGHT
+                  : barHeight + LABEL_HEIGHT
+              } // Up to the baseline
+              fill="transparent"
+              style={{ cursor: cursorStyle }}
+              onMouseMove={(e) => {
+                if (containerRef.current) {
+                  const rect = containerRef.current.getBoundingClientRect()
+                  setTooltip({
+                    visible: true,
+                    x: e.clientX - rect.left + 20,
+                    y: e.clientY - rect.top + 20,
+                    data: d,
+                  })
+                }
+              }}
+              onClick={() => {
+                if (yearLabels.includes(d.year)) {
+                  getSelectedYear(d.year.toString())
+                }
+              }}
+              onMouseLeave={() =>
+                setTooltip((prev) => ({ ...prev, visible: false }))
+              }
+            />
           </g>
         )
       })}
@@ -270,12 +325,18 @@ function XAxis({
 }
 
 function YAxis({
+  yTicks,
+  yExtents,
   yScale,
+  average,
   dimensions,
   animate,
 }: {
+  yTicks: { value: number; label: string }[]
+  yExtents: [number, number]
   yScale: d3.ScaleLinear<number, number>
   dimensions: { width: number; height: number }
+  average: number
   animate: boolean
 }) {
   const aboveMidpoint = (margin.top + yScale(0)) / 2

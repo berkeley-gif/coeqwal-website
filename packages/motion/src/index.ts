@@ -1,1 +1,7 @@
-export { motion, useInView, useAnimation, AnimatePresence } from "framer-motion"
+export {
+  motion,
+  useInView,
+  useAnimation,
+  AnimatePresence,
+  useScroll,
+} from "framer-motion"

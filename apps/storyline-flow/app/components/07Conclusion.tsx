@@ -1,8 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@repo/ui/mui"
-import storyline from "../../public/locales/english.json" assert { type: "json" }
-import AnimatedWaves from "./helpers/AnimatedWave"
+import useStory from "../story/useStory"
 
 function Conclusion() {
   return (
@@ -13,8 +12,10 @@ function Conclusion() {
   )
 }
 
+//TODO: add resize observer for animated waves
 function Resolution() {
-  const content = storyline.conclusion
+  const { storyline } = useStory()
+  const content = storyline?.conclusion
 
   return (
     <>
@@ -34,31 +35,30 @@ function Resolution() {
             justifyContent: "flex-start",
             backgroundColor: "#031a35",
             height: "100vh",
-            width: "100vw",
+            width: "100%",
           }}
         >
-          <AnimatedWaves />
-          <Box sx={{ zIndex: 1, marginTop: "20rem" }}>
-            <Box className="paragraph" sx={{ marginBottom: "25rem" }}>
+          <Box sx={{ zIndex: 1 }}>
+            <Box className="paragraph">
               <Typography variant="h3">
-                {content.transition.subtitle}
+                {content?.transition.subtitle}
               </Typography>
             </Box>
             <Box className="paragraph">
               <Typography variant="h3">
-                {content.transition.p11} <br />
-                {content.transition.p12}
+                {content?.transition.p11} <br />
+                {content?.transition.p12}
               </Typography>
             </Box>
             <Box className="paragraph">
-              <Typography variant="h3">{content.transition.p2}</Typography>
+              <Typography variant="h3">{content?.transition.p2}</Typography>
             </Box>
             <Box className="paragraph">
-              <Typography variant="h3" sx={{ marginTop: "10rem" }}>
+              <Typography variant="h3">
                 <span style={{ fontWeight: "bold" }}>
-                  <u>{content.ending.p11}</u>
+                  <u>{content?.ending.p11}</u>
                 </span>{" "}
-                {content.ending.p12}
+                {content?.ending.p12}
               </Typography>
             </Box>
           </Box>
@@ -69,7 +69,8 @@ function Resolution() {
 }
 
 function Builder() {
-  const content = storyline.conclusion
+  const { storyline } = useStory()
+  const content = storyline?.conclusion
 
   return (
     <>
@@ -77,36 +78,35 @@ function Builder() {
         <Box
           className="container-center"
           height="100vh"
-          width="100vw"
+          width="100%"
           sx={{ backgroundColor: "#031a35" }}
         >
           <Box className="paragraph" sx={{ marginBottom: "10rem" }}>
             <Typography variant="h3" gutterBottom>
-              {content.subtitle}
+              {content?.subtitle}
             </Typography>
-            <Typography variant="h3">{content.caption}</Typography>
+            <Typography variant="h3">{content?.caption}</Typography>
           </Box>
           <Box className="paragraph">
             <Typography variant="h3">
-              {content.p11}{" "}
-              <span style={{ fontWeight: "bold" }}>{content.p12}</span>{" "}
-              {content.p13} <br />
-              {content.p14}{" "}
-              <span style={{ fontWeight: "bold" }}>{content.p15}</span>{" "}
-              {content.p16}
+              {content?.p11}{" "}
+              <span style={{ fontWeight: "bold" }}>{content?.p12}</span>{" "}
+              {content?.p13} <br />
+              {content?.p14}{" "}
+              <span style={{ fontWeight: "bold" }}>{content?.p15}</span>{" "}
+              {content?.p16}
             </Typography>
           </Box>
           <Box className="paragraph">
-            <Typography variant="body1">{content.p2}</Typography>
+            <Typography variant="body1">{content?.p2}</Typography>
           </Box>
           <Box className="paragraph" sx={{ marginBottom: "10rem" }}>
-            <Typography variant="body1">{content.p3}</Typography>
-            <Typography variant="body1">{content.p4}</Typography>
+            <Typography variant="body1">{content?.p3}</Typography>
           </Box>
           <Box className="paragraph">
             <Typography variant="h3">
-              {content.p51} <br />
-              {content.p52}
+              {content?.p41} <br />
+              {content?.p42}
             </Typography>
           </Box>
         </Box>

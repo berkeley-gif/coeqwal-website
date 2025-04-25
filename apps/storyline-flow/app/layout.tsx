@@ -4,6 +4,7 @@ import { TranslationProvider } from "@repo/i18n"
 import { MapProvider } from "@repo/map/client"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/helpers/FontLoader"
+import StoryProvider from "./story/StoryProvider"
 
 export const metadata: Metadata = {
   title: "How Water Moves through California",
@@ -21,7 +22,9 @@ export default function RootLayout({
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
           <ThemeRegistry theme="story">
-            <MapProvider>{children}</MapProvider>
+            <StoryProvider>
+              <MapProvider>{children}</MapProvider>
+            </StoryProvider>
           </ThemeRegistry>
         </TranslationProvider>
       </body>
