@@ -4,13 +4,15 @@ applications:
       phases:
         preBuild:
           commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
             - corepack enable
             - pnpm install
         build:
           commands:
             - pnpm rebuild
             - npx turbo run build --filter=main
-            - pnpm --filter=main export
       artifacts:
         baseDirectory: apps/main/out
         files:
@@ -24,4 +26,4 @@ applications:
     environment:
       variables:
         NODE_VERSION: 22
-        NEXT_PUBLIC_MAPBOX_TOKEN: ${{ env.NEXT_PUBLIC_MAPBOX_TOKEN }}
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN}

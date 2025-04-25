@@ -71,7 +71,6 @@ export default function Home() {
           left: 0,
           width: "100%",
           height: "100%",
-          pointerEvents: "all",
           zIndex: -1,
         }}
       >
@@ -144,7 +143,7 @@ export default function Home() {
             sx={{
               pointerEvents: "auto",
               position: "relative",
-              zIndex: 5,
+              zIndex: 1,
               height: "100vh",
               overflow: "hidden",
             }}
