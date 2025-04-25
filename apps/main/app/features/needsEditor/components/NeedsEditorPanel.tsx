@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import {
+  useTheme,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -21,6 +22,7 @@ import { WATER_NEED_TYPES, BLANK_WATER_NEED } from "./constants"
 const waterNeedSettings: WaterNeedSetting[] = []
 
 const NeedsEditorPanel: React.FC = () => {
+  const theme = useTheme()
   const [expanded, setExpanded] = useState("")
   const [needsList, setNeedsList] = useState(waterNeedSettings)
 
@@ -51,6 +53,7 @@ const NeedsEditorPanel: React.FC = () => {
   return (
     <Box
       sx={{
+        backgroundColor: theme.palette.background.default,
         width: "100%",
         height: "fit-content",
         display: "flex",
