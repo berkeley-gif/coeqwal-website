@@ -40,10 +40,7 @@ export type {
   LineJoinType,
 } from "./types"
 
-import { Layer } from "react-map-gl/mapbox"
-
-// Export Layer type correctly using typeof
-export type MapboxLayer = typeof Layer
+export type { Layer as MapboxLayer } from "react-map-gl/mapbox"
 
 // Export transitions
 export { MapTransitions } from "./types"
