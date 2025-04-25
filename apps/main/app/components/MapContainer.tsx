@@ -30,8 +30,8 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
     // Only run in browser
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return
+
     console.log("🚀 MapContainer useEffect running")
 
     const ref = mapRef?.current
