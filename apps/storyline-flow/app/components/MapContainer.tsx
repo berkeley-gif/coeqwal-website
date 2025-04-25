@@ -1,35 +1,28 @@
 "use client"
 
-import React, { useEffect } from "react"
-import { Map, useMap } from "@repo/map"
-import type { MapboxMapRef } from "@repo/map"
+import { Map } from "@repo/map"
+import { Box } from "@repo/ui/mui"
 import { stateMapViewState } from "./helpers/mapViews"
 
 interface MapContainerProps {
-  uncontrolledRef?: React.RefObject<MapboxMapRef | null>
+  onLoad?: () => void
 }
 
-export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
+export default function MapContainer({ onLoad }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { mapRef } = useMap() // from our context
-
-  const refToUse = mapRef
-
-  useEffect(() => {
-    if (uncontrolledRef && refToUse.current) {
-      uncontrolledRef.current = refToUse.current
-    }
-  }, [uncontrolledRef, refToUse])
 
   return (
-    <Map
-      mapboxToken={mapboxToken}
-      mapStyle="mapbox://styles/yskuo/cm9dhus8h009v01sp2sxn2g6r"
-      initialViewState={stateMapViewState}
-      style={{ width: "100%", height: "100%" }}
-      interactive={false}
-      navigationControl={false}
-      dragPan={false}
-    />
+    <Box sx={{ width: "100%", height: "100vh" }}>
+      <Map
+        mapboxToken={mapboxToken}
+        mapStyle="mapbox://styles/yskuo/cm9dhus8h009v01sp2sxn2g6r"
+        initialViewState={stateMapViewState}
+        style={{ width: "100%", height: "100%" }}
+        interactive={false}
+        navigationControl={false}
+        dragPan={false}
+        onLoad={onLoad}
+      />
+    </Box>
   )
 }

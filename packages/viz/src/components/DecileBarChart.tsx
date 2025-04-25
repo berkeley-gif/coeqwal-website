@@ -1,5 +1,5 @@
 "use client"
-
+// mockup for now
 import React, { useRef, useEffect, useMemo } from "react"
 import * as d3 from "d3"
 import { DecileChartProps, DecileData } from "../types"
@@ -14,7 +14,7 @@ const defaultMargin = { top: 40, right: 30, bottom: 50, left: 60 }
 
 export const DecileBarChart: React.FC<DecileChartProps> = ({
   data,
-  width = 400,
+  width = 60,
   height = 280,
   margin = defaultMargin,
   title = "Decile Distribution",
@@ -23,6 +23,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
   colorScheme = "blues",
   showValues = true,
   responsive = true,
+  barWidthPixels = 30,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -65,7 +66,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
 
     // Get dimensions from container (for responsive)
     let chartWidth = width
-    let chartHeight = height
+    const chartHeight = height
 
     if (responsive && containerRef.current) {
       const containerWidth = containerRef.current.clientWidth
@@ -90,12 +91,11 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
     // Sort data by decile
     const sortedData = [...decileData].sort((a, b) => a.decile - b.decile)
 
-    // Get min and max values for scaling
-    const minValue = d3.min(sortedData, (d) => d.value) || 0
+    // Get max value for scaling
     const maxValue = d3.max(sortedData, (d) => d.value) || 100
 
-    // Create a single bar with segments
-    const barWidth = innerWidth * 0.3 // Make the bar 30% of inner width instead of 60%
+    // Update barWidth calculation to use fixed pixel width
+    const barWidth = Math.min(barWidthPixels, innerWidth * 0.8) // Use fixed pixel width but limit to 80% of inner width
     const barX = (innerWidth - barWidth) / 2 // Center the bar
 
     // Create Y scale
@@ -310,6 +310,7 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
     colorScheme,
     showValues,
     responsive,
+    barWidthPixels,
   ])
 
   return (

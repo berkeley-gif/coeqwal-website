@@ -5,7 +5,6 @@ A React-based data visualization library for COEQWAL built with D3.js.
 ## Features
 
 - **DecileBarChart**: Visualize decile data with customizable colors
-- Responsive charts that adapt to container size
 - TypeScript support with comprehensive type definitions
 - Utility functions for data processing and formatting
 
@@ -21,8 +20,6 @@ The package is part of the COEQWAL monorepo and is available via workspace impor
 ```
 
 ## Usage
-
-### DecileBarChart
 
 ```jsx
 import { DecileBarChart } from "@repo/viz"

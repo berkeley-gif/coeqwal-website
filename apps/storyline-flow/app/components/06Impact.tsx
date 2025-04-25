@@ -1,30 +1,28 @@
 "use client"
 
-import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
-import SectionContainer from "./helpers/SectionContainer"
-import storyline from "../../public/locales/english.json" assert { type: "json" }
+import { Box, Typography, VisibilityIcon, LibraryBooksIcon } from "@repo/ui/mui"
 import population from "../../public/data/city_population.json" assert { type: "json" }
-import impactMarker from "../../public/data/impact_marker.json" assert { type: "json" }
-import { LibraryBooksIcon } from "@repo/ui/mui"
 import Pictogram from "./vis/Pictogram"
 import PeopleIcon from "./helpers/PeopleIcon"
-import { useMemo, useRef } from "react"
+import { useMemo } from "react"
 import RiceIcon from "./helpers/RiceIcon"
 import AlmondIcon from "./helpers/AlmondIcon"
-import Image from "next/image"
 import {
   cityMapViewState,
   impactMapViewState,
   valleyMapViewState,
 } from "./helpers/mapViews"
-import { MapTransitions, Marker, useMap } from "@repo/map"
+import { useMap } from "@repo/map"
 import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
-import { motion } from "@repo/motion"
+import useStory from "../story/useStory"
+import useActiveSection from "../hooks/useActiveSection"
 
+/*
 interface Point {
   latitude: number
   longitude: number
 }
+
 
 const getMarker = (point: Point) => (
   <Marker latitude={point.latitude} longitude={point.longitude}>
@@ -36,7 +34,7 @@ const getMarker = (point: Point) => (
       className="impact-marker"
     ></motion.div>
   </Marker>
-)
+)*/
 
 function SectionImpact() {
   return (
@@ -54,39 +52,28 @@ function SectionImpact() {
 }
 
 function City() {
-  const content = storyline.impact
-  const viewState = cityMapViewState
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact
+  const sectionRef = useActiveSection("city", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
   function moveTo() {
     if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    const markers = markersToAdd()
-    mapRef.current?.setMotionChildren(markers)
+    flyTo({
+      longitude: cityMapViewState.longitude,
+      latitude: cityMapViewState.latitude,
+      zoom: cityMapViewState.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
-  useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveTo()
-      }
-    },
-    { threshold: 0.5 },
-  )
-
+  /*
   const markersToAdd = () => {
     return Object.entries(population).map(([key, chunk]) => {
-      const [longitude, latitude] = chunk["coordinates"]
+      const { coordinates } = chunk as { coordinates: [number, number] }
+      const [longitude, latitude] = coordinates
       return (
         <Marker
           latitude={latitude as number}
@@ -103,7 +90,7 @@ function City() {
         </Marker>
       )
     })
-  }
+  }*/
 
   const data = useMemo(() => {
     const norcal = ["sanfrancisco", "sanjose"]
@@ -149,513 +136,407 @@ function City() {
     }
   }, [])
 
+  useIntersectionObserver(
+    sectionRef,
+    ["city"],
+    ["transformation", "agriculture"],
+    moveTo,
+    () => {},
+    { threshold: 0.5 },
+  )
+
   return (
-    <SectionContainer id="city">
-      <Box
-        ref={ref}
-        className="container"
-        height="100vh"
-        sx={{ justifyContent: "center" }}
-      >
-        <div style={{ height: "12%", width: "80%" }} className="paragraph">
-          <Pictogram
-            partialValue={data.norcal.pastPopulation}
-            totalValue={data.norcal.currentPopulation}
-            unit={50000}
-            Icon={PeopleIcon}
-            title={data.norcal.title}
-            reversed
-            rowCount={20}
-            labels={data.norcal.cities}
-          />
-        </div>
-        <Box className="paragraph">
-          <Typography variant="body1">{content.benefits.p1}</Typography>
-        </Box>
-        <div style={{ height: "24%", width: "80%" }} className="paragraph">
-          <Pictogram
-            partialValue={data.socal.pastPopulation}
-            totalValue={data.socal.currentPopulation}
-            unit={50000}
-            Icon={PeopleIcon}
-            title={data.socal.title}
-            reversed
-            rowCount={20}
-            labels={data.socal.cities}
-          />
-        </div>
-        <Typography variant="body2" gutterBottom sx={{ fontStyle: "italic" }}>
-          {
-            "*Grayed out icons represent population in 1940s. Filled icons show the population growth by 2024. One icon represents 50,000 people."
-          }
-        </Typography>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <div style={{ height: "12%", width: "80%" }} className="paragraph">
+        <Pictogram
+          partialValue={data.norcal.pastPopulation}
+          totalValue={data.norcal.currentPopulation}
+          unit={50000}
+          Icon={PeopleIcon}
+          title={data.norcal.title}
+          reversed
+          rowCount={20}
+          labels={data.norcal.cities}
+        />
+      </div>
+      <Box className="paragraph">
+        <Typography variant="body1">{content?.benefits.p1}</Typography>
       </Box>
-    </SectionContainer>
+      <div style={{ height: "24%", width: "80%" }} className="paragraph">
+        <Pictogram
+          partialValue={data.socal.pastPopulation}
+          totalValue={data.socal.currentPopulation}
+          unit={50000}
+          Icon={PeopleIcon}
+          title={data.socal.title}
+          reversed
+          rowCount={20}
+          labels={data.socal.cities}
+        />
+      </div>
+      <Typography variant="body2" gutterBottom sx={{ fontStyle: "italic" }}>
+        {
+          "*Grayed out icons represent population in 1940s. Filled icons show the population growth by 2024. One icon represents 50,000 people."
+        }
+      </Typography>
+    </Box>
   )
 }
 
 function Agriculture() {
-  const content = storyline.impact
-  const viewState = valleyMapViewState
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact
+  const sectionRef = useActiveSection("agriculture", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
   function moveTo() {
     if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    mapRef.current?.setMotionChildren(null)
+    flyTo({
+      longitude: valleyMapViewState.longitude,
+      latitude: valleyMapViewState.latitude,
+      zoom: valleyMapViewState.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
   useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveTo()
-      }
-    },
+    sectionRef,
+    ["agriculture"],
+    ["city", "salmon"],
+    moveTo,
+    () => {},
     { threshold: 0.5 },
   )
 
   return (
-    <SectionContainer id="agriculture">
-      <Box
-        ref={ref}
-        className="container"
-        height="100vh"
-        sx={{ justifyContent: "center" }}
-      >
-        <Box className="paragraph">
-          <Typography variant="body1">{content.benefits.p2}</Typography>
-        </Box>
-        <div style={{ height: "15vh", width: "80%" }} className="paragraph">
-          <Pictogram
-            partialValue={7.5}
-            totalValue={24}
-            unit={1}
-            Icon={AlmondIcon}
-            title={"Mockup"}
-            rowCount={10}
-            size={55}
-            reversed
-          />
-        </div>
-        <div style={{ height: "20vh", width: "80%" }} className="paragraph">
-          <Pictogram
-            partialValue={11.12}
-            totalValue={34.11}
-            unit={1}
-            Icon={RiceIcon}
-            title={"Mockup"}
-            rowCount={10}
-            size={55}
-            reversed
-          />
-        </div>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">{content?.benefits.p2}</Typography>
       </Box>
-    </SectionContainer>
+      <div style={{ height: "15vh", width: "80%" }} className="paragraph">
+        <Pictogram
+          partialValue={7.5}
+          totalValue={24}
+          unit={1}
+          Icon={AlmondIcon}
+          title={"Mockup"}
+          rowCount={10}
+          size={55}
+          reversed
+        />
+      </div>
+      <div style={{ height: "20vh", width: "80%" }} className="paragraph">
+        <Pictogram
+          partialValue={11.12}
+          totalValue={34.11}
+          unit={1}
+          Icon={RiceIcon}
+          title={"Mockup"}
+          rowCount={10}
+          size={55}
+          reversed
+        />
+      </div>
+    </Box>
   )
 }
 
 function Transition() {
-  const content = storyline.impact.benefits
+  const { storyline } = useStory()
+  const content = storyline?.impact.benefits
 
   return (
-    <SectionContainer id="transition">
-      <Box
-        className="container"
-        height="100vh"
-        sx={{ justifyContent: "center" }}
-      >
-        <Box className="paragraph">
-          <Typography variant="body1" gutterBottom>
-            {content.p3}
-          </Typography>
-          <Typography variant="body1" gutterBottom>
-            {content.p4}
-          </Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1" gutterBottom sx={{ fontWeight: "bold" }}>
-            {content.transition}
-          </Typography>
-        </Box>
+    <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
+      <Box className="paragraph">
+        <Typography variant="body1" gutterBottom>
+          {content?.p3}
+        </Typography>
+        <Typography variant="body1" gutterBottom>
+          {content?.p4}
+        </Typography>
       </Box>
-    </SectionContainer>
+      <Box className="paragraph">
+        <Typography variant="body1" gutterBottom sx={{ fontWeight: "bold" }}>
+          {content?.transition}
+        </Typography>
+      </Box>
+    </Box>
   )
 }
 
 function Salmon() {
-  const content = storyline.impact.salmon
-  const marker = impactMarker.salmon
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact.salmon
+  const sectionRef = useActiveSection("impact-salmon", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
   function moveToSalmon() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      impactMapViewState.salmon.longitude,
-      impactMapViewState.salmon.latitude,
-      impactMapViewState.salmon.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    flyTo({
+      longitude: impactMapViewState.salmon.longitude,
+      latitude: impactMapViewState.salmon.latitude,
+      zoom: impactMapViewState.salmon.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
   useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveToSalmon()
-      }
-    },
+    sectionRef,
+    ["impact-salmon"],
+    [],
+    moveToSalmon,
+    () => {},
     { threshold: 0.5 },
   )
 
   return (
-    <>
-      <SectionContainer id="salmon">
-        <Box
-          ref={ref}
-          className="container"
-          height="100vh"
-          sx={{ justifyContent: "center" }}
-        >
-          <Box className="paragraph">
-            <Typography variant="body1">
-              {content.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">
-              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">
-              {content.p31}{" "}
-              <span style={{ fontWeight: "bold" }}>
-                <u>{content.p32}</u>
-              </span>{" "}
-              <LibraryBooksIcon
-                sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-              />{" "}
-              {content.p33}
-            </Typography>
-          </Box>
-          <div className="paragraph">
-            <Image
-              src="/impact/salmon.jpg"
-              alt="Salmon"
-              width={1000}
-              height={600}
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">
+          {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">
+          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">
+          {content?.p31}{" "}
+          <span style={{ fontWeight: "bold" }}>
+            <u>{content?.p32}</u>
+          </span>{" "}
+          <LibraryBooksIcon
+            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+          />{" "}
+          {content?.p33}
+        </Typography>
+      </Box>
+    </Box>
   )
 }
 
 function Delta() {
-  const content = storyline.impact.delta
-  const marker = impactMarker.delta
-  const viewState = impactMapViewState.delta
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact.delta
+  const sectionRef = useActiveSection("impact-delta", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
-  function moveToDelta() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+  function moveTo() {
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    flyTo({
+      longitude: impactMapViewState.delta.longitude,
+      latitude: impactMapViewState.delta.latitude,
+      zoom: impactMapViewState.delta.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
-  useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveToDelta()
-      }
-    },
-    { threshold: 0.5 },
-  )
+  useIntersectionObserver(sectionRef, ["impact-delta"], [], moveTo, () => {}, {
+    threshold: 0.5,
+  })
 
   return (
-    <>
-      <SectionContainer id="delta">
-        <Box
-          ref={ref}
-          className="container"
-          height="100vh"
-          sx={{ justifyContent: "center" }}
-        >
-          <Box className="paragraph">
-            <Typography variant="body1">
-              <span style={{ fontWeight: "bold" }}>
-                <u>{content.p11}</u>
-              </span>{" "}
-              <LibraryBooksIcon
-                sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-              />{" "}
-              {content.p12}
-            </Typography>
-            <Typography variant="body1">{content.p2}</Typography>
-            <Typography variant="body1">
-              {content.p3} {content.p4}{" "}
-              <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">{content.p5}</Typography>
-          </Box>
-          <div className="paragraph">
-            <Image
-              src="/impact/delta.jpg"
-              alt="Delta"
-              width={1000}
-              height={600}
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">
+          <span style={{ fontWeight: "bold" }}>
+            <u>{content?.p11}</u>
+          </span>{" "}
+          <LibraryBooksIcon
+            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+          />{" "}
+          {content?.p12}
+        </Typography>
+        <Typography variant="body1">{content?.p2}</Typography>
+        <Typography variant="body1">
+          {content?.p3} {content?.p4}{" "}
+          <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">{content?.p5}</Typography>
+      </Box>
+      <div className="paragraph"></div>
+    </Box>
   )
 }
 
 function Groundwater() {
-  const content = storyline.impact.groundwater
-  const marker = impactMarker.groundwater
-  const viewState = impactMapViewState.groundwater
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact.groundwater
+  const sectionRef = useActiveSection("impact-groundwater", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    flyTo({
+      longitude: impactMapViewState.groundwater.longitude,
+      latitude: impactMapViewState.groundwater.latitude,
+      zoom: impactMapViewState.groundwater.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
   useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveTo()
-      }
-    },
+    sectionRef,
+    ["impact-groundwater"],
+    [],
+    moveTo,
+    () => {},
     { threshold: 0.5 },
   )
 
   return (
-    <>
-      <SectionContainer id="groundwater">
-        <Box
-          ref={ref}
-          className="container"
-          height="100vh"
-          sx={{ justifyContent: "center" }}
-        >
-          <Box className="paragraph">
-            <Typography variant="body1">{content.p1}</Typography>
-            <Typography variant="body1">
-              {content.p21}{" "}
-              <span style={{ fontWeight: "bold" }}>
-                <u>{content.p22}</u>
-              </span>{" "}
-              <LibraryBooksIcon
-                sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-              />
-              {""}
-              {content.p23}
-            </Typography>
-          </Box>
-          <div className="paragraph">
-            <Image
-              src="/impact/groundwater.jpg"
-              alt="Groundwater"
-              width={1000}
-              height={600}
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-          <Box className="paragraph">
-            <Typography variant="body1">{content.p3}</Typography>
-          </Box>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">{content?.p1}</Typography>
+        <Typography variant="body1">
+          {content?.p21}{" "}
+          <span style={{ fontWeight: "bold" }}>
+            <u>{content?.p22}</u>
+          </span>{" "}
+          <LibraryBooksIcon
+            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+          />
+          {""}
+          {content?.p23}
+        </Typography>
+      </Box>
+      <Box className="paragraph">
+        <Typography variant="body1">{content?.p3}</Typography>
+      </Box>
+    </Box>
   )
 }
 
 function Drinking() {
-  const content = storyline.impact.drinking
-  const marker = impactMarker.drinkingwater
-  const viewState = impactMapViewState.drinkingwater
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact.drinking
+  const sectionRef = useActiveSection("impact-water", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    flyTo({
+      longitude: impactMapViewState.drinkingwater.longitude,
+      latitude: impactMapViewState.drinkingwater.latitude,
+      zoom: impactMapViewState.drinkingwater.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
-  useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveTo()
-      }
-    },
-    { threshold: 0.5 },
-  )
+  useIntersectionObserver(sectionRef, ["impact-water"], [], moveTo, () => {}, {
+    threshold: 0.5,
+  })
 
   return (
-    <>
-      <SectionContainer id="drinking">
-        <Box
-          ref={ref}
-          className="container"
-          height="90vh"
-          sx={{ justifyContent: "center" }}
-        >
-          <Box className="paragraph">
-            <Typography variant="body1">{content.p1}</Typography>
-          </Box>
-          <Box className="paragraph">
-            <Typography variant="body1">
-              {content.p21}{" "}
-              <span style={{ fontWeight: "bold" }}>
-                <u>{content.p22}</u>
-              </span>{" "}
-              <LibraryBooksIcon
-                sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-              />
-              {""}
-              {content.p23}
-            </Typography>
-          </Box>
-          <div className="paragraph">
-            <Image
-              src="/impact/drinking-water.jpg"
-              alt="Drinking"
-              width={1000}
-              height={600}
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="90vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">{content?.p1}</Typography>
+      </Box>
+      <Box className="paragraph">
+        <Typography variant="body1">
+          {content?.p21}{" "}
+          <span style={{ fontWeight: "bold" }}>
+            <u>{content?.p22}</u>
+          </span>{" "}
+          <LibraryBooksIcon
+            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+          />
+          {""}
+          {content?.p23}
+        </Typography>
+      </Box>
+    </Box>
   )
 }
 
 function Climate() {
-  const content = storyline.impact.climate
-  const marker = impactMarker.climate
-  const viewState = impactMapViewState.climate
-  const ref = useRef<HTMLDivElement>(null)
-  const { mapRef } = useMap()
+  const { storyline } = useStory()
+  const content = storyline?.impact.climate
+  const sectionRef = useActiveSection("impact-climate", { amount: 0.5 })
+  const { mapRef, flyTo } = useMap()
 
   function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    mapRef.current?.flyTo(
-      viewState.longitude,
-      viewState.latitude,
-      viewState.zoom,
-      0,
-      0,
-      3500,
-      MapTransitions.SMOOTH,
-    )
-    const markerToAdd = getMarker(marker)
-    mapRef.current?.setMotionChildren(markerToAdd)
-    //mapRef.current?.setMotionChildren("salmon")
+    const mapInst = mapRef.current?.getMap()
+    if (!mapInst) return
+    flyTo({
+      longitude: impactMapViewState.climate.longitude,
+      latitude: impactMapViewState.climate.latitude,
+      zoom: impactMapViewState.climate.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
   }
 
-  useIntersectionObserver(
-    ref,
-    (isIntersecting) => {
-      if (isIntersecting) {
-        moveTo()
-      }
-    },
-    { threshold: 0.5 },
-  )
+  useIntersectionObserver(sectionRef, ["impact-water"], [], moveTo, () => {}, {
+    threshold: 0.5,
+  })
 
   return (
-    <>
-      <SectionContainer id="climate">
-        <Box
-          ref={ref}
-          className="container"
-          height="100vh"
-          sx={{ justifyContent: "center" }}
-        >
-          <Box className="paragraph">
-            <Typography variant="body1">
-              <span style={{ fontWeight: "bold" }}>
-                <u>{content.p11}</u>
-              </span>{" "}
-              <LibraryBooksIcon
-                sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-              />{" "}
-              {content.p12}
-            </Typography>
-            <Typography variant="body1">
-              {content.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-            </Typography>
-            <Typography variant="body1">{content.p3}</Typography>
-          </Box>
-          <div className="paragraph">
-            <Image
-              src="/impact/climate-change.jpg"
-              alt="Climate"
-              width={1000}
-              height={600}
-              style={{ objectFit: "cover" }}
-            />
-          </div>
-        </Box>
-      </SectionContainer>
-    </>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <Box className="paragraph">
+        <Typography variant="body1">
+          <span style={{ fontWeight: "bold" }}>
+            <u>{content?.p11}</u>
+          </span>{" "}
+          <LibraryBooksIcon
+            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+          />{" "}
+          {content?.p12}
+        </Typography>
+        <Typography variant="body1">
+          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Typography>
+        <Typography variant="body1">{content?.p3}</Typography>
+      </Box>
+    </Box>
   )
 }
 

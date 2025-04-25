@@ -49,11 +49,7 @@ interface QuestionSummaryProps {
   wasScrolled?: boolean // Keeping prop for backward compatibility but not using it
 }
 
-const QuestionSummary: React.FC<QuestionSummaryProps> = (
-  {
-    // wasScrolled is ignored
-  },
-) => {
+const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
   const theme = useTheme()
   const { t, locale } = useTranslation()
   const textRef = React.useRef<HTMLElement>(null)
@@ -1323,12 +1319,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = (
     formatOutcomeText,
     t,
     locale,
-    isExploratoryMode,
   ])
 
   // Update font size based on text overflow using ResizeObserver
   React.useEffect(() => {
-    // This is now handled by the calculatedFontSize memo value
+    // TODO:This is now handled by the calculatedFontSize memo value
     // The ResizeObserver may not be needed anymore since we calculate size based on selection count
     // We can remove this effect entirely or keep it for a transition period
     // No need to update fontSize state since it's not used anymore

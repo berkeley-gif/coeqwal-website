@@ -47,6 +47,7 @@ export {
 } from "@mui/material"
 
 export type { BoxProps } from "@mui/material"
+export type { TypographyProps } from "@mui/material/Typography"
 
 // Import and re-export specific commonly used icons
 import WaterIcon from "@mui/icons-material/Water"

@@ -1,12 +1,27 @@
-/* Adobe Fonts */
 @import url("https://use.typekit.net/rxm7kha.css");
 
-/* Define CSS variable for Adobe font with fallbacks */
-:root {
-  --font-akzidenz-grotesk-next-pro: "akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-}
+/* 
+ * Adobe Fonts CSS file
+ * Also loaded within MUI's CssBaseline component and by the FontLoader component
+ * This is a backup to ensure the font is applied
+ */
 
-/* Add a direct font-family rule as additional backup */
-body, button, input, select, textarea {
-  font-family: var(--font-akzidenz-grotesk-next-pro);
-} 
+ /* Font loading state classes */
+ .wf-loading {
+   /* Avoid FOUT (Flash of Unstyled Text) during loading */
+   opacity: 1;
+ }
+ 
+ .wf-active {
+   opacity: 1;
+   transition: opacity 0.1s;
+ }
+ 
+ .wf-inactive {
+   opacity: 1;
+ }
+ 
+ /* Adobe Fonts class - this is added by the FontLoader component */
+ .tk-akzidenz-grotesk-next-pro {
+   font-family: "akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+ } 

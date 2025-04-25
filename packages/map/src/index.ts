@@ -1,14 +1,59 @@
-// Primary Map API (context-based with full map access)
-export { Map } from "./Map"
-export { MapProvider, useMap } from "../context/MapContext"
-export { Marker, Popup, MapTransitions } from "./MapboxMap"
+// packages/map/src/index.ts
+export { MapProviderClientWrapper as MapProvider } from "./context/MapProviderClientWrapper"
+export { useMap } from "./context/MapContext"
+export { default as Map } from "./Map"
 
-// Types
-export type { ViewState } from "./types"
-export type { MapProps, MarkerProperties } from "./MapboxMap"
+// Export Marker and Popup directly from react-map-gl
+export {
+  Marker,
+  Popup,
+  NavigationControl,
+  GeolocateControl,
+  Source,
+  Layer,
+} from "react-map-gl/mapbox"
 
-// Legacy ref-based API (for advanced cases)
-export { MapboxMap } from "./MapboxMap"
-export type { MapboxMapRef } from "./MapboxMap"
+// Export types from react-map-gl and mapbox-gl
+export type { LayerProps } from "react-map-gl/mapbox"
+export type { MapRef } from "react-map-gl/mapbox"
+export type { LngLatLike, FitBoundsOptions } from "mapbox-gl"
 
-export type { Layer } from "mapbox-gl"
+// Export core types from our types file
+export type {
+  ViewState,
+  ViewStateTransitionOptions,
+  MapLayerType,
+  StyleValue,
+  MapSourceData,
+  MapSource,
+  MapLayer,
+  MapOperationsAPI,
+  StateManagementMode,
+  MapProps,
+  MarkerProperties,
+  // Layer style types
+  LineLayerStyle,
+  FillLayerStyle,
+  CircleLayerStyle,
+  MapLayerStyle,
+  LineCapType,
+  LineJoinType,
+} from "./types"
+
+export type { Layer as MapboxLayer } from "react-map-gl/mapbox"
+
+// Export transitions
+export { MapTransitions } from "./types"
+export { createFlyToOptions, createFlyToContextOptions } from "./transitions"
+
+// Marker components
+export { ScaledMarker, MarkerWithPopup, MarkersLayer } from "./markers"
+
+// Export MapboxMapRef as an alias for MapRef
+export type { MapRef as MapboxMapRef } from "react-map-gl/mapbox"
+
+// Export styles for consistency
+export { MAP_STYLES, MAP_THEME_URLS, MAP_TRANSITIONS } from "./styles"
+
+// Export hooks for declarative layer management
+export { useMapLayers, useMapSources } from "./hooks/useMapLayers"

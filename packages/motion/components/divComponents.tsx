@@ -1,5 +1,7 @@
-import { Box } from "@repo/ui/mui"
-import { motion } from "framer-motion"
+import { Box, BoxProps } from "@repo/ui/mui"
+import { motion, HTMLMotionProps } from "framer-motion"
 import { ComponentType } from "react"
 
-export const MotionParagraph: ComponentType<any> = motion.create(Box)
+export const MotionParagraph = motion.create(Box) as ComponentType<
+  BoxProps & HTMLMotionProps<"div">
+>

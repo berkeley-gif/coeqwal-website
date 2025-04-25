@@ -27,9 +27,10 @@ export interface DecileData {
 }
 
 export interface DecileChartProps extends ChartConfig {
-  data: DecileData[] | Record<string, any>
+  data: DecileData[] | Record<string, number | string>
   colorScheme?: "blues" | "greens" | "purples" | "oranges" | "reds"
   showValues?: boolean
+  barWidthPixels?: number // Width of the bar in pixels
 }
 
 // Types for time series data

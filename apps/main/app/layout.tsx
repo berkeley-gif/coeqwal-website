@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
-import { MapProvider } from "@repo/map"
-import "./globals.css"
 import "./fonts.css" // Import Adobe Fonts
 import { FontLoader } from "./components/FontLoader"
+import ClientDynamicMapProvider from "./components/ClientDynamicMapProvider"
 
 export const metadata: Metadata = {
   title: "COEQWAL",
@@ -20,24 +19,12 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
-        {/* Global style to disable scroll snapping */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-          html, body, div, main, section, article {
-            scroll-snap-type: none !important;
-            scroll-snap-align: none !important;
-            scroll-snap-stop: normal !important;
-          }
-        `,
-          }}
-        />
       </head>
       <body>
         <FontLoader kitId="rxm7kha" />
         <TranslationProvider initialLocale="en">
           <ThemeRegistry>
-            <MapProvider>{children}</MapProvider>
+            <ClientDynamicMapProvider>{children}</ClientDynamicMapProvider>
           </ThemeRegistry>
         </TranslationProvider>
       </body>

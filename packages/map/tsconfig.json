@@ -1,6 +1,10 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@repo/map/client": ["./client"]
+    },
     "outDir": "dist",
     "skipLibCheck": true,
     "emitDeclarationOnly": true,
@@ -8,6 +12,6 @@
     "moduleResolution": "bundler",
     "module": "ESNext"
   },
-  "include": ["src/**/*", "hooks/**/*", "context/**/*"],
+  "include": ["src/**/*", "hooks/**/*", "src/context/**/*"],
   "exclude": ["node_modules", "dist"]
 }

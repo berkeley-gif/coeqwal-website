@@ -18,6 +18,8 @@
     "@repo/map": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/viz": "workspace:*",
+    "@repo/state": "workspace:*",
+    "@repo/motion": "workspace:*",
     "next": "^15.2.1"
   },
   "devDependencies": {

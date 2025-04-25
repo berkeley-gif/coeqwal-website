@@ -1,48 +1,54 @@
 "use client"
 
-import { useRef, useEffect } from "react"
-import { MapboxMap, type MapboxMapProps, type MapboxMapRef } from "./MapboxMap"
-import { useMap } from "../context/MapContext"
-import type { ViewState } from "./types"
+import { MapRef, Marker, Map as MapboxGLMap } from "react-map-gl/mapbox"
+import { useCallback } from "react"
+import { useMap } from "./context/MapContext"
+import type { MapProps, MarkerProperties } from "./types"
+import "mapbox-gl/dist/mapbox-gl.css"
 
-// High-level context-based map
-export function Map({
-  viewState,
-  initialViewState,
-  onMove,
-  ...otherProps
-}: MapProps) {
-  const mapRef = useRef<MapboxMapRef>(null)
-  const { mapRef: ctxMapRef, setViewState } = useMap()
+export default function Map(props: MapProps) {
+  const { mapRef, markers = [], motionChildren } = useMap() // Todo: incorporate motionChildrenStyle
 
-  // Connect local ref to the context so other components can call useMap()
-  useEffect(() => {
-    if (mapRef.current) {
-      ctxMapRef.current = mapRef.current
-    }
-  }, [ctxMapRef])
+  const assignMapRef = useCallback(
+    (instance: MapRef | null) => {
+      if (!mapRef) return
 
-  // Whenever the map changes in controlled mode, handle it
-  const handleViewStateChange = (newState: ViewState) => {
-    setViewState(newState)
-    onMove?.({ viewState: newState })
-  }
+      if (instance) {
+        mapRef.current = instance
+        console.log("✅ mapRef assigned to context")
+      } else {
+        console.log("🧹 Map unmounted – clearing mapRef")
+        mapRef.current = null
+      }
+    },
+    [mapRef],
+  )
 
   return (
-    <MapboxMap
-      ref={mapRef}
-      {...otherProps}
-      viewState={viewState}
-      initialViewState={initialViewState}
-      onViewStateChange={handleViewStateChange}
-    />
-  )
-}
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <MapboxGLMap
+        {...props}
+        ref={assignMapRef}
+        mapboxAccessToken={props.mapboxToken}
+        style={{ position: "absolute", inset: 0, ...props.style }}
+      >
+        {/* Render standard markers from context */}
+        {markers.map((marker: MarkerProperties, idx: number) => (
+          <Marker
+            key={marker.id ?? idx}
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+          >
+            {marker.content}
+          </Marker>
+        ))}
 
-export interface MapProps extends Omit<MapboxMapProps, "onViewStateChange"> {
-  // For controlled usage
-  viewState?: ViewState
-  initialViewState?: ViewState
-  // Custom callback
-  onMove?: (evt: { viewState: ViewState }) => void
+        {/* Render children (which can include markers) */}
+        {props.children}
+
+        {/* Render motion children */}
+        {motionChildren}
+      </MapboxGLMap>
+    </div>
+  )
 }
