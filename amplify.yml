@@ -11,6 +11,11 @@ applications:
             - pnpm install
         build:
           commands:
+            - npm install -g pnpm
+            - pnpm install
+            - pnpm run build # The turbo build builds all packages (first)
+            # Then build the main app
+            - cd apps/main && pnpm run build
             - export DEBUG=next*
             - export NODE_OPTIONS="--max-old-space-size=6144 --trace-warnings"
             - NODE_DEBUG=fs,http,net npx turbo run build --filter=main
