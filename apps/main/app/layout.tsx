@@ -20,18 +20,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
-        {/* Global style to disable scroll snapping */}
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-          html, body, div, main, section, article {
-            scroll-snap-type: none !important;
-            scroll-snap-align: none !important;
-            scroll-snap-stop: normal !important;
-          }
-        `,
-          }}
-        />
       </head>
       <body>
         <FontLoader kitId="rxm7kha" />

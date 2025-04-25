@@ -112,7 +112,6 @@ export default function Home() {
 
       {/* ===== Main Content Area ===== */}
       <Box
-        className="no-scroll-snap"
         sx={(theme) => ({
           position: "relative",
           zIndex: 20,
