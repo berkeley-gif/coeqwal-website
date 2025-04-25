@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import {
   Box,
@@ -17,12 +17,11 @@ import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
 import { useMap } from "@repo/map"
 
-// Dynamic import components that use client-side features
+// Lazy loading
 const MapContainer = dynamic(() => import("./components/MapContainer"), {
-  ssr: false, // Disable server-side rendering
+  ssr: false,
 })
 
-// Dynamic import the map state display
 const MapStateDisplay = dynamic(
   () => import("./features/mapControls/MapStateDisplay"),
   {
@@ -30,11 +29,10 @@ const MapStateDisplay = dynamic(
   },
 )
 
-// Dynamic import the combined panel
 const CombinedPanel = dynamic(
   () => import("./features/combinedPanel/CombinedPanel"),
   {
-    ssr: true,
+    ssr: true, // will still be code-split, loading separately from the main bundle
   },
 )
 
@@ -42,22 +40,7 @@ export default function Home() {
   const { t } = useTranslation()
   const { mapRef } = useMap()
 
-  useEffect(() => {
-    console.log("✅ useEffect in page.tsx running")
-
-    const interval = setInterval(() => {
-      if (mapRef?.current) {
-        const center = mapRef.current.getMap().getCenter()
-        console.log("✅ mapRef is now available:", center)
-      } else {
-        console.log("❌ mapRef is still null")
-      }
-    }, 2000) // every 2 seconds
-
-    return () => clearInterval(interval)
-  }, [mapRef])
   const [drawerOpen, setDrawerOpen] = useState(false)
-
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
 
   // For the uncontrolled map, we'll store its ref so we can call flyTo

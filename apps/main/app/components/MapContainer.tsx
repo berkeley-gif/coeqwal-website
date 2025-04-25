@@ -27,11 +27,6 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
     ? filterMarkersByType(markers, filterType)
     : markers
 
-  // 🟢 Render log
-  console.log("📦 MapContainer rendered", {
-    markerCount: filteredMarkers.length,
-  })
-
   // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
     console.log("🚀 MapContainer useEffect running")
@@ -85,8 +80,7 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
     >
       <Map
         mapboxToken={mapboxToken}
-        initialViewState={mapState.viewState} // Start uncontrolled
-        // 🔁 Remove viewState for now to stay in uncontrolled mode
+        initialViewState={mapState.viewState} // uncontrolled
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
         scrollZoom={false}
         interactive
