@@ -126,7 +126,7 @@ export default function Home() {
           }),
         })}
       >
-        {/* Header - Enable pointer events */}
+        {/* Header */}
         <Box sx={{ pointerEvents: "auto" }}>
           <Header drawerOpen={drawerOpen} drawerPosition="right" />
         </Box>
