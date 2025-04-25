@@ -13,12 +13,14 @@ applications:
           commands:
             - export DEBUG=next*
             - export NODE_OPTIONS="--max-old-space-size=6144 --trace-warnings"
+            - NODE_DEBUG=fs,http,net npx turbo run build --filter="./packages/*"
             - NODE_DEBUG=fs,http,net npx turbo run build --filter=main
-            - echo "Build completed successfully! Checking output..."
-            - du -sh apps/main/out
-            - ls -la apps/main/out
+            - echo "Build completed! Checking output directory..."
+            - ls -la apps/main
+            - echo "Showing .next directory contents:"
+            - ls -la apps/main/.next
       artifacts:
-        baseDirectory: apps/main/out
+        baseDirectory: apps/main/.next
         files:
           - '**/*'
       cache:
