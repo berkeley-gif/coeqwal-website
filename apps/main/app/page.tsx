@@ -18,6 +18,7 @@ import { useMap } from "@repo/map"
 import MapContainer from "./components/MapContainer"
 import MapStateDisplay from "./features/mapControls/MapStateDisplay"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
+import { NeedsEditorPanel } from "./features/needsEditor/components"
 
 export default function Home() {
   const { t } = useTranslation()
@@ -463,6 +464,10 @@ export default function Home() {
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">
             <CombinedPanel />
+          </Box>
+          {/* Needs Editor */}
+          <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">
+            <NeedsEditorPanel />
           </Box>
         </Box>
       </Box>

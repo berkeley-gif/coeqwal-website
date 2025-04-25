@@ -69,6 +69,10 @@ import BarChartIcon from "@mui/icons-material/BarChart"
 import SlideshowIcon from "@mui/icons-material/Slideshow"
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"
 import VisibilityIcon from "@mui/icons-material/Visibility"
+import AddIcon from "@mui/icons-material/Add"
+import CheckIcon from "@mui/icons-material/Check"
+import CloseIcon from "@mui/icons-material/Close"
+import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 
 // Export individually imported icons
 export {
@@ -91,6 +95,10 @@ export {
   SlideshowIcon,
   LibraryBooksIcon,
   VisibilityIcon,
+  AddIcon,
+  CheckIcon,
+  CloseIcon,
+  ArrowRightIcon,
 }
 
 // Export the full icons library for access to other icons as needed
