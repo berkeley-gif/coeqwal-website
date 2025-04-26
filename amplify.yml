@@ -13,7 +13,6 @@ applications:
           commands:
             - pnpm rebuild
             - npx turbo run build --filter=main
-            - pnpm --filter=main export
       artifacts:
         baseDirectory: apps/main/out
         files:
