@@ -71,6 +71,7 @@ function Transition() {
 //TODO: add animation for these graphics
 //TODO: show up by sentence
 //TODO: map transistions not perfect
+//TODO: probably watch the current window size
 function Delta() {
   const { storyline } = useStory()
   const content = storyline?.delta

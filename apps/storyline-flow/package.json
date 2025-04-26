@@ -16,7 +16,8 @@
     "@repo/ui": "workspace:*",
     "d3": "^7.9.0",
     "lodash": "^4.17.21",
-    "next": "^15.2.1"
+    "next": "^15.2.1",
+    "roughjs": "^4.6.6"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

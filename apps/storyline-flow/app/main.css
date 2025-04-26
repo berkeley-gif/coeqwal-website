@@ -1,6 +1,7 @@
 :root{
     --primary-color: #031a35;
     --testing-color: #036352;
+    --text-color: #f2f0ef;
 }
 
 /* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
@@ -30,6 +31,19 @@ html{
     pointer-events: auto;
 }
 
+#section-container{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    z-index: 1000;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: rgba(3, 26, 53, 0.4);
+}
+
 #loader{
     position: fixed;
     top: 0;
@@ -43,9 +57,17 @@ html{
     z-index: 1000;
 }
 
-
 #holder{
     width: calc(100% - 1px)
+}
+
+#section-line{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2px;
+    background-color: #f2f0ef;
+    z-index: 1000;
 }
 
 .container{
@@ -104,6 +126,39 @@ html{
     cursor: pointer;
 }
 
+.section-indicator{
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: #f2f0ef;
+    border-radius: 50%;
+}
+
+.section-component{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.section-text{
+    text-align: center;
+    dominant-baseline: middle;
+    text-anchor: end;
+    color: var(--text-color);
+}
+
+.stroked-text{
+    text-shadow:
+    -1px -1px 0 var(--text-color),
+    0px -1px 0 var(--text-color),
+    1px -1px 0 var(--text-color),
+    1px 0px 0 var(--text-color),
+    1px 1px 0 var(--text-color),
+    0px 1px 0 var(--text-color),
+    -1px 1px 0 var(--text-color),
+    -1px 0px 0 var(--text-color);
+}
 
 .mapboxgl-popup-content{
     color: #000;

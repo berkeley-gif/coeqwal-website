@@ -12,12 +12,16 @@ import { useInViewVisibility } from "../hooks/useInViewVisibility"
 import { MarkerType } from "./helpers/types"
 import { useFetchData } from "../hooks/useFetchData"
 import PrecipitationBar from "./vis/PrecipitationBar"
-import { riverLayerStyle } from "./helpers/mapLayerStyle"
+import {
+  precipitationPaintStyle,
+  riverLayerStyle,
+} from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import { Paragraph } from "@repo/motion/components"
 import { stateMapViewState } from "./helpers/mapViews"
 import Image from "next/image"
 import { LayerProps } from "@repo/map"
+import AnimatedCurve from "./vis/AnimatedCurve"
 
 const MotionText = motion.create(Typography)
 
@@ -41,7 +45,7 @@ function SectionWaterSource() {
   )
 }
 
-//TODO: current onEnter() will be triggered twice
+//TODO: current onEnter() will be triggered twice, but it could just be strict mode or something
 function Precipitation() {
   const { addLayer, addSource, setPaintProperty, getStyle, mapRef } = useMap()
   const { storyline } = useStory()
@@ -52,21 +56,32 @@ function Precipitation() {
   function loadPrecipitation() {
     const mapInst = mapRef.current?.getMap()
     if (!mapInst) return
-    addSource("precipitation", {
-      type: "raster",
-      url: "mapbox://coeqwal.82rnru99",
-      tileSize: 256,
+    //TODO: clean up and smooth the polygons even more, then upload to coeqwal account
+    //TODO: make the entrance more smooth here
+    addSource("precipitation-vector", {
+      type: "vector",
+      url: "mapbox://yskuo.9zuvqy7z",
     })
-    addLayer("precipitation-layer", "precipitation", "raster", {
-      "raster-opacity": 0,
-    })
-    setPaintProperty("precipitation-layer", "raster-opacity", 1)
+    addLayer(
+      "precipitation-vector-layer",
+      "precipitation-vector",
+      "fill",
+      precipitationPaintStyle,
+      {},
+      { "source-layer": "region" },
+    )
+
+    setTimeout(() => {
+      setPaintProperty("precipitation-vector-layer", "fill-opacity", 1)
+      setPaintProperty("river-sac-layer", "line-opacity", 0)
+      setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
+    }, 500)
   }
 
   function unLoadPrecipitation() {
     const layers = getStyle().layers.map((layer) => layer.id)
-    if (!layers.includes("precipitation-layer")) return
-    setPaintProperty("precipitation-layer", "raster-opacity", 0)
+    if (!layers.includes("precipitation-vector-layer")) return
+    setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
   }
 
   useIntersectionObserver(
@@ -75,7 +90,7 @@ function Precipitation() {
     ["opener", "variability"],
     loadPrecipitation,
     unLoadPrecipitation,
-    { threshold: 0.75 },
+    { threshold: 0.5 },
   )
 
   const springUpVariants = {
@@ -303,6 +318,7 @@ function Snowpack() {
   const { storyline } = useStory()
   const content = storyline?.snowpack
   const sectionRef = useActiveSection("snowpack", { amount: 0.5 })
+  const visRef = useInViewVisibility()
 
   return (
     <Box
@@ -325,9 +341,15 @@ function Snowpack() {
         <Typography variant="body1">{content?.p3}</Typography>
       </Box>
       <div
-        style={{ height: "40%", width: "100%", backgroundColor: "teal" }}
+        ref={visRef.ref}
+        style={{ height: "100%", width: "100%" }}
         className="paragraph"
-      ></div>
+      >
+        <Typography variant="h6">
+          {"From Snow to Snowmelt \u2014 an Illustration"}
+        </Typography>
+        <AnimatedCurve />
+      </div>
     </Box>
   )
 }

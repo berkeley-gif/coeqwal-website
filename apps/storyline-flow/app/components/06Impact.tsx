@@ -3,10 +3,10 @@
 import { Box, Typography, VisibilityIcon, LibraryBooksIcon } from "@repo/ui/mui"
 import population from "../../public/data/city_population.json" assert { type: "json" }
 import Pictogram from "./vis/Pictogram"
-import PeopleIcon from "./helpers/PeopleIcon"
+import PeopleIcon from "./helpers/Icons/PeopleIcon"
 import { useMemo } from "react"
-import RiceIcon from "./helpers/RiceIcon"
-import AlmondIcon from "./helpers/AlmondIcon"
+import RiceIcon from "./helpers/Icons/RiceIcon"
+import AlmondIcon from "./helpers/Icons/AlmondIcon"
 import {
   cityMapViewState,
   impactMapViewState,
@@ -256,9 +256,15 @@ function Agriculture() {
 function Transition() {
   const { storyline } = useStory()
   const content = storyline?.impact.benefits
+  const sectionRef = useActiveSection("economy", { amount: 0.5 })
 
   return (
-    <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
       <Box className="paragraph">
         <Typography variant="body1" gutterBottom>
           {content?.p3}

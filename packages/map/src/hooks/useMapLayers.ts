@@ -8,6 +8,7 @@ interface LayerConfig {
   type: string | MapLayerType
   paint?: Record<string, StyleValue>
   layout?: Record<string, StyleValue>
+  others?: Record<string, StyleValue>
 }
 
 interface SourceConfig {
@@ -68,7 +69,14 @@ export function useMapLayers(
     layers.forEach((layer) => {
       if (!hasLayer(layer.id)) {
         // Add the layer
-        addLayer(layer.id, layer.source, layer.type, layer.paint, layer.layout)
+        addLayer(
+          layer.id,
+          layer.source,
+          layer.type,
+          layer.paint,
+          layer.layout,
+          layer.others,
+        )
 
         // Track for cleanup
         addedLayers.push(layer.id)

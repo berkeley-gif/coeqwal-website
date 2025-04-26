@@ -2,6 +2,8 @@
 
 import { Box, Typography } from "@repo/ui/mui"
 import useStory from "../story/useStory"
+import AnimatedWaves from "./helpers/AnimatedWave"
+import { useEffect, useRef, useState } from "react"
 
 function Conclusion() {
   return (
@@ -16,6 +18,28 @@ function Conclusion() {
 function Resolution() {
   const { storyline } = useStory()
   const content = storyline?.conclusion
+  const ref = useRef<HTMLDivElement>(null)
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    const element = ref.current
+    if (!element) return
+
+    // Create a ResizeObserver to watch the container size
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect
+        setContainerSize({ width, height })
+      }
+    })
+
+    resizeObserver.observe(element)
+
+    // Cleanup observer on component unmount
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
 
   return (
     <>
@@ -28,16 +52,21 @@ function Resolution() {
         ></Box>
 
         <Box
+          ref={ref}
           className="container-center"
           sx={{
             position: "sticky",
             bottom: 0,
-            justifyContent: "flex-start",
+            justifyContent: "center",
             backgroundColor: "#031a35",
             height: "100vh",
             width: "100%",
           }}
         >
+          <AnimatedWaves
+            width={containerSize.width}
+            height={containerSize.height}
+          />
           <Box sx={{ zIndex: 1 }}>
             <Box className="paragraph">
               <Typography variant="h3">

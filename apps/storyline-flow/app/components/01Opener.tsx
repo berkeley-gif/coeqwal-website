@@ -8,6 +8,7 @@ import useActiveSection from "../hooks/useActiveSection"
 
 //TODO: motion doesn't support component prop
 //TODO: modularize this entire setup
+//TODO: make sure all map layers are disabled here
 function Opener() {
   const { storyline } = useStory()
   const content = storyline?.opener
