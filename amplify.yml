@@ -4,6 +4,9 @@ applications:
       phases:
         preBuild:
           commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
             - corepack enable
             - pnpm install
         build:
@@ -15,10 +18,6 @@ applications:
         baseDirectory: apps/main/out
         files:
           - '**/*'
-      # cache:
-      #   paths:
-      #     - node_modules/**/*
-      #     - ~/.cache/pnpm/**/*
       buildPath: /
     appRoot: apps/main
     environment:
