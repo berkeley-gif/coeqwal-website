@@ -2,22 +2,10 @@
 
 import { useMap } from "@repo/map"
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
-import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
 import { riverLayerStyle } from "./helpers/mapLayerStyle"
-import useStory from "../story/useStory"
 import useActiveSection from "../hooks/useActiveSection"
-
-/*const getMarker = (point: Point, idx: number) => (
-  <Marker latitude={point.latitude} longitude={point.longitude} key={idx}>
-    <motion.div
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0 }} // Define exit animation
-      transition={{ duration: 0.5 }}
-      className="impact-marker"
-    ></motion.div>
-  </Marker>
-)*/
+import useStoryStore from "../store"
+import { useCallback, useEffect, useRef } from "react"
 
 function SectionHuman() {
   return (
@@ -30,9 +18,9 @@ function SectionHuman() {
 }
 
 function Header() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy
-  const sectionRef = useActiveSection("goldrush", { amount: 0.5 })
+  const { sectionRef } = useActiveSection("goldrush", { amount: 0.5 })
 
   return (
     <Box
@@ -57,9 +45,9 @@ function Header() {
 }
 
 function Irrigation() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy.irrigation
-  const sectionRef = useActiveSection("irrigation", { amount: 0.5 })
+  const { sectionRef } = useActiveSection("irrigation", { amount: 0.5 })
 
   return (
     <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
@@ -74,15 +62,15 @@ function Irrigation() {
 }
 
 function Drinking() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy.drinking
-  const sectionRef = useActiveSection("drinking", { amount: 0.5 })
-  const { mapRef, addSource, addLayer, setPaintProperty } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection("drinking", {
+    amount: 0.5,
+  })
+  const { addSource, addLayer, setPaintProperty } = useMap()
+  const hasSeen = useRef(false)
 
-  function loadRivers() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-
+  const init = useCallback(() => {
     addSource("river-combined", {
       type: "geojson",
       data: "/rivers/combinedRivers.geojson",
@@ -95,33 +83,34 @@ function Drinking() {
       riverLayerStyle.paint,
       riverLayerStyle.layout,
     )
+  }, [addSource, addLayer])
 
+  const load = useCallback(() => {
     setPaintProperty("river-combined-layer", "line-opacity", 1)
-  }
+  }, [setPaintProperty])
 
-  function unLoadRivers() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
-
+  const unload = useCallback(() => {
     setPaintProperty("river-combined-layer", "line-opacity", 0)
-  }
+  }, [setPaintProperty])
 
-  /*
-  const markers = [
-    { longitude: -114.596, latitude: 33.61, caption: "Colorado River" },
-    { longitude: -118.3951, latitude: 37.3686, caption: "Lake Mead" },
-    { longitude: -119.7862, latitude: 37.9481, caption: "Lake Powell" },
-  ]
-  */
-
-  useIntersectionObserver(
-    sectionRef,
-    ["drinking"],
-    ["irrigation"],
-    loadRivers,
-    unLoadRivers,
-    { threshold: 0.5 },
-  )
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+        init()
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        unload()
+        //console.log('unload stuff')
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load, unload, init])
 
   return (
     <Box

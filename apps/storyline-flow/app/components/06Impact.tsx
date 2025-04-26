@@ -4,7 +4,7 @@ import { Box, Typography, VisibilityIcon, LibraryBooksIcon } from "@repo/ui/mui"
 import population from "../../public/data/city_population.json" assert { type: "json" }
 import Pictogram from "./vis/Pictogram"
 import PeopleIcon from "./helpers/Icons/PeopleIcon"
-import { useMemo } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import RiceIcon from "./helpers/Icons/RiceIcon"
 import AlmondIcon from "./helpers/Icons/AlmondIcon"
 import {
@@ -13,28 +13,9 @@ import {
   valleyMapViewState,
 } from "./helpers/mapViews"
 import { useMap } from "@repo/map"
-import { useIntersectionObserver } from "../hooks/useIntersectionObserver"
-import useStory from "../story/useStory"
 import useActiveSection from "../hooks/useActiveSection"
-
-/*
-interface Point {
-  latitude: number
-  longitude: number
-}
-
-
-const getMarker = (point: Point) => (
-  <Marker latitude={point.latitude} longitude={point.longitude}>
-    <motion.div
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0 }} // Define exit animation
-      transition={{ duration: 0.5 }}
-      className="impact-marker"
-    ></motion.div>
-  </Marker>
-)*/
+import useStoryStore from "../store"
+import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 
 function SectionImpact() {
   return (
@@ -52,45 +33,13 @@ function SectionImpact() {
 }
 
 function City() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact
-  const sectionRef = useActiveSection("city", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
-
-  function moveTo() {
-    if (!mapRef.current?.getMap()) return
-    flyTo({
-      longitude: cityMapViewState.longitude,
-      latitude: cityMapViewState.latitude,
-      zoom: cityMapViewState.zoom,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-  }
-
-  /*
-  const markersToAdd = () => {
-    return Object.entries(population).map(([key, chunk]) => {
-      const { coordinates } = chunk as { coordinates: [number, number] }
-      const [longitude, latitude] = coordinates
-      return (
-        <Marker
-          latitude={latitude as number}
-          longitude={longitude as number}
-          key={key}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }} // Define exit animation
-            transition={{ duration: 0.5 }}
-            className="city-marker"
-          ></motion.div>
-        </Marker>
-      )
-    })
-  }*/
+  const { sectionRef, isSectionActive } = useActiveSection("city", {
+    amount: 0.5,
+  })
+  const { flyTo } = useMap()
+  const hasSeen = useRef(false)
 
   const data = useMemo(() => {
     const norcal = ["sanfrancisco", "sanjose"]
@@ -136,14 +85,33 @@ function City() {
     }
   }, [])
 
-  useIntersectionObserver(
-    sectionRef,
-    ["city"],
-    ["transformation", "agriculture"],
-    moveTo,
-    () => {},
-    { threshold: 0.5 },
-  )
+  const load = useCallback(() => {
+    flyTo({
+      longitude: cityMapViewState.longitude,
+      latitude: cityMapViewState.latitude,
+      zoom: cityMapViewState.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+  }, [flyTo])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        console.log("initialize stuff")
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        console.log("unload stuff")
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
 
   return (
     <Box
@@ -189,13 +157,15 @@ function City() {
 }
 
 function Agriculture() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact
-  const sectionRef = useActiveSection("agriculture", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection("agriculture", {
+    amount: 0.5,
+  })
+  const { flyTo } = useMap()
+  const hasSeen = useRef(false)
 
-  function moveTo() {
-    if (!mapRef.current?.getMap()) return
+  const load = useCallback(() => {
     flyTo({
       longitude: valleyMapViewState.longitude,
       latitude: valleyMapViewState.latitude,
@@ -204,16 +174,24 @@ function Agriculture() {
         duration: 2000,
       },
     })
-  }
+  }, [flyTo])
 
-  useIntersectionObserver(
-    sectionRef,
-    ["agriculture"],
-    ["city", "salmon"],
-    moveTo,
-    () => {},
-    { threshold: 0.5 },
-  )
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        console.log("initialize stuff")
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        console.log("unload stuff")
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
 
   return (
     <Box
@@ -254,9 +232,9 @@ function Agriculture() {
 }
 
 function Transition() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.benefits
-  const sectionRef = useActiveSection("economy", { amount: 0.5 })
+  const { sectionRef } = useActiveSection("economy", { amount: 0.5 })
 
   return (
     <Box
@@ -283,14 +261,14 @@ function Transition() {
 }
 
 function Salmon() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.salmon
-  const sectionRef = useActiveSection("impact-salmon", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection("impact-salmon", {
+    amount: 0.5,
+  })
+  const { flyTo } = useMap()
 
-  function moveToSalmon() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
+  const load = useCallback(() => {
     flyTo({
       longitude: impactMapViewState.salmon.longitude,
       latitude: impactMapViewState.salmon.latitude,
@@ -299,15 +277,13 @@ function Salmon() {
         duration: 2000,
       },
     })
-  }
+  }, [flyTo])
 
-  useIntersectionObserver(
-    sectionRef,
-    ["impact-salmon"],
-    [],
-    moveToSalmon,
+  useSectionLifecycle(
+    isSectionActive,
     () => {},
-    { threshold: 0.5 },
+    load,
+    () => {},
   )
 
   return (
@@ -340,14 +316,14 @@ function Salmon() {
 }
 
 function Delta() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.delta
-  const sectionRef = useActiveSection("impact-delta", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection("impact-delta", {
+    amount: 0.5,
+  })
+  const { flyTo } = useMap()
 
-  function moveTo() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
+  const load = useCallback(() => {
     flyTo({
       longitude: impactMapViewState.delta.longitude,
       latitude: impactMapViewState.delta.latitude,
@@ -356,11 +332,14 @@ function Delta() {
         duration: 2000,
       },
     })
-  }
+  }, [flyTo])
 
-  useIntersectionObserver(sectionRef, ["impact-delta"], [], moveTo, () => {}, {
-    threshold: 0.5,
-  })
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    load,
+    () => {},
+  )
 
   return (
     <Box
@@ -392,14 +371,15 @@ function Delta() {
 }
 
 function Groundwater() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.groundwater
-  const sectionRef = useActiveSection("impact-groundwater", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection(
+    "impact-groundwater",
+    { amount: 0.5 },
+  )
+  const { flyTo } = useMap()
 
-  function moveTo() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
+  const load = useCallback(() => {
     flyTo({
       longitude: impactMapViewState.groundwater.longitude,
       latitude: impactMapViewState.groundwater.latitude,
@@ -408,15 +388,13 @@ function Groundwater() {
         duration: 2000,
       },
     })
-  }
+  }, [flyTo])
 
-  useIntersectionObserver(
-    sectionRef,
-    ["impact-groundwater"],
-    [],
-    moveTo,
+  useSectionLifecycle(
+    isSectionActive,
     () => {},
-    { threshold: 0.5 },
+    load,
+    () => {},
   )
 
   return (
@@ -448,14 +426,14 @@ function Groundwater() {
 }
 
 function Drinking() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.drinking
-  const sectionRef = useActiveSection("impact-water", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection("impact-water", {
+    amount: 0.5,
+  })
+  const { flyTo } = useMap()
 
-  function moveTo() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
+  const load = useCallback(() => {
     flyTo({
       longitude: impactMapViewState.drinkingwater.longitude,
       latitude: impactMapViewState.drinkingwater.latitude,
@@ -464,11 +442,14 @@ function Drinking() {
         duration: 2000,
       },
     })
-  }
+  }, [flyTo])
 
-  useIntersectionObserver(sectionRef, ["impact-water"], [], moveTo, () => {}, {
-    threshold: 0.5,
-  })
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    load,
+    () => {},
+  )
 
   return (
     <Box
@@ -498,14 +479,14 @@ function Drinking() {
 }
 
 function Climate() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.climate
-  const sectionRef = useActiveSection("impact-climate", { amount: 0.5 })
-  const { mapRef, flyTo } = useMap()
+  const { sectionRef, isSectionActive } = useActiveSection("impact-climate", {
+    amount: 0.5,
+  })
+  const { flyTo } = useMap()
 
-  function moveTo() {
-    const mapInst = mapRef.current?.getMap()
-    if (!mapInst) return
+  const load = useCallback(() => {
     flyTo({
       longitude: impactMapViewState.climate.longitude,
       latitude: impactMapViewState.climate.latitude,
@@ -514,11 +495,14 @@ function Climate() {
         duration: 2000,
       },
     })
-  }
+  }, [flyTo])
 
-  useIntersectionObserver(sectionRef, ["impact-water"], [], moveTo, () => {}, {
-    threshold: 0.5,
-  })
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    load,
+    () => {},
+  )
 
   return (
     <Box

@@ -13,7 +13,6 @@ import {
 } from "@repo/motion/variants"
 import { VisibleIcon } from "../helpers/Icons"
 import "./precipitation-bar.css"
-import { MarkerType } from "../helpers/types"
 import { useFetchData } from "../../hooks/useFetchData"
 
 interface PrecipitationDatum {
@@ -28,11 +27,11 @@ const LABEL_HEIGHT = 50
 
 //TODO: possible make the height a fixed number
 function PrecipitationBar({
-  mapData,
+  yearLabels,
   startAnimation,
   getSelectedYear,
 }: {
-  mapData: Record<string, MarkerType[]>
+  yearLabels: number[]
   startAnimation: boolean
   getSelectedYear: (year: string) => void
 }) {
@@ -93,11 +92,6 @@ function PrecipitationBar({
       setData(processedData)
     },
   )
-
-  const yearLabels = useMemo(() => {
-    if (!mapData) return []
-    return Object.keys(mapData).map((key) => parseInt(key))
-  }, [mapData])
 
   const average = useMemo(() => {
     return parseFloat(d3.mean(data, (d) => d.value)?.toFixed(2) || "0.00")

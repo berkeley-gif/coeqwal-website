@@ -1,10 +1,10 @@
 .axis{
-    stroke: #fff;
+    stroke: #F2F0EF;
     stroke-width: 2px;
 }
 
 text{
-    fill: #fff;
+    fill: #F2F0EF;
 }
 
 .axis-label{
@@ -26,8 +26,8 @@ text{
 
 .tooltip{
     position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    background: rgba(2, 18, 36, 0.9);
+    color: #F2F0EF;
     padding: 8px;
     border-radius: 4px;
     pointer-events: none;

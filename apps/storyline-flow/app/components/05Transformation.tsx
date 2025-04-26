@@ -1,8 +1,8 @@
 "use client"
 
 import { Box, Typography, VisibilityIcon, LibraryBooksIcon } from "@repo/ui/mui"
-import useStory from "../story/useStory"
 import useActiveSection from "../hooks/useActiveSection"
+import useStoryStore from "../store"
 
 function SectionTransformation() {
   return (
@@ -15,9 +15,9 @@ function SectionTransformation() {
 //TODO: pop up those
 // Use waterdrop for dams
 function Transformation() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.transformation
-  const sectionRef = useActiveSection("transformation", { amount: 0.5 })
+  const { sectionRef } = useActiveSection("transformation", { amount: 0.5 })
 
   return (
     <Box
