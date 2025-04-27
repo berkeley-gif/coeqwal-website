@@ -1,10 +1,7 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import {
-  Box,
-  Typography
-} from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { BasePanel } from "@repo/ui"
