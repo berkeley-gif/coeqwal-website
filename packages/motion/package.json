@@ -4,9 +4,9 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./variants": "./variants/index.ts",
-    "./hooks": "./hooks/index.ts",
-    "./components": "./components/index.ts"
+    "./variants": "./src/variants/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./components": "./src/components/index.ts"
   },
   "scripts": {
     "build": "tsc --skipLibCheck",

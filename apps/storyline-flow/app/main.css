@@ -1,6 +1,7 @@
 :root{
     --primary-color: #031a35;
-    --testing-color: #036352;
+    --dark-color: #021224;
+    --light-color: #1a3a5c;
     --text-color: #f2f0ef;
 }
 
@@ -29,19 +30,6 @@ html{
     z-index: 1;
 }
 
-#section-container{
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 10px;
-    z-index: 1000;
-    font-size: 0.8rem;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background-color: rgba(3, 26, 53, 0.4);
-}
-
 #sticky-section{
     position: sticky;
     bottom: 0;
@@ -60,6 +48,14 @@ html{
     align-items: center;
     z-index: 1000;
 }
+
+#month-slider{
+    width: calc(100% - 210px);
+    margin-left: 140px;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
 
 .container{
     position: relative;
@@ -132,12 +128,23 @@ html{
     border-radius: 50%;
 }
 
+/* section indicator*/
+
+#section-container{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    z-index: 2;
+    font-size: 0.9rem;
+    background-color: rgba(3, 26, 53, 0.4);
+}
+
 .section-component{
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
-    gap: 5px;
 }
 
 .section-text{
@@ -147,33 +154,101 @@ html{
     color: var(--text-color);
 }
 
-.stroked-text{
-    text-shadow:
-    -1px -1px 0 var(--text-color),
-    0px -1px 0 var(--text-color),
-    1px -1px 0 var(--text-color),
-    1px 0px 0 var(--text-color),
-    1px 1px 0 var(--text-color),
-    0px 1px 0 var(--text-color),
-    -1px 1px 0 var(--text-color),
-    -1px 0px 0 var(--text-color);
+.section-circle {
+    width: 15px;
+    height: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+.section-circle.active {
+transform: scale(1.2); /* Slightly enlarge the active indicator */
+}
+
+/* popup */
+.popup {
+    width: 100%;
+    max-width: 600px;
+}
+  
+/* Carousel container */
+.carousel-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup .nav-button{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(242, 240, 239, 0.7);
+}
+
+.popup .nav-button:hover{
+    background-color: rgba(242, 240, 239, 0.9);
+}
+
+.popup .indicator-dots{
+    position: absolute;
+    bottom: 8;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 0.5 ;
+}
+
+.popup .indicator-dots .dot {
+    padding: 0.5rem;
+    color: rgba(3, 26, 53, 0.4);
+    transition: color 0.3s ease;
+  }
+  
+  .popup .indicator-dots .dot.active {
+    color: var(--light-color);
+  }
+  
+
+/* mapbox popup*/
+
+.mapboxgl-popup{
+    z-index: 1000;
 }
 
 .mapboxgl-popup-content{
-    color: #000;
+    color: var(--text-color);
+    background-color: var(--light-color);
+    border-radius: 10px;
+}
+.mapboxgl-popup-close-button{
+    color: var(--text-color);
+    margin: 0.5em 0.5em;
+}
+
+.mapboxgl-popup-tip{
+    border-left-color: var(--light-color) !important;
 }
 
 .popup{
-    width: 500px;
+    width: 600px;
     padding: 1em;
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack content vertically */
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
 }
 
 .popup p{
     font-size: 1rem;
     margin-top: 1em;
+    line-height: 1.2;
 }
 
 .popup h3{
     font-size: 1.2rem;
-    margin-bottom: 1em;
+    margin: 0.7em 0;
+
 }

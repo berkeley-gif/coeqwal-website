@@ -14,6 +14,14 @@ export const deltaMapViewState = {
   pitch: 0,
 }
 
+export const riverMapViewState = {
+  longitude: -122.4311,
+  latitude: 37.6478,
+  zoom: 7.76,
+  bearing: -9.15,
+  pitch: 49.19,
+}
+
 export const cityMapViewState = {
   longitude: -123.6427,
   latitude: 35.308,

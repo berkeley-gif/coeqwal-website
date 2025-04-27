@@ -17,7 +17,13 @@ const FIXED_HEIGHT = 400
 
 //Clean up rect error
 
-export default function AnimatedCurve() {
+export default function AnimatedCurve({
+  startAnimation = false,
+  selectedMonth = 0,
+}: {
+  startAnimation: boolean
+  selectedMonth: number
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const pathRef = useRef<SVGPathElement | null>(null)
@@ -129,8 +135,10 @@ export default function AnimatedCurve() {
       if (t < 1) requestAnimationFrame(tick)
     }
 
+    if (!startAnimation) return
+
     requestAnimationFrame(tick)
-  }, [dimensions, areaGen, xScale, yScale, snowArea, meltArea])
+  }, [dimensions, areaGen, xScale, yScale, snowArea, meltArea, startAnimation])
 
   return (
     <div
@@ -147,15 +155,16 @@ export default function AnimatedCurve() {
           transition={{ duration: 5, ease: "easeInOut" }}
         />
 
-        <Annotation dimensions={dimensions} xScale={xScale} />
         <XAxis size={dimensions} xScale={xScale} />
         <YAxis size={dimensions} yScale={yScale} />
 
         <g ref={pathRef} />
+        <Annotation
+          dimensions={dimensions}
+          xScale={xScale}
+          monthIdx={selectedMonth}
+        />
       </svg>
-      <div style={{ width: "100%", height: "60px", backgroundColor: "teal" }}>
-        Timeline Slider
-      </div>
     </div>
   )
 }
@@ -163,9 +172,11 @@ export default function AnimatedCurve() {
 function Annotation({
   dimensions,
   xScale,
+  monthIdx,
 }: {
   dimensions: { width: number; height: number }
   xScale: d3.ScaleLinear<number, number>
+  monthIdx: number
 }) {
   return (
     <motion.g
@@ -178,7 +189,7 @@ function Annotation({
       <rect
         x={xScale(0)}
         y={0}
-        width={xScale(5) - xScale(0)}
+        width={xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)}
         height={dimensions.height - margin.bottom}
         fill="#f2f0ef"
         opacity={0.1}
@@ -194,6 +205,16 @@ function Annotation({
       >
         Wet season
       </text>
+
+      <line
+        x1={xScale(monthIdx)}
+        x2={xScale(monthIdx)}
+        y1={0}
+        y2={dimensions.height - margin.bottom}
+        stroke="#f2f0ef"
+        strokeWidth={1}
+        strokeDasharray="1 1"
+      />
     </motion.g>
   )
 }
@@ -277,15 +298,6 @@ function XAxis({
         strokeWidth={1}
         className="domain"
       />
-      <text
-        x={(margin.left + size.width) / 2}
-        y="3.3rem"
-        fill="#f2f0ef"
-        fontSize="1rem"
-        textAnchor="middle"
-      >
-        Months
-      </text>
     </motion.g>
   )
 }

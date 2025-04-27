@@ -5,7 +5,7 @@ import * as d3 from "d3"
 
 const numWaves = 4
 const colors: string[] = ["#1a3a5d", "#2568a3", "#3092d1", "#00e5ff"] // blues
-const heightPortion = 0.25 // lower means waves are higher
+const heightPortion = 0.35 // lower means waves are higher
 
 const AnimatedWaves = ({
   width,

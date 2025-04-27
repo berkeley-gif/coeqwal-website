@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import MapContainer from "./components/MapContainer"
-import { Box, CircularProgress } from "@repo/ui/mui"
+import { Box, CircularProgress, Typography } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
@@ -10,11 +10,13 @@ import SectionWaterSource from "./components/02WaterSource"
 import SectionWaterFlow from "./components/03NaturalFlow"
 import SectionHuman from "./components/04Human"
 import SectionTransformation from "./components/05Transformation"
-import SectionImpact from "./components/06Impact"
-import Conclusion from "./components/07Conclusion"
+import SectionBenefits from "./components/06Benefits"
+import SectionImpact from "./components/07Impact"
+import Conclusion from "./components/08Conclusion"
 import { AnimatePresence, motion } from "@repo/motion"
 import { DIVISION } from "./components/helpers/sectionDivision"
 import useStoryStore from "./store"
+import { WaterDropIcon } from "./components/helpers/WaterIcon"
 
 //TODO: potentially replace all the visibiltiy hook with scroll opacity hook
 //TODO: instead of width 100%, it might need to be max-content
@@ -53,6 +55,7 @@ export default function StoryContainer() {
         <SectionWaterFlow />
         <SectionHuman />
         <SectionTransformation />
+        <SectionBenefits />
         <SectionImpact />
         <Conclusion />
       </div>
@@ -64,31 +67,33 @@ function SectionIndicator() {
   const activeSection = useStoryStore((state) => state.activeSection)
 
   return (
-    <div id="section-container">
-      {DIVISION.map((division, index) => (
-        <motion.div
-          key={index}
-          className="section-component"
-          initial={{ opacity: 0.4 }}
-          animate={{
-            opacity: division.sections.includes(activeSection) ? 1 : 0.4,
-          }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="section-text">{division.name}</div>
-          <div className="section-indicator"></div>
-        </motion.div>
-      ))}
-    </div>
+    <Box
+      id="section-container"
+      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+    >
+      {DIVISION.map((division, index) => {
+        const isActive = division.sections.includes(activeSection)
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0.4 }}
+            animate={{
+              opacity: isActive ? 1 : 0.4,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <Box className="section-component" sx={{ gap: 1 }}>
+              <Typography variant="caption">{division.name}</Typography>
+              <Box className="section-circle">
+                <WaterDropIcon />
+              </Box>
+            </Box>
+          </motion.div>
+        )
+      })}
+    </Box>
   )
 }
-
-/*
-              <svg width="133" height="133" viewBox="0 0 133 133" fill="#212121" xmlns="http://www.w3.org/2000/svg">
-                <path fill='#f2f0ef' transform="scale(0.1)"
-                  d="M66.9999 11.25C37.2408 36.8438 22.3333 58.95 22.3333 77.625C22.3333 105.638 43.5499 123.75 66.9999 123.75C90.4499 123.75 111.667 105.638 111.667 77.625C111.667 58.95 96.7591 36.8438 66.9999 11.25Z" />
-              </svg>
-*/
 
 function Loader() {
   return (

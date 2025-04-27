@@ -3,7 +3,11 @@
 import { Map } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { stateMapViewState } from "./helpers/mapViews"
-import { MarkersLayer } from "./helpers/mapMarkers"
+import {
+  CarouselLayer,
+  TextMarker,
+  TextMarkersLayer,
+} from "./helpers/mapMarkers"
 import { AnimatePresence } from "@repo/motion"
 import useStoryStore from "../store"
 
@@ -13,7 +17,7 @@ interface MapContainerProps {
 
 export default function MapContainer({ onLoad }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const markers = useStoryStore((state) => state.markers)
+  const markerLayer = useStoryStore((state) => state.markerLayer)
 
   return (
     <Box sx={{ width: "100%", height: "100vh" }}>
@@ -28,7 +32,15 @@ export default function MapContainer({ onLoad }: MapContainerProps) {
         onLoad={onLoad}
       >
         <AnimatePresence>
-          <MarkersLayer markers={markers} />
+          {markerLayer.style === "rough-circle" && (
+            <CarouselLayer markers={markerLayer.points} />
+          )}
+          {markerLayer.style === "text" && (
+            <TextMarkersLayer
+              markers={markerLayer.points}
+              styledMarker={TextMarker}
+            />
+          )}
         </AnimatePresence>
       </Map>
     </Box>

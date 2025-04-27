@@ -3,19 +3,26 @@
 import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { motion } from "@repo/motion"
-import { deltaMapViewState, stateMapViewState } from "./helpers/mapViews"
+import {
+  deltaMapViewState,
+  riverMapViewState,
+  stateMapViewState,
+} from "./helpers/mapViews"
 
 import Bird from "./vis/Bird"
 import Grass from "./vis/Grass"
 import useActiveSection from "../hooks/useActiveSection"
-import { useCallback, useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { riverLayerStyle } from "./helpers/mapLayerStyle"
 import useStoryStore from "../store"
+import { Sentence } from "@repo/motion/components"
+import { FlowTextLabels } from "./helpers/mapAnnotations"
 
 function SectionDelta() {
   return (
     <>
       <WaterFlow />
+      <Valley />
       <Delta />
       <Transition />
     </>
@@ -25,25 +32,14 @@ function SectionDelta() {
 function WaterFlow() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.flow
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const flowSection = useActiveSection("flow", { amount: 0.1 })
-  const flowSectionRef = flowSection.sectionRef
-  const isFlowSectionActive = flowSection.isSectionActive
+  const { sectionRef, isSectionActive } = useActiveSection("flow", {
+    amount: 0.5,
+  })
   const hasSeen = useRef(false)
-  const valleySection = useActiveSection("valley", { amount: 0.5 })
-  const valleySectionRef = valleySection.sectionRef
   const { addSource, addLayer, setPaintProperty, flyTo } = useMap() // from our context
+  const setMarkers = useStoryStore((state) => state.setMarkers)
 
-  const closeMapViewState = useMemo(
-    () => ({
-      latitude: 38.8309,
-      longitude: -124.8652,
-      zoom: 7,
-    }),
-    [],
-  )
-
-  const initFlow = useCallback(() => {
+  const init = useCallback(() => {
     addSource("river-sac", {
       type: "geojson",
       data: "/rivers/SacramentoRiver_wo.geojson",
@@ -71,104 +67,142 @@ function WaterFlow() {
     )
   }, [addLayer, addSource])
 
-  const loadFlow = useCallback(() => {
+  const load = useCallback(() => {
     flyTo({
-      longitude: closeMapViewState.longitude,
-      latitude: closeMapViewState.latitude,
-      zoom: closeMapViewState.zoom,
+      longitude: riverMapViewState.longitude,
+      latitude: riverMapViewState.latitude,
+      zoom: riverMapViewState.zoom,
+      pitch: riverMapViewState.pitch,
+      bearing: riverMapViewState.bearing,
       transitionOptions: {
         duration: 2000,
       },
     })
     setPaintProperty("river-sac-layer", "line-opacity", 1)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
-  }, [flyTo, closeMapViewState, setPaintProperty])
-
-  const unloadFlow = useCallback(() => {
-    //TODO: this fly is not the best spot
-    flyTo({
-      longitude: stateMapViewState.longitude,
-      latitude: stateMapViewState.latitude,
-      zoom: stateMapViewState.zoom,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setPaintProperty("river-sac-layer", "line-opacity", 0)
-    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-  }, [setPaintProperty, flyTo])
+    setMarkers(FlowTextLabels, "text")
+  }, [flyTo, setMarkers, setPaintProperty])
 
   useEffect(() => {
-    if (isFlowSectionActive) {
+    if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
-        initFlow()
+        init()
       }
       hasSeen.current = true
-      loadFlow()
+      load()
     } else {
       if (hasSeen.current) {
         //console.log('unload stuff')
-        unloadFlow()
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [initFlow, isFlowSectionActive, loadFlow, unloadFlow])
+  }, [isSectionActive, init, load])
 
   return (
-    <div ref={sectionRef}>
-      <Box
-        ref={flowSectionRef}
-        className="container"
-        height="100vh"
-        tabIndex={-1}
-        role="region"
-      >
-        <Box className="paragraph">
-          <Typography variant="h3" gutterBottom>
-            {content?.title}
-          </Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content?.p1}</Typography>
-          <Typography variant="body1">
-            {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-          </Typography>
-          <Typography variant="body1">{content?.p3}</Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content?.p4}</Typography>
-        </Box>
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      tabIndex={-1}
+      role="region"
+    >
+      <Box className="paragraph">
+        <Sentence variant="h3" gutterBottom custom={0}>
+          {content?.title}
+        </Sentence>
       </Box>
-      <Box
-        ref={valleySectionRef}
-        className="container"
-        height="100vh"
-        tabIndex={-1}
-        role="region"
-      >
-        <Box className="paragraph">
-          <Typography variant="body1">{content?.valley.p1}</Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">
-            {content?.valley.p2}{" "}
-            <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-          </Typography>
-          <Typography variant="body1">
-            {content?.valley.p3}{" "}
-            <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-          </Typography>
-          <Typography variant="body1">{content?.valley.p4}</Typography>
-        </Box>
-        <Box className="paragraph">
-          <Typography variant="body1">{content?.transition.p1}</Typography>
-          <Typography variant="body1">{content?.transition.p2}</Typography>
-        </Box>
+      <Box className="paragraph">
+        <Sentence custom={1}>{content?.p1}</Sentence>
+        <Sentence custom={2}>
+          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Sentence>
+        <Sentence custom={3}>{content?.p3}</Sentence>
       </Box>
-    </div>
+      <Box className="paragraph">
+        <Sentence custom={4}>{content?.p41}</Sentence>
+        <Sentence custom={5.5}>
+          <span>{content?.p42}</span>
+          <span>{content?.p43}</span>
+        </Sentence>
+      </Box>
+    </Box>
+  )
+}
+
+function Valley() {
+  const storyline = useStoryStore((state) => state.storyline)
+  const content = storyline?.flow
+  const { sectionRef, isSectionActive } = useActiveSection("valley", {
+    amount: 0.5,
+  })
+  const { flyTo, setPaintProperty } = useMap() // from our context
+  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const hasSeen = useRef(false)
+
+  const load = useCallback(() => {
+    flyTo({
+      longitude: riverMapViewState.longitude,
+      latitude: riverMapViewState.latitude,
+      zoom: riverMapViewState.zoom,
+      pitch: riverMapViewState.pitch,
+      bearing: riverMapViewState.bearing,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+    setPaintProperty("river-sac-layer", "line-opacity", 1)
+    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
+    setMarkers(FlowTextLabels, "text")
+  }, [flyTo, setMarkers, setPaintProperty])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
+
+  return (
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      tabIndex={-1}
+      role="region"
+    >
+      <Box className="paragraph">
+        <Sentence custom={0}>{content?.valley.p1}</Sentence>
+      </Box>
+      <Box className="paragraph">
+        <Sentence custom={1}>
+          {content?.valley.p2}{" "}
+          <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Sentence>
+        <Sentence custom={2}>
+          {content?.valley.p3}{" "}
+          <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+        </Sentence>
+        <Sentence custom={3}>{content?.valley.p4}</Sentence>
+      </Box>
+      <Box className="paragraph">
+        <Sentence custom={4}>{content?.transition.p11}</Sentence>
+        <Sentence custom={5}>{content?.transition.p12}</Sentence>
+        <Sentence custom={6}>{content?.transition.p2}</Sentence>
+      </Box>
+    </Box>
   )
 }
 
@@ -180,8 +214,9 @@ function Delta() {
   const { sectionRef, isSectionActive } = useActiveSection("delta", {
     amount: 0.1,
   })
-  const { flyTo } = useMap() // from our context
+  const { flyTo, setPaintProperty } = useMap() // from our context
   const hasSeen = useRef(false)
+  const setMarkers = useStoryStore((state) => state.setMarkers)
 
   const load = useCallback(() => {
     flyTo({
@@ -192,7 +227,10 @@ function Delta() {
         duration: 2000,
       },
     })
-  }, [flyTo])
+    setPaintProperty("river-sac-layer", "line-opacity", 0)
+    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
+    setMarkers([], "text")
+  }, [flyTo, setMarkers, setPaintProperty])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -244,12 +282,12 @@ function Delta() {
           </Typography>
         </Box>
         <Box className="paragraph">
-          <Typography variant="body1">{content?.p2}</Typography>
+          <Sentence custom={1}>{content?.p2}</Sentence>
         </Box>
         <Box className="paragraph">
-          <Typography variant="body1">{content?.p3}</Typography>
-          <Typography variant="body1">{content?.p4}</Typography>
-          <Typography variant="body1">{content?.p5}</Typography>
+          <Sentence custom={3}>{content?.p3}</Sentence>
+          <Sentence custom={4.5}>{content?.p4}</Sentence>
+          <Sentence custom={6}>{content?.p5}</Sentence>
         </Box>
       </motion.div>
     </Box>

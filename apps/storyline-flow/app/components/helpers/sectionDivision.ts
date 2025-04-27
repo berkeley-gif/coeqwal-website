@@ -18,11 +18,14 @@ export const DIVISION = [
   {
     name: "What Has Happened?",
     sections: [
+      "turning",
       "impact-salmon",
       "impact-delta",
       "impact-groundwater",
       "impact-water",
       "impact-climate",
+      "resolution",
+      "tension",
     ],
   },
 ]

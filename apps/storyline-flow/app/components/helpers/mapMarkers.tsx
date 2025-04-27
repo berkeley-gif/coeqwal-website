@@ -1,8 +1,16 @@
-import { motion } from "@repo/motion"
+import { AnimatePresence, motion } from "@repo/motion"
 import React, { useEffect, useRef, useState } from "react"
 import rough from "roughjs"
 import Image from "next/image"
 import { Marker, Popup } from "@repo/map"
+import {
+  Box,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  IconButton,
+  Typography,
+  FiberManualRecordIcon,
+} from "@repo/ui/mui"
 
 export type MarkerType = {
   id: string
@@ -11,20 +19,231 @@ export type MarkerType = {
   longitude: number
   caption?: string
   image?: string
-  anchor: string
+  images?: string[]
+  anchor?: string
 }
 
 //TODO: fix exit animation
-export function MarkersLayer({ markers }: { markers: MarkerType[] }) {
+export function MarkersLayer({
+  markers,
+  styledMarker = RoughCircleMarker,
+}: {
+  markers: MarkerType[]
+  styledMarker?: React.FC<{ idx: number }>
+}) {
   return (
     <>
       {markers.map((child, idx) => (
         <MarkerWithPopup
           key={idx}
           marker={child as MarkerType}
-          StyledMarker={RoughCircleMarker}
+          StyledMarker={styledMarker}
         />
       ))}
+    </>
+  )
+}
+
+export function TextMarkersLayer({
+  markers,
+  styledMarker = TextMarker,
+}: {
+  markers: MarkerType[]
+  styledMarker?: React.FC<{ text: string }>
+}) {
+  return (
+    <>
+      {markers.map((child, idx) => (
+        <Marker key={idx} longitude={child.longitude} latitude={child.latitude}>
+          {React.createElement(styledMarker, { text: child.name })}
+        </Marker>
+      ))}
+    </>
+  )
+}
+
+export function CarouselLayer({
+  markers,
+  styledMarker = RoughCircleMarker,
+}: {
+  markers: MarkerType[]
+  styledMarker?: React.FC<{ idx: number }>
+}) {
+  return (
+    <>
+      {markers.map((child, idx) => (
+        <MarkerWithCarouselPopup
+          key={idx}
+          marker={child as MarkerType}
+          StyledMarker={styledMarker}
+        />
+      ))}
+    </>
+  )
+}
+
+export function MarkerWithCarouselPopup({
+  marker,
+  StyledMarker,
+}: {
+  marker: MarkerType
+  StyledMarker: React.FC<{ idx: number }>
+}) {
+  const [isPopupVisible, setIsPopupVisible] = useState(false)
+  const [currentImgIndex, setCurrentImgIndex] = useState(0)
+
+  const images = marker.images || [marker.image] // Fallback to single image if no array
+
+  const nextImage = () => {
+    console.log("you clicked next")
+    setCurrentImgIndex((prev) => (prev + 1) % images.length)
+  }
+
+  const prevImage = () => {
+    console.log("you clicked prev")
+    setCurrentImgIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  return (
+    <>
+      <Marker
+        longitude={marker.longitude}
+        latitude={marker.latitude}
+        onClick={(e) => {
+          e.originalEvent.stopPropagation()
+          setIsPopupVisible(!isPopupVisible)
+        }}
+      >
+        <StyledMarker idx={0} />
+        {isPopupVisible && (
+          <Popup
+            longitude={marker.longitude}
+            latitude={marker.latitude}
+            closeButton={true}
+            closeOnClick={true}
+            onClose={() => setIsPopupVisible(false)}
+            anchor={marker.anchor as mapboxgl.Anchor}
+            offset={{ bottom: [0, -10] }}
+          >
+            <Box className="popup">
+              <Box
+                sx={{ position: "relative", overflow: "hidden", width: "100%" }}
+              >
+                <ImageContainer
+                  images={images as string[]}
+                  currentImgIndex={currentImgIndex}
+                  caption={marker.caption || ""}
+                />
+
+                {images.length > 1 && (
+                  <CarouselNavigation
+                    images={images as string[]}
+                    currentImgIndex={currentImgIndex}
+                    setCurrentImgIndex={setCurrentImgIndex}
+                    nextImage={nextImage}
+                    prevImage={prevImage}
+                  />
+                )}
+              </Box>
+
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="h6">{marker.name}</Typography>
+                <Typography variant="body2">{marker.caption}</Typography>
+              </Box>
+            </Box>
+          </Popup>
+        )}
+      </Marker>
+    </>
+  )
+}
+
+function ImageContainer({
+  images,
+  currentImgIndex,
+  caption,
+}: {
+  images: string[]
+  currentImgIndex: number
+  caption: string
+}) {
+  return (
+    <Box className="carousel-container">
+      <AnimatePresence initial={false} mode="wait">
+        <motion.div
+          key={currentImgIndex}
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          transition={{ duration: 0.3 }}
+          style={{ width: "100%" }}
+        >
+          <Image
+            src={`/variability/${images[currentImgIndex]}`}
+            alt={caption || "Marker image"}
+            width={600}
+            height={400}
+            style={{ objectFit: "cover" }}
+          />
+        </motion.div>
+      </AnimatePresence>
+    </Box>
+  )
+}
+
+function CarouselNavigation({
+  images,
+  currentImgIndex,
+  setCurrentImgIndex,
+  nextImage,
+  prevImage,
+}: {
+  images: string[]
+  currentImgIndex: number
+  setCurrentImgIndex: (index: number) => void
+  nextImage: () => void
+  prevImage: () => void
+}) {
+  return (
+    <>
+      <IconButton
+        className="nav-button"
+        onClick={(e) => {
+          e.stopPropagation()
+          prevImage()
+        }}
+        sx={{ left: 8 }}
+        size="small"
+      >
+        <ChevronLeftIcon />
+      </IconButton>
+      <IconButton
+        className="nav-button"
+        onClick={(e) => {
+          e.stopPropagation()
+          nextImage()
+        }}
+        sx={{ right: 8 }}
+        size="small"
+      >
+        <ChevronRightIcon />
+      </IconButton>
+
+      <Box className="indicator-dots">
+        {images.map((_, index) => (
+          <IconButton
+            key={index}
+            onClick={(e) => {
+              e.stopPropagation()
+              setCurrentImgIndex(index)
+            }}
+            className={`dot ${currentImgIndex === index ? "active" : ""}`}
+            size="small"
+          >
+            <FiberManualRecordIcon sx={{ fontSize: 10 }} />
+          </IconButton>
+        ))}
+      </Box>
     </>
   )
 }
@@ -63,10 +282,11 @@ export function MarkerWithPopup({
               <Image
                 src={`/variability/${marker.image}`}
                 alt={marker.caption || "Marker image"}
-                width={470}
-                height={300}
+                width={600}
+                height={400}
                 style={{ objectFit: "cover" }}
               />
+              <h3>{marker.name}</h3>
               <p>{marker.caption}</p>
             </div>
           </Popup>
@@ -76,7 +296,7 @@ export function MarkerWithPopup({
   )
 }
 
-export default function CircleMarker({ idx }: { idx: number }) {
+export default function CircleMarker({ idx = 0 }: { idx: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
@@ -88,7 +308,7 @@ export default function CircleMarker({ idx }: { idx: number }) {
   )
 }
 
-export function RoughCircleMarker({ idx }: { idx: number }) {
+export function RoughCircleMarker({ idx = 0 }: { idx: number }) {
   const svgRef = useRef<SVGSVGElement | null>(null) // Create a ref for the SVG element
   const [path, setPath] = useState<string>("") // State to hold the path data
 

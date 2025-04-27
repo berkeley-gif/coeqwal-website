@@ -1,10 +1,8 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Slider, Typography } from "@repo/ui/mui"
 import { useState, useCallback, useRef, useEffect } from "react"
 import { useMap } from "@repo/map/client"
-import { motion } from "@repo/motion"
-import { useInViewVisibility } from "../hooks/useInViewVisibility"
 import { useFetchData } from "../hooks/useFetchData"
 import PrecipitationBar from "./vis/PrecipitationBar"
 import { precipitationPaintStyle } from "./helpers/mapLayerStyle"
@@ -12,10 +10,10 @@ import useActiveSection from "../hooks/useActiveSection"
 import { MarkerType } from "./helpers/mapMarkers"
 import useStoryStore from "../store"
 
-import { opacityVariants } from "@repo/motion/variants"
 import AnimatedCurve from "./vis/AnimatedCurve"
-
-const MotionText = motion.create(Typography)
+import { Sentence } from "@repo/motion/components"
+import { MONTHS, selectedMonths } from "./helpers/constants"
+import { stateMapViewState } from "./helpers/mapViews"
 
 function SectionWaterSource() {
   const [markers, setMarkers] = useState<Record<string, MarkerType[]>>({}) // Initialize markers as an empty array
@@ -73,15 +71,6 @@ function Precipitation() {
     setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
   }, [setPaintProperty])
 
-  const springUpVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: (custom: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", delay: custom * 1.5 },
-    }),
-  }
-
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
@@ -112,61 +101,22 @@ function Precipitation() {
       role="region"
     >
       <Box className="paragraph" component="article">
-        <MotionText
+        <Sentence
           variant="h3"
           gutterBottom
-          variants={springUpVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
+          options={{ amount: 0.1 }}
           custom={0}
         >
           {content?.title}
-        </MotionText>
+        </Sentence>
       </Box>
       <Box className="paragraph">
-        <MotionText
-          variant="body1"
-          variants={springUpVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          custom={1}
-        >
-          {content?.p1}
-        </MotionText>
-        <MotionText
-          variant="body1"
-          variants={springUpVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          custom={2}
-        >
-          {content?.p2}
-        </MotionText>
+        <Sentence custom={1}>{content?.p1}</Sentence>
+        <Sentence custom={2}>{content?.p2}</Sentence>
       </Box>
       <Box className="paragraph">
-        <MotionText
-          variant="body1"
-          variants={springUpVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          custom={3}
-        >
-          {content?.p3}
-        </MotionText>
-        <MotionText
-          variant="body1"
-          variants={springUpVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          custom={4}
-        >
-          {content?.p4}
-        </MotionText>
+        <Sentence custom={3}>{content?.p3}</Sentence>
+        <Sentence custom={4}>{content?.p4}</Sentence>
       </Box>
     </Box>
   )
@@ -178,8 +128,6 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   const { sectionRef, isSectionActive } = useActiveSection("variability", {
     amount: 0.5,
   })
-  //TODO: update this one
-  const visRef = useInViewVisibility()
   const hasSeen = useRef(false)
 
   const [startBarAnimation, setStartBarAnimation] = useState(false)
@@ -187,7 +135,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
 
   const getSelectedYear = (year: string) => {
     const points = markers[year] || []
-    setMarkers(points)
+    setMarkers(points, "rough-circle")
   }
 
   useEffect(() => {
@@ -199,7 +147,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
     } else {
       if (hasSeen.current) {
         //console.log('unload stuff')
-        setMarkers([])
+        setMarkers([], "rough-circle")
       } else {
         //console.log('not seen yet, dont do anything')
         return
@@ -216,32 +164,27 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
       role="region"
     >
       <Box className="paragraph">
-        <Typography variant="body1">{content?.p1}</Typography>
-        <Typography variant="body1">{content?.p2}</Typography>
+        <Sentence custom={0}>{content?.p1}</Sentence>
+        <Sentence custom={1}>{content?.p2}</Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">{content?.p3}</Typography>
-        <Typography variant="body1">{content?.p4}</Typography>
+        <Sentence custom={2}>{content?.p3}</Sentence>
+        <Sentence custom={3}>{content?.p4}</Sentence>
       </Box>
-      <motion.div
-        ref={visRef.ref}
-        style={{ height: "100%", width: "100%" }}
-        className="paragraph"
-        variants={opacityVariants}
-        initial="hidden"
-        animate={visRef.controls}
-        custom={3}
-        onAnimationComplete={() => setStartBarAnimation(true)}
-      >
-        <Typography variant="h6">
-          California Annual Precipitation Relative to Historical Average
-        </Typography>
+      <Box className="paragraph" style={{ height: "100%", width: "100%" }}>
+        <Sentence
+          variant="h6"
+          custom={4}
+          onAnimationComplete={() => setStartBarAnimation(true)}
+        >
+          California Rainfall Deviation from Average
+        </Sentence>
         <PrecipitationBar
           yearLabels={Object.keys(markers).map((key) => parseInt(key))}
           startAnimation={startBarAnimation}
           getSelectedYear={getSelectedYear}
         />
-      </motion.div>
+      </Box>
     </Box>
   )
 }
@@ -250,8 +193,45 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
 function Snowpack() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.snowpack
-  const { sectionRef } = useActiveSection("snowpack", { amount: 0.5 })
-  const visRef = useInViewVisibility()
+  const { sectionRef, isSectionActive } = useActiveSection("snowpack", {
+    amount: 0.5,
+  })
+  const [startAnimation, setStartAnimation] = useState(false)
+  const [monthIdx, setMonthIdx] = useState(0)
+  const hasSeen = useRef(false)
+  const { flyTo, setPaintProperty } = useMap()
+  const setMarkers = useStoryStore((state) => state.setMarkers)
+
+  const load = useCallback(() => {
+    flyTo({
+      longitude: stateMapViewState.longitude,
+      latitude: stateMapViewState.latitude,
+      zoom: stateMapViewState.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+    setPaintProperty("river-sac-layer", "line-opacity", 0)
+    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
+    setMarkers([], "text")
+  }, [flyTo, setPaintProperty, setMarkers])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
 
   return (
     <Box
@@ -262,27 +242,61 @@ function Snowpack() {
       role="region"
     >
       <Box className="paragraph">
-        <Typography variant="h3" gutterBottom>
+        <Sentence variant="h3" gutterBottom custom={0}>
           {content?.title}
-        </Typography>
+        </Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">{content?.p1}</Typography>
-        <Typography variant="body1">{content?.p2}</Typography>
+        <Sentence custom={1}>{content?.p1}</Sentence>
+        <Sentence custom={2}>{content?.p2}</Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">{content?.p3}</Typography>
+        <Sentence
+          custom={3}
+          onAnimationComplete={() => setStartAnimation(true)}
+        >
+          {content?.p3}
+        </Sentence>
       </Box>
-      <div
-        ref={visRef.ref}
-        style={{ height: "100%", width: "100%" }}
-        className="paragraph"
-      >
-        <Typography variant="h6">
+      <Box className="paragraph" style={{ height: "100%", width: "100%" }}>
+        <Sentence custom={3} variant="h6">
           {"From Snow to Snowmelt \u2014 an Illustration"}
-        </Typography>
-        <AnimatedCurve />
-      </div>
+        </Sentence>
+        <AnimatedCurve
+          startAnimation={startAnimation}
+          selectedMonth={monthIdx}
+        />
+        <div id="month-slider">
+          <Slider
+            min={0}
+            max={11}
+            value={monthIdx}
+            track={false}
+            onChange={(e, newValue) => setMonthIdx(newValue as number)}
+            valueLabelDisplay="auto"
+            valueLabelFormat={(value) => MONTHS[value]}
+            marks={MONTHS.filter((d) => selectedMonths.includes(d)).map(
+              (each) => ({
+                value: MONTHS.indexOf(each),
+                label: (
+                  <span
+                    style={{
+                      fontWeight:
+                        MONTHS.indexOf(each) === monthIdx ? "bold" : "normal",
+                    }}
+                  >
+                    {each}
+                  </span>
+                ),
+              }),
+            )}
+            step={1}
+          />
+          <Typography variant="h6" gutterBottom>
+            Months in a Water Year
+          </Typography>
+        </div>
+      </Box>
     </Box>
   )
 }

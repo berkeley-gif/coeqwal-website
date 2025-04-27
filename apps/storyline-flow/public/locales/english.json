@@ -28,9 +28,11 @@
   "flow": {
     "title": "Water Flows from the Sierra to the Delta",
     "p1": "Across our planet, gravity drives freshwater flow from mountains to the sea.",
-    "p2": "Within California, snowmelt drains from northern peaks and the western slope of the Sierra into small mountain creeks.",
+    "p2": "Within California, snowmelt drains from the Sierra Nevada mountains into small mountain creeks.",
     "p3": "Some water seeps underground, replenishing aquifers.",
-    "p4": "Streams flow downslope toward the Central Valley into the state's two largest rivers \u2014 the Sacramento and San Joaquin.",
+    "p41": "Streams flow downslope toward the Central Valley into the state's two largest rivers \u2014 ",
+    "p42": "the Sacramento and San Joaquin Rivers",
+    "p43": ".",
     "valley": {
       "p1": "The Sacramento and San Joaquin Rivers define the Central Valley.",
       "p2": "During winter floods, water spills onto floodplains, forming vast wetlands.",
@@ -38,7 +40,8 @@
       "p4": "In the dry summer, the groundwater then feeds rivers with a cool source of water."
     },
     "transition": {
-      "p1": "The Sacramento and San Joaquin Rivers meet in the Sacramento-San Joaquin Delta, where freshwater and saltwater mix.",
+      "p11": "The Sacramento and San Joaquin Rivers meet in the Sacramento-San Joaquin Delta, ",
+      "p12": "where freshwater and saltwater mix.",
       "p2": "This dynamic convergence of water supports an abundance of life."
     }
   },
@@ -126,7 +129,7 @@
     }
   },
   "conclusion": {
-    "subtitle": "All Californians are connected through water",
+    "subtitle": "All Californians are connected through water.",
     "caption": "We all need clean drinking water, healthy food, and vibrant ecosystems.",
     "p11": "Yet, as we",
     "p12": "move water",

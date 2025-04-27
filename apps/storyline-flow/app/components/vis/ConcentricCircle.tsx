@@ -1,10 +1,9 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useEffect, useMemo } from "react"
 import { motion } from "@repo/motion"
-import { debounce } from "lodash"
 import "./concentric-circle.css"
-import { PeopleIcon } from "../helpers/Icons"
+import { IconProps } from "../helpers/Icons"
 
 type Entry = {
   year: number
@@ -12,22 +11,7 @@ type Entry = {
   annotation: string
 }
 
-type Dimensions = {
-  width: number
-  height: number
-  maxRadius: number
-  minRadius: number
-}
-
-const margin = { top: 20, right: 80, bottom: 30, left: 20 }
-const data = {
-  past: { year: 1940, value: 40000, annotation: "0.8M" },
-  present: { year: 2024, value: 170000, annotation: "1.35M" },
-  icon: <PeopleIcon />,
-  title: "SoCal",
-}
-const shift: [number, number] = [-0.2, 0.3]
-const growth = data.present.value / data.past.value
+//TODO: now size and shift are all for positioning lol
 
 const RadiusSpringUpVariants = {
   hidden: { r: 0 },
@@ -50,132 +34,115 @@ const OpacityVariants = {
   }),
 }
 
-//TODO: add icons
-function ConcentricCircle() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({
-    width: 0,
-    height: 0,
-    maxRadius: 0,
-    minRadius: 0,
-  })
-  const [center, setCenter] = useState({ x: 0, y: 0 })
+function ConcentricCircle({
+  data,
+  startAnimation = false,
+  delay = 0,
+  radius = 50,
+  size = { width: 500, height: 500 },
+  shift = [0.25, 0.25],
+  clipId = "",
+}: {
+  data: {
+    past: Entry
+    present: Entry
+    title: string
+    icon: React.FC
+  }
+  radius?: number
+  size?: { width: number; height: number }
+  shift?: [number, number]
+  clipId?: string
+  startAnimation: boolean
+  delay: number
+}) {
+  const center = useMemo(() => {
+    return {
+      x: size.width / 2 + shift[0] * size.width,
+      y: size.height / 2 + shift[1] * size.height,
+    }
+  }, [size, shift])
+
+  const growth = data.present.value / data.past.value
 
   useEffect(() => {
-    const handleResize = debounce((entries: ResizeObserverEntry[]) => {
-      for (const entry of entries) {
-        if (entry.target === containerRef.current) {
-          const { width, height } = entry.contentRect
-          const adjustedWidth = width - margin.left - margin.right
-          const adjustedHeight = height - margin.top - margin.bottom
-          const maxRadius = Math.min(adjustedWidth, adjustedHeight) / 2
-          setDimensions({
-            width,
-            height,
-            maxRadius: maxRadius,
-            minRadius: 0.3 * maxRadius,
-          })
-
-          setCenter({
-            x: width / 2 + shift[0] * width,
-            y: height / 2 + shift[1] * height,
-          })
-        }
-      }
-    }, 300) // Debounce with a delay of 300ms
-
-    const resizeObserver = new ResizeObserver((entries) =>
-      handleResize(entries),
-    )
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
-    }
-
-    return () => {
-      resizeObserver.disconnect()
-      handleResize.cancel()
-    }
-  }, [])
+    console.log(radius, growth, radius * growth)
+  }, [growth, radius])
 
   return (
-    <div
-      ref={containerRef}
-      style={{ width: "100%", height: "100%", position: "relative" }}
-    >
-      <svg width={dimensions.width} height={dimensions.height}>
-        <CircleMask dimensions={dimensions} center={center} />
-        <motion.circle
-          className="cc-circle"
-          cx={center.x}
-          cy={center.y}
-          r={dimensions.minRadius}
-          fill="none"
-          variants={RadiusSpringUpVariants}
-          custom={{ radius: dimensions.minRadius, delay: 1.5 }}
-          initial="hidden"
-          animate="visible"
-        />
-        <motion.circle
-          className="cc-circle"
-          cx={center.x}
-          cy={center.y}
-          r={dimensions.minRadius * growth}
-          mask="url(#circle-mask)"
-          fillOpacity={0.1}
-          fill="white"
-          variants={RadiusSpringUpVariants}
-          custom={{ radius: dimensions.minRadius * growth, delay: 3.5 }}
-          initial="hidden"
-          animate="visible"
-        />
-        <Label
-          entity={data.past}
-          x={center.x}
-          y={center.y - dimensions.minRadius * (1 + 0.25)}
-          delay={2.5}
-        />
-        <Label
-          entity={data.present}
-          x={center.x}
-          y={center.y - dimensions.minRadius * (growth - 0.4)}
-          delay={4.5}
-        />
-        <motion.text
-          className="cc-circle-label"
-          x={center.x}
-          y={center.y}
-          textAnchor="middle"
-          fontSize="1.5rem"
-          fontWeight="bold"
-          variants={OpacityVariants}
-          initial="hidden"
-          animate="visible"
-          custom={1}
-        >
-          {data.title}
-        </motion.text>
-      </svg>
-    </div>
+    <svg width="100%" height="100%">
+      <CircleMask center={center} radius={radius} clipId={clipId} />
+      <motion.circle
+        className="cc-circle"
+        cx={center.x}
+        cy={center.y}
+        r={radius}
+        fill="none"
+        variants={RadiusSpringUpVariants}
+        custom={{ radius: radius, delay: delay + 1.5 }}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+      />
+      <motion.circle
+        className="cc-circle"
+        cx={center.x}
+        cy={center.y}
+        r={radius * growth}
+        mask={`url(#circle-mask-${clipId})`}
+        fillOpacity={0.1}
+        fill="white"
+        variants={RadiusSpringUpVariants}
+        custom={{ radius: radius * growth, delay: delay + 3.5 }}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+      />
+      <Label
+        entity={data.past}
+        x={center.x}
+        y={center.y - radius * (1 + 0.3)}
+        delay={2.5 + delay}
+        startAnimation={startAnimation}
+        Icon={data.icon}
+      />
+      <Label
+        entity={data.present}
+        x={center.x}
+        y={center.y - radius * (growth - 0.5 - 0.3)}
+        delay={4.5 + delay}
+        startAnimation={startAnimation}
+        Icon={data.icon}
+      />
+      <motion.text
+        className="cc-circle-label"
+        x={center.x}
+        y={center.y}
+        textAnchor="middle"
+        fontSize="1.2rem"
+        fontWeight="bold"
+        variants={OpacityVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={1 + delay}
+      >
+        {data.title}
+      </motion.text>
+    </svg>
   )
 }
 
 function CircleMask({
   center,
-  dimensions,
+  radius,
+  clipId,
 }: {
   center: { x: number; y: number }
-  dimensions: Dimensions
+  radius: number
+  clipId: string
 }) {
   return (
-    <mask id="circle-mask">
-      <rect width={dimensions.width} height={dimensions.height} fill="white" />
-      <circle
-        cx={center.x}
-        cy={center.y}
-        r={dimensions.minRadius}
-        fill="black"
-      />
+    <mask id={`circle-mask-${clipId}`}>
+      <rect width="100%" height="100%" fill="white" />
+      <circle cx={center.x} cy={center.y} r={radius} fill="black" />
     </mask>
   )
 }
@@ -185,18 +152,16 @@ function Label({
   x,
   y,
   delay = 0.5,
+  startAnimation = false,
+  Icon,
 }: {
   entity: Entry
   x: number
   y: number
-  delay?: number
+  delay: number
+  startAnimation: boolean
+  Icon: React.FC<IconProps>
 }) {
-  const textWidth = measureTextWidth(
-    entity.annotation.toString(),
-    "1.3rem",
-    "bold",
-  )
-
   return (
     <g transform={`translate(${x}, ${y})`}>
       <motion.text
@@ -204,12 +169,11 @@ function Label({
         y={0}
         variants={OpacityVariants}
         initial="hidden"
-        animate="visible"
+        animate={startAnimation ? "visible" : "hidden"}
         custom={delay}
-        dx="0.25em"
         className="cc-circle-label"
         textAnchor="start"
-        fontSize="1.2rem"
+        fontSize="1rem"
       >
         {entity.annotation}
       </motion.text>
@@ -218,55 +182,60 @@ function Label({
         y={0}
         variants={OpacityVariants}
         initial="hidden"
-        animate="visible"
+        animate={startAnimation ? "visible" : "hidden"}
         custom={delay}
-        dx="-1em"
+        dx="-0.6em"
         className="cc-circle-label"
         textAnchor="end"
         dominantBaseline="middle"
         fill="white"
         fontWeight="bold"
-        fontSize="1.2rem"
+        fontSize="1rem"
       >
         {entity.year}
       </motion.text>
-      <g transform={`translate(${textWidth * 1.15}, -17)`}>
-        <PeopleIcon delay={delay} animation="visible" transform="scale(0.7)" />
+      <g
+        transform={`translate(${estimateTextWidth(entity.annotation) + 5}, -12)`}
+      >
+        <Icon
+          delay={delay}
+          animation={startAnimation ? "visible" : "hidden"}
+          transform="scale(0.5)"
+        />
       </g>
     </g>
   )
 }
 
-function measureTextWidth(
+function estimateTextWidth(
   text: string,
-  fontSize: string = "1rem",
+  fontSize: string = "1rem", // Numeric value in pixels
   fontWeight: string = "normal",
-  fontFamily: string = "Arial",
-): number {
-  // Create a temporary SVG element
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-  const textElement = document.createElementNS(
-    "http://www.w3.org/2000/svg",
-    "text",
-  )
+) {
+  // Convert fontSize string to number if needed
+  let fontSizeNum: number = parseFloat(fontSize.replace(/[^0-9.]/g, ""))
+  // Handle rem units by approximating 1rem = 16px
+  if (fontSize.includes("rem")) {
+    fontSizeNum *= 16
+  }
+  // Handle em units similarly
+  else if (fontSize.includes("em")) {
+    fontSizeNum *= 16
+  }
+  // Handle px units
+  else if (fontSize.includes("px")) {
+    // No conversion needed, already in pixels
+  }
 
-  // Set the text content and styles
-  textElement.textContent = text
-  textElement.setAttribute("font-size", fontSize)
-  textElement.setAttribute("font-weight", fontWeight)
-  textElement.setAttribute("font-family", fontFamily)
+  const avgCharWidth = fontWeight === "bold" ? 0.63 : 0.58
 
-  // Append the text element to the SVG
-  svg.appendChild(textElement)
-  document.body.appendChild(svg)
-
-  // Measure the text width
-  const textWidth = textElement.getBBox().width
-
-  // Clean up by removing the temporary SVG
-  document.body.removeChild(svg)
-
-  return textWidth
+  // Apply character-specific width adjustments
+  return text.split("").reduce((width, char) => {
+    if (/[il|.]/.test(char)) return width + fontSizeNum * 0.3
+    if (/[mwWM@]/.test(char)) return width + fontSizeNum * 0.85
+    if (/[%GOQC&]/.test(char)) return width + fontSizeNum * 0.8
+    return width + fontSizeNum * avgCharWidth
+  }, 0)
 }
 
 export default ConcentricCircle

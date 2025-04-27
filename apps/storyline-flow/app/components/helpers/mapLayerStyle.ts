@@ -24,7 +24,6 @@ export const precipitationPaintStyle = {
   ] as unknown as string,
   "fill-opacity-transition": {
     duration: 1000,
-    delay: 1000,
   } as unknown as string,
 }
 

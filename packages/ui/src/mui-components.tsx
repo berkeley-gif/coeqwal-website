@@ -34,6 +34,10 @@ export {
   TextField,
   IconButton,
   MenuItem,
+  Slider,
+  List,
+  ListItem,
+  ListItemText,
 
   // Feedback components
   Snackbar,
@@ -73,6 +77,7 @@ import AddIcon from "@mui/icons-material/Add"
 import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 
 // Export individually imported icons
 export {
@@ -99,6 +104,7 @@ export {
   CheckIcon,
   CloseIcon,
   ArrowRightIcon,
+  FiberManualRecordIcon,
 }
 
 // Export the full icons library for access to other icons as needed

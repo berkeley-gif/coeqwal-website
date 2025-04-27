@@ -1,11 +1,12 @@
 "use client"
 
 import { useMap } from "@repo/map"
-import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
+import { Box, VisibilityIcon } from "@repo/ui/mui"
 import { riverLayerStyle } from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { useCallback, useEffect, useRef } from "react"
+import { Sentence } from "@repo/motion/components"
 
 function SectionHuman() {
   return (
@@ -30,15 +31,13 @@ function Header() {
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">
-        <Typography variant="h3" gutterBottom>
+        <Sentence variant="h3" gutterBottom custom={0}>
           {content?.title}
-        </Typography>
+        </Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">{content?.p1}</Typography>
-        <Typography variant="body1">
-          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
+        <Sentence custom={1}>{content?.p1}</Sentence>
+        <Sentence custom={1}>{content?.p2}</Sentence>
       </Box>
     </Box>
   )
@@ -52,10 +51,10 @@ function Irrigation() {
   return (
     <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
       <Box ref={sectionRef} className="paragraph">
-        <Typography variant="body1">
+        <Sentence custom={0}>
           {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
-        <Typography variant="body1">{content?.p2}</Typography>
+        </Sentence>
+        <Sentence custom={1}>{content?.p2}</Sentence>
       </Box>
     </Box>
   )
@@ -120,13 +119,13 @@ function Drinking() {
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">
-        <Typography variant="body1">
+        <Sentence custom={0}>
           {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
-        <Typography variant="body1">
+        </Sentence>
+        <Sentence custom={1}>
           {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
-        <Typography variant="body1">{content?.p3}</Typography>
+        </Sentence>
+        <Sentence custom={2}>{content?.p3}</Sentence>
       </Box>
     </Box>
   )

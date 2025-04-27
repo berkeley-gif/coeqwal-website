@@ -54,6 +54,7 @@
       "latitude": 39.2981,
       "longitude": -121.0893,
       "image": "06.png",
+      "images": ["06.png", "07.png"],
       "anchor": "right"
     },
     {
