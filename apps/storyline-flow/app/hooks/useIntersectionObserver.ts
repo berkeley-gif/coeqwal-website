@@ -1,5 +1,5 @@
 import { useEffect, RefObject, useRef } from "react"
-import useStory from "../story/useStory"
+import useStoryStore from "../store"
 
 export function useIntersectionObserver(
   ref: RefObject<HTMLElement | null>,
@@ -9,7 +9,7 @@ export function useIntersectionObserver(
   onLeave: () => void,
   options: IntersectionObserverInit = { threshold: 0.5 },
 ) {
-  const { activeSection } = useStory()
+  const activeSection = useStoryStore((state) => state.activeSection)
   const previousActiveSection = useRef<string | null>(null)
 
   useEffect(() => {
@@ -24,12 +24,14 @@ export function useIntersectionObserver(
         }
       } else {
         if (
+          // To check if we are really scrolling out of the section
           sectionIds.includes(previousActiveSection.current as string) &&
           leavingSectionIds.includes(activeSection as string)
         ) {
           onLeave()
         }
       }
+
       previousActiveSection.current = activeSection
     }, options)
 

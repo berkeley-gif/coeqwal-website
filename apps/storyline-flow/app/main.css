@@ -19,7 +19,6 @@ html{
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: auto;
     z-index: 0;
 }
 
@@ -28,7 +27,6 @@ html{
     display: flex;
     flex-direction: column;
     z-index: 1;
-    pointer-events: auto;
 }
 
 #section-container{
@@ -44,6 +42,12 @@ html{
     background-color: rgba(3, 26, 53, 0.4);
 }
 
+#sticky-section{
+    position: sticky;
+    bottom: 0;
+    pointer-events: auto;
+}
+
 #loader{
     position: fixed;
     top: 0;
@@ -57,19 +61,6 @@ html{
     z-index: 1000;
 }
 
-#holder{
-    width: calc(100% - 1px)
-}
-
-#section-line{
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 2px;
-    background-color: #f2f0ef;
-    z-index: 1000;
-}
-
 .container{
     position: relative;
     display: flex;
@@ -78,7 +69,14 @@ html{
     padding-left: 5rem;
     padding-right: 5rem;
     width: max-content;
+    pointer-events: auto;
+    margin-bottom: 20vh;
 }
+
+.full-width-section {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%); /* Centers the section */
+  }
 
 .container-center{
     display: flex;
@@ -87,6 +85,7 @@ html{
     align-items: center;
     width: 100%;
     text-align: center;
+    pointer-events: auto;
 }
 
 .paragraph{

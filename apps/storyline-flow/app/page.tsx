@@ -13,20 +13,22 @@ import SectionTransformation from "./components/05Transformation"
 import SectionImpact from "./components/06Impact"
 import Conclusion from "./components/07Conclusion"
 import { AnimatePresence, motion } from "@repo/motion"
-import useStory from "./story/useStory"
 import { DIVISION } from "./components/helpers/sectionDivision"
+import useStoryStore from "./store"
 
 //TODO: potentially replace all the visibiltiy hook with scroll opacity hook
 //TODO: instead of width 100%, it might need to be max-content
+//NOTE: check if we really need to preload
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMapLoaded, setIsMapLoaded] = useState(true)
-
-  const { activeSection } = useStory()
+  const fetchStoryline = useStoryStore((state) => state.fetchStoryline)
+  //const loadedSections = useStoryStore((state) => state.loadedSections);
+  //const markSectionAsLoaded = useStoryStore((state) => state.markSectionAsLoaded);
 
   useEffect(() => {
-    console.log("📝 section is now active:", activeSection)
-  }, [activeSection])
+    fetchStoryline()
+  }, [fetchStoryline])
 
   return (
     <Box id="meta-container">
@@ -43,7 +45,7 @@ export default function StoryContainer() {
         ref={containerRef}
         id="story-container"
         tabIndex={-1} // Ensure focusable for screen readers
-        style={{ height: "100%", minWidth: "max-content", maxWidth: "100%" }}
+        style={{ height: "100%", width: "100%" }}
         aria-label="Story about water transformation in California"
       >
         <Opener />
@@ -59,11 +61,10 @@ export default function StoryContainer() {
 }
 
 function SectionIndicator() {
-  const { activeSection } = useStory()
+  const activeSection = useStoryStore((state) => state.activeSection)
 
   return (
     <div id="section-container">
-      <div id="section-line"></div>
       {DIVISION.map((division, index) => (
         <motion.div
           key={index}

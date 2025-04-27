@@ -1,9 +1,10 @@
 "use client"
 
 import { Box, Typography } from "@repo/ui/mui"
-import useStory from "../story/useStory"
+import useStoryStore from "../store"
 import AnimatedWaves from "./helpers/AnimatedWave"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import useActiveSection from "../hooks/useActiveSection"
 
 function Conclusion() {
   return (
@@ -16,13 +17,15 @@ function Conclusion() {
 
 //TODO: add resize observer for animated waves
 function Resolution() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.conclusion
-  const ref = useRef<HTMLDivElement>(null)
+  const { sectionRef } = useActiveSection("resolution", {
+    amount: 0.5,
+  })
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
-    const element = ref.current
+    const element = sectionRef.current
     if (!element) return
 
     // Create a ResizeObserver to watch the container size
@@ -39,7 +42,7 @@ function Resolution() {
     return () => {
       resizeObserver.disconnect()
     }
-  }, [])
+  }, [sectionRef])
 
   return (
     <>
@@ -52,7 +55,7 @@ function Resolution() {
         ></Box>
 
         <Box
-          ref={ref}
+          ref={sectionRef}
           className="container-center"
           sx={{
             position: "sticky",
@@ -98,13 +101,17 @@ function Resolution() {
 }
 
 function Builder() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.conclusion
+  const { sectionRef } = useActiveSection("tension", {
+    amount: 0.5,
+  })
 
   return (
     <>
       <Box style={{ width: "100%", height: "100%", zIndex: 1 }}>
         <Box
+          ref={sectionRef}
           className="container-center"
           height="100vh"
           width="100%"

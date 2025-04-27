@@ -15,6 +15,8 @@ const months = Array.from({ length: 12 }, (_, i) =>
 const margin = { top: 50, right: 30, bottom: 100, left: 100 }
 const FIXED_HEIGHT = 400
 
+//Clean up rect error
+
 export default function AnimatedCurve() {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)

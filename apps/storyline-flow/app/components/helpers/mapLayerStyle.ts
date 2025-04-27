@@ -22,6 +22,10 @@ export const precipitationPaintStyle = {
     "rgba(77, 166, 255, 0.3)",
     "rgba(77, 166, 255, 0.1)",
   ] as unknown as string,
+  "fill-opacity-transition": {
+    duration: 1000,
+    delay: 1000,
+  } as unknown as string,
 }
 
 //#00aaff

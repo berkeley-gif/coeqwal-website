@@ -5,6 +5,7 @@ import { useCallback } from "react"
 import { useMap } from "./context/MapContext"
 import type { MapProps, MarkerProperties } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
+import { AnimatePresence } from "@repo/motion"
 
 export default function Map(props: MapProps) {
   const { mapRef, markers = [], motionChildren } = useMap() // Todo: incorporate motionChildrenStyle
@@ -47,7 +48,7 @@ export default function Map(props: MapProps) {
         {props.children}
 
         {/* Render motion children */}
-        {motionChildren}
+        <AnimatePresence>{motionChildren}</AnimatePresence>
       </MapboxGLMap>
     </div>
   )
