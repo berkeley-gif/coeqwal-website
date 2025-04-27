@@ -3,7 +3,6 @@ import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
-import type { MapboxMapRef } from "@repo/map"
 
 interface Props {
   onOpenDrawer: () => void

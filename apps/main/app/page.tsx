@@ -3,18 +3,14 @@
 import React, { useState, useRef } from "react"
 import {
   Box,
-  Typography,
-  Stack,
-  KeyboardArrowDownIcon,
-  VisibilityIcon,
+  Typography
 } from "@repo/ui/mui"
-import { Header, MiniDrawer, VerticalDivider, LearnMoreButton } from "@repo/ui"
+import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { HeroQuestionsPanel, BasePanel } from "@repo/ui"
+import { BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
-import { useMap } from "@repo/map"
 import MapContainer from "./components/MapContainer"
 import MapStateDisplay from "./features/mapControls/MapStateDisplay"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
@@ -25,7 +21,6 @@ import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 
 export default function Home() {
   const { t } = useTranslation()
-  const { mapRef } = useMap()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
