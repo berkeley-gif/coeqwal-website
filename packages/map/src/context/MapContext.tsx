@@ -201,6 +201,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
       type: MapLayerType | string,
       paint?: Record<string, StyleValue>,
       layout?: Record<string, StyleValue>,
+      others?: Record<string, StyleValue>,
     ) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
@@ -211,6 +212,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
           type,
           ...(paint ? { paint } : {}),
           ...(layout ? { layout } : {}),
+          ...(others ? others : {}),
         } as LayerSpecification
         map.addLayer(layer)
       } catch (err) {

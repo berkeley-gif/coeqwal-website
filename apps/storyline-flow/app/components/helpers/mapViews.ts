@@ -8,16 +8,32 @@ export const stateMapViewState = {
 
 export const deltaMapViewState = {
   longitude: -121.8427,
-  latitude: 37.708,
+  latitude: 37.758,
   zoom: 9,
   bearing: 0,
   pitch: 0,
 }
 
+export const riverMapViewState = {
+  longitude: -122.4311,
+  latitude: 37.6478,
+  zoom: 7.76,
+  bearing: -9.15,
+  pitch: 49.19,
+}
+
+export const riverDeltaMapViewState = {
+  longitude: -122.6311,
+  latitude: 37.7478,
+  zoom: 8.5,
+  bearing: -9.15,
+  pitch: 49.19,
+}
+
 export const cityMapViewState = {
-  longitude: -123.6427,
-  latitude: 35.308,
-  zoom: 7,
+  longitude: -124.8427,
+  latitude: 36.308,
+  zoom: 6.5,
   bearing: 0,
   pitch: 0,
 }

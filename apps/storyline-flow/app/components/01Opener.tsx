@@ -1,22 +1,24 @@
 "use client"
 
 import { Box, Typography, Stack } from "@repo/ui/mui"
-import useStory from "../story/useStory"
 import { motion, useScroll, useAnimation } from "@repo/motion"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import useActiveSection from "../hooks/useActiveSection"
+import useStoryStore from "../store"
+import Underline from "./helpers/Underline"
 
 //TODO: motion doesn't support component prop
-//TODO: modularize this entire setup
+//TODO: make sure all map layers are disabled here
 function Opener() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.opener
-  const sectionRef = useActiveSection("opener", { amount: 0.5 })
+  const { sectionRef } = useActiveSection("opener", { amount: 0.5 })
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start center", "end start"],
   })
   const controls = useAnimation()
+  const [startAnimation, setStartAnimation] = useState(false)
 
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (latest) => {
@@ -41,7 +43,7 @@ function Opener() {
       className="container"
       height="100vh"
       sx={{ justifyContent: "center" }}
-      tabIndex={-1} // Ensure focusable for screen readers
+      tabIndex={-1}
       role="region"
     >
       <Box className="paragraph" component="header" role="banner">
@@ -63,9 +65,14 @@ function Opener() {
           variants={opacityFloatVariants}
           initial="hidden"
           animate={controls}
+          onAnimationComplete={() => setStartAnimation(true)}
         >
           <Typography id="throughline-heading" variant="body1">
-            {content?.throughline}
+            {content?.throughline.p11}
+            <Underline startAnimation={startAnimation}>
+              {content?.throughline.p12}
+            </Underline>
+            {content?.throughline.p13}
           </Typography>
         </motion.div>
       </Stack>

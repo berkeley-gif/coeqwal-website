@@ -219,6 +219,7 @@ export interface MapOperationsAPI {
     type: MapLayerType | string,
     paint?: Record<string, StyleValue>,
     layout?: Record<string, StyleValue>,
+    others?: Record<string, StyleValue>,
   ) => void
   removeLayer: (id: string) => void
   setLayerVisibility: (id: string, visible: boolean) => void

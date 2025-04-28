@@ -1,8 +1,13 @@
 "use client"
 
-import { Box, Typography, VisibilityIcon, LibraryBooksIcon } from "@repo/ui/mui"
-import useStory from "../story/useStory"
+import { Box, LibraryBooksIcon } from "@repo/ui/mui"
 import useActiveSection from "../hooks/useActiveSection"
+import useStoryStore from "../store"
+import { Sentence } from "@repo/motion/components"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useMap } from "@repo/map"
+import { stateMapViewState } from "./helpers/mapViews"
+import Underline from "./helpers/Underline"
 
 function SectionTransformation() {
   return (
@@ -15,9 +20,42 @@ function SectionTransformation() {
 //TODO: pop up those
 // Use waterdrop for dams
 function Transformation() {
-  const { storyline } = useStory()
+  const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.transformation
-  const sectionRef = useActiveSection("transformation", { amount: 0.5 })
+  const { sectionRef, isSectionActive } = useActiveSection("transformation", {
+    amount: 0.5,
+  })
+  const hasSeen = useRef(false)
+  const { flyTo } = useMap()
+  const [startAnimation, setStartAnimation] = useState(false)
+
+  const load = useCallback(() => {
+    flyTo({
+      longitude: stateMapViewState.longitude,
+      latitude: stateMapViewState.latitude,
+      zoom: stateMapViewState.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+  }, [flyTo])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
 
   return (
     <Box
@@ -27,14 +65,14 @@ function Transformation() {
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">
-        <Typography variant="h2" gutterBottom>
+        <Sentence variant="h2" gutterBottom custom={0}>
           {content?.subtitle1}
           <br />
           {content?.subtitle2}
-        </Typography>
+        </Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">
+        <Sentence custom={1.5}>
           <span style={{ fontWeight: "bold" }}>
             <u>{content?.p11}</u>
           </span>{" "}
@@ -42,27 +80,36 @@ function Transformation() {
             sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
           />{" "}
           {content?.p12}
-        </Typography>
+        </Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">
+        <Sentence custom={3}>
           {content?.p21}{" "}
           <span style={{ fontWeight: "bold" }}>{content?.p22}</span>{" "}
-          {content?.p23} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
-        <Typography variant="body1">
+          {content?.p23}
+        </Sentence>
+        <Sentence custom={4}>
           {content?.p31}{" "}
           <span style={{ fontWeight: "bold" }}>{content?.p32}</span>{" "}
-          {content?.p33} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
-        <Typography variant="body1">
+          {content?.p33}
+        </Sentence>
+        <Sentence custom={5}>
           {content?.p41}{" "}
           <span style={{ fontWeight: "bold" }}>{content?.p42}</span>{" "}
-          {content?.p43} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Typography>
+          {content?.p43}
+        </Sentence>
       </Box>
       <Box className="paragraph">
-        <Typography variant="body1">{content?.transition}</Typography>
+        <Sentence
+          custom={6.5}
+          onAnimationComplete={() => setStartAnimation(true)}
+        >
+          {content?.transition.p11}
+          <Underline startAnimation={startAnimation}>
+            {content?.transition.p12}
+          </Underline>
+          {content?.transition.p13}
+        </Sentence>
       </Box>
     </Box>
   )

@@ -13,7 +13,6 @@ import {
 } from "@repo/motion/variants"
 import { VisibleIcon } from "../helpers/Icons"
 import "./precipitation-bar.css"
-import { MarkerType } from "../helpers/types"
 import { useFetchData } from "../../hooks/useFetchData"
 
 interface PrecipitationDatum {
@@ -28,11 +27,11 @@ const LABEL_HEIGHT = 50
 
 //TODO: possible make the height a fixed number
 function PrecipitationBar({
-  mapData,
+  yearLabels,
   startAnimation,
   getSelectedYear,
 }: {
-  mapData: Record<string, MarkerType[]>
+  yearLabels: number[]
   startAnimation: boolean
   getSelectedYear: (year: string) => void
 }) {
@@ -93,11 +92,6 @@ function PrecipitationBar({
       setData(processedData)
     },
   )
-
-  const yearLabels = useMemo(() => {
-    if (!mapData) return []
-    return Object.keys(mapData).map((key) => parseInt(key))
-  }, [mapData])
 
   const average = useMemo(() => {
     return parseFloat(d3.mean(data, (d) => d.value)?.toFixed(2) || "0.00")
@@ -208,6 +202,7 @@ function Bars({
   animate: boolean
   getSelectedYear: (year: string) => void
 }) {
+  const [finished, setFinished] = useState(false)
   const barWidth = xScale.bandwidth() * 0.6
   return (
     <>
@@ -248,6 +243,9 @@ function Bars({
                   delay={4.5 + idx * 0.1}
                   animation={animate ? "visible" : "hidden"}
                   transform={`translate(-0.45em, ${d.anomaly < 0 ? "0.7em" : "-1.7em"})`}
+                  onAnimationComplete={() => {
+                    if (idx === data.length - 1) setFinished(true)
+                  }}
                 />
               )}
             </g>
@@ -263,6 +261,7 @@ function Bars({
               fill="transparent"
               style={{ cursor: cursorStyle }}
               onMouseMove={(e) => {
+                if (!finished) return
                 if (containerRef.current) {
                   const rect = containerRef.current.getBoundingClientRect()
                   setTooltip({

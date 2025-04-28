@@ -3,11 +3,11 @@
   "compilerOptions": {
     "outDir": "dist",
     "skipLibCheck": true,
-    "emitDeclarationOnly": true,
+    "noEmit": true,
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
     "module": "ESNext"
   },
-  "include": ["src", "components", "hooks", "variants"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

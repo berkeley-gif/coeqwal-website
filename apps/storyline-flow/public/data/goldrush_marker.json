@@ -1,0 +1,74 @@
+{
+  "mining": [
+    {
+      "id": "1",
+      "name": "Yuba River, Nevada County, 1864",
+      "latitude": 39.2112,
+      "longitude": -121.2936,
+      "images": ["/historical/miningSluice01.jpg"],
+      "captions": [
+        "Two wooden sluices (in the valley below the road) carry mining debris into the Yuba River. Debris often contained “slickens”, a toxic mix of heavy metals, like mercury. Carried downstream, the waste blocked rivers and buried floodplains, causing flooding, navigation problems, burial of salmon spawning grounds, and decreased tidal range. A Supreme Court case in 1892 ended the disastrous hydraulic mining practices, though the consequences plague California’s waters to this day."
+      ],
+      "source": "Lawrence and Houseworth, ca. 1864",
+      "anchor": "right"
+    },
+    {
+      "id": "2",
+      "name": "French Corral, Nevada County, 1867",
+      "latitude": 39.3061,
+      "longitude": -121.1613,
+      "images": ["/historical/miningCorral01.jpg"],
+      "captions": [
+        "Miners at their “monitors”, an iron nozzle attached to a hose, used in hydraulic mining during the Gold Rush. The high-powered jets allowed miners to remove massive amounts of gravel from ancient riverbeds. The debris washed into sluices where miners searched for gold. The debris was often discharged into the nearest river."
+      ],
+      "source": "Houseworth at French Corral Mine, ca. 1867",
+      "anchor": "right"
+    },
+    {
+      "id": "3",
+      "name": "Bowman Dam, Nevada County, 1868",
+      "latitude": 39.4489,
+      "longitude": -120.6531,
+      "images": ["/historical/miningBowman01.jpg"],
+      "captions": [
+        "Upstream of the mines, dams often collected water to divert into flumes that brought water to mining sites at high pressure. Pictured is a predecessor of the Bowman Dam on Canyon Creek, a major tributary of the South Yuba River in Nevada County."
+      ],
+      "source": "Watkins, ca. 1868",
+      "anchor": "right"
+    }
+  ],
+  "irrigation": [
+    {
+      "id": "4",
+      "name": "Turlock, 1901",
+      "latitude": 37.4698,
+      "longitude": -121.8694,
+      "images": [
+        "/historical/irrigationTurlock01.jpg",
+        "/historical/irrigationWell01.jpg"
+      ],
+      "captions": [
+        "An early farmstead outside of Turlock in the sandy plains of the San Joaquin Valley, between the Tuolumne and Merced Rivers. A large water tank sits behind the farmhouse. An adjacent windmill-powered groundwater pump supplied water to the tank. Raised tanks increased water pressure, allowing for household use. At this time, dry-farmed wheat was commonly grown in drier regions of the Central Valley, but was declining as irrigation canals expanded their reach. Today, land use in the region is dominated by irrigated agriculture, served by imported surface water from the Tuolumne River via canals. Household water remains largely served by groundwater. ",
+        "Well drilling at a farm in the San Joaquin Valley. Due to the consequences of overdrafted groundwater, the valley is now managed under California’s Sustainable Groundwater Management Act"
+      ],
+      "source": "CSU Stanislaus, ca. 1901",
+      "anchor": "left"
+    },
+    {
+      "id": "5",
+      "name": "West Sacramento, 1910",
+      "latitude": 38.5351,
+      "longitude": -121.5646,
+      "images": [
+        "/historical/irrigationLevee01.jpg",
+        "/historical/irrigationDredger01.jpg"
+      ],
+      "captions": [
+        "Levees confine rivers between earthen mounds. In the Delta, levee construction began after the 1850 flood. The California Reclamation District Act of 1855 accelerated the process. It allowed the sale of “swampland” for $1 per acre, spurring the establishment of Reclamation District to drain wetlands. By the early 1900s, horse-drawn machinery helped to regrade land, load and dump soils. At the time of this photo, levees confined more than half of the Delta’s rivers. Today, about 13,000 miles of levees confine rivers across California.",
+        "By 1910, an innovative steam-powered dredger with clamshell bucket reduced the labor needed to deepen rivers, build canals and levees, and develop land. This dredger cut a straight channel through wetlands in Reclamation District 900, immediately west of Sacramento. Within the District, an internal system of canals drains land ringed by levees. Reclamation Districts manage the infrastructure that keeps water out of “reclaimed” former wetlands. By 1930, nearly all of the Delta’s wetlands were drained for agriculture or settlement. Today, over 90% of the state’s wetlands have been drained or filled."
+      ],
+      "source": "McMurry Foto Co., ca. 1910",
+      "anchor": "top"
+    }
+  ]
+}

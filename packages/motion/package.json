@@ -4,9 +4,9 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./variants": "./variants/index.ts",
-    "./hooks": "./hooks/index.ts",
-    "./components": "./components/index.ts"
+    "./variants": "./src/variants/index.ts",
+    "./hooks": "./src/hooks/index.ts",
+    "./components": "./src/components/index.ts"
   },
   "scripts": {
     "build": "tsc --skipLibCheck",
@@ -15,6 +15,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "peerDependencies": {
+    "@types/flubber": "^0.4.0",
     "@types/node": ">=22.13.10",
     "@types/react": ">=19.0.10",
     "@types/react-dom": ">=19.0.4",
@@ -29,6 +30,7 @@
     "@repo/ui": "workspace:*"
   },
   "dependencies": {
+    "flubber": "^0.4.2",
     "framer-motion": "^12.4.10"
   }
 }

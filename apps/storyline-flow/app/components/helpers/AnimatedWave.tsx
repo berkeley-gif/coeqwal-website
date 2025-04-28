@@ -3,25 +3,29 @@
 import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
 
-const AnimatedWaves = () => {
-  const svgRef = useRef(null)
+const numWaves = 4
+const colors: string[] = ["#1a3a5d", "#2568a3", "#3092d1", "#00e5ff"] // blues
+const heightPortion = 0.35 // lower means waves are higher
+
+const AnimatedWaves = ({
+  width,
+  height,
+}: {
+  width: number
+  height: number
+}) => {
+  const svgRef = useRef<SVGSVGElement | null>(null)
 
   useEffect(() => {
+    if (!width || !height) return // Avoid rendering if dimensions are invalid
+
     const svg = d3.select(svgRef.current)
-    const width = window.innerWidth
-    const height = window.innerHeight
+
+    // Clear previous SVG content to avoid overlapping waves
+    svg.selectAll("*").remove()
 
     svg.attr("width", width).attr("height", height)
 
-    // Set the darkest blue as the background color
-    d3.select("body").style("background-color", "#14263e")
-
-    const numWaves = 4
-    const colors: string[] = ["#1a3a5d", "#2568a3", "#3092d1", "#00e5ff"] // blues
-    //
-    //const colors = ['#1a3f6b', "#356d8f", "#629caf", "#9acbcf"]
-
-    // Define the type for our wave data points
     type WaveDataPoint = [number, number]
 
     const area = d3
@@ -31,7 +35,6 @@ const AnimatedWaves = () => {
       .y1(height)
       .curve(d3.curveBasis)
 
-    // Define the correct type for the waves array
     const waves: d3.Selection<
       SVGPathElement,
       WaveDataPoint[],
@@ -40,19 +43,18 @@ const AnimatedWaves = () => {
     >[] = []
 
     for (let i = 0; i < numWaves; i++) {
-      // Explicitly type the wave data as an array of tuples
       const waveData: WaveDataPoint[] = d3
         .range(width)
         .map((x) => [
           x,
-          height * 0.4 + Math.sin(x * 0.004 + i * 2) * 80 + i * 70,
+          height * heightPortion + Math.sin(x * 0.004 + i * 2) * 80 + i * 70,
         ])
 
       const wave = svg
         .append("path")
         .datum(waveData)
         .attr("d", area)
-        .attr("fill", colors[i] as string)
+        .attr("fill", colors[i] || "#00e5ff")
         .attr("opacity", 0.8 - i * 0.2)
 
       waves.push(wave)
@@ -63,12 +65,11 @@ const AnimatedWaves = () => {
       const fallTime = Date.now() * 0.00075
 
       waves.forEach((wave, i) => {
-        // Make sure the updated data is also properly typed
         const updatedData: WaveDataPoint[] = d3
           .range(width)
           .map((x) => [
             x,
-            height * 0.4 +
+            height * heightPortion +
               Math.sin(x * 0.003 + i * 2 + shiftTime) *
                 (80 + 30 * Math.sin(fallTime * 0.5 + i)) +
               i * 70,
@@ -81,7 +82,7 @@ const AnimatedWaves = () => {
     }
 
     animateWaves()
-  }, [])
+  }, [width, height]) // Re-run the effect when width or height changes
 
   return (
     <svg ref={svgRef} style={{ position: "absolute", top: 0, left: 0 }}></svg>
