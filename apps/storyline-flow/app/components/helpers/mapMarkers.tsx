@@ -17,8 +17,8 @@ export type MarkerType = {
   name: string
   latitude: number
   longitude: number
-  caption?: string
-  image?: string
+  captions?: string[]
+  source?: string
   images?: string[]
   anchor?: string
 }
@@ -29,7 +29,7 @@ export function MarkersLayer({
   styledMarker = RoughCircleMarker,
 }: {
   markers: MarkerType[]
-  styledMarker?: React.FC<{ idx: number }>
+  styledMarker?: React.FC<{ idx: number; radius?: number }>
 }) {
   return (
     <>
@@ -92,7 +92,7 @@ export function MarkerWithCarouselPopup({
   const [isPopupVisible, setIsPopupVisible] = useState(false)
   const [currentImgIndex, setCurrentImgIndex] = useState(0)
 
-  const images = marker.images || [marker.image] // Fallback to single image if no array
+  const images = marker.images || [] // Fallback to single image if no array
 
   const nextImage = () => {
     console.log("you clicked next")
@@ -132,7 +132,7 @@ export function MarkerWithCarouselPopup({
                 <ImageContainer
                   images={images as string[]}
                   currentImgIndex={currentImgIndex}
-                  caption={marker.caption || ""}
+                  captions={marker.captions || [""]}
                 />
 
                 {images.length > 1 && (
@@ -148,7 +148,11 @@ export function MarkerWithCarouselPopup({
 
               <Box sx={{ mt: 1 }}>
                 <Typography variant="h6">{marker.name}</Typography>
-                <Typography variant="body2">{marker.caption}</Typography>
+                <Typography variant="body2">
+                  {marker.captions
+                    ? marker.captions[currentImgIndex] || ""
+                    : ""}
+                </Typography>
               </Box>
             </Box>
           </Popup>
@@ -161,11 +165,11 @@ export function MarkerWithCarouselPopup({
 function ImageContainer({
   images,
   currentImgIndex,
-  caption,
+  captions,
 }: {
   images: string[]
   currentImgIndex: number
-  caption: string
+  captions: string[]
 }) {
   return (
     <Box className="carousel-container">
@@ -179,10 +183,10 @@ function ImageContainer({
           style={{ width: "100%" }}
         >
           <Image
-            src={`/variability/${images[currentImgIndex]}`}
-            alt={caption || "Marker image"}
-            width={600}
-            height={400}
+            src={`${images[currentImgIndex]}`}
+            alt={captions[currentImgIndex] || "Caption not available"}
+            width={500}
+            height={300}
             style={{ objectFit: "cover" }}
           />
         </motion.div>
@@ -280,14 +284,14 @@ export function MarkerWithPopup({
           >
             <div className="popup">
               <Image
-                src={`/variability/${marker.image}`}
-                alt={marker.caption || "Marker image"}
+                src={`${marker.images ? marker.images[0] : ""}`}
+                alt={"Marker image"}
                 width={600}
                 height={400}
                 style={{ objectFit: "cover" }}
               />
               <h3>{marker.name}</h3>
-              <p>{marker.caption}</p>
+              <p>{""}</p>
             </div>
           </Popup>
         )}
@@ -308,35 +312,47 @@ export default function CircleMarker({ idx = 0 }: { idx: number }) {
   )
 }
 
-export function RoughCircleMarker({ idx = 0 }: { idx: number }) {
+export function RoughCircleMarker({
+  idx = 0,
+  radius = 50,
+}: {
+  idx: number
+  radius?: number
+}) {
   const svgRef = useRef<SVGSVGElement | null>(null) // Create a ref for the SVG element
   const [path, setPath] = useState<string>("") // State to hold the path data
 
   useEffect(() => {
     if (svgRef.current) {
       const rc = rough.svg(svgRef.current) // Use Rough.js with the SVG element
-      const roughCircle = rc.circle(50, 50, 40, {
-        strokeWidth: 3,
+      const roughCircle = rc.circle(radius, radius, radius, {
+        strokeWidth: 4,
       })
       const pathElement = roughCircle.querySelectorAll("path")[0]
       if (pathElement instanceof SVGPathElement) {
         setPath(pathElement.getAttribute("d") || "") // Extract the 'd' attribute
       }
     }
-  }, [])
+  }, [radius])
 
   return (
     <svg
       ref={svgRef} // Attach the ref to the SVG element
-      width="100"
-      height="100"
-      viewBox="0 0 100 100"
-      style={{ cursor: "pointer", position: "absolute", top: 0, left: 0 }}
+      width={radius * 2}
+      height={radius * 2}
+      viewBox={`0 0 ${radius * 2} ${radius * 2}`}
+      style={{
+        cursor: "pointer",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        transform: "translate(-50%, -50%)",
+      }}
     >
       <motion.path
         d={path}
         stroke="#f2f0ef"
-        style={{ strokeWidth: 3 }}
+        style={{ strokeWidth: 4 }}
         fill="none"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}

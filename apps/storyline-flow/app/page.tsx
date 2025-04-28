@@ -85,7 +85,7 @@ function SectionIndicator() {
             <Box className="section-component" sx={{ gap: 1 }}>
               <Typography variant="caption">{division.name}</Typography>
               <Box className="section-circle">
-                <WaterDropIcon />
+                <WaterDropIcon color={isActive ? "#3d8ec9" : "#f2f0ef"} />
               </Box>
             </Box>
           </motion.div>

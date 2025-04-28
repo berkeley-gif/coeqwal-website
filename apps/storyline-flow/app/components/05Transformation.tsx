@@ -1,9 +1,13 @@
 "use client"
 
-import { Box, VisibilityIcon, LibraryBooksIcon } from "@repo/ui/mui"
+import { Box, LibraryBooksIcon } from "@repo/ui/mui"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { Sentence } from "@repo/motion/components"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useMap } from "@repo/map"
+import { stateMapViewState } from "./helpers/mapViews"
+import Underline from "./helpers/Underline"
 
 function SectionTransformation() {
   return (
@@ -18,7 +22,40 @@ function SectionTransformation() {
 function Transformation() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.transformation
-  const { sectionRef } = useActiveSection("transformation", { amount: 0.5 })
+  const { sectionRef, isSectionActive } = useActiveSection("transformation", {
+    amount: 0.5,
+  })
+  const hasSeen = useRef(false)
+  const { flyTo } = useMap()
+  const [startAnimation, setStartAnimation] = useState(false)
+
+  const load = useCallback(() => {
+    flyTo({
+      longitude: stateMapViewState.longitude,
+      latitude: stateMapViewState.latitude,
+      zoom: stateMapViewState.zoom,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+  }, [flyTo])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
 
   return (
     <Box
@@ -49,21 +86,30 @@ function Transformation() {
         <Sentence custom={3}>
           {content?.p21}{" "}
           <span style={{ fontWeight: "bold" }}>{content?.p22}</span>{" "}
-          {content?.p23} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+          {content?.p23}
         </Sentence>
         <Sentence custom={4}>
           {content?.p31}{" "}
           <span style={{ fontWeight: "bold" }}>{content?.p32}</span>{" "}
-          {content?.p33} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+          {content?.p33}
         </Sentence>
         <Sentence custom={5}>
           {content?.p41}{" "}
           <span style={{ fontWeight: "bold" }}>{content?.p42}</span>{" "}
-          {content?.p43} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
+          {content?.p43}
         </Sentence>
       </Box>
       <Box className="paragraph">
-        <Sentence custom={6.5}>{content?.transition}</Sentence>
+        <Sentence
+          custom={6.5}
+          onAnimationComplete={() => setStartAnimation(true)}
+        >
+          {content?.transition.p11}
+          <Underline startAnimation={startAnimation}>
+            {content?.transition.p12}
+          </Underline>
+          {content?.transition.p13}
+        </Sentence>
       </Box>
     </Box>
   )

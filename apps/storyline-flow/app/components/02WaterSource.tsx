@@ -189,6 +189,13 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   )
 }
 
+const mountainMarker = {
+  id: "sierra-nevada-mountains",
+  name: "Sierra Nevada Mountains",
+  latitude: 38.2489,
+  longitude: -119.6877,
+}
+
 //TODO: add snowpack
 function Snowpack() {
   const storyline = useStoryStore((state) => state.storyline)
@@ -213,8 +220,12 @@ function Snowpack() {
     })
     setPaintProperty("river-sac-layer", "line-opacity", 0)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-    setMarkers([], "text")
+    setMarkers([mountainMarker], "text")
   }, [flyTo, setPaintProperty, setMarkers])
+
+  const unload = useCallback(() => {
+    setMarkers([], "text")
+  }, [setMarkers])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -226,12 +237,13 @@ function Snowpack() {
     } else {
       if (hasSeen.current) {
         //console.log('unload stuff')
+        unload()
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [isSectionActive, load, unload])
 
   return (
     <Box

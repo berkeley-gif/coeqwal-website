@@ -3,28 +3,43 @@
     {
       "id": "1",
       "name": "East Porterville",
-      "caption": "The Avila household of East Porterville, CA turns on the tap after years without running water. Private wells in the small unincorporated community ran dry in the 2012-2016. Through the five-year drought, hundreds of households lacked a reliable water source. By 2017, an emergency distribution system delivered water from a nearby town to 1,800 homes.",
       "latitude": 36.0598,
       "longitude": -118.973,
-      "image": "01.png",
+      "images": ["/variability/2014porter01.jpg"],
+      "captions": [
+        "The Avila household of East Porterville, CA turns on the tap after years without running water. Private wells in the small unincorporated community ran dry in the 2012-2016. Through the five-year drought, hundreds of households lacked a reliable water source. By 2017, an emergency distribution system delivered water from a nearby town to 1,800 homes."
+      ],
+      "source": "",
       "anchor": "right"
     },
     {
       "id": "2",
       "name": "Sacramento Weir, Yolo Bypass",
-      "caption": "In 2014, biologists from state agencies trucked almost 20 million fall-run Chinook salmon from hatcheries and released them into San Francisco Bay, a 180-mile journey. The emergency measures save them from drought conditions in the Delta. Gates that usually prevent salmon from getting killed in pumps for California's water supply infrastructure had to remain open during the drought. Though the trucking is stressful for the fish, it increased their chances of survival, which is critical to the survival of state's salmon fishing industry.",
       "latitude": 40.3987,
       "longitude": -122.1454,
-      "image": "02.png",
-      "anchor": "right"
+      "images": [
+        "/variability/2014trucking01.jpg",
+        "/variability/2014trucking02.jpg",
+        "/variability/2014trucking03.jpg"
+      ],
+      "captions": [
+        "During the 2014 drought, water levels in the Sacramento River dropped so low that fall-run Chinook salmon would not survive the journey from hatcheries to the ocean.",
+        "Biologists working for state and federal agencies trucked about 20 million fish from upstream hatcheries to the San Francisco Bay.",
+        "Bypassing the Sacramento River and the California Delta supported the salmon’s survival. During extreme drought, the I-5 highway can become a critical part of California’s water system for migrating salmon."
+      ],
+      "source": "US Fish and Wildlife Service, Pacific Southwest Region, 2014",
+      "anchor": "top"
     },
     {
       "id": "3",
       "name": "Sacramento Weir, Yolo Bypass",
-      "caption": "The Sacramento Weir sits closed and dry in 2014. The weir protects the City of Sacramento from floods by diverting river flows into the Yolo Bypass.",
       "latitude": 38.6052,
       "longitude": -121.5574,
-      "image": "03.png",
+      "images": ["/variability/2014weir01.jpg"],
+      "captions": [
+        "The Sacramento Weir sits closed and dry in 2014. The weir protects the City of Sacramento from floods by diverting river flows into the Yolo Bypass."
+      ],
+      "source": "",
       "anchor": "right"
     }
   ],
@@ -32,38 +47,49 @@
     {
       "id": "4",
       "name": "Oroville Dam",
-      "caption": "Oroville Dam's spillway eroded during floods in February of 2017. After heavy rainfall (almost 13 inches over 4 days), floodwaters threatened to overtop the dam, forcing engineers to release massive amounts of water that eroded the main and emergency spillways. The crisis forced the evacuation of over 180,000 residents and relocation of a fish hatchery.",
       "latitude": 39.5427,
       "longitude": -121.4921,
-      "image": "04.png",
+      "images": ["/variability/2017oroville01.jpg"],
+      "captions": [
+        "Oroville Dam's spillway eroded during floods in February of 2017. After heavy rainfall (almost 13 inches over 4 days), floodwaters threatened to overtop the dam, forcing engineers to release massive amounts of water that eroded the main and emergency spillways. The crisis forced the evacuation of over 180,000 residents and relocation of a fish hatchery."
+      ],
+      "source": "California Department of Water Resources, 2017",
       "anchor": "right"
     },
     {
       "id": "5",
       "name": "Soda Springs in the Sierra Nevada",
-      "caption": "In spring of 2017, record snowpack in Soda Springs (near Donner Pass in the Sierra Nevada) consumes a home.",
       "latitude": 39.3251,
       "longitude": -120.3835,
-      "image": "05.png",
+      "images": ["/variability/2017soda01.jpg"],
+      "captions": [
+        "In spring of 2017, record snowpack in Soda Springs (near Donner Pass in the Sierra Nevada) consumes a home."
+      ],
+      "source": "",
       "anchor": "right"
     },
     {
       "id": "6",
       "name": "South Yuba River at Old Route 49 Bridge",
-      "caption": "High flows reached 40x the normal rate on the South Yuba River after a series of atmospheric river storms in January 2017.",
       "latitude": 39.2981,
       "longitude": -121.0893,
-      "image": "06.png",
-      "images": ["06.png", "07.png"],
+      "images": ["/variability/2017yuba01.jpg"],
+      "captions": [
+        "High flows reached 40x the normal rate on the South Yuba River after a series of atmospheric river storms in January 2017."
+      ],
+      "source": "",
       "anchor": "right"
     },
     {
       "id": "7",
       "name": "Sacramento Weir, Yolo Bypass",
-      "caption": "The Sacramento Weir, built in 1916, protects the City of Sacramento from floods by diverting the Sacramento River flows into the Yolo Bypass. It is only opened manually during very large floods. In 2017, the gates were open for 17 days in January, then again for 2 days in February. They had not been opened since 2007.",
+      "captions": [
+        "The Sacramento Weir, built in 1916, protects the City of Sacramento from floods by diverting the Sacramento River flows into the Yolo Bypass. It is only opened manually during very large floods. In 2017, the gates were open for 17 days in January, then again for 2 days in February. They had not been opened since 2007."
+      ],
       "latitude": 38.6052,
       "longitude": -121.5574,
-      "image": "07.png",
+      "images": ["/variability/2017weir01.jpg"],
+      "source": "",
       "anchor": "right"
     }
   ],
@@ -71,21 +97,13 @@
     {
       "id": "8",
       "name": "Bidwell Bar Bridge, Lake Oroville",
-      "caption": "The Bidwell Bar Bridge and nearby marina on Lake Oroville at record-breaking low water. By September 2021, water storage in the reservoir was 25 percent of the total capacity. The historic low elevation of 643 was two feet lower than previous record from the 1977 drought.",
+      "captions": [
+        "The Bidwell Bar Bridge and nearby marina on Lake Oroville at record-breaking low water. By September 2021, water storage in the reservoir was 25 percent of the total capacity. The historic low elevation of 643 was two feet lower than previous record from the 1977 drought."
+      ],
       "latitude": 39.5497,
       "longitude": -121.4322,
-      "image": "08.png",
-      "anchor": "right"
-    }
-  ],
-  "2022": [
-    {
-      "id": "9",
-      "name": "West False River, Contra Costa County",
-      "caption": "Construction crews work on an emergency drought barrier for the West False River in the Sacramento-San Joaquin Delta. The 750-foot-wide rock barrier helped deter saltwater from entering the central Delta during the multi-year drought in 2022.",
-      "latitude": 38.0586,
-      "longitude": -121.6738,
-      "image": "09.png",
+      "images": ["/variability/2021oroville01.jpg"],
+      "source": "California Department of Water Resources, 2021",
       "anchor": "right"
     }
   ],
@@ -93,10 +111,17 @@
     {
       "id": "10",
       "name": "Tulare Lake",
-      "caption": "Storms in March 2023 refilled much of Tulare Lake, which had been dry for over 100 years. Counties in the southern San Joaquin Valley experienced almost $300 million in flood damage in 2023. Once the largest freshwater lake west of the Mississippi River, Tulare Lake vanished by the late 1800's due to diversions for water supply. The lake, known as 'Pa-ashi', which means 'big water', has been inhabitated by the Tachi Yakuts people, who were forcibly removed during the gold rush. They honored the lake's return.",
       "latitude": 36.025,
       "longitude": -119.726526,
-      "image": "10.png",
+      "images": [
+        "/variability/2023tulare01.jpg",
+        "/variability/2023tulare02.jpg"
+      ],
+      "captions": [
+        "Storms in March 2023 filled much of Tulare Lake, which had been dry for over 100 years. Once the largest freshwater lake west of the Mississippi River, Tulare Lake vanished by the late 1800's due to diversions for water supply.",
+        "The lake, known as 'Pa-ashi' or 'big water' has been inhabited by the Tachi Yakuts people, who were forcibly removed during the Gold Rush. In 2023, the Tachi Yakuts honored the lake's return."
+      ],
+      "source": "California Department of Water Resources, 2023",
       "anchor": "right"
     }
   ]

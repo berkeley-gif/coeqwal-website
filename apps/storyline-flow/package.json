@@ -14,6 +14,8 @@
     "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",
     "@repo/ui": "workspace:*",
+    "@turf/turf": "^7.2.0",
+    "@types/geojson": "^7946.0.16",
     "d3": "^7.9.0",
     "lodash": "^4.17.21",
     "next": "^15.2.1",

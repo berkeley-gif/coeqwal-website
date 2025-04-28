@@ -5,6 +5,7 @@ import { useMap } from "@repo/map"
 import { motion } from "@repo/motion"
 import {
   deltaMapViewState,
+  riverDeltaMapViewState,
   riverMapViewState,
   stateMapViewState,
 } from "./helpers/mapViews"
@@ -12,11 +13,16 @@ import {
 import Bird from "./vis/Bird"
 import Grass from "./vis/Grass"
 import useActiveSection from "../hooks/useActiveSection"
-import { useCallback, useEffect, useRef } from "react"
-import { riverLayerStyle } from "./helpers/mapLayerStyle"
+import { useCallback, useEffect, useRef, useState } from "react"
+import {
+  deltaWaterLayerStyle,
+  deltaWetlandLayerStyle,
+  riverLayerStyle,
+} from "./helpers/mapLayerStyle"
 import useStoryStore from "../store"
 import { Sentence } from "@repo/motion/components"
-import { FlowTextLabels } from "./helpers/mapAnnotations"
+import { FlowTextLabels, ValleyTextLabels } from "./helpers/mapAnnotations"
+import Underline from "./helpers/Underline"
 
 function SectionDelta() {
   return (
@@ -38,11 +44,29 @@ function WaterFlow() {
   const hasSeen = useRef(false)
   const { addSource, addLayer, setPaintProperty, flyTo } = useMap() // from our context
   const setMarkers = useStoryStore((state) => state.setMarkers)
+  const [startAnimation, setStartAnimation] = useState(false)
 
-  const init = useCallback(() => {
+  const fetchGeoJSON = useCallback(async (url: string) => {
+    try {
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`)
+      }
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error("Error fetching GeoJSON:", error)
+      return null
+    }
+  }, [])
+
+  const init = useCallback(async () => {
+    const riverSacData = await fetchGeoJSON("/rivers/SacramentoRiver.geojson")
+    //console.log("riverSacData", riverSacData);
+
     addSource("river-sac", {
       type: "geojson",
-      data: "/rivers/SacramentoRiver_wo.geojson",
+      data: riverSacData,
     })
 
     addLayer(
@@ -65,7 +89,7 @@ function WaterFlow() {
       riverLayerStyle.paint,
       riverLayerStyle.layout,
     )
-  }, [addLayer, addSource])
+  }, [addLayer, addSource, fetchGeoJSON])
 
   const load = useCallback(() => {
     flyTo({
@@ -122,10 +146,19 @@ function WaterFlow() {
         <Sentence custom={3}>{content?.p3}</Sentence>
       </Box>
       <Box className="paragraph">
-        <Sentence custom={4}>{content?.p41}</Sentence>
+        <Sentence
+          custom={4}
+          onAnimationComplete={() => setStartAnimation(true)}
+        >
+          {content?.p41}
+          <Underline startAnimation={startAnimation} delay={0.5}>
+            {content?.p42}
+          </Underline>
+          {content?.p43}
+        </Sentence>
         <Sentence custom={5.5}>
-          <span>{content?.p42}</span>
-          <span>{content?.p43}</span>
+          <span style={{ fontWeight: "bold" }}>{content?.p44}</span>
+          <span>{content?.p45}</span>
         </Sentence>
       </Box>
     </Box>
@@ -138,42 +171,81 @@ function Valley() {
   const { sectionRef, isSectionActive } = useActiveSection("valley", {
     amount: 0.5,
   })
-  const { flyTo, setPaintProperty } = useMap() // from our context
+  const { flyTo, setPaintProperty, addSource, addLayer } = useMap() // from our context
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const hasSeen = useRef(false)
+  const [startValleyAnimation, setStartValleyAnimation] = useState(false)
+  const [startDeltaAnimation, setStartDeltaAnimation] = useState(false)
+
+  const init = useCallback(() => {
+    addSource("delta-water", {
+      type: "vector",
+      url: "mapbox://yskuo.6mkxbslj",
+    })
+    addLayer(
+      "delta-water-layer",
+      "delta-water",
+      deltaWaterLayerStyle.type,
+      deltaWaterLayerStyle.paint,
+      {},
+      deltaWaterLayerStyle.layer,
+    )
+    addSource("delta-wetland", {
+      type: "vector",
+      url: "mapbox://yskuo.90ys4c1j",
+    })
+    addLayer(
+      "delta-wetland-layer",
+      "delta-wetland",
+      deltaWetlandLayerStyle.type,
+      deltaWetlandLayerStyle.paint,
+      {},
+      deltaWetlandLayerStyle.layer,
+    )
+  }, [addSource, addLayer])
 
   const load = useCallback(() => {
     flyTo({
-      longitude: riverMapViewState.longitude,
-      latitude: riverMapViewState.latitude,
-      zoom: riverMapViewState.zoom,
-      pitch: riverMapViewState.pitch,
-      bearing: riverMapViewState.bearing,
+      longitude: riverDeltaMapViewState.longitude,
+      latitude: riverDeltaMapViewState.latitude,
+      zoom: riverDeltaMapViewState.zoom,
+      pitch: riverDeltaMapViewState.pitch,
+      bearing: riverDeltaMapViewState.bearing,
       transitionOptions: {
         duration: 2000,
       },
     })
     setPaintProperty("river-sac-layer", "line-opacity", 1)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
-    setMarkers(FlowTextLabels, "text")
+    setPaintProperty("delta-water-layer", "fill-opacity", 1)
+    setPaintProperty("delta-wetland-layer", "fill-opacity", 1)
+    setMarkers(ValleyTextLabels, "text")
   }, [flyTo, setMarkers, setPaintProperty])
+
+  const unload = useCallback(() => {
+    setPaintProperty("delta-water-layer", "fill-opacity", 0)
+    setPaintProperty("delta-wetland-layer", "fill-opacity", 0)
+    setMarkers([], "text")
+  }, [setPaintProperty, setMarkers])
 
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
+        init()
       }
       hasSeen.current = true
       load()
     } else {
       if (hasSeen.current) {
+        unload()
         //console.log('unload stuff')
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [isSectionActive, load, init, unload])
 
   return (
     <Box
@@ -184,22 +256,37 @@ function Valley() {
       role="region"
     >
       <Box className="paragraph">
-        <Sentence custom={0}>{content?.valley.p1}</Sentence>
+        <Sentence
+          custom={0}
+          onAnimationComplete={() => setStartValleyAnimation(true)}
+        >
+          {content?.valley.p11}
+          <Underline startAnimation={startValleyAnimation} delay={0.5}>
+            {content?.valley.p12}
+          </Underline>
+          {content?.valley.p13}
+        </Sentence>
       </Box>
       <Box className="paragraph">
         <Sentence custom={1}>
           {content?.valley.p2}{" "}
           <VisibilityIcon sx={{ verticalAlign: "middle" }} />
         </Sentence>
-        <Sentence custom={2}>
-          {content?.valley.p3}{" "}
-          <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
+        <Sentence custom={2}>{content?.valley.p3}</Sentence>
         <Sentence custom={3}>{content?.valley.p4}</Sentence>
       </Box>
       <Box className="paragraph">
-        <Sentence custom={4}>{content?.transition.p11}</Sentence>
-        <Sentence custom={5}>{content?.transition.p12}</Sentence>
+        <Sentence
+          custom={4}
+          onAnimationComplete={() => setStartDeltaAnimation(true)}
+        >
+          {content?.transition.p11}
+          <Underline startAnimation={startDeltaAnimation}>
+            {content?.transition.p12}
+          </Underline>
+          {content?.transition.p13}
+        </Sentence>
+        <Sentence custom={5}>{content?.transition.p14}</Sentence>
         <Sentence custom={6}>{content?.transition.p2}</Sentence>
       </Box>
     </Box>

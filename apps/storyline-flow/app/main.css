@@ -170,7 +170,7 @@ transform: scale(1.2); /* Slightly enlarge the active indicator */
 /* popup */
 .popup {
     width: 100%;
-    max-width: 600px;
+    max-width: 500px;
 }
   
 /* Carousel container */
@@ -216,6 +216,7 @@ transform: scale(1.2); /* Slightly enlarge the active indicator */
 
 .mapboxgl-popup{
     z-index: 1000;
+    max-width: fit-content !important;
 }
 
 .mapboxgl-popup-content{
@@ -228,9 +229,22 @@ transform: scale(1.2); /* Slightly enlarge the active indicator */
     margin: 0.5em 0.5em;
 }
 
-.mapboxgl-popup-tip{
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip {
+    border-bottom-color: var(--light-color) !important;
+    }
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+    border-top-color: var(--light-color) !important;
+    }
+.mapboxgl-popup-anchor-left .mapboxgl-popup-tip {
+    border-right-color: var(--light-color) !important;
+    }
+.mapboxgl-popup-anchor-right .mapboxgl-popup-tip {
     border-left-color: var(--light-color) !important;
-}
+    }
 
 .popup{
     width: 600px;

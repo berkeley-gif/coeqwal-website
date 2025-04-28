@@ -25,6 +25,37 @@ function SectionBenefits() {
   )
 }
 
+const norCalData = {
+  past: { year: 1940, value: 3066654, annotation: "3.06M" },
+  present: { year: 2024, value: 15581091, annotation: "15.5M" },
+  icon: PeopleIcon,
+  title: "NorCal",
+}
+
+const soCalData = {
+  past: { year: 1940, value: 3840733, annotation: "3.84M" },
+  present: { year: 2024, value: 23479897, annotation: "23.48M" },
+  icon: PeopleIcon,
+  title: "SoCal",
+}
+
+const markers = [
+  {
+    id: "norcal",
+    name: "Southern California",
+    latitude: 34.0522,
+    longitude: -118.2437,
+    radius: 100,
+  },
+  {
+    id: "socal",
+    name: "Northern California",
+    latitude: 37.7749,
+    longitude: -122.4194,
+    radius: 100,
+  },
+]
+
 function City() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact
@@ -34,20 +65,7 @@ function City() {
   const { flyTo } = useMap()
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
-
-  const norCalData = {
-    past: { year: 1940, value: 3066654, annotation: "3.06M" },
-    present: { year: 2024, value: 15581091, annotation: "15.5M" },
-    icon: PeopleIcon,
-    title: "NorCal",
-  }
-
-  const soCalData = {
-    past: { year: 1940, value: 3840733, annotation: "3.84M" },
-    present: { year: 2024, value: 23479897, annotation: "23.48M" },
-    icon: PeopleIcon,
-    title: "SoCal",
-  }
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const load = useCallback(() => {
     flyTo({
@@ -58,24 +76,26 @@ function City() {
         duration: 2000,
       },
     })
-  }, [flyTo])
+    setTextMarkers(markers, "text")
+  }, [flyTo, setTextMarkers])
 
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
-        console.log("initialize stuff")
+        //console.log("initialize stuff")
       }
       hasSeen.current = true
       load()
     } else {
       if (hasSeen.current) {
-        console.log("unload stuff")
+        //console.log("unload stuff")
+        setTextMarkers([], "text")
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [isSectionActive, load, setTextMarkers])
 
   return (
     <Box
@@ -198,7 +218,7 @@ function Economy() {
 
   const economyData = {
     past: { year: 1980, value: 13779, annotation: "$50.9K*" },
-    present: { year: 2024, value: 104916, annotation: "$104.K" },
+    present: { year: 2024, value: 104916, annotation: "$105K" },
     icon: PeopleIcon,
     title: "Economy",
   }

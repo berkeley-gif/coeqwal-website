@@ -11,6 +11,28 @@ export const riverLayerStyle = {
   },
 }
 
+export const deltaWaterLayerStyle = {
+  type: "fill",
+  paint: {
+    "fill-color": "#031a35",
+    "fill-opacity": 0,
+  },
+  layer: {
+    "source-layer": "delta_water-cxxi58",
+  },
+}
+
+export const deltaWetlandLayerStyle = {
+  type: "fill",
+  paint: {
+    "fill-color": "rgba(37, 90, 22, 0.3)",
+    "fill-opacity": 0,
+  },
+  layer: {
+    "source-layer": "delta_freshwater_wetland-5wdgh4",
+  },
+}
+
 export const precipitationPaintStyle = {
   "fill-color": [
     "case",

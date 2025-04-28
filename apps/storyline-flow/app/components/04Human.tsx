@@ -5,23 +5,87 @@ import { Box, VisibilityIcon } from "@repo/ui/mui"
 import { riverLayerStyle } from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Sentence } from "@repo/motion/components"
+import { MarkerType } from "./helpers/mapMarkers"
+import { useFetchData } from "../hooks/useFetchData"
+import {
+  DrinkingTextLabels,
+  GoldRushTextLabels,
+  IrrigationTextLabels,
+} from "./helpers/mapAnnotations"
 
 function SectionHuman() {
+  const [mineMarkers, setMineMarkers] = useState<Record<string, MarkerType[]>>(
+    {},
+  ) // Initialize markers as an empty array
+
+  useFetchData<Record<string, MarkerType[]>>(
+    "/data/goldrush_marker.json",
+    (data) => {
+      setMineMarkers(data)
+    },
+  )
+
   return (
     <>
-      <Header />
-      <Irrigation />
+      <Header markers={mineMarkers.mining || []} />
+      <Irrigation markers={mineMarkers.irrigation || []} />
       <Drinking />
     </>
   )
 }
 
-function Header() {
+function Header({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy
-  const { sectionRef } = useActiveSection("goldrush", { amount: 0.5 })
+  const { sectionRef, isSectionActive } = useActiveSection("goldrush", {
+    amount: 0.5,
+  })
+  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+  const hasSeen = useRef(false)
+  const { flyTo } = useMap()
+
+  const load = useCallback(() => {
+    setTimeout(() => {
+      flyTo({
+        longitude: -123.1613,
+        latitude: 39.306,
+        zoom: 8,
+        transitionOptions: {
+          duration: 2000,
+        },
+      })
+    }, 1000)
+    setTimeout(() => {
+      setMarkers(markers, "rough-circle")
+      setTextMarkers(GoldRushTextLabels, "text")
+    }, 2000)
+  }, [flyTo, markers, setMarkers, setTextMarkers])
+
+  const unload = useCallback(() => {
+    setMarkers([], "rough-circle")
+    setTextMarkers([], "text")
+  }, [setMarkers, setTextMarkers])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+        unload()
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load, unload])
 
   return (
     <Box
@@ -43,17 +107,57 @@ function Header() {
   )
 }
 
-function Irrigation() {
+function Irrigation({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy.irrigation
-  const { sectionRef } = useActiveSection("irrigation", { amount: 0.5 })
+  const { sectionRef, isSectionActive } = useActiveSection("irrigation", {
+    amount: 0.5,
+  })
+  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+  const hasSeen = useRef(false)
+  const { flyTo } = useMap()
+
+  const load = useCallback(() => {
+    flyTo({
+      longitude: -123.6694,
+      latitude: 37.4698,
+      zoom: 7.5,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+    setMarkers(markers, "rough-circle")
+    setTextMarkers(IrrigationTextLabels, "text")
+  }, [flyTo, markers, setMarkers, setTextMarkers])
+
+  const unload = useCallback(() => {
+    setMarkers([], "rough-circle")
+    setTextMarkers([], "text")
+  }, [setMarkers, setTextMarkers])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+        unload()
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load, unload])
 
   return (
     <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
       <Box ref={sectionRef} className="paragraph">
-        <Sentence custom={0}>
-          {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
+        <Sentence custom={0}>{content?.p1}</Sentence>
         <Sentence custom={1}>{content?.p2}</Sentence>
       </Box>
     </Box>
@@ -66,8 +170,9 @@ function Drinking() {
   const { sectionRef, isSectionActive } = useActiveSection("drinking", {
     amount: 0.5,
   })
-  const { addSource, addLayer, setPaintProperty } = useMap()
+  const { addSource, addLayer, setPaintProperty, flyTo } = useMap()
   const hasSeen = useRef(false)
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const init = useCallback(() => {
     addSource("river-combined", {
@@ -85,12 +190,22 @@ function Drinking() {
   }, [addSource, addLayer])
 
   const load = useCallback(() => {
+    flyTo({
+      longitude: -122.4944,
+      latitude: 35.5816,
+      zoom: 6.5,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
     setPaintProperty("river-combined-layer", "line-opacity", 1)
-  }, [setPaintProperty])
+    setTextMarkers(DrinkingTextLabels, "text")
+  }, [flyTo, setPaintProperty, setTextMarkers])
 
   const unload = useCallback(() => {
     setPaintProperty("river-combined-layer", "line-opacity", 0)
-  }, [setPaintProperty])
+    setTextMarkers([], "text")
+  }, [setPaintProperty, setTextMarkers])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -122,9 +237,7 @@ function Drinking() {
         <Sentence custom={0}>
           {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
         </Sentence>
-        <Sentence custom={1}>
-          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
+        <Sentence custom={1}>{content?.p2}</Sentence>
         <Sentence custom={2}>{content?.p3}</Sentence>
       </Box>
     </Box>

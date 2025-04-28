@@ -4,7 +4,11 @@
     "subtitle": "Why California’s Water Is Unique",
     "p1": "All living things need water to survive.",
     "p2": "However, in California, most of our water falls far from where most people live, work, and farm.",
-    "throughline": "To address this mismatch, we have transformed the way water moves across our state."
+    "throughline": {
+      "p11": "To address this mismatch, we have ",
+      "p12": "transformed",
+      "p13": " the way water moves across our state."
+    }
   },
   "precipitation": {
     "title": "Where and When Precipitation Falls",
@@ -30,18 +34,24 @@
     "p1": "Across our planet, gravity drives freshwater flow from mountains to the sea.",
     "p2": "Within California, snowmelt drains from the Sierra Nevada mountains into small mountain creeks.",
     "p3": "Some water seeps underground, replenishing aquifers.",
-    "p41": "Streams flow downslope toward the Central Valley into the state's two largest rivers \u2014 ",
-    "p42": "the Sacramento and San Joaquin Rivers",
-    "p43": ".",
+    "p41": "Streams flow downslope toward ",
+    "p42": "the Central Valley",
+    "p43": " into the state's two largest rivers \u2014 ",
+    "p44": "the Sacramento and San Joaquin Rivers",
+    "p45": ".",
     "valley": {
-      "p1": "The Sacramento and San Joaquin Rivers define the Central Valley.",
+      "p11": "The Sacramento and San Joaquin Rivers define ",
+      "p12": "the Central Valley",
+      "p13": ".",
       "p2": "During winter floods, water spills onto floodplains, forming vast wetlands.",
       "p3": "Floodwaters infiltrate into soils and refresh groundwater.",
       "p4": "In the dry summer, the groundwater then feeds rivers with a cool source of water."
     },
     "transition": {
-      "p11": "The Sacramento and San Joaquin Rivers meet in the Sacramento-San Joaquin Delta, ",
-      "p12": "where freshwater and saltwater mix.",
+      "p11": "The Sacramento and San Joaquin Rivers meet in ",
+      "p12": "the Sacramento-San Joaquin Delta",
+      "p13": ",",
+      "p14": "where freshwater and saltwater mix.",
       "p2": "This dynamic convergence of water supports an abundance of life."
     }
   },
@@ -60,7 +70,7 @@
     "p1": "The Gold Rush brought thousands of European settlers to California.",
     "p2": "Miners diverted rivers to find gold. ",
     "irrigation": {
-      "p1": "Settlers built dams and canals, drained wetlands, and pumped groundwater to expand Central Valley farms.",
+      "p1": "Settlers built canals, drained wetlands, and pumped groundwater to expand Central Valley farms.",
       "p2": "As the scale of irrigation increased, agriculture became a powerhouse of the state's economy."
     },
     "drinking": {
@@ -83,7 +93,11 @@
     "p41": "And it",
     "p42": "delivers",
     "p43": "water to agricultural lands and communities, especially in southern California.",
-    "transition": "Over the past 175 years, the timing and pathways of California's water flows have been transformed by our water infrastructure."
+    "transition": {
+      "p11": "Over the past 175 years, the timing and pathways of California's water flows have been ",
+      "p12": "transformed",
+      "p13": " by our water infrastructure."
+    }
   },
   "impact": {
     "benefits": {
@@ -91,7 +105,7 @@
       "p2": "Our agricultural productivity has grown.",
       "p3": "Our economy has skyrocketed.",
       "p4": "Our water supply has been central to the state's growth and vitality.",
-      "transition": "There are also costs."
+      "transition": "However, there are also costs."
     },
     "salmon": {
       "p1": "Dams store water, help manage floods, and generate electricity.",

@@ -4,7 +4,11 @@ export interface Storyline {
     subtitle: string
     p1: string
     p2: string
-    throughline: string
+    throughline: {
+      p11: string
+      p12: string
+      p13: string
+    }
   }
   precipitation: {
     title: string
@@ -33,8 +37,12 @@ export interface Storyline {
     p41: string
     p42: string
     p43: string
+    p44: string
+    p45: string
     valley: {
-      p1: string
+      p11: string
+      p12: string
+      p13: string
       p2: string
       p3: string
       p4: string
@@ -42,6 +50,8 @@ export interface Storyline {
     transition: {
       p11: string
       p12: string
+      p13: string
+      p14: string
       p2: string
     }
   }
@@ -83,7 +93,11 @@ export interface Storyline {
     p41: string
     p42: string
     p43: string
-    transition: string
+    transition: {
+      p11: string
+      p12: string
+      p13: string
+    }
   }
   impact: {
     benefits: {

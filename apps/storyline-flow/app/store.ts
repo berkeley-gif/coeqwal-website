@@ -10,10 +10,15 @@ interface StoryState {
     points: MarkerType[]
     style: string
   }
+  textMarkerLayer: {
+    points: MarkerType[]
+    style: string
+  }
   setActiveSection: (section: string) => void
   fetchStoryline: () => Promise<void>
   markSectionAsLoaded: (section: string) => void
   setMarkers: (markers: MarkerType[], style: string) => void
+  setTextMarkers: (markers: MarkerType[], style: string) => void
 }
 
 const useStoryStore = create<StoryState>((set) => ({
@@ -43,5 +48,8 @@ const useStoryStore = create<StoryState>((set) => ({
   },
   setMarkers: (markers: MarkerType[], style: string) =>
     set({ markerLayer: { points: markers, style: style } }),
+  setTextMarkers: (markers: MarkerType[], style: string) =>
+    set({ textMarkerLayer: { points: markers, style: style } }),
 }))
+
 export default useStoryStore
