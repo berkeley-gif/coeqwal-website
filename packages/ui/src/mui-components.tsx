@@ -78,6 +78,7 @@ import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
+import EditIcon from "@mui/icons-material/Edit"
 
 // Export individually imported icons
 export {
@@ -105,6 +106,7 @@ export {
   CloseIcon,
   ArrowRightIcon,
   FiberManualRecordIcon,
+  EditIcon,
 }
 
 // Export the full icons library for access to other icons as needed

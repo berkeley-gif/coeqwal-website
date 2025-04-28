@@ -1,16 +1,31 @@
 import React from "react"
-import { Box, Typography, Paper, Button, Stack, CloseIcon } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Stack,
+  CloseIcon,
+  EditIcon,
+} from "@repo/ui/mui"
 // import CloseIcon from '@mui/icons-material/Close';
 import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
 interface AddedWaterNeedsProps {
   waterNeeds: WaterNeedSetting[]
   setWaterNeeds: React.Dispatch<React.SetStateAction<WaterNeedSetting[]>>
+  editWaterNeed: (idx: number) => void
 }
 
 export default function AddedWaterNeeds({
   waterNeeds,
   setWaterNeeds,
+  editWaterNeed,
 }: AddedWaterNeedsProps) {
+  const onEditNeed = (idxToEdit: number) => {
+    editWaterNeed(idxToEdit) // Signal to parent to edit this need
+    onRemoveNeed(idxToEdit) // Remove from current list
+  }
+
   const onRemoveNeed = (idxToRemove: number) => {
     setWaterNeeds((prevNeeds) => {
       console.log(
@@ -19,8 +34,7 @@ export default function AddedWaterNeeds({
         "from needs:",
         prevNeeds,
       )
-      prevNeeds.splice(idxToRemove, 1)
-      return [...prevNeeds]
+      return prevNeeds.filter((_, index) => index !== idxToRemove)
     })
   }
 
@@ -53,22 +67,34 @@ export default function AddedWaterNeeds({
                 border: "1px solid #ddd",
                 p: 2,
                 minWidth: 200,
-                maxWidth: 240,
+                maxWidth: 300,
               }}
             >
-              <Typography fontWeight="bold">{need.name}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                {need.name}
+              <Typography variant="h5">{need.name}</Typography>
+              <Typography variant="h6" color="text.secondary">
+                Summary
+                {/* {need.name} */}
               </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<CloseIcon />}
-                sx={{ mt: 1 }}
-                onClick={() => onRemoveNeed(id)}
-              >
-                Remove
-              </Button>
+              <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<EditIcon />}
+                  sx={{ mt: 1 }}
+                  onClick={() => onEditNeed(id)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  startIcon={<CloseIcon />}
+                  sx={{ mt: 1 }}
+                  onClick={() => onRemoveNeed(id)}
+                >
+                  Remove
+                </Button>
+              </Box>
             </Paper>
           ))}
         </Stack>

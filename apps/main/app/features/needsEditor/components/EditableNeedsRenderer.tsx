@@ -104,7 +104,9 @@ const EditableNeedsRenderer = ({
   const handleAddRule = () => {
     // You can customize this with a form or dialog
     setCurrentWaterNeed((prev) => {
-      const defaultRule = currentWaterNeedType.defaultSetting.rule[0]
+      const defaultRule = JSON.parse(
+        JSON.stringify(currentWaterNeedType.defaultSetting.rule[0]),
+      )
       if (!defaultRule) {
         console.warn("No default rule found for current water need type")
         return prev

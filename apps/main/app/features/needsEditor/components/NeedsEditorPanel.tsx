@@ -22,6 +22,7 @@ import { WATER_NEED_TYPES, BLANK_WATER_NEED } from "./constants"
 const waterNeedSettings: WaterNeedSetting[] = []
 
 const NeedsEditorPanel: React.FC = () => {
+  console.log("Rendering NeedsEditorPanel")
   const theme = useTheme()
   const [expanded, setExpanded] = useState("")
   const [needsList, setNeedsList] = useState(waterNeedSettings)
@@ -48,6 +49,14 @@ const NeedsEditorPanel: React.FC = () => {
 
   const handleAccordionChange = (panelName: string) => () => {
     setExpanded((prevExpanded) => (prevExpanded === panelName ? "" : panelName))
+  }
+
+  const handleEditWaterNeed = (idx: number) => {
+    const needToEdit = needsList[idx]
+    if (!needToEdit) return
+    console.log("Editing need at index:", idx, "need:", needToEdit)
+
+    setCurrentWaterNeedSetting(needToEdit)
   }
 
   return (
@@ -140,6 +149,7 @@ const NeedsEditorPanel: React.FC = () => {
           <AddedWaterNeeds
             waterNeeds={needsList}
             setWaterNeeds={setNeedsList}
+            editWaterNeed={handleEditWaterNeed}
           />
         </Box>
         {needsList.length > 0 && (
