@@ -216,7 +216,7 @@ const theme = createTheme({
       paper: themeValues.palette.neutral.light,
     },
     interstitial: {
-      main: themeValues.palette.neutral.light,
+      main: "#4b8fb4",
     },
     text: {
       primary: themeValues.palette.black,

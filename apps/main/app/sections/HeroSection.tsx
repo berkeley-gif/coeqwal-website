@@ -1,10 +1,19 @@
 import { HeroQuestionsPanel } from "@repo/ui"
 import { Box } from "@repo/ui/mui"
+import { ScrollDownIcon } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import React from "react"
 
 export default function HeroSection() {
   const { t } = useTranslation()
+
+  const handleScrollDown = () => {
+    // Scroll to the next section smoothly
+    window.scrollBy({
+      top: window.innerHeight,
+      behavior: "smooth",
+    })
+  }
 
   // Get translated headlines or fall back to default values
   const headlines = (t("heroPanel.headlines") as string[]) || [
@@ -39,7 +48,7 @@ export default function HeroSection() {
             yPercent: -36,
             radius: 80,
             stroke: "white",
-            strokeWidth: 8,
+            strokeWidth: 6,
             speechBubbleText: headlines[0],
             speechBubbleAnchor: "bottom-right",
             speechBubbleWidth: 600,
@@ -52,7 +61,7 @@ export default function HeroSection() {
             yPercent: 25,
             radius: 90,
             stroke: "white",
-            strokeWidth: 8,
+            strokeWidth: 6,
             speechBubbleText: headlines[1],
             speechBubbleAnchor: "top-left",
             speechBubbleWidth: 600,
@@ -65,7 +74,7 @@ export default function HeroSection() {
             yPercent: -18,
             radius: 85,
             stroke: "white",
-            strokeWidth: 8,
+            strokeWidth: 6,
             speechBubbleText: headlines[2],
             speechBubbleAnchor: "bottom-left",
             speechBubbleWidth: 600,
@@ -78,7 +87,7 @@ export default function HeroSection() {
             yPercent: 34,
             radius: 70,
             stroke: "white",
-            strokeWidth: 8,
+            strokeWidth: 6,
             speechBubbleText: headlines[3],
             speechBubbleAnchor: "top-left",
             speechBubbleWidth: 600,
@@ -91,7 +100,7 @@ export default function HeroSection() {
             yPercent: -35,
             radius: 90,
             stroke: "white",
-            strokeWidth: 8,
+            strokeWidth: 6,
             speechBubbleText: headlines[4],
             speechBubbleAnchor: "bottom-left",
             speechBubbleWidth: 600,
@@ -104,6 +113,11 @@ export default function HeroSection() {
             marginTop: "-15vh",
           },
         }}
+      />
+      
+      <ScrollDownIcon 
+        onClick={handleScrollDown}
+        color="white"
       />
     </Box>
   )
