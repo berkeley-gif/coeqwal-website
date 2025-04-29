@@ -6,6 +6,14 @@ import React from "react"
 export default function HeroSection() {
   const { t } = useTranslation()
 
+  const headlines = [
+    "How do reservoir operations affect Delta water quality?",
+    "Which water futures support salmon survival?",
+    "How do cities and farms share water in a hotter, drier future?",
+    "Which policies help meet environmental goals?",
+    "What happens if we let our rivers run?",
+  ]
+
   return (
     <Box
       sx={{
@@ -18,17 +26,9 @@ export default function HeroSection() {
     >
       <HeroQuestionsPanel
         backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
-        headlines={
-          (t("heroPanel.headlines") as string[]) || [
-            "How do reservoir operations affect Delta water quality?",
-            "Which water futures support salmon survival?",
-            "How do cities and farms share water in a hotter, drier future?",
-            "Which policies help meet environmental goals?",
-            "What happens if we let our rivers run?",
-          ]
-        }
+        headlines={[]}
         verticalAlignment="center"
-        background="light"
+        background="transparent"
         includeHeaderSpacing={false}
         headlineColor="common.white"
         overlayCircles={[
@@ -39,6 +39,10 @@ export default function HeroSection() {
             radius: 80,
             stroke: "white",
             strokeWidth: 4,
+            speechBubbleText: headlines[0],
+            speechBubbleAnchor: "bottom-right",
+            speechBubbleWidth: 300,
+            speechBubbleVariant: "h4",
           },
           // Circle 2: Upper right
           {
@@ -47,6 +51,10 @@ export default function HeroSection() {
             radius: 90,
             stroke: "white",
             strokeWidth: 4,
+            speechBubbleText: headlines[1],
+            speechBubbleAnchor: "bottom-left",
+            speechBubbleWidth: 300,
+            speechBubbleVariant: "h4",
           },
           // Circle 3: Middle left
           {
@@ -55,6 +63,10 @@ export default function HeroSection() {
             radius: 70,
             stroke: "white",
             strokeWidth: 4,
+            speechBubbleText: headlines[2],
+            speechBubbleAnchor: "top-right",
+            speechBubbleWidth: 350,
+            speechBubbleVariant: "h4",
           },
           // Circle 4: Lower right
           {
@@ -63,6 +75,10 @@ export default function HeroSection() {
             radius: 85,
             stroke: "white",
             strokeWidth: 4,
+            speechBubbleText: headlines[3],
+            speechBubbleAnchor: "top-left",
+            speechBubbleWidth: 300,
+            speechBubbleVariant: "h4",
           },
           // Circle 5: Bottom center
           {
@@ -71,10 +87,20 @@ export default function HeroSection() {
             radius: 75,
             stroke: "white",
             strokeWidth: 4,
+            speechBubbleText: headlines[4],
+            speechBubbleAnchor: "top-left",
+            speechBubbleWidth: 300,
+            speechBubbleVariant: "h4",
           },
         ]}
         sx={{
-          backgroundColor: "rgb(191, 218, 220)",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
+            zIndex: 0,
+          },
           "& > div": {
             marginTop: "-15vh",
           },

@@ -30,6 +30,20 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
     stroke?: string
     /** Circle stroke width in pixels (defaults to 3) */
     strokeWidth?: number
+    /** Text to display in a speech bubble next to this circle */
+    speechBubbleText?: string
+    /** Where to position the speech bubble relative to the circle */
+    speechBubbleAnchor?:
+      | "top-left"
+      | "top-right"
+      | "bottom-left"
+      | "bottom-right"
+    /** Distance in pixels between circle and speech bubble */
+    speechBubblePadding?: number
+    /** Maximum width of the speech bubble in pixels */
+    speechBubbleWidth?: number
+    /** Typography variant for the speech bubble text */
+    speechBubbleVariant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
   }>
 }
 
@@ -113,6 +127,97 @@ export function HeroQuestionsPanel({
                 stroke={circle.stroke || "currentColor"}
                 strokeWidth={circle.strokeWidth || 3}
               />
+            )
+          })}
+        </Box>
+      )}
+
+      {/* Speech Bubbles */}
+      {overlayCircles.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 2, // above circles and content
+          }}
+        >
+          {overlayCircles.map((circle, index) => {
+            // Skip if no speech bubble text
+            if (!circle.speechBubbleText) return null
+
+            // Get circle position and properties
+            const cx = `calc(50% + ${circle.xPercent}%)`
+            const cy = `calc(50% + ${circle.yPercent}%)`
+            const radius = circle.radius
+            const padding = circle.speechBubblePadding ?? 10
+            const bubbleWidth = circle.speechBubbleWidth ?? 300
+            const variant = circle.speechBubbleVariant ?? "h4"
+
+            // Choose anchor if not specified (based on circle position)
+            const anchor =
+              circle.speechBubbleAnchor ??
+              (circle.xPercent >= 0
+                ? circle.yPercent >= 0
+                  ? "top-left"
+                  : "bottom-left"
+                : circle.yPercent >= 0
+                  ? "top-right"
+                  : "bottom-right")
+
+            // Calculate position and text alignment based on anchor point
+            let left, top, textAlign: "left" | "right" | "center"
+
+            switch (anchor) {
+              case "top-left": // Above and to the left of the circle
+                left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
+                top = `calc(${cy} - ${radius}px - ${padding}px)`
+                textAlign = "right"
+                break
+
+              case "top-right": // Above and to the right of the circle
+                left = `calc(${cx} + ${radius}px + ${padding}px)`
+                top = `calc(${cy} - ${radius}px - ${padding}px)`
+                textAlign = "left"
+                break
+
+              case "bottom-left": // Below and to the left of the circle
+                left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
+                top = `calc(${cy} + ${radius}px + ${padding}px)`
+                textAlign = "right"
+                break
+
+              case "bottom-right": // Below and to the right of the circle
+              default:
+                left = `calc(${cx} + ${radius}px + ${padding}px)`
+                top = `calc(${cy} + ${radius}px + ${padding}px)`
+                textAlign = "left"
+                break
+            }
+
+            return (
+              <Box
+                key={`bubble-${index}`}
+                sx={{
+                  position: "absolute",
+                  left,
+                  top,
+                  maxWidth: `${bubbleWidth}px`,
+                  pointerEvents: "auto",
+                }}
+              >
+                <Typography
+                  variant={variant}
+                  color={headlineColor}
+                  sx={{
+                    textAlign,
+                  }}
+                >
+                  {circle.speechBubbleText}
+                </Typography>
+              </Box>
             )
           })}
         </Box>
