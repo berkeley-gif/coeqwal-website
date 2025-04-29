@@ -83,7 +83,7 @@ export default function HeroSection() {
             speechBubbleAnchor: "top-left",
             speechBubbleWidth: 600,
             speechBubbleVariant: "h1",
-            speechBubblePadding: 20,
+            speechBubblePadding: 10,
           },
           // Circle 5
           {
@@ -96,7 +96,7 @@ export default function HeroSection() {
             speechBubbleAnchor: "bottom-left",
             speechBubbleWidth: 600,
             speechBubbleVariant: "h1",
-            speechBubblePadding: 20,
+            speechBubblePadding: 30,
           },
         ]}
         sx={{
