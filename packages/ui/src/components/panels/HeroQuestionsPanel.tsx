@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { TransitionHeadline } from "../common/TransitionHeadline"
 import { Fade } from "@mui/material"
+import { SxProps, Theme } from "@mui/material/styles"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
@@ -74,7 +75,7 @@ export function HeroQuestionsPanel({
   backgroundImage,
   verticalAlignment = "center",
   children,
-  transitionInterval = 8000,
+  transitionInterval = 6000,
   includeHeaderSpacing = true,
   headlineColor,
   overlayCircles = [],
@@ -149,7 +150,7 @@ export function HeroQuestionsPanel({
         clearTimeout(animationRef.current)
       }
     }
-  }, [overlayCircles.length, transitionInterval])
+  }, [overlayCircles.length, transitionInterval, overlayCircles])
 
   return (
     <BasePanel
@@ -245,7 +246,7 @@ export function HeroQuestionsPanel({
 
             // Calculate position and text alignment based on anchor point
             let left, top, textAlign: "left" | "right" | "center"
-            let boxSx: Record<string, any> = {}
+            let boxSx: SxProps<Theme> = {}
 
             switch (anchor) {
               case "top-left": // Above and to the left of the circle
