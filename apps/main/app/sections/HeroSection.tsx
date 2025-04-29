@@ -17,6 +17,7 @@ export default function HeroSection() {
       }}
     >
       <HeroQuestionsPanel
+        backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
         headlines={
           (t("heroPanel.headlines") as string[]) || [
             "How do reservoir operations affect Delta water quality?",

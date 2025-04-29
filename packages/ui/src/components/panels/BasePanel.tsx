@@ -10,6 +10,13 @@ export interface BasePanelProps extends BoxProps {
   paddingVariant?: "normal" | "narrow" | "wide" | "very-wide" | "none"
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
+  /**
+   * Optional background image that will cover the entire panel.  Useful for hero sections
+   * or full-bleed graphics. When provided, the image is applied with
+   * `background-size: cover` and `background-position: center` so it fills the
+   * viewport while maintaining aspect ratio.
+   */
+  backgroundImage?: string
 }
 
 const PanelRoot = styled(Box, {
@@ -17,13 +24,15 @@ const PanelRoot = styled(Box, {
     prop !== "fullHeight" &&
     prop !== "background" &&
     prop !== "paddingVariant" &&
-    prop !== "includeHeaderSpacing",
+    prop !== "includeHeaderSpacing" &&
+    prop !== "backgroundImage",
 })<BasePanelProps>(({
   theme,
   fullHeight,
   background,
   paddingVariant,
   includeHeaderSpacing,
+  backgroundImage,
 }) => {
   // Base padding based on variant
   const getBasePadding = () => {
@@ -95,6 +104,11 @@ const PanelRoot = styled(Box, {
     [theme.breakpoints.down("md")]: {
       padding: getPaddingString(mobilePadding),
     },
+
+    // Optional full-bleed background image
+    backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+    backgroundSize: backgroundImage ? "cover" : undefined,
+    backgroundPosition: backgroundImage ? "center" : undefined,
   }
 })
 
@@ -103,6 +117,7 @@ export function BasePanel({
   background = "light",
   paddingVariant = "normal",
   includeHeaderSpacing = true,
+  backgroundImage,
   children,
   ...rest
 }: BasePanelProps) {
@@ -112,6 +127,7 @@ export function BasePanel({
       background={background}
       paddingVariant={paddingVariant}
       includeHeaderSpacing={includeHeaderSpacing}
+      backgroundImage={backgroundImage}
       {...rest}
     >
       {children}
