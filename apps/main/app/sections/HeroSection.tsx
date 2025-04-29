@@ -6,12 +6,13 @@ import React from "react"
 export default function HeroSection() {
   const { t } = useTranslation()
 
-  const headlines = [
-    "How do reservoir operations affect Delta water quality?",
-    "Which water futures support salmon survival?",
-    "How do cities and farms share water in a hotter, drier future?",
-    "Which policies help meet environmental goals?",
-    "What happens if we let our rivers run?",
+  // Get translated headlines or fall back to default values
+  const headlines = (t("heroPanel.headlines") as string[]) || [
+    "Is California ready for the next drought?",
+    "Does saving salmon means changing how we use water?",
+    "Do some Californians still lack water justice?",
+    "How is climate change reshaping California's water?",
+    "Where does your water come from? Who else depends on it?",
   ]
 
   return (
@@ -94,13 +95,6 @@ export default function HeroSection() {
           },
         ]}
         sx={{
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.3)",
-            zIndex: 0,
-          },
           "& > div": {
             marginTop: "-15vh",
           },

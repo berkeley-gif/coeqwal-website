@@ -1,0 +1,31 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - nvm install 22
+            - nvm use 22
+            - node -v
+            - corepack enable
+            - pnpm install
+        build:
+          commands:
+            - export NODE_OPTIONS="--max-old-space-size=4096"
+            - pnpm rebuild
+            - npx turbo run build --filter=storyline-flow
+      artifacts:
+        baseDirectory: apps/storyline-flow/out
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - ~/.cache/pnpm/**/*
+      buildPath: /
+    appRoot: apps/storyline-flow
+    environment:
+      variables:
+        AMPLIFY_DIFF_DEPLOY: false
+        AMPLIFY_MONOREPO_APP_ROOT: apps/storyline-flow
+        NEXT_PUBLIC_MAPBOX_TOKEN: ${NEXT_PUBLIC_MAPBOX_TOKEN} 
