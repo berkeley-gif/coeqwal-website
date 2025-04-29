@@ -35,15 +35,15 @@ export default function HeroSection() {
         overlayCircles={[
           // Circle 1: Upper left
           {
-            xPercent: -25,
-            yPercent: -30,
+            xPercent: -30,
+            yPercent: -36,
             radius: 80,
             stroke: "white",
-            strokeWidth: 4,
+            strokeWidth: 6,
             speechBubbleText: headlines[0],
             speechBubbleAnchor: "bottom-right",
-            speechBubbleWidth: 300,
-            speechBubbleVariant: "h4",
+            speechBubbleWidth: 600,
+            speechBubbleVariant: "h1",
           },
           // Circle 2: Upper right
           {
@@ -55,7 +55,7 @@ export default function HeroSection() {
             speechBubbleText: headlines[1],
             speechBubbleAnchor: "bottom-left",
             speechBubbleWidth: 300,
-            speechBubbleVariant: "h4",
+            speechBubbleVariant: "h1",
           },
           // Circle 3: Middle left
           {
@@ -67,7 +67,7 @@ export default function HeroSection() {
             speechBubbleText: headlines[2],
             speechBubbleAnchor: "top-right",
             speechBubbleWidth: 350,
-            speechBubbleVariant: "h4",
+            speechBubbleVariant: "h1",
           },
           // Circle 4: Lower right
           {
@@ -79,7 +79,7 @@ export default function HeroSection() {
             speechBubbleText: headlines[3],
             speechBubbleAnchor: "top-left",
             speechBubbleWidth: 300,
-            speechBubbleVariant: "h4",
+            speechBubbleVariant: "h1",
           },
           // Circle 5: Bottom center
           {
@@ -91,7 +91,7 @@ export default function HeroSection() {
             speechBubbleText: headlines[4],
             speechBubbleAnchor: "top-left",
             speechBubbleWidth: 300,
-            speechBubbleVariant: "h4",
+            speechBubbleVariant: "h1",
           },
         ]}
         sx={{
