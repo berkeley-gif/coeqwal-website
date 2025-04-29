@@ -114,11 +114,8 @@ export default function HeroSection() {
           },
         }}
       />
-      
-      <ScrollDownIcon 
-        onClick={handleScrollDown}
-        color="white"
-      />
+
+      <ScrollDownIcon onClick={handleScrollDown} color="white" />
     </Box>
   )
 }

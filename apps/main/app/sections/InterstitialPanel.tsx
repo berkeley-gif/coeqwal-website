@@ -5,13 +5,15 @@ import { ScrollDownIcon } from "@repo/ui"
 
 export default function InterstitialPanel() {
   const { t } = useTranslation()
-  
+
   const handleScrollDown = () => {
     // Scroll to the next section smoothly
     // Find and scroll to the next section element
-    const californiaWaterSection = document.getElementById('california-water-panel')
+    const californiaWaterSection = document.getElementById(
+      "california-water-panel",
+    )
     if (californiaWaterSection) {
-      californiaWaterSection.scrollIntoView({ behavior: 'smooth' })
+      californiaWaterSection.scrollIntoView({ behavior: "smooth" })
     } else {
       // Fallback to a shorter scroll distance if next section not found
       window.scrollBy({
@@ -20,7 +22,7 @@ export default function InterstitialPanel() {
       })
     }
   }
-  
+
   return (
     <BasePanel
       fullHeight={false}
@@ -47,11 +49,8 @@ export default function InterstitialPanel() {
           </Typography>
         </Stack>
       </Box>
-      
-      <ScrollDownIcon 
-        onClick={handleScrollDown}
-        color="white"
-      />
+
+      <ScrollDownIcon onClick={handleScrollDown} color="white" />
     </BasePanel>
   )
 }

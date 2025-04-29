@@ -91,11 +91,13 @@ const PanelRoot = styled(Box, {
             ? theme.palette.pop.main
             : background === "interstitial"
               ? theme.palette.interstitial.main
-            : "transparent",
+              : "transparent",
 
     // Text color based on background
     color:
-      background === "dark" || background === "accent" || background === "interstitial"
+      background === "dark" ||
+      background === "accent" ||
+      background === "interstitial"
         ? theme.palette.common.white
         : theme.palette.text.primary,
 
