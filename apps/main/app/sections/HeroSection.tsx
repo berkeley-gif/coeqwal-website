@@ -31,6 +31,48 @@ export default function HeroSection() {
         background="light"
         includeHeaderSpacing={false}
         headlineColor="common.white"
+        overlayCircles={[
+          // Circle 1: Upper left
+          {
+            xPercent: -25,
+            yPercent: -30,
+            radius: 80,
+            stroke: "white",
+            strokeWidth: 4,
+          },
+          // Circle 2: Upper right
+          {
+            xPercent: 25,
+            yPercent: -25,
+            radius: 90,
+            stroke: "white",
+            strokeWidth: 4,
+          },
+          // Circle 3: Middle left
+          {
+            xPercent: -30,
+            yPercent: 10,
+            radius: 70,
+            stroke: "white",
+            strokeWidth: 4,
+          },
+          // Circle 4: Lower right
+          {
+            xPercent: 15,
+            yPercent: 20,
+            radius: 85,
+            stroke: "white",
+            strokeWidth: 4,
+          },
+          // Circle 5: Bottom center
+          {
+            xPercent: 0,
+            yPercent: 35,
+            radius: 75,
+            stroke: "white",
+            strokeWidth: 4,
+          },
+        ]}
         sx={{
           backgroundColor: "rgb(191, 218, 220)",
           "& > div": {

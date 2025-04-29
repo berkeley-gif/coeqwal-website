@@ -15,6 +15,22 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
   includeHeaderSpacing?: boolean
   /** Optional MUI palette key or CSS color string for the headline text */
   headlineColor?: string
+  /**
+   * Optional circles to overlay on the panel. Each circle is positioned
+   * relative to the center of the panel.
+   */
+  overlayCircles?: Array<{
+    /** Horizontal position in percentage relative to center (positive = right, negative = left) */
+    xPercent: number
+    /** Vertical position in percentage relative to center (positive = down, negative = up) */
+    yPercent: number
+    /** Circle radius in pixels */
+    radius: number
+    /** Circle stroke color (defaults to theme pop.main) */
+    stroke?: string
+    /** Circle stroke width in pixels (defaults to 3) */
+    strokeWidth?: number
+  }>
 }
 
 /**
@@ -45,6 +61,7 @@ export function HeroQuestionsPanel({
   transitionInterval = 4000,
   includeHeaderSpacing = true,
   headlineColor,
+  overlayCircles = [],
   ...panelProps
 }: HeroQuestionsPanelProps) {
   // Use title as a single headline if headlines array is empty
@@ -68,6 +85,39 @@ export function HeroQuestionsPanel({
         ...panelProps.sx,
       }}
     >
+      {/* Overlay circles */}
+      {overlayCircles.length > 0 && (
+        <Box
+          component="svg"
+          sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 0, // below content
+          }}
+        >
+          {overlayCircles.map((circle, index) => {
+            // Calculate center-relative position
+            const cx = `calc(50% + ${circle.xPercent}%)`
+            const cy = `calc(50% + ${circle.yPercent}%)`
+
+            return (
+              <circle
+                key={index}
+                cx={cx}
+                cy={cy}
+                r={circle.radius}
+                fill="none"
+                stroke={circle.stroke || "currentColor"}
+                strokeWidth={circle.strokeWidth || 3}
+              />
+            )
+          })}
+        </Box>
+      )}
+
       <Box
         sx={(theme) => ({
           display: "flex",
