@@ -30,6 +30,7 @@ export default function HeroSection() {
         verticalAlignment="center"
         background="light"
         includeHeaderSpacing={false}
+        headlineColor="common.white"
         sx={{
           backgroundColor: "rgb(191, 218, 220)",
           "& > div": {

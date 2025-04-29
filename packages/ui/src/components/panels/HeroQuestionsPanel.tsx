@@ -13,6 +13,8 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
   children?: React.ReactNode
   transitionInterval?: number // Interval for headline transitions
   includeHeaderSpacing?: boolean
+  /** Optional MUI palette key or CSS color string for the headline text */
+  headlineColor?: string
 }
 
 /**
@@ -42,6 +44,7 @@ export function HeroQuestionsPanel({
   children,
   transitionInterval = 4000,
   includeHeaderSpacing = true,
+  headlineColor,
   ...panelProps
 }: HeroQuestionsPanelProps) {
   // Use title as a single headline if headlines array is empty
@@ -90,6 +93,7 @@ export function HeroQuestionsPanel({
           headlines={headlinesArray}
           transitionInterval={transitionInterval}
           variant="h1"
+          color={headlineColor}
           sx={{ marginBottom: content ? 3 : 0 }}
         />
 
