@@ -33,7 +33,7 @@ export default function HeroSection() {
         includeHeaderSpacing={false}
         headlineColor="common.white"
         overlayCircles={[
-          // Circle 1: Upper left
+          // Circle 1
           {
             xPercent: -30,
             yPercent: -36,

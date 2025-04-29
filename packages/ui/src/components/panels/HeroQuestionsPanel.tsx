@@ -74,7 +74,7 @@ export function HeroQuestionsPanel({
   backgroundImage,
   verticalAlignment = "center",
   children,
-  transitionInterval = 4000,
+  transitionInterval = 8000,
   includeHeaderSpacing = true,
   headlineColor,
   overlayCircles = [],
@@ -100,34 +100,47 @@ export function HeroQuestionsPanel({
 
     // Calculate timing
     const showDuration = transitionInterval
-    const staggerDelay = transitionInterval * 0.8 // Some overlap between animations
+    const staggerDelay = transitionInterval * 0.95 // Controls overlap - lower value = more overlap
     const totalItems = overlayCircles.length
 
     // Start with no bubbles visible
     setVisibleBubbles([])
 
     // Function to cycle through bubbles
-    const animateBubbles = (startIndex = 0) => {
-      // Show current bubble
-      setVisibleBubbles([startIndex])
+    const showBubble = (index: number) => {
+      // Add this bubble to visible bubbles
+      setVisibleBubbles((prev) => [...prev, index])
 
-      // Schedule it to disappear
+      // Schedule when to hide this bubble
       setTimeout(() => {
-        setVisibleBubbles([])
-
-        // Move to next bubble or loop back to start
-        const nextIndex = (startIndex + 1) % totalItems
-
-        // Add small delay before showing next bubble
-        animationRef.current = setTimeout(() => {
-          animateBubbles(nextIndex)
-        }, 500)
+        setVisibleBubbles((prev) => prev.filter((i) => i !== index))
       }, showDuration)
+    }
+
+    // Function to start the sequence
+    const startSequence = () => {
+      // Clear any existing bubbles
+      setVisibleBubbles([])
+
+      // Display each bubble with a staggered delay
+      overlayCircles.forEach((_, index) => {
+        const delay = index * staggerDelay
+
+        setTimeout(() => {
+          showBubble(index)
+        }, delay)
+      })
+
+      // Schedule the next sequence
+      const sequenceDuration = staggerDelay * (totalItems - 1) + showDuration
+      animationRef.current = setTimeout(() => {
+        startSequence()
+      }, sequenceDuration + 1000) // 1 second pause between sequences
     }
 
     // Start animation sequence after a brief delay
     animationRef.current = setTimeout(() => {
-      animateBubbles(0)
+      startSequence()
     }, 500)
 
     // Cleanup on unmount
@@ -185,7 +198,7 @@ export function HeroQuestionsPanel({
                 stroke={circle.stroke || "currentColor"}
                 strokeWidth={circle.strokeWidth || 3}
                 opacity={isVisible ? 1 : 0} // Completely fade out when not active
-                style={{ transition: "opacity 500ms ease" }}
+                style={{ transition: "opacity 1500ms ease-in-out" }}
               />
             )
           })}
@@ -232,24 +245,43 @@ export function HeroQuestionsPanel({
 
             // Calculate position and text alignment based on anchor point
             let left, top, textAlign: "left" | "right" | "center"
+            let boxSx: Record<string, any> = {}
 
             switch (anchor) {
               case "top-left": // Above and to the left of the circle
                 left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
                 top = `calc(${cy} - ${radius}px - ${padding}px)`
                 textAlign = "right"
+                boxSx = {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end", // Right align
+                  justifyContent: "flex-start", // Top align
+                }
                 break
 
               case "top-right": // Above and to the right of the circle
                 left = `calc(${cx} + ${radius}px + ${padding}px)`
                 top = `calc(${cy} - ${radius}px - ${padding}px)`
                 textAlign = "left"
+                boxSx = {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start", // Left align
+                  justifyContent: "flex-start", // Top align
+                }
                 break
 
               case "bottom-left": // Below and to the left of the circle
                 left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
                 top = `calc(${cy} + ${radius}px + ${padding}px)`
                 textAlign = "right"
+                boxSx = {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end", // Right align
+                  justifyContent: "flex-end", // Bottom align
+                }
                 break
 
               case "bottom-right": // Below and to the right of the circle
@@ -257,18 +289,26 @@ export function HeroQuestionsPanel({
                 left = `calc(${cx} + ${radius}px + ${padding}px)`
                 top = `calc(${cy} + ${radius}px + ${padding}px)`
                 textAlign = "left"
+                boxSx = {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start", // Left align
+                  justifyContent: "flex-end", // Bottom align
+                }
                 break
             }
 
             return (
-              <Fade key={`bubble-${index}`} in={isVisible} timeout={800}>
+              <Fade key={`bubble-${index}`} in={isVisible} timeout={1800}>
                 <Box
                   sx={{
                     position: "absolute",
                     left,
                     top,
                     maxWidth: `${bubbleWidth}px`,
+                    minHeight: "200px", // Add minimum height for vertical alignment
                     pointerEvents: "auto",
+                    ...boxSx, // Apply position-specific styles
                   }}
                 >
                   <Typography
