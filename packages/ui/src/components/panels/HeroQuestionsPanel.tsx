@@ -1,8 +1,10 @@
 "use client"
 
 import { Box, Typography } from "@mui/material"
+import { useState, useEffect, useRef } from "react"
 import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { TransitionHeadline } from "../common/TransitionHeadline"
+import { Fade } from "@mui/material"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
@@ -82,6 +84,60 @@ export function HeroQuestionsPanel({
   const headlinesArray =
     headlines.length > 0 ? headlines : title ? [title] : [""]
 
+  // State for tracking which circles/bubbles are currently visible
+  const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
+  const animationRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Set up animation sequence for the speech bubbles
+  useEffect(() => {
+    // Only apply animation if we have circles with speech bubbles
+    if (!overlayCircles.length) return
+
+    // Clear any existing animation
+    if (animationRef.current) {
+      clearTimeout(animationRef.current)
+    }
+
+    // Calculate timing
+    const showDuration = transitionInterval
+    const staggerDelay = transitionInterval * 0.8 // Some overlap between animations
+    const totalItems = overlayCircles.length
+
+    // Start with no bubbles visible
+    setVisibleBubbles([])
+
+    // Function to cycle through bubbles
+    const animateBubbles = (startIndex = 0) => {
+      // Show current bubble
+      setVisibleBubbles([startIndex])
+
+      // Schedule it to disappear
+      setTimeout(() => {
+        setVisibleBubbles([])
+
+        // Move to next bubble or loop back to start
+        const nextIndex = (startIndex + 1) % totalItems
+
+        // Add small delay before showing next bubble
+        animationRef.current = setTimeout(() => {
+          animateBubbles(nextIndex)
+        }, 500)
+      }, showDuration)
+    }
+
+    // Start animation sequence after a brief delay
+    animationRef.current = setTimeout(() => {
+      animateBubbles(0)
+    }, 500)
+
+    // Cleanup on unmount
+    return () => {
+      if (animationRef.current) {
+        clearTimeout(animationRef.current)
+      }
+    }
+  }, [overlayCircles.length, transitionInterval])
+
   return (
     <BasePanel
       fullHeight={true}
@@ -113,7 +169,9 @@ export function HeroQuestionsPanel({
           }}
         >
           {overlayCircles.map((circle, index) => {
-            // Calculate center-relative position
+            // Check if this circle should be visible
+            const isVisible = visibleBubbles.includes(index)
+
             const cx = `calc(50% + ${circle.xPercent}%)`
             const cy = `calc(50% + ${circle.yPercent}%)`
 
@@ -126,6 +184,8 @@ export function HeroQuestionsPanel({
                 fill="none"
                 stroke={circle.stroke || "currentColor"}
                 strokeWidth={circle.strokeWidth || 3}
+                opacity={isVisible ? 1 : 0} // Completely fade out when not active
+                style={{ transition: "opacity 500ms ease" }}
               />
             )
           })}
@@ -155,6 +215,9 @@ export function HeroQuestionsPanel({
             const padding = circle.speechBubblePadding ?? 10
             const bubbleWidth = circle.speechBubbleWidth ?? 300
             const variant = circle.speechBubbleVariant ?? "h4"
+
+            // Check if this bubble should be visible
+            const isVisible = visibleBubbles.includes(index)
 
             // Choose anchor if not specified (based on circle position)
             const anchor =
@@ -198,26 +261,27 @@ export function HeroQuestionsPanel({
             }
 
             return (
-              <Box
-                key={`bubble-${index}`}
-                sx={{
-                  position: "absolute",
-                  left,
-                  top,
-                  maxWidth: `${bubbleWidth}px`,
-                  pointerEvents: "auto",
-                }}
-              >
-                <Typography
-                  variant={variant}
-                  color={headlineColor}
+              <Fade key={`bubble-${index}`} in={isVisible} timeout={800}>
+                <Box
                   sx={{
-                    textAlign,
+                    position: "absolute",
+                    left,
+                    top,
+                    maxWidth: `${bubbleWidth}px`,
+                    pointerEvents: "auto",
                   }}
                 >
-                  {circle.speechBubbleText}
-                </Typography>
-              </Box>
+                  <Typography
+                    variant={variant}
+                    color={headlineColor}
+                    sx={{
+                      textAlign,
+                    }}
+                  >
+                    {circle.speechBubbleText}
+                  </Typography>
+                </Box>
+              </Fade>
             )
           })}
         </Box>
