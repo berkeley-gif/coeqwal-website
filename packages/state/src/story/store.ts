@@ -8,7 +8,6 @@ export interface StoryUIState {
   queue: Scene[]
   // actions
   setScene: (scene: Scene) => void
-  setAnimating: (flag: boolean) => void
   markDone: () => void
   setOverlay: (key: string, visible: boolean) => void
 }
@@ -19,10 +18,6 @@ export const useStoryStore = create<StoryUIState>()(
     overlays: {},
     queue: [],
     setScene: (scene) => set((s) => void (s.current = scene)),
-    setAnimating: (flag) =>
-      set((s) => {
-        s.current.status = flag ? "running" : "idle"
-      }),
     markDone: () => set((s) => void (s.current.status = "done")),
     setOverlay: (key, visible) =>
       set((s) => {

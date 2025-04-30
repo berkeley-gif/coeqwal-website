@@ -45,10 +45,8 @@ export function usePrecipitationAnimation(
     flyOverlapMs = 400,
   }: Options = {},
 ) {
-  const isAnimating = useStoryStore((state) => state.isAnimating)
-  const { setAnimating, setOverlay, setScene, markDone } =
-    useStoryStore.getState()
-  const isAnimatingRef = useRef(isAnimating)
+  const { setOverlay, setScene, markDone } = useStoryStore.getState()
+  const isAnimatingRef = useRef(false)
   const frameId = useRef<number | null>(null)
 
   // ---- helpers -----------------------------------------------------------
@@ -153,7 +151,6 @@ export function usePrecipitationAnimation(
           cancelAnimationFrame(frameId.current!)
           frameId.current = null
           markDone()
-          setAnimating(false)
           isAnimatingRef.current = false
           setOverlay("arLabel", false)
           return
@@ -171,7 +168,6 @@ export function usePrecipitationAnimation(
     }
 
     setScene({ id: "ar-overview", status: "running" })
-    setAnimating(true)
     isAnimatingRef.current = true
     setOverlay("arLabel", true)
 
@@ -189,14 +185,13 @@ export function usePrecipitationAnimation(
   }, [
     bandDurationMs,
     initialiseLayers,
-    isAnimating,
+    isAnimatingRef,
     mapRef,
     setOpacity,
     snowfallThreshold,
     fadeMultiplier,
     snowFadeDurationMs,
     flyOverlapMs,
-    setAnimating,
     setOverlay,
     setScene,
     markDone,
