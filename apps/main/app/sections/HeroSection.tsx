@@ -115,7 +115,11 @@ export default function HeroSection() {
         }}
       />
 
-      <ScrollDownIcon onClick={handleScrollDown} color="white" />
+      <ScrollDownIcon 
+        onClick={handleScrollDown} 
+        color="white" 
+        text="Water connects us. Explore California's water system and discover possibilities for the future of water in our state."
+      />
     </Box>
   )
 }

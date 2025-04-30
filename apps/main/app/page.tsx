@@ -115,7 +115,7 @@ export default function Home() {
             position: "relative",
           }}
         >
-          {/* Hero Questions Panel */}
+          {/* Landing Panel */}
           <HeroSection />
 
           {/* Interstitial Panel */}
@@ -127,7 +127,7 @@ export default function Home() {
           {/* Managing Water panel with two columns */}
           <ManagingWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
 
-          {/* Challenges Panel */}
+          {/* Challenges panel */}
           <ChallengesSection onOpenDrawer={() => setDrawerOpen(true)} />
 
           {/* To Be Continued Panel */}

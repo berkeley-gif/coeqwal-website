@@ -1,18 +1,20 @@
 "use client"
 
-import { Box, IconButton } from "@mui/material"
+import { Box, IconButton, Typography } from "@mui/material"
 import { KeyboardArrowDown as KeyboardArrowDownIcon } from "@mui/icons-material"
 
 interface ScrollDownIconProps {
   onClick?: () => void
   color?: string
   size?: number
+  text?: string
 }
 
 export function ScrollDownIcon({
   onClick,
   color = "white",
   size = 40,
+  text,
 }: ScrollDownIconProps) {
   return (
     <Box
@@ -26,9 +28,25 @@ export function ScrollDownIcon({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        maxWidth: "600px",
       }}
       onClick={onClick}
     >
+      {text && (
+        <Typography 
+          variant="subtitle1" 
+          align="center" 
+          sx={{ 
+            color,
+            mb: 2,
+            fontSize: "1.2rem",
+            maxWidth: "100%",
+            textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)"
+          }}
+        >
+          {text}
+        </Typography>
+      )}
       <IconButton
         sx={{
           color,
