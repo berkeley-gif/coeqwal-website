@@ -5,6 +5,8 @@ import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
 import { usePrecipitationAnimation } from "../hooks/usePrecipitationAnimation"
 import { useStoryStore } from "@repo/state"
+import { useMapFly } from "../hooks/useMapFly"
+import { views } from "../config/mapViews"
 
 interface Props {
   onOpenDrawer: () => void
@@ -13,6 +15,7 @@ interface Props {
 export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
+  const fly = useMapFly()
   // precipitation animation hook
   const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef, {
     bandDurationMs: 250, // band cycling rate
@@ -20,6 +23,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   })
 
   const showARLabel = useStoryStore((s) => s.overlays.arLabel ?? false)
+  const darkenParagraphs = useStoryStore((s)=>s.overlays.paragraphShade ?? false)
   const { setOverlay } = useStoryStore.getState()
 
   const handleAnimateBands = () => {
@@ -29,7 +33,10 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   // helper for list items
   const renderParagraph = (translationKey: string, onClick?: () => void) => (
     <Box
-      sx={(theme) => ({ ...theme.mixins.hoverParagraph })}
+      sx={(theme) => ({
+        ...theme.mixins.hoverParagraph,
+        ...(darkenParagraphs ? { backgroundColor: theme.background.paragraph } : {}),
+      })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
       <Typography variant="body1">
@@ -88,15 +95,8 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
                 setOverlay("arLabel", false)
-                console.log("👁 flyTo clicked", mapRef.current)
-                mapRef.current?.flyTo({
-                  center: [-122.305, 37.075],
-                  zoom: 7.82,
-                  pitch: 60,
-                  bearing: 45,
-                  duration: 3000,
-                  essential: true,
-                })
+                setOverlay("paragraphShade", true)
+                fly(views.deltaClose)
               })}
               {renderParagraph("californiaWater.paragraph3")}
               {renderParagraph("californiaWater.paragraph4")}

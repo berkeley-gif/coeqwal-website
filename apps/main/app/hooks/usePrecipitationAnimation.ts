@@ -168,8 +168,8 @@ export function usePrecipitationAnimation(
     }
 
     setScene({ id: "ar-overview", status: "running" })
-    isAnimatingRef.current = true
     setOverlay("arLabel", true)
+    setOverlay("paragraphShade", false)
 
     // kick off slightly before fly ends
     const earlyDelay = Math.max(0, flyDuration - flyOverlapMs)

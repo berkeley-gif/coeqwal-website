@@ -6,6 +6,7 @@ import { Box } from "@repo/ui/mui"
 import { useMapStore, mapActions } from "@repo/state/map"
 import AnimatedMarker from "./AnimatedMarker"
 import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
+import { useStoryStore } from "@repo/state"
 
 interface MapContainerProps {
   uncontrolledRef?: React.RefObject<MapRef | null>
@@ -92,6 +93,8 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
               delay: 0,
             })
           }
+          // initial view: ensure paragraph background off
+          useStoryStore.getState().setOverlay("paragraphShade", false)
         }}
       >
         {/* Standard markers rendered using our utility & AnimatedMarker */}
