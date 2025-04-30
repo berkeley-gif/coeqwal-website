@@ -22,12 +22,18 @@ interface Options {
   /** index at which the snowfall layer fades in */
   snowfallThreshold?: number
   /** frames (RAF) that each band is shown */
-  framesPerBand?: number
+  framesPerBand?: number // deprecated, kept for backward compatibility
+  /** milliseconds each band is shown  – preferred */
+  bandDurationMs?: number
 }
 
 export function usePrecipitationAnimation(
   mapRef: React.RefObject<MapRef | null>,
-  { snowfallThreshold = 5, framesPerBand = 30 }: Options = {},
+  {
+    snowfallThreshold = 5,
+    framesPerBand = 30,
+    bandDurationMs = 400, // faster cycling – 0.4s per band
+  }: Options = {},
 ) {
   const [isAnimating, setIsAnimating] = useState(false)
   const frameId = useRef<number | null>(null)
@@ -84,6 +90,7 @@ export function usePrecipitationAnimation(
   // ---- animation --------------------------------------------------------
   const animateBands = useCallback(() => {
     if (isAnimating) return
+
     const map = mapRef.current?.getMap()
     if (!map) {
       console.warn("map not ready for animation")
@@ -94,21 +101,27 @@ export function usePrecipitationAnimation(
     // Fly out over the Pacific for context before the animation begins
     map.flyTo({
       center: [-135, 35], // west of California
-      zoom: 4,
+      zoom: 4.6,
       pitch: 0,
       bearing: 0,
       duration: 1500,
       essential: true,
     })
 
-    let bandIndex = 0
-    let frame = 0
-    let snowShown = false
+    // Ensure precipitation layer fades between bands
+    map.setPaintProperty(
+      "precipitable-water",
+      "raster-fade-duration",
+      bandDurationMs,
+    )
 
-    const step = () => {
-      frame++
-      if (frame >= framesPerBand) {
-        frame = 0
+    let bandIndex = 0
+    let snowShown = false
+    let lastSwitch = performance.now()
+
+    const step = (now: number) => {
+      if (now - lastSwitch >= bandDurationMs) {
+        lastSwitch = now
         bandIndex += 1
         if (bandIndex < PRECIPITATION_BANDS.length) {
           map.setPaintProperty(
@@ -116,6 +129,8 @@ export function usePrecipitationAnimation(
             "raster-array-band",
             PRECIPITATION_BANDS[bandIndex],
           )
+
+          // fade in snowfall once threshold reached
           if (bandIndex >= snowfallThreshold && !snowShown) {
             setOpacity(map, "snowfall", 1, 2000)
             snowShown = true
@@ -134,7 +149,7 @@ export function usePrecipitationAnimation(
     setIsAnimating(true)
     frameId.current = requestAnimationFrame(step)
   }, [
-    framesPerBand,
+    bandDurationMs,
     initialiseLayers,
     isAnimating,
     mapRef,

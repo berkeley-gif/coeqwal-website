@@ -13,7 +13,10 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
   // precipitation animation hook
-  const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef)
+  const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef, {
+    bandDurationMs: 250, // band cycling rate
+    snowfallThreshold: 6, // band timing for fade-in
+  })
 
   // helper for list items
   const renderParagraph = (translationKey: string, onClick?: () => void) => (
