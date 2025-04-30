@@ -15,6 +15,8 @@ import HeroSection from "./sections/HeroSection"
 import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
+import ChallengesSection from "./sections/ChallengesSection"
+
 export default function Home() {
   const { t } = useTranslation()
 
@@ -124,6 +126,9 @@ export default function Home() {
 
           {/* Managing Water panel with two columns */}
           <ManagingWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* Challenges Panel */}
+          <ChallengesSection onOpenDrawer={() => setDrawerOpen(true)} />
 
           {/* To Be Continued Panel */}
           <Box sx={{ pointerEvents: "auto" }}>

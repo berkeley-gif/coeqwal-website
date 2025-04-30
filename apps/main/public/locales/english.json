@@ -52,6 +52,13 @@
     "paragraph2": "Much of the freshwater flowing from the Sacramento and San Joaquin rivers into the Delta is pumped into canals that deliver water back to farms in the San Joaquin Valley and cities in Southern California.",
     "paragraph3": "Managing California's water is no easy task. Precipitation varies unpredictably both seasonally and year to year, and a web of laws, regulations, and institutions shapes how water is managed and allocated across the state."
   },
+  "challenges": {
+    "title": "Growing Challenges",
+    "paragraph1": "California's water is essential for farms, cities, and the environment—but not everyone has equal access to it. Historically, laws prevented Indigenous communities and people of color from securing land and water rights, and the effects of these injustices are still felt today. Many communities continue to struggle with limited or unsafe drinking water, and the state is facing a growing population.",
+    "paragraph2": "The transforamtion of our water system has taken a toll on freshwater ecosystems. Dams have reduced river flows and blocked migratory fish like the endangered Sacramento River winter-run Chinook salmon. For more than a century, farms have relied heavily on groundwater for irrigation, depleting aquifers throughout the Central Valley.",
+    "paragraph3": "Climate change is making things even more challenging. California is experiencing more extreme weather, and rising temperatures mean less snow in the mountains. Meanwhile, rising sea levels are pushing saltwater farther inland, threatening ecosystems, farms, communities, and the water supply system in the Delta.",
+    "paragraph4": "Despite these challenges, California has opportunities to adapt. By improving the way we manage water, we can better meet future needs and ensure a more fair and sustainable water supply for everyone."
+  },
   "scenarioResults": {
     "title": "Scenario Results",
     "description": "View and compare results from different water management scenarios.",
