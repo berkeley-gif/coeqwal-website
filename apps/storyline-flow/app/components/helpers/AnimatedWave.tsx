@@ -2,10 +2,19 @@
 
 import React, { useEffect, useRef } from "react"
 import * as d3 from "d3"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 const numWaves = 4
 const colors: string[] = ["#1a3a5d", "#2568a3", "#3092d1", "#00e5ff"] // blues
-const heightPortion = 0.35 // lower means waves are higher
+
+//TODO: make the wave height also responsive
+const portion = {
+  xs: 0.35,
+  sm: 0.35,
+  md: 0.35,
+  lg: 0.25,
+  xl: 0.35,
+}
 
 const AnimatedWaves = ({
   width,
@@ -15,11 +24,13 @@ const AnimatedWaves = ({
   height: number
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null)
+  const breakpoint = useBreakpoint()
 
   useEffect(() => {
     if (!width || !height) return // Avoid rendering if dimensions are invalid
 
     const svg = d3.select(svgRef.current)
+    const heightPortion = portion[breakpoint] || 0.35
 
     // Clear previous SVG content to avoid overlapping waves
     svg.selectAll("*").remove()
@@ -82,7 +93,7 @@ const AnimatedWaves = ({
     }
 
     animateWaves()
-  }, [width, height]) // Re-run the effect when width or height changes
+  }, [width, height, breakpoint]) // Re-run the effect when width or height changes
 
   return (
     <svg ref={svgRef} style={{ position: "absolute", top: 0, left: 0 }}></svg>

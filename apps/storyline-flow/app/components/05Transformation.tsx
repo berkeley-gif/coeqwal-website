@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useMap } from "@repo/map"
 import { stateMapViewState } from "./helpers/mapViews"
 import Underline from "./helpers/Underline"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 function SectionTransformation() {
   return (
@@ -28,17 +29,19 @@ function Transformation() {
   const hasSeen = useRef(false)
   const { flyTo } = useMap()
   const [startAnimation, setStartAnimation] = useState(false)
+  const breakpoint = useBreakpoint()
+  const mapViewState = stateMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: stateMapViewState.longitude,
-      latitude: stateMapViewState.latitude,
-      zoom: stateMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {

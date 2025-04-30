@@ -14,6 +14,7 @@ import AnimatedCurve from "./vis/AnimatedCurve"
 import { Sentence } from "@repo/motion/components"
 import { MONTHS, selectedMonths } from "./helpers/constants"
 import { stateMapViewState } from "./helpers/mapViews"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 function SectionWaterSource() {
   const [markers, setMarkers] = useState<Record<string, MarkerType[]>>({}) // Initialize markers as an empty array
@@ -131,6 +132,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   const hasSeen = useRef(false)
 
   const [startBarAnimation, setStartBarAnimation] = useState(false)
+  const { setPaintProperty } = useMap()
   const setMarkers = useStoryStore((state) => state.setMarkers)
 
   const getSelectedYear = (year: string) => {
@@ -144,6 +146,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
         //console.log('initialize stuff')
       }
       hasSeen.current = true
+      setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
     } else {
       if (hasSeen.current) {
         //console.log('unload stuff')
@@ -153,7 +156,7 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
         return
       }
     }
-  }, [isSectionActive, setMarkers])
+  }, [isSectionActive, setMarkers, setPaintProperty])
 
   return (
     <Box
@@ -208,12 +211,14 @@ function Snowpack() {
   const hasSeen = useRef(false)
   const { flyTo, setPaintProperty } = useMap()
   const setMarkers = useStoryStore((state) => state.setMarkers)
+  const breakpoint = useBreakpoint()
+  const mapViewState = stateMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: stateMapViewState.longitude,
-      latitude: stateMapViewState.latitude,
-      zoom: stateMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
@@ -221,7 +226,7 @@ function Snowpack() {
     setPaintProperty("river-sac-layer", "line-opacity", 0)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
     setMarkers([mountainMarker], "text")
-  }, [flyTo, setPaintProperty, setMarkers])
+  }, [flyTo, setPaintProperty, setMarkers, mapViewState])
 
   const unload = useCallback(() => {
     setMarkers([], "text")
