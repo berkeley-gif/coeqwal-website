@@ -35,7 +35,17 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        ...(darkenParagraphs ? { backgroundColor: theme.background.paragraph } : {}),
+        ...(darkenParagraphs
+          ? {
+              backgroundColor: "rgba(25, 118, 210, 0.6)",
+              "&:hover": {
+                backgroundColor: "rgba(25, 118, 210, 0.8)",
+              },
+              "&:active": {
+                backgroundColor: "rgba(25, 118, 210, 0.9)",
+              },
+            }
+          : {}),
       })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
