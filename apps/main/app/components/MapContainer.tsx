@@ -83,6 +83,16 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
         interactive
         dragPan
         style={{ width: "100%", height: "100%" }}
+        onLoad={() => {
+          const map = mapRef.current?.getMap()
+          if (map && map.getLayer("snowfall")) {
+            map.setPaintProperty("snowfall", "raster-opacity", 0)
+            map.setPaintProperty("snowfall", "raster-opacity-transition", {
+              duration: 0,
+              delay: 0,
+            })
+          }
+        }}
       >
         {/* Standard markers rendered using our utility & AnimatedMarker */}
         {filteredMarkers.map((marker) => (
