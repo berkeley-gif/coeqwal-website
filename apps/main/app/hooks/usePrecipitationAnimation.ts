@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from "react"
+import { useRef, useCallback, useEffect } from "react"
 import type { MapRef } from "@repo/map"
+import { useStoryStore } from "@repo/state"
 
 // local map type convenience
 type MBMap = ReturnType<MapRef["getMap"]>
@@ -44,8 +45,9 @@ export function usePrecipitationAnimation(
     flyOverlapMs = 400,
   }: Options = {},
 ) {
-  const [isAnimating, setIsAnimating] = useState(false)
-  const isAnimatingRef = useRef(false)
+  const isAnimating = useStoryStore((state) => state.isAnimating)
+  const { setAnimating, setOverlay } = useStoryStore.getState()
+  const isAnimatingRef = useRef(isAnimating)
   const frameId = useRef<number | null>(null)
 
   // ---- helpers -----------------------------------------------------------
@@ -99,7 +101,7 @@ export function usePrecipitationAnimation(
 
   // ---- animation --------------------------------------------------------
   const animateBands = useCallback(() => {
-    if (isAnimating) return
+    if (isAnimatingRef.current) return
 
     const map = mapRef.current?.getMap()
     if (!map) {
@@ -149,8 +151,9 @@ export function usePrecipitationAnimation(
         } else {
           cancelAnimationFrame(frameId.current!)
           frameId.current = null
-          setIsAnimating(false)
+          setAnimating(false)
           isAnimatingRef.current = false
+          setOverlay("arLabel", false)
           return
         }
       }
@@ -165,8 +168,9 @@ export function usePrecipitationAnimation(
       map.off("moveend", startAnimation)
     }
 
-    setIsAnimating(true)
+    setAnimating(true)
     isAnimatingRef.current = true
+    setOverlay("arLabel", true)
 
     // kick off slightly before fly ends
     const earlyDelay = Math.max(0, flyDuration - flyOverlapMs)
@@ -189,6 +193,8 @@ export function usePrecipitationAnimation(
     fadeMultiplier,
     snowFadeDurationMs,
     flyOverlapMs,
+    setAnimating,
+    setOverlay,
   ])
 
   // cleanup on unmount
@@ -198,5 +204,5 @@ export function usePrecipitationAnimation(
     }
   }, [])
 
-  return { animateBands, isAnimating }
+  return { animateBands, isAnimating: isAnimatingRef.current }
 }

@@ -95,7 +95,10 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             </Typography>
 
             <Stack spacing={1}>
-              {renderParagraph("californiaWater.paragraph1", handleAnimateBands)}
+              {renderParagraph(
+                "californiaWater.paragraph1",
+                handleAnimateBands,
+              )}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
                 console.log("👁 flyTo clicked", mapRef.current)

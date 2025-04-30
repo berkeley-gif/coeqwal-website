@@ -7,4 +7,4 @@ export const VERSION = "0.1.0"
 export * from "./map"
 
 // Export story store
-export * from "./story/store"
+export * from "./story"
