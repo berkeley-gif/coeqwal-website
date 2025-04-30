@@ -62,6 +62,10 @@ export function usePrecipitationAnimation(
     )
     map.setPaintProperty("precipitable-water", "raster-opacity", 0.7)
     setOpacity(map, "snowfall", 0, 0)
+    map.setPaintProperty("snowfall", "raster-opacity-transition", {
+      duration: 0,
+      delay: 0,
+    })
     return true
   }, [mapRef, setOpacity])
 
@@ -89,12 +93,12 @@ export function usePrecipitationAnimation(
 
     // Fly out over the Pacific for context before the animation begins
     map.flyTo({
-        center: [-135, 35], // west of California
-        zoom: 4,
-        pitch: 0,
-        bearing: 0,
-        duration: 1500,
-        essential: true,
+      center: [-135, 35], // west of California
+      zoom: 4,
+      pitch: 0,
+      bearing: 0,
+      duration: 1500,
+      essential: true,
     })
 
     let bandIndex = 0
@@ -121,8 +125,6 @@ export function usePrecipitationAnimation(
           cancelAnimationFrame(frameId.current!)
           frameId.current = null
           setIsAnimating(false)
-          // reset snowfall
-          setOpacity(map, "snowfall", 0, 1000)
           return
         }
       }
