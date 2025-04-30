@@ -46,7 +46,8 @@ export function usePrecipitationAnimation(
   }: Options = {},
 ) {
   const isAnimating = useStoryStore((state) => state.isAnimating)
-  const { setAnimating, setOverlay, setScene, markDone } = useStoryStore.getState()
+  const { setAnimating, setOverlay, setScene, markDone } =
+    useStoryStore.getState()
   const isAnimatingRef = useRef(isAnimating)
   const frameId = useRef<number | null>(null)
 
