@@ -1,9 +1,10 @@
-import React, { useState } from "react"
+import React from "react"
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
 import { usePrecipitationAnimation } from "../hooks/usePrecipitationAnimation"
+import { useStoryStore } from "@repo/state"
 
 interface Props {
   onOpenDrawer: () => void
@@ -18,11 +19,11 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     snowfallThreshold: 6, // band timing for fade-in
   })
 
-  const [showARLabel, setShowARLabel] = useState(false)
+  const showARLabel = useStoryStore((s) => s.overlays.arLabel ?? false)
+  const { setOverlay } = useStoryStore.getState()
 
   const handleAnimateBands = () => {
     animateBands()
-    setShowARLabel(true)
   }
 
   // helper for list items
@@ -86,6 +87,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               )}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
+                setOverlay("arLabel", false)
                 console.log("👁 flyTo clicked", mapRef.current)
                 mapRef.current?.flyTo({
                   center: [-122.305, 37.075],
