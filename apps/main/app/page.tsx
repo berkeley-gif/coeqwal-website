@@ -1,10 +1,9 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
@@ -16,7 +15,7 @@ import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
-
+import CalSimSection from "./sections/CalSimSection"
 export default function Home() {
   const { t } = useTranslation()
 
@@ -130,7 +129,10 @@ export default function Home() {
           {/* Challenges panel */}
           <ChallengesSection onOpenDrawer={() => setDrawerOpen(true)} />
 
-          {/* To Be Continued Panel */}
+          {/* CalSim panel */}
+          <CalSimSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* To Be Continued Panel
           <Box sx={{ pointerEvents: "auto" }}>
             <BasePanel
               background="transparent"
@@ -154,7 +156,7 @@ export default function Home() {
                 (to be continued)
               </Typography>
             </BasePanel>
-          </Box>
+          </Box> */}
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">
