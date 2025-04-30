@@ -1,23 +1,24 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
+import type { Scene } from "./types"
 
 export interface StoryUIState {
-  currentScene: string | null
-  isAnimating: boolean
+  current: Scene
   overlays: Record<string, boolean>
+  queue: Scene[]
   // actions
-  setScene: (id: string | null) => void
-  setAnimating: (flag: boolean) => void
+  setScene: (scene: Scene) => void
+  markDone: () => void
   setOverlay: (key: string, visible: boolean) => void
 }
 
 export const useStoryStore = create<StoryUIState>()(
   immer<StoryUIState>((set) => ({
-    currentScene: null,
-    isAnimating: false,
+    current: { id: "initial-load", status: "idle" },
     overlays: {},
-    setScene: (id) => set((s) => void (s.currentScene = id)),
-    setAnimating: (flag) => set((s) => void (s.isAnimating = flag)),
+    queue: [],
+    setScene: (scene) => set((s) => void (s.current = scene)),
+    markDone: () => set((s) => void (s.current.status = "done")),
     setOverlay: (key, visible) =>
       set((s) => {
         s.overlays[key] = visible

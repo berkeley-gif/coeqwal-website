@@ -46,7 +46,7 @@ export function usePrecipitationAnimation(
   }: Options = {},
 ) {
   const isAnimating = useStoryStore((state) => state.isAnimating)
-  const { setAnimating, setOverlay } = useStoryStore.getState()
+  const { setAnimating, setOverlay, setScene, markDone } = useStoryStore.getState()
   const isAnimatingRef = useRef(isAnimating)
   const frameId = useRef<number | null>(null)
 
@@ -151,6 +151,7 @@ export function usePrecipitationAnimation(
         } else {
           cancelAnimationFrame(frameId.current!)
           frameId.current = null
+          markDone()
           setAnimating(false)
           isAnimatingRef.current = false
           setOverlay("arLabel", false)
@@ -168,6 +169,7 @@ export function usePrecipitationAnimation(
       map.off("moveend", startAnimation)
     }
 
+    setScene({ id: "ar-overview", status: "running" })
     setAnimating(true)
     isAnimatingRef.current = true
     setOverlay("arLabel", true)
@@ -195,6 +197,8 @@ export function usePrecipitationAnimation(
     flyOverlapMs,
     setAnimating,
     setOverlay,
+    setScene,
+    markDone,
   ])
 
   // cleanup on unmount

@@ -125,7 +125,7 @@ const hoverParagraphMixin = {
   borderRadius: 1,
   transition: "background-color 0.3s ease",
   "&:hover": {
-    backgroundColor: "rgba(25, 118, 210, 0.08)",
+    backgroundColor: "rgba(25, 118, 210, 0.1)",
   },
   "&:hover .MuiSvgIcon-root": {
     color: "#42a5f5",
