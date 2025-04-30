@@ -112,7 +112,7 @@ export function usePrecipitationAnimation(
     const flyDuration = 1500
     map.flyTo({
       center: [-135, 35], // west of California
-      zoom: 4.6,
+      zoom: 4.8,
       pitch: 0,
       bearing: 0,
       duration: flyDuration,

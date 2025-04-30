@@ -40,7 +40,11 @@
     "paragraph1": "La mayor parte del agua de California cae en invierno como lluvia y nieve en el norte de California y la Sierra Nevada. Esta precipitación, muy variable de un año a otro, es la principal fuente de agua del estado.",
     "paragraph2": "La capa de nieve sirve como un embalse natural, liberando agua durante la primavera. A medida que la lluvia y el deshielo fluyen desde las montañas hacia los ríos del Valle Central, parte de ella se filtra bajo tierra y recarga grandes acuíferos.",
     "paragraph3": "El río Sacramento, el más grande de California, fluye desde el norte y se une con el río San Joaquín, que sube desde el sur, en el Delta. Estos flujos crean uno de los estuarios ecológicamente más ricos de la Costa Oeste antes de desembocar en la Bahía de San Francisco y el Océano Pacífico. En el Delta, el agua dulce se mezcla con agua salada, creando un equilibrio de salinidad cambiante determinado por la cantidad de flujo y las mareas.",
-    "paragraph4": "Aunque California tiene abundancia de agua, la mayor parte de nuestra agua cae lejos de donde vive, trabaja y cultiva la mayoría de la gente. Para suministrar agua a la agricultura y a una población creciente en las partes más secas del estado, hemos transformado cómo se mueve el agua a través de California."
+    "paragraph4": "Aunque California tiene abundancia de agua, la mayor parte de nuestra agua cae lejos de donde vive, trabaja y cultiva la mayoría de la gente. Para suministrar agua a la agricultura y a una población creciente en las partes más secas del estado, hemos transformado cómo se mueve el agua a través de California.",
+    "arLabel": {
+      "title": "Río atmosférico",
+      "date": "diciembre de 2024"
+    }
   },
   "scenarioResults": {
     "title": "Resultados de Escenarios",

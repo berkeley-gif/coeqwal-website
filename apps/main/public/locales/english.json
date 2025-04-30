@@ -8,7 +8,7 @@
     "headlines": [
       "Is California ready for the next drought?",
       "Does saving salmon mean changing how we use water?",
-      "How is climate change reshaping California’s water?",
+      "How is climate change reshaping California's water?",
       "Do some Californians still lack water justice?",
       "Where does your water come from? Who else depends on it?"
     ],
@@ -40,7 +40,11 @@
     "paragraph1": "Most of California's water falls in the winter as rain and snow in northern California and the Sierra Nevada. This precipitation – highly variable from year to year – is the state's primary water supply.",
     "paragraph2": "Snowpack serves as a natural reservoir, releasing water throughout the spring. As rainfall and melting snow flows from the mountains into rivers of the Central Valley, some of it seeps underground and replenishes large aquifers.",
     "paragraph3": "The Sacramento River - California's largest - flows from the north and joins with the San Joaquin River, flowing up from the south, in the Delta. These flows create one of the most ecologically rich estuaries on the West Coast before flowing out to the San Francisco Bay and Pacific Ocean. In the Delta, freshwater mixes with saltwater, creating a shifting salinity balance shaped by the amount of flow and the tides.",
-    "paragraph4": "Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, we have transformed how water moves through California."
+    "paragraph4": "Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, we have transformed how water moves through California.",
+    "arLabel": {
+      "title": "Atmospheric River",
+      "date": "December 2024"
+    }
   },
   "scenarioResults": {
     "title": "Scenario Results",

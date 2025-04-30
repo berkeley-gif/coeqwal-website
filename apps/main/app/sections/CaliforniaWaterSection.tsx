@@ -156,13 +156,13 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
                 variant="body1"
                 sx={{ fontSize: "1rem", color: "white", fontWeight: 600 }}
               >
-                Atmospheric River
+                {t("californiaWater.arLabel.title")}
               </Typography>
               <Typography
                 variant="body1"
                 sx={{ fontSize: "1rem", color: "white", fontWeight: 400 }}
               >
-                December 2024
+                {t("californiaWater.arLabel.date")}
               </Typography>
             </Box>
           </Box>
