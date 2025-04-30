@@ -1,7 +1,7 @@
 "use client"
 
 import { MapRef, Marker, Map as MapboxGLMap } from "react-map-gl/mapbox"
-import { useCallback } from "react"
+import { useCallback, useEffect } from "react"
 import { useMap } from "./context/MapContext"
 import type { MapProps, MarkerProperties } from "./types"
 import "mapbox-gl/dist/mapbox-gl.css"
@@ -24,6 +24,25 @@ export default function Map(props: MapProps) {
     },
     [mapRef],
   )
+
+  // Hide graticule layer whenever style is (re)loaded
+  useEffect(() => {
+    const mapInstance = mapRef?.current?.getMap?.()
+    if (!mapInstance) return
+
+    const hideGraticule = () => {
+      if (mapInstance.getLayer && mapInstance.getLayer("graticule")) {
+        mapInstance.setLayoutProperty("graticule", "visibility", "none")
+      }
+    }
+
+    if (mapInstance.isStyleLoaded()) hideGraticule()
+    mapInstance.on("styledata", hideGraticule)
+
+    return () => {
+      mapInstance.off("styledata", hideGraticule)
+    }
+  }, [mapRef])
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
