@@ -216,7 +216,7 @@ const theme = createTheme({
       paper: themeValues.palette.neutral.light,
     },
     interstitial: {
-      main: themeValues.palette.neutral.light,
+      main: "#4b8fb4",
     },
     text: {
       primary: themeValues.palette.black,
@@ -234,9 +234,9 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "7rem",
-      fontWeight: 700,
-      lineHeight: 1.1,
+      fontSize: "3.6rem",
+      fontWeight: 500,
+      lineHeight: 1.05,
       letterSpacing: "normal",
     },
     h2: {
