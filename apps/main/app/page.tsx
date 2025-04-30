@@ -16,6 +16,8 @@ import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
 import CalSimSection from "./sections/CalSimSection"
+import InvitationSection from "./sections/InvitationSection"
+
 export default function Home() {
   const { t } = useTranslation()
 
@@ -126,11 +128,14 @@ export default function Home() {
           {/* Managing Water panel with two columns */}
           <ManagingWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
 
-          {/* Challenges panel */}
+          {/* Challenges panel with two columns */}
           <ChallengesSection onOpenDrawer={() => setDrawerOpen(true)} />
 
-          {/* CalSim panel */}
+          {/* CalSim panel with two columns */}
           <CalSimSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* Invitation panel with two columns */}
+          <InvitationSection onOpenDrawer={() => setDrawerOpen(true)} />
 
           {/* To Be Continued Panel
           <Box sx={{ pointerEvents: "auto" }}>

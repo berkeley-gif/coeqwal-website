@@ -65,6 +65,13 @@
     "paragraph2": "The model tracks how much water flows into reservoirs, how much is stored and released, and where it gets delivered across the state. The advantage of CalSim is in its flexibility—we can change the rules for distributing water and see the effects. For example, we can adjust priorities, modify regulations, and even test what happens if new infrastructure is added. We can also see how the system might respond to different climate conditions. This is the model that the state Department of Water Resources and the U.S. Bureau of Reclamation uses to model water management across the state.",
     "paragraph3": "Each unique combination of rules and climate conditions creates a scenario that shows how water might be allocated under different circumstances. The COEQWAL project is using CalSim to build a library of these scenarios for you to explore on this website. We've also developed tools to help you see how different choices impact the outcomes that you care about and the tradeoffs of those outcomes."
   },
+  "invitation": {
+    "title": "Begin your Exploration",
+    "paragraph1": "We invite you to explore the baseline scenario, which represents how water is currently managed in California. This scenario reflects existing laws and regulations as of 2025 and illustrates how the system is intended to operate today as well as under different climate conditions.",
+    "paragraph2": "We have organized our library of scenarios into themes that address specific water issues. You can explore the in-depth description of these themes and their scenarios.",
+    "paragraph3": "You can also go straight to the source and access the unprocessed scenario run data for the COEQWAL scenarios by clicking the Raw Data button above.",
+    "paragraph4": "Below you can search our library of scenarios for specific outcomes."
+  },
   "scenarioResults": {
     "title": "Scenario Results",
     "description": "View and compare results from different water management scenarios.",
