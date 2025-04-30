@@ -136,6 +136,19 @@ const hoverParagraphMixin = {
   },
 } as const
 
+// Darkened variant of the hover paragraph (used when paragraphShade flag is true)
+const hoverParagraphDarkenedMixin = {
+  ...hoverParagraphMixin,
+  backgroundColor: "rgba(54, 69, 99, 0.6)", // Payne's gray with blue and transparency
+  color: "white",
+  "&:hover": {
+    backgroundColor: "rgba(54, 69, 99, 0.7)",
+  },
+  "&:active": {
+    backgroundColor: "rgba(54, 69, 99, 0.8)",
+  },
+} as const
+
 /* ========================================================
  2. Theme configuration
  ======================================================== */
@@ -606,6 +619,7 @@ const theme = createTheme({
   mixins: {
     ...baseTheme.mixins,
     hoverParagraph: hoverParagraphMixin,
+    hoverParagraphDarkened: hoverParagraphDarkenedMixin,
   },
 })
 
@@ -697,6 +711,7 @@ declare module "@mui/material/styles" {
 
   interface Mixins {
     hoverParagraph: CSSProperties
+    hoverParagraphDarkened: CSSProperties
   }
 }
 

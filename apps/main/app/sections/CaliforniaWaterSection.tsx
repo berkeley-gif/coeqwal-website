@@ -44,14 +44,9 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
-              backgroundColor: "rgba(54, 69, 99, 0.6)", // Payne's gray with even more blue and more transparency
-              color: "white",
-              "&:hover": {
-                backgroundColor: "rgba(54, 69, 99, 0.7)",
-              },
-              "&:active": {
-                backgroundColor: "rgba(54, 69, 99, 0.8)",
-              },
+              ...theme.mixins.hoverParagraphDarkened,
+              p: 2,
+              borderRadius: "8px",
             }
           : {}),
       })}
