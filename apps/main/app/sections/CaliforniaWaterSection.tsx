@@ -1,4 +1,3 @@
-import React from "react"
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
@@ -115,19 +114,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             </Stack>
 
             <Box sx={{ mt: 3 }}>
-              <LearnMoreButton
-                onClick={onOpenDrawer}
-                variant="outlined"
-                sx={{
-                  borderColor: "white",
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    borderColor: "white",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  },
-                }}
-              />
+              <LearnMoreButton onClick={onOpenDrawer} />
             </Box>
           </Box>
 

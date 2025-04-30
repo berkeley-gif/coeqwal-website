@@ -14,7 +14,7 @@ import { NeedsEditorPanel } from "./features/needsEditor/components"
 import HeroSection from "./sections/HeroSection"
 import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
-
+import ManagingWaterSection from "./sections/ManagingWaterSection"
 export default function Home() {
   const { t } = useTranslation()
 
@@ -119,8 +119,11 @@ export default function Home() {
           {/* Interstitial Panel */}
           <InterstitialPanel />
 
-          {/* Custom California Water panel with two columns */}
+          {/* California Water panel with two columns */}
           <CaliforniaWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* Managing Water panel with two columns */}
+          <ManagingWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
 
           {/* To Be Continued Panel */}
           <Box sx={{ pointerEvents: "auto" }}>

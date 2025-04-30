@@ -46,6 +46,12 @@
       "date": "December 2024"
     }
   },
+  "managingWater": {
+    "title": "Managing California Water",
+    "paragraph1": "California's vast water system includes over a thousand dams and hundreds of miles of canals. Our large reservoirs, such as Lake Shasta and Lake Oroville, collect water from rain and melting snow in the winter and spring. Reservoirs reduce the risk of flooding in the winter and store water into the dry season for use by farms, cities, and ecosystems.",
+    "paragraph2": "Much of the freshwater flowing from the Sacramento and San Joaquin rivers into the Delta is pumped into canals that deliver water back to farms in the San Joaquin Valley and cities in Southern California.",
+    "paragraph3": "Managing California's water is no easy task. Precipitation varies unpredictably both seasonally and year to year, and a web of laws, regulations, and institutions shapes how water is managed and allocated across the state."
+  },
   "scenarioResults": {
     "title": "Scenario Results",
     "description": "View and compare results from different water management scenarios.",
