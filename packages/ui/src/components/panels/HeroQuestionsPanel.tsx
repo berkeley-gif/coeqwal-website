@@ -317,6 +317,7 @@ export function HeroQuestionsPanel({
                     color={headlineColor}
                     sx={{
                       textAlign,
+                      textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
                     }}
                   >
                     {circle.speechBubbleText}
@@ -354,7 +355,10 @@ export function HeroQuestionsPanel({
           transitionInterval={transitionInterval}
           variant="h1"
           color={headlineColor}
-          sx={{ marginBottom: content ? 3 : 0 }}
+          sx={{ 
+            marginBottom: content ? 3 : 0,
+            textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+          }}
         />
 
         {content && (
@@ -362,8 +366,8 @@ export function HeroQuestionsPanel({
             variant="h5"
             align="center"
             sx={{
-              //   maxWidth: { xs: "100%", md: "80%" },
               margin: "0 auto",
+              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
             }}
           >
             {content}
