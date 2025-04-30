@@ -14,6 +14,8 @@ import {
 import { VisibleIcon } from "../helpers/Icons"
 import "./precipitation-bar.css"
 import { useFetchData } from "../../hooks/useFetchData"
+import { useBreakpoint } from "@repo/ui/hooks"
+import { visibleIconTransform } from "../helpers/breakpoints"
 
 interface PrecipitationDatum {
   year: number
@@ -204,6 +206,8 @@ function Bars({
 }) {
   const [finished, setFinished] = useState(false)
   const barWidth = xScale.bandwidth() * 0.6
+  const breakpoint = useBreakpoint()
+  const transform = visibleIconTransform[breakpoint]
   return (
     <>
       {data.map((d, idx) => {
@@ -242,7 +246,7 @@ function Bars({
                 <VisibleIcon
                   delay={4.5 + idx * 0.1}
                   animation={animate ? "visible" : "hidden"}
-                  transform={`translate(-0.45em, ${d.anomaly < 0 ? "0.7em" : "-1.7em"})`}
+                  transform={`translate(${transform?.x ?? 0}, ${d.anomaly < 0 ? (transform?.belowY ?? 0) : (transform?.aboveY ?? 0)})`}
                   onAnimationComplete={() => {
                     if (idx === data.length - 1) setFinished(true)
                   }}

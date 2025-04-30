@@ -2,12 +2,19 @@
 
 import { Box, LibraryBooksIcon } from "@repo/ui/mui"
 import { useCallback } from "react"
-import { impactMapViewState } from "./helpers/mapViews"
+import {
+  impactClimateMapViewState,
+  impactDeltaMapViewState,
+  impactDrinkingMapViewState,
+  impactGroundMapViewState,
+  impactSalmonMapViewState,
+} from "./helpers/mapViews"
 import { useMap } from "@repo/map"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 import { Sentence } from "@repo/motion/components"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 function SectionImpact() {
   return (
@@ -60,17 +67,19 @@ function Salmon() {
     amount: 0.5,
   })
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = impactSalmonMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: impactMapViewState.salmon.longitude,
-      latitude: impactMapViewState.salmon.latitude,
-      zoom: impactMapViewState.salmon.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useSectionLifecycle(
     isSectionActive,
@@ -111,17 +120,19 @@ function Delta() {
     amount: 0.5,
   })
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = impactDeltaMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: impactMapViewState.delta.longitude,
-      latitude: impactMapViewState.delta.latitude,
-      zoom: impactMapViewState.delta.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useSectionLifecycle(
     isSectionActive,
@@ -165,17 +176,19 @@ function Groundwater() {
     { amount: 0.5 },
   )
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = impactGroundMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: impactMapViewState.groundwater.longitude,
-      latitude: impactMapViewState.groundwater.latitude,
-      zoom: impactMapViewState.groundwater.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useSectionLifecycle(
     isSectionActive,
@@ -219,17 +232,19 @@ function Drinking() {
     amount: 0.5,
   })
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = impactDrinkingMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: impactMapViewState.drinkingwater.longitude,
-      latitude: impactMapViewState.drinkingwater.latitude,
-      zoom: impactMapViewState.drinkingwater.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useSectionLifecycle(
     isSectionActive,
@@ -272,17 +287,19 @@ function Climate() {
     amount: 0.5,
   })
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = impactClimateMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: impactMapViewState.climate.longitude,
-      latitude: impactMapViewState.climate.latitude,
-      zoom: impactMapViewState.climate.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useSectionLifecycle(
     isSectionActive,

@@ -14,6 +14,12 @@ import {
   GoldRushTextLabels,
   IrrigationTextLabels,
 } from "./helpers/mapAnnotations"
+import {
+  drinkingMapViewState,
+  goldRushMapViewState,
+  reclamationMapViewState,
+} from "./helpers/mapViews"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 function SectionHuman() {
   const [mineMarkers, setMineMarkers] = useState<Record<string, MarkerType[]>>(
@@ -46,13 +52,15 @@ function Header({ markers }: { markers: MarkerType[] }) {
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const hasSeen = useRef(false)
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = goldRushMapViewState[breakpoint]
 
   const load = useCallback(() => {
     setTimeout(() => {
       flyTo({
-        longitude: -123.1613,
-        latitude: 39.306,
-        zoom: 8,
+        longitude: mapViewState?.longitude ?? 0,
+        latitude: mapViewState?.latitude ?? 0,
+        zoom: mapViewState?.zoom ?? 1,
         transitionOptions: {
           duration: 2000,
         },
@@ -62,7 +70,7 @@ function Header({ markers }: { markers: MarkerType[] }) {
       setMarkers(markers, "rough-circle")
       setTextMarkers(GoldRushTextLabels, "text")
     }, 2000)
-  }, [flyTo, markers, setMarkers, setTextMarkers])
+  }, [flyTo, markers, setMarkers, setTextMarkers, mapViewState])
 
   const unload = useCallback(() => {
     setMarkers([], "rough-circle")
@@ -117,19 +125,21 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const hasSeen = useRef(false)
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = reclamationMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: -123.6694,
-      latitude: 37.4698,
-      zoom: 7.5,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
     setMarkers(markers, "rough-circle")
     setTextMarkers(IrrigationTextLabels, "text")
-  }, [flyTo, markers, setMarkers, setTextMarkers])
+  }, [flyTo, markers, setMarkers, setTextMarkers, mapViewState])
 
   const unload = useCallback(() => {
     setMarkers([], "rough-circle")
@@ -173,6 +183,8 @@ function Drinking() {
   const { addSource, addLayer, setPaintProperty, flyTo } = useMap()
   const hasSeen = useRef(false)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+  const breakpoint = useBreakpoint()
+  const mapViewState = drinkingMapViewState[breakpoint]
 
   const init = useCallback(() => {
     addSource("river-combined", {
@@ -191,16 +203,16 @@ function Drinking() {
 
   const load = useCallback(() => {
     flyTo({
-      longitude: -122.4944,
-      latitude: 35.5816,
-      zoom: 6.5,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
     setPaintProperty("river-combined-layer", "line-opacity", 1)
     setTextMarkers(DrinkingTextLabels, "text")
-  }, [flyTo, setPaintProperty, setTextMarkers])
+  }, [flyTo, setPaintProperty, setTextMarkers, mapViewState])
 
   const unload = useCallback(() => {
     setPaintProperty("river-combined-layer", "line-opacity", 0)
