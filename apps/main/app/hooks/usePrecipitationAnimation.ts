@@ -25,6 +25,12 @@ interface Options {
   framesPerBand?: number // deprecated, kept for backward compatibility
   /** milliseconds each band is shown  – preferred */
   bandDurationMs?: number
+  /** multiplier applied to bandDuration to get raster-fade-duration (overlap) */
+  fadeMultiplier?: number
+  /** snowfall fade-in duration in ms */
+  snowFadeDurationMs?: number
+  /** milliseconds before flyTo end at which band animation starts */
+  flyOverlapMs?: number
 }
 
 export function usePrecipitationAnimation(
@@ -32,10 +38,14 @@ export function usePrecipitationAnimation(
   {
     snowfallThreshold = 5,
     framesPerBand = 30,
-    bandDurationMs = 400, // faster cycling – 0.4s per band
+    bandDurationMs = 400,
+    fadeMultiplier = 1.5,
+    snowFadeDurationMs = 2500,
+    flyOverlapMs = 400,
   }: Options = {},
 ) {
   const [isAnimating, setIsAnimating] = useState(false)
+  const isAnimatingRef = useRef(false)
   const frameId = useRef<number | null>(null)
 
   // ---- helpers -----------------------------------------------------------
@@ -98,28 +108,30 @@ export function usePrecipitationAnimation(
     }
     if (!initialiseLayers()) return
 
-    // Fly out over the Pacific for context before the animation begins
+    // Fly out over the Pacific first — animation begins after movement ends
+    const flyDuration = 1500
     map.flyTo({
       center: [-135, 35], // west of California
       zoom: 4.6,
       pitch: 0,
       bearing: 0,
-      duration: 1500,
+      duration: flyDuration,
       essential: true,
     })
 
-    // Ensure precipitation layer fades between bands
+    // Prepare paint transition (done once)
     map.setPaintProperty(
       "precipitable-water",
       "raster-fade-duration",
-      bandDurationMs,
+      Math.round(bandDurationMs * fadeMultiplier),
     )
 
     let bandIndex = 0
     let snowShown = false
-    let lastSwitch = performance.now()
+    let lastSwitch = 0
 
     const step = (now: number) => {
+      if (lastSwitch === 0) lastSwitch = now
       if (now - lastSwitch >= bandDurationMs) {
         lastSwitch = now
         bandIndex += 1
@@ -130,24 +142,43 @@ export function usePrecipitationAnimation(
             PRECIPITATION_BANDS[bandIndex],
           )
 
-          // fade in snowfall once threshold reached
           if (bandIndex >= snowfallThreshold && !snowShown) {
-            setOpacity(map, "snowfall", 1, 2000)
+            setOpacity(map, "snowfall", 1, snowFadeDurationMs)
             snowShown = true
           }
         } else {
-          // finished
           cancelAnimationFrame(frameId.current!)
           frameId.current = null
           setIsAnimating(false)
+          isAnimatingRef.current = false
           return
         }
       }
       frameId.current = requestAnimationFrame(step)
     }
 
+    const startAnimation = () => {
+      // kick-off RAF loop once flyTo completes
+      if (!isAnimatingRef.current) return // animation may have been canceled
+      lastSwitch = performance.now()
+      frameId.current = requestAnimationFrame(step)
+      map.off("moveend", startAnimation)
+    }
+
     setIsAnimating(true)
-    frameId.current = requestAnimationFrame(step)
+    isAnimatingRef.current = true
+
+    // kick off slightly before fly ends
+    const earlyDelay = Math.max(0, flyDuration - flyOverlapMs)
+    const timeoutId = window.setTimeout(() => {
+      if (!frameId.current && isAnimatingRef.current) startAnimation()
+    }, earlyDelay)
+
+    // fallback when movement really ends
+    map.on("moveend", startAnimation)
+
+    // clear timeout if flyTo cancelled/ends sooner
+    map.once("moveend", () => clearTimeout(timeoutId))
   }, [
     bandDurationMs,
     initialiseLayers,
@@ -155,6 +186,9 @@ export function usePrecipitationAnimation(
     mapRef,
     setOpacity,
     snowfallThreshold,
+    fadeMultiplier,
+    snowFadeDurationMs,
+    flyOverlapMs,
   ])
 
   // cleanup on unmount
