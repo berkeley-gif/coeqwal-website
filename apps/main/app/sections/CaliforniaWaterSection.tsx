@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
@@ -17,6 +17,13 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     bandDurationMs: 250, // band cycling rate
     snowfallThreshold: 6, // band timing for fade-in
   })
+
+  const [showARLabel, setShowARLabel] = useState(false)
+
+  const handleAnimateBands = () => {
+    animateBands()
+    setShowARLabel(true)
+  }
 
   // helper for list items
   const renderParagraph = (translationKey: string, onClick?: () => void) => (
@@ -88,7 +95,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             </Typography>
 
             <Stack spacing={1}>
-              {renderParagraph("californiaWater.paragraph1", animateBands)}
+              {renderParagraph("californiaWater.paragraph1", handleAnimateBands)}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
                 console.log("👁 flyTo clicked", mapRef.current)
@@ -122,8 +129,43 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             </Box>
           </Box>
 
-          {/* Right column (empty placeholder for future content) */}
-          <Box sx={{ width: { xs: "100%", md: "50%" } }} />
+          {/* Right column */}
+          <Box
+            sx={{
+              width: { xs: "100%", md: "50%" },
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 2,
+              pl: 2,
+            }}
+          >
+            <Box
+              sx={{
+                opacity: showARLabel ? 1 : 0,
+                transition: "opacity 1s ease",
+                textAlign: "center",
+                backgroundColor: "rgba(2, 18, 36, 0.9)",
+                color: "#F2F0EF",
+                px: 1,
+                py: 1,
+                borderRadius: "4px",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontSize: "1rem", color: "white", fontWeight: 600 }}
+              >
+                Atmospheric River
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ fontSize: "1rem", color: "white", fontWeight: 400 }}
+              >
+                December 2024
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </BasePanel>
     </Box>
