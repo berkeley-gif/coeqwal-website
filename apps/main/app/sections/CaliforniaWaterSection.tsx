@@ -32,7 +32,11 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   }
 
   // helper for list items
-  const renderParagraph = (translationKey: string, onClick?: () => void) => (
+  const renderParagraph = (
+    translationKey: string, 
+    onClick?: () => void,
+    showIcon: boolean = true
+  ) => (
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
@@ -52,20 +56,22 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     >
       <Typography variant="body1">
         {t(translationKey)}
-        <VisibilityIcon
-          sx={{
-            ml: 1,
-            verticalAlign: "middle",
-            animation:
-              translationKey === "californiaWater.paragraph1" && isAnimating
-                ? "pulse 1.5s infinite"
-                : "none",
-          }}
-          onClick={(e) => {
-            e.stopPropagation()
-            onClick?.()
-          }}
-        />
+        {showIcon && (
+          <VisibilityIcon
+            sx={{
+              ml: 1,
+              verticalAlign: "middle",
+              animation:
+                translationKey === "californiaWater.paragraph1" && isAnimating
+                  ? "pulse 1.5s infinite"
+                  : "none",
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClick?.()
+            }}
+          />
+        )}
       </Typography>
     </Box>
   )
@@ -101,7 +107,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             <Stack spacing={1}>
               {renderParagraph(
                 "californiaWater.paragraph1",
-                handleAnimateBands,
+                handleAnimateBands
               )}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
@@ -110,7 +116,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
                 fly(views.deltaClose)
               })}
               {renderParagraph("californiaWater.paragraph3")}
-              {renderParagraph("californiaWater.paragraph4")}
+              {renderParagraph("californiaWater.paragraph4", undefined, false)}
             </Stack>
 
             <Box sx={{ mt: 3 }}>
