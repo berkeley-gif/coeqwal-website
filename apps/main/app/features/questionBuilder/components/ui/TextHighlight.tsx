@@ -43,5 +43,9 @@ export const ColoredText: React.FC<ColoredTextProps> = ({
   color,
   children,
 }) => {
-  return <span style={{ color, fontWeight: 500, textDecoration: "underline" }}>{children}</span>
+  return (
+    <span style={{ color, fontWeight: 500, textDecoration: "underline" }}>
+      {children}
+    </span>
+  )
 }
