@@ -195,8 +195,6 @@ const OutcomesSelector: React.FC = () => {
               }
               section={category.id}
               isOperations={false}
-              noDirectionControls={category.id === "type" ? ["deliveries"] : []}
-              noParentCheckbox={category.id === "type" ? ["deliveries"] : []}
             />
 
             {/* Add map for region section if hasMap is true */}
