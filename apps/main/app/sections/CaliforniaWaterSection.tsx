@@ -33,9 +33,9 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
 
   // helper for list items
   const renderParagraph = (
-    translationKey: string, 
+    translationKey: string,
     onClick?: () => void,
-    showIcon: boolean = true
+    showIcon: boolean = true,
   ) => (
     <Box
       sx={(theme) => ({
@@ -105,7 +105,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             <Stack spacing={1}>
               {renderParagraph(
                 "californiaWater.paragraph1",
-                handleAnimateBands
+                handleAnimateBands,
               )}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {

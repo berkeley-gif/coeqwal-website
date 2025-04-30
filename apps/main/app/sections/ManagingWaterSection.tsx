@@ -9,25 +9,27 @@ interface Props {
 
 export default function ManagingWaterSection({ onOpenDrawer }: Props) {
   const { t } = useTranslation()
-  
+
   // Access the darkened paragraphs flag from the store
   const darkenParagraphs = useStoryStore(
     (s) => s.overlays.paragraphShade ?? false,
   )
 
   const renderParagraph = (translationKey: string) => (
-    <Box sx={(theme) => ({
-      ...theme.mixins.hoverParagraph,
-      p: 2,
-      borderRadius: "8px",
-      ...(darkenParagraphs
-        ? {
-            ...theme.mixins.hoverParagraphDarkened,
-            p: 2,
-            borderRadius: "8px",
-          }
-        : {}),
-    })}>
+    <Box
+      sx={(theme) => ({
+        ...theme.mixins.hoverParagraph,
+        p: 2,
+        borderRadius: "8px",
+        ...(darkenParagraphs
+          ? {
+              ...theme.mixins.hoverParagraphDarkened,
+              p: 2,
+              borderRadius: "8px",
+            }
+          : {}),
+      })}
+    >
       <Typography variant="body1">
         {t(translationKey)}
         <VisibilityIcon sx={{ ml: 1, verticalAlign: "middle" }} />
