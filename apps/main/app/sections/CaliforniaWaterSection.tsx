@@ -3,6 +3,7 @@ import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
+import { usePrecipitationAnimation } from "../hooks/usePrecipitationAnimation"
 
 interface Props {
   onOpenDrawer: () => void
@@ -11,6 +12,8 @@ interface Props {
 export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
+  // precipitation animation hook
+  const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef)
 
   // helper for list items
   const renderParagraph = (translationKey: string, onClick?: () => void) => (
@@ -36,7 +39,14 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
       <Typography variant="body1">
         {t(translationKey)}
         <VisibilityIcon
-          sx={{ ml: 1, verticalAlign: "middle" }}
+          sx={{
+            ml: 1,
+            verticalAlign: "middle",
+            animation:
+              translationKey === "californiaWater.paragraph1" && isAnimating
+                ? "pulse 1.5s infinite"
+                : "none",
+          }}
           onClick={(e) => {
             e.stopPropagation()
             onClick?.()
@@ -75,7 +85,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             </Typography>
 
             <Stack spacing={1}>
-              {renderParagraph("californiaWater.paragraph1")}
+              {renderParagraph("californiaWater.paragraph1", animateBands)}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
                 console.log("👁 flyTo clicked", mapRef.current)
