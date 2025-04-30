@@ -58,7 +58,7 @@ export default function HeroSection() {
           // Circle 2
           {
             xPercent: 5,
-            yPercent: 25,
+            yPercent: 15,
             radius: 90,
             stroke: "white",
             strokeWidth: 6,

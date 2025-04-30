@@ -184,8 +184,8 @@ export function HeroQuestionsPanel({
         >
           {/* Add SVG filter definition for shadow */}
           <defs>
-            <filter id="circle-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="rgba(0, 0, 0, 0.7)" />
+            <filter id="circle-shadow" x="-25%" y="-25%" width="150%" height="150%">
+              <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="rgba(0, 0, 0, 0.25)" />
             </filter>
           </defs>
           
