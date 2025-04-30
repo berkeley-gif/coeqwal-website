@@ -40,14 +40,17 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
+        p: 2,
+        borderRadius: "8px",
         ...(darkenParagraphs
           ? {
-              backgroundColor: "rgba(25, 118, 210, 0.6)",
+              backgroundColor: "rgba(54, 69, 99, 0.6)", // Payne's gray with even more blue and more transparency
+              color: "white",
               "&:hover": {
-                backgroundColor: "rgba(25, 118, 210, 0.8)",
+                backgroundColor: "rgba(54, 69, 99, 0.7)",
               },
               "&:active": {
-                backgroundColor: "rgba(25, 118, 210, 0.9)",
+                backgroundColor: "rgba(54, 69, 99, 0.8)",
               },
             }
           : {}),
