@@ -33,15 +33,15 @@ export function ScrollDownIcon({
       onClick={onClick}
     >
       {text && (
-        <Typography 
-          variant="subtitle1" 
-          align="center" 
-          sx={{ 
+        <Typography
+          variant="subtitle1"
+          align="center"
+          sx={{
             color,
             mb: 2,
             fontSize: "1.4rem",
             maxWidth: "100%",
-            textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)"
+            textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
           }}
         >
           {text}

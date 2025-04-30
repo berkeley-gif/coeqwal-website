@@ -184,11 +184,22 @@ export function HeroQuestionsPanel({
         >
           {/* Add SVG filter definition for shadow */}
           <defs>
-            <filter id="circle-shadow" x="-25%" y="-25%" width="150%" height="150%">
-              <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="rgba(0, 0, 0, 0.25)" />
+            <filter
+              id="circle-shadow"
+              x="-25%"
+              y="-25%"
+              width="150%"
+              height="150%"
+            >
+              <feDropShadow
+                dx="0"
+                dy="0"
+                stdDeviation="5"
+                floodColor="rgba(0, 0, 0, 0.25)"
+              />
             </filter>
           </defs>
-          
+
           {overlayCircles.map((circle, index) => {
             // Check if this circle should be visible
             const isVisible = visibleBubbles.includes(index)
@@ -206,9 +217,9 @@ export function HeroQuestionsPanel({
                 stroke={circle.stroke || "currentColor"}
                 strokeWidth={circle.strokeWidth || 3}
                 opacity={isVisible ? 1 : 0} // Completely fade out when not active
-                style={{ 
+                style={{
                   transition: "opacity 1500ms ease-in-out",
-                  filter: "url(#circle-shadow)"
+                  filter: "url(#circle-shadow)",
                 }}
               />
             )
@@ -365,7 +376,7 @@ export function HeroQuestionsPanel({
           transitionInterval={transitionInterval}
           variant="h1"
           color={headlineColor}
-          sx={{ 
+          sx={{
             marginBottom: content ? 3 : 0,
             textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
           }}

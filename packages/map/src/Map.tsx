@@ -31,16 +31,63 @@ export default function Map(props: MapProps) {
     if (!mapInstance) return
 
     const hideGraticule = () => {
-      if (mapInstance.getLayer && mapInstance.getLayer("graticule")) {
-        mapInstance.setLayoutProperty("graticule", "visibility", "none")
+      try {
+        // First try direct hide
+        if (mapInstance.getLayer && mapInstance.getLayer("graticule")) {
+          console.log("Hiding graticule layer")
+          mapInstance.setLayoutProperty("graticule", "visibility", "none")
+        }
+
+        // Try other possible variations of the name
+        const possibleNames = [
+          "graticule",
+          "grid",
+          "graticules",
+          "lat-lon-grid",
+          "grid-lines",
+        ]
+        possibleNames.forEach((name) => {
+          if (mapInstance.getLayer && mapInstance.getLayer(name)) {
+            console.log(`Hiding layer: ${name}`)
+            mapInstance.setLayoutProperty(name, "visibility", "none")
+          }
+        })
+
+        // Some styles use a different structure like source-layer
+        // This is a more aggressive approach
+        mapInstance.getStyle()?.layers?.forEach((layer) => {
+          if (
+            layer.id.toLowerCase().includes("grid") ||
+            layer.id.toLowerCase().includes("graticule")
+          ) {
+            console.log(`Found and hiding layer: ${layer.id}`)
+            mapInstance.setLayoutProperty(layer.id, "visibility", "none")
+          }
+        })
+      } catch (err) {
+        console.warn("Error while trying to hide graticule:", err)
       }
     }
 
-    if (mapInstance.isStyleLoaded()) hideGraticule()
+    // Try immediately if the map is ready
+    if (mapInstance.isStyleLoaded()) {
+      hideGraticule()
+    }
+
+    // Set up various event listeners
     mapInstance.on("styledata", hideGraticule)
+    mapInstance.on("load", hideGraticule)
+
+    // Also set multiple timeouts as a fallback strategy
+    const timeouts = [500, 1000, 2000, 3000].map((delay) =>
+      setTimeout(hideGraticule, delay),
+    )
 
     return () => {
+      // Clean up all event listeners and timeouts
       mapInstance.off("styledata", hideGraticule)
+      mapInstance.off("load", hideGraticule)
+      timeouts.forEach(clearTimeout)
     }
   }, [mapRef])
 
