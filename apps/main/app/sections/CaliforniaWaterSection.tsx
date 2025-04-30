@@ -23,7 +23,9 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   })
 
   const showARLabel = useStoryStore((s) => s.overlays.arLabel ?? false)
-  const darkenParagraphs = useStoryStore((s)=>s.overlays.paragraphShade ?? false)
+  const darkenParagraphs = useStoryStore(
+    (s) => s.overlays.paragraphShade ?? false,
+  )
   const { setOverlay } = useStoryStore.getState()
 
   const handleAnimateBands = () => {

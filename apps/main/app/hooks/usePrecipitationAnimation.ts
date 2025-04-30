@@ -38,14 +38,13 @@ export function usePrecipitationAnimation(
   mapRef: React.RefObject<MapRef | null>,
   {
     snowfallThreshold = 5,
-    framesPerBand = 30,
     bandDurationMs = 400,
     fadeMultiplier = 1.5,
     snowFadeDurationMs = 2500,
     flyOverlapMs = 400,
   }: Options = {},
 ) {
-  const { setOverlay, setScene, markDone } = useStoryStore.getState()
+  const { setOverlay, markDone } = useStoryStore.getState()
   const isAnimatingRef = useRef(false)
   const frameId = useRef<number | null>(null)
 
@@ -193,7 +192,6 @@ export function usePrecipitationAnimation(
     snowFadeDurationMs,
     flyOverlapMs,
     setOverlay,
-    setScene,
     markDone,
   ])
 

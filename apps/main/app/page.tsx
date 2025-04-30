@@ -9,7 +9,6 @@ import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
 import MapContainer from "./components/MapContainer"
-import MapStateDisplay from "./features/mapControls/MapStateDisplay"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 import { NeedsEditorPanel } from "./features/needsEditor/components"
 import HeroSection from "./sections/HeroSection"
@@ -54,9 +53,6 @@ export default function Home() {
         }}
       >
         <MapContainer uncontrolledRef={uncontrolledRef} />
-
-        {/* Map State Display */}
-        <MapStateDisplay />
       </Box>
 
       {/* ===== Navigation Sidebar ===== */}

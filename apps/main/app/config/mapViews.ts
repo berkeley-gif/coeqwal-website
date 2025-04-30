@@ -16,4 +16,4 @@ export const views = {
 } as const
 
 export type ViewKey = keyof typeof views
-export type ViewStatePreset = (typeof views)[ViewKey] 
+export type ViewStatePreset = (typeof views)[ViewKey]
