@@ -87,6 +87,16 @@ export function usePrecipitationAnimation(
     }
     if (!initialiseLayers()) return
 
+    // Fly out over the Pacific for context before the animation begins
+    map.flyTo({
+        center: [-135, 35], // west of California
+        zoom: 4,
+        pitch: 0,
+        bearing: 0,
+        duration: 1500,
+        essential: true,
+    })
+
     let bandIndex = 0
     let frame = 0
     let snowShown = false
