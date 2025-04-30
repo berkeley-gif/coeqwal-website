@@ -28,22 +28,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   // helper for list items
   const renderParagraph = (translationKey: string, onClick?: () => void) => (
     <Box
-      sx={{
-        cursor: "pointer",
-        p: 1,
-        borderRadius: 1,
-        transition: "background-color 0.3s ease",
-        "&:hover": {
-          backgroundColor: "rgba(25, 118, 210, 0.08)",
-        },
-        "&:hover .MuiSvgIcon-root": {
-          color: "#42a5f5",
-          transform: "scale(1.2)",
-        },
-        "&:active": {
-          backgroundColor: "rgba(25, 118, 210, 0.16)",
-        },
-      }}
+      sx={(theme) => ({ ...theme.mixins.hoverParagraph })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
       <Typography variant="body1">

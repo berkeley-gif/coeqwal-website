@@ -1,4 +1,5 @@
 import { createTheme, Theme } from "@mui/material/styles"
+import type { CSSProperties } from "react"
 
 // TODO:
 // - Transitions
@@ -116,6 +117,24 @@ const themeValues = {
     tooltip: 1500,
   },
 }
+
+// Reusable paragraph hover mixin (background + icon scale)
+const hoverParagraphMixin = {
+  cursor: "pointer",
+  p: 1,
+  borderRadius: 1,
+  transition: "background-color 0.3s ease",
+  "&:hover": {
+    backgroundColor: "rgba(25, 118, 210, 0.08)",
+  },
+  "&:hover .MuiSvgIcon-root": {
+    color: "#42a5f5",
+    transform: "scale(1.2)",
+  },
+  "&:active": {
+    backgroundColor: "rgba(25, 118, 210, 0.16)",
+  },
+} as const
 
 /* ========================================================
  2. Theme configuration
@@ -584,6 +603,10 @@ const theme = createTheme({
       },
     },
   },
+  mixins: {
+    ...baseTheme.mixins,
+    hoverParagraph: hoverParagraphMixin,
+  },
 })
 
 /* ========================================================
@@ -607,6 +630,9 @@ theme.background = {
 }
 
 theme.borderRadius = themeValues.borderRadius
+
+// expose mixin constant for easy import if needed
+export const hoverParagraph = hoverParagraphMixin
 
 export default theme
 
@@ -667,6 +693,10 @@ declare module "@mui/material/styles" {
         closedWidth?: number
       }
     }
+  }
+
+  interface Mixins {
+    hoverParagraph: CSSProperties
   }
 }
 
