@@ -97,7 +97,9 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
           useStoryStore.getState().setOverlay("paragraphShade", false)
         }}
       >
-        {/* Standard markers rendered using our utility & AnimatedMarker */}
+        {/* 
+        // Pulsing motion markers temporarily disabled
+        // Uncomment to re-enable
         {filteredMarkers.map((marker) => (
           <Marker
             key={marker.id}
@@ -121,6 +123,7 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
             />
           </Marker>
         ))}
+        */}
       </Map>
     </Box>
   )
