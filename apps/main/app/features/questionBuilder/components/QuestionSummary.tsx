@@ -76,11 +76,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       return "2.2rem" // Smaller text for exploratory mode
     }
 
-    // When in swapped mode (outcomes to operations), use medium-small size
-    if (swapped) {
-      return "3.5rem" // Medium-small size for swapped mode
-    }
-
     // Count total selections
     const operationsCount = selectedOperations.length
     const outcomesCount = Object.values(outcomesBySection).reduce(
@@ -104,7 +99,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
     // Extra small size
     return "2.8rem"
-  }, [selectedOperations, outcomesBySection, isExploratoryMode, swapped])
+  }, [selectedOperations, outcomesBySection, isExploratoryMode])
 
   // Expensive calculation for the summary text
   const summary = useMemo(() => {
@@ -1205,14 +1200,16 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           return (
             <>
               Para estos {outcomeContent}
-              {climateElement}, ¿qué {operationsPart} podríamos probar?
+              {climateElement}, ¿qué {operationsPart}
+              podríamos probar?
             </>
           )
         } else {
           return (
             <>
               For these {outcomeContent}
-              {climateElement}, which {operationsPart} could we try?
+              {climateElement}, which {operationsPart}
+              could we try?
             </>
           )
         }
@@ -1236,14 +1233,16 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           return (
             <>
               Para estos {outcomePart} con {climateElement}, ¿qué{" "}
-              {operationsPart} podríamos probar?
+              {operationsPart}
+              podríamos probar?
             </>
           )
         } else {
           return (
             <>
               For these {outcomePart} with {climateElement}, which{" "}
-              {operationsPart} could we try?
+              {operationsPart}
+              could we try?
             </>
           )
         }
@@ -1360,7 +1359,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           fontSize: calculatedFontSize, // Using the calculated font size
           backgroundColor: "white",
           paddingTop: isExploratoryMode ? "20px" : "20px", // Reduce padding in exploratory mode
-          paddingBottom: isExploratoryMode ? "12px" : "32px", // Reduce padding in exploratory mode
+          paddingBottom: isExploratoryMode ? "12px" : 0, // Reduce padding in exploratory mode
           paddingLeft: "5%",
           paddingRight: "5%",
           boxShadow: "none",
