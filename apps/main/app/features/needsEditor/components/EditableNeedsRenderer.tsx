@@ -14,6 +14,7 @@ import {
   VisibilityIcon,
 } from "@repo/ui/mui"
 import { ColoredText } from "../../scenarioResults/components/ui"
+import ExceedancePlot from "./ExceedancePlot"
 
 import {
   EditingFieldTarget,
@@ -78,6 +79,7 @@ const EditableNeedsRenderer = ({
     null,
   )
   const [isShowingSelector, setIsShowingSelector] = useState(false)
+  const [isShowingExeedancePlot, setIsShowingExceedancePlot] = useState(false)
 
   const [userSetting, setUserSetting] = useState<UserSetting>(
     currentWaterNeed.setting,
@@ -102,24 +104,19 @@ const EditableNeedsRenderer = ({
   }
 
   const handleAddRule = () => {
-    // You can customize this with a form or dialog
     setCurrentWaterNeed((prev) => {
-      const defaultRule = JSON.parse(
-        JSON.stringify(currentWaterNeedType.defaultSetting.rule[0]),
-      )
-      if (!defaultRule) {
-        console.warn("No default rule found for current water need type")
-        return prev
+      const newRule =
+        prev.setting.rule.length > 0
+          ? JSON.parse(
+              JSON.stringify(prev.setting.rule[prev.setting.rule.length - 1]),
+            )
+          : JSON.parse(
+              JSON.stringify(currentWaterNeedType.defaultSetting.rule[0]),
+            )
+      return {
+        ...prev,
+        setting: { ...prev.setting, rule: [...prev.setting.rule, newRule] },
       }
-      const newUserSetting = {
-        ...prev.setting,
-        rule: [...prev.setting.rule, defaultRule],
-      }
-      console.log("Old setting:", prev)
-      const updatedWaterNeed = { ...prev, setting: newUserSetting }
-      console.log("New setting:", updatedWaterNeed)
-
-      return updatedWaterNeed
     })
   }
 
@@ -600,6 +597,19 @@ const EditableNeedsRenderer = ({
             </Box>
           )}
       </Box>
+      {isShowingExeedancePlot &&
+        currentWaterNeedType.label == "Water Delivery" && (
+          <Box
+            sx={{ display: "flex", width: "100%", justifyContent: "center" }}
+          >
+            <ExceedancePlot
+              currentWaterNeed={currentWaterNeed}
+              width={600}
+              height={300}
+            />
+          </Box>
+        )}
+
       <Stack direction="row" spacing={2} sx={{}}>
         <Button
           variant="outlined"
@@ -616,8 +626,11 @@ const EditableNeedsRenderer = ({
             startIcon={<BarChartIcon />}
             size="small"
             sx={{ color: "black", borderColor: "black" }}
+            onClick={() => {
+              setIsShowingExceedancePlot(!isShowingExeedancePlot)
+            }}
           >
-            View as an Exceedance Plot
+            Toggle Exceedance Plot
           </Button>
         )}
       </Stack>

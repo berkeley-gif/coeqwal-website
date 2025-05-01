@@ -10,6 +10,8 @@ import {
 } from "@repo/ui/mui"
 // import CloseIcon from '@mui/icons-material/Close';
 import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
+import getRuleText from "./utils"
+import { WATER_NEED_TYPES } from "./constants"
 interface AddedWaterNeedsProps {
   waterNeeds: WaterNeedSetting[]
   setWaterNeeds: React.Dispatch<React.SetStateAction<WaterNeedSetting[]>>
@@ -36,6 +38,16 @@ export default function AddedWaterNeeds({
       )
       return prevNeeds.filter((_, index) => index !== idxToRemove)
     })
+  }
+
+  const getNeedSummary = (need: WaterNeedSetting) => {
+    const currentWaterNeedType = WATER_NEED_TYPES.find(
+      (item) => item.label === need.name,
+    )
+    if (!currentWaterNeedType) {
+      return "No summary available"
+    }
+    return getRuleText(need.setting, currentWaterNeedType.ruleGrammar)
   }
 
   return (
@@ -71,9 +83,18 @@ export default function AddedWaterNeeds({
               }}
             >
               <Typography variant="h5">{need.name}</Typography>
-              <Typography variant="h6" color="text.secondary">
-                Summary
+              <Typography
+                variant="h6"
+                color="text.secondary"
+                sx={{
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: 2, // Limit to 2 lines
+                }}
+              >
                 {/* {need.name} */}
+                {getNeedSummary(need)}
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
                 <Button
