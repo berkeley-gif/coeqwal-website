@@ -23,6 +23,20 @@ const translations: TranslationsMap = {
   },
 }
 
+// Default styling for the LearnMoreButton
+const defaultStyling = {
+  variant: "outlined" as const,
+  sx: {
+    borderColor: "white",
+    color: "white",
+    backgroundColor: "transparent",
+    "&:hover": {
+      borderColor: "white",
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+    },
+  },
+}
+
 interface LearnMoreButtonProps extends ButtonProps {
   onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
   children?: React.ReactNode
@@ -31,6 +45,8 @@ interface LearnMoreButtonProps extends ButtonProps {
 export function LearnMoreButton({
   onClick,
   children,
+  variant = defaultStyling.variant,
+  sx = {},
   ...props
 }: LearnMoreButtonProps) {
   const { locale, isLoading } = useTranslation()
@@ -40,8 +56,17 @@ export function LearnMoreButton({
   const componentText =
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
+  // Merge default styling with any custom sx props passed
+  const mergedSx = { ...defaultStyling.sx, ...sx }
+
   return (
-    <Button onClick={onClick} endIcon={<CustomArrowForwardIcon />} {...props}>
+    <Button
+      onClick={onClick}
+      endIcon={<CustomArrowForwardIcon />}
+      variant={variant}
+      sx={mergedSx}
+      {...props}
+    >
       {children || componentText.text}
     </Button>
   )

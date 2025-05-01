@@ -84,8 +84,16 @@ html{
     pointer-events: auto;
 }
 
-.paragraph{
-    margin-bottom: 3rem;
+@media (min-width: 1536px) {
+    .paragraph {
+        margin-bottom: 3rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .paragraph {
+        margin-bottom: 1.5rem;
+    }
 }
 
 .image-container {
@@ -138,6 +146,18 @@ html{
     z-index: 2;
     font-size: 0.9rem;
     background-color: rgba(3, 26, 53, 0.4);
+}
+
+@media (min-width: 1536px) {
+    #section-container {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    #section-container {
+        font-size: 0.75rem;
+    }
 }
 
 .section-component{

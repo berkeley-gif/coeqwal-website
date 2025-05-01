@@ -2,13 +2,13 @@
   "heroPanel": {
     "title": "Californians are\u00A0connected by\u00A0their water",
     "content": [
-      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to cities, farms, and ecosystems across the state.",
+      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to communities, farms, and ecosystems across the state.",
       "The COEQWAL project helps you understand how California moves water, what alternatives look like, and how we might adapt the system for a changing climate."
     ],
     "headlines": [
       "Is California ready for the next drought?",
       "Does saving salmon mean changing how we use water?",
-      "How is climate change reshaping California’s water?",
+      "How is climate change reshaping California's water?",
       "Do some Californians still lack water justice?",
       "Where does your water come from? Who else depends on it?"
     ],
@@ -17,16 +17,16 @@
   },
   "interstitial": {
     "content": [
-      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to cities, farms, and ecosystems across the state.",
+      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to communities, farms, and ecosystems across the state.",
       "The COEQWAL project helps you understand how California moves water, what alternatives look like, and the effects of a changing climate."
     ],
     "boldText": "From mountains to coast and north to south,",
-    "part1": "Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to cities, farms, and ecosystems across the state.",
+    "part1": "Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to communities, farms, and ecosystems across the state.",
     "part2": "The COEQWAL project helps you understand how California moves water, what alternatives look like, and the effects of a changing climate."
   },
   "secondaryNavigation": {
     "californiaWater": "How water moves through California",
-    "managingWater": "Managing California water",
+    "managingWater": "Managing water",
     "challenges": "Challenges",
     "alternativeScenarios": "Alternative scenarios",
     "scenarioData": "Alternative scenario data",
@@ -40,7 +40,37 @@
     "paragraph1": "Most of California's water falls in the winter as rain and snow in northern California and the Sierra Nevada. This precipitation – highly variable from year to year – is the state's primary water supply.",
     "paragraph2": "Snowpack serves as a natural reservoir, releasing water throughout the spring. As rainfall and melting snow flows from the mountains into rivers of the Central Valley, some of it seeps underground and replenishes large aquifers.",
     "paragraph3": "The Sacramento River - California's largest - flows from the north and joins with the San Joaquin River, flowing up from the south, in the Delta. These flows create one of the most ecologically rich estuaries on the West Coast before flowing out to the San Francisco Bay and Pacific Ocean. In the Delta, freshwater mixes with saltwater, creating a shifting salinity balance shaped by the amount of flow and the tides.",
-    "paragraph4": "Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, we have transformed how water moves through California."
+    "paragraph4": "Although California has an abundance of water, most of our water falls far from where most people live, work, and farm. To supply water to agriculture and a growing population in drier parts of the state, over the past century we have transformed how water moves through California.",
+    "arLabel": {
+      "title": "Atmospheric River",
+      "date": "December 2024"
+    }
+  },
+  "managingWater": {
+    "title": "Managing Water",
+    "paragraph1": "California's vast water system includes over a thousand dams and hundreds of miles of canals. Our large reservoirs, such as Lake Shasta and Lake Oroville, collect water from rain and melting snow in the winter and spring. Reservoirs reduce the risk of flooding in the winter and store water into the dry season for use by farms, communities, and ecosystems.",
+    "paragraph2": "Much of the freshwater flowing from the Sacramento and San Joaquin rivers into the Delta is pumped into canals that deliver water back to farms in the San Joaquin Valley and communities in Southern California.",
+    "paragraph3": "Managing California's water is no easy task. Precipitation varies unpredictably both seasonally and year to year, and a web of laws, regulations, and institutions shapes how water is managed and allocated across the state."
+  },
+  "challenges": {
+    "title": "Growing Challenges",
+    "paragraph1": "California's water is essential for farms, communities, and the environment—but not everyone has equal access to it. Historically, laws prevented Indigenous communities and people of color from securing land and water rights, and the effects of these injustices are still felt today. Many communities continue to struggle with limited or unsafe drinking water, and the state is facing a growing population.",
+    "paragraph2": "The transforamtion of our water system has taken a toll on freshwater ecosystems. Dams have reduced river flows and blocked migratory fish like the endangered Sacramento River winter-run Chinook salmon. For more than a century, farms have relied heavily on groundwater for irrigation, depleting aquifers throughout the Central Valley.",
+    "paragraph3": "Climate change is making things even more challenging. California is experiencing more extreme weather, and rising temperatures mean less snow in the mountains. Meanwhile, rising sea levels are pushing saltwater farther inland, threatening ecosystems, farms, communities, and the water supply system in the Delta.",
+    "paragraph4": "Despite these challenges, California has opportunities to adapt. By improving the way we manage water, we can better meet future needs and ensure a more fair and sustainable water supply for everyone."
+  },
+  "calsim": {
+    "title": "Exploring Alternatives",
+    "paragraph1": "To explore alternative ways of managing water, we need to understand how much water is available, where it's needed, and how decisions in one part of the system can affect everything else. That's where CalSim comes in. CalSim is a powerful water modeling tool that simulates how water moves through California's major water projects within the Central Valley and connected regions.",
+    "paragraph2": "The model tracks how much water flows into reservoirs, how much is stored and released, and where it gets delivered across the state. The advantage of CalSim is in its flexibility—we can change the rules for distributing water and see the effects. For example, we can adjust priorities, modify regulations, and even test what happens if new infrastructure is added. We can also see how the system might respond to different climate conditions. This is the model that the state Department of Water Resources and the U.S. Bureau of Reclamation uses to model water management across the state.",
+    "paragraph3": "Each unique combination of rules and climate conditions creates a scenario that shows how water might be allocated under different circumstances. The COEQWAL project is using CalSim to build a library of these scenarios for you to explore on this website. We've also developed tools to help you see how different choices impact the outcomes that you care about and the tradeoffs of those outcomes."
+  },
+  "invitation": {
+    "title": "Begin your Exploration",
+    "paragraph1": "We invite you to explore the baseline scenario, which represents how water is currently managed in California. This scenario reflects existing laws and regulations as of 2025 and illustrates how the system is intended to operate today as well as under different climate conditions.",
+    "paragraph2": "We have organized our library of scenarios into themes that address specific water issues. You can explore the in-depth description of these themes and their scenarios.",
+    "paragraph3": "You can also go straight to the source and access the unprocessed scenario run data for the COEQWAL scenarios by clicking the Raw Data button above.",
+    "paragraph4": "Below you can search our library of scenarios for specific outcomes."
   },
   "scenarioResults": {
     "title": "Scenario Results",
@@ -49,9 +79,10 @@
   },
   "questionBuilder": {
     "defaultTerms": {
-      "waterAvailability": "water availability",
+      "waterAvailability": "outcomes",
       "outcomes": "outcomes",
-      "decisions": "decisions"
+      "decisions": "water operations",
+      "decisions_sub": "water operation scenarios"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
@@ -59,7 +90,7 @@
     "pluralVerb": "do",
     "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
     "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} with {{climate}}?",
-    "swappedFormat": "To change {{outcome}}, which {{operation}} could we consider?",
+    "swappedFormat": "For these {{outcome}}, which {{operation}} could we try?",
     "swappedFormatNoChange": "For {{outcome}}, which {{operation}} could we consider?",
     "connectors": {
       "and": "and",
@@ -79,7 +110,7 @@
       "clearSelections": "Clear selections"
     },
     "operationsSelector": {
-      "title": "How do {{decisions}} affect",
+      "title": "{{decisions}}",
       "swappedTitle": "could we consider?",
       "searchPlaceholder": "Type to search...",
       "searchOperations": "Search operations",
@@ -88,7 +119,7 @@
     "outcomesSelector": {
       "title": "{{waterAvailability}}?",
       "swappedTitle": "To change {{waterAvailability}}",
-      "includeClimate": "Include climate futures",
+      "includeClimate": "Include future climate conditions",
       "chooseLocation": "Choose location on map",
       "mapPlaceholder": "Map Placeholder"
     },

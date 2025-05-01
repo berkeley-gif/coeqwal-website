@@ -14,6 +14,8 @@ import { Sentence } from "@repo/motion/components"
 import ConcentricCircle from "./vis/ConcentricCircle"
 import { PeopleIcon, AlmondIcon } from "./helpers/Icons"
 import React from "react"
+import { useBreakpoint } from "@repo/ui/hooks"
+import { concentricTransform } from "./helpers/breakpoints"
 
 function SectionBenefits() {
   return (
@@ -29,7 +31,7 @@ const norCalData = {
   past: { year: 1940, value: 3066654, annotation: "3.06M" },
   present: { year: 2024, value: 15581091, annotation: "15.5M" },
   icon: PeopleIcon,
-  title: "NorCal",
+  title: "SF Bay",
 }
 
 const soCalData = {
@@ -49,7 +51,7 @@ const markers = [
   },
   {
     id: "socal",
-    name: "Northern California",
+    name: "San Francisco Bay Area",
     latitude: 37.7749,
     longitude: -122.4194,
     radius: 100,
@@ -66,18 +68,20 @@ function City() {
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+  const breakpoint = useBreakpoint()
+  const mapViewState = cityMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: cityMapViewState.longitude,
-      latitude: cityMapViewState.latitude,
-      zoom: cityMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
     setTextMarkers(markers, "text")
-  }, [flyTo, setTextMarkers])
+  }, [flyTo, setTextMarkers, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -102,16 +106,22 @@ function City() {
       ref={sectionRef}
       className="container"
       height="120vh"
-      width="70vw"
+      width="80vw"
       sx={{ justifyContent: "center" }}
     >
       <ConcentricCircle
-        size={{ width: 600, height: 400 }}
+        size={
+          concentricTransform[breakpoint]?.norcal?.size ?? {
+            width: 0,
+            height: 0,
+          }
+        }
         data={norCalData}
-        shift={[1, 0.3]}
+        shift={concentricTransform[breakpoint]?.norcal?.shift ?? [0, 0]}
         clipId="norcal"
         delay={0}
         startAnimation={startAnimation}
+        radius={concentricTransform[breakpoint]?.norcal?.radius ?? 10}
       />
       <Box className="paragraph">
         <Sentence
@@ -122,12 +132,18 @@ function City() {
         </Sentence>
       </Box>
       <ConcentricCircle
-        size={{ width: 800, height: 400 }}
+        size={
+          concentricTransform[breakpoint]?.socal?.size ?? {
+            width: 0,
+            height: 0,
+          }
+        }
         data={soCalData}
-        shift={[0.8, 0.27]}
+        shift={concentricTransform[breakpoint]?.socal?.shift ?? [0, 0]}
         clipId="socal"
         delay={1}
         startAnimation={startAnimation}
+        radius={concentricTransform[breakpoint]?.socal?.radius ?? 10}
       />
     </Box>
   )
@@ -142,6 +158,8 @@ function Agriculture() {
   const { flyTo } = useMap()
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
+  const breakpoint = useBreakpoint()
+  const mapViewState = valleyMapViewState[breakpoint]
 
   const almondData = {
     past: { year: 1980, value: 327314, annotation: "0.32M" },
@@ -152,14 +170,14 @@ function Agriculture() {
 
   const load = useCallback(() => {
     flyTo({
-      longitude: valleyMapViewState.longitude,
-      latitude: valleyMapViewState.latitude,
-      zoom: valleyMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -195,12 +213,18 @@ function Agriculture() {
         </Sentence>
       </Box>
       <ConcentricCircle
-        size={{ width: 600, height: 400 }}
+        size={
+          concentricTransform[breakpoint]?.agriculture?.size ?? {
+            width: 0,
+            height: 0,
+          }
+        }
         data={almondData}
-        shift={[0.5, 0.3]}
+        shift={concentricTransform[breakpoint]?.agriculture?.shift ?? [0, 0]}
         clipId="almond"
         delay={1}
         startAnimation={startAnimation}
+        radius={concentricTransform[breakpoint]?.agriculture?.radius ?? 10}
       />
     </Box>
   )
@@ -215,24 +239,26 @@ function Economy() {
   const { flyTo } = useMap()
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
+  const breakpoint = useBreakpoint()
+  const mapViewState = stateMapViewState[breakpoint]
 
   const economyData = {
     past: { year: 1980, value: 13779, annotation: "$50.9K*" },
     present: { year: 2024, value: 104916, annotation: "$105K" },
     icon: PeopleIcon,
-    title: "Economy",
+    title: "GDP",
   }
 
   const load = useCallback(() => {
     flyTo({
-      longitude: stateMapViewState.longitude,
-      latitude: stateMapViewState.latitude,
-      zoom: stateMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
       transitionOptions: {
         duration: 2000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -268,12 +294,18 @@ function Economy() {
         </Sentence>
       </Box>
       <ConcentricCircle
-        size={{ width: 600, height: 400 }}
+        size={
+          concentricTransform[breakpoint]?.economy?.size ?? {
+            width: 0,
+            height: 0,
+          }
+        }
         data={economyData}
-        shift={[0.5, 0.5]}
+        shift={concentricTransform[breakpoint]?.economy?.shift ?? [0, 0]}
         clipId="economy"
         delay={1}
         startAnimation={startAnimation}
+        radius={concentricTransform[breakpoint]?.economy?.radius ?? 10}
       />
     </Box>
   )

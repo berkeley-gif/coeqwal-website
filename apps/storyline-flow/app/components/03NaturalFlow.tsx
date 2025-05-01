@@ -23,6 +23,7 @@ import useStoryStore from "../store"
 import { Sentence } from "@repo/motion/components"
 import { FlowTextLabels, ValleyTextLabels } from "./helpers/mapAnnotations"
 import Underline from "./helpers/Underline"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 function SectionDelta() {
   return (
@@ -45,7 +46,10 @@ function WaterFlow() {
   const { addSource, addLayer, setPaintProperty, flyTo } = useMap() // from our context
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const [startAnimation, setStartAnimation] = useState(false)
+  const breakpoint = useBreakpoint()
+  const mapViewState = riverMapViewState[breakpoint]
 
+  /*
   const fetchGeoJSON = useCallback(async (url: string) => {
     try {
       const response = await fetch(url)
@@ -58,15 +62,14 @@ function WaterFlow() {
       console.error("Error fetching GeoJSON:", error)
       return null
     }
-  }, [])
+  }, [])*/
 
   const init = useCallback(async () => {
-    const riverSacData = await fetchGeoJSON("/rivers/SacramentoRiver.geojson")
     //console.log("riverSacData", riverSacData);
 
     addSource("river-sac", {
       type: "geojson",
-      data: riverSacData,
+      data: "/rivers/SacramentoRiver.geojson",
     })
 
     addLayer(
@@ -89,15 +92,15 @@ function WaterFlow() {
       riverLayerStyle.paint,
       riverLayerStyle.layout,
     )
-  }, [addLayer, addSource, fetchGeoJSON])
+  }, [addLayer, addSource])
 
   const load = useCallback(() => {
     flyTo({
-      longitude: riverMapViewState.longitude,
-      latitude: riverMapViewState.latitude,
-      zoom: riverMapViewState.zoom,
-      pitch: riverMapViewState.pitch,
-      bearing: riverMapViewState.bearing,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 0,
+      pitch: mapViewState?.pitch ?? 0,
+      bearing: mapViewState?.bearing ?? 0,
       transitionOptions: {
         duration: 2000,
       },
@@ -105,7 +108,7 @@ function WaterFlow() {
     setPaintProperty("river-sac-layer", "line-opacity", 1)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
     setMarkers(FlowTextLabels, "text")
-  }, [flyTo, setMarkers, setPaintProperty])
+  }, [flyTo, setMarkers, setPaintProperty, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -176,6 +179,8 @@ function Valley() {
   const hasSeen = useRef(false)
   const [startValleyAnimation, setStartValleyAnimation] = useState(false)
   const [startDeltaAnimation, setStartDeltaAnimation] = useState(false)
+  const breakpoint = useBreakpoint()
+  const mapViewState = riverDeltaMapViewState[breakpoint]
 
   const init = useCallback(() => {
     addSource("delta-water", {
@@ -206,21 +211,19 @@ function Valley() {
 
   const load = useCallback(() => {
     flyTo({
-      longitude: riverDeltaMapViewState.longitude,
-      latitude: riverDeltaMapViewState.latitude,
-      zoom: riverDeltaMapViewState.zoom,
-      pitch: riverDeltaMapViewState.pitch,
-      bearing: riverDeltaMapViewState.bearing,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 0,
+      pitch: mapViewState?.pitch ?? 0,
+      bearing: mapViewState?.bearing ?? 0,
       transitionOptions: {
         duration: 2000,
       },
     })
-    setPaintProperty("river-sac-layer", "line-opacity", 1)
-    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
     setPaintProperty("delta-water-layer", "fill-opacity", 1)
     setPaintProperty("delta-wetland-layer", "fill-opacity", 1)
     setMarkers(ValleyTextLabels, "text")
-  }, [flyTo, setMarkers, setPaintProperty])
+  }, [flyTo, mapViewState, setMarkers, setPaintProperty])
 
   const unload = useCallback(() => {
     setPaintProperty("delta-water-layer", "fill-opacity", 0)
@@ -304,12 +307,14 @@ function Delta() {
   const { flyTo, setPaintProperty } = useMap() // from our context
   const hasSeen = useRef(false)
   const setMarkers = useStoryStore((state) => state.setMarkers)
+  const breakpoint = useBreakpoint()
+  const mapViewState = deltaMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: deltaMapViewState.longitude,
-      latitude: deltaMapViewState.latitude,
-      zoom: deltaMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 0,
       transitionOptions: {
         duration: 2000,
       },
@@ -317,7 +322,7 @@ function Delta() {
     setPaintProperty("river-sac-layer", "line-opacity", 0)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
     setMarkers([], "text")
-  }, [flyTo, setMarkers, setPaintProperty])
+  }, [flyTo, setMarkers, setPaintProperty, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -391,17 +396,19 @@ function Transition() {
   })
   const hasSeen = useRef(false)
   const { flyTo } = useMap()
+  const breakpoint = useBreakpoint()
+  const mapViewState = stateMapViewState[breakpoint]
 
   const load = useCallback(() => {
     flyTo({
-      longitude: stateMapViewState.longitude,
-      latitude: stateMapViewState.latitude,
-      zoom: stateMapViewState.zoom,
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 0,
       transitionOptions: {
         duration: 1000,
       },
     })
-  }, [flyTo])
+  }, [flyTo, mapViewState])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -429,7 +436,7 @@ function Transition() {
         width="100%"
         sx={{ backgroundColor: "#031a35" }}
       >
-        <Box className="paragraph">
+        <Box className="paragraph" sx={{ p: 1 }}>
           <Typography variant="h2">{content?.transition}</Typography>
         </Box>
       </Box>

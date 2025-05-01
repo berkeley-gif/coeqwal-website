@@ -1,20 +1,22 @@
 "use client"
 
 import React, { useState, useRef } from "react"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { BasePanel } from "@repo/ui"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
 import MapContainer from "./components/MapContainer"
-import MapStateDisplay from "./features/mapControls/MapStateDisplay"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 import { NeedsEditorPanel } from "./features/needsEditor/components"
 import HeroSection from "./sections/HeroSection"
 import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
+import ManagingWaterSection from "./sections/ManagingWaterSection"
+import ChallengesSection from "./sections/ChallengesSection"
+import CalSimSection from "./sections/CalSimSection"
+import InvitationSection from "./sections/InvitationSection"
 
 export default function Home() {
   const { t } = useTranslation()
@@ -54,9 +56,6 @@ export default function Home() {
         }}
       >
         <MapContainer uncontrolledRef={uncontrolledRef} />
-
-        {/* Map State Display */}
-        <MapStateDisplay />
       </Box>
 
       {/* ===== Navigation Sidebar ===== */}
@@ -117,16 +116,28 @@ export default function Home() {
             position: "relative",
           }}
         >
-          {/* Hero Questions Panel */}
+          {/* Landing Panel */}
           <HeroSection />
 
           {/* Interstitial Panel */}
           <InterstitialPanel />
 
-          {/* Custom California Water panel with two columns */}
+          {/* California Water panel with two columns */}
           <CaliforniaWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
 
-          {/* To Be Continued Panel */}
+          {/* Managing Water panel with two columns */}
+          <ManagingWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* Challenges panel with two columns */}
+          <ChallengesSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* CalSim panel with two columns */}
+          <CalSimSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* Invitation panel with two columns */}
+          <InvitationSection onOpenDrawer={() => setDrawerOpen(true)} />
+
+          {/* To Be Continued Panel
           <Box sx={{ pointerEvents: "auto" }}>
             <BasePanel
               background="transparent"
@@ -150,7 +161,7 @@ export default function Home() {
                 (to be continued)
               </Typography>
             </BasePanel>
-          </Box>
+          </Box> */}
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">

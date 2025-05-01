@@ -6,6 +6,7 @@ import rough from "roughjs"
 import { motion } from "@repo/motion"
 import { FlubberInterpolate } from "@repo/motion"
 import { debounce } from "lodash"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 const startMonth = 9 // October
 const months = Array.from({ length: 12 }, (_, i) =>
@@ -13,8 +14,14 @@ const months = Array.from({ length: 12 }, (_, i) =>
 )
 
 const margin = { top: 50, right: 30, bottom: 100, left: 100 }
-const FIXED_HEIGHT = 400
 
+const responsiveHeight = {
+  xs: 200,
+  sm: 250,
+  md: 300,
+  lg: 300,
+  xl: 400,
+}
 //Clean up rect error
 
 export default function AnimatedCurve({
@@ -27,9 +34,10 @@ export default function AnimatedCurve({
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
   const pathRef = useRef<SVGPathElement | null>(null)
+  const breakpoint = useBreakpoint()
   const [dimensions, setDimensions] = useState({
     width: 0,
-    height: FIXED_HEIGHT,
+    height: responsiveHeight[breakpoint] || 350,
   })
 
   useEffect(() => {
@@ -37,7 +45,7 @@ export default function AnimatedCurve({
       for (const entry of entries) {
         if (entry.target === containerRef.current) {
           const { width } = entry.contentRect
-          setDimensions({ width, height: FIXED_HEIGHT })
+          setDimensions({ width, height: responsiveHeight[breakpoint] || 350 })
         }
       }
     }, 300) // Debounce with a delay of 300ms
@@ -54,7 +62,7 @@ export default function AnimatedCurve({
       resizeObserver.disconnect()
       handleResize.cancel()
     }
-  }, [])
+  }, [breakpoint])
 
   const xScale = useMemo(() => {
     return d3

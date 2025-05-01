@@ -5,12 +5,16 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
     },
     "./map": {
-      "types": "./dist/map/index.d.ts",
-      "import": "./dist/map/index.js"
+      "import": "./src/map/index.ts",
+      "types": "./src/map/index.ts"
+    },
+    "./story": {
+      "import": "./src/story/index.ts",
+      "types": "./src/story/index.ts"
     }
   },
   "scripts": {

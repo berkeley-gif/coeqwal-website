@@ -58,7 +58,7 @@ export default function HeroSection() {
           // Circle 2
           {
             xPercent: 5,
-            yPercent: 25,
+            yPercent: 15,
             radius: 90,
             stroke: "white",
             strokeWidth: 6,
@@ -115,7 +115,11 @@ export default function HeroSection() {
         }}
       />
 
-      <ScrollDownIcon onClick={handleScrollDown} color="white" />
+      <ScrollDownIcon
+        onClick={handleScrollDown}
+        color="white"
+        text="Water connects us. Explore California's water system and discover possibilities for the future of water in our state."
+      />
     </Box>
   )
 }

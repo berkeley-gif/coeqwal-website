@@ -1,4 +1,5 @@
 import { createTheme, Theme } from "@mui/material/styles"
+import type { CSSProperties } from "react"
 
 // TODO:
 // - Transitions
@@ -116,6 +117,37 @@ const themeValues = {
     tooltip: 1500,
   },
 }
+
+// Reusable paragraph hover mixin (background + icon scale)
+const hoverParagraphMixin = {
+  cursor: "pointer",
+  p: 1,
+  borderRadius: 1,
+  transition: "background-color 0.3s ease",
+  "&:hover": {
+    backgroundColor: "rgba(25, 118, 210, 0.1)",
+  },
+  "&:hover .MuiSvgIcon-root": {
+    color: "#42a5f5",
+    transform: "scale(1.2)",
+  },
+  "&:active": {
+    backgroundColor: "rgba(25, 118, 210, 0.16)",
+  },
+} as const
+
+// Darkened variant of the hover paragraph (used when paragraphShade flag is true)
+const hoverParagraphDarkenedMixin = {
+  ...hoverParagraphMixin,
+  backgroundColor: "rgba(54, 69, 99, 0.6)", // Payne's gray with blue and transparency
+  color: "white",
+  "&:hover": {
+    backgroundColor: "rgba(54, 69, 99, 0.7)",
+  },
+  "&:active": {
+    backgroundColor: "rgba(54, 69, 99, 0.8)",
+  },
+} as const
 
 /* ========================================================
  2. Theme configuration
@@ -240,7 +272,7 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     h2: {
-      fontSize: "4.8rem",
+      fontSize: "4.2rem",
       fontWeight: 500,
       lineHeight: 1.2,
       letterSpacing: "normal",
@@ -256,7 +288,7 @@ const theme = createTheme({
       lineHeight: 1.4,
     },
     h5: {
-      fontSize: "1.6rem",
+      fontSize: "1.4rem",
       letterSpacing: "normal",
     },
     h6: {
@@ -584,6 +616,11 @@ const theme = createTheme({
       },
     },
   },
+  mixins: {
+    ...baseTheme.mixins,
+    hoverParagraph: hoverParagraphMixin,
+    hoverParagraphDarkened: hoverParagraphDarkenedMixin,
+  },
 })
 
 /* ========================================================
@@ -607,6 +644,9 @@ theme.background = {
 }
 
 theme.borderRadius = themeValues.borderRadius
+
+// expose mixin constant for easy import if needed
+export const hoverParagraph = hoverParagraphMixin
 
 export default theme
 
@@ -667,6 +707,11 @@ declare module "@mui/material/styles" {
         closedWidth?: number
       }
     }
+  }
+
+  interface Mixins {
+    hoverParagraph: CSSProperties
+    hoverParagraphDarkened: CSSProperties
   }
 }
 

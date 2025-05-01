@@ -383,14 +383,91 @@ const CombinedPanelContent = () => {
           width: "100%",
           maxWidth: "none !important",
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          flexDirection: "column",
+          // alignItems: "center",
+          padding: theme.spacing(4),
           paddingTop: `${theme.layout.headerHeight}px`,
           backgroundColor: "#FFFFFF",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+          // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
           overflow: "visible",
         }}
       >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "top",
+            width: "100%",
+          }}
+        >
+          <Typography variant="h6">SCENARIO SEARCH</Typography>
+
+          {/* Climate checkbox in a small card - only visible after scroll */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              opacity: hasClickedScroll ? 1 : 0,
+              visibility: hasClickedScroll ? "visible" : "hidden",
+              transform: hasClickedScroll
+                ? "translateY(0)"
+                : "translateY(-10px)",
+              transition: "all 0.5s ease",
+              transitionDelay: "0.2s",
+              zIndex: 2500,
+            }}
+          >
+            <Card
+              sx={{
+                marginTop: theme.spacing(2),
+                padding: theme.spacing(2),
+                width: "280px",
+                border: "1px solid rgba(0, 0, 0, 0.12)",
+                borderRadius: `${theme.borderRadius.card}px !important`,
+                color: "black",
+                backgroundColor: theme.palette.common.white,
+                boxShadow: "none",
+                overflow: "hidden",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeClimate}
+                    onChange={() => toggleClimate()}
+                    color="primary"
+                    size="large"
+                    sx={{
+                      marginTop: "0",
+                      color: "black",
+                      "&.Mui-checked": {
+                        color: "black",
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 500,
+                      color: "black",
+                    }}
+                  >
+                    {t("questionBuilder.outcomesSelector.includeClimate")}
+                  </Typography>
+                }
+                sx={{
+                  margin: 0,
+                  alignItems: "flex-start",
+                  "& .MuiCheckbox-root": {
+                    paddingTop: "4px",
+                  },
+                }}
+              />
+            </Card>
+          </Box>
+        </Box>
         <Box
           sx={{
             width: "100%",
@@ -402,60 +479,12 @@ const CombinedPanelContent = () => {
           <QuestionSummary wasScrolled={hasClickedScroll} />
         </Box>
 
-        {/* Climate checkbox in a small card - only visible after scroll */}
+        {/* Search button */}
         <Box
           sx={{
-            position: "absolute",
-            bottom: -28,
-            right: `calc(${theme.spacing(4)} + 180px + 32px)`, // Position 32px to the left of search button
-            opacity: hasClickedScroll ? 1 : 0,
-            visibility: hasClickedScroll ? "visible" : "hidden",
-            transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
-            transition: "all 0.5s ease",
-            transitionDelay: "0.2s",
-            zIndex: 2500,
-          }}
-        >
-          <Card
-            sx={{
-              padding: theme.spacing(0.5, 2),
-              borderRadius: "999px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={includeClimate}
-                  onChange={() => toggleClimate()}
-                  color="primary"
-                  size="small"
-                  sx={{
-                    color: theme.palette.text.primary,
-                    "&.Mui-checked": {
-                      color: theme.palette.text.primary,
-                    },
-                  }}
-                />
-              }
-              label={t("questionBuilder.outcomesSelector.includeClimate")}
-              sx={{
-                margin: 0,
-                "& .MuiTypography-root": {
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                },
-              }}
-            />
-          </Card>
-        </Box>
-
-        {/* Search button - only visible after scroll */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: -28,
-            right: theme.spacing(4),
+            width: "100%",
+            display: "flex",
+            justifyContent: "flex-end",
             opacity: hasClickedScroll ? 1 : 0,
             visibility: hasClickedScroll ? "visible" : "hidden",
             transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
@@ -506,12 +535,12 @@ const CombinedPanelContent = () => {
       </Box>
 
       {/* Initial spacer to create the centering effect */}
-      <Box
+      {/* <Box
         sx={(theme) => ({
           height: "65px",
           backgroundColor: theme.palette.background.default,
         })}
-      />
+      /> */}
 
       {/* Main content */}
       <BasePanel

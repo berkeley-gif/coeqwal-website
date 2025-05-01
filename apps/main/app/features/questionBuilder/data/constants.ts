@@ -351,36 +351,47 @@ export const OUTCOME_CATEGORIES = [
     titleEs: "Por tipo",
     options: [
       {
-        id: "deliveries",
-        label: "deliveries",
-        labelEs: "entregas",
-        subtypes: [
-          {
-            id: "deliveries_agricultural",
-            label: "agricultural",
-            labelEs: "agrícolas",
-          },
-          {
-            id: "deliveries_urban",
-            label: "municipal",
-            labelEs: "municipales",
-          },
-          {
-            id: "deliveries_refuge",
-            label: "managed wetland",
-            labelEs: "humedales gestionados",
-          },
-        ],
+        id: "supply_storage",
+        label: "Supply and storage",
+        labelEs: "Suministro y almacenamiento",
+        shortText: "supply & storage",
+        shortTextEs: "suministro & almacenamiento",
       },
-      ...CANONICAL_OUTCOME_TYPES.filter(
-        (outcome) =>
-          ![
-            "deliveries",
-            "deliveries_agricultural",
-            "deliveries_urban",
-            "deliveries_refuge",
-          ].includes(outcome.id),
-      ),
+      {
+        id: "delta_health",
+        label: "Delta health",
+        labelEs: "Salud del Delta",
+        shortText: "Delta health",
+        shortTextEs: "salud del Delta",
+      },
+      {
+        id: "delivery_reliability",
+        label: "Delivery reliability",
+        labelEs: "Fiabilidad de entrega",
+        shortText: "reliability",
+        shortTextEs: "fiabilidad",
+      },
+      {
+        id: "equity",
+        label: "Equity",
+        labelEs: "Equidad",
+        shortText: "equity",
+        shortTextEs: "equidad",
+      },
+      {
+        id: "flows",
+        label: "Flows",
+        labelEs: "Flujos",
+        shortText: "flows",
+        shortTextEs: "flujos",
+      },
+      {
+        id: "groundwater",
+        label: "Groundwater",
+        labelEs: "Agua subterránea",
+        shortText: "groundwater",
+        shortTextEs: "agua subterránea",
+      },
     ],
   },
   {
@@ -389,60 +400,6 @@ export const OUTCOME_CATEGORIES = [
     titleEs: "Por región",
     options: [...CANONICAL_REGIONS],
     hasMap: true,
-  },
-  {
-    id: "metric",
-    title: "By metric",
-    titleEs: "Por métrica",
-    options: [
-      {
-        id: "Needs-based equity",
-        label: "Needs-based equity",
-        labelEs: "Equidad basada en necesidades",
-      },
-      {
-        id: "Burden-sharing equity",
-        label: "Burden-sharing equity",
-        labelEs: "Equidad en el reparto de cargas",
-      },
-      {
-        id: "Economic burden",
-        label: "Economic burden",
-        labelEs: "Carga económica",
-      },
-      {
-        id: "Drinking water shortages",
-        label: "Drinking water shortages",
-        labelEs: "Escasez de agua potable",
-      },
-      {
-        id: "Supply ratio",
-        label: "Supply ratio",
-        labelEs: "Ratio de suministro",
-      },
-      {
-        id: "Probability of Winter run Chinook salmon quasi-extinction",
-        label: "Probability of Winter run Chinook salmon quasi-extinction",
-        labelEs:
-          "Probabilidad de cuasi-extinción del salmón Chinook de carrera invernal",
-      },
-      {
-        id: "Probability of achieving the doubling goal",
-        label: "Probability of achieving the doubling goal",
-        labelEs: "Probabilidad de lograr el objetivo de duplicación",
-      },
-      {
-        id: "Percent change in Winter run Chinook salmon spawner abundance",
-        label: "Percent change in Winter run Chinook salmon spawner abundance",
-        labelEs:
-          "Cambio porcentual en la abundancia de desovadores de salmón Chinook de carrera invernal",
-      },
-      {
-        id: "Net present value of production",
-        label: "Net present value of production",
-        labelEs: "Valor presente neto de la producción",
-      },
-    ],
   },
 ]
 

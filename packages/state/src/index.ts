@@ -5,3 +5,6 @@ export const VERSION = "0.1.0"
 
 // Export map module
 export * from "./map"
+
+// Export story store
+export * from "./story"

@@ -518,16 +518,44 @@ export const useQuestionBuilderHelpers = () => {
 
       // Check if this is an ID that needs to be mapped to a label
       if (section === "type") {
-        // Look in CANONICAL_OUTCOME_TYPES for matching ID
-        const matchingType = CANONICAL_OUTCOME_TYPES.find(
-          (type) => type.id === text,
-        )
-        if (matchingType) {
-          // Use Spanish label if available and Spanish is selected
-          formattedText =
-            useSpanish && matchingType.labelEs
-              ? matchingType.labelEs
-              : matchingType.label
+        // First look in OUTCOME_CATEGORIES for the "type" section
+        const typeCategory = OUTCOME_CATEGORIES.find((cat) => cat.id === "type")
+        if (typeCategory) {
+          // Type assertion for the option
+          type OutcomeOption = {
+            id: string
+            label: string
+            labelEs?: string
+            shortText?: string
+            shortTextEs?: string
+          }
+
+          const matchingOption = typeCategory.options.find(
+            (option) => typeof option === "object" && option.id === text,
+          ) as OutcomeOption | undefined
+
+          if (matchingOption) {
+            // Use short text if available, otherwise use label
+            if (useSpanish) {
+              formattedText =
+                matchingOption.shortTextEs ||
+                matchingOption.labelEs ||
+                matchingOption.label
+            } else {
+              formattedText = matchingOption.shortText || matchingOption.label
+            }
+          } else {
+            // Fall back to CANONICAL_OUTCOME_TYPES for compatibility with older data
+            const matchingType = CANONICAL_OUTCOME_TYPES.find(
+              (type) => type.id === text,
+            )
+            if (matchingType) {
+              formattedText =
+                useSpanish && matchingType.labelEs
+                  ? matchingType.labelEs
+                  : matchingType.label
+            }
+          }
         }
       } else if (section === "region") {
         // Look in CANONICAL_REGIONS for matching ID
@@ -546,7 +574,7 @@ export const useQuestionBuilderHelpers = () => {
           (cat) => cat.id === "metric",
         )
         if (metricCategory) {
-          const matchingMetric = metricCategory.options.find(
+          const matchingMetric = metricCategory?.options.find(
             (option) => typeof option === "object" && option.id === text,
           )
           if (matchingMetric && typeof matchingMetric === "object") {

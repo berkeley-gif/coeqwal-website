@@ -1,8 +1,11 @@
-import React from "react"
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
+import { usePrecipitationAnimation } from "../hooks/usePrecipitationAnimation"
+import { useStoryStore } from "@repo/state"
+import { useMapFly } from "../hooks/useMapFly"
+import { views } from "../config/mapViews"
 
 interface Props {
   onOpenDrawer: () => void
@@ -11,37 +14,62 @@ interface Props {
 export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
+  const fly = useMapFly()
+  // precipitation animation hook
+  const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef, {
+    bandDurationMs: 250, // band cycling rate
+    snowfallThreshold: 6, // band timing for fade-in
+  })
+
+  const showARLabel = useStoryStore((s) => s.overlays.arLabel ?? false)
+  const darkenParagraphs = useStoryStore(
+    (s) => s.overlays.paragraphShade ?? false,
+  )
+  const { setOverlay } = useStoryStore.getState()
+
+  const handleAnimateBands = () => {
+    animateBands()
+  }
 
   // helper for list items
-  const renderParagraph = (translationKey: string, onClick?: () => void) => (
+  const renderParagraph = (
+    translationKey: string,
+    onClick?: () => void,
+    showIcon: boolean = true,
+  ) => (
     <Box
-      sx={{
-        cursor: "pointer",
-        p: 1,
-        borderRadius: 1,
-        transition: "background-color 0.3s ease",
-        "&:hover": {
-          backgroundColor: "rgba(25, 118, 210, 0.08)",
-        },
-        "&:hover .MuiSvgIcon-root": {
-          color: "#42a5f5",
-          transform: "scale(1.2)",
-        },
-        "&:active": {
-          backgroundColor: "rgba(25, 118, 210, 0.16)",
-        },
-      }}
+      sx={(theme) => ({
+        ...theme.mixins.hoverParagraph,
+        p: 2,
+        borderRadius: "8px",
+        ...(darkenParagraphs
+          ? {
+              ...theme.mixins.hoverParagraphDarkened,
+              p: 2,
+              borderRadius: "8px",
+            }
+          : {}),
+      })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
       <Typography variant="body1">
         {t(translationKey)}
-        <VisibilityIcon
-          sx={{ ml: 1, verticalAlign: "middle" }}
-          onClick={(e) => {
-            e.stopPropagation()
-            onClick?.()
-          }}
-        />
+        {showIcon && (
+          <VisibilityIcon
+            sx={{
+              ml: 1,
+              verticalAlign: "middle",
+              animation:
+                translationKey === "californiaWater.paragraph1" && isAnimating
+                  ? "pulse 1.5s infinite"
+                  : "none",
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClick?.()
+            }}
+          />
+        )}
       </Typography>
     </Box>
   )
@@ -74,43 +102,63 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               {t("californiaWater.title")}
             </Typography>
 
-            <Stack spacing={1}>
-              {renderParagraph("californiaWater.paragraph1")}
+            <Stack ml={"-10px"}>
+              {renderParagraph(
+                "californiaWater.paragraph1",
+                handleAnimateBands,
+              )}
               {/* Paragraph 2 includes map flyTo */}
               {renderParagraph("californiaWater.paragraph2", () => {
-                console.log("👁 flyTo clicked", mapRef.current)
-                mapRef.current?.flyTo({
-                  center: [-122.305, 37.075],
-                  zoom: 7.82,
-                  pitch: 60,
-                  bearing: 45,
-                  duration: 3000,
-                  essential: true,
-                })
+                setOverlay("arLabel", false)
+                setOverlay("paragraphShade", true)
+                fly(views.deltaClose)
               })}
               {renderParagraph("californiaWater.paragraph3")}
-              {renderParagraph("californiaWater.paragraph4")}
+              {renderParagraph("californiaWater.paragraph4", undefined, false)}
             </Stack>
 
             <Box sx={{ mt: 3 }}>
-              <LearnMoreButton
-                onClick={onOpenDrawer}
-                variant="outlined"
-                sx={{
-                  borderColor: "white",
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    borderColor: "white",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  },
-                }}
-              />
+              <LearnMoreButton onClick={onOpenDrawer} />
             </Box>
           </Box>
 
-          {/* Right column (empty placeholder for future content) */}
-          <Box sx={{ width: { xs: "100%", md: "50%" } }} />
+          {/* Right column */}
+          <Box
+            sx={{
+              width: { xs: "100%", md: "50%" },
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 2,
+              pl: 2,
+            }}
+          >
+            <Box
+              sx={{
+                opacity: showARLabel ? 1 : 0,
+                transition: "opacity 1s ease",
+                textAlign: "center",
+                backgroundColor: "rgba(2, 18, 36, 0.9)",
+                color: "#F2F0EF",
+                px: 1,
+                py: 1,
+                borderRadius: "4px",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ fontSize: "1rem", color: "white", fontWeight: 600 }}
+              >
+                {t("californiaWater.arLabel.title")}
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ fontSize: "1rem", color: "white", fontWeight: 400 }}
+              >
+                {t("californiaWater.arLabel.date")}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </BasePanel>
     </Box>

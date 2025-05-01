@@ -1199,15 +1199,17 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         if (locale === "es") {
           return (
             <>
-              Para {outcomeContent}
-              {climateElement}, ¿qué {operationsPart} podríamos considerar?
+              Para estos {outcomeContent}
+              {climateElement}, ¿qué {operationsPart}
+              podríamos probar?
             </>
           )
         } else {
           return (
             <>
-              To {outcomeContent}
-              {climateElement}, which {operationsPart} could we consider?
+              For these {outcomeContent}
+              {climateElement}, which {operationsPart}
+              could we try?
             </>
           )
         }
@@ -1230,15 +1232,17 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         if (locale === "es") {
           return (
             <>
-              Para cambiar {outcomePart} con {climateElement}, ¿qué{" "}
-              {operationsPart} podríamos considerar?
+              Para estos {outcomePart} con {climateElement}, ¿qué{" "}
+              {operationsPart}
+              podríamos probar?
             </>
           )
         } else {
           return (
             <>
-              To change {outcomePart} with {climateElement}, which{" "}
-              {operationsPart} could we consider?
+              For these {outcomePart} with {climateElement}, which{" "}
+              {operationsPart}
+              could we try?
             </>
           )
         }
@@ -1348,14 +1352,14 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           mt: theme.spacing(4),
           mb: 0,
           lineHeight: theme.typography.h2.lineHeight,
-          textAlign: "left",
+          textAlign: "center",
           fontWeight: 500,
           width: "100%",
           margin: "0 auto",
           fontSize: calculatedFontSize, // Using the calculated font size
           backgroundColor: "white",
-          paddingTop: isExploratoryMode ? "20px" : "72px", // Reduce padding in exploratory mode
-          paddingBottom: isExploratoryMode ? "12px" : "32px", // Reduce padding in exploratory mode
+          paddingTop: isExploratoryMode ? "20px" : "20px", // Reduce padding in exploratory mode
+          paddingBottom: isExploratoryMode ? "12px" : 0, // Reduce padding in exploratory mode
           paddingLeft: "5%",
           paddingRight: "5%",
           boxShadow: "none",

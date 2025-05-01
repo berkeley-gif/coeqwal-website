@@ -10,11 +10,42 @@ const storyTheme = createTheme({
     },
     body1: {
       ...baseTheme.typography.body1,
-      fontSize: "1.8rem",
+      fontSize: "0.875rem", // xs default
       lineHeight: 1.5,
+      "@media (min-width: 1200px)": {
+        fontSize: "1.25rem",
+      },
+      "@media (min-width: 1536px)": {
+        fontSize: "1.8rem",
+      },
+    },
+    h2: {
+      ...baseTheme.typography.h2,
+      "@media (min-width: 1200px)": {
+        fontSize: "3.35rem",
+      },
+      "@media (min-width: 1536px)": {
+        fontSize: "4.8rem",
+      },
+    },
+    h3: {
+      ...baseTheme.typography.h3,
+      "@media (min-width: 1200px)": {
+        fontSize: "1.8rem",
+      },
+      "@media (min-width: 1536px)": {
+        fontSize: "2.778rem",
+      },
     },
   },
   components: {
+    MuiTypography: {
+      styleOverrides: {
+        gutterBottom: {
+          marginBottom: "1rem",
+        },
+      },
+    },
     MuiSlider: {
       styleOverrides: {
         root: {

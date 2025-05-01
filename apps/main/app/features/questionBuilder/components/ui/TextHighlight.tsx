@@ -3,8 +3,7 @@
 import { useTheme } from "@repo/ui/mui"
 import React from "react"
 /**
- * HighlightText component - text with colored background
- * Used for visually emphasizing key terms with a colored background
+ * Key terms in question summary
  */
 interface HighlightTextProps {
   bgcolor: string
@@ -44,5 +43,9 @@ export const ColoredText: React.FC<ColoredTextProps> = ({
   color,
   children,
 }) => {
-  return <span style={{ color, fontWeight: 500 }}>{children}</span>
+  return (
+    <span style={{ color, fontWeight: 500, textDecoration: "underline" }}>
+      {children}
+    </span>
+  )
 }

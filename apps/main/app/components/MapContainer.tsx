@@ -1,11 +1,14 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { Map, useMap, Marker, MapRef } from "@repo/map"
+// import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
+// import { Map, useMap, Marker, MapRef } from "@repo/map"
+import { Map, useMap, MapRef } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import { useMapStore, mapActions } from "@repo/state/map"
-import AnimatedMarker from "./AnimatedMarker"
-import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
+// import AnimatedMarker from "./AnimatedMarker"
+// import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
+import { useStoryStore } from "@repo/state"
 
 interface MapContainerProps {
   uncontrolledRef?: React.RefObject<MapRef | null>
@@ -18,14 +21,14 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const initialized = useRef(false)
 
   // Use utilities to manage markers
-  const [markers] = useState(WATER_FEATURES)
-  const [filterType] = useState<string | null>(null)
+  // const [markers] = useState(WATER_FEATURES)
+  // const [filterType] = useState<string | null>(null)
   // const [filterType, setFilterType] = useState<string | null>(null) // Uncomment when needed
 
   // Filter markers if a type is selected
-  const filteredMarkers = filterType
-    ? filterMarkersByType(markers, filterType)
-    : markers
+  // const filteredMarkers = filterType
+  //   ? filterMarkersByType(markers, filterType)
+  //   : markers
 
   // ✅ Register mapRef and sync uncontrolledRef
   useEffect(() => {
@@ -83,8 +86,22 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
         interactive
         dragPan
         style={{ width: "100%", height: "100%" }}
+        onLoad={() => {
+          const map = mapRef.current?.getMap()
+          if (map && map.getLayer("snowfall")) {
+            map.setPaintProperty("snowfall", "raster-opacity", 0)
+            map.setPaintProperty("snowfall", "raster-opacity-transition", {
+              duration: 0,
+              delay: 0,
+            })
+          }
+          // initial view: ensure paragraph background off
+          useStoryStore.getState().setOverlay("paragraphShade", false)
+        }}
       >
-        {/* Standard markers rendered using our utility & AnimatedMarker */}
+        {/* 
+        // Pulsing motion markers temporarily disabled
+        // Uncomment to re-enable
         {filteredMarkers.map((marker) => (
           <Marker
             key={marker.id}
@@ -108,6 +125,7 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
             />
           </Marker>
         ))}
+        */}
       </Map>
     </Box>
   )
