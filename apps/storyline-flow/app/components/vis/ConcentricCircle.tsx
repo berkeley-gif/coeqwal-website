@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useMemo } from "react"
+import React, { useMemo } from "react"
 import { motion } from "@repo/motion"
 import "./concentric-circle.css"
 import { IconProps } from "../helpers/Icons"
@@ -64,10 +64,6 @@ function ConcentricCircle({
   }, [size, shift])
 
   const growth = data.present.value / data.past.value
-
-  useEffect(() => {
-    console.log(radius, growth, radius * growth)
-  }, [growth, radius])
 
   return (
     <svg width="100%" height="100%">

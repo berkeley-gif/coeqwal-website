@@ -91,7 +91,7 @@ export const concentricTransform: Record<string, benefitConfig> = {
     },
     agriculture: {
       size: { width: 400, height: 400 },
-      shift: [0.0, 0.0],
+      shift: [0.5, 0.5],
       radius: 40,
     },
     economy: {
@@ -113,12 +113,12 @@ export const concentricTransform: Record<string, benefitConfig> = {
     },
     agriculture: {
       size: { width: 600, height: 400 },
-      shift: [0.5, 0.3],
+      shift: [0.5, 0.7],
       radius: 50,
     },
     economy: {
-      size: { width: 600, height: 400 },
-      shift: [0.5, 0.5],
+      size: { width: 600, height: 450 },
+      shift: [0.6, 0.9],
       radius: 50,
     },
   },

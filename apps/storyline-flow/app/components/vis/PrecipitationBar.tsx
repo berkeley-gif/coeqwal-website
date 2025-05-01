@@ -23,8 +23,15 @@ interface PrecipitationDatum {
   value: number
 }
 
+const responsiveHeight = {
+  xs: 200,
+  sm: 250,
+  md: 300,
+  lg: 500,
+  xl: 500,
+}
+
 const margin = { top: 20, right: 80, bottom: 30, left: 180 }
-const FIXED_HEIGHT = 500
 const LABEL_HEIGHT = 50
 
 //TODO: possible make the height a fixed number
@@ -38,9 +45,11 @@ function PrecipitationBar({
   getSelectedYear: (year: string) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const breakpoint = useBreakpoint()
+  const selectedHeight = responsiveHeight[breakpoint] || 400
   const [dimensions, setDimensions] = useState({
     width: 0,
-    height: FIXED_HEIGHT,
+    height: selectedHeight,
   })
   const [tooltip, setTooltip] = useState<{
     visible: boolean
@@ -56,7 +65,7 @@ function PrecipitationBar({
       for (const entry of entries) {
         if (entry.target === containerRef.current) {
           const { width } = entry.contentRect
-          setDimensions({ width, height: FIXED_HEIGHT })
+          setDimensions({ width, height: selectedHeight })
         }
       }
     }, 300) // Debounce with a delay of 300ms
@@ -73,7 +82,7 @@ function PrecipitationBar({
       resizeObserver.disconnect()
       handleResize.cancel()
     }
-  }, [])
+  }, [selectedHeight])
 
   useFetchData(
     "/data/annual_precipitation.json",
@@ -134,7 +143,7 @@ function PrecipitationBar({
   return (
     <div
       ref={containerRef}
-      style={{ height: FIXED_HEIGHT, width: "100%", padding: " 2rem 0 " }}
+      style={{ height: selectedHeight, width: "100%", padding: " 2rem 0 " }}
     >
       {tooltip.visible && tooltip.data && (
         <div
@@ -149,7 +158,7 @@ function PrecipitationBar({
           inch
         </div>
       )}
-      <svg width={dimensions.width} height={dimensions.height}>
+      <svg width={dimensions.width} height={selectedHeight}>
         <YAxis
           yTicks={yTicks}
           yExtents={yExtents as [number, number]}
@@ -344,6 +353,7 @@ function YAxis({
 }) {
   const aboveMidpoint = (margin.top + yScale(0)) / 2
   const belowMidpoint = (dimensions.height - margin.bottom + yScale(0)) / 2
+  console.log(dimensions)
 
   return (
     <>

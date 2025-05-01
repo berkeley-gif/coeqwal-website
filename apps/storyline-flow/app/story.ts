@@ -37,8 +37,6 @@ export interface Storyline {
     p41: string
     p42: string
     p43: string
-    p44: string
-    p45: string
     valley: {
       p11: string
       p12: string
