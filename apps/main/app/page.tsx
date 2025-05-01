@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useMemo } from "react"
 import { Box } from "@repo/ui/mui"
 import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
+import type { SecondaryNavItem } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
@@ -53,6 +54,48 @@ export default function Home() {
     activeSection,
     handleSectionClick,
     t,
+  )
+
+  // Create the secondary navigation items
+  const secondaryNavItems = useMemo<SecondaryNavItem[]>(
+    () => [
+      {
+        key: "home",
+        label: "HOME",
+        sectionId: "hero",
+      },
+      {
+        key: "californiaWater",
+        label: "CALIFORNIA WATER",
+        sectionId: "california-water",
+      },
+      {
+        key: "managingWater",
+        label: "MANAGING WATER",
+        sectionId: "managing-water",
+      },
+      {
+        key: "challenges",
+        label: "GROWING CHALLENGES",
+        sectionId: "challenges",
+      },
+      {
+        key: "calsim",
+        label: "CALSIM",
+        sectionId: "calsim",
+      },
+      {
+        key: "explore",
+        label: "EXPLORE",
+        sectionId: "invitation",
+      },
+      {
+        key: "scenarioSearch",
+        label: "SCENARIO SEARCH",
+        sectionId: "combined-panel",
+      },
+    ],
+    [],
   )
 
   return (
@@ -124,6 +167,8 @@ export default function Home() {
             drawerPosition="right"
             activeSection={activeSection}
             onSectionClick={handleSectionClick}
+            showSecondaryNav={true}
+            secondaryNavItems={secondaryNavItems}
           />
         </Box>
 

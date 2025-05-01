@@ -14,15 +14,6 @@ type HeaderTranslations = {
     getData: string
     about: string
   }
-  navigation: {
-    home: string
-    californiaWater: string
-    managingWater: string
-    challenges: string
-    calsim: string
-    explore: string
-    scenarioSearch: string
-  }
 }
 
 type TranslationsMap = {
@@ -30,11 +21,20 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
+// Incoming: secondary nav option
+export interface SecondaryNavItem {
+  key: string
+  label: string
+  sectionId: string
+}
+
 interface HeaderProps {
   drawerOpen?: boolean
   drawerPosition?: "left" | "right"
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
+  showSecondaryNav?: boolean // Renamed from showNavigation
+  secondaryNavItems?: SecondaryNavItem[] // Allow configurable navigation items
 }
 
 const translations: TranslationsMap = {
@@ -44,15 +44,6 @@ const translations: TranslationsMap = {
       getData: "Raw Data",
       about: "About COEQWAL",
     },
-    navigation: {
-      home: "HOME",
-      californiaWater: "CALIFORNIA WATER",
-      managingWater: "MANAGING WATER",
-      challenges: "GROWING CHALLENGES",
-      calsim: "CALSIM",
-      explore: "EXPLORE",
-      scenarioSearch: "SCENARIO SEARCH",
-    },
   },
   es: {
     title: "COEQWAL",
@@ -60,27 +51,7 @@ const translations: TranslationsMap = {
       getData: "Datos sin procesar",
       about: "Sobre COEQWAL",
     },
-    navigation: {
-      home: "INICIO",
-      californiaWater: "AGUA DE CALIFORNIA",
-      managingWater: "GESTIÓN DEL AGUA",
-      challenges: "DESAFÍOS CRECIENTES",
-      calsim: "CALSIM",
-      explore: "EXPLORAR",
-      scenarioSearch: "BÚSQUEDA DE ESCENARIOS",
-    },
   },
-}
-
-// Map navigation items to their corresponding section IDs
-const navigationSectionMap = {
-  home: "hero", // Assuming "hero" is the ID for the HeroSection
-  californiaWater: "california-water",
-  managingWater: "managing-water",
-  challenges: "challenges",
-  calsim: "calsim",
-  explore: "invitation",
-  scenarioSearch: "combined-panel", // Assuming this is the ID for CombinedPanel
 }
 
 export function Header({
@@ -88,6 +59,8 @@ export function Header({
   drawerPosition = "right",
   activeSection,
   onSectionClick,
+  showSecondaryNav = false,
+  secondaryNavItems = [], // Default to empty array, bc optional
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -101,8 +74,9 @@ export function Header({
   const componentText =
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
-  // Skip rendering navigation on mobile
-  const showNavigation = !isMobile
+  // Only show secondary navigation if explicitly enabled and not on mobile
+  const displaySecondaryNav =
+    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   return (
     <AppBar
@@ -122,8 +96,8 @@ export function Header({
           <Logo />
         </Box>
 
-        {/* Navigation Menu */}
-        {showNavigation && (
+        {/* Secondary Navigation Menu */}
+        {displaySecondaryNav && (
           <Stack
             direction="row"
             spacing={1}
@@ -134,16 +108,14 @@ export function Header({
               mx: 2,
             }}
           >
-            {Object.entries(componentText.navigation).map(([key, label]) => {
-              const sectionId =
-                navigationSectionMap[key as keyof typeof navigationSectionMap]
-              const isActive = activeSection === sectionId
+            {secondaryNavItems.map((item) => {
+              const isActive = activeSection === item.sectionId
 
               return (
                 <Button
-                  key={key}
+                  key={item.key}
                   variant="text"
-                  onClick={() => onSectionClick?.(sectionId)}
+                  onClick={() => onSectionClick?.(item.sectionId)}
                   sx={{
                     color: "white",
                     minWidth: "auto",
@@ -155,7 +127,7 @@ export function Header({
                     fontWeight: isActive ? 600 : 400,
                   }}
                 >
-                  {label}
+                  {item.label}
                   {isActive && (
                     <ArrowDropDownIcon
                       sx={{

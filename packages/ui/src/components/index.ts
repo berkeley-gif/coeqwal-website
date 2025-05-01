@@ -5,6 +5,7 @@
 
 // Navigation components
 export { Header } from "./navigation/Header"
+export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { LearnMoreButton } from "./navigation/LearnMoreButton"
 export { MiniDrawer } from "./navigation/MiniDrawer"
