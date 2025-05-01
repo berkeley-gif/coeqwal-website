@@ -33,7 +33,8 @@ import { Card } from "@repo/ui"
 import { OPERATION_THEMES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
-import { HighlightText } from "./ui"
+// import { ColoredText, HighlightText } from "./ui"
+import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
 const OperationsSelector: React.FC = () => {
@@ -218,15 +219,16 @@ const OperationsSelector: React.FC = () => {
           mb: 2,
         }}
       >
-        <Typography variant="h5">
+        <Typography variant="h3" sx={{ fontSize: "3rem" }}>
           {swapped ? (
             <>
               {" "}
-              {locale === "es" ? "¿qué " : "which "}
-              <HighlightText bgcolor={theme.palette.pop.main}>
-                {t("questionBuilder.defaultTerms.decisions")}
-              </HighlightText>
-              &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")}
+              {/* {locale === "es" ? "¿qué " : "which "} */}
+              {/* <HighlightText bgcolor={theme.palette.pop.main}> */}
+              <ColoredText color={theme.palette.pop.main}>
+                {t("questionBuilder.defaultTerms.decisions_sub")}
+              </ColoredText>
+              {/* &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")} */}
             </>
           ) : (
             <>
@@ -237,9 +239,11 @@ const OperationsSelector: React.FC = () => {
                   <React.Fragment key={index}>
                     {part}
                     {index < array.length - 1 && (
-                      <HighlightText bgcolor={theme.palette.pop.main}>
-                        {t("questionBuilder.defaultTerms.decisions")}
-                      </HighlightText>
+                      // <HighlightText bgcolor={theme.palette.pop.main}>
+                      <ColoredText color={theme.palette.pop.main}>
+                        {t("questionBuilder.defaultTerms.decisions_sub")}
+                      </ColoredText>
+                      // </HighlightText>
                     )}
                   </React.Fragment>
                 ))}

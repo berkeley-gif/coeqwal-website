@@ -33,7 +33,8 @@ import { Card } from "@repo/ui"
 import { OUTCOME_CATEGORIES } from "../data/constants"
 import SectionAccordion from "./SectionAccordion"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
-import { HighlightText } from "./ui"
+import { ColoredText } from "./ui"
+// import { HighlightText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
 const OutcomesSelector: React.FC = () => {
@@ -112,18 +113,18 @@ const OutcomesSelector: React.FC = () => {
           mb: 2,
         }}
       >
-        <Typography variant="h5">
+        <Typography variant="h3" sx={{ fontSize: "3rem" }}>
           {swapped ? (
             <>
               {/* Use JSX directly - the t function can't handle React elements as params */}
-              {
+              {/* {
                 t("questionBuilder.outcomesSelector.swappedTitle").split(
                   "{{waterAvailability}}",
                 )[0]
-              }
-              <HighlightText bgcolor={theme.palette.cool.main}>
+              } */}
+              <ColoredText color={theme.palette.cool.main}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
-              </HighlightText>
+              </ColoredText>
               {t("questionBuilder.outcomesSelector.swappedTitle").split(
                 "{{waterAvailability}}",
               )[1] || ""}
@@ -131,9 +132,9 @@ const OutcomesSelector: React.FC = () => {
           ) : (
             <>
               {" "}
-              <HighlightText bgcolor={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.cool.main}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
-              </HighlightText>
+              </ColoredText>
               {t("questionBuilder.outcomesSelector.title").split(
                 "{{waterAvailability}}",
               )[1] || ""}

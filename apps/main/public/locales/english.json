@@ -81,7 +81,8 @@
     "defaultTerms": {
       "waterAvailability": "outcomes",
       "outcomes": "outcomes",
-      "decisions": "water operations"
+      "decisions": "water operations",
+      "decisions_sub": "water operation scenarios"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
@@ -109,7 +110,7 @@
       "clearSelections": "Clear selections"
     },
     "operationsSelector": {
-      "title": "How do {{decisions}} affect",
+      "title": "{{decisions}}",
       "swappedTitle": "could we consider?",
       "searchPlaceholder": "Type to search...",
       "searchOperations": "Search operations",
@@ -118,7 +119,7 @@
     "outcomesSelector": {
       "title": "{{waterAvailability}}?",
       "swappedTitle": "To change {{waterAvailability}}",
-      "includeClimate": "Include climate futures",
+      "includeClimate": "Include future climate conditions",
       "chooseLocation": "Choose location on map",
       "mapPlaceholder": "Map Placeholder"
     },

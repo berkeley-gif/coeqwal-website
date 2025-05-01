@@ -19,13 +19,15 @@ const StyledCard = styled(Paper, {
   backgroundColor: theme.palette.common.white,
   width: "100%",
   overflow: "hidden",
-  transition: "box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms", // MUI v7 transition
+  // transition: "box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms", // MUI v7 transition
+  transition: "none",
   border: theme.border.none,
   padding: theme.spacing(3),
 
   // Custom softer shadow
-  boxShadow:
-    "0px 2px 4px -1px rgba(0,0,0,0.1), 0px 1px 2px 0px rgba(0,0,0,0.05), 0px 1px 5px 0px rgba(0,0,0,0.08)",
+  // boxShadow:
+  //   "0px 2px 4px -1px rgba(0,0,0,0.1), 0px 1px 2px 0px rgba(0,0,0,0.05), 0px 1px 5px 0px rgba(0,0,0,0.08)",
+  boxShadow: "none",
 
   // Color variants as accent borders
   ...(color === "primary" && {
@@ -39,10 +41,10 @@ const StyledCard = styled(Paper, {
   }),
 
   // Softer hover shadow
-  "&:hover": {
-    boxShadow:
-      "0px 3px 5px -1px rgba(0,0,0,0.12), 0px 5px 8px 0px rgba(0,0,0,0.08), 0px 1px 10px 0px rgba(0,0,0,0.06)",
-  },
+  // "&:hover": {
+  //   boxShadow:
+  //     "0px 3px 5px -1px rgba(0,0,0,0.12), 0px 5px 8px 0px rgba(0,0,0,0.08), 0px 1px 10px 0px rgba(0,0,0,0.06)",
+  // },
 }))
 
 const CardHeader = styled(Box)(({ theme }) => ({
