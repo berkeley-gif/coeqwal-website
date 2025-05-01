@@ -38,7 +38,12 @@ export default function ManagingWaterSection({ onOpenDrawer }: Props) {
   )
 
   return (
-    <Box sx={{ pointerEvents: "auto" }} id="managing-water-panel">
+    <Box
+      id="managing-water"
+      sx={{
+        pointerEvents: "auto",
+      }}
+    >
       <BasePanel
         background="transparent"
         paddingVariant="wide"

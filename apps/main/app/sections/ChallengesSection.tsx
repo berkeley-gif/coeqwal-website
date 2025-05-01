@@ -55,7 +55,12 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
   )
 
   return (
-    <Box sx={{ pointerEvents: "auto" }} id="challenges-panel">
+    <Box
+      id="challenges"
+      sx={{
+        pointerEvents: "auto",
+      }}
+    >
       <BasePanel
         background="transparent"
         paddingVariant="wide"

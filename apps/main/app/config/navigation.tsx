@@ -17,22 +17,24 @@ interface NavItem {
 
 // All section IDs in order (used for scroll tracking)
 export const sectionIds = [
-  "california-water-panel",
+  "hero",
+  "california-water",
   "managing-water",
   "challenges",
-  "alternative-scenarios",
-  "scenario-data",
-  "presentation-tools",
+  "calsim",
+  "invitation",
+  "combined-panel",
 ]
 
 // Define the translation keys for each navigation item
 export const navigationKeys = {
-  "california-water-panel": "secondaryNavigation.californiaWater",
+  hero: "secondaryNavigation.home",
+  "california-water": "secondaryNavigation.californiaWater",
   "managing-water": "secondaryNavigation.managingWater",
   challenges: "secondaryNavigation.challenges",
-  "alternative-scenarios": "secondaryNavigation.alternativeScenarios",
-  "scenario-data": "secondaryNavigation.scenarioData",
-  "presentation-tools": "secondaryNavigation.presentationTools",
+  calsim: "secondaryNavigation.calsim",
+  invitation: "secondaryNavigation.explore",
+  "combined-panel": "secondaryNavigation.scenarioSearch",
 }
 
 // Helper function to generate navigation items with active state and scroll behavior
@@ -43,10 +45,10 @@ export const getNavigationItems = (
 ): NavItem[] => {
   return [
     {
-      text: t(navigationKeys["california-water-panel"]),
+      text: t(navigationKeys["california-water"]),
       icon: <WaterIcon />,
-      onClick: () => scrollToSection("california-water-panel"),
-      active: activeSection === "california-water-panel",
+      onClick: () => scrollToSection("california-water"),
+      active: activeSection === "california-water",
     },
     {
       text: t(navigationKeys["managing-water"]),
@@ -61,22 +63,22 @@ export const getNavigationItems = (
       active: activeSection === "challenges",
     },
     {
-      text: t(navigationKeys["alternative-scenarios"]),
+      text: t(navigationKeys["calsim"]),
       icon: <SwapHorizIcon />,
-      onClick: () => scrollToSection("alternative-scenarios"),
-      active: activeSection === "alternative-scenarios",
+      onClick: () => scrollToSection("calsim"),
+      active: activeSection === "calsim",
     },
     {
-      text: t(navigationKeys["scenario-data"]),
+      text: t(navigationKeys["invitation"]),
       icon: <BarChartIcon />,
-      onClick: () => scrollToSection("scenario-data"),
-      active: activeSection === "scenario-data",
+      onClick: () => scrollToSection("invitation"),
+      active: activeSection === "invitation",
     },
     {
-      text: t(navigationKeys["presentation-tools"]),
+      text: t(navigationKeys["combined-panel"]),
       icon: <SlideshowIcon />,
-      onClick: () => scrollToSection("presentation-tools"),
-      active: activeSection === "presentation-tools",
+      onClick: () => scrollToSection("combined-panel"),
+      active: activeSection === "combined-panel",
     },
   ]
 }

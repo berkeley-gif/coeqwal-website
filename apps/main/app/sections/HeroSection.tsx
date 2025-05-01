@@ -26,6 +26,7 @@ export default function HeroSection() {
 
   return (
     <Box
+      id="hero"
       sx={{
         pointerEvents: "auto",
         position: "relative",

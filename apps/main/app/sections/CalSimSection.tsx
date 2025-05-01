@@ -55,7 +55,12 @@ export default function CalSimSection({ onOpenDrawer }: Props) {
   )
 
   return (
-    <Box sx={{ pointerEvents: "auto" }} id="calsim-panel">
+    <Box
+      id="calsim"
+      sx={{
+        pointerEvents: "auto",
+      }}
+    >
       <BasePanel
         background="transparent"
         paddingVariant="wide"

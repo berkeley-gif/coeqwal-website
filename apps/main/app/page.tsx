@@ -18,11 +18,24 @@ import ChallengesSection from "./sections/ChallengesSection"
 import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
 
+// Make sure these IDs match the section IDs used in the Header component
+export const navSectionIds = {
+  hero: "hero", // For HeroSection and InterstitialPanel together
+  californiaWater: "california-water",
+  managingWater: "managing-water",
+  challenges: "challenges",
+  calsim: "calsim",
+  invitation: "invitation",
+  combinedPanel: "combined-panel",
+}
+
 export default function Home() {
   const { t } = useTranslation()
 
   const [drawerOpen, setDrawerOpen] = useState(false)
-  const { activeSection, scrollToSection } = useScrollTracking(sectionIds)
+  // Track all sections including the ones for the top navigation
+  const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
+  const { activeSection, scrollToSection } = useScrollTracking(allSectionIds)
 
   // For the uncontrolled map, we'll store its ref so we can call flyTo
   const uncontrolledRef = useRef<MapboxMapRef | null>(
@@ -106,7 +119,12 @@ export default function Home() {
       >
         {/* Header */}
         <Box sx={{ pointerEvents: "auto" }}>
-          <Header drawerOpen={drawerOpen} drawerPosition="right" />
+          <Header
+            drawerOpen={drawerOpen}
+            drawerPosition="right"
+            activeSection={activeSection}
+            onSectionClick={handleSectionClick}
+          />
         </Box>
 
         {/* Main content sections */}
@@ -137,34 +155,8 @@ export default function Home() {
           {/* Invitation panel with two columns */}
           <InvitationSection onOpenDrawer={() => setDrawerOpen(true)} />
 
-          {/* To Be Continued Panel
-          <Box sx={{ pointerEvents: "auto" }}>
-            <BasePanel
-              background="transparent"
-              paddingVariant="wide"
-              includeHeaderSpacing={false}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "30vh",
-              }}
-            >
-              <Typography
-                variant="h4"
-                sx={{
-                  fontStyle: "italic",
-                  color: "white",
-                  textAlign: "center",
-                }}
-              >
-                (to be continued)
-              </Typography>
-            </BasePanel>
-          </Box> */}
-
           {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto" }} id="combined-panel-container">
+          <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
             <CombinedPanel />
           </Box>
           {/* Needs Editor Panel */}

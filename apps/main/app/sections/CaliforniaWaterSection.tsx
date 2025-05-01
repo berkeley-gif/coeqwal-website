@@ -75,7 +75,12 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
   )
 
   return (
-    <Box sx={{ pointerEvents: "auto" }} id="california-water-panel">
+    <Box
+      id="california-water"
+      sx={{
+        pointerEvents: "auto",
+      }}
+    >
       <BasePanel
         background="transparent"
         paddingVariant="wide"

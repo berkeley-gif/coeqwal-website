@@ -55,7 +55,12 @@ export default function InvitationSection({ onOpenDrawer }: Props) {
   )
 
   return (
-    <Box sx={{ pointerEvents: "auto" }} id="calsim-panel">
+    <Box
+      id="invitation"
+      sx={{
+        pointerEvents: "auto",
+      }}
+    >
       <BasePanel
         background="transparent"
         paddingVariant="wide"
