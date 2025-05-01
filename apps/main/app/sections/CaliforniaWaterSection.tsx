@@ -102,7 +102,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               {t("californiaWater.title")}
             </Typography>
 
-            <Stack spacing={1}>
+            <Stack ml={"-10px"}>
               {renderParagraph(
                 "californiaWater.paragraph1",
                 handleAnimateBands,

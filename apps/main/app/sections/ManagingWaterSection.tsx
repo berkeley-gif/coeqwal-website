@@ -58,7 +58,7 @@ export default function ManagingWaterSection({ onOpenDrawer }: Props) {
               {t("managingWater.title")}
             </Typography>
 
-            <Stack spacing={1}>
+            <Stack ml={"-10px"}>
               {renderParagraph("managingWater.paragraph1")}
               {renderParagraph("managingWater.paragraph2")}
               {renderParagraph("managingWater.paragraph3")}

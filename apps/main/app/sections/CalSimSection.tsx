@@ -75,7 +75,7 @@ export default function CalSimSection({ onOpenDrawer }: Props) {
               {t("calsim.title")}
             </Typography>
 
-            <Stack spacing={1}>
+            <Stack ml={"-10px"}>
               {renderParagraph("calsim.paragraph1", undefined, false)}
               {renderParagraph("calsim.paragraph2", undefined, false)}
               {renderParagraph("calsim.paragraph3", undefined, false)}

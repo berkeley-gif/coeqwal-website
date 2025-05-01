@@ -75,7 +75,7 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
               {t("challenges.title")}
             </Typography>
 
-            <Stack spacing={1}>
+            <Stack ml={"-10px"}>
               {renderParagraph("challenges.paragraph1", undefined, false)}
               {renderParagraph("challenges.paragraph2", undefined, false)}
               {renderParagraph("challenges.paragraph3", undefined, false)}

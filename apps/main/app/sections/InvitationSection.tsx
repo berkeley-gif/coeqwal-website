@@ -75,7 +75,7 @@ export default function InvitationSection({ onOpenDrawer }: Props) {
               {t("invitation.title")}
             </Typography>
 
-            <Stack spacing={1}>
+            <Stack ml={"-10px"}>
               {renderParagraph("invitation.paragraph1", undefined, false)}
               {renderParagraph("invitation.paragraph2", undefined, false)}
               {renderParagraph("invitation.paragraph3", undefined, false)}
