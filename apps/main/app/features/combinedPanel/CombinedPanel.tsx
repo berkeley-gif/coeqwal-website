@@ -479,12 +479,12 @@ const CombinedPanelContent = () => {
           <QuestionSummary wasScrolled={hasClickedScroll} />
         </Box>
 
-        {/* Search button - only visible after scroll */}
+        {/* Search button */}
         <Box
           sx={{
-            position: "absolute",
-            bottom: -28,
-            right: theme.spacing(4),
+            width: "100%",
+            display: "flex",
+            justifyContent: "flex-end",
             opacity: hasClickedScroll ? 1 : 0,
             visibility: hasClickedScroll ? "visible" : "hidden",
             transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
