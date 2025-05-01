@@ -76,6 +76,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       return "2.2rem" // Smaller text for exploratory mode
     }
 
+    // When in swapped mode (outcomes to operations), use medium-small size
+    if (swapped) {
+      return "3.5rem" // Medium-small size for swapped mode
+    }
+
     // Count total selections
     const operationsCount = selectedOperations.length
     const outcomesCount = Object.values(outcomesBySection).reduce(
@@ -99,7 +104,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
     // Extra small size
     return "2.8rem"
-  }, [selectedOperations, outcomesBySection, isExploratoryMode])
+  }, [selectedOperations, outcomesBySection, isExploratoryMode, swapped])
 
   // Expensive calculation for the summary text
   const summary = useMemo(() => {
@@ -1199,15 +1204,15 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         if (locale === "es") {
           return (
             <>
-              Para {outcomeContent}
-              {climateElement}, ¿qué {operationsPart} podríamos considerar?
+              Para estos {outcomeContent}
+              {climateElement}, ¿qué {operationsPart} podríamos probar?
             </>
           )
         } else {
           return (
             <>
-              To {outcomeContent}
-              {climateElement}, which {operationsPart} could we consider?
+              For these {outcomeContent}
+              {climateElement}, which {operationsPart} could we try?
             </>
           )
         }
@@ -1230,15 +1235,15 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         if (locale === "es") {
           return (
             <>
-              Para cambiar {outcomePart} con {climateElement}, ¿qué{" "}
-              {operationsPart} podríamos considerar?
+              Para estos {outcomePart} con {climateElement}, ¿qué{" "}
+              {operationsPart} podríamos probar?
             </>
           )
         } else {
           return (
             <>
-              To change {outcomePart} with {climateElement}, which{" "}
-              {operationsPart} could we consider?
+              For these {outcomePart} with {climateElement}, which{" "}
+              {operationsPart} could we try?
             </>
           )
         }

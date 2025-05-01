@@ -89,7 +89,7 @@
     "pluralVerb": "afectan",
     "questionFormat": "¿Cómo {{verb}} {{operation}} a {{outcome}}?",
     "questionFormatWithClimate": "¿Cómo {{verb}} {{operation}} a {{outcome}} con {{climate}}?",
-    "swappedFormat": "Para cambiar {{outcome}}, ¿qué {{operation}} podríamos considerar?",
+    "swappedFormat": "Para estos {{outcome}}, ¿qué {{operation}} podríamos probar?",
     "swappedFormatNoChange": "Para {{outcome}}, ¿qué {{operation}} podríamos considerar?",
     "connectors": {
       "and": "y",

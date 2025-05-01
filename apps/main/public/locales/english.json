@@ -90,7 +90,7 @@
     "pluralVerb": "do",
     "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
     "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} with {{climate}}?",
-    "swappedFormat": "To change {{outcome}}, which {{operation}} could we consider?",
+    "swappedFormat": "For these {{outcome}}, which {{operation}} could we try?",
     "swappedFormatNoChange": "For {{outcome}}, which {{operation}} could we consider?",
     "connectors": {
       "and": "and",
