@@ -39,7 +39,7 @@ import { useTranslation } from "@repo/i18n"
 
 const OperationsSelector: React.FC = () => {
   const theme = useTheme()
-  const { t, locale } = useTranslation()
+  const { t } = useTranslation()
   const {
     state: { swapped, selectedOperations, isExploratoryMode },
     handleOperationChange,
