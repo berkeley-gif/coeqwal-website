@@ -5,7 +5,7 @@ export const DIVISION = [
   },
   {
     name: "Natural Water Flow",
-    sections: ["flow", "valley", "delta", "transition"],
+    sections: ["flow", "valley", "wetland", "delta", "transition"],
   },
   {
     name: "Humans",

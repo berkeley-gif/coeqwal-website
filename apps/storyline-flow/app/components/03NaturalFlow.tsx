@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { motion } from "@repo/motion"
 import {
@@ -30,6 +30,7 @@ function SectionDelta() {
     <>
       <WaterFlow />
       <Valley />
+      <Wetland />
       <Delta />
       <Transition />
     </>
@@ -45,7 +46,6 @@ function WaterFlow() {
   const hasSeen = useRef(false)
   const { addSource, addLayer, setPaintProperty, flyTo } = useMap() // from our context
   const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = riverMapViewState[breakpoint]
 
@@ -143,25 +143,14 @@ function WaterFlow() {
       </Box>
       <Box className="paragraph">
         <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence custom={2}>
-          {content?.p2} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
+        <Sentence custom={2}>{content?.p2}</Sentence>
         <Sentence custom={3}>{content?.p3}</Sentence>
       </Box>
       <Box className="paragraph">
-        <Sentence
-          custom={4}
-          onAnimationComplete={() => setStartAnimation(true)}
-        >
-          {content?.p41}
-          <Underline startAnimation={startAnimation} delay={0.5}>
-            {content?.p42}
-          </Underline>
-          {content?.p43}
-        </Sentence>
+        <Sentence custom={4}>{content?.p41}</Sentence>
         <Sentence custom={5.5}>
-          <span style={{ fontWeight: "bold" }}>{content?.p44}</span>
-          <span>{content?.p45}</span>
+          <span style={{ fontWeight: "bold" }}>{content?.p42}</span>
+          <span>{content?.p43}</span>
         </Sentence>
       </Box>
     </Box>
@@ -174,10 +163,77 @@ function Valley() {
   const { sectionRef, isSectionActive } = useActiveSection("valley", {
     amount: 0.5,
   })
+  const { flyTo, setPaintProperty } = useMap() // from our context
+  const hasSeen = useRef(false)
+  const [startAnimation, setStartAnimation] = useState(false)
+  const breakpoint = useBreakpoint()
+  const mapViewState = riverDeltaMapViewState[breakpoint]
+
+  const load = useCallback(() => {
+    flyTo({
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 0,
+      pitch: mapViewState?.pitch ?? 0,
+      bearing: mapViewState?.bearing ?? 0,
+      transitionOptions: {
+        duration: 2000,
+      },
+    })
+    setPaintProperty("delta-water-layer", "fill-opacity", 0)
+    setPaintProperty("delta-wetland-layer", "fill-opacity", 0)
+  }, [flyTo, mapViewState, setPaintProperty])
+
+  useEffect(() => {
+    if (isSectionActive) {
+      if (!hasSeen.current) {
+        //console.log('initialize stuff')
+      }
+      hasSeen.current = true
+      load()
+    } else {
+      if (hasSeen.current) {
+        //console.log('unload stuff')
+      } else {
+        //console.log('not seen yet, dont do anything')
+        return
+      }
+    }
+  }, [isSectionActive, load])
+
+  return (
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      tabIndex={-1}
+      role="region"
+    >
+      <Box className="paragraph">
+        <Sentence
+          custom={0}
+          onAnimationComplete={() => setStartAnimation(true)}
+        >
+          {content?.valley.p11}
+          <Underline startAnimation={startAnimation} delay={0.5}>
+            {content?.valley.p12}
+          </Underline>
+          {content?.valley.p13}
+        </Sentence>
+      </Box>
+    </Box>
+  )
+}
+
+function Wetland() {
+  const storyline = useStoryStore((state) => state.storyline)
+  const content = storyline?.flow
+  const { sectionRef, isSectionActive } = useActiveSection("wetland", {
+    amount: 0.5,
+  })
   const { flyTo, setPaintProperty, addSource, addLayer } = useMap() // from our context
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const hasSeen = useRef(false)
-  const [startValleyAnimation, setStartValleyAnimation] = useState(false)
   const [startDeltaAnimation, setStartDeltaAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = riverDeltaMapViewState[breakpoint]
@@ -259,28 +315,13 @@ function Valley() {
       role="region"
     >
       <Box className="paragraph">
-        <Sentence
-          custom={0}
-          onAnimationComplete={() => setStartValleyAnimation(true)}
-        >
-          {content?.valley.p11}
-          <Underline startAnimation={startValleyAnimation} delay={0.5}>
-            {content?.valley.p12}
-          </Underline>
-          {content?.valley.p13}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={1}>
-          {content?.valley.p2}{" "}
-          <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
-        <Sentence custom={2}>{content?.valley.p3}</Sentence>
-        <Sentence custom={3}>{content?.valley.p4}</Sentence>
+        <Sentence custom={0}>{content?.valley.p2} </Sentence>
+        <Sentence custom={1}>{content?.valley.p3}</Sentence>
+        <Sentence custom={2}>{content?.valley.p4}</Sentence>
       </Box>
       <Box className="paragraph">
         <Sentence
-          custom={4}
+          custom={3}
           onAnimationComplete={() => setStartDeltaAnimation(true)}
         >
           {content?.transition.p11}
@@ -289,8 +330,8 @@ function Valley() {
           </Underline>
           {content?.transition.p13}
         </Sentence>
-        <Sentence custom={5}>{content?.transition.p14}</Sentence>
-        <Sentence custom={6}>{content?.transition.p2}</Sentence>
+        <Sentence custom={4}>{content?.transition.p14}</Sentence>
+        <Sentence custom={5}>{content?.transition.p2}</Sentence>
       </Box>
     </Box>
   )

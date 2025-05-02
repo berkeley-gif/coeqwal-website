@@ -84,3 +84,17 @@ export const popUpVariants = {
     },
   }),
 }
+
+export const horizontalGrowRectVariants = {
+  hidden: {
+    width: 0,
+  },
+  visible: (custom: { width: number; delay: number }) => ({
+    width: custom.width,
+    transition: {
+      duration: 1.5,
+      ease: "easeInOut",
+      delay: custom.delay,
+    },
+  }),
+}
