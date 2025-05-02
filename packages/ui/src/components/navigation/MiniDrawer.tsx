@@ -185,6 +185,7 @@ export function MiniDrawer({
                   backgroundColor: bgColor,
                   color: theme.palette.common.white,
                   padding: theme.spacing(2),
+                  textAlign: "left",
                   "&:hover": {
                     backgroundColor: `${bgColor}dd`,
                     transform: "translateY(-2px)",
@@ -204,14 +205,13 @@ export function MiniDrawer({
               >
                 <ListItemText
                   primary={item.text}
-                  slotProps={{
-                    primary: {
-                      variant: "h6",
-                      sx: {
-                        lineHeight: 1.2,
-                        color: "inherit",
-                      },
-                    },
+                  sx={{
+                    margin: 0,
+                    "& .MuiListItemText-primary": {
+                      fontSize: "1rem",
+                      lineHeight: 1.2,
+                      color: "inherit"
+                    }
                   }}
                 />
               </ListItemButton>

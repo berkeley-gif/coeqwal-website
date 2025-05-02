@@ -484,7 +484,7 @@ const theme = createTheme({
           return {
             width: theme.layout.drawer.width,
             flexShrink: 0,
-            whiteSpace: "nowrap",
+            whiteSpace: "normal",
 
             "&.MiniDrawer-docked": {
               zIndex: theme.zIndex.drawer,
@@ -529,6 +529,8 @@ const theme = createTheme({
 
               "& .MuiListItemText-root": {
                 opacity: ownerState.open ? 1 : 0,
+                width: "100%",
+                maxWidth: "100%",
                 transition: theme.transitions.create("opacity", {
                   duration: theme.transitions.duration.shortest,
                 }),
