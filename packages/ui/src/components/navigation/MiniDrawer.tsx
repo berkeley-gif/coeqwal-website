@@ -7,11 +7,10 @@ import {
   IconButton,
   List,
   ListItem,
-  ListItemButton,
-  ListItemIcon,
   ListItemText,
   Divider,
   styled,
+  useTheme,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
@@ -42,8 +41,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 export interface MiniDrawerItem {
   /** Text to display for the drawer item */
   text: string
-  /** Icon to display for the drawer item */
-  icon: React.ReactNode
   /** Optional click handler for the drawer item */
   onClick?: () => void
   /** Whether this item is currently active */
@@ -83,6 +80,7 @@ export function MiniDrawer({
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
+  const theme = useTheme()
 
   // Toggle handlers for drawer state
   const handleDrawerOpen = () => {
@@ -152,24 +150,13 @@ export function MiniDrawer({
 
       <List
         sx={(theme) => ({
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: theme.spacing(1),
-          my: theme.spacing(1),
-          px: 0,
+          padding: theme.spacing(1, 0),
+          width: "100%",
         })}
       >
         {items.map((item, index) => {
           // Array of background colors to cycle through
-          const bgColors = [
-            "#BFDADC",
-            "#9ACBCF",
-            "#71BFB3",
-            "#4D9CA0",
-            "#2C6E91",
-            "#1A3F6B",
-          ]
+          const bgColors = theme.drawerNavigation.colors
 
           // Get color based on index (cycling through the array)
           const bgColor = bgColors[index % bgColors.length]
@@ -177,69 +164,35 @@ export function MiniDrawer({
           return (
             <ListItem
               key={index}
+              onClick={open ? undefined : handleDrawerOpen}
               disablePadding
-              sx={{
-                display: "block",
-                padding: 0,
-                width: "176px",
-              }}
-            >
-              <ListItemButton
-                onClick={item.onClick}
-                disableRipple={true}
-                sx={(theme) => ({
-                  width: "100%",
-                  backgroundColor: bgColor,
-                  color: theme.palette.common.white,
-                  "&:hover": {
-                    backgroundColor: `${bgColor}dd`,
-                    boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
-                    transform: "translateY(-2px)",
+              sx={(theme) => ({
+                display: "inline-block",
+                padding: theme.spacing(2),
+                backgroundColor: bgColor,
+                color: theme.palette.common.white,
+                borderRadius: open ? theme.borderRadius.standard : 0,
+                mx: open ? 1 : 0,
+                my: 0.5,
+                width: open ? "200px" : "200px", // changing width is tricky
+                height: open ? "100px" : "200px", // changing height works
+                "&:hover": {
+                  backgroundColor: `${bgColor}dd`,
+                  cursor: "pointer",
+                },
+                // Apply hover styling when item is active
+                ...(item.active && {
+                  backgroundColor: `${bgColor}dd`,
+                }),
+                transition: theme.transitions.create(
+                  ["background-color", "transform"],
+                  {
+                    duration: theme.transitions.duration.shortest,
                   },
-                  // Apply hover styling when item is active
-                  ...(item.active && {
-                    backgroundColor: `${bgColor}dd`,
-                    boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
-                    transform: "translateY(-2px)",
-                  }),
-                  minHeight: 96,
-                  transition: theme.transitions.create(
-                    ["background-color", "box-shadow", "transform"],
-                    {
-                      duration: theme.transitions.duration.shortest,
-                    },
-                  ),
-                })}
-              >
-                <ListItemIcon
-                  sx={(theme) => ({
-                    minWidth: "auto",
-                    color: theme.palette.common.white,
-                    marginBottom: theme.spacing(2),
-                    "& .MuiSvgIcon-root": {
-                      fontSize: 32,
-                    },
-                  })}
-                >
-                  {item.icon}
-                </ListItemIcon>
-
-                <ListItemText
-                  primary={item.text}
-                  slotProps={{
-                    primary: {
-                      variant: "h6",
-                      sx: {
-                        lineHeight: 1.1,
-                        whiteSpace: "normal",
-                        overflowWrap: "break-word",
-                        wordBreak: "break-word",
-                        color: "inherit",
-                      },
-                    },
-                  }}
-                />
-              </ListItemButton>
+                ),
+              })}
+            >
+              <ListItemText primary={item.text} />
             </ListItem>
           )
         })}

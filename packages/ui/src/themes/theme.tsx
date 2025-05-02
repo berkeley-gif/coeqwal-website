@@ -52,7 +52,7 @@ const themeValues = {
     headerHeight: 64,
     drawer: {
       width: 226,
-      closedWidth: 64,
+      closedWidth: 52,
     },
   },
 
@@ -266,9 +266,9 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "3.6rem",
+      fontSize: "4.4rem",
       fontWeight: 500,
-      lineHeight: 1.05,
+      lineHeight: 1.1,
       letterSpacing: "normal",
     },
     h2: {
@@ -470,9 +470,9 @@ const theme = createTheme({
       styleOverrides: {
         paper: ({ theme }) => ({
           color: theme.palette.text.secondary,
-          width: 400,
           top: theme.layout.headerHeight,
           height: `calc(100% - ${theme.layout.headerHeight}px)`,
+          borderRadius: 0,
         }),
         root: ({ theme, ownerState }) => {
           const drawerMixins = createDrawerMixins(
@@ -483,8 +483,6 @@ const theme = createTheme({
 
           return {
             width: theme.layout.drawer.width,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
 
             "&.MiniDrawer-docked": {
               zIndex: theme.zIndex.drawer,
@@ -503,45 +501,21 @@ const theme = createTheme({
               },
 
               "& .MuiListItemButton-root": {
-                minHeight: 96,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                alignItems: ownerState.open ? "flex-start" : "center",
+                display: "block",
                 padding: theme.spacing(2),
                 borderRadius: theme.borderRadius.standard,
                 mx: 1,
                 my: 0.5,
-                overflow: "hidden",
                 transition: theme.transitions.create(
-                  [
-                    "background-color",
-                    "color",
-                    "padding",
-                    "margin",
-                    "align-items",
-                    "transform",
-                    "box-shadow",
-                  ],
+                  ["background-color", "transform", "box-shadow"],
                   {
                     duration: theme.transitions.duration.shortest,
                   },
                 ),
-                "& .MuiTouchRipple-root": {
-                  display: "none",
-                },
-                "&.Mui-focusVisible": {
-                  backgroundColor: "transparent",
-                },
                 "&:hover": {
                   backgroundColor: `${theme.palette.action.hover}cc`,
                   transform: "translateY(-2px)",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-
-                  // Ensure icon color is preserved on hover
-                  "& .MuiListItemIcon-root .MuiSvgIcon-root": {
-                    color: "inherit",
-                  },
                 },
                 "&:active": {
                   transform: "translateY(0px)",
@@ -549,27 +523,23 @@ const theme = createTheme({
                 },
               },
 
-              "& .MuiListItemIcon-root": {
-                width: "100%",
-                display: "flex",
-                justifyContent: ownerState.open ? "flex-start" : "center",
-                transition: theme.transitions.create("justify-content", {
+              "& .MuiListItem-root": {
+                transform: ownerState.open ? "rotate(0deg)" : "rotate(-90deg)",
+                transformOrigin: "center center",
+                transition: theme.transitions.create("transform", {
                   duration: theme.transitions.duration.shortest,
                 }),
-
-                // Prevent icon color change on hover
-                "& .MuiSvgIcon-root": {
-                  color: "inherit",
-                  transition: "none", // Disable color transition
-                  "&:hover, &:focus": {
-                    color: "inherit", // Keep the same color on hover/focus
-                  },
-                },
               },
 
               "& .MuiListItemText-root": {
-                opacity: ownerState.open ? 1 : 0,
-                whiteSpace: "nowrap",
+                textAlign: ownerState.open ? "left" : "center",
+                "& .MuiListItemText-primary": {
+                  color: "inherit",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  lineHeight: 1.1,
+                },
               },
             },
           }
@@ -581,7 +551,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
-          padding: "5px 15px", // to account for border width
+          padding: "1px 15px", // to account for border width
           textTransform: "none",
           backgroundColor: "transparent", // Default background for unselected
           color: theme.palette.primary.contrastText, // Default text color for unselected
@@ -645,6 +615,11 @@ theme.background = {
 
 theme.borderRadius = themeValues.borderRadius
 
+// Define color palette for drawer navigation items
+theme.drawerNavigation = {
+  colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
+}
+
 // expose mixin constant for easy import if needed
 export const hoverParagraph = hoverParagraphMixin
 
@@ -696,6 +671,9 @@ declare module "@mui/material/styles" {
       card: string
       standard: string
       none: string
+    }
+    drawerNavigation: {
+      colors: string[]
     }
   }
 

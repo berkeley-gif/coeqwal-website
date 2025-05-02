@@ -395,13 +395,11 @@ const CombinedPanelContent = () => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
             alignItems: "top",
             width: "100%",
           }}
         >
-          <Typography variant="h6">SCENARIO SEARCH</Typography>
-
           {/* Climate checkbox in a small card - only visible after scroll */}
           <Box
             sx={{

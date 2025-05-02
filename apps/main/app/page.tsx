@@ -66,7 +66,7 @@ export default function Home() {
       },
       {
         key: "californiaWater",
-        label: "CALIFORNIA WATER",
+        label: "California Water",
         sectionId: "california-water",
       },
       {

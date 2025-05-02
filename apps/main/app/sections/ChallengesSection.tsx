@@ -63,7 +63,7 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
     >
       <BasePanel
         background="transparent"
-        paddingVariant="wide"
+        paddingVariant="very-wide"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -75,8 +75,8 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
           }}
         >
           {/* Left column */}
-          <Box sx={{ width: { xs: "100%", md: "50%" }, pr: { md: 4 } }}>
-            <Typography variant="h2" sx={{ mb: 1 }}>
+          <Box sx={{ width: { xs: "100%", md: "48%" }, pr: { md: 4 } }}>
+            <Typography variant="h1" sx={{ mb: 1 }}>
               {t("challenges.title")}
             </Typography>
 

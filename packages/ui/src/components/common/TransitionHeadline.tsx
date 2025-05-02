@@ -66,9 +66,6 @@ export function TransitionHeadline({
   return (
     <Box
       sx={{
-        overflow: "hidden",
-        height: "auto",
-        minHeight: 0,
         ...sx,
       }}
     >
@@ -80,8 +77,6 @@ export function TransitionHeadline({
           className={className}
           sx={() => ({
             transition: "all 0.5s ease-in-out",
-            height: "auto",
-            minHeight: 0,
             // Remove any fixed calculations that prevent shrinking
             display: "block",
           })}
