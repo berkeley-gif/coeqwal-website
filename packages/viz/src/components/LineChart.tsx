@@ -41,7 +41,9 @@ const LineChart: React.FC<LineChartProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  const dimensions = useResizeObserver(containerRef)
+  const dimensions = useResizeObserver(
+    containerRef as React.RefObject<HTMLElement>,
+  )
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
 
@@ -94,7 +96,7 @@ const LineChart: React.FC<LineChartProps> = ({
       const waterYearIdx = monthToWaterYearIndex[monthStr] || 0
 
       result.push({
-        month: waterYearMonths[waterYearIdx],
+        month: waterYearMonths[waterYearIdx] || "Unknown",
         monthIndex: i,
         waterYearIndex: waterYearIdx,
         overall: data.overall[monthStr] || 0,
@@ -188,20 +190,22 @@ const LineChart: React.FC<LineChartProps> = ({
           .tickFormat((d) => {
             const idx = Math.round(Number(d))
             if (idx >= 0 && idx < 12) {
-              return [
-                "Oct",
-                "Nov",
-                "Dec",
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-              ][idx]
+              return (
+                [
+                  "Oct",
+                  "Nov",
+                  "Dec",
+                  "Jan",
+                  "Feb",
+                  "Mar",
+                  "Apr",
+                  "May",
+                  "Jun",
+                  "Jul",
+                  "Aug",
+                  "Sep",
+                ][idx] || ""
+              )
             }
             return ""
           }),
