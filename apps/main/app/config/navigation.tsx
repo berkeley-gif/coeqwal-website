@@ -45,7 +45,8 @@ export const getNavigationItems = (
 ): NavItem[] => {
   return [
     {
-      text: t(navigationKeys["california-water"]),
+      // text: t(navigationKeys["california-water"]),
+      text: "California Water",
       icon: <WaterIcon />,
       onClick: () => scrollToSection("california-water"),
       active: activeSection === "california-water",

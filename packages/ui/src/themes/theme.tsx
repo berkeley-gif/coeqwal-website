@@ -483,8 +483,6 @@ const theme = createTheme({
 
           return {
             width: theme.layout.drawer.width,
-            flexShrink: 0,
-            whiteSpace: "normal",
 
             "&.MiniDrawer-docked": {
               zIndex: theme.zIndex.drawer,
@@ -526,8 +524,10 @@ const theme = createTheme({
               },
 
               "& .MuiListItemText-root": {
-                opacity: ownerState.open ? 1 : 0,
-                transition: theme.transitions.create("opacity", {
+                opacity: 1, // Always visible
+                transform: ownerState.open ? "rotate(0deg)" : "rotate(-90deg)",
+                transformOrigin: "center center",
+                transition: theme.transitions.create(["transform", "opacity"], {
                   duration: theme.transitions.duration.shortest,
                 }),
               },

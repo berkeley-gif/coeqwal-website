@@ -170,51 +170,45 @@ export function MiniDrawer({
           return (
             <ListItem
               key={index}
+              onClick={item.onClick}
               disablePadding
-              sx={{
+              sx={(theme) => ({
                 display: "block",
-                padding: 0,
-                width: "100%",
-              }}
-            >
-              <ListItemButton
-                onClick={item.onClick}
-                disableRipple={true}
-                sx={(theme) => ({
-                  width: "100%",
-                  backgroundColor: bgColor,
-                  color: theme.palette.common.white,
-                  padding: theme.spacing(2),
-                  textAlign: "left",
-                  "&:hover": {
-                    backgroundColor: `${bgColor}dd`,
-                    transform: "translateY(-2px)",
+                padding: theme.spacing(2),
+                backgroundColor: bgColor,
+                color: theme.palette.common.white,
+                borderRadius: theme.borderRadius.standard,
+                mx: 1,
+                my: 0.5,
+                "&:hover": {
+                  backgroundColor: `${bgColor}dd`,
+                  transform: "translateY(-2px)",
+                  cursor: "pointer",
+                },
+                // Apply hover styling when item is active
+                ...(item.active && {
+                  backgroundColor: `${bgColor}dd`,
+                  transform: "translateY(-2px)",
+                }),
+                transition: theme.transitions.create(
+                  ["background-color", "transform"],
+                  {
+                    duration: theme.transitions.duration.shortest,
                   },
-                  // Apply hover styling when item is active
-                  ...(item.active && {
-                    backgroundColor: `${bgColor}dd`,
-                    transform: "translateY(-2px)",
-                  }),
-                  transition: theme.transitions.create(
-                    ["background-color", "transform"],
-                    {
-                      duration: theme.transitions.duration.shortest,
-                    },
-                  ),
-                })}
-              >
-                <ListItemText
-                  primary={item.text}
-                  sx={{
-                    margin: 0,
-                    "& .MuiListItemText-primary": {
-                      fontSize: "1rem",
-                      lineHeight: 1.2,
-                      color: "inherit",
-                    },
-                  }}
-                />
-              </ListItemButton>
+                ),
+              })}
+            >
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  margin: 0,
+                  "& .MuiListItemText-primary": {
+                    fontSize: "1rem",
+                    lineHeight: 1.2,
+                    color: "inherit",
+                  },
+                }}
+              />
             </ListItem>
           )
         })}
