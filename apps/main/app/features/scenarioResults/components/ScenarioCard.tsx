@@ -81,6 +81,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
     if (metricType === "X2") return "km"
 
     if (
+      metricType === "INFLOW" ||
       metricType?.includes("STORAGE") ||
       metricType?.includes("RESERVOIR") ||
       metricType?.includes("DEL") ||
