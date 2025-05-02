@@ -285,7 +285,7 @@ const LineChart: React.FC<LineChartProps> = ({
         .attr("fill", "none")
         .attr("stroke", s.color || "#000")
         .attr("stroke-width", 2.5)
-        .attr("d", line as any)
+        .attr("d", line)
 
       // Add dots
       g.selectAll(`.dot-${s.key}`)
@@ -342,6 +342,8 @@ const LineChart: React.FC<LineChartProps> = ({
     showLegend,
     responsive,
     dimensions,
+    width,
+    height,
   ])
 
   return (

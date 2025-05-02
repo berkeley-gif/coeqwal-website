@@ -12,10 +12,10 @@ import { Card } from "@repo/ui"
 import { DecileBarChart, LineChart } from "@repo/viz"
 import type { LineChartData } from "@repo/viz"
 
-// Define types for monthly data
-interface MonthlyData {
-  [key: string]: number
-}
+// // Define types for monthly data
+// interface MonthlyData {
+//   [key: string]: number
+// }
 
 interface ScenarioCardProps {
   title?: string
