@@ -54,14 +54,11 @@ const translations: TranslationsMap = {
   },
 }
 
-// Define which sections should have white text (others will have black)
+// Define which sections should have BLACK text (all others will have white)
 // TODO: generalize this
-const whiteSections = [
-  "california-water",
-  "managing-water",
-  "challenges", // Keep this here for text color, even though we removed the button
-  "calsim",
-  "invitation",
+const blackSections = [
+  "hero", // Home section
+  "combined-panel", // Scenario search section
 ]
 
 // This maps sections to their parent section in the UI
@@ -96,9 +93,10 @@ export function Header({
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   // Determine the text color for all navigation items based on active section
-  const textColor = whiteSections.includes(activeSection || "")
-    ? "white"
-    : "black"
+  // Default to white, switch to black for specific sections
+  const textColor = blackSections.includes(activeSection || "")
+    ? "black"
+    : "white"
 
   return (
     <AppBar
@@ -203,7 +201,7 @@ export function Header({
             }),
             // If drawer is on the left side
             ...(drawerPosition === "left" && {
-              paddingRight: "16px", // Fixed padding for left drawer
+              paddingRight: "16px",
             }),
             transition: theme.transitions.create("padding", {
               easing: theme.transitions.easing.sharp,
