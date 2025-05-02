@@ -614,6 +614,18 @@ theme.background = {
 
 theme.borderRadius = themeValues.borderRadius
 
+// Define color palette for drawer navigation items
+theme.drawerNavigation = {
+  colors: [
+    "#BFDADC",
+    "#9ACBCF",
+    "#76B2BE",
+    "#548FAF",
+    "#3B6C97",
+    "#1A3F6A"
+  ]
+}
+
 // expose mixin constant for easy import if needed
 export const hoverParagraph = hoverParagraphMixin
 
@@ -665,6 +677,9 @@ declare module "@mui/material/styles" {
       card: string
       standard: string
       none: string
+    }
+    drawerNavigation: {
+      colors: string[]
     }
   }
 

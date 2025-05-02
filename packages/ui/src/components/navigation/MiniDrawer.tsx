@@ -11,6 +11,7 @@ import {
   ListItemText,
   Divider,
   styled,
+  useTheme,
 } from "@mui/material"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
@@ -80,6 +81,7 @@ export function MiniDrawer({
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = controlledOpen !== undefined
   const open = isControlled ? controlledOpen : internalOpen
+  const theme = useTheme()
 
   // Toggle handlers for drawer state
   const handleDrawerOpen = () => {
@@ -155,14 +157,7 @@ export function MiniDrawer({
       >
         {items.map((item, index) => {
           // Array of background colors to cycle through
-          const bgColors = [
-            "#BFDADC",
-            "#9ACBCF",
-            "#71BFB3",
-            "#4D9CA0",
-            "#2C6E91",
-            "#1A3F6B",
-          ]
+          const bgColors = theme.drawerNavigation.colors
 
           // Get color based on index (cycling through the array)
           const bgColor = bgColors[index % bgColors.length]
