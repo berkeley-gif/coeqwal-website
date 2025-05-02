@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Toolbar, Stack, Button, Box, Typography } from "@mui/material"
+import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
@@ -55,13 +55,21 @@ const translations: TranslationsMap = {
 }
 
 // Define which sections should have white text (others will have black)
+// TODO: generalize this
 const whiteSections = [
   "california-water",
   "managing-water",
-  "challenges",
+  "challenges", // Keep this here for text color, even though we removed the button
   "calsim",
   "invitation",
 ]
+
+// This maps sections to their parent section in the UI
+// Used for arrow display when scrolling through combined sections
+const sectionParentMap: Record<string, string | undefined> = {
+  challenges: "managing-water", // Map challenges section to managing-water button
+  calsim: "managing-water",
+}
 
 export function Header({
   drawerOpen = false,
@@ -110,7 +118,7 @@ export function Header({
           <Logo />
         </Box>
 
-        {/* Secondary Navigation Menu */}
+        {/* Optional secondary navigation menu */}
         {displaySecondaryNav && (
           <Stack
             direction="row"
@@ -123,7 +131,10 @@ export function Header({
             }}
           >
             {secondaryNavItems.map((item) => {
-              const isActive = activeSection === item.sectionId
+              // Check if this section is directly active or if it's the parent of the active section
+              const isActive =
+                activeSection === item.sectionId ||
+                sectionParentMap[activeSection || ""] === item.sectionId
 
               return (
                 <Button
@@ -158,7 +169,7 @@ export function Header({
                         left: "50%",
                         transform: "translateX(-50%)",
                         fontSize: 24,
-                        color: textColor, // Apply the same color to arrow indicator
+                        color: textColor,
                         animation: "fadeIn 0.3s ease-in-out",
                         "@keyframes fadeIn": {
                           "0%": {

@@ -75,18 +75,8 @@ export default function Home() {
         sectionId: "managing-water",
       },
       {
-        key: "challenges",
-        label: "GROWING CHALLENGES",
-        sectionId: "challenges",
-      },
-      {
-        key: "calsim",
-        label: "CALSIM",
-        sectionId: "calsim",
-      },
-      {
         key: "explore",
-        label: "EXPLORE",
+        label: "EXPLORE SCENARIOS",
         sectionId: "invitation",
       },
       {
