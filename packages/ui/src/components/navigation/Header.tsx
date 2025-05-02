@@ -80,7 +80,11 @@ export function Header({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const isTablet = useMediaQuery(theme.breakpoints.down("md"))
   const buttonVariant = isMobile ? "text" : "standard"
-  const buttonStyle = {}
+  const buttonStyle = {
+    lineHeight: 1.1, // Line height for text wrapping
+    height: "44px", // Fixed height to match language switcher
+    minHeight: "44px", // Ditto
+  }
   const { locale, isLoading } = useTranslation()
 
   // Use 'en' as default until client-side hydration is complete
@@ -150,6 +154,7 @@ export function Header({
                     letterSpacing: "0.5px",
                     fontWeight: isActive ? 600 : 500,
                     transition: "color 0.3s ease",
+                    lineHeight: 1.1, // Slightly more spacing between lines when wrapped
                     "&:hover": {
                       backgroundColor: "transparent",
                     },
