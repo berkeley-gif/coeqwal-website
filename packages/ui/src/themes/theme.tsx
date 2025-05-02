@@ -532,6 +532,7 @@ const theme = createTheme({
               },
 
               "& .MuiListItemText-root": {
+                textAlign: ownerState.open ? "left" : "center",
                 "& .MuiListItemText-primary": {
                   color: "inherit",
                   textTransform: "uppercase",

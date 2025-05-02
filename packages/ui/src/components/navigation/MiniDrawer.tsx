@@ -172,8 +172,8 @@ export function MiniDrawer({
                 padding: theme.spacing(2),
                 backgroundColor: bgColor,
                 color: theme.palette.common.white,
-                borderRadius: theme.borderRadius.standard,
-                mx: 1,
+                borderRadius: open ? theme.borderRadius.standard : 0,
+                mx: open ? 1 : 0,
                 my: 0.5,
                 width: open ? "200px" : "200px", // changing width is tricky
                 height: open ? "100px" : "200px", // changing height works
