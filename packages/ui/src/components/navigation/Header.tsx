@@ -82,8 +82,8 @@ export function Header({
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
     lineHeight: 1.1, // Line height for text wrapping
-    height: "44px", // Fixed height to match language switcher
-    minHeight: "44px", // Ditto
+    height: "36px", // Fixed height to match language switcher
+    minHeight: "36px", // Ditto
   }
   const { locale, isLoading } = useTranslation()
 

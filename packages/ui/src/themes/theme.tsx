@@ -52,7 +52,7 @@ const themeValues = {
     headerHeight: 64,
     drawer: {
       width: 226,
-      closedWidth: 64,
+      closedWidth: 52,
     },
   },
 
@@ -551,7 +551,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
-          padding: "5px 15px", // to account for border width
+          padding: "1px 15px", // to account for border width
           textTransform: "none",
           backgroundColor: "transparent", // Default background for unselected
           color: theme.palette.primary.contrastText, // Default text color for unselected

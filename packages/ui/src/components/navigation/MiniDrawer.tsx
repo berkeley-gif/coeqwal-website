@@ -165,7 +165,7 @@ export function MiniDrawer({
           return (
             <ListItem
               key={index}
-              onClick={item.onClick}
+              onClick={open ? undefined : handleDrawerOpen}
               disablePadding
               sx={(theme) => ({
                 display: "inline-block",
