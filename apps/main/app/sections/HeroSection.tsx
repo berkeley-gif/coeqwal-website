@@ -38,6 +38,18 @@ function CustomHeadlineText({ text }: { text: string | undefined }) {
     )
   }
 
+  // Check if this is the climate change headline
+  if (text.includes("climate change")) {
+    const parts = ["How is climate change reshaping", "California's water?"]
+    
+    return (
+      <>
+        <div style={{ display: "block" }}>{parts[0]}</div>
+        <div style={{ display: "block" }}>{parts[1]}</div>
+      </>
+    )
+  }
+
   // Return regular text for other headlines
   return <>{text}</>
 }
