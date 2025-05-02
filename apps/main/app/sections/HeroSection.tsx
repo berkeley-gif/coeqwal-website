@@ -2,7 +2,7 @@ import { HeroQuestionsPanel } from "@repo/ui"
 import { Box, Typography } from "@repo/ui/mui"
 import { ScrollDownIcon } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 
 // Custom headline component that formats the last headline with a line break
 function CustomHeadlineText({ text }: { text: string | undefined }) {
@@ -67,14 +67,15 @@ export default function HeroSection() {
     })
   }
 
-  // Get translated headlines
-  const headlines = (t("heroPanel.headlines") as string[]) || [
-    "Is California ready for the next drought?",
-    "Does saving salmon mean changing how we use water?",
-    "How is climate change reshaping California's water?",
-    "Do some Californians still lack water justice?",
-    "Where does your water come from? Who else depends on it?",
-  ]
+  // Memoize headlines to prevent recreation on each render
+  const headlines = useMemo(() => 
+    (t("heroPanel.headlines") as string[]) || [
+      "Is California ready for the next drought?",
+      "Does saving salmon mean changing how we use water?",
+      "How is climate change reshaping California's water?",
+      "Do some Californians still lack water justice?",
+      "Where does your water come from? Who else depends on it?",
+    ], [t])
 
   // Set up headline transition (similar to TransitionHeadline component)
   useEffect(() => {
