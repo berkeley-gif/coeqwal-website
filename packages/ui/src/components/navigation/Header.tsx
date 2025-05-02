@@ -115,6 +115,7 @@ export function Header({
                 <Button
                   key={item.key}
                   variant="text"
+                  disableRipple
                   onClick={() => onSectionClick?.(item.sectionId)}
                   sx={{
                     color: "white",
@@ -124,8 +125,14 @@ export function Header({
                     position: "relative",
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
-                    fontWeight: isActive ? 600 : 400,
+                    fontWeight: isActive ? 600 : 500,
                     transition: "color 0.3s ease",
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                    },
+                    "&.MuiButtonBase-root:hover": {
+                      backgroundColor: "transparent",
+                    },
                   }}
                 >
                   {item.label}
