@@ -33,8 +33,8 @@ interface HeaderProps {
   drawerPosition?: "left" | "right"
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
-  showSecondaryNav?: boolean // Renamed from showNavigation
-  secondaryNavItems?: SecondaryNavItem[] // Allow configurable navigation items
+  showSecondaryNav?: boolean
+  secondaryNavItems?: SecondaryNavItem[]
 }
 
 const translations: TranslationsMap = {
@@ -53,6 +53,15 @@ const translations: TranslationsMap = {
     },
   },
 }
+
+// Define which sections should have white text (others will have black)
+const whiteSections = [
+  "california-water",
+  "managing-water",
+  "challenges",
+  "calsim",
+  "invitation",
+]
 
 export function Header({
   drawerOpen = false,
@@ -77,6 +86,11 @@ export function Header({
   // Only show secondary navigation if explicitly enabled and not on mobile
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
+
+  // Determine the text color for all navigation items based on active section
+  const textColor = whiteSections.includes(activeSection || "")
+    ? "white"
+    : "black"
 
   return (
     <AppBar
@@ -118,7 +132,7 @@ export function Header({
                   disableRipple
                   onClick={() => onSectionClick?.(item.sectionId)}
                   sx={{
-                    color: "white",
+                    color: textColor, // Apply the same color to all items
                     minWidth: "auto",
                     px: isTablet ? 1 : 2,
                     fontSize: isTablet ? "0.75rem" : "0.875rem",
@@ -144,6 +158,7 @@ export function Header({
                         left: "50%",
                         transform: "translateX(-50%)",
                         fontSize: 24,
+                        color: textColor, // Apply the same color to arrow indicator
                         animation: "fadeIn 0.3s ease-in-out",
                         "@keyframes fadeIn": {
                           "0%": {
