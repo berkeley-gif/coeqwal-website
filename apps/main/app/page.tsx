@@ -20,7 +20,7 @@ import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
 
 // Make sure these IDs match the section IDs used in the Header component
-export const navSectionIds = {
+const navSectionIds = {
   hero: "hero", // For HeroSection and InterstitialPanel together
   californiaWater: "california-water",
   managingWater: "managing-water",
