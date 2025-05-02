@@ -1,15 +1,20 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 
 /**
  * Custom hook to track the currently visible section based on scroll position
  */
 export function useScrollTracking(sectionIds: string[]) {
   const [activeSection, setActiveSection] = useState("")
+  // Flag to track if we're currently performing a programmatic scroll
+  const isProgrammaticScrolling = useRef(false)
 
   // Create the scroll handler as a memoized callback
   const checkActiveSection = useCallback(() => {
+    // Skip checking during programmatic scrolling to prevent stuttering
+    if (isProgrammaticScrolling.current) return
+
     // Calculate the threshold for section visibility (20% of viewport height)
     const threshold = Math.max(100, window.innerHeight * 0.2)
     let foundSection = false
@@ -59,6 +64,12 @@ export function useScrollTracking(sectionIds: string[]) {
   const scrollToSection = useCallback((elementId: string) => {
     const element = document.getElementById(elementId)
     if (element) {
+      // Set active section immediately to prevent stuttering
+      setActiveSection(elementId)
+
+      // Set flag to disable scroll checking during programmatic scrolling
+      isProgrammaticScrolling.current = true
+
       // Calculate header offset (typically 64px for MUI AppBar)
       const headerOffset = 80
       const elementPosition = element.getBoundingClientRect().top
@@ -70,10 +81,11 @@ export function useScrollTracking(sectionIds: string[]) {
         behavior: "smooth",
       })
 
-      // Set the active section after a small delay to match the scroll animation
+      // Re-enable scroll checking after animation completes
+      // Animation typically takes ~1000ms
       setTimeout(() => {
-        setActiveSection(elementId)
-      }, 100)
+        isProgrammaticScrolling.current = false
+      }, 1000)
     }
   }, [])
 

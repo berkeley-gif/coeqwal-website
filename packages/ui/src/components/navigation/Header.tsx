@@ -125,6 +125,7 @@ export function Header({
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
                     fontWeight: isActive ? 600 : 400,
+                    transition: "color 0.3s ease",
                   }}
                 >
                   {item.label}
@@ -136,6 +137,17 @@ export function Header({
                         left: "50%",
                         transform: "translateX(-50%)",
                         fontSize: 24,
+                        animation: "fadeIn 0.3s ease-in-out",
+                        "@keyframes fadeIn": {
+                          "0%": {
+                            opacity: 0,
+                            transform: "translateX(-50%) translateY(-5px)",
+                          },
+                          "100%": {
+                            opacity: 1,
+                            transform: "translateX(-50%) translateY(0)",
+                          },
+                        },
                       }}
                     />
                   )}
