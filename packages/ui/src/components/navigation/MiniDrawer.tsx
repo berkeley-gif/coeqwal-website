@@ -210,8 +210,8 @@ export function MiniDrawer({
                     "& .MuiListItemText-primary": {
                       fontSize: "1rem",
                       lineHeight: 1.2,
-                      color: "inherit"
-                    }
+                      color: "inherit",
+                    },
                   }}
                 />
               </ListItemButton>

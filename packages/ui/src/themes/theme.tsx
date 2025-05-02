@@ -470,9 +470,9 @@ const theme = createTheme({
       styleOverrides: {
         paper: ({ theme }) => ({
           color: theme.palette.text.secondary,
-          width: 400,
           top: theme.layout.headerHeight,
           height: `calc(100% - ${theme.layout.headerHeight}px)`,
+          borderRadius: 0,
         }),
         root: ({ theme, ownerState }) => {
           const drawerMixins = createDrawerMixins(
@@ -503,13 +503,11 @@ const theme = createTheme({
               },
 
               "& .MuiListItemButton-root": {
-                minHeight: 60,
                 display: "block",
                 padding: theme.spacing(2),
                 borderRadius: theme.borderRadius.standard,
                 mx: 1,
                 my: 0.5,
-                overflow: "hidden",
                 transition: theme.transitions.create(
                   ["background-color", "transform", "box-shadow"],
                   {
@@ -529,8 +527,6 @@ const theme = createTheme({
 
               "& .MuiListItemText-root": {
                 opacity: ownerState.open ? 1 : 0,
-                width: "100%",
-                maxWidth: "100%",
                 transition: theme.transitions.create("opacity", {
                   duration: theme.transitions.duration.shortest,
                 }),
