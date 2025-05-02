@@ -292,9 +292,8 @@ function Snowpack() {
       "all",
       ["==", ["get", "month-adjusted"], "10"],
     ] as unknown as string)
-    if (animationComplete) {
-      setPaintProperty("snowpack-layer", "fill-opacity", 1)
-    }
+    if (!animationComplete) return
+    setPaintProperty("snowpack-layer", "fill-opacity", 1)
     setMarkers([mountainMarker], "text")
   }, [
     flyTo,

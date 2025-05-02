@@ -2,7 +2,7 @@
 
 import { useMap } from "@repo/map"
 import { Box, VisibilityIcon } from "@repo/ui/mui"
-import { riverLayerStyle } from "./helpers/mapLayerStyle"
+import { canalLayerStyle, riverLayerStyle } from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -132,7 +132,7 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const hasSeen = useRef(false)
-  const { flyTo } = useMap()
+  const { flyTo, setPaintProperty } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = reclamationMapViewState[breakpoint]
   const [animationComplete, setAnimationComplete] = useState(false)
@@ -148,7 +148,15 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
     })
     setMarkers(markers, "rough-circle")
     setTextMarkers(IrrigationTextLabels, "text")
-  }, [flyTo, markers, setMarkers, setTextMarkers, mapViewState])
+    setPaintProperty("canal-layer", "line-opacity", 0)
+  }, [
+    flyTo,
+    markers,
+    setMarkers,
+    setTextMarkers,
+    mapViewState,
+    setPaintProperty,
+  ])
 
   const unload = useCallback(() => {
     setMarkers([], "rough-circle")
@@ -203,9 +211,22 @@ function Drinking() {
   const [animationComplete, setAnimationComplete] = useState(false)
 
   const init = useCallback(() => {
-    addSource("river-combined", {
+    addSource("canal", {
       type: "geojson",
-      data: "/rivers/combinedRivers.geojson",
+      data: "/rivers/drinking.geojson",
+    })
+
+    addLayer(
+      "canal-layer",
+      "canal",
+      canalLayerStyle.type,
+      canalLayerStyle.paint,
+      canalLayerStyle.layout,
+    )
+
+    addSource("river-combined", {
+      type: "vector",
+      url: "mapbox://yskuo.a2firbty",
     })
 
     addLayer(
@@ -214,6 +235,7 @@ function Drinking() {
       riverLayerStyle.type,
       riverLayerStyle.paint,
       riverLayerStyle.layout,
+      riverLayerStyle.layer,
     )
   }, [addSource, addLayer])
 
@@ -227,6 +249,7 @@ function Drinking() {
       },
     })
     setPaintProperty("river-combined-layer", "line-opacity", 1)
+    setPaintProperty("canal-layer", "line-opacity", 1)
     setTextMarkers(DrinkingTextLabels, "text")
   }, [flyTo, setPaintProperty, setTextMarkers, mapViewState])
 

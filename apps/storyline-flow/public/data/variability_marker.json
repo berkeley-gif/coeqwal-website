@@ -1,20 +1,8 @@
 {
   "2014": [
     {
-      "id": "1",
-      "name": "East Porterville",
-      "latitude": 36.0598,
-      "longitude": -118.973,
-      "images": ["/variability/2014porter01.jpg"],
-      "captions": [
-        "The Avila household of East Porterville, CA turns on the tap after years without running water. Private wells in the small unincorporated community ran dry in the 2012-2016. Through the five-year drought, hundreds of households lacked a reliable water source. By 2017, an emergency distribution system delivered water from a nearby town to 1,800 homes."
-      ],
-      "source": "",
-      "anchor": "right"
-    },
-    {
       "id": "2",
-      "name": "Sacramento Weir, Yolo Bypass",
+      "name": "Trucking hatchery salmon",
       "latitude": 40.3987,
       "longitude": -122.1454,
       "images": [
@@ -23,16 +11,16 @@
         "/variability/2014trucking03.jpg"
       ],
       "captions": [
-        "During the 2014 drought, water levels in the Sacramento River dropped so low that fall-run Chinook salmon would not survive the journey from hatcheries to the ocean.",
-        "Biologists working for state and federal agencies trucked about 20 million fish from upstream hatcheries to the San Francisco Bay.",
-        "Bypassing the Sacramento River and the California Delta supported the salmon’s survival. During extreme drought, the I-5 highway can become a critical part of California’s water system for migrating salmon."
+        "During the 2014 drought, water levels in the Sacramento River dropped so low that fall-run Chinook salmon would not survive the journey from hatcheries to the ocean. Biologists working for state and federal agencies trucked about 20 million fish from upstream hatcheries to the San Francisco Bay.",
+        "During extreme drought, the I-5 highway can become a critical part of California’s water system for migrating salmon. The trucking practice highlights the intensity of management efforts for Sacramento River fall-run Chinook salmon. Despite heroic efforts at five major hatcheries, the number of adults returning to the Sacramento River each fall has been inconsistent and at times, alarmingly low. ",
+        "In 2024, the hatchery-raised juvenile salmon were released near Mare Island. Bypassing their migration route down the Sacramento River and through the Delta improved the population’s survival in the short term. Ongoing experiments will test if trucking has unintended consequences on the full lifecycle of the population."
       ],
       "source": "US Fish and Wildlife Service, Pacific Southwest Region, 2014",
       "anchor": "top"
     },
     {
       "id": "3",
-      "name": "Sacramento Weir, Yolo Bypass",
+      "name": "Sacramento Weir sits idle",
       "latitude": 38.6052,
       "longitude": -121.5574,
       "images": ["/variability/2014weir01.jpg"],
@@ -46,19 +34,19 @@
   "2017": [
     {
       "id": "4",
-      "name": "Oroville Dam",
+      "name": "Oroville Dam emergency",
       "latitude": 39.5427,
       "longitude": -121.4921,
       "images": ["/variability/2017oroville01.jpg"],
       "captions": [
-        "Oroville Dam's spillway eroded during floods in February of 2017. After heavy rainfall (almost 13 inches over 4 days), floodwaters threatened to overtop the dam, forcing engineers to release massive amounts of water that eroded the main and emergency spillways. The crisis forced the evacuation of over 180,000 residents and relocation of a fish hatchery."
+        "Oroville Dam's spillway eroded during February floods of 2017. After heavy rainfall (almost 13 inches over 4 days), floodwaters threatened to overtop the dam, forcing engineers to release massive amounts of water. As the main and emergency spillway failed, over 180,000 residents evacuated and hatchery fish were urgently relocated. Photo by California Department of Water Resources, 2017."
       ],
       "source": "California Department of Water Resources, 2017",
       "anchor": "right"
     },
     {
       "id": "5",
-      "name": "Soda Springs in the Sierra Nevada",
+      "name": "Record Sierran snowpack",
       "latitude": 39.3251,
       "longitude": -120.3835,
       "images": ["/variability/2017soda01.jpg"],
@@ -70,19 +58,19 @@
     },
     {
       "id": "6",
-      "name": "South Yuba River at Old Route 49 Bridge",
+      "name": "Yuba River roils",
       "latitude": 39.2981,
       "longitude": -121.0893,
       "images": ["/variability/2017yuba01.jpg"],
       "captions": [
-        "High flows reached 40x the normal rate on the South Yuba River after a series of atmospheric river storms in January 2017."
+        "High flows reached 40x the normal rate on the South Yuba River after a series of atmospheric river storms in January 2017. "
       ],
       "source": "",
       "anchor": "right"
     },
     {
       "id": "7",
-      "name": "Sacramento Weir, Yolo Bypass",
+      "name": "Sacramento Weir opens",
       "captions": [
         "The Sacramento Weir, built in 1916, protects the City of Sacramento from floods by diverting the Sacramento River flows into the Yolo Bypass. It is only opened manually during very large floods. In 2017, the gates were open for 17 days in January, then again for 2 days in February. They had not been opened since 2007."
       ],
@@ -96,9 +84,9 @@
   "2021": [
     {
       "id": "8",
-      "name": "Bidwell Bar Bridge, Lake Oroville",
+      "name": "Lake Oroville breaks records",
       "captions": [
-        "The Bidwell Bar Bridge and nearby marina on Lake Oroville at record-breaking low water. By September 2021, water storage in the reservoir was 25 percent of the total capacity. The historic low elevation of 643 was two feet lower than previous record from the 1977 drought."
+        "The Bidwell Bar Bridge and nearby marina on Lake Oroville at record-breaking low water. In September 2021, water storage in the reservoir was 25 percent of the total capacity. By this time, the spillway of the Oroville Dam had been reconstructed after hazardous failures during floods of 2017."
       ],
       "latitude": 39.5497,
       "longitude": -121.4322,
@@ -110,16 +98,12 @@
   "2023": [
     {
       "id": "10",
-      "name": "Tulare Lake",
+      "name": "Tulare Lake returns",
       "latitude": 36.025,
       "longitude": -119.726526,
-      "images": [
-        "/variability/2023tulare01.jpg",
-        "/variability/2023tulare02.jpg"
-      ],
+      "images": ["/variability/2023tulare01.jpg"],
       "captions": [
-        "Storms in March 2023 filled much of Tulare Lake, which had been dry for over 100 years. Once the largest freshwater lake west of the Mississippi River, Tulare Lake vanished by the late 1800's due to diversions for water supply.",
-        "The lake, known as 'Pa-ashi' or 'big water' has been inhabited by the Tachi Yakuts people, who were forcibly removed during the Gold Rush. In 2023, the Tachi Yakuts honored the lake's return."
+        "Storms in March 2023 filled much of Tulare Lake, which had been dry for over 100 years. Once the largest freshwater lake west of the Mississippi River, Tulare Lake vanished by the late 1800's due to diversions for water supply. The lake, known as 'Pa-ashi' or 'big water' has been inhabited by the Tachi Yakuts people, who were forcibly removed during the Gold Rush. In 2023, the Tachi Yakuts honored the lake's return."
       ],
       "source": "California Department of Water Resources, 2023",
       "anchor": "right"

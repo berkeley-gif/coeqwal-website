@@ -78,6 +78,7 @@ import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 
 // Export individually imported icons
 export {
@@ -91,6 +92,7 @@ export {
   ExpandMoreIcon,
   ArrowCircleUpIcon,
   ArrowCircleDownIcon,
+  ArrowDropDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   OpacityIcon,

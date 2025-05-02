@@ -23,7 +23,7 @@ const CentralValley = {
   id: "central-valley",
   name: "Central Valley",
   latitude: 37.0783,
-  longitude: -119.9179,
+  longitude: -120.2179,
 }
 
 const AncientDeltaWetlands = {
@@ -50,8 +50,8 @@ const YubaRiver = {
 const ColoradoRiver = {
   id: "colorado-river",
   name: "Colorado River",
-  latitude: 34.1069,
-  longitude: -115.4466,
+  latitude: 35.1069,
+  longitude: -114.9466,
 }
 
 const OwensRiver = {
@@ -82,14 +82,40 @@ const Pumping = {
   longitude: -121.6404,
 }
 
+const HetchHetchy = {
+  id: "hetch-hetchy",
+  name: "Hetch Hetchy Aqueduct",
+  latitude: 37.7651,
+  longitude: -121.6376,
+}
+
+const LosAngelesAqueduct = {
+  id: "los-angeles-aqueduct",
+  name: "Los Angeles Aqueduct",
+  latitude: 35.5547,
+  longitude: -117.1535,
+}
+
+const ColoradoRiverAqueduct = {
+  id: "colorado-river-aqueduct",
+  name: "Colorado River Aqueduct",
+  latitude: 33.9302,
+  longitude: -115.8132,
+}
+
 export const FlowTextLabels = [
   SierraNevadaMountains,
+  SacramentoRiver,
+  SanJoaquinRiver,
+]
+
+export const ValleyTextLabels = [
   SacramentoRiver,
   SanJoaquinRiver,
   CentralValley,
 ]
 
-export const ValleyTextLabels = [
+export const DeltaTextLabels = [
   SacramentoRiver,
   SanJoaquinRiver,
   AncientDeltaWetlands,
@@ -99,4 +125,11 @@ export const GoldRushTextLabels = [YubaRiver]
 
 export const IrrigationTextLabels = [DeltaWetlands, Reclamation, Pumping]
 
-export const DrinkingTextLabels = [OwensRiver, ToulumeRiver, ColoradoRiver]
+export const DrinkingTextLabels = [
+  OwensRiver,
+  ToulumeRiver,
+  ColoradoRiver,
+  HetchHetchy,
+  LosAngelesAqueduct,
+  ColoradoRiverAqueduct,
+]
