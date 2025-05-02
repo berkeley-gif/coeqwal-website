@@ -70,22 +70,24 @@ export function useScrollTracking(sectionIds: string[]) {
       // Set flag to disable scroll checking during programmatic scrolling
       isProgrammaticScrolling.current = true
 
-      // Calculate header offset (typically 64px for MUI AppBar)
-      const headerOffset = 80
-      const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-
-      // Use window.scrollTo with smooth behavior for better cross-browser support
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth",
-      })
-
-      // Re-enable scroll checking after animation completes
-      // Animation typically takes ~1000ms
+      // Use setTimeout to ensure DOM is fully ready before scrolling
       setTimeout(() => {
-        isProgrammaticScrolling.current = false
-      }, 1000)
+        // Calculate position without any header offset since header is transparent
+        const elementPosition = element.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset
+
+        // Use window.scrollTo with smooth behavior for better cross-browser support
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        })
+
+        // Re-enable scroll checking after animation completes
+        // Animation typically takes ~1000ms
+        setTimeout(() => {
+          isProgrammaticScrolling.current = false
+        }, 1000)
+      }, 50) // Small delay to ensure calculations are accurate
     }
   }, [])
 
