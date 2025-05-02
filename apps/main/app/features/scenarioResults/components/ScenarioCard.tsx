@@ -35,7 +35,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
   expanded = false,
 }) => {
   const theme = useTheme()
-  const [chartType, setChartType] = useState<ChartType>("bar")
+  const [chartType, setChartType] = useState<ChartType>("line")
   const [monthlyData, setMonthlyData] = useState<LineChartData | null>(null)
 
   // Parse the JSON data if available
