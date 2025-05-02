@@ -56,6 +56,7 @@ const operationToScenarioId: Record<string, string> = {
 
 // Available metrics for visualization
 const AVAILABLE_METRICS = [
+  "INFLOW",
   "DELTA_OUTFLOW",
   "EXPORTS",
   "SOD_URBAN",
@@ -66,7 +67,6 @@ const AVAILABLE_METRICS = [
   "SAC_FLOW",
   "STORAGE",
   "TOTAL",
-  "INFLOW",
   "CHANNEL",
   "PUMPING",
   "ELEVATION",
@@ -98,7 +98,7 @@ const CombinedPanelContent = () => {
   const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(new Set())
 
   // Currently selected metric type to display
-  const [selectedMetric, setSelectedMetric] = useState<string>("DELTA_OUTFLOW")
+  const [selectedMetric, setSelectedMetric] = useState<string>("INFLOW")
   // Loading state
   const [isLoading, setIsLoading] = useState(false)
 
@@ -169,6 +169,48 @@ const CombinedPanelContent = () => {
     )
 
     try {
+      // Special case for INFLOW metric - use the s9999_inflows data
+      if (selectedMetric === "INFLOW") {
+        try {
+          const response = await fetch(
+            "/scenario_data/s9999_inflows/_aggregates.json",
+          )
+          if (response.ok) {
+            const rawData = await response.json()
+
+            // Format the data to match the expected structure for decile charts
+            // Using the "all" section which has overall, dry, and wet data
+            const formattedData = {
+              overall: {
+                q10: rawData.all.deciles.overall.q10,
+                q20: rawData.all.deciles.overall.q20,
+                q30: rawData.all.deciles.overall.q30,
+                q40: rawData.all.deciles.overall.q40,
+                q50: rawData.all.deciles.overall.q50,
+                q60: rawData.all.deciles.overall.q60,
+                q70: rawData.all.deciles.overall.q70,
+                q80: rawData.all.deciles.overall.q80,
+                q90: rawData.all.deciles.overall.q90,
+              },
+              // Add more data if needed
+            }
+
+            return {
+              id: operationId,
+              title:
+                operationId === "current-operations"
+                  ? "Current Operations"
+                  : getOperationTitle(operationId),
+              data: JSON.stringify(formattedData, null, 2),
+              metricType: selectedMetric,
+            }
+          }
+        } catch (error) {
+          console.warn("Error loading INFLOW from aggregates:", error)
+          // Continue to try other methods if this fails
+        }
+      }
+
       // Special case for current-operations/baseline
       if (operationId === "current-operations") {
         // Try multiple baseline naming patterns

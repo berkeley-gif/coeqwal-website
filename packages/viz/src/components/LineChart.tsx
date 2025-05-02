@@ -47,29 +47,64 @@ const LineChart: React.FC<LineChartProps> = ({
 
   // Convert the data format to a more D3-friendly structure
   const processData = (data: LineChartData) => {
-    const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    // Water year order: Oct, Nov, Dec, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep
+    const waterYearMonths = [
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
     ]
+
+    // Month number to water year index mapping (1=Jan → 3, 10=Oct → 0)
+    const monthToWaterYearIndex: { [key: string]: number } = {
+      "10": 0,
+      "11": 1,
+      "12": 2, // Oct, Nov, Dec
+      "1": 3,
+      "2": 4,
+      "3": 5,
+      "4": 6,
+      "5": 7,
+      "6": 8,
+      "7": 9,
+      "8": 10,
+      "9": 11, // Jan to Sep
+    }
 
     const result: Array<{
       month: string
       monthIndex: number
+      waterYearIndex: number
       overall: number
       dry: number
       wet: number
     }> = []
 
-    // Ensure all months are present
+    // Add data for each month in calendar order first
     for (let i = 1; i <= 12; i++) {
+      const monthStr = i.toString()
+      const waterYearIdx = monthToWaterYearIndex[monthStr] || 0
+
       result.push({
-        month: months[i - 1],
+        month: waterYearMonths[waterYearIdx],
         monthIndex: i,
-        overall: data.overall[i.toString()] || 0,
-        dry: data.dry[i.toString()] || 0,
-        wet: data.wet[i.toString()] || 0,
+        waterYearIndex: waterYearIdx,
+        overall: data.overall[monthStr] || 0,
+        dry: data.dry[monthStr] || 0,
+        wet: data.wet[monthStr] || 0,
       })
     }
+
+    // Sort by water year order
+    result.sort((a, b) => a.waterYearIndex - b.waterYearIndex)
 
     return result
   }
@@ -101,14 +136,14 @@ const LineChart: React.FC<LineChartProps> = ({
     // Create scales
     const xScale = d3
       .scaleLinear()
-      .domain([1, 12])
+      .domain([0, 11]) // 0-11 for water year months
       .range([0, innerWidth])
 
     // Find max value across all series to set y scale
     const maxValue = Math.max(
-      d3.max(processedData, d => d.overall) || 0,
-      d3.max(processedData, d => d.dry) || 0,
-      d3.max(processedData, d => d.wet) || 0
+      d3.max(processedData, (d) => d.overall) || 0,
+      d3.max(processedData, (d) => d.dry) || 0,
+      d3.max(processedData, (d) => d.wet) || 0,
     )
 
     const yScale = d3
@@ -142,7 +177,7 @@ const LineChart: React.FC<LineChartProps> = ({
         .text(subtitle)
     }
 
-    // Add X axis with month labels
+    // Add X axis with month labels in water year order
     const xAxis = g
       .append("g")
       .attr("transform", `translate(0,${innerHeight})`)
@@ -151,12 +186,25 @@ const LineChart: React.FC<LineChartProps> = ({
           .axisBottom(xScale)
           .ticks(12)
           .tickFormat((d) => {
-            const monthIndex = Math.round(Number(d)) - 1
-            if (monthIndex >= 0 && monthIndex < 12) {
-              return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][monthIndex]
+            const idx = Math.round(Number(d))
+            if (idx >= 0 && idx < 12) {
+              return [
+                "Oct",
+                "Nov",
+                "Dec",
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+              ][idx]
             }
             return ""
-          })
+          }),
       )
 
     // Style the x-axis
@@ -200,16 +248,16 @@ const LineChart: React.FC<LineChartProps> = ({
       .append("line")
       .attr("x1", 0)
       .attr("x2", innerWidth)
-      .attr("y1", d => yScale(d))
-      .attr("y2", d => yScale(d))
+      .attr("y1", (d) => yScale(d))
+      .attr("y2", (d) => yScale(d))
       .attr("stroke", "#e0e0e0")
       .attr("stroke-dasharray", "3,3")
 
     // Create line generators
     const line = d3
-      .line<{ monthIndex: number; value: number }>()
-      .x(d => xScale(d.monthIndex))
-      .y(d => yScale(d.value))
+      .line<{ waterYearIndex: number; value: number }>()
+      .x((d) => xScale(d.waterYearIndex))
+      .y((d) => yScale(d.value))
       .curve(d3.curveMonotoneX) // Smoothed line
 
     // Define series
@@ -220,10 +268,10 @@ const LineChart: React.FC<LineChartProps> = ({
     ]
 
     // Draw lines
-    series.forEach(s => {
+    series.forEach((s) => {
       // Create data points for this series
-      const seriesData = processedData.map(d => ({
-        monthIndex: d.monthIndex,
+      const seriesData = processedData.map((d) => ({
+        waterYearIndex: d.waterYearIndex,
         value: d[s.key as keyof typeof d] as number,
       }))
 
@@ -231,7 +279,7 @@ const LineChart: React.FC<LineChartProps> = ({
       g.append("path")
         .datum(seriesData)
         .attr("fill", "none")
-        .attr("stroke", s.color)
+        .attr("stroke", s.color || "#000")
         .attr("stroke-width", 2.5)
         .attr("d", line as any)
 
@@ -241,12 +289,12 @@ const LineChart: React.FC<LineChartProps> = ({
         .enter()
         .append("circle")
         .attr("class", `dot-${s.key}`)
-        .attr("cx", d => xScale(d.monthIndex))
-        .attr("cy", d => yScale(d.value))
+        .attr("cx", (d) => xScale(d.waterYearIndex))
+        .attr("cy", (d) => yScale(d.value))
         .attr("r", 4)
-        .attr("fill", s.color)
+        .attr("fill", s.color || "#000")
         .append("title")
-        .text(d => `${s.name}: ${d.value.toFixed(1)}`)
+        .text((d) => `${s.name}: ${d.value.toFixed(1)}`)
     })
 
     // Add legend if enabled
@@ -267,7 +315,7 @@ const LineChart: React.FC<LineChartProps> = ({
         .attr("x", innerWidth - 19)
         .attr("width", 19)
         .attr("height", 19)
-        .attr("fill", d => d.color)
+        .attr("fill", (d) => d.color || "#000")
 
       legend
         .append("text")
@@ -275,7 +323,7 @@ const LineChart: React.FC<LineChartProps> = ({
         .attr("y", 9.5)
         .attr("dy", "0.32em")
         .attr("text-anchor", "end")
-        .text(d => d.name)
+        .text((d) => d.name)
     }
   }, [
     data,
@@ -310,4 +358,4 @@ const LineChart: React.FC<LineChartProps> = ({
   )
 }
 
-export default LineChart 
+export default LineChart
