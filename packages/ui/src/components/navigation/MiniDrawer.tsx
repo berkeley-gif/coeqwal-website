@@ -193,9 +193,7 @@ export function MiniDrawer({
                 ),
               })}
             >
-              <ListItemText
-                primary={item.text}
-              />
+              <ListItemText primary={item.text} />
             </ListItem>
           )
         })}

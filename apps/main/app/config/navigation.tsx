@@ -17,9 +17,9 @@ export const sectionIds = [
 
 // Define the translation keys for each navigation item
 export const navigationKeys = {
-  "tab1": "secondaryNavigation.tab1",
-  "tab2": "secondaryNavigation.tab2",
-  "tab3": "secondaryNavigation.tab3"
+  tab1: "secondaryNavigation.tab1",
+  tab2: "secondaryNavigation.tab2",
+  tab3: "secondaryNavigation.tab3",
 }
 
 // Helper function to generate navigation items with active state and scroll behavior
@@ -43,6 +43,6 @@ export const getNavigationItems = (
       text: t(navigationKeys["tab3"]),
       onClick: () => scrollToSection("challenges"),
       active: activeSection === "challenges",
-    }
+    },
   ]
 }
