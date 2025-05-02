@@ -4,6 +4,11 @@
     height: 400px;
     /* background: transparent; */
   }
+
+  .grass-layer.center{
+    left: 25%;
+    width: 50%;
+  }
   
   /* Left grass covers 25% of the viewport on the left */
   .grass-layer.left {

@@ -11,7 +11,9 @@ export interface Storyline {
     }
   }
   precipitation: {
-    title: string
+    title1: string
+    title2: string
+    title3: string
     p1: string
     p2: string
     p3: string
@@ -24,7 +26,9 @@ export interface Storyline {
     p4: string
   }
   snowpack: {
-    title: string
+    title1: string
+    title2: string
+    title3: string
     p1: string
     p2: string
     p3: string

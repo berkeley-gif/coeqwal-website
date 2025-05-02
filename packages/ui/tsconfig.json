@@ -8,6 +8,6 @@
     "moduleResolution": "bundler",
     "module": "ESNext"
   },
-  "include": ["src"],
+  "include": ["src", "../motion/src/components/HeaderStory.tsx"],
   "exclude": ["node_modules", "dist"]
 }

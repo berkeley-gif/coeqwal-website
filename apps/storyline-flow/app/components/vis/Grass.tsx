@@ -2,6 +2,9 @@
 
 import React, { useEffect } from "react"
 import "./grass.css"
+import { motion, MotionValue } from "@repo/motion"
+import { useBreakpoint } from "@repo/ui/hooks"
+import { grassConfig } from "../helpers/breakpoints"
 
 function createStars() {
   const starsContainer = document.getElementById("stars")
@@ -71,23 +74,42 @@ function createGrass(
   }
 }
 
-function Grass() {
+function Grass({ opacity }: { opacity: MotionValue<number> }) {
+  const breakpoint = useBreakpoint()
+  const sideBladeHeight = grassConfig[breakpoint]?.sideBladeHeight || 100
+  const centerBladeHeight = grassConfig[breakpoint]?.centerBladeHeight || 90
+
   useEffect(() => {
     createStars()
 
     // Adjust the grass density (if needed, you may change the divisor).
-    const densityQuarter = Math.floor(window.innerWidth / 20)
+    const sideDensityQuarter = Math.floor(window.innerWidth / 20)
+    const densityQuarter = Math.floor(window.innerWidth / 10)
 
     // Create grass for the left and right containers.
     // Here, the baseSwaySpeed is set to 4 seconds, and each blade's duration will vary more randomly.
-    createGrass("grass-layer-left", 240, densityQuarter, 20)
-    createGrass("grass-layer-right", 240, densityQuarter, 20)
-  }, [])
+    createGrass("grass-layer-left", sideBladeHeight, sideDensityQuarter, 20)
+    createGrass("grass-layer-right", sideBladeHeight, sideDensityQuarter, 20)
+    createGrass("grass-layer-center", centerBladeHeight, densityQuarter, 20)
+  }, [centerBladeHeight, sideBladeHeight])
 
   return (
     <>
-      <div className="grass-layer left" id="grass-layer-left"></div>
-      <div className="grass-layer right" id="grass-layer-right"></div>
+      <motion.div
+        className="grass-layer left"
+        id="grass-layer-left"
+        style={{ opacity: opacity }}
+      ></motion.div>
+      <motion.div
+        className="grass-layer right"
+        id="grass-layer-right"
+        style={{ opacity: opacity }}
+      ></motion.div>
+      <motion.div
+        className="grass-layer center"
+        id="grass-layer-center"
+        style={{ opacity: opacity }}
+      ></motion.div>
     </>
   )
 }

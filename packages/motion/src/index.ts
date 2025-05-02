@@ -8,7 +8,9 @@ export {
   MotionValue,
   useAnimationControls,
   useMotionValue,
+  useMotionValueEvent,
   animate,
+  useSpring,
 } from "framer-motion"
 
 export { interpolate as FlubberInterpolate } from "flubber"

@@ -6,6 +6,10 @@ import AnimatedWaves from "./helpers/AnimatedWave"
 import { useEffect, useState } from "react"
 import useActiveSection from "../hooks/useActiveSection"
 import { Sentence } from "@repo/motion/components"
+import ScrollIndicator from "./helpers/ScrollIndicator"
+import { motion, useScroll, useSpring, useTransform } from "@repo/motion"
+
+const MotionBox = motion.create(Box)
 
 function Conclusion() {
   return (
@@ -16,7 +20,6 @@ function Conclusion() {
   )
 }
 
-//TODO: add resize observer for animated waves
 function Resolution() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.conclusion
@@ -111,28 +114,44 @@ function Builder() {
   const { sectionRef } = useActiveSection("tension", {
     amount: 0.5,
   })
+  const [animationComplete, setAnimationComplete] = useState(false)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
+
+  /*useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    console.log("scrollYProgress:", latest); //around 0.84
+  });*/
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 20,
+  })
+  const opacity = useTransform(smoothProgress, [0, 0.2], [0, 1])
 
   return (
     <>
       <Box style={{ width: "100%", height: "100%", zIndex: 1 }}>
-        <Box
+        <MotionBox
           ref={sectionRef}
           className="container-center"
           height="100vh"
           width="100%"
           sx={{ backgroundColor: "#031a35" }}
+          style={{ opacity }}
         >
           <Stack spacing={12} direction="column">
             <Box className="paragraph">
-              <Sentence variant="h3" gutterBottom custom={0}>
+              <Sentence variant="h3" gutterBottom custom={0.2}>
                 {content?.subtitle}
               </Sentence>
-              <Sentence variant="h3" custom={1}>
+              <Sentence variant="h3" custom={2.2}>
                 {content?.caption}
               </Sentence>
             </Box>
             <Box className="paragraph">
-              <Sentence variant="h3" custom={3}>
+              <Sentence variant="h3" custom={4.2}>
                 {content?.p11}{" "}
                 <span style={{ fontWeight: "bold" }}>{content?.p12}</span>{" "}
                 {content?.p13} <br />
@@ -142,21 +161,26 @@ function Builder() {
               </Sentence>
             </Box>
             <Box className="paragraph">
-              <Sentence variant="h3" custom={5}>
+              <Sentence variant="h3" custom={6.2}>
                 {content?.p2}
               </Sentence>
-              <Sentence variant="h3" custom={6}>
+              <Sentence variant="h3" custom={7.2}>
                 {content?.p3}
               </Sentence>
             </Box>
             <Box className="paragraph">
-              <Sentence variant="h3" custom={8}>
+              <Sentence
+                variant="h3"
+                custom={8.2}
+                onAnimationComplete={() => setAnimationComplete(true)}
+              >
                 {content?.p41} <br />
                 {content?.p42}
               </Sentence>
             </Box>
           </Stack>
-        </Box>
+          <ScrollIndicator animationComplete={animationComplete} />
+        </MotionBox>
       </Box>
     </>
   )
