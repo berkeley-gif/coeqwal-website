@@ -503,45 +503,23 @@ const theme = createTheme({
               },
 
               "& .MuiListItemButton-root": {
-                minHeight: 96,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                alignItems: ownerState.open ? "flex-start" : "center",
+                minHeight: 60,
+                display: "block",
                 padding: theme.spacing(2),
                 borderRadius: theme.borderRadius.standard,
                 mx: 1,
                 my: 0.5,
                 overflow: "hidden",
                 transition: theme.transitions.create(
-                  [
-                    "background-color",
-                    "color",
-                    "padding",
-                    "margin",
-                    "align-items",
-                    "transform",
-                    "box-shadow",
-                  ],
+                  ["background-color", "transform", "box-shadow"],
                   {
                     duration: theme.transitions.duration.shortest,
                   },
                 ),
-                "& .MuiTouchRipple-root": {
-                  display: "none",
-                },
-                "&.Mui-focusVisible": {
-                  backgroundColor: "transparent",
-                },
                 "&:hover": {
                   backgroundColor: `${theme.palette.action.hover}cc`,
                   transform: "translateY(-2px)",
                   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-
-                  // Ensure icon color is preserved on hover
-                  "& .MuiListItemIcon-root .MuiSvgIcon-root": {
-                    color: "inherit",
-                  },
                 },
                 "&:active": {
                   transform: "translateY(0px)",
@@ -549,27 +527,11 @@ const theme = createTheme({
                 },
               },
 
-              "& .MuiListItemIcon-root": {
-                width: "100%",
-                display: "flex",
-                justifyContent: ownerState.open ? "flex-start" : "center",
-                transition: theme.transitions.create("justify-content", {
-                  duration: theme.transitions.duration.shortest,
-                }),
-
-                // Prevent icon color change on hover
-                "& .MuiSvgIcon-root": {
-                  color: "inherit",
-                  transition: "none", // Disable color transition
-                  "&:hover, &:focus": {
-                    color: "inherit", // Keep the same color on hover/focus
-                  },
-                },
-              },
-
               "& .MuiListItemText-root": {
                 opacity: ownerState.open ? 1 : 0,
-                whiteSpace: "nowrap",
+                transition: theme.transitions.create("opacity", {
+                  duration: theme.transitions.duration.shortest,
+                }),
               },
             },
           }

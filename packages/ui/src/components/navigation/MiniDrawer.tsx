@@ -8,7 +8,6 @@ import {
   List,
   ListItem,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   Divider,
   styled,
@@ -42,8 +41,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 export interface MiniDrawerItem {
   /** Text to display for the drawer item */
   text: string
-  /** Icon to display for the drawer item */
-  icon: React.ReactNode
   /** Optional click handler for the drawer item */
   onClick?: () => void
   /** Whether this item is currently active */
@@ -152,12 +149,8 @@ export function MiniDrawer({
 
       <List
         sx={(theme) => ({
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: theme.spacing(1),
-          my: theme.spacing(1),
-          px: 0,
+          padding: theme.spacing(1, 0),
+          width: "100%",
         })}
       >
         {items.map((item, index) => {
@@ -181,7 +174,7 @@ export function MiniDrawer({
               sx={{
                 display: "block",
                 padding: 0,
-                width: "176px",
+                width: "100%",
               }}
             >
               <ListItemButton
@@ -191,49 +184,31 @@ export function MiniDrawer({
                   width: "100%",
                   backgroundColor: bgColor,
                   color: theme.palette.common.white,
+                  padding: theme.spacing(2),
                   "&:hover": {
                     backgroundColor: `${bgColor}dd`,
-                    boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
                     transform: "translateY(-2px)",
                   },
                   // Apply hover styling when item is active
                   ...(item.active && {
                     backgroundColor: `${bgColor}dd`,
-                    boxShadow: "0 0 8px rgba(0, 0, 0, 0.2)",
                     transform: "translateY(-2px)",
                   }),
-                  minHeight: 96,
                   transition: theme.transitions.create(
-                    ["background-color", "box-shadow", "transform"],
+                    ["background-color", "transform"],
                     {
                       duration: theme.transitions.duration.shortest,
                     },
                   ),
                 })}
               >
-                <ListItemIcon
-                  sx={(theme) => ({
-                    minWidth: "auto",
-                    color: theme.palette.common.white,
-                    marginBottom: theme.spacing(2),
-                    "& .MuiSvgIcon-root": {
-                      fontSize: 32,
-                    },
-                  })}
-                >
-                  {item.icon}
-                </ListItemIcon>
-
                 <ListItemText
                   primary={item.text}
                   slotProps={{
                     primary: {
                       variant: "h6",
                       sx: {
-                        lineHeight: 1.1,
-                        whiteSpace: "normal",
-                        overflowWrap: "break-word",
-                        wordBreak: "break-word",
+                        lineHeight: 1.2,
                         color: "inherit",
                       },
                     },
