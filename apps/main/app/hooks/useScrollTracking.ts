@@ -64,30 +64,26 @@ export function useScrollTracking(sectionIds: string[]) {
   const scrollToSection = useCallback((elementId: string) => {
     const element = document.getElementById(elementId)
     if (element) {
-      // Set active section immediately to prevent stuttering
+      // Set active section immediately
       setActiveSection(elementId)
 
       // Set flag to disable scroll checking during programmatic scrolling
       isProgrammaticScrolling.current = true
 
-      // Use setTimeout to ensure DOM is fully ready before scrolling
+      // Calculate position without any header offset since header is transparent
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset
+
+      // Use window.scrollTo with smooth behavior
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      })
+
+      // Re-enable scroll checking after animation completes
       setTimeout(() => {
-        // Calculate position without any header offset since header is transparent
-        const elementPosition = element.getBoundingClientRect().top
-        const offsetPosition = elementPosition + window.pageYOffset
-
-        // Use window.scrollTo with smooth behavior for better cross-browser support
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        })
-
-        // Re-enable scroll checking after animation completes
-        // Animation typically takes ~1000ms
-        setTimeout(() => {
-          isProgrammaticScrolling.current = false
-        }, 1000)
-      }, 50) // Small delay to ensure calculations are accurate
+        isProgrammaticScrolling.current = false
+      }, 1000)
     }
   }, [])
 
