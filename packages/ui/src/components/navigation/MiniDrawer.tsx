@@ -173,7 +173,7 @@ export function MiniDrawer({
               onClick={item.onClick}
               disablePadding
               sx={(theme) => ({
-                display: "block",
+                display: "inline-block",
                 padding: theme.spacing(2),
                 backgroundColor: bgColor,
                 color: theme.palette.common.white,
@@ -182,13 +182,11 @@ export function MiniDrawer({
                 my: 0.5,
                 "&:hover": {
                   backgroundColor: `${bgColor}dd`,
-                  transform: "translateY(-2px)",
                   cursor: "pointer",
                 },
                 // Apply hover styling when item is active
                 ...(item.active && {
                   backgroundColor: `${bgColor}dd`,
-                  transform: "translateY(-2px)",
                 }),
                 transition: theme.transitions.create(
                   ["background-color", "transform"],

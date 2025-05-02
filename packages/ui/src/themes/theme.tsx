@@ -523,8 +523,7 @@ const theme = createTheme({
                 },
               },
 
-              "& .MuiListItemText-root": {
-                opacity: 1, // Always visible
+              "& .MuiListItem-root": {
                 transform: ownerState.open ? "rotate(0deg)" : "rotate(-90deg)",
                 transformOrigin: "center center",
                 transition: theme.transitions.create(["transform", "opacity"], {
