@@ -100,7 +100,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
           <Box
             sx={{
               width: { xs: "100%", md: "48%" },
-              pr: { md: 4 }
+              pr: { md: 4 },
             }}
           >
             <Typography variant="h1" sx={{ mb: 1 }}>

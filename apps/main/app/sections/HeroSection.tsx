@@ -41,7 +41,7 @@ function CustomHeadlineText({ text }: { text: string | undefined }) {
   // Check if this is the climate change headline
   if (text.includes("climate change")) {
     const parts = ["How is climate change reshaping", "California's water?"]
-    
+
     return (
       <>
         <div style={{ display: "block" }}>{parts[0]}</div>
@@ -68,14 +68,17 @@ export default function HeroSection() {
   }
 
   // Memoize headlines to prevent recreation on each render
-  const headlines = useMemo(() => 
-    (t("heroPanel.headlines") as string[]) || [
-      "Is California ready for the next drought?",
-      "Does saving salmon mean changing how we use water?",
-      "How is climate change reshaping California's water?",
-      "Do some Californians still lack water justice?",
-      "Where does your water come from? Who else depends on it?",
-    ], [t])
+  const headlines = useMemo(
+    () =>
+      (t("heroPanel.headlines") as string[]) || [
+        "Is California ready for the next drought?",
+        "Does saving salmon mean changing how we use water?",
+        "How is climate change reshaping California's water?",
+        "Do some Californians still lack water justice?",
+        "Where does your water come from? Who else depends on it?",
+      ],
+    [t],
+  )
 
   // Set up headline transition (similar to TransitionHeadline component)
   useEffect(() => {
