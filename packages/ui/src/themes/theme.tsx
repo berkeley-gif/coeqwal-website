@@ -526,9 +526,19 @@ const theme = createTheme({
               "& .MuiListItem-root": {
                 transform: ownerState.open ? "rotate(0deg)" : "rotate(-90deg)",
                 transformOrigin: "center center",
-                transition: theme.transitions.create(["transform", "opacity"], {
+                transition: theme.transitions.create("transform", {
                   duration: theme.transitions.duration.shortest,
                 }),
+              },
+
+              "& .MuiListItemText-root": {
+                "& .MuiListItemText-primary": {
+                  color: "inherit",
+                  textTransform: "uppercase",
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  lineHeight: 1.1,
+                },
               },
             },
           }

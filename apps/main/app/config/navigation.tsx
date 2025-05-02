@@ -1,16 +1,5 @@
-import React from "react"
-import {
-  WaterIcon,
-  SettingsIcon,
-  ReportProblemIcon,
-  SwapHorizIcon,
-  BarChartIcon,
-  SlideshowIcon,
-} from "@repo/ui/mui"
-
 interface NavItem {
   text: string
-  icon: React.ReactNode
   onClick: () => void
   active?: boolean
 }
@@ -28,13 +17,9 @@ export const sectionIds = [
 
 // Define the translation keys for each navigation item
 export const navigationKeys = {
-  hero: "secondaryNavigation.home",
-  "california-water": "secondaryNavigation.californiaWater",
-  "managing-water": "secondaryNavigation.managingWater",
-  challenges: "secondaryNavigation.challenges",
-  calsim: "secondaryNavigation.calsim",
-  invitation: "secondaryNavigation.explore",
-  "combined-panel": "secondaryNavigation.scenarioSearch",
+  "tab1": "secondaryNavigation.tab1",
+  "tab2": "secondaryNavigation.tab2",
+  "tab3": "secondaryNavigation.tab3"
 }
 
 // Helper function to generate navigation items with active state and scroll behavior
@@ -45,41 +30,19 @@ export const getNavigationItems = (
 ): NavItem[] => {
   return [
     {
-      // text: t(navigationKeys["california-water"]),
-      text: "California Water",
-      icon: <WaterIcon />,
+      text: t(navigationKeys["tab1"]),
       onClick: () => scrollToSection("california-water"),
       active: activeSection === "california-water",
     },
     {
-      text: t(navigationKeys["managing-water"]),
-      icon: <SettingsIcon />,
+      text: t(navigationKeys["tab2"]),
       onClick: () => scrollToSection("managing-water"),
       active: activeSection === "managing-water",
     },
     {
-      text: t(navigationKeys["challenges"]),
-      icon: <ReportProblemIcon />,
+      text: t(navigationKeys["tab3"]),
       onClick: () => scrollToSection("challenges"),
       active: activeSection === "challenges",
-    },
-    {
-      text: t(navigationKeys["calsim"]),
-      icon: <SwapHorizIcon />,
-      onClick: () => scrollToSection("calsim"),
-      active: activeSection === "calsim",
-    },
-    {
-      text: t(navigationKeys["invitation"]),
-      icon: <BarChartIcon />,
-      onClick: () => scrollToSection("invitation"),
-      active: activeSection === "invitation",
-    },
-    {
-      text: t(navigationKeys["combined-panel"]),
-      icon: <SlideshowIcon />,
-      onClick: () => scrollToSection("combined-panel"),
-      active: activeSection === "combined-panel",
-    },
+    }
   ]
 }

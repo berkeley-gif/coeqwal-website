@@ -180,6 +180,8 @@ export function MiniDrawer({
                 borderRadius: theme.borderRadius.standard,
                 mx: 1,
                 my: 0.5,
+                width: open ? "200px" : "200px", // changing width is tricky
+                height: open ? "100px" : "200px", // changing height works
                 "&:hover": {
                   backgroundColor: `${bgColor}dd`,
                   cursor: "pointer",
@@ -198,14 +200,6 @@ export function MiniDrawer({
             >
               <ListItemText
                 primary={item.text}
-                sx={{
-                  margin: 0,
-                  "& .MuiListItemText-primary": {
-                    fontSize: "1rem",
-                    lineHeight: 1.2,
-                    color: "inherit",
-                  },
-                }}
               />
             </ListItem>
           )
