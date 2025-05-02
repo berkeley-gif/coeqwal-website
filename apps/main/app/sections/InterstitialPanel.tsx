@@ -38,13 +38,13 @@ export default function InterstitialPanel() {
     >
       <Box maxWidth="1000px">
         <Stack spacing={2}>
-          <Typography variant="body1" sx={{ fontSize: "1.8rem" }}>
+          <Typography variant="body1" sx={{ fontSize: "1.6rem" }}>
             <Box component="span" sx={{ fontWeight: 600 }}>
               {t("interstitial.boldText")}
             </Box>
             {" " + t("interstitial.part1")}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: "1.8rem" }}>
+          <Typography variant="body1" sx={{ fontSize: "1.6rem" }}>
             {t("interstitial.part2")}
           </Typography>
         </Stack>
