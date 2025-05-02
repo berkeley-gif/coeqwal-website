@@ -226,6 +226,7 @@ export interface MapOperationsAPI {
   setLayerProperty: (id: string, property: string, value: StyleValue) => void
   setPaintProperty: (id: string, property: string, value: StyleValue) => void
   setLayoutProperty: (id: string, property: string, value: StyleValue) => void
+  setFilter: (id: string, filter: string) => void // TODO: not really string type for filter
 
   // Optional overlay portal system
   overlays?: RefObject<Record<string, OverlayEntry>>

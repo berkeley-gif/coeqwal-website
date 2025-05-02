@@ -23,8 +23,15 @@ interface PrecipitationDatum {
   value: number
 }
 
+const responsiveHeight = {
+  xs: 200,
+  sm: 250,
+  md: 300,
+  lg: 420,
+  xl: 500,
+}
+
 const margin = { top: 20, right: 80, bottom: 30, left: 180 }
-const FIXED_HEIGHT = 500
 const LABEL_HEIGHT = 50
 
 //TODO: possible make the height a fixed number
@@ -32,15 +39,19 @@ function PrecipitationBar({
   yearLabels,
   startAnimation,
   getSelectedYear,
+  onAnimationComplete,
 }: {
   yearLabels: number[]
   startAnimation: boolean
   getSelectedYear: (year: string) => void
+  onAnimationComplete: () => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const breakpoint = useBreakpoint()
+  const selectedHeight = responsiveHeight[breakpoint] || 400
   const [dimensions, setDimensions] = useState({
     width: 0,
-    height: FIXED_HEIGHT,
+    height: selectedHeight,
   })
   const [tooltip, setTooltip] = useState<{
     visible: boolean
@@ -56,7 +67,7 @@ function PrecipitationBar({
       for (const entry of entries) {
         if (entry.target === containerRef.current) {
           const { width } = entry.contentRect
-          setDimensions({ width, height: FIXED_HEIGHT })
+          setDimensions({ width, height: selectedHeight })
         }
       }
     }, 300) // Debounce with a delay of 300ms
@@ -73,7 +84,7 @@ function PrecipitationBar({
       resizeObserver.disconnect()
       handleResize.cancel()
     }
-  }, [])
+  }, [selectedHeight])
 
   useFetchData(
     "/data/annual_precipitation.json",
@@ -132,10 +143,7 @@ function PrecipitationBar({
   }, [dimensions.height, yExtents])
 
   return (
-    <div
-      ref={containerRef}
-      style={{ height: FIXED_HEIGHT, width: "100%", padding: " 2rem 0 " }}
-    >
+    <div ref={containerRef} style={{ height: selectedHeight, width: "100%" }}>
       {tooltip.visible && tooltip.data && (
         <div
           className="tooltip"
@@ -149,7 +157,7 @@ function PrecipitationBar({
           inch
         </div>
       )}
-      <svg width={dimensions.width} height={dimensions.height}>
+      <svg width={dimensions.width} height={selectedHeight}>
         <YAxis
           yTicks={yTicks}
           yExtents={yExtents as [number, number]}
@@ -167,6 +175,7 @@ function PrecipitationBar({
           containerRef={containerRef}
           yearLabels={yearLabels}
           getSelectedYear={getSelectedYear}
+          onAnimationComplete={onAnimationComplete}
         />
         <XAxis
           yOffset={yScale(0)}
@@ -187,6 +196,7 @@ function Bars({
   yearLabels,
   animate,
   getSelectedYear,
+  onAnimationComplete,
 }: {
   data: PrecipitationDatum[]
   xScale: d3.ScaleBand<number>
@@ -203,11 +213,19 @@ function Bars({
   yearLabels: number[]
   animate: boolean
   getSelectedYear: (year: string) => void
+  onAnimationComplete: () => void
 }) {
   const [finished, setFinished] = useState(false)
   const barWidth = xScale.bandwidth() * 0.6
   const breakpoint = useBreakpoint()
   const transform = visibleIconTransform[breakpoint]
+
+  useEffect(() => {
+    if (finished) {
+      onAnimationComplete()
+    }
+  }, [finished, onAnimationComplete])
+
   return (
     <>
       {data.map((d, idx) => {

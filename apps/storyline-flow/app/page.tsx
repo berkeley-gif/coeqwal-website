@@ -13,10 +13,19 @@ import SectionTransformation from "./components/05Transformation"
 import SectionBenefits from "./components/06Benefits"
 import SectionImpact from "./components/07Impact"
 import Conclusion from "./components/08Conclusion"
-import { AnimatePresence, motion } from "@repo/motion"
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+} from "@repo/motion"
 import { DIVISION } from "./components/helpers/sectionDivision"
 import useStoryStore from "./store"
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
+import { HeaderStory } from "@repo/motion/components"
+import SourceAnnouncer from "./components/helpers/SourceAnnouncer"
+
+const MotionBox = motion.create(Box)
 
 //TODO: potentially replace all the visibiltiy hook with scroll opacity hook
 //TODO: instead of width 100%, it might need to be max-content
@@ -35,6 +44,7 @@ export default function StoryContainer() {
   return (
     <Box id="meta-container">
       <AnimatePresence>{!isMapLoaded && <Loader />}</AnimatePresence>
+      <HeaderStory />
       <SectionIndicator />
       <div id="map-container">
         <MapContainer
@@ -59,17 +69,43 @@ export default function StoryContainer() {
         <SectionImpact />
         <Conclusion />
       </div>
+      <SourceAnnouncer />
     </Box>
   )
 }
 
 function SectionIndicator() {
   const activeSection = useStoryStore((state) => state.activeSection)
+  const { scrollY } = useScroll()
+  const lastYRef = useRef(0)
+  const [isHidden, setIsHidden] = useState(false)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
 
   return (
-    <Box
+    <MotionBox
+      animate={isHidden ? "hidden" : "visible"}
+      variants={{
+        hidden: {
+          top: "10px",
+        },
+        visible: {
+          top: "74.5px",
+        },
+      }}
+      transition={{ duration: 0.3 }}
       id="section-container"
-      sx={{ display: "flex", flexDirection: "column", gap: 1 }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+      }}
     >
       {DIVISION.map((division, index) => {
         const isActive = division.sections.includes(activeSection)
@@ -83,7 +119,7 @@ function SectionIndicator() {
             transition={{ duration: 0.3 }}
           >
             <Box className="section-component" sx={{ gap: 1 }}>
-              <Typography variant="caption">{division.name}</Typography>
+              <Typography variant="body2">{division.name}</Typography>
               <Box className="section-circle">
                 <WaterDropIcon color={isActive ? "#3d8ec9" : "#f2f0ef"} />
               </Box>
@@ -91,7 +127,7 @@ function SectionIndicator() {
           </motion.div>
         )
       })}
-    </Box>
+    </MotionBox>
   )
 }
 

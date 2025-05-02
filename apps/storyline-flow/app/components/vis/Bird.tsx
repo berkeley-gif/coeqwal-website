@@ -1,26 +1,45 @@
+import { MotionValue, motion } from "@repo/motion"
 import "./bird.css"
 
-function Bird() {
+function Bird({ opacity }: { opacity: MotionValue<number> }) {
   return (
     <>
-      <div className="bird-container bird-container--one">
+      <motion.div
+        className="bird-container bird-container--one"
+        style={{ opacity }}
+      >
         <div className="bird bird--one"></div>
-      </div>
-      <div className="bird-container bird-container--two">
+      </motion.div>
+      <motion.div
+        className="bird-container bird-container--two"
+        style={{ opacity }}
+      >
         <div className="bird bird--two"></div>
-      </div>
-      <div className="bird-container bird-container--three">
+      </motion.div>
+      <motion.div
+        className="bird-container bird-container--three"
+        style={{ opacity }}
+      >
         <div className="bird bird--three"></div>
-      </div>
-      <div className="bird-container bird-container--four">
+      </motion.div>
+      <motion.div
+        className="bird-container bird-container--four"
+        style={{ opacity }}
+      >
         <div className="bird bird--four"></div>
-      </div>
-      <div className="bird-container bird-container--five">
+      </motion.div>
+      <motion.div
+        className="bird-container bird-container--five"
+        style={{ opacity }}
+      >
         <div className="bird bird--five"></div>
-      </div>
-      <div className="bird-container bird-container--six">
+      </motion.div>
+      <motion.div
+        className="bird-container bird-container--six"
+        style={{ opacity }}
+      >
         <div className="bird bird--six"></div>
-      </div>
+      </motion.div>
     </>
   )
 }

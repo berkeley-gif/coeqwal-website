@@ -7,13 +7,19 @@ import { motion } from "@repo/motion"
 import { FlubberInterpolate } from "@repo/motion"
 import { debounce } from "lodash"
 import { useBreakpoint } from "@repo/ui/hooks"
+import {
+  axisVariants,
+  horizontalGrowRectVariants,
+  opacityTextVariants,
+  opacityVariants,
+} from "@repo/motion/variants"
 
 const startMonth = 9 // October
 const months = Array.from({ length: 12 }, (_, i) =>
   d3.timeFormat("%b")(new Date(2024, (i + startMonth) % 12, 1)),
 )
 
-const margin = { top: 50, right: 30, bottom: 100, left: 100 }
+const margin = { top: 50, right: 30, bottom: 70, left: 100 }
 
 const responsiveHeight = {
   xs: 200,
@@ -22,7 +28,9 @@ const responsiveHeight = {
   lg: 300,
   xl: 400,
 }
-//Clean up rect error
+
+const snowData = getSnowCurve()
+const meltData = getMeltCurve()
 
 export default function AnimatedCurve({
   startAnimation = false,
@@ -39,6 +47,7 @@ export default function AnimatedCurve({
     width: 0,
     height: responsiveHeight[breakpoint] || 350,
   })
+  const [startMorph, setStartMorph] = useState(false)
 
   useEffect(() => {
     const handleResize = debounce((entries: ResizeObserverEntry[]) => {
@@ -93,10 +102,8 @@ export default function AnimatedCurve({
     .y((d) => yScale(d.y))
     .curve(d3.curveBasis)
 
-  const snowPath = getGammaCurve()
-  const meltPath = getGaussianCurve()
-  const snowArea = areaGen(snowPath)!
-  const meltArea = areaGen(meltPath)!
+  const snowArea = areaGen(snowData)!
+  const meltArea = areaGen(meltData)!
 
   useEffect(() => {
     if (!svgRef.current || !pathRef.current) return
@@ -107,9 +114,9 @@ export default function AnimatedCurve({
 
     const style = {
       hachureAngle: 60,
-      hachureGap: 10,
-      fillWeight: 3,
-      strokeWidth: 3,
+      hachureGap: 6,
+      fillWeight: 2.5,
+      strokeWidth: 2,
       roughness: 0.5,
     }
 
@@ -143,34 +150,60 @@ export default function AnimatedCurve({
       if (t < 1) requestAnimationFrame(tick)
     }
 
-    if (!startAnimation) return
+    if (!startMorph) return
 
     requestAnimationFrame(tick)
-  }, [dimensions, areaGen, xScale, yScale, snowArea, meltArea, startAnimation])
+  }, [dimensions, areaGen, xScale, yScale, snowArea, meltArea, startMorph])
 
   return (
     <div
       ref={containerRef}
-      style={{ width: "100%", height: "400px", padding: "2rem 0" }}
+      style={{
+        width: "100%",
+        height: `${responsiveHeight[breakpoint] || 350}px`,
+        paddingTop: "15px",
+      }}
     >
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height}>
         <motion.path
-          d={lineGen(snowPath) as string}
+          d={lineGen(snowData)!}
           stroke="#f2f0ef"
+          strokeWidth={2}
           fill="none"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: 5, ease: "easeInOut" }}
+          variants={axisVariants}
+          initial="hidden"
+          animate={startMorph ? "visible" : "hidden"}
+          custom={1}
         />
 
-        <XAxis size={dimensions} xScale={xScale} />
-        <YAxis size={dimensions} yScale={yScale} />
+        <XAxis
+          size={dimensions}
+          xScale={xScale}
+          startAnimation={startAnimation}
+        />
+        <YAxis
+          size={dimensions}
+          yScale={yScale}
+          startAnimation={startAnimation}
+        />
 
-        <g ref={pathRef} />
+        <motion.g
+          ref={pathRef}
+          variants={opacityVariants}
+          initial="hidden"
+          animate={startAnimation ? "visible" : "hidden"}
+          custom={7.5}
+          onAnimationComplete={() => {
+            setStartMorph(true)
+          }}
+        />
         <Annotation
+          startAnimation={startAnimation}
           dimensions={dimensions}
           xScale={xScale}
+          yScale={yScale}
           monthIdx={selectedMonth}
+          snowData={snowData}
         />
       </svg>
     </div>
@@ -178,31 +211,53 @@ export default function AnimatedCurve({
 }
 
 function Annotation({
+  startAnimation,
   dimensions,
   xScale,
+  yScale,
   monthIdx,
+  snowData,
 }: {
   dimensions: { width: number; height: number }
   xScale: d3.ScaleLinear<number, number>
+  yScale: d3.ScaleLinear<number, number>
   monthIdx: number
+  startAnimation: boolean
+  snowData: { x: number; y: number }[]
 }) {
+  const width = xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)
+  const pathRef = useRef<SVGPathElement | null>(null)
+
+  const lineGen = d3
+    .line<{ x: number; y: number }>()
+    .x((d) => xScale(d.x))
+    .y((d) => yScale(d.y))
+    .curve(d3.curveBasis)
+
+  const snowPoint = snowData.find((d) => d.x === monthIdx)
+  const pathString = lineGen([snowPoint!])!
+  const match = pathString.match(/-?\d+(\.\d+)?/g)
+  const numbers: [string, string] = [match?.[0] || "0", match?.[1] || "0"]
+  const position = numbers
+    ? [parseFloat(numbers[0]), parseFloat(numbers[1])]
+    : [0, 0]
+
   return (
-    <motion.g
-      id="annotation"
-      transform={`translate(${0}, ${0})`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-    >
-      <rect
+    <g id="annotation" transform={`translate(${0}, ${0})`}>
+      <path ref={pathRef} d={lineGen(snowData)!} fill="none" stroke="none" />
+      <motion.rect
+        variants={horizontalGrowRectVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={{ width, delay: 4 }}
         x={xScale(0)}
         y={0}
-        width={xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)}
+        width={width}
         height={dimensions.height - margin.bottom}
         fill="#f2f0ef"
         opacity={0.1}
       />
-      <text
+      <motion.text
         x={xScale(2.5)}
         y={0}
         dy="1rem"
@@ -210,11 +265,15 @@ function Annotation({
         fontSize="1rem"
         fontWeight="bold"
         textAnchor="middle"
+        variants={opacityTextVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={4.5}
       >
         Wet season
-      </text>
+      </motion.text>
 
-      <line
+      <motion.line
         x1={xScale(monthIdx)}
         x2={xScale(monthIdx)}
         y1={0}
@@ -222,17 +281,33 @@ function Annotation({
         stroke="#f2f0ef"
         strokeWidth={1}
         strokeDasharray="1 1"
+        variants={opacityVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={7.5}
       />
-    </motion.g>
+      <motion.circle
+        cx={position[0]}
+        cy={position[1]}
+        r={3}
+        fill="#f2f0ef"
+        variants={opacityVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={7.5}
+      />
+    </g>
   )
 }
 
 function YAxis({
+  startAnimation,
   size,
   yScale,
 }: {
   size: { width: number; height: number }
   yScale: d3.ScaleLinear<number, number>
+  startAnimation: boolean
 }) {
   const labels = ["Low", "High"]
   return (
@@ -244,7 +319,11 @@ function YAxis({
     >
       {[0, 1].map((tick, i) => (
         <g key={i} transform={`translate(0,${yScale(tick)})`}>
-          <text
+          <motion.text
+            variants={opacityTextVariants}
+            initial="hidden"
+            animate={startAnimation ? "visible" : "hidden"}
+            custom={1.8 + i * 1.5}
             fill="#f2f0ef"
             dx="-1em"
             dy="0.25em"
@@ -252,72 +331,109 @@ function YAxis({
             textAnchor="end"
           >
             {labels[i]}
-          </text>
-          <line x2={-6} stroke="#f2f0ef" />
+          </motion.text>
+          <motion.line
+            x2={-6}
+            stroke="#f2f0ef"
+            variants={axisVariants}
+            initial="hidden"
+            animate={startAnimation ? "visible" : "hidden"}
+            custom={1.8 + i * 1.5}
+          />
         </g>
       ))}
-      <line
-        y1={margin.top}
-        y2={size.height - margin.bottom}
+      <motion.line
+        variants={axisVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={1.8}
+        y1={size.height - margin.bottom}
+        y2={margin.top}
         stroke="#f2f0ef"
         strokeWidth={1}
         className="domain"
       />
-      <text
+      <motion.text
         x={0}
         y={size.height / 2}
         fill="#f2f0ef"
         dx={"-3rem"}
         fontSize="1rem"
         textAnchor="end"
+        variants={opacityTextVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={3}
       >
         Volume
-      </text>
+      </motion.text>
     </motion.g>
   )
 }
 
 function XAxis({
+  startAnimation,
   size,
   xScale,
 }: {
   size: { width: number; height: number }
   xScale: d3.ScaleLinear<number, number>
+  startAnimation: boolean
 }) {
   return (
-    <motion.g
-      transform={`translate(0,${size.height - margin.bottom})`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-    >
+    <g transform={`translate(0,${size.height - margin.bottom})`}>
       {months.map((month, i) => (
         <g key={i} transform={`translate(${xScale(i)}, 0)`}>
-          <text fill="#f2f0ef" dy="1.5em" textAnchor="middle" fontSize="1rem">
+          <motion.text
+            fill="#f2f0ef"
+            dy="1.5em"
+            textAnchor="middle"
+            fontSize="1rem"
+            variants={opacityTextVariants}
+            initial="hidden"
+            animate={startAnimation ? "visible" : "hidden"}
+            custom={0.3 + i * 0.1}
+          >
             {month}
-          </text>
-          <line y2="5" stroke="#f2f0ef" />
+          </motion.text>
+          <motion.line
+            y2="5"
+            stroke="#f2f0ef"
+            variants={axisVariants}
+            initial="hidden"
+            animate={startAnimation ? "visible" : "hidden"}
+            custom={0.3 + i * 0.1}
+          />
         </g>
       ))}
-      <line
+      <motion.line
         x1={margin.left}
         x2={size.width}
         stroke="#f2f0ef"
         strokeWidth={1}
+        variants={axisVariants}
+        initial="hidden"
+        animate={startAnimation ? "visible" : "hidden"}
+        custom={0.3}
         className="domain"
       />
-    </motion.g>
+    </g>
   )
 }
 
-function getGammaCurve(shape = 3, scale = 1.2) {
+function getSnowCurve(shape = 5, scale = 0.6) {
   const xValues = d3.range(0, months.length, 0.1)
-  const raw = xValues.map((x) => Math.pow(x, shape - 1) * Math.exp(-x / scale))
+  const raw = xValues.map((x) => {
+    const y = Math.pow(x, shape - 1) * Math.exp(-x / scale)
+    return y
+  })
+
+  // Normalize the curve so the peak is 1
   const max = d3.max(raw) || 1
   return xValues.map((x, i) => ({ x, y: (raw[i] ?? 0) / max }))
 }
 
-function getGaussianCurve(peak = 7.5, stdDev = 1.8) {
+function getMeltCurve(peak = 8, stdDev = 1.2) {
   const xValues = d3.range(0, months.length, 0.1)
   return xValues.map((x) => ({
     x,

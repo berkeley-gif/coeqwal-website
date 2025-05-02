@@ -285,6 +285,17 @@ export function MapProvider({ children }: { children: ReactNode }) {
       }
     },
 
+    setFilter: (id, filter) => {
+      const map = mapRef.current?.getMap()
+      if (!map || !map.getLayer(id)) return
+      try {
+        // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
+        map.setFilter(id, filter)
+      } catch (err) {
+        console.error(`Failed to set filter for layer '${id}':`, err)
+      }
+    },
+
     setMarkers: (newMarkers) => {
       setMarkersState(newMarkers)
     },

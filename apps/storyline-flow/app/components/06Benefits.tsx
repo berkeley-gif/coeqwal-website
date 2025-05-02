@@ -12,7 +12,7 @@ import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { Sentence } from "@repo/motion/components"
 import ConcentricCircle from "./vis/ConcentricCircle"
-import { PeopleIcon, AlmondIcon } from "./helpers/Icons"
+import { PeopleIcon, MoneyBagIcon, FarmIcon } from "./helpers/Icons"
 import React from "react"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { concentricTransform } from "./helpers/breakpoints"
@@ -28,15 +28,15 @@ function SectionBenefits() {
 }
 
 const norCalData = {
-  past: { year: 1940, value: 3066654, annotation: "3.06M" },
-  present: { year: 2024, value: 15581091, annotation: "15.5M" },
+  past: { year: 1960, value: 3373827, annotation: "3.37M" },
+  present: { year: 2024, value: 6551627 * 2.5, annotation: "6.55M" },
   icon: PeopleIcon,
   title: "SF Bay",
 }
 
 const soCalData = {
-  past: { year: 1940, value: 3840733, annotation: "3.84M" },
-  present: { year: 2024, value: 23479897, annotation: "23.48M" },
+  past: { year: 1960, value: 9007878, annotation: "9.00M" },
+  present: { year: 2024, value: 22095061 * 2.5, annotation: "22.01M" },
   icon: PeopleIcon,
   title: "SoCal",
 }
@@ -162,10 +162,10 @@ function Agriculture() {
   const mapViewState = valleyMapViewState[breakpoint]
 
   const almondData = {
-    past: { year: 1980, value: 327314, annotation: "0.32M" },
-    present: { year: 2022, value: 1582870, annotation: "1.58M" },
-    icon: AlmondIcon,
-    title: "Almond",
+    past: { year: 1980, value: 15998697724, annotation: "16B*" },
+    present: { year: 2022, value: 132351395410, annotation: "132B" },
+    icon: FarmIcon,
+    title: "Yield",
   }
 
   const load = useCallback(() => {
@@ -243,9 +243,9 @@ function Economy() {
   const mapViewState = stateMapViewState[breakpoint]
 
   const economyData = {
-    past: { year: 1980, value: 13779, annotation: "$50.9K*" },
-    present: { year: 2024, value: 104916, annotation: "$105K" },
-    icon: PeopleIcon,
+    past: { year: 1980, value: 327958, annotation: "$327B*" },
+    present: { year: 2024, value: 4103124, annotation: "$4,103B" },
+    icon: MoneyBagIcon,
     title: "GDP",
   }
 
@@ -263,13 +263,13 @@ function Economy() {
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
-        console.log("initialize stuff")
+        //console.log("initialize stuff")
       }
       hasSeen.current = true
       load()
     } else {
       if (hasSeen.current) {
-        console.log("unload stuff")
+        //console.log("unload stuff")
       } else {
         //console.log('not seen yet, dont do anything')
         return
@@ -281,8 +281,8 @@ function Economy() {
     <Box
       ref={sectionRef}
       className="container"
-      height="100vh"
-      width="70vw"
+      height="120vh"
+      width="90vw"
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">

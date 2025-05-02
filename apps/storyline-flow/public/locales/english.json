@@ -11,7 +11,9 @@
     }
   },
   "precipitation": {
-    "title": "Where and When Precipitation Falls",
+    "title1": "Where and When ",
+    "title2": "Precipitation",
+    "title3": " Falls",
     "p1": "The vast majority of California’s rain and snow falls in the northern part of the state.",
     "p2": "Like clockwork, we expect nearly all of our precipitation in winter \u2014 a short period lasting less than 100 days.",
     "p3": "What’s less predictable is how much rain and snow we get in any year.",
@@ -24,7 +26,9 @@
     "p4": "Yet we need water every day of the year, all across the state."
   },
   "snowpack": {
-    "title": "The Snowpack Advantage: Nature’s Water Storage",
+    "title1": "The ",
+    "title2": "Snowpack",
+    "title3": "Advantage: Nature’s Water Storage",
     "p1": "At high elevations in California’s mountains, abundant snow isn’t just fun or pretty.",
     "p2": "It is a frozen water tower, storing water in the mountains.",
     "p3": "As snow melts in late spring, it feeds rivers and keeps many flowing through our dry summer."
@@ -34,11 +38,9 @@
     "p1": "Across our planet, gravity drives freshwater flow from mountains to the sea.",
     "p2": "Within California, snowmelt drains from the Sierra Nevada mountains into small mountain creeks.",
     "p3": "Some water seeps underground, replenishing aquifers.",
-    "p41": "Streams flow downslope toward ",
-    "p42": "the Central Valley",
-    "p43": " into the state's two largest rivers \u2014 ",
-    "p44": "the Sacramento and San Joaquin Rivers",
-    "p45": ".",
+    "p41": "Streams flow downslope into the state's two largest rivers \u2014 ",
+    "p42": "the Sacramento and San Joaquin Rivers",
+    "p43": ".",
     "valley": {
       "p11": "The Sacramento and San Joaquin Rivers define ",
       "p12": "the Central Valley",

@@ -165,7 +165,6 @@ export function HeroQuestionsPanel({
         position: "relative",
         display: "flex",
         justifyContent: "center",
-        overflow: "hidden",
         ...panelProps.sx,
       }}
     >

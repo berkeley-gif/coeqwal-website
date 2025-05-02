@@ -1,57 +1,91 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 
 /**
  * Custom hook to track the currently visible section based on scroll position
  */
 export function useScrollTracking(sectionIds: string[]) {
   const [activeSection, setActiveSection] = useState("")
+  // Flag to track if we're currently performing a programmatic scroll
+  const isProgrammaticScrolling = useRef(false)
 
-  // Add scroll listener - only runs once on mount
-  useEffect(() => {
-    // Function to check which section is currently visible
-    const checkActiveSection = () => {
-      // Find the first section that's currently visible in the viewport
-      for (const id of sectionIds) {
-        const element = document.getElementById(id)
-        if (element) {
-          const rect = element.getBoundingClientRect()
-          // Check if the element is at least partially visible in the viewport
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            setActiveSection(id)
-            return
-          }
+  // Create the scroll handler as a memoized callback
+  const checkActiveSection = useCallback(() => {
+    // Skip checking during programmatic scrolling to prevent stuttering
+    if (isProgrammaticScrolling.current) return
+
+    // Calculate the threshold for section visibility (20% of viewport height)
+    const threshold = Math.max(100, window.innerHeight * 0.2)
+    let foundSection = false
+
+    // Find the first section that's currently visible in the viewport
+    for (const id of sectionIds) {
+      if (!id) continue // Skip any undefined or empty IDs
+
+      const element = document.getElementById(id)
+      if (element) {
+        const rect = element.getBoundingClientRect()
+
+        // Consider a section visible if its top is within the top portion of the viewport
+        // or if it occupies a significant portion of the viewport
+        if (
+          (rect.top <= threshold && rect.bottom >= threshold) ||
+          (rect.top >= 0 && rect.top <= threshold * 2)
+        ) {
+          setActiveSection(id)
+          foundSection = true
+          return
         }
       }
-
-      // If no section is active (e.g., at the very top of the page)
-      setActiveSection("")
     }
 
+    // If no section is active (e.g., at the very top of the page)
+    // Default to the first section
+    if (!foundSection && sectionIds.length > 0 && sectionIds[0]) {
+      setActiveSection(sectionIds[0])
+    }
+  }, [sectionIds])
+
+  // Add scroll listener
+  useEffect(() => {
     window.addEventListener("scroll", checkActiveSection)
-    checkActiveSection() // Initial check
+    // Initial check with a small delay to ensure DOM is ready
+    const initialCheck = setTimeout(checkActiveSection, 100)
 
     // Cleanup
     return () => {
       window.removeEventListener("scroll", checkActiveSection)
+      clearTimeout(initialCheck)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // Empty dependency array means this effect runs once on mount
+  }, [checkActiveSection]) // Only depend on the callback
 
   // Function to scroll to an element by ID with smooth animation
-  const scrollToSection = (elementId: string) => {
+  const scrollToSection = useCallback((elementId: string) => {
     const element = document.getElementById(elementId)
     if (element) {
-      // Use the native scrollIntoView with smooth behavior
-      element.scrollIntoView({
+      // Set active section immediately
+      setActiveSection(elementId)
+
+      // Set flag to disable scroll checking during programmatic scrolling
+      isProgrammaticScrolling.current = true
+
+      // Calculate position without any header offset since header is transparent
+      const elementPosition = element.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset
+
+      // Use window.scrollTo with smooth behavior
+      window.scrollTo({
+        top: offsetPosition,
         behavior: "smooth",
-        block: "start",
       })
 
-      setActiveSection(elementId)
+      // Re-enable scroll checking after animation completes
+      setTimeout(() => {
+        isProgrammaticScrolling.current = false
+      }, 1000)
     }
-  }
+  }, [])
 
   return { activeSection, scrollToSection }
 }

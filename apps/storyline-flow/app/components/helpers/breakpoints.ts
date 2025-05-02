@@ -91,13 +91,13 @@ export const concentricTransform: Record<string, benefitConfig> = {
     },
     agriculture: {
       size: { width: 400, height: 400 },
-      shift: [0.0, 0.0],
-      radius: 40,
+      shift: [0.5, 0.3],
+      radius: 35,
     },
     economy: {
       size: { width: 400, height: 400 },
-      shift: [0.5, 0.3],
-      radius: 40,
+      shift: [0.6, 0.6],
+      radius: 35,
     },
   },
   xl: {
@@ -113,12 +113,12 @@ export const concentricTransform: Record<string, benefitConfig> = {
     },
     agriculture: {
       size: { width: 600, height: 400 },
-      shift: [0.5, 0.3],
+      shift: [0.5, 0.7],
       radius: 50,
     },
     economy: {
-      size: { width: 600, height: 400 },
-      shift: [0.5, 0.5],
+      size: { width: 600, height: 450 },
+      shift: [0.6, 0.9],
       radius: 50,
     },
   },
@@ -158,3 +158,31 @@ export const visibleIconTransform: Record<string, visibleIconTransformConfig> =
       belowY: "0.7em",
     },
   }
+
+interface grassConfig {
+  sideBladeHeight: number
+  centerBladeHeight: number
+}
+
+export const grassConfig: Record<string, grassConfig> = {
+  xs: {
+    sideBladeHeight: 20,
+    centerBladeHeight: 30,
+  },
+  sm: {
+    sideBladeHeight: 20,
+    centerBladeHeight: 30,
+  },
+  md: {
+    sideBladeHeight: 20,
+    centerBladeHeight: 30,
+  },
+  lg: {
+    sideBladeHeight: 150,
+    centerBladeHeight: 100,
+  },
+  xl: {
+    sideBladeHeight: 180,
+    centerBladeHeight: 130,
+  },
+}

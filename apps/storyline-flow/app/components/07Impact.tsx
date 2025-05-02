@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, LibraryBooksIcon } from "@repo/ui/mui"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import {
   impactClimateMapViewState,
   impactDeltaMapViewState,
@@ -15,6 +15,7 @@ import useStoryStore from "../store"
 import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 import { Sentence } from "@repo/motion/components"
 import { useBreakpoint } from "@repo/ui/hooks"
+import ScrollIndicator from "./helpers/ScrollIndicator"
 
 function SectionImpact() {
   return (
@@ -33,6 +34,7 @@ function Transition() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.benefits
   const { sectionRef } = useActiveSection("turning", { amount: 0.5 })
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   return (
     <Box
@@ -52,10 +54,12 @@ function Transition() {
           gutterBottom
           sx={{ fontWeight: "bold" }}
           custom={2}
+          onAnimationComplete={() => setAnimationComplete(true)}
         >
           {content?.transition}
         </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -69,6 +73,7 @@ function Salmon() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactSalmonMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -98,7 +103,10 @@ function Salmon() {
       <Box className="paragraph">
         <Sentence custom={0}>{content?.p1}</Sentence>
         <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence custom={2}>
+        <Sentence
+          custom={2}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
           {content?.p31}{" "}
           <span style={{ fontWeight: "bold" }}>
             <u>{content?.p32}</u>
@@ -109,6 +117,7 @@ function Salmon() {
           {content?.p33}
         </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -122,6 +131,7 @@ function Delta() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactDeltaMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -162,8 +172,14 @@ function Delta() {
         <Sentence custom={2}>
           {content?.p3} {content?.p4}{" "}
         </Sentence>
-        <Sentence custom={3}>{content?.p5}</Sentence>
+        <Sentence
+          custom={3}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
+          {content?.p5}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -178,6 +194,7 @@ function Groundwater() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactGroundMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -219,8 +236,14 @@ function Groundwater() {
         </Sentence>
       </Box>
       <Box className="paragraph">
-        <Sentence custom={2.5}>{content?.p3}</Sentence>
+        <Sentence
+          custom={2.5}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
+          {content?.p3}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -234,6 +257,7 @@ function Drinking() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactDrinkingMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -264,7 +288,10 @@ function Drinking() {
         <Sentence custom={1}>{content?.p1}</Sentence>
       </Box>
       <Box className="paragraph">
-        <Sentence custom={2}>
+        <Sentence
+          custom={2}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
           {content?.p21}{" "}
           <span style={{ fontWeight: "bold" }}>
             <u>{content?.p22}</u>
@@ -276,6 +303,7 @@ function Drinking() {
           {content?.p23}
         </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -289,6 +317,7 @@ function Climate() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactClimateMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -326,8 +355,14 @@ function Climate() {
           {content?.p12}
         </Sentence>
         <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence custom={2}>{content?.p3}</Sentence>
+        <Sentence
+          custom={2}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
+          {content?.p3}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }

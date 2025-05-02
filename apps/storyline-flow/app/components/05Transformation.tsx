@@ -9,6 +9,7 @@ import { useMap } from "@repo/map"
 import { stateMapViewState } from "./helpers/mapViews"
 import Underline from "./helpers/Underline"
 import { useBreakpoint } from "@repo/ui/hooks"
+import ScrollIndicator from "./helpers/ScrollIndicator"
 
 function SectionTransformation() {
   return (
@@ -31,6 +32,7 @@ function Transformation() {
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = stateMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -105,7 +107,10 @@ function Transformation() {
       <Box className="paragraph">
         <Sentence
           custom={6.5}
-          onAnimationComplete={() => setStartAnimation(true)}
+          onAnimationComplete={() => {
+            setStartAnimation(true)
+            setAnimationComplete(true)
+          }}
         >
           {content?.transition.p11}
           <Underline startAnimation={startAnimation}>
@@ -114,6 +119,7 @@ function Transformation() {
           {content?.transition.p13}
         </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} delay={1} />
     </Box>
   )
 }
