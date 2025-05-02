@@ -250,6 +250,9 @@ importers:
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@repo/i18n':
+        specifier: workspace:*
+        version: link:../i18n
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

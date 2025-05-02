@@ -1,39 +1,27 @@
 "use client"
 
 import { Box, Typography, Stack } from "@repo/ui/mui"
-import { motion, useScroll, useAnimation } from "@repo/motion"
-import { useEffect, useState } from "react"
+import { motion } from "@repo/motion"
+import { useState } from "react"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import Underline from "./helpers/Underline"
+import ScrollIndicator from "./helpers/ScrollIndicator"
 
-//TODO: motion doesn't support component prop
-//TODO: make sure all map layers are disabled here
 function Opener() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.opener
   const { sectionRef } = useActiveSection("opener", { amount: 0.5 })
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start center", "end start"],
-  })
-  const controls = useAnimation()
   const [startAnimation, setStartAnimation] = useState(false)
-
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      if (latest >= 0.4) {
-        controls.start("visible")
-      }
-    })
-
-    return () => unsubscribe()
-  }, [scrollYProgress, controls])
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const opacityFloatVariants = {
     hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-    transition: { duration: 2, type: "spring" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 2, type: "spring", delay: 1, once: true },
+    },
   }
 
   return (
@@ -64,8 +52,11 @@ function Opener() {
           aria-labelledby="opener-throughline"
           variants={opacityFloatVariants}
           initial="hidden"
-          animate={controls}
-          onAnimationComplete={() => setStartAnimation(true)}
+          animate="visible"
+          onAnimationComplete={() => {
+            setStartAnimation(true)
+            setAnimationComplete(true)
+          }}
         >
           <Typography id="throughline-heading" variant="body1">
             {content?.throughline.p11}
@@ -76,6 +67,7 @@ function Opener() {
           </Typography>
         </motion.div>
       </Stack>
+      <ScrollIndicator animationComplete={animationComplete} delay={1} />
     </Box>
   )
 }

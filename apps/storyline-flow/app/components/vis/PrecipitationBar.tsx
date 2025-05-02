@@ -27,7 +27,7 @@ const responsiveHeight = {
   xs: 200,
   sm: 250,
   md: 300,
-  lg: 500,
+  lg: 420,
   xl: 500,
 }
 
@@ -39,10 +39,12 @@ function PrecipitationBar({
   yearLabels,
   startAnimation,
   getSelectedYear,
+  onAnimationComplete,
 }: {
   yearLabels: number[]
   startAnimation: boolean
   getSelectedYear: (year: string) => void
+  onAnimationComplete: () => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const breakpoint = useBreakpoint()
@@ -141,10 +143,7 @@ function PrecipitationBar({
   }, [dimensions.height, yExtents])
 
   return (
-    <div
-      ref={containerRef}
-      style={{ height: selectedHeight, width: "100%", padding: " 2rem 0 " }}
-    >
+    <div ref={containerRef} style={{ height: selectedHeight, width: "100%" }}>
       {tooltip.visible && tooltip.data && (
         <div
           className="tooltip"
@@ -176,6 +175,7 @@ function PrecipitationBar({
           containerRef={containerRef}
           yearLabels={yearLabels}
           getSelectedYear={getSelectedYear}
+          onAnimationComplete={onAnimationComplete}
         />
         <XAxis
           yOffset={yScale(0)}
@@ -196,6 +196,7 @@ function Bars({
   yearLabels,
   animate,
   getSelectedYear,
+  onAnimationComplete,
 }: {
   data: PrecipitationDatum[]
   xScale: d3.ScaleBand<number>
@@ -212,11 +213,19 @@ function Bars({
   yearLabels: number[]
   animate: boolean
   getSelectedYear: (year: string) => void
+  onAnimationComplete: () => void
 }) {
   const [finished, setFinished] = useState(false)
   const barWidth = xScale.bandwidth() * 0.6
   const breakpoint = useBreakpoint()
   const transform = visibleIconTransform[breakpoint]
+
+  useEffect(() => {
+    if (finished) {
+      onAnimationComplete()
+    }
+  }, [finished, onAnimationComplete])
+
   return (
     <>
       {data.map((d, idx) => {
@@ -353,7 +362,6 @@ function YAxis({
 }) {
   const aboveMidpoint = (margin.top + yScale(0)) / 2
   const belowMidpoint = (dimensions.height - margin.bottom + yScale(0)) / 2
-  console.log(dimensions)
 
   return (
     <>

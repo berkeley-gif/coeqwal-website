@@ -20,6 +20,7 @@ import {
   reclamationMapViewState,
 } from "./helpers/mapViews"
 import { useBreakpoint } from "@repo/ui/hooks"
+import ScrollIndicator from "./helpers/ScrollIndicator"
 
 function SectionHuman() {
   const [mineMarkers, setMineMarkers] = useState<Record<string, MarkerType[]>>(
@@ -54,6 +55,7 @@ function Header({ markers }: { markers: MarkerType[] }) {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = goldRushMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     setTimeout(() => {
@@ -109,8 +111,14 @@ function Header({ markers }: { markers: MarkerType[] }) {
       </Box>
       <Box className="paragraph">
         <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
+        <Sentence
+          custom={1}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
+          {content?.p2}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -127,6 +135,7 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = reclamationMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -168,8 +177,14 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
     <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
       <Box ref={sectionRef} className="paragraph">
         <Sentence custom={0}>{content?.p1}</Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
+        <Sentence
+          custom={1}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
+          {content?.p2}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -185,6 +200,7 @@ function Drinking() {
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const breakpoint = useBreakpoint()
   const mapViewState = drinkingMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const init = useCallback(() => {
     addSource("river-combined", {
@@ -250,8 +266,14 @@ function Drinking() {
           {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
         </Sentence>
         <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence custom={2}>{content?.p3}</Sentence>
+        <Sentence
+          custom={2}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
+          {content?.p3}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }

@@ -37,6 +37,16 @@ const storyTheme = createTheme({
         fontSize: "2.778rem",
       },
     },
+    body2: {
+      ...baseTheme.typography.body2,
+      fontSize: "0.8929rem",
+      letterSpacing: "normal",
+    },
+    caption: {
+      ...baseTheme.typography.caption,
+      color: "rgba(242, 240, 239, 0.6)",
+      lineHeight: 1,
+    },
   },
   components: {
     MuiTypography: {

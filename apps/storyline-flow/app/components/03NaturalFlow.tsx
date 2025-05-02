@@ -2,7 +2,7 @@
 
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
-import { motion } from "@repo/motion"
+import { motion, useScroll, useSpring, useTransform } from "@repo/motion"
 import {
   deltaMapViewState,
   riverDeltaMapViewState,
@@ -24,6 +24,9 @@ import { Sentence } from "@repo/motion/components"
 import { FlowTextLabels, ValleyTextLabels } from "./helpers/mapAnnotations"
 import Underline from "./helpers/Underline"
 import { useBreakpoint } from "@repo/ui/hooks"
+import ScrollIndicator from "./helpers/ScrollIndicator"
+
+const MotionBox = motion.create(Box)
 
 function SectionDelta() {
   return (
@@ -48,21 +51,7 @@ function WaterFlow() {
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const breakpoint = useBreakpoint()
   const mapViewState = riverMapViewState[breakpoint]
-
-  /*
-  const fetchGeoJSON = useCallback(async (url: string) => {
-    try {
-      const response = await fetch(url)
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.statusText}`)
-      }
-      const data = await response.json()
-      return data
-    } catch (error) {
-      console.error("Error fetching GeoJSON:", error)
-      return null
-    }
-  }, [])*/
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const init = useCallback(async () => {
     //console.log("riverSacData", riverSacData);
@@ -148,11 +137,15 @@ function WaterFlow() {
       </Box>
       <Box className="paragraph">
         <Sentence custom={4}>{content?.p41}</Sentence>
-        <Sentence custom={5.5}>
+        <Sentence
+          custom={5.5}
+          onAnimationComplete={() => setAnimationComplete(true)}
+        >
           <span style={{ fontWeight: "bold" }}>{content?.p42}</span>
           <span>{content?.p43}</span>
         </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
@@ -168,6 +161,7 @@ function Valley() {
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = riverDeltaMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const load = useCallback(() => {
     flyTo({
@@ -212,7 +206,10 @@ function Valley() {
       <Box className="paragraph">
         <Sentence
           custom={0}
-          onAnimationComplete={() => setStartAnimation(true)}
+          onAnimationComplete={() => {
+            setStartAnimation(true)
+            setAnimationComplete(true)
+          }}
         >
           {content?.valley.p11}
           <Underline startAnimation={startAnimation} delay={0.5}>
@@ -221,6 +218,7 @@ function Valley() {
           {content?.valley.p13}
         </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} delay={1.5} />
     </Box>
   )
 }
@@ -237,6 +235,7 @@ function Wetland() {
   const [startDeltaAnimation, setStartDeltaAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = riverDeltaMapViewState[breakpoint]
+  const [animationComplete, setAnimationComplete] = useState(false)
 
   const init = useCallback(() => {
     addSource("delta-water", {
@@ -331,14 +330,20 @@ function Wetland() {
           {content?.transition.p13}
         </Sentence>
         <Sentence custom={4}>{content?.transition.p14}</Sentence>
-        <Sentence custom={5}>{content?.transition.p2}</Sentence>
+        <Sentence
+          custom={5}
+          onAnimationComplete={() => {
+            setAnimationComplete(true)
+          }}
+        >
+          {content?.transition.p2}
+        </Sentence>
       </Box>
+      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
 
-//TODO: add animation for these graphics
-//TODO: show up by sentence
 function Delta() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.delta
@@ -350,6 +355,21 @@ function Delta() {
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const breakpoint = useBreakpoint()
   const mapViewState = deltaMapViewState[breakpoint]
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
+  const [animationComplete, setAnimationComplete] = useState(false)
+
+  /*useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    console.log("scrollYProgress:", latest); //around 0.84
+  });*/
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 20,
+  })
+  const opacity = useTransform(smoothProgress, [0.65, 0.9], [1, 0])
 
   const load = useCallback(() => {
     flyTo({
@@ -390,7 +410,7 @@ function Delta() {
       <Box
         ref={sectionRef}
         className="container"
-        height="150vh"
+        height="140vh"
         width="1px"
         sx={{ pointerEvents: "none" }}
       ></Box>
@@ -404,31 +424,39 @@ function Delta() {
           overflowX: "hidden",
         }}
       >
-        <Bird />
-        <Grass />
-        <Box className="paragraph">
+        <Bird opacity={opacity} />
+        <Grass opacity={opacity} />
+        <MotionBox className="paragraph" style={{ opacity }}>
           <Typography variant="body1">
             {content?.p11}{" "}
             <span style={{ fontWeight: "bold" }}>{content?.p12}</span>
             {""}
             {content?.p13}
           </Typography>
-        </Box>
-        <Box className="paragraph">
+        </MotionBox>
+        <MotionBox className="paragraph" style={{ opacity }}>
           <Sentence custom={1}>{content?.p2}</Sentence>
-        </Box>
-        <Box className="paragraph">
+        </MotionBox>
+        <MotionBox className="paragraph" style={{ opacity }}>
           <Sentence custom={3}>{content?.p3}</Sentence>
           <Sentence custom={4.5}>{content?.p4}</Sentence>
-          <Sentence custom={6}>{content?.p5}</Sentence>
-        </Box>
+          <Sentence
+            custom={6}
+            onAnimationComplete={() => setAnimationComplete(true)}
+          >
+            {content?.p5}
+          </Sentence>
+        </MotionBox>
+        <ScrollIndicator
+          animationComplete={animationComplete}
+          opacity={opacity}
+        />
       </motion.div>
     </Box>
   )
 }
 
-//TODO: instead of scrolling away, make it disappear
-//TODO: sometimes see a 1px gap between this and Delta
+//TODO: sometimes see a 1px gap between this and Delta (found out the delta section is not high enough??)
 function Transition() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.delta
@@ -439,6 +467,16 @@ function Transition() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = stateMapViewState[breakpoint]
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
+
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 20,
+  })
+  const opacity = useTransform(smoothProgress, [0.6, 0.8], [1, 0])
 
   const load = useCallback(() => {
     flyTo({
@@ -469,7 +507,48 @@ function Transition() {
   }, [isSectionActive, load])
 
   return (
-    <Box style={{ width: "100%", height: "100%", zIndex: 1 }}>
+    <MotionBox
+      style={{ width: "100%", height: "100%", zIndex: 1, opacity: opacity }}
+    >
+      <Box
+        sx={{ position: "absolute", width: "100%", height: "130vh", zIndex: 2 }}
+      >
+        <svg width="100%" height="100%" viewBox="0 0 100 100">
+          <motion.circle
+            cx="50"
+            cy="50"
+            r="45"
+            fill="none"
+            stroke="rgba(255, 255, 255, 0.3)"
+            strokeWidth="0.3"
+            initial={{ r: 0 }}
+            animate={{ r: [0, 45], opacity: [1, 0] }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 1.8,
+              ease: "easeOut",
+            }}
+          />
+          <motion.circle
+            cx="50"
+            cy="50"
+            r="30"
+            fill="none"
+            stroke="rgba(255, 255, 255, 0.3)"
+            strokeWidth="0.3"
+            initial={{ r: 0 }}
+            animate={{ r: [0, 30], opacity: [1, 0] }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              delay: 0.5,
+              repeatDelay: 1.8,
+              ease: "easeOut",
+            }}
+          />
+        </svg>
+      </Box>
       <Box
         ref={sectionRef}
         className="container-center"
@@ -481,7 +560,7 @@ function Transition() {
           <Typography variant="h2">{content?.transition}</Typography>
         </Box>
       </Box>
-    </Box>
+    </MotionBox>
   )
 }
 

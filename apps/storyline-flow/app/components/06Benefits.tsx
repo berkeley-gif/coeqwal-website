@@ -282,7 +282,7 @@ function Economy() {
       ref={sectionRef}
       className="container"
       height="120vh"
-      width="70vw"
+      width="90vw"
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">

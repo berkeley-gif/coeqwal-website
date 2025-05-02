@@ -19,7 +19,7 @@ const months = Array.from({ length: 12 }, (_, i) =>
   d3.timeFormat("%b")(new Date(2024, (i + startMonth) % 12, 1)),
 )
 
-const margin = { top: 50, right: 30, bottom: 100, left: 100 }
+const margin = { top: 50, right: 30, bottom: 70, left: 100 }
 
 const responsiveHeight = {
   xs: 200,
@@ -161,7 +161,7 @@ export default function AnimatedCurve({
       style={{
         width: "100%",
         height: `${responsiveHeight[breakpoint] || 350}px`,
-        padding: "2rem 0",
+        paddingTop: "15px",
       }}
     >
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height}>
