@@ -10,6 +10,8 @@ import { stateMapViewState } from "./helpers/mapViews"
 import Underline from "./helpers/Underline"
 import { useBreakpoint } from "@repo/ui/hooks"
 import ScrollIndicator from "./helpers/ScrollIndicator"
+import { DAMS } from "./helpers/data/dams"
+import { canalLayerStyle } from "./helpers/mapLayerStyle"
 
 function SectionTransformation() {
   return (
@@ -28,11 +30,28 @@ function Transformation() {
     amount: 0.5,
   })
   const hasSeen = useRef(false)
-  const { flyTo } = useMap()
+  const { flyTo, setPaintProperty, addSource, addLayer } = useMap()
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = stateMapViewState[breakpoint]
   const [animationComplete, setAnimationComplete] = useState(false)
+  const setMarkers = useStoryStore((state) => state.setMarkers)
+
+  const init = useCallback(() => {
+    addSource("delta-canal", {
+      type: "vector",
+      url: "mapbox://yskuo.dagkiwwv",
+    })
+
+    addLayer(
+      "delta-canal-layer",
+      "delta-canal",
+      canalLayerStyle.type,
+      canalLayerStyle.paint,
+      canalLayerStyle.layout,
+      { "source-layer": "delta_canal-40ddl9" },
+    )
+  }, [addLayer, addSource])
 
   const load = useCallback(() => {
     flyTo({
@@ -43,24 +62,34 @@ function Transformation() {
         duration: 2000,
       },
     })
-  }, [flyTo, mapViewState])
+    setMarkers(DAMS, "dam")
+    setPaintProperty("canal-layer", "line-opacity", 1)
+    setPaintProperty("delta-canal-layer", "line-opacity", 1)
+  }, [flyTo, mapViewState, setMarkers, setPaintProperty])
+
+  const unload = useCallback(() => {
+    setPaintProperty("delta-canal-layer", "line-opacity", 0)
+    setMarkers([], "dam")
+  }, [setMarkers, setPaintProperty])
 
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
+        init()
       }
       hasSeen.current = true
       load()
     } else {
       if (hasSeen.current) {
+        unload()
         //console.log('unload stuff')
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [init, isSectionActive, load, unload])
 
   return (
     <Box

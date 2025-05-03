@@ -5,6 +5,7 @@ import { Box } from "@repo/ui/mui"
 import { stateMapViewState } from "./helpers/mapViews"
 import {
   CarouselLayer,
+  DamLayer,
   TextMarker,
   TextMarkersLayer,
 } from "./helpers/mapMarkers"
@@ -52,6 +53,9 @@ export default function MapContainer({ onLoad }: MapContainerProps) {
               markers={textMarkerLayer.points}
               styledMarker={TextMarker}
             />
+          )}
+          {markerLayer.style === "dam" && (
+            <DamLayer markers={markerLayer.points} />
           )}
         </AnimatePresence>
       </Map>

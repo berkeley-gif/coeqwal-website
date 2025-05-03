@@ -7,24 +7,36 @@ import {
   deltaMapViewState,
   riverDeltaMapViewState,
   riverMapViewState,
+  riverValleyMapViewState,
   stateMapViewState,
 } from "./helpers/mapViews"
 
 import Bird from "./vis/Bird"
 import Grass from "./vis/Grass"
 import useActiveSection from "../hooks/useActiveSection"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
+  boundaryPaintStyle,
   deltaWaterLayerStyle,
   deltaWetlandLayerStyle,
   riverLayerStyle,
 } from "./helpers/mapLayerStyle"
 import useStoryStore from "../store"
 import { Sentence } from "@repo/motion/components"
-import { FlowTextLabels, ValleyTextLabels } from "./helpers/mapAnnotations"
+import {
+  DeltaTextLabels,
+  FlowTextLabels,
+  ValleyTextLabels,
+} from "./helpers/mapAnnotations"
 import Underline from "./helpers/Underline"
 import { useBreakpoint } from "@repo/ui/hooks"
 import ScrollIndicator from "./helpers/ScrollIndicator"
+import {
+  ValleyBoundary,
+  Coordinate,
+  DeltaBoundary,
+} from "./helpers/data/boundaries"
+import * as turf from "@turf/turf"
 
 const MotionBox = motion.create(Box)
 
@@ -96,6 +108,7 @@ function WaterFlow() {
     })
     setPaintProperty("river-sac-layer", "line-opacity", 1)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
+    setPaintProperty("snowpack-layer", "fill-opacity", 0)
     setMarkers(FlowTextLabels, "text")
   }, [flyTo, setMarkers, setPaintProperty, mapViewState])
 
@@ -109,13 +122,14 @@ function WaterFlow() {
       load()
     } else {
       if (hasSeen.current) {
+        setMarkers([], "text")
         //console.log('unload stuff')
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, init, load])
+  }, [isSectionActive, init, load, setMarkers])
 
   return (
     <Box
@@ -141,7 +155,9 @@ function WaterFlow() {
           custom={5.5}
           onAnimationComplete={() => setAnimationComplete(true)}
         >
-          <span style={{ fontWeight: "bold" }}>{content?.p42}</span>
+          <span style={{ fontWeight: "bold", color: "#3d8ec9" }}>
+            {content?.p42}
+          </span>
           <span>{content?.p43}</span>
         </Sentence>
       </Box>
@@ -156,12 +172,61 @@ function Valley() {
   const { sectionRef, isSectionActive } = useActiveSection("valley", {
     amount: 0.5,
   })
-  const { flyTo, setPaintProperty } = useMap() // from our context
+  const { flyTo, setPaintProperty, addSource, addLayer, mapRef } = useMap() // from our context
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
-  const mapViewState = riverDeltaMapViewState[breakpoint]
+  const mapViewState = riverValleyMapViewState[breakpoint]
   const [animationComplete, setAnimationComplete] = useState(false)
+  const [boundaryAnimationComplete, setBoundaryAnimationComplete] =
+    useState(false)
+  const setMarkers = useStoryStore((state) => state.setMarkers)
+
+  const boundaryData = useMemo(() => {
+    const line = turf.lineString(ValleyBoundary)
+    const length = turf.length(line, { units: "kilometers" })
+    const frames = 100
+    const segment = length / frames
+    const smoothCoords: Coordinate[] = []
+    for (let dist = 0; dist <= length; dist += segment) {
+      const pt = turf.along(line, dist, { units: "kilometers" })
+      smoothCoords.push(pt.geometry.coordinates as Coordinate)
+    }
+    smoothCoords.push(ValleyBoundary[ValleyBoundary.length - 1] ?? [0, 0])
+    return smoothCoords
+  }, [])
+
+  const setUpBoundary = useCallback(() => {
+    let idx = 0
+    const total = boundaryData.length
+
+    function frame() {
+      if (!mapRef.current) return
+
+      // update line up to current idx
+      ;(
+        mapRef.current.getSource("valley-boundary") as mapboxgl.GeoJSONSource
+      ).setData({
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: boundaryData.slice(0, idx + 1),
+        },
+        properties: {},
+      })
+
+      if (idx < total - 1) {
+        idx += 1
+        setTimeout(frame, 1)
+      }
+      if (idx === total - 1) {
+        setBoundaryAnimationComplete(true)
+      }
+    }
+
+    // start after a short pause
+    setTimeout(frame, 500)
+  }, [mapRef, boundaryData])
 
   const load = useCallback(() => {
     flyTo({
@@ -176,24 +241,69 @@ function Valley() {
     })
     setPaintProperty("delta-water-layer", "fill-opacity", 0)
     setPaintProperty("delta-wetland-layer", "fill-opacity", 0)
-  }, [flyTo, mapViewState, setPaintProperty])
+    setPaintProperty("snowpack-layer", "fill-opacity", 0)
+    setMarkers(ValleyTextLabels, "text")
+    if (boundaryAnimationComplete) return
+    setPaintProperty("valley-boundary-layer", "line-opacity", 1)
+    setUpBoundary()
+  }, [
+    flyTo,
+    mapViewState,
+    setPaintProperty,
+    setUpBoundary,
+    boundaryAnimationComplete,
+    setMarkers,
+  ])
+
+  const init = useCallback(() => {
+    addSource("valley-boundary", {
+      type: "geojson",
+      data: turf.featureCollection([]),
+    })
+    addLayer(
+      "valley-boundary-layer",
+      "valley-boundary",
+      boundaryPaintStyle.type,
+      boundaryPaintStyle.paint,
+      boundaryPaintStyle.layout,
+      {},
+    )
+  }, [addLayer, addSource])
+
+  const unload = useCallback(() => {
+    setPaintProperty("valley-boundary-layer", "line-opacity", 0)
+    setBoundaryAnimationComplete(false)
+    if (!mapRef.current) return
+    ;(
+      mapRef.current.getSource("valley-boundary") as mapboxgl.GeoJSONSource
+    ).setData({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: boundaryData.slice(0, 1),
+      },
+      properties: {},
+    })
+  }, [setPaintProperty, mapRef, boundaryData])
 
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
+        init()
       }
       hasSeen.current = true
       load()
     } else {
       if (hasSeen.current) {
+        unload()
         //console.log('unload stuff')
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [init, isSectionActive, load, unload])
 
   return (
     <Box
@@ -277,7 +387,7 @@ function Wetland() {
     })
     setPaintProperty("delta-water-layer", "fill-opacity", 1)
     setPaintProperty("delta-wetland-layer", "fill-opacity", 1)
-    setMarkers(ValleyTextLabels, "text")
+    setMarkers(DeltaTextLabels, "text")
   }, [flyTo, mapViewState, setMarkers, setPaintProperty])
 
   const unload = useCallback(() => {
@@ -350,7 +460,7 @@ function Delta() {
   const { sectionRef, isSectionActive } = useActiveSection("delta", {
     amount: 0.1,
   })
-  const { flyTo, setPaintProperty } = useMap() // from our context
+  const { flyTo, setPaintProperty, mapRef, addSource, addLayer } = useMap() // from our context
   const hasSeen = useRef(false)
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const breakpoint = useBreakpoint()
@@ -360,16 +470,91 @@ function Delta() {
     offset: ["start end", "end start"],
   })
   const [animationComplete, setAnimationComplete] = useState(false)
-
-  /*useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    console.log("scrollYProgress:", latest); //around 0.84
-  });*/
+  const [boundaryAnimationComplete, setBoundaryAnimationComplete] =
+    useState(false)
 
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 20,
   })
   const opacity = useTransform(smoothProgress, [0.65, 0.9], [1, 0])
+
+  const boundaryData = useMemo(() => {
+    const line = turf.lineString(DeltaBoundary)
+    const length = turf.length(line, { units: "kilometers" })
+    const frames = 100
+    const segment = length / frames
+    const smoothCoords: Coordinate[] = []
+    for (let dist = 0; dist <= length; dist += segment) {
+      const pt = turf.along(line, dist, { units: "kilometers" })
+      smoothCoords.push(pt.geometry.coordinates as Coordinate)
+    }
+    smoothCoords.push(DeltaBoundary[DeltaBoundary.length - 1] ?? [0, 0])
+    return smoothCoords
+  }, [])
+
+  const setUpBoundary = useCallback(() => {
+    let idx = 0
+    const total = boundaryData.length
+
+    function frame() {
+      if (!mapRef.current) return
+
+      // update line up to current idx
+      ;(
+        mapRef.current.getSource("delta-boundary") as mapboxgl.GeoJSONSource
+      ).setData({
+        type: "Feature",
+        geometry: {
+          type: "LineString",
+          coordinates: boundaryData.slice(0, idx + 1),
+        },
+        properties: {},
+      })
+
+      if (idx < total - 1) {
+        idx += 1
+        setTimeout(frame, 1)
+      }
+      if (idx === total - 1) {
+        setBoundaryAnimationComplete(true)
+      }
+    }
+
+    // start after a short pause
+    setTimeout(frame, 500)
+  }, [mapRef, boundaryData])
+
+  const init = useCallback(() => {
+    addSource("delta-boundary", {
+      type: "geojson",
+      data: turf.featureCollection([]),
+    })
+    addLayer(
+      "delta-boundary-layer",
+      "delta-boundary",
+      boundaryPaintStyle.type,
+      boundaryPaintStyle.paint,
+      boundaryPaintStyle.layout,
+      {},
+    )
+  }, [addLayer, addSource])
+
+  const unload = useCallback(() => {
+    setPaintProperty("delta-boundary-layer", "line-opacity", 0)
+    setBoundaryAnimationComplete(false)
+    if (!mapRef.current) return
+    ;(
+      mapRef.current.getSource("delta-boundary") as mapboxgl.GeoJSONSource
+    ).setData({
+      type: "Feature",
+      geometry: {
+        type: "LineString",
+        coordinates: boundaryData.slice(0, 1),
+      },
+      properties: {},
+    })
+  }, [setPaintProperty, mapRef, boundaryData])
 
   const load = useCallback(() => {
     flyTo({
@@ -382,25 +567,38 @@ function Delta() {
     })
     setPaintProperty("river-sac-layer", "line-opacity", 0)
     setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
+    setPaintProperty("snowpack-layer", "fill-opacity", 0)
     setMarkers([], "text")
-  }, [flyTo, setMarkers, setPaintProperty, mapViewState])
+    if (boundaryAnimationComplete) return
+    setPaintProperty("valley-boundary-layer", "line-opacity", 1)
+    setUpBoundary()
+  }, [
+    flyTo,
+    setMarkers,
+    setPaintProperty,
+    mapViewState,
+    setUpBoundary,
+    boundaryAnimationComplete,
+  ])
 
   useEffect(() => {
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
+        init()
       }
       hasSeen.current = true
       load()
     } else {
       if (hasSeen.current) {
         //console.log('unload stuff')
+        unload()
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [init, isSectionActive, load, unload])
 
   return (
     <Box
@@ -526,7 +724,7 @@ function Transition() {
             transition={{
               duration: 2,
               repeat: Infinity,
-              repeatDelay: 1.8,
+              repeatDelay: 1.5,
               ease: "easeOut",
             }}
           />
@@ -543,7 +741,7 @@ function Transition() {
               duration: 2,
               repeat: Infinity,
               delay: 0.5,
-              repeatDelay: 1.8,
+              repeatDelay: 1.5,
               ease: "easeOut",
             }}
           />

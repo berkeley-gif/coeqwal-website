@@ -21,6 +21,44 @@ export type MarkerType = {
   source?: string
   images?: string[]
   anchor?: string
+  rotation?: number
+}
+
+export function DamLayer({ markers }: { markers: MarkerType[] }) {
+  const width = 20
+  const height = 9
+
+  return (
+    <>
+      {markers.map((marker, idx) => (
+        <Marker
+          key={idx}
+          longitude={marker.longitude}
+          latitude={marker.latitude}
+        >
+          <motion.svg
+            width={width}
+            height={height}
+            viewBox={`0 0 ${width} ${height}`}
+            style={{
+              cursor: "pointer",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+          >
+            <rect
+              width={width}
+              height={height}
+              fill="#072c6c" // Darker blue color for dams
+              stroke="#0a4a9c" // Lighter blue color derived from #072c6c
+              strokeWidth="1"
+            />
+          </motion.svg>
+        </Marker>
+      ))}
+    </>
+  )
 }
 
 //TODO: fix exit animation
