@@ -349,14 +349,17 @@ const OperationsSelector: React.FC = () => {
     if (!scrollContainer) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Check if we're at the top or bottom boundary
+      // Get current scroll position and dimensions
       const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const isAtTop = scrollTop === 0;
-      const isAtBottom = Math.abs(scrollTop + clientHeight - scrollHeight) < 1;
       
-      // If we're at the top and trying to scroll up, or at the bottom and trying to scroll down
+      // More precise boundary detection
+      const isAtTop = scrollTop <= 0;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+      
+      // Only prevent default when we've hit a boundary in the direction of scroll
       if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
         e.preventDefault();
+        e.stopPropagation(); // Also stop propagation for more reliable containment
       }
     };
 
@@ -374,13 +377,19 @@ const OperationsSelector: React.FC = () => {
       
       const touchY = e.touches[0].clientY;
       const touchDeltaY = touchStartY - touchY;
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const isAtTop = scrollTop <= 0;
-      const isAtBottom = Math.abs(scrollTop + clientHeight - scrollHeight) < 1;
       
-      // Prevent parent scrolling when at boundaries
+      // Get current scroll position and dimensions
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      
+      // More precise boundary detection, adding a small buffer (1px)
+      const isAtTop = scrollTop <= 0;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
+      
+      // Detect scroll direction from touch movement and check boundaries
+      // Positive touchDeltaY means scrolling down, negative means scrolling up
       if ((isAtTop && touchDeltaY < 0) || (isAtBottom && touchDeltaY > 0)) {
         e.preventDefault();
+        e.stopPropagation(); // Also stop propagation for more reliable containment
       }
     };
 
@@ -389,10 +398,19 @@ const OperationsSelector: React.FC = () => {
     scrollContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
     scrollContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
     
+    // Also prevent scroll on the parent container when we're at boundaries
+    const preventParentScroll = (e: Event) => {
+      // This helps ensure the parent doesn't scroll
+      e.stopPropagation();
+    };
+    
+    scrollContainer.addEventListener('scroll', preventParentScroll);
+    
     return () => {
       scrollContainer.removeEventListener('wheel', handleWheel);
       scrollContainer.removeEventListener('touchstart', handleTouchStart);
       scrollContainer.removeEventListener('touchmove', handleTouchMove);
+      scrollContainer.removeEventListener('scroll', preventParentScroll);
     };
   }, []);
 
