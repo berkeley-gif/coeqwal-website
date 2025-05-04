@@ -207,6 +207,65 @@ const theme = createTheme({
       closedWidth: themeValues.layout.drawer.closedWidth,
     },
   },
+  // Card typography scale
+  cards: {
+    typography: {
+      hero: {
+        fontSize: "2.5rem", // 40px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      sectionTitle: {
+        fontSize: "2rem", // 32px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      cardTitle: {
+        fontSize: "1.5rem", // 24px
+        lineHeight: 1.4,
+        fontWeight: 500,
+      },
+      subtitle: {
+        fontSize: "1.25rem", // 20px
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      body: {
+        fontSize: "1rem", // 16px
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      caption: {
+        fontSize: "0.875rem", // 14px
+        lineHeight: 1.4,
+        fontWeight: 400,
+      },
+      button: {
+        fontSize: "0.95rem",
+        lineHeight: 1.5,
+        fontWeight: 500,
+      },
+    },
+    spacing: {
+      padding: 3, // 24px inner padding
+      gap: 3, // 24px between cards
+      capsule: {
+        px: 2, // Horizontal emphasis
+        py: 0.5, // Minimal vertical padding
+        marginRight: 1, // Space between capsules (horizontal)
+        marginBottom: 1, // Space between capsules (vertical wrapping)
+      },
+      modal: {
+        padding: 4, // 32px for modal content 
+      },
+      coBenefitTags: {
+        marginTop: 2, // Slightly detached from subtypes
+      },
+      tellMoreIcon: {
+        marginLeft: 'auto', // Aligns right within card header row
+      }
+    }
+  },
   // Palette (some are fixed MUI theme properties, some are custom)
   palette: {
     common: {
@@ -266,62 +325,74 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "4.4rem",
-      fontWeight: 500,
-      lineHeight: 1.1,
+      fontSize: "2.5rem",
+      fontWeight: 600,
+      lineHeight: 1.25,
       letterSpacing: "normal",
     },
     h2: {
-      fontSize: "4.2rem",
-      fontWeight: 500,
-      lineHeight: 1.2,
+      fontSize: "2rem",
+      fontWeight: 600,
+      lineHeight: 1.25,
       letterSpacing: "normal",
     },
     h3: {
-      fontSize: "2.778rem",
+      fontSize: "1.5rem",
+      fontWeight: 500,
+      lineHeight: 1.4,
       letterSpacing: "normal",
     },
     h4: {
-      fontSize: "1.8rem",
-      fontWeight: 300,
+      fontSize: "1.25rem",
+      fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
     h5: {
-      fontSize: "1.4rem",
+      fontSize: "1.15rem",
+      fontWeight: 500,
       letterSpacing: "normal",
     },
     h6: {
-      fontSize: "1.2rem",
+      fontSize: "1.05rem",
+      fontWeight: 500,
       letterSpacing: "normal",
     },
     body1: {
-      fontSize: "1.3rem",
-      letterSpacing: "0.01rem",
-      lineHeight: 1.4,
+      fontSize: "1rem",
+      letterSpacing: "normal",
+      lineHeight: 1.5,
     },
     body2: {
-      fontSize: "1.6rem",
+      fontSize: "0.95rem",
+      letterSpacing: "normal",
+      lineHeight: 1.5,
     },
     subtitle1: {
-      fontSize: "1.2rem",
+      fontSize: "1.25rem",
       letterSpacing: "normal",
+      lineHeight: 1.5,
     },
     subtitle2: {
-      fontSize: "0.8929rem",
+      fontSize: "1.1rem",
       letterSpacing: "normal",
+      lineHeight: 1.5,
     },
     button: {
-      fontSize: "1.0714rem",
+      fontSize: "0.95rem",
       letterSpacing: "normal",
+      fontWeight: 500,
+      textTransform: "none",
     },
     caption: {
-      fontSize: "0.8929rem",
+      fontSize: "0.875rem",
       letterSpacing: "normal",
+      lineHeight: 1.4,
     },
     overline: {
-      fontSize: "0.8929rem",
+      fontSize: "0.75rem",
       letterSpacing: "normal",
+      lineHeight: 1.4,
     },
   },
   shape: {
@@ -407,7 +478,7 @@ const theme = createTheme({
             padding: "6px 16px",
             minWidth: 64,
             lineHeight: 1.75,
-            fontSize: "1.0714rem",
+            fontSize: "0.95rem",
             fontWeight: 500,
             color: theme.palette.common.white,
             backgroundColor: theme.palette.common.black,
@@ -675,6 +746,64 @@ declare module "@mui/material/styles" {
     drawerNavigation: {
       colors: string[]
     }
+    cards: {
+      typography: {
+        hero: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        sectionTitle: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        cardTitle: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        subtitle: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        body: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        caption: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        button: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+      }
+      spacing: {
+        padding: number
+        gap: number
+        capsule: {
+          px: number
+          py: number
+          marginRight: number
+          marginBottom: number
+        }
+        modal: {
+          padding: number
+        }
+        coBenefitTags: {
+          marginTop: number
+        }
+        tellMoreIcon: {
+          marginLeft: string
+        }
+      }
+    }
   }
 
   interface ThemeOptions {
@@ -683,6 +812,64 @@ declare module "@mui/material/styles" {
       drawer?: {
         width?: number
         closedWidth?: number
+      }
+    }
+    cards?: {
+      typography?: {
+        hero?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        sectionTitle?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        cardTitle?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        subtitle?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        body?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        caption?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        button?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+      }
+      spacing?: {
+        padding?: number
+        gap?: number
+        capsule?: {
+          px?: number
+          py?: number
+          marginRight?: number
+          marginBottom?: number
+        }
+        modal?: {
+          padding?: number
+        }
+        coBenefitTags?: {
+          marginTop?: number
+        }
+        tellMoreIcon?: {
+          marginLeft?: string
+        }
       }
     }
   }

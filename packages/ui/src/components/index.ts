@@ -19,6 +19,7 @@ export { Logo } from "./common/Logo"
 export { TransitionDiv } from "./common/TransitionDiv"
 export { TransitionHeadline } from "./common/TransitionHeadline"
 export { VideoBackground } from "./common/VideoBackground"
+export { default as CustomScrollContainer } from "./common/CustomScrollContainer"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"

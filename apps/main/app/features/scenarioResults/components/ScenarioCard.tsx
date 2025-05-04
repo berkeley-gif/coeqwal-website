@@ -196,7 +196,7 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         display: "flex",
         flexDirection: expanded ? "row" : "column",
         alignItems: "flex-start",
-        p: theme.spacing(2),
+        p: theme => theme.cards.spacing.padding,
         pt: theme.spacing(4),
         transition: "all 0.3s ease-in-out",
         "&:hover": {
@@ -215,7 +215,15 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
           height: expanded ? "auto" : "auto",
         }}
       >
-        <Typography variant="h6" sx={{ mb: 1 }}>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            mb: 1,
+            fontSize: (theme) => theme.cards.typography.cardTitle.fontSize,
+            lineHeight: (theme) => theme.cards.typography.cardTitle.lineHeight,
+            fontWeight: (theme) => theme.cards.typography.cardTitle.fontWeight,
+          }}
+        >
           {title || `Scenario ${scenarioNumber}`}
         </Typography>
 
@@ -236,7 +244,16 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
         </ToggleButtonGroup>
 
         {expanded && (
-          <Typography variant="body2" sx={{ mt: 2, color: "text.secondary" }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              mt: 2, 
+              color: "text.secondary",
+              fontSize: (theme) => theme.cards.typography.body.fontSize,
+              lineHeight: (theme) => theme.cards.typography.body.lineHeight,
+              fontWeight: (theme) => theme.cards.typography.body.fontWeight,
+            }}
+          >
             {metricType
               ? `Displaying: ${formattedMetricName}`
               : "No metric selected"}

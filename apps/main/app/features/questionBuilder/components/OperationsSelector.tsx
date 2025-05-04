@@ -19,7 +19,7 @@
  * Different text formats based on the "swapped" state
  */
 
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import {
   Typography,
   Box,
@@ -309,13 +309,38 @@ const OperationsSelector: React.FC = () => {
     "& .MuiOutlinedInput-root": {
       borderRadius: theme.borderRadius.pill,
       height: "40px",
-      fontSize: theme.typography.caption.fontSize,
+      fontSize: theme.cards.typography.caption.fontSize,
     },
     "& .MuiOutlinedInput-input": {
       padding: theme.spacing(1, 2),
     },
     width: "300px",
   }
+  
+  // Let's ditch the custom scrollbar due to lag issues and use a better native scrollbar
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isScrollable, setIsScrollable] = useState(false);
+  
+  // Check if content is scrollable once when component loads and on window resize
+  useEffect(() => {
+    const checkScrollable = () => {
+      const container = scrollContainerRef.current;
+      if (container) {
+        setIsScrollable(container.scrollHeight > container.clientHeight + 10); // 10px buffer
+      }
+    };
+    
+    // Initial check with delay to ensure layout is complete
+    const timeoutId = setTimeout(checkScrollable, 200);
+    
+    // Recheck on window resize
+    window.addEventListener('resize', checkScrollable);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkScrollable);
+    };
+  }, [operationCardsWithState.length]);
 
   return (
     <Card>
@@ -328,7 +353,14 @@ const OperationsSelector: React.FC = () => {
           mb: 3,
         }}
       >
-        <Typography variant="h3" sx={{ fontSize: "3rem" }}>
+        <Typography 
+          variant="h3" 
+          sx={{ 
+            fontSize: theme => theme.cards.typography.hero.fontSize,
+            lineHeight: theme => theme.cards.typography.hero.lineHeight,
+            fontWeight: theme => theme.cards.typography.hero.fontWeight,
+          }}
+        >
           {swapped ? (
             <>
               <ColoredText color={theme.palette.pop.main}>
@@ -399,24 +431,99 @@ const OperationsSelector: React.FC = () => {
         />
       </Box>
 
-      {/* Operation cards */}
-      <Box sx={{ mt: 3 }}>
-        {operationCardsWithState.map((op) => (
-          <OperationCard
-            key={op.id}
-            title={op.title}
-            bullet={op.bullet}
-            subOptions={op.subOptions}
-            selected={op.selected}
-            onMainOptionChange={(checked) =>
-              handleMainOptionChange(op.id, checked)
-            }
-            onSubOptionChange={(subId, checked) =>
-              handleSubOptionChange(op.id, subId, checked)
-            }
-            onInfoClick={() => handleInfoClick(op.id)}
-          />
-        ))}
+      {/* Operation cards with custom scrolling */}
+      <Box 
+        sx={{ 
+          position: "relative", 
+          height: "60vh", 
+          mt: 3,
+          border: "1px solid rgba(0, 0, 0, 0.12)",
+          borderRadius: "12px",
+          p: 1,
+          overflow: "hidden",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        {/* Simple scrollable box with stylish round scrollbar */}
+        <Box
+          ref={scrollContainerRef}
+          sx={{
+            width: "100%",
+            height: "100%",
+            overflowY: "auto",
+            mt: 0, // Removed space for the header (was mt: 3)
+            pr: 2,
+            // High-performance scrollbar styling
+            "&::-webkit-scrollbar": {
+              width: "14px",
+              backgroundColor: "transparent",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "transparent",
+              margin: theme.spacing(1),
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#00000030",
+              border: "4px solid white",
+              borderRadius: "24px",
+            },
+            // Firefox
+            scrollbarWidth: "thin",
+            scrollbarColor: "#00000030 transparent",
+            // Add relative positioning for the scroll indicator
+            position: "relative",
+            "& > div:not(:last-child)": {
+              marginBottom: theme => theme.cards.spacing.gap,
+            },
+          }}
+        >
+          {/* Subtle scroll indicator */}
+          {isScrollable && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "0px",
+                right: "25px", // Position to the left of the scrollbar
+                background: "linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%)",
+                color: "rgba(0, 0, 0, 0.7)",
+                px: 1.5,
+                py: 0.5,
+                borderRadius: "0 0 4px 4px",
+                zIndex: 1000,
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              <span>SCROLL</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 10L12 15L17 10" stroke="rgba(0, 0, 0, 0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </Box>
+          )}
+          
+          {operationCardsWithState.map((op) => (
+            <OperationCard
+              key={op.id}
+              title={op.title}
+              bullet={op.bullet}
+              subOptions={op.subOptions}
+              selected={op.selected}
+              onMainOptionChange={(checked) =>
+                handleMainOptionChange(op.id, checked)
+              }
+              onSubOptionChange={(subId, checked) =>
+                handleSubOptionChange(op.id, subId, checked)
+              }
+              onInfoClick={() => handleInfoClick(op.id)}
+            />
+          ))}
+        </Box>
       </Box>
     </Card>
   )
