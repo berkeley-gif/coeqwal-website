@@ -34,11 +34,11 @@ import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
 // Card data for the operation cards
-const OPERATION_CARDS = [
+const OPERATION_CARDS = (theme: any) => [
   {
     id: "current-operations",
     title: "Current operations",
-    bullet: { color: "#4CAF50", size: 24 }, // Green
+    bullet: { color: theme.palette.categories.infrastructure, size: 24 }, // Infrastructure - Slate gray
     subOptions: [
       {
         id: "use-as-comparison",
@@ -49,7 +49,7 @@ const OPERATION_CARDS = [
   {
     id: "remove-tucps",
     title: "What if we removed any temporary emergency changes (TUCP's)?",
-    bullet: { color: "#2196F3", size: 24 }, // Blue
+    bullet: { color: theme.palette.categories.noFlowRequirements, size: 24 }, // No Flow Requirements - Red
     subOptions: [
       {
         id: "select-tucps",
@@ -60,7 +60,7 @@ const OPERATION_CARDS = [
   {
     id: "limit-groundwater",
     title: "What if we limited groundwater pumping?",
-    bullet: { color: "#FF9800", size: 24 }, // Orange
+    bullet: { color: theme.palette.categories.groundwaterManagement, size: 24 }, // Groundwater Management - Green
     subOptions: [
       {
         id: "sjv-only",
@@ -84,7 +84,7 @@ const OPERATION_CARDS = [
   {
     id: "change-stream-flows",
     title: "What if we changed how water flows in our streams?",
-    bullet: { color: "#9C27B0", size: 24 }, // Purple
+    bullet: { color: theme.palette.categories.riverFlows, size: 24 }, // River Flows - Blue
     subOptions: [
       {
         id: "no-environmental-flows",
@@ -114,7 +114,7 @@ const OPERATION_CARDS = [
   {
     id: "prioritize-drinking-water",
     title: "What if we prioritized drinking water?",
-    bullet: { color: "#00BCD4", size: 24 }, // Cyan
+    bullet: { color: theme.palette.categories.urbanWaterPriorities, size: 24 }, // Urban Water Priorities - Purple
     subOptions: [
       {
         id: "adjust-urban-demand",
@@ -139,7 +139,7 @@ const OPERATION_CARDS = [
   {
     id: "balance-delta-uses",
     title: "What if we balanced water uses in the Delta?",
-    bullet: { color: "#607D8B", size: 24 }, // Blue Grey
+    bullet: { color: theme.palette.categories.deltaBalance, size: 24 }, // Delta Balance - Amber orange
     subOptions: [
       {
         id: "delta-outflows-tier1",
@@ -182,7 +182,7 @@ const OPERATION_CARDS = [
   {
     id: "new-infrastructure",
     title: "What if we added new water infrastructure?",
-    bullet: { color: "#FF5722", size: 24 }, // Deep Orange
+    bullet: { color: theme.palette.categories.conveyanceProjects, size: 24 }, // Conveyance Projects - Earthy brown
     subOptions: [
       {
         id: "delta-conveyance-tunnel",
@@ -236,17 +236,17 @@ const OperationsSelector: React.FC = () => {
 
   // Filter operations based on search term
   const filteredOperations = useMemo(() => {
-    if (!searchTerm) return OPERATION_CARDS
+    if (!searchTerm) return OPERATION_CARDS(theme)
 
     const lowercaseSearch = searchTerm.toLowerCase()
-    return OPERATION_CARDS.filter(
+    return OPERATION_CARDS(theme).filter(
       (op) =>
         op.title.toLowerCase().includes(lowercaseSearch) ||
         op.subOptions.some((sub) =>
           sub.label.toLowerCase().includes(lowercaseSearch),
         ),
     )
-  }, [searchTerm])
+  }, [searchTerm, theme])
 
   // Prepare the operation cards with selected state
   const operationCardsWithState = useMemo(() => {
@@ -341,6 +341,60 @@ const OperationsSelector: React.FC = () => {
       window.removeEventListener('resize', checkScrollable);
     };
   }, [operationCardsWithState.length]);
+
+  // Prevent scroll propagation at the top/bottom boundaries
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    
+    if (!scrollContainer) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Check if we're at the top or bottom boundary
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtTop = scrollTop === 0;
+      const isAtBottom = Math.abs(scrollTop + clientHeight - scrollHeight) < 1;
+      
+      // If we're at the top and trying to scroll up, or at the bottom and trying to scroll down
+      if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+        e.preventDefault();
+      }
+    };
+
+    // Track touch movement for mobile
+    let touchStartY: number | null = null;
+    
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches?.[0]) {
+        touchStartY = e.touches[0].clientY;
+      }
+    };
+    
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStartY === null || !scrollContainer || !e.touches?.[0]) return;
+      
+      const touchY = e.touches[0].clientY;
+      const touchDeltaY = touchStartY - touchY;
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+      const isAtTop = scrollTop <= 0;
+      const isAtBottom = Math.abs(scrollTop + clientHeight - scrollHeight) < 1;
+      
+      // Prevent parent scrolling when at boundaries
+      if ((isAtTop && touchDeltaY < 0) || (isAtBottom && touchDeltaY > 0)) {
+        e.preventDefault();
+      }
+    };
+
+    // Add the event listeners with passive: false to allow preventDefault()
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    scrollContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
+    scrollContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+    
+    return () => {
+      scrollContainer.removeEventListener('wheel', handleWheel);
+      scrollContainer.removeEventListener('touchstart', handleTouchStart);
+      scrollContainer.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
 
   return (
     <Card>

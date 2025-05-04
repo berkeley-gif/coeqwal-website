@@ -85,6 +85,21 @@ const themeValues = {
       light: "#58D68D",
       dark: "#1E8449",
     },
+    // Category-specific colors
+    categories: {
+      groundwaterManagement: "#4CAF50", // Leafy green, ag/groundwater
+      riverFlows: "#2196F3", // Cool blue, river systems
+      urbanWaterPriorities: "#9C27B0", // Plum purple, civic-focused
+      deltaBalance: "#FF9800", // Amber/orange, delta ecosystems
+      infrastructure: "#607D8B", // Slate gray, engineered systems
+      noFlowRequirements: "#F44336", // Red, disruption/emergency
+      carryoverRequirements: "#00ACC1", // Aqua, reservoir logic
+      deltaOutflows: "#FF5722", // Burnt orange, flow export
+      urbanDemand: "#8BC34A", // Light green, consumption
+      exportReductions: "#3F51B5", // Deep indigo, regulatory
+      conveyanceProjects: "#795548", // Earthy brown, infrastructure
+      climateFuture: "#E91E63", // Bright magenta, emphasis
+    },
   },
 
   // Border radius values
@@ -301,6 +316,20 @@ const theme = createTheme({
       main: themeValues.palette.climate.main,
       light: themeValues.palette.climate.light,
       dark: themeValues.palette.climate.dark,
+    },
+    categories: {
+      groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
+      riverFlows: themeValues.palette.categories.riverFlows,
+      urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
+      deltaBalance: themeValues.palette.categories.deltaBalance,
+      infrastructure: themeValues.palette.categories.infrastructure,
+      noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
+      carryoverRequirements: themeValues.palette.categories.carryoverRequirements,
+      deltaOutflows: themeValues.palette.categories.deltaOutflows,
+      urbanDemand: themeValues.palette.categories.urbanDemand,
+      exportReductions: themeValues.palette.categories.exportReductions,
+      conveyanceProjects: themeValues.palette.categories.conveyanceProjects,
+      climateFuture: themeValues.palette.categories.climateFuture,
     },
     background: {
       default: themeValues.palette.white,
@@ -709,6 +738,20 @@ declare module "@mui/material/styles" {
     pop: Palette["primary"]
     cool: Palette["primary"]
     climate: Palette["primary"]
+    categories: {
+      groundwaterManagement: string
+      riverFlows: string
+      urbanWaterPriorities: string
+      deltaBalance: string
+      infrastructure: string
+      noFlowRequirements: string
+      carryoverRequirements: string
+      deltaOutflows: string
+      urbanDemand: string
+      exportReductions: string
+      conveyanceProjects: string
+      climateFuture: string
+    }
   }
   interface PaletteOptions {
     interstitial?: PaletteOptions["primary"]
@@ -716,6 +759,20 @@ declare module "@mui/material/styles" {
     pop?: PaletteOptions["primary"]
     cool?: PaletteOptions["primary"]
     climate?: PaletteOptions["primary"]
+    categories?: {
+      groundwaterManagement?: string
+      riverFlows?: string
+      urbanWaterPriorities?: string
+      deltaBalance?: string
+      infrastructure?: string
+      noFlowRequirements?: string
+      carryoverRequirements?: string
+      deltaOutflows?: string
+      urbanDemand?: string
+      exportReductions?: string
+      conveyanceProjects?: string
+      climateFuture?: string
+    }
   }
 
   interface Theme {

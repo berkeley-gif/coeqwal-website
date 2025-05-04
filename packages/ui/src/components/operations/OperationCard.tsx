@@ -51,13 +51,22 @@ export const OperationCard: React.FC<OperationCardProps> = ({
 }) => {
   const theme = useTheme()
 
-  // Generate a series of pastel colors for the capsules
+  // Use colors from the theme categories
+  const categoryColors = [
+    theme.palette.categories.groundwaterManagement, // Leafy green
+    theme.palette.categories.riverFlows, // Cool blue
+    theme.palette.categories.urbanWaterPriorities, // Plum purple
+    theme.palette.categories.deltaBalance, // Amber orange
+    theme.palette.categories.infrastructure, // Slate gray
+  ]
+
+  // Generate a series of pastel colors for the capsules based on category colors
   const capsuleColors = [
-    "rgba(33, 150, 243, 0.1)", // Light blue
-    "rgba(76, 175, 80, 0.1)", // Light green
-    "rgba(156, 39, 176, 0.1)", // Light purple
-    "rgba(255, 152, 0, 0.1)", // Light orange
-    "rgba(233, 30, 99, 0.1)", // Light pink
+    "rgba(76, 175, 80, 0.1)", // Groundwater - light green 
+    "rgba(33, 150, 243, 0.1)", // River Flows - light blue
+    "rgba(156, 39, 176, 0.1)", // Urban Water - light purple
+    "rgba(255, 152, 0, 0.1)", // Delta Balance - light amber
+    "rgba(96, 125, 139, 0.1)", // Infrastructure - light slate
   ]
 
   return (
