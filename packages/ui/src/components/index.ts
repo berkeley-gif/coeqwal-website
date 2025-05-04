@@ -26,3 +26,7 @@ export { HeroPanel } from "./panels/HeroPanel"
 export { HeroQuestionsPanel } from "./panels/HeroQuestionsPanel"
 export { TwoColumnPanel } from "./panels/TwoColumnPanel"
 export { VideoPanel } from "./panels/VideoPanel"
+
+// Operation components
+export { default as OperationCard } from "./operations/OperationCard"
+export type { OperationCardProps, SubOption } from "./operations/OperationCard"

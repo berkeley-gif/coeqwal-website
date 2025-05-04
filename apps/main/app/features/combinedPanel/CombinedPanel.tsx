@@ -432,7 +432,9 @@ const CombinedPanelContent = () => {
           paddingTop: `${theme.layout.headerHeight}px`,
           backgroundColor: "#FFFFFF",
           transition: "position 0.3s ease, box-shadow 0.3s ease",
-          boxShadow: hasClickedSearch ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
+          boxShadow: hasClickedSearch
+            ? "0 2px 8px rgba(0, 0, 0, 0.08)"
+            : "none",
           overflow: "visible",
         }}
       >
@@ -448,7 +450,7 @@ const CombinedPanelContent = () => {
           <Box
             sx={{
               display: "flex",
-              justifyContent: "flex-end", 
+              justifyContent: "flex-end",
               alignItems: "center",
               width: "100%",
               mt: 2,
@@ -523,7 +525,7 @@ const CombinedPanelContent = () => {
                   }}
                 />
               </Card>
-              
+
               {/* Search button */}
               <Button
                 variant="contained"
@@ -531,8 +533,8 @@ const CombinedPanelContent = () => {
                 disableElevation
                 onClick={() => {
                   // Mark search as clicked to make header sticky
-                  setHasClickedSearch(true);
-                  
+                  setHasClickedSearch(true)
+
                   // Enter exploratory mode - shrink the question summary
                   setExploratoryMode(true)
 

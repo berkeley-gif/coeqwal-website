@@ -79,7 +79,7 @@
       "waterAvailability": "outcomes",
       "outcomes": "outcomes",
       "decisions": "water operations",
-      "decisions_sub": "water operation scenarios"
+      "decisions_sub": "water operations"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",

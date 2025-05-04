@@ -13,11 +13,10 @@
 /**
  * OperationsSelector
  * Uses checkboxes for multi-selection
- * Organizes options into themed categories using accordions
+ * Organizes options into cards for clarity
  * Includes a search feature for operations
- * Uses orange highlighting for visual distinction
+ * Uses colored bullets and capsules for visual distinction
  * Different text formats based on the "swapped" state
- * Data model is more complex (nested themes with options)
  */
 
 import React, { useState, useMemo, useCallback } from "react"
@@ -29,13 +28,55 @@ import {
   SearchIcon,
   Button,
 } from "@repo/ui/mui"
-import { Card } from "@repo/ui"
-import { OPERATION_THEMES } from "../data/constants"
-import SectionAccordion from "./SectionAccordion"
+import { Card, OperationCard, SubOption } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
-// import { ColoredText, HighlightText } from "./ui"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
+
+// Card data for the operation cards
+const OPERATION_CARDS = [
+  {
+    id: "current-operations",
+    title: "Current operations",
+    bullet: { color: "#4CAF50", size: 24 }, // Green
+    subOptions: [
+      {
+        id: "use-as-comparison",
+        label: "Use as comparison",
+      },
+    ],
+  },
+  {
+    id: "remove-tucps",
+    title: "What if we removed TUCPs",
+    bullet: { color: "#2196F3", size: 24 }, // Blue
+    subOptions: [],
+  },
+  {
+    id: "limit-groundwater",
+    title: "What if we limited groundwater pumpting",
+    bullet: { color: "#FF9800", size: 24 }, // Orange
+    subOptions: [
+      {
+        id: "sjv-only",
+        label: "...in the San Joaquin Valley only",
+      },
+      {
+        id: "both-valleys",
+        label: "...in both the Sacramento and San Joaquin Valleys",
+      },
+      {
+        id: "sjv-reduced-acreage",
+        label: "...in the San Joaquin Valley and reduced agricultural acreage",
+      },
+      {
+        id: "both-valleys-reduced-acreage",
+        label:
+          "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
+      },
+    ],
+  },
+]
 
 const OperationsSelector: React.FC = () => {
   const theme = useTheme()
@@ -48,9 +89,6 @@ const OperationsSelector: React.FC = () => {
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
-
-  // Track expanded accordions
-  const [expandedAccordions, setExpandedAccordions] = useState<string[]>([])
 
   // Exit exploratory mode when interacting with this component
   const exitExploratoryMode = useCallback(() => {
@@ -73,72 +111,61 @@ const OperationsSelector: React.FC = () => {
     resetOperations()
   }, [exitExploratoryMode, resetOperations])
 
-  // Determine which accordions should be forced open because they contain selected options
-  const forcedOpenAccordions = useMemo(() => {
-    const forced: string[] = []
+  // Filter operations based on search term
+  const filteredOperations = useMemo(() => {
+    if (!searchTerm) return OPERATION_CARDS
 
-    // Find which theme contains each selected operation
-    selectedOperations.forEach((opId) => {
-      for (const theme of OPERATION_THEMES) {
-        // Check if this operation is in this theme
-        let isInTheme = false
+    const lowercaseSearch = searchTerm.toLowerCase()
+    return OPERATION_CARDS.filter(
+      (op) =>
+        op.title.toLowerCase().includes(lowercaseSearch) ||
+        op.subOptions.some((sub) =>
+          sub.label.toLowerCase().includes(lowercaseSearch),
+        ),
+    )
+  }, [searchTerm])
 
-        for (const option of theme.options) {
-          if (typeof option === "string") {
-            if (option === opId) {
-              isInTheme = true
-              break
-            }
-          } else if (typeof option === "object") {
-            if (option.id === opId) {
-              isInTheme = true
-              break
-            }
+  // Prepare the operation cards with selected state
+  const operationCardsWithState = useMemo(() => {
+    return filteredOperations.map((op) => {
+      const mainOptionSelected = selectedOperations.includes(op.id)
 
-            // Check subtypes if they exist
-            if ("subtypes" in option && Array.isArray(option.subtypes)) {
-              const hasSubtype = option.subtypes.some(
-                (sub: { id: string }) => sub.id === opId,
-              )
-              if (hasSubtype) {
-                isInTheme = true
-                break
-              }
-            }
-          }
-        }
+      const subOptionsWithState = op.subOptions.map((sub) => ({
+        ...sub,
+        selected: selectedOperations.includes(sub.id),
+      }))
 
-        if (isInTheme) {
-          forced.push(theme.id)
-          break
-        }
+      return {
+        ...op,
+        selected: mainOptionSelected,
+        subOptions: subOptionsWithState,
       }
     })
+  }, [filteredOperations, selectedOperations])
 
-    return forced
-  }, [selectedOperations])
+  // Handle main option change
+  const handleMainOptionChange = (optionId: string, checked: boolean) => {
+    handleOperationChangeWithExitMode(optionId, checked)
+  }
 
-  // Handle accordion expansion change
-  const handleAccordionChange = (themeId: string, isExpanded: boolean) => {
-    setExpandedAccordions((prev) => {
-      // If expanding, add to expanded list
-      if (isExpanded) {
-        return [...prev, themeId]
-      }
+  // Handle sub-option change
+  const handleSubOptionChange = (
+    optionId: string,
+    subOptionId: string,
+    checked: boolean,
+  ) => {
+    handleOperationChangeWithExitMode(subOptionId, checked)
+  }
 
-      // If collapsing, only allow if not in forced open list
-      if (!forcedOpenAccordions.includes(themeId)) {
-        return prev.filter((id) => id !== themeId)
-      }
-
-      // Otherwise keep as is
-      return prev
-    })
+  // Handle info click
+  const handleInfoClick = (optionId: string) => {
+    console.log(`Show more info for: ${optionId}`)
+    // Implement info modal or expanded view
   }
 
   // Common styles
   const searchBoxStyles = {
-    mb: 1,
+    mb: 3,
     border: "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: `${theme.borderRadius.card}px`,
     overflow: "hidden",
@@ -167,47 +194,6 @@ const OperationsSelector: React.FC = () => {
     width: "300px",
   }
 
-  // Handle option change while respecting active status
-  const handleOptionChangeWithActiveCheck = (
-    optionId: string,
-    checked: boolean,
-  ) => {
-    // First, check if the option is active before proceeding
-    let isActive = false
-
-    // Find the option in all themes to check its active status
-    for (const theme of OPERATION_THEMES) {
-      for (const option of theme.options) {
-        if (typeof option === "string" && option === optionId) {
-          // Legacy string options are always active
-          isActive = true
-          break
-        } else if (typeof option === "object" && option.id === optionId) {
-          isActive = option.active !== false // Default to true if not specified
-          break
-        } else if (
-          typeof option === "object" &&
-          "subtypes" in option &&
-          option.subtypes
-        ) {
-          // Check subtypes if they exist
-          const subtype = option.subtypes.find((sub) => sub.id === optionId)
-          if (subtype) {
-            isActive = option.active !== false && subtype.active !== false
-            break
-          }
-        }
-      }
-      if (isActive) break // No need to check other themes if found
-    }
-
-    // Don't allow changes for inactive options
-    if (!isActive) return
-
-    // Always use checkbox behavior - allow multiple selections regardless of swapped state
-    handleOperationChangeWithExitMode(optionId, checked)
-  }
-
   return (
     <Card>
       <Box
@@ -216,19 +202,15 @@ const OperationsSelector: React.FC = () => {
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          mb: 2,
+          mb: 3,
         }}
       >
         <Typography variant="h3" sx={{ fontSize: "3rem" }}>
           {swapped ? (
             <>
-              {" "}
-              {/* {locale === "es" ? "¿qué " : "which "} */}
-              {/* <HighlightText bgcolor={theme.palette.pop.main}> */}
               <ColoredText color={theme.palette.pop.main}>
                 {t("questionBuilder.defaultTerms.decisions_sub")}
               </ColoredText>
-              {/* &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")} */}
             </>
           ) : (
             <>
@@ -239,11 +221,9 @@ const OperationsSelector: React.FC = () => {
                   <React.Fragment key={index}>
                     {part}
                     {index < array.length - 1 && (
-                      // <HighlightText bgcolor={theme.palette.pop.main}>
                       <ColoredText color={theme.palette.pop.main}>
                         {t("questionBuilder.defaultTerms.decisions_sub")}
                       </ColoredText>
-                      // </HighlightText>
                     )}
                   </React.Fragment>
                 ))}
@@ -282,43 +262,43 @@ const OperationsSelector: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Operation categories */}
+      {/* Search operations section */}
+      <Box sx={searchBoxStyles}>
+        <SearchIcon sx={searchIconStyles} />
+        <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
+          {t("questionBuilder.operationsSelector.searchOperations")}
+        </Typography>
+        <TextField
+          size="small"
+          placeholder={t(
+            "questionBuilder.operationsSelector.searchPlaceholder",
+          )}
+          sx={textFieldStyles}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => e.stopPropagation()}
+        />
+      </Box>
+
+      {/* Operation cards */}
       <Box sx={{ mt: 3 }}>
-        {OPERATION_THEMES.map((theme) => (
-          <SectionAccordion
-            key={theme.id}
-            title={theme.title}
-            titleEs={theme.titleEs}
-            options={theme.options}
-            selectedOptions={selectedOperations}
-            onOptionChange={handleOptionChangeWithActiveCheck}
-            noParentCheckbox={["delta-conveyance"]}
-            isOperations={true}
-            isExpanded={expandedAccordions.includes(theme.id)}
-            onAccordionChange={(isExpanded) =>
-              handleAccordionChange(theme.id, isExpanded)
+        {operationCardsWithState.map((op) => (
+          <OperationCard
+            key={op.id}
+            title={op.title}
+            bullet={op.bullet}
+            subOptions={op.subOptions}
+            selected={op.selected}
+            onMainOptionChange={(checked) =>
+              handleMainOptionChange(op.id, checked)
             }
+            onSubOptionChange={(subId, checked) =>
+              handleSubOptionChange(op.id, subId, checked)
+            }
+            onInfoClick={() => handleInfoClick(op.id)}
           />
         ))}
-
-        {/* Search operations section */}
-        <Box sx={searchBoxStyles}>
-          <SearchIcon sx={searchIconStyles} />
-          <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
-            {t("questionBuilder.operationsSelector.searchOperations")}
-          </Typography>
-          <TextField
-            size="small"
-            placeholder={t(
-              "questionBuilder.operationsSelector.searchPlaceholder",
-            )}
-            sx={textFieldStyles}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            onFocus={(e) => e.stopPropagation()}
-          />
-        </Box>
       </Box>
     </Card>
   )
