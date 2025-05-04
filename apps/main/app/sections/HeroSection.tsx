@@ -1,61 +1,60 @@
 import { HeroQuestionsPanel } from "@repo/ui"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import { ScrollDownIcon } from "@repo/ui"
-import { useTranslation } from "@repo/i18n"
-import React, { useState, useEffect, useMemo } from "react"
+// import { useTranslation } from "@repo/i18n"
 
 // Custom headline component that formats the last headline with a line break
-function CustomHeadlineText({ text }: { text: string | undefined }) {
-  // Handle undefined text
-  if (!text) return null
+// function CustomHeadlineText({ text }: { text: string | undefined }) {
+//   // Handle undefined text
+//   if (!text) return null
 
-  // Check if this is the last headline (contains "Where does your water")
-  if (text.includes("Where does your water")) {
-    // Split into two parts
-    const parts = [
-      "Where does your water come from?",
-      "Who else depends on it?",
-    ]
+//   // Check if this is the last headline (contains "Where does your water")
+//   if (text.includes("Where does your water")) {
+//     // Split into two parts
+//     const parts = [
+//       "Where does your water come from?",
+//       "Who else depends on it?",
+//     ]
 
-    return (
-      <>
-        <div style={{ display: "block" }}>{parts[0]}</div>
-        <div style={{ display: "block" }}>{parts[1]}</div>
-      </>
-    )
-  }
+//     return (
+//       <>
+//         <div style={{ display: "block" }}>{parts[0]}</div>
+//         <div style={{ display: "block" }}>{parts[1]}</div>
+//       </>
+//     )
+//   }
 
-  // Check if this is the salmon headline
-  if (text.includes("saving salmon")) {
-    // Split into two parts
-    const parts = ["Does saving salmon mean changing", "how we use water?"]
+//   // Check if this is the salmon headline
+//   if (text.includes("saving salmon")) {
+//     // Split into two parts
+//     const parts = ["Does saving salmon mean changing", "how we use water?"]
 
-    return (
-      <>
-        <div style={{ display: "block" }}>{parts[0]}</div>
-        <div style={{ display: "block" }}>{parts[1]}</div>
-      </>
-    )
-  }
+//     return (
+//       <>
+//         <div style={{ display: "block" }}>{parts[0]}</div>
+//         <div style={{ display: "block" }}>{parts[1]}</div>
+//       </>
+//     )
+//   }
 
-  // Check if this is the climate change headline
-  if (text.includes("climate change")) {
-    const parts = ["How is climate change reshaping", "California's water?"]
+//   // Check if this is the climate change headline
+//   if (text.includes("climate change")) {
+//     const parts = ["How is climate change reshaping", "California's water?"]
 
-    return (
-      <>
-        <div style={{ display: "block" }}>{parts[0]}</div>
-        <div style={{ display: "block" }}>{parts[1]}</div>
-      </>
-    )
-  }
+//     return (
+//       <>
+//         <div style={{ display: "block" }}>{parts[0]}</div>
+//         <div style={{ display: "block" }}>{parts[1]}</div>
+//       </>
+//     )
+//   }
 
-  // Return regular text for other headlines
-  return <>{text}</>
-}
+//   // Return regular text for other headlines
+//   return <>{text}</>
+// }
 
 export default function HeroSection() {
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
   const handleScrollDown = () => {
     // Scroll to the next section smoothly
     window.scrollBy({

@@ -95,7 +95,7 @@ export function HeroQuestionsPanel({
   backgroundImage,
   verticalAlignment = "center",
   children,
-  transitionInterval = 6000,
+  transitionInterval = 4000,
   includeHeaderSpacing = true,
   headlineColor,
   overlayCircles = [],
@@ -181,7 +181,7 @@ export function HeroQuestionsPanel({
     if (!useSvgQuestions && headlines.length <= 1) return
     if (useSvgQuestions && questionSvgs.length <= 1) return
 
-    const totalItems = useSvgQuestions ? questionSvgs.length : headlines.length
+    // const totalItems = useSvgQuestions ? questionSvgs.length : headlines.length
 
     const interval = setInterval(() => {
       if (useSvgQuestions) {
