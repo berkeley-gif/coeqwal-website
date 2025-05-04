@@ -48,13 +48,18 @@ const OPERATION_CARDS = [
   },
   {
     id: "remove-tucps",
-    title: "What if we removed TUCPs",
+    title: "What if we removed any temporary emergency changes (TUCP's)?",
     bullet: { color: "#2196F3", size: 24 }, // Blue
-    subOptions: [],
+    subOptions: [
+      {
+        id: "select-tucps",
+        label: "Select",
+      },
+    ],
   },
   {
     id: "limit-groundwater",
-    title: "What if we limited groundwater pumpting",
+    title: "What if we limited groundwater pumping?",
     bullet: { color: "#FF9800", size: 24 }, // Orange
     subOptions: [
       {
@@ -73,6 +78,124 @@ const OPERATION_CARDS = [
         id: "both-valleys-reduced-acreage",
         label:
           "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
+      },
+    ],
+  },
+  {
+    id: "change-stream-flows",
+    title: "What if we changed how water flows in our streams?",
+    bullet: { color: "#9C27B0", size: 24 }, // Purple
+    subOptions: [
+      {
+        id: "no-environmental-flows",
+        label: "...with no environmental flow requirements",
+      },
+      {
+        id: "functional-flows-balance",
+        label:
+          "...with functional flows to balance water needs with ecosystem support",
+      },
+      {
+        id: "functional-flows-reduced",
+        label:
+          "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
+      },
+      {
+        id: "enhanced-functional-flows-salmon",
+        label: "...with enhanced functional flows to support salmon",
+      },
+      {
+        id: "enhanced-functional-flows-salmon-reduced",
+        label:
+          "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
+      },
+    ],
+  },
+  {
+    id: "prioritize-drinking-water",
+    title: "What if we prioritized drinking water?",
+    bullet: { color: "#00BCD4", size: 24 }, // Cyan
+    subOptions: [
+      {
+        id: "adjust-urban-demand",
+        label: "...by adjusting urban demand patterns",
+      },
+      {
+        id: "prioritize-impacted-communities",
+        label:
+          "...by prioritizing drinking water for the most impacted communities",
+      },
+      {
+        id: "prioritize-underserved-communities",
+        label:
+          "...by prioritizing drinking water for all historically-underserved communities",
+      },
+      {
+        id: "prioritize-all-communities",
+        label: "...for all communities across the system",
+      },
+    ],
+  },
+  {
+    id: "balance-delta-uses",
+    title: "What if we balanced water uses in the Delta?",
+    bullet: { color: "#607D8B", size: 24 }, // Blue Grey
+    subOptions: [
+      {
+        id: "delta-outflows-tier1",
+        label: "...by increasing Delta outflows, tier 1",
+      },
+      {
+        id: "delta-outflows-tier2",
+        label: "...by increasing Delta outflows, tier 2",
+      },
+      {
+        id: "delta-outflows-tier3",
+        label: "...by increasing Delta outflows, tier 3",
+      },
+      {
+        id: "reduce-sacramento-valley-deliveries",
+        label: "...by reducing Sacramento Valley deliveries",
+      },
+      {
+        id: "more-carryover-storage-shasta",
+        label: "...by requiring more carryover storage in Shasta Reservoir",
+      },
+      {
+        id: "less-carryover-storage-shasta",
+        label: "...by allowing less carryover storage in Shasta Reservoir",
+      },
+      {
+        id: "reduce-delta-exports-tier1",
+        label: "...by reducing Delta exports, tier 1",
+      },
+      {
+        id: "reduce-delta-exports-tier2",
+        label: "...by reducing Delta exports, tier 2",
+      },
+      {
+        id: "reduce-delta-exports-tier3",
+        label: "...by reducing Delta exports, tier 3",
+      },
+    ],
+  },
+  {
+    id: "new-infrastructure",
+    title: "What if we added new water infrastructure?",
+    bullet: { color: "#FF5722", size: 24 }, // Deep Orange
+    subOptions: [
+      {
+        id: "delta-conveyance-tunnel",
+        label: "...Delta conveyance tunnel",
+      },
+      {
+        id: "delta-conveyance-reduced-groundwater",
+        label:
+          "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
+      },
+      {
+        id: "delta-conveyance-functional-flows",
+        label: "...Delta conveyance with functional flows",
       },
     ],
   },
@@ -233,28 +356,23 @@ const OperationsSelector: React.FC = () => {
 
         {/* Clear Selection Button */}
         <Button
-          variant="contained"
-          color="primary"
+          variant="text"
           size="medium"
           onClick={handleResetWithExitMode}
           sx={{
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: 0,
             minWidth: "150px",
-            px: 2,
-            py: 0.75,
-            fontWeight: 500,
+            px: 1,
+            py: 0.5,
+            fontWeight: 400,
+            color: "rgba(0, 0, 0, 0.42)",
+            backgroundColor: "transparent",
+            border: "none",
             "&:hover": {
-              backgroundColor: "white",
-              color: theme.palette.primary.main,
-              borderColor: theme.palette.primary.main,
-              border: "1px solid",
-            },
-            "&:active": {
-              backgroundColor: "white",
-              color: theme.palette.primary.main,
-              borderColor: theme.palette.primary.main,
-              border: "1px solid",
+              backgroundColor: "transparent",
+              color: "rgba(0, 0, 0, 0.6)",
+              textDecoration: "underline",
             },
           }}
         >
