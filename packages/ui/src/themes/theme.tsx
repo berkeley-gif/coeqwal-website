@@ -271,15 +271,15 @@ const theme = createTheme({
         marginBottom: 1, // Space between capsules (vertical wrapping)
       },
       modal: {
-        padding: 4, // 32px for modal content 
+        padding: 4, // 32px for modal content
       },
       coBenefitTags: {
         marginTop: 2, // Slightly detached from subtypes
       },
       tellMoreIcon: {
-        marginLeft: 'auto', // Aligns right within card header row
-      }
-    }
+        marginLeft: "auto", // Aligns right within card header row
+      },
+    },
   },
   // Palette (some are fixed MUI theme properties, some are custom)
   palette: {
@@ -318,13 +318,15 @@ const theme = createTheme({
       dark: themeValues.palette.climate.dark,
     },
     categories: {
-      groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
+      groundwaterManagement:
+        themeValues.palette.categories.groundwaterManagement,
       riverFlows: themeValues.palette.categories.riverFlows,
       urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
       deltaBalance: themeValues.palette.categories.deltaBalance,
       infrastructure: themeValues.palette.categories.infrastructure,
       noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
-      carryoverRequirements: themeValues.palette.categories.carryoverRequirements,
+      carryoverRequirements:
+        themeValues.palette.categories.carryoverRequirements,
       deltaOutflows: themeValues.palette.categories.deltaOutflows,
       urbanDemand: themeValues.palette.categories.urbanDemand,
       exportReductions: themeValues.palette.categories.exportReductions,

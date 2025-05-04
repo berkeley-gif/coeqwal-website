@@ -25,16 +25,16 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
   const [atBottom, setAtBottom] = useState(false)
 
   const scrollStep = 200 // pixels to scroll per click
-  
+
   // Handle scroll event to determine if we're at the top or bottom
   const handleScroll = () => {
     if (!contentRef.current) return
-    
+
     const { scrollTop, scrollHeight, clientHeight } = contentRef.current
     setAtTop(scrollTop <= 0)
     setAtBottom(scrollTop + clientHeight >= scrollHeight - 10) // 10px tolerance
   }
-  
+
   // Scroll up function
   const scrollUp = () => {
     if (!contentRef.current) return
@@ -43,13 +43,13 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
       behavior: "smooth",
     })
   }
-  
+
   // Scroll down function
   const scrollDown = () => {
     if (!contentRef.current) return
     contentRef.current.scrollBy({
       top: scrollStep,
-      behavior: "smooth", 
+      behavior: "smooth",
     })
   }
 
@@ -60,14 +60,14 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
         ref={contentRef}
         sx={{
           width: "100%",
-          height: "100%", 
+          height: "100%",
           maxHeight: "100%",
           overflowY: "auto",
           overflowX: "hidden",
           paddingRight: theme.spacing(2),
           boxSizing: "border-box",
           scrollbarWidth: "thin",
-          "&::-webkit-scrollbar": { 
+          "&::-webkit-scrollbar": {
             width: "8px",
             backgroundColor: "#f5f5f5",
             borderRadius: "4px",
@@ -81,7 +81,7 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
       >
         {children}
       </Box>
-      
+
       {/* Large scroll buttons */}
       <Box
         sx={{
@@ -117,7 +117,7 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
         >
           <KeyboardArrowUpIcon />
         </Box>
-        
+
         {/* Down button */}
         <Box
           onClick={scrollDown}
@@ -146,4 +146,4 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
   )
 }
 
-export default CustomScrollContainer 
+export default CustomScrollContainer

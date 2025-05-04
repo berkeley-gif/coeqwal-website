@@ -62,7 +62,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
 
   // Generate a series of pastel colors for the capsules based on category colors
   const capsuleColors = [
-    "rgba(76, 175, 80, 0.1)", // Groundwater - light green 
+    "rgba(76, 175, 80, 0.1)", // Groundwater - light green
     "rgba(33, 150, 243, 0.1)", // River Flows - light blue
     "rgba(156, 39, 176, 0.1)", // Urban Water - light purple
     "rgba(255, 152, 0, 0.1)", // Delta Balance - light amber
@@ -85,13 +85,22 @@ export const OperationCard: React.FC<OperationCardProps> = ({
       <Box
         sx={{
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "space-between",
           width: "100%",
           mb: subOptions.length > 0 ? theme.spacing(2.5) : 0,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            flexGrow: 1,
+            pr: 2,
+            overflow: "hidden",
+            maxWidth: "calc(100% - 110px)",
+          }}
+        >
           {/* Colored bullet */}
           <Box
             sx={{
@@ -101,6 +110,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               bgcolor: bullet.color,
               mr: theme.spacing(2),
               flexShrink: 0,
+              marginTop: "5px",
             }}
           />
 
@@ -108,10 +118,15 @@ export const OperationCard: React.FC<OperationCardProps> = ({
           <Typography
             variant="h6"
             sx={{
-              fontWeight: (theme) => theme.cards.typography.cardTitle.fontWeight,
+              fontWeight: (theme) =>
+                theme.cards.typography.cardTitle.fontWeight,
               fontSize: (theme) => theme.cards.typography.cardTitle.fontSize,
-              lineHeight: (theme) => theme.cards.typography.cardTitle.lineHeight,
+              lineHeight: (theme) =>
+                theme.cards.typography.cardTitle.lineHeight,
               letterSpacing: "-0.01em",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+              hyphens: "auto",
             }}
           >
             {title}
@@ -126,10 +141,16 @@ export const OperationCard: React.FC<OperationCardProps> = ({
             alignItems: "center",
             cursor: "pointer",
             color: "rgba(0, 0, 0, 0.42)",
-            transition: "color 0.2s ease",
+            transition: "all 0.2s ease",
             marginLeft: (theme) => theme.cards.spacing.tellMoreIcon.marginLeft,
+            minWidth: "110px",
+            flexShrink: 0,
+            justifyContent: "flex-end",
+            borderRadius: "4px",
+            padding: "4px 8px",
             "&:hover": {
-              color: theme.palette.primary.main,
+              color: "rgba(0, 0, 0, 0.8)",
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
             },
           }}
         >
@@ -140,6 +161,9 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               fontSize: (theme) => theme.cards.typography.caption.fontSize,
               fontWeight: (theme) => theme.cards.typography.caption.fontWeight,
               opacity: 0.8,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             Tell me more
@@ -192,9 +216,11 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               <Typography
                 variant="body2"
                 sx={{
-                  fontWeight: (theme) => theme.cards.typography.caption.fontWeight,
+                  fontWeight: (theme) =>
+                    theme.cards.typography.caption.fontWeight,
                   fontSize: (theme) => theme.cards.typography.caption.fontSize,
-                  lineHeight: (theme) => theme.cards.typography.caption.lineHeight,
+                  lineHeight: (theme) =>
+                    theme.cards.typography.caption.lineHeight,
                   letterSpacing: "0.01em",
                 }}
               >

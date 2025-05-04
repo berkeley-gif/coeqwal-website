@@ -316,103 +316,107 @@ const OperationsSelector: React.FC = () => {
     },
     width: "300px",
   }
-  
+
   // Let's ditch the custom scrollbar due to lag issues and use a better native scrollbar
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isScrollable, setIsScrollable] = useState(false);
-  
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isScrollable, setIsScrollable] = useState(false)
+
   // Check if content is scrollable once when component loads and on window resize
   useEffect(() => {
     const checkScrollable = () => {
-      const container = scrollContainerRef.current;
+      const container = scrollContainerRef.current
       if (container) {
-        setIsScrollable(container.scrollHeight > container.clientHeight + 10); // 10px buffer
+        setIsScrollable(container.scrollHeight > container.clientHeight + 10) // 10px buffer
       }
-    };
-    
+    }
+
     // Initial check with delay to ensure layout is complete
-    const timeoutId = setTimeout(checkScrollable, 200);
-    
+    const timeoutId = setTimeout(checkScrollable, 200)
+
     // Recheck on window resize
-    window.addEventListener('resize', checkScrollable);
-    
+    window.addEventListener("resize", checkScrollable)
+
     return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', checkScrollable);
-    };
-  }, [operationCardsWithState.length]);
+      clearTimeout(timeoutId)
+      window.removeEventListener("resize", checkScrollable)
+    }
+  }, [operationCardsWithState.length])
 
   // Prevent scroll propagation at the top/bottom boundaries
   useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    
-    if (!scrollContainer) return;
+    const scrollContainer = scrollContainerRef.current
+
+    if (!scrollContainer) return
 
     const handleWheel = (e: WheelEvent) => {
       // Get current scroll position and dimensions
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+
       // More precise boundary detection
-      const isAtTop = scrollTop <= 0;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
-      
+      const isAtTop = scrollTop <= 0
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1
+
       // Only prevent default when we've hit a boundary in the direction of scroll
       if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
-        e.preventDefault();
-        e.stopPropagation(); // Also stop propagation for more reliable containment
+        e.preventDefault()
+        e.stopPropagation() // Also stop propagation for more reliable containment
       }
-    };
+    }
 
     // Track touch movement for mobile
-    let touchStartY: number | null = null;
-    
+    let touchStartY: number | null = null
+
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches?.[0]) {
-        touchStartY = e.touches[0].clientY;
+        touchStartY = e.touches[0].clientY
       }
-    };
-    
+    }
+
     const handleTouchMove = (e: TouchEvent) => {
-      if (touchStartY === null || !scrollContainer || !e.touches?.[0]) return;
-      
-      const touchY = e.touches[0].clientY;
-      const touchDeltaY = touchStartY - touchY;
-      
+      if (touchStartY === null || !scrollContainer || !e.touches?.[0]) return
+
+      const touchY = e.touches[0].clientY
+      const touchDeltaY = touchStartY - touchY
+
       // Get current scroll position and dimensions
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+
       // More precise boundary detection, adding a small buffer (1px)
-      const isAtTop = scrollTop <= 0;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
-      
+      const isAtTop = scrollTop <= 0
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1
+
       // Detect scroll direction from touch movement and check boundaries
       // Positive touchDeltaY means scrolling down, negative means scrolling up
       if ((isAtTop && touchDeltaY < 0) || (isAtBottom && touchDeltaY > 0)) {
-        e.preventDefault();
-        e.stopPropagation(); // Also stop propagation for more reliable containment
+        e.preventDefault()
+        e.stopPropagation() // Also stop propagation for more reliable containment
       }
-    };
+    }
 
     // Add the event listeners with passive: false to allow preventDefault()
-    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
-    scrollContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
-    scrollContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
-    
+    scrollContainer.addEventListener("wheel", handleWheel, { passive: false })
+    scrollContainer.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    })
+    scrollContainer.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    })
+
     // Also prevent scroll on the parent container when we're at boundaries
     const preventParentScroll = (e: Event) => {
       // This helps ensure the parent doesn't scroll
-      e.stopPropagation();
-    };
-    
-    scrollContainer.addEventListener('scroll', preventParentScroll);
-    
+      e.stopPropagation()
+    }
+
+    scrollContainer.addEventListener("scroll", preventParentScroll)
+
     return () => {
-      scrollContainer.removeEventListener('wheel', handleWheel);
-      scrollContainer.removeEventListener('touchstart', handleTouchStart);
-      scrollContainer.removeEventListener('touchmove', handleTouchMove);
-      scrollContainer.removeEventListener('scroll', preventParentScroll);
-    };
-  }, []);
+      scrollContainer.removeEventListener("wheel", handleWheel)
+      scrollContainer.removeEventListener("touchstart", handleTouchStart)
+      scrollContainer.removeEventListener("touchmove", handleTouchMove)
+      scrollContainer.removeEventListener("scroll", preventParentScroll)
+    }
+  }, [])
 
   return (
     <Card>
@@ -425,12 +429,12 @@ const OperationsSelector: React.FC = () => {
           mb: 3,
         }}
       >
-        <Typography 
-          variant="h3" 
-          sx={{ 
-            fontSize: theme => theme.cards.typography.hero.fontSize,
-            lineHeight: theme => theme.cards.typography.hero.lineHeight,
-            fontWeight: theme => theme.cards.typography.hero.fontWeight,
+        <Typography
+          variant="h3"
+          sx={{
+            fontSize: (theme) => theme.cards.typography.hero.fontSize,
+            lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
+            fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
           }}
         >
           {swapped ? (
@@ -504,10 +508,10 @@ const OperationsSelector: React.FC = () => {
       </Box>
 
       {/* Operation cards with custom scrolling */}
-      <Box 
-        sx={{ 
-          position: "relative", 
-          height: "60vh", 
+      <Box
+        sx={{
+          position: "relative",
+          height: "60vh",
           mt: 3,
           border: "1px solid rgba(0, 0, 0, 0.12)",
           borderRadius: "12px",
@@ -545,7 +549,7 @@ const OperationsSelector: React.FC = () => {
             // Add relative positioning for the scroll indicator
             position: "relative",
             "& > div:not(:last-child)": {
-              marginBottom: theme => theme.cards.spacing.gap,
+              marginBottom: (theme) => theme.cards.spacing.gap,
             },
           }}
         >
@@ -556,7 +560,8 @@ const OperationsSelector: React.FC = () => {
                 position: "absolute",
                 top: "0px",
                 right: "25px", // Position to the left of the scrollbar
-                background: "linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%)",
+                background:
+                  "linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%)",
                 color: "rgba(0, 0, 0, 0.7)",
                 px: 1.5,
                 py: 0.5,
@@ -573,12 +578,24 @@ const OperationsSelector: React.FC = () => {
               }}
             >
               <span>SCROLL</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 10L12 15L17 10" stroke="rgba(0, 0, 0, 0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7 10L12 15L17 10"
+                  stroke="rgba(0, 0, 0, 0.6)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </Box>
           )}
-          
+
           {operationCardsWithState.map((op) => (
             <OperationCard
               key={op.id}
