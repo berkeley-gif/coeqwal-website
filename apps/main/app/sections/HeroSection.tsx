@@ -70,21 +70,35 @@ export default function HeroSection() {
       src: "/images/question1.svg",
       xPercent: -20,
       yPercent: 0,
+      width: 360,
+      height: 360,
+    },
+    {
+      src: "/images/question2.svg",
+      xPercent: 0,
+      yPercent: 16,
+      width: 500,
+      height: 500,
+    },
+    {
+      src: "/images/question3.svg",
+      xPercent: -10,
+      yPercent: 0,
       width: 400,
       height: 400,
     },
     {
-      src: "/images/question1.svg", // Using the same SVG as a placeholder
-      xPercent: 25,
-      yPercent: 10,
-      width: 640,
-      height: 440,
+      src: "/images/question4.svg",
+      xPercent: 4,
+      yPercent: 0,
+      width: 400,
+      height: 400,
     },
     {
-      src: "/images/question1.svg", // Using the same SVG as a placeholder
-      xPercent: 0,
-      yPercent: -25,
-      width: 700,
+      src: "/images/question5.svg",
+      xPercent: 28,
+      yPercent: 28,
+      width: 460,
       height: 460,
     },
   ]
@@ -118,7 +132,7 @@ export default function HeroSection() {
       <ScrollDownIcon
         onClick={handleScrollDown}
         color="white"
-        text="Water connects us. Explore California's water system and discover possibilities for the future of water in our state."
+        text="Our water connects us. Explore California's water system and discover possibilities for the future of water in our state."
       />
     </Box>
   )

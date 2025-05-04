@@ -296,8 +296,8 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     body1: {
-      fontSize: "1.4rem",
-      letterSpacing: "normal",
+      fontSize: "1.3rem",
+      letterSpacing: "0.01rem",
       lineHeight: 1.4,
     },
     body2: {
