@@ -56,9 +56,6 @@ function CustomHeadlineText({ text }: { text: string | undefined }) {
 
 export default function HeroSection() {
   const { t } = useTranslation()
-  const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
-
   const handleScrollDown = () => {
     // Scroll to the next section smoothly
     window.scrollBy({
@@ -67,36 +64,30 @@ export default function HeroSection() {
     })
   }
 
-  // Memoize headlines to prevent recreation on each render
-  const headlines = useMemo(
-    () =>
-      (t("heroPanel.headlines") as string[]) || [
-        "Is California ready for the next drought?",
-        "Does saving salmon mean changing how we use water?",
-        "How is climate change reshaping California's water?",
-        "Do some Californians still lack water justice?",
-        "Where does your water come from? Who else depends on it?",
-      ],
-    [t],
-  )
-
-  // Set up headline transition (similar to TransitionHeadline component)
-  useEffect(() => {
-    if (headlines.length <= 1) return
-
-    const interval = setInterval(() => {
-      // Fade out
-      setIsVisible(false)
-
-      // Change headline and fade in
-      setTimeout(() => {
-        setCurrentHeadlineIndex((prev) => (prev + 1) % headlines.length)
-        setIsVisible(true)
-      }, 500)
-    }, 6000) // Match the default interval in HeroQuestionsPanel
-
-    return () => clearInterval(interval)
-  }, [headlines])
+  // Define SVG questions with positions
+  const questionSvgs = [
+    {
+      src: "/images/question1.svg",
+      xPercent: -20,
+      yPercent: 0,
+      width: 400,
+      height: 400,
+    },
+    {
+      src: "/images/question1.svg", // Using the same SVG as a placeholder
+      xPercent: 25,
+      yPercent: 10,
+      width: 640,
+      height: 440,
+    },
+    {
+      src: "/images/question1.svg", // Using the same SVG as a placeholder
+      xPercent: 0,
+      yPercent: -25,
+      width: 700,
+      height: 460,
+    },
+  ]
 
   return (
     <Box
@@ -110,35 +101,19 @@ export default function HeroSection() {
     >
       <HeroQuestionsPanel
         backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
-        headlines={[]}
         verticalAlignment="center"
         background="transparent"
         includeHeaderSpacing={false}
         headlineColor="common.white"
+        questionSvgs={questionSvgs}
+        useSvgQuestions={true}
+        transitionInterval={6000}
         sx={{
           "& > div": {
             marginTop: "-15vh",
           },
         }}
-      >
-        {/* Custom headline with line break */}
-        <Box
-          sx={{
-            opacity: isVisible ? 1 : 0,
-            transition: "opacity 500ms ease-in-out",
-          }}
-        >
-          <Typography
-            variant="h1"
-            sx={{
-              color: "common.white",
-              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-            }}
-          >
-            <CustomHeadlineText text={headlines[currentHeadlineIndex]} />
-          </Typography>
-        </Box>
-      </HeroQuestionsPanel>
+      />
 
       <ScrollDownIcon
         onClick={handleScrollDown}

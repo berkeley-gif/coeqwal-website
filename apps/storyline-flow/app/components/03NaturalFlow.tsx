@@ -201,9 +201,7 @@ function Valley() {
     const total = boundaryData.length
 
     function frame() {
-      if (!mapRef.current) return
-
-      // update line up to current idx
+      if (!mapRef.current) return // update line up to current idx
       ;(
         mapRef.current.getSource("valley-boundary") as mapboxgl.GeoJSONSource
       ).setData({
@@ -498,9 +496,7 @@ function Delta() {
     const total = boundaryData.length
 
     function frame() {
-      if (!mapRef.current) return
-
-      // update line up to current idx
+      if (!mapRef.current) return // update line up to current idx
       ;(
         mapRef.current.getSource("delta-boundary") as mapboxgl.GeoJSONSource
       ).setData({
