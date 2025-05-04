@@ -506,6 +506,7 @@ const CombinedPanelContent = () => {
                       sx={{
                         fontWeight: 500,
                         color: "black",
+                        lineHeight: 1.2,
                       }}
                     >
                       {t("questionBuilder.outcomesSelector.includeClimate")}
