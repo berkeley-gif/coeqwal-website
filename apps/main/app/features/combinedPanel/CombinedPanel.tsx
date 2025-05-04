@@ -88,6 +88,8 @@ const CombinedPanelContent = () => {
 
   // Track if the scroll button has been clicked or if the user has scrolled manually
   const [hasClickedScroll, setHasClickedScroll] = useState(false)
+  // Track if search has been performed
+  const [hasClickedSearch, setHasClickedSearch] = useState(false)
   // State to store the loaded scenario data for each operation
   const [scenarioDataItems, setScenarioDataItems] = useState<
     ScenarioDataItem[]
@@ -419,18 +421,18 @@ const CombinedPanelContent = () => {
       <Box
         ref={stickyHeaderRef}
         sx={{
-          position: "sticky",
+          position: hasClickedSearch ? "sticky" : "relative",
           top: 0,
           zIndex: 1000,
           width: "100%",
           maxWidth: "none !important",
           display: "flex",
           flexDirection: "column",
-          // alignItems: "center",
           padding: theme.spacing(4),
           paddingTop: `${theme.layout.headerHeight}px`,
           backgroundColor: "#FFFFFF",
-          // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+          transition: "position 0.3s ease, box-shadow 0.3s ease",
+          boxShadow: hasClickedSearch ? "0 2px 8px rgba(0, 0, 0, 0.08)" : "none",
           overflow: "visible",
         }}
       >
@@ -528,6 +530,9 @@ const CombinedPanelContent = () => {
                 color="primary"
                 disableElevation
                 onClick={() => {
+                  // Mark search as clicked to make header sticky
+                  setHasClickedSearch(true);
+                  
                   // Enter exploratory mode - shrink the question summary
                   setExploratoryMode(true)
 
