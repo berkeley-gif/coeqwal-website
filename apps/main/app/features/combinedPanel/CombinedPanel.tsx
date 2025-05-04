@@ -436,80 +436,6 @@ const CombinedPanelContent = () => {
       >
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "top",
-            width: "100%",
-          }}
-        >
-          {/* Climate checkbox in a small card - only visible after scroll */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              opacity: hasClickedScroll ? 1 : 0,
-              visibility: hasClickedScroll ? "visible" : "hidden",
-              transform: hasClickedScroll
-                ? "translateY(0)"
-                : "translateY(-10px)",
-              transition: "all 0.5s ease",
-              transitionDelay: "0.2s",
-              zIndex: 2500,
-            }}
-          >
-            <Card
-              sx={{
-                marginTop: theme.spacing(2),
-                padding: theme.spacing(2),
-                width: "280px",
-                border: "1px solid rgba(0, 0, 0, 0.12)",
-                borderRadius: `${theme.borderRadius.card}px !important`,
-                color: "black",
-                backgroundColor: theme.palette.common.white,
-                boxShadow: "none",
-                overflow: "hidden",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeClimate}
-                    onChange={() => toggleClimate()}
-                    color="primary"
-                    size="large"
-                    sx={{
-                      marginTop: "0",
-                      color: "black",
-                      "&.Mui-checked": {
-                        color: "black",
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 500,
-                      color: "black",
-                    }}
-                  >
-                    {t("questionBuilder.outcomesSelector.includeClimate")}
-                  </Typography>
-                }
-                sx={{
-                  margin: 0,
-                  alignItems: "flex-start",
-                  "& .MuiCheckbox-root": {
-                    paddingTop: "4px",
-                  },
-                }}
-              />
-            </Card>
-          </Box>
-        </Box>
-        <Box
-          sx={{
             width: "100%",
             maxWidth: "none !important",
             position: "relative",
@@ -517,60 +443,128 @@ const CombinedPanelContent = () => {
           }}
         >
           <QuestionSummary wasScrolled={hasClickedScroll} />
-        </Box>
-
-        {/* Search button */}
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "flex-end",
-            opacity: hasClickedScroll ? 1 : 0,
-            visibility: hasClickedScroll ? "visible" : "hidden",
-            transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
-            transition: "all 0.5s ease",
-            transitionDelay: "0.2s",
-            zIndex: 2500,
-          }}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            disableElevation
-            onClick={() => {
-              // Enter exploratory mode - shrink the question summary
-              setExploratoryMode(true)
-
-              // Fetch the scenario data for all selected operations
-              fetchAllScenarioData()
-
-              // Scroll to scenario results
-              const element = document.getElementById("scenario-results")
-              if (element) {
-                const headerOffset = 100
-                const elementPosition = element.getBoundingClientRect().top
-                const offsetPosition =
-                  elementPosition + window.scrollY - headerOffset
-                window.scrollTo({
-                  top: offsetPosition,
-                  behavior: "smooth",
-                })
-              }
-            }}
-            startIcon={<SearchIcon />}
+          <Box
             sx={{
-              borderRadius: "999px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              padding: theme.spacing(1, 2),
-              bgcolor: "black",
-              color: "white",
-              "&:hover": {
-                bgcolor: "#333",
-              },
+              display: "flex",
+              justifyContent: "flex-end", 
+              alignItems: "center",
+              width: "100%",
+              mt: 2,
+              pr: 4,
             }}
           >
-            {t("scenarioResults.search")}
-          </Button>
+            {/* Climate checkbox and search button in same row, both right-aligned */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+                mt: 2,
+                opacity: hasClickedScroll ? 1 : 0,
+                visibility: hasClickedScroll ? "visible" : "hidden",
+                transform: hasClickedScroll
+                  ? "translateY(0)"
+                  : "translateY(-10px)",
+                transition: "all 0.5s ease",
+                transitionDelay: "0.2s",
+                zIndex: 2500,
+              }}
+            >
+              {/* Climate checkbox */}
+              <Card
+                sx={{
+                  padding: theme.spacing(2),
+                  width: "280px",
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  borderRadius: `${theme.borderRadius.card}px !important`,
+                  color: "black",
+                  backgroundColor: theme.palette.common.white,
+                  boxShadow: "none",
+                  overflow: "hidden",
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={includeClimate}
+                      onChange={() => toggleClimate()}
+                      color="primary"
+                      size="large"
+                      sx={{
+                        marginTop: "0",
+                        color: "black",
+                        "&.Mui-checked": {
+                          color: "black",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 500,
+                        color: "black",
+                      }}
+                    >
+                      {t("questionBuilder.outcomesSelector.includeClimate")}
+                    </Typography>
+                  }
+                  sx={{
+                    margin: 0,
+                    alignItems: "flex-start",
+                    "& .MuiCheckbox-root": {
+                      paddingTop: "4px",
+                    },
+                  }}
+                />
+              </Card>
+              
+              {/* Search button */}
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                onClick={() => {
+                  // Enter exploratory mode - shrink the question summary
+                  setExploratoryMode(true)
+
+                  // Fetch the scenario data for all selected operations
+                  fetchAllScenarioData()
+
+                  // Scroll to scenario results
+                  const element = document.getElementById("scenario-results")
+                  if (element) {
+                    const headerOffset = 100
+                    const elementPosition = element.getBoundingClientRect().top
+                    const offsetPosition =
+                      elementPosition + window.scrollY - headerOffset
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: "smooth",
+                    })
+                  }
+                }}
+                startIcon={<SearchIcon fontSize="large" />}
+                sx={{
+                  borderRadius: "999px",
+                  boxShadow: "none",
+                  padding: theme.spacing(1.5, 3),
+                  bgcolor: "black",
+                  color: "white",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  minHeight: "50px",
+                  "&:hover": {
+                    bgcolor: "#333",
+                  },
+                }}
+              >
+                {t("scenarioResults.search")}
+              </Button>
+            </Box>
+          </Box>
         </Box>
       </Box>
 
@@ -592,6 +586,7 @@ const CombinedPanelContent = () => {
         sx={{
           width: "100%",
           position: "relative",
+          pt: 0,
         }}
       >
         {/* Anchor point for scrolling (placed at the top) */}

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, ReactNode } from "react"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
@@ -1335,7 +1335,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
   // Update container styles to be relative to exploratory mode
   return (
-    <div
+    <Box
       style={{
         backgroundColor: "transparent",
         width: "100%",
@@ -1343,6 +1343,10 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         zIndex: 1000,
         padding: 0,
         maxWidth: "none !important",
+        display: "flex",
+      }}
+      sx={{
+        mt: 3,
       }}
     >
       <Typography
@@ -1369,7 +1373,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       >
         {summary}
       </Typography>
-    </div>
+    </Box>
   )
 }
 
