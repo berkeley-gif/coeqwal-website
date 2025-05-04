@@ -6,7 +6,6 @@ import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { TransitionHeadline } from "../common/TransitionHeadline"
 import { Fade } from "@mui/material"
 import { SxProps, Theme } from "@mui/material/styles"
-import { useTheme } from "@mui/material/styles"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
@@ -104,8 +103,6 @@ export function HeroQuestionsPanel({
   useSvgQuestions = false,
   ...panelProps
 }: HeroQuestionsPanelProps) {
-  const theme = useTheme()
-  const [currentIndex, setCurrentIndex] = useState(0)
   const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
   // Track which SVG question is currently visible
   const [currentSvgIndex, setCurrentSvgIndex] = useState(0)
@@ -198,7 +195,7 @@ export function HeroQuestionsPanel({
         }, 500)
       } else {
         // Original headline transition
-        setCurrentIndex((prev) => (prev + 1) % headlines.length)
+        setCurrentSvgIndex((prev) => (prev + 1) % headlines.length)
       }
     }, transitionInterval)
 

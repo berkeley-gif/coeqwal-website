@@ -40,6 +40,7 @@ export function ScrollDownIcon({
             color,
             mb: 2,
             maxWidth: "100%",
+            fontWeight: 500,
             textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
           }}
         >

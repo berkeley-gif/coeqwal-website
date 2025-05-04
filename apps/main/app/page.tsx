@@ -21,7 +21,8 @@ import InvitationSection from "./sections/InvitationSection"
 
 // Make sure these IDs match the section IDs used in the Header component
 const navSectionIds = {
-  hero: "hero", // For HeroSection and InterstitialPanel together
+  hero: "hero",
+  interstitial: "interstitial",
   californiaWater: "california-water",
   managingWater: "managing-water",
   challenges: "challenges",
