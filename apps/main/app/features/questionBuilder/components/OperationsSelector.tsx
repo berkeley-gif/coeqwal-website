@@ -48,7 +48,7 @@ const OPERATION_CARDS = (theme: any) => [
   },
   {
     id: "remove-tucps",
-    title: "What if we removed any temporary emergency changes (TUCP's)?",
+    title: "What if we removed temporary emergency changes (TUCP's)?",
     bullet: { color: theme.palette.categories.noFlowRequirements, size: 24 }, // No Flow Requirements - Red
     subOptions: [
       {
@@ -419,7 +419,13 @@ const OperationsSelector: React.FC = () => {
   }, [])
 
   return (
-    <Card>
+    <Card
+      sx={{
+        pt: 0, // Remove top padding from card
+        pb: 3, // Keep bottom padding
+        px: 3, // Keep horizontal padding
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -512,7 +518,7 @@ const OperationsSelector: React.FC = () => {
         sx={{
           position: "relative",
           height: "60vh",
-          mt: 3,
+          mt: 1, // Reduced from mt: 3
           border: "1px solid rgba(0, 0, 0, 0.12)",
           borderRadius: "12px",
           p: 1,

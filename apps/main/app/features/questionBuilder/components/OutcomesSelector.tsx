@@ -103,7 +103,13 @@ const OutcomesSelector: React.FC = () => {
   }
 
   return (
-    <Card>
+    <Card
+      sx={{
+        pt: 0,
+        pb: 3,
+        px: 3,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -113,7 +119,14 @@ const OutcomesSelector: React.FC = () => {
           mb: 2,
         }}
       >
-        <Typography variant="h3" sx={{ fontSize: "3rem" }}>
+        <Typography 
+          variant="h3" 
+          sx={{
+            fontSize: (theme) => theme.cards.typography.hero.fontSize,
+            lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
+            fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
+          }}
+        >
           {swapped ? (
             <>
               {/* Use JSX directly - the t function can't handle React elements as params */}
@@ -174,7 +187,7 @@ const OutcomesSelector: React.FC = () => {
       </Box>
 
       {/* Outcome categories */}
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: 1 }}>
         {OUTCOME_CATEGORIES.map((category) => (
           <Box key={category.id}>
             <SectionAccordion

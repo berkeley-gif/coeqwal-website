@@ -1355,12 +1355,12 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         sx={(theme) => ({
           mt: theme.spacing(4),
           mb: 0,
-          lineHeight: theme.typography.h2.lineHeight,
+          lineHeight: theme.cards.typography.hero.lineHeight,
           textAlign: "center",
-          fontWeight: 500,
+          fontWeight: theme.cards.typography.hero.fontWeight,
           width: "100%",
           margin: "0 auto",
-          fontSize: calculatedFontSize, // Using the calculated font size
+          fontSize: "3rem", // Larger than the hero size in the card typography
           backgroundColor: "white",
           paddingTop: isExploratoryMode ? "20px" : "20px", // Reduce padding in exploratory mode
           paddingBottom: isExploratoryMode ? "12px" : 0, // Reduce padding in exploratory mode
