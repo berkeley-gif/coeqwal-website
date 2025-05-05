@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useMemo } from "react"
 import { Box } from "@repo/ui/mui"
-import { Header, MultiDrawer } from "@repo/ui"
+import { Header } from "@repo/ui"
 import type { SecondaryNavItem, TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
@@ -40,7 +40,7 @@ export default function Home() {
   const [, setDrawerOpen] = useState(false)
   const [activeDrawerTab, setActiveDrawerTab] = useState<TabKey | null>(null)
   // Get actions from the Zustand drawer store
-  const { openDrawer, closeDrawer, setActiveTab } = useDrawerStore.getState()
+  const { openDrawer, closeDrawer } = useDrawerStore.getState()
 
   // Track all sections including the ones for the top navigation
   const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
@@ -64,22 +64,6 @@ export default function Home() {
   //   handleSectionClick,
   //   t,
   // )
-
-  // Handler for drawer state changes - updates the store
-  const handleDrawerStateChange = (
-    isOpen: boolean,
-    activeTab: TabKey | null,
-  ) => {
-    if (isOpen && activeTab) {
-      setActiveTab(activeTab)
-    } else {
-      closeDrawer()
-    }
-
-    // Keep the legacy state in sync for components not yet migrated
-    setDrawerOpen(isOpen)
-    setActiveDrawerTab(activeTab)
-  }
 
   // Handler to open specific drawer tabs - using the store
   const handleOpenThemesDrawer = (operationId?: string) => {
@@ -282,8 +266,6 @@ export default function Home() {
           {/* Challenges panel with two columns */}
           <ChallengesSection
             onOpenLearnDrawer={handleOpenLearnDrawer}
-            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
-            onOpenThemesDrawer={handleOpenThemesDrawer}
           />
 
           {/* CalSim panel with two columns */}
@@ -291,7 +273,6 @@ export default function Home() {
 
           {/* Invitation panel with two columns */}
           <InvitationSection
-            onOpenLearnDrawer={handleOpenLearnDrawer}
             onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
             onOpenThemesDrawer={handleOpenThemesDrawer}
           />

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { DrawerState, DrawerSize } from "./types"
+import type { DrawerState } from "./types"
 
 // TabKey type from the component
 type TabKey = "learn" | "currentOps" | "themes"

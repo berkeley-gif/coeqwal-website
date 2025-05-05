@@ -1,4 +1,5 @@
-import type { TabKey } from "@repo/ui"
+// Define TabKey type here instead of importing from @repo/ui (creates circular dependency)
+export type TabKey = "learn" | "currentOps" | "themes"
 
 // Additional configuration options for the drawer
 export type DrawerSize = "default" | "large" | "full"

@@ -7,13 +7,11 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 
 // Add props interface
 interface InvitationSectionProps {
-  onOpenLearnDrawer?: (sectionId: string) => void
   onOpenCurrentOpsDrawer?: (sectionId: string) => void
   onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 export default function InvitationSection({
-  onOpenLearnDrawer,
   onOpenCurrentOpsDrawer,
   onOpenThemesDrawer,
 }: InvitationSectionProps = {}) {

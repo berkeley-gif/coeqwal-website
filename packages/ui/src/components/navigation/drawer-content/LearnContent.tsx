@@ -21,7 +21,7 @@ export interface LearnContentProps {
 /**
  * Content component for the Learn tab in the MultiDrawer
  */
-export function LearnContent({ onClose, selectedSection }: LearnContentProps) {
+export function LearnContent({ onClose }: LearnContentProps) {
   const theme = useTheme()
 
   // Sample learn topics - replace with your actual topics
@@ -58,7 +58,7 @@ export function LearnContent({ onClose, selectedSection }: LearnContentProps) {
         color="text.secondary"
         sx={{ mb: 3, lineHeight: 1.4 }}
       >
-        Explore these topics to learn more about California's water system and
+        Explore these topics to learn more about California&apos;s water system and
         management.
       </Typography>
 
@@ -124,7 +124,7 @@ export function LearnContent({ onClose, selectedSection }: LearnContentProps) {
           color="text.secondary"
           sx={{ mt: 1, lineHeight: 1.4 }}
         >
-          Understanding California's water system helps you make more informed
+          Understanding California&apos;s water system helps you make more informed
           choices when exploring water management scenarios.
         </Typography>
       </Box>

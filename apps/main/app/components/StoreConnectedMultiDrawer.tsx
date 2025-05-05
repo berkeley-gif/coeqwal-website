@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { MultiDrawer } from "@repo/ui"
+import { MultiDrawer, TabKey } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 
 interface StoreConnectedMultiDrawerProps {
@@ -19,10 +19,10 @@ export function StoreConnectedMultiDrawer({
   overlay = false,
 }: StoreConnectedMultiDrawerProps) {
   // Get state and actions from the Zustand store
-  const { activeTab, setActiveTab, isOpen, content } = useDrawerStore()
+  const { activeTab, setActiveTab, content } = useDrawerStore()
 
   // Handle drawer state changes from the MultiDrawer component
-  const handleDrawerStateChange = (isOpen: boolean, tab: any) => {
+  const handleDrawerStateChange = (isOpen: boolean, tab: TabKey | null) => {
     if (isOpen && tab) {
       setActiveTab(tab)
     } else {

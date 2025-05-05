@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { Box, Typography } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
@@ -16,7 +15,6 @@ export interface CurrentOpsContentProps {
  */
 export function CurrentOpsContent({
   onClose,
-  selectedSection,
 }: CurrentOpsContentProps) {
   return (
     <ContentWrapper

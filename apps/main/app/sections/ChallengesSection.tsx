@@ -8,14 +8,10 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 // Add props interface
 interface ChallengesSectionProps {
   onOpenLearnDrawer?: (sectionId: string) => void
-  onOpenCurrentOpsDrawer?: (sectionId: string) => void
-  onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 export default function ChallengesSection({
   onOpenLearnDrawer,
-  onOpenCurrentOpsDrawer,
-  onOpenThemesDrawer,
 }: ChallengesSectionProps = {}) {
   const { t } = useTranslation()
 
