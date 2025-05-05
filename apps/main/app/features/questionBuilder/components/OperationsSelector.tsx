@@ -33,12 +33,49 @@ import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
+// Organized palette for water operations with primary (dot) and secondary (title) colors
+const WATER_PALETTE = {
+  currentOperations: {
+    primary: "#607D8B", // Slate gray - stable, established
+    secondary: "rgba(96, 125, 139, 0.85)",
+  },
+  emergencyMeasures: {
+    primary: "#F44336", // Red - urgency, critical actions
+    secondary: "rgba(244, 67, 54, 0.85)",
+  },
+  groundwaterManagement: {
+    primary: "#4CAF50", // Green - agriculture, earth, sustainability
+    secondary: "rgba(76, 175, 80, 0.85)",
+  },
+  streamFlowManagement: {
+    primary: "#2196F3", // Blue - water, rivers, flow
+    secondary: "rgba(33, 150, 243, 0.85)",
+  },
+  urbanWaterPriorities: {
+    primary: "#9C27B0", // Purple - civic, community focus
+    secondary: "rgba(156, 39, 176, 0.85)",
+  },
+  deltaBalance: {
+    primary: "#FF9800", // Amber - delta ecosystems, balance
+    secondary: "rgba(255, 152, 0, 0.85)",
+  },
+  infrastructure: {
+    primary: "#3F51B5", // Indigo - construction, structural elements
+    secondary: "rgba(63, 81, 181, 0.85)",
+  },
+  climateAdaptation: {
+    primary: "#00ACC1", // Teal - future water, adaptation
+    secondary: "rgba(0, 172, 193, 0.85)",
+  },
+};
+
 // Card data for the operation cards
 const OPERATION_CARDS = (theme: any) => [
   {
     id: "current-operations",
     title: "Current operations",
-    bullet: { color: theme.palette.categories.infrastructure, size: 24 }, // Infrastructure - Slate gray
+    bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
+    titleColor: WATER_PALETTE.currentOperations.secondary,
     subOptions: [
       {
         id: "use-as-comparison",
@@ -49,7 +86,8 @@ const OPERATION_CARDS = (theme: any) => [
   {
     id: "remove-tucps",
     title: "What if we removed temporary emergency measures (TUCP's)?",
-    bullet: { color: theme.palette.categories.noFlowRequirements, size: 24 }, // No Flow Requirements - Red
+    bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
+    titleColor: WATER_PALETTE.emergencyMeasures.secondary,
     subOptions: [
       {
         id: "select-tucps",
@@ -60,7 +98,8 @@ const OPERATION_CARDS = (theme: any) => [
   {
     id: "limit-groundwater",
     title: "What if we limited groundwater pumping?",
-    bullet: { color: theme.palette.categories.groundwaterManagement, size: 24 }, // Groundwater Management - Green
+    bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
+    titleColor: WATER_PALETTE.groundwaterManagement.secondary,
     subOptions: [
       {
         id: "sjv-only",
@@ -84,7 +123,8 @@ const OPERATION_CARDS = (theme: any) => [
   {
     id: "change-stream-flows",
     title: "What if we changed how water flows in our streams?",
-    bullet: { color: theme.palette.categories.riverFlows, size: 24 }, // River Flows - Blue
+    bullet: { color: WATER_PALETTE.streamFlowManagement.primary, size: 24 },
+    titleColor: WATER_PALETTE.streamFlowManagement.secondary,
     subOptions: [
       {
         id: "no-environmental-flows",
@@ -114,7 +154,8 @@ const OPERATION_CARDS = (theme: any) => [
   {
     id: "prioritize-drinking-water",
     title: "What if we prioritized drinking water?",
-    bullet: { color: theme.palette.categories.urbanWaterPriorities, size: 24 }, // Urban Water Priorities - Purple
+    bullet: { color: WATER_PALETTE.urbanWaterPriorities.primary, size: 24 },
+    titleColor: WATER_PALETTE.urbanWaterPriorities.secondary,
     subOptions: [
       {
         id: "adjust-urban-demand",
@@ -139,7 +180,8 @@ const OPERATION_CARDS = (theme: any) => [
   {
     id: "balance-delta-uses",
     title: "What if we balanced water uses in the Delta?",
-    bullet: { color: theme.palette.categories.deltaBalance, size: 24 }, // Delta Balance - Amber orange
+    bullet: { color: WATER_PALETTE.deltaBalance.primary, size: 24 },
+    titleColor: WATER_PALETTE.deltaBalance.secondary,
     subOptions: [
       {
         id: "delta-outflows-tier1",
@@ -182,7 +224,8 @@ const OPERATION_CARDS = (theme: any) => [
   {
     id: "new-infrastructure",
     title: "What if we added new water infrastructure?",
-    bullet: { color: theme.palette.categories.conveyanceProjects, size: 24 }, // Conveyance Projects - Earthy brown
+    bullet: { color: WATER_PALETTE.infrastructure.primary, size: 24 },
+    titleColor: WATER_PALETTE.infrastructure.secondary,
     subOptions: [
       {
         id: "delta-conveyance-tunnel",
@@ -606,6 +649,7 @@ const OperationsSelector: React.FC = () => {
               key={op.id}
               title={op.title}
               bullet={op.bullet}
+              titleColor={op.titleColor}
               subOptions={op.subOptions}
               selected={op.selected}
               onMainOptionChange={(checked) =>

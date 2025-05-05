@@ -25,6 +25,7 @@ export interface OperationCardProps {
     color: string
     size?: number
   }
+  titleColor?: string
   subOptions?: SubOption[]
   selected?: boolean
   onMainOptionChange?: (selected: boolean) => void
@@ -43,6 +44,7 @@ export interface OperationCardProps {
 export const OperationCard: React.FC<OperationCardProps> = ({
   title,
   bullet = { color: "#FF5722", size: 16 },
+  titleColor,
   subOptions = [],
   selected = false,
   onMainOptionChange,
