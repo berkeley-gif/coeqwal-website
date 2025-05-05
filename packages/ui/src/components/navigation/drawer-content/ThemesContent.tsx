@@ -97,7 +97,11 @@ export function ThemesContent({
         // Find the parent scrollable container
         let element = document.querySelector(".drawer-content-wrapper")
         if (element && element instanceof HTMLElement) {
-          element.scrollTop = 0
+          // Use smooth scrolling instead of instant jump
+          element.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          })
         }
       }, 300)
     }
