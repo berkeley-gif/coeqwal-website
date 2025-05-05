@@ -141,7 +141,7 @@ export function ThemesContent({
                     : "rgba(0, 0, 0, 0.02)",
                 transition: "all 0.2s ease",
                 "&:hover": {
-                  bgcolor: "rgba(0, 0, 0, 0.05)",
+                  bgcolor: "rgba(0, 0, 0, 0.08)",
                 },
                 // Highlight the selected theme
                 ...(item.id === selectedOperation && {
