@@ -35,7 +35,7 @@ export default function Home() {
   // const { t } = useTranslation()
 
   // State for the drawer's open status and active tab
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [, setDrawerOpen] = useState(false)
   const [activeDrawerTab, setActiveDrawerTab] = useState<TabKey | null>(null)
 
   // Track all sections including the ones for the top navigation
@@ -139,7 +139,6 @@ export default function Home() {
       {/* ===== MultiDrawer with tabs ===== */}
       <MultiDrawer
         drawerWidth={360}
-        isOpen={drawerOpen}
         onDrawerStateChange={handleDrawerStateChange}
         activeTab={activeDrawerTab}
         overlay={true}
