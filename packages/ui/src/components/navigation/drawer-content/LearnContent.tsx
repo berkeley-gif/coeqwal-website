@@ -26,26 +26,32 @@ export function LearnContent({ onClose }: LearnContentProps) {
   // Sample learn topics - replace with your actual topics
   const learnTopics = [
     {
-      title: "California Water System",
-      description: "Overview of California's complex water infrastructure",
-    },
-    {
-      title: "Managing Water",
-      description: "How water is managed across the state",
-    },
-    {
-      title: "Water Challenges",
+      title: "How water moves through California",
       description:
-        "Current and future challenges facing California's water system",
+        "An overview of the natural movement of water across the state.",
+    },
+    {
+      title: "How water is managed in California",
+      description:
+        "Governance, policies, and institutions manage and route our water resources.",
     },
     {
       title: "CalSim",
-      description: "Understanding the CalSim water modeling system",
+      description: "Understanding the CalSim water modeling.",
+    },
+    {
+      title: "Equity in California Water",
+      description:
+        "Exploring equitable access, distribution, and impacts of water in California.",
     },
   ]
 
   return (
-    <ContentWrapper title="Learn About California Water" onClose={onClose}>
+    <ContentWrapper
+      title="Learn About California Water"
+      onClose={onClose}
+      bgColor="rgb(191, 218, 220)"
+    >
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Explore these topics to learn more about California's water system and
         management.

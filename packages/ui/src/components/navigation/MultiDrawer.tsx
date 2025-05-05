@@ -38,9 +38,15 @@ interface RailButtonProps {
 /**
  * Button component for the mini rail - vertical tab style with vertical text
  */
-function RailButton({ label, onClick, active, bgColor, hoverColor }: RailButtonProps) {
+function RailButton({
+  label,
+  onClick,
+  active,
+  bgColor,
+  hoverColor,
+}: RailButtonProps) {
   const theme = useTheme()
-  
+
   return (
     <Box
       onClick={onClick}
@@ -58,20 +64,20 @@ function RailButton({ label, onClick, active, bgColor, hoverColor }: RailButtonP
         height: "180px", // Taller to accommodate longer text
         cursor: "pointer",
         position: "relative",
-        borderRight: active ? `4px solid ${theme.palette.primary.dark}` : "none",
+        borderRight: active
+          ? `4px solid ${theme.palette.primary.dark}`
+          : "none",
         border: "none", // Remove border
         transition: "all 0.2s ease",
-        "&:hover": { 
-          bgcolor: active 
-            ? theme.palette.primary.main 
-            : hoverColor,
+        "&:hover": {
+          bgcolor: active ? theme.palette.primary.main : hoverColor,
         },
       }}
       aria-label={`Open ${label} panel`}
     >
-      <Typography 
-        variant="button" 
-        sx={{ 
+      <Typography
+        variant="button"
+        sx={{
           fontWeight: 500, // Match secondary nav
           fontSize: "0.75rem", // Match secondary nav
           transform: "rotate(-90deg)",
@@ -186,13 +192,10 @@ export function MultiDrawer({
           borderRadius: 0, // No border radius
           border: "none", // No border
           boxShadow: "none", // No shadow
-          transition: theme.transitions.create(
-            ["opacity", "visibility"],
-            {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            },
-          ),
+          transition: theme.transitions.create(["opacity", "visibility"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
         }}
       >
         <RailButton

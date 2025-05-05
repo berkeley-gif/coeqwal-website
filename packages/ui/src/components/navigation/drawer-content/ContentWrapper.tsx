@@ -11,6 +11,8 @@ export interface ContentWrapperProps {
   children: React.ReactNode
   /** Function called when the close button is clicked */
   onClose: () => void
+  /** Optional background color for the wrapper */
+  bgColor?: string
 }
 
 /**
@@ -21,9 +23,18 @@ export function ContentWrapper({
   title,
   children,
   onClose,
+  bgColor,
 }: ContentWrapperProps) {
   return (
-    <Box sx={{ p: 2, width: "100%", height: "100%", overflow: "auto" }}>
+    <Box
+      sx={{
+        p: 2,
+        width: "100%",
+        height: "100%",
+        overflow: "auto",
+        bgcolor: bgColor,
+      }}
+    >
       <Box
         sx={{
           display: "flex",

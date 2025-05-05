@@ -64,7 +64,11 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
   }
 
   return (
-    <ContentWrapper title="Scenario Themes" onClose={onClose}>
+    <ContentWrapper
+      title="Scenario Themes"
+      onClose={onClose}
+      bgColor="rgb(118, 178, 190)"
+    >
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Save and manage themed scenarios that you can reapply later.
       </Typography>

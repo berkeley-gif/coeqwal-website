@@ -44,7 +44,11 @@ export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
   }
 
   return (
-    <ContentWrapper title="Current Operations" onClose={onClose}>
+    <ContentWrapper
+      title="Current Operations"
+      onClose={onClose}
+      bgColor="rgb(154, 203, 207)"
+    >
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Configure current water operation settings that will affect all
         scenarios.
