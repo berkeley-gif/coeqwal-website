@@ -6,7 +6,6 @@ import {
   Card,
   Typography,
   Checkbox,
-  IconButton,
   useTheme,
 } from "@mui/material"
 import VisibilityIcon from "@mui/icons-material/Visibility"
@@ -44,23 +43,20 @@ export interface OperationCardProps {
 export const OperationCard: React.FC<OperationCardProps> = ({
   title,
   bullet = { color: "#FF5722", size: 16 },
-  titleColor,
   subOptions = [],
-  selected = false,
-  onMainOptionChange,
   onSubOptionChange,
   onInfoClick,
 }) => {
   const theme = useTheme()
 
   // Use colors from the theme categories
-  const categoryColors = [
-    theme.palette.categories.groundwaterManagement, // Leafy green
-    theme.palette.categories.riverFlows, // Cool blue
-    theme.palette.categories.urbanWaterPriorities, // Plum purple
-    theme.palette.categories.deltaBalance, // Amber orange
-    theme.palette.categories.infrastructure, // Slate gray
-  ]
+//   const categoryColors = [
+//     theme.palette.categories.groundwaterManagement, // Leafy green
+//     theme.palette.categories.riverFlows, // Cool blue
+//     theme.palette.categories.urbanWaterPriorities, // Plum purple
+//     theme.palette.categories.deltaBalance, // Amber orange
+//     theme.palette.categories.infrastructure, // Slate gray
+//   ]
 
   // Generate a series of pastel colors for the capsules based on category colors
   const capsuleColors = [
@@ -128,7 +124,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               overflowWrap: "break-word",
               hyphens: "none",
               msHyphens: "none",
-              WebkitHyphens: "none"
+              WebkitHyphens: "none",
             }}
           >
             {title}
@@ -203,23 +199,25 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               <Checkbox
                 checked={option.selected}
                 disabled={option.disabled}
-                onChange={(e) => onSubOptionChange?.(option.id, e.target.checked)}
+                onChange={(e) =>
+                  onSubOptionChange?.(option.id, e.target.checked)
+                }
                 size="small"
                 sx={{
                   mr: theme.spacing(0.375),
                   p: theme.spacing(0.4),
 
                   /* Unchecked = white box with gray border */
-                  '& .MuiSvgIcon-root': {
-                    backgroundColor: 'white',
-                    borderRadius: '2px',
-                    color: '#9e9e9e',           // gray outline
+                  "& .MuiSvgIcon-root": {
+                    backgroundColor: "white",
+                    borderRadius: "2px",
+                    color: "#9e9e9e", // gray outline
                   },
 
                   /* Checked = white box + primary-color checkmark */
-                  '&.Mui-checked .MuiSvgIcon-root': {
+                  "&.Mui-checked .MuiSvgIcon-root": {
                     fill: theme.palette.primary.main,
-                    backgroundColor: 'black',
+                    backgroundColor: "black",
                     color: theme.palette.primary.main,
                   },
                 }}

@@ -70,36 +70,36 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
   } = useQuestionBuilderHelpers()
 
   // Calculate font size based on number of selections and exploratory mode
-  const calculatedFontSize = useMemo(() => {
-    // If in exploratory mode, use smaller font
-    if (isExploratoryMode) {
-      return "2.2rem" // Smaller text for exploratory mode
-    }
+  // const calculatedFontSize = useMemo(() => {
+  //   // If in exploratory mode, use smaller font
+  //   if (isExploratoryMode) {
+  //     return "2.2rem" // Smaller text for exploratory mode
+  //   }
 
-    // Count total selections
-    const operationsCount = selectedOperations.length
-    const outcomesCount = Object.values(outcomesBySection).reduce(
-      (count, section) => count + (section ? section.length : 0),
-      0,
-    )
+  //   // Count total selections
+  //   const operationsCount = selectedOperations.length
+  //   const outcomesCount = Object.values(outcomesBySection).reduce(
+  //     (count, section) => count + (section ? section.length : 0),
+  //     0,
+  //   )
 
-    const totalSelections = operationsCount + outcomesCount
+  //   const totalSelections = operationsCount + outcomesCount
 
-    // Default large size
-    if (totalSelections <= 1) return "4.8rem"
+  //   // Default large size
+  //   if (totalSelections <= 1) return "4.8rem"
 
-    // Medium size
-    if (totalSelections <= 3) return "4.2rem"
+  //   // Medium size
+  //   if (totalSelections <= 3) return "4.2rem"
 
-    // Medium-small size
-    if (totalSelections <= 5) return "3.6rem"
+  //   // Medium-small size
+  //   if (totalSelections <= 5) return "3.6rem"
 
-    // Small size
-    if (totalSelections <= 7) return "3.2rem"
+  //   // Small size
+  //   if (totalSelections <= 7) return "3.2rem"
 
-    // Extra small size
-    return "2.8rem"
-  }, [selectedOperations, outcomesBySection, isExploratoryMode])
+  //   // Extra small size
+  //   return "2.8rem"
+  // }, [selectedOperations, outcomesBySection, isExploratoryMode])
 
   // Expensive calculation for the summary text
   const summary = useMemo(() => {

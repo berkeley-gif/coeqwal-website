@@ -29,7 +29,11 @@ export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
         >
           What are current operations?
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1, lineHeight: 1.4 }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mt: 1, lineHeight: 1.4 }}
+        >
           The current operations scenario illustrates how water has been managed
           in recent years. It also serves as a reference point to compare
           against alternative scenarios in which changes in operations are

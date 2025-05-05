@@ -1,13 +1,7 @@
 "use client"
 
 import React from "react"
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  Chip,
-} from "@mui/material"
+import { Box, Typography, List, ListItem, Chip } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
 export interface ThemesContentProps {
@@ -58,7 +52,11 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
       onClose={onClose}
       bgColor="rgb(87, 137, 154)" /* #57899A */
     >
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.4 }}>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mb: 3, lineHeight: 1.4 }}
+      >
         We have organized the alternative scenarios we are running on CalSim
         into themes. In a technical sense, themes are clusters of multiple water
         operation settings that can be applied and varied.

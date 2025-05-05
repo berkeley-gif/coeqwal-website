@@ -4,16 +4,10 @@ import { useState } from "react"
 import {
   Box,
   Drawer,
-  IconButton,
-  Tooltip,
   useTheme,
   Fade,
   Typography,
 } from "@mui/material"
-
-// Icons
-import SchoolIcon from "@mui/icons-material/School"
-import SettingsIcon from "@mui/icons-material/Settings"
 
 // Content components
 import {

@@ -9,8 +9,8 @@ interface Props {
   onOpenThemesDrawer: () => void
 }
 
-export default function InvitationSection({ 
-  onOpenLearnDrawer,
+export default function InvitationSection({
+  // onOpenLearnDrawer,
   onOpenCurrentOpsDrawer,
   onOpenThemesDrawer,
 }: Props) {

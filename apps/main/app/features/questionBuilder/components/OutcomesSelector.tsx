@@ -122,7 +122,6 @@ const OutcomesSelector: React.FC = () => {
         <Typography
           variant="h3"
           sx={{
-            fontSize: (theme) => theme.cards.typography.hero.fontSize,
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
           }}

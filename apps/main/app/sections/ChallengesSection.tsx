@@ -9,10 +9,10 @@ interface Props {
   onOpenThemesDrawer: () => void
 }
 
-export default function ChallengesSection({ 
+export default function ChallengesSection({
   onOpenLearnDrawer,
-  onOpenCurrentOpsDrawer,
-  onOpenThemesDrawer
+  // onOpenCurrentOpsDrawer,
+  // onOpenThemesDrawer,
 }: Props) {
   const { t } = useTranslation()
 

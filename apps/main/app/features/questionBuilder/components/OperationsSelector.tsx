@@ -28,13 +28,13 @@ import {
   SearchIcon,
   Button,
 } from "@repo/ui/mui"
-import { Card, OperationCard, SubOption } from "@repo/ui"
+import { Card, OperationCard } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
 interface OperationsSelectorProps {
-  onOpenThemesDrawer?: () => void;
+  onOpenThemesDrawer?: () => void
 }
 
 // Organized palette for water operations with primary (dot) and secondary (title) colors
@@ -71,10 +71,10 @@ const WATER_PALETTE = {
     primary: "#00ACC1", // Teal - future water, adaptation
     secondary: "rgba(0, 172, 193, 0.85)",
   },
-};
+}
 
 // Card data for the operation cards
-const OPERATION_CARDS = (theme: any) => [
+const OPERATION_CARDS = () => [
   {
     id: "current-operations",
     title: "Current operations",
@@ -248,7 +248,9 @@ const OPERATION_CARDS = (theme: any) => [
   },
 ]
 
-const OperationsSelector: React.FC<OperationsSelectorProps> = ({ onOpenThemesDrawer }) => {
+const OperationsSelector: React.FC<OperationsSelectorProps> = ({
+  onOpenThemesDrawer,
+}) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -283,17 +285,17 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({ onOpenThemesDra
 
   // Filter operations based on search term
   const filteredOperations = useMemo(() => {
-    if (!searchTerm) return OPERATION_CARDS(theme)
+    if (!searchTerm) return OPERATION_CARDS()
 
     const lowercaseSearch = searchTerm.toLowerCase()
-    return OPERATION_CARDS(theme).filter(
+    return OPERATION_CARDS().filter(
       (op) =>
         op.title.toLowerCase().includes(lowercaseSearch) ||
         op.subOptions.some((sub) =>
           sub.label.toLowerCase().includes(lowercaseSearch),
         ),
     )
-  }, [searchTerm, theme])
+  }, [searchTerm])
 
   // Prepare the operation cards with selected state
   const operationCardsWithState = useMemo(() => {
@@ -320,7 +322,6 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({ onOpenThemesDra
 
   // Handle sub-option change
   const handleSubOptionChange = (
-    optionId: string,
     subOptionId: string,
     checked: boolean,
   ) => {
@@ -328,7 +329,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({ onOpenThemesDra
   }
 
   // Handle info click
-  const handleInfoClick = (optionId: string) => {
+  const handleInfoClick = () => {
     // Open the themes drawer when "Tell me more" is clicked
     if (onOpenThemesDrawer) {
       onOpenThemesDrawer()
@@ -662,9 +663,9 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({ onOpenThemesDra
                 handleMainOptionChange(op.id, checked)
               }
               onSubOptionChange={(subId, checked) =>
-                handleSubOptionChange(op.id, subId, checked)
+                handleSubOptionChange(subId, checked)
               }
-              onInfoClick={() => handleInfoClick(op.id)}
+              onInfoClick={() => handleInfoClick()}
             />
           ))}
         </Box>

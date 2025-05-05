@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import {
   Box,
   Typography,
@@ -52,8 +51,12 @@ export function LearnContent({ onClose }: LearnContentProps) {
       onClose={onClose}
       bgColor="rgb(128, 175, 196)" /* #80AFC4 */
     >
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3, lineHeight: 1.4 }}>
-        Explore these topics to learn more about California's water system and
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mb: 3, lineHeight: 1.4 }}
+      >
+        Explore these topics to learn more about California`&apos;`s water system and
         management.
       </Typography>
 
@@ -94,9 +97,9 @@ export function LearnContent({ onClose }: LearnContentProps) {
                   </Typography>
                 }
                 secondary={topic.description}
-                secondaryTypographyProps={{ 
+                secondaryTypographyProps={{
                   variant: "body1",
-                  sx: { lineHeight: 1.4 }
+                  sx: { lineHeight: 1.4 },
                 }}
               />
             </Box>
@@ -114,8 +117,12 @@ export function LearnContent({ onClose }: LearnContentProps) {
         >
           Why learn about water?
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 1, lineHeight: 1.4 }}>
-          Understanding California's water system helps you make more informed
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mt: 1, lineHeight: 1.4 }}
+        >
+          Understanding California`&apos;`s water system helps you make more informed
           choices when exploring water management scenarios.
         </Typography>
       </Box>

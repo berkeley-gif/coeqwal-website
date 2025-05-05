@@ -2,11 +2,11 @@
 
 import React, { useState, useRef, useMemo } from "react"
 import { Box } from "@repo/ui/mui"
-import { Header, MultiDrawer, VerticalDivider } from "@repo/ui"
+import { Header, MultiDrawer } from "@repo/ui"
 import type { SecondaryNavItem, TabKey } from "@repo/ui"
-import { useTranslation } from "@repo/i18n"
+// import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
-import { sectionIds, getNavigationItems } from "./config/navigation"
+import { sectionIds } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
 import MapContainer from "./components/MapContainer"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
@@ -32,7 +32,7 @@ const navSectionIds = {
 }
 
 export default function Home() {
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
 
   // State for the drawer's open status and active tab
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -55,11 +55,11 @@ export default function Home() {
   }
 
   // Get navigation items with the current active section and translation function
-  const navigationItems = getNavigationItems(
-    activeSection,
-    handleSectionClick,
-    t,
-  )
+  // const navigationItems = getNavigationItems(
+  //   activeSection,
+  //   handleSectionClick,
+  //   t,
+  // )
 
   // Handler for drawer state changes
   const handleDrawerStateChange = (
@@ -139,6 +139,7 @@ export default function Home() {
       {/* ===== MultiDrawer with tabs ===== */}
       <MultiDrawer
         drawerWidth={360}
+        isOpen={drawerOpen}
         onDrawerStateChange={handleDrawerStateChange}
         activeTab={activeDrawerTab}
         overlay={true}
@@ -183,7 +184,7 @@ export default function Home() {
           <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection 
+          <ChallengesSection
             onOpenLearnDrawer={handleOpenLearnDrawer}
             onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
             onOpenThemesDrawer={handleOpenThemesDrawer}
@@ -193,7 +194,7 @@ export default function Home() {
           <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Invitation panel with two columns */}
-          <InvitationSection 
+          <InvitationSection
             onOpenLearnDrawer={handleOpenLearnDrawer}
             onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
             onOpenThemesDrawer={handleOpenThemesDrawer}

@@ -7,7 +7,15 @@ import { styled } from "@mui/material/styles"
 export interface BasePanelProps extends BoxProps {
   fullHeight?: boolean
   background?: "light" | "dark" | "accent" | "transparent" | "interstitial"
-  paddingVariant?: "normal" | "narrow" | "wide" | "very-wide" | "content-first" | "content-middle" | "content-last" | "none"
+  paddingVariant?:
+    | "normal"
+    | "narrow"
+    | "wide"
+    | "very-wide"
+    | "content-first"
+    | "content-middle"
+    | "content-last"
+    | "none"
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
   /**
@@ -74,7 +82,7 @@ const PanelRoot = styled(Box, {
         : "192px"
       return `${topPad} 192px 120px 192px` // Full top padding, increased bottom (120px)
     }
-    
+
     // Middle content section: reduced top/bottom padding
     if (paddingVariant === "content-middle") {
       const topPad = includeHeaderSpacing
@@ -82,7 +90,7 @@ const PanelRoot = styled(Box, {
         : "80px"
       return `${topPad} 192px 120px 192px` // Top 80px, bottom 120px for 200px between sections
     }
-    
+
     // Last content section: reduced top, full bottom padding
     if (paddingVariant === "content-last") {
       const topPad = includeHeaderSpacing

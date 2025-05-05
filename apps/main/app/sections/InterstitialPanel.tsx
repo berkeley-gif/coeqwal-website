@@ -52,9 +52,7 @@ export default function InterstitialPanel() {
               </Box>
               {" " + t("interstitial.part1")}
             </Typography>
-            <Typography variant="body2">
-              {t("interstitial.part2")}
-            </Typography>
+            <Typography variant="body2">{t("interstitial.part2")}</Typography>
           </Stack>
         </Box>
 

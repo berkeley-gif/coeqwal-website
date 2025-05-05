@@ -34,7 +34,7 @@ import {
 
 // CombinedPanel props interface
 interface CombinedPanelProps {
-  onOpenThemesDrawer?: () => void;
+  onOpenThemesDrawer?: () => void
 }
 
 // Type for scenario data
@@ -620,7 +620,11 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
         >
           {/* Column 1: Operations or outcome text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? <OutcomesSelector /> : <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />}
+            {swapped ? (
+              <OutcomesSelector />
+            ) : (
+              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
+            )}
           </Grid>
 
           {/* Column 2: Action verb & switch - aligned to top */}
@@ -674,7 +678,11 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
 
           {/* Column 3: Outcomes or operations text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} /> : <OutcomesSelector />}
+            {swapped ? (
+              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
+            ) : (
+              <OutcomesSelector />
+            )}
           </Grid>
 
           {/* Column 4: "with" label */}
@@ -707,7 +715,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
 
         {/* Scenario Results Section */}
         <Box
-          sx={{ 
+          sx={{
             width: "100%",
           }}
           data-section="scenario-results"
