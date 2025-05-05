@@ -68,11 +68,6 @@ export function ThemesContent({
     },
   ])
 
-  // Find the selected theme if an operation ID was provided
-  const selectedTheme = selectedOperation
-    ? themes.find((theme) => theme.id === selectedOperation)
-    : undefined
-
   // Set up ref callback to store theme elements in the ref map
   const setThemeRef = useCallback((el: HTMLDivElement | null, id: string) => {
     themeRefs.current[id] = el
@@ -95,7 +90,7 @@ export function ThemesContent({
       // If no selectedOperation, scroll to top
       setTimeout(() => {
         // Find the parent scrollable container
-        let element = document.querySelector(".drawer-content-wrapper")
+        const element = document.querySelector(".drawer-content-wrapper")
         if (element && element instanceof HTMLElement) {
           // Use smooth scrolling instead of instant jump
           element.scrollTo({
