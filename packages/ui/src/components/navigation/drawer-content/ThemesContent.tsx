@@ -118,38 +118,34 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
               </IconButton>
             }
           >
-            <ListItemText
-              primary={
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 500, mb: 0.5, pr: 4 }}
-                >
-                  {item.name}
-                </Typography>
-              }
-              secondary={
-                <Box>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    {item.description}
-                  </Typography>
-                  <Box>
-                    {item.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        variant="outlined"
-                        sx={{ mr: 0.5, mb: 0.5 }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              }
-            />
+            <Box sx={{ flexGrow: 1, pr: 4 }}>
+              <Typography
+                variant="subtitle1"
+                component="div"
+                sx={{ fontWeight: 500, mb: 0.5 }}
+              >
+                {item.name}
+              </Typography>
+              <Typography
+                variant="body2"
+                component="div"
+                color="text.secondary"
+                sx={{ mb: 1 }}
+              >
+                {item.description}
+              </Typography>
+              <Box>
+                {item.tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    size="small"
+                    variant="outlined"
+                    sx={{ mr: 0.5, mb: 0.5 }}
+                  />
+                ))}
+              </Box>
+            </Box>
           </ListItem>
         ))}
       </List>
