@@ -448,6 +448,9 @@ const theme = createTheme({
           margin: 0;
           padding: 0;
           letter-spacing: normal;
+          hyphens: none;
+          -ms-hyphens: none;
+          -webkit-hyphens: none;
         }
         html, body {
           margin: 0;

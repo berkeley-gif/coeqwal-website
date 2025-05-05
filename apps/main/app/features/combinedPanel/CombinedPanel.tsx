@@ -454,7 +454,7 @@ const CombinedPanelContent = () => {
               alignItems: "center",
               width: "100%",
               mt: 2,
-              pr: 4,
+              pr: 10,
             }}
           >
             {/* Climate checkbox and search button in same row, both right-aligned */}

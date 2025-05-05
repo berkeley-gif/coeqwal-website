@@ -116,17 +116,17 @@ export const OperationCard: React.FC<OperationCardProps> = ({
 
           {/* Title */}
           <Typography
-            variant="h6"
+            variant="body1"
             sx={{
               fontWeight: (theme) =>
                 theme.cards.typography.cardTitle.fontWeight,
-              fontSize: (theme) => theme.cards.typography.cardTitle.fontSize,
               lineHeight: (theme) =>
                 theme.cards.typography.cardTitle.lineHeight,
-              letterSpacing: "-0.01em",
               wordBreak: "break-word",
               overflowWrap: "break-word",
-              hyphens: "auto",
+              hyphens: "none",
+              msHyphens: "none",
+              WebkitHyphens: "none"
             }}
           >
             {title}

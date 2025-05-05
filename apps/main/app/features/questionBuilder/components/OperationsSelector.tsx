@@ -48,7 +48,7 @@ const OPERATION_CARDS = (theme: any) => [
   },
   {
     id: "remove-tucps",
-    title: "What if we removed temporary emergency changes (TUCP's)?",
+    title: "What if we removed temporary emergency measures (TUCP's)?",
     bullet: { color: theme.palette.categories.noFlowRequirements, size: 24 }, // No Flow Requirements - Red
     subOptions: [
       {
@@ -438,7 +438,6 @@ const OperationsSelector: React.FC = () => {
         <Typography
           variant="h3"
           sx={{
-            fontSize: (theme) => theme.cards.typography.hero.fontSize,
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
           }}

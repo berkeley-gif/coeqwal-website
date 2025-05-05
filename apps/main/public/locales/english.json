@@ -109,7 +109,7 @@
     "operationsSelector": {
       "title": "{{decisions}}",
       "swappedTitle": "could we consider?",
-      "searchPlaceholder": "Type to search...",
+      "searchPlaceholder": "Operations search coming soon",
       "searchOperations": "Search operations",
       "comingSoon": "Coming Soon"
     },

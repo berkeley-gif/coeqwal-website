@@ -1357,7 +1357,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           mb: 0,
           lineHeight: theme.cards.typography.hero.lineHeight,
           textAlign: "center",
-          fontWeight: theme.cards.typography.hero.fontWeight,
+          fontWeight: 400,
           width: "100%",
           margin: "0 auto",
           backgroundColor: "white",
