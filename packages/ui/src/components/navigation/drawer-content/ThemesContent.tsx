@@ -20,6 +20,13 @@ export function ThemesContent({
 }: ThemesContentProps) {
   const [themes] = React.useState([
     {
+      id: "remove-tucps",
+      name: "Temporary emergency measures (TUCP's)",
+      description:
+        "Temporary Urgency Change Petitions (TUCPs) allow water‑right holders to temporarily (up to 180 days) modify the terms of their permits or licenses during urgent conditions such as extreme drought.",
+      tags: ["drought", "policy", "flows", "salinity"],
+    },
+    {
       id: "limit-groundwater",
       name: "Limiting groundwater pumping",
       description:
