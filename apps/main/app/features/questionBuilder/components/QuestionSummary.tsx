@@ -1367,14 +1367,14 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         display: "flex",
       }}
       sx={{
-        mt: 3,
+        mt: 6,
       }}
     >
       <Typography
         variant="h2"
         ref={textRef}
         sx={(theme) => ({
-          mt: theme.spacing(4),
+          mt: theme.spacing(6),
           mb: 0,
           lineHeight: theme.cards.typography.hero.lineHeight,
           textAlign: "center",
@@ -1382,8 +1382,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           width: "100%",
           margin: "0 auto",
           backgroundColor: "white",
-          paddingTop: isExploratoryMode ? "20px" : "20px", // Reduce padding in exploratory mode
-          paddingBottom: isExploratoryMode ? "12px" : 0, // Reduce padding in exploratory mode
+          paddingTop: isExploratoryMode ? "30px" : "40px",
+          paddingBottom: isExploratoryMode ? "12px" : 0,
           paddingLeft: "5%",
           paddingRight: "5%",
           boxShadow: "none",
