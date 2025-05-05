@@ -129,40 +129,21 @@ export default function Home() {
         drawerWidth={360}
         onDrawerStateChange={handleDrawerStateChange}
         activeTab={activeDrawerTab}
-      />
-
-      {/* ===== Drawer "border" ===== */}
-      <VerticalDivider
-        right={(theme) =>
-          drawerOpen
-            ? theme.layout.drawer.width
-            : theme.layout.drawer.closedWidth
-        }
-        animated
+        overlay={true}
       />
 
       {/* ===== Main Content Area ===== */}
       <Box
-        sx={(theme) => ({
+        sx={{
           position: "relative",
           zIndex: 20,
           pointerEvents: "none",
-          marginRight: drawerOpen
-            ? `${theme.layout.drawer.width}px`
-            : `${theme.layout.drawer.closedWidth}px`,
-          transition: theme.transitions.create("margin", {
-            easing: theme.transitions.easing.sharp,
-            duration: drawerOpen
-              ? theme.transitions.duration.enteringScreen
-              : theme.transitions.duration.leavingScreen,
-          }),
-        })}
+          width: "100%",
+        }}
       >
         {/* Header */}
         <Box sx={{ pointerEvents: "auto" }}>
           <Header
-            drawerOpen={drawerOpen}
-            drawerPosition="right"
             activeSection={activeSection}
             onSectionClick={handleSectionClick}
             showSecondaryNav={true}

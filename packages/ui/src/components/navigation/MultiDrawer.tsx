@@ -104,6 +104,12 @@ export interface MultiDrawerProps {
    * If provided, the drawer becomes a controlled component
    */
   activeTab?: TabKey | null
+
+  /**
+   * When true, the drawer and tabs will overlay content instead of pushing it aside
+   * @default false
+   */
+  overlay?: boolean
 }
 
 /**
@@ -118,6 +124,7 @@ export function MultiDrawer({
   drawerWidth = 360,
   onDrawerStateChange,
   activeTab: controlledActiveTab,
+  overlay = false,
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -166,7 +173,7 @@ export function MultiDrawer({
           transform: "translateY(-50%)", // Center vertically without X translation
           opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
           visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
-          zIndex: 1200, // Ensure tabs are above other content
+          zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -214,6 +221,9 @@ export function MultiDrawer({
         open={drawerOpen}
         onClose={close}
         sx={{
+          // Use higher z-index in overlay mode
+          zIndex: overlay ? 1300 : theme.zIndex.drawer,
+          position: "relative",
           ".MuiDrawer-paper": {
             width: drawerWidth,
             transition: theme.transitions.create("width", {
@@ -221,7 +231,9 @@ export function MultiDrawer({
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflow: "hidden", // Prevent scrollbar flicker during transitions
-            zIndex: theme.zIndex.drawer,
+            zIndex: overlay ? 1300 : theme.zIndex.drawer,
+            // Don't push content in overlay mode
+            position: overlay ? "fixed" : "relative",
           },
         }}
       >
