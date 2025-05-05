@@ -7,7 +7,7 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 
 // Add props interface
 interface CalSimSectionProps {
-  onOpenLearnDrawer?: () => void
+  onOpenLearnDrawer?: (sectionId: string) => void
 }
 
 export default function CalSimSection({
@@ -94,11 +94,16 @@ export default function CalSimSection({
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() =>
-                  onOpenLearnDrawer
-                    ? onOpenLearnDrawer()
-                    : useDrawerStore.getState().openDrawer("learn")
-                }
+                onClick={() => {
+                  if (onOpenLearnDrawer) {
+                    onOpenLearnDrawer("calsim")
+                  } else {
+                    useDrawerStore
+                      .getState()
+                      .setDrawerContent({ selectedSection: "calsim" })
+                    useDrawerStore.getState().openDrawer("learn")
+                  }
+                }}
               />
             </Box>
           </Box>

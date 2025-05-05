@@ -7,9 +7,9 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 
 // Add props interface
 interface InvitationSectionProps {
-  onOpenLearnDrawer?: () => void
-  onOpenCurrentOpsDrawer?: () => void
-  onOpenThemesDrawer?: () => void
+  onOpenLearnDrawer?: (sectionId: string) => void
+  onOpenCurrentOpsDrawer?: (sectionId: string) => void
+  onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 export default function InvitationSection({
@@ -95,11 +95,16 @@ export default function InvitationSection({
 
               <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
                 <ExploreButton
-                  onClick={() =>
-                    onOpenCurrentOpsDrawer
-                      ? onOpenCurrentOpsDrawer()
-                      : useDrawerStore.getState().openDrawer("currentOps")
-                  }
+                  onClick={() => {
+                    if (onOpenCurrentOpsDrawer) {
+                      onOpenCurrentOpsDrawer("invitation")
+                    } else {
+                      useDrawerStore
+                        .getState()
+                        .setDrawerContent({ selectedSection: "invitation" })
+                      useDrawerStore.getState().openDrawer("currentOps")
+                    }
+                  }}
                 >
                   Explore Current Operations
                 </ExploreButton>
@@ -109,11 +114,16 @@ export default function InvitationSection({
 
               <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
                 <ExploreButton
-                  onClick={() =>
-                    onOpenThemesDrawer
-                      ? onOpenThemesDrawer()
-                      : useDrawerStore.getState().openDrawer("themes")
-                  }
+                  onClick={() => {
+                    if (onOpenThemesDrawer) {
+                      onOpenThemesDrawer("invitation")
+                    } else {
+                      useDrawerStore
+                        .getState()
+                        .setDrawerContent({ selectedSection: "invitation" })
+                      useDrawerStore.getState().openDrawer("themes")
+                    }
+                  }}
                 >
                   Explore Scenario Themes
                 </ExploreButton>

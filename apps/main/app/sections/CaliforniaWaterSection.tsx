@@ -11,7 +11,7 @@ import { views } from "../config/mapViews"
 
 // Add props interface
 interface CaliforniaWaterSectionProps {
-  onOpenLearnDrawer?: () => void
+  onOpenLearnDrawer?: (sectionId: string) => void
 }
 
 export default function CaliforniaWaterSection({
@@ -130,11 +130,16 @@ export default function CaliforniaWaterSection({
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() =>
-                  onOpenLearnDrawer
-                    ? onOpenLearnDrawer()
-                    : useDrawerStore.getState().openDrawer("learn")
-                }
+                onClick={() => {
+                  if (onOpenLearnDrawer) {
+                    onOpenLearnDrawer("california-water")
+                  } else {
+                    useDrawerStore
+                      .getState()
+                      .setDrawerContent({ selectedSection: "california-water" })
+                    useDrawerStore.getState().openDrawer("learn")
+                  }
+                }}
               />
             </Box>
           </Box>

@@ -7,9 +7,9 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 
 // Add props interface
 interface ChallengesSectionProps {
-  onOpenLearnDrawer?: () => void
-  onOpenCurrentOpsDrawer?: () => void
-  onOpenThemesDrawer?: () => void
+  onOpenLearnDrawer?: (sectionId: string) => void
+  onOpenCurrentOpsDrawer?: (sectionId: string) => void
+  onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 export default function ChallengesSection({
@@ -100,11 +100,17 @@ export default function ChallengesSection({
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() =>
-                  onOpenLearnDrawer
-                    ? onOpenLearnDrawer()
-                    : useDrawerStore.getState().openDrawer("learn")
-                }
+                sx={{ mb: 2, fontSize: "0.875rem" }}
+                onClick={() => {
+                  if (onOpenLearnDrawer) {
+                    onOpenLearnDrawer("challenges")
+                  } else {
+                    useDrawerStore
+                      .getState()
+                      .setDrawerContent({ selectedSection: "challenges" })
+                    useDrawerStore.getState().openDrawer("learn")
+                  }
+                }}
               />
             </Box>
           </Box>

@@ -7,7 +7,7 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 
 // Add props interface
 interface ManagingWaterSectionProps {
-  onOpenLearnDrawer?: () => void
+  onOpenLearnDrawer?: (sectionId: string) => void
 }
 
 export default function ManagingWaterSection({
@@ -78,11 +78,16 @@ export default function ManagingWaterSection({
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() =>
-                  onOpenLearnDrawer
-                    ? onOpenLearnDrawer()
-                    : useDrawerStore.getState().openDrawer("learn")
-                }
+                onClick={() => {
+                  if (onOpenLearnDrawer) {
+                    onOpenLearnDrawer("managing-water")
+                  } else {
+                    useDrawerStore
+                      .getState()
+                      .setDrawerContent({ selectedSection: "managing-water" })
+                    useDrawerStore.getState().openDrawer("learn")
+                  }
+                }}
               />
             </Box>
           </Box>

@@ -7,12 +7,17 @@ import { ContentWrapper } from "./ContentWrapper"
 export interface CurrentOpsContentProps {
   /** Function called when the close button is clicked */
   onClose: () => void
+  /** Selected section ID passed from the drawer store */
+  selectedSection?: string
 }
 
 /**
  * Content component for the Current Operations tab in the MultiDrawer
  */
-export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
+export function CurrentOpsContent({
+  onClose,
+  selectedSection,
+}: CurrentOpsContentProps) {
   return (
     <ContentWrapper
       title="Current Operations"

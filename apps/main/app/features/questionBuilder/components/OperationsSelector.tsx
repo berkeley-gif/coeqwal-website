@@ -336,9 +336,19 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
       const drawerStore = useDrawerStore.getState()
 
       // Check if the "themes" drawer is already open
-      // If it is, close it; otherwise, open it
       if (drawerStore.activeTab === "themes") {
-        drawerStore.closeDrawer()
+        // Check if this is the same operation that's currently selected
+        const currentOperation = drawerStore.content?.selectedOperation as
+          | string
+          | undefined
+
+        if (currentOperation === operationId) {
+          // Same operation - close the drawer (toggle behavior)
+          drawerStore.closeDrawer()
+        } else {
+          // Different operation - switch context instead of closing
+          drawerStore.setDrawerContent({ selectedOperation: operationId })
+        }
       } else {
         // Open drawer and store the operation ID as drawer content
         drawerStore.setDrawerContent({ selectedOperation: operationId })

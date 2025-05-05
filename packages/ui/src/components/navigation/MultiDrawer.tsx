@@ -268,7 +268,14 @@ export function MultiDrawer({
               overflow: "auto",
             }}
           >
-            {activeTab === "learn" && <LearnContent onClose={close} />}
+            {activeTab === "learn" && (
+              <LearnContent
+                onClose={close}
+                selectedSection={
+                  drawerContent.selectedSection as string | undefined
+                }
+              />
+            )}
           </Box>
         </Fade>
 
@@ -281,7 +288,12 @@ export function MultiDrawer({
             }}
           >
             {activeTab === "currentOps" && (
-              <CurrentOpsContent onClose={close} />
+              <CurrentOpsContent
+                onClose={close}
+                selectedSection={
+                  drawerContent.selectedSection as string | undefined
+                }
+              />
             )}
           </Box>
         </Fade>

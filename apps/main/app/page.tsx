@@ -85,13 +85,25 @@ export default function Home() {
   const handleOpenThemesDrawer = (operationId?: string) => {
     // Check if the themes drawer is already open
     if (activeDrawerTab === "themes") {
-      // If it's already open, close it
-      closeDrawer()
+      // Check if this is the same operation that's currently selected
+      const drawerStore = useDrawerStore.getState()
+      const currentOperation = drawerStore.content?.selectedOperation as
+        | string
+        | undefined
 
-      // Keep the legacy state in sync for components not yet migrated
-      setDrawerOpen(false)
-      setActiveDrawerTab(null)
-      return
+      if (currentOperation === operationId) {
+        // Same operation - close the drawer (toggle behavior)
+        closeDrawer()
+
+        // Keep the legacy state in sync for components not yet migrated
+        setDrawerOpen(false)
+        setActiveDrawerTab(null)
+        return
+      } else {
+        // Different operation - just update the content instead of closing
+        drawerStore.setDrawerContent({ selectedOperation: operationId })
+        return
+      }
     }
 
     // Store the operation ID in the drawer content if provided
@@ -108,7 +120,34 @@ export default function Home() {
   }
 
   // Handler to open specific drawer tabs - using the store
-  const handleOpenLearnDrawer = () => {
+  const handleOpenLearnDrawer = (sectionId?: string) => {
+    // Check if the learn drawer is already open
+    if (activeDrawerTab === "learn") {
+      // Check if this is the same section that's currently selected
+      const drawerStore = useDrawerStore.getState()
+      const currentSection = drawerStore.content?.selectedSection as
+        | string
+        | undefined
+
+      if (currentSection === sectionId) {
+        // Same section - close the drawer (toggle behavior)
+        closeDrawer()
+
+        // Keep the legacy state in sync for components not yet migrated
+        setDrawerOpen(false)
+        setActiveDrawerTab(null)
+        return
+      } else {
+        // Different section - just update the content instead of closing
+        drawerStore.setDrawerContent({ selectedSection: sectionId })
+        return
+      }
+    }
+
+    // Store the section ID in the drawer content if provided
+    if (sectionId) {
+      useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
+    }
     openDrawer("learn")
 
     // Keep the legacy state in sync for components not yet migrated
@@ -116,7 +155,34 @@ export default function Home() {
     setActiveDrawerTab("learn")
   }
 
-  const handleOpenCurrentOpsDrawer = () => {
+  const handleOpenCurrentOpsDrawer = (sectionId?: string) => {
+    // Check if the currentOps drawer is already open
+    if (activeDrawerTab === "currentOps") {
+      // Check if this is the same section that's currently selected
+      const drawerStore = useDrawerStore.getState()
+      const currentSection = drawerStore.content?.selectedSection as
+        | string
+        | undefined
+
+      if (currentSection === sectionId) {
+        // Same section - close the drawer (toggle behavior)
+        closeDrawer()
+
+        // Keep the legacy state in sync for components not yet migrated
+        setDrawerOpen(false)
+        setActiveDrawerTab(null)
+        return
+      } else {
+        // Different section - just update the content instead of closing
+        drawerStore.setDrawerContent({ selectedSection: sectionId })
+        return
+      }
+    }
+
+    // Store the section ID in the drawer content if provided
+    if (sectionId) {
+      useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
+    }
     openDrawer("currentOps")
 
     // Keep the legacy state in sync for components not yet migrated
