@@ -73,7 +73,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
     <Card
       sx={{
         width: "100%",
-        p: (theme) => theme.cards.spacing.padding,
+        p: (theme) => theme.spacing(2.5),
         mb: (theme) => theme.cards.spacing.gap / 2,
         backgroundColor: "#FFFFFF",
         boxShadow: "none",
@@ -88,7 +88,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
           alignItems: "flex-start",
           justifyContent: "space-between",
           width: "100%",
-          mb: subOptions.length > 0 ? theme.spacing(2.5) : 0,
+          mb: subOptions.length > 0 ? theme.spacing(2) : 0,
         }}
       >
         <Box
@@ -96,7 +96,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
             display: "flex",
             alignItems: "flex-start",
             flexGrow: 1,
-            pr: 2,
+            pr: 1.5,
             overflow: "hidden",
             maxWidth: "calc(100% - 110px)",
           }}
@@ -108,7 +108,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               height: bullet.size,
               borderRadius: "50%",
               bgcolor: bullet.color,
-              mr: theme.spacing(2),
+              mr: theme.spacing(1.75),
               flexShrink: 0,
               marginTop: "5px",
             }}
@@ -157,7 +157,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
           <Typography
             variant="body2"
             sx={{
-              mr: theme.spacing(0.5),
+              mr: theme.spacing(0.25),
               fontSize: (theme) => theme.cards.typography.caption.fontSize,
               fontWeight: (theme) => theme.cards.typography.caption.fontWeight,
               opacity: 0.8,
@@ -178,7 +178,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: (theme) => theme.spacing(1.5),
+            gap: (theme) => theme.spacing(1.25),
           }}
         >
           {subOptions.map((option, index) => (
@@ -190,10 +190,10 @@ export const OperationCard: React.FC<OperationCardProps> = ({
                 bgcolor:
                   option.color || capsuleColors[index % capsuleColors.length],
                 borderRadius: theme.spacing(3),
-                py: (theme) => theme.cards.spacing.capsule.py,
+                py: (theme) => theme.spacing(0.375),
                 px: (theme) => theme.cards.spacing.capsule.px,
-                mr: (theme) => theme.cards.spacing.capsule.marginRight,
-                mb: (theme) => theme.cards.spacing.capsule.marginBottom,
+                mr: (theme) => theme.spacing(0.75),
+                mb: (theme) => theme.spacing(0.5),
                 width: "fit-content",
                 maxWidth: "100%",
               }}
@@ -206,8 +206,8 @@ export const OperationCard: React.FC<OperationCardProps> = ({
                 }
                 size="small"
                 sx={{
-                  mr: theme.spacing(0.5),
-                  p: theme.spacing(0.5),
+                  mr: theme.spacing(0.375),
+                  p: theme.spacing(0.4),
                   "&.Mui-checked": {
                     color: theme.palette.primary.main,
                   },
