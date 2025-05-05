@@ -28,7 +28,7 @@ export default function InterstitialPanel() {
       id="interstitial"
       sx={{
         position: "relative",
-        height: "100vh",
+        height: "auto",
         zIndex: 1,
       }}
     >

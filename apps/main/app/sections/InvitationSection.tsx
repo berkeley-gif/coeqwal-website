@@ -30,12 +30,12 @@ export default function InvitationSection({
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -69,7 +69,8 @@ export default function InvitationSection({
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-last"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -86,10 +87,10 @@ export default function InvitationSection({
               {t("invitation.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph("invitation.paragraph1", undefined, false)}
 
-              <Box sx={{ mt: 2, mb: 3 }}>
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
                 <ExploreButton onClick={onOpenCurrentOpsDrawer}>
                   Explore Current Operations
                 </ExploreButton>
@@ -97,7 +98,7 @@ export default function InvitationSection({
 
               {renderParagraph("invitation.paragraph2", undefined, false)}
 
-              <Box sx={{ mt: 2, mb: 3 }}>
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
                 <ExploreButton onClick={onOpenThemesDrawer}>
                   Explore Scenario Themes
                 </ExploreButton>

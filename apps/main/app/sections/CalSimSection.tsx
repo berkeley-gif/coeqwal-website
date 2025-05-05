@@ -24,12 +24,12 @@ export default function CalSimSection({ onOpenLearnDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -63,7 +63,8 @@ export default function CalSimSection({ onOpenLearnDrawer }: Props) {
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-middle"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -80,13 +81,13 @@ export default function CalSimSection({ onOpenLearnDrawer }: Props) {
               {t("calsim.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph("calsim.paragraph1", undefined, false)}
               {renderParagraph("calsim.paragraph2", undefined, false)}
               {renderParagraph("calsim.paragraph3", undefined, false)}
             </Stack>
 
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>

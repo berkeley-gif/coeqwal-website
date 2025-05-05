@@ -30,12 +30,12 @@ export default function ChallengesSection({
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -64,12 +64,14 @@ export default function ChallengesSection({
     <Box
       id="challenges"
       sx={{
+        mt: 0,
         pointerEvents: "auto",
       }}
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-middle"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -86,14 +88,14 @@ export default function ChallengesSection({
               {t("challenges.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph("challenges.paragraph1", undefined, false)}
               {renderParagraph("challenges.paragraph2", undefined, false)}
               {renderParagraph("challenges.paragraph3", undefined, false)}
               {renderParagraph("challenges.paragraph4", undefined, false)}
             </Stack>
 
-            <Box sx={{ mt: 3 }}>
+            <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>

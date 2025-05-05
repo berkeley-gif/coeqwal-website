@@ -32,6 +32,8 @@ interface RailButtonProps {
   active?: boolean
   bgColor: string
   hoverColor: string
+  topButton?: boolean
+  bottomButton?: boolean
 }
 
 /**
@@ -43,6 +45,8 @@ function RailButton({
   active,
   bgColor,
   hoverColor,
+  topButton,
+  bottomButton,
 }: RailButtonProps) {
   const theme = useTheme()
 
@@ -60,9 +64,11 @@ function RailButton({
         padding: "12px 2px", // Reduced horizontal padding
         my: 0,
         width: "60px", // Wider to accommodate longer text
-        height: "180px", // Taller to accommodate longer text
+        height: "220px", // Increased height for more text space
         cursor: "pointer",
         position: "relative",
+        borderTopLeftRadius: topButton ? "8px" : 0,
+        borderBottomLeftRadius: bottomButton ? "8px" : 0,
         borderRight: active
           ? `4px solid ${theme.palette.primary.dark}`
           : "none",
@@ -199,9 +205,9 @@ export function MultiDrawer({
           flexDirection: "column",
           alignItems: "center",
           gap: 0, // No gap between buttons
+          overflow: "hidden", // Ensure child border-radius is respected
           p: 0, // No padding
           backgroundColor: "transparent", // Transparent background
-          borderRadius: 0, // No border radius
           border: "none", // No border
           boxShadow: "none", // No shadow
           transition: theme.transitions.create(["opacity", "visibility"], {
@@ -216,6 +222,7 @@ export function MultiDrawer({
           active={activeTab === "learn"}
           bgColor="rgb(128, 175, 196)" /* #80AFC4 */
           hoverColor="rgb(113, 160, 181)" /* #71A0B5 */
+          topButton
         />
         <RailButton
           label="CURRENT OPERATIONS"
@@ -230,6 +237,7 @@ export function MultiDrawer({
           active={activeTab === "themes"}
           bgColor="rgb(87, 137, 154)" /* #57899A */
           hoverColor="rgb(76, 123, 138)" /* #4C7B8A */
+          bottomButton
         />
       </Box>
 
