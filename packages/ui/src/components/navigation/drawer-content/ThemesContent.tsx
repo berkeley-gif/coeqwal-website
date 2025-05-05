@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 import { Box, Typography, List, ListItem, Chip } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
@@ -18,6 +18,11 @@ export function ThemesContent({
   onClose,
   selectedOperation,
 }: ThemesContentProps) {
+  // Create a map to store refs for each theme item
+  const themeRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  // Main content container ref
+  const contentRef = useRef<HTMLDivElement | null>(null)
+
   const [themes] = React.useState([
     {
       id: "remove-tucps",
@@ -68,111 +73,101 @@ export function ThemesContent({
     ? themes.find((theme) => theme.id === selectedOperation)
     : undefined
 
+  // Set up ref callback to store theme elements in the ref map
+  const setThemeRef = useCallback((el: HTMLDivElement | null, id: string) => {
+    themeRefs.current[id] = el
+  }, [])
+
+  // Effect to scroll to the selected theme when the drawer opens
+  useEffect(() => {
+    if (selectedOperation && themeRefs.current[selectedOperation]) {
+      // Get the element to scroll to
+      const element = themeRefs.current[selectedOperation]
+
+      // Add a small delay to ensure the drawer is fully open
+      setTimeout(() => {
+        if (element) {
+          // Scroll the element into view with a smooth animation
+          element.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      }, 300)
+    }
+  }, [selectedOperation])
+
   return (
     <ContentWrapper
-      title={selectedTheme ? `Theme: ${selectedTheme.name}` : "Scenario Themes"}
+      title="Scenario Themes"
       onClose={onClose}
       bgColor="rgb(87, 137, 154)" /* #57899A */
     >
-      {selectedTheme ? (
-        // Show detailed view for a specific theme
-        <Box>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 2, lineHeight: 1.4 }}
-          >
-            {selectedTheme.description}
-          </Typography>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mb: 3, lineHeight: 1.4 }}
+      >
+        We have organized the alternative scenarios we are running on CalSim
+        into themes. In a technical sense, themes are clusters of multiple water
+        operation settings that can be applied and varied.
+      </Typography>
 
-          <Box sx={{ mb: 2 }}>
-            {selectedTheme.tags.map((tag) => (
-              <Chip
-                key={tag}
-                label={tag}
-                size="small"
-                variant="outlined"
-                sx={{ color: "white", mr: 0.5, mb: 0.5 }}
-              />
-            ))}
-          </Box>
-
-          <Typography variant="h6" sx={{ mb: 1, mt: 3, fontWeight: 500 }}>
-            Related scenarios and impacts
-          </Typography>
-
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 3, lineHeight: 1.4 }}
-          >
-            Explore various scenarios related to{" "}
-            {selectedTheme.name.toLowerCase()}, including potential impacts on
-            water availability, environmental conditions, and communities.
-          </Typography>
-        </Box>
-      ) : (
-        // Show the list of all themes
-        <>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{ mb: 3, lineHeight: 1.4 }}
-          >
-            We have organized the alternative scenarios we are running on CalSim
-            into themes. In a technical sense, themes are clusters of multiple
-            water operation settings that can be applied and varied.
-          </Typography>
-
-          <List sx={{ width: "100%", p: 0 }}>
-            {themes.map((item) => (
-              <ListItem
-                key={item.id}
-                component="div"
-                sx={{
-                  mb: 1.5,
-                  p: 1.5,
-                  borderRadius: 1,
-                  bgcolor: "rgba(0, 0, 0, 0.02)",
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    bgcolor: "rgba(0, 0, 0, 0.05)",
-                  },
-                }}
-              >
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography
-                    variant="subtitle1"
-                    component="div"
-                    sx={{ fontWeight: 500, mb: 0.5 }}
-                  >
-                    {item.name}
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    component="div"
-                    color="text.secondary"
-                    sx={{ mb: 1, lineHeight: 1.4 }}
-                  >
-                    {item.description}
-                  </Typography>
-                  <Box>
-                    {item.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        size="small"
-                        variant="outlined"
-                        sx={{ color: "white", mr: 0.5, mb: 0.5 }}
-                      />
-                    ))}
-                  </Box>
+      <Box ref={contentRef} sx={{ width: "100%" }}>
+        <List sx={{ width: "100%", p: 0 }}>
+          {themes.map((item) => (
+            <ListItem
+              key={item.id}
+              component="div"
+              ref={(el) => setThemeRef(el as HTMLDivElement, item.id)}
+              id={`theme-${item.id}`}
+              sx={{
+                mb: 1.5,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor:
+                  item.id === selectedOperation
+                    ? "rgba(0, 0, 0, 0.08)"
+                    : "rgba(0, 0, 0, 0.02)",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  bgcolor: "rgba(0, 0, 0, 0.05)",
+                },
+                // Highlight the selected theme
+                ...(item.id === selectedOperation && {
+                  boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.4)",
+                }),
+              }}
+            >
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                  variant="subtitle1"
+                  component="div"
+                  sx={{ fontWeight: 500, mb: 0.5 }}
+                >
+                  {item.name}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  component="div"
+                  color="text.secondary"
+                  sx={{ mb: 1, lineHeight: 1.4 }}
+                >
+                  {item.description}
+                </Typography>
+                <Box>
+                  {item.tags.map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      variant="outlined"
+                      sx={{ color: "white", mr: 0.5, mb: 0.5 }}
+                    />
+                  ))}
                 </Box>
-              </ListItem>
-            ))}
-          </List>
-        </>
-      )}
+              </Box>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
     </ContentWrapper>
   )
 }
