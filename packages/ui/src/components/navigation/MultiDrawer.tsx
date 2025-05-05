@@ -112,6 +112,11 @@ export interface MultiDrawerProps {
    * @default false
    */
   overlay?: boolean
+
+  /**
+   * Optional drawer content that can be passed to drawer components
+   */
+  drawerContent?: Record<string, unknown>
 }
 
 /**
@@ -127,6 +132,7 @@ export function MultiDrawer({
   onDrawerStateChange,
   activeTab: controlledActiveTab,
   overlay = false,
+  drawerContent = {},
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -288,7 +294,14 @@ export function MultiDrawer({
               overflow: "auto",
             }}
           >
-            {activeTab === "themes" && <ThemesContent onClose={close} />}
+            {activeTab === "themes" && (
+              <ThemesContent
+                onClose={close}
+                selectedOperation={
+                  drawerContent.selectedOperation as string | undefined
+                }
+              />
+            )}
           </Box>
         </Fade>
       </Drawer>

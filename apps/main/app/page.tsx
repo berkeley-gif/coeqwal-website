@@ -82,6 +82,32 @@ export default function Home() {
   }
 
   // Handler to open specific drawer tabs - using the store
+  const handleOpenThemesDrawer = (operationId?: string) => {
+    // Check if the themes drawer is already open
+    if (activeDrawerTab === "themes") {
+      // If it's already open, close it
+      closeDrawer()
+
+      // Keep the legacy state in sync for components not yet migrated
+      setDrawerOpen(false)
+      setActiveDrawerTab(null)
+      return
+    }
+
+    // Store the operation ID in the drawer content if provided
+    if (operationId) {
+      useDrawerStore
+        .getState()
+        .setDrawerContent({ selectedOperation: operationId })
+    }
+    openDrawer("themes")
+
+    // Keep the legacy state in sync for components not yet migrated
+    setDrawerOpen(true)
+    setActiveDrawerTab("themes")
+  }
+
+  // Handler to open specific drawer tabs - using the store
   const handleOpenLearnDrawer = () => {
     openDrawer("learn")
 
@@ -96,14 +122,6 @@ export default function Home() {
     // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
     setActiveDrawerTab("currentOps")
-  }
-
-  const handleOpenThemesDrawer = () => {
-    openDrawer("themes")
-
-    // Keep the legacy state in sync for components not yet migrated
-    setDrawerOpen(true)
-    setActiveDrawerTab("themes")
   }
 
   // Create the secondary navigation items

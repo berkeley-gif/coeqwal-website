@@ -35,7 +35,7 @@ import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state"
 
 interface OperationsSelectorProps {
-  openThemesDrawer?: () => void
+  openThemesDrawer?: (operationId?: string) => void
 }
 
 // Organized palette for water operations with primary (dot) and secondary (title) colors
@@ -327,12 +327,23 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
   }
 
   // Handle info click
-  const handleInfoClick = () => {
+  const handleInfoClick = (operationId: string) => {
     // Use the prop if available, otherwise fallback to the store
     if (openThemesDrawer) {
-      openThemesDrawer()
+      openThemesDrawer(operationId)
     } else {
-      useDrawerStore.getState().openDrawer("themes")
+      // Get the drawer store state
+      const drawerStore = useDrawerStore.getState()
+
+      // Check if the "themes" drawer is already open
+      // If it is, close it; otherwise, open it
+      if (drawerStore.activeTab === "themes") {
+        drawerStore.closeDrawer()
+      } else {
+        // Open drawer and store the operation ID as drawer content
+        drawerStore.setDrawerContent({ selectedOperation: operationId })
+        drawerStore.openDrawer("themes")
+      }
     }
   }
 
@@ -665,7 +676,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
               onSubOptionChange={(subId, checked) =>
                 handleSubOptionChange(subId, checked)
               }
-              onInfoClick={() => handleInfoClick()}
+              onInfoClick={() => handleInfoClick(op.id)}
             />
           ))}
         </Box>

@@ -7,108 +7,165 @@ import { ContentWrapper } from "./ContentWrapper"
 export interface ThemesContentProps {
   /** Function called when the close button is clicked */
   onClose: () => void
+  /** Selected operation ID passed from the drawer store */
+  selectedOperation?: string
 }
 
 /**
  * Content component for the Scenario Themes tab in the MultiDrawer
  */
-export function ThemesContent({ onClose }: ThemesContentProps) {
+export function ThemesContent({
+  onClose,
+  selectedOperation,
+}: ThemesContentProps) {
   const [themes] = React.useState([
     {
-      id: "1",
+      id: "limit-groundwater",
       name: "Limiting groundwater pumping",
-      description: "Operations focused on limiting groundwater pumping",
+      description:
+        "Operations focused on limiting groundwater pumping across different regions and evaluating impacts on agriculture and water availability.",
       tags: ["groundwater", "agriculture", "drinking water", "sustainability"],
     },
     {
-      id: "2",
+      id: "change-stream-flows",
       name: "Varying stream flows",
-      description: "Varying stream flow",
-      tags: ["environment", "water quality"],
+      description:
+        "Adjusting stream flow requirements to balance environmental needs with water availability for other uses.",
+      tags: ["environment", "water quality", "river flows"],
     },
     {
-      id: "3",
+      id: "prioritize-drinking-water",
       name: "Prioritizing community drinking water",
-      description: "Optimizing for community drinking water",
-      tags: ["equity", "community", "drinking water"],
+      description:
+        "Optimizing water operations to ensure drinking water access for all communities, especially those historically underserved.",
+      tags: ["equity", "community", "drinking water", "urban water"],
     },
     {
-      id: "4",
+      id: "balance-delta-uses",
       name: "Balancing water uses in the Delta",
-      description: "Balancing...",
-      tags: ["equity", "community", "environment", "water quality"],
+      description:
+        "Exploring different approaches to managing Delta water export and outflow requirements, with impacts on multiple stakeholders.",
+      tags: ["equity", "community", "environment", "water quality", "delta"],
     },
     {
-      id: "5",
+      id: "new-infrastructure",
       name: "Adding new water infrastructure",
-      description: "Like the Delta conveyance tunnel...",
-      tags: ["sustainability", "community", "environment", "water quality"],
+      description:
+        "Evaluating potential benefits and impacts of new infrastructure projects like the Delta conveyance tunnel.",
+      tags: ["infrastructure", "sustainability", "water storage", "conveyance"],
     },
   ])
 
+  // Find the selected theme if an operation ID was provided
+  const selectedTheme = selectedOperation
+    ? themes.find((theme) => theme.id === selectedOperation)
+    : undefined
+
   return (
     <ContentWrapper
-      title="Scenario Themes"
+      title={selectedTheme ? `Theme: ${selectedTheme.name}` : "Scenario Themes"}
       onClose={onClose}
       bgColor="rgb(87, 137, 154)" /* #57899A */
     >
-      <Typography
-        variant="body1"
-        color="text.secondary"
-        sx={{ mb: 3, lineHeight: 1.4 }}
-      >
-        We have organized the alternative scenarios we are running on CalSim
-        into themes. In a technical sense, themes are clusters of multiple water
-        operation settings that can be applied and varied.
-      </Typography>
-
-      <List sx={{ width: "100%", p: 0 }}>
-        {themes.map((item) => (
-          <ListItem
-            key={item.id}
-            component="div"
-            sx={{
-              mb: 1.5,
-              p: 1.5,
-              borderRadius: 1,
-              bgcolor: "rgba(0, 0, 0, 0.02)",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                bgcolor: "rgba(0, 0, 0, 0.05)",
-              },
-            }}
+      {selectedTheme ? (
+        // Show detailed view for a specific theme
+        <Box>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 2, lineHeight: 1.4 }}
           >
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography
-                variant="subtitle1"
+            {selectedTheme.description}
+          </Typography>
+
+          <Box sx={{ mb: 2 }}>
+            {selectedTheme.tags.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                size="small"
+                variant="outlined"
+                sx={{ color: "white", mr: 0.5, mb: 0.5 }}
+              />
+            ))}
+          </Box>
+
+          <Typography variant="h6" sx={{ mb: 1, mt: 3, fontWeight: 500 }}>
+            Related scenarios and impacts
+          </Typography>
+
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 3, lineHeight: 1.4 }}
+          >
+            Explore various scenarios related to{" "}
+            {selectedTheme.name.toLowerCase()}, including potential impacts on
+            water availability, environmental conditions, and communities.
+          </Typography>
+        </Box>
+      ) : (
+        // Show the list of all themes
+        <>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ mb: 3, lineHeight: 1.4 }}
+          >
+            We have organized the alternative scenarios we are running on CalSim
+            into themes. In a technical sense, themes are clusters of multiple
+            water operation settings that can be applied and varied.
+          </Typography>
+
+          <List sx={{ width: "100%", p: 0 }}>
+            {themes.map((item) => (
+              <ListItem
+                key={item.id}
                 component="div"
-                sx={{ fontWeight: 500, mb: 0.5 }}
+                sx={{
+                  mb: 1.5,
+                  p: 1.5,
+                  borderRadius: 1,
+                  bgcolor: "rgba(0, 0, 0, 0.02)",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    bgcolor: "rgba(0, 0, 0, 0.05)",
+                  },
+                }}
               >
-                {item.name}
-              </Typography>
-              <Typography
-                variant="body1"
-                component="div"
-                color="text.secondary"
-                sx={{ mb: 1, lineHeight: 1.4 }}
-              >
-                {item.description}
-              </Typography>
-              <Box>
-                {item.tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    variant="outlined"
-                    sx={{ color: "white", mr: 0.5, mb: 0.5 }}
-                  />
-                ))}
-              </Box>
-            </Box>
-          </ListItem>
-        ))}
-      </List>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    component="div"
+                    sx={{ fontWeight: 500, mb: 0.5 }}
+                  >
+                    {item.name}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    component="div"
+                    color="text.secondary"
+                    sx={{ mb: 1, lineHeight: 1.4 }}
+                  >
+                    {item.description}
+                  </Typography>
+                  <Box>
+                    {item.tags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={tag}
+                        size="small"
+                        variant="outlined"
+                        sx={{ color: "white", mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              </ListItem>
+            ))}
+          </List>
+        </>
+      )}
     </ContentWrapper>
   )
 }

@@ -34,7 +34,7 @@ import {
 
 // CombinedPanel props interface
 interface CombinedPanelProps {
-  onOpenThemesDrawer?: () => void
+  onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 // Type for scenario data

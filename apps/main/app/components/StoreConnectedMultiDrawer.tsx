@@ -19,7 +19,7 @@ export function StoreConnectedMultiDrawer({
   overlay = false,
 }: StoreConnectedMultiDrawerProps) {
   // Get state and actions from the Zustand store
-  const { activeTab, setActiveTab, isOpen } = useDrawerStore()
+  const { activeTab, setActiveTab, isOpen, content } = useDrawerStore()
 
   // Handle drawer state changes from the MultiDrawer component
   const handleDrawerStateChange = (isOpen: boolean, tab: any) => {
@@ -36,6 +36,7 @@ export function StoreConnectedMultiDrawer({
       onDrawerStateChange={handleDrawerStateChange}
       activeTab={activeTab}
       overlay={overlay}
+      drawerContent={content}
     />
   )
 }
