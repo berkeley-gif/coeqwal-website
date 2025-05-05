@@ -19,8 +19,8 @@ export function ThemeRegistry({
 
   return (
     <ThemeProvider theme={themeToUse}>
-      <CssBaseline />
       {children}
+      <CssBaseline />
     </ThemeProvider>
   )
 }

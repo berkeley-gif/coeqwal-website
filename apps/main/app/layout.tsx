@@ -1,5 +1,3 @@
-"use client"
-
 import type { Metadata } from "next"
 import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import { TranslationProvider } from "@repo/i18n"
