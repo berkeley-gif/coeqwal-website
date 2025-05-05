@@ -1,19 +1,11 @@
+"use client"
+
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton as ExploreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { useStoryStore } from "@repo/state"
+import { useStoryStore, useDrawerStore } from "@repo/state"
 
-interface Props {
-  onOpenLearnDrawer: () => void
-  onOpenCurrentOpsDrawer: () => void
-  onOpenThemesDrawer: () => void
-}
-
-export default function InvitationSection({
-  // onOpenLearnDrawer,
-  onOpenCurrentOpsDrawer,
-  onOpenThemesDrawer,
-}: Props) {
+export default function InvitationSection() {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -91,7 +83,11 @@ export default function InvitationSection({
               {renderParagraph("invitation.paragraph1", undefined, false)}
 
               <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
-                <ExploreButton onClick={onOpenCurrentOpsDrawer}>
+                <ExploreButton
+                  onClick={() =>
+                    useDrawerStore.getState().openDrawer("currentOps")
+                  }
+                >
                   Explore Current Operations
                 </ExploreButton>
               </Box>
@@ -99,7 +95,9 @@ export default function InvitationSection({
               {renderParagraph("invitation.paragraph2", undefined, false)}
 
               <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
-                <ExploreButton onClick={onOpenThemesDrawer}>
+                <ExploreButton
+                  onClick={() => useDrawerStore.getState().openDrawer("themes")}
+                >
                   Explore Scenario Themes
                 </ExploreButton>
               </Box>

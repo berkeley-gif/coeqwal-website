@@ -1,13 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Box,
-  Drawer,
-  useTheme,
-  Fade,
-  Typography,
-} from "@mui/material"
+import { Box, Drawer, useTheme, Fade, Typography } from "@mui/material"
 
 // Content components
 import {

@@ -15,6 +15,10 @@
     "./story": {
       "import": "./src/story/index.ts",
       "types": "./src/story/index.ts"
+    },
+    "./drawer": {
+      "import": "./src/drawer/index.ts",
+      "types": "./src/drawer/index.ts"
     }
   },
   "scripts": {

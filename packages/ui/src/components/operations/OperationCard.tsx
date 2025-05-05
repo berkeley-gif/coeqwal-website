@@ -1,13 +1,7 @@
 "use client"
 
 import React from "react"
-import {
-  Box,
-  Card,
-  Typography,
-  Checkbox,
-  useTheme,
-} from "@mui/material"
+import { Box, Card, Typography, Checkbox, useTheme } from "@mui/material"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 
 export interface SubOption {
@@ -50,13 +44,13 @@ export const OperationCard: React.FC<OperationCardProps> = ({
   const theme = useTheme()
 
   // Use colors from the theme categories
-//   const categoryColors = [
-//     theme.palette.categories.groundwaterManagement, // Leafy green
-//     theme.palette.categories.riverFlows, // Cool blue
-//     theme.palette.categories.urbanWaterPriorities, // Plum purple
-//     theme.palette.categories.deltaBalance, // Amber orange
-//     theme.palette.categories.infrastructure, // Slate gray
-//   ]
+  //   const categoryColors = [
+  //     theme.palette.categories.groundwaterManagement, // Leafy green
+  //     theme.palette.categories.riverFlows, // Cool blue
+  //     theme.palette.categories.urbanWaterPriorities, // Plum purple
+  //     theme.palette.categories.deltaBalance, // Amber orange
+  //     theme.palette.categories.infrastructure, // Slate gray
+  //   ]
 
   // Generate a series of pastel colors for the capsules based on category colors
   const capsuleColors = [

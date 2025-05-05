@@ -33,9 +33,7 @@ import {
 } from "@dnd-kit/sortable"
 
 // CombinedPanel props interface
-interface CombinedPanelProps {
-  onOpenThemesDrawer?: () => void
-}
+interface CombinedPanelProps {}
 
 // Type for scenario data
 interface ScenarioDataItem {
@@ -81,7 +79,7 @@ const AVAILABLE_METRICS = [
 ]
 
 // Content component that uses the context
-const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
+const CombinedPanelContent = ({}: CombinedPanelProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -620,11 +618,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
         >
           {/* Column 1: Operations or outcome text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? (
-              <OutcomesSelector />
-            ) : (
-              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
-            )}
+            {swapped ? <OutcomesSelector /> : <OperationsSelector />}
           </Grid>
 
           {/* Column 2: Action verb & switch - aligned to top */}
@@ -678,11 +672,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
 
           {/* Column 3: Outcomes or operations text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? (
-              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
-            ) : (
-              <OutcomesSelector />
-            )}
+            {swapped ? <OperationsSelector /> : <OutcomesSelector />}
           </Grid>
 
           {/* Column 4: "with" label */}
@@ -881,10 +871,10 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
 // For debugging in React DevTools
 CombinedPanelContent.displayName = "CombinedPanelContent"
 
-export function CombinedPanel({ onOpenThemesDrawer }: CombinedPanelProps) {
+export function CombinedPanel() {
   return (
     <QuestionBuilderProvider>
-      <CombinedPanelContent onOpenThemesDrawer={onOpenThemesDrawer} />
+      <CombinedPanelContent />
     </QuestionBuilderProvider>
   )
 }

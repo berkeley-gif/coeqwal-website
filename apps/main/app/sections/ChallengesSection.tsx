@@ -1,19 +1,11 @@
+"use client"
+
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { useStoryStore } from "@repo/state"
+import { useStoryStore, useDrawerStore } from "@repo/state"
 
-interface Props {
-  onOpenLearnDrawer: () => void
-  onOpenCurrentOpsDrawer: () => void
-  onOpenThemesDrawer: () => void
-}
-
-export default function ChallengesSection({
-  onOpenLearnDrawer,
-  // onOpenCurrentOpsDrawer,
-  // onOpenThemesDrawer,
-}: Props) {
+export default function ChallengesSection() {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -96,7 +88,9 @@ export default function ChallengesSection({
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>
-              <LearnMoreButton onClick={onOpenLearnDrawer} />
+              <LearnMoreButton
+                onClick={() => useDrawerStore.getState().openDrawer("learn")}
+              />
             </Box>
           </Box>
 

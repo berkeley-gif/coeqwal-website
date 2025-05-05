@@ -32,10 +32,9 @@ import { Card, OperationCard } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
+import { useDrawerStore } from "@repo/state"
 
-interface OperationsSelectorProps {
-  onOpenThemesDrawer?: () => void
-}
+interface OperationsSelectorProps {}
 
 // Organized palette for water operations with primary (dot) and secondary (title) colors
 const WATER_PALETTE = {
@@ -248,9 +247,7 @@ const OPERATION_CARDS = () => [
   },
 ]
 
-const OperationsSelector: React.FC<OperationsSelectorProps> = ({
-  onOpenThemesDrawer,
-}) => {
+const OperationsSelector: React.FC<OperationsSelectorProps> = () => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -321,19 +318,14 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
   }
 
   // Handle sub-option change
-  const handleSubOptionChange = (
-    subOptionId: string,
-    checked: boolean,
-  ) => {
+  const handleSubOptionChange = (subOptionId: string, checked: boolean) => {
     handleOperationChangeWithExitMode(subOptionId, checked)
   }
 
   // Handle info click
   const handleInfoClick = () => {
-    // Open the themes drawer when "Tell me more" is clicked
-    if (onOpenThemesDrawer) {
-      onOpenThemesDrawer()
-    }
+    // Open the themes drawer using the store
+    useDrawerStore.getState().openDrawer("themes")
   }
 
   // Common styles

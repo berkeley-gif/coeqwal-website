@@ -56,8 +56,8 @@ export function LearnContent({ onClose }: LearnContentProps) {
         color="text.secondary"
         sx={{ mb: 3, lineHeight: 1.4 }}
       >
-        Explore these topics to learn more about California`&apos;`s water system and
-        management.
+        Explore these topics to learn more about California`&apos;`s water
+        system and management.
       </Typography>
 
       <List sx={{ width: "100%", p: 0 }}>
@@ -122,8 +122,8 @@ export function LearnContent({ onClose }: LearnContentProps) {
           color="text.secondary"
           sx={{ mt: 1, lineHeight: 1.4 }}
         >
-          Understanding California`&apos;`s water system helps you make more informed
-          choices when exploring water management scenarios.
+          Understanding California`&apos;`s water system helps you make more
+          informed choices when exploring water management scenarios.
         </Typography>
       </Box>
     </ContentWrapper>

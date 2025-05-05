@@ -18,6 +18,8 @@ import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
 import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
+import { useDrawerStore } from "@repo/state"
+import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 
 // Make sure these IDs match the section IDs used in the Header component
 const navSectionIds = {
@@ -34,9 +36,11 @@ const navSectionIds = {
 export default function Home() {
   // const { t } = useTranslation()
 
-  // State for the drawer's open status and active tab
+  // State for the drawer's open status and active tab - REPLACED WITH STORE
   const [, setDrawerOpen] = useState(false)
   const [activeDrawerTab, setActiveDrawerTab] = useState<TabKey | null>(null)
+  // Get actions from the Zustand drawer store
+  const { openDrawer, closeDrawer, setActiveTab } = useDrawerStore.getState()
 
   // Track all sections including the ones for the top navigation
   const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
@@ -50,8 +54,8 @@ export default function Home() {
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
     scrollToSection(sectionId)
-    setDrawerOpen(false)
-    setActiveDrawerTab(null)
+    // Close drawer through the store
+    closeDrawer()
   }
 
   // Get navigation items with the current active section and translation function
@@ -61,29 +65,43 @@ export default function Home() {
   //   t,
   // )
 
-  // Handler for drawer state changes
+  // Handler for drawer state changes - updates the store
   const handleDrawerStateChange = (
     isOpen: boolean,
     activeTab: TabKey | null,
   ) => {
+    if (isOpen && activeTab) {
+      setActiveTab(activeTab)
+    } else {
+      closeDrawer()
+    }
+
+    // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(isOpen)
     setActiveDrawerTab(activeTab)
   }
 
-  // Handler to open the "learn" tab of the drawer
+  // Handler to open specific drawer tabs - using the store
   const handleOpenLearnDrawer = () => {
+    openDrawer("learn")
+
+    // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
     setActiveDrawerTab("learn")
   }
 
-  // Handler to open the "currentOps" tab of the drawer
   const handleOpenCurrentOpsDrawer = () => {
+    openDrawer("currentOps")
+
+    // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
     setActiveDrawerTab("currentOps")
   }
 
-  // Handler to open the "themes" tab of the drawer
   const handleOpenThemesDrawer = () => {
+    openDrawer("themes")
+
+    // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
     setActiveDrawerTab("themes")
   }
@@ -137,12 +155,7 @@ export default function Home() {
       </Box>
 
       {/* ===== MultiDrawer with tabs ===== */}
-      <MultiDrawer
-        drawerWidth={360}
-        onDrawerStateChange={handleDrawerStateChange}
-        activeTab={activeDrawerTab}
-        overlay={true}
-      />
+      <StoreConnectedMultiDrawer drawerWidth={360} overlay={true} />
 
       {/* ===== Main Content Area ===== */}
       <Box
@@ -177,31 +190,23 @@ export default function Home() {
           <InterstitialPanel />
 
           {/* California Water panel with two columns */}
-          <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          <CaliforniaWaterSection />
 
           {/* Managing Water panel with two columns */}
-          <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          <ManagingWaterSection />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection
-            onOpenLearnDrawer={handleOpenLearnDrawer}
-            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
-            onOpenThemesDrawer={handleOpenThemesDrawer}
-          />
+          <ChallengesSection />
 
           {/* CalSim panel with two columns */}
-          <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          <CalSimSection />
 
           {/* Invitation panel with two columns */}
-          <InvitationSection
-            onOpenLearnDrawer={handleOpenLearnDrawer}
-            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
-            onOpenThemesDrawer={handleOpenThemesDrawer}
-          />
+          <InvitationSection />
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
-            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
+            <CombinedPanel />
           </Box>
           {/* Needs Editor Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">

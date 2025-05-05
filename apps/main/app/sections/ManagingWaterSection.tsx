@@ -1,13 +1,11 @@
+"use client"
+
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
-import { useStoryStore } from "@repo/state"
+import { useStoryStore, useDrawerStore } from "@repo/state"
 
-interface Props {
-  onOpenLearnDrawer: () => void
-}
-
-export default function ManagingWaterSection({ onOpenLearnDrawer }: Props) {
+export default function ManagingWaterSection() {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -72,7 +70,9 @@ export default function ManagingWaterSection({ onOpenLearnDrawer }: Props) {
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>
-              <LearnMoreButton onClick={onOpenLearnDrawer} />
+              <LearnMoreButton
+                onClick={() => useDrawerStore.getState().openDrawer("learn")}
+              />
             </Box>
           </Box>
 
