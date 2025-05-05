@@ -148,8 +148,21 @@ export function MultiDrawer({
   // Derive drawer open state from active tab
   const drawerOpen = activeTab !== null
 
+  // Mapping of tab keys to background colors
+  const tabBg: Record<TabKey, string> = {
+    learn: "rgb(128, 175, 196)",
+    currentOps: "rgb(106, 155, 170)",
+    themes: "rgb(87, 137, 154)",
+  }
+
+  // Track the bg color to apply to drawer paper, preserve while closing
+  const [drawerBg, setDrawerBg] = useState<string>(tabBg.learn)
+
   // Update drawer state and call optional callback
   const updateDrawerState = (tab: TabKey | null) => {
+    if (tab) {
+      setDrawerBg(tabBg[tab])
+    }
     if (!isControlled) {
       setInternalActiveTab(tab)
     }
@@ -240,6 +253,7 @@ export function MultiDrawer({
             zIndex: overlay ? 1300 : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
+            backgroundColor: drawerBg,
           },
         }}
       >
