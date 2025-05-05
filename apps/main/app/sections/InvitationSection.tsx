@@ -1,7 +1,11 @@
 "use client"
 
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
-import { BasePanel, LearnMoreButton as ExploreButton } from "@repo/ui"
+import {
+  BasePanel,
+  LearnMoreButton as ExploreButton,
+  SearchScenariosButton,
+} from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore, useDrawerStore } from "@repo/state"
 
@@ -126,6 +130,22 @@ export default function InvitationSection({
 
               {renderParagraph("invitation.paragraph3", undefined, false)}
               {renderParagraph("invitation.paragraph4", undefined, false)}
+
+              {/* Search Scenarios button with down arrow */}
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
+                <SearchScenariosButton
+                  onClick={() => {
+                    // Scroll to combined-panel
+                    const combinedPanel =
+                      document.getElementById("combined-panel")
+                    if (combinedPanel) {
+                      combinedPanel.scrollIntoView({ behavior: "smooth" })
+                    }
+                  }}
+                >
+                  Search Scenarios
+                </SearchScenariosButton>
+              </Box>
             </Stack>
           </Box>
 
