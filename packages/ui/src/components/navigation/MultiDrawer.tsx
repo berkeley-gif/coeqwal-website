@@ -14,7 +14,6 @@ import {
 // Icons
 import SchoolIcon from "@mui/icons-material/School"
 import SettingsIcon from "@mui/icons-material/Settings"
-import StarIcon from "@mui/icons-material/Star"
 
 // Content components
 import {
@@ -202,22 +201,22 @@ export function MultiDrawer({
           label="LEARN ABOUT WATER"
           onClick={() => toggleTab("learn")}
           active={activeTab === "learn"}
-          bgColor="rgb(191, 218, 220)"
-          hoverColor="rgb(172, 196, 198)"
+          bgColor="rgb(128, 175, 196)" /* #80AFC4 */
+          hoverColor="rgb(113, 160, 181)" /* #71A0B5 */
         />
         <RailButton
           label="CURRENT OPERATIONS"
           onClick={() => toggleTab("currentOps")}
           active={activeTab === "currentOps"}
-          bgColor="rgb(154, 203, 207)"
-          hoverColor="rgb(139, 183, 186)"
+          bgColor="rgb(106, 155, 170)" /* #6A9BAA */
+          hoverColor="rgb(94, 141, 156)" /* #5E8D9C */
         />
         <RailButton
           label="SCENARIO THEMES"
           onClick={() => toggleTab("themes")}
           active={activeTab === "themes"}
-          bgColor="rgb(118, 178, 190)"
-          hoverColor="rgb(106, 160, 171)"
+          bgColor="rgb(87, 137, 154)" /* #57899A */
+          hoverColor="rgb(76, 123, 138)" /* #4C7B8A */
         />
       </Box>
 

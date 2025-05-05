@@ -17,7 +17,7 @@ export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
     <ContentWrapper
       title="Current Operations"
       onClose={onClose}
-      bgColor="rgb(154, 203, 207)"
+      bgColor="rgb(106, 155, 170)" /* #6A9BAA */
     >
       <Box
         sx={{ mt: 2, p: 2, bgcolor: "rgba(0, 0, 0, 0.03)", borderRadius: 1 }}

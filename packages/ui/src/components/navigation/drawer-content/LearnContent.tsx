@@ -50,7 +50,7 @@ export function LearnContent({ onClose }: LearnContentProps) {
     <ContentWrapper
       title="Learn About California Water"
       onClose={onClose}
-      bgColor="rgb(191, 218, 220)"
+      bgColor="rgb(128, 175, 196)" /* #80AFC4 */
     >
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Explore these topics to learn more about California's water system and
