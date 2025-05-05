@@ -1172,6 +1172,58 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
     }
 
+    // Format multiple climate selections
+    const formatClimateSelections = () => {
+      if (!selectedClimate || selectedClimate.length === 0) {
+        return null
+      }
+
+      // Convert array of climate IDs to array of ColoredText components with translated labels
+      const formattedClimates = selectedClimate.map((id) => (
+        <ColoredText key={id} color={theme.palette.climate.main}>
+          {t(`questionBuilder.climateSelector.options.${id}`)}
+        </ColoredText>
+      ))
+
+      // If only one climate, return it directly
+      if (formattedClimates.length === 1) {
+        return formattedClimates[0]
+      }
+
+      // For multiple climates, join with "or" using the same reducer pattern as operations
+      return formattedClimates.reduce((result, climate, index) => {
+        if (index === 0) return climate
+
+        // For the last item in a list of 3+ items, use ", or"
+        if (
+          index === formattedClimates.length - 1 &&
+          formattedClimates.length > 2
+        ) {
+          return (
+            <>
+              {result}, or {climate}
+            </>
+          )
+        }
+
+        // For middle items in a list of 3+ items, use commas
+        if (formattedClimates.length > 2) {
+          return (
+            <>
+              {result}, {climate}
+            </>
+          )
+        }
+
+        // For exactly 2 items, join with "or"
+        return (
+          <>
+            {result} or {climate}
+          </>
+        )
+      })
+    }
+
     // Change question structure based on number of operations
     if (swapped) {
       // Determine if we need singular or plural form of "scenario"
@@ -1191,10 +1243,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         const climateElement = includeClimate ? (
           <>
             {" "}
-            {locale === "es" ? "con" : "with"}{" "}
-            <ColoredText color={theme.palette.climate.main}>
-              {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
-            </ColoredText>
+            {locale === "es" ? "con" : "with"} {formatClimateSelections()}
           </>
         ) : null
 
@@ -1243,11 +1292,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       }
 
       // Create the climate element with green highlighting if climate is enabled
-      const climateElement = includeClimate ? (
-        <ColoredText color={theme.palette.climate.main}>
-          {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
-        </ColoredText>
-      ) : null
+      const climateElement = includeClimate ? formatClimateSelections() : null
 
       // If no outcomes are selected, use the default format with climate if enabled
       if (includeClimate) {
@@ -1312,11 +1357,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       const outcome = <span key="outcome">{outcomePart}</span>
 
       // Create the climate element with green highlighting
-      const climate = (
-        <ColoredText color={theme.palette.climate.main}>
-          {getClimateLabel()}
-        </ColoredText>
-      )
+      const climate = formatClimateSelections()
 
       return (
         <TranslatedQuestion

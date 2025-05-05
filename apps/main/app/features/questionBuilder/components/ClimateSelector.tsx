@@ -8,10 +8,10 @@
 
 /**
  * ClimateSelector
- * Uses radio buttons for single selection (only one climate option can be active)
+ * Uses checkboxes for multiple selection
  * Has a simple flat list without categorization
  * Has styling with green highlight color
- * Simplest data model (just an array of strings)
+ * Supports selecting multiple climate options
  */
 
 import React from "react"
@@ -19,8 +19,7 @@ import {
   Typography,
   Box,
   FormControlLabel,
-  Radio,
-  RadioGroup,
+  Checkbox,
   useTheme,
   Button,
 } from "@repo/ui/mui"
@@ -43,22 +42,33 @@ const ClimateSelector: React.FC = () => {
     state: { selectedClimate, includeClimate },
     setClimate,
     toggleClimate,
+    selectClimate,
+    deselectClimate,
   } = useQuestionBuilderHelpers()
 
-  const handleClimateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setClimate(event.target.value)
-    
-    // If climate is not included, include it automatically when user selects an option
-    if (!includeClimate) {
-      toggleClimate()
+  const handleClimateChange = (id: string, checked: boolean) => {
+    if (checked) {
+      selectClimate(id)
+
+      // If climate is not included, include it automatically when user selects an option
+      if (!includeClimate) {
+        toggleClimate()
+      }
+    } else {
+      deselectClimate(id)
+
+      // If no climates are selected, disable climate inclusion
+      if (selectedClimate.length === 1 && selectedClimate[0] === id) {
+        toggleClimate()
+      }
     }
   }
 
   // Match the styling of the OperationsSelector
-  const radioStyles = {
+  const checkboxStyles = {
     color: "rgba(0, 0, 0, 0.54)",
     "&.Mui-checked": {
-      color: theme.palette.primary.main,
+      color: theme.palette.climate.main,
     },
   }
 
@@ -73,7 +83,7 @@ const ClimateSelector: React.FC = () => {
     padding: theme.spacing(0.5, 1),
     margin: 0,
     width: "100%",
-    "& .MuiRadio-root": {
+    "& .MuiCheckbox-root": {
       padding: theme.spacing(0.5),
       marginRight: theme.spacing(1),
     },
@@ -130,7 +140,9 @@ const ClimateSelector: React.FC = () => {
             },
           }}
         >
-          {includeClimate ? t("questionBuilder.ui.disable") : t("questionBuilder.ui.enable")}
+          {includeClimate
+            ? t("questionBuilder.ui.disable")
+            : t("questionBuilder.ui.enable")}
         </Button>
       </Box>
 
@@ -146,38 +158,35 @@ const ClimateSelector: React.FC = () => {
           transition: "background-color 0.3s",
         }}
       >
-        <RadioGroup
-          value={selectedClimate}
-          onChange={handleClimateChange}
-          name="climate-options"
-        >
-          {CLIMATE_OPTIONS.map((option: ClimateOption) => (
-            <FormControlLabel
-              key={option.id}
-              control={
-                <Radio 
-                  size="small" 
-                  sx={radioStyles} 
-                  disabled={!includeClimate}
-                />
-              }
-              label={
-                <Typography 
-                  variant="body1"
-                  sx={{
-                    color: includeClimate ? "inherit" : "rgba(0, 0, 0, 0.38)",
-                    fontWeight: selectedClimate === option.id ? 500 : 400,
-                  }}
-                >
-                  {t(`questionBuilder.climateSelector.options.${option.id}`)}
-                </Typography>
-              }
-              sx={formControlStyles}
-              value={option.id}
-              disabled={!includeClimate}
-            />
-          ))}
-        </RadioGroup>
+        {CLIMATE_OPTIONS.map((option: ClimateOption) => (
+          <FormControlLabel
+            key={option.id}
+            control={
+              <Checkbox
+                size="small"
+                sx={checkboxStyles}
+                checked={selectedClimate.includes(option.id)}
+                onChange={(e) =>
+                  handleClimateChange(option.id, e.target.checked)
+                }
+                disabled={!includeClimate}
+              />
+            }
+            label={
+              <Typography
+                variant="body1"
+                sx={{
+                  color: includeClimate ? "inherit" : "rgba(0, 0, 0, 0.38)",
+                  fontWeight: selectedClimate.includes(option.id) ? 500 : 400,
+                }}
+              >
+                {t(`questionBuilder.climateSelector.options.${option.id}`)}
+              </Typography>
+            }
+            sx={formControlStyles}
+            disabled={!includeClimate}
+          />
+        ))}
       </Box>
     </Card>
   )

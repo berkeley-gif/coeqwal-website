@@ -32,6 +32,20 @@ export const useQuestionBuilderHelpers = () => {
     [dispatch],
   )
 
+  const selectClimate = useCallback(
+    (climate: string) => {
+      dispatch(questionBuilderActions.selectClimate(climate))
+    },
+    [dispatch],
+  )
+
+  const deselectClimate = useCallback(
+    (climate: string) => {
+      dispatch(questionBuilderActions.deselectClimate(climate))
+    },
+    [dispatch],
+  )
+
   // Operations-related helpers
   const handleOperationChange = useCallback(
     (option: string, checked: boolean) => {
@@ -702,6 +716,8 @@ export const useQuestionBuilderHelpers = () => {
     // Action helpers
     toggleClimate,
     setClimate,
+    selectClimate,
+    deselectClimate,
     handleOperationChange,
     handleOperationDirectionChange,
     handleOutcomeChange,

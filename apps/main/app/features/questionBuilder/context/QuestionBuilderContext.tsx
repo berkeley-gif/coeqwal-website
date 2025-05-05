@@ -7,7 +7,7 @@ import { CLIMATE_OPTIONS } from "../data/constants"
 export interface QuestionBuilderState {
   swapped: boolean
   includeClimate: boolean
-  selectedClimate: string
+  selectedClimate: string[]
   selectedOperations: string[]
   operationDirections: Record<string, "increase" | "decrease">
   selectedOutcomes: string[]
@@ -22,6 +22,8 @@ type Action =
   | { type: "TOGGLE_SWAP" }
   | { type: "TOGGLE_MAP" }
   | { type: "SET_CLIMATE"; payload: string }
+  | { type: "SELECT_CLIMATE"; payload: string }
+  | { type: "DESELECT_CLIMATE"; payload: string }
   | { type: "SELECT_OPERATION"; payload: string }
   | { type: "DESELECT_OPERATION"; payload: string }
   | {
@@ -37,7 +39,9 @@ type Action =
 const initialState: QuestionBuilderState = {
   swapped: false,
   includeClimate: false,
-  selectedClimate: CLIMATE_OPTIONS[0]?.id || "hist_adj",
+  selectedClimate: CLIMATE_OPTIONS[0]?.id
+    ? [CLIMATE_OPTIONS[0].id]
+    : ["hist_adj"],
   selectedOperations: [],
   operationDirections: {},
   selectedOutcomes: [],
@@ -75,7 +79,23 @@ const questionBuilderReducer = (
     case "SET_CLIMATE":
       return {
         ...state,
-        selectedClimate: action.payload,
+        selectedClimate: [action.payload],
+      }
+    case "SELECT_CLIMATE":
+      // Only add if not already selected
+      if (state.selectedClimate.includes(action.payload)) {
+        return state
+      }
+      return {
+        ...state,
+        selectedClimate: [...state.selectedClimate, action.payload],
+      }
+    case "DESELECT_CLIMATE":
+      return {
+        ...state,
+        selectedClimate: state.selectedClimate.filter(
+          (item) => item !== action.payload,
+        ),
       }
     case "SELECT_OPERATION":
       return {
@@ -186,6 +206,10 @@ export const questionBuilderActions = {
   toggleMap: () => ({ type: "TOGGLE_MAP" }) as const,
   setClimate: (climate: string) =>
     ({ type: "SET_CLIMATE", payload: climate }) as const,
+  selectClimate: (climate: string) =>
+    ({ type: "SELECT_CLIMATE", payload: climate }) as const,
+  deselectClimate: (climate: string) =>
+    ({ type: "DESELECT_CLIMATE", payload: climate }) as const,
   selectOperation: (operation: string) =>
     ({ type: "SELECT_OPERATION", payload: operation }) as const,
   deselectOperation: (operation: string) =>
