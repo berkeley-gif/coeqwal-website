@@ -32,25 +32,38 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
   const [themes, setThemes] = React.useState([
     {
       id: "1",
-      name: "Drought Resilience",
-      description:
-        "Operations focused on drought resilience and water conservation",
+      name: "Limiting groundwater pumping",
+      description: "Operations focused on limiting groundwater pumping",
       favorite: true,
-      tags: ["drought", "conservation"],
+      tags: ["groundwater", "agriculture", "drinking water", "sustainability"],
     },
     {
       id: "2",
-      name: "Environmental Protection",
-      description: "Prioritizing ecological health and environmental flows",
+      name: "Varying stream flows",
+      description: "Varying stream flow",
       favorite: false,
-      tags: ["environment", "ecology"],
+      tags: ["environment", "water quality"],
     },
     {
       id: "3",
-      name: "Agricultural Support",
-      description: "Optimized for agricultural deliveries and food production",
+      name: "Prioritizing community drinking water",
+      description: "Optimizing for community drinking water",
       favorite: true,
-      tags: ["agriculture", "food"],
+      tags: ["equity", "community", "drinking water"],
+    },
+    {
+      id: "4",
+      name: "Balancing water uses in the Delta",
+      description: "Balancing...",
+      favorite: true,
+      tags: ["equity", "community", "environment", "water quality"],
+    },
+    {
+      id: "5",
+      name: "Adding new water infrastructure",
+      description: "Like the Delta conveyance tunnel...",
+      favorite: true,
+      tags: ["sustainability", "community", "environment", "water quality"],
     },
   ])
 
@@ -70,29 +83,10 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
       bgColor="rgb(118, 178, 190)"
     >
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Save and manage themed scenarios that you can reapply later.
+        We have organized the alternative scenarios we are running on CalSim
+        into themes. In a technical sense, themes are clusters of multiple water
+        operation settings that can be applied and varied.
       </Typography>
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-          Your Themes
-        </Typography>
-        <Button
-          variant="outlined"
-          size="small"
-          startIcon={<AddIcon />}
-          sx={{ textTransform: "none" }}
-        >
-          New Theme
-        </Button>
-      </Box>
 
       <List sx={{ width: "100%", p: 0 }}>
         {themes.map((item) => (
@@ -153,23 +147,6 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
           </ListItem>
         ))}
       </List>
-
-      <Box
-        sx={{ mt: 3, p: 2, bgcolor: "rgba(0, 0, 0, 0.03)", borderRadius: 1 }}
-      >
-        <Typography
-          variant="subtitle2"
-          color="primary"
-          sx={{ fontWeight: "bold" }}
-        >
-          What are scenario themes?
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Themes are saved configurations of multiple water operation settings
-          that can be quickly applied. Create themes for specific management
-          goals or conditions.
-        </Typography>
-      </Box>
     </ContentWrapper>
   )
 }
