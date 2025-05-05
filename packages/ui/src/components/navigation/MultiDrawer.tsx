@@ -189,9 +189,9 @@ export function MultiDrawer({
       <Box
         sx={{
           position: "fixed",
-          top: theme.layout.headerHeight, // Position directly under header
+          top: "50%", // Position at middle of window height
           right: 0, // Keep in fixed position
-          transform: "translateY(0)", // No vertical centering
+          transform: "translateY(-50%)", // Center vertically
           opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
           visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
           zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer

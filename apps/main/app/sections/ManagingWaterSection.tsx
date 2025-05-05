@@ -4,10 +4,10 @@ import { useTranslation } from "@repo/i18n"
 import { useStoryStore } from "@repo/state"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
 }
 
-export default function ManagingWaterSection({ onOpenDrawer }: Props) {
+export default function ManagingWaterSection({ onOpenLearnDrawer }: Props) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -70,7 +70,7 @@ export default function ManagingWaterSection({ onOpenDrawer }: Props) {
             </Stack>
 
             <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
+              <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>
 

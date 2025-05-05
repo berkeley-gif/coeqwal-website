@@ -1,13 +1,19 @@
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
-import { BasePanel, LearnMoreButton } from "@repo/ui"
+import { BasePanel, LearnMoreButton as ExploreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore } from "@repo/state"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
+  onOpenCurrentOpsDrawer: () => void
+  onOpenThemesDrawer: () => void
 }
 
-export default function InvitationSection({ onOpenDrawer }: Props) {
+export default function InvitationSection({ 
+  onOpenLearnDrawer,
+  onOpenCurrentOpsDrawer,
+  onOpenThemesDrawer,
+}: Props) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -82,14 +88,24 @@ export default function InvitationSection({ onOpenDrawer }: Props) {
 
             <Stack ml={"-10px"}>
               {renderParagraph("invitation.paragraph1", undefined, false)}
+
+              <Box sx={{ mt: 2, mb: 3 }}>
+                <ExploreButton onClick={onOpenCurrentOpsDrawer}>
+                  Explore Current Operations
+                </ExploreButton>
+              </Box>
+
               {renderParagraph("invitation.paragraph2", undefined, false)}
+
+              <Box sx={{ mt: 2, mb: 3 }}>
+                <ExploreButton onClick={onOpenThemesDrawer}>
+                  Explore Scenario Themes
+                </ExploreButton>
+              </Box>
+
               {renderParagraph("invitation.paragraph3", undefined, false)}
               {renderParagraph("invitation.paragraph4", undefined, false)}
             </Stack>
-
-            <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
-            </Box>
           </Box>
 
           {/* Right placeholder column */}

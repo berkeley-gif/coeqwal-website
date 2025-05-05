@@ -8,10 +8,10 @@ import { useMapFly } from "../hooks/useMapFly"
 import { views } from "../config/mapViews"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
 }
 
-export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
+export default function CaliforniaWaterSection({ onOpenLearnDrawer }: Props) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
   const fly = useMapFly()
@@ -123,7 +123,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
             </Stack>
 
             <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
+              <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>
 

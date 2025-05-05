@@ -4,10 +4,16 @@ import { useTranslation } from "@repo/i18n"
 import { useStoryStore } from "@repo/state"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
+  onOpenCurrentOpsDrawer: () => void
+  onOpenThemesDrawer: () => void
 }
 
-export default function ChallengesSection({ onOpenDrawer }: Props) {
+export default function ChallengesSection({ 
+  onOpenLearnDrawer,
+  onOpenCurrentOpsDrawer,
+  onOpenThemesDrawer
+}: Props) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -88,7 +94,7 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
             </Stack>
 
             <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
+              <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>
 

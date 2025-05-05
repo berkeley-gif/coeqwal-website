@@ -76,6 +76,18 @@ export default function Home() {
     setActiveDrawerTab("learn")
   }
 
+  // Handler to open the "currentOps" tab of the drawer
+  const handleOpenCurrentOpsDrawer = () => {
+    setDrawerOpen(true)
+    setActiveDrawerTab("currentOps")
+  }
+
+  // Handler to open the "themes" tab of the drawer
+  const handleOpenThemesDrawer = () => {
+    setDrawerOpen(true)
+    setActiveDrawerTab("themes")
+  }
+
   // Create the secondary navigation items
   const secondaryNavItems = useMemo<SecondaryNavItem[]>(
     () => [
@@ -165,19 +177,27 @@ export default function Home() {
           <InterstitialPanel />
 
           {/* California Water panel with two columns */}
-          <CaliforniaWaterSection onOpenDrawer={handleOpenLearnDrawer} />
+          <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Managing Water panel with two columns */}
-          <ManagingWaterSection onOpenDrawer={handleOpenLearnDrawer} />
+          <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection onOpenDrawer={handleOpenLearnDrawer} />
+          <ChallengesSection 
+            onOpenLearnDrawer={handleOpenLearnDrawer}
+            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
+            onOpenThemesDrawer={handleOpenThemesDrawer}
+          />
 
           {/* CalSim panel with two columns */}
-          <CalSimSection onOpenDrawer={handleOpenLearnDrawer} />
+          <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Invitation panel with two columns */}
-          <InvitationSection onOpenDrawer={handleOpenLearnDrawer} />
+          <InvitationSection 
+            onOpenLearnDrawer={handleOpenLearnDrawer}
+            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
+            onOpenThemesDrawer={handleOpenThemesDrawer}
+          />
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
