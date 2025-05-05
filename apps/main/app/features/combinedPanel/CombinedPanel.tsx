@@ -428,7 +428,7 @@ const CombinedPanelContent = () => {
           maxWidth: "none !important",
           display: "flex",
           flexDirection: "column",
-          padding: theme.spacing(4),
+          padding: theme.spacing(6),
           paddingTop: `${theme.layout.headerHeight}px`,
           backgroundColor: "#FFFFFF",
           transition: "position 0.3s ease, box-shadow 0.3s ease",
@@ -589,7 +589,7 @@ const CombinedPanelContent = () => {
         id="question-builder-content"
         fullHeight={false}
         background="light"
-        paddingVariant="narrow"
+        paddingVariant="wide"
         includeHeaderSpacing={false}
         sx={{
           width: "100%",
@@ -702,7 +702,9 @@ const CombinedPanelContent = () => {
 
         {/* Scenario Results Section */}
         <Box
-          sx={{ width: "100%" }}
+          sx={{ 
+            width: "100%",
+          }}
           data-section="scenario-results"
           id="scenario-results"
         >
