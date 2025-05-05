@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useMemo } from "react"
 import { Box } from "@repo/ui/mui"
-import { Header, MiniDrawer, VerticalDivider } from "@repo/ui"
-import type { SecondaryNavItem } from "@repo/ui"
+import { Header, MultiDrawer, VerticalDivider } from "@repo/ui"
+import type { SecondaryNavItem, TabKey } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds, getNavigationItems } from "./config/navigation"
@@ -34,7 +34,10 @@ const navSectionIds = {
 export default function Home() {
   const { t } = useTranslation()
 
+  // State for the drawer's open status and active tab
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [activeDrawerTab, setActiveDrawerTab] = useState<TabKey | null>(null)
+
   // Track all sections including the ones for the top navigation
   const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
   const { activeSection, scrollToSection } = useScrollTracking(allSectionIds)
@@ -48,6 +51,7 @@ export default function Home() {
   const handleSectionClick = (sectionId: string) => {
     scrollToSection(sectionId)
     setDrawerOpen(false)
+    setActiveDrawerTab(null)
   }
 
   // Get navigation items with the current active section and translation function
@@ -56,6 +60,21 @@ export default function Home() {
     handleSectionClick,
     t,
   )
+
+  // Handler for drawer state changes
+  const handleDrawerStateChange = (
+    isOpen: boolean,
+    activeTab: TabKey | null,
+  ) => {
+    setDrawerOpen(isOpen)
+    setActiveDrawerTab(activeTab)
+  }
+
+  // Handler to open the "learn" tab of the drawer
+  const handleOpenLearnDrawer = () => {
+    setDrawerOpen(true)
+    setActiveDrawerTab("learn")
+  }
 
   // Create the secondary navigation items
   const secondaryNavItems = useMemo<SecondaryNavItem[]>(
@@ -105,24 +124,12 @@ export default function Home() {
         <MapContainer uncontrolledRef={uncontrolledRef} />
       </Box>
 
-      {/* ===== Navigation Sidebar ===== */}
-      <Box
-        sx={{
-          pointerEvents: "none",
-          position: "relative",
-          zIndex: 10,
-        }}
-      >
-        <Box sx={{ pointerEvents: "auto" }}>
-          <MiniDrawer
-            items={navigationItems}
-            open={drawerOpen}
-            onOpenChange={setDrawerOpen}
-            position="right"
-            title="Learn"
-          />
-        </Box>
-      </Box>
+      {/* ===== MultiDrawer with tabs ===== */}
+      <MultiDrawer
+        drawerWidth={360}
+        onDrawerStateChange={handleDrawerStateChange}
+        activeTab={activeDrawerTab}
+      />
 
       {/* ===== Drawer "border" ===== */}
       <VerticalDivider
@@ -177,19 +184,19 @@ export default function Home() {
           <InterstitialPanel />
 
           {/* California Water panel with two columns */}
-          <CaliforniaWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
+          <CaliforniaWaterSection onOpenDrawer={handleOpenLearnDrawer} />
 
           {/* Managing Water panel with two columns */}
-          <ManagingWaterSection onOpenDrawer={() => setDrawerOpen(true)} />
+          <ManagingWaterSection onOpenDrawer={handleOpenLearnDrawer} />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection onOpenDrawer={() => setDrawerOpen(true)} />
+          <ChallengesSection onOpenDrawer={handleOpenLearnDrawer} />
 
           {/* CalSim panel with two columns */}
-          <CalSimSection onOpenDrawer={() => setDrawerOpen(true)} />
+          <CalSimSection onOpenDrawer={handleOpenLearnDrawer} />
 
           {/* Invitation panel with two columns */}
-          <InvitationSection onOpenDrawer={() => setDrawerOpen(true)} />
+          <InvitationSection onOpenDrawer={handleOpenLearnDrawer} />
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel">

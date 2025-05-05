@@ -119,8 +119,8 @@ const OutcomesSelector: React.FC = () => {
           mb: 2,
         }}
       >
-        <Typography 
-          variant="h3" 
+        <Typography
+          variant="h3"
           sx={{
             fontSize: (theme) => theme.cards.typography.hero.fontSize,
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
