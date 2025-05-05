@@ -19,7 +19,6 @@ export interface ThemesContentProps {
  * Content component for the Scenario Themes tab in the MultiDrawer
  */
 export function ThemesContent({ onClose }: ThemesContentProps) {
-  // Sample themes - replace with your actual themes data
   const [themes] = React.useState([
     {
       id: "1",
@@ -104,7 +103,7 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
                     label={tag}
                     size="small"
                     variant="outlined"
-                    sx={{ mr: 0.5, mb: 0.5 }}
+                    sx={{ color: "white", mr: 0.5, mb: 0.5 }}
                   />
                 ))}
               </Box>

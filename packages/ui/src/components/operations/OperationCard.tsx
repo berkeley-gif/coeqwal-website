@@ -203,14 +203,23 @@ export const OperationCard: React.FC<OperationCardProps> = ({
               <Checkbox
                 checked={option.selected}
                 disabled={option.disabled}
-                onChange={(e) =>
-                  onSubOptionChange?.(option.id, e.target.checked)
-                }
+                onChange={(e) => onSubOptionChange?.(option.id, e.target.checked)}
                 size="small"
                 sx={{
                   mr: theme.spacing(0.375),
                   p: theme.spacing(0.4),
-                  "&.Mui-checked": {
+
+                  /* Unchecked = white box with gray border */
+                  '& .MuiSvgIcon-root': {
+                    backgroundColor: 'white',
+                    borderRadius: '2px',
+                    color: '#9e9e9e',           // gray outline
+                  },
+
+                  /* Checked = white box + primary-color checkmark */
+                  '&.Mui-checked .MuiSvgIcon-root': {
+                    fill: theme.palette.primary.main,
+                    backgroundColor: 'black',
                     color: theme.palette.primary.main,
                   },
                 }}
