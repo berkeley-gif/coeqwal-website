@@ -32,6 +32,11 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
 
+// CombinedPanel props interface
+interface CombinedPanelProps {
+  onOpenThemesDrawer?: () => void;
+}
+
 // Type for scenario data
 interface ScenarioDataItem {
   id: string
@@ -76,7 +81,7 @@ const AVAILABLE_METRICS = [
 ]
 
 // Content component that uses the context
-const CombinedPanelContent = () => {
+const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -615,7 +620,7 @@ const CombinedPanelContent = () => {
         >
           {/* Column 1: Operations or outcome text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? <OutcomesSelector /> : <OperationsSelector />}
+            {swapped ? <OutcomesSelector /> : <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />}
           </Grid>
 
           {/* Column 2: Action verb & switch - aligned to top */}
@@ -669,7 +674,7 @@ const CombinedPanelContent = () => {
 
           {/* Column 3: Outcomes or operations text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? <OperationsSelector /> : <OutcomesSelector />}
+            {swapped ? <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} /> : <OutcomesSelector />}
           </Grid>
 
           {/* Column 4: "with" label */}
@@ -868,10 +873,10 @@ const CombinedPanelContent = () => {
 // For debugging in React DevTools
 CombinedPanelContent.displayName = "CombinedPanelContent"
 
-export function CombinedPanel() {
+export function CombinedPanel({ onOpenThemesDrawer }: CombinedPanelProps) {
   return (
     <QuestionBuilderProvider>
-      <CombinedPanelContent />
+      <CombinedPanelContent onOpenThemesDrawer={onOpenThemesDrawer} />
     </QuestionBuilderProvider>
   )
 }

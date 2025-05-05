@@ -201,7 +201,7 @@ export default function Home() {
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
-            <CombinedPanel />
+            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
           {/* Needs Editor Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">

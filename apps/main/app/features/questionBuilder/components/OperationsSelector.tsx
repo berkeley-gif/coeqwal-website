@@ -33,34 +33,38 @@ import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
+interface OperationsSelectorProps {
+  onOpenThemesDrawer?: () => void;
+}
+
 // Organized palette for water operations with primary (dot) and secondary (title) colors
 const WATER_PALETTE = {
   currentOperations: {
-    primary: "#607D8B", // Slate gray - stable, established
+    primary: "#90B9BF", // Soft blue/gray
     secondary: "rgba(96, 125, 139, 0.85)",
   },
   emergencyMeasures: {
-    primary: "#F44336", // Red - urgency, critical actions
-    secondary: "rgba(244, 67, 54, 0.85)",
-  },
-  groundwaterManagement: {
-    primary: "#4CAF50", // Green - agriculture, earth, sustainability
-    secondary: "rgba(76, 175, 80, 0.85)",
-  },
-  streamFlowManagement: {
-    primary: "#2196F3", // Blue - water, rivers, flow
+    primary: "#C3E68B", // Light green
     secondary: "rgba(33, 150, 243, 0.85)",
   },
+  groundwaterManagement: {
+    primary: "#FFC700", // Bright yellow
+    secondary: "rgba(244, 67, 54, 0.85)",
+  },
+  streamFlowManagement: {
+    primary: "#FF9C00", // Orange
+    secondary: "rgba(76, 175, 80, 0.85)",
+  },
   urbanWaterPriorities: {
-    primary: "#9C27B0", // Purple - civic, community focus
+    primary: "#CF9AAD", // Soft pink
     secondary: "rgba(156, 39, 176, 0.85)",
   },
   deltaBalance: {
-    primary: "#FF9800", // Amber - delta ecosystems, balance
+    primary: "#A66484", // Purple
     secondary: "rgba(255, 152, 0, 0.85)",
   },
   infrastructure: {
-    primary: "#3F51B5", // Indigo - construction, structural elements
+    primary: "#D96E00", // Amber/brown
     secondary: "rgba(63, 81, 181, 0.85)",
   },
   climateAdaptation: {
@@ -244,7 +248,7 @@ const OPERATION_CARDS = (theme: any) => [
   },
 ]
 
-const OperationsSelector: React.FC = () => {
+const OperationsSelector: React.FC<OperationsSelectorProps> = ({ onOpenThemesDrawer }) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -325,8 +329,10 @@ const OperationsSelector: React.FC = () => {
 
   // Handle info click
   const handleInfoClick = (optionId: string) => {
-    console.log(`Show more info for: ${optionId}`)
-    // Implement info modal or expanded view
+    // Open the themes drawer when "Tell me more" is clicked
+    if (onOpenThemesDrawer) {
+      onOpenThemesDrawer()
+    }
   }
 
   // Common styles
