@@ -251,7 +251,7 @@ const theme = createTheme({
         fontWeight: 400,
       },
       caption: {
-        fontSize: "0.875rem", // 14px
+        fontSize: "0.95rem", // smallest type per spec
         lineHeight: 1.4,
         fontWeight: 400,
       },
@@ -362,19 +362,19 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     h2: {
-      fontSize: "2rem",
-      fontWeight: 600,
-      lineHeight: 1.25,
+      fontSize: "3.6rem", // 57.6px
+      fontWeight: 500,
+      lineHeight: 1.15,
       letterSpacing: "normal",
     },
     h3: {
-      fontSize: "1.5rem",
+      fontSize: "3rem", // 48px
       fontWeight: 500,
-      lineHeight: 1.4,
+      lineHeight: 1.2,
       letterSpacing: "normal",
     },
     h4: {
-      fontSize: "1.25rem",
+      fontSize: "1.25rem", // unchanged (20px)
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
@@ -390,14 +390,14 @@ const theme = createTheme({
       letterSpacing: "normal",
     },
     body1: {
-      fontSize: "1rem",
+      fontSize: "1.25rem", // 20px
       letterSpacing: "normal",
-      lineHeight: 1.5,
+      lineHeight: 1.6,
     },
     body2: {
-      fontSize: "0.95rem",
+      fontSize: "1.5rem", // 24px
       letterSpacing: "normal",
-      lineHeight: 1.5,
+      lineHeight: 1.6,
     },
     subtitle1: {
       fontSize: "1.25rem",
@@ -416,12 +416,17 @@ const theme = createTheme({
       textTransform: "none",
     },
     caption: {
-      fontSize: "0.875rem",
+      fontSize: "0.95rem", // smallest type per spec
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
     overline: {
       fontSize: "0.75rem",
+      letterSpacing: "normal",
+      lineHeight: 1.4,
+    },
+    nav: {
+      fontSize: "0.875rem",
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
@@ -937,6 +942,14 @@ declare module "@mui/material/styles" {
     hoverParagraph: CSSProperties
     hoverParagraphDarkened: CSSProperties
   }
+
+  // Add custom typography variant
+  interface TypographyVariants {
+    nav: React.CSSProperties
+  }
+  interface TypographyVariantsOptions {
+    nav?: React.CSSProperties
+  }
 }
 
 // Custom button variants
@@ -944,5 +957,11 @@ declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     pill: true
     standard: true
+  }
+}
+
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    nav: true
   }
 }

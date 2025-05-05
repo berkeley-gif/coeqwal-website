@@ -76,7 +76,7 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
         >
           {/* Left column */}
           <Box sx={{ width: { xs: "100%", md: "48%" }, pr: { md: 4 } }}>
-            <Typography variant="h1" sx={{ mb: 1 }}>
+            <Typography variant="h2" sx={{ mb: 1 }}>
               {t("challenges.title")}
             </Typography>
 

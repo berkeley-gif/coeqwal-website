@@ -103,7 +103,7 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               pr: { md: 4 },
             }}
           >
-            <Typography variant="h1" sx={{ mb: 1 }}>
+            <Typography variant="h2" sx={{ mb: 1 }}>
               {t("californiaWater.title")}
             </Typography>
 

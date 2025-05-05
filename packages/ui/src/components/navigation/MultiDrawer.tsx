@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import { useState } from "react"
 import {
   Box,
   Drawer,
@@ -75,10 +75,10 @@ function RailButton({
       aria-label={`Open ${label} panel`}
     >
       <Typography
-        variant="button"
+        variant="nav"
         sx={{
           fontWeight: 500, // Match secondary nav
-          fontSize: "0.75rem", // Match secondary nav
+          fontSize: theme.typography.nav.fontSize,
           transform: "rotate(-90deg)",
           whiteSpace: "nowrap",
           letterSpacing: "0.05em",
