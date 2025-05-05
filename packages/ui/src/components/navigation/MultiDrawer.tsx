@@ -169,8 +169,8 @@ export function MultiDrawer({
         sx={{
           position: "fixed",
           top: "50%", // Center vertically
-          right: drawerOpen ? drawerWidth : 0, // Position relative to drawer
-          transform: "translateY(-50%)", // Center vertically without X translation
+          right: 0, // Keep in fixed position
+          transform: "translateY(-50%)", // Center vertically
           opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
           visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
           zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
@@ -188,7 +188,7 @@ export function MultiDrawer({
           borderBottom: "1px solid rgba(0,0,0,0.1)",
           boxShadow: "-4px 0 12px rgba(0,0,0,0.15)",
           transition: theme.transitions.create(
-            ["right", "opacity", "visibility"],
+            ["opacity", "visibility"],
             {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
