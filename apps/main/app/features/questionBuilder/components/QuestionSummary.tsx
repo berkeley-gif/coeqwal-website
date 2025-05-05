@@ -65,7 +65,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       operationDirections,
       isExploratoryMode,
     },
-    getOperationShortText,
     shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
@@ -205,8 +204,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
       // Handle regular operations
       regularOptions.forEach((op) => {
-        // Get the direction for this operation
-        const direction = operationDirections[op] || "increase"
         // Get the term instead of using operation short text
         const termText = getTermForOperation(op)
 
@@ -1343,7 +1340,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     theme.palette.cool.main,
     theme.palette.pop.main,
     theme.palette.climate.main,
-    getOperationShortText,
     shouldUseDo,
     formatOutcomeText,
     t,
