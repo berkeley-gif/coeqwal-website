@@ -1166,11 +1166,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     const operationsPart = getOperationsPart()
     const outcomePart = getOutcomesPart()
 
-    // Find the climate label for the selected climate ID
-    const getClimateLabel = () => {
-      // Use the translated label for the selected climate ID
-      return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
-    }
+    // // Find the climate label for the selected climate ID
+    // const getClimateLabel = () => {
+    //   // Use the translated label for the selected climate ID
+    //   return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
+    // }
 
     // Format multiple climate selections
     const formatClimateSelections = () => {

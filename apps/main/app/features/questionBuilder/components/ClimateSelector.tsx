@@ -40,7 +40,6 @@ const ClimateSelector: React.FC = () => {
   const { t } = useTranslation()
   const {
     state: { selectedClimate, includeClimate },
-    setClimate,
     toggleClimate,
     selectClimate,
     deselectClimate,

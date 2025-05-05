@@ -685,7 +685,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
             )}
           </Grid>
 
-          {/* Column 4: "with" label */}
+          {/* Column 4: "with" label
           <Grid
             sx={{
               flex: "0 0 auto",
@@ -696,7 +696,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
             <Typography variant="h5" sx={{ mt: 3 }}>
               {t("questionBuilder.connectors.with")}
             </Typography>
-          </Grid>
+          </Grid> */}
 
           {/* Column 5: "climate" label */}
           <Grid
