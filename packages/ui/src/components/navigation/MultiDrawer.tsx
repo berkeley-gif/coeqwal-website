@@ -31,14 +31,16 @@ interface RailButtonProps {
   label: string
   onClick: () => void
   active?: boolean
+  bgColor: string
+  hoverColor: string
 }
 
 /**
  * Button component for the mini rail - vertical tab style with vertical text
  */
-function RailButton({ label, onClick, active }: RailButtonProps) {
+function RailButton({ label, onClick, active, bgColor, hoverColor }: RailButtonProps) {
   const theme = useTheme()
-
+  
   return (
     <Box
       onClick={onClick}
@@ -46,38 +48,39 @@ function RailButton({ label, onClick, active }: RailButtonProps) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: active ? theme.palette.primary.main : "#f5f5f5",
-        color: active ? "white" : theme.palette.text.primary,
-        borderRadius: active ? "4px 0 0 4px" : 4,
-        boxShadow: active ? "none" : "0 2px 5px rgba(0,0,0,0.1)",
-        padding: "12px 8px",
-        my: 0.5,
-        width: "48px", // Wider for better visibility
-        height: "120px",
+        bgcolor: active ? theme.palette.primary.main : bgColor,
+        color: "#FFFFFF", // White text to match secondary nav
+        borderRadius: 0, // Remove capsule shape
+        boxShadow: "none",
+        padding: "12px 2px", // Reduced horizontal padding
+        my: 0,
+        width: "60px", // Wider to accommodate longer text
+        height: "180px", // Taller to accommodate longer text
         cursor: "pointer",
         position: "relative",
-        borderRight: active
-          ? `4px solid ${theme.palette.primary.dark}`
-          : "none",
-        border: active ? "none" : "1px solid rgba(0,0,0,0.1)",
+        borderRight: active ? `4px solid ${theme.palette.primary.dark}` : "none",
+        border: "none", // Remove border
         transition: "all 0.2s ease",
-        "&:hover": {
-          bgcolor: active
-            ? theme.palette.primary.main
-            : theme.palette.action.hover,
+        "&:hover": { 
+          bgcolor: active 
+            ? theme.palette.primary.main 
+            : hoverColor,
         },
       }}
       aria-label={`Open ${label} panel`}
     >
-      <Typography
-        variant="button"
-        sx={{
-          fontWeight: active ? 600 : 600,
-          fontSize: "0.95rem",
+      <Typography 
+        variant="button" 
+        sx={{ 
+          fontWeight: 500, // Match secondary nav
+          fontSize: "0.75rem", // Match secondary nav
           transform: "rotate(-90deg)",
           whiteSpace: "nowrap",
           letterSpacing: "0.05em",
           textTransform: "uppercase",
+          color: "inherit", // Ensure text color is inherited
+          width: "180px", // Ensure enough width for rotated text
+          textAlign: "center", // Center the text
         }}
       >
         {label}
@@ -168,25 +171,21 @@ export function MultiDrawer({
       <Box
         sx={{
           position: "fixed",
-          top: "50%", // Center vertically
+          top: theme.layout.headerHeight, // Position directly under header
           right: 0, // Keep in fixed position
-          transform: "translateY(-50%)", // Center vertically
+          transform: "translateY(0)", // No vertical centering
           opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
           visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
           zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 1,
-          py: 1.5,
-          px: 0.5,
-          bgcolor: "white", // Solid background to ensure visibility
-          borderTopLeftRadius: 8,
-          borderBottomLeftRadius: 8,
-          borderLeft: "1px solid rgba(0,0,0,0.1)",
-          borderTop: "1px solid rgba(0,0,0,0.1)",
-          borderBottom: "1px solid rgba(0,0,0,0.1)",
-          boxShadow: "-4px 0 12px rgba(0,0,0,0.15)",
+          gap: 0, // No gap between buttons
+          p: 0, // No padding
+          backgroundColor: "transparent", // Transparent background
+          borderRadius: 0, // No border radius
+          border: "none", // No border
+          boxShadow: "none", // No shadow
           transition: theme.transitions.create(
             ["opacity", "visibility"],
             {
@@ -194,23 +193,28 @@ export function MultiDrawer({
               duration: theme.transitions.duration.enteringScreen,
             },
           ),
-          // Remove debug outline
         }}
       >
         <RailButton
-          label="Learn"
+          label="LEARN ABOUT WATER"
           onClick={() => toggleTab("learn")}
           active={activeTab === "learn"}
+          bgColor="rgb(191, 218, 220)"
+          hoverColor="rgb(172, 196, 198)"
         />
         <RailButton
-          label="Operations"
+          label="CURRENT OPERATIONS"
           onClick={() => toggleTab("currentOps")}
           active={activeTab === "currentOps"}
+          bgColor="rgb(154, 203, 207)"
+          hoverColor="rgb(139, 183, 186)"
         />
         <RailButton
-          label="Themes"
+          label="SCENARIO THEMES"
           onClick={() => toggleTab("themes")}
           active={activeTab === "themes"}
+          bgColor="rgb(118, 178, 190)"
+          hoverColor="rgb(106, 160, 171)"
         />
       </Box>
 
