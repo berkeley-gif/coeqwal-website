@@ -190,23 +190,31 @@ export default function Home() {
           <InterstitialPanel />
 
           {/* California Water panel with two columns */}
-          <CaliforniaWaterSection />
+          <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Managing Water panel with two columns */}
-          <ManagingWaterSection />
+          <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection />
+          <ChallengesSection
+            onOpenLearnDrawer={handleOpenLearnDrawer}
+            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
+            onOpenThemesDrawer={handleOpenThemesDrawer}
+          />
 
           {/* CalSim panel with two columns */}
-          <CalSimSection />
+          <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Invitation panel with two columns */}
-          <InvitationSection />
+          <InvitationSection
+            onOpenLearnDrawer={handleOpenLearnDrawer}
+            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
+            onOpenThemesDrawer={handleOpenThemesDrawer}
+          />
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
-            <CombinedPanel />
+            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
           {/* Needs Editor Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">

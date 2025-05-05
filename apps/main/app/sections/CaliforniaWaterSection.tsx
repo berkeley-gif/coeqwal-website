@@ -9,7 +9,14 @@ import { useStoryStore, useDrawerStore } from "@repo/state"
 import { useMapFly } from "../hooks/useMapFly"
 import { views } from "../config/mapViews"
 
-export default function CaliforniaWaterSection() {
+// Add props interface
+interface CaliforniaWaterSectionProps {
+  onOpenLearnDrawer?: () => void
+}
+
+export default function CaliforniaWaterSection({
+  onOpenLearnDrawer,
+}: CaliforniaWaterSectionProps = {}) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
   const fly = useMapFly()
@@ -123,7 +130,11 @@ export default function CaliforniaWaterSection() {
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() => useDrawerStore.getState().openDrawer("learn")}
+                onClick={() =>
+                  onOpenLearnDrawer
+                    ? onOpenLearnDrawer()
+                    : useDrawerStore.getState().openDrawer("learn")
+                }
               />
             </Box>
           </Box>

@@ -5,7 +5,18 @@ import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore, useDrawerStore } from "@repo/state"
 
-export default function ChallengesSection() {
+// Add props interface
+interface ChallengesSectionProps {
+  onOpenLearnDrawer?: () => void
+  onOpenCurrentOpsDrawer?: () => void
+  onOpenThemesDrawer?: () => void
+}
+
+export default function ChallengesSection({
+  onOpenLearnDrawer,
+  onOpenCurrentOpsDrawer,
+  onOpenThemesDrawer,
+}: ChallengesSectionProps = {}) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -89,7 +100,11 @@ export default function ChallengesSection() {
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() => useDrawerStore.getState().openDrawer("learn")}
+                onClick={() =>
+                  onOpenLearnDrawer
+                    ? onOpenLearnDrawer()
+                    : useDrawerStore.getState().openDrawer("learn")
+                }
               />
             </Box>
           </Box>

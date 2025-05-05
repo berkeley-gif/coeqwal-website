@@ -34,7 +34,9 @@ import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state"
 
-interface OperationsSelectorProps {}
+interface OperationsSelectorProps {
+  openThemesDrawer?: () => void
+}
 
 // Organized palette for water operations with primary (dot) and secondary (title) colors
 const WATER_PALETTE = {
@@ -247,7 +249,9 @@ const OPERATION_CARDS = () => [
   },
 ]
 
-const OperationsSelector: React.FC<OperationsSelectorProps> = () => {
+const OperationsSelector: React.FC<OperationsSelectorProps> = ({
+  openThemesDrawer,
+}) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -324,8 +328,12 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = () => {
 
   // Handle info click
   const handleInfoClick = () => {
-    // Open the themes drawer using the store
-    useDrawerStore.getState().openDrawer("themes")
+    // Use the prop if available, otherwise fallback to the store
+    if (openThemesDrawer) {
+      openThemesDrawer()
+    } else {
+      useDrawerStore.getState().openDrawer("themes")
+    }
   }
 
   // Common styles

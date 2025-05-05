@@ -5,7 +5,14 @@ import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore, useDrawerStore } from "@repo/state"
 
-export default function ManagingWaterSection() {
+// Add props interface
+interface ManagingWaterSectionProps {
+  onOpenLearnDrawer?: () => void
+}
+
+export default function ManagingWaterSection({
+  onOpenLearnDrawer,
+}: ManagingWaterSectionProps = {}) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -71,7 +78,11 @@ export default function ManagingWaterSection() {
 
             <Box sx={{ mt: 3, pl: 1 }}>
               <LearnMoreButton
-                onClick={() => useDrawerStore.getState().openDrawer("learn")}
+                onClick={() =>
+                  onOpenLearnDrawer
+                    ? onOpenLearnDrawer()
+                    : useDrawerStore.getState().openDrawer("learn")
+                }
               />
             </Box>
           </Box>
