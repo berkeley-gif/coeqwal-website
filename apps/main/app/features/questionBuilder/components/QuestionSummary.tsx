@@ -5,6 +5,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
+import { OPERATION_CARDS } from "./OperationsSelector"
 
 // TODO: define formatting rules as a configuration object
 // const FORMATTING_RULES = {
@@ -147,6 +148,27 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         )
       }
 
+      // Get all operation cards for term lookup
+      const operationCards = OPERATION_CARDS()
+
+      // Helper function to find term for an operation ID
+      const getTermForOperation = (opId: string): string => {
+        // First check main operation cards
+        for (const card of operationCards) {
+          if (card.id === opId) {
+            return card.term || opId
+          }
+
+          // Then check sub-options
+          for (const subOp of card.subOptions) {
+            if (subOp.id === opId) {
+              return subOp.term || opId
+            }
+          }
+        }
+        return opId // Fallback to ID if term not found
+      }
+
       // Group related subtypes together
       const flowReqSubtypes: string[] = []
       const conveyanceSubtypes: string[] = []
@@ -185,10 +207,12 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       regularOptions.forEach((op) => {
         // Get the direction for this operation
         const direction = operationDirections[op] || "increase"
+        // Get the term instead of using operation short text
+        const termText = getTermForOperation(op)
 
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
-            {getOperationShortText(op, direction)}
+            {termText}
             {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
@@ -211,9 +235,10 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
       // Handle conveyance subtypes
       if (conveyanceSubtypes.length > 0) {
+        // Find and use the term for delta conveyance subtype if available
         const conveyanceText =
           conveyanceSubtypes.length === 1
-            ? `conveyance tunnel (${conveyanceSubtypes[0]})`
+            ? getTermForOperation(`dct-${conveyanceSubtypes[0]}`)
             : `conveyance tunnel (${conveyanceSubtypes.join(", ")})`
 
         formattedOperations.push(
