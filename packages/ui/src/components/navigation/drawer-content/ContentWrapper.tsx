@@ -27,6 +27,7 @@ export function ContentWrapper({
 }: ContentWrapperProps) {
   return (
     <Box
+      className="drawer-content-wrapper"
       sx={{
         p: 2,
         width: "100%",

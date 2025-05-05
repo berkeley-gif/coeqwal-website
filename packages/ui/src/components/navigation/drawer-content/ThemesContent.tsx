@@ -91,6 +91,15 @@ export function ThemesContent({
           element.scrollIntoView({ behavior: "smooth", block: "start" })
         }
       }, 300)
+    } else {
+      // If no selectedOperation, scroll to top
+      setTimeout(() => {
+        // Find the parent scrollable container
+        let element = document.querySelector(".drawer-content-wrapper")
+        if (element && element instanceof HTMLElement) {
+          element.scrollTop = 0
+        }
+      }, 300)
     }
   }, [selectedOperation])
 

@@ -114,11 +114,8 @@ export default function InvitationSection({
                 <ExploreButton
                   onClick={() => {
                     if (onOpenThemesDrawer) {
-                      onOpenThemesDrawer("invitation")
+                      onOpenThemesDrawer()
                     } else {
-                      useDrawerStore
-                        .getState()
-                        .setDrawerContent({ selectedSection: "invitation" })
                       useDrawerStore.getState().openDrawer("themes")
                     }
                   }}
