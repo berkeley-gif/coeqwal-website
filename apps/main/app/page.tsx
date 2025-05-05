@@ -264,9 +264,7 @@ export default function Home() {
           <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection
-            onOpenLearnDrawer={handleOpenLearnDrawer}
-          />
+          <ChallengesSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* CalSim panel with two columns */}
           <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />

@@ -13,9 +13,7 @@ export interface CurrentOpsContentProps {
 /**
  * Content component for the Current Operations tab in the MultiDrawer
  */
-export function CurrentOpsContent({
-  onClose,
-}: CurrentOpsContentProps) {
+export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
   return (
     <ContentWrapper
       title="Current Operations"

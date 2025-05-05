@@ -328,6 +328,23 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
 
   // Handle info click
   const handleInfoClick = (operationId: string) => {
+    // Special case for current-operations - open the currentOps drawer
+    if (operationId === "current-operations") {
+      const drawerStore = useDrawerStore.getState()
+
+      // Check if currentOps drawer is already open
+      if (drawerStore.activeTab === "currentOps") {
+        // Toggle behavior - close if already open
+        drawerStore.closeDrawer()
+      } else {
+        // Open the currentOps drawer
+        drawerStore.setDrawerContent({ selectedSection: "challenges" })
+        drawerStore.openDrawer("currentOps")
+      }
+      return
+    }
+
+    // For all other operations, use the themes drawer
     // Use the prop if available, otherwise fallback to the store
     if (openThemesDrawer) {
       openThemesDrawer(operationId)
