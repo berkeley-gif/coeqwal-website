@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useMemo } from "react"
 import { Box } from "@repo/ui/mui"
-import { Header, MultiDrawer } from "@repo/ui"
+import { Header } from "@repo/ui"
 import type { SecondaryNavItem, TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
@@ -18,6 +18,8 @@ import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
 import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
+import { useDrawerStore } from "@repo/state"
+import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 
 // Make sure these IDs match the section IDs used in the Header component
 const navSectionIds = {
@@ -34,9 +36,11 @@ const navSectionIds = {
 export default function Home() {
   // const { t } = useTranslation()
 
-  // State for the drawer's open status and active tab
+  // State for the drawer's open status and active tab - REPLACED WITH STORE
   const [, setDrawerOpen] = useState(false)
   const [activeDrawerTab, setActiveDrawerTab] = useState<TabKey | null>(null)
+  // Get actions from the Zustand drawer store
+  const { openDrawer, closeDrawer } = useDrawerStore.getState()
 
   // Track all sections including the ones for the top navigation
   const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
@@ -50,8 +54,8 @@ export default function Home() {
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
     scrollToSection(sectionId)
-    setDrawerOpen(false)
-    setActiveDrawerTab(null)
+    // Close drawer through the store
+    closeDrawer()
   }
 
   // Get navigation items with the current active section and translation function
@@ -61,31 +65,113 @@ export default function Home() {
   //   t,
   // )
 
-  // Handler for drawer state changes
-  const handleDrawerStateChange = (
-    isOpen: boolean,
-    activeTab: TabKey | null,
-  ) => {
-    setDrawerOpen(isOpen)
-    setActiveDrawerTab(activeTab)
+  // Handler to open specific drawer tabs - using the store
+  const handleOpenThemesDrawer = (operationId?: string) => {
+    // Check if the themes drawer is already open
+    if (activeDrawerTab === "themes") {
+      // Check if this is the same operation that's currently selected
+      const drawerStore = useDrawerStore.getState()
+      const currentOperation = drawerStore.content?.selectedOperation as
+        | string
+        | undefined
+
+      if (currentOperation === operationId) {
+        // Same operation - close the drawer (toggle behavior)
+        closeDrawer()
+
+        // Keep the legacy state in sync for components not yet migrated
+        setDrawerOpen(false)
+        setActiveDrawerTab(null)
+        return
+      } else {
+        // Different operation - just update the content instead of closing
+        drawerStore.setDrawerContent({ selectedOperation: operationId })
+        return
+      }
+    }
+
+    // Store the operation ID in the drawer content if provided
+    if (operationId) {
+      useDrawerStore
+        .getState()
+        .setDrawerContent({ selectedOperation: operationId })
+    }
+    openDrawer("themes")
+
+    // Keep the legacy state in sync for components not yet migrated
+    setDrawerOpen(true)
+    setActiveDrawerTab("themes")
   }
 
-  // Handler to open the "learn" tab of the drawer
-  const handleOpenLearnDrawer = () => {
+  // Handler to open specific drawer tabs - using the store
+  const handleOpenLearnDrawer = (sectionId?: string) => {
+    // Check if the learn drawer is already open
+    if (activeDrawerTab === "learn") {
+      // Check if this is the same section that's currently selected
+      const drawerStore = useDrawerStore.getState()
+      const currentSection = drawerStore.content?.selectedSection as
+        | string
+        | undefined
+
+      if (currentSection === sectionId) {
+        // Same section - close the drawer (toggle behavior)
+        closeDrawer()
+
+        // Keep the legacy state in sync for components not yet migrated
+        setDrawerOpen(false)
+        setActiveDrawerTab(null)
+        return
+      } else {
+        // Different section - just update the content instead of closing
+        drawerStore.setDrawerContent({ selectedSection: sectionId })
+        return
+      }
+    }
+
+    // Store the section ID in the drawer content if provided
+    if (sectionId) {
+      useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
+    }
+    openDrawer("learn")
+
+    // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
     setActiveDrawerTab("learn")
   }
 
-  // Handler to open the "currentOps" tab of the drawer
-  const handleOpenCurrentOpsDrawer = () => {
+  const handleOpenCurrentOpsDrawer = (sectionId?: string) => {
+    // Check if the currentOps drawer is already open
+    if (activeDrawerTab === "currentOps") {
+      // Check if this is the same section that's currently selected
+      const drawerStore = useDrawerStore.getState()
+      const currentSection = drawerStore.content?.selectedSection as
+        | string
+        | undefined
+
+      if (currentSection === sectionId) {
+        // Same section - close the drawer (toggle behavior)
+        closeDrawer()
+
+        // Keep the legacy state in sync for components not yet migrated
+        setDrawerOpen(false)
+        setActiveDrawerTab(null)
+        return
+      } else {
+        // Different section - just update the content instead of closing
+        drawerStore.setDrawerContent({ selectedSection: sectionId })
+        return
+      }
+    }
+
+    // Store the section ID in the drawer content if provided
+    if (sectionId) {
+      useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
+    }
+    openDrawer("currentOps")
+
+    // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
     setActiveDrawerTab("currentOps")
-  }
-
-  // Handler to open the "themes" tab of the drawer
-  const handleOpenThemesDrawer = () => {
-    setDrawerOpen(true)
-    setActiveDrawerTab("themes")
   }
 
   // Create the secondary navigation items
@@ -137,12 +223,7 @@ export default function Home() {
       </Box>
 
       {/* ===== MultiDrawer with tabs ===== */}
-      <MultiDrawer
-        drawerWidth={360}
-        onDrawerStateChange={handleDrawerStateChange}
-        activeTab={activeDrawerTab}
-        overlay={true}
-      />
+      <StoreConnectedMultiDrawer drawerWidth={360} overlay={true} />
 
       {/* ===== Main Content Area ===== */}
       <Box
@@ -183,18 +264,13 @@ export default function Home() {
           <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection
-            onOpenLearnDrawer={handleOpenLearnDrawer}
-            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
-            onOpenThemesDrawer={handleOpenThemesDrawer}
-          />
+          <ChallengesSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* CalSim panel with two columns */}
           <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Invitation panel with two columns */}
           <InvitationSection
-            onOpenLearnDrawer={handleOpenLearnDrawer}
             onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
             onOpenThemesDrawer={handleOpenThemesDrawer}
           />

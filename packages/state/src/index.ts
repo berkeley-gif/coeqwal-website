@@ -8,3 +8,6 @@ export * from "./map"
 
 // Export story store
 export * from "./story"
+
+// Export drawer store
+export * from "./drawer"

@@ -5,6 +5,7 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
+import { OPERATION_CARDS } from "./OperationsSelector"
 
 // TODO: define formatting rules as a configuration object
 // const FORMATTING_RULES = {
@@ -64,7 +65,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       operationDirections,
       isExploratoryMode,
     },
-    getOperationShortText,
     shouldUseDo,
     formatOutcomeText,
   } = useQuestionBuilderHelpers()
@@ -147,6 +147,27 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         )
       }
 
+      // Get all operation cards for term lookup
+      const operationCards = OPERATION_CARDS()
+
+      // Helper function to find term for an operation ID
+      const getTermForOperation = (opId: string): string => {
+        // First check main operation cards
+        for (const card of operationCards) {
+          if (card.id === opId) {
+            return card.term || opId
+          }
+
+          // Then check sub-options
+          for (const subOp of card.subOptions) {
+            if (subOp.id === opId) {
+              return subOp.term || opId
+            }
+          }
+        }
+        return opId // Fallback to ID if term not found
+      }
+
       // Group related subtypes together
       const flowReqSubtypes: string[] = []
       const conveyanceSubtypes: string[] = []
@@ -183,12 +204,12 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
       // Handle regular operations
       regularOptions.forEach((op) => {
-        // Get the direction for this operation
-        const direction = operationDirections[op] || "increase"
+        // Get the term instead of using operation short text
+        const termText = getTermForOperation(op)
 
         formattedOperations.push(
           <ColoredText key={op} color={theme.palette.pop.main}>
-            {getOperationShortText(op, direction)}
+            {termText}
             {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
         )
@@ -211,9 +232,10 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
       // Handle conveyance subtypes
       if (conveyanceSubtypes.length > 0) {
+        // Find and use the term for delta conveyance subtype if available
         const conveyanceText =
           conveyanceSubtypes.length === 1
-            ? `conveyance tunnel (${conveyanceSubtypes[0]})`
+            ? getTermForOperation(`dct-${conveyanceSubtypes[0]}`)
             : `conveyance tunnel (${conveyanceSubtypes.join(", ")})`
 
         formattedOperations.push(
@@ -1144,10 +1166,62 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     const operationsPart = getOperationsPart()
     const outcomePart = getOutcomesPart()
 
-    // Find the climate label for the selected climate ID
-    const getClimateLabel = () => {
-      // Use the translated label for the selected climate ID
-      return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
+    // // Find the climate label for the selected climate ID
+    // const getClimateLabel = () => {
+    //   // Use the translated label for the selected climate ID
+    //   return t(`questionBuilder.climateSelector.options.${selectedClimate}`)
+    // }
+
+    // Format multiple climate selections
+    const formatClimateSelections = () => {
+      if (!selectedClimate || selectedClimate.length === 0) {
+        return null
+      }
+
+      // Convert array of climate IDs to array of ColoredText components with translated labels
+      const formattedClimates = selectedClimate.map((id) => (
+        <ColoredText key={id} color={theme.palette.climate.main}>
+          {t(`questionBuilder.climateSelector.options.${id}`)}
+        </ColoredText>
+      ))
+
+      // If only one climate, return it directly
+      if (formattedClimates.length === 1) {
+        return formattedClimates[0]
+      }
+
+      // For multiple climates, join with "or" using the same reducer pattern as operations
+      return formattedClimates.reduce((result, climate, index) => {
+        if (index === 0) return climate
+
+        // For the last item in a list of 3+ items, use ", or"
+        if (
+          index === formattedClimates.length - 1 &&
+          formattedClimates.length > 2
+        ) {
+          return (
+            <>
+              {result}, or {climate}
+            </>
+          )
+        }
+
+        // For middle items in a list of 3+ items, use commas
+        if (formattedClimates.length > 2) {
+          return (
+            <>
+              {result}, {climate}
+            </>
+          )
+        }
+
+        // For exactly 2 items, join with "or"
+        return (
+          <>
+            {result} or {climate}
+          </>
+        )
+      })
     }
 
     // Change question structure based on number of operations
@@ -1169,10 +1243,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         const climateElement = includeClimate ? (
           <>
             {" "}
-            {locale === "es" ? "con" : "with"}{" "}
-            <ColoredText color={theme.palette.climate.main}>
-              {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
-            </ColoredText>
+            {locale === "es" ? "con" : "with"} {formatClimateSelections()}
           </>
         ) : null
 
@@ -1221,11 +1292,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       }
 
       // Create the climate element with green highlighting if climate is enabled
-      const climateElement = includeClimate ? (
-        <ColoredText color={theme.palette.climate.main}>
-          {t(`questionBuilder.climateSelector.options.${selectedClimate}`)}
-        </ColoredText>
-      ) : null
+      const climateElement = includeClimate ? formatClimateSelections() : null
 
       // If no outcomes are selected, use the default format with climate if enabled
       if (includeClimate) {
@@ -1290,11 +1357,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       const outcome = <span key="outcome">{outcomePart}</span>
 
       // Create the climate element with green highlighting
-      const climate = (
-        <ColoredText color={theme.palette.climate.main}>
-          {getClimateLabel()}
-        </ColoredText>
-      )
+      const climate = formatClimateSelections()
 
       return (
         <TranslatedQuestion
@@ -1318,7 +1381,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     theme.palette.cool.main,
     theme.palette.pop.main,
     theme.palette.climate.main,
-    getOperationShortText,
     shouldUseDo,
     formatOutcomeText,
     t,
@@ -1346,14 +1408,14 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         display: "flex",
       }}
       sx={{
-        mt: 3,
+        mt: 6,
       }}
     >
       <Typography
         variant="h2"
         ref={textRef}
         sx={(theme) => ({
-          mt: theme.spacing(4),
+          mt: theme.spacing(6),
           mb: 0,
           lineHeight: theme.cards.typography.hero.lineHeight,
           textAlign: "center",
@@ -1361,8 +1423,8 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           width: "100%",
           margin: "0 auto",
           backgroundColor: "white",
-          paddingTop: isExploratoryMode ? "20px" : "20px", // Reduce padding in exploratory mode
-          paddingBottom: isExploratoryMode ? "12px" : 0, // Reduce padding in exploratory mode
+          paddingTop: isExploratoryMode ? "30px" : "40px",
+          paddingBottom: isExploratoryMode ? "12px" : 0,
           paddingLeft: "5%",
           paddingRight: "5%",
           boxShadow: "none",

@@ -34,7 +34,7 @@ import {
 
 // CombinedPanel props interface
 interface CombinedPanelProps {
-  onOpenThemesDrawer?: () => void
+  onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 // Type for scenario data
@@ -623,7 +623,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
             {swapped ? (
               <OutcomesSelector />
             ) : (
-              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
+              <OperationsSelector openThemesDrawer={onOpenThemesDrawer} />
             )}
           </Grid>
 
@@ -679,13 +679,13 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
           {/* Column 3: Outcomes or operations text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
             {swapped ? (
-              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
+              <OperationsSelector openThemesDrawer={onOpenThemesDrawer} />
             ) : (
               <OutcomesSelector />
             )}
           </Grid>
 
-          {/* Column 4: "with" label */}
+          {/* Column 4: "with" label
           <Grid
             sx={{
               flex: "0 0 auto",
@@ -696,7 +696,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
             <Typography variant="h5" sx={{ mt: 3 }}>
               {t("questionBuilder.connectors.with")}
             </Typography>
-          </Grid>
+          </Grid> */}
 
           {/* Column 5: "climate" label */}
           <Grid

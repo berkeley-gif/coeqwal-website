@@ -1,13 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Box,
-  Drawer,
-  useTheme,
-  Fade,
-  Typography,
-} from "@mui/material"
+import { Box, Drawer, useTheme, Fade, Typography } from "@mui/material"
 
 // Content components
 import {
@@ -118,6 +112,11 @@ export interface MultiDrawerProps {
    * @default false
    */
   overlay?: boolean
+
+  /**
+   * Optional drawer content that can be passed to drawer components
+   */
+  drawerContent?: Record<string, unknown>
 }
 
 /**
@@ -133,6 +132,7 @@ export function MultiDrawer({
   onDrawerStateChange,
   activeTab: controlledActiveTab,
   overlay = false,
+  drawerContent = {},
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -268,7 +268,14 @@ export function MultiDrawer({
               overflow: "auto",
             }}
           >
-            {activeTab === "learn" && <LearnContent onClose={close} />}
+            {activeTab === "learn" && (
+              <LearnContent
+                onClose={close}
+                selectedSection={
+                  drawerContent.selectedSection as string | undefined
+                }
+              />
+            )}
           </Box>
         </Fade>
 
@@ -281,7 +288,12 @@ export function MultiDrawer({
             }}
           >
             {activeTab === "currentOps" && (
-              <CurrentOpsContent onClose={close} />
+              <CurrentOpsContent
+                onClose={close}
+                selectedSection={
+                  drawerContent.selectedSection as string | undefined
+                }
+              />
             )}
           </Box>
         </Fade>
@@ -294,7 +306,14 @@ export function MultiDrawer({
               overflow: "auto",
             }}
           >
-            {activeTab === "themes" && <ThemesContent onClose={close} />}
+            {activeTab === "themes" && (
+              <ThemesContent
+                onClose={close}
+                selectedOperation={
+                  drawerContent.selectedOperation as string | undefined
+                }
+              />
+            )}
           </Box>
         </Fade>
       </Drawer>

@@ -1,19 +1,24 @@
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
-import { BasePanel, LearnMoreButton as ExploreButton } from "@repo/ui"
-import { useTranslation } from "@repo/i18n"
-import { useStoryStore } from "@repo/state"
+"use client"
 
-interface Props {
-  onOpenLearnDrawer: () => void
-  onOpenCurrentOpsDrawer: () => void
-  onOpenThemesDrawer: () => void
+import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import {
+  BasePanel,
+  LearnMoreButton as ExploreButton,
+  SearchScenariosButton,
+} from "@repo/ui"
+import { useTranslation } from "@repo/i18n"
+import { useStoryStore, useDrawerStore } from "@repo/state"
+
+// Add props interface
+interface InvitationSectionProps {
+  onOpenCurrentOpsDrawer?: (sectionId: string) => void
+  onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 export default function InvitationSection({
-  // onOpenLearnDrawer,
   onOpenCurrentOpsDrawer,
   onOpenThemesDrawer,
-}: Props) {
+}: InvitationSectionProps = {}) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -91,7 +96,18 @@ export default function InvitationSection({
               {renderParagraph("invitation.paragraph1", undefined, false)}
 
               <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
-                <ExploreButton onClick={onOpenCurrentOpsDrawer}>
+                <ExploreButton
+                  onClick={() => {
+                    if (onOpenCurrentOpsDrawer) {
+                      onOpenCurrentOpsDrawer("invitation")
+                    } else {
+                      useDrawerStore
+                        .getState()
+                        .setDrawerContent({ selectedSection: "invitation" })
+                      useDrawerStore.getState().openDrawer("currentOps")
+                    }
+                  }}
+                >
                   Explore Current Operations
                 </ExploreButton>
               </Box>
@@ -99,13 +115,37 @@ export default function InvitationSection({
               {renderParagraph("invitation.paragraph2", undefined, false)}
 
               <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
-                <ExploreButton onClick={onOpenThemesDrawer}>
+                <ExploreButton
+                  onClick={() => {
+                    if (onOpenThemesDrawer) {
+                      onOpenThemesDrawer()
+                    } else {
+                      useDrawerStore.getState().openDrawer("themes")
+                    }
+                  }}
+                >
                   Explore Scenario Themes
                 </ExploreButton>
               </Box>
 
               {renderParagraph("invitation.paragraph3", undefined, false)}
               {renderParagraph("invitation.paragraph4", undefined, false)}
+
+              {/* Search Scenarios button with down arrow */}
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
+                <SearchScenariosButton
+                  onClick={() => {
+                    // Scroll to combined-panel
+                    const combinedPanel =
+                      document.getElementById("combined-panel")
+                    if (combinedPanel) {
+                      combinedPanel.scrollIntoView({ behavior: "smooth" })
+                    }
+                  }}
+                >
+                  Search Scenarios
+                </SearchScenariosButton>
+              </Box>
             </Stack>
           </Box>
 

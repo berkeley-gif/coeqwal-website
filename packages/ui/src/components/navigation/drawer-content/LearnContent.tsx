@@ -14,6 +14,8 @@ import BookIcon from "@mui/icons-material/Book"
 export interface LearnContentProps {
   /** Function called when the close button is clicked */
   onClose: () => void
+  /** Selected section ID passed from the drawer store */
+  selectedSection?: string
 }
 
 /**
@@ -56,8 +58,8 @@ export function LearnContent({ onClose }: LearnContentProps) {
         color="text.secondary"
         sx={{ mb: 3, lineHeight: 1.4 }}
       >
-        Explore these topics to learn more about California`&apos;`s water system and
-        management.
+        Explore these topics to learn more about California&apos;s water system
+        and management.
       </Typography>
 
       <List sx={{ width: "100%", p: 0 }}>
@@ -73,7 +75,7 @@ export function LearnContent({ onClose }: LearnContentProps) {
               cursor: "pointer",
               transition: "all 0.2s ease",
               "&:hover": {
-                bgcolor: "rgba(0, 0, 0, 0.05)",
+                bgcolor: "rgba(0, 0, 0, 0.08)",
                 transform: "translateX(4px)",
               },
             }}
@@ -122,8 +124,8 @@ export function LearnContent({ onClose }: LearnContentProps) {
           color="text.secondary"
           sx={{ mt: 1, lineHeight: 1.4 }}
         >
-          Understanding California`&apos;`s water system helps you make more informed
-          choices when exploring water management scenarios.
+          Understanding California&apos;s water system helps you make more
+          informed choices when exploring water management scenarios.
         </Typography>
       </Box>
     </ContentWrapper>

@@ -1,12 +1,13 @@
 "use client"
 
-import React from "react"
 import { Box, Typography } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
 export interface CurrentOpsContentProps {
   /** Function called when the close button is clicked */
   onClose: () => void
+  /** Selected section ID passed from the drawer store */
+  selectedSection?: string
 }
 
 /**

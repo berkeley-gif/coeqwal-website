@@ -32,9 +32,10 @@ import { Card, OperationCard } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
+import { useDrawerStore } from "@repo/state"
 
 interface OperationsSelectorProps {
-  onOpenThemesDrawer?: () => void
+  openThemesDrawer?: (operationId?: string) => void
 }
 
 // Organized palette for water operations with primary (dot) and secondary (title) colors
@@ -74,182 +75,216 @@ const WATER_PALETTE = {
 }
 
 // Card data for the operation cards
-const OPERATION_CARDS = () => [
+export const OPERATION_CARDS = () => [
   {
     id: "current-operations",
     title: "Current operations",
+    term: "current operations",
     bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
     titleColor: WATER_PALETTE.currentOperations.secondary,
     subOptions: [
       {
         id: "use-as-comparison",
         label: "Use as comparison",
+        term: "current operations",
       },
     ],
   },
   {
     id: "remove-tucps",
     title: "What if we removed temporary emergency measures (TUCP's)?",
+    term: "removing emergency measures",
     bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
     titleColor: WATER_PALETTE.emergencyMeasures.secondary,
     subOptions: [
       {
         id: "select-tucps",
         label: "Select",
+        term: "removing TUCPs",
       },
     ],
   },
   {
     id: "limit-groundwater",
     title: "What if we limited groundwater pumping?",
+    term: "limiting groundwater pumping",
     bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
     titleColor: WATER_PALETTE.groundwaterManagement.secondary,
     subOptions: [
       {
         id: "sjv-only",
         label: "...in the San Joaquin Valley only",
+        term: "SJV groundwater limits",
       },
       {
         id: "both-valleys",
         label: "...in both the Sacramento and San Joaquin Valleys",
+        term: "valley-wide groundwater limits",
       },
       {
         id: "sjv-reduced-acreage",
         label: "...in the San Joaquin Valley and reduced agricultural acreage",
+        term: "SJV groundwater & acreage limits",
       },
       {
         id: "both-valleys-reduced-acreage",
         label:
           "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
+        term: "valley-wide groundwater & acreage limits",
       },
     ],
   },
   {
     id: "change-stream-flows",
     title: "What if we changed how water flows in our streams?",
+    term: "changing stream flows",
     bullet: { color: WATER_PALETTE.streamFlowManagement.primary, size: 24 },
     titleColor: WATER_PALETTE.streamFlowManagement.secondary,
     subOptions: [
       {
         id: "no-environmental-flows",
         label: "...with no environmental flow requirements",
+        term: "no environmental flows",
       },
       {
         id: "functional-flows-balance",
         label:
           "...with functional flows to balance water needs with ecosystem support",
+        term: "balanced functional flows",
       },
       {
         id: "functional-flows-reduced",
         label:
           "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
+        term: "reduced ag & functional flows",
       },
       {
         id: "enhanced-functional-flows-salmon",
         label: "...with enhanced functional flows to support salmon",
+        term: "salmon-enhancing flows",
       },
       {
         id: "enhanced-functional-flows-salmon-reduced",
         label:
           "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
+        term: "reduced ag & salmon-enhancing flows",
       },
     ],
   },
   {
     id: "prioritize-drinking-water",
     title: "What if we prioritized drinking water?",
+    term: "prioritizing drinking water",
     bullet: { color: WATER_PALETTE.urbanWaterPriorities.primary, size: 24 },
     titleColor: WATER_PALETTE.urbanWaterPriorities.secondary,
     subOptions: [
       {
         id: "adjust-urban-demand",
         label: "...by adjusting urban demand patterns",
+        term: "adjusted urban demand",
       },
       {
         id: "prioritize-impacted-communities",
         label:
           "...by prioritizing drinking water for the most impacted communities",
+        term: "impacted communities priority",
       },
       {
         id: "prioritize-underserved-communities",
         label:
           "...by prioritizing drinking water for all historically-underserved communities",
+        term: "underserved communities priority",
       },
       {
         id: "prioritize-all-communities",
         label: "...for all communities across the system",
+        term: "all communities priority",
       },
     ],
   },
   {
     id: "balance-delta-uses",
     title: "What if we balanced water uses in the Delta?",
+    term: "balancing Delta water uses",
     bullet: { color: WATER_PALETTE.deltaBalance.primary, size: 24 },
     titleColor: WATER_PALETTE.deltaBalance.secondary,
     subOptions: [
       {
         id: "delta-outflows-tier1",
         label: "...by increasing Delta outflows, tier 1",
+        term: "Delta outflows tier 1",
       },
       {
         id: "delta-outflows-tier2",
         label: "...by increasing Delta outflows, tier 2",
+        term: "Delta outflows tier 2",
       },
       {
         id: "delta-outflows-tier3",
         label: "...by increasing Delta outflows, tier 3",
+        term: "Delta outflows tier 3",
       },
       {
         id: "reduce-sacramento-valley-deliveries",
         label: "...by reducing Sacramento Valley deliveries",
+        term: "reduced Sacramento deliveries",
       },
       {
         id: "more-carryover-storage-shasta",
         label: "...by requiring more carryover storage in Shasta Reservoir",
+        term: "more Shasta carryover",
       },
       {
         id: "less-carryover-storage-shasta",
         label: "...by allowing less carryover storage in Shasta Reservoir",
+        term: "less Shasta carryover",
       },
       {
         id: "reduce-delta-exports-tier1",
         label: "...by reducing Delta exports, tier 1",
+        term: "Delta exports tier 1",
       },
       {
         id: "reduce-delta-exports-tier2",
         label: "...by reducing Delta exports, tier 2",
+        term: "Delta exports tier 2",
       },
       {
         id: "reduce-delta-exports-tier3",
         label: "...by reducing Delta exports, tier 3",
+        term: "Delta exports tier 3",
       },
     ],
   },
   {
     id: "new-infrastructure",
     title: "What if we added new water infrastructure?",
+    term: "adding infrastructure",
     bullet: { color: WATER_PALETTE.infrastructure.primary, size: 24 },
     titleColor: WATER_PALETTE.infrastructure.secondary,
     subOptions: [
       {
         id: "delta-conveyance-tunnel",
         label: "...Delta conveyance tunnel",
+        term: "Delta tunnel",
       },
       {
         id: "delta-conveyance-reduced-groundwater",
         label:
           "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
+        term: "Delta tunnel & reduced pumping",
       },
       {
         id: "delta-conveyance-functional-flows",
         label: "...Delta conveyance with functional flows",
+        term: "Delta tunnel & functional flows",
       },
     ],
   },
 ]
 
 const OperationsSelector: React.FC<OperationsSelectorProps> = ({
-  onOpenThemesDrawer,
+  openThemesDrawer,
 }) => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -321,18 +356,55 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
   }
 
   // Handle sub-option change
-  const handleSubOptionChange = (
-    subOptionId: string,
-    checked: boolean,
-  ) => {
+  const handleSubOptionChange = (subOptionId: string, checked: boolean) => {
     handleOperationChangeWithExitMode(subOptionId, checked)
   }
 
   // Handle info click
-  const handleInfoClick = () => {
-    // Open the themes drawer when "Tell me more" is clicked
-    if (onOpenThemesDrawer) {
-      onOpenThemesDrawer()
+  const handleInfoClick = (operationId: string) => {
+    // Special case for current-operations - open the currentOps drawer
+    if (operationId === "current-operations") {
+      const drawerStore = useDrawerStore.getState()
+
+      // Check if currentOps drawer is already open
+      if (drawerStore.activeTab === "currentOps") {
+        // Toggle behavior - close if already open
+        drawerStore.closeDrawer()
+      } else {
+        // Open the currentOps drawer
+        drawerStore.setDrawerContent({ selectedSection: "challenges" })
+        drawerStore.openDrawer("currentOps")
+      }
+      return
+    }
+
+    // For all other operations, use the themes drawer
+    // Use the prop if available, otherwise fallback to the store
+    if (openThemesDrawer) {
+      openThemesDrawer(operationId)
+    } else {
+      // Get the drawer store state
+      const drawerStore = useDrawerStore.getState()
+
+      // Check if the "themes" drawer is already open
+      if (drawerStore.activeTab === "themes") {
+        // Check if this is the same operation that's currently selected
+        const currentOperation = drawerStore.content?.selectedOperation as
+          | string
+          | undefined
+
+        if (currentOperation === operationId) {
+          // Same operation - close the drawer (toggle behavior)
+          drawerStore.closeDrawer()
+        } else {
+          // Different operation - switch context instead of closing
+          drawerStore.setDrawerContent({ selectedOperation: operationId })
+        }
+      } else {
+        // Open drawer and store the operation ID as drawer content
+        drawerStore.setDrawerContent({ selectedOperation: operationId })
+        drawerStore.openDrawer("themes")
+      }
     }
   }
 
@@ -665,7 +737,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
               onSubOptionChange={(subId, checked) =>
                 handleSubOptionChange(subId, checked)
               }
-              onInfoClick={() => handleInfoClick()}
+              onInfoClick={() => handleInfoClick(op.id)}
             />
           ))}
         </Box>

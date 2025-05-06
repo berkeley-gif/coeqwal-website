@@ -1,17 +1,22 @@
+"use client"
+
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
 import { usePrecipitationAnimation } from "../hooks/usePrecipitationAnimation"
-import { useStoryStore } from "@repo/state"
+import { useStoryStore, useDrawerStore } from "@repo/state"
 import { useMapFly } from "../hooks/useMapFly"
 import { views } from "../config/mapViews"
 
-interface Props {
-  onOpenLearnDrawer: () => void
+// Add props interface
+interface CaliforniaWaterSectionProps {
+  onOpenLearnDrawer?: (sectionId: string) => void
 }
 
-export default function CaliforniaWaterSection({ onOpenLearnDrawer }: Props) {
+export default function CaliforniaWaterSection({
+  onOpenLearnDrawer,
+}: CaliforniaWaterSectionProps = {}) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
   const fly = useMapFly()
@@ -124,7 +129,18 @@ export default function CaliforniaWaterSection({ onOpenLearnDrawer }: Props) {
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>
-              <LearnMoreButton onClick={onOpenLearnDrawer} />
+              <LearnMoreButton
+                onClick={() => {
+                  if (onOpenLearnDrawer) {
+                    onOpenLearnDrawer("california-water")
+                  } else {
+                    useDrawerStore
+                      .getState()
+                      .setDrawerContent({ selectedSection: "california-water" })
+                    useDrawerStore.getState().openDrawer("learn")
+                  }
+                }}
+              />
             </Box>
           </Box>
 

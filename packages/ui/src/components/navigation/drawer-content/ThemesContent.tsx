@@ -1,50 +1,106 @@
 "use client"
 
-import React from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 import { Box, Typography, List, ListItem, Chip } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
 export interface ThemesContentProps {
   /** Function called when the close button is clicked */
   onClose: () => void
+  /** Selected operation ID passed from the drawer store */
+  selectedOperation?: string
 }
 
 /**
  * Content component for the Scenario Themes tab in the MultiDrawer
  */
-export function ThemesContent({ onClose }: ThemesContentProps) {
+export function ThemesContent({
+  onClose,
+  selectedOperation,
+}: ThemesContentProps) {
+  // Create a map to store refs for each theme item
+  const themeRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  // Main content container ref
+  const contentRef = useRef<HTMLDivElement | null>(null)
+
   const [themes] = React.useState([
     {
-      id: "1",
+      id: "remove-tucps",
+      name: "Temporary emergency measures (TUCP's)",
+      description:
+        "Temporary Urgency Change Petitions (TUCPs) allow water‑right holders to temporarily (up to 180 days) modify the terms of their permits or licenses during urgent conditions such as extreme drought.",
+      tags: ["drought", "policy", "flows", "salinity"],
+    },
+    {
+      id: "limit-groundwater",
       name: "Limiting groundwater pumping",
-      description: "Operations focused on limiting groundwater pumping",
+      description:
+        "Operations focused on limiting groundwater pumping across different regions and evaluating impacts on agriculture and water availability.",
       tags: ["groundwater", "agriculture", "drinking water", "sustainability"],
     },
     {
-      id: "2",
+      id: "change-stream-flows",
       name: "Varying stream flows",
-      description: "Varying stream flow",
-      tags: ["environment", "water quality"],
+      description:
+        "Adjusting stream flow requirements to balance environmental needs with water availability for other uses.",
+      tags: ["environment", "water quality", "river flows"],
     },
     {
-      id: "3",
+      id: "prioritize-drinking-water",
       name: "Prioritizing community drinking water",
-      description: "Optimizing for community drinking water",
-      tags: ["equity", "community", "drinking water"],
+      description:
+        "Optimizing water operations to ensure drinking water access for all communities, especially those historically underserved.",
+      tags: ["equity", "community", "drinking water", "urban water"],
     },
     {
-      id: "4",
+      id: "balance-delta-uses",
       name: "Balancing water uses in the Delta",
-      description: "Balancing...",
-      tags: ["equity", "community", "environment", "water quality"],
+      description:
+        "Exploring different approaches to managing Delta water export and outflow requirements, with impacts on multiple stakeholders.",
+      tags: ["equity", "community", "environment", "water quality", "delta"],
     },
     {
-      id: "5",
+      id: "new-infrastructure",
       name: "Adding new water infrastructure",
-      description: "Like the Delta conveyance tunnel...",
-      tags: ["sustainability", "community", "environment", "water quality"],
+      description:
+        "Evaluating potential benefits and impacts of new infrastructure projects like the Delta conveyance tunnel.",
+      tags: ["infrastructure", "sustainability", "water storage", "conveyance"],
     },
   ])
+
+  // Set up ref callback to store theme elements in the ref map
+  const setThemeRef = useCallback((el: HTMLDivElement | null, id: string) => {
+    themeRefs.current[id] = el
+  }, [])
+
+  // Effect to scroll to the selected theme when the drawer opens
+  useEffect(() => {
+    if (selectedOperation && themeRefs.current[selectedOperation]) {
+      // Get the element to scroll to
+      const element = themeRefs.current[selectedOperation]
+
+      // Add a small delay to ensure the drawer is fully open
+      setTimeout(() => {
+        if (element) {
+          // Scroll the element into view with a smooth animation
+          element.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      }, 300)
+    } else {
+      // If no selectedOperation, scroll to top
+      setTimeout(() => {
+        // Find the parent scrollable container
+        const element = document.querySelector(".drawer-content-wrapper")
+        if (element && element instanceof HTMLElement) {
+          // Use smooth scrolling instead of instant jump
+          element.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          })
+        }
+      }, 300)
+    }
+  }, [selectedOperation])
 
   return (
     <ContentWrapper
@@ -62,53 +118,64 @@ export function ThemesContent({ onClose }: ThemesContentProps) {
         operation settings that can be applied and varied.
       </Typography>
 
-      <List sx={{ width: "100%", p: 0 }}>
-        {themes.map((item) => (
-          <ListItem
-            key={item.id}
-            component="div"
-            sx={{
-              mb: 1.5,
-              p: 1.5,
-              borderRadius: 1,
-              bgcolor: "rgba(0, 0, 0, 0.02)",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                bgcolor: "rgba(0, 0, 0, 0.05)",
-              },
-            }}
-          >
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography
-                variant="subtitle1"
-                component="div"
-                sx={{ fontWeight: 500, mb: 0.5 }}
-              >
-                {item.name}
-              </Typography>
-              <Typography
-                variant="body1"
-                component="div"
-                color="text.secondary"
-                sx={{ mb: 1, lineHeight: 1.4 }}
-              >
-                {item.description}
-              </Typography>
-              <Box>
-                {item.tags.map((tag) => (
-                  <Chip
-                    key={tag}
-                    label={tag}
-                    size="small"
-                    variant="outlined"
-                    sx={{ color: "white", mr: 0.5, mb: 0.5 }}
-                  />
-                ))}
+      <Box ref={contentRef} sx={{ width: "100%" }}>
+        <List sx={{ width: "100%", p: 0 }}>
+          {themes.map((item) => (
+            <ListItem
+              key={item.id}
+              component="div"
+              ref={(el) => setThemeRef(el as HTMLDivElement, item.id)}
+              id={`theme-${item.id}`}
+              sx={{
+                mb: 1.5,
+                p: 1.5,
+                borderRadius: 1,
+                bgcolor:
+                  item.id === selectedOperation
+                    ? "rgba(0, 0, 0, 0.08)"
+                    : "rgba(0, 0, 0, 0.02)",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  bgcolor: "rgba(0, 0, 0, 0.08)",
+                },
+                // Highlight the selected theme
+                ...(item.id === selectedOperation && {
+                  boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.4)",
+                }),
+              }}
+            >
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography
+                  variant="subtitle1"
+                  component="div"
+                  sx={{ fontWeight: 500, mb: 0.5 }}
+                >
+                  {item.name}
+                </Typography>
+                <Typography
+                  variant="body1"
+                  component="div"
+                  color="text.secondary"
+                  sx={{ mb: 1, lineHeight: 1.4 }}
+                >
+                  {item.description}
+                </Typography>
+                <Box>
+                  {item.tags.map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      size="small"
+                      variant="outlined"
+                      sx={{ color: "white", mr: 0.5, mb: 0.5 }}
+                    />
+                  ))}
+                </Box>
               </Box>
-            </Box>
-          </ListItem>
-        ))}
-      </List>
+            </ListItem>
+          ))}
+        </List>
+      </Box>
     </ContentWrapper>
   )
 }

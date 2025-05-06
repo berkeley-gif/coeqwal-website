@@ -352,9 +352,9 @@ export const OUTCOME_CATEGORIES = [
     options: [
       {
         id: "supply_storage",
-        label: "Supply and storage",
+        label: "Storage",
         labelEs: "Suministro y almacenamiento",
-        shortText: "supply & storage",
+        shortText: "storage",
         shortTextEs: "suministro & almacenamiento",
       },
       {
