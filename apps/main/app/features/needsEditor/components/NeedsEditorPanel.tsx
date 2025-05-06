@@ -11,6 +11,9 @@ import {
   Box,
   ExpandMoreIcon,
   ArrowRightIcon,
+  Dialog,
+  DialogContent,
+  DialogActions,
 } from "@repo/ui/mui"
 
 import AddedWaterNeeds from "./AddedNeedsList"
@@ -20,17 +23,29 @@ import ActionPanel from "./ActionPanel"
 import TutorialSlider from "./TutorialSlider"
 import { WaterNeedSetting } from "./types"
 
-import { WATER_NEED_TYPES, BLANK_WATER_NEED } from "./constants"
+import {
+  WATER_NEED_TYPES,
+  BLANK_WATER_NEED,
+  DEFAULT_OTHER_WATER_NEEDS,
+  SYNERGY_COLOR,
+  UNSATISFIABLE_COLOR,
+} from "./constants"
 
-const waterNeedSettings: WaterNeedSetting[] = []
+// const waterNeedSettings: WaterNeedSetting[] = []
+
+// const needsBucketWaterNeedSettings: NeedsBucketWaterNeedSetting[] = []
 
 const NeedsEditorPanel: React.FC = () => {
   const theme = useTheme()
   const [expanded, setExpanded] = useState("")
-  const [needsList, setNeedsList] = useState(waterNeedSettings)
+  const [needsList, setNeedsList] = useState<WaterNeedSetting[]>(
+    DEFAULT_OTHER_WATER_NEEDS,
+  )
+
   const [showTutorial, setShowTutorial] = useState(true)
   const [showBucketScene, setShowBucketScene] = useState(false)
   const [showActionPanel, setShowActionPanel] = useState(false)
+  const [isShowingPopup, setIsShowingPopup] = useState(false)
 
   const [currentWaterNeedSetting, setCurrentWaterNeedSetting] =
     useState<WaterNeedSetting>(BLANK_WATER_NEED)
@@ -47,6 +62,9 @@ const NeedsEditorPanel: React.FC = () => {
     const newNeed: WaterNeedSetting = {
       name: type,
       setting: JSON.parse(JSON.stringify(defaultSetting)),
+      isSatisfiable: false,
+      isUserDefined: true,
+      isSelected: true,
     }
 
     setCurrentWaterNeedSetting(newNeed)
@@ -75,12 +93,25 @@ const NeedsEditorPanel: React.FC = () => {
     setShowBucketScene(false) // Close the bucket scene if open
   }
 
+  const handleGoBack = () => {
+    if (showBucketScene) {
+      setShowBucketScene(false)
+      setShowActionPanel(false)
+      return
+    }
+    if (showActionPanel) {
+      setShowActionPanel(false)
+      setShowBucketScene(true)
+      return
+    }
+  }
+
   return (
     <Box
       sx={{
         backgroundColor: theme.palette.background.default,
         width: "100%",
-        height: "fit-content",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -88,6 +119,12 @@ const NeedsEditorPanel: React.FC = () => {
         position: "relative", // Added for overlay positioning
       }}
     >
+      <Button
+        sx={{ position: "absolute", left: 0, bottom: 0, m: 4 }}
+        onClick={handleGoBack}
+      >
+        Go Back
+      </Button>
       {showTutorial && (
         <Box
           sx={{
@@ -98,7 +135,7 @@ const NeedsEditorPanel: React.FC = () => {
             top: 0,
             left: 0,
             width: "100%",
-            height: "100%",
+            height: "100vh",
             backgroundColor: "rgba(0, 0, 0, 0)", // Semi-transparent dark overlay
             backdropFilter: "blur(2px)", // Bokeh effect
             zIndex: 10, // Ensure it overlays other content
@@ -208,7 +245,11 @@ const NeedsEditorPanel: React.FC = () => {
                 variant="outlined"
                 startIcon={<ArrowRightIcon />}
                 size="medium"
-                onClick={() => setShowBucketScene(true)}
+                onClick={() => {
+                  setShowBucketScene(true)
+
+                  setIsShowingPopup(true)
+                }}
                 sx={{
                   color: "black",
                   borderColor: "black",
@@ -234,8 +275,10 @@ const NeedsEditorPanel: React.FC = () => {
             needsList={needsList}
             height={600}
             editWaterNeed={handleEditWaterNeed}
+            setNeedsList={setNeedsList}
             finishWaterNeed={(selectedNeedsList) => {
               setNeedsList(selectedNeedsList)
+              // setNeedsBucketWaterNeedSetting(selectedNeedsList)
               setShowBucketScene(false)
               setTimeout(() => setShowActionPanel(true), 0)
             }}
@@ -250,9 +293,55 @@ const NeedsEditorPanel: React.FC = () => {
             justifyContent: "center",
           }}
         >
-          <ActionPanel finalNeedsList={needsList} />
+          <ActionPanel finalNeedsList={needsList.filter((d) => d.isSelected)} />
         </Box>
       )}
+      <Dialog
+        open={isShowingPopup}
+        slotProps={{
+          paper: {
+            sx: { backgroundColor: "white" },
+          },
+        }}
+      >
+        <DialogContent>
+          <Typography variant="h5">
+            We&apos;ve combined the <em>Water Needs</em> with the predefined
+            needs that COEQWAL is aware of, so that you can explore your needs
+            in context of others&apos; water needs.
+            <br />
+            <br />
+            Your selection is first populated in the center{" "}
+            <em>Currently Selected</em> bucket, and we will determine after
+            every change whether the other water needs are{" "}
+            <span
+              style={{
+                background: SYNERGY_COLOR,
+                borderRadius: "5px",
+                padding: "2px 4px",
+              }}
+            >
+              synergistic
+            </span>{" "}
+            or{" "}
+            <span
+              style={{
+                background: UNSATISFIABLE_COLOR,
+                borderRadius: "5px",
+                padding: "2px 4px",
+              }}
+            >
+              unsatisfiable
+            </span>
+            .
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsShowingPopup(false)} color="primary">
+            OK!
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

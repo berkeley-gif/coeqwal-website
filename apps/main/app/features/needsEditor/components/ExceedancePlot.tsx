@@ -30,7 +30,6 @@ const ExceedancePlot = ({
           parseFloat(deliverySetting["Years"]?.["value"] as string) ?? 0
         const amountValue =
           parseFloat(deliverySetting["Amount"]?.["value"] as string) ?? 0
-        console.log("Exceedance Plot deliverySetting:", yearsValue, amountValue)
         return {
           value: amountValue,
           cutoff: 1 - yearsValue / 20, // Convert years to a fraction of 20

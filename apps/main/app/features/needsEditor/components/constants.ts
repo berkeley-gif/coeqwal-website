@@ -173,6 +173,9 @@ export const BLANK_WATER_NEED: WaterNeedSetting = {
     title: {},
     rule: [{}],
   },
+  isSatisfiable: false,
+  isUserDefined: false,
+  isSelected: false,
 }
 
 export const DEFAULT_OTHER_WATER_NEEDS: WaterNeedSetting[] = [
@@ -216,6 +219,9 @@ export const DEFAULT_OTHER_WATER_NEEDS: WaterNeedSetting[] = [
         },
       ],
     },
+    isSatisfiable: false,
+    isUserDefined: false,
+    isSelected: false,
   },
   {
     name: "Salmon",
@@ -259,6 +265,9 @@ export const DEFAULT_OTHER_WATER_NEEDS: WaterNeedSetting[] = [
         },
       ],
     },
+    isSatisfiable: false,
+    isUserDefined: false,
+    isSelected: false,
   },
   {
     name: "Drinking Water",
@@ -292,5 +301,12 @@ export const DEFAULT_OTHER_WATER_NEEDS: WaterNeedSetting[] = [
         },
       ],
     },
+    isSatisfiable: false,
+    isUserDefined: false,
+    isSelected: false,
   },
 ]
+
+export const SELECTED_COLOR = "#B0B0B0"
+export const SYNERGY_COLOR = "#D6E5BD"
+export const UNSATISFIABLE_COLOR = "#FFCBCB"

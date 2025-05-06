@@ -79,68 +79,71 @@ export default function AddedWaterNeeds({
       {/* if not empty */}
       {waterNeeds?.length > 0 && (
         <Stack direction="row" flexWrap="wrap">
-          {waterNeeds.map((need, id) => (
-            <Paper
-              key={id}
-              elevation={1}
-              sx={{
-                borderRadius: 1,
-                border: "1px solid #ddd",
-                p: 2,
-                minWidth: 200,
-                maxWidth: 300,
-              }}
-            >
-              <Typography variant="h4" sx={{ mb: 1 }}>
-                {need.name}
-              </Typography>
-              <Typography
-                variant="h6"
-                sx={{
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 1, // Limit to 2 lines
-                }}
-              >
-                {/* {need.name} */}
-                {getNeedTitle(need)}
-              </Typography>
-              <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 2, // Limit to 2 lines
-                }}
-              >
-                {/* {need.name} */}
-                {getNeedSummary(need)}
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<EditIcon />}
-                  sx={{ mt: 1 }}
-                  onClick={() => onEditNeed(id)}
+          {waterNeeds.map(
+            (need, id) =>
+              need.isUserDefined && (
+                <Paper
+                  key={id}
+                  elevation={1}
+                  sx={{
+                    borderRadius: 1,
+                    border: "1px solid #ddd",
+                    p: 2,
+                    minWidth: 200,
+                    maxWidth: 300,
+                  }}
                 >
-                  Edit
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<CloseIcon />}
-                  sx={{ mt: 1 }}
-                  onClick={() => onRemoveNeed(id)}
-                >
-                  Remove
-                </Button>
-              </Box>
-            </Paper>
-          ))}
+                  <Typography variant="h4" sx={{ mb: 1 }}>
+                    {need.name}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 1, // Limit to 2 lines
+                    }}
+                  >
+                    {/* {need.name} */}
+                    {getNeedTitle(need)}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    sx={{
+                      overflow: "hidden",
+                      display: "-webkit-box",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 2, // Limit to 2 lines
+                    }}
+                  >
+                    {/* {need.name} */}
+                    {getNeedSummary(need)}
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<EditIcon />}
+                      sx={{ mt: 1 }}
+                      onClick={() => onEditNeed(id)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<CloseIcon />}
+                      sx={{ mt: 1 }}
+                      onClick={() => onRemoveNeed(id)}
+                    >
+                      Remove
+                    </Button>
+                  </Box>
+                </Paper>
+              ),
+          )}
         </Stack>
       )}
     </Box>

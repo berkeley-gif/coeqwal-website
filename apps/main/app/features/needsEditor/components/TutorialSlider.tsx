@@ -8,15 +8,38 @@ import {
   useTheme,
   ArrowRightIcon,
   ArrowLeftIcon,
-  VisibilityIcon,
 } from "@repo/ui/mui"
 
-const tutorialSteps = [
+const tutorialSteps: { description: React.ReactNode }[] = [
   {
     description: (
       <>
-        Welcome to the <strong>Water Needs</strong>-based search interface. This
-        is quick tutorial to help you get started!
+        Welcome to the <em>Water Needs</em>-based search interface! This quick
+        tutorial will help you get started.
+        <br />
+        <br />
+        The goal of this interface is to help you:
+        <br />
+        <br />
+        <ol
+          style={{
+            maxWidth: "80%",
+            paddingLeft: "20px",
+            textAlign: "left", // Center the text
+            margin: "0 auto", // Center the list horizontally
+          }}
+        >
+          <li>
+            Find scenarios that meet your <em>Water Needs</em>.
+          </li>
+          <li>
+            Learn about possible synergies and trade-offs with other{" "}
+            <em>Water Needs</em>.
+          </li>
+          <li>
+            Learn how your scenarios can be realized via water operations.
+          </li>
+        </ol>
       </>
     ),
   },
@@ -35,20 +58,32 @@ const tutorialSteps = [
         Here a <strong>Water Need</strong> is just a criteria or a requirement
         for a water allocation scenario, whether that&apos;s related to Water
         Deliveries, Salmon Population, or Delta Salinity.
+        <br />
+        <br />
+        Simply put, it&apos;s a way to express what someone wants or needs from
+        their water allocations.
+        <br />
+        <br />
+        For example, someone might have interest in maintaining a certain amount
+        of water delivery to a particular location, or someone else might be
+        more interested in preserving habitat for Salmon.
       </>
     ),
   },
   {
     description: (
       <>
-        But one of the realities of California water is that not all{" "}
-        <em>Water Needs</em> can be met <strong>at the same time</strong>.
+        But one of the realities of California water is it&apos;s a highly
+        complex system; not all <em>Water Needs</em> can be met{" "}
+        <strong>at the same time</strong>.
         <br />
-        Some <em>Water Needs</em> can be met simultaneously, but some are in
+        <br />
+        Some <em>Water Needs</em> can be met simultaneously, but some may be in
         conflict with each other.
         <br />
         <br />
-        You&apos;ll see this referred to as{" "}
+        When two sets of needs can be met together, we&apos;ll call them{" "}
+        {/* You&apos;ll see this referred to as{" "} */}
         <Box
           sx={{
             background: "rgba(214, 229, 189, 1.0)", // Adjusted for transparency
@@ -63,10 +98,14 @@ const tutorialSteps = [
             },
           }}
         >
-          satisfiable
-          <VisibilityIcon />
-        </Box>{" "}
-        and{" "}
+          synergistic
+          {/* <VisibilityIcon />! */}
+        </Box>
+        !
+        <br />
+        <br />
+        On the other hand, if we can&apos;t find a scenario in our catalog that
+        meets both sets of needs, we&apos;ll call them {/* ! and{" "} */}
         <Box
           sx={{
             background: "rgba(255, 203, 203, 1.0)", // Adjusted for transparency
@@ -82,12 +121,17 @@ const tutorialSteps = [
           }}
         >
           unsatisfiable
-          <VisibilityIcon />
-        </Box>{" "}
-        needs.
+          {/* <VisibilityIcon />. */}
+        </Box>
+        .
         <br />
         <br />
         So, keep a look out for these terms!
+        <br />
+        <br />
+        However, remember these results are based on the future scenarios that
+        we at COEQWAL have considered &mdash; there may be other scenarios that
+        we&apos;ve <em> unfortunately missed.</em>
       </>
     ),
   },
@@ -129,7 +173,7 @@ const TutorialSlider: React.FC<TutorialSliderProps> = ({ onFinish }) => {
         backgroundColor: "#E9E9E9",
         width: "60%",
         margin: "auto",
-        padding: 2,
+        padding: 3,
         textAlign: "center",
         borderRadius: 1,
       }}

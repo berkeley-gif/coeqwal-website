@@ -33,8 +33,13 @@ export interface WaterNeed {
   defaultSetting: UserSetting // Default user settings for the water need
   fieldOptions: FieldOptions // Optional field options for the water need
 }
+// export type NeedsBucketWaterNeedSetting = WaterNeedSetting & {
+// }
 
 export interface WaterNeedSetting {
   name: string // Name of the water need
   setting: UserSetting // User-defined settings for the water need
+  isUserDefined: boolean
+  isSelected: boolean
+  isSatisfiable: boolean
 }

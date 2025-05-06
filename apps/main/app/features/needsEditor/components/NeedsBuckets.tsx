@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, useState } from "react"
 import { WaterNeedSetting } from "./types"
-import { WATER_NEED_TYPES, DEFAULT_OTHER_WATER_NEEDS } from "./constants"
+import {
+  WATER_NEED_TYPES,
+  SYNERGY_COLOR,
+  UNSATISFIABLE_COLOR,
+  SELECTED_COLOR,
+} from "./constants"
 import {
   Box,
-  Chip,
   Button,
   AddIcon,
   IconButton,
@@ -16,24 +20,19 @@ import {
   DialogContent,
   DialogActions,
 } from "@repo/ui/mui"
-import { getTitleText, getRuleText } from "./utils"
+import NeedCard from "../ui/NeedCard"
 import Matter from "matter-js"
-
-type NeedsBucketWaterNeedSetting = WaterNeedSetting & {
-  isUserDefined: boolean
-  isSelected: boolean
-  isSatisfiable: boolean
-}
 
 interface BucketSceneProps {
   height?: number
   width?: number
   needsList: WaterNeedSetting[]
+  setNeedsList: React.Dispatch<React.SetStateAction<WaterNeedSetting[]>>
   editWaterNeed: (idx: number) => void
-  finishWaterNeed: (finalSelectedNeeds: NeedsBucketWaterNeedSetting[]) => void
+  finishWaterNeed: (finalSelectedNeeds: WaterNeedSetting[]) => void
 }
 
-const getLabel = (need: NeedsBucketWaterNeedSetting) => {
+const getLabel = (need: WaterNeedSetting) => {
   const currentWaterNeedType = WATER_NEED_TYPES.find(
     (item) => item.label === need.name,
   )
@@ -56,6 +55,7 @@ const BucketScene = ({
   height = 800,
   width = 800,
   needsList,
+  setNeedsList,
   editWaterNeed,
   finishWaterNeed,
 }: BucketSceneProps) => {
@@ -67,41 +67,25 @@ const BucketScene = ({
   const ballsRef = useRef<Matter.Body[]>([])
   const [isAddRemovePopupOpen, setIsAddRemovePopupOpen] = useState(false)
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
-  const [selectedBall, setSelectedBall] =
-    useState<NeedsBucketWaterNeedSetting | null>(null) // State for the selected ball
+  const [selectedBall, setSelectedBall] = useState<WaterNeedSetting | null>(
+    null,
+  ) // State for the selected ball
   const isHoveringFinalizeRef = useRef(false)
 
-  const initialAllNeedsList = [
-    ...needsList.map((need) => ({
-      ...need,
-      isUserDefined: true,
-      isSelected: true,
-      isSatisfiable: false, // placeholder, will be updated
-    })),
-    ...DEFAULT_OTHER_WATER_NEEDS.map((need) => ({
-      ...need,
-      isUserDefined: false,
-      isSelected: false,
-      isSatisfiable: false, // placeholder, will be updated later
-    })),
-  ]
-  const [allNeeds, setAllNeeds] =
-    useState<NeedsBucketWaterNeedSetting[]>(initialAllNeedsList)
-
-  const handleOpenPopup = (ball: NeedsBucketWaterNeedSetting) => {
+  const handleOpenPopup = (ball: WaterNeedSetting) => {
     setIsAddRemovePopupOpen(true) // Open the popup
     setSelectedBall(ball) // Set the selected ball
   }
   const handleClosePopup = (
-    closingBall: NeedsBucketWaterNeedSetting,
+    closingBall: WaterNeedSetting,
     isSaving: boolean,
   ) => {
     if (isSaving) {
-      const editingNeedIndex = allNeeds.findIndex(
+      const editingNeedIndex = needsList.findIndex(
         (need) => need === closingBall,
       )
       if (editingNeedIndex !== -1) {
-        let updatedNeeds = [...allNeeds]
+        let updatedNeeds = [...needsList]
         updatedNeeds[editingNeedIndex] = {
           ...JSON.parse(JSON.stringify(updatedNeeds[editingNeedIndex])),
           isSelected:
@@ -113,10 +97,9 @@ const BucketScene = ({
           return {
             ...need,
             isSatisfiable: determineIfSatisfiable(),
-            // isSatisfiable: determineIfSatisfiable(need, updatedNeeds),
           }
         })
-        setAllNeeds(updatedNeeds)
+        setNeedsList(updatedNeeds)
       }
     }
 
@@ -127,31 +110,6 @@ const BucketScene = ({
   useEffect(() => {
     ballsRef.current = balls
   }, [balls])
-
-  useEffect(() => {
-    let initialAllNeedsList = [
-      ...needsList.map((need) => ({
-        ...JSON.parse(JSON.stringify(need)),
-        isUserDefined: true,
-        isSelected: true,
-        isSatisfiable: false, // placeholder, will be updated later
-      })),
-      ...DEFAULT_OTHER_WATER_NEEDS.map((need) => ({
-        ...JSON.parse(JSON.stringify(need)),
-        isUserDefined: false,
-        isSelected: false,
-        isSatisfiable: false, // placeholder, will be updated later
-      })),
-    ]
-    initialAllNeedsList = initialAllNeedsList.map((need) => {
-      return {
-        ...need,
-        // isSatisfiable: determineIfSatisfiable(need, initialAllNeedsList),
-        isSatisfiable: determineIfSatisfiable(),
-      }
-    })
-    setAllNeeds(initialAllNeedsList)
-  }, [needsList])
 
   useEffect(() => {
     const engine = engineRef.current
@@ -281,52 +239,50 @@ const BucketScene = ({
     ctx.textAlign = "center"
     ctx.textBaseline = "middle"
 
-    const ballBodies = allNeeds.map(
-      (need: NeedsBucketWaterNeedSetting, i: number) => {
-        const existingBall: Matter.body = ballsRef.current.find(
-          (ball) => JSON.stringify(ball.need) === JSON.stringify(need),
-        )
+    const ballBodies = needsList.map((need: WaterNeedSetting, i: number) => {
+      const existingBall: Matter.body = ballsRef.current.find(
+        (ball) => JSON.stringify(ball.need) === JSON.stringify(need),
+      )
 
-        let ball: Matter.body
-        const isSatisfiable = need.isSatisfiable
+      let ball: Matter.body
+      const isSatisfiable = need.isSatisfiable
 
-        const row = Math.floor(i / 3)
-        const x = need.isSelected ? centerX : isSatisfiable ? leftX : rightX
-        const y = 100 + row * 30
+      const row = Math.floor(i / 3)
+      const x = need.isSelected ? centerX : isSatisfiable ? leftX : rightX
+      const y = 100 + row * 30
 
-        if (existingBall) {
-          ball = Bodies.circle(
-            existingBall.position.x,
-            existingBall.position.y,
-            80,
-            {
-              mass: 10,
-              render: {
-                fillStyle: need.isSelected
-                  ? "#B0B0B0"
-                  : isSatisfiable
-                    ? "#D6E5BD"
-                    : "#FFCBCB",
-              },
-            },
-          )
-        } else {
-          ball = Bodies.circle(x, y, 80, {
+      if (existingBall) {
+        ball = Bodies.circle(
+          existingBall.position.x,
+          existingBall.position.y,
+          80,
+          {
             mass: 10,
             render: {
               fillStyle: need.isSelected
-                ? "#B0B0B0"
+                ? SELECTED_COLOR
                 : isSatisfiable
-                  ? "#D6E5BD"
-                  : "#FFCBCB",
+                  ? SYNERGY_COLOR
+                  : UNSATISFIABLE_COLOR,
             },
-          })
-        }
+          },
+        )
+      } else {
+        ball = Bodies.circle(x, y, 80, {
+          mass: 10,
+          render: {
+            fillStyle: need.isSelected
+              ? SELECTED_COLOR
+              : isSatisfiable
+                ? SYNERGY_COLOR
+                : UNSATISFIABLE_COLOR,
+          },
+        })
+      }
 
-        ball.need = need
-        return ball
-      },
-    )
+      ball.need = need
+      return ball
+    })
 
     setBalls(ballBodies)
 
@@ -347,7 +303,7 @@ const BucketScene = ({
         ctx.globalAlpha = 1.0 // Reset global opacity to fully opaque
       }
 
-      ctx.fillText("Satisfiable", leftX, height * 0.1)
+      ctx.fillText("Synergistic", leftX, height * 0.1)
       ctx.fillText("Currently Selected", centerX, height * 0.1)
       ctx.fillText("Unsatisfiable", rightX, height * 0.1)
 
@@ -430,7 +386,7 @@ const BucketScene = ({
       // // Restore scrolling
       document.body.style.overflow = originalOverflow
     }
-  }, [allNeeds, width, height])
+  }, [needsList, width, height])
 
   return (
     <Box
@@ -444,8 +400,8 @@ const BucketScene = ({
     >
       <Typography variant="h3">
         Explore different{" "}
-        <span style={{ fontStyle: "italic" }}>water needs</span>, co-benefits,
-        and trade-offs!
+        <span style={{ fontStyle: "italic" }}>water needs</span>, synergies and,
+        trade-offs!
       </Typography>
       <Box
         sx={{
@@ -465,17 +421,17 @@ const BucketScene = ({
           others&apos; water needs are! <br /> Some other water needs are{" "}
           <span
             style={{
-              background: "#D6E5BD",
+              background: SYNERGY_COLOR,
               borderRadius: "5px",
               padding: "2px 4px",
             }}
           >
-            satisfiable
+            synergistic
           </span>{" "}
           , but some are{" "}
           <span
             style={{
-              background: "#FFCBCB",
+              background: UNSATISFIABLE_COLOR,
               borderRadius: "5px",
               padding: "2px 4px",
             }}
@@ -485,12 +441,12 @@ const BucketScene = ({
           . <br />
           <span
             style={{
-              background: "#D6E5BD",
+              background: SYNERGY_COLOR,
               borderRadius: "5px",
               padding: "2px 4px",
             }}
           >
-            Satisfiable
+            Synergistic
           </span>{" "}
           simply means, in addition to your selected needs, COEQWAL can find a
           scenario that meets that need and{" "}
@@ -535,7 +491,8 @@ const BucketScene = ({
           Click on each water need to learn more about it!
           <br />
           <span style={{ fontStyle: "italic", fontSize: "0.8em" }}>
-            [Dev note: the sat/unsat ident. is currently random...]
+            [Development note: the synergy/unsatisfiable ident. is currently
+            random.]
           </span>
         </Typography>
       </Box>
@@ -593,7 +550,8 @@ const BucketScene = ({
             gap: 1,
           }}
         >
-          <Box
+          {selectedBall && <NeedCard currentWaterNeedSetting={selectedBall} />}
+          {/* <Box
             sx={{
               border: "3px solid #ccc",
               borderRadius: 1,
@@ -647,8 +605,8 @@ const BucketScene = ({
                 }`}
                 sx={{
                   backgroundColor: selectedBall?.isSatisfiable
-                    ? "#D6E5BD"
-                    : "#FFCBCB",
+                    ? SYNERGY_COLOR
+                    : UNSATISFIABLE_COLOR,
                 }}
               />
             )}
@@ -662,7 +620,7 @@ const BucketScene = ({
                 This water need is in conflict with [Water Need Name]
               </Typography>
             </Box>
-          )}
+          )} */}
         </DialogContent>
         <DialogActions>
           <Button
@@ -724,11 +682,13 @@ const BucketScene = ({
                   if (curWaterNeed) {
                     const idx = needsList.findIndex(
                       (need) =>
-                        JSON.stringify(need) ===
-                        JSON.stringify({
-                          name: curWaterNeed["name"],
-                          setting: curWaterNeed["setting"],
-                        }),
+                        JSON.stringify(need) === JSON.stringify(curWaterNeed),
+                    )
+                    console.log(
+                      "Editing need at index:",
+                      idx,
+                      needsList,
+                      curWaterNeed,
                     )
                     editWaterNeed(idx)
                   }
@@ -748,7 +708,7 @@ const BucketScene = ({
         variant="outlined"
         startIcon={<CheckIcon />}
         onClick={() => {
-          finishWaterNeed(allNeeds.filter((need) => need.isSelected))
+          finishWaterNeed(needsList)
         }}
         onMouseEnter={() => (isHoveringFinalizeRef.current = true)}
         onMouseLeave={() => (isHoveringFinalizeRef.current = false)}
