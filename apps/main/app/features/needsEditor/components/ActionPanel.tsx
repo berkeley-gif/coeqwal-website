@@ -1,4 +1,5 @@
 import { Box, Typography } from "@repo/ui/mui"
+import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
 import { getTitleText, getRuleText } from "./utils"
 import { WATER_NEED_TYPES } from "./constants"
 
@@ -54,6 +55,10 @@ const ActionPanel = ({ finalNeedsList }: ActionPanelProps) => {
       <Box>
         <Typography variant="h4" sx={{ mb: 2 }}>
           COEQWAL Scenarios that satisfy these needs
+          <br />
+          <span style={{ fontStyle: "italic", fontSize: "0.8em" }}>
+            [Dev note: currently random...]
+          </span>
         </Typography>
         {scenarioIDS.map((id) => (
           <Box
@@ -70,6 +75,10 @@ const ActionPanel = ({ finalNeedsList }: ActionPanelProps) => {
       <Box>
         <Typography variant="h4" sx={{ mb: 2 }}>
           How to realize these scenarios?
+          <br />
+          <span style={{ fontStyle: "italic", fontSize: "0.8em" }}>
+            [Dev note: currently random...]
+          </span>
         </Typography>
         {policies.map((policy) => (
           <Box

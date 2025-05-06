@@ -534,6 +534,10 @@ const BucketScene = ({
           <br />
           <br />
           Click on each water need to learn more about it!
+          <br />
+          <span style={{ fontStyle: "italic", fontSize: "0.8em" }}>
+            [Dev note: the sat/unsat ident. is currently random...]
+          </span>
         </Typography>
       </Box>
       {selectedBall && (
@@ -578,11 +582,9 @@ const BucketScene = ({
           },
         }}
       >
-        <DialogTitle>
-          <Typography variant="h4">
-            What&apos;s this{" "}
-            <span style={{ fontStyle: "italic" }}>Water Need</span> about?
-          </Typography>
+        <DialogTitle variant="h4">
+          What&apos;s this{" "}
+          <span style={{ fontStyle: "italic" }}>Water Need</span> about?
         </DialogTitle>
         <DialogContent
           sx={{
