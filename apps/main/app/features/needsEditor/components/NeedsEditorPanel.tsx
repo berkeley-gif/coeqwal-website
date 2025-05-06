@@ -42,6 +42,7 @@ const NeedsEditorPanel: React.FC = () => {
     if (!defaultSetting) {
       return
     }
+    // console.log("Adding new need of type:", type, "with default setting:", defaultSetting)
 
     const newNeed: WaterNeedSetting = {
       name: type,
@@ -143,6 +144,7 @@ const NeedsEditorPanel: React.FC = () => {
               {WATER_NEED_TYPES.map((item) => (
                 <Accordion
                   key={item.label}
+                  expanded={expanded === item.label}
                   onChange={handleAccordionChange(item.label)}
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -233,9 +235,9 @@ const NeedsEditorPanel: React.FC = () => {
             height={600}
             editWaterNeed={handleEditWaterNeed}
             finishWaterNeed={(selectedNeedsList) => {
-              console.log("Selected needs list:", selectedNeedsList)
+              setNeedsList(selectedNeedsList)
               setShowBucketScene(false)
-              setShowActionPanel(true)
+              setTimeout(() => setShowActionPanel(true), 0)
             }}
           />
         </Box>

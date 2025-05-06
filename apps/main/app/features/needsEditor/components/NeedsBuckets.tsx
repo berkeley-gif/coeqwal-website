@@ -60,11 +60,11 @@ const BucketScene = ({
   finishWaterNeed,
 }: BucketSceneProps) => {
   const sceneRef = useRef(null)
-  const ballsRef = useRef<Matter.Body[]>([])
   const engineRef = useRef(Matter.Engine.create())
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // const [balls, setBalls] = useState<Matter.Body[]>([])
+  const [balls, setBalls] = useState<Matter.Body[]>([])
+  const ballsRef = useRef<Matter.Body[]>([])
   const [isAddRemovePopupOpen, setIsAddRemovePopupOpen] = useState(false)
   const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false)
   const [selectedBall, setSelectedBall] =
@@ -123,6 +123,10 @@ const BucketScene = ({
     setIsAddRemovePopupOpen(false) // Close the popup
     setSelectedBall(null) // Clear the selected ball
   }
+
+  useEffect(() => {
+    ballsRef.current = balls
+  }, [balls])
 
   useEffect(() => {
     let initialAllNeedsList = [
@@ -283,19 +287,14 @@ const BucketScene = ({
           (ball) => JSON.stringify(ball.need) === JSON.stringify(need),
         )
 
-        const shouldUpdate = existingBall
-        console.log("shouldUpdate", need, shouldUpdate)
-
         let ball: Matter.body
-
         const isSatisfiable = need.isSatisfiable
 
         const row = Math.floor(i / 3)
         const x = need.isSelected ? centerX : isSatisfiable ? leftX : rightX
         const y = 100 + row * 30
 
-        if (shouldUpdate) {
-          console.log("Same bucket, reusing ball", need)
+        if (existingBall) {
           ball = Bodies.circle(
             existingBall.position.x,
             existingBall.position.y,
@@ -329,7 +328,7 @@ const BucketScene = ({
       },
     )
 
-    ballsRef.current = ballBodies
+    setBalls(ballBodies)
 
     World.add(world, ballBodies)
 
@@ -679,7 +678,7 @@ const BucketScene = ({
       </Dialog>
       <div ref={containerRef} style={{ width: "100%" }}>
         <div style={{ position: "relative" }}>
-          {ballsRef.current.map((ball, i) => (
+          {balls.map((ball, i) => (
             <Box
               key={i}
               id={`ball-overlay-${i}`}
@@ -693,8 +692,6 @@ const BucketScene = ({
                 width: "100px",
                 height: "100px",
                 "&:hover": {
-                  // backgroundColor: "blue", // Change background color on hover
-                  // transform: "translate(-50%, -50%) scale(1.1)", // Slightly enlarge on hover
                   cursor: "pointer", // Change cursor to pointer
                 },
               }}
@@ -705,7 +702,7 @@ const BucketScene = ({
               }}
             ></Box>
           ))}
-          {ballsRef.current.map((ball, i) => (
+          {balls.map((ball, i) => (
             <Box
               key={i}
               id={`ball-btn-${i}`}

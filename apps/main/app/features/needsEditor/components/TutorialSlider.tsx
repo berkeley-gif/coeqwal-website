@@ -1,4 +1,4 @@
-import React, { act, useState } from "react"
+import React, { useState } from "react"
 import {
   Box,
   Button,
@@ -8,6 +8,7 @@ import {
   useTheme,
   ArrowRightIcon,
   ArrowLeftIcon,
+  VisibilityIcon,
 } from "@repo/ui/mui"
 
 const tutorialSteps = [
@@ -43,34 +44,62 @@ const tutorialSteps = [
         But one of the realities of California water is that not all{" "}
         <em>Water Needs</em> can be met <strong>at the same time</strong>.
         <br />
-        Some <em>Water Needs</em> can be met simultaneously but some are in
+        Some <em>Water Needs</em> can be met simultaneously, but some are in
         conflict with each other.
         <br />
         <br />
         You&apos;ll see this referred to as{" "}
-        <span
-          style={{
-            background: "#D6E5BD",
+        <Box
+          sx={{
+            background: "rgba(214, 229, 189, 1.0)", // Adjusted for transparency
             borderRadius: "5px",
             padding: "2px 4px",
+            display: "inline-flex",
+            alignItems: "center",
+            verticalAlign: "middle",
+            "&:hover": {
+              background: "rgba(214, 229, 189, 0.5)", // Adjusted for transparency
+              cursor: "pointer",
+            },
           }}
         >
           satisfiable
-        </span>{" "}
+          <VisibilityIcon />
+        </Box>{" "}
         and{" "}
-        <span
-          style={{
-            background: "#FFCBCB",
+        <Box
+          sx={{
+            background: "rgba(255, 203, 203, 1.0)", // Adjusted for transparency
             borderRadius: "5px",
             padding: "2px 4px",
+            display: "inline-flex",
+            alignItems: "center",
+            verticalAlign: "middle",
+            "&:hover": {
+              background: "rgba(255, 203, 203, 0.5)", // Adjusted for transparency
+              cursor: "pointer",
+            },
           }}
         >
           unsatisfiable
-        </span>{" "}
+          <VisibilityIcon />
+        </Box>{" "}
         needs.
         <br />
         <br />
         So, keep a look out for these terms!
+      </>
+    ),
+  },
+  {
+    description: (
+      <>
+        We welcome you to define your own <em>Water Needs</em>, and we also have
+        a list of pre-defined <em>Water Needs</em> that COEQWAL is aware of, so
+        you learn how your <em>Water Needs</em> relate to those as well.
+        <br />
+        <br />
+        We hope it&apos;s informative and useful for you!
       </>
     ),
   },
