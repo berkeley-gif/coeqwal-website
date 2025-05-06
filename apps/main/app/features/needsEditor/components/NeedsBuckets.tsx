@@ -590,6 +590,7 @@ const BucketScene = ({
           sx={{
             display: "flex",
             flexDirection: "column",
+            width: "fit-content",
             gap: 1,
           }}
         >
@@ -597,6 +598,7 @@ const BucketScene = ({
             sx={{
               border: "3px solid #ccc",
               borderRadius: 1,
+              width: "fit-content",
               p: 2,
             }}
           >
@@ -624,7 +626,7 @@ const BucketScene = ({
           <Box
             sx={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: "column",
               gap: 1,
               width: "fit-content",
             }}
@@ -632,8 +634,8 @@ const BucketScene = ({
             <Chip
               label={`${
                 selectedBall?.isUserDefined
-                  ? "👤 User-Defined"
-                  : "⚙️ Pre-Defined"
+                  ? "👤 Defined by You!"
+                  : "⚙️ A Predefined need known to COEQWAL"
               }`}
               color={selectedBall?.isUserDefined ? "default" : "default"}
             />
