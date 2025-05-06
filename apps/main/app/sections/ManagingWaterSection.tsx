@@ -4,10 +4,10 @@ import { useTranslation } from "@repo/i18n"
 import { useStoryStore } from "@repo/state"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
 }
 
-export default function ManagingWaterSection({ onOpenDrawer }: Props) {
+export default function ManagingWaterSection({ onOpenLearnDrawer }: Props) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -19,12 +19,12 @@ export default function ManagingWaterSection({ onOpenDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -41,12 +41,14 @@ export default function ManagingWaterSection({ onOpenDrawer }: Props) {
     <Box
       id="managing-water"
       sx={{
+        mb: 0,
         pointerEvents: "auto",
       }}
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-middle"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -59,18 +61,18 @@ export default function ManagingWaterSection({ onOpenDrawer }: Props) {
         >
           {/* Left column */}
           <Box sx={{ width: { xs: "100%", md: "48%" }, pr: { md: 4 } }}>
-            <Typography variant="h1" sx={{ mb: 1 }}>
+            <Typography variant="h2" sx={{ mb: 1 }}>
               {t("managingWater.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph("managingWater.paragraph1")}
               {renderParagraph("managingWater.paragraph2")}
               {renderParagraph("managingWater.paragraph3")}
             </Stack>
 
-            <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
+            <Box sx={{ mt: 3, pl: 1 }}>
+              <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>
 

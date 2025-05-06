@@ -38,6 +38,11 @@ export {
   List,
   ListItem,
   ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
 
   // Feedback components
   Snackbar,
@@ -79,6 +84,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import EditIcon from "@mui/icons-material/Edit"
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 
 // Export individually imported icons
 export {
@@ -92,6 +98,7 @@ export {
   ExpandMoreIcon,
   ArrowCircleUpIcon,
   ArrowCircleDownIcon,
+  ArrowDropDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   OpacityIcon,

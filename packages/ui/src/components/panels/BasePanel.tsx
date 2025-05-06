@@ -7,7 +7,15 @@ import { styled } from "@mui/material/styles"
 export interface BasePanelProps extends BoxProps {
   fullHeight?: boolean
   background?: "light" | "dark" | "accent" | "transparent" | "interstitial"
-  paddingVariant?: "normal" | "narrow" | "wide" | "very-wide" | "none"
+  paddingVariant?:
+    | "normal"
+    | "narrow"
+    | "wide"
+    | "very-wide"
+    | "content-first"
+    | "content-middle"
+    | "content-last"
+    | "none"
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
   /**
@@ -40,6 +48,9 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "narrow") return theme.spacing(4)
     if (paddingVariant === "wide") return theme.spacing(12)
     if (paddingVariant === "very-wide") return "192px"
+    if (paddingVariant === "content-first") return "192px"
+    if (paddingVariant === "content-middle") return "192px"
+    if (paddingVariant === "content-last") return "192px"
     return theme.spacing(6) // normal padding
   }
 
@@ -64,6 +75,29 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "none") {
       return includeHeaderSpacing ? `${theme.layout.headerHeight}px 0 0 0` : 0
     }
+    // First content section: full top padding, reduced bottom padding
+    if (paddingVariant === "content-first") {
+      const topPad = includeHeaderSpacing
+        ? `${theme.layout.headerHeight + 192}px`
+        : "192px"
+      return `${topPad} 192px 120px 192px` // Full top padding, increased bottom (120px)
+    }
+
+    // Middle content section: reduced top/bottom padding
+    if (paddingVariant === "content-middle") {
+      const topPad = includeHeaderSpacing
+        ? `${theme.layout.headerHeight + 80}px`
+        : "80px"
+      return `${topPad} 192px 120px 192px` // Top 80px, bottom 120px for 200px between sections
+    }
+
+    // Last content section: reduced top, full bottom padding
+    if (paddingVariant === "content-last") {
+      const topPad = includeHeaderSpacing
+        ? `${theme.layout.headerHeight + 80}px`
+        : "80px"
+      return `${topPad} 192px 192px 192px` // Reduced top, full bottom padding
+    }
     const topPad = getTopPadding(basePad)
     return `${topPad} ${basePad} ${basePad} ${basePad}`
   }
@@ -73,6 +107,7 @@ const PanelRoot = styled(Box, {
   const mobilePadding = getMobilePadding()
 
   return {
+    margin: 0,
     width: "100%",
     minHeight: fullHeight ? "100vh" : "auto",
     display: "flex",

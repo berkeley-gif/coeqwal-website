@@ -4,10 +4,16 @@ import { useTranslation } from "@repo/i18n"
 import { useStoryStore } from "@repo/state"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
+  onOpenCurrentOpsDrawer: () => void
+  onOpenThemesDrawer: () => void
 }
 
-export default function ChallengesSection({ onOpenDrawer }: Props) {
+export default function ChallengesSection({
+  onOpenLearnDrawer,
+  // onOpenCurrentOpsDrawer,
+  // onOpenThemesDrawer,
+}: Props) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -24,12 +30,12 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -58,12 +64,14 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
     <Box
       id="challenges"
       sx={{
+        mt: 0,
         pointerEvents: "auto",
       }}
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-middle"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -76,19 +84,19 @@ export default function ChallengesSection({ onOpenDrawer }: Props) {
         >
           {/* Left column */}
           <Box sx={{ width: { xs: "100%", md: "48%" }, pr: { md: 4 } }}>
-            <Typography variant="h1" sx={{ mb: 1 }}>
+            <Typography variant="h2" sx={{ mb: 1 }}>
               {t("challenges.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph("challenges.paragraph1", undefined, false)}
               {renderParagraph("challenges.paragraph2", undefined, false)}
               {renderParagraph("challenges.paragraph3", undefined, false)}
               {renderParagraph("challenges.paragraph4", undefined, false)}
             </Stack>
 
-            <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
+            <Box sx={{ mt: 3, pl: 1 }}>
+              <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>
 

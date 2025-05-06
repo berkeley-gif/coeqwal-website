@@ -1,64 +1,60 @@
 import { HeroQuestionsPanel } from "@repo/ui"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import { ScrollDownIcon } from "@repo/ui"
-import { useTranslation } from "@repo/i18n"
-import React, { useState, useEffect, useMemo } from "react"
+// import { useTranslation } from "@repo/i18n"
 
 // Custom headline component that formats the last headline with a line break
-function CustomHeadlineText({ text }: { text: string | undefined }) {
-  // Handle undefined text
-  if (!text) return null
+// function CustomHeadlineText({ text }: { text: string | undefined }) {
+//   // Handle undefined text
+//   if (!text) return null
 
-  // Check if this is the last headline (contains "Where does your water")
-  if (text.includes("Where does your water")) {
-    // Split into two parts
-    const parts = [
-      "Where does your water come from?",
-      "Who else depends on it?",
-    ]
+//   // Check if this is the last headline (contains "Where does your water")
+//   if (text.includes("Where does your water")) {
+//     // Split into two parts
+//     const parts = [
+//       "Where does your water come from?",
+//       "Who else depends on it?",
+//     ]
 
-    return (
-      <>
-        <div style={{ display: "block" }}>{parts[0]}</div>
-        <div style={{ display: "block" }}>{parts[1]}</div>
-      </>
-    )
-  }
+//     return (
+//       <>
+//         <div style={{ display: "block" }}>{parts[0]}</div>
+//         <div style={{ display: "block" }}>{parts[1]}</div>
+//       </>
+//     )
+//   }
 
-  // Check if this is the salmon headline
-  if (text.includes("saving salmon")) {
-    // Split into two parts
-    const parts = ["Does saving salmon mean changing", "how we use water?"]
+//   // Check if this is the salmon headline
+//   if (text.includes("saving salmon")) {
+//     // Split into two parts
+//     const parts = ["Does saving salmon mean changing", "how we use water?"]
 
-    return (
-      <>
-        <div style={{ display: "block" }}>{parts[0]}</div>
-        <div style={{ display: "block" }}>{parts[1]}</div>
-      </>
-    )
-  }
+//     return (
+//       <>
+//         <div style={{ display: "block" }}>{parts[0]}</div>
+//         <div style={{ display: "block" }}>{parts[1]}</div>
+//       </>
+//     )
+//   }
 
-  // Check if this is the climate change headline
-  if (text.includes("climate change")) {
-    const parts = ["How is climate change reshaping", "California's water?"]
+//   // Check if this is the climate change headline
+//   if (text.includes("climate change")) {
+//     const parts = ["How is climate change reshaping", "California's water?"]
 
-    return (
-      <>
-        <div style={{ display: "block" }}>{parts[0]}</div>
-        <div style={{ display: "block" }}>{parts[1]}</div>
-      </>
-    )
-  }
+//     return (
+//       <>
+//         <div style={{ display: "block" }}>{parts[0]}</div>
+//         <div style={{ display: "block" }}>{parts[1]}</div>
+//       </>
+//     )
+//   }
 
-  // Return regular text for other headlines
-  return <>{text}</>
-}
+//   // Return regular text for other headlines
+//   return <>{text}</>
+// }
 
 export default function HeroSection() {
-  const { t } = useTranslation()
-  const [currentHeadlineIndex, setCurrentHeadlineIndex] = useState(0)
-  const [isVisible, setIsVisible] = useState(true)
-
+  // const { t } = useTranslation()
   const handleScrollDown = () => {
     // Scroll to the next section smoothly
     window.scrollBy({
@@ -67,36 +63,44 @@ export default function HeroSection() {
     })
   }
 
-  // Memoize headlines to prevent recreation on each render
-  const headlines = useMemo(
-    () =>
-      (t("heroPanel.headlines") as string[]) || [
-        "Is California ready for the next drought?",
-        "Does saving salmon mean changing how we use water?",
-        "How is climate change reshaping California's water?",
-        "Do some Californians still lack water justice?",
-        "Where does your water come from? Who else depends on it?",
-      ],
-    [t],
-  )
-
-  // Set up headline transition (similar to TransitionHeadline component)
-  useEffect(() => {
-    if (headlines.length <= 1) return
-
-    const interval = setInterval(() => {
-      // Fade out
-      setIsVisible(false)
-
-      // Change headline and fade in
-      setTimeout(() => {
-        setCurrentHeadlineIndex((prev) => (prev + 1) % headlines.length)
-        setIsVisible(true)
-      }, 500)
-    }, 6000) // Match the default interval in HeroQuestionsPanel
-
-    return () => clearInterval(interval)
-  }, [headlines])
+  // Define SVG questions with positions
+  const questionSvgs = [
+    {
+      src: "/images/question1.svg",
+      xPercent: -20,
+      yPercent: 0,
+      width: 360,
+      height: 360,
+    },
+    {
+      src: "/images/question2.svg",
+      xPercent: 3,
+      yPercent: 18,
+      width: 500,
+      height: 500,
+    },
+    {
+      src: "/images/question3.svg",
+      xPercent: -24,
+      yPercent: -10,
+      width: 400,
+      height: 400,
+    },
+    {
+      src: "/images/question4.svg",
+      xPercent: 4,
+      yPercent: 0,
+      width: 400,
+      height: 400,
+    },
+    {
+      src: "/images/question5.svg",
+      xPercent: 28,
+      yPercent: 28,
+      width: 460,
+      height: 460,
+    },
+  ]
 
   return (
     <Box
@@ -110,40 +114,24 @@ export default function HeroSection() {
     >
       <HeroQuestionsPanel
         backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
-        headlines={[]}
         verticalAlignment="center"
         background="transparent"
         includeHeaderSpacing={false}
         headlineColor="common.white"
+        questionSvgs={questionSvgs}
+        useSvgQuestions={true}
+        transitionInterval={6000}
         sx={{
           "& > div": {
             marginTop: "-15vh",
           },
         }}
-      >
-        {/* Custom headline with line break */}
-        <Box
-          sx={{
-            opacity: isVisible ? 1 : 0,
-            transition: "opacity 500ms ease-in-out",
-          }}
-        >
-          <Typography
-            variant="h1"
-            sx={{
-              color: "common.white",
-              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-            }}
-          >
-            <CustomHeadlineText text={headlines[currentHeadlineIndex]} />
-          </Typography>
-        </Box>
-      </HeroQuestionsPanel>
+      />
 
       <ScrollDownIcon
         onClick={handleScrollDown}
         color="white"
-        text="Water connects us. Explore California's water system and discover possibilities for the future of water in our state."
+        text="Our water connects us. Explore California's water system and discover possibilities for the future of water in our state."
       />
     </Box>
   )

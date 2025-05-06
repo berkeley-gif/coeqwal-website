@@ -25,6 +25,14 @@ import {
 
 import { WATER_NEED_TYPES } from "./constants"
 
+type EditableNeedsRendererProps = {
+  // userSetting: UserSetting
+  // setUserSetting: React.Dispatch<React.SetStateAction<UserSetting>>
+
+  currentWaterNeed: WaterNeedSetting
+  setCurrentWaterNeed: React.Dispatch<React.SetStateAction<WaterNeedSetting>>
+}
+
 const getCurrentFieldValue = (
   editingField: EditingFieldTarget,
   setting: UserSetting,
@@ -54,16 +62,25 @@ const isInputValid = (dataType: string, value: string | number) => {
   }
 }
 
+const shouldShowExceedancePlot = (
+  currentWaterNeed: WaterNeedSetting,
+): boolean => {
+  // Show the Exceedance Plot only for "Water Delivery" needs and if all units are TAF
+
+  const currentWaterNeedType = WATER_NEED_TYPES.find(
+    (item) => item.label === currentWaterNeed.name,
+  )
+
+  return (
+    currentWaterNeedType?.label === "Water Delivery" &&
+    currentWaterNeed.setting.rule
+      .map((d) => d["Unit"]?.value === "TAF")
+      .every((value) => value === true)
+  )
+}
+
 const getTargetKey = (target: EditingFieldTarget) =>
   `${target.type}-${target.ruleIndex ?? ""}-${target.index}`
-
-type EditableNeedsRendererProps = {
-  // userSetting: UserSetting
-  // setUserSetting: React.Dispatch<React.SetStateAction<UserSetting>>
-
-  currentWaterNeed: WaterNeedSetting
-  setCurrentWaterNeed: React.Dispatch<React.SetStateAction<WaterNeedSetting>>
-}
 
 const EditableNeedsRenderer = ({
   // userSetting,
@@ -91,8 +108,12 @@ const EditableNeedsRenderer = ({
       return
     } else {
       setUserSetting(currentWaterNeed.setting)
+
+      setIsShowingExceedancePlot(
+        shouldShowExceedancePlot(currentWaterNeed) && isShowingExeedancePlot,
+      )
     }
-  }, [currentWaterNeed])
+  }, [currentWaterNeed, isShowingExeedancePlot])
 
   const currentWaterNeedType = WATER_NEED_TYPES.find(
     (item) => item.label === currentWaterNeed.name,
@@ -428,7 +449,11 @@ const EditableNeedsRenderer = ({
                 variant="text"
                 size="small"
                 endIcon={<VisibilityIcon />}
-                sx={{ textTransform: "none", color: "black" }}
+                sx={{
+                  textTransform: "none",
+                  color: "black",
+                  "&:hover": { background: "lightgrey" },
+                }}
                 onClick={() => {
                   // Add your "Learn More" action here
                   console.log("Learn more clicked")
@@ -604,8 +629,8 @@ const EditableNeedsRenderer = ({
           >
             <ExceedancePlot
               currentWaterNeed={currentWaterNeed}
-              width={600}
-              height={300}
+              width={500}
+              height={200}
             />
           </Box>
         )}
@@ -620,7 +645,7 @@ const EditableNeedsRenderer = ({
         >
           Add another rule
         </Button>
-        {currentWaterNeedType.label == "Water Delivery" && (
+        {shouldShowExceedancePlot(currentWaterNeed) && (
           <Button
             variant="outlined"
             startIcon={<BarChartIcon />}

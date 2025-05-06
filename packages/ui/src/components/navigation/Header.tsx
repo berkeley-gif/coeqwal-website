@@ -148,7 +148,7 @@ export function Header({
                     color: textColor, // Apply the same color to all items
                     minWidth: "auto",
                     px: isTablet ? 1 : 2,
-                    fontSize: isTablet ? "0.75rem" : "0.875rem",
+                    fontSize: theme.typography.nav.fontSize,
                     position: "relative",
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",

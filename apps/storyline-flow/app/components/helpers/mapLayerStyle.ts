@@ -9,6 +9,26 @@ export const riverLayerStyle = {
     "line-width": 3,
     "line-opacity": 0,
   },
+  layer: {
+    "source-layer": "combinedRivers-avtojv",
+  },
+}
+
+export const canalLayerStyle = {
+  type: "line",
+  layout: {
+    "line-cap": "round",
+    "line-join": "round",
+  },
+  layer: {
+    "source-layer": "drinking-34z621",
+  },
+  paint: {
+    "line-color": "#072c6c", // A darker blue contrasting with #3d8ec9
+    "line-width": 3,
+    "line-opacity": 0,
+    "line-dasharray": [2, 2] as unknown as string,
+  },
 }
 
 export const deltaWaterLayerStyle = {
@@ -65,6 +85,15 @@ export const snowpackPaintStyle = {
   } as unknown as string,
 }
 
-//#00aaff
-//#4da6ff
-//#3d8ec9
+export const boundaryPaintStyle = {
+  type: "line",
+  layout: {
+    "line-join": "round",
+    "line-cap": "round",
+  },
+  paint: {
+    "line-color": "#f2f0ef",
+    "line-width": 6,
+    "line-opacity": 0.7,
+  },
+}

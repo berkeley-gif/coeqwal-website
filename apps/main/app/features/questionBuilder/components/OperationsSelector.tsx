@@ -13,14 +13,13 @@
 /**
  * OperationsSelector
  * Uses checkboxes for multi-selection
- * Organizes options into themed categories using accordions
+ * Organizes options into cards for clarity
  * Includes a search feature for operations
- * Uses orange highlighting for visual distinction
+ * Uses colored bullets and capsules for visual distinction
  * Different text formats based on the "swapped" state
- * Data model is more complex (nested themes with options)
  */
 
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react"
 import {
   Typography,
   Box,
@@ -29,15 +28,229 @@ import {
   SearchIcon,
   Button,
 } from "@repo/ui/mui"
-import { Card } from "@repo/ui"
-import { OPERATION_THEMES } from "../data/constants"
-import SectionAccordion from "./SectionAccordion"
+import { Card, OperationCard } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
-// import { ColoredText, HighlightText } from "./ui"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
 
-const OperationsSelector: React.FC = () => {
+interface OperationsSelectorProps {
+  onOpenThemesDrawer?: () => void
+}
+
+// Organized palette for water operations with primary (dot) and secondary (title) colors
+const WATER_PALETTE = {
+  currentOperations: {
+    primary: "#90B9BF", // Soft blue/gray
+    secondary: "rgba(96, 125, 139, 0.85)",
+  },
+  emergencyMeasures: {
+    primary: "#C3E68B", // Light green
+    secondary: "rgba(33, 150, 243, 0.85)",
+  },
+  groundwaterManagement: {
+    primary: "#FFC700", // Bright yellow
+    secondary: "rgba(244, 67, 54, 0.85)",
+  },
+  streamFlowManagement: {
+    primary: "#FF9C00", // Orange
+    secondary: "rgba(76, 175, 80, 0.85)",
+  },
+  urbanWaterPriorities: {
+    primary: "#CF9AAD", // Soft pink
+    secondary: "rgba(156, 39, 176, 0.85)",
+  },
+  deltaBalance: {
+    primary: "#A66484", // Purple
+    secondary: "rgba(255, 152, 0, 0.85)",
+  },
+  infrastructure: {
+    primary: "#D96E00", // Amber/brown
+    secondary: "rgba(63, 81, 181, 0.85)",
+  },
+  climateAdaptation: {
+    primary: "#00ACC1", // Teal - future water, adaptation
+    secondary: "rgba(0, 172, 193, 0.85)",
+  },
+}
+
+// Card data for the operation cards
+const OPERATION_CARDS = () => [
+  {
+    id: "current-operations",
+    title: "Current operations",
+    bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
+    titleColor: WATER_PALETTE.currentOperations.secondary,
+    subOptions: [
+      {
+        id: "use-as-comparison",
+        label: "Use as comparison",
+      },
+    ],
+  },
+  {
+    id: "remove-tucps",
+    title: "What if we removed temporary emergency measures (TUCP's)?",
+    bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
+    titleColor: WATER_PALETTE.emergencyMeasures.secondary,
+    subOptions: [
+      {
+        id: "select-tucps",
+        label: "Select",
+      },
+    ],
+  },
+  {
+    id: "limit-groundwater",
+    title: "What if we limited groundwater pumping?",
+    bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
+    titleColor: WATER_PALETTE.groundwaterManagement.secondary,
+    subOptions: [
+      {
+        id: "sjv-only",
+        label: "...in the San Joaquin Valley only",
+      },
+      {
+        id: "both-valleys",
+        label: "...in both the Sacramento and San Joaquin Valleys",
+      },
+      {
+        id: "sjv-reduced-acreage",
+        label: "...in the San Joaquin Valley and reduced agricultural acreage",
+      },
+      {
+        id: "both-valleys-reduced-acreage",
+        label:
+          "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
+      },
+    ],
+  },
+  {
+    id: "change-stream-flows",
+    title: "What if we changed how water flows in our streams?",
+    bullet: { color: WATER_PALETTE.streamFlowManagement.primary, size: 24 },
+    titleColor: WATER_PALETTE.streamFlowManagement.secondary,
+    subOptions: [
+      {
+        id: "no-environmental-flows",
+        label: "...with no environmental flow requirements",
+      },
+      {
+        id: "functional-flows-balance",
+        label:
+          "...with functional flows to balance water needs with ecosystem support",
+      },
+      {
+        id: "functional-flows-reduced",
+        label:
+          "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
+      },
+      {
+        id: "enhanced-functional-flows-salmon",
+        label: "...with enhanced functional flows to support salmon",
+      },
+      {
+        id: "enhanced-functional-flows-salmon-reduced",
+        label:
+          "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
+      },
+    ],
+  },
+  {
+    id: "prioritize-drinking-water",
+    title: "What if we prioritized drinking water?",
+    bullet: { color: WATER_PALETTE.urbanWaterPriorities.primary, size: 24 },
+    titleColor: WATER_PALETTE.urbanWaterPriorities.secondary,
+    subOptions: [
+      {
+        id: "adjust-urban-demand",
+        label: "...by adjusting urban demand patterns",
+      },
+      {
+        id: "prioritize-impacted-communities",
+        label:
+          "...by prioritizing drinking water for the most impacted communities",
+      },
+      {
+        id: "prioritize-underserved-communities",
+        label:
+          "...by prioritizing drinking water for all historically-underserved communities",
+      },
+      {
+        id: "prioritize-all-communities",
+        label: "...for all communities across the system",
+      },
+    ],
+  },
+  {
+    id: "balance-delta-uses",
+    title: "What if we balanced water uses in the Delta?",
+    bullet: { color: WATER_PALETTE.deltaBalance.primary, size: 24 },
+    titleColor: WATER_PALETTE.deltaBalance.secondary,
+    subOptions: [
+      {
+        id: "delta-outflows-tier1",
+        label: "...by increasing Delta outflows, tier 1",
+      },
+      {
+        id: "delta-outflows-tier2",
+        label: "...by increasing Delta outflows, tier 2",
+      },
+      {
+        id: "delta-outflows-tier3",
+        label: "...by increasing Delta outflows, tier 3",
+      },
+      {
+        id: "reduce-sacramento-valley-deliveries",
+        label: "...by reducing Sacramento Valley deliveries",
+      },
+      {
+        id: "more-carryover-storage-shasta",
+        label: "...by requiring more carryover storage in Shasta Reservoir",
+      },
+      {
+        id: "less-carryover-storage-shasta",
+        label: "...by allowing less carryover storage in Shasta Reservoir",
+      },
+      {
+        id: "reduce-delta-exports-tier1",
+        label: "...by reducing Delta exports, tier 1",
+      },
+      {
+        id: "reduce-delta-exports-tier2",
+        label: "...by reducing Delta exports, tier 2",
+      },
+      {
+        id: "reduce-delta-exports-tier3",
+        label: "...by reducing Delta exports, tier 3",
+      },
+    ],
+  },
+  {
+    id: "new-infrastructure",
+    title: "What if we added new water infrastructure?",
+    bullet: { color: WATER_PALETTE.infrastructure.primary, size: 24 },
+    titleColor: WATER_PALETTE.infrastructure.secondary,
+    subOptions: [
+      {
+        id: "delta-conveyance-tunnel",
+        label: "...Delta conveyance tunnel",
+      },
+      {
+        id: "delta-conveyance-reduced-groundwater",
+        label:
+          "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
+      },
+      {
+        id: "delta-conveyance-functional-flows",
+        label: "...Delta conveyance with functional flows",
+      },
+    ],
+  },
+]
+
+const OperationsSelector: React.FC<OperationsSelectorProps> = ({
+  onOpenThemesDrawer,
+}) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -48,9 +261,6 @@ const OperationsSelector: React.FC = () => {
   } = useQuestionBuilderHelpers()
 
   const [searchTerm, setSearchTerm] = useState("")
-
-  // Track expanded accordions
-  const [expandedAccordions, setExpandedAccordions] = useState<string[]>([])
 
   // Exit exploratory mode when interacting with this component
   const exitExploratoryMode = useCallback(() => {
@@ -73,72 +283,62 @@ const OperationsSelector: React.FC = () => {
     resetOperations()
   }, [exitExploratoryMode, resetOperations])
 
-  // Determine which accordions should be forced open because they contain selected options
-  const forcedOpenAccordions = useMemo(() => {
-    const forced: string[] = []
+  // Filter operations based on search term
+  const filteredOperations = useMemo(() => {
+    if (!searchTerm) return OPERATION_CARDS()
 
-    // Find which theme contains each selected operation
-    selectedOperations.forEach((opId) => {
-      for (const theme of OPERATION_THEMES) {
-        // Check if this operation is in this theme
-        let isInTheme = false
+    const lowercaseSearch = searchTerm.toLowerCase()
+    return OPERATION_CARDS().filter(
+      (op) =>
+        op.title.toLowerCase().includes(lowercaseSearch) ||
+        op.subOptions.some((sub) =>
+          sub.label.toLowerCase().includes(lowercaseSearch),
+        ),
+    )
+  }, [searchTerm])
 
-        for (const option of theme.options) {
-          if (typeof option === "string") {
-            if (option === opId) {
-              isInTheme = true
-              break
-            }
-          } else if (typeof option === "object") {
-            if (option.id === opId) {
-              isInTheme = true
-              break
-            }
+  // Prepare the operation cards with selected state
+  const operationCardsWithState = useMemo(() => {
+    return filteredOperations.map((op) => {
+      const mainOptionSelected = selectedOperations.includes(op.id)
 
-            // Check subtypes if they exist
-            if ("subtypes" in option && Array.isArray(option.subtypes)) {
-              const hasSubtype = option.subtypes.some(
-                (sub: { id: string }) => sub.id === opId,
-              )
-              if (hasSubtype) {
-                isInTheme = true
-                break
-              }
-            }
-          }
-        }
+      const subOptionsWithState = op.subOptions.map((sub) => ({
+        ...sub,
+        selected: selectedOperations.includes(sub.id),
+      }))
 
-        if (isInTheme) {
-          forced.push(theme.id)
-          break
-        }
+      return {
+        ...op,
+        selected: mainOptionSelected,
+        subOptions: subOptionsWithState,
       }
     })
+  }, [filteredOperations, selectedOperations])
 
-    return forced
-  }, [selectedOperations])
+  // Handle main option change
+  const handleMainOptionChange = (optionId: string, checked: boolean) => {
+    handleOperationChangeWithExitMode(optionId, checked)
+  }
 
-  // Handle accordion expansion change
-  const handleAccordionChange = (themeId: string, isExpanded: boolean) => {
-    setExpandedAccordions((prev) => {
-      // If expanding, add to expanded list
-      if (isExpanded) {
-        return [...prev, themeId]
-      }
+  // Handle sub-option change
+  const handleSubOptionChange = (
+    subOptionId: string,
+    checked: boolean,
+  ) => {
+    handleOperationChangeWithExitMode(subOptionId, checked)
+  }
 
-      // If collapsing, only allow if not in forced open list
-      if (!forcedOpenAccordions.includes(themeId)) {
-        return prev.filter((id) => id !== themeId)
-      }
-
-      // Otherwise keep as is
-      return prev
-    })
+  // Handle info click
+  const handleInfoClick = () => {
+    // Open the themes drawer when "Tell me more" is clicked
+    if (onOpenThemesDrawer) {
+      onOpenThemesDrawer()
+    }
   }
 
   // Common styles
   const searchBoxStyles = {
-    mb: 1,
+    mb: 3,
     border: "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: `${theme.borderRadius.card}px`,
     overflow: "hidden",
@@ -159,7 +359,7 @@ const OperationsSelector: React.FC = () => {
     "& .MuiOutlinedInput-root": {
       borderRadius: theme.borderRadius.pill,
       height: "40px",
-      fontSize: theme.typography.caption.fontSize,
+      fontSize: theme.cards.typography.caption.fontSize,
     },
     "& .MuiOutlinedInput-input": {
       padding: theme.spacing(1, 2),
@@ -167,68 +367,136 @@ const OperationsSelector: React.FC = () => {
     width: "300px",
   }
 
-  // Handle option change while respecting active status
-  const handleOptionChangeWithActiveCheck = (
-    optionId: string,
-    checked: boolean,
-  ) => {
-    // First, check if the option is active before proceeding
-    let isActive = false
+  // Let's ditch the custom scrollbar due to lag issues and use a better native scrollbar
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [isScrollable, setIsScrollable] = useState(false)
 
-    // Find the option in all themes to check its active status
-    for (const theme of OPERATION_THEMES) {
-      for (const option of theme.options) {
-        if (typeof option === "string" && option === optionId) {
-          // Legacy string options are always active
-          isActive = true
-          break
-        } else if (typeof option === "object" && option.id === optionId) {
-          isActive = option.active !== false // Default to true if not specified
-          break
-        } else if (
-          typeof option === "object" &&
-          "subtypes" in option &&
-          option.subtypes
-        ) {
-          // Check subtypes if they exist
-          const subtype = option.subtypes.find((sub) => sub.id === optionId)
-          if (subtype) {
-            isActive = option.active !== false && subtype.active !== false
-            break
-          }
-        }
+  // Check if content is scrollable once when component loads and on window resize
+  useEffect(() => {
+    const checkScrollable = () => {
+      const container = scrollContainerRef.current
+      if (container) {
+        setIsScrollable(container.scrollHeight > container.clientHeight + 10) // 10px buffer
       }
-      if (isActive) break // No need to check other themes if found
     }
 
-    // Don't allow changes for inactive options
-    if (!isActive) return
+    // Initial check with delay to ensure layout is complete
+    const timeoutId = setTimeout(checkScrollable, 200)
 
-    // Always use checkbox behavior - allow multiple selections regardless of swapped state
-    handleOperationChangeWithExitMode(optionId, checked)
-  }
+    // Recheck on window resize
+    window.addEventListener("resize", checkScrollable)
+
+    return () => {
+      clearTimeout(timeoutId)
+      window.removeEventListener("resize", checkScrollable)
+    }
+  }, [operationCardsWithState.length])
+
+  // Prevent scroll propagation at the top/bottom boundaries
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current
+
+    if (!scrollContainer) return
+
+    const handleWheel = (e: WheelEvent) => {
+      // Get current scroll position and dimensions
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+
+      // More precise boundary detection
+      const isAtTop = scrollTop <= 0
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1
+
+      // Only prevent default when we've hit a boundary in the direction of scroll
+      if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+        e.preventDefault()
+        e.stopPropagation() // Also stop propagation for more reliable containment
+      }
+    }
+
+    // Track touch movement for mobile
+    let touchStartY: number | null = null
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches?.[0]) {
+        touchStartY = e.touches[0].clientY
+      }
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (touchStartY === null || !scrollContainer || !e.touches?.[0]) return
+
+      const touchY = e.touches[0].clientY
+      const touchDeltaY = touchStartY - touchY
+
+      // Get current scroll position and dimensions
+      const { scrollTop, scrollHeight, clientHeight } = scrollContainer
+
+      // More precise boundary detection, adding a small buffer (1px)
+      const isAtTop = scrollTop <= 0
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1
+
+      // Detect scroll direction from touch movement and check boundaries
+      // Positive touchDeltaY means scrolling down, negative means scrolling up
+      if ((isAtTop && touchDeltaY < 0) || (isAtBottom && touchDeltaY > 0)) {
+        e.preventDefault()
+        e.stopPropagation() // Also stop propagation for more reliable containment
+      }
+    }
+
+    // Add the event listeners with passive: false to allow preventDefault()
+    scrollContainer.addEventListener("wheel", handleWheel, { passive: false })
+    scrollContainer.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    })
+    scrollContainer.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    })
+
+    // Also prevent scroll on the parent container when we're at boundaries
+    const preventParentScroll = (e: Event) => {
+      // This helps ensure the parent doesn't scroll
+      e.stopPropagation()
+    }
+
+    scrollContainer.addEventListener("scroll", preventParentScroll)
+
+    return () => {
+      scrollContainer.removeEventListener("wheel", handleWheel)
+      scrollContainer.removeEventListener("touchstart", handleTouchStart)
+      scrollContainer.removeEventListener("touchmove", handleTouchMove)
+      scrollContainer.removeEventListener("scroll", preventParentScroll)
+    }
+  }, [])
 
   return (
-    <Card>
+    <Card
+      sx={{
+        pt: 0, // Remove top padding from card
+        pb: 3, // Keep bottom padding
+        px: 3, // Keep horizontal padding
+      }}
+    >
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           flexWrap: "wrap",
-          mb: 2,
+          mb: 3,
         }}
       >
-        <Typography variant="h3" sx={{ fontSize: "3rem" }}>
+        <Typography
+          variant="h3"
+          sx={{
+            lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
+            fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
+          }}
+        >
           {swapped ? (
             <>
-              {" "}
-              {/* {locale === "es" ? "¿qué " : "which "} */}
-              {/* <HighlightText bgcolor={theme.palette.pop.main}> */}
               <ColoredText color={theme.palette.pop.main}>
                 {t("questionBuilder.defaultTerms.decisions_sub")}
               </ColoredText>
-              {/* &nbsp;{t("questionBuilder.operationsSelector.swappedTitle")} */}
             </>
           ) : (
             <>
@@ -239,11 +507,9 @@ const OperationsSelector: React.FC = () => {
                   <React.Fragment key={index}>
                     {part}
                     {index < array.length - 1 && (
-                      // <HighlightText bgcolor={theme.palette.pop.main}>
                       <ColoredText color={theme.palette.pop.main}>
                         {t("questionBuilder.defaultTerms.decisions_sub")}
                       </ColoredText>
-                      // </HighlightText>
                     )}
                   </React.Fragment>
                 ))}
@@ -253,28 +519,23 @@ const OperationsSelector: React.FC = () => {
 
         {/* Clear Selection Button */}
         <Button
-          variant="contained"
-          color="primary"
+          variant="text"
           size="medium"
           onClick={handleResetWithExitMode}
           sx={{
             textTransform: "none",
-            borderRadius: 2,
+            borderRadius: 0,
             minWidth: "150px",
-            px: 2,
-            py: 0.75,
-            fontWeight: 500,
+            px: 1,
+            py: 0.5,
+            fontWeight: 400,
+            color: "rgba(0, 0, 0, 0.42)",
+            backgroundColor: "transparent",
+            border: "none",
             "&:hover": {
-              backgroundColor: "white",
-              color: theme.palette.primary.main,
-              borderColor: theme.palette.primary.main,
-              border: "1px solid",
-            },
-            "&:active": {
-              backgroundColor: "white",
-              color: theme.palette.primary.main,
-              borderColor: theme.palette.primary.main,
-              border: "1px solid",
+              backgroundColor: "transparent",
+              color: "rgba(0, 0, 0, 0.6)",
+              textDecoration: "underline",
             },
           }}
         >
@@ -282,42 +543,131 @@ const OperationsSelector: React.FC = () => {
         </Button>
       </Box>
 
-      {/* Operation categories */}
-      <Box sx={{ mt: 3 }}>
-        {OPERATION_THEMES.map((theme) => (
-          <SectionAccordion
-            key={theme.id}
-            title={theme.title}
-            titleEs={theme.titleEs}
-            options={theme.options}
-            selectedOptions={selectedOperations}
-            onOptionChange={handleOptionChangeWithActiveCheck}
-            noParentCheckbox={["delta-conveyance"]}
-            isOperations={true}
-            isExpanded={expandedAccordions.includes(theme.id)}
-            onAccordionChange={(isExpanded) =>
-              handleAccordionChange(theme.id, isExpanded)
-            }
-          />
-        ))}
+      {/* Search operations section */}
+      <Box sx={searchBoxStyles}>
+        <SearchIcon sx={searchIconStyles} />
+        <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
+          {t("questionBuilder.operationsSelector.searchOperations")}
+        </Typography>
+        <TextField
+          size="small"
+          placeholder={t(
+            "questionBuilder.operationsSelector.searchPlaceholder",
+          )}
+          sx={textFieldStyles}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onFocus={(e) => e.stopPropagation()}
+        />
+      </Box>
 
-        {/* Search operations section */}
-        <Box sx={searchBoxStyles}>
-          <SearchIcon sx={searchIconStyles} />
-          <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
-            {t("questionBuilder.operationsSelector.searchOperations")}
-          </Typography>
-          <TextField
-            size="small"
-            placeholder={t(
-              "questionBuilder.operationsSelector.searchPlaceholder",
-            )}
-            sx={textFieldStyles}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            onFocus={(e) => e.stopPropagation()}
-          />
+      {/* Operation cards with custom scrolling */}
+      <Box
+        sx={{
+          position: "relative",
+          height: "60vh",
+          mt: 1, // Reduced from mt: 3
+          border: "1px solid rgba(0, 0, 0, 0.12)",
+          borderRadius: "12px",
+          p: 1,
+          overflow: "hidden",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        {/* Simple scrollable box with stylish round scrollbar */}
+        <Box
+          ref={scrollContainerRef}
+          sx={{
+            width: "100%",
+            height: "100%",
+            overflowY: "auto",
+            mt: 0, // Removed space for the header (was mt: 3)
+            pr: 2,
+            // High-performance scrollbar styling
+            "&::-webkit-scrollbar": {
+              width: "14px",
+              backgroundColor: "transparent",
+            },
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "transparent",
+              margin: theme.spacing(1),
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#00000030",
+              border: "4px solid white",
+              borderRadius: "24px",
+            },
+            // Firefox
+            scrollbarWidth: "thin",
+            scrollbarColor: "#00000030 transparent",
+            // Add relative positioning for the scroll indicator
+            position: "relative",
+            "& > div:not(:last-child)": {
+              marginBottom: (theme) => theme.cards.spacing.gap,
+            },
+          }}
+        >
+          {/* Subtle scroll indicator */}
+          {isScrollable && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "0px",
+                right: "25px", // Position to the left of the scrollbar
+                background:
+                  "linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%)",
+                color: "rgba(0, 0, 0, 0.7)",
+                px: 1.5,
+                py: 0.5,
+                borderRadius: "0 0 4px 4px",
+                zIndex: 1000,
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+              }}
+            >
+              <span>SCROLL</span>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7 10L12 15L17 10"
+                  stroke="rgba(0, 0, 0, 0.6)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </Box>
+          )}
+
+          {operationCardsWithState.map((op) => (
+            <OperationCard
+              key={op.id}
+              title={op.title}
+              bullet={op.bullet}
+              titleColor={op.titleColor}
+              subOptions={op.subOptions}
+              selected={op.selected}
+              onMainOptionChange={(checked) =>
+                handleMainOptionChange(op.id, checked)
+              }
+              onSubOptionChange={(subId, checked) =>
+                handleSubOptionChange(subId, checked)
+              }
+              onInfoClick={() => handleInfoClick()}
+            />
+          ))}
         </Box>
       </Box>
     </Card>

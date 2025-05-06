@@ -85,6 +85,21 @@ const themeValues = {
       light: "#58D68D",
       dark: "#1E8449",
     },
+    // Category-specific colors
+    categories: {
+      groundwaterManagement: "#4CAF50", // Leafy green, ag/groundwater
+      riverFlows: "#2196F3", // Cool blue, river systems
+      urbanWaterPriorities: "#9C27B0", // Plum purple, civic-focused
+      deltaBalance: "#FF9800", // Amber/orange, delta ecosystems
+      infrastructure: "#607D8B", // Slate gray, engineered systems
+      noFlowRequirements: "#F44336", // Red, disruption/emergency
+      carryoverRequirements: "#00ACC1", // Aqua, reservoir logic
+      deltaOutflows: "#FF5722", // Burnt orange, flow export
+      urbanDemand: "#8BC34A", // Light green, consumption
+      exportReductions: "#3F51B5", // Deep indigo, regulatory
+      conveyanceProjects: "#795548", // Earthy brown, infrastructure
+      climateFuture: "#E91E63", // Bright magenta, emphasis
+    },
   },
 
   // Border radius values
@@ -207,6 +222,65 @@ const theme = createTheme({
       closedWidth: themeValues.layout.drawer.closedWidth,
     },
   },
+  // Card typography scale
+  cards: {
+    typography: {
+      hero: {
+        fontSize: "2.5rem", // 40px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      sectionTitle: {
+        fontSize: "2rem", // 32px
+        lineHeight: 1.25,
+        fontWeight: 600,
+      },
+      cardTitle: {
+        fontSize: "1.5rem", // 24px
+        lineHeight: 1.4,
+        fontWeight: 500,
+      },
+      subtitle: {
+        fontSize: "1.25rem", // 20px
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      body: {
+        fontSize: "1rem", // 16px
+        lineHeight: 1.5,
+        fontWeight: 400,
+      },
+      caption: {
+        fontSize: "0.95rem", // smallest type per spec
+        lineHeight: 1.4,
+        fontWeight: 400,
+      },
+      button: {
+        fontSize: "0.95rem",
+        lineHeight: 1.5,
+        fontWeight: 500,
+      },
+    },
+    spacing: {
+      padding: 3, // 24px inner padding
+      gap: 3, // 24px between cards
+      capsule: {
+        px: 2, // Horizontal emphasis
+        py: 0.5, // Minimal vertical padding
+        marginRight: 1, // Space between capsules (horizontal)
+        marginBottom: 1, // Space between capsules (vertical wrapping)
+      },
+      modal: {
+        padding: 4, // 32px for modal content
+      },
+      coBenefitTags: {
+        marginTop: 2, // Slightly detached from subtypes
+      },
+      tellMoreIcon: {
+        marginLeft: "auto", // Aligns right within card header row
+      },
+    },
+  },
   // Palette (some are fixed MUI theme properties, some are custom)
   palette: {
     common: {
@@ -243,6 +317,22 @@ const theme = createTheme({
       light: themeValues.palette.climate.light,
       dark: themeValues.palette.climate.dark,
     },
+    categories: {
+      groundwaterManagement:
+        themeValues.palette.categories.groundwaterManagement,
+      riverFlows: themeValues.palette.categories.riverFlows,
+      urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
+      deltaBalance: themeValues.palette.categories.deltaBalance,
+      infrastructure: themeValues.palette.categories.infrastructure,
+      noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
+      carryoverRequirements:
+        themeValues.palette.categories.carryoverRequirements,
+      deltaOutflows: themeValues.palette.categories.deltaOutflows,
+      urbanDemand: themeValues.palette.categories.urbanDemand,
+      exportReductions: themeValues.palette.categories.exportReductions,
+      conveyanceProjects: themeValues.palette.categories.conveyanceProjects,
+      climateFuture: themeValues.palette.categories.climateFuture,
+    },
     background: {
       default: themeValues.palette.white,
       paper: themeValues.palette.neutral.light,
@@ -266,62 +356,79 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontSize: "4.4rem",
-      fontWeight: 500,
-      lineHeight: 1.1,
+      fontSize: "2.5rem",
+      fontWeight: 600,
+      lineHeight: 1.25,
       letterSpacing: "normal",
     },
     h2: {
-      fontSize: "4.2rem",
+      fontSize: "3.6rem", // 57.6px
+      fontWeight: 500,
+      lineHeight: 1.15,
+      letterSpacing: "normal",
+    },
+    h3: {
+      fontSize: "3rem", // 48px
       fontWeight: 500,
       lineHeight: 1.2,
       letterSpacing: "normal",
     },
-    h3: {
-      fontSize: "2.778rem",
-      letterSpacing: "normal",
-    },
     h4: {
-      fontSize: "1.8rem",
-      fontWeight: 300,
+      fontSize: "1.25rem", // unchanged (20px)
+      fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
     h5: {
-      fontSize: "1.4rem",
+      fontSize: "1.15rem",
+      fontWeight: 500,
       letterSpacing: "normal",
     },
     h6: {
-      fontSize: "1.2rem",
+      fontSize: "1.05rem",
+      fontWeight: 500,
       letterSpacing: "normal",
     },
     body1: {
-      fontSize: "1.4rem",
+      fontSize: "1.25rem", // 20px
+      letterSpacing: "normal",
+      lineHeight: 1.6,
+    },
+    body2: {
+      fontSize: "1.5rem", // 24px
+      letterSpacing: "normal",
+      lineHeight: 1.6,
+    },
+    subtitle1: {
+      fontSize: "1.25rem",
+      letterSpacing: "normal",
+      lineHeight: 1.5,
+    },
+    subtitle2: {
+      fontSize: "1.1rem",
+      letterSpacing: "normal",
+      lineHeight: 1.5,
+    },
+    button: {
+      fontSize: "0.95rem",
+      letterSpacing: "normal",
+      fontWeight: 500,
+      textTransform: "none",
+    },
+    caption: {
+      fontSize: "0.95rem", // smallest type per spec
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
-    body2: {
-      fontSize: "1.6rem",
-    },
-    subtitle1: {
-      fontSize: "1.2rem",
-      letterSpacing: "normal",
-    },
-    subtitle2: {
-      fontSize: "0.8929rem",
-      letterSpacing: "normal",
-    },
-    button: {
-      fontSize: "1.0714rem",
-      letterSpacing: "normal",
-    },
-    caption: {
-      fontSize: "0.8929rem",
-      letterSpacing: "normal",
-    },
     overline: {
-      fontSize: "0.8929rem",
+      fontSize: "0.75rem",
       letterSpacing: "normal",
+      lineHeight: 1.4,
+    },
+    nav: {
+      fontSize: "0.875rem",
+      letterSpacing: "normal",
+      lineHeight: 1.4,
     },
   },
   shape: {
@@ -341,6 +448,9 @@ const theme = createTheme({
           margin: 0;
           padding: 0;
           letter-spacing: normal;
+          hyphens: none;
+          -ms-hyphens: none;
+          -webkit-hyphens: none;
         }
         html, body {
           margin: 0;
@@ -407,7 +517,7 @@ const theme = createTheme({
             padding: "6px 16px",
             minWidth: 64,
             lineHeight: 1.75,
-            fontSize: "1.0714rem",
+            fontSize: "0.95rem",
             fontWeight: 500,
             color: theme.palette.common.white,
             backgroundColor: theme.palette.common.black,
@@ -638,6 +748,20 @@ declare module "@mui/material/styles" {
     pop: Palette["primary"]
     cool: Palette["primary"]
     climate: Palette["primary"]
+    categories: {
+      groundwaterManagement: string
+      riverFlows: string
+      urbanWaterPriorities: string
+      deltaBalance: string
+      infrastructure: string
+      noFlowRequirements: string
+      carryoverRequirements: string
+      deltaOutflows: string
+      urbanDemand: string
+      exportReductions: string
+      conveyanceProjects: string
+      climateFuture: string
+    }
   }
   interface PaletteOptions {
     interstitial?: PaletteOptions["primary"]
@@ -645,6 +769,20 @@ declare module "@mui/material/styles" {
     pop?: PaletteOptions["primary"]
     cool?: PaletteOptions["primary"]
     climate?: PaletteOptions["primary"]
+    categories?: {
+      groundwaterManagement?: string
+      riverFlows?: string
+      urbanWaterPriorities?: string
+      deltaBalance?: string
+      infrastructure?: string
+      noFlowRequirements?: string
+      carryoverRequirements?: string
+      deltaOutflows?: string
+      urbanDemand?: string
+      exportReductions?: string
+      conveyanceProjects?: string
+      climateFuture?: string
+    }
   }
 
   interface Theme {
@@ -675,6 +813,64 @@ declare module "@mui/material/styles" {
     drawerNavigation: {
       colors: string[]
     }
+    cards: {
+      typography: {
+        hero: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        sectionTitle: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        cardTitle: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        subtitle: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        body: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        caption: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+        button: {
+          fontSize: string
+          lineHeight: number
+          fontWeight: number
+        }
+      }
+      spacing: {
+        padding: number
+        gap: number
+        capsule: {
+          px: number
+          py: number
+          marginRight: number
+          marginBottom: number
+        }
+        modal: {
+          padding: number
+        }
+        coBenefitTags: {
+          marginTop: number
+        }
+        tellMoreIcon: {
+          marginLeft: string
+        }
+      }
+    }
   }
 
   interface ThemeOptions {
@@ -685,11 +881,77 @@ declare module "@mui/material/styles" {
         closedWidth?: number
       }
     }
+    cards?: {
+      typography?: {
+        hero?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        sectionTitle?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        cardTitle?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        subtitle?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        body?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        caption?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+        button?: {
+          fontSize?: string
+          lineHeight?: number
+          fontWeight?: number
+        }
+      }
+      spacing?: {
+        padding?: number
+        gap?: number
+        capsule?: {
+          px?: number
+          py?: number
+          marginRight?: number
+          marginBottom?: number
+        }
+        modal?: {
+          padding?: number
+        }
+        coBenefitTags?: {
+          marginTop?: number
+        }
+        tellMoreIcon?: {
+          marginLeft?: string
+        }
+      }
+    }
   }
 
   interface Mixins {
     hoverParagraph: CSSProperties
     hoverParagraphDarkened: CSSProperties
+  }
+
+  // Add custom typography variant
+  interface TypographyVariants {
+    nav: React.CSSProperties
+  }
+  interface TypographyVariantsOptions {
+    nav?: React.CSSProperties
   }
 }
 
@@ -698,5 +960,11 @@ declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     pill: true
     standard: true
+  }
+}
+
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    nav: true
   }
 }

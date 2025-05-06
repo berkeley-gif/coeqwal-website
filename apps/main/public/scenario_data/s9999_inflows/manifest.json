@@ -1,0 +1,1107 @@
+[
+  {
+    "Arc_ID": "I_DRC012",
+    "Name": "Deer Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MLC006",
+    "Name": "Mill Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_PYN001",
+    "Name": "Paynes Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFA054",
+    "Name": "North Fork American River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_WBF015",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SHSTA",
+    "Name": "Sacramento River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_THM028",
+    "Name": "Thomes Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_HON021",
+    "Name": "South Honcut Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MERLC",
+    "Name": "French Dry Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LGRSV",
+    "Name": "South Fork Feather River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CWD018",
+    "Name": "Cottonwood Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_EPARK",
+    "Name": "Stony Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BTC060",
+    "Name": "Butte Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_TRNTY",
+    "Name": "Trinity River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CLR011",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ELD027",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BLKBT",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SGRGE",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_OROVL",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SCW008",
+    "Name": "South Fork Cottonwood Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ENGLB",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CMPFW",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LDC029",
+    "Name": "Little Dry Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LOSVQ",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CMBIE",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DHC001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFY029",
+    "Name": "North Yuba River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SLT009",
+    "Name": "Slate Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MSH015",
+    "Name": "Marsh Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LCC038",
+    "Name": "Little Chico Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_OGN005",
+    "Name": "Oregon Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_WBF030",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_INDVL",
+    "Name": "North Fork Cache Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CLRLK",
+    "Name": "Cache Creek/Lower Lake",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BRC003",
+    "Name": "Bear Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFA022",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MNS000",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFF008",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFA001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFA030",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CCH053",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NBLDB",
+    "Name": "Local Inflow New Bullards Bar",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LKVLY",
+    "Name": "North Fork North Fork American River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFF011",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFF019",
+    "Name": "Middle Fork Feather River",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_WLF013",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_RVPHB",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BRR023",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_COW014",
+    "Name": "Cow Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LWSTN",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_HNSLY",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BCN010",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BTL006",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BCC014",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BTC048",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_RLLNS",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SPLDG",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DHC021",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CLRLK",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DER001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_FOLSM",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DBC024",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_ING008",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CHC000",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SLO007",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DCM027",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_LPC007",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_STS059",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CSM035",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DSC035",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CMCHE",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_AMADR",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_PARDE",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_NHGAN",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_LJC022",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MELON",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_TULOC",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_PEDRO",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MCLRE",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BCK040",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DED044",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_ESTMN",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MLRTN",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_OWN040",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BANOS",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_ORT014",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SLUIS",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DPC008",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_GRZ012",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MPS038",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_FSL012",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CLV026",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BUR005",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DEE023",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_INDVL",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_TUO054",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SJR258",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_JBP006",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_QNT005",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_ORG000",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CAP000",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_COT033",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SJR265",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_FRS046",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MCD055",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SFY007",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CHW031",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DCT050",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_WBF006",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MOK079",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_FRDYC",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BOWMN",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_JKSMD",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SCOTF",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DER004",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_RKC001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFA040",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_PLM001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ALD001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFA068",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ICEHS",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_UNVLY",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SILVR",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CAPLS",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_RUB047",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_RUB023",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LOONL",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LRB004",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_HHOLE",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_FRMDW",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DCC010",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFA025",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_RUB002",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_PLC007",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_STMPY",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFD003",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFR006",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFM008",
+    "Name": "Middle Fork Mokelumne River",
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BCM003",
+    "Name": "Bear Creek (Mokelumne)",
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SFM005",
+    "Name": "South Fork Mokelumne River",
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CMP014",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_JNKSN",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_CMP001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_FRMAN",
+    "Name": "Little Last Chance Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_DAVIS",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFF087",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFF046",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_EBF001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFF058",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BTVLY",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MTMDW",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ANTLP",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ALMNR",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ALOHA",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_PYR001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ECHOL",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SLC003",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NLC003",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LNG012",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_GERLE",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SLV015",
+    "Name": "Inflow to Junction Resevoir",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SLV006",
+    "Name": "Inflow to Camino Res",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BSH003",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ALD004",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_WBR001",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFA066",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NMA003",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFA036",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NNA013",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFY048",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SLF009",
+    "Name": "Proposed SOFAR Sherman Reservoir",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SFA076",
+    "Name": "Proposed SOFAR Forni Reservoir",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_ANG017",
+    "Name": "Angels Creek",
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_NFS033",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SPICE",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CFS001",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MFS047",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_RLIEF",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_DONLL",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MFS022",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BEARD",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_PCRST",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SSR033",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SSR030",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MFS013",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_LYONS",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_NFS009",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_BVC007",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_NFS007",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MIL003",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_NFS006",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MCD080",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MCD096",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MSF001",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MSF023",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MCD119",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MCD128",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CHY006",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_LLOYD",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_ELENR",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_HTCHY",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MFT000",
+    "Name": "Middle Fork Tuolumne River",
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SFT003",
+    "Name": "South Fork Tuolumne River",
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_JWB001",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_NFT008",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MOC003",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_CLV009",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_COL003",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_FRNCH",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_LCBRF",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFM010",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_TGC003",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_UBEAR",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_SLTSP",
+    "Name": null,
+    "HR": "SJR"
+  },
+  {
+    "Arc_ID": "I_MFY013",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_MFA023",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_BUCKS",
+    "Name": "Bucks Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_SLYCK",
+    "Name": "Sly Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_WKYTN",
+    "Name": "Clear Creek",
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_PTH070",
+    "Name": null,
+    "HR": "SAC"
+  },
+  {
+    "Arc_ID": "I_NFF029",
+    "Name": null,
+    "HR": "SAC"
+  }
+]

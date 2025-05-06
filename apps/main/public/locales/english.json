@@ -64,7 +64,7 @@
   },
   "invitation": {
     "title": "Begin your Exploration",
-    "paragraph1": "We invite you to explore the baseline scenario, which represents how water is currently managed in California. This scenario reflects existing laws and regulations as of 2025 and illustrates how the system is intended to operate today as well as under different climate conditions.",
+    "paragraph1": "We invite you to explore the current operations scenario, which represents how water is currently managed in California. This scenario reflects existing laws and regulations as of 2025 and illustrates how the system is intended to operate today as well as under different climate conditions.",
     "paragraph2": "We have organized our library of scenarios into themes that address specific water issues. You can explore the in-depth description of these themes and their scenarios.",
     "paragraph3": "You can also go straight to the source and access the unprocessed scenario run data for the COEQWAL scenarios by clicking the Raw Data button above.",
     "paragraph4": "Below you can search our library of scenarios for specific outcomes."
@@ -79,7 +79,7 @@
       "waterAvailability": "outcomes",
       "outcomes": "outcomes",
       "decisions": "water operations",
-      "decisions_sub": "water operation scenarios"
+      "decisions_sub": "water operations"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
@@ -109,12 +109,12 @@
     "operationsSelector": {
       "title": "{{decisions}}",
       "swappedTitle": "could we consider?",
-      "searchPlaceholder": "Type to search...",
+      "searchPlaceholder": "Operations search coming soon",
       "searchOperations": "Search operations",
       "comingSoon": "Coming Soon"
     },
     "outcomesSelector": {
-      "title": "{{waterAvailability}}?",
+      "title": "{{waterAvailability}}",
       "swappedTitle": "To change {{waterAvailability}}",
       "includeClimate": "Include future climate conditions",
       "chooseLocation": "Choose location on map",

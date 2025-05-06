@@ -64,7 +64,7 @@ function City() {
   const { sectionRef, isSectionActive } = useActiveSection("city", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
+  const { flyTo, setPaintProperty } = useMap()
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
@@ -81,7 +81,8 @@ function City() {
       },
     })
     setTextMarkers(markers, "text")
-  }, [flyTo, setTextMarkers, mapViewState])
+    setPaintProperty("canal-layer", "line-opacity", 0)
+  }, [flyTo, mapViewState, setTextMarkers, setPaintProperty])
 
   useEffect(() => {
     if (isSectionActive) {

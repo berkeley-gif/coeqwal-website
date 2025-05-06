@@ -41,8 +41,8 @@ export const deltaMapViewState: ResponsiveMapViewState = {
   },
   xl: {
     longitude: -121.8427,
-    latitude: 37.758,
-    zoom: 9,
+    latitude: 37.618,
+    zoom: 8.3,
     bearing: 0,
     pitch: 0,
   },
@@ -62,6 +62,23 @@ export const riverMapViewState: ResponsiveMapViewState = {
     zoom: 7.76,
     bearing: -9.15,
     pitch: 49.19,
+  },
+}
+
+export const riverValleyMapViewState: ResponsiveMapViewState = {
+  lg: {
+    longitude: -122.4311,
+    latitude: 37.6478,
+    zoom: 6.76,
+    bearing: -9.15,
+    pitch: 49.19,
+  },
+  xl: {
+    longitude: -122.6156,
+    latitude: 36.4965,
+    zoom: 7,
+    bearing: -20.53,
+    pitch: 39.41,
   },
 }
 

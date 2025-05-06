@@ -8,10 +8,10 @@ import { useMapFly } from "../hooks/useMapFly"
 import { views } from "../config/mapViews"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
 }
 
-export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
+export default function CaliforniaWaterSection({ onOpenLearnDrawer }: Props) {
   const { t } = useTranslation()
   const { mapRef } = useMap()
   const fly = useMapFly()
@@ -40,12 +40,12 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -83,7 +83,8 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-first"
         includeHeaderSpacing={false}
         sx={{
           color: (theme) => theme.palette.text.secondary,
@@ -103,11 +104,11 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               pr: { md: 4 },
             }}
           >
-            <Typography variant="h1" sx={{ mb: 1 }}>
+            <Typography variant="h2" sx={{ mb: 1 }}>
               {t("californiaWater.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph(
                 "californiaWater.paragraph1",
                 handleAnimateBands,
@@ -122,8 +123,8 @@ export default function CaliforniaWaterSection({ onOpenDrawer }: Props) {
               {renderParagraph("californiaWater.paragraph4", undefined, false)}
             </Stack>
 
-            <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
+            <Box sx={{ mt: 3, pl: 1 }}>
+              <LearnMoreButton onClick={onOpenLearnDrawer} />
             </Box>
           </Box>
 

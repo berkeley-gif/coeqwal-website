@@ -10,7 +10,7 @@ import {
 } from "@repo/ui/mui"
 // import CloseIcon from '@mui/icons-material/Close';
 import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
-import getRuleText from "./utils"
+import { getRuleText, getTitleText } from "./utils"
 import { WATER_NEED_TYPES } from "./constants"
 interface AddedWaterNeedsProps {
   waterNeeds: WaterNeedSetting[]
@@ -25,7 +25,6 @@ export default function AddedWaterNeeds({
 }: AddedWaterNeedsProps) {
   const onEditNeed = (idxToEdit: number) => {
     editWaterNeed(idxToEdit) // Signal to parent to edit this need
-    onRemoveNeed(idxToEdit) // Remove from current list
   }
 
   const onRemoveNeed = (idxToRemove: number) => {
@@ -38,6 +37,16 @@ export default function AddedWaterNeeds({
       )
       return prevNeeds.filter((_, index) => index !== idxToRemove)
     })
+  }
+
+  const getNeedTitle = (need: WaterNeedSetting) => {
+    const currentWaterNeedType = WATER_NEED_TYPES.find(
+      (item) => item.label === need.name,
+    )
+    if (!currentWaterNeedType) {
+      return "No title available"
+    }
+    return getTitleText(need.setting, currentWaterNeedType.titleGrammar)
   }
 
   const getNeedSummary = (need: WaterNeedSetting) => {
@@ -69,7 +78,7 @@ export default function AddedWaterNeeds({
 
       {/* if not empty */}
       {waterNeeds?.length > 0 && (
-        <Stack direction="row" spacing={2} flexWrap="wrap">
+        <Stack direction="row" flexWrap="wrap">
           {waterNeeds.map((need, id) => (
             <Paper
               key={id}
@@ -82,7 +91,21 @@ export default function AddedWaterNeeds({
                 maxWidth: 300,
               }}
             >
-              <Typography variant="h5">{need.name}</Typography>
+              <Typography variant="h4" sx={{ mb: 1 }}>
+                {need.name}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: 1, // Limit to 2 lines
+                }}
+              >
+                {/* {need.name} */}
+                {getNeedTitle(need)}
+              </Typography>
               <Typography
                 variant="h6"
                 color="text.secondary"

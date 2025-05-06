@@ -1,13 +1,19 @@
 import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
-import { BasePanel, LearnMoreButton } from "@repo/ui"
+import { BasePanel, LearnMoreButton as ExploreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore } from "@repo/state"
 
 interface Props {
-  onOpenDrawer: () => void
+  onOpenLearnDrawer: () => void
+  onOpenCurrentOpsDrawer: () => void
+  onOpenThemesDrawer: () => void
 }
 
-export default function InvitationSection({ onOpenDrawer }: Props) {
+export default function InvitationSection({
+  // onOpenLearnDrawer,
+  onOpenCurrentOpsDrawer,
+  onOpenThemesDrawer,
+}: Props) {
   const { t } = useTranslation()
 
   // Access the darkened paragraphs flag from the store
@@ -24,12 +30,12 @@ export default function InvitationSection({ onOpenDrawer }: Props) {
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
-        p: 2,
+        p: "16px 16px 16px 8px",
         borderRadius: "8px",
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
-              p: 2,
+              p: "16px 16px 16px 8px",
               borderRadius: "8px",
             }
           : {}),
@@ -63,7 +69,8 @@ export default function InvitationSection({ onOpenDrawer }: Props) {
     >
       <BasePanel
         background="transparent"
-        paddingVariant="very-wide"
+        fullHeight={false}
+        paddingVariant="content-last"
         includeHeaderSpacing={false}
         sx={{ color: (theme) => theme.palette.text.secondary }}
       >
@@ -76,20 +83,30 @@ export default function InvitationSection({ onOpenDrawer }: Props) {
         >
           {/* Left column */}
           <Box sx={{ width: { xs: "100%", md: "48%" }, pr: { md: 4 } }}>
-            <Typography variant="h1" sx={{ mb: 1 }}>
+            <Typography variant="h2" sx={{ mb: 1 }}>
               {t("invitation.title")}
             </Typography>
 
-            <Stack ml={"-10px"}>
+            <Stack>
               {renderParagraph("invitation.paragraph1", undefined, false)}
+
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
+                <ExploreButton onClick={onOpenCurrentOpsDrawer}>
+                  Explore Current Operations
+                </ExploreButton>
+              </Box>
+
               {renderParagraph("invitation.paragraph2", undefined, false)}
+
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
+                <ExploreButton onClick={onOpenThemesDrawer}>
+                  Explore Scenario Themes
+                </ExploreButton>
+              </Box>
+
               {renderParagraph("invitation.paragraph3", undefined, false)}
               {renderParagraph("invitation.paragraph4", undefined, false)}
             </Stack>
-
-            <Box sx={{ mt: 3 }}>
-              <LearnMoreButton onClick={onOpenDrawer} />
-            </Box>
           </Box>
 
           {/* Right placeholder column */}

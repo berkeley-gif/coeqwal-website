@@ -48,6 +48,26 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
     /** Typography variant for the speech bubble text */
     speechBubbleVariant?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6"
   }>
+  /**
+   * Optional SVG images to display as questions. Each SVG is positioned
+   * relative to the center of the panel and will transition in sequence.
+   */
+  questionSvgs?: Array<{
+    /** Path to the SVG file */
+    src: string
+    /** Horizontal position in percentage relative to center (positive = right, negative = left) */
+    xPercent: number
+    /** Vertical position in percentage relative to center (positive = down, negative = up) */
+    yPercent: number
+    /** Width of the SVG in pixels */
+    width: number
+    /** Height of the SVG in pixels */
+    height: number
+    /** Optional delay for this SVG in ms (added to the sequence timing) */
+    delay?: number
+  }>
+  /** Whether to use SVGs instead of text headlines */
+  useSvgQuestions?: boolean
 }
 
 /**
@@ -75,19 +95,23 @@ export function HeroQuestionsPanel({
   backgroundImage,
   verticalAlignment = "center",
   children,
-  transitionInterval = 6000,
+  transitionInterval = 4000,
   includeHeaderSpacing = true,
   headlineColor,
   overlayCircles = [],
+  questionSvgs = [],
+  useSvgQuestions = false,
   ...panelProps
 }: HeroQuestionsPanelProps) {
+  const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
+  // Track which SVG question is currently visible
+  const [currentSvgIndex, setCurrentSvgIndex] = useState(0)
+  const [svgVisible, setSvgVisible] = useState(true)
+  const animationRef = useRef<NodeJS.Timeout | null>(null)
+
   // Use title as a single headline if headlines array is empty
   const headlinesArray =
     headlines.length > 0 ? headlines : title ? [title] : [""]
-
-  // State for tracking which circles/bubbles are currently visible
-  const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
-  const animationRef = useRef<NodeJS.Timeout | null>(null)
 
   // Set up animation sequence for the speech bubbles
   useEffect(() => {
@@ -151,6 +175,32 @@ export function HeroQuestionsPanel({
       }
     }
   }, [overlayCircles.length, transitionInterval, overlayCircles])
+
+  // Set up headline transition
+  useEffect(() => {
+    if (!useSvgQuestions && headlines.length <= 1) return
+    if (useSvgQuestions && questionSvgs.length <= 1) return
+
+    // const totalItems = useSvgQuestions ? questionSvgs.length : headlines.length
+
+    const interval = setInterval(() => {
+      if (useSvgQuestions) {
+        // Fade out current SVG
+        setSvgVisible(false)
+
+        // Change SVG and fade in after transition
+        setTimeout(() => {
+          setCurrentSvgIndex((prev) => (prev + 1) % questionSvgs.length)
+          setSvgVisible(true)
+        }, 500)
+      } else {
+        // Original headline transition
+        setCurrentSvgIndex((prev) => (prev + 1) % headlines.length)
+      }
+    }, transitionInterval)
+
+    return () => clearInterval(interval)
+  }, [headlines, transitionInterval, useSvgQuestions, questionSvgs])
 
   return (
     <BasePanel
@@ -219,6 +269,48 @@ export function HeroQuestionsPanel({
                 style={{
                   transition: "opacity 1500ms ease-in-out",
                   filter: "url(#circle-shadow)",
+                }}
+              />
+            )
+          })}
+        </Box>
+      )}
+
+      {/* SVG Questions */}
+      {useSvgQuestions && questionSvgs.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            zIndex: 1, // above circles, below speech bubbles
+          }}
+        >
+          {questionSvgs.map((svg, index) => {
+            // Only render the current SVG
+            if (index !== currentSvgIndex) return null
+
+            const left = `calc(50% + ${svg.xPercent}%)`
+            const top = `calc(50% + ${svg.yPercent}%)`
+
+            return (
+              <Box
+                key={index}
+                component="img"
+                src={svg.src}
+                alt={`Question ${index + 1}`}
+                sx={{
+                  position: "absolute",
+                  left,
+                  top,
+                  width: svg.width,
+                  height: svg.height,
+                  transform: "translate(-50%, -50%)", // Center the SVG at the position
+                  opacity: svgVisible ? 1 : 0,
+                  transition: "opacity 500ms ease-in-out",
+                  filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
                 }}
               />
             )
@@ -370,16 +462,19 @@ export function HeroQuestionsPanel({
                 : "center",
         })}
       >
-        <TransitionHeadline
-          headlines={headlinesArray}
-          transitionInterval={transitionInterval}
-          variant="h1"
-          color={headlineColor}
-          sx={{
-            marginBottom: content ? 3 : 0,
-            textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-          }}
-        />
+        {/* Show TransitionHeadline only if not using SVG questions */}
+        {!useSvgQuestions && (
+          <TransitionHeadline
+            headlines={headlinesArray}
+            transitionInterval={transitionInterval}
+            variant="h1"
+            color={headlineColor}
+            sx={{
+              marginBottom: content ? 3 : 0,
+              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+            }}
+          />
+        )}
 
         {content && (
           <Typography

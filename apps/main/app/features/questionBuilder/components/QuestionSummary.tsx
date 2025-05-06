@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useMemo, ReactNode } from "react"
-import { Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
 import { useTranslation } from "@repo/i18n"
@@ -70,36 +70,36 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
   } = useQuestionBuilderHelpers()
 
   // Calculate font size based on number of selections and exploratory mode
-  const calculatedFontSize = useMemo(() => {
-    // If in exploratory mode, use smaller font
-    if (isExploratoryMode) {
-      return "2.2rem" // Smaller text for exploratory mode
-    }
+  // const calculatedFontSize = useMemo(() => {
+  //   // If in exploratory mode, use smaller font
+  //   if (isExploratoryMode) {
+  //     return "2.2rem" // Smaller text for exploratory mode
+  //   }
 
-    // Count total selections
-    const operationsCount = selectedOperations.length
-    const outcomesCount = Object.values(outcomesBySection).reduce(
-      (count, section) => count + (section ? section.length : 0),
-      0,
-    )
+  //   // Count total selections
+  //   const operationsCount = selectedOperations.length
+  //   const outcomesCount = Object.values(outcomesBySection).reduce(
+  //     (count, section) => count + (section ? section.length : 0),
+  //     0,
+  //   )
 
-    const totalSelections = operationsCount + outcomesCount
+  //   const totalSelections = operationsCount + outcomesCount
 
-    // Default large size
-    if (totalSelections <= 1) return "4.8rem"
+  //   // Default large size
+  //   if (totalSelections <= 1) return "4.8rem"
 
-    // Medium size
-    if (totalSelections <= 3) return "4.2rem"
+  //   // Medium size
+  //   if (totalSelections <= 3) return "4.2rem"
 
-    // Medium-small size
-    if (totalSelections <= 5) return "3.6rem"
+  //   // Medium-small size
+  //   if (totalSelections <= 5) return "3.6rem"
 
-    // Small size
-    if (totalSelections <= 7) return "3.2rem"
+  //   // Small size
+  //   if (totalSelections <= 7) return "3.2rem"
 
-    // Extra small size
-    return "2.8rem"
-  }, [selectedOperations, outcomesBySection, isExploratoryMode])
+  //   // Extra small size
+  //   return "2.8rem"
+  // }, [selectedOperations, outcomesBySection, isExploratoryMode])
 
   // Expensive calculation for the summary text
   const summary = useMemo(() => {
@@ -1335,7 +1335,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
   // Update container styles to be relative to exploratory mode
   return (
-    <div
+    <Box
       style={{
         backgroundColor: "transparent",
         width: "100%",
@@ -1343,6 +1343,10 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         zIndex: 1000,
         padding: 0,
         maxWidth: "none !important",
+        display: "flex",
+      }}
+      sx={{
+        mt: 3,
       }}
     >
       <Typography
@@ -1351,12 +1355,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         sx={(theme) => ({
           mt: theme.spacing(4),
           mb: 0,
-          lineHeight: theme.typography.h2.lineHeight,
+          lineHeight: theme.cards.typography.hero.lineHeight,
           textAlign: "center",
-          fontWeight: 500,
+          fontWeight: 400,
           width: "100%",
           margin: "0 auto",
-          fontSize: calculatedFontSize, // Using the calculated font size
           backgroundColor: "white",
           paddingTop: isExploratoryMode ? "20px" : "20px", // Reduce padding in exploratory mode
           paddingBottom: isExploratoryMode ? "12px" : 0, // Reduce padding in exploratory mode
@@ -1369,7 +1372,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       >
         {summary}
       </Typography>
-    </div>
+    </Box>
   )
 }
 

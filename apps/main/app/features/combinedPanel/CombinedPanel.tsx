@@ -32,6 +32,11 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
 
+// CombinedPanel props interface
+interface CombinedPanelProps {
+  onOpenThemesDrawer?: () => void
+}
+
 // Type for scenario data
 interface ScenarioDataItem {
   id: string
@@ -56,6 +61,7 @@ const operationToScenarioId: Record<string, string> = {
 
 // Available metrics for visualization
 const AVAILABLE_METRICS = [
+  "INFLOW",
   "DELTA_OUTFLOW",
   "EXPORTS",
   "SOD_URBAN",
@@ -66,7 +72,6 @@ const AVAILABLE_METRICS = [
   "SAC_FLOW",
   "STORAGE",
   "TOTAL",
-  "INFLOW",
   "CHANNEL",
   "PUMPING",
   "ELEVATION",
@@ -76,7 +81,7 @@ const AVAILABLE_METRICS = [
 ]
 
 // Content component that uses the context
-const CombinedPanelContent = () => {
+const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const {
@@ -88,6 +93,8 @@ const CombinedPanelContent = () => {
 
   // Track if the scroll button has been clicked or if the user has scrolled manually
   const [hasClickedScroll, setHasClickedScroll] = useState(false)
+  // Track if search has been performed
+  const [hasClickedSearch, setHasClickedSearch] = useState(false)
   // State to store the loaded scenario data for each operation
   const [scenarioDataItems, setScenarioDataItems] = useState<
     ScenarioDataItem[]
@@ -98,7 +105,7 @@ const CombinedPanelContent = () => {
   const [expandedCardIds, setExpandedCardIds] = useState<Set<string>>(new Set())
 
   // Currently selected metric type to display
-  const [selectedMetric, setSelectedMetric] = useState<string>("DELTA_OUTFLOW")
+  const [selectedMetric, setSelectedMetric] = useState<string>("INFLOW")
   // Loading state
   const [isLoading, setIsLoading] = useState(false)
 
@@ -169,6 +176,48 @@ const CombinedPanelContent = () => {
     )
 
     try {
+      // Special case for INFLOW metric - use the s9999_inflows data
+      if (selectedMetric === "INFLOW") {
+        try {
+          const response = await fetch(
+            "/scenario_data/s9999_inflows/_aggregates.json",
+          )
+          if (response.ok) {
+            const rawData = await response.json()
+
+            // Format the data to match the expected structure for decile charts
+            // Using the "all" section which has overall, dry, and wet data
+            const formattedData = {
+              overall: {
+                q10: rawData.all.deciles.overall.q10,
+                q20: rawData.all.deciles.overall.q20,
+                q30: rawData.all.deciles.overall.q30,
+                q40: rawData.all.deciles.overall.q40,
+                q50: rawData.all.deciles.overall.q50,
+                q60: rawData.all.deciles.overall.q60,
+                q70: rawData.all.deciles.overall.q70,
+                q80: rawData.all.deciles.overall.q80,
+                q90: rawData.all.deciles.overall.q90,
+              },
+              // Add more data if needed
+            }
+
+            return {
+              id: operationId,
+              title:
+                operationId === "current-operations"
+                  ? "Current Operations"
+                  : getOperationTitle(operationId),
+              data: JSON.stringify(formattedData, null, 2),
+              metricType: selectedMetric,
+            }
+          }
+        } catch (error) {
+          console.warn("Error loading INFLOW from aggregates:", error)
+          // Continue to try other methods if this fails
+        }
+      }
+
       // Special case for current-operations/baseline
       if (operationId === "current-operations") {
         // Try multiple baseline naming patterns
@@ -377,95 +426,23 @@ const CombinedPanelContent = () => {
       <Box
         ref={stickyHeaderRef}
         sx={{
-          position: "sticky",
+          position: hasClickedSearch ? "sticky" : "relative",
           top: 0,
           zIndex: 1000,
           width: "100%",
           maxWidth: "none !important",
           display: "flex",
           flexDirection: "column",
-          // alignItems: "center",
-          padding: theme.spacing(4),
+          padding: theme.spacing(6),
           paddingTop: `${theme.layout.headerHeight}px`,
           backgroundColor: "#FFFFFF",
-          // boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+          transition: "position 0.3s ease, box-shadow 0.3s ease",
+          boxShadow: hasClickedSearch
+            ? "0 2px 8px rgba(0, 0, 0, 0.08)"
+            : "none",
           overflow: "visible",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "top",
-            width: "100%",
-          }}
-        >
-          {/* Climate checkbox in a small card - only visible after scroll */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              opacity: hasClickedScroll ? 1 : 0,
-              visibility: hasClickedScroll ? "visible" : "hidden",
-              transform: hasClickedScroll
-                ? "translateY(0)"
-                : "translateY(-10px)",
-              transition: "all 0.5s ease",
-              transitionDelay: "0.2s",
-              zIndex: 2500,
-            }}
-          >
-            <Card
-              sx={{
-                marginTop: theme.spacing(2),
-                padding: theme.spacing(2),
-                width: "280px",
-                border: "1px solid rgba(0, 0, 0, 0.12)",
-                borderRadius: `${theme.borderRadius.card}px !important`,
-                color: "black",
-                backgroundColor: theme.palette.common.white,
-                boxShadow: "none",
-                overflow: "hidden",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeClimate}
-                    onChange={() => toggleClimate()}
-                    color="primary"
-                    size="large"
-                    sx={{
-                      marginTop: "0",
-                      color: "black",
-                      "&.Mui-checked": {
-                        color: "black",
-                      },
-                    }}
-                  />
-                }
-                label={
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontWeight: 500,
-                      color: "black",
-                    }}
-                  >
-                    {t("questionBuilder.outcomesSelector.includeClimate")}
-                  </Typography>
-                }
-                sx={{
-                  margin: 0,
-                  alignItems: "flex-start",
-                  "& .MuiCheckbox-root": {
-                    paddingTop: "4px",
-                  },
-                }}
-              />
-            </Card>
-          </Box>
-        </Box>
         <Box
           sx={{
             width: "100%",
@@ -475,60 +452,132 @@ const CombinedPanelContent = () => {
           }}
         >
           <QuestionSummary wasScrolled={hasClickedScroll} />
-        </Box>
-
-        {/* Search button */}
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "flex-end",
-            opacity: hasClickedScroll ? 1 : 0,
-            visibility: hasClickedScroll ? "visible" : "hidden",
-            transform: hasClickedScroll ? "translateY(0)" : "translateY(-10px)",
-            transition: "all 0.5s ease",
-            transitionDelay: "0.2s",
-            zIndex: 2500,
-          }}
-        >
-          <Button
-            variant="contained"
-            color="primary"
-            disableElevation
-            onClick={() => {
-              // Enter exploratory mode - shrink the question summary
-              setExploratoryMode(true)
-
-              // Fetch the scenario data for all selected operations
-              fetchAllScenarioData()
-
-              // Scroll to scenario results
-              const element = document.getElementById("scenario-results")
-              if (element) {
-                const headerOffset = 100
-                const elementPosition = element.getBoundingClientRect().top
-                const offsetPosition =
-                  elementPosition + window.scrollY - headerOffset
-                window.scrollTo({
-                  top: offsetPosition,
-                  behavior: "smooth",
-                })
-              }
-            }}
-            startIcon={<SearchIcon />}
+          <Box
             sx={{
-              borderRadius: "999px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              padding: theme.spacing(1, 2),
-              bgcolor: "black",
-              color: "white",
-              "&:hover": {
-                bgcolor: "#333",
-              },
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              width: "100%",
+              mt: 2,
+              pr: 10,
             }}
           >
-            {t("scenarioResults.search")}
-          </Button>
+            {/* Climate checkbox and search button in same row, both right-aligned */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 2,
+                mt: 2,
+                opacity: hasClickedScroll ? 1 : 0,
+                visibility: hasClickedScroll ? "visible" : "hidden",
+                transform: hasClickedScroll
+                  ? "translateY(0)"
+                  : "translateY(-10px)",
+                transition: "all 0.5s ease",
+                transitionDelay: "0.2s",
+                zIndex: 2500,
+              }}
+            >
+              {/* Climate checkbox */}
+              <Card
+                sx={{
+                  padding: theme.spacing(2),
+                  width: "280px",
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                  borderRadius: `${theme.borderRadius.card}px !important`,
+                  color: "black",
+                  backgroundColor: theme.palette.common.white,
+                  boxShadow: "none",
+                  overflow: "hidden",
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={includeClimate}
+                      onChange={() => toggleClimate()}
+                      color="primary"
+                      size="large"
+                      sx={{
+                        marginTop: "0",
+                        color: "black",
+                        "&.Mui-checked": {
+                          color: "black",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 500,
+                        color: "black",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {t("questionBuilder.outcomesSelector.includeClimate")}
+                    </Typography>
+                  }
+                  sx={{
+                    margin: 0,
+                    alignItems: "flex-start",
+                    "& .MuiCheckbox-root": {
+                      paddingTop: "4px",
+                    },
+                  }}
+                />
+              </Card>
+
+              {/* Search button */}
+              <Button
+                variant="contained"
+                color="primary"
+                disableElevation
+                onClick={() => {
+                  // Mark search as clicked to make header sticky
+                  setHasClickedSearch(true)
+
+                  // Enter exploratory mode - shrink the question summary
+                  setExploratoryMode(true)
+
+                  // Fetch the scenario data for all selected operations
+                  fetchAllScenarioData()
+
+                  // Scroll to scenario results
+                  const element = document.getElementById("scenario-results")
+                  if (element) {
+                    const headerOffset = 100
+                    const elementPosition = element.getBoundingClientRect().top
+                    const offsetPosition =
+                      elementPosition + window.scrollY - headerOffset
+                    window.scrollTo({
+                      top: offsetPosition,
+                      behavior: "smooth",
+                    })
+                  }
+                }}
+                startIcon={<SearchIcon fontSize="large" />}
+                sx={{
+                  borderRadius: "999px",
+                  boxShadow: "none",
+                  padding: theme.spacing(1.5, 3),
+                  bgcolor: "black",
+                  color: "white",
+                  fontSize: "1.1rem",
+                  fontWeight: 600,
+                  minHeight: "50px",
+                  "&:hover": {
+                    bgcolor: "#333",
+                  },
+                }}
+              >
+                {t("scenarioResults.search")}
+              </Button>
+            </Box>
+          </Box>
         </Box>
       </Box>
 
@@ -545,11 +594,12 @@ const CombinedPanelContent = () => {
         id="question-builder-content"
         fullHeight={false}
         background="light"
-        paddingVariant="narrow"
+        paddingVariant="wide"
         includeHeaderSpacing={false}
         sx={{
           width: "100%",
           position: "relative",
+          pt: 0,
         }}
       >
         {/* Anchor point for scrolling (placed at the top) */}
@@ -570,7 +620,11 @@ const CombinedPanelContent = () => {
         >
           {/* Column 1: Operations or outcome text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? <OutcomesSelector /> : <OperationsSelector />}
+            {swapped ? (
+              <OutcomesSelector />
+            ) : (
+              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
+            )}
           </Grid>
 
           {/* Column 2: Action verb & switch - aligned to top */}
@@ -624,7 +678,11 @@ const CombinedPanelContent = () => {
 
           {/* Column 3: Outcomes or operations text */}
           <Grid sx={{ flex: 1, alignSelf: "flex-start" }}>
-            {swapped ? <OperationsSelector /> : <OutcomesSelector />}
+            {swapped ? (
+              <OperationsSelector onOpenThemesDrawer={onOpenThemesDrawer} />
+            ) : (
+              <OutcomesSelector />
+            )}
           </Grid>
 
           {/* Column 4: "with" label */}
@@ -657,7 +715,9 @@ const CombinedPanelContent = () => {
 
         {/* Scenario Results Section */}
         <Box
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+          }}
           data-section="scenario-results"
           id="scenario-results"
         >
@@ -821,10 +881,10 @@ const CombinedPanelContent = () => {
 // For debugging in React DevTools
 CombinedPanelContent.displayName = "CombinedPanelContent"
 
-export function CombinedPanel() {
+export function CombinedPanel({ onOpenThemesDrawer }: CombinedPanelProps) {
   return (
     <QuestionBuilderProvider>
-      <CombinedPanelContent />
+      <CombinedPanelContent onOpenThemesDrawer={onOpenThemesDrawer} />
     </QuestionBuilderProvider>
   )
 }

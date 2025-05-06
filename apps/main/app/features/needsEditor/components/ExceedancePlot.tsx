@@ -16,6 +16,7 @@ const ExceedancePlot = ({
   height = 300,
 }: ExceedancePlotProps) => {
   const svgRef = useRef<SVGSVGElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!svgRef.current) return
@@ -61,29 +62,40 @@ const ExceedancePlot = ({
       thresholds.unshift({ cutoff: 0, value: thresholds[0].value })
     }
 
+    // Get dimensions from container (for responsive)
+    let chartWidth = width
+    const chartHeight = height
+
     const MAX = d3.max(thresholds, (d) => d.value) * 1.5 || 0
 
-    const MARGIN = { top: 30, right: 50, bottom: 50, left: 60 }
+    if (containerRef.current) {
+      const containerWidth = containerRef.current.clientWidth
+      chartWidth = width > containerWidth ? containerWidth : width
+    }
+
+    // const MARGIN = { top: 30, right: 50, bottom: 50, left: 60 }
+    const MARGIN = { top: 10, right: 10, bottom: 50, left: 60 }
     const svg = d3
       .select(svgRef.current)
-      .attr("width", width)
-      .attr("height", height)
+      .attr("width", chartWidth)
+      .attr("height", chartHeight)
       .append("g")
+    console.log("SIZE", chartWidth, chartHeight)
 
     const xScale = d3
       .scaleLinear()
       .domain([0, 1])
-      .range([MARGIN.left, width - MARGIN.right])
+      .range([MARGIN.left, chartWidth - MARGIN.right])
 
     const yScale = d3
       .scaleLinear()
       .domain([0, MAX])
-      .range([height - MARGIN.bottom, MARGIN.top])
+      .range([chartHeight - MARGIN.bottom, MARGIN.top])
     svg
       .append("text")
       .attr("text-anchor", "middle")
-      .attr("x", (width - MARGIN.left - MARGIN.right) / 2 + MARGIN.left)
-      .attr("y", height - 10)
+      .attr("x", (chartWidth - MARGIN.left - MARGIN.right) / 2 + MARGIN.left)
+      .attr("y", chartHeight - 10)
       .attr("font-size", "18px")
       .text("Probability of Exceedance (%)")
 
@@ -93,13 +105,13 @@ const ExceedancePlot = ({
       .attr("text-anchor", "middle")
       .attr("transform", "rotate(-90)")
       .attr("y", MARGIN.left - 40)
-      .attr("x", -(height - MARGIN.top - MARGIN.bottom) / 2 - MARGIN.top)
+      .attr("x", -(chartHeight - MARGIN.top - MARGIN.bottom) / 2 - MARGIN.top)
       .attr("font-size", "18px")
       .text("TAF")
 
     svg
       .append("g")
-      .attr("transform", `translate(0, ${height - MARGIN.bottom})`)
+      .attr("transform", `translate(0, ${chartHeight - MARGIN.bottom})`)
       .call(d3.axisBottom(xScale).tickFormat((d) => d * 100))
     svg
       .append("g")
@@ -135,14 +147,6 @@ const ExceedancePlot = ({
       .attr("cy", (d) => yScale(d.value))
       .attr("r", 4)
       .attr("fill", "#444444")
-    // .call(
-    //   d3.drag().on("drag", function (event, d) {
-    //     data[0].value = data[1].value;
-    //     d.value = Math.round(yScale.invert(event.y) / 20) * 20;
-    //     sanitizeConstraints();
-    //     updateCircles();
-    //   })
-    // );
 
     svg
       .selectAll("vertical-lines")
@@ -158,34 +162,26 @@ const ExceedancePlot = ({
       .attr("stroke", "#878787")
       .style("stroke-dasharray", "5,10")
       .attr("stroke-width", 0.5)
-
-    // const updateCircles = () => {
-    //   // data[0].value = data[1].value;
-    //   svg
-    //     .selectAll("circle")
-    //     .attr("cx", (d) => xScale(d.cutoff))
-    //     .attr("cy", (d) => yScale(d.value))
-    //   svg.select("#exceedance-path").attr(
-    //     "d",
-    //     d3
-    //       .line<{ cutoff: number; value: number }>()
-    //       .x((d) => xScale(d.cutoff))
-    //       .y((d) => yScale(d.value)),
-    //   )
-    // }
   }, [currentWaterNeed, width, height])
 
   return (
-    <svg
-      ref={svgRef}
+    <div
+      ref={containerRef}
       style={{
-        width: width,
-        height: height,
-        aspectRatio: "auto",
-        display: "block",
-        overflow: "visible",
+        width: "100%",
+        height: "fit-content",
+        position: "relative",
       }}
-    />
+    >
+      <svg
+        ref={svgRef}
+        style={{
+          width: "100%",
+          display: "block",
+          overflow: "visible",
+        }}
+      />
+    </div>
   )
 }
 
