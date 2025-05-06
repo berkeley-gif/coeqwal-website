@@ -554,8 +554,8 @@ const BucketScene = ({
           <DialogContent>
             <Typography variant="h6">
               {selectedBall?.isSelected
-                ? `Remove need -- ${selectedBall?.name} -- from my selection`
-                : `Add need --  ${selectedBall?.name} -- to my selection`}
+                ? `Remove need - ${selectedBall?.name} - from my selection`
+                : `Add need -  ${selectedBall?.name} - to my selection`}
             </Typography>
           </DialogContent>
           <DialogActions>

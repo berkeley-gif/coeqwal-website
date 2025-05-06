@@ -17,6 +17,7 @@ import AddedWaterNeeds from "./AddedNeedsList"
 import WaterNeedEditor from "./WaterNeedEditor"
 import BucketScene from "./NeedsBuckets"
 import ActionPanel from "./ActionPanel"
+import TutorialSlider from "./TutorialSlider"
 import { WaterNeedSetting } from "./types"
 
 import { WATER_NEED_TYPES, BLANK_WATER_NEED } from "./constants"
@@ -27,6 +28,7 @@ const NeedsEditorPanel: React.FC = () => {
   const theme = useTheme()
   const [expanded, setExpanded] = useState("")
   const [needsList, setNeedsList] = useState(waterNeedSettings)
+  const [showTutorial, setShowTutorial] = useState(true)
   const [showBucketScene, setShowBucketScene] = useState(false)
   const [showActionPanel, setShowActionPanel] = useState(false)
 
@@ -82,8 +84,28 @@ const NeedsEditorPanel: React.FC = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        position: "relative", // Added for overlay positioning
       }}
     >
+      {showTutorial && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0)", // Semi-transparent dark overlay
+            backdropFilter: "blur(2px)", // Bokeh effect
+            zIndex: 10, // Ensure it overlays other content
+          }}
+        >
+          <TutorialSlider onFinish={() => setShowTutorial(false)} />
+        </Box>
+      )}
       {!showBucketScene && !showActionPanel && (
         <Box
           sx={{
@@ -121,7 +143,6 @@ const NeedsEditorPanel: React.FC = () => {
               {WATER_NEED_TYPES.map((item) => (
                 <Accordion
                   key={item.label}
-                  expanded={expanded == item.label}
                   onChange={handleAccordionChange(item.label)}
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>

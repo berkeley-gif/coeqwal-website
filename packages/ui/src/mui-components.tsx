@@ -17,6 +17,7 @@ export {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  MobileStepper,
 
   // Typography and content
   Typography,
@@ -82,6 +83,7 @@ import AddIcon from "@mui/icons-material/Add"
 import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import EditIcon from "@mui/icons-material/Edit"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
@@ -112,6 +114,7 @@ export {
   CheckIcon,
   CloseIcon,
   ArrowRightIcon,
+  ArrowLeftIcon,
   FiberManualRecordIcon,
   EditIcon,
 }
