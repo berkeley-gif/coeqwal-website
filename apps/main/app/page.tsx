@@ -239,8 +239,8 @@ export default function Home() {
           <Header
             activeSection={activeSection}
             onSectionClick={handleSectionClick}
-            showSecondaryNav={true}
-            secondaryNavItems={secondaryNavItems}
+            showSecondaryNav={false}
+            // secondaryNavItems={secondaryNavItems}
           />
         </Box>
 
