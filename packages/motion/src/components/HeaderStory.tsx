@@ -21,6 +21,7 @@ type HeaderTranslations = {
   title: string
   buttons: {
     home: string
+    data: string
     about: string
   }
 }
@@ -40,6 +41,7 @@ const translations: TranslationsMap = {
     title: "COEQWAL",
     buttons: {
       home: "Home",
+      data: "Raw Data",
       about: "About COEQWAL",
     },
   },
@@ -47,6 +49,7 @@ const translations: TranslationsMap = {
     title: "COEQWAL",
     buttons: {
       home: "Inicio",
+      data: "Datos sin procesar",
       about: "Sobre COEQWAL",
     },
   },
@@ -138,6 +141,14 @@ export function HeaderStory({
             }}
           >
             {componentText.buttons.home}
+          </Button>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              ...buttonStyle,
+            }}
+          >
+            {componentText.buttons.data}
           </Button>
           <Button
             variant={buttonVariant}
