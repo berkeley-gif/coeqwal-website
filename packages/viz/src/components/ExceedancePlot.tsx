@@ -39,7 +39,7 @@ const ExceedancePlot = ({
       return
     }
 
-    // # Add the first point of the curve at 0% exceedance
+    // Add the first point of the curve at 0% exceedance
     thresholds.sort((a, b) => a.cutoff - b.cutoff)
     if (thresholds[0]) {
       thresholds.unshift({ cutoff: 0, value: thresholds[0].value })
@@ -104,10 +104,6 @@ const ExceedancePlot = ({
       .append("g")
       .attr("transform", `translate(${MARGIN.left}, 0)`)
       .call(d3.axisLeft(yScale))
-
-    // data.unshift({ cutoff: 0, value: data[0].value });
-    // console.log(data);
-    // let data = JSON.parse(JSON.stringify(constraints.value));
 
     svg
       .selectAll("exceedance-path")
