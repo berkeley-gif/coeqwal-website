@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useRef, useCallback, useState } from "react"
+import React, { useEffect, useRef, useCallback } from "react"
 import { Box, Typography, List, ListItem, Chip, useTheme } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
@@ -24,12 +24,10 @@ export function ThemesContent({
   const themeRefs = useRef<Record<string, HTMLDivElement | null>>({})
   // Main content container ref
   const contentRef = useRef<HTMLDivElement | null>(null)
-  // Track if this is the first mount
-  const initialMountRef = useRef<boolean>(true)
-  // Track previous selectedOperation to detect actual changes
-  const [prevSelectedOperation, setPrevSelectedOperation] = useState<
-    string | undefined
-  >(undefined)
+  // Track the previous operation to detect real changes
+  const prevOperationRef = useRef<string | undefined>(undefined)
+  // Track first render to avoid scrolling when initially opened
+  const isFirstRenderRef = useRef(true)
 
   const [themes] = React.useState([
     {
@@ -81,33 +79,37 @@ export function ThemesContent({
     themeRefs.current[id] = el
   }, [])
 
-  // Effect to scroll to the selected theme when the drawer opens
+  // Scroll to the selected operation when it changes
   useEffect(() => {
-    // If it's the initial mount, we don't want to scroll - this is when opening from the tab rail
-    if (initialMountRef.current) {
-      initialMountRef.current = false
-      setPrevSelectedOperation(selectedOperation)
+    // On first render, just update the ref without scrolling
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      prevOperationRef.current = selectedOperation
       return
     }
 
-    // Only scroll if selectedOperation has actually changed - this happens from Tell Me More button clicks
-    if (selectedOperation !== prevSelectedOperation) {
-      setPrevSelectedOperation(selectedOperation)
+    // Only scroll if there's a selected operation and it has changed
+    // This prevents unwanted scrolling when the panel is simply opened
+    if (selectedOperation && selectedOperation !== prevOperationRef.current) {
+      // Update the previous operation reference
+      prevOperationRef.current = selectedOperation
 
-      if (selectedOperation && themeRefs.current[selectedOperation]) {
-        // Get the element to scroll to
-        const element = themeRefs.current[selectedOperation]
-
-        // Add a small delay to ensure the drawer is fully open
+      const element = themeRefs.current[selectedOperation]
+      if (element) {
         setTimeout(() => {
-          if (element) {
-            // Scroll the element into view with a smooth animation
-            element.scrollIntoView({ behavior: "smooth", block: "start" })
-          }
+          element.scrollIntoView({ behavior: "smooth", block: "start" })
         }, 300)
       }
     }
   }, [selectedOperation])
+
+  // Reset tracking on unmount
+  useEffect(() => {
+    return () => {
+      isFirstRenderRef.current = true
+      prevOperationRef.current = undefined
+    }
+  }, [])
 
   return (
     <ContentWrapper title="Scenario Themes" onClose={onClose}>

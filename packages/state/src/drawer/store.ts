@@ -12,6 +12,10 @@ export interface DrawerStoreState extends DrawerState {
   setActiveTab: (tab: TabKey | null) => void
   setDrawerWidth: (width: number) => void
   setDrawerContent: (content: Record<string, unknown>) => void
+  // Convenience methods for specific panels
+  openLearnPanel: () => void
+  openCurrentOpsPanel: () => void
+  openThemesPanel: (selectedOperation?: string) => void
 }
 
 export const useDrawerStore = create<DrawerStoreState>()(
@@ -33,6 +37,8 @@ export const useDrawerStore = create<DrawerStoreState>()(
       set((state) => {
         state.isOpen = false
         state.activeTab = null
+        // Clear any content when closing
+        state.content = undefined
       }),
 
     setActiveTab: (tab) =>
@@ -49,6 +55,28 @@ export const useDrawerStore = create<DrawerStoreState>()(
     setDrawerContent: (content) =>
       set((state) => {
         state.content = content
+      }),
+
+    // Convenience methods for specific buttons
+    openLearnPanel: () =>
+      set((state) => {
+        state.isOpen = true
+        state.activeTab = "learn"
+        state.content = { selectedSection: undefined }
+      }),
+
+    openCurrentOpsPanel: () =>
+      set((state) => {
+        state.isOpen = true
+        state.activeTab = "currentOps"
+        state.content = { selectedSection: undefined }
+      }),
+
+    openThemesPanel: (selectedOperation) =>
+      set((state) => {
+        state.isOpen = true
+        state.activeTab = "themes"
+        state.content = { selectedOperation }
       }),
   })),
 )
