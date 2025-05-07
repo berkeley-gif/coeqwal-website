@@ -27,6 +27,7 @@ import type { CSSProperties } from "react"
     - Border
     - Background
     - Border radius
+    - DrawerContent styling
     
  4. TypeScript customizations
     - Custom palette extensions
@@ -161,6 +162,77 @@ const hoverParagraphDarkenedMixin = {
   },
   "&:active": {
     backgroundColor: "rgba(54, 69, 99, 0.8)",
+  },
+} as const
+
+// Drawer content styling mixins
+const drawerContentMixins = {
+  contentWrapper: {
+    p: 2,
+    width: "100%",
+    height: "100%",
+    overflow: "auto",
+    color: "text.primary",
+  },
+  headerBox: {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    mb: 2,
+  },
+  closeButton: {
+    color: "text.primary",
+  },
+  contentText: {
+    lineHeight: 1.4,
+    color: "text.primary",
+    mb: 3,
+  },
+  infoBox: {
+    mt: 2,
+    p: 2,
+    bgcolor: "rgba(0, 0, 0, 0.03)",
+    borderRadius: 1,
+  },
+  headingText: {
+    fontWeight: "bold",
+    color: "primary.dark",
+  },
+  itemBox: {
+    mb: 1.5,
+    p: 1.5,
+    borderRadius: 1,
+    bgcolor: "rgba(0, 0, 0, 0.02)",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      bgcolor: "rgba(0, 0, 0, 0.05)",
+      transform: "translateX(4px)",
+    },
+  },
+  selectedItemBox: {
+    bgcolor: "rgba(0, 0, 0, 0.08)",
+    boxShadow: "0 0 0 2px rgba(0, 0, 0, 0.1)",
+  },
+  chip: {
+    color: "text.primary",
+    borderColor: "rgba(0, 0, 0, 0.23)",
+    mr: 0.5,
+    mb: 0.5,
+  },
+  icon: {
+    mr: 1.5,
+    mt: 0.5,
+    color: "primary.dark",
+  },
+  secondaryText: {
+    lineHeight: 1.4,
+    color: "text.primary",
+  },
+  bodyText: {
+    mt: 1,
+    lineHeight: 1.4,
+    color: "text.primary",
   },
 } as const
 
@@ -700,6 +772,7 @@ const theme = createTheme({
     ...baseTheme.mixins,
     hoverParagraph: hoverParagraphMixin,
     hoverParagraphDarkened: hoverParagraphDarkenedMixin,
+    drawerContent: drawerContentMixins,
   },
 })
 
@@ -944,6 +1017,7 @@ declare module "@mui/material/styles" {
   interface Mixins {
     hoverParagraph: CSSProperties
     hoverParagraphDarkened: CSSProperties
+    drawerContent: typeof drawerContentMixins
   }
 
   // Add custom typography variant

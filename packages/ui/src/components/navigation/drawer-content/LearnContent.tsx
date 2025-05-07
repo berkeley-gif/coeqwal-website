@@ -48,16 +48,8 @@ export function LearnContent({ onClose }: LearnContentProps) {
   ]
 
   return (
-    <ContentWrapper
-      title="Learn About California Water"
-      onClose={onClose}
-      bgColor="rgb(128, 175, 196)" /* #80AFC4 */
-    >
-      <Typography
-        variant="body1"
-        color="text.secondary"
-        sx={{ mb: 3, lineHeight: 1.4 }}
-      >
+    <ContentWrapper title="Learn About California Water" onClose={onClose}>
+      <Typography variant="body1" sx={theme.mixins.drawerContent.contentText}>
         Explore these topics to learn more about California&apos;s water system
         and management.
       </Typography>
@@ -67,28 +59,10 @@ export function LearnContent({ onClose }: LearnContentProps) {
           <ListItem
             key={index}
             component="div"
-            sx={{
-              mb: 1.5,
-              p: 1.5,
-              borderRadius: 1,
-              bgcolor: "rgba(0, 0, 0, 0.02)",
-              cursor: "pointer",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                bgcolor: "rgba(0, 0, 0, 0.08)",
-                transform: "translateX(4px)",
-              },
-            }}
+            sx={theme.mixins.drawerContent.itemBox}
           >
             <Box sx={{ display: "flex", alignItems: "flex-start" }}>
-              <BookIcon
-                sx={{
-                  mr: 1.5,
-                  mt: 0.5,
-                  color: theme.palette.primary.main,
-                  opacity: 0.7,
-                }}
-              />
+              <BookIcon sx={theme.mixins.drawerContent.icon} />
               <ListItemText
                 primary={
                   <Typography
@@ -101,7 +75,7 @@ export function LearnContent({ onClose }: LearnContentProps) {
                 secondary={topic.description}
                 secondaryTypographyProps={{
                   variant: "body1",
-                  sx: { lineHeight: 1.4 },
+                  sx: theme.mixins.drawerContent.secondaryText,
                 }}
               />
             </Box>
@@ -109,21 +83,14 @@ export function LearnContent({ onClose }: LearnContentProps) {
         ))}
       </List>
 
-      <Box
-        sx={{ mt: 3, p: 2, bgcolor: "rgba(0, 0, 0, 0.03)", borderRadius: 1 }}
-      >
+      <Box sx={theme.mixins.drawerContent.infoBox}>
         <Typography
           variant="subtitle2"
-          color="primary"
-          sx={{ fontWeight: "bold" }}
+          sx={theme.mixins.drawerContent.headingText}
         >
           Why learn about water?
         </Typography>
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ mt: 1, lineHeight: 1.4 }}
-        >
+        <Typography variant="body1" sx={theme.mixins.drawerContent.bodyText}>
           Understanding California&apos;s water system helps you make more
           informed choices when exploring water management scenarios.
         </Typography>

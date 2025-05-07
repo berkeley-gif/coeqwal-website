@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, IconButton, Typography } from "@mui/material"
+import { Box, IconButton, useTheme } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 
 export interface ContentWrapperProps {
@@ -11,7 +11,9 @@ export interface ContentWrapperProps {
   children: React.ReactNode
   /** Function called when the close button is clicked */
   onClose: () => void
-  /** Optional background color for the wrapper */
+  /**
+   * @deprecated No longer used since we now handle background color in the parent component
+   */
   bgColor?: string
 }
 
@@ -23,33 +25,21 @@ export function ContentWrapper({
   title,
   children,
   onClose,
-  bgColor,
 }: ContentWrapperProps) {
+  const theme = useTheme()
+
   return (
     <Box
       className="drawer-content-wrapper"
-      sx={{
-        p: 2,
-        width: "100%",
-        height: "100%",
-        overflow: "auto",
-        bgcolor: bgColor,
-      }}
+      sx={theme.mixins.drawerContent.contentWrapper}
     >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {title}
-        </Typography>
-        <IconButton onClick={onClose} size="small" aria-label="close">
+      <Box sx={theme.mixins.drawerContent.headerBox}>
+        <IconButton
+          onClick={onClose}
+          size="small"
+          aria-label="close"
+          sx={theme.mixins.drawerContent.closeButton}
+        >
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>

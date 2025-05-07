@@ -119,6 +119,13 @@ export interface MultiDrawerProps {
   drawerContent?: Record<string, unknown>
 }
 
+// Map of tab keys to display titles
+const tabTitles: Record<TabKey, string> = {
+  learn: "LEARN ABOUT CALIFORNIA WATER",
+  currentOps: "CURRENT OPERATIONS",
+  themes: "SCENARIO THEMES",
+}
+
 /**
  * MultiDrawer component with three tabs
  *
@@ -255,7 +262,7 @@ export function MultiDrawer({
             zIndex: overlay ? 1300 : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
-            backgroundColor: drawerBg,
+            backgroundColor: theme.palette.common.white, // Set default background to white
           },
         }}
       >
@@ -269,12 +276,34 @@ export function MultiDrawer({
             }}
           >
             {activeTab === "learn" && (
-              <LearnContent
-                onClose={close}
-                selectedSection={
-                  drawerContent.selectedSection as string | undefined
-                }
-              />
+              <>
+                <Box
+                  sx={{
+                    backgroundColor: tabBg.learn,
+                    color: theme.palette.common.white,
+                    padding: 2,
+                  }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                    {tabTitles.learn}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    backgroundColor: theme.palette.common.white,
+                    height: "calc(100% - 56px)", // Adjust based on header height
+                    overflow: "auto",
+                  }}
+                >
+                  <LearnContent
+                    onClose={close}
+                    selectedSection={
+                      drawerContent.selectedSection as string | undefined
+                    }
+                  />
+                </Box>
+              </>
             )}
           </Box>
         </Fade>
@@ -288,12 +317,34 @@ export function MultiDrawer({
             }}
           >
             {activeTab === "currentOps" && (
-              <CurrentOpsContent
-                onClose={close}
-                selectedSection={
-                  drawerContent.selectedSection as string | undefined
-                }
-              />
+              <>
+                <Box
+                  sx={{
+                    backgroundColor: tabBg.currentOps,
+                    color: theme.palette.common.white,
+                    padding: 2,
+                  }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                    {tabTitles.currentOps}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    backgroundColor: theme.palette.common.white,
+                    height: "calc(100% - 56px)", // Adjust based on header height
+                    overflow: "auto",
+                  }}
+                >
+                  <CurrentOpsContent
+                    onClose={close}
+                    selectedSection={
+                      drawerContent.selectedSection as string | undefined
+                    }
+                  />
+                </Box>
+              </>
             )}
           </Box>
         </Fade>
@@ -307,12 +358,34 @@ export function MultiDrawer({
             }}
           >
             {activeTab === "themes" && (
-              <ThemesContent
-                onClose={close}
-                selectedOperation={
-                  drawerContent.selectedOperation as string | undefined
-                }
-              />
+              <>
+                <Box
+                  sx={{
+                    backgroundColor: tabBg.themes,
+                    color: theme.palette.common.white,
+                    padding: 2,
+                  }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                    {tabTitles.themes}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    backgroundColor: theme.palette.common.white,
+                    height: "calc(100% - 56px)", // Adjust based on header height
+                    overflow: "auto",
+                  }}
+                >
+                  <ThemesContent
+                    onClose={close}
+                    selectedOperation={
+                      drawerContent.selectedOperation as string | undefined
+                    }
+                  />
+                </Box>
+              </>
             )}
           </Box>
         </Fade>

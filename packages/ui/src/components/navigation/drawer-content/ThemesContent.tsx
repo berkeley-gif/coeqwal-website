@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useEffect, useRef, useCallback } from "react"
-import { Box, Typography, List, ListItem, Chip } from "@mui/material"
+import React, { useEffect, useRef, useCallback, useState } from "react"
+import { Box, Typography, List, ListItem, Chip, useTheme } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
 export interface ThemesContentProps {
@@ -18,10 +18,18 @@ export function ThemesContent({
   onClose,
   selectedOperation,
 }: ThemesContentProps) {
+  const theme = useTheme()
+
   // Create a map to store refs for each theme item
   const themeRefs = useRef<Record<string, HTMLDivElement | null>>({})
   // Main content container ref
   const contentRef = useRef<HTMLDivElement | null>(null)
+  // Track if this is the first mount
+  const initialMountRef = useRef<boolean>(true)
+  // Track previous selectedOperation to detect actual changes
+  const [prevSelectedOperation, setPrevSelectedOperation] = useState<
+    string | undefined
+  >(undefined)
 
   const [themes] = React.useState([
     {
@@ -75,44 +83,35 @@ export function ThemesContent({
 
   // Effect to scroll to the selected theme when the drawer opens
   useEffect(() => {
-    if (selectedOperation && themeRefs.current[selectedOperation]) {
-      // Get the element to scroll to
-      const element = themeRefs.current[selectedOperation]
+    // If it's the initial mount, we don't want to scroll - this is when opening from the tab rail
+    if (initialMountRef.current) {
+      initialMountRef.current = false
+      setPrevSelectedOperation(selectedOperation)
+      return
+    }
 
-      // Add a small delay to ensure the drawer is fully open
-      setTimeout(() => {
-        if (element) {
-          // Scroll the element into view with a smooth animation
-          element.scrollIntoView({ behavior: "smooth", block: "start" })
-        }
-      }, 300)
-    } else {
-      // If no selectedOperation, scroll to top
-      setTimeout(() => {
-        // Find the parent scrollable container
-        const element = document.querySelector(".drawer-content-wrapper")
-        if (element && element instanceof HTMLElement) {
-          // Use smooth scrolling instead of instant jump
-          element.scrollTo({
-            top: 0,
-            behavior: "smooth",
-          })
-        }
-      }, 300)
+    // Only scroll if selectedOperation has actually changed - this happens from Tell Me More button clicks
+    if (selectedOperation !== prevSelectedOperation) {
+      setPrevSelectedOperation(selectedOperation)
+
+      if (selectedOperation && themeRefs.current[selectedOperation]) {
+        // Get the element to scroll to
+        const element = themeRefs.current[selectedOperation]
+
+        // Add a small delay to ensure the drawer is fully open
+        setTimeout(() => {
+          if (element) {
+            // Scroll the element into view with a smooth animation
+            element.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        }, 300)
+      }
     }
   }, [selectedOperation])
 
   return (
-    <ContentWrapper
-      title="Scenario Themes"
-      onClose={onClose}
-      bgColor="rgb(87, 137, 154)" /* #57899A */
-    >
-      <Typography
-        variant="body1"
-        color="text.secondary"
-        sx={{ mb: 3, lineHeight: 1.4 }}
-      >
+    <ContentWrapper title="Scenario Themes" onClose={onClose}>
+      <Typography variant="body1" sx={theme.mixins.drawerContent.contentText}>
         We have organized the alternative scenarios we are running on CalSim
         into themes. In a technical sense, themes are clusters of multiple water
         operation settings that can be applied and varied.
@@ -127,21 +126,9 @@ export function ThemesContent({
               ref={(el) => setThemeRef(el as HTMLDivElement, item.id)}
               id={`theme-${item.id}`}
               sx={{
-                mb: 1.5,
-                p: 1.5,
-                borderRadius: 1,
-                bgcolor:
-                  item.id === selectedOperation
-                    ? "rgba(0, 0, 0, 0.08)"
-                    : "rgba(0, 0, 0, 0.02)",
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  bgcolor: "rgba(0, 0, 0, 0.08)",
-                },
-                // Highlight the selected theme
-                ...(item.id === selectedOperation && {
-                  boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.4)",
-                }),
+                ...(theme.mixins.drawerContent.itemBox as any),
+                ...(item.id === selectedOperation &&
+                  theme.mixins.drawerContent.selectedItemBox),
               }}
             >
               <Box sx={{ flexGrow: 1 }}>
@@ -155,8 +142,7 @@ export function ThemesContent({
                 <Typography
                   variant="body1"
                   component="div"
-                  color="text.secondary"
-                  sx={{ mb: 1, lineHeight: 1.4 }}
+                  sx={{ mb: 1, ...theme.mixins.drawerContent.secondaryText }}
                 >
                   {item.description}
                 </Typography>
@@ -167,7 +153,7 @@ export function ThemesContent({
                       label={tag}
                       size="small"
                       variant="outlined"
-                      sx={{ color: "white", mr: 0.5, mb: 0.5 }}
+                      sx={theme.mixins.drawerContent.chip}
                     />
                   ))}
                 </Box>
