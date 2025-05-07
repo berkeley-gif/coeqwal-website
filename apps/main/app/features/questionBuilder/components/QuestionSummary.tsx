@@ -1278,7 +1278,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         } else {
           return (
             <>
-              For these {outcomeContent}
+              For different{outcomeContent}
               {climateElement}, which {operationsPart}
               could we try?
             </>
