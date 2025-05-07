@@ -78,8 +78,8 @@
     "defaultTerms": {
       "waterAvailability": "outcomes",
       "outcomes": "outcomes",
-      "decisions": "water operations",
-      "decisions_sub": "water operations"
+      "decisions": "new scenarios",
+      "decisions_sub": "new scenarios"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
@@ -117,7 +117,7 @@
       "title": "{{waterAvailability}}",
       "swappedTitle": "To change {{waterAvailability}}",
       "includeClimate": "Include future climate conditions",
-      "chooseLocation": "Choose location on map",
+      "chooseLocation": "My community",
       "mapPlaceholder": "Map Placeholder"
     },
     "climateSelector": {
