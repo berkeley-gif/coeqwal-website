@@ -19,11 +19,12 @@ export interface DrawerStoreState extends DrawerState {
 }
 
 export const useDrawerStore = create<DrawerStoreState>()(
-  immer<DrawerStoreState>((set) => ({
+  immer<DrawerStoreState>((set, get) => ({
     // Initial state
     isOpen: false,
     activeTab: null,
     drawerWidth: 360, // Default width
+    content: {},
 
     // Actions
     openDrawer: (tab, width = 360) =>
@@ -38,11 +39,16 @@ export const useDrawerStore = create<DrawerStoreState>()(
         state.isOpen = false
         state.activeTab = null
         // Clear any content when closing
-        state.content = undefined
+        state.content = {}
       }),
 
     setActiveTab: (tab) =>
       set((state) => {
+        // If switching tabs, clear content
+        if (state.activeTab !== tab) {
+          state.content = {}
+        }
+
         state.activeTab = tab
         state.isOpen = tab !== null
       }),
@@ -60,6 +66,11 @@ export const useDrawerStore = create<DrawerStoreState>()(
     // Convenience methods for specific buttons
     openLearnPanel: () =>
       set((state) => {
+        // Close current panel content first if changing tabs
+        if (state.activeTab !== "learn") {
+          state.content = {}
+        }
+
         state.isOpen = true
         state.activeTab = "learn"
         state.content = { selectedSection: undefined }
@@ -67,6 +78,11 @@ export const useDrawerStore = create<DrawerStoreState>()(
 
     openCurrentOpsPanel: () =>
       set((state) => {
+        // Close current panel content first if changing tabs
+        if (state.activeTab !== "currentOps") {
+          state.content = {}
+        }
+
         state.isOpen = true
         state.activeTab = "currentOps"
         state.content = { selectedSection: undefined }
@@ -74,8 +90,31 @@ export const useDrawerStore = create<DrawerStoreState>()(
 
     openThemesPanel: (selectedOperation) =>
       set((state) => {
-        state.isOpen = true
+        // Check if we're already on the themes tab with the same operation selected
+        if (
+          state.activeTab === "themes" &&
+          state.content?.selectedOperation === selectedOperation
+        ) {
+          // Toggle behavior - close if the same operation is already selected
+          state.isOpen = false
+          state.activeTab = null
+          state.content = {}
+          return
+        }
+
+        // Otherwise, handle the transition to the themes panel
+        const isTabChange = state.activeTab !== "themes"
+
+        // First update the tab (critical for panel switching)
         state.activeTab = "themes"
+        state.isOpen = true
+
+        // Clear existing content if switching tabs
+        if (isTabChange) {
+          state.content = {}
+        }
+
+        // Then set the new content to ensure proper rendering
         state.content = { selectedOperation }
       }),
   })),

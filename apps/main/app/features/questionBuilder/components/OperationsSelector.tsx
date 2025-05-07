@@ -362,18 +362,18 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
 
   // Handle info click
   const handleInfoClick = (operationId: string) => {
+    // Get the drawer store
+    const drawerStore = useDrawerStore.getState()
+
     // Special case for current-operations - open the currentOps drawer
     if (operationId === "current-operations") {
-      const drawerStore = useDrawerStore.getState()
-
       // Check if currentOps drawer is already open
       if (drawerStore.activeTab === "currentOps") {
         // Toggle behavior - close if already open
         drawerStore.closeDrawer()
       } else {
-        // Open the currentOps drawer
-        drawerStore.setDrawerContent({ selectedSection: "challenges" })
-        drawerStore.openDrawer("currentOps")
+        // Use the dedicated method for opening the current ops panel
+        drawerStore.openCurrentOpsPanel()
       }
       return
     }
@@ -383,28 +383,8 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     if (openThemesDrawer) {
       openThemesDrawer(operationId)
     } else {
-      // Get the drawer store state
-      const drawerStore = useDrawerStore.getState()
-
-      // Check if the "themes" drawer is already open
-      if (drawerStore.activeTab === "themes") {
-        // Check if this is the same operation that's currently selected
-        const currentOperation = drawerStore.content?.selectedOperation as
-          | string
-          | undefined
-
-        if (currentOperation === operationId) {
-          // Same operation - close the drawer (toggle behavior)
-          drawerStore.closeDrawer()
-        } else {
-          // Different operation - switch context instead of closing
-          drawerStore.setDrawerContent({ selectedOperation: operationId })
-        }
-      } else {
-        // Open drawer and store the operation ID as drawer content
-        drawerStore.setDrawerContent({ selectedOperation: operationId })
-        drawerStore.openDrawer("themes")
-      }
+      // Always use the dedicated method which handles tab transitions correctly
+      drawerStore.openThemesPanel(operationId)
     }
   }
 
