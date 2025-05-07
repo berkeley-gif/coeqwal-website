@@ -14,7 +14,7 @@ import {
   VisibilityIcon,
 } from "@repo/ui/mui"
 import { ColoredText } from "../../scenarioResults/components/ui"
-import ExceedancePlot from "./ExceedancePlot"
+import { ExceedancePlot } from "@repo/viz"
 
 import {
   EditingFieldTarget,
@@ -628,7 +628,21 @@ const EditableNeedsRenderer = ({
             sx={{ display: "flex", width: "100%", justifyContent: "center" }}
           >
             <ExceedancePlot
-              currentWaterNeed={currentWaterNeed}
+              thresholds={currentWaterNeed.setting.rule.map(
+                (deliverySetting: Setting) => {
+                  const yearsValue =
+                    parseFloat(deliverySetting["Years"]?.["value"] as string) ??
+                    0
+                  const amountValue =
+                    parseFloat(
+                      deliverySetting["Amount"]?.["value"] as string,
+                    ) ?? 0
+                  return {
+                    value: amountValue,
+                    cutoff: 1 - yearsValue / 20, // Convert years to a fraction of 20
+                  }
+                },
+              )}
               width={500}
               height={200}
             />

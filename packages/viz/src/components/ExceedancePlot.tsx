@@ -1,17 +1,14 @@
 import * as d3 from "d3"
 import { useEffect, useRef } from "react"
-import { Setting, WaterNeedSetting } from "./types"
 
 type ExceedancePlotProps = {
-  currentWaterNeed: WaterNeedSetting
-  // thresholds: Array<{ cutoff: number; value: number }>
+  thresholds: { cutoff: number; value: number }[]
   width: number
   height: number
 }
 
 const ExceedancePlot = ({
-  currentWaterNeed,
-  // thresholds,
+  thresholds,
   width = 500,
   height = 300,
 }: ExceedancePlotProps) => {
@@ -24,20 +21,7 @@ const ExceedancePlot = ({
     // Clear previous chart
     d3.select(svgRef.current).selectAll("*").remove()
 
-    const thresholds = currentWaterNeed.setting.rule.map(
-      (deliverySetting: Setting) => {
-        const yearsValue =
-          parseFloat(deliverySetting["Years"]?.["value"] as string) ?? 0
-        const amountValue =
-          parseFloat(deliverySetting["Amount"]?.["value"] as string) ?? 0
-        return {
-          value: amountValue,
-          cutoff: 1 - yearsValue / 20, // Convert years to a fraction of 20
-        }
-      },
-    )
-
-    if (thresholds.length <= 0) {
+    if (!thresholds || thresholds.length <= 0) {
       const svg = d3
         .select(svgRef.current)
         .attr("width", width)
@@ -65,7 +49,7 @@ const ExceedancePlot = ({
     let chartWidth = width
     const chartHeight = height
 
-    const MAX = d3.max(thresholds, (d) => d.value) * 1.5 || 0
+    const MAX = (d3.max(thresholds, (d) => d?.value) ?? 0) * 1.5
 
     if (containerRef.current) {
       const containerWidth = containerRef.current.clientWidth
@@ -111,7 +95,11 @@ const ExceedancePlot = ({
     svg
       .append("g")
       .attr("transform", `translate(0, ${chartHeight - MARGIN.bottom})`)
-      .call(d3.axisBottom(xScale).tickFormat((d) => d * 100))
+      .call(
+        d3
+          .axisBottom(xScale)
+          .tickFormat((d) => (parseFloat(d.toString()) * 100).toString()),
+      )
     svg
       .append("g")
       .attr("transform", `translate(${MARGIN.left}, 0)`)
@@ -161,7 +149,7 @@ const ExceedancePlot = ({
       .attr("stroke", "#878787")
       .style("stroke-dasharray", "5,10")
       .attr("stroke-width", 0.5)
-  }, [currentWaterNeed, width, height])
+  }, [thresholds, width, height])
 
   return (
     <div

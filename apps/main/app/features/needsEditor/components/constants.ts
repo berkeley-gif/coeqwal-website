@@ -301,7 +301,7 @@ export const DEFAULT_OTHER_WATER_NEEDS: WaterNeedSetting[] = [
         },
       ],
     },
-    isSatisfiable: false,
+    isSatisfiable: true,
     isUserDefined: false,
     isSelected: false,
   },
