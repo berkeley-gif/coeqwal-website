@@ -78,13 +78,13 @@ export const CANONICAL_CLIMATE_OPTIONS = [
   },
   {
     id: "cc50",
-    label: "a moderately hotter and dryer future",
-    labelEs: "futuro moderadamente más caluroso y seco",
+    label: "moderate change: +1.5°C warming, 3% less rain",
+    labelEs: "cambio moderado: +1.5°C de calentamiento, 3% menos lluvia",
   },
   {
     id: "cc95",
-    label: "a severely hotter and dryer future",
-    labelEs: "futuro severamente más caluroso y seco",
+    label: "severe change: +1.8°C warming, 9% less rain",
+    labelEs: "cambio severo: +1.8°C de calentamiento, 9% menos lluvia",
   },
 ]
 

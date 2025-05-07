@@ -124,8 +124,8 @@
       "title": "climate",
       "options": {
         "hist_adj": "current conditions",
-        "cc50": "a moderately hotter and dryer future",
-        "cc95": "a severely hotter and dryer future"
+        "cc50": "moderate change by mid-century: +1.5°C warming, 3% less rain",
+        "cc95": "severe change by mid-century: +1.8°C warming, 9% less rain"
       }
     },
     "sectionAccordion": {
