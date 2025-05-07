@@ -176,6 +176,34 @@ export default function AnimatedCurve({
           custom={1}
         />
 
+        <motion.text
+          x={xScale(4)}
+          y={yScale(0.8)}
+          fill="#f2f0ef"
+          fontSize="1rem"
+          textAnchor="middle"
+          variants={opacityTextVariants}
+          initial="hidden"
+          animate={startMorph ? "visible" : "hidden"}
+          custom={2}
+        >
+          Snowpack
+        </motion.text>
+
+        <motion.text
+          x={xScale(9.5)}
+          y={yScale(0.8)}
+          style={{ fill: "#4682B4 !important" }}
+          fontSize="1rem"
+          textAnchor="middle"
+          variants={opacityTextVariants}
+          initial="hidden"
+          animate={startMorph ? "visible" : "hidden"}
+          custom={2}
+        >
+          Snowmelt
+        </motion.text>
+
         <XAxis
           size={dimensions}
           xScale={xScale}

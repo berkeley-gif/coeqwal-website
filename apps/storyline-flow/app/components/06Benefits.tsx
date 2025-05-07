@@ -28,15 +28,23 @@ function SectionBenefits() {
 }
 
 const norCalData = {
-  past: { year: 1960, value: 3373827, annotation: "3.37M" },
-  present: { year: 2024, value: 6551627 * 2.5, annotation: "6.55M" },
+  past: { year: "in 1960 \u2014 ", value: 3373827, annotation: "3.37M" },
+  present: {
+    year: "in 2024 \u2014",
+    value: 6551627 * 2.5,
+    annotation: "6.55M",
+  },
   icon: PeopleIcon,
   title: "SF Bay",
 }
 
 const soCalData = {
-  past: { year: 1960, value: 9007878, annotation: "9.00M" },
-  present: { year: 2024, value: 22095061 * 2.5, annotation: "22.01M" },
+  past: { year: "in 1960 \u2014 ", value: 9007878, annotation: "9.00M" },
+  present: {
+    year: "in 2024 \u2014",
+    value: 22095061 * 2.5,
+    annotation: "22.01M",
+  },
   icon: PeopleIcon,
   title: "SoCal",
 }
@@ -163,8 +171,12 @@ function Agriculture() {
   const mapViewState = valleyMapViewState[breakpoint]
 
   const almondData = {
-    past: { year: 1980, value: 15998697724, annotation: "16B*" },
-    present: { year: 2022, value: 132351395410, annotation: "132B" },
+    past: { year: "in 1980 \u2014", value: 15998697724, annotation: "16B" },
+    present: {
+      year: "in 2022 \u2014",
+      value: 132351395410,
+      annotation: "132B",
+    },
     icon: FarmIcon,
     title: "Yield",
   }
@@ -244,8 +256,8 @@ function Economy() {
   const mapViewState = stateMapViewState[breakpoint]
 
   const economyData = {
-    past: { year: 1980, value: 327958, annotation: "$327B*" },
-    present: { year: 2024, value: 4103124, annotation: "$4,103B" },
+    past: { year: "in 1980 \u2014", value: 327958, annotation: "$327B" },
+    present: { year: "in 2024 \u2014", value: 4103124, annotation: "$4,103B" },
     icon: MoneyBagIcon,
     title: "GDP",
   }

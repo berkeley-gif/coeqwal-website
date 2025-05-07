@@ -6,7 +6,7 @@ import "./concentric-circle.css"
 import { IconProps } from "../helpers/Icons"
 
 type Entry = {
-  year: number
+  year: string
   value: number
   annotation: string
 }

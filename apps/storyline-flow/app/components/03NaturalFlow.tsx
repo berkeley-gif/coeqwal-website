@@ -158,7 +158,6 @@ function WaterFlow() {
           <span style={{ fontWeight: "bold", color: "#3d8ec9" }}>
             {content?.p42}
           </span>
-          <span>{content?.p43}</span>
         </Sentence>
       </Box>
       <ScrollIndicator animationComplete={animationComplete} />

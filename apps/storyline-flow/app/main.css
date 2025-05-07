@@ -5,6 +5,12 @@
     --text-color: #f2f0ef;
 }
 
+/* All for header */
+
+header {
+    pointer-events: auto;
+}
+
 /* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
 html{
     position: relative;
