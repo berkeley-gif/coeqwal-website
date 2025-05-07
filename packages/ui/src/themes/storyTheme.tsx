@@ -49,6 +49,7 @@ const storyTheme = createTheme({
     },
   },
   components: {
+    ...baseTheme.components,
     MuiTypography: {
       styleOverrides: {
         gutterBottom: {

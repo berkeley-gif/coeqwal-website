@@ -74,8 +74,15 @@ function Salmon() {
   const breakpoint = useBreakpoint()
   const mapViewState = impactSalmonMapViewState[breakpoint]
   const [animationComplete, setAnimationComplete] = useState(false)
+  const setMarkers = useStoryStore((state) => state.setMarkers)
 
   const load = useCallback(() => {
+    const marker = {
+      id: "1",
+      name: "Red Bluff",
+      longitude: -122.2358,
+      latitude: 40.1786,
+    }
     flyTo({
       longitude: mapViewState?.longitude ?? 0,
       latitude: mapViewState?.latitude ?? 0,
@@ -84,14 +91,14 @@ function Salmon() {
         duration: 2000,
       },
     })
-  }, [flyTo, mapViewState])
+    setMarkers([marker], "rough-circle")
+  }, [flyTo, mapViewState, setMarkers])
 
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    load,
-    () => {},
-  )
+  const unload = useCallback(() => {
+    setMarkers([], "rough-circle")
+  }, [setMarkers])
+
+  useSectionLifecycle(isSectionActive, () => {}, load, unload)
 
   return (
     <Box
