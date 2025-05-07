@@ -19,7 +19,7 @@ export interface DrawerStoreState extends DrawerState {
 }
 
 export const useDrawerStore = create<DrawerStoreState>()(
-  immer<DrawerStoreState>((set, get) => ({
+  immer<DrawerStoreState>((set) => ({
     // Initial state
     isOpen: false,
     activeTab: null,

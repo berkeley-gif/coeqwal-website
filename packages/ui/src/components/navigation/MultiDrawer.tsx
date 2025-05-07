@@ -279,7 +279,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    backgroundColor: tabBg.learn,
+                    backgroundColor: drawerBg,
                     color: theme.palette.common.white,
                     padding: 2,
                   }}
@@ -320,7 +320,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    backgroundColor: tabBg.currentOps,
+                    backgroundColor: drawerBg,
                     color: theme.palette.common.white,
                     padding: 2,
                   }}
@@ -361,7 +361,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    backgroundColor: tabBg.themes,
+                    backgroundColor: drawerBg,
                     color: theme.palette.common.white,
                     padding: 2,
                   }}

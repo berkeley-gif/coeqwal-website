@@ -21,11 +21,7 @@ export interface ContentWrapperProps {
  * Wrapper component for drawer content sections
  * Provides consistent styling and a close button
  */
-export function ContentWrapper({
-  title,
-  children,
-  onClose,
-}: ContentWrapperProps) {
+export function ContentWrapper({ children, onClose }: ContentWrapperProps) {
   const theme = useTheme()
 
   return (

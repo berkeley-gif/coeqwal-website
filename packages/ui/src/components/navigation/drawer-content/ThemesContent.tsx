@@ -1,7 +1,16 @@
 "use client"
 
 import React, { useEffect, useRef, useCallback } from "react"
-import { Box, Typography, List, ListItem, Chip, useTheme } from "@mui/material"
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  Chip,
+  useTheme,
+  SxProps,
+  Theme,
+} from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 
 export interface ThemesContentProps {
@@ -128,7 +137,7 @@ export function ThemesContent({
               ref={(el) => setThemeRef(el as HTMLDivElement, item.id)}
               id={`theme-${item.id}`}
               sx={{
-                ...(theme.mixins.drawerContent.itemBox as any),
+                ...(theme.mixins.drawerContent.itemBox as SxProps<Theme>),
                 ...(item.id === selectedOperation &&
                   theme.mixins.drawerContent.selectedItemBox),
               }}
