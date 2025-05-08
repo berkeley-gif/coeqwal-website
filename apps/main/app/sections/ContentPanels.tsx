@@ -81,7 +81,12 @@ export default function ContentPanels({
   const Panel1Content = () => (
     <Box>
       <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-        Water in California travels remarkable distances. Most of it falls far from where it is needed. Managing this journey involves one of the most complex water conveyance systems in the world. By understanding how water flows and how policies and management decisions balance water needs across the state, you can participate in shaping our shared water future.
+        Water in California travels remarkable distances. Most of it falls far
+        from where it is needed. Managing this journey involves one of the most
+        complex water conveyance systems in the world. By understanding how
+        water flows and how policies and management decisions balance water
+        needs across the state, you can participate in shaping our shared water
+        future.
       </Typography>
       <Typography variant="body2" color="common.white">
         Use our{" "}
@@ -94,12 +99,13 @@ export default function ContentPanels({
             pointerEvents: "auto",
             "&:hover": {
               opacity: 0.8,
-            }
+            },
           }}
         >
           California Water Learning Library
         </Box>{" "}
-        to deepen your understanding, explore key topics, and become an informed advocate for sustainable water management.
+        to deepen your understanding, explore key topics, and become an informed
+        advocate for sustainable water management.
       </Typography>
     </Box>
   )
@@ -108,10 +114,13 @@ export default function ContentPanels({
   const Panel2Content = () => (
     <Box>
       <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-        The COEQWAL project is using the same computer models as the state Department of Water Resources and the U.S. Bureau of Reclamation to model a broad range of water management and climate scenarios.
+        The COEQWAL project is using the same computer models as the state
+        Department of Water Resources and the U.S. Bureau of Reclamation to
+        model a broad range of water management and climate scenarios.
       </Typography>
       <Typography variant="body2" color="common.white">
-        Explore these scenarios and empower your community with actionable insights to advocate for water solutions.
+        Explore these scenarios and empower your community with actionable
+        insights to advocate for water solutions.
       </Typography>
     </Box>
   )
@@ -120,10 +129,14 @@ export default function ContentPanels({
   const Panel3Content = () => (
     <Box>
       <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-        How will policy changes impact your community's water supply and environment? What strategies could help your community achieve their water goals?
+        How will policy changes impact your community&apos;s water supply and
+        environment? What strategies could help your community achieve their
+        water goals?
       </Typography>
       <Typography variant="body2" color="common.white">
-        Search our scenario data, identify actionable strategies, and take informed steps to advocate effectively for your community's water future.
+        Search our scenario data, identify actionable strategies, and take
+        informed steps to advocate effectively for your community&apos;s water
+        future.
       </Typography>
     </Box>
   )
@@ -136,14 +149,26 @@ export default function ContentPanels({
         sx={{
           backgroundColor: "#1A3F6A", // Deep blue
           py: 12, // vertical padding
-          color: "white"
+          color: "white",
         }}
       >
         <Grid container spacing={6} alignItems="flex-start">
-          <Grid size={{ xs: 12, md: 4 }} sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", pt: 0 }}>
+          <Grid
+            size={{ xs: 12, md: 4 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 0,
+            }}
+          >
             <LearnTextContent />
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }} sx={{ display: "flex", alignItems: "flex-start" }}>
+          <Grid
+            size={{ xs: 12, md: 8 }}
+            sx={{ display: "flex", alignItems: "flex-start" }}
+          >
             <Panel1Content />
           </Grid>
         </Grid>
@@ -159,10 +184,22 @@ export default function ContentPanels({
         }}
       >
         <Grid container spacing={6} alignItems="flex-start">
-          <Grid size={{ xs: 12, md: 4 }} sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", pt: 0 }}>
+          <Grid
+            size={{ xs: 12, md: 4 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 0,
+            }}
+          >
             <EmpowerTextContent />
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }} sx={{ display: "flex", alignItems: "flex-start" }}>
+          <Grid
+            size={{ xs: 12, md: 8 }}
+            sx={{ display: "flex", alignItems: "flex-start" }}
+          >
             <Panel2Content />
           </Grid>
         </Grid>
@@ -178,14 +215,26 @@ export default function ContentPanels({
         }}
       >
         <Grid container spacing={6} alignItems="flex-start">
-          <Grid size={{ xs: 12, md: 4 }} sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", pt: 0 }}>
+          <Grid
+            size={{ xs: 12, md: 4 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 0,
+            }}
+          >
             <ActTextContent />
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }} sx={{ display: "flex", alignItems: "flex-start" }}>
+          <Grid
+            size={{ xs: 12, md: 8 }}
+            sx={{ display: "flex", alignItems: "flex-start" }}
+          >
             <Panel3Content />
           </Grid>
         </Grid>
       </BasePanel>
     </>
   )
-} 
+}

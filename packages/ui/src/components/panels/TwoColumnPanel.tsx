@@ -32,12 +32,12 @@ export function TwoColumnPanel({
       includeHeaderSpacing={includeHeaderSpacing}
       {...panelProps}
     >
-      <Grid 
-        container 
+      <Grid
+        container
         spacing={4}
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", md: "row" }
+          flexDirection: { xs: "column", md: "row" },
         }}
       >
         <Grid

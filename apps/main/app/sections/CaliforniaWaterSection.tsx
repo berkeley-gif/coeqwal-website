@@ -21,7 +21,7 @@ export default function CaliforniaWaterSection({
   const { mapRef } = useMap()
   const fly = useMapFly()
   // precipitation animation hook
-  const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef, {
+  const { animateBands } = usePrecipitationAnimation(mapRef, {
     bandDurationMs: 250, // band cycling rate
     snowfallThreshold: 6, // band timing for fade-in
   })
@@ -37,10 +37,7 @@ export default function CaliforniaWaterSection({
   }
 
   // helper for list items
-  const renderParagraph = (
-    translationKey: string,
-    onClick?: () => void,
-  ) => (
+  const renderParagraph = (translationKey: string, onClick?: () => void) => (
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
@@ -56,9 +53,7 @@ export default function CaliforniaWaterSection({
       })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
-      <Typography variant="body1">
-        {t(translationKey)}
-      </Typography>
+      <Typography variant="body1">{t(translationKey)}</Typography>
     </Box>
   )
 

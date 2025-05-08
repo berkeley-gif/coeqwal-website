@@ -21,10 +21,7 @@ export default function CalSimSection({
   )
 
   // helper for list items
-  const renderParagraph = (
-    translationKey: string,
-    onClick?: () => void,
-  ) => (
+  const renderParagraph = (translationKey: string, onClick?: () => void) => (
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
@@ -40,9 +37,7 @@ export default function CalSimSection({
       })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
-      <Typography variant="body1">
-        {t(translationKey)}
-      </Typography>
+      <Typography variant="body1">{t(translationKey)}</Typography>
     </Box>
   )
 

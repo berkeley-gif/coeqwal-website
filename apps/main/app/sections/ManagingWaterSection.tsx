@@ -35,9 +35,7 @@ export default function ManagingWaterSection({
           : {}),
       })}
     >
-      <Typography variant="body1">
-        {t(translationKey)}
-      </Typography>
+      <Typography variant="body1">{t(translationKey)}</Typography>
     </Box>
   )
 
