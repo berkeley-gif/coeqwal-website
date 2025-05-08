@@ -1,8 +1,37 @@
 import React from "react"
 import { Box, Typography, Grid } from "@repo/ui/mui"
 import { BasePanel } from "@repo/ui"
+import { useDrawerStore } from "@repo/state"
 
-export default function ContentPanels() {
+// Add props interface
+interface ContentPanelsProps {
+  onOpenLearnDrawer?: (sectionId: string) => void
+}
+
+export default function ContentPanels({
+  onOpenLearnDrawer,
+}: ContentPanelsProps = {}) {
+  // Initialize drawer store
+  const { activeTab } = useDrawerStore()
+  const drawerStore = useDrawerStore.getState()
+
+  // Handler to toggle the Learn drawer
+  const handleToggleLearnDrawer = () => {
+    if (activeTab === "learn") {
+      // If already open, close it (toggle behavior)
+      drawerStore.closeDrawer()
+    } else {
+      // Open the drawer, either using prop or direct access
+      if (onOpenLearnDrawer) {
+        onOpenLearnDrawer("california-water") // Section ID
+      } else {
+        // Direct access pattern used by LearnMoreButtons
+        drawerStore.setDrawerContent({ selectedSection: "california-water" })
+        drawerStore.openDrawer("learn")
+      }
+    }
+  }
+
   // Text component for the first panel
   const LearnTextContent = () => (
     <Typography
@@ -55,7 +84,22 @@ export default function ContentPanels() {
         Water in California travels remarkable distances. Most of it falls far from where it is needed. Managing this journey involves one of the most complex water conveyance systems in the world. By understanding how water flows and how policies and management decisions balance water needs across the state, you can participate in shaping our shared water future.
       </Typography>
       <Typography variant="body2" color="common.white">
-        Use our California Water Learning Library to deepen your understanding, explore key topics, and become an informed advocate for sustainable water management.
+        Use our{" "}
+        <Box
+          component="span"
+          onClick={handleToggleLearnDrawer}
+          sx={{
+            textDecoration: "underline",
+            cursor: "pointer",
+            pointerEvents: "auto",
+            "&:hover": {
+              opacity: 0.8,
+            }
+          }}
+        >
+          California Water Learning Library
+        </Box>{" "}
+        to deepen your understanding, explore key topics, and become an informed advocate for sustainable water management.
       </Typography>
     </Box>
   )

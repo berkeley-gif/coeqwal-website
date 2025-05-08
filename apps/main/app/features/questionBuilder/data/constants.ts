@@ -406,6 +406,13 @@ export const OUTCOME_CATEGORIES = [
         shortText: "climate resilience",
         shortTextEs: "resiliencia climática",
       },
+      {
+        id: "all_outcomes",
+        label: "All outcomes",
+        labelEs: "Todos los resultados",
+        shortText: "all outcomes",
+        shortTextEs: "todos los resultados",
+      },
     ],
   },
   {

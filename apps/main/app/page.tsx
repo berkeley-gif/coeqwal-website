@@ -256,7 +256,7 @@ export default function Home() {
           <HeroSection />
 
           {/* Content Panels */}
-          <ContentPanels />
+          <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Interstitial Panel */}
           {/* <InterstitialPanel /> */}
