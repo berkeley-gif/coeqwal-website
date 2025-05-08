@@ -86,6 +86,21 @@ export const CANONICAL_CLIMATE_OPTIONS = [
     label: "severe change: +1.8°C warming, 9% less rain",
     labelEs: "cambio severo: +1.8°C de calentamiento, 9% menos lluvia",
   },
+  {
+    id: "extreme_warming",
+    label: "extreme warming by mid-century: +1.9°C, 7% less rain",
+    labelEs: "calentamiento extremo a mediados de siglo: +1.9°C, 7% menos lluvia",
+  },
+  {
+    id: "extreme_drying",
+    label: "extreme drying by mid-century: +1.4°C, 12% less rain",
+    labelEs: "sequía extrema a mediados de siglo: +1.4°C, 12% menos lluvia",
+  },
+  {
+    id: "wetter_future",
+    label: "wetter future by mid-century: +1.2°C, 4% more rain",
+    labelEs: "futuro más húmedo a mediados de siglo: +1.2°C, 4% más lluvia",
+  },
 ]
 
 export const OPERATION_THEMES = [

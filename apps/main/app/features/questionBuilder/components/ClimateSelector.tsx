@@ -33,11 +33,12 @@ import { useTranslation } from "@repo/i18n"
 interface ClimateOption {
   id: string
   label: string
+  labelEs?: string
 }
 
 const ClimateSelector: React.FC = () => {
   const theme = useTheme()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const {
     state: { selectedClimate, includeClimate },
     toggleClimate,
@@ -79,13 +80,17 @@ const ClimateSelector: React.FC = () => {
       borderRadius: theme.spacing(1),
     },
     transition: "background-color 0.2s",
-    padding: theme.spacing(0.5, 1),
+    padding: theme.spacing(1, 1.5),
     margin: 0,
     width: "100%",
     "& .MuiCheckbox-root": {
       padding: theme.spacing(0.5),
       marginRight: theme.spacing(1),
     },
+    borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+    "&:last-child": {
+      borderBottom: "none",
+    }
   }
 
   return (
@@ -157,6 +162,11 @@ const ClimateSelector: React.FC = () => {
           transition: "background-color 0.3s",
         }}
       >
+        {/* Debug info - show how many options we have */}
+        <Typography variant="caption" sx={{ display: "block", mb: 1, color: "text.secondary" }}>
+          Available options: {CLIMATE_OPTIONS.length}
+        </Typography>
+        
         {CLIMATE_OPTIONS.map((option: ClimateOption) => (
           <FormControlLabel
             key={option.id}
@@ -175,11 +185,18 @@ const ClimateSelector: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  color: includeClimate ? "inherit" : "rgba(0, 0, 0, 0.38)",
+                  color: includeClimate ? "text.primary" : "rgba(0, 0, 0, 0.38)",
                   fontWeight: selectedClimate.includes(option.id) ? 500 : 400,
+                  backgroundColor: selectedClimate.includes(option.id) 
+                    ? "rgba(76, 175, 80, 0.1)" 
+                    : "transparent",
+                  padding: selectedClimate.includes(option.id) ? "2px 8px" : 0,
+                  borderRadius: "4px",
+                  transition: "all 0.2s ease",
                 }}
               >
-                {t(`questionBuilder.climateSelector.options.${option.id}`)}
+                {/* Use the direct label instead of trying to translate */}
+                {locale === "es" && option.labelEs ? option.labelEs : option.label}
               </Typography>
             }
             sx={formControlStyles}
