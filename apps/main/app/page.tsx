@@ -12,6 +12,7 @@ import MapContainer from "./components/MapContainer"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 import { NeedsEditorPanel } from "./features/needsEditor/components"
 import HeroSection from "./sections/HeroSection"
+import ContentPanels from "./sections/ContentPanels"
 import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
@@ -253,6 +254,9 @@ export default function Home() {
         >
           {/* Landing Panel */}
           <HeroSection />
+
+          {/* Content Panels */}
+          <ContentPanels />
 
           {/* Interstitial Panel */}
           <InterstitialPanel />
