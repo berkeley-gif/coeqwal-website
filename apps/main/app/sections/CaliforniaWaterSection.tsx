@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography, Stack } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
@@ -21,7 +21,7 @@ export default function CaliforniaWaterSection({
   const { mapRef } = useMap()
   const fly = useMapFly()
   // precipitation animation hook
-  const { animateBands, isAnimating } = usePrecipitationAnimation(mapRef, {
+  const { animateBands } = usePrecipitationAnimation(mapRef, {
     bandDurationMs: 250, // band cycling rate
     snowfallThreshold: 6, // band timing for fade-in
   })
@@ -37,11 +37,7 @@ export default function CaliforniaWaterSection({
   }
 
   // helper for list items
-  const renderParagraph = (
-    translationKey: string,
-    onClick?: () => void,
-    showIcon: boolean = true,
-  ) => (
+  const renderParagraph = (translationKey: string, onClick?: () => void) => (
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
@@ -57,25 +53,7 @@ export default function CaliforniaWaterSection({
       })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
-      <Typography variant="body1">
-        {t(translationKey)}
-        {showIcon && (
-          <VisibilityIcon
-            sx={{
-              ml: 1,
-              verticalAlign: "middle",
-              animation:
-                translationKey === "californiaWater.paragraph1" && isAnimating
-                  ? "pulse 1.5s infinite"
-                  : "none",
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onClick?.()
-            }}
-          />
-        )}
-      </Typography>
+      <Typography variant="body1">{t(translationKey)}</Typography>
     </Box>
   )
 
@@ -125,7 +103,7 @@ export default function CaliforniaWaterSection({
                 fly(views.deltaClose)
               })}
               {renderParagraph("californiaWater.paragraph3")}
-              {renderParagraph("californiaWater.paragraph4", undefined, false)}
+              {renderParagraph("californiaWater.paragraph4")}
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>

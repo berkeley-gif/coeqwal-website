@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography, Stack } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore, useDrawerStore } from "@repo/state"
@@ -35,10 +35,7 @@ export default function ManagingWaterSection({
           : {}),
       })}
     >
-      <Typography variant="body1">
-        {t(translationKey)}
-        <VisibilityIcon sx={{ ml: 1, verticalAlign: "middle" }} />
-      </Typography>
+      <Typography variant="body1">{t(translationKey)}</Typography>
     </Box>
   )
 

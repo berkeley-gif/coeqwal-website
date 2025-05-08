@@ -114,7 +114,7 @@ export default function HeroSection() {
     >
       <HeroQuestionsPanel
         backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
-        verticalAlignment="center"
+        verticalAlignment="top"
         background="transparent"
         includeHeaderSpacing={false}
         headlineColor="common.white"
@@ -122,6 +122,8 @@ export default function HeroSection() {
         useSvgQuestions={true}
         transitionInterval={6000}
         sx={{
+          backgroundSize: "cover",
+          backgroundPosition: "center -100px",
           "& > div": {
             marginTop: "-15vh",
           },

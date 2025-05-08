@@ -34,7 +34,7 @@ export function ScrollDownIcon({
     >
       {text && (
         <Typography
-          variant="body1"
+          variant="body2"
           align="center"
           sx={{
             color,

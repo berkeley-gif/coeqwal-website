@@ -90,20 +90,20 @@ export const OPERATION_CARDS = () => [
       },
     ],
   },
-  {
-    id: "remove-tucps",
-    title: "What if we removed temporary emergency measures (TUCP's)?",
-    term: "removing emergency measures",
-    bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
-    titleColor: WATER_PALETTE.emergencyMeasures.secondary,
-    subOptions: [
-      {
-        id: "select-tucps",
-        label: "Select",
-        term: "removing TUCPs",
-      },
-    ],
-  },
+  // {
+  //   id: "remove-tucps",
+  //   title: "What if we removed temporary emergency measures (TUCP's)?",
+  //   term: "removing emergency measures",
+  //   bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
+  //   titleColor: WATER_PALETTE.emergencyMeasures.secondary,
+  //   subOptions: [
+  //     {
+  //       id: "select-tucps",
+  //       label: "Select",
+  //       term: "removing TUCPs",
+  //     },
+  //   ],
+  // },
   {
     id: "limit-groundwater",
     title: "What if we limited groundwater pumping?",
@@ -211,18 +211,8 @@ export const OPERATION_CARDS = () => [
     subOptions: [
       {
         id: "delta-outflows-tier1",
-        label: "...by increasing Delta outflows, tier 1",
-        term: "Delta outflows tier 1",
-      },
-      {
-        id: "delta-outflows-tier2",
-        label: "...by increasing Delta outflows, tier 2",
-        term: "Delta outflows tier 2",
-      },
-      {
-        id: "delta-outflows-tier3",
-        label: "...by increasing Delta outflows, tier 3",
-        term: "Delta outflows tier 3",
+        label: "...by increasing Delta outflows",
+        term: "increasing Delta outflows",
       },
       {
         id: "reduce-sacramento-valley-deliveries",
@@ -241,18 +231,8 @@ export const OPERATION_CARDS = () => [
       },
       {
         id: "reduce-delta-exports-tier1",
-        label: "...by reducing Delta exports, tier 1",
-        term: "Delta exports tier 1",
-      },
-      {
-        id: "reduce-delta-exports-tier2",
-        label: "...by reducing Delta exports, tier 2",
-        term: "Delta exports tier 2",
-      },
-      {
-        id: "reduce-delta-exports-tier3",
-        label: "...by reducing Delta exports, tier 3",
-        term: "Delta exports tier 3",
+        label: "...by reducing Delta exports",
+        term: "reducingDelta exports",
       },
     ],
   },

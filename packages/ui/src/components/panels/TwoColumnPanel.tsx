@@ -32,10 +32,18 @@ export function TwoColumnPanel({
       includeHeaderSpacing={includeHeaderSpacing}
       {...panelProps}
     >
-      <Grid container spacing={4}>
+      <Grid
+        container
+        spacing={4}
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+        }}
+      >
         <Grid
           sx={{
-            gridColumn: { xs: "1 / -1", md: "span 6" },
+            flexBasis: { xs: "100%", md: "50%" },
+            maxWidth: { xs: "100%", md: "50%" },
             order: { xs: 1, md: reversed ? 2 : 1 },
           }}
           {...columnProps.left}
@@ -49,7 +57,8 @@ export function TwoColumnPanel({
         </Grid>
         <Grid
           sx={{
-            gridColumn: { xs: "1 / -1", md: "span 6" },
+            flexBasis: { xs: "100%", md: "50%" },
+            maxWidth: { xs: "100%", md: "50%" },
             order: { xs: 2, md: reversed ? 1 : 2 },
           }}
           {...columnProps.right}

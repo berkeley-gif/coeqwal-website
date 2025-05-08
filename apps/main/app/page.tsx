@@ -1,18 +1,19 @@
 "use client"
 
-import React, { useState, useRef, useMemo } from "react"
+import React, { useState, useRef } from "react"
 import { Box } from "@repo/ui/mui"
 import { Header } from "@repo/ui"
-import type { SecondaryNavItem, TabKey } from "@repo/ui"
+import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds } from "./config/navigation"
 import type { MapboxMapRef } from "@repo/map"
 import MapContainer from "./components/MapContainer"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
-import { NeedsEditorPanel } from "./features/needsEditor/components"
+// import { NeedsEditorPanel } from "./features/needsEditor/components"
 import HeroSection from "./sections/HeroSection"
-import InterstitialPanel from "./sections/InterstitialPanel"
+import ContentPanels from "./sections/ContentPanels"
+// import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
@@ -175,36 +176,36 @@ export default function Home() {
   }
 
   // Create the secondary navigation items
-  const secondaryNavItems = useMemo<SecondaryNavItem[]>(
-    () => [
-      {
-        key: "home",
-        label: "HOME",
-        sectionId: "hero",
-      },
-      {
-        key: "californiaWater",
-        label: "California Water",
-        sectionId: "california-water",
-      },
-      {
-        key: "managingWater",
-        label: "MANAGING WATER",
-        sectionId: "managing-water",
-      },
-      {
-        key: "explore",
-        label: "EXPLORE SCENARIOS",
-        sectionId: "invitation",
-      },
-      {
-        key: "scenarioSearch",
-        label: "SCENARIO SEARCH",
-        sectionId: "combined-panel",
-      },
-    ],
-    [],
-  )
+  // const secondaryNavItems = useMemo<SecondaryNavItem[]>(
+  //   () => [
+  //     {
+  //       key: "home",
+  //       label: "HOME",
+  //       sectionId: "hero",
+  //     },
+  //     {
+  //       key: "californiaWater",
+  //       label: "California Water",
+  //       sectionId: "california-water",
+  //     },
+  //     {
+  //       key: "managingWater",
+  //       label: "MANAGING WATER",
+  //       sectionId: "managing-water",
+  //     },
+  //     {
+  //       key: "explore",
+  //       label: "EXPLORE SCENARIOS",
+  //       sectionId: "invitation",
+  //     },
+  //     {
+  //       key: "scenarioSearch",
+  //       label: "SCENARIO SEARCH",
+  //       sectionId: "combined-panel",
+  //     },
+  //   ],
+  //   [],
+  // )
 
   return (
     <>
@@ -239,8 +240,8 @@ export default function Home() {
           <Header
             activeSection={activeSection}
             onSectionClick={handleSectionClick}
-            showSecondaryNav={true}
-            secondaryNavItems={secondaryNavItems}
+            showSecondaryNav={false}
+            // secondaryNavItems={secondaryNavItems}
           />
         </Box>
 
@@ -254,8 +255,16 @@ export default function Home() {
           {/* Landing Panel */}
           <HeroSection />
 
+          {/* Content Panels */}
+          <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
+
           {/* Interstitial Panel */}
-          <InterstitialPanel />
+          {/* <InterstitialPanel /> */}
+
+          {/* Combined Panel */}
+          <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
+            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
+          </Box>
 
           {/* California Water panel with two columns */}
           <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
@@ -275,14 +284,10 @@ export default function Home() {
             onOpenThemesDrawer={handleOpenThemesDrawer}
           />
 
-          {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
-            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
-          </Box>
           {/* Needs Editor Panel */}
-          <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">
+          {/* <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">
             <NeedsEditorPanel />
-          </Box>
+          </Box> */}
         </Box>
       </Box>
     </>

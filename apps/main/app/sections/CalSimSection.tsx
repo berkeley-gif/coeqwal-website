@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography, Stack } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore, useDrawerStore } from "@repo/state"
@@ -21,11 +21,7 @@ export default function CalSimSection({
   )
 
   // helper for list items
-  const renderParagraph = (
-    translationKey: string,
-    onClick?: () => void,
-    showIcon: boolean = true,
-  ) => (
+  const renderParagraph = (translationKey: string, onClick?: () => void) => (
     <Box
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
@@ -41,21 +37,7 @@ export default function CalSimSection({
       })}
       onClick={onClick || (() => console.log(`Clicked ${translationKey}`))}
     >
-      <Typography variant="body1">
-        {t(translationKey)}
-        {showIcon && (
-          <VisibilityIcon
-            sx={{
-              ml: 1,
-              verticalAlign: "middle",
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onClick?.()
-            }}
-          />
-        )}
-      </Typography>
+      <Typography variant="body1">{t(translationKey)}</Typography>
     </Box>
   )
 
@@ -87,9 +69,9 @@ export default function CalSimSection({
             </Typography>
 
             <Stack>
-              {renderParagraph("calsim.paragraph1", undefined, false)}
-              {renderParagraph("calsim.paragraph2", undefined, false)}
-              {renderParagraph("calsim.paragraph3", undefined, false)}
+              {renderParagraph("calsim.paragraph1")}
+              {renderParagraph("calsim.paragraph2")}
+              {renderParagraph("calsim.paragraph3")}
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>
