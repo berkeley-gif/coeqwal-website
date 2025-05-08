@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography, Stack } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useMap } from "@repo/map"
@@ -40,7 +40,6 @@ export default function CaliforniaWaterSection({
   const renderParagraph = (
     translationKey: string,
     onClick?: () => void,
-    showIcon: boolean = true,
   ) => (
     <Box
       sx={(theme) => ({
@@ -59,22 +58,6 @@ export default function CaliforniaWaterSection({
     >
       <Typography variant="body1">
         {t(translationKey)}
-        {showIcon && (
-          <VisibilityIcon
-            sx={{
-              ml: 1,
-              verticalAlign: "middle",
-              animation:
-                translationKey === "californiaWater.paragraph1" && isAnimating
-                  ? "pulse 1.5s infinite"
-                  : "none",
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onClick?.()
-            }}
-          />
-        )}
       </Typography>
     </Box>
   )
@@ -125,7 +108,7 @@ export default function CaliforniaWaterSection({
                 fly(views.deltaClose)
               })}
               {renderParagraph("californiaWater.paragraph3")}
-              {renderParagraph("californiaWater.paragraph4", undefined, false)}
+              {renderParagraph("californiaWater.paragraph4")}
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>

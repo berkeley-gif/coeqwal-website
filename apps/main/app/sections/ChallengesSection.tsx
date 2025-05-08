@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography, Stack } from "@repo/ui/mui"
 import { BasePanel, LearnMoreButton } from "@repo/ui"
 import { useTranslation } from "@repo/i18n"
 import { useStoryStore, useDrawerStore } from "@repo/state"
@@ -24,7 +24,6 @@ export default function ChallengesSection({
   const renderParagraph = (
     translationKey: string,
     onClick?: () => void,
-    showIcon: boolean = true,
   ) => (
     <Box
       sx={(theme) => ({
@@ -43,18 +42,6 @@ export default function ChallengesSection({
     >
       <Typography variant="body1">
         {t(translationKey)}
-        {showIcon && (
-          <VisibilityIcon
-            sx={{
-              ml: 1,
-              verticalAlign: "middle",
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onClick?.()
-            }}
-          />
-        )}
       </Typography>
     </Box>
   )
@@ -88,10 +75,10 @@ export default function ChallengesSection({
             </Typography>
 
             <Stack>
-              {renderParagraph("challenges.paragraph1", undefined, false)}
-              {renderParagraph("challenges.paragraph2", undefined, false)}
-              {renderParagraph("challenges.paragraph3", undefined, false)}
-              {renderParagraph("challenges.paragraph4", undefined, false)}
+              {renderParagraph("challenges.paragraph1")}
+              {renderParagraph("challenges.paragraph2")}
+              {renderParagraph("challenges.paragraph3")}
+              {renderParagraph("challenges.paragraph4")}
             </Stack>
 
             <Box sx={{ mt: 3, pl: 1 }}>
