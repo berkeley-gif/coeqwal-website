@@ -261,6 +261,11 @@ export default function Home() {
           {/* Interstitial Panel */}
           {/* <InterstitialPanel /> */}
 
+          {/* Combined Panel */}
+          <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
+            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
+          </Box>
+
           {/* California Water panel with two columns */}
           <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
@@ -279,14 +284,10 @@ export default function Home() {
             onOpenThemesDrawer={handleOpenThemesDrawer}
           />
 
-          {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
-            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
-          </Box>
           {/* Needs Editor Panel */}
-          <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">
+          {/* <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">
             <NeedsEditorPanel />
-          </Box>
+          </Box> */}
         </Box>
       </Box>
     </>
