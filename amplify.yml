@@ -13,13 +13,13 @@ applications:
         build:
           commands:
             - pnpm rebuild
-            - npx turbo run build --filter=main
+            - npx turbo run build --filter=storyline-flow
       artifacts:
-        baseDirectory: apps/main/out
+        baseDirectory: apps/storyline-flow/out
         files:
           - '**/*'
       buildPath: /
-    appRoot: apps/main
+    appRoot: apps/storyline-flow
     environment:
       variables:
         NODE_VERSION: 20
