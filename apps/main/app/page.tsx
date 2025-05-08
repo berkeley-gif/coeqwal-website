@@ -259,7 +259,7 @@ export default function Home() {
           <ContentPanels />
 
           {/* Interstitial Panel */}
-          <InterstitialPanel />
+          {/* <InterstitialPanel /> */}
 
           {/* California Water panel with two columns */}
           <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
