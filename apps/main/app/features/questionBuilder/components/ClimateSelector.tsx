@@ -90,7 +90,7 @@ const ClimateSelector: React.FC = () => {
     borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
     "&:last-child": {
       borderBottom: "none",
-    }
+    },
   }
 
   return (
@@ -163,10 +163,13 @@ const ClimateSelector: React.FC = () => {
         }}
       >
         {/* Debug info - show how many options we have */}
-        <Typography variant="caption" sx={{ display: "block", mb: 1, color: "text.secondary" }}>
+        <Typography
+          variant="caption"
+          sx={{ display: "block", mb: 1, color: "text.secondary" }}
+        >
           Available options: {CLIMATE_OPTIONS.length}
         </Typography>
-        
+
         {CLIMATE_OPTIONS.map((option: ClimateOption) => (
           <FormControlLabel
             key={option.id}
@@ -185,10 +188,12 @@ const ClimateSelector: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{
-                  color: includeClimate ? "text.primary" : "rgba(0, 0, 0, 0.38)",
+                  color: includeClimate
+                    ? "text.primary"
+                    : "rgba(0, 0, 0, 0.38)",
                   fontWeight: selectedClimate.includes(option.id) ? 500 : 400,
-                  backgroundColor: selectedClimate.includes(option.id) 
-                    ? "rgba(76, 175, 80, 0.1)" 
+                  backgroundColor: selectedClimate.includes(option.id)
+                    ? "rgba(76, 175, 80, 0.1)"
                     : "transparent",
                   padding: selectedClimate.includes(option.id) ? "2px 8px" : 0,
                   borderRadius: "4px",
@@ -196,7 +201,9 @@ const ClimateSelector: React.FC = () => {
                 }}
               >
                 {/* Use the direct label instead of trying to translate */}
-                {locale === "es" && option.labelEs ? option.labelEs : option.label}
+                {locale === "es" && option.labelEs
+                  ? option.labelEs
+                  : option.label}
               </Typography>
             }
             sx={formControlStyles}

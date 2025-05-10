@@ -89,7 +89,8 @@ export const CANONICAL_CLIMATE_OPTIONS = [
   {
     id: "extreme_warming",
     label: "extreme warming by mid-century: +1.9°C, 7% less rain",
-    labelEs: "calentamiento extremo a mediados de siglo: +1.9°C, 7% menos lluvia",
+    labelEs:
+      "calentamiento extremo a mediados de siglo: +1.9°C, 7% menos lluvia",
   },
   {
     id: "extreme_drying",
