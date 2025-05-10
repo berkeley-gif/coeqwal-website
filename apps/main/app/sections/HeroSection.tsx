@@ -115,7 +115,8 @@ export default function HeroSection() {
       <HeroQuestionsPanel
         backgroundImage="/images/premium_photo-1700063706147-de2eeb8a578d.jpg"
         verticalAlignment="top"
-        background="transparent"
+        background="light"
+        fullHeight={false}
         includeHeaderSpacing={false}
         headlineColor="common.white"
         questionSvgs={questionSvgs}

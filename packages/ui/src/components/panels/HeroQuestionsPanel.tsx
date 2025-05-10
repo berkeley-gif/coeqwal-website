@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography } from "@mui/material"
+import { Box, Typography, useTheme } from "@mui/material"
 import { useState, useEffect, useRef } from "react"
 import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { TransitionHeadline } from "../common/TransitionHeadline"
@@ -96,7 +96,7 @@ export function HeroQuestionsPanel({
   verticalAlignment = "center",
   children,
   transitionInterval = 4000,
-  includeHeaderSpacing = true,
+  // includeHeaderSpacing = true,
   headlineColor,
   overlayCircles = [],
   questionSvgs = [],
@@ -108,6 +108,11 @@ export function HeroQuestionsPanel({
   const [currentSvgIndex, setCurrentSvgIndex] = useState(0)
   const [svgVisible, setSvgVisible] = useState(true)
   const animationRef = useRef<NodeJS.Timeout | null>(null)
+  const theme = useTheme()
+
+  // Margin around the full-screen panel. You can tweak spacing here.
+  const margin = theme.spacing(2) // 16px side & bottom margins
+  const topPadding = `${theme.layout.headerHeight}px` // only header height
 
   // Use title as a single headline if headlines array is empty
   const headlinesArray =
@@ -203,294 +208,311 @@ export function HeroQuestionsPanel({
   }, [headlines, transitionInterval, useSvgQuestions, questionSvgs])
 
   return (
-    <BasePanel
-      fullHeight={true}
-      paddingVariant="wide"
-      includeHeaderSpacing={includeHeaderSpacing}
-      {...panelProps}
+    <Box
       sx={{
-        backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        position: "relative",
+        height: "100%",
+        width: "100%",
+        pt: topPadding,
+        pb: margin,
+        px: margin,
+        boxSizing: "border-box",
         display: "flex",
-        justifyContent: "center",
-        ...panelProps.sx,
+        flexDirection: "column",
+        backgroundColor: theme.palette.common.white,
       }}
     >
-      {/* Overlay circles */}
-      {overlayCircles.length > 0 && (
-        <Box
-          component="svg"
-          sx={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-            zIndex: 0, // below content
-          }}
-        >
-          {/* Add SVG filter definition for shadow */}
-          <defs>
-            <filter
-              id="circle-shadow"
-              x="-25%"
-              y="-25%"
-              width="150%"
-              height="150%"
-            >
-              <feDropShadow
-                dx="0"
-                dy="0"
-                stdDeviation="5"
-                floodColor="rgba(0, 0, 0, 0.25)"
-              />
-            </filter>
-          </defs>
+      <BasePanel
+        fullHeight={true}
+        paddingVariant="wide"
+        includeHeaderSpacing={false}
+        {...panelProps}
+        sx={{
+          backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          position: "relative",
+          display: "flex",
+          justifyContent: "center",
+          borderRadius: theme.borderRadius.card,
+          overflow: "hidden",
+          flex: 1,
+          ...panelProps.sx,
+        }}
+      >
+        {/* Overlay circles */}
+        {overlayCircles.length > 0 && (
+          <Box
+            component="svg"
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              zIndex: 0, // below content
+            }}
+          >
+            {/* Add SVG filter definition for shadow */}
+            <defs>
+              <filter
+                id="circle-shadow"
+                x="-25%"
+                y="-25%"
+                width="150%"
+                height="150%"
+              >
+                <feDropShadow
+                  dx="0"
+                  dy="0"
+                  stdDeviation="5"
+                  floodColor="rgba(0, 0, 0, 0.25)"
+                />
+              </filter>
+            </defs>
 
-          {overlayCircles.map((circle, index) => {
-            // Check if this circle should be visible
-            const isVisible = visibleBubbles.includes(index)
+            {overlayCircles.map((circle, index) => {
+              // Check if this circle should be visible
+              const isVisible = visibleBubbles.includes(index)
 
-            const cx = `calc(50% + ${circle.xPercent}%)`
-            const cy = `calc(50% + ${circle.yPercent}%)`
+              const cx = `calc(50% + ${circle.xPercent}%)`
+              const cy = `calc(50% + ${circle.yPercent}%)`
 
-            return (
-              <circle
-                key={index}
-                cx={cx}
-                cy={cy}
-                r={circle.radius}
-                fill="none"
-                stroke={circle.stroke || "currentColor"}
-                strokeWidth={circle.strokeWidth || 3}
-                opacity={isVisible ? 1 : 0} // Completely fade out when not active
-                style={{
-                  transition: "opacity 1500ms ease-in-out",
-                  filter: "url(#circle-shadow)",
-                }}
-              />
-            )
-          })}
-        </Box>
-      )}
+              return (
+                <circle
+                  key={index}
+                  cx={cx}
+                  cy={cy}
+                  r={circle.radius}
+                  fill="none"
+                  stroke={circle.stroke || "currentColor"}
+                  strokeWidth={circle.strokeWidth || 3}
+                  opacity={isVisible ? 1 : 0} // Completely fade out when not active
+                  style={{
+                    transition: "opacity 1500ms ease-in-out",
+                    filter: "url(#circle-shadow)",
+                  }}
+                />
+              )
+            })}
+          </Box>
+        )}
 
-      {/* SVG Questions */}
-      {useSvgQuestions && questionSvgs.length > 0 && (
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-            zIndex: 1, // above circles, below speech bubbles
-          }}
-        >
-          {questionSvgs.map((svg, index) => {
-            // Only render the current SVG
-            if (index !== currentSvgIndex) return null
+        {/* SVG Questions */}
+        {useSvgQuestions && questionSvgs.length > 0 && (
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              zIndex: 1, // above circles, below speech bubbles
+            }}
+          >
+            {questionSvgs.map((svg, index) => {
+              // Only render the current SVG
+              if (index !== currentSvgIndex) return null
 
-            const left = `calc(50% + ${svg.xPercent}%)`
-            const top = `calc(50% + ${svg.yPercent}%)`
+              const left = `calc(50% + ${svg.xPercent}%)`
+              const top = `calc(50% + ${svg.yPercent}%)`
 
-            return (
-              <Box
-                key={index}
-                component="img"
-                src={svg.src}
-                alt={`Question ${index + 1}`}
-                sx={{
-                  position: "absolute",
-                  left,
-                  top,
-                  width: svg.width,
-                  height: svg.height,
-                  transform: "translate(-50%, -50%)", // Center the SVG at the position
-                  opacity: svgVisible ? 1 : 0,
-                  transition: "opacity 500ms ease-in-out",
-                  filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
-                }}
-              />
-            )
-          })}
-        </Box>
-      )}
-
-      {/* Speech Bubbles */}
-      {overlayCircles.length > 0 && (
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-            zIndex: 2, // above circles and content
-          }}
-        >
-          {overlayCircles.map((circle, index) => {
-            // Skip if no speech bubble text
-            if (!circle.speechBubbleText) return null
-
-            // Get circle position and properties
-            const cx = `calc(50% + ${circle.xPercent}%)`
-            const cy = `calc(50% + ${circle.yPercent}%)`
-            const radius = circle.radius
-            const padding = circle.speechBubblePadding ?? 10
-            const bubbleWidth = circle.speechBubbleWidth ?? 300
-            const variant = circle.speechBubbleVariant ?? "h4"
-
-            // Check if this bubble should be visible
-            const isVisible = visibleBubbles.includes(index)
-
-            // Choose anchor if not specified (based on circle position)
-            const anchor =
-              circle.speechBubbleAnchor ??
-              (circle.xPercent >= 0
-                ? circle.yPercent >= 0
-                  ? "top-left"
-                  : "bottom-left"
-                : circle.yPercent >= 0
-                  ? "top-right"
-                  : "bottom-right")
-
-            // Calculate position and text alignment based on anchor point
-            let left, top, textAlign: "left" | "right" | "center"
-            let boxSx: SxProps<Theme> = {}
-
-            switch (anchor) {
-              case "top-left": // Above and to the left of the circle
-                left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
-                top = `calc(${cy} - ${radius}px - ${padding}px)`
-                textAlign = "right"
-                boxSx = {
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end", // Right align
-                  justifyContent: "flex-start", // Top align
-                }
-                break
-
-              case "top-right": // Above and to the right of the circle
-                left = `calc(${cx} + ${radius}px + ${padding}px)`
-                top = `calc(${cy} - ${radius}px - ${padding}px)`
-                textAlign = "left"
-                boxSx = {
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start", // Left align
-                  justifyContent: "flex-start", // Top align
-                }
-                break
-
-              case "bottom-left": // Below and to the left of the circle
-                left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
-                top = `calc(${cy} + ${radius}px + ${padding}px)`
-                textAlign = "right"
-                boxSx = {
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end", // Right align
-                  justifyContent: "flex-end", // Bottom align
-                }
-                break
-
-              case "bottom-right": // Below and to the right of the circle
-              default:
-                left = `calc(${cx} + ${radius}px + ${padding}px)`
-                top = `calc(${cy} + ${radius}px + ${padding}px)`
-                textAlign = "left"
-                boxSx = {
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start", // Left align
-                  justifyContent: "flex-end", // Bottom align
-                }
-                break
-            }
-
-            return (
-              <Fade key={`bubble-${index}`} in={isVisible} timeout={1800}>
+              return (
                 <Box
+                  key={index}
+                  component="img"
+                  src={svg.src}
+                  alt={`Question ${index + 1}`}
                   sx={{
                     position: "absolute",
                     left,
                     top,
-                    maxWidth: `${bubbleWidth}px`,
-                    minHeight: "200px", // Add minimum height for vertical alignment
-                    pointerEvents: "auto",
-                    ...boxSx, // Apply position-specific styles
+                    width: svg.width,
+                    height: svg.height,
+                    transform: "translate(-50%, -50%)", // Center the SVG at the position
+                    opacity: svgVisible ? 1 : 0,
+                    transition: "opacity 500ms ease-in-out",
+                    filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
                   }}
-                >
-                  <Typography
-                    variant={variant}
-                    color={headlineColor}
-                    sx={{
-                      textAlign,
-                      textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-                    }}
-                  >
-                    {circle.speechBubbleText}
-                  </Typography>
-                </Box>
-              </Fade>
-            )
-          })}
-        </Box>
-      )}
-
-      <Box
-        sx={(theme) => ({
-          display: "flex",
-          flexDirection: "column",
-          height: "auto",
-          width: "100%",
-          maxWidth: "96%",
-          textAlign: "center",
-          position: "relative",
-          zIndex: 1,
-          alignItems: "center",
-          margin: "0 auto",
-          padding: { xs: theme.spacing(1), md: theme.spacing(2) },
-          justifyContent:
-            verticalAlignment === "top"
-              ? "flex-start"
-              : verticalAlignment === "bottom"
-                ? "flex-end"
-                : "center",
-        })}
-      >
-        {/* Show TransitionHeadline only if not using SVG questions */}
-        {!useSvgQuestions && (
-          <TransitionHeadline
-            headlines={headlinesArray}
-            transitionInterval={transitionInterval}
-            variant="h1"
-            color={headlineColor}
-            sx={{
-              marginBottom: content ? 3 : 0,
-              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-            }}
-          />
+                />
+              )
+            })}
+          </Box>
         )}
 
-        {content && (
-          <Typography
-            variant="h5"
-            align="center"
+        {/* Speech Bubbles */}
+        {overlayCircles.length > 0 && (
+          <Box
             sx={{
-              margin: "0 auto",
-              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              zIndex: 2, // above circles and content
             }}
           >
-            {content}
-          </Typography>
+            {overlayCircles.map((circle, index) => {
+              // Skip if no speech bubble text
+              if (!circle.speechBubbleText) return null
+
+              // Get circle position and properties
+              const cx = `calc(50% + ${circle.xPercent}%)`
+              const cy = `calc(50% + ${circle.yPercent}%)`
+              const radius = circle.radius
+              const padding = circle.speechBubblePadding ?? 10
+              const bubbleWidth = circle.speechBubbleWidth ?? 300
+              const variant = circle.speechBubbleVariant ?? "h4"
+
+              // Check if this bubble should be visible
+              const isVisible = visibleBubbles.includes(index)
+
+              // Choose anchor if not specified (based on circle position)
+              const anchor =
+                circle.speechBubbleAnchor ??
+                (circle.xPercent >= 0
+                  ? circle.yPercent >= 0
+                    ? "top-left"
+                    : "bottom-left"
+                  : circle.yPercent >= 0
+                    ? "top-right"
+                    : "bottom-right")
+
+              // Calculate position and text alignment based on anchor point
+              let left, top, textAlign: "left" | "right" | "center"
+              let boxSx: SxProps<Theme> = {}
+
+              switch (anchor) {
+                case "top-left": // Above and to the left of the circle
+                  left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
+                  top = `calc(${cy} - ${radius}px - ${padding}px)`
+                  textAlign = "right"
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end", // Right align
+                    justifyContent: "flex-start", // Top align
+                  }
+                  break
+
+                case "top-right": // Above and to the right of the circle
+                  left = `calc(${cx} + ${radius}px + ${padding}px)`
+                  top = `calc(${cy} - ${radius}px - ${padding}px)`
+                  textAlign = "left"
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start", // Left align
+                    justifyContent: "flex-start", // Top align
+                  }
+                  break
+
+                case "bottom-left": // Below and to the left of the circle
+                  left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
+                  top = `calc(${cy} + ${radius}px + ${padding}px)`
+                  textAlign = "right"
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end", // Right align
+                    justifyContent: "flex-end", // Bottom align
+                  }
+                  break
+
+                case "bottom-right": // Below and to the right of the circle
+                default:
+                  left = `calc(${cx} + ${radius}px + ${padding}px)`
+                  top = `calc(${cy} + ${radius}px + ${padding}px)`
+                  textAlign = "left"
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start", // Left align
+                    justifyContent: "flex-end", // Bottom align
+                  }
+                  break
+              }
+
+              return (
+                <Fade key={`bubble-${index}`} in={isVisible} timeout={1800}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      left,
+                      top,
+                      maxWidth: `${bubbleWidth}px`,
+                      minHeight: "200px", // Add minimum height for vertical alignment
+                      pointerEvents: "auto",
+                      ...boxSx, // Apply position-specific styles
+                    }}
+                  >
+                    <Typography
+                      variant={variant}
+                      color={headlineColor}
+                      sx={{
+                        textAlign,
+                        textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+                      }}
+                    >
+                      {circle.speechBubbleText}
+                    </Typography>
+                  </Box>
+                </Fade>
+              )
+            })}
+          </Box>
         )}
 
-        {children}
-      </Box>
-    </BasePanel>
+        <Box
+          sx={(theme) => ({
+            display: "flex",
+            flexDirection: "column",
+            height: "auto",
+            width: "100%",
+            maxWidth: "96%",
+            textAlign: "center",
+            position: "relative",
+            zIndex: 1,
+            alignItems: "center",
+            margin: "0 auto",
+            padding: { xs: theme.spacing(1), md: theme.spacing(2) },
+            justifyContent:
+              verticalAlignment === "top"
+                ? "flex-start"
+                : verticalAlignment === "bottom"
+                  ? "flex-end"
+                  : "center",
+          })}
+        >
+          {/* Show TransitionHeadline only if not using SVG questions */}
+          {!useSvgQuestions && (
+            <TransitionHeadline
+              headlines={headlinesArray}
+              transitionInterval={transitionInterval}
+              variant="h1"
+              color={headlineColor}
+              sx={{
+                marginBottom: content ? 3 : 0,
+                textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+              }}
+            />
+          )}
+
+          {content && (
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{
+                margin: "0 auto",
+                textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+              }}
+            >
+              {content}
+            </Typography>
+          )}
+
+          {children}
+        </Box>
+      </BasePanel>
+    </Box>
   )
 }
