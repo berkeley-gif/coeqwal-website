@@ -547,7 +547,7 @@ export function HeroQuestionsPanel({
           variant="h1"
           sx={{
             fontFamily: '"akzidenz-grotesk-next-pro", sans-serif',
-            fontWeight: 600,
+            fontWeight: 800,
             color: "common.black",
             fontSize: { xs: "2.5rem", sm: "3.5rem", md: "8rem" },
           }}
