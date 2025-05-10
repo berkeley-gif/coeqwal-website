@@ -113,7 +113,7 @@ export default function HeroSection() {
       }}
     >
       <HeroQuestionsPanel
-        backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
+        backgroundImage="/images/premium_photo-1700063706147-de2eeb8a578d.jpg"
         verticalAlignment="top"
         background="transparent"
         includeHeaderSpacing={false}

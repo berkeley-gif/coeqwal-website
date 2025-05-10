@@ -50,7 +50,7 @@ const themeValues = {
 
   // Layout dimensions
   layout: {
-    headerHeight: 64,
+    headerHeight: 56,
     drawer: {
       width: 226,
       closedWidth: 52,
@@ -764,6 +764,17 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.card,
+        }),
+      },
+    },
+    MuiToolbar: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          height: 56,
+          minHeight: 56,
+          [theme.breakpoints.up("sm")]: {
+            minHeight: 56,
+          },
         }),
       },
     },

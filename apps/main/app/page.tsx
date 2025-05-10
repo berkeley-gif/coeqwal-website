@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react"
 import { Box } from "@repo/ui/mui"
-import { Header } from "@repo/ui"
+import { HeaderHome } from "@repo/ui"
 import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
@@ -22,7 +22,7 @@ import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 
-// Make sure these IDs match the section IDs used in the Header component
+// Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
   hero: "hero",
   interstitial: "interstitial",
@@ -235,9 +235,9 @@ export default function Home() {
           width: "100%",
         }}
       >
-        {/* Header */}
+        {/* HeaderHome */}
         <Box sx={{ pointerEvents: "auto" }}>
-          <Header
+          <HeaderHome
             activeSection={activeSection}
             onSectionClick={handleSectionClick}
             showSecondaryNav={false}

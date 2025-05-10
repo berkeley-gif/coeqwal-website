@@ -1,10 +1,10 @@
 /**
  * Custom components exports file.
- * Organized by category for ease of use.
  */
 
 // Navigation components
 export { Header } from "./navigation/Header"
+export { HeaderHome } from "./navigation/HeaderHome"
 export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { LearnMoreButton } from "./navigation/LearnMoreButton"
