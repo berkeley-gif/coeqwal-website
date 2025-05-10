@@ -5,7 +5,8 @@ import { useState, useEffect, useRef } from "react"
 import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { TransitionHeadline } from "../common/TransitionHeadline"
 import { Fade } from "@mui/material"
-import { SxProps, Theme } from "@mui/material/styles"
+import { SxProps } from "@mui/material/styles"
+import type { Theme as AppTheme } from "@mui/material/styles"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
@@ -117,7 +118,9 @@ export function HeroQuestionsPanel({
 
   // Margin around the full-screen panel. You can tweak spacing here.
   const margin = theme.spacing(2)
-  const headerHeight = (theme as any).layout?.headerHeight ?? 56
+  const headerHeight = (
+    theme as AppTheme & { layout?: { headerHeight?: number } }
+  ).layout?.headerHeight ?? 56
   const topPadding = `${headerHeight + parseInt(margin, 10)}px`
 
   // Use title as a single headline if headlines array is empty
@@ -239,7 +242,7 @@ export function HeroQuestionsPanel({
           position: "relative",
           display: "flex",
           justifyContent: "center",
-          borderRadius: (theme as any).borderRadius?.card || 12,
+          borderRadius: 1,
           overflow: "hidden",
           flex: 1,
           ...panelProps.sx,
@@ -400,8 +403,10 @@ export function HeroQuestionsPanel({
                     : "bottom-right")
 
               // Calculate position and text alignment based on anchor point
-              let left, top, textAlign: "left" | "right" | "center"
-              let boxSx: SxProps<Theme> = {}
+              let left: string = ""
+              let top: string = ""
+              let textAlign: "left" | "right" | "center" = "left"
+              let boxSx: SxProps = {}
 
               switch (anchor) {
                 case "top-left": // Above and to the left of the circle
@@ -462,9 +467,9 @@ export function HeroQuestionsPanel({
                       left,
                       top,
                       maxWidth: `${bubbleWidth}px`,
-                      minHeight: "200px", // Add minimum height for vertical alignment
+                      minHeight: "200px", // Maintain bubble height for vertical alignment
                       pointerEvents: "auto",
-                      ...boxSx, // Apply position-specific styles
+                      ...boxSx, // Merge anchor-specific styles
                     }}
                   >
                     <Typography
