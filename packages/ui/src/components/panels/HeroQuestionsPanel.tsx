@@ -68,6 +68,9 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
   }>
   /** Whether to use SVGs instead of text headlines */
   useSvgQuestions?: boolean
+  // New bottom content
+  bottomHeadline?: string
+  bottomText?: string
 }
 
 /**
@@ -101,6 +104,8 @@ export function HeroQuestionsPanel({
   overlayCircles = [],
   questionSvgs = [],
   useSvgQuestions = false,
+  bottomHeadline = "Learn. Empower. Act.",
+  bottomText = "Our water connects us. Explore California's water system and discover possibilities for the future of water in our state.",
   ...panelProps
 }: HeroQuestionsPanelProps) {
   const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
@@ -111,8 +116,9 @@ export function HeroQuestionsPanel({
   const theme = useTheme()
 
   // Margin around the full-screen panel. You can tweak spacing here.
-  const margin = theme.spacing(2) // 16px side & bottom margins
-  const topPadding = `${theme.layout.headerHeight}px` // only header height
+  const margin = theme.spacing(2)
+  const headerHeight = (theme as any).layout?.headerHeight ?? 56
+  const topPadding = `${headerHeight + parseInt(margin, 10)}px`
 
   // Use title as a single headline if headlines array is empty
   const headlinesArray =
@@ -222,8 +228,8 @@ export function HeroQuestionsPanel({
       }}
     >
       <BasePanel
-        fullHeight={true}
-        paddingVariant="wide"
+        fullHeight={false}
+        paddingVariant="none"
         includeHeaderSpacing={false}
         {...panelProps}
         sx={{
@@ -233,12 +239,28 @@ export function HeroQuestionsPanel({
           position: "relative",
           display: "flex",
           justifyContent: "center",
-          borderRadius: theme.borderRadius.card,
+          borderRadius: (theme as any).borderRadius?.card || 12,
           overflow: "hidden",
           flex: 1,
           ...panelProps.sx,
         }}
       >
+        {/* Foreground image */}
+        {backgroundImage && (
+          <Box
+            component="img"
+            src={backgroundImage}
+            alt="hero background"
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
+
         {/* Overlay circles */}
         {overlayCircles.length > 0 && (
           <Box
@@ -513,6 +535,24 @@ export function HeroQuestionsPanel({
           {children}
         </Box>
       </BasePanel>
+
+      {/* Bottom headline & text */}
+      <Box sx={{ mt: margin, mb: theme.spacing(10), textAlign: "center" }}>
+        <Typography
+          variant="h1"
+          sx={{
+            fontFamily: '"akzidenz-grotesk-next-pro", sans-serif',
+            fontWeight: 500,
+            color: "common.black",
+            fontSize: { xs: "2.5rem", sm: "3.5rem", md: "8rem" },
+          }}
+        >
+          {bottomHeadline}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "common.black", mt: 1 }}>
+          {bottomText}
+        </Typography>
+      </Box>
     </Box>
   )
 }
