@@ -28,7 +28,6 @@ export { default as CustomScrollContainer } from "./common/CustomScrollContainer
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
 export { HeroPanel } from "./panels/HeroPanel"
-export { HeroQuestionsPanel } from "./panels/HeroQuestionsPanel"
 export { TwoColumnPanel } from "./panels/TwoColumnPanel"
 export { VideoPanel } from "./panels/VideoPanel"
 

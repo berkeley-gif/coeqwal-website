@@ -7,7 +7,8 @@
     "./themes/ThemeRegistry": "./src/themes/ThemeRegistry.tsx",
     "./themes/theme": "./src/themes/theme.tsx",
     "./mui": "./src/mui-components.tsx",
-    "./hooks": "./src/hooks/index.ts"
+    "./hooks": "./src/hooks/index.ts",
+    "./panels/HeroQuestionsPanel": "./src/components/panels/HeroQuestionsPanel.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -35,5 +36,6 @@
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
     "@repo/i18n": "workspace:*"
-  }
+  },
+  "sideEffects": false
 }
