@@ -111,36 +111,16 @@ export function HeroQuestionsPanel({
   ...panelProps
 }: HeroQuestionsPanelProps) {
   const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
-  // Track which SVG question is currently visible
-  const [currentSvgIndex, setCurrentSvgIndex] = useState(0)
-  const [svgVisible, setSvgVisible] = useState(true)
   const animationRef = useRef<NodeJS.Timeout | null>(null)
   const theme = useTheme()
-
-  /* ===== panel size tracking ===== */
-  const panelRef = useRef<HTMLDivElement | null>(null)
-  const [panelSize, setPanelSize] = useState({ width: 0, height: 0 })
-
-  useEffect(() => {
-    if (!panelRef.current) return
-
-    // Observe size changes so the clamping logic stays accurate on resize
-    const resizeObserver = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect
-      setPanelSize({ width, height })
-    })
-
-    resizeObserver.observe(panelRef.current)
-
-    return () => resizeObserver.disconnect()
-  }, [])
 
   // Margin around the full-screen panel. You can tweak spacing here.
   const margin = theme.spacing(2)
   const headerHeight =
     (theme as AppTheme & { layout?: { headerHeight?: number } }).layout
       ?.headerHeight ?? 56
-  const topPadding = `${headerHeight + parseInt(margin, 10)}px`
+  // const topPadding = `${headerHeight + parseInt(margin, 10)}px`
+  const topPadding = `${headerHeight}px`
 
   // Use title as a single headline if headlines array is empty
   const headlinesArray =
@@ -209,32 +189,6 @@ export function HeroQuestionsPanel({
     }
   }, [overlayCircles.length, transitionInterval, overlayCircles])
 
-  // Set up headline transition
-  useEffect(() => {
-    if (!useSvgQuestions && headlines.length <= 1) return
-    if (useSvgQuestions && questionSvgs.length <= 1) return
-
-    // const totalItems = useSvgQuestions ? questionSvgs.length : headlines.length
-
-    const interval = setInterval(() => {
-      if (useSvgQuestions) {
-        // Fade out current SVG
-        setSvgVisible(false)
-
-        // Change SVG and fade in after transition
-        setTimeout(() => {
-          setCurrentSvgIndex((prev) => (prev + 1) % questionSvgs.length)
-          setSvgVisible(true)
-        }, 500)
-      } else {
-        // Original headline transition
-        setCurrentSvgIndex((prev) => (prev + 1) % headlines.length)
-      }
-    }, transitionInterval)
-
-    return () => clearInterval(interval)
-  }, [headlines, transitionInterval, useSvgQuestions, questionSvgs])
-
   return (
     <Box
       sx={{
@@ -254,7 +208,6 @@ export function HeroQuestionsPanel({
         paddingVariant="none"
         includeHeaderSpacing={false}
         {...panelProps}
-        ref={panelRef}
         sx={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
