@@ -34,10 +34,11 @@ export default function InterstitialPanel() {
     >
       <BasePanel
         fullHeight={false}
-        background="interstitial"
         paddingVariant="very-wide"
         includeHeaderSpacing={false}
         sx={{
+          backgroundColor: "#2f84ab",
+          color: "white",
           alignItems: "center",
           justifyContent: "center",
           pointerEvents: "auto",
@@ -46,6 +47,9 @@ export default function InterstitialPanel() {
       >
         <Box maxWidth="1000px">
           <Stack spacing={2}>
+            <Typography variant="h2" sx={{ fontWeight: 500 }}>
+              What is California&apos;s water future?
+            </Typography>
             <Typography variant="body2">
               <Box component="span" sx={{ fontWeight: 600 }}>
                 {t("interstitial.boldText")}

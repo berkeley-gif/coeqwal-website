@@ -68,8 +68,6 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
     /** Optional delay for this SVG in ms (added to the sequence timing) */
     delay?: number
   }>
-  /** Whether to use SVGs instead of text headlines */
-  useSvgQuestions?: boolean
   // New bottom content
   bottomHeadline?: string
   bottomText?: string
@@ -105,7 +103,6 @@ export function HeroQuestionsPanel({
   headlineColor,
   overlayCircles = [],
   questionSvgs = [],
-  useSvgQuestions = false,
   bottomHeadline = "Learn. Empower. Act.",
   bottomText = "Explore California's water system and discover possibilities for the future of water in our state.",
   ...panelProps
@@ -296,7 +293,7 @@ export function HeroQuestionsPanel({
         )}
 
         {/* Foreground photo + question SVGs */}
-        {useSvgQuestions && questionSvgs.length > 0 && (
+        {questionSvgs.length > 0 && (
           <PhotoWithQuestions
             src={backgroundImage ?? ""}
             questionSvgs={questionSvgs}
@@ -451,7 +448,6 @@ export function HeroQuestionsPanel({
           })}
         >
           {/* Show TransitionHeadline only if not using SVG questions */}
-          {!useSvgQuestions && (
             <TransitionHeadline
               headlines={headlinesArray}
               transitionInterval={transitionInterval}
@@ -462,7 +458,6 @@ export function HeroQuestionsPanel({
                 textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
               }}
             />
-          )}
 
           {content && (
             <Typography

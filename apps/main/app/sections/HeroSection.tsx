@@ -120,7 +120,6 @@ export default function HeroSection() {
         includeHeaderSpacing={false}
         headlineColor="common.white"
         questionSvgs={questionSvgs}
-        useSvgQuestions={true}
         transitionInterval={6000}
         sx={{
           backgroundSize: "cover",

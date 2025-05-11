@@ -67,7 +67,12 @@ export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
   if (questionSvgs.length === 0) {
     return (
       <Box sx={{ width: "100%", height: "100%" }}>
-        <Box component="img" src={src} alt="hero foreground" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <Box
+          component="img"
+          src={src}
+          alt="hero foreground"
+          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
       </Box>
     )
   }

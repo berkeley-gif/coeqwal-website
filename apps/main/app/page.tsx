@@ -13,7 +13,7 @@ import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
 import HeroSection from "./sections/HeroSection"
 import ContentPanels from "./sections/ContentPanels"
-// import InterstitialPanel from "./sections/InterstitialPanel"
+import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
@@ -255,11 +255,11 @@ export default function Home() {
           {/* Landing Panel */}
           <HeroSection />
 
+          {/* Interstitial Panel */}
+          <InterstitialPanel />
+
           {/* Content Panels */}
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
-
-          {/* Interstitial Panel */}
-          {/* <InterstitialPanel /> */}
 
           {/* Combined Panel */}
           <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
