@@ -50,13 +50,9 @@ export default function InterstitialPanel() {
             <Typography variant="h2" sx={{ fontWeight: 500 }}>
               What is California&apos;s water future?
             </Typography>
-            <Typography variant="body2">
-              <Box component="span" sx={{ fontWeight: 600 }}>
-                {t("interstitial.boldText")}
-              </Box>
-              {" " + t("interstitial.part1")}
-            </Typography>
+            <Typography variant="body2">{t("interstitial.part1")}</Typography>
             <Typography variant="body2">{t("interstitial.part2")}</Typography>
+            <Typography variant="body2">{t("interstitial.part3")}</Typography>
           </Stack>
         </Box>
 

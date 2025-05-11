@@ -448,16 +448,16 @@ export function HeroQuestionsPanel({
           })}
         >
           {/* Show TransitionHeadline only if not using SVG questions */}
-            <TransitionHeadline
-              headlines={headlinesArray}
-              transitionInterval={transitionInterval}
-              variant="h1"
-              color={headlineColor}
-              sx={{
-                marginBottom: content ? 3 : 0,
-                textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-              }}
-            />
+          <TransitionHeadline
+            headlines={headlinesArray}
+            transitionInterval={transitionInterval}
+            variant="h1"
+            color={headlineColor}
+            sx={{
+              marginBottom: content ? 3 : 0,
+              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
+            }}
+          />
 
           {content && (
             <Typography
