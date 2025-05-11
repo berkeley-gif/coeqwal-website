@@ -67,8 +67,8 @@ export default function HeroSection() {
   const questionSvgs = [
     {
       src: "/images/question1.svg",
-      xPercent: -20,
-      yPercent: 0,
+      xPercent: -30,
+      yPercent: 10,
       width: 360,
       height: 360,
     },
@@ -96,7 +96,7 @@ export default function HeroSection() {
     {
       src: "/images/question5.svg",
       xPercent: 28,
-      yPercent: 28,
+      yPercent: 50,
       width: 460,
       height: 460,
     },
@@ -113,7 +113,7 @@ export default function HeroSection() {
       }}
     >
       <HeroQuestionsPanel
-        backgroundImage="/images/premium_photo-1700063706147-de2eeb8a578d.jpg"
+        backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
         verticalAlignment="top"
         background="light"
         fullHeight={false}

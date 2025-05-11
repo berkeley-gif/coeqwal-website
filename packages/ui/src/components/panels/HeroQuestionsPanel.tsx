@@ -7,6 +7,7 @@ import { TransitionHeadline } from "../common/TransitionHeadline"
 import { Fade } from "@mui/material"
 import { SxProps } from "@mui/material/styles"
 import type { Theme as AppTheme } from "@mui/material/styles"
+import { PhotoWithQuestions } from "./PhotoWithQuestions"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
@@ -116,11 +117,29 @@ export function HeroQuestionsPanel({
   const animationRef = useRef<NodeJS.Timeout | null>(null)
   const theme = useTheme()
 
+  /* ===== panel size tracking ===== */
+  const panelRef = useRef<HTMLDivElement | null>(null)
+  const [panelSize, setPanelSize] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    if (!panelRef.current) return
+
+    // Observe size changes so the clamping logic stays accurate on resize
+    const resizeObserver = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect
+      setPanelSize({ width, height })
+    })
+
+    resizeObserver.observe(panelRef.current)
+
+    return () => resizeObserver.disconnect()
+  }, [])
+
   // Margin around the full-screen panel. You can tweak spacing here.
   const margin = theme.spacing(2)
-  const headerHeight = (
-    theme as AppTheme & { layout?: { headerHeight?: number } }
-  ).layout?.headerHeight ?? 56
+  const headerHeight =
+    (theme as AppTheme & { layout?: { headerHeight?: number } }).layout
+      ?.headerHeight ?? 56
   const topPadding = `${headerHeight + parseInt(margin, 10)}px`
 
   // Use title as a single headline if headlines array is empty
@@ -235,6 +254,7 @@ export function HeroQuestionsPanel({
         paddingVariant="none"
         includeHeaderSpacing={false}
         {...panelProps}
+        ref={panelRef}
         sx={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           backgroundSize: "cover",
@@ -322,46 +342,13 @@ export function HeroQuestionsPanel({
           </Box>
         )}
 
-        {/* SVG Questions */}
+        {/* Foreground photo + question SVGs */}
         {useSvgQuestions && questionSvgs.length > 0 && (
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              zIndex: 1, // above circles, below speech bubbles
-            }}
-          >
-            {questionSvgs.map((svg, index) => {
-              // Only render the current SVG
-              if (index !== currentSvgIndex) return null
-
-              const left = `calc(50% + ${svg.xPercent}%)`
-              const top = `calc(50% + ${svg.yPercent}%)`
-
-              return (
-                <Box
-                  key={index}
-                  component="img"
-                  src={svg.src}
-                  alt={`Question ${index + 1}`}
-                  sx={{
-                    position: "absolute",
-                    left,
-                    top,
-                    width: svg.width,
-                    height: svg.height,
-                    transform: "translate(-50%, -50%)", // Center the SVG at the position
-                    opacity: svgVisible ? 1 : 0,
-                    transition: "opacity 500ms ease-in-out",
-                    filter: "drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.25))",
-                  }}
-                />
-              )
-            })}
-          </Box>
+          <PhotoWithQuestions
+            src={backgroundImage ?? ""}
+            questionSvgs={questionSvgs}
+            transitionInterval={transitionInterval}
+          />
         )}
 
         {/* Speech Bubbles */}
