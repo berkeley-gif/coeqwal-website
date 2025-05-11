@@ -107,7 +107,7 @@ export function HeroQuestionsPanel({
   questionSvgs = [],
   useSvgQuestions = false,
   bottomHeadline = "Learn. Empower. Act.",
-  bottomText = "Our water connects us. Explore California's water system and discover possibilities for the future of water in our state.",
+  bottomText = "Explore California's water system and discover possibilities for the future of water in our state.",
   ...panelProps
 }: HeroQuestionsPanelProps) {
   const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
@@ -489,7 +489,9 @@ export function HeroQuestionsPanel({
             fontFamily: '"akzidenz-grotesk-next-pro", sans-serif',
             fontWeight: 800,
             color: "common.black",
-            fontSize: { xs: "2.5rem", sm: "3.5rem", md: "8rem" },
+            whiteSpace: "nowrap",
+            lineHeight: 1.1,
+            fontSize: "clamp(2rem, 6vw, 6rem)",
           }}
         >
           {bottomHeadline}

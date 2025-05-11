@@ -34,6 +34,7 @@ export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
   useEffect(() => {
     if (!wrapperRef.current) return
     const ro = new ResizeObserver(([entry]) => {
+      if (!entry) return
       const { width, height } = entry.contentRect
       setSize({ w: width, h: height })
     })
@@ -54,14 +55,22 @@ export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
     return () => clearInterval(id)
   }, [questionSvgs.length, transitionInterval])
 
-  const svg = questionSvgs[index]
-  // compute clamped positions
+  const svg = questionSvgs[index]!
   const maxX = size.w ? 50 - (svg.width / 2 / size.w) * 100 : 50
   const maxY = size.h ? 50 - (svg.height / 2 / size.h) * 100 : 50
   const safeX = Math.max(-maxX, Math.min(svg.xPercent, maxX))
   const safeY = Math.max(-maxY, Math.min(svg.yPercent, maxY))
   const left = `calc(50% + ${safeX}%)`
   const top = `calc(50% + ${safeY}%)`
+
+  // If no SVGs supplied, render just the photo
+  if (questionSvgs.length === 0) {
+    return (
+      <Box sx={{ width: "100%", height: "100%" }}>
+        <Box component="img" src={src} alt="hero foreground" sx={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      </Box>
+    )
+  }
 
   return (
     <Box
