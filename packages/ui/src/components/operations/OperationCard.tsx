@@ -150,6 +150,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
             variant="body2"
             sx={{
               mr: theme.spacing(0.25),
+              mb: 0,
               fontSize: (theme) => theme.cards.typography.caption.fontSize,
               fontWeight: (theme) => theme.cards.typography.caption.fontWeight,
               opacity: 0.8,
@@ -225,6 +226,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
                   lineHeight: (theme) =>
                     theme.cards.typography.caption.lineHeight,
                   letterSpacing: "0.01em",
+                  mb: 0,
                 }}
               >
                 {option.label}

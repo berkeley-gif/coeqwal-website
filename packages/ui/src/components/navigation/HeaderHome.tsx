@@ -107,7 +107,7 @@ export function HeaderHome({
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: "white",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
         borderBottom: "none",
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
