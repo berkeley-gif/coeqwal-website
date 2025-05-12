@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Drawer, useTheme, Fade, Typography } from "@mui/material"
+import { Box, Drawer, useTheme, Typography, Fade } from "@mui/material"
 
 // Content components
 import {
@@ -117,6 +117,12 @@ export interface MultiDrawerProps {
    * Optional drawer content that can be passed to drawer components
    */
   drawerContent?: Record<string, unknown>
+
+  /**
+   * Controls visibility of the rail+drawer from parent (used for scroll fade).
+   * If omitted, component is always visible.
+   */
+  visible?: boolean
 }
 
 // Map of tab keys to display titles
@@ -140,6 +146,7 @@ export function MultiDrawer({
   activeTab: controlledActiveTab,
   overlay = false,
   drawerContent = {},
+  visible = true,
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -193,54 +200,61 @@ export function MultiDrawer({
   return (
     <>
       {/* Mini rail with vertical tab buttons */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: "50%", // Position at middle of window height
-          right: 0, // Keep in fixed position
-          transform: "translateY(-50%)", // Center vertically
-          opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
-          visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
-          zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 0, // No gap between buttons
-          overflow: "hidden", // Ensure child border-radius is respected
-          p: 0, // No padding
-          backgroundColor: "transparent", // Transparent background
-          border: "none", // No border
-          boxShadow: "none", // No shadow
-          transition: theme.transitions.create(["opacity", "visibility"], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        }}
+      <Fade
+        in={!drawerOpen && visible}
+        timeout={600}
+        mountOnEnter
+        unmountOnExit
       >
-        <RailButton
-          label="LEARN ABOUT WATER"
-          onClick={() => toggleTab("learn")}
-          active={activeTab === "learn"}
-          bgColor="rgb(128, 175, 196)" /* #80AFC4 */
-          hoverColor="rgb(113, 160, 181)" /* #71A0B5 */
-          topButton
-        />
-        <RailButton
-          label="CURRENT OPERATIONS"
-          onClick={() => toggleTab("currentOps")}
-          active={activeTab === "currentOps"}
-          bgColor="rgb(106, 155, 170)" /* #6A9BAA */
-          hoverColor="rgb(94, 141, 156)" /* #5E8D9C */
-        />
-        <RailButton
-          label="SCENARIO THEMES"
-          onClick={() => toggleTab("themes")}
-          active={activeTab === "themes"}
-          bgColor="rgb(87, 137, 154)" /* #57899A */
-          hoverColor="rgb(76, 123, 138)" /* #4C7B8A */
-          bottomButton
-        />
-      </Box>
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%", // Position at middle of window height
+            right: 0, // Keep in fixed position
+            transform: "translateY(-50%)", // Center vertically
+            opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
+            visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
+            zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 0, // No gap between buttons
+            overflow: "hidden", // Ensure child border-radius is respected
+            p: 0, // No padding
+            backgroundColor: "transparent", // Transparent background
+            border: "none", // No border
+            boxShadow: "none", // No shadow
+            transition: theme.transitions.create(["opacity", "visibility"], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          }}
+        >
+          <RailButton
+            label="LEARN ABOUT WATER"
+            onClick={() => toggleTab("learn")}
+            active={activeTab === "learn"}
+            bgColor="rgb(128, 175, 196)" /* #80AFC4 */
+            hoverColor="rgb(113, 160, 181)" /* #71A0B5 */
+            topButton
+          />
+          <RailButton
+            label="CURRENT OPERATIONS"
+            onClick={() => toggleTab("currentOps")}
+            active={activeTab === "currentOps"}
+            bgColor="rgb(106, 155, 170)" /* #6A9BAA */
+            hoverColor="rgb(94, 141, 156)" /* #5E8D9C */
+          />
+          <RailButton
+            label="SCENARIO THEMES"
+            onClick={() => toggleTab("themes")}
+            active={activeTab === "themes"}
+            bgColor="rgb(87, 137, 154)" /* #57899A */
+            hoverColor="rgb(76, 123, 138)" /* #4C7B8A */
+            bottomButton
+          />
+        </Box>
+      </Fade>
 
       {/* Main drawer with dynamic content */}
       <Drawer

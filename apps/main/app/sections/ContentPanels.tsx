@@ -142,7 +142,7 @@ export default function ContentPanels({
   )
 
   return (
-    <>
+    <Box id="content-panels">
       {/* First Panel - Deep blue background */}
       <BasePanel
         paddingVariant="very-wide"
@@ -235,6 +235,6 @@ export default function ContentPanels({
           </Grid>
         </Grid>
       </BasePanel>
-    </>
+    </Box>
   )
 }

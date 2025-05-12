@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef } from "react"
+import React, { useState, useRef, useEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { HeaderHome } from "@repo/ui"
 import type { TabKey } from "@repo/ui"
@@ -21,6 +21,7 @@ import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
+import { Slide } from "@mui/material"
 
 // Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
@@ -51,6 +52,22 @@ export default function Home() {
   const uncontrolledRef = useRef<MapboxMapRef | null>(
     null,
   ) as React.RefObject<MapboxMapRef>
+
+  // Show drawer after content panels moved up 50% of viewport
+  const [showDrawer, setShowDrawer] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const elem = document.getElementById("content-panels")
+      if (!elem) return
+      const rect = elem.getBoundingClientRect()
+      const threshold = window.innerHeight * 0.5
+      setShowDrawer(rect.top < threshold)
+    }
+    handleScroll()
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
@@ -224,7 +241,15 @@ export default function Home() {
       </Box>
 
       {/* ===== MultiDrawer with tabs ===== */}
-      <StoreConnectedMultiDrawer drawerWidth={360} overlay={true} />
+      <Slide in={showDrawer} timeout={600} mountOnEnter unmountOnExit>
+        <Box>
+          <StoreConnectedMultiDrawer
+            drawerWidth={360}
+            overlay={true}
+            visible={showDrawer}
+          />
+        </Box>
+      </Slide>
 
       {/* ===== Main Content Area ===== */}
       <Box

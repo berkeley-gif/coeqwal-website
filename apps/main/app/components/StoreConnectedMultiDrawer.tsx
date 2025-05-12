@@ -4,9 +4,10 @@ import React from "react"
 import { MultiDrawer, TabKey } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 
-interface StoreConnectedMultiDrawerProps {
+export interface StoreConnectedMultiDrawerProps {
   drawerWidth?: number
   overlay?: boolean
+  visible?: boolean
 }
 
 /**
@@ -17,6 +18,7 @@ interface StoreConnectedMultiDrawerProps {
 export function StoreConnectedMultiDrawer({
   drawerWidth = 360,
   overlay = false,
+  visible = true,
 }: StoreConnectedMultiDrawerProps) {
   // Get state and actions from the Zustand store
   const { activeTab, setActiveTab, content } = useDrawerStore()
@@ -36,6 +38,7 @@ export function StoreConnectedMultiDrawer({
       onDrawerStateChange={handleDrawerStateChange}
       activeTab={activeTab}
       overlay={overlay}
+      visible={visible}
       drawerContent={content}
     />
   )
