@@ -406,7 +406,7 @@ export function HeroQuestionsPanel({
         >
           {bottomHeadline}
         </Typography>
-        <Typography variant="body2" sx={{ color: "common.black", mt: 1 }}>
+        <Typography variant="body2" sx={{ color: "common.black" }}>
           {bottomText}
         </Typography>
       </Box>
