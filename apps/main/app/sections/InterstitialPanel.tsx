@@ -46,7 +46,7 @@ export default function InterstitialPanel() {
         }}
       >
         <Box maxWidth="1000px">
-          <Stack spacing={2}>
+          <Stack spacing={4}>
             <Typography variant="h2" sx={{ fontWeight: 500 }}>
               What is California&apos;s water future?
             </Typography>

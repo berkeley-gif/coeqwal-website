@@ -778,6 +778,16 @@ const theme = createTheme({
         }),
       },
     },
+    MuiTypography: {
+      variants: [
+        {
+          props: { variant: "body2" },
+          style: ({ theme }) => ({
+            marginBottom: theme.spacing(4), // 32px between body2 paragraphs
+          }),
+        },
+      ],
+    },
   },
   mixins: {
     ...baseTheme.mixins,
