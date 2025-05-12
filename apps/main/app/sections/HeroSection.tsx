@@ -1,4 +1,4 @@
-import { HeroQuestionsPanel } from "@repo/ui/panels/HeroQuestionsPanel"
+import { HeroQuestionsPanel } from "../features/heroQuestionsPanel/HeroQuestionsPanel"
 import { Box } from "@repo/ui/mui"
 import { ScrollDownIcon } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"

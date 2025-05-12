@@ -30,6 +30,7 @@ export { BasePanel } from "./panels/BasePanel"
 export { HeroPanel } from "./panels/HeroPanel"
 export { TwoColumnPanel } from "./panels/TwoColumnPanel"
 export { VideoPanel } from "./panels/VideoPanel"
+export type { BasePanelProps } from "./panels/BasePanel"
 
 // Operation components
 export { default as OperationCard } from "./operations/OperationCard"

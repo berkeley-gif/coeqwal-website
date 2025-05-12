@@ -20,7 +20,11 @@
     "@repo/viz": "workspace:*",
     "@repo/state": "workspace:*",
     "@repo/motion": "workspace:*",
-    "next": "^15.2.1"
+    "next": "^15.2.1",
+    "@mui/material": "^7.0.1",
+    "@mui/icons-material": "^7.0.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

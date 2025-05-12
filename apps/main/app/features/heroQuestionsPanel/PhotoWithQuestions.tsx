@@ -109,4 +109,4 @@ export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
       </Fade>
     </Box>
   )
-}
+} 

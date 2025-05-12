@@ -2,12 +2,12 @@
 
 import { Box, Typography, useTheme } from "@mui/material"
 import { useState, useEffect, useRef } from "react"
-import { BasePanel, type BasePanelProps } from "./BasePanel"
-import { TransitionHeadline } from "../common/TransitionHeadline"
-import { Fade } from "@mui/material"
-import { SxProps } from "@mui/material/styles"
+import { BasePanel, TransitionHeadline } from "@repo/ui"
 import type { Theme as AppTheme } from "@mui/material/styles"
 import { PhotoWithQuestions } from "./PhotoWithQuestions"
+import { Fade } from "@mui/material"
+import { SxProps } from "@mui/material/styles"
+import type { BasePanelProps } from "@repo/ui"
 
 interface HeroQuestionsPanelProps extends BasePanelProps {
   title?: string // Title optional
@@ -73,24 +73,6 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
   bottomText?: string
 }
 
-/**
- * HeroQuestionsPanel Component
- *
- * A full-height panel with transitioning headlines and content.
- * Designed to showcase questions or prompts that change over time.
- *
- * @example
- * <HeroQuestionsPanel
- *   headlines={[
- *     "How can we balance California's water needs?",
- *     "What scenarios improve salmon survival?",
- *     "Can we meet urban and agricultural demand?"
- *   ]}
- *   content="Explore scenarios across the state's water system"
- *   backgroundImage="/images/hero-background.jpg"
- *   verticalAlignment="center"
- * />
- */
 export function HeroQuestionsPanel({
   title,
   headlines = [],
@@ -99,7 +81,6 @@ export function HeroQuestionsPanel({
   verticalAlignment = "center",
   children,
   transitionInterval = 4000,
-  // includeHeaderSpacing = true,
   headlineColor,
   overlayCircles = [],
   questionSvgs = [],
@@ -116,73 +97,44 @@ export function HeroQuestionsPanel({
   const headerHeight =
     (theme as AppTheme & { layout?: { headerHeight?: number } }).layout
       ?.headerHeight ?? 56
-  // const topPadding = `${headerHeight + parseInt(margin, 10)}px`
   const topPadding = `${headerHeight}px`
 
   // Use title as a single headline if headlines array is empty
   const headlinesArray =
     headlines.length > 0 ? headlines : title ? [title] : [""]
 
-  // Set up animation sequence for the speech bubbles
+  // Animation for bubbles
   useEffect(() => {
-    // Only apply animation if we have circles with speech bubbles
     if (!overlayCircles.length) return
 
-    // Clear any existing animation
-    if (animationRef.current) {
-      clearTimeout(animationRef.current)
-    }
+    if (animationRef.current) clearTimeout(animationRef.current)
 
-    // Calculate timing
     const showDuration = transitionInterval
-    const staggerDelay = transitionInterval * 0.95 // Controls overlap - lower value = more overlap
+    const staggerDelay = transitionInterval * 0.95
     const totalItems = overlayCircles.length
 
-    // Start with no bubbles visible
     setVisibleBubbles([])
 
-    // Function to cycle through bubbles
     const showBubble = (index: number) => {
-      // Add this bubble to visible bubbles
       setVisibleBubbles((prev) => [...prev, index])
-
-      // Schedule when to hide this bubble
       setTimeout(() => {
         setVisibleBubbles((prev) => prev.filter((i) => i !== index))
       }, showDuration)
     }
 
-    // Function to start the sequence
     const startSequence = () => {
-      // Clear any existing bubbles
       setVisibleBubbles([])
-
-      // Display each bubble with a staggered delay
       overlayCircles.forEach((_, index) => {
         const delay = index * staggerDelay
-
-        setTimeout(() => {
-          showBubble(index)
-        }, delay)
+        setTimeout(() => showBubble(index), delay)
       })
-
-      // Schedule the next sequence
-      const sequenceDuration = staggerDelay * (totalItems - 1) + showDuration
-      animationRef.current = setTimeout(() => {
-        startSequence()
-      }, sequenceDuration + 1000) // 1 second pause between sequences
+      const seqDur = staggerDelay * (totalItems - 1) + showDuration
+      animationRef.current = setTimeout(startSequence, seqDur + 1000)
     }
 
-    // Start animation sequence after a brief delay
-    animationRef.current = setTimeout(() => {
-      startSequence()
-    }, 500)
-
-    // Cleanup on unmount
+    animationRef.current = setTimeout(startSequence, 500)
     return () => {
-      if (animationRef.current) {
-        clearTimeout(animationRef.current)
-      }
+      if (animationRef.current) clearTimeout(animationRef.current)
     }
   }, [overlayCircles.length, transitionInterval, overlayCircles])
 
@@ -215,63 +167,33 @@ export function HeroQuestionsPanel({
           borderRadius: 1,
           overflow: "hidden",
           flex: 1,
-          ...panelProps.sx,
+          ...(panelProps as BasePanelProps).sx,
         }}
       >
-        {/* Foreground image */}
         {backgroundImage && (
           <Box
             component="img"
             src={backgroundImage}
             alt="hero background"
-            sx={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
+            sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
           />
         )}
 
-        {/* Overlay circles */}
-        {overlayCircles.length > 0 && (
+        {/* Circles layer */}
+        {/* {overlayCircles.length > 0 && (
           <Box
             component="svg"
-            sx={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              zIndex: 0, // below content
-            }}
+            sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 0 }}
           >
-            {/* Add SVG filter definition for shadow */}
             <defs>
-              <filter
-                id="circle-shadow"
-                x="-25%"
-                y="-25%"
-                width="150%"
-                height="150%"
-              >
-                <feDropShadow
-                  dx="0"
-                  dy="0"
-                  stdDeviation="5"
-                  floodColor="rgba(0, 0, 0, 0.25)"
-                />
+              <filter id="circle-shadow" x="-25%" y="-25%" width="150%" height="150%">
+                <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="rgba(0,0,0,0.25)" />
               </filter>
             </defs>
-
             {overlayCircles.map((circle, index) => {
-              // Check if this circle should be visible
               const isVisible = visibleBubbles.includes(index)
-
               const cx = `calc(50% + ${circle.xPercent}%)`
               const cy = `calc(50% + ${circle.yPercent}%)`
-
               return (
                 <circle
                   key={index}
@@ -281,18 +203,15 @@ export function HeroQuestionsPanel({
                   fill="none"
                   stroke={circle.stroke || "currentColor"}
                   strokeWidth={circle.strokeWidth || 3}
-                  opacity={isVisible ? 1 : 0} // Completely fade out when not active
-                  style={{
-                    transition: "opacity 1500ms ease-in-out",
-                    filter: "url(#circle-shadow)",
-                  }}
+                  opacity={isVisible ? 1 : 0}
+                  style={{ transition: "opacity 1500ms ease-in-out", filter: "url(#circle-shadow)" }}
                 />
               )
             })}
           </Box>
-        )}
+        )} */}
 
-        {/* Foreground photo + question SVGs */}
+        {/* Foreground photo + question svgs */}
         {questionSvgs.length > 0 && (
           <PhotoWithQuestions
             src={backgroundImage ?? ""}
@@ -301,34 +220,18 @@ export function HeroQuestionsPanel({
           />
         )}
 
-        {/* Speech Bubbles */}
+        {/* Speech bubbles */}
         {overlayCircles.length > 0 && (
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              zIndex: 2, // above circles and content
-            }}
-          >
+          <Box sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}>
             {overlayCircles.map((circle, index) => {
-              // Skip if no speech bubble text
               if (!circle.speechBubbleText) return null
-
-              // Get circle position and properties
               const cx = `calc(50% + ${circle.xPercent}%)`
               const cy = `calc(50% + ${circle.yPercent}%)`
               const radius = circle.radius
               const padding = circle.speechBubblePadding ?? 10
               const bubbleWidth = circle.speechBubbleWidth ?? 300
               const variant = circle.speechBubbleVariant ?? "h4"
-
-              // Check if this bubble should be visible
               const isVisible = visibleBubbles.includes(index)
-
-              // Choose anchor if not specified (based on circle position)
               const anchor =
                 circle.speechBubbleAnchor ??
                 (circle.xPercent >= 0
@@ -339,83 +242,48 @@ export function HeroQuestionsPanel({
                     ? "top-right"
                     : "bottom-right")
 
-              // Calculate position and text alignment based on anchor point
               let left: string = ""
               let top: string = ""
               let textAlign: "left" | "right" | "center" = "left"
               let boxSx: SxProps = {}
 
               switch (anchor) {
-                case "top-left": // Above and to the left of the circle
+                case "top-left":
                   left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
                   top = `calc(${cy} - ${radius}px - ${padding}px)`
                   textAlign = "right"
-                  boxSx = {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end", // Right align
-                    justifyContent: "flex-start", // Top align
-                  }
+                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "flex-start" }
                   break
-
-                case "top-right": // Above and to the right of the circle
+                case "top-right":
                   left = `calc(${cx} + ${radius}px + ${padding}px)`
                   top = `calc(${cy} - ${radius}px - ${padding}px)`
                   textAlign = "left"
-                  boxSx = {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start", // Left align
-                    justifyContent: "flex-start", // Top align
-                  }
+                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start" }
                   break
-
-                case "bottom-left": // Below and to the left of the circle
+                case "bottom-left":
                   left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
                   top = `calc(${cy} + ${radius}px + ${padding}px)`
                   textAlign = "right"
-                  boxSx = {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-end", // Right align
-                    justifyContent: "flex-end", // Bottom align
-                  }
+                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "flex-end" }
                   break
-
-                case "bottom-right": // Below and to the right of the circle
+                case "bottom-right":
                 default:
                   left = `calc(${cx} + ${radius}px + ${padding}px)`
                   top = `calc(${cy} + ${radius}px + ${padding}px)`
                   textAlign = "left"
-                  boxSx = {
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start", // Left align
-                    justifyContent: "flex-end", // Bottom align
-                  }
+                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-end" }
                   break
               }
 
               return (
                 <Fade key={`bubble-${index}`} in={isVisible} timeout={1800}>
                   <Box
-                    sx={{
-                      position: "absolute",
-                      left,
-                      top,
-                      maxWidth: `${bubbleWidth}px`,
-                      minHeight: "200px", // Maintain bubble height for vertical alignment
-                      pointerEvents: "auto",
-                      ...boxSx, // Merge anchor-specific styles
-                    }}
+                    sx={(theme: AppTheme) => ({ position: "absolute", left, top, maxWidth: `${bubbleWidth}px`, minHeight: "200px", pointerEvents: "auto", ...boxSx })}
                   >
                     <Typography
                       variant={variant}
                       color={headlineColor}
-                      sx={{
-                        textAlign,
-                        textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-                      }}
+                      sx={{ textAlign, textShadow: "0px 0px 6px rgba(0,0,0,0.7)" }}
                     >
                       {circle.speechBubbleText}
                     </Typography>
@@ -426,8 +294,9 @@ export function HeroQuestionsPanel({
           </Box>
         )}
 
+        {/* Center content (headline + body) */}
         <Box
-          sx={(theme) => ({
+          sx={(theme: AppTheme) => ({
             display: "flex",
             flexDirection: "column",
             height: "auto",
@@ -447,27 +316,16 @@ export function HeroQuestionsPanel({
                   : "center",
           })}
         >
-          {/* Show TransitionHeadline only if not using SVG questions */}
           <TransitionHeadline
             headlines={headlinesArray}
             transitionInterval={transitionInterval}
             variant="h1"
             color={headlineColor}
-            sx={{
-              marginBottom: content ? 3 : 0,
-              textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-            }}
+            sx={{ marginBottom: content ? 3 : 0, textShadow: "0px 0px 6px rgba(0,0,0,0.7)" }}
           />
 
           {content && (
-            <Typography
-              variant="h5"
-              align="center"
-              sx={{
-                margin: "0 auto",
-                textShadow: "0px 0px 6px rgba(0, 0, 0, 0.7)",
-              }}
-            >
+            <Typography variant="h5" align="center" sx={{ margin: "0 auto", textShadow: "0px 0px 6px rgba(0,0,0,0.7)" }}>
               {content}
             </Typography>
           )}
@@ -477,7 +335,7 @@ export function HeroQuestionsPanel({
       </BasePanel>
 
       {/* Bottom headline & text */}
-      <Box sx={{ mt: margin, mb: theme.spacing(10), textAlign: "center" }}>
+      <Box sx={{ mt: margin, mb: theme.spacing(8), textAlign: "center" }}>
         <Typography
           variant="h1"
           sx={{
@@ -487,6 +345,7 @@ export function HeroQuestionsPanel({
             whiteSpace: "nowrap",
             lineHeight: 1.1,
             fontSize: "clamp(2rem, 6vw, 6rem)",
+            mt: 1
           }}
         >
           {bottomHeadline}
@@ -497,4 +356,4 @@ export function HeroQuestionsPanel({
       </Box>
     </Box>
   )
-}
+} 
