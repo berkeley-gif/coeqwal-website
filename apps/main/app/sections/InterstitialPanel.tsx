@@ -56,7 +56,7 @@ export default function InterstitialPanel() {
           </Stack>
         </Box>
 
-        <ScrollDownIcon onClick={handleScrollDown} color="white" />
+        {/* <ScrollDownIcon onClick={handleScrollDown} color="white" /> */}
       </BasePanel>
     </Box>
   )
