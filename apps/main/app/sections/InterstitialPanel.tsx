@@ -45,7 +45,7 @@ export default function InterstitialPanel() {
           position: "relative", // Required for absolute positioning of ScrollDownIcon
         }}
       >
-        <Box maxWidth="1000px">
+        <Box maxWidth="920px">
           <Stack spacing={4}>
             <Typography variant="h2" sx={{ fontWeight: 500 }}>
               What is California&apos;s water future?

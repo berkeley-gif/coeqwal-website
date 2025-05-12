@@ -2,12 +2,14 @@
 
 import { Box, IconButton, Typography } from "@mui/material"
 import { KeyboardArrowDown as KeyboardArrowDownIcon } from "@mui/icons-material"
+import { SxProps, Theme } from "@mui/material/styles"
 
 interface ScrollDownIconProps {
   onClick?: () => void
   color?: string
   size?: number
   text?: string
+  sx?: SxProps<Theme>
 }
 
 export function ScrollDownIcon({
@@ -15,6 +17,7 @@ export function ScrollDownIcon({
   color = "white",
   size = 40,
   text,
+  sx,
 }: ScrollDownIconProps) {
   return (
     <Box
@@ -29,6 +32,7 @@ export function ScrollDownIcon({
         flexDirection: "column",
         alignItems: "center",
         maxWidth: "600px",
+        ...sx,
       }}
       onClick={onClick}
     >
