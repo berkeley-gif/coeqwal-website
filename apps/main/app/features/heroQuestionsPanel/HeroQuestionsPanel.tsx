@@ -175,7 +175,13 @@ export function HeroQuestionsPanel({
             component="img"
             src={backgroundImage}
             alt="hero background"
-            sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
           />
         )}
 
@@ -222,7 +228,16 @@ export function HeroQuestionsPanel({
 
         {/* Speech bubbles */}
         {overlayCircles.length > 0 && (
-          <Box sx={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 2 }}>
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              zIndex: 2,
+            }}
+          >
             {overlayCircles.map((circle, index) => {
               if (!circle.speechBubbleText) return null
               const cx = `calc(50% + ${circle.xPercent}%)`
@@ -252,38 +267,69 @@ export function HeroQuestionsPanel({
                   left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
                   top = `calc(${cy} - ${radius}px - ${padding}px)`
                   textAlign = "right"
-                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "flex-start" }
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                    justifyContent: "flex-start",
+                  }
                   break
                 case "top-right":
                   left = `calc(${cx} + ${radius}px + ${padding}px)`
                   top = `calc(${cy} - ${radius}px - ${padding}px)`
                   textAlign = "left"
-                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start" }
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
+                  }
                   break
                 case "bottom-left":
                   left = `calc(${cx} - ${radius}px - ${bubbleWidth}px - ${padding}px)`
                   top = `calc(${cy} + ${radius}px + ${padding}px)`
                   textAlign = "right"
-                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-end", justifyContent: "flex-end" }
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                    justifyContent: "flex-end",
+                  }
                   break
                 case "bottom-right":
                 default:
                   left = `calc(${cx} + ${radius}px + ${padding}px)`
                   top = `calc(${cy} + ${radius}px + ${padding}px)`
                   textAlign = "left"
-                  boxSx = { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-end" }
+                  boxSx = {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-end",
+                  }
                   break
               }
 
               return (
                 <Fade key={`bubble-${index}`} in={isVisible} timeout={1800}>
                   <Box
-                    sx={(theme: AppTheme) => ({ position: "absolute", left, top, maxWidth: `${bubbleWidth}px`, minHeight: "200px", pointerEvents: "auto", ...boxSx })}
+                    sx={{
+                      position: "absolute",
+                      left,
+                      top,
+                      maxWidth: `${bubbleWidth}px`,
+                      minHeight: "200px",
+                      pointerEvents: "auto",
+                      ...boxSx,
+                    }}
                   >
                     <Typography
                       variant={variant}
                       color={headlineColor}
-                      sx={{ textAlign, textShadow: "0px 0px 6px rgba(0,0,0,0.7)" }}
+                      sx={{
+                        textAlign,
+                        textShadow: "0px 0px 6px rgba(0,0,0,0.7)",
+                      }}
                     >
                       {circle.speechBubbleText}
                     </Typography>
@@ -321,11 +367,21 @@ export function HeroQuestionsPanel({
             transitionInterval={transitionInterval}
             variant="h1"
             color={headlineColor}
-            sx={{ marginBottom: content ? 3 : 0, textShadow: "0px 0px 6px rgba(0,0,0,0.7)" }}
+            sx={{
+              marginBottom: content ? 3 : 0,
+              textShadow: "0px 0px 6px rgba(0,0,0,0.7)",
+            }}
           />
 
           {content && (
-            <Typography variant="h5" align="center" sx={{ margin: "0 auto", textShadow: "0px 0px 6px rgba(0,0,0,0.7)" }}>
+            <Typography
+              variant="h5"
+              align="center"
+              sx={{
+                margin: "0 auto",
+                textShadow: "0px 0px 6px rgba(0,0,0,0.7)",
+              }}
+            >
               {content}
             </Typography>
           )}
@@ -345,7 +401,7 @@ export function HeroQuestionsPanel({
             whiteSpace: "nowrap",
             lineHeight: 1.1,
             fontSize: "clamp(2rem, 6vw, 6rem)",
-            mt: 1
+            mt: 1,
           }}
         >
           {bottomHeadline}
@@ -356,4 +412,4 @@ export function HeroQuestionsPanel({
       </Box>
     </Box>
   )
-} 
+}
