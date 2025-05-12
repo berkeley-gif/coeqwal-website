@@ -1,27 +1,27 @@
 import { BasePanel } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import { ScrollDownIcon } from "@repo/ui"
+// import { ScrollDownIcon } from "@repo/ui"
 
 export default function InterstitialPanel() {
   const { t } = useTranslation()
 
-  const handleScrollDown = () => {
-    // Scroll to the next section smoothly
-    // Find and scroll to the next section element
-    const californiaWaterSection = document.getElementById(
-      "california-water-panel",
-    )
-    if (californiaWaterSection) {
-      californiaWaterSection.scrollIntoView({ behavior: "smooth" })
-    } else {
-      // Fallback to a shorter scroll distance if next section not found
-      window.scrollBy({
-        top: 500, // Shorter distance than full viewport
-        behavior: "smooth",
-      })
-    }
-  }
+  // const handleScrollDown = () => {
+  //   // Scroll to the next section smoothly
+  //   // Find and scroll to the next section element
+  //   const californiaWaterSection = document.getElementById(
+  //     "california-water-panel",
+  //   )
+  //   if (californiaWaterSection) {
+  //     californiaWaterSection.scrollIntoView({ behavior: "smooth" })
+  //   } else {
+  //     // Fallback to a shorter scroll distance if next section not found
+  //     window.scrollBy({
+  //       top: 500, // Shorter distance than full viewport
+  //       behavior: "smooth",
+  //     })
+  //   }
+  // }
 
   return (
     <Box
