@@ -73,14 +73,6 @@ export default function Home() {
     })
   }, []) // Empty dependency array ensures this runs once before component mounts
 
-  // Log when uncontrolledRef changes
-  useEffect(() => {
-    console.log(
-      "🗺️ Page uncontrolledRef status:",
-      uncontrolledRef.current ? "Available" : "Not available",
-    )
-  }, [uncontrolledRef.current])
-
   // Keep our own reference to the Ken Burns effect for cleanup
   const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
 
@@ -89,19 +81,19 @@ export default function Home() {
 
   // Ensure map starts in the correct position
   useEffect(() => {
-    // Reset the map position when it becomes available
-    if (uncontrolledRef.current) {
-      console.log(
-        "🌍 Setting initial map position to match first animation keyframe",
-      )
-      uncontrolledRef.current.jumpTo({
-        center: [mapStore.viewState.longitude, mapStore.viewState.latitude],
-        zoom: mapStore.viewState.zoom,
-        bearing: mapStore.viewState.bearing,
-        pitch: mapStore.viewState.pitch,
-      })
-    }
-  }, [uncontrolledRef.current])
+    if (!uncontrolledRef.current) return
+
+    console.log(
+      "🌍 Setting initial map position to match first animation keyframe",
+    )
+    uncontrolledRef.current.jumpTo({
+      center: [mapStore.viewState.longitude, mapStore.viewState.latitude],
+      zoom: mapStore.viewState.zoom,
+      bearing: mapStore.viewState.bearing,
+      pitch: mapStore.viewState.pitch,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uncontrolledRef])
 
   // Create and prepare the Ken Burns effect
   useEffect(() => {
