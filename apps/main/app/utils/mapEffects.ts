@@ -54,12 +54,30 @@ export class KenBurnsMapEffect {
   start() {
     if (this.isPlaying) return this
 
+    // Get the current map reference - it might have changed
+    this.map = this.mapRef.current
+
     this.isPlaying = true
     this.currentIndex = 0
 
     if (this.map && this.sequence.length > 0) {
-      console.log("▶️ Starting Ken Burns effect with map")
-      this.playCurrentKeyframe()
+      console.log("▶️ Starting Ken Burns effect with map - IMMEDIATE")
+
+      // Apply tiny immediate movement to provide instant visual feedback
+      // This helps overcome any perception of delay
+      const currentCenter = this.map.getCenter()
+      const microShift = 0.0002 // Extremely small movement
+      this.map.jumpTo({
+        center: [
+          currentCenter.lng + microShift,
+          currentCenter.lat - microShift,
+        ],
+      })
+
+      // Start animation immediately
+      requestAnimationFrame(() => {
+        this.playCurrentKeyframe()
+      })
     } else {
       console.warn(
         "⚠️ Cannot start Ken Burns effect - map or sequence not available",
@@ -129,11 +147,45 @@ export class KenBurnsMapEffect {
       return
     }
 
-    // First frame initialization
+    // Initialize timestamp and do first frame animation immediately
     if (!this.lastTimestamp) {
       this.lastTimestamp = timestamp || performance.now()
+      console.log("🎬 Starting animation frames IMMEDIATELY")
+
+      // Apply small initial movement for immediate visual feedback
+      // instead of waiting for next animation frame
+      const initialProgress = 0.03 // 3% progress for immediate feedback
+
+      // Apply small initial movement
+      const newCenter: [number, number] = [
+        this.startProps.center[0] +
+          (this.targetProps.center[0] - this.startProps.center[0]) *
+            initialProgress,
+        this.startProps.center[1] +
+          (this.targetProps.center[1] - this.startProps.center[1]) *
+            initialProgress,
+      ]
+
+      const newZoom =
+        this.startProps.zoom +
+        (this.targetProps.zoom - this.startProps.zoom) * initialProgress
+      const newBearing =
+        this.startProps.bearing +
+        (this.targetProps.bearing - this.startProps.bearing) * initialProgress
+      const newPitch =
+        this.startProps.pitch +
+        (this.targetProps.pitch - this.startProps.pitch) * initialProgress
+
+      // Apply immediate movement
+      this.map.jumpTo({
+        center: newCenter,
+        zoom: newZoom,
+        bearing: newBearing,
+        pitch: newPitch,
+      })
+
+      // Then continue with animation frames
       this.animationFrameId = requestAnimationFrame(this.animateFrame)
-      console.log("🎬 Starting animation frames")
       return
     }
 

@@ -111,7 +111,7 @@ export default function Home() {
       .addKeyframe(
         [mapStore.viewState.longitude, mapStore.viewState.latitude],
         mapStore.viewState.zoom,
-        10000, // Longer duration for smoother transition
+        2000, // Very short first transition for immediate effect
         mapStore.viewState.bearing, // Keep default bearing
         mapStore.viewState.pitch,
       )
@@ -120,8 +120,8 @@ export default function Home() {
       .addKeyframe(
         [mapStore.viewState.longitude + 0.3, mapStore.viewState.latitude + 0.7],
         mapStore.viewState.zoom + 0.2, // Very slight zoom
-        18000, // Much longer duration
-        mapStore.viewState.bearing, // Keep default bearing instead of 5
+        8000, // Shorter duration for faster feedback
+        mapStore.viewState.bearing, // Keep default bearing
         5, // Slight pitch
       )
 
