@@ -171,12 +171,6 @@ export default function ContentPanels({
         to deepen your understanding, explore key topics, and become an informed
         advocate.
       </Typography>
-
-      <LearnCardCarousel
-        title="Learning Resources"
-        cards={learnCards}
-        onCardClick={handleCardClick}
-      />
     </Box>
   )
 
@@ -242,6 +236,15 @@ export default function ContentPanels({
             <Panel1Content />
           </Grid>
         </Grid>
+
+        {/* Learn Card Carousel - positioned below the grid to span full width */}
+        <Box sx={{ width: "100%" }}>
+          <LearnCardCarousel
+            title="Learning Resources"
+            cards={learnCards}
+            onCardClick={handleCardClick}
+          />
+        </Box>
       </BasePanel>
 
       {/* Second Panel - Teal background */}
