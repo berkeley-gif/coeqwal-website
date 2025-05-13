@@ -37,22 +37,36 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
 
     console.log("🚀 MapContainer useEffect running")
 
-    const ref = mapRef?.current
-    if (!ref) {
-      console.warn("❌ mapRef.current is null in MapContainer")
-      return
+    // Wait for mapRef to be initialized
+    const checkMapRef = () => {
+      const ref = mapRef?.current
+      if (!ref) {
+        console.warn(
+          "❌ mapRef.current is null in MapContainer, will retry in 500ms",
+        )
+        setTimeout(checkMapRef, 500)
+        return
+      }
+
+      console.log("✅ mapRef.current initialized in MapContainer")
+
+      if (uncontrolledRef) {
+        uncontrolledRef.current = ref
+        console.log(
+          "🔗 uncontrolledRef assigned successfully",
+          ref ? "with valid map" : "but map is null",
+        )
+      }
+
+      if (!initialized.current) {
+        mapActions.registerMapInstance(ref)
+        initialized.current = true
+        console.log("📌 map instance registered with mapActions")
+      }
     }
 
-    if (uncontrolledRef) {
-      uncontrolledRef.current = ref
-      console.log("🔗 uncontrolledRef assigned")
-    }
-
-    if (!initialized.current) {
-      mapActions.registerMapInstance(ref)
-      initialized.current = true
-      console.log("📌 map instance registered with mapActions")
-    }
+    // Start the check process
+    checkMapRef()
   }, [mapRef, uncontrolledRef])
 
   // Example of how to add markers programmatically
@@ -95,6 +109,15 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
               delay: 0,
             })
           }
+
+          // Explicitly trigger an update to uncontrolledRef
+          if (uncontrolledRef && !uncontrolledRef.current && mapRef.current) {
+            console.log(
+              "🔄 Map loaded - updating uncontrolledRef directly in onLoad",
+            )
+            uncontrolledRef.current = mapRef.current
+          }
+
           // initial view: ensure paragraph background off
           useStoryStore.getState().setOverlay("paragraphShade", false)
         }}

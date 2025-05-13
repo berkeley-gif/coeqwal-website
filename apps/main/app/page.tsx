@@ -53,6 +53,14 @@ export default function Home() {
     null,
   ) as React.RefObject<MapboxMapRef>
 
+  // Log when uncontrolledRef changes
+  useEffect(() => {
+    console.log(
+      "🗺️ Page uncontrolledRef status:",
+      uncontrolledRef.current ? "Available" : "Not available",
+    )
+  }, [uncontrolledRef.current])
+
   // Show drawer after content panels moved up 50% of viewport
   const [showDrawer, setShowDrawer] = useState(false)
 
@@ -278,7 +286,7 @@ export default function Home() {
           }}
         >
           {/* Landing Panel */}
-          <HeroSection />
+          <HeroSection uncontrolledMapRef={uncontrolledRef} />
 
           {/* Interstitial Panel */}
           <InterstitialPanel />
