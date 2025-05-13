@@ -163,51 +163,6 @@ export default function Home() {
   // Ken Burns effect is enabled by default
   const kenBurnsEnabled = true
 
-  // Performance monitor for Ken Burns effect
-  useEffect(() => {
-    if (!kenBurnsEnabled) return
-
-    // Store initial time
-    const startTime = performance.now()
-    let frameCount = 0
-    let lastFrameTime = startTime
-
-    // Monitor function to track performance
-    const checkPerformance = () => {
-      frameCount++
-      const now = performance.now()
-
-      // Log every 50 frames to avoid console spam
-      if (frameCount % 50 === 0) {
-        const elapsed = now - startTime
-        const fps = Math.round((frameCount / elapsed) * 1000)
-        const frameTime = (now - lastFrameTime).toFixed(2)
-
-        // Look for long frame times which could cause render issues
-        if (parseFloat(frameTime) > 50) {
-          console.warn(
-            `Ken Burns effect: Slow frame detected - ${frameTime}ms (Target: <16ms)`,
-          )
-        }
-
-        console.log(
-          `Ken Burns monitoring: ${fps} FPS, last frame: ${frameTime}ms`,
-        )
-      }
-
-      lastFrameTime = now
-
-      // Continue monitoring
-      requestAnimationFrame(checkPerformance)
-    }
-
-    // Only monitor in development
-    if (process.env.NODE_ENV === "development") {
-      const rafId = requestAnimationFrame(checkPerformance)
-      return () => cancelAnimationFrame(rafId)
-    }
-  }, [kenBurnsEnabled])
-
   // pull the values out once, so eslint can track them
   const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
 
@@ -332,7 +287,11 @@ export default function Home() {
     kenBurnsActive,
     kenBurnsEnabled,
     uncontrolledRef,
-    // Omit mapStore.viewState to avoid frequent rerenders
+    /*
+     * Deliberately omitting the mapStore.viewState properties from dependencies.
+     * Including them would cause frequent rerenders and disrupt smooth animations.
+     * The values are accessed via closure when needed for the flyTo transition.
+     */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ])
 

@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react"
 // import { Map, useMap, Marker, MapRef } from "@repo/map"
 import { Map, useMap, MapRef } from "@repo/map"
 import { Box } from "@repo/ui/mui"
-import { useMapStore, mapActions } from "@repo/state/map"
+import { mapActions } from "@repo/state/map"
 // import AnimatedMarker from "./AnimatedMarker"
 // import { WATER_FEATURES, filterMarkersByType } from "../utils/markers"
 import { useStoryStore } from "@repo/state"
@@ -17,7 +17,7 @@ interface MapContainerProps {
 export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const { mapRef } = useMap()
-  const mapState = useMapStore()
+  // const mapState = useMapStore()
   const initialized = useRef(false)
 
   // Use utilities to manage markers

@@ -20,25 +20,25 @@ export default function ContentPanels({
   onOpenLearnDrawer,
 }: ContentPanelsProps = {}) {
   // Initialize drawer store
-  const { activeTab } = useDrawerStore()
+  // const { activeTab } = useDrawerStore()
   const drawerStore = useDrawerStore.getState()
 
   // Handler to toggle the Learn drawer
-  const handleToggleLearnDrawer = () => {
-    if (activeTab === "learn") {
-      // If already open, close it (toggle behavior)
-      drawerStore.closeDrawer()
-    } else {
-      // Open the drawer, either using prop or direct access
-      if (onOpenLearnDrawer) {
-        onOpenLearnDrawer("california-water") // Section ID
-      } else {
-        // Direct access pattern used by LearnMoreButtons
-        drawerStore.setDrawerContent({ selectedSection: "california-water" })
-        drawerStore.openDrawer("learn")
-      }
-    }
-  }
+  // const handleToggleLearnDrawer = () => {
+  //   if (activeTab === "learn") {
+  //     // If already open, close it (toggle behavior)
+  //     drawerStore.closeDrawer()
+  //   } else {
+  //     // Open the drawer, either using prop or direct access
+  //     if (onOpenLearnDrawer) {
+  //       onOpenLearnDrawer("california-water") // Section ID
+  //     } else {
+  //       // Direct access pattern used by LearnMoreButtons
+  //       drawerStore.setDrawerContent({ selectedSection: "california-water" })
+  //       drawerStore.openDrawer("learn")
+  //     }
+  //   }
+  // }
 
   // Sample learn cards data
   const learnCards: LearnCardType[] = [
@@ -73,6 +73,12 @@ export default function ContentPanels({
 
   // Handle card click to open the learn drawer with the appropriate section
   const handleCardClick = (index: number) => {
+    // Special case for the first card - open external link
+    if (index === 0) {
+      window.open("https://flow.coeqwal.org", "_blank")
+      return
+    }
+
     // Map index to a section ID (this should be more dynamic in a real implementation)
     const sectionMappings = [
       "california-water",

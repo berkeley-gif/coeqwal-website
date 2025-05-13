@@ -29,6 +29,7 @@ const StyledCard = styled(Card, {
   backgroundClip: "border-box",
   border: "1px solid #fff",
   borderRadius: "8px", // Added 8px border radius
+  pointerEvents: "auto", // Ensure hover effects work
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
     transform: "translateY(-5px)",
@@ -168,9 +169,11 @@ const LearnCard: React.FC<LearnCardProps> = ({
           <StyledButton
             variant="outlined"
             sx={{
+              alignSelf: "flex-end",
               backgroundColor: "transparent",
               color: buttonColor,
               borderColor: buttonColor,
+              pointerEvents: "auto",
               "&:hover": {
                 backgroundColor: buttonColor,
                 color: "#fff",

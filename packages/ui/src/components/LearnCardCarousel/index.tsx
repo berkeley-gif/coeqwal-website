@@ -45,6 +45,7 @@ const CarouselTrack = styled(Box)(({ theme }) => ({
   display: "flex",
   overflowX: "hidden",
   scrollBehavior: "smooth",
+  paddingTop: "8px",
   paddingBottom: theme.spacing(1),
 }))
 
@@ -72,12 +73,15 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
   const [cardWidth, setCardWidth] = useState(MAX_CARD_WIDTH)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
-  
+
   // Helper to update the scroll button states
-  const updateScrollButtons = useCallback((index: number, visibleCards: number) => {
-    setCanScrollLeft(index > 0)
-    setCanScrollRight(index + visibleCards < cards.length)
-  }, [cards.length])
+  const updateScrollButtons = useCallback(
+    (index: number, visibleCards: number) => {
+      setCanScrollLeft(index > 0)
+      setCanScrollRight(index + visibleCards < cards.length)
+    },
+    [cards.length],
+  )
 
   // Calculate card width based on container size
   useEffect(() => {

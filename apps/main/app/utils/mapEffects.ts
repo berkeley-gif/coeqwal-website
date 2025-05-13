@@ -1,5 +1,13 @@
 import type { MapboxMapRef } from "@repo/map"
 
+// Define interface for map properties
+interface MapProps {
+  center: [number, number]
+  zoom: number
+  bearing: number
+  pitch: number
+}
+
 /**
  * KenBurnsMapEffect - Creates smooth animated panning and zooming effects for maps
  * Inspired by the Ken Burns effect for photos (slow pan and zoom)
@@ -19,8 +27,8 @@ export class KenBurnsMapEffect {
   private currentIndex = 0
   private lastTimestamp: number | null = null
   private currentDuration = 0
-  private startProps: any = null
-  private targetProps: any = null
+  private startProps: MapProps | null = null
+  private targetProps: MapProps | null = null
 
   constructor(mapRef: React.RefObject<MapboxMapRef | null>) {
     this.mapRef = mapRef
@@ -137,7 +145,7 @@ export class KenBurnsMapEffect {
    * Animate a single frame of the effect
    */
   private animateFrame = (timestamp?: number) => {
-    if (!this.isPlaying || !this.map) {
+    if (!this.isPlaying || !this.map || !this.startProps || !this.targetProps) {
       console.warn(
         "⚠️ Animation frame canceled - isPlaying:",
         this.isPlaying,
@@ -195,21 +203,21 @@ export class KenBurnsMapEffect {
 
     // Interpolate values
     const newCenter: [number, number] = [
-      this.startProps.center[0] +
-        (this.targetProps.center[0] - this.startProps.center[0]) * progress,
-      this.startProps.center[1] +
-        (this.targetProps.center[1] - this.startProps.center[1]) * progress,
+      this.startProps!.center[0] +
+        (this.targetProps!.center[0] - this.startProps!.center[0]) * progress,
+      this.startProps!.center[1] +
+        (this.targetProps!.center[1] - this.startProps!.center[1]) * progress,
     ]
 
     const newZoom =
-      this.startProps.zoom +
-      (this.targetProps.zoom - this.startProps.zoom) * progress
+      this.startProps!.zoom +
+      (this.targetProps!.zoom - this.startProps!.zoom) * progress
     const newBearing =
-      this.startProps.bearing +
-      (this.targetProps.bearing - this.startProps.bearing) * progress
+      this.startProps!.bearing +
+      (this.targetProps!.bearing - this.startProps!.bearing) * progress
     const newPitch =
-      this.startProps.pitch +
-      (this.targetProps.pitch - this.startProps.pitch) * progress
+      this.startProps!.pitch +
+      (this.targetProps!.pitch - this.startProps!.pitch) * progress
 
     try {
       // Apply to map without causing React state changes

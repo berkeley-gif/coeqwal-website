@@ -429,7 +429,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
       window.removeEventListener("resize", checkScrollable)
     }
     // Only re-run when the length of operations changes, not on every render
-  }, [operationCardsWithState.length])
+  }, [operationCardsWithState.length, isScrollable])
 
   // Prevent scroll propagation at the top/bottom boundaries
   useEffect(() => {
