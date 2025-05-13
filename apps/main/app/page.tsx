@@ -112,7 +112,7 @@ export default function Home() {
         [mapStore.viewState.longitude, mapStore.viewState.latitude],
         mapStore.viewState.zoom,
         10000, // Longer duration for smoother transition
-        mapStore.viewState.bearing,
+        mapStore.viewState.bearing, // Keep default bearing
         mapStore.viewState.pitch,
       )
 
@@ -121,7 +121,7 @@ export default function Home() {
         [mapStore.viewState.longitude + 0.3, mapStore.viewState.latitude + 0.7],
         mapStore.viewState.zoom + 0.2, // Very slight zoom
         18000, // Much longer duration
-        5, // Slight bearing change
+        mapStore.viewState.bearing, // Keep default bearing instead of 5
         5, // Slight pitch
       )
 
@@ -130,7 +130,7 @@ export default function Home() {
         [mapStore.viewState.longitude + 0.5, mapStore.viewState.latitude + 0.2],
         mapStore.viewState.zoom + 0.3,
         20000,
-        -5,
+        mapStore.viewState.bearing, // Keep default bearing instead of -5
         10,
       )
 
