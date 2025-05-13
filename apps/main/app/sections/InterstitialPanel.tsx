@@ -33,19 +33,19 @@ export default function InterstitialPanel() {
       }}
     >
       <BasePanel
-        fullHeight={false}
-        paddingVariant="very-wide"
+        fullHeight={true}
+        paddingVariant="wide"
         includeHeaderSpacing={false}
         sx={{
-          backgroundColor: "#2f84ab",
+          backgroundColor: "transparent",
           color: "white",
-          alignItems: "center",
+          alignItems: "left",
           justifyContent: "center",
           pointerEvents: "auto",
           position: "relative", // Required for absolute positioning of ScrollDownIcon
         }}
       >
-        <Box maxWidth="920px">
+        <Box maxWidth="876px">
           <Stack spacing={4}>
             <Typography variant="h2" sx={{ fontWeight: 500 }}>
               What is California&apos;s water future?

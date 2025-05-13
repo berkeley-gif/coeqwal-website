@@ -46,7 +46,7 @@ const PanelRoot = styled(Box, {
   const getBasePadding = () => {
     if (paddingVariant === "none") return 0
     if (paddingVariant === "narrow") return theme.spacing(4)
-    if (paddingVariant === "wide") return theme.spacing(12)
+    if (paddingVariant === "wide") return "120px"
     if (paddingVariant === "very-wide") return "192px"
     if (paddingVariant === "content-first") return "192px"
     if (paddingVariant === "content-middle") return "192px"
