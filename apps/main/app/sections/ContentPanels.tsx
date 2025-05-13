@@ -71,6 +71,54 @@ export default function ContentPanels({
     },
   ]
 
+  // Sample scenario cards data
+  const scenarioCards: LearnCardType[] = [
+    {
+      title: "Current Operations",
+      content:
+        "Lorem ipsum",
+      image: "/images/DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
+      type: "resource",
+    },
+    {
+      title: "What if we limit groundwater pumping?",
+      content:
+        "Lorem ipsum",
+      image: "/images/DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
+      type: "article",
+    },
+    {
+      title: "What if we changed how water flows in our streams?",
+      content:
+        "Lorem ipsum",
+      image: "/images/DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
+      type: "resource",
+    },
+    {
+      title: "What if we prioritized drinking water?",
+      content:
+        "Lorem ipsum",
+      type: "video",
+    },
+  ]
+
+  // Handle scenario card click to open the themes drawer with appropriate operation
+  const handleScenarioCardClick = (index: number) => {
+    // Map index to an operation ID (this should be more dynamic in a real implementation)
+    const operationMappings = [
+      "delta-operations",
+      "climate-change",
+      "water-storage",
+      "groundwater",
+    ]
+
+    const operationId = operationMappings[index] || "delta-operations"
+
+    // Access the drawer store directly since we don't have an onOpenThemesDrawer prop
+    drawerStore.setDrawerContent({ selectedOperation: operationId })
+    drawerStore.openDrawer("themes")
+  }
+
   // Handle card click to open the learn drawer with the appropriate section
   const handleCardClick = (index: number) => {
     // Special case for the first card - open external link
@@ -249,7 +297,7 @@ export default function ContentPanels({
 
       {/* Second Panel - Teal background */}
       <BasePanel
-        paddingVariant="very-wide"
+        paddingVariant="wide"
         sx={{
           backgroundColor: "#005B6E", // Teal
           py: 12,
@@ -276,6 +324,15 @@ export default function ContentPanels({
             <Panel2Content />
           </Grid>
         </Grid>
+
+        {/* Scenario Card Carousel - positioned below the grid to span full width */}
+        <Box sx={{ width: "100%" }}>
+          <LearnCardCarousel
+            title="Scenario Library"
+            cards={scenarioCards}
+            onCardClick={handleScenarioCardClick}
+          />
+        </Box>
       </BasePanel>
 
       {/* Third Panel - Purple background */}
