@@ -166,7 +166,61 @@ export default function Home() {
   // pull the values out once, so eslint can track them
   const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
 
-  // Start/stop Ken Burns effect based on which section is active
+  // Add direct scroll listener for immediate Ken Burns activation
+  useEffect(() => {
+    const handleDirectScrollCheck = () => {
+      if (
+        !kenBurnsEnabled ||
+        !kenBurnsEffectRef.current ||
+        !uncontrolledRef.current
+      )
+        return
+
+      // Check if interstitial is visible using direct DOM measurement
+      const interstitialElement = document.getElementById("interstitial")
+      if (!interstitialElement) return
+
+      const rect = interstitialElement.getBoundingClientRect()
+      // Consider visible when taking up significant portion of viewport
+      const isVisible = rect.top < window.innerHeight * 0.4 && rect.bottom > 0
+
+      if (isVisible && !kenBurnsActive) {
+        console.log(
+          "🔄 Direct scroll detection: Interstitial visible, starting Ken Burns immediately",
+        )
+        kenBurnsEffectRef.current.start()
+        setKenBurnsActive(true)
+      } else if (!isVisible && kenBurnsActive) {
+        console.log(
+          "🔄 Direct scroll detection: Interstitial no longer visible, stopping Ken Burns",
+        )
+        kenBurnsEffectRef.current.stop()
+
+        // Reset map to default position
+        uncontrolledRef.current.flyTo({
+          center: [longitude, latitude],
+          zoom,
+          bearing,
+          pitch,
+          duration: 800, // Faster transition when leaving section
+        })
+
+        setKenBurnsActive(false)
+      }
+    }
+
+    // Attach scroll listener for immediate response
+    window.addEventListener("scroll", handleDirectScrollCheck, {
+      passive: true,
+    })
+    // Run once immediately to check current state
+    handleDirectScrollCheck()
+
+    return () => window.removeEventListener("scroll", handleDirectScrollCheck)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kenBurnsActive, kenBurnsEnabled])
+
+  // Original activation logic (can be kept as fallback)
   useEffect(() => {
     console.log("⚡ Ken Burns effect check running with:", {
       activeSection,
