@@ -105,7 +105,7 @@ export default function ContentPanels({
           California Water Learning Library
         </Box>{" "}
         to deepen your understanding, explore key topics, and become an informed
-        advocate for sustainable water management.
+        advocate.
       </Typography>
     </Box>
   )

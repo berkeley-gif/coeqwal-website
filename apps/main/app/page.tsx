@@ -93,7 +93,7 @@ export default function Home() {
       pitch: mapStore.viewState.pitch,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uncontrolledRef])
+  }, [uncontrolledRef.current])
 
   // Create and prepare the Ken Burns effect
   useEffect(() => {
@@ -155,10 +155,14 @@ export default function Home() {
         kenBurnsEffectRef.current = null
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uncontrolledRef.current])
 
   // Ken Burns effect is enabled by default
   const kenBurnsEnabled = true
+
+  // pull the values out once, so eslint can track them
+  const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState;
 
   // Start/stop Ken Burns effect based on which section is active
   useEffect(() => {
@@ -198,10 +202,10 @@ export default function Home() {
         if (uncontrolledRef.current) {
           console.log("🔄 Resetting map to default position")
           uncontrolledRef.current.flyTo({
-            center: [mapStore.viewState.longitude, mapStore.viewState.latitude],
-            zoom: mapStore.viewState.zoom,
-            bearing: mapStore.viewState.bearing,
-            pitch: mapStore.viewState.pitch,
+            center: [longitude, latitude],
+            zoom,
+            bearing,
+            pitch,
             duration: 1000, // Smooth transition over 1 second
           })
         }
@@ -214,7 +218,11 @@ export default function Home() {
     kenBurnsActive,
     uncontrolledRef,
     kenBurnsEnabled,
-    navSectionIds.interstitial,
+    longitude,
+    latitude,
+    zoom,
+    bearing,
+    pitch,
   ])
 
   // Show drawer after content panels moved up 50% of viewport
