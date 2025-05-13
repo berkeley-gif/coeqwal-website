@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react"
+import React, { useRef, useState, useEffect, useCallback } from "react"
 import {
   Box,
   Typography,
@@ -31,7 +31,7 @@ const CarouselHeader = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }))
 
-const CarouselTitle = styled(Typography)(({ theme }) => ({
+const CarouselTitle = styled(Typography)(() => ({
   fontWeight: 500,
   color: "white",
 }))
@@ -72,6 +72,12 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
   const [cardWidth, setCardWidth] = useState(MAX_CARD_WIDTH)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  
+  // Helper to update the scroll button states
+  const updateScrollButtons = useCallback((index: number, visibleCards: number) => {
+    setCanScrollLeft(index > 0)
+    setCanScrollRight(index + visibleCards < cards.length)
+  }, [cards.length])
 
   // Calculate card width based on container size
   useEffect(() => {
@@ -105,13 +111,7 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
     window.addEventListener("resize", calculateCardWidth)
 
     return () => window.removeEventListener("resize", calculateCardWidth)
-  }, [currentIndex, isMdUp, isSmUp])
-
-  // Helper to update the scroll button states
-  const updateScrollButtons = (index: number, visibleCards: number) => {
-    setCanScrollLeft(index > 0)
-    setCanScrollRight(index + visibleCards < cards.length)
-  }
+  }, [currentIndex, isMdUp, isSmUp, cards.length, updateScrollButtons])
 
   const scrollLeft = () => {
     if (!canScrollLeft) return

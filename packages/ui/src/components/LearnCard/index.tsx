@@ -17,7 +17,7 @@ interface StyledCardProps {
 // Use shouldForwardProp to prevent cardType from being passed to the DOM
 const StyledCard = styled(Card, {
   shouldForwardProp: (prop) => prop !== "cardType",
-})<StyledCardProps>(({ theme, cardType }) => ({
+})<StyledCardProps>(() => ({
   position: "relative",
   display: "flex",
   flexDirection: "column",
@@ -37,18 +37,6 @@ const StyledCard = styled(Card, {
   },
 }))
 
-const CardImageWrapper = styled(Box)({
-  height: "220px", // Fixed height for all card images
-  overflow: "hidden",
-  position: "relative",
-  minHeight: "100px",
-  maxHeight: "100px",
-  width: "100%",
-  display: "flex", // Use flexbox for better centering
-  alignItems: "center", // Center vertically
-  justifyContent: "center", // Center horizontally
-})
-
 const CardImage = styled("img")({
   width: "100%",
   height: "100%",
@@ -57,7 +45,7 @@ const CardImage = styled("img")({
 })
 
 // Updated button style to match HeaderHome
-const StyledButton = styled(Button)(({ theme }) => ({
+const StyledButton = styled(Button)(() => ({
   textTransform: "none",
   borderRadius: "50rem", // Rounded pill
   boxShadow: "none",
@@ -190,7 +178,7 @@ const LearnCard: React.FC<LearnCardProps> = ({
             }}
             onClick={(e) => {
               e.stopPropagation() // Prevent card onClick from triggering
-              onClick && onClick()
+              if (onClick) onClick()
             }}
           >
             {getButtonText()}
