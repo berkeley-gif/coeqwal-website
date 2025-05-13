@@ -45,25 +45,25 @@ export default function ContentPanels({
     {
       title: "How water moves through California",
       content:
-        "An introduction to the complex water infrastructure across the state, including reservoirs, aqueducts, and groundwater basins.",
+        "Most of California's water falls as rain and snow. This precipitation is highly variable both across the state and from year to year.",
       image:
-        "https://images.unsplash.com/photo-1534251623184-22cb7e61c526?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80",
+        "/images/DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
       type: "resource",
     },
     {
       title: "How California's water is managed",
       content:
-        "Explore the critical Delta region where rivers meet the San Francisco Bay, a vital ecosystem and water hub.",
+        "An introduction to the complex water infrastructure across the state.",
       image:
-        "https://images.unsplash.com/photo-1590332088237-fa156a5f8bea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2874&q=80",
+        "/images/DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
       type: "article",
     },
     {
       title: "Climate change and California water",
       content:
-        "Learn about the impacts of groundwater management and sustainable aquifer replenishment strategies.",
+        "Learn about the impacts of climate change on the future of California water.",
       image:
-        "https://images.unsplash.com/photo-1620207418302-439b387441b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80",
+        "/images/DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
       type: "video",
     },
     {
@@ -208,7 +208,7 @@ export default function ContentPanels({
     <Box id="content-panels">
       {/* First Panel - Deep blue background */}
       <BasePanel
-        paddingVariant="very-wide"
+        paddingVariant="wide"
         sx={{
           backgroundColor: "#1A3F6A", // Deep blue
           py: 12, // vertical padding

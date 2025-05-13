@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Card, CardContent, Typography, Box, Button } from "@mui/material"
 import { styled } from "@mui/material/styles"
 
@@ -38,15 +38,22 @@ const StyledCard = styled(Card, {
 }))
 
 const CardImageWrapper = styled(Box)({
-  height: "220px", // Consistent height for all card images
+  height: "220px", // Fixed height for all card images
   overflow: "hidden",
   position: "relative",
+  minHeight: "100px",
+  maxHeight: "100px",
+  width: "100%",
+  display: "flex", // Use flexbox for better centering
+  alignItems: "center", // Center vertically
+  justifyContent: "center", // Center horizontally
 })
 
 const CardImage = styled("img")({
   width: "100%",
   height: "100%",
   objectFit: "cover",
+  objectPosition: "center", // Center the image
 })
 
 // Default empty image placeholder
@@ -72,6 +79,20 @@ const StyledButton = styled(Button)(({ theme }) => ({
   minHeight: "36px", // Min height to match HeaderHome
 }))
 
+// Function to truncate text at word boundaries
+const truncateText = (text: string, maxLength: number): string => {
+  if (text.length <= maxLength) return text;
+  
+  // Find the last space before maxLength
+  const lastSpace = text.lastIndexOf(' ', maxLength);
+  
+  // If no space found, just truncate at maxLength
+  if (lastSpace === -1) return text.substring(0, maxLength) + '...';
+  
+  // Return text truncated at the last space
+  return text.substring(0, lastSpace) + '...';
+};
+
 const LearnCard: React.FC<LearnCardProps> = ({
   title,
   content,
@@ -81,16 +102,8 @@ const LearnCard: React.FC<LearnCardProps> = ({
 }) => {
   // Determine button text based on card type
   const getButtonText = () => {
-    switch (type) {
-      case "resource":
-        return "Explore"
-      case "article":
-        return "Read More"
-      case "video":
-        return "Watch"
-      default:
-        return "Discover"
-    }
+    // Always return "Explore" for all card types
+    return "Explore";
   }
 
   // Determine button color based on card type
@@ -108,6 +121,10 @@ const LearnCard: React.FC<LearnCardProps> = ({
   }
 
   const buttonColor = getButtonColor()
+  
+  // Calculate truncated text versions
+  const truncatedTitle = useMemo(() => truncateText(title, 80), [title]);
+  const truncatedContent = useMemo(() => truncateText(content, 200), [content]);
 
   return (
     <StyledCard cardType={type} onClick={onClick}>
@@ -127,30 +144,32 @@ const LearnCard: React.FC<LearnCardProps> = ({
           padding: 3,
         }}
       >
-        <Typography variant="h6" component="h3" gutterBottom>
-          {title}
+        <Typography 
+          variant="h6" 
+          component="h3" 
+          gutterBottom
+          title={title} // Show full title on hover
+        >
+          {truncatedTitle}
         </Typography>
+        
         <Typography
           variant="body1"
           sx={{
             flexGrow: 1,
             mb: 3,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
           }}
+          title={content} // Show full content on hover
         >
-          {content}
+          {truncatedContent}
         </Typography>
-
+        
         <Box
           sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
         >
-          <StyledButton
-            variant="outlined"
-            sx={{
+          <StyledButton 
+            variant="outlined" 
+            sx={{ 
               backgroundColor: "transparent",
               color: buttonColor,
               borderColor: buttonColor,
