@@ -94,7 +94,13 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
     >
       <Map
         mapboxToken={mapboxToken}
-        initialViewState={mapState.viewState} // uncontrolled
+        initialViewState={{
+          longitude: -127.5,
+          latitude: 37.962,
+          zoom: 5.83,
+          bearing: 0,
+          pitch: 0,
+        }} // Hard-coded to match the animation's first keyframe
         mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
         scrollZoom={false}
         interactive
@@ -116,6 +122,17 @@ export default function MapContainer({ uncontrolledRef }: MapContainerProps) {
               "🔄 Map loaded - updating uncontrolledRef directly in onLoad",
             )
             uncontrolledRef.current = mapRef.current
+          }
+
+          // Make absolutely sure the map is in the correct position
+          if (mapRef.current) {
+            console.log("📍 Ensuring map is in the correct position on load")
+            mapRef.current.jumpTo({
+              center: [-127.5, 37.962],
+              zoom: 5.83,
+              bearing: 0,
+              pitch: 0,
+            })
           }
 
           // initial view: ensure paragraph background off

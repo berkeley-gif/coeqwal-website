@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { HeaderHome } from "@repo/ui"
 import type { TabKey } from "@repo/ui"
@@ -20,6 +20,7 @@ import ChallengesSection from "./sections/ChallengesSection"
 import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
+import { useMapStore, mapActions } from "@repo/state/map"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 import { Slide } from "@mui/material"
 import { KenBurnsMapEffect } from "./utils/mapEffects"
@@ -54,11 +55,31 @@ export default function Home() {
     null,
   ) as React.RefObject<MapboxMapRef>
 
-  // Keep our own reference to the Ken Burns effect for cleanup
-  const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
+  // Access the map store to update the initial view state
+  const mapStore = useMapStore()
 
-  // Track if the effect is running
-  const [kenBurnsActive, setKenBurnsActive] = useState(false)
+  // Default initial position to use consistently throughout the app
+  const initialPosition = {
+    longitude: -127.5,
+    latitude: 37.962,
+    zoom: 5.83,
+    bearing: 0,
+    pitch: 0,
+  }
+
+  // Use useLayoutEffect to ensure this runs BEFORE the first render
+  // This guarantees the map store has the correct state before any map initialization
+  useLayoutEffect(() => {
+    console.log("🗺️ PRE-RENDER: Setting map store viewState to match animation")
+
+    mapActions.setViewState({
+      longitude: initialPosition.longitude,
+      latitude: initialPosition.latitude,
+      zoom: initialPosition.zoom,
+      bearing: initialPosition.bearing,
+      pitch: initialPosition.pitch,
+    })
+  }, []) // Empty dependency array ensures this runs once before component mounts
 
   // Log when uncontrolledRef changes
   useEffect(() => {
@@ -66,6 +87,28 @@ export default function Home() {
       "🗺️ Page uncontrolledRef status:",
       uncontrolledRef.current ? "Available" : "Not available",
     )
+  }, [uncontrolledRef.current])
+
+  // Keep our own reference to the Ken Burns effect for cleanup
+  const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
+
+  // Track if the effect is running
+  const [kenBurnsActive, setKenBurnsActive] = useState(false)
+
+  // Ensure map starts in the correct position
+  useEffect(() => {
+    // Reset the map position when it becomes available
+    if (uncontrolledRef.current) {
+      console.log(
+        "🌍 Setting initial map position to match first animation keyframe",
+      )
+      uncontrolledRef.current.jumpTo({
+        center: [initialPosition.longitude, initialPosition.latitude],
+        zoom: initialPosition.zoom,
+        bearing: initialPosition.bearing,
+        pitch: initialPosition.pitch,
+      })
+    }
   }, [uncontrolledRef.current])
 
   // Create and prepare the Ken Burns effect
@@ -78,13 +121,41 @@ export default function Home() {
     // Create the effect
     const effect = new KenBurnsMapEffect(uncontrolledRef)
 
-    // Set up the keyframes - California-wide view
+    // Set up the keyframes to follow California's water system
     effect
-      .addKeyframe([-119.4179, 37.7653], 5, 12000) // Start with central California
-      .addKeyframe([-123.7104, 39.4621], 7, 10000, 15) // Move to northern California coast with slight rotation
-      .addKeyframe([-119.0222, 35.3733], 6.5, 10000) // Pan to central valleys
-      .addKeyframe([-115.1391, 36.1699], 8, 10000) // Pan to Las Vegas/Colorado River
-      .addKeyframe([-119.4179, 37.7653], 5, 10000) // Return to starting point
+      // Start with California overview - EXACTLY match the default position
+      .addKeyframe(
+        [initialPosition.longitude, initialPosition.latitude],
+        initialPosition.zoom,
+        7000,
+        initialPosition.bearing,
+        initialPosition.pitch,
+      )
+
+      // Move to Shasta Lake
+      .addKeyframe([-123.3, 40.72], 8, 9000, 0, 10)
+
+      // Down the Sacramento River
+      .addKeyframe([-123.2, 40.58], 8.5, 7000, -5, 20)
+
+      // Delta region
+      .addKeyframe([-122.5, 38.05], 8.2, 12000, 10, 20)
+
+      // Upper San Joaquin River
+      .addKeyframe([-122.2, 37.67], 8, 10000, 5, 30)
+
+      // Mid San Joaquin Valley (not going as far south)
+      .addKeyframe([-121.6, 37.3], 7.8, 11000, 0, 20)
+
+      // Zoom out to full state view to complete the journey - EXACTLY match the default position
+      .addKeyframe(
+        [initialPosition.longitude, initialPosition.latitude],
+        initialPosition.zoom,
+        9000,
+        initialPosition.bearing,
+        initialPosition.pitch,
+      )
+
       .setLoop(true)
 
     // Store the effect for later use
@@ -102,42 +173,10 @@ export default function Home() {
     }
   }, [uncontrolledRef.current])
 
-  // Ensure map starts in the correct position
-  useEffect(() => {
-    // Default position of the map
-    const defaultPosition = {
-      longitude: -126.037,
-      latitude: 37.962,
-      zoom: 5.83,
-      bearing: 0,
-      pitch: 0,
-    }
-
-    // Reset the map position when it becomes available
-    if (uncontrolledRef.current) {
-      console.log("🌍 Setting initial map position")
-      uncontrolledRef.current.jumpTo({
-        center: [defaultPosition.longitude, defaultPosition.latitude],
-        zoom: defaultPosition.zoom,
-        bearing: defaultPosition.bearing,
-        pitch: defaultPosition.pitch,
-      })
-    }
-  }, [uncontrolledRef.current])
-
   // Start/stop Ken Burns effect based on which section is active
   useEffect(() => {
     // Only proceed if map and effect are available
     if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
-
-    // Original default map position
-    const defaultPosition = {
-      longitude: -126.037,
-      latitude: 37.962,
-      zoom: 5.83,
-      bearing: 0,
-      pitch: 0,
-    }
 
     // Start effect when Interstitial panel becomes active
     if (activeSection === navSectionIds.interstitial) {
@@ -160,10 +199,10 @@ export default function Home() {
         if (uncontrolledRef.current) {
           console.log("🔄 Resetting map to default position")
           uncontrolledRef.current.flyTo({
-            center: [defaultPosition.longitude, defaultPosition.latitude],
-            zoom: defaultPosition.zoom,
-            bearing: defaultPosition.bearing,
-            pitch: defaultPosition.pitch,
+            center: [initialPosition.longitude, initialPosition.latitude],
+            zoom: initialPosition.zoom,
+            bearing: initialPosition.bearing,
+            pitch: initialPosition.pitch,
             duration: 1000, // Smooth transition over 1 second
           })
         }
