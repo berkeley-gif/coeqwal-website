@@ -22,6 +22,7 @@ import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 import { Slide } from "@mui/material"
+import { KenBurnsMapEffect } from "./utils/mapEffects"
 
 // Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
@@ -53,6 +54,12 @@ export default function Home() {
     null,
   ) as React.RefObject<MapboxMapRef>
 
+  // Keep our own reference to the Ken Burns effect for cleanup
+  const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
+
+  // Track if the effect is running
+  const [kenBurnsActive, setKenBurnsActive] = useState(false)
+
   // Log when uncontrolledRef changes
   useEffect(() => {
     console.log(
@@ -60,6 +67,66 @@ export default function Home() {
       uncontrolledRef.current ? "Available" : "Not available",
     )
   }, [uncontrolledRef.current])
+
+  // Create and prepare the Ken Burns effect
+  useEffect(() => {
+    // Initialize effect only when map reference is available
+    if (!uncontrolledRef.current || kenBurnsEffectRef.current) return
+
+    console.log("📸 Creating Ken Burns effect instance")
+
+    // Create the effect
+    const effect = new KenBurnsMapEffect(uncontrolledRef)
+
+    // Set up the keyframes - California-wide view
+    effect
+      .addKeyframe([-119.4179, 37.7653], 5, 12000) // Start with central California
+      .addKeyframe([-123.7104, 39.4621], 7, 10000, 15) // Move to northern California coast with slight rotation
+      .addKeyframe([-119.0222, 35.3733], 6.5, 10000) // Pan to central valleys
+      .addKeyframe([-115.1391, 36.1699], 8, 10000) // Pan to Las Vegas/Colorado River
+      .addKeyframe([-119.4179, 37.7653], 5, 10000) // Return to starting point
+      .setLoop(true)
+
+    // Store the effect for later use
+    kenBurnsEffectRef.current = effect
+
+    // Don't start it yet - wait for scroll position trigger
+
+    // Cleanup on unmount
+    return () => {
+      if (kenBurnsEffectRef.current) {
+        console.log("🛑 Cleaning up Ken Burns effect on page unmount")
+        kenBurnsEffectRef.current.stop()
+        kenBurnsEffectRef.current = null
+      }
+    }
+  }, [uncontrolledRef.current])
+
+  // Start/stop Ken Burns effect based on which section is active
+  useEffect(() => {
+    // Only proceed if map and effect are available
+    if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
+
+    // Start effect when Interstitial panel becomes active
+    if (activeSection === navSectionIds.interstitial) {
+      if (!kenBurnsActive) {
+        console.log("▶️ Starting Ken Burns effect - Interstitial panel in view")
+        kenBurnsEffectRef.current.start()
+        setKenBurnsActive(true)
+      }
+    }
+    // Stop the effect for certain sections where it might be distracting
+    else if (
+      activeSection === navSectionIds.hero ||
+      activeSection === navSectionIds.combinedPanel
+    ) {
+      if (kenBurnsActive) {
+        console.log("⏸️ Stopping Ken Burns effect - Different section in view")
+        kenBurnsEffectRef.current.stop()
+        setKenBurnsActive(false)
+      }
+    }
+  }, [activeSection, kenBurnsActive, uncontrolledRef.current])
 
   // Show drawer after content panels moved up 50% of viewport
   const [showDrawer, setShowDrawer] = useState(false)
@@ -286,7 +353,7 @@ export default function Home() {
           }}
         >
           {/* Landing Panel */}
-          <HeroSection uncontrolledMapRef={uncontrolledRef} />
+          <HeroSection />
 
           {/* Interstitial Panel */}
           <InterstitialPanel />
