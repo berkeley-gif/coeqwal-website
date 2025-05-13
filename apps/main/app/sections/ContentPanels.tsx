@@ -1,7 +1,15 @@
 import React from "react"
 import { Box, Typography, Grid } from "@repo/ui/mui"
-import { BasePanel } from "@repo/ui"
+import { BasePanel, LearnCardCarousel } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
+
+// Define the card type locally
+interface LearnCardType {
+  title: string
+  content: string
+  image?: string
+  type: "resource" | "article" | "video"
+}
 
 // Add props interface
 interface ContentPanelsProps {
@@ -29,6 +37,62 @@ export default function ContentPanels({
         drawerStore.setDrawerContent({ selectedSection: "california-water" })
         drawerStore.openDrawer("learn")
       }
+    }
+  }
+
+  // Sample learn cards data
+  const learnCards: LearnCardType[] = [
+    {
+      title: "Understanding California's Water Systems",
+      content:
+        "An introduction to the complex water infrastructure across the state, including reservoirs, aqueducts, and groundwater basins.",
+      image:
+        "https://images.unsplash.com/photo-1534251623184-22cb7e61c526?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80",
+      type: "resource",
+    },
+    {
+      title: "Sacramento-San Joaquin Delta",
+      content:
+        "Explore the critical Delta region where rivers meet the San Francisco Bay, a vital ecosystem and water hub.",
+      image:
+        "https://images.unsplash.com/photo-1590332088237-fa156a5f8bea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2874&q=80",
+      type: "article",
+    },
+    {
+      title: "Groundwater Sustainability",
+      content:
+        "Learn about the impacts of groundwater management and sustainable aquifer replenishment strategies.",
+      image:
+        "https://images.unsplash.com/photo-1620207418302-439b387441b0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2940&q=80",
+      type: "video",
+    },
+    {
+      title: "California Water Policy",
+      content:
+        "An overview of key water policies and regulations shaping water management decisions.",
+      image:
+        "https://images.unsplash.com/photo-1548407260-da850faa41e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2487&q=80",
+      type: "resource",
+    },
+  ]
+
+  // Handle card click to open the learn drawer with the appropriate section
+  const handleCardClick = (index: number) => {
+    // Map index to a section ID (this should be more dynamic in a real implementation)
+    const sectionMappings = [
+      "california-water",
+      "delta-operations",
+      "groundwater",
+      "water-policy",
+    ]
+
+    const sectionId = sectionMappings[index] || "california-water"
+
+    if (onOpenLearnDrawer) {
+      onOpenLearnDrawer(sectionId)
+    } else {
+      drawerStore.setDrawerContent({ selectedSection: sectionId })
+      drawerStore.openDrawer("learn")
     }
   }
 
@@ -107,6 +171,12 @@ export default function ContentPanels({
         to deepen your understanding, explore key topics, and become an informed
         advocate.
       </Typography>
+
+      <LearnCardCarousel
+        title="Learning Resources"
+        cards={learnCards}
+        onCardClick={handleCardClick}
+      />
     </Box>
   )
 

@@ -163,6 +163,51 @@ export default function Home() {
   // Ken Burns effect is enabled by default
   const kenBurnsEnabled = true
 
+  // Performance monitor for Ken Burns effect
+  useEffect(() => {
+    if (!kenBurnsEnabled) return
+
+    // Store initial time
+    const startTime = performance.now()
+    let frameCount = 0
+    let lastFrameTime = startTime
+
+    // Monitor function to track performance
+    const checkPerformance = () => {
+      frameCount++
+      const now = performance.now()
+
+      // Log every 50 frames to avoid console spam
+      if (frameCount % 50 === 0) {
+        const elapsed = now - startTime
+        const fps = Math.round((frameCount / elapsed) * 1000)
+        const frameTime = (now - lastFrameTime).toFixed(2)
+
+        // Look for long frame times which could cause render issues
+        if (parseFloat(frameTime) > 50) {
+          console.warn(
+            `Ken Burns effect: Slow frame detected - ${frameTime}ms (Target: <16ms)`,
+          )
+        }
+
+        console.log(
+          `Ken Burns monitoring: ${fps} FPS, last frame: ${frameTime}ms`,
+        )
+      }
+
+      lastFrameTime = now
+
+      // Continue monitoring
+      requestAnimationFrame(checkPerformance)
+    }
+
+    // Only monitor in development
+    if (process.env.NODE_ENV === "development") {
+      const rafId = requestAnimationFrame(checkPerformance)
+      return () => cancelAnimationFrame(rafId)
+    }
+  }, [kenBurnsEnabled])
+
   // pull the values out once, so eslint can track them
   const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
 
@@ -222,63 +267,73 @@ export default function Home() {
 
   // Original activation logic (can be kept as fallback)
   useEffect(() => {
-    console.log("⚡ Ken Burns effect check running with:", {
-      activeSection,
-      kenBurnsEnabled,
-      kenBurnsActive,
-      hasEffect: !!kenBurnsEffectRef.current,
-      hasMap: !!uncontrolledRef.current,
-      isInterstitial: activeSection === navSectionIds.interstitial,
-    })
-
     // Only proceed if map and effect are available
-    if (!kenBurnsEffectRef.current || !uncontrolledRef.current) {
-      console.log("🚫 Missing refs, can't start Ken Burns effect")
-      return
-    }
+    if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
 
-    // Start effect when Interstitial panel becomes active
-    if (activeSection === navSectionIds.interstitial && kenBurnsEnabled) {
-      if (!kenBurnsActive) {
-        console.log("▶️ Starting Ken Burns effect - Interstitial panel in view")
-        kenBurnsEffectRef.current.start()
-        setKenBurnsActive(true)
-      }
-    }
-    // Stop the effect for certain sections where it might be distracting
-    else if (
-      activeSection === navSectionIds.hero ||
-      activeSection === navSectionIds.combinedPanel
-    ) {
-      if (kenBurnsActive) {
-        console.log("⏸️ Stopping Ken Burns effect - Different section in view")
-        kenBurnsEffectRef.current.stop()
+    // Use RAF to schedule animation updates outside React's render cycle
+    let rafId: number | null = null
 
-        // Reset map to default position when stopping the effect
-        if (uncontrolledRef.current) {
-          console.log("🔄 Resetting map to default position")
-          uncontrolledRef.current.flyTo({
-            center: [longitude, latitude],
-            zoom,
-            bearing,
-            pitch,
-            duration: 1000, // Smooth transition over 1 second
-          })
+    const scheduleAnimationCheck = () => {
+      // Cancel any pending animation check
+      if (rafId) cancelAnimationFrame(rafId)
+
+      // Schedule new check with RAF, outside of React cycles
+      rafId = requestAnimationFrame(() => {
+        // Start effect when Interstitial panel becomes active
+        if (activeSection === navSectionIds.interstitial && kenBurnsEnabled) {
+          if (!kenBurnsActive) {
+            console.log(
+              "▶️ Starting Ken Burns effect - Interstitial panel in view",
+            )
+            kenBurnsEffectRef.current?.start()
+            setKenBurnsActive(true)
+          }
         }
+        // Stop the effect for certain sections where it might be distracting
+        else if (
+          activeSection === navSectionIds.hero ||
+          activeSection === navSectionIds.combinedPanel
+        ) {
+          if (kenBurnsActive) {
+            console.log(
+              "⏸️ Stopping Ken Burns effect - Different section in view",
+            )
+            kenBurnsEffectRef.current?.stop()
 
-        setKenBurnsActive(false)
-      }
+            // Reset map to default position when stopping the effect
+            if (uncontrolledRef.current) {
+              uncontrolledRef.current.flyTo({
+                center: [
+                  mapStore.viewState.longitude,
+                  mapStore.viewState.latitude,
+                ],
+                zoom: mapStore.viewState.zoom,
+                bearing: mapStore.viewState.bearing,
+                pitch: mapStore.viewState.pitch,
+                duration: 1000, // Smooth transition over 1 second
+              })
+            }
+
+            setKenBurnsActive(false)
+          }
+        }
+      })
+    }
+
+    // Run initially
+    scheduleAnimationCheck()
+
+    // Cleanup on unmount
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId)
     }
   }, [
     activeSection,
     kenBurnsActive,
-    uncontrolledRef,
     kenBurnsEnabled,
-    longitude,
-    latitude,
-    zoom,
-    bearing,
-    pitch,
+    uncontrolledRef,
+    // Omit mapStore.viewState to avoid frequent rerenders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   ])
 
   // Show drawer after content panels moved up 50% of viewport

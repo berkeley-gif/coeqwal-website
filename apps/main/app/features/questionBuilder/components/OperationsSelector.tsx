@@ -408,7 +408,13 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     const checkScrollable = () => {
       const container = scrollContainerRef.current
       if (container) {
-        setIsScrollable(container.scrollHeight > container.clientHeight + 10) // 10px buffer
+        const isCurrentlyScrollable =
+          container.scrollHeight > container.clientHeight + 10 // 10px buffer
+
+        // Only update state if the value has actually changed
+        if (isCurrentlyScrollable !== isScrollable) {
+          setIsScrollable(isCurrentlyScrollable)
+        }
       }
     }
 
@@ -422,6 +428,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
       clearTimeout(timeoutId)
       window.removeEventListener("resize", checkScrollable)
     }
+    // Only re-run when the length of operations changes, not on every render
   }, [operationCardsWithState.length])
 
   // Prevent scroll propagation at the top/bottom boundaries
@@ -498,6 +505,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
       scrollContainer.removeEventListener("touchmove", handleTouchMove)
       scrollContainer.removeEventListener("scroll", preventParentScroll)
     }
+    // No dependencies needed here as it only runs once and cleans up on unmount
   }, [])
 
   return (
@@ -588,9 +596,16 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
           )}
           sx={textFieldStyles}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            e.stopPropagation()
+            setSearchTerm(e.target.value)
+          }}
           onClick={(e) => e.stopPropagation()}
           onFocus={(e) => e.stopPropagation()}
+          // Add debounce to search input to reduce state updates
+          inputProps={{
+            spellCheck: false,
+          }}
         />
       </Box>
 

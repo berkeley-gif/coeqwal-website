@@ -35,3 +35,7 @@ export type { BasePanelProps } from "./panels/BasePanel"
 // Operation components
 export { default as OperationCard } from "./operations/OperationCard"
 export type { OperationCardProps, SubOption } from "./operations/OperationCard"
+
+// Learn components
+export { default as LearnCard } from "./LearnCard"
+export { default as LearnCardCarousel } from "./LearnCardCarousel"
