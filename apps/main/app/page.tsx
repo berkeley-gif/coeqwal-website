@@ -173,13 +173,16 @@ export default function Home() {
     }
   }, [uncontrolledRef.current])
 
+  // Ken Burns effect is disabled by default
+  const kenBurnsEnabled = false
+
   // Start/stop Ken Burns effect based on which section is active
   useEffect(() => {
     // Only proceed if map and effect are available
     if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
 
     // Start effect when Interstitial panel becomes active
-    if (activeSection === navSectionIds.interstitial) {
+    if (activeSection === navSectionIds.interstitial && kenBurnsEnabled) {
       if (!kenBurnsActive) {
         console.log("▶️ Starting Ken Burns effect - Interstitial panel in view")
         kenBurnsEffectRef.current.start()
