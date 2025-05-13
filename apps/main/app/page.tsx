@@ -92,7 +92,7 @@ export default function Home() {
       bearing: mapStore.viewState.bearing,
       pitch: mapStore.viewState.pitch,
     })
-  }, [uncontrolledRef.current, mapStore.viewState])
+  }, [uncontrolledRef, mapStore.viewState])
 
   // Create and prepare the Ken Burns effect
   useEffect(() => {
@@ -154,7 +154,7 @@ export default function Home() {
         kenBurnsEffectRef.current = null
       }
     }
-  }, [uncontrolledRef.current])
+  }, [uncontrolledRef, mapStore.viewState])
 
   // Ken Burns effect is enabled by default
   const kenBurnsEnabled = true
@@ -221,6 +221,7 @@ export default function Home() {
     zoom,
     bearing,
     pitch,
+    mapStore.viewState,
   ])
 
   // Original activation logic (can be kept as fallback)
@@ -291,9 +292,6 @@ export default function Home() {
     kenBurnsActive,
     kenBurnsEnabled,
     uncontrolledRef,
-    // We deliberately omit mapStore.viewState from dependencies to prevent frequent rerenders
-    // that would disrupt smooth animations. Instead, we capture its values in the closure.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     mapStore.viewState,
   ])
 
