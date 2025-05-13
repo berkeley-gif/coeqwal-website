@@ -100,42 +100,45 @@ export default function Home() {
     // Initialize effect only when map reference is available
     if (!uncontrolledRef.current || kenBurnsEffectRef.current) return
 
-    console.log("📸 Creating Ken Burns effect instance")
+    console.log("📸 Creating subtle ambient Ken Burns effect")
 
     // Create the effect
     const effect = new KenBurnsMapEffect(uncontrolledRef)
 
-    // Set up the keyframes to follow California's water system
+    // Set up the keyframes for a subtle ambient effect
     effect
-      // Start with California overview - EXACTLY match the default position
+      // Start with California overview
       .addKeyframe(
         [mapStore.viewState.longitude, mapStore.viewState.latitude],
         mapStore.viewState.zoom,
-        7000,
+        10000, // Longer duration for smoother transition
         mapStore.viewState.bearing,
         mapStore.viewState.pitch,
       )
 
-      // Move to Shasta Lake
-      .addKeyframe([-123.3, 40.72], 8, 9000, 0, 10)
+      // Gentle drift north
+      .addKeyframe(
+        [mapStore.viewState.longitude + 0.3, mapStore.viewState.latitude + 0.7],
+        mapStore.viewState.zoom + 0.2, // Very slight zoom
+        18000, // Much longer duration
+        5, // Slight bearing change
+        5, // Slight pitch
+      )
 
-      // Down the Sacramento River
-      .addKeyframe([-123.2, 40.58], 8.5, 7000, -5, 20)
+      // Gentle drift east
+      .addKeyframe(
+        [mapStore.viewState.longitude + 0.5, mapStore.viewState.latitude + 0.2],
+        mapStore.viewState.zoom + 0.3,
+        20000,
+        -5,
+        10,
+      )
 
-      // Delta region
-      .addKeyframe([-122.5, 38.05], 8.2, 12000, 10, 20)
-
-      // Upper San Joaquin River
-      .addKeyframe([-122.2, 37.67], 8, 10000, 5, 30)
-
-      // Mid San Joaquin Valley (not going as far south)
-      .addKeyframe([-121.6, 37.3], 7.8, 11000, 0, 20)
-
-      // Zoom out to full state view to complete the journey - EXACTLY match the default position
+      // Drift back to center
       .addKeyframe(
         [mapStore.viewState.longitude, mapStore.viewState.latitude],
         mapStore.viewState.zoom,
-        9000,
+        15000,
         mapStore.viewState.bearing,
         mapStore.viewState.pitch,
       )
@@ -144,8 +147,7 @@ export default function Home() {
 
     // Store the effect for later use
     kenBurnsEffectRef.current = effect
-
-    // Don't start it yet - wait for scroll position trigger
+    console.log("✅ Ken Burns effect created successfully")
 
     // Cleanup on unmount
     return () => {
@@ -155,14 +157,14 @@ export default function Home() {
         kenBurnsEffectRef.current = null
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uncontrolledRef.current])
 
   // Ken Burns effect is enabled by default
   const kenBurnsEnabled = true
 
   // pull the values out once, so eslint can track them
-  const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState;
+  const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
 
   // Start/stop Ken Burns effect based on which section is active
   useEffect(() => {
