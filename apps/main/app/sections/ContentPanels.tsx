@@ -75,29 +75,25 @@ export default function ContentPanels({
   const scenarioCards: LearnCardType[] = [
     {
       title: "Current Operations",
-      content:
-        "Lorem ipsum",
+      content: "Lorem ipsum",
       image: "/images/DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
       type: "resource",
     },
     {
       title: "What if we limit groundwater pumping?",
-      content:
-        "Lorem ipsum",
+      content: "Lorem ipsum",
       image: "/images/DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
       type: "article",
     },
     {
       title: "What if we changed how water flows in our streams?",
-      content:
-        "Lorem ipsum",
+      content: "Lorem ipsum",
       image: "/images/DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
       type: "resource",
     },
     {
       title: "What if we prioritized drinking water?",
-      content:
-        "Lorem ipsum",
+      content: "Lorem ipsum",
       type: "video",
     },
   ]
@@ -116,7 +112,7 @@ export default function ContentPanels({
 
     // Access the drawer store directly since we don't have an onOpenThemesDrawer prop
     drawerStore.setDrawerContent({ selectedOperation: operationId })
-    drawerStore.openDrawer("themes")
+    drawerStore.openDrawer("glossary")
   }
 
   // Handle card click to open the learn drawer with the appropriate section
@@ -141,7 +137,7 @@ export default function ContentPanels({
       onOpenLearnDrawer(sectionId)
     } else {
       drawerStore.setDrawerContent({ selectedSection: sectionId })
-      drawerStore.openDrawer("learn")
+      drawerStore.openDrawer("glossary")
     }
   }
 

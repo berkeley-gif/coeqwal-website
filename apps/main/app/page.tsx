@@ -328,7 +328,7 @@ export default function Home() {
   // Handler to open specific drawer tabs - using the store
   const handleOpenThemesDrawer = (operationId?: string) => {
     // Check if the themes drawer is already open
-    if (activeDrawerTab === "themes") {
+    if (activeDrawerTab === "glossary") {
       // Check if this is the same operation that's currently selected
       const drawerStore = useDrawerStore.getState()
       const currentOperation = drawerStore.content?.selectedOperation as
@@ -356,17 +356,17 @@ export default function Home() {
         .getState()
         .setDrawerContent({ selectedOperation: operationId })
     }
-    openDrawer("themes")
+    openDrawer("glossary")
 
     // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
-    setActiveDrawerTab("themes")
+    setActiveDrawerTab("glossary")
   }
 
   // Handler to open specific drawer tabs - using the store
   const handleOpenLearnDrawer = (sectionId?: string) => {
     // Check if the learn drawer is already open
-    if (activeDrawerTab === "learn") {
+    if (activeDrawerTab === "glossary") {
       // Check if this is the same section that's currently selected
       const drawerStore = useDrawerStore.getState()
       const currentSection = drawerStore.content?.selectedSection as
@@ -392,16 +392,16 @@ export default function Home() {
     if (sectionId) {
       useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
     }
-    openDrawer("learn")
+    openDrawer("glossary")
 
     // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
-    setActiveDrawerTab("learn")
+    setActiveDrawerTab("glossary")
   }
 
   const handleOpenCurrentOpsDrawer = (sectionId?: string) => {
     // Check if the currentOps drawer is already open
-    if (activeDrawerTab === "currentOps") {
+    if (activeDrawerTab === "glossary") {
       // Check if this is the same section that's currently selected
       const drawerStore = useDrawerStore.getState()
       const currentSection = drawerStore.content?.selectedSection as
@@ -427,11 +427,11 @@ export default function Home() {
     if (sectionId) {
       useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
     }
-    openDrawer("currentOps")
+    openDrawer("glossary")
 
     // Keep the legacy state in sync for components not yet migrated
     setDrawerOpen(true)
-    setActiveDrawerTab("currentOps")
+    setActiveDrawerTab("glossary")
   }
 
   // Create the secondary navigation items

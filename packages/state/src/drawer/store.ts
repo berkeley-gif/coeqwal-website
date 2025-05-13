@@ -3,7 +3,7 @@ import { immer } from "zustand/middleware/immer"
 import type { DrawerState } from "./types"
 
 // TabKey type from the component
-type TabKey = "learn" | "currentOps" | "themes"
+type TabKey = "glossary"
 
 export interface DrawerStoreState extends DrawerState {
   // Actions
@@ -13,9 +13,7 @@ export interface DrawerStoreState extends DrawerState {
   setDrawerWidth: (width: number) => void
   setDrawerContent: (content: Record<string, unknown>) => void
   // Convenience methods for specific panels
-  openLearnPanel: () => void
-  openCurrentOpsPanel: () => void
-  openThemesPanel: (selectedOperation?: string) => void
+  openGlossaryPanel: () => void
 }
 
 export const useDrawerStore = create<DrawerStoreState>()(
@@ -63,59 +61,12 @@ export const useDrawerStore = create<DrawerStoreState>()(
         state.content = content
       }),
 
-    // Convenience methods for specific buttons
-    openLearnPanel: () =>
+    // Convenience method for glossary panel
+    openGlossaryPanel: () =>
       set((state) => {
-        // Close current panel content first if changing tabs
-        if (state.activeTab !== "learn") {
-          state.content = {}
-        }
-
         state.isOpen = true
-        state.activeTab = "learn"
+        state.activeTab = "glossary"
         state.content = { selectedSection: undefined }
-      }),
-
-    openCurrentOpsPanel: () =>
-      set((state) => {
-        // Close current panel content first if changing tabs
-        if (state.activeTab !== "currentOps") {
-          state.content = {}
-        }
-
-        state.isOpen = true
-        state.activeTab = "currentOps"
-        state.content = { selectedSection: undefined }
-      }),
-
-    openThemesPanel: (selectedOperation) =>
-      set((state) => {
-        // Check if we're already on the themes tab with the same operation selected
-        if (
-          state.activeTab === "themes" &&
-          state.content?.selectedOperation === selectedOperation
-        ) {
-          // Toggle behavior - close if the same operation is already selected
-          state.isOpen = false
-          state.activeTab = null
-          state.content = {}
-          return
-        }
-
-        // Otherwise, handle the transition to the themes panel
-        const isTabChange = state.activeTab !== "themes"
-
-        // First update the tab (critical for panel switching)
-        state.activeTab = "themes"
-        state.isOpen = true
-
-        // Clear existing content if switching tabs
-        if (isTabChange) {
-          state.content = {}
-        }
-
-        // Then set the new content to ensure proper rendering
-        state.content = { selectedOperation }
       }),
   })),
 )

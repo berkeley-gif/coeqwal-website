@@ -4,14 +4,10 @@ import { useState } from "react"
 import { Box, Drawer, useTheme, Typography, Fade } from "@mui/material"
 
 // Content components
-import {
-  LearnContent,
-  CurrentOpsContent,
-  ThemesContent,
-} from "./drawer-content"
+import { CurrentOpsContent } from "./drawer-content"
 
 // Types
-export type TabKey = "learn" | "currentOps" | "themes"
+export type TabKey = "glossary"
 
 // Props for the rail buttons
 interface RailButtonProps {
@@ -20,8 +16,6 @@ interface RailButtonProps {
   active?: boolean
   bgColor: string
   hoverColor: string
-  topButton?: boolean
-  bottomButton?: boolean
 }
 
 /**
@@ -33,8 +27,6 @@ function RailButton({
   active,
   bgColor,
   hoverColor,
-  topButton,
-  bottomButton,
 }: RailButtonProps) {
   const theme = useTheme()
 
@@ -47,7 +39,7 @@ function RailButton({
         alignItems: "center",
         bgcolor: active ? theme.palette.primary.main : bgColor,
         color: "#FFFFFF", // White text to match secondary nav
-        borderRadius: 0, // Remove capsule shape
+        borderRadius: "8px 0 0 8px", // Rounded corners on the left side only
         boxShadow: "none",
         padding: "12px 2px", // Reduced horizontal padding
         my: 0,
@@ -55,8 +47,6 @@ function RailButton({
         height: "220px", // Increased height for more text space
         cursor: "pointer",
         position: "relative",
-        borderTopLeftRadius: topButton ? "8px" : 0,
-        borderBottomLeftRadius: bottomButton ? "8px" : 0,
         borderRight: active
           ? `4px solid ${theme.palette.primary.dark}`
           : "none",
@@ -127,18 +117,16 @@ export interface MultiDrawerProps {
 
 // Map of tab keys to display titles
 const tabTitles: Record<TabKey, string> = {
-  learn: "LEARN ABOUT CALIFORNIA WATER",
-  currentOps: "CURRENT OPERATIONS",
-  themes: "SCENARIO THEMES",
+  glossary: "GLOSSARY",
 }
 
 /**
- * MultiDrawer component with three tabs
+ * MultiDrawer component with a single Glossary tab
  *
  * Features:
- * - Always visible mini rail with labeled buttons
- * - Single drawer with different content based on active tab
- * - Smooth transitions between tabs
+ * - Always visible mini rail with labeled button
+ * - Drawer with glossary content
+ * - Smooth transitions
  */
 export function MultiDrawer({
   drawerWidth = 360,
@@ -164,13 +152,11 @@ export function MultiDrawer({
 
   // Mapping of tab keys to background colors
   const tabBg: Record<TabKey, string> = {
-    learn: "rgb(128, 175, 196)",
-    currentOps: "rgb(106, 155, 170)",
-    themes: "rgb(87, 137, 154)",
+    glossary: "rgb(106, 155, 170)",
   }
 
   // Track the bg color to apply to drawer paper, preserve while closing
-  const [drawerBg, setDrawerBg] = useState<string>(tabBg.learn)
+  const [drawerBg, setDrawerBg] = useState<string>(tabBg.glossary)
 
   // Update drawer state and call optional callback
   const updateDrawerState = (tab: TabKey | null) => {
@@ -199,7 +185,7 @@ export function MultiDrawer({
 
   return (
     <>
-      {/* Mini rail with vertical tab buttons */}
+      {/* Mini rail with vertical tab button */}
       <Fade
         in={!drawerOpen && visible}
         timeout={600}
@@ -231,32 +217,16 @@ export function MultiDrawer({
           }}
         >
           <RailButton
-            label="LEARN ABOUT WATER"
-            onClick={() => toggleTab("learn")}
-            active={activeTab === "learn"}
-            bgColor="rgb(128, 175, 196)" /* #80AFC4 */
-            hoverColor="rgb(113, 160, 181)" /* #71A0B5 */
-            topButton
-          />
-          <RailButton
-            label="CURRENT OPERATIONS"
-            onClick={() => toggleTab("currentOps")}
-            active={activeTab === "currentOps"}
+            label="GLOSSARY"
+            onClick={() => toggleTab("glossary")}
+            active={activeTab === "glossary"}
             bgColor="rgb(106, 155, 170)" /* #6A9BAA */
             hoverColor="rgb(94, 141, 156)" /* #5E8D9C */
-          />
-          <RailButton
-            label="SCENARIO THEMES"
-            onClick={() => toggleTab("themes")}
-            active={activeTab === "themes"}
-            bgColor="rgb(87, 137, 154)" /* #57899A */
-            hoverColor="rgb(76, 123, 138)" /* #4C7B8A */
-            bottomButton
           />
         </Box>
       </Fade>
 
-      {/* Main drawer with dynamic content */}
+      {/* Main drawer with glossary content */}
       <Drawer
         anchor="right"
         variant="persistent"
@@ -280,16 +250,15 @@ export function MultiDrawer({
           },
         }}
       >
-        {/* Fade transitions for each content section */}
-        <Fade in={activeTab === "learn"}>
+        <Fade in={activeTab === "glossary"}>
           <Box
             sx={{
-              display: activeTab === "learn" ? "block" : "none",
+              display: activeTab === "glossary" ? "block" : "none",
               height: "100%",
               overflow: "auto",
             }}
           >
-            {activeTab === "learn" && (
+            {activeTab === "glossary" && (
               <>
                 <Box
                   sx={{
@@ -299,48 +268,7 @@ export function MultiDrawer({
                   }}
                 >
                   <Typography variant="h5" sx={{ fontWeight: 500 }}>
-                    {tabTitles.learn}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    color: theme.palette.text.primary,
-                    backgroundColor: theme.palette.common.white,
-                    height: "calc(100% - 56px)", // Adjust based on header height
-                    overflow: "auto",
-                  }}
-                >
-                  <LearnContent
-                    onClose={close}
-                    selectedSection={
-                      drawerContent.selectedSection as string | undefined
-                    }
-                  />
-                </Box>
-              </>
-            )}
-          </Box>
-        </Fade>
-
-        <Fade in={activeTab === "currentOps"}>
-          <Box
-            sx={{
-              display: activeTab === "currentOps" ? "block" : "none",
-              height: "100%",
-              overflow: "auto",
-            }}
-          >
-            {activeTab === "currentOps" && (
-              <>
-                <Box
-                  sx={{
-                    backgroundColor: drawerBg,
-                    color: theme.palette.common.white,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
-                    {tabTitles.currentOps}
+                    {tabTitles.glossary}
                   </Typography>
                 </Box>
                 <Box
@@ -355,47 +283,6 @@ export function MultiDrawer({
                     onClose={close}
                     selectedSection={
                       drawerContent.selectedSection as string | undefined
-                    }
-                  />
-                </Box>
-              </>
-            )}
-          </Box>
-        </Fade>
-
-        <Fade in={activeTab === "themes"}>
-          <Box
-            sx={{
-              display: activeTab === "themes" ? "block" : "none",
-              height: "100%",
-              overflow: "auto",
-            }}
-          >
-            {activeTab === "themes" && (
-              <>
-                <Box
-                  sx={{
-                    backgroundColor: drawerBg,
-                    color: theme.palette.common.white,
-                    padding: 2,
-                  }}
-                >
-                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
-                    {tabTitles.themes}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    color: theme.palette.text.primary,
-                    backgroundColor: theme.palette.common.white,
-                    height: "calc(100% - 56px)", // Adjust based on header height
-                    overflow: "auto",
-                  }}
-                >
-                  <ThemesContent
-                    onClose={close}
-                    selectedOperation={
-                      drawerContent.selectedOperation as string | undefined
                     }
                   />
                 </Box>
