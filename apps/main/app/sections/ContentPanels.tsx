@@ -46,32 +46,27 @@ export default function ContentPanels({
       title: "How water moves through California",
       content:
         "Most of California's water falls as rain and snow. This precipitation is highly variable both across the state and from year to year.",
-      image:
-        "/images/DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
+      image: "/images/DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
       type: "resource",
     },
     {
       title: "How California's water is managed",
       content:
         "An introduction to the complex water infrastructure across the state.",
-      image:
-        "/images/DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
+      image: "/images/DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
       type: "article",
     },
     {
       title: "Climate change and California water",
       content:
         "Learn about the impacts of climate change on the future of California water.",
-      image:
-        "/images/DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
+      image: "/images/DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
       type: "video",
     },
     {
       title: "Equity in California water",
       content:
         "An overview of key water policies and regulations shaping water management decisions.",
-      image:
-        "https://images.unsplash.com/photo-1548407260-da850faa41e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2487&q=80",
       type: "resource",
     },
   ]

@@ -56,15 +56,6 @@ const CardImage = styled("img")({
   objectPosition: "center", // Center the image
 })
 
-// Default empty image placeholder
-const EmptyImagePlaceholder = styled(Box)({
-  height: "220px", // Same height as the image wrapper
-  backgroundColor: "#e0e0e0", // Light gray background
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-})
-
 // Updated button style to match HeaderHome
 const StyledButton = styled(Button)(({ theme }) => ({
   textTransform: "none",
@@ -81,17 +72,33 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 // Function to truncate text at word boundaries
 const truncateText = (text: string, maxLength: number): string => {
-  if (text.length <= maxLength) return text;
-  
+  if (text.length <= maxLength) return text
+
   // Find the last space before maxLength
-  const lastSpace = text.lastIndexOf(' ', maxLength);
-  
+  const lastSpace = text.lastIndexOf(" ", maxLength)
+
   // If no space found, just truncate at maxLength
-  if (lastSpace === -1) return text.substring(0, maxLength) + '...';
-  
+  if (lastSpace === -1) return text.substring(0, maxLength) + "..."
+
   // Return text truncated at the last space
-  return text.substring(0, lastSpace) + '...';
-};
+  return text.substring(0, lastSpace) + "..."
+}
+
+// Get color based on card type
+const getCardColor = (
+  type: "resource" | "article" | "video" | undefined,
+): string => {
+  switch (type) {
+    case "resource":
+      return "#2f84ab"
+    case "video":
+      return "#005B6E" // Teal
+    case "article":
+      return "#3A3F79" // Purple
+    default:
+      return "#2f84ab"
+  }
+}
 
 const LearnCard: React.FC<LearnCardProps> = ({
   title,
@@ -103,39 +110,42 @@ const LearnCard: React.FC<LearnCardProps> = ({
   // Determine button text based on card type
   const getButtonText = () => {
     // Always return "Explore" for all card types
-    return "Explore";
+    return "Explore"
   }
 
   // Determine button color based on card type
   const getButtonColor = () => {
-    switch (type) {
-      case "resource":
-        return "#1A3F6A" // Deep blue
-      case "video":
-        return "#005B6E" // Teal
-      case "article":
-        return "#3A3F79" // Purple
-      default:
-        return "#1A3F6A" // Default to blue
-    }
+    return getCardColor(type)
   }
 
   const buttonColor = getButtonColor()
-  
+
   // Calculate truncated text versions
-  const truncatedTitle = useMemo(() => truncateText(title, 80), [title]);
-  const truncatedContent = useMemo(() => truncateText(content, 200), [content]);
+  const truncatedTitle = useMemo(() => truncateText(title, 80), [title])
+  const truncatedContent = useMemo(() => truncateText(content, 200), [content])
+
+  // Get the background color for the image placeholder
+  const bgColor = getCardColor(type)
 
   return (
     <StyledCard cardType={type} onClick={onClick}>
-      {/* Always render an image container, either with image or placeholder */}
-      {image ? (
-        <CardImageWrapper>
-          <CardImage src={image} alt={title} />
-        </CardImageWrapper>
-      ) : (
-        <EmptyImagePlaceholder />
-      )}
+      {/* Always render an image container, with colored background if no image */}
+      <Box
+        sx={{
+          height: "100px",
+          minHeight: "100px",
+          maxHeight: "100px",
+          width: "100%",
+          overflow: "hidden",
+          position: "relative",
+          backgroundColor: bgColor, // Use type-specific background color
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {image && <CardImage src={image} alt={title} />}
+      </Box>
       <CardContent
         sx={{
           display: "flex",
@@ -144,15 +154,15 @@ const LearnCard: React.FC<LearnCardProps> = ({
           padding: 3,
         }}
       >
-        <Typography 
-          variant="h6" 
-          component="h3" 
+        <Typography
+          variant="h6"
+          component="h3"
           gutterBottom
           title={title} // Show full title on hover
         >
           {truncatedTitle}
         </Typography>
-        
+
         <Typography
           variant="body1"
           sx={{
@@ -163,13 +173,13 @@ const LearnCard: React.FC<LearnCardProps> = ({
         >
           {truncatedContent}
         </Typography>
-        
+
         <Box
           sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
         >
-          <StyledButton 
-            variant="outlined" 
-            sx={{ 
+          <StyledButton
+            variant="outlined"
+            sx={{
               backgroundColor: "transparent",
               color: buttonColor,
               borderColor: buttonColor,
