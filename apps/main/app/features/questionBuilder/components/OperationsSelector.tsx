@@ -345,15 +345,15 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     // Get the drawer store
     const drawerStore = useDrawerStore.getState()
 
-    // Special case for current-operations - open the currentOps drawer
+    // Special case for current-operations - open the glossary drawer
     if (operationId === "current-operations") {
-      // Check if currentOps drawer is already open
-      if (drawerStore.activeTab === "currentOps") {
+      // Check if glossary drawer is already open
+      if (drawerStore.activeTab === "glossary") {
         // Toggle behavior - close if already open
         drawerStore.closeDrawer()
       } else {
-        // Use the dedicated method for opening the current ops panel
-        drawerStore.openCurrentOpsPanel()
+        // Use the dedicated method for opening the glossary panel
+        drawerStore.openGlossaryPanel()
       }
       return
     }
@@ -364,7 +364,8 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
       openThemesDrawer(operationId)
     } else {
       // Always use the dedicated method which handles tab transitions correctly
-      drawerStore.openThemesPanel(operationId)
+      drawerStore.setDrawerContent({ selectedOperation: operationId })
+      drawerStore.openDrawer("glossary")
     }
   }
 
