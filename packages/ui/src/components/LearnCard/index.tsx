@@ -22,13 +22,13 @@ const StyledCard = styled(Card, {
   display: "flex",
   flexDirection: "column",
   minWidth: 0,
-  width: "429px",
-  height: cardType === "resource" ? "380px" : "320px",
+  width: "100%", // Make card take full width of parent
+  height: "380px", // Consistent height for all cards
   wordWrap: "break-word",
   backgroundColor: "#fff",
   backgroundClip: "border-box",
   border: "1px solid #fff",
-  borderRadius: 0,
+  borderRadius: "8px", // Added 8px border radius
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
     transform: "translateY(-5px)",
@@ -38,7 +38,7 @@ const StyledCard = styled(Card, {
 }))
 
 const CardImageWrapper = styled(Box)({
-  height: "220px",
+  height: "220px", // Consistent height for all card images
   overflow: "hidden",
   position: "relative",
 })
@@ -49,17 +49,27 @@ const CardImage = styled("img")({
   objectFit: "cover",
 })
 
+// Default empty image placeholder
+const EmptyImagePlaceholder = styled(Box)({
+  height: "220px", // Same height as the image wrapper
+  backgroundColor: "#e0e0e0", // Light gray background
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+})
+
+// Updated button style to match HeaderHome
 const StyledButton = styled(Button)(({ theme }) => ({
-  textDecoration: "none",
-  textTransform: "uppercase",
-  letterSpacing: "0.1em",
-  cursor: "pointer",
-  borderRadius: "50rem",
-  padding: "0.5em 1em",
-  fontSize: "1.4rem",
-  lineHeight: 1.5,
-  transition:
-    "color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
+  textTransform: "none",
+  borderRadius: "50rem", // Rounded pill
+  boxShadow: "none",
+  padding: "6px 16px",
+  minWidth: 64,
+  lineHeight: 1.75,
+  fontSize: "0.95rem",
+  fontWeight: 500,
+  height: "36px", // Fixed height to match HeaderHome
+  minHeight: "36px", // Min height to match HeaderHome
 }))
 
 const LearnCard: React.FC<LearnCardProps> = ({
@@ -73,13 +83,13 @@ const LearnCard: React.FC<LearnCardProps> = ({
   const getButtonText = () => {
     switch (type) {
       case "resource":
-        return "EXPLORE"
+        return "Explore"
       case "article":
-        return "READ MORE"
+        return "Read More"
       case "video":
-        return "WATCH"
+        return "Watch"
       default:
-        return "DISCOVER"
+        return "Discover"
     }
   }
 
@@ -101,10 +111,13 @@ const LearnCard: React.FC<LearnCardProps> = ({
 
   return (
     <StyledCard cardType={type} onClick={onClick}>
-      {image && (
+      {/* Always render an image container, either with image or placeholder */}
+      {image ? (
         <CardImageWrapper>
           <CardImage src={image} alt={title} />
         </CardImageWrapper>
+      ) : (
+        <EmptyImagePlaceholder />
       )}
       <CardContent
         sx={{
@@ -118,10 +131,10 @@ const LearnCard: React.FC<LearnCardProps> = ({
           {title}
         </Typography>
         <Typography
-          variant="body2"
+          variant="body1"
           sx={{
             flexGrow: 1,
-            mb: 2,
+            mb: 3,
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
@@ -132,41 +145,28 @@ const LearnCard: React.FC<LearnCardProps> = ({
           {content}
         </Typography>
 
-        <StyledButton
-          variant="outlined"
-          sx={{
-            alignSelf: "flex-start",
-            backgroundColor: "transparent",
-            color: buttonColor,
-            borderColor: buttonColor,
-            "&:hover": {
-              backgroundColor: buttonColor,
-              color: "#fff",
-            },
-          }}
-          onClick={(e) => {
-            e.stopPropagation() // Prevent card onClick from triggering
-            onClick && onClick()
-          }}
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}
         >
-          {getButtonText()}
-        </StyledButton>
-
-        {type && (
-          <Box
+          <StyledButton
+            variant="outlined"
             sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              bgcolor: buttonColor,
-              color: "white",
-              px: 2,
-              py: 0.5,
+              backgroundColor: "transparent",
+              color: buttonColor,
+              borderColor: buttonColor,
+              "&:hover": {
+                backgroundColor: buttonColor,
+                color: "#fff",
+              },
+            }}
+            onClick={(e) => {
+              e.stopPropagation() // Prevent card onClick from triggering
+              onClick && onClick()
             }}
           >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </Box>
-        )}
+            {getButtonText()}
+          </StyledButton>
+        </Box>
       </CardContent>
     </StyledCard>
   )

@@ -1,5 +1,11 @@
-import React from "react"
-import { Box, Typography, IconButton } from "@mui/material"
+import React, { useRef, useState, useEffect } from "react"
+import {
+  Box,
+  Typography,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material"
 import { styled } from "@mui/material/styles"
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew"
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos"
@@ -27,6 +33,7 @@ const CarouselHeader = styled(Box)(({ theme }) => ({
 
 const CarouselTitle = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
+  color: "white",
 }))
 
 const CarouselControls = styled(Box)({
@@ -34,52 +41,142 @@ const CarouselControls = styled(Box)({
   gap: "8px",
 })
 
-const CarouselTrack = styled(Box)({
+const CarouselTrack = styled(Box)(({ theme }) => ({
   display: "flex",
-  overflowX: "auto",
+  overflowX: "hidden",
   scrollBehavior: "smooth",
-  scrollbarWidth: "none", // Hide scrollbar for Firefox
-  msOverflowStyle: "none", // Hide scrollbar for IE/Edge
-  "&::-webkit-scrollbar": {
-    display: "none", // Hide scrollbar for Chrome/Safari
-  },
-  padding: "10px 0", // Add padding to show shadow
-})
+  paddingBottom: theme.spacing(1),
+}))
 
-const CarouselItem = styled(Box)({
-  padding: "0 10px",
-  flexShrink: 0,
-})
+// Constants for card sizing
+const MAX_CARD_WIDTH = 429 // Maximum width in pixels
+const CARD_GAP = 20 // Gap between cards in pixels
+const CARDS_TO_SHOW_MD = 4 // Always show 4 cards on md screens
+const CARDS_TO_SHOW_SM = 2 // Show 2 cards on small screens
+const CARDS_TO_SHOW_XS = 1 // Show 1 card on extra small screens
 
 const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
   title,
   cards,
   onCardClick,
 }) => {
-  const trackRef = React.useRef<HTMLDivElement>(null)
+  const theme = useTheme()
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"))
+
+  const trackRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // State to track current position and card widths
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [cardWidth, setCardWidth] = useState(MAX_CARD_WIDTH)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(true)
+
+  // Calculate card width based on container size
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const calculateCardWidth = () => {
+      const containerWidth = containerRef.current?.clientWidth || 0
+
+      // Determine how many cards to show based on screen size
+      let cardsToShow = CARDS_TO_SHOW_XS
+      if (isMdUp) cardsToShow = CARDS_TO_SHOW_MD
+      else if (isSmUp) cardsToShow = CARDS_TO_SHOW_SM
+
+      // Calculate total space needed for gaps
+      const totalGapWidth = (cardsToShow - 1) * CARD_GAP
+
+      // Calculate the width for each card
+      const calculatedWidth = Math.floor(
+        (containerWidth - totalGapWidth) / cardsToShow,
+      )
+
+      // Use calculated width, but cap at MAX_CARD_WIDTH
+      const newWidth = Math.min(calculatedWidth, MAX_CARD_WIDTH)
+      setCardWidth(newWidth)
+
+      // Update scroll buttons
+      updateScrollButtons(currentIndex, cardsToShow)
+    }
+
+    calculateCardWidth()
+    window.addEventListener("resize", calculateCardWidth)
+
+    return () => window.removeEventListener("resize", calculateCardWidth)
+  }, [currentIndex, isMdUp, isSmUp])
+
+  // Helper to update the scroll button states
+  const updateScrollButtons = (index: number, visibleCards: number) => {
+    setCanScrollLeft(index > 0)
+    setCanScrollRight(index + visibleCards < cards.length)
+  }
 
   const scrollLeft = () => {
+    if (!canScrollLeft) return
+
+    // Move by one card
+    const newIndex = Math.max(0, currentIndex - 1)
+    setCurrentIndex(newIndex)
+
     if (trackRef.current) {
-      trackRef.current.scrollBy({ left: -450, behavior: "smooth" })
+      trackRef.current.scrollTo({
+        left: newIndex * (cardWidth + CARD_GAP),
+        behavior: "smooth",
+      })
     }
+
+    // Get current visible cards count
+    let visibleCards = CARDS_TO_SHOW_XS
+    if (isMdUp) visibleCards = CARDS_TO_SHOW_MD
+    else if (isSmUp) visibleCards = CARDS_TO_SHOW_SM
+
+    updateScrollButtons(newIndex, visibleCards)
   }
 
   const scrollRight = () => {
+    if (!canScrollRight) return
+
+    // Get current visible cards count
+    let visibleCards = CARDS_TO_SHOW_XS
+    if (isMdUp) visibleCards = CARDS_TO_SHOW_MD
+    else if (isSmUp) visibleCards = CARDS_TO_SHOW_SM
+
+    // Move by one card
+    const newIndex = Math.min(cards.length - visibleCards, currentIndex + 1)
+    setCurrentIndex(newIndex)
+
     if (trackRef.current) {
-      trackRef.current.scrollBy({ left: 450, behavior: "smooth" })
+      trackRef.current.scrollTo({
+        left: newIndex * (cardWidth + CARD_GAP),
+        behavior: "smooth",
+      })
     }
+
+    updateScrollButtons(newIndex, visibleCards)
   }
 
   return (
-    <CarouselContainer>
+    <CarouselContainer ref={containerRef}>
       {title && (
         <CarouselHeader>
           <CarouselTitle variant="h5">{title}</CarouselTitle>
           <CarouselControls>
-            <IconButton onClick={scrollLeft} size="small">
+            <IconButton
+              onClick={scrollLeft}
+              size="small"
+              sx={{ color: "white" }}
+              disabled={!canScrollLeft}
+            >
               <ArrowBackIosNewIcon />
             </IconButton>
-            <IconButton onClick={scrollRight} size="small">
+            <IconButton
+              onClick={scrollRight}
+              size="small"
+              sx={{ color: "white" }}
+              disabled={!canScrollRight}
+            >
               <ArrowForwardIosIcon />
             </IconButton>
           </CarouselControls>
@@ -88,12 +185,20 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
 
       <CarouselTrack ref={trackRef}>
         {cards.map((card, index) => (
-          <CarouselItem key={index}>
+          <Box
+            key={index}
+            sx={{
+              width: `${cardWidth}px`,
+              maxWidth: `${MAX_CARD_WIDTH}px`,
+              flexShrink: 0,
+              marginRight: `${CARD_GAP}px`,
+            }}
+          >
             <LearnCard
               {...card}
               onClick={() => onCardClick && onCardClick(index)}
             />
-          </CarouselItem>
+          </Box>
         ))}
       </CarouselTrack>
     </CarouselContainer>

@@ -41,7 +41,7 @@ const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
     buttons: {
-      getData: "Raw Data",
+      getData: "Data",
       about: "About COEQWAL",
     },
   },

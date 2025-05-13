@@ -43,7 +43,7 @@ export default function ContentPanels({
   // Sample learn cards data
   const learnCards: LearnCardType[] = [
     {
-      title: "Understanding California's Water Systems",
+      title: "How water moves through California",
       content:
         "An introduction to the complex water infrastructure across the state, including reservoirs, aqueducts, and groundwater basins.",
       image:
@@ -51,7 +51,7 @@ export default function ContentPanels({
       type: "resource",
     },
     {
-      title: "Sacramento-San Joaquin Delta",
+      title: "How California's water is managed",
       content:
         "Explore the critical Delta region where rivers meet the San Francisco Bay, a vital ecosystem and water hub.",
       image:
@@ -59,7 +59,7 @@ export default function ContentPanels({
       type: "article",
     },
     {
-      title: "Groundwater Sustainability",
+      title: "Climate change and California water",
       content:
         "Learn about the impacts of groundwater management and sustainable aquifer replenishment strategies.",
       image:
@@ -67,7 +67,7 @@ export default function ContentPanels({
       type: "video",
     },
     {
-      title: "California Water Policy",
+      title: "Equity in California water",
       content:
         "An overview of key water policies and regulations shaping water management decisions.",
       image:
@@ -156,7 +156,6 @@ export default function ContentPanels({
         Use our{" "}
         <Box
           component="span"
-          onClick={handleToggleLearnDrawer}
           sx={{
             textDecoration: "underline",
             cursor: "pointer",
@@ -240,7 +239,7 @@ export default function ContentPanels({
         {/* Learn Card Carousel - positioned below the grid to span full width */}
         <Box sx={{ width: "100%" }}>
           <LearnCardCarousel
-            title="Learning Resources"
+            title="California Water Learning Library"
             cards={learnCards}
             onCardClick={handleCardClick}
           />
