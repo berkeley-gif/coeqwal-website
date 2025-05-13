@@ -58,26 +58,18 @@ export default function Home() {
   // Access the map store to update the initial view state
   const mapStore = useMapStore()
 
-  // Default initial position to use consistently throughout the app
-  const initialPosition = {
-    longitude: -127.5,
-    latitude: 37.962,
-    zoom: 5.83,
-    bearing: 0,
-    pitch: 0,
-  }
-
   // Use useLayoutEffect to ensure this runs BEFORE the first render
   // This guarantees the map store has the correct state before any map initialization
   useLayoutEffect(() => {
-    console.log("🗺️ PRE-RENDER: Setting map store viewState to match animation")
+    console.log("🗺️ PRE-RENDER: Setting map store viewState")
 
+    // Set default position in the map store
     mapActions.setViewState({
-      longitude: initialPosition.longitude,
-      latitude: initialPosition.latitude,
-      zoom: initialPosition.zoom,
-      bearing: initialPosition.bearing,
-      pitch: initialPosition.pitch,
+      longitude: -127.5,
+      latitude: 37.962,
+      zoom: 5.83,
+      bearing: 0,
+      pitch: 0,
     })
   }, []) // Empty dependency array ensures this runs once before component mounts
 
@@ -103,10 +95,10 @@ export default function Home() {
         "🌍 Setting initial map position to match first animation keyframe",
       )
       uncontrolledRef.current.jumpTo({
-        center: [initialPosition.longitude, initialPosition.latitude],
-        zoom: initialPosition.zoom,
-        bearing: initialPosition.bearing,
-        pitch: initialPosition.pitch,
+        center: [mapStore.viewState.longitude, mapStore.viewState.latitude],
+        zoom: mapStore.viewState.zoom,
+        bearing: mapStore.viewState.bearing,
+        pitch: mapStore.viewState.pitch,
       })
     }
   }, [uncontrolledRef.current])
@@ -125,11 +117,11 @@ export default function Home() {
     effect
       // Start with California overview - EXACTLY match the default position
       .addKeyframe(
-        [initialPosition.longitude, initialPosition.latitude],
-        initialPosition.zoom,
+        [mapStore.viewState.longitude, mapStore.viewState.latitude],
+        mapStore.viewState.zoom,
         7000,
-        initialPosition.bearing,
-        initialPosition.pitch,
+        mapStore.viewState.bearing,
+        mapStore.viewState.pitch,
       )
 
       // Move to Shasta Lake
@@ -149,11 +141,11 @@ export default function Home() {
 
       // Zoom out to full state view to complete the journey - EXACTLY match the default position
       .addKeyframe(
-        [initialPosition.longitude, initialPosition.latitude],
-        initialPosition.zoom,
+        [mapStore.viewState.longitude, mapStore.viewState.latitude],
+        mapStore.viewState.zoom,
         9000,
-        initialPosition.bearing,
-        initialPosition.pitch,
+        mapStore.viewState.bearing,
+        mapStore.viewState.pitch,
       )
 
       .setLoop(true)
@@ -173,13 +165,25 @@ export default function Home() {
     }
   }, [uncontrolledRef.current])
 
-  // Ken Burns effect is disabled by default
-  const kenBurnsEnabled = false
+  // Ken Burns effect is enabled by default
+  const kenBurnsEnabled = true
 
   // Start/stop Ken Burns effect based on which section is active
   useEffect(() => {
+    console.log("⚡ Ken Burns effect check running with:", {
+      activeSection,
+      kenBurnsEnabled,
+      kenBurnsActive,
+      hasEffect: !!kenBurnsEffectRef.current,
+      hasMap: !!uncontrolledRef.current,
+      isInterstitial: activeSection === navSectionIds.interstitial,
+    })
+
     // Only proceed if map and effect are available
-    if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
+    if (!kenBurnsEffectRef.current || !uncontrolledRef.current) {
+      console.log("🚫 Missing refs, can't start Ken Burns effect")
+      return
+    }
 
     // Start effect when Interstitial panel becomes active
     if (activeSection === navSectionIds.interstitial && kenBurnsEnabled) {
@@ -202,10 +206,10 @@ export default function Home() {
         if (uncontrolledRef.current) {
           console.log("🔄 Resetting map to default position")
           uncontrolledRef.current.flyTo({
-            center: [initialPosition.longitude, initialPosition.latitude],
-            zoom: initialPosition.zoom,
-            bearing: initialPosition.bearing,
-            pitch: initialPosition.pitch,
+            center: [mapStore.viewState.longitude, mapStore.viewState.latitude],
+            zoom: mapStore.viewState.zoom,
+            bearing: mapStore.viewState.bearing,
+            pitch: mapStore.viewState.pitch,
             duration: 1000, // Smooth transition over 1 second
           })
         }
@@ -213,7 +217,13 @@ export default function Home() {
         setKenBurnsActive(false)
       }
     }
-  }, [activeSection, kenBurnsActive, uncontrolledRef.current])
+  }, [
+    activeSection,
+    kenBurnsActive,
+    uncontrolledRef,
+    kenBurnsEnabled,
+    navSectionIds.interstitial,
+  ])
 
   // Show drawer after content panels moved up 50% of viewport
   const [showDrawer, setShowDrawer] = useState(false)
