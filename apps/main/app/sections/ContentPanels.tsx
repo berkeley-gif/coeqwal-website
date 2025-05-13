@@ -75,7 +75,7 @@ export default function ContentPanels({
   const handleCardClick = (index: number) => {
     // Special case for the first card - open external link
     if (index === 0) {
-      window.open("https://flow.coeqwal.org", "_blank")
+      window.location.href = "https://flow.coeqwal.org"
       return
     }
 
@@ -183,7 +183,7 @@ export default function ContentPanels({
         model a broad range of water management and climate scenarios.
       </Typography>
       <Typography variant="body2" color="common.white">
-        Explore these scenarios and empower your community with actionable
+        Explore these scenario themes and empower your community with actionable
         insights to advocate for water solutions.
       </Typography>
     </Box>

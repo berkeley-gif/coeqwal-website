@@ -92,13 +92,16 @@ export default function Home() {
       bearing: mapStore.viewState.bearing,
       pitch: mapStore.viewState.pitch,
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uncontrolledRef.current])
+  }, [uncontrolledRef.current, mapStore.viewState])
 
   // Create and prepare the Ken Burns effect
   useEffect(() => {
     // Initialize effect only when map reference is available
     if (!uncontrolledRef.current || kenBurnsEffectRef.current) return
+
+    // Destructure the viewState properties to use inside this effect
+    // This captures the values in the closure without needing them in dependencies
+    const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
 
     console.log("📸 Creating subtle ambient Ken Burns effect")
 
@@ -109,39 +112,33 @@ export default function Home() {
     effect
       // Start with California overview
       .addKeyframe(
-        [mapStore.viewState.longitude, mapStore.viewState.latitude],
-        mapStore.viewState.zoom,
+        [longitude, latitude],
+        zoom,
         2000, // Very short first transition for immediate effect
-        mapStore.viewState.bearing, // Keep default bearing
-        mapStore.viewState.pitch,
+        bearing, // Keep default bearing
+        pitch,
       )
 
       // Gentle drift north
       .addKeyframe(
-        [mapStore.viewState.longitude + 0.3, mapStore.viewState.latitude + 0.7],
-        mapStore.viewState.zoom + 0.2, // Very slight zoom
+        [longitude + 0.3, latitude + 0.7],
+        zoom + 0.2, // Very slight zoom
         8000, // Shorter duration for faster feedback
-        mapStore.viewState.bearing, // Keep default bearing
+        bearing, // Keep default bearing
         5, // Slight pitch
       )
 
       // Gentle drift east
       .addKeyframe(
-        [mapStore.viewState.longitude + 0.5, mapStore.viewState.latitude + 0.2],
-        mapStore.viewState.zoom + 0.3,
+        [longitude + 0.5, latitude + 0.2],
+        zoom + 0.3,
         20000,
-        mapStore.viewState.bearing, // Keep default bearing instead of -5
+        bearing, // Keep default bearing instead of -5
         10,
       )
 
       // Drift back to center
-      .addKeyframe(
-        [mapStore.viewState.longitude, mapStore.viewState.latitude],
-        mapStore.viewState.zoom,
-        15000,
-        mapStore.viewState.bearing,
-        mapStore.viewState.pitch,
-      )
+      .addKeyframe([longitude, latitude], zoom, 15000, bearing, pitch)
 
       .setLoop(true)
 
@@ -157,7 +154,6 @@ export default function Home() {
         kenBurnsEffectRef.current = null
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uncontrolledRef.current])
 
   // Ken Burns effect is enabled by default
@@ -217,13 +213,24 @@ export default function Home() {
     handleDirectScrollCheck()
 
     return () => window.removeEventListener("scroll", handleDirectScrollCheck)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kenBurnsActive, kenBurnsEnabled])
+  }, [
+    kenBurnsActive,
+    kenBurnsEnabled,
+    longitude,
+    latitude,
+    zoom,
+    bearing,
+    pitch,
+  ])
 
   // Original activation logic (can be kept as fallback)
   useEffect(() => {
     // Only proceed if map and effect are available
     if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
+
+    // Destructure viewState properties to capture current values in the closure
+    // This avoids adding them as dependencies while preventing the ESLint warning
+    const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
 
     // Use RAF to schedule animation updates outside React's render cycle
     let rafId: number | null = null
@@ -258,13 +265,10 @@ export default function Home() {
             // Reset map to default position when stopping the effect
             if (uncontrolledRef.current) {
               uncontrolledRef.current.flyTo({
-                center: [
-                  mapStore.viewState.longitude,
-                  mapStore.viewState.latitude,
-                ],
-                zoom: mapStore.viewState.zoom,
-                bearing: mapStore.viewState.bearing,
-                pitch: mapStore.viewState.pitch,
+                center: [longitude, latitude],
+                zoom: zoom,
+                bearing: bearing,
+                pitch: pitch,
                 duration: 1000, // Smooth transition over 1 second
               })
             }
@@ -287,12 +291,10 @@ export default function Home() {
     kenBurnsActive,
     kenBurnsEnabled,
     uncontrolledRef,
-    /*
-     * Deliberately omitting the mapStore.viewState properties from dependencies.
-     * Including them would cause frequent rerenders and disrupt smooth animations.
-     * The values are accessed via closure when needed for the flyTo transition.
-     */
+    // We deliberately omit mapStore.viewState from dependencies to prevent frequent rerenders
+    // that would disrupt smooth animations. Instead, we capture its values in the closure.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    mapStore.viewState,
   ])
 
   // Show drawer after content panels moved up 50% of viewport
