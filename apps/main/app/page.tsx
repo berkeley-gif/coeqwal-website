@@ -102,10 +102,42 @@ export default function Home() {
     }
   }, [uncontrolledRef.current])
 
+  // Ensure map starts in the correct position
+  useEffect(() => {
+    // Default position of the map
+    const defaultPosition = {
+      longitude: -126.037,
+      latitude: 37.962,
+      zoom: 5.83,
+      bearing: 0,
+      pitch: 0,
+    }
+
+    // Reset the map position when it becomes available
+    if (uncontrolledRef.current) {
+      console.log("🌍 Setting initial map position")
+      uncontrolledRef.current.jumpTo({
+        center: [defaultPosition.longitude, defaultPosition.latitude],
+        zoom: defaultPosition.zoom,
+        bearing: defaultPosition.bearing,
+        pitch: defaultPosition.pitch,
+      })
+    }
+  }, [uncontrolledRef.current])
+
   // Start/stop Ken Burns effect based on which section is active
   useEffect(() => {
     // Only proceed if map and effect are available
     if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
+
+    // Original default map position
+    const defaultPosition = {
+      longitude: -126.037,
+      latitude: 37.962,
+      zoom: 5.83,
+      bearing: 0,
+      pitch: 0,
+    }
 
     // Start effect when Interstitial panel becomes active
     if (activeSection === navSectionIds.interstitial) {
@@ -123,6 +155,19 @@ export default function Home() {
       if (kenBurnsActive) {
         console.log("⏸️ Stopping Ken Burns effect - Different section in view")
         kenBurnsEffectRef.current.stop()
+
+        // Reset map to default position when stopping the effect
+        if (uncontrolledRef.current) {
+          console.log("🔄 Resetting map to default position")
+          uncontrolledRef.current.flyTo({
+            center: [defaultPosition.longitude, defaultPosition.latitude],
+            zoom: defaultPosition.zoom,
+            bearing: defaultPosition.bearing,
+            pitch: defaultPosition.pitch,
+            duration: 1000, // Smooth transition over 1 second
+          })
+        }
+
         setKenBurnsActive(false)
       }
     }
