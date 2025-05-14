@@ -221,7 +221,7 @@ export function MultiDrawer({
             onClick={() => toggleTab("glossary")}
             active={activeTab === "glossary"}
             bgColor="#60aacb"
-            hoverColor="#4e8fa9" /* Slightly darker version of #60aacb */
+            hoverColor="#7cbad5" /* Brighter version of #60aacb */
           />
         </Box>
       </Fade>
