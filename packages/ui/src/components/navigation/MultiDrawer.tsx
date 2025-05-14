@@ -37,7 +37,7 @@ function RailButton({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: active ? theme.palette.primary.main : bgColor,
+        bgcolor: active ? "#60aacb" : bgColor,
         color: "#FFFFFF", // White text to match secondary nav
         borderRadius: "8px 0 0 8px", // Rounded corners on the left side only
         boxShadow: "none",
@@ -53,7 +53,7 @@ function RailButton({
         border: "none", // Remove border
         transition: "all 0.2s ease",
         "&:hover": {
-          bgcolor: active ? theme.palette.primary.main : hoverColor,
+          bgcolor: active ? "#60aacb" : hoverColor,
         },
       }}
       aria-label={`Open ${label} panel`}
@@ -152,7 +152,7 @@ export function MultiDrawer({
 
   // Mapping of tab keys to background colors
   const tabBg: Record<TabKey, string> = {
-    glossary: "rgb(106, 155, 170)",
+    glossary: "#60aacb",
   }
 
   // Track the bg color to apply to drawer paper, preserve while closing
@@ -220,8 +220,8 @@ export function MultiDrawer({
             label="GLOSSARY"
             onClick={() => toggleTab("glossary")}
             active={activeTab === "glossary"}
-            bgColor="rgb(106, 155, 170)" /* #6A9BAA */
-            hoverColor="rgb(94, 141, 156)" /* #5E8D9C */
+            bgColor="#60aacb"
+            hoverColor="#4e8fa9" /* Slightly darker version of #60aacb */
           />
         </Box>
       </Fade>

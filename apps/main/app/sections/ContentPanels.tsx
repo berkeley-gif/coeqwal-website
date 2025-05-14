@@ -167,7 +167,7 @@ export default function ContentPanels({
         alignSelf: "flex-start",
       }}
     >
-      Empower
+      Explore
     </Typography>
   )
 
@@ -182,7 +182,7 @@ export default function ContentPanels({
         alignSelf: "flex-start",
       }}
     >
-      Act
+      Empower
     </Typography>
   )
 
@@ -277,11 +277,11 @@ export default function ContentPanels({
         </Box>
       </BasePanel>
 
-      {/* Second Panel - Teal background */}
+      {/* Second Panel */}
       <BasePanel
         paddingVariant="wide"
         sx={{
-          backgroundColor: "#005B6E", // Teal
+          backgroundColor: "#2f84ab",
           py: 12,
           color: "white", // Ensure text color is white
         }}
@@ -319,9 +319,9 @@ export default function ContentPanels({
 
       {/* Third Panel - Purple background */}
       <BasePanel
-        paddingVariant="very-wide"
+        paddingVariant="wide"
         sx={{
-          backgroundColor: "#3A3F79", // Deep purple
+          backgroundColor: "#135773",
           py: 12,
           color: "white", // Ensure text color is white
         }}
