@@ -102,13 +102,6 @@ const LearnCard: React.FC<LearnCardProps> = ({
     return "Explore"
   }
 
-  // Determine button color based on card type
-  const getButtonColor = () => {
-    return getCardColor(type)
-  }
-
-  const buttonColor = getButtonColor()
-
   // Calculate truncated text versions
   const truncatedTitle = useMemo(() => truncateText(title, 80), [title])
   const truncatedContent = useMemo(() => truncateText(content, 200), [content])
