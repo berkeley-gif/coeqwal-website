@@ -83,7 +83,7 @@ export default function CalSimSection({
                     useDrawerStore
                       .getState()
                       .setDrawerContent({ selectedSection: "calsim" })
-                    useDrawerStore.getState().openDrawer("learn")
+                    useDrawerStore.getState().openDrawer("glossary")
                   }
                 }}
               />

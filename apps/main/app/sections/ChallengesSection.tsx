@@ -86,7 +86,7 @@ export default function ChallengesSection({
                     useDrawerStore
                       .getState()
                       .setDrawerContent({ selectedSection: "challenges" })
-                    useDrawerStore.getState().openDrawer("learn")
+                    useDrawerStore.getState().openDrawer("glossary")
                   }
                 }}
               />

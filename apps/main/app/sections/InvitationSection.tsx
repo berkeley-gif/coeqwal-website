@@ -103,8 +103,8 @@ export default function InvitationSection({
                     } else {
                       useDrawerStore
                         .getState()
-                        .setDrawerContent({ selectedSection: "invitation" })
-                      useDrawerStore.getState().openDrawer("currentOps")
+                        .setDrawerContent({ selectedSection: "operations" })
+                      useDrawerStore.getState().openDrawer("glossary")
                     }
                   }}
                 >
@@ -118,9 +118,12 @@ export default function InvitationSection({
                 <ExploreButton
                   onClick={() => {
                     if (onOpenThemesDrawer) {
-                      onOpenThemesDrawer()
+                      onOpenThemesDrawer("delta-conveyance-tunnel")
                     } else {
-                      useDrawerStore.getState().openDrawer("themes")
+                      useDrawerStore.getState().setDrawerContent({
+                        selectedOperation: "delta-conveyance-tunnel",
+                      })
+                      useDrawerStore.getState().openDrawer("glossary")
                     }
                   }}
                 >

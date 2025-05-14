@@ -10,8 +10,13 @@ export interface QuestionSvg {
 }
 
 interface PhotoWithQuestionsProps {
+  /** Fallback image when backgroundImages not provided */
   src: string
   questionSvgs: QuestionSvg[]
+  /** Optional array of background images to rotate in sync with questions */
+  backgroundImages?: string[]
+  /** Optional object-position values matching backgroundImages */
+  backgroundPositions?: string[]
   transitionInterval?: number
 }
 
@@ -23,6 +28,8 @@ interface PhotoWithQuestionsProps {
 export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
   src,
   questionSvgs,
+  backgroundImages,
+  backgroundPositions,
   transitionInterval = 4000,
 }) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null)
@@ -63,15 +70,24 @@ export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
   const left = `calc(50% + ${safeX}%)`
   const top = `calc(50% + ${safeY}%)`
 
-  // If no SVGs supplied, render just the photo
+  // Determine current background image
+  const currentBg = backgroundImages?.[index] || src
+  const objectPos = backgroundPositions?.[index] || "center center"
+
+  // If no SVGs supplied, render just the photo (currentBg)
   if (questionSvgs.length === 0) {
     return (
       <Box sx={{ width: "100%", height: "100%" }}>
         <Box
           component="img"
-          src={src}
+          src={currentBg}
           alt="hero foreground"
-          sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+          sx={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: objectPos,
+          }}
         />
       </Box>
     )
@@ -85,9 +101,15 @@ export const PhotoWithQuestions: React.FC<PhotoWithQuestionsProps> = ({
       {/* foreground photo */}
       <Box
         component="img"
-        src={src}
+        src={currentBg}
         alt="hero foreground"
-        sx={{ width: "100%", height: "100%", objectFit: "cover" }}
+        sx={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: objectPos,
+          transition: "opacity 0.5s ease-in-out",
+        }}
       />
 
       {/* active SVG */}

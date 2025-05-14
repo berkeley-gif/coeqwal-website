@@ -115,7 +115,7 @@ export default function CaliforniaWaterSection({
                     useDrawerStore
                       .getState()
                       .setDrawerContent({ selectedSection: "california-water" })
-                    useDrawerStore.getState().openDrawer("learn")
+                    useDrawerStore.getState().openDrawer("glossary")
                   }
                 }}
               />

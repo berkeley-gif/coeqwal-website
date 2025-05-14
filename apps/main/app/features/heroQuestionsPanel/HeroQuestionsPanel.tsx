@@ -71,6 +71,9 @@ interface HeroQuestionsPanelProps extends BasePanelProps {
   // New bottom content
   bottomHeadline?: string
   bottomText?: string
+  /** Optional array of background images to pair with questionSvgs */
+  backgroundImages?: string[]
+  backgroundPositions?: string[]
 }
 
 export function HeroQuestionsPanel({
@@ -84,7 +87,9 @@ export function HeroQuestionsPanel({
   headlineColor,
   overlayCircles = [],
   questionSvgs = [],
-  bottomHeadline = "Learn. Empower. Act.",
+  backgroundImages,
+  backgroundPositions,
+  bottomHeadline = "Learn. Explore. Empower.",
   bottomText = "Explore California's water system and discover possibilities for the future of water in our state.",
   ...panelProps
 }: HeroQuestionsPanelProps) {
@@ -145,11 +150,13 @@ export function HeroQuestionsPanel({
         width: "100%",
         pt: topPadding,
         pb: margin,
-        px: margin,
+        px: 0,
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
         backgroundColor: theme.palette.common.white,
+        maxWidth: "100vw",
+        overflow: "hidden",
       }}
     >
       <BasePanel
@@ -164,7 +171,7 @@ export function HeroQuestionsPanel({
           position: "relative",
           display: "flex",
           justifyContent: "center",
-          borderRadius: 1,
+          borderRadius: 0,
           overflow: "hidden",
           flex: 1,
           ...(panelProps as BasePanelProps).sx,
@@ -221,6 +228,8 @@ export function HeroQuestionsPanel({
         {questionSvgs.length > 0 && (
           <PhotoWithQuestions
             src={backgroundImage ?? ""}
+            backgroundImages={backgroundImages}
+            backgroundPositions={backgroundPositions}
             questionSvgs={questionSvgs}
             transitionInterval={transitionInterval}
           />
@@ -391,7 +400,7 @@ export function HeroQuestionsPanel({
       </BasePanel>
 
       {/* Bottom headline & text */}
-      <Box sx={{ mt: margin, mb: theme.spacing(8), textAlign: "center" }}>
+      <Box sx={{ mt: 0, mb: theme.spacing(4), textAlign: "center" }}>
         <Typography
           variant="h1"
           sx={{

@@ -66,22 +66,22 @@ export default function HeroSection() {
   const questionSvgs = [
     {
       src: "/images/question1.svg",
-      xPercent: -30,
-      yPercent: 10,
+      xPercent: 34,
+      yPercent: 16,
       width: 360,
       height: 360,
     },
     {
       src: "/images/question2.svg",
-      xPercent: 3,
-      yPercent: 18,
+      xPercent: 34,
+      yPercent: 50,
       width: 500,
       height: 500,
     },
     {
       src: "/images/question3.svg",
-      xPercent: -24,
-      yPercent: -10,
+      xPercent: -40,
+      yPercent: 5,
       width: 400,
       height: 400,
     },
@@ -94,11 +94,28 @@ export default function HeroSection() {
     },
     {
       src: "/images/question5.svg",
-      xPercent: 28,
-      yPercent: 50,
+      xPercent: 30,
+      yPercent: 70,
       width: 460,
       height: 460,
     },
+  ]
+
+  // Background images that match each question index
+  const backgroundImages = [
+    "/images/DWR_FL_Caltrans_Sign-7163.jpg",
+    "/images/DWR_CC_salmon_underH20-5_10_15_2012.jpg",
+    "/images/DWR_2020_10_13_FL_Lookout_Slough-0252.jpg",
+    "/images/steven-kelly-tO63oH6mGlg-unsplash.jpg",
+    "/images/DWR_2024_09_27_XM_0691_Native_American_Day.jpg",
+  ]
+
+  const backgroundPositions = [
+    "center top", // first image top aligned
+    "center center", // second centered
+    "center center", // third centered
+    "center top", // fourth top aligned
+    "center top", // fifth top aligned
   ]
 
   return (
@@ -112,7 +129,8 @@ export default function HeroSection() {
       }}
     >
       <HeroQuestionsPanel
-        backgroundImage="/images/steven-kelly-tO63oH6mGlg-unsplash.jpg"
+        backgroundImages={backgroundImages}
+        backgroundPositions={backgroundPositions}
         verticalAlignment="top"
         background="light"
         fullHeight={false}
@@ -122,7 +140,10 @@ export default function HeroSection() {
         transitionInterval={6000}
         sx={{
           backgroundSize: "cover",
-          backgroundPosition: "center -100px",
+          backgroundPosition: "center",
+          width: "100vw",
+          marginLeft: "50%",
+          transform: "translateX(-50%)",
           "& > div": {
             marginTop: "-15vh",
           },

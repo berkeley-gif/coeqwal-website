@@ -82,7 +82,7 @@ export default function ManagingWaterSection({
                     useDrawerStore
                       .getState()
                       .setDrawerContent({ selectedSection: "managing-water" })
-                    useDrawerStore.getState().openDrawer("learn")
+                    useDrawerStore.getState().openDrawer("glossary")
                   }
                 }}
               />
