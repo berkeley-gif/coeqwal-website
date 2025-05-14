@@ -25,15 +25,15 @@ const StyledCard = styled(Card, {
   width: "100%", // Make card take full width of parent
   height: "380px", // Consistent height for all cards
   wordWrap: "break-word",
-  backgroundColor: "#fff",
+  backgroundColor: "transparent", // Changed from #fff to transparent
   backgroundClip: "border-box",
-  border: "1px solid #fff",
+  border: "1px solid rgba(255, 255, 255, 0.6)", // Changed from #fff to semi-transparent white
   borderRadius: "8px", // Added 8px border radius
   pointerEvents: "auto", // Ensure hover effects work
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
     transform: "translateY(-5px)",
-    boxShadow: "0 8px 16px rgba(0,0,0,0.1)",
+    boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
     cursor: "pointer",
   },
 }))
@@ -141,6 +141,7 @@ const LearnCard: React.FC<LearnCardProps> = ({
           flexDirection: "column",
           flexGrow: 1,
           padding: 3,
+          backgroundColor: "transparent", // Ensure content background is also transparent
         }}
       >
         <Typography
@@ -148,6 +149,7 @@ const LearnCard: React.FC<LearnCardProps> = ({
           component="h3"
           gutterBottom
           title={title} // Show full title on hover
+          sx={{ color: "#fff" }} // Make title text white
         >
           {truncatedTitle}
         </Typography>
@@ -157,6 +159,7 @@ const LearnCard: React.FC<LearnCardProps> = ({
           sx={{
             flexGrow: 1,
             mb: 3,
+            color: "#fff", // Make content text white
           }}
           title={content} // Show full content on hover
         >
@@ -171,12 +174,13 @@ const LearnCard: React.FC<LearnCardProps> = ({
             sx={{
               alignSelf: "flex-end",
               backgroundColor: "transparent",
-              color: buttonColor,
-              borderColor: buttonColor,
+              color: "#fff", // Changed from buttonColor to white
+              borderColor: "#fff", // Changed from buttonColor to white
               pointerEvents: "auto",
               "&:hover": {
-                backgroundColor: buttonColor,
-                color: "#fff",
+                backgroundColor: "rgba(255, 255, 255, 0.2)", // Semi-transparent white on hover
+                color: "#fff", // Keep text white on hover
+                borderColor: "#fff", // Keep border white on hover
               },
             }}
             onClick={(e) => {

@@ -198,22 +198,8 @@ export default function ContentPanels({
         future.
       </Typography>
       <Typography variant="body2" color="common.white">
-        Use our{" "}
-        <Box
-          component="span"
-          sx={{
-            textDecoration: "underline",
-            cursor: "pointer",
-            pointerEvents: "auto",
-            "&:hover": {
-              opacity: 0.8,
-            },
-          }}
-        >
-          California Water Learning Library
-        </Box>{" "}
-        to deepen your understanding, explore key topics, and become an informed
-        advocate.
+        Use our California Water Learning Library to deepen your understanding,
+        explore key topics, and become an informed advocate.
       </Typography>
     </Box>
   )
