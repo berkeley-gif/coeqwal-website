@@ -263,9 +263,9 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: "linear-gradient(to bottom, #f69a93, #1d76bb)",
+        background: "linear-gradient(to bottom, #f69a93, #81D4FA)",
         backgroundImage:
-          "url('/images/collage_water.png'), linear-gradient(to bottom, #f69a93, #1d76bb)",
+          "url('/images/collage_water.png'), linear-gradient(to bottom, #f69a93, #81D4FA)",
         backgroundSize: "cover, 100% 100%",
         backgroundPosition: "center, center",
         backgroundRepeat: "no-repeat, no-repeat",

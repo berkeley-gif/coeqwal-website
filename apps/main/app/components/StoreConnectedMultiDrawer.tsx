@@ -21,7 +21,7 @@ interface StoreConnectedMultiDrawerProps {
 export function StoreConnectedMultiDrawer({
   drawerWidth,
   overlay = false,
-  showRailButton = false,
+  showRailButton = true,
 }: StoreConnectedMultiDrawerProps) {
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
