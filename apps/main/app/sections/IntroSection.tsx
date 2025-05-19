@@ -169,18 +169,18 @@ const circlePositions = {
     { left: "75%", top: "10%" },
     { left: "50%", top: "45%" },
   ],
-  
+
   // Foreground circles (appear in front of text)
   foreground: [
     { left: "35%", top: "65%" },
     { left: "60%", top: "70%" },
     { left: "75%", top: "55%" },
   ],
-};
+}
 
 // Keep these for backward compatibility
-const backgroundPositions = circlePositions.background;
-const foregroundPositions = circlePositions.foreground;
+const backgroundPositions = circlePositions.background
+const foregroundPositions = circlePositions.foreground
 
 // Function to generate fixed circle configuration
 const generateFixedCircleProps = (
@@ -195,21 +195,24 @@ const generateFixedCircleProps = (
   // Default position as fallback in case positions array is somehow empty
   const defaultPosition = { left: "50%", top: "50%" }
   const position = positions[safeIndex] || defaultPosition
-  
-  console.log(`Creating ${isBackground ? 'background' : 'foreground'} circle at position:`, position);
-  
+
+  console.log(
+    `Creating ${isBackground ? "background" : "foreground"} circle at position:`,
+    position,
+  )
+
   // Determine z-index based on whether it's a background or foreground circle
   const index = isBackground ? 0 : 20
 
   // Fixed size with small variation
-  const size = 280 + (positionIndex * 10)
+  const size = 280 + positionIndex * 10
 
   // Generate animation parameters with consistent variation
   const baseFreq = 0.05
-  const freqX1 = baseFreq + (positionIndex * 0.01)
-  const freqX2 = baseFreq - (positionIndex * 0.005)
-  const freqY1 = baseFreq + (positionIndex * 0.008)
-  const freqY2 = baseFreq + (positionIndex * 0.012)
+  const freqX1 = baseFreq + positionIndex * 0.01
+  const freqX2 = baseFreq - positionIndex * 0.005
+  const freqY1 = baseFreq + positionIndex * 0.008
+  const freqY2 = baseFreq + positionIndex * 0.012
 
   // Fixed phases with variation based on position index
   const basePhase = positionIndex * 0.8
@@ -220,10 +223,10 @@ const generateFixedCircleProps = (
 
   // Fixed amplitudes with small variations
   const baseAmplitude = 30
-  const amplitudeX1 = baseAmplitude + (positionIndex * 3)
-  const amplitudeX2 = baseAmplitude - (positionIndex * 2)
-  const amplitudeY1 = baseAmplitude + (positionIndex * 2)
-  const amplitudeY2 = baseAmplitude - (positionIndex * 1)
+  const amplitudeX1 = baseAmplitude + positionIndex * 3
+  const amplitudeX2 = baseAmplitude - positionIndex * 2
+  const amplitudeY1 = baseAmplitude + positionIndex * 2
+  const amplitudeY2 = baseAmplitude - positionIndex * 1
 
   return {
     imagePath,
@@ -316,7 +319,7 @@ const IntroSection: React.FC = () => {
   useEffect(() => {
     // Select consistent images from the available ones
     // Using 8 total circles (4 background + 4 foreground)
-    const selectedImages = [...availableImages].slice(0, 8);
+    const selectedImages = [...availableImages].slice(0, 8)
 
     // Create 4 background circles with fixed positions
     const bgCircles = selectedImages
@@ -482,12 +485,13 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "#007C92",
-              mb: 3, // 24px spacing between lines
-              fontSize: "96px", // Scaled up from 72px
-              fontWeight: 700, // Bold
-              lineHeight: 1, // Changed from 1.2 to 1
+              mb: 4, // 32px spacing
+              fontSize: "86px",
+              fontWeight: 700,
+              lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              fontFamily:
+                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
@@ -498,12 +502,13 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "#007C92",
-              mb: 3, // 24px spacing between lines
-              fontSize: "96px", // Scaled up from 72px
-              fontWeight: 700, // Bold
-              lineHeight: 1, // Changed from 1.2 to 1
+              mb: 4, // 32px spacing
+              fontSize: "86px",
+              fontWeight: 700,
+              lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              fontFamily:
+                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
@@ -514,12 +519,13 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "#007C92",
-              mb: 4, // 32px spacing (larger gap before final line)
-              fontSize: "96px", // Scaled up from 72px
-              fontWeight: 700, // Bold
-              lineHeight: 1, // Changed from 1.2 to 1
+              mb: 4, // 32px spacing
+              fontSize: "86px",
+              fontWeight: 700,
+              lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              fontFamily:
+                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
@@ -530,11 +536,13 @@ const IntroSection: React.FC = () => {
             variant="h4"
             sx={{
               color: "#007C92",
-              fontSize: "54px", // Scaled up from 40px
-              fontWeight: 500, // Medium weight
-              lineHeight: 1, // Changed from 1.3 to 1
+              mt: 2, // 16px top margin
+              fontSize: "48px",
+              fontWeight: 500,
+              lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
-              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              fontFamily:
+                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
@@ -548,8 +556,8 @@ const IntroSection: React.FC = () => {
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
             }}
           >
-            Rethink California water.Explore California&apos;s water system and discover possibilities
-            for the future of water in our state.
+            Rethink California water.Explore California&apos;s water system and
+            discover possibilities for the future of water in our state.
           </Typography>
         </Box>
 
