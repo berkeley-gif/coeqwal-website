@@ -482,41 +482,63 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "#007C92",
-              mb: 1,
-              fontSize: "clamp(4rem, 8vw, 8rem)",
+              mb: 3, // 24px spacing between lines
+              fontSize: "96px", // Scaled up from 72px
+              fontWeight: 700, // Bold
+              lineHeight: 1, // Changed from 1.2 to 1
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
-            Learn
+            Learn.
           </Typography>
 
           <Typography
             variant="h1"
             sx={{
               color: "#007C92",
-              mb: 1,
-              fontSize: "clamp(4rem, 8vw, 8rem)",
+              mb: 3, // 24px spacing between lines
+              fontSize: "96px", // Scaled up from 72px
+              fontWeight: 700, // Bold
+              lineHeight: 1, // Changed from 1.2 to 1
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
-            Explore
+            Explore.
           </Typography>
 
           <Typography
             variant="h1"
             sx={{
               color: "#007C92",
-              fontSize: "clamp(4rem, 8vw, 8rem)",
+              mb: 4, // 32px spacing (larger gap before final line)
+              fontSize: "96px", // Scaled up from 72px
+              fontWeight: 700, // Bold
+              lineHeight: 1, // Changed from 1.2 to 1
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
             className="inter-font"
           >
-            Empower
+            Empower.
+          </Typography>
+
+          <Typography
+            variant="h4"
+            sx={{
+              color: "#007C92",
+              fontSize: "54px", // Scaled up from 40px
+              fontWeight: 500, // Medium weight
+              lineHeight: 1, // Changed from 1.3 to 1
+              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            }}
+            className="inter-font"
+          >
+            Rethink California Water.
           </Typography>
 
           <Typography
