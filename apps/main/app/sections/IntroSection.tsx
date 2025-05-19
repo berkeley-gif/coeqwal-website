@@ -318,21 +318,26 @@ const IntroSection: React.FC = () => {
   // Generate circles on initial render - using only available images
   useEffect(() => {
     // Select consistent images from the available ones
-    // Using 8 total circles (4 background + 4 foreground)
+    // Using 8 total circles for all positions (background + foreground)
     const selectedImages = [...availableImages].slice(0, 8)
 
-    // Create 4 background circles with fixed positions
-    const bgCircles = selectedImages
-      .slice(0, 4)
-      .map((img, index) => generateFixedCircleProps(img, true, index))
-
-    // Create 4 foreground circles (using different images) with fixed positions
-    const fgCircles = selectedImages
-      .slice(4, 8)
-      .map((img, index) => generateFixedCircleProps(img, false, index))
+    // Create circles with all positions (background + foreground) for the background
+    const allPositions = [...circlePositions.background, ...circlePositions.foreground]
+    const bgCircles = selectedImages.map((img, index) => {
+      // Use the position index to determine which position to use
+      const positionIndex = index % allPositions.length
+      const position = allPositions[positionIndex] || { left: "50%", top: "50%" };
+      // Call generateFixedCircleProps with the correct values
+      return {
+        ...generateFixedCircleProps(img, true, index),
+        // Override the position with the exact one from allPositions
+        left: position.left,
+        top: position.top
+      }
+    })
 
     setBackgroundCircles(bgCircles)
-    setForegroundCircles(fgCircles)
+    setForegroundCircles([]) // Empty the foreground circles
   }, [])
 
   return (
@@ -486,8 +491,8 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "#007C92",
               mb: 4, // 32px spacing
-              fontSize: "86px",
-              fontWeight: 700,
+              fontSize: "108px",
+              fontWeight: 600,
               lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
@@ -503,8 +508,8 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "#007C92",
               mb: 4, // 32px spacing
-              fontSize: "86px",
-              fontWeight: 700,
+              fontSize: "108px",
+              fontWeight: 600,
               lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
@@ -520,8 +525,8 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "#007C92",
               mb: 4, // 32px spacing
-              fontSize: "86px",
-              fontWeight: 700,
+              fontSize: "108px",
+              fontWeight: 600,
               lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
@@ -537,7 +542,7 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "#007C92",
               mt: 2, // 16px top margin
-              fontSize: "48px",
+              fontSize: "62px",
               fontWeight: 500,
               lineHeight: 0.8,
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
@@ -554,6 +559,7 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "#007C92",
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              fontSize: "20px",
             }}
           >
             Rethink California water.Explore California&apos;s water system and
@@ -561,7 +567,7 @@ const IntroSection: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Foreground Circles (above text) */}
+        {/* Foreground Circles section is kept for code structure but not rendering any circles */}
         <Box
           sx={{
             position: "absolute",
@@ -573,9 +579,7 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {foregroundCircles.map((circle, index) => (
-            <ImageCircle key={`fg-circle-${index}`} {...circle} />
-          ))}
+          {/* No foreground circles rendered */}
         </Box>
       </BasePanel>
 
