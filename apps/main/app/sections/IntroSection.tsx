@@ -174,6 +174,94 @@ const getRandomInRange = (min: number, max: number): number => {
   return Math.random() * (max - min) + min
 }
 
+// Clear configuration for circle positions - easy to edit
+const circlePositions = {
+  // Background circles (appear behind text)
+  background: [
+    { left: "30%", top: "10%" }, 
+    { left: "50%", top: "10%" },
+    { left: "60%", top: "10%" },
+    { left: "76%", top: "10%" }, 
+  ],
+  
+  // Foreground circles (appear in front of text)
+  foreground: [
+    { left: "40%", top: "40%" }, 
+    { left: "50%", top: "60%" },
+    { left: "60%", top: "40%" },
+    { left: "70%", top: "60%" }, 
+  ],
+};
+
+// Keep these for backward compatibility
+const backgroundPositions = circlePositions.background;
+const foregroundPositions = circlePositions.foreground;
+
+// Function to generate fixed circle configuration
+const generateFixedCircleProps = (
+  imagePath: string,
+  isBackground: boolean,
+  positionIndex: number,
+): AnimatedCircleProps => {
+  // Use predefined positions based on whether it's a background or foreground circle
+  const positions = isBackground ? backgroundPositions : foregroundPositions
+  // Ensure position index is within bounds
+  const safeIndex = positionIndex % positions.length
+  // Default position as fallback in case positions array is somehow empty
+  const defaultPosition = { left: "50%", top: "50%" }
+  const position = positions[safeIndex] || defaultPosition
+  
+  console.log(`Creating ${isBackground ? 'background' : 'foreground'} circle at position:`, position);
+  
+  // Determine z-index based on whether it's a background or foreground circle
+  const index = isBackground ? 0 : 20
+
+  // Fixed size with small variation
+  const size = 280 + (positionIndex * 10)
+
+  // Generate animation parameters with consistent variation
+  const baseFreq = 0.05
+  const freqX1 = baseFreq + (positionIndex * 0.01)
+  const freqX2 = baseFreq - (positionIndex * 0.005)
+  const freqY1 = baseFreq + (positionIndex * 0.008)
+  const freqY2 = baseFreq + (positionIndex * 0.012)
+
+  // Fixed phases with variation based on position index
+  const basePhase = positionIndex * 0.8
+  const phaseX1 = basePhase
+  const phaseX2 = basePhase + 1.2
+  const phaseY1 = basePhase + 0.5
+  const phaseY2 = basePhase + 1.8
+
+  // Fixed amplitudes with small variations
+  const baseAmplitude = 30
+  const amplitudeX1 = baseAmplitude + (positionIndex * 3)
+  const amplitudeX2 = baseAmplitude - (positionIndex * 2)
+  const amplitudeY1 = baseAmplitude + (positionIndex * 2)
+  const amplitudeY2 = baseAmplitude - (positionIndex * 1)
+
+  return {
+    imagePath,
+    left: position.left,
+    top: position.top,
+    index,
+    opacity: 1,
+    size,
+    freqX1,
+    freqX2,
+    freqY1,
+    freqY2,
+    phaseX1,
+    phaseX2,
+    phaseY1,
+    phaseY2,
+    amplitudeX1,
+    amplitudeX2,
+    amplitudeY1,
+    amplitudeY2,
+  }
+}
+
 // Function to generate random circle configuration
 const generateRandomCircleProps = (
   imagePath: string,
@@ -241,18 +329,19 @@ const IntroSection: React.FC = () => {
 
   // Generate circles on initial render - using only available images
   useEffect(() => {
-    // Shuffle the available images array to randomize which images are used
-    const shuffledImages = [...availableImages].sort(() => Math.random() - 0.5)
+    // Select consistent images from the available ones
+    // No need to shuffle - we'll use a consistent order for consistency
+    const selectedImages = [...availableImages].slice(0, 8);
 
-    // Create 4 background circles
-    const bgCircles = shuffledImages
+    // Create 4 background circles with fixed positions
+    const bgCircles = selectedImages
       .slice(0, 4)
-      .map((img) => generateRandomCircleProps(img, true))
+      .map((img, index) => generateFixedCircleProps(img, true, index))
 
-    // Create 4 foreground circles (using different images)
-    const fgCircles = shuffledImages
+    // Create 4 foreground circles (using different images) with fixed positions
+    const fgCircles = selectedImages
       .slice(4, 8)
-      .map((img) => generateRandomCircleProps(img, false))
+      .map((img, index) => generateFixedCircleProps(img, false, index))
 
     setBackgroundCircles(bgCircles)
     setForegroundCircles(fgCircles)
@@ -446,7 +535,7 @@ const IntroSection: React.FC = () => {
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
             }}
           >
-            Explore California&apos;s water system and discover possibilities
+            Rethink California water.Explore California&apos;s water system and discover possibilities
             for the future of water in our state.
           </Typography>
         </Box>
