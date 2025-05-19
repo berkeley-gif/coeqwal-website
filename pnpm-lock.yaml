@@ -228,6 +228,9 @@ importers:
 
   packages/motion:
     dependencies:
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../ui
       '@types/flubber':
         specifier: ^0.4.0
         version: 0.4.0

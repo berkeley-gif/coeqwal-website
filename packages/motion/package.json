@@ -22,13 +22,13 @@
     "eslint": ">=9.22.0",
     "react": ">=19",
     "react-dom": ">=19",
-    "typescript": ">=5.8.2"
+    "typescript": ">=5.8.2",
+    "@repo/ui": "workspace:*"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/i18n": "workspace:*",
-    "@repo/ui": "workspace:*"
+    "@repo/i18n": "workspace:*"
   },
   "dependencies": {
     "flubber": "^0.4.2",
