@@ -375,14 +375,17 @@ function PanelWithDetail({
     const detailHeight = detailRef.current.offsetHeight
     const mainHeight = panelRef.current.offsetHeight
 
+    // Capture the current ref element to use in cleanup function
+    const currentPanelElement = panelRef.current
+
     // Use the taller of the two panels
     const newHeight = Math.max(detailHeight, mainHeight)
     setContainerHeight(`${newHeight}px`)
 
     // Cleanup - reset to main panel height when detail becomes inactive
     return () => {
-      if (panelRef.current) {
-        setContainerHeight(`${panelRef.current.offsetHeight}px`)
+      if (currentPanelElement) {
+        setContainerHeight(`${currentPanelElement.offsetHeight}px`)
       }
     }
   }, [isActive])
