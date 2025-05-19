@@ -20,6 +20,16 @@ import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import theme from "@repo/ui/themes/theme"
 ```
 
+### Theme colors
+
+Our theme includes the following color options:
+
+- Standard MUI colors (primary, secondary, etc.)
+- Custom teal color (`#007C92`) - accessible via the `teal` color prop:
+  ```tsx
+  <Typography color="teal">This text will be teal</Typography>
+  ```
+
 ### Importing components
 
 #### MUI Components and Icons

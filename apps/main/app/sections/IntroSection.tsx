@@ -1,181 +1,126 @@
-import React from "react"
+import React, { useRef, useEffect } from "react"
 import { BasePanel } from "@repo/ui"
 import { Box, Typography, useTheme } from "@mui/material"
-import { motion } from "@repo/motion"
+import { motion, useMotionValue } from "@repo/motion"
 
-// Create a Circle component using Framer Motion
+// Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
   color?: string
   left: string
   top: string
   index: number
   opacity?: number
+  // Animation parameters - unique for each circle
+  freqX1?: number
+  freqX2?: number
+  freqY1?: number
+  freqY2?: number
+  phaseX1?: number
+  phaseX2?: number
+  phaseY1?: number
+  phaseY2?: number
+  amplitudeX1?: number
+  amplitudeX2?: number
+  amplitudeY1?: number
+  amplitudeY2?: number
 }
 
 const MotionCircle: React.FC<AnimatedCircleProps> = ({
-  color = "#007C9220",
+  color = "#007C92",
   left,
   top,
   index,
   opacity = 0.3,
+  // Each circle gets its own unique animation characteristics
+  freqX1 = 0.07,
+  freqX2 = 0.04,
+  freqY1 = 0.05,
+  freqY2 = 0.09,
+  phaseX1 = 0,
+  phaseX2 = 0,
+  phaseY1 = 0,
+  phaseY2 = 0,
+  amplitudeX1 = 40,
+  amplitudeX2 = 20,
+  amplitudeY1 = 30,
+  amplitudeY2 = 25,
 }) => {
-  // Create different animation paths for variety
-  const floatVariants = [
-    {
-      initial: { x: 50, y: -30, rotate: 5 },
-      animate: {
-        x: [50, 250, -100, 180, -220, 50],
-        y: [-30, -180, 120, -90, 150, -30],
-        rotate: [5, 18, -12, 20, -8, 5],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 20,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: -70, y: 40, rotate: -8 },
-      animate: {
-        x: [-70, -200, 120, -280, 180, -70],
-        y: [40, 220, -90, 50, -180, 40],
-        rotate: [-8, -24, 15, -5, 12, -8],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 24,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: 120, y: 80, rotate: -5 },
-      animate: {
-        x: [120, -150, 220, -80, 190, 120],
-        y: [80, 180, -150, 210, -60, 80],
-        rotate: [-5, 15, -20, 8, -15, -5],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 28,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: -40, y: -120, rotate: 10 },
-      animate: {
-        x: [-40, 180, -220, 80, -150, -40],
-        y: [-120, 50, -200, 160, -80, -120],
-        rotate: [10, -5, 22, -15, 8, 10],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 22,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: 90, y: -50, rotate: -12 },
-      animate: {
-        x: [90, -120, 250, -180, 100, 90],
-        y: [-50, 130, -80, 200, -140, -50],
-        rotate: [-12, 8, -25, 15, -5, -12],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 26,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: -100, y: 100, rotate: 15 },
-      animate: {
-        x: [-100, 150, -180, 220, -120, -100],
-        y: [100, -130, 180, -70, 150, 100],
-        rotate: [15, -12, 20, -8, 10, 15],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 23,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: 60, y: 150, rotate: -18 },
-      animate: {
-        x: [60, -210, 190, -100, 170, 60],
-        y: [150, 30, -170, 190, -120, 150],
-        rotate: [-18, 10, -22, 15, -8, -18],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 27,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-    {
-      initial: { x: 130, y: -90, rotate: 8 },
-      animate: {
-        x: [130, -80, 230, -150, 120, 130],
-        y: [-90, 140, -180, 80, -220, -90],
-        rotate: [8, -15, 20, -10, 25, 8],
-        transition: {
-          repeat: Infinity,
-          repeatType: "loop" as const,
-          duration: 25,
-          times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-          ease: "linear",
-        },
-      },
-    },
-  ]
+  // Use refs to store time-related values
+  const timeRef = useRef(Math.random() * 100) // Start at random point in animation
 
-  // Choose a variation based on the index (with safety check)
-  const safeIndex = Math.min(index, floatVariants.length - 1)
-  const variant = floatVariants[safeIndex]
+  // Create motion values for animation
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
 
-  // Default variant if somehow we still don't have one
-  const initial = variant?.initial || { x: 0, y: 0, rotate: 0 }
-  const animate = variant?.animate || {
-    x: [0, 200, -200, 150, -150, 0],
-    y: [0, -150, 150, -100, 100, 0],
-    rotate: [0, 10, -10, 5, -5, 0],
-    transition: {
-      repeat: Infinity,
-      repeatType: "loop" as const,
-      duration: 25,
-      times: [0, 0.2, 0.4, 0.6, 0.8, 1],
-      ease: "linear",
-    },
-  }
+  // Use requestAnimationFrame to create continuous, organic motion
+  useEffect(() => {
+    let animationId: number
+
+    const animate = () => {
+      // Update time value - INCREASED SIGNIFICANTLY for faster motion
+      timeRef.current += 0.03 // 6x faster than before
+
+      // Calculate complex, overlapping sine wave motion
+      // X position: combine two sine waves with different frequencies and phases
+      const newX =
+        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 +
+        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2
+
+      // Y position: combine two cosine waves with different frequencies and phases
+      const newY =
+        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 +
+        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2
+
+      // Apply new values
+      x.set(newX)
+      y.set(newY)
+
+      // Continue animation
+      animationId = requestAnimationFrame(animate)
+    }
+
+    // Start animation
+    animationId = requestAnimationFrame(animate)
+
+    // Cleanup
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
+  }, [
+    amplitudeX1,
+    amplitudeX2,
+    amplitudeY1,
+    amplitudeY2,
+    freqX1,
+    freqX2,
+    freqY1,
+    freqY2,
+    phaseX1,
+    phaseX2,
+    phaseY1,
+    phaseY2,
+    x,
+    y,
+  ])
 
   return (
     <motion.div
-      initial={initial}
-      animate={animate}
       style={{
         position: "absolute",
         width: "300px",
         height: "300px",
         borderRadius: "50%",
-        backgroundColor: color.substring(0, 7), // Remove any alpha from the color
-        opacity, // Use explicit opacity instead of transparent colors
+        backgroundColor: color,
+        opacity,
         left,
         top,
-        zIndex: index, // Use index for z-index layering
+        zIndex: index,
+        x, // Apply motion values
+        y,
+        transformOrigin: "center",
+        pointerEvents: "none",
       }}
     />
   )
@@ -197,75 +142,96 @@ const IntroSection: React.FC = () => {
         flexDirection: "column",
         justifyContent: "center",
         position: "relative",
-        overflow: "hidden", // Keep circles contained
+        overflow: "visible", // Allow circles to overflow/render fully
       }}
     >
-      {/* Animated circles using Framer Motion */}
+      {/* Background Circles (below text) */}
       <MotionCircle
         color="#007C92"
         left="-5%"
         top="15%"
-        index={1}
+        index={0}
         opacity={0.15}
+        freqX1={0.08}
+        freqX2={0.03}
+        freqY1={0.05}
+        freqY2={0.02}
+        phaseX1={0}
+        phaseX2={1.5}
+        phaseY1={2.2}
+        phaseY2={3.1}
+        amplitudeX1={50}
+        amplitudeX2={30}
+        amplitudeY1={40}
+        amplitudeY2={20}
       />
       <MotionCircle
         color="#007C92"
         left="65%"
         top="10%"
-        index={3}
+        index={0}
         opacity={0.25}
+        freqX1={0.06}
+        freqX2={0.02}
+        freqY1={0.04}
+        freqY2={0.07}
+        phaseX1={1.2}
+        phaseX2={3.4}
+        phaseY1={0.5}
+        phaseY2={2.7}
+        amplitudeX1={30}
+        amplitudeX2={20}
+        amplitudeY1={35}
+        amplitudeY2={15}
       />
       <MotionCircle
         color="#007C92"
         left="20%"
         top="60%"
-        index={2}
-        opacity={0.2}
-      />
-      <MotionCircle
-        color="#007C92"
-        left="75%"
-        top="65%"
-        index={4}
-        opacity={0.15}
-      />
-      <MotionCircle
-        color="#007C92"
-        left="40%"
-        top="30%"
         index={0}
-        opacity={0.1}
+        opacity={0.2}
+        freqX1={0.05}
+        freqX2={0.09}
+        freqY1={0.03}
+        freqY2={0.06}
+        phaseX1={2.1}
+        phaseX2={0.8}
+        phaseY1={3.0}
+        phaseY2={1.4}
+        amplitudeX1={40}
+        amplitudeX2={25}
+        amplitudeY1={30}
+        amplitudeY2={35}
       />
       <MotionCircle
         color="#007C92"
         left="85%"
         top="25%"
-        index={5}
+        index={0}
         opacity={0.18}
-      />
-      <MotionCircle
-        color="#007C92"
-        left="15%"
-        top="80%"
-        index={6}
-        opacity={0.12}
-      />
-      <MotionCircle
-        color="#007C92"
-        left="50%"
-        top="5%"
-        index={7}
-        opacity={0.22}
+        freqX1={0.04}
+        freqX2={0.075}
+        freqY1={0.06}
+        freqY2={0.03}
+        phaseX1={3.5}
+        phaseX2={2.3}
+        phaseY1={1.7}
+        phaseY2={0.6}
+        amplitudeX1={45}
+        amplitudeX2={15}
+        amplitudeY1={25}
+        amplitudeY2={40}
       />
 
+      {/* Text content on top of background circles */}
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
           width: "100%",
           ml: { xs: 3, md: 6 },
-          position: "relative", // Make sure text is above circles
-          zIndex: 1,
+          position: "relative",
+          zIndex: 10, // Higher z-index for text
         }}
       >
         <Typography
@@ -273,7 +239,7 @@ const IntroSection: React.FC = () => {
           sx={{
             color: "#007C92",
             mb: 1,
-            fontSize: "clamp(2rem, 6vw, 6rem)",
+            fontSize: "clamp(4rem, 8vw, 8rem)",
           }}
         >
           LEARN
@@ -284,7 +250,7 @@ const IntroSection: React.FC = () => {
           sx={{
             color: "#007C92",
             mb: 1,
-            fontSize: "clamp(2rem, 6vw, 6rem)",
+            fontSize: "clamp(4rem, 8vw, 8rem)",
           }}
         >
           EXPLORE
@@ -294,12 +260,100 @@ const IntroSection: React.FC = () => {
           variant="h1"
           sx={{
             color: "#007C92",
-            fontSize: "clamp(2rem, 6vw, 6rem)",
+            fontSize: "clamp(4rem, 8vw, 8rem)",
           }}
         >
           EMPOWER
         </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#007C92",
+          }}
+        >
+          Explore California&apos;s water system and discover possibilities for
+          the future of water in our state.
+        </Typography>
       </Box>
+
+      {/* Foreground Circles (above text) */}
+      <MotionCircle
+        color="#007C92"
+        left="75%"
+        top="65%"
+        index={20}
+        opacity={0.15}
+        freqX1={0.045}
+        freqX2={0.085}
+        freqY1={0.07}
+        freqY2={0.04}
+        phaseX1={1.9}
+        phaseX2={3.2}
+        phaseY1={0.7}
+        phaseY2={2.5}
+        amplitudeX1={35}
+        amplitudeX2={25}
+        amplitudeY1={45}
+        amplitudeY2={20}
+      />
+      <MotionCircle
+        color="#007C92"
+        left="40%"
+        top="30%"
+        index={20}
+        opacity={0.1}
+        freqX1={0.065}
+        freqX2={0.035}
+        freqY1={0.08}
+        freqY2={0.05}
+        phaseX1={2.8}
+        phaseX2={0.9}
+        phaseY1={3.6}
+        phaseY2={1.3}
+        amplitudeX1={20}
+        amplitudeX2={40}
+        amplitudeY1={30}
+        amplitudeY2={25}
+      />
+      <MotionCircle
+        color="#007C92"
+        left="15%"
+        top="80%"
+        index={20}
+        opacity={0.12}
+        freqX1={0.055}
+        freqX2={0.025}
+        freqY1={0.09}
+        freqY2={0.045}
+        phaseX1={0.4}
+        phaseX2={2.6}
+        phaseY1={1.8}
+        phaseY2={3.3}
+        amplitudeX1={45}
+        amplitudeX2={20}
+        amplitudeY1={25}
+        amplitudeY2={30}
+      />
+      <MotionCircle
+        color="#007C92"
+        left="50%"
+        top="5%"
+        index={20}
+        opacity={0.22}
+        freqX1={0.035}
+        freqX2={0.065}
+        freqY1={0.055}
+        freqY2={0.08}
+        phaseX1={3.7}
+        phaseX2={1.1}
+        phaseY1={2.4}
+        phaseY2={0.3}
+        amplitudeX1={25}
+        amplitudeX2={35}
+        amplitudeY1={20}
+        amplitudeY2={40}
+      />
     </BasePanel>
   )
 }

@@ -37,8 +37,8 @@ export default function InterstitialPanel() {
         paddingVariant="wide"
         includeHeaderSpacing={false}
         sx={{
-          backgroundColor: "transparent",
-          color: "white",
+          backgroundColor: "white",
+          color: "teal",
           alignItems: "left",
           justifyContent: "center",
           pointerEvents: "auto",

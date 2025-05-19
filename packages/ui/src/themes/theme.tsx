@@ -61,6 +61,7 @@ const themeValues = {
   palette: {
     black: "#000000",
     white: "#FFFFFF",
+    teal: "#007C92", // Teal color for primary typeface
     neutral: {
       light: "#AAAAAA",
       medium: "#888888",
@@ -415,6 +416,7 @@ const theme = createTheme({
     text: {
       primary: themeValues.palette.black,
       secondary: themeValues.palette.white,
+      teal: themeValues.palette.teal,
     },
     divider: themeValues.palette.white,
   },
@@ -429,7 +431,7 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontSize: "2.5rem",
-      fontWeight: 400,
+      fontWeight: 300,
       lineHeight: 1.25,
       letterSpacing: "0.1rem",
     },
@@ -786,6 +788,12 @@ const theme = createTheme({
             marginBottom: theme.spacing(4), // 32px between body2 paragraphs
           }),
         },
+        {
+          props: { color: "teal" },
+          style: {
+            color: "#135773", // Teal color
+          },
+        },
       ],
     },
   },
@@ -857,6 +865,11 @@ declare module "@mui/material/styles" {
       climateFuture: string
     }
   }
+
+  interface TypeText {
+    teal: string
+  }
+
   interface PaletteOptions {
     interstitial?: PaletteOptions["primary"]
     neutral?: PaletteOptions["primary"]
