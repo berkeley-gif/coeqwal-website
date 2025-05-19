@@ -16,9 +16,7 @@ export default function ContentPanels({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenLearnDrawer,
 }: ContentPanelsProps = {}) {
-  // State to track if we're showing the detail panel
-  const [showDetailPanel, setShowDetailPanel] = useState(false)
-  // Track which panel's details we're showing
+  // Track which panel is showing details (if any)
   const [activePanel, setActivePanel] = useState<PanelType>(null)
 
   // Text component for the first panel
@@ -115,22 +113,55 @@ export default function ContentPanels({
     </Box>
   )
 
-  // Function to trigger transition to detail panel
-  const handleShowDetail = (panelType: PanelType) => {
-    setActivePanel(panelType)
-    setShowDetailPanel(true)
+  // Function to toggle showing/hiding detail for a panel
+  const togglePanelDetail = (panelType: PanelType) => {
+    if (activePanel === panelType) {
+      setActivePanel(null) // Hide detail if same panel clicked
+    } else {
+      setActivePanel(panelType) // Show detail for the clicked panel
+    }
   }
 
-  // Function to go back to main panels
-  const handleBackToMain = () => {
-    setShowDetailPanel(false)
-  }
-
-  // Get details content based on active panel
-  const getDetailContent = () => {
-    switch (activePanel) {
+  // Get background color for each panel
+  const getPanelBgColor = (panelType: PanelType) => {
+    switch (panelType) {
       case "learn":
-        return (
+        return "#1A3F6A" // Deep blue
+      case "explore":
+        return "#2f84ab" // Teal blue
+      case "empower":
+        return "#135773" // Dark teal
+      default:
+        return "#1A3F6A" // Fallback
+    }
+  }
+
+  // Get background color for detail panels (slightly darker)
+  const getDetailPanelBgColor = (panelType: PanelType) => {
+    switch (panelType) {
+      case "learn":
+        return "#134970" // Darker blue
+      case "explore":
+        return "#1E657D" // Darker teal blue
+      case "empower":
+        return "#0A3D50" // Darker teal
+      default:
+        return "#134970" // Fallback
+    }
+  }
+
+  return (
+    <Box id="content-panels" sx={{ position: "relative" }}>
+      {/* Panel Component - Learn */}
+      <PanelWithDetail
+        panelType="learn"
+        isActive={activePanel === "learn"}
+        onToggleDetail={() => togglePanelDetail("learn")}
+        bgColor={getPanelBgColor("learn")}
+        detailBgColor={getDetailPanelBgColor("learn")}
+        title={<LearnTextContent />}
+        content={<Panel1Content />}
+        detailContent={
           <>
             <Typography
               variant="h1"
@@ -144,25 +175,33 @@ export default function ContentPanels({
               Learn Details
             </Typography>
             <Box>
-              <Typography
-                variant="body2"
-                color="common.white"
-                sx={{ mb: 4 }}
-              >
-                This detailed panel provides in-depth information about California's
-                water system and the complex journey water takes throughout the state.
+              <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+                This detailed panel provides in-depth information about
+                California's water system and the complex journey water takes
+                throughout the state.
               </Typography>
               <Typography variant="body2" color="common.white">
-                Understanding California's water system means appreciating its geography,
-                climate, infrastructure, and policy frameworks. The state's water management
-                includes a complex network of reservoirs, aqueducts, and groundwater basins 
-                that work together to meet environmental, agricultural, and urban needs.
+                Understanding California's water system means appreciating its
+                geography, climate, infrastructure, and policy frameworks. The
+                state's water management includes a complex network of
+                reservoirs, aqueducts, and groundwater basins that work together
+                to meet environmental, agricultural, and urban needs.
               </Typography>
             </Box>
           </>
-        )
-      case "explore":
-        return (
+        }
+      />
+
+      {/* Panel Component - Explore */}
+      <PanelWithDetail
+        panelType="explore"
+        isActive={activePanel === "explore"}
+        onToggleDetail={() => togglePanelDetail("explore")}
+        bgColor={getPanelBgColor("explore")}
+        detailBgColor={getDetailPanelBgColor("explore")}
+        title={<EmpowerTextContent />}
+        content={<Panel2Content />}
+        detailContent={
           <>
             <Typography
               variant="h1"
@@ -176,26 +215,33 @@ export default function ContentPanels({
               Explore Details
             </Typography>
             <Box>
-              <Typography
-                variant="body2"
-                color="common.white"
-                sx={{ mb: 4 }}
-              >
-                The COEQWAL modeling tools provide unprecedented insights into 
+              <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+                The COEQWAL modeling tools provide unprecedented insights into
                 California's water management options under various scenarios.
               </Typography>
               <Typography variant="body2" color="common.white">
-                Our models incorporate decades of historical data, climate projections,
-                water rights frameworks, infrastructure capabilities, and environmental
-                requirements. By exploring different management approaches, users can
-                understand tradeoffs between different water management strategies and
-                their impacts on communities, agriculture, and ecosystems.
+                Our models incorporate decades of historical data, climate
+                projections, water rights frameworks, infrastructure
+                capabilities, and environmental requirements. By exploring
+                different management approaches, users can understand tradeoffs
+                between different water management strategies and their impacts
+                on communities, agriculture, and ecosystems.
               </Typography>
             </Box>
           </>
-        )
-      case "empower":
-        return (
+        }
+      />
+
+      {/* Panel Component - Empower */}
+      <PanelWithDetail
+        panelType="empower"
+        isActive={activePanel === "empower"}
+        onToggleDetail={() => togglePanelDetail("empower")}
+        bgColor={getPanelBgColor("empower")}
+        detailBgColor={getDetailPanelBgColor("empower")}
+        title={<ActTextContent />}
+        content={<Panel3Content />}
+        detailContent={
           <>
             <Typography
               variant="h1"
@@ -209,76 +255,67 @@ export default function ContentPanels({
               Empower Details
             </Typography>
             <Box>
-              <Typography
-                variant="body2"
-                color="common.white"
-                sx={{ mb: 4 }}
-              >
+              <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
                 Informed communities can advocate effectively for water policies
-                that meet their unique needs while respecting the larger water system.
+                that meet their unique needs while respecting the larger water
+                system.
               </Typography>
               <Typography variant="body2" color="common.white">
                 The COEQWAL project helps community members and decision-makers
-                understand the complex interrelationships in California's water system.
-                By providing accessible data and visualizations, we empower stakeholders
-                to participate meaningfully in water planning processes and advocate
-                for sustainable, equitable water solutions that benefit diverse communities
-                across the state.
+                understand the complex interrelationships in California's water
+                system. By providing accessible data and visualizations, we
+                empower stakeholders to participate meaningfully in water
+                planning processes and advocate for sustainable, equitable water
+                solutions that benefit diverse communities across the state.
               </Typography>
             </Box>
           </>
-        )
-      default:
-        return null
-    }
-  }
+        }
+      />
+    </Box>
+  )
+}
 
-  // Get background color for detail panel based on active panel
-  const getDetailPanelBgColor = () => {
-    switch (activePanel) {
-      case "learn":
-        return "#134970" // Darker blue than the Learn panel
-      case "explore":
-        return "#1E657D" // Darker teal than the Explore panel
-      case "empower":
-        return "#0A3D50" // Darker teal than the Empower panel
-      default:
-        return "#005066" // Default dark teal
-    }
-  }
+// PanelWithDetail component for each panel/detail pair
+interface PanelWithDetailProps {
+  panelType: PanelType
+  isActive: boolean
+  onToggleDetail: () => void
+  bgColor: string
+  detailBgColor: string
+  title: React.ReactNode
+  content: React.ReactNode
+  detailContent: React.ReactNode
+}
 
+function PanelWithDetail({
+  panelType,
+  isActive,
+  onToggleDetail,
+  bgColor,
+  detailBgColor,
+  title,
+  content,
+  detailContent,
+}: PanelWithDetailProps) {
   return (
-    <Box sx={{ position: "relative", overflow: "hidden", width: "100%" }}>
-      {/* Creating a container that's twice the viewport width with both panels side by side */}
-      <motion.div
-        style={{ 
-          display: "flex",
-          width: "200%", // Double the width to contain both panels
-          position: "relative",
-        }}
-        animate={{ 
-          x: showDetailPanel ? "-50%" : "0%", // Move left by 50% when showing detail
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-        }}
-      >
-        {/* Left side - Original stacked content panels */}
-        <Box
-          id="content-panels"
-          sx={{ 
-            width: "50%", // 50% of the container (100% of viewport)
-            flexShrink: 0,
+    <Box sx={{ position: "relative", width: "100%" }}>
+      <Box sx={{ position: "relative", width: "200%", display: "flex" }}>
+        <motion.div
+          style={{ width: "50%" }}
+          animate={{ x: isActive ? "-100%" : "0%" }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
           }}
         >
-          {/* First Panel - Deep blue background */}
+          {/* Main Panel */}
           <BasePanel
             paddingVariant="wide"
             fullHeight={false}
             sx={{
-              backgroundColor: "#1A3F6A", // Deep blue
+              backgroundColor: bgColor,
               py: 12, // vertical padding
               color: "white",
               position: "relative", // For absolute positioning of icons
@@ -295,19 +332,19 @@ export default function ContentPanels({
                   pt: 0,
                 }}
               >
-                <LearnTextContent />
+                {title}
               </Grid>
               <Grid
                 size={{ xs: 12, md: 8 }}
                 sx={{ display: "flex", alignItems: "flex-start" }}
               >
-                <Panel1Content />
+                {content}
               </Grid>
             </Grid>
 
             {/* Right centered play icon */}
             <IconButton
-              onClick={() => handleShowDetail("learn")}
+              onClick={onToggleDetail}
               sx={{
                 position: "absolute",
                 right: 30,
@@ -353,191 +390,32 @@ export default function ContentPanels({
               </IconButton>
             </Box>
           </BasePanel>
+        </motion.div>
 
-          {/* Second Panel */}
-          <BasePanel
-            paddingVariant="wide"
-            fullHeight={false}
-            sx={{
-              backgroundColor: "#2f84ab",
-              py: 12,
-              color: "white", // Ensure text color is white
-              position: "relative", // For absolute positioning of icons
-            }}
-          >
-            <Grid container spacing={6} alignItems="flex-start">
-              <Grid
-                size={{ xs: 12, md: 4 }}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                  pt: 0,
-                }}
-              >
-                <EmpowerTextContent />
-              </Grid>
-              <Grid
-                size={{ xs: 12, md: 8 }}
-                sx={{ display: "flex", alignItems: "flex-start" }}
-              >
-                <Panel2Content />
-              </Grid>
-            </Grid>
-
-            {/* Right centered play icon */}
-            <IconButton
-              onClick={() => handleShowDetail("explore")}
-              sx={{
-                position: "absolute",
-                right: 30,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "white",
-                backgroundColor: "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.3)",
-                },
-                width: 60,
-                height: 60,
-              }}
-            >
-              <PlayArrowIcon sx={{ fontSize: 36 }} />
-            </IconButton>
-
-            {/* Bottom centered play icon */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                position: "absolute",
-                bottom: 20,
-                left: 0,
-              }}
-            >
-              <IconButton
-                sx={{
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  width: 60,
-                  height: 60,
-                }}
-              >
-                <PlayArrowIcon
-                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                />
-              </IconButton>
-            </Box>
-          </BasePanel>
-
-          {/* Third Panel - Purple background */}
-          <BasePanel
-            paddingVariant="wide"
-            fullHeight={false}
-            sx={{
-              backgroundColor: "#135773",
-              py: 12,
-              color: "white", // Ensure text color is white
-              position: "relative", // For absolute positioning of icons
-            }}
-          >
-            <Grid container spacing={6} alignItems="flex-start">
-              <Grid
-                size={{ xs: 12, md: 4 }}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                  pt: 0,
-                }}
-              >
-                <ActTextContent />
-              </Grid>
-              <Grid
-                size={{ xs: 12, md: 8 }}
-                sx={{ display: "flex", alignItems: "flex-start" }}
-              >
-                <Panel3Content />
-              </Grid>
-            </Grid>
-
-            {/* Right centered play icon */}
-            <IconButton
-              onClick={() => handleShowDetail("empower")}
-              sx={{
-                position: "absolute",
-                right: 30,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "white",
-                backgroundColor: "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.3)",
-                },
-                width: 60,
-                height: 60,
-              }}
-            >
-              <PlayArrowIcon sx={{ fontSize: 36 }} />
-            </IconButton>
-
-            {/* Bottom centered play icon */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                position: "absolute",
-                bottom: 20,
-                left: 0,
-              }}
-            >
-              <IconButton
-                sx={{
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  width: 60,
-                  height: 60,
-                }}
-              >
-                <PlayArrowIcon
-                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                />
-              </IconButton>
-            </Box>
-          </BasePanel>
-        </Box>
-
-        {/* Right side - Detail panel (connected visually) */}
-        <Box
-          sx={{ 
-            width: "50%", // 50% of the container (100% of viewport)
-            flexShrink: 0,
+        <motion.div
+          style={{ width: "50%" }}
+          animate={{ x: isActive ? "-100%" : "0%" }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
           }}
         >
+          {/* Detail Panel */}
           <BasePanel
             paddingVariant="wide"
             fullHeight={false}
             sx={{
-              backgroundColor: getDetailPanelBgColor(), // Dynamic color based on active panel
-              py: 12,
-              minHeight: "100vh", // Match the height of stack panels
+              backgroundColor: detailBgColor,
+              py: 12, // vertical padding
+              height: "100%",
               color: "white",
               position: "relative",
             }}
           >
             <Grid container spacing={6} alignItems="flex-start">
               <Grid
-                size={{ xs: 12, md: 4 }}
+                size={{ xs: 12, md: 8 }}
                 sx={{
                   display: "flex",
                   flexDirection: "column",
@@ -546,14 +424,13 @@ export default function ContentPanels({
                   pt: 0,
                 }}
               >
-                {/* Dynamic title and content based on active panel */}
-                {getDetailContent()}
+                {detailContent}
               </Grid>
             </Grid>
 
-            {/* Left arrow to go back to main panels */}
+            {/* Left arrow to go back to main panel */}
             <IconButton
-              onClick={handleBackToMain}
+              onClick={onToggleDetail}
               sx={{
                 position: "absolute",
                 left: 30,
@@ -599,8 +476,8 @@ export default function ContentPanels({
               </IconButton>
             </Box>
           </BasePanel>
-        </Box>
-      </motion.div>
+        </motion.div>
+      </Box>
     </Box>
   )
 }
