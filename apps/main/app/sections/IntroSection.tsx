@@ -311,9 +311,6 @@ const IntroSection: React.FC = () => {
   const [backgroundCircles, setBackgroundCircles] = useState<
     AnimatedCircleProps[]
   >([])
-  const [foregroundCircles, setForegroundCircles] = useState<
-    AnimatedCircleProps[]
-  >([])
 
   // Generate circles on initial render - using only available images
   useEffect(() => {
@@ -337,7 +334,6 @@ const IntroSection: React.FC = () => {
     })
 
     setBackgroundCircles(bgCircles)
-    setForegroundCircles([]) // Empty the foreground circles
   }, [])
 
   return (
