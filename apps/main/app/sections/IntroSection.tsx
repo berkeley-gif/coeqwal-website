@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react"
 import { BasePanel } from "@repo/ui"
-import { Box, Typography } from "@mui/material"
+import { Box, Typography, Stack } from "@mui/material"
 import { motion, useMotionValue } from "@repo/motion"
 import Image from "next/image"
+import { useTranslation } from "@repo/i18n"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
@@ -229,6 +230,7 @@ const generateRandomCircleProps = (
 }
 
 const IntroSection: React.FC = () => {
+  const { t } = useTranslation()
   // State to store the generated circles
   const [backgroundCircles, setBackgroundCircles] = useState<
     AnimatedCircleProps[]
@@ -257,85 +259,194 @@ const IntroSection: React.FC = () => {
   }, [])
 
   return (
-    <BasePanel
+    <Box
       id="intro"
-      fullHeight
-      includeHeaderSpacing
       sx={{
-        backgroundColor: "#fff",
-        padding: { xs: 3, md: 6 },
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
         position: "relative",
-        overflow: "visible", // Allow circles to overflow/render fully
+        background: "linear-gradient(to bottom, #f69a93, #1d76bb)",
+        backgroundImage:
+          "url('/images/collage_water.png'), linear-gradient(to bottom, #f69a93, #1d76bb)",
+        backgroundSize: "cover, 100% 100%",
+        backgroundPosition: "center, center",
+        backgroundRepeat: "no-repeat, no-repeat",
+        width: "100%",
+        overflow: "visible",
       }}
     >
-      {/* Background Circles (below text) */}
-      {backgroundCircles.map((circle, index) => (
-        <ImageCircle key={`bg-circle-${index}`} {...circle} />
-      ))}
-
-      {/* Text content on top of background circles */}
-      <Box
+      {/* First section with bubbles - limited to 100vh */}
+      <BasePanel
+        fullHeight
+        includeHeaderSpacing
         sx={{
+          padding: { xs: 3, md: 6 },
+          height: "100vh",
+          minHeight: "100vh",
+          maxHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          width: "100%",
-          ml: { xs: 3, md: 6 },
+          justifyContent: "center",
           position: "relative",
-          zIndex: 10, // Higher z-index for text
+          overflow: "visible",
+          backgroundColor: "transparent",
         }}
       >
-        <Typography
-          variant="h1"
+        {/* Background Circles (below text) - contained within the first 100vh */}
+        <Box
           sx={{
-            color: "#007C92",
-            mb: 1,
-            fontSize: "clamp(4rem, 8vw, 8rem)",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 1,
+            pointerEvents: "none",
           }}
         >
-          LEARN
-        </Typography>
+          {backgroundCircles.map((circle, index) => (
+            <ImageCircle key={`bg-circle-${index}`} {...circle} />
+          ))}
+        </Box>
 
-        <Typography
-          variant="h1"
+        {/* Text content on top of background circles */}
+        <Box
           sx={{
-            color: "#007C92",
-            mb: 1,
-            fontSize: "clamp(4rem, 8vw, 8rem)",
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            ml: { xs: 3, md: 6 },
+            position: "relative",
+            zIndex: 10, // Higher z-index for text
           }}
         >
-          EXPLORE
-        </Typography>
+          <Typography
+            variant="h1"
+            sx={{
+              color: "#007C92",
+              mb: 1,
+              fontSize: "clamp(4rem, 8vw, 8rem)",
+              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+            }}
+          >
+            LEARN
+          </Typography>
 
-        <Typography
-          variant="h1"
+          <Typography
+            variant="h1"
+            sx={{
+              color: "#007C92",
+              mb: 1,
+              fontSize: "clamp(4rem, 8vw, 8rem)",
+              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+            }}
+          >
+            EXPLORE
+          </Typography>
+
+          <Typography
+            variant="h1"
+            sx={{
+              color: "#007C92",
+              fontSize: "clamp(4rem, 8vw, 8rem)",
+              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+            }}
+          >
+            EMPOWER
+          </Typography>
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: "#007C92",
+              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+            }}
+          >
+            Explore California&apos;s water system and discover possibilities
+            for the future of water in our state.
+          </Typography>
+        </Box>
+
+        {/* Foreground Circles (above text) */}
+        <Box
           sx={{
-            color: "#007C92",
-            fontSize: "clamp(4rem, 8vw, 8rem)",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 15,
+            pointerEvents: "none",
           }}
         >
-          EMPOWER
-        </Typography>
+          {foregroundCircles.map((circle, index) => (
+            <ImageCircle key={`fg-circle-${index}`} {...circle} />
+          ))}
+        </Box>
+      </BasePanel>
 
-        <Typography
-          variant="body2"
+      {/* Second section with interstitial content - flows naturally after the first section */}
+      <BasePanel
+        fullHeight={false}
+        paddingVariant="wide"
+        includeHeaderSpacing={false}
+        sx={{
+          color: "white",
+          alignItems: "left",
+          justifyContent: "center",
+          pointerEvents: "auto",
+          position: "relative",
+          backgroundColor: "transparent", // No background image here anymore since it's on the parent
+          minHeight: "100vh",
+        }}
+      >
+        {/* Content container for proper blending context */}
+        <Box
           sx={{
-            color: "#007C92",
+            position: "relative",
+            isolation: "isolate", // Create a stacking context
+            width: "100%",
+            height: "100%",
           }}
         >
-          Explore California&apos;s water system and discover possibilities for
-          the future of water in our state.
-        </Typography>
-      </Box>
-
-      {/* Foreground Circles (above text) */}
-      {foregroundCircles.map((circle, index) => (
-        <ImageCircle key={`fg-circle-${index}`} {...circle} />
-      ))}
-    </BasePanel>
+          {/* Text content with mix-blend-mode */}
+          <Box
+            maxWidth="876px"
+            sx={{
+              position: "relative",
+              zIndex: 10,
+              backgroundColor: "transparent",
+              padding: 3,
+              borderRadius: 2,
+              "& .blend-text": {
+                mixBlendMode: "difference",
+                color: "#FFFFFF",
+                textShadow: "0 0 10px rgba(0,0,0,0.1)",
+              },
+            }}
+          >
+            <Stack spacing={4}>
+              <Typography
+                variant="h2"
+                className="blend-text"
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
+                What is California&apos;s water future?
+              </Typography>
+              <Typography variant="body2" className="blend-text">
+                {t("interstitial.part1")}
+              </Typography>
+              <Typography variant="body2" className="blend-text">
+                {t("interstitial.part2")}
+              </Typography>
+              <Typography variant="body2" className="blend-text">
+                {t("interstitial.part3")}
+              </Typography>
+            </Stack>
+          </Box>
+        </Box>
+      </BasePanel>
+    </Box>
   )
 }
 

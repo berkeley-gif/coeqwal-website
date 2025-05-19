@@ -7,6 +7,7 @@ interface NavItem {
 // All section IDs in order (used for scroll tracking)
 export const sectionIds = [
   "hero",
+  "intro",
   "california-water",
   "managing-water",
   "challenges",

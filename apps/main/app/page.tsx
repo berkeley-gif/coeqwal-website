@@ -12,7 +12,6 @@ import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
-import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
 import ManagingWaterSection from "./sections/ManagingWaterSection"
 import ChallengesSection from "./sections/ChallengesSection"
@@ -27,7 +26,6 @@ import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
 // Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
   intro: "intro",
-  interstitial: "interstitial",
   californiaWater: "california-water",
   managingWater: "managing-water",
   challenges: "challenges",
@@ -259,9 +257,6 @@ export default function Home() {
         >
           {/* Intro Panel */}
           <IntroSection />
-
-          {/* Interstitial Panel */}
-          <InterstitialPanel />
 
           {/* Content Panels */}
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
