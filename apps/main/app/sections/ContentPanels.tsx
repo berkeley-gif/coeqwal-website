@@ -151,7 +151,23 @@ export default function ContentPanels({
   }
 
   return (
-    <Box id="content-panels" sx={{ position: "relative" }}>
+    <Box id="content-panels" sx={{ 
+      position: "relative",
+      // Custom styling to ensure proper overlapping
+      "& .active-panel-container": {
+        isolation: "isolate", // Create stacking context
+        zIndex: 1000 // Push active panels above others
+      },
+      "& .active-detail-panel": {
+        position: "relative", 
+        zIndex: 1000,
+        overflow: "visible"
+      },
+      // Custom styling for panel containers
+      "& > div > div": {
+        marginBottom: 0 // Remove any margin between panel containers
+      }
+    }}>
       <Box 
         sx={{ 
           position: "relative", 
@@ -165,7 +181,10 @@ export default function ContentPanels({
             marginTop: 0,
             marginBottom: 0,
             borderRadius: 0
-          }
+          },
+          // Create stacking context to handle z-index properly
+          zIndex: 1,
+          overflow: "visible"
         }}
       >
         {/* Panel Component - Learn */}
@@ -317,6 +336,7 @@ function PanelWithDetail({
 }: PanelWithDetailProps) {
   // Track height of panel container for seamless matching
   const panelRef = useRef<HTMLDivElement>(null)
+  const detailRef = useRef<HTMLDivElement>(null)
   const [containerHeight, setContainerHeight] = useState<string>("auto")
 
   // Measure the main panel height to set container height
@@ -330,11 +350,13 @@ function PanelWithDetail({
 
   return (
     <Box 
+      className={isActive ? "active-panel-container" : ""}
       sx={{ 
         position: "relative", 
         width: "100%", 
-        overflow: "hidden",
+        overflow: "visible", // Allow overflow for the detail panel
         height: containerHeight, // Fixed height to prevent content shifting
+        zIndex: isActive ? 1000 : 1, // Much higher z-index when active to overlay other content
       }}
     >
       <Box sx={{ 
@@ -345,9 +367,12 @@ function PanelWithDetail({
       }}>
         <motion.div
           ref={panelRef}
+          className={isActive ? "active-panel" : ""}
           style={{ 
             width: "50%",
             height: "100%",
+            zIndex: 1,
+            willChange: "transform", // Hint for browser optimization
           }}
           animate={{ x: isActive ? "-100%" : "0%" }}
           transition={{
@@ -410,7 +435,7 @@ function PanelWithDetail({
               <PlayArrowIcon sx={{ fontSize: 36 }} />
             </IconButton>
 
-            {/* Bottom centered play icon */}
+            {/* Bottom scroll icon */}
             <Box
               sx={{
                 display: "flex",
@@ -441,9 +466,14 @@ function PanelWithDetail({
         </motion.div>
 
         <motion.div
+          ref={detailRef}
+          className={isActive ? "active-detail-panel" : ""}
           style={{ 
             width: "50%",
-            height: "100%",
+            height: "auto", // Allow this to grow taller than the container
+            zIndex: isActive ? 1000 : 1, // Higher z-index when active
+            position: "relative",
+            willChange: "transform", // Hint for browser optimization
           }}
           animate={{ x: isActive ? "-100%" : "0%" }}
           transition={{
@@ -462,8 +492,9 @@ function PanelWithDetail({
               color: "white",
               position: "relative",
               borderRadius: 0, // No border radius
-              height: "100%", // Fill the full height
-              overflow: "auto", // Allow scrolling if content is too long
+              minHeight: "100%", // At least as tall as container
+              height: "auto", // But can grow to fit content
+              overflow: "visible", // Let content extend beyond if needed
             }}
           >
             <Grid container spacing={6} alignItems="flex-start">
