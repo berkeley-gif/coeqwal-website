@@ -46,6 +46,8 @@ const themeValues = {
   fontFamily: {
     primary:
       '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    inter:
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions
@@ -430,10 +432,11 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
+      fontFamily: themeValues.fontFamily.inter,
       fontSize: "2.5rem",
-      fontWeight: 300,
-      lineHeight: 1,
-      letterSpacing: "0.1rem",
+      fontWeight: 600,
+      lineHeight: 1.2,
+      letterSpacing: "0.05rem",
     },
     h2: {
       fontSize: "3.76rem", // 57.6px
@@ -515,6 +518,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: `
         @import url("https://use.typekit.net/rxm7kha.css");
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
         *, *::before, *::after {
           box-sizing: border-box;
         }

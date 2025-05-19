@@ -4,6 +4,8 @@
  * This is a backup to ensure the font is applied
  */
 @import url("https://use.typekit.net/rxm7kha.css");
+/* Import Inter font from Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
 /* Font loading state classes */
 .wf-loading {
@@ -23,4 +25,9 @@
 /* Adobe Fonts class - this is added by the FontLoader component */
 .tk-akzidenz-grotesk-next-pro {
   font-family: "akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+} 
+
+/* Inter font class - for modern headings */
+.inter-font {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
 } 

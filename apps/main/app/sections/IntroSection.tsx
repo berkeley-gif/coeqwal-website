@@ -146,50 +146,35 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 // List of all available images in the circular-crops directory
 // This list exactly matches what's in the directory (verified via ls command)
 const availableImages = [
-  "1.png",
-  "2.png",
-  "3.png",
-  "4.png",
-  "5.png",
   "6.png",
-  "7.png",
+  "2.png",
+  "4.png",
   "8.png",
   "9.png",
-  "10.png",
   "11.png",
   "12.png",
-  "13.png",
-  "14.png",
-  "15.png",
-  "DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
-  "DWR_2020_10_13_FL_Lookout_Slough-0252.jpg",
-  "DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
-  "DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
-  "DWR_2025_03_11_NS_0036_Oroville_Lake_Levels.jpg",
-  "DWR_CC_salmon_underH20-5_10_15_2012.jpg",
 ]
 
 // Function to generate a random value within a range
-const getRandomInRange = (min: number, max: number): number => {
-  return Math.random() * (max - min) + min
-}
+// const getRandomInRange = (min: number, max: number): number => {
+//   return Math.random() * (max - min) + min
+// }
 
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
   // Background circles (appear behind text)
   background: [
-    { left: "30%", top: "10%" }, 
-    { left: "50%", top: "10%" },
-    { left: "60%", top: "10%" },
-    { left: "76%", top: "10%" }, 
+    { left: "35%", top: "15%" },
+    { left: "60%", top: "25%" },
+    { left: "75%", top: "10%" },
+    { left: "50%", top: "45%" },
   ],
   
   // Foreground circles (appear in front of text)
   foreground: [
-    { left: "40%", top: "40%" }, 
-    { left: "50%", top: "60%" },
-    { left: "60%", top: "40%" },
-    { left: "70%", top: "60%" }, 
+    { left: "35%", top: "65%" },
+    { left: "60%", top: "70%" },
+    { left: "75%", top: "55%" },
   ],
 };
 
@@ -263,59 +248,59 @@ const generateFixedCircleProps = (
 }
 
 // Function to generate random circle configuration
-const generateRandomCircleProps = (
-  imagePath: string,
-  isBackground: boolean,
-): AnimatedCircleProps => {
-  // Position the circle randomly, but keep it visible on the screen
-  const left = `${getRandomInRange(-10, 90)}%`
-  const top = `${getRandomInRange(0, 80)}%`
+// const generateRandomCircleProps = (
+//   imagePath: string,
+//   isBackground: boolean,
+// ): AnimatedCircleProps => {
+//   // Position the circle randomly, but keep it visible on the screen
+//   const left = `${getRandomInRange(-10, 90)}%`
+//   const top = `${getRandomInRange(0, 80)}%`
 
-  // Determine z-index based on whether it's a background or foreground circle
-  const index = isBackground ? 0 : 20
+//   // Determine z-index based on whether it's a background or foreground circle
+//   const index = isBackground ? 0 : 20
 
-  // Random size within specified range (smaller for better aesthetic)
-  const size = getRandomInRange(250, 320)
+//   // Random size within specified range (smaller for better aesthetic)
+//   const size = getRandomInRange(250, 320)
 
-  // Generate random animation parameters
-  const freqX1 = getRandomInRange(0.03, 0.09)
-  const freqX2 = getRandomInRange(0.02, 0.08)
-  const freqY1 = getRandomInRange(0.03, 0.09)
-  const freqY2 = getRandomInRange(0.02, 0.08)
+//   // Generate random animation parameters
+//   const freqX1 = getRandomInRange(0.03, 0.09)
+//   const freqX2 = getRandomInRange(0.02, 0.08)
+//   const freqY1 = getRandomInRange(0.03, 0.09)
+//   const freqY2 = getRandomInRange(0.02, 0.08)
 
-  // Random phases for more variation
-  const phaseX1 = getRandomInRange(0, 3.5)
-  const phaseX2 = getRandomInRange(0, 3.5)
-  const phaseY1 = getRandomInRange(0, 3.5)
-  const phaseY2 = getRandomInRange(0, 3.5)
+//   // Random phases for more variation
+//   const phaseX1 = getRandomInRange(0, 3.5)
+//   const phaseX2 = getRandomInRange(0, 3.5)
+//   const phaseY1 = getRandomInRange(0, 3.5)
+//   const phaseY2 = getRandomInRange(0, 3.5)
 
-  // Random amplitudes for motion
-  const amplitudeX1 = getRandomInRange(20, 50)
-  const amplitudeX2 = getRandomInRange(15, 40)
-  const amplitudeY1 = getRandomInRange(20, 45)
-  const amplitudeY2 = getRandomInRange(15, 40)
+//   // Random amplitudes for motion
+//   const amplitudeX1 = getRandomInRange(20, 50)
+//   const amplitudeX2 = getRandomInRange(15, 40)
+//   const amplitudeY1 = getRandomInRange(20, 45)
+//   const amplitudeY2 = getRandomInRange(15, 40)
 
-  return {
-    imagePath,
-    left,
-    top,
-    index,
-    opacity: 1,
-    size,
-    freqX1,
-    freqX2,
-    freqY1,
-    freqY2,
-    phaseX1,
-    phaseX2,
-    phaseY1,
-    phaseY2,
-    amplitudeX1,
-    amplitudeX2,
-    amplitudeY1,
-    amplitudeY2,
-  }
-}
+//   return {
+//     imagePath,
+//     left,
+//     top,
+//     index,
+//     opacity: 1,
+//     size,
+//     freqX1,
+//     freqX2,
+//     freqY1,
+//     freqY2,
+//     phaseX1,
+//     phaseX2,
+//     phaseY1,
+//     phaseY2,
+//     amplitudeX1,
+//     amplitudeX2,
+//     amplitudeY1,
+//     amplitudeY2,
+//   }
+// }
 
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
@@ -330,7 +315,7 @@ const IntroSection: React.FC = () => {
   // Generate circles on initial render - using only available images
   useEffect(() => {
     // Select consistent images from the available ones
-    // No need to shuffle - we'll use a consistent order for consistency
+    // Using 8 total circles (4 background + 4 foreground)
     const selectedImages = [...availableImages].slice(0, 8);
 
     // Create 4 background circles with fixed positions
@@ -500,7 +485,9 @@ const IntroSection: React.FC = () => {
               mb: 1,
               fontSize: "clamp(4rem, 8vw, 8rem)",
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
+            className="inter-font"
           >
             Learn
           </Typography>
@@ -512,7 +499,9 @@ const IntroSection: React.FC = () => {
               mb: 1,
               fontSize: "clamp(4rem, 8vw, 8rem)",
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
+            className="inter-font"
           >
             Explore
           </Typography>
@@ -523,7 +512,9 @@ const IntroSection: React.FC = () => {
               color: "#007C92",
               fontSize: "clamp(4rem, 8vw, 8rem)",
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
+            className="inter-font"
           >
             Empower
           </Typography>
