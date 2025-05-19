@@ -124,9 +124,9 @@ const tabTitles: Record<TabKey, string> = {
  * MultiDrawer component with a single Glossary tab
  *
  * Features:
- * - Always visible mini rail with labeled button
  * - Drawer with glossary content
  * - Smooth transitions
+ * - Can be controlled from outside via HeaderHome
  */
 export function MultiDrawer({
   drawerWidth = 360,
@@ -185,47 +185,6 @@ export function MultiDrawer({
 
   return (
     <>
-      {/* Mini rail with vertical tab button */}
-      <Fade
-        in={!drawerOpen && visible}
-        timeout={600}
-        mountOnEnter
-        unmountOnExit
-      >
-        <Box
-          sx={{
-            position: "fixed",
-            top: "50%", // Position at middle of window height
-            right: 0, // Keep in fixed position
-            transform: "translateY(-50%)", // Center vertically
-            opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
-            visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
-            zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 0, // No gap between buttons
-            overflow: "hidden", // Ensure child border-radius is respected
-            p: 0, // No padding
-            backgroundColor: "transparent", // Transparent background
-            border: "none", // No border
-            boxShadow: "none", // No shadow
-            transition: theme.transitions.create(["opacity", "visibility"], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-          }}
-        >
-          <RailButton
-            label="GLOSSARY"
-            onClick={() => toggleTab("glossary")}
-            active={activeTab === "glossary"}
-            bgColor="#60aacb"
-            hoverColor="#7cbad5" /* Brighter version of #60aacb */
-          />
-        </Box>
-      </Fade>
-
       {/* Main drawer with glossary content */}
       <Drawer
         anchor="right"

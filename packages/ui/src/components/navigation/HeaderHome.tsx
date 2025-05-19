@@ -13,6 +13,7 @@ type HeaderTranslations = {
   buttons: {
     getData: string
     about: string
+    glossary: string
   }
 }
 
@@ -35,6 +36,8 @@ interface HeaderProps {
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
+  onGlossaryClick?: () => void
+  isGlossaryActive?: boolean
 }
 
 const translations: TranslationsMap = {
@@ -43,6 +46,7 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Data",
       about: "About COEQWAL",
+      glossary: "Glossary",
     },
   },
   es: {
@@ -50,6 +54,7 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Datos sin procesar",
       about: "Sobre COEQWAL",
+      glossary: "Glosario",
     },
   },
 }
@@ -75,6 +80,8 @@ export function HeaderHome({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [], // Default to empty array, bc optional
+  onGlossaryClick,
+  isGlossaryActive = false,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -233,6 +240,20 @@ export function HeaderHome({
             {componentText.buttons.about}
           </Button>
           <LanguageSwitcher />
+          <Button
+            variant={buttonVariant}
+            onClick={onGlossaryClick}
+            sx={{
+              ...buttonStyle,
+              backgroundColor: isGlossaryActive ? "#60aacb" : undefined,
+              color: isGlossaryActive ? "white" : undefined,
+              "&:hover": {
+                backgroundColor: isGlossaryActive ? "#7cbad5" : undefined,
+              },
+            }}
+          >
+            {componentText.buttons.glossary}
+          </Button>
         </Stack>
       </Toolbar>
     </AppBar>

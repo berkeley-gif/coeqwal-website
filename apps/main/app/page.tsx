@@ -290,6 +290,10 @@ export default function Home() {
             drawerWidth={360}
             overlay={true}
             visible={showDrawer}
+            activeSection={activeSection}
+            onSectionClick={handleSectionClick}
+            showSecondaryNav={false}
+            secondaryNavItems={[]}
           />
         </Box>
       </Slide>
@@ -303,16 +307,6 @@ export default function Home() {
           width: "100%",
         }}
       >
-        {/* HeaderHome */}
-        <Box sx={{ pointerEvents: "auto" }}>
-          <HeaderHome
-            activeSection={activeSection}
-            onSectionClick={handleSectionClick}
-            showSecondaryNav={false}
-            // secondaryNavItems={secondaryNavItems}
-          />
-        </Box>
-
         {/* Main content sections */}
         <Box
           component="main"
