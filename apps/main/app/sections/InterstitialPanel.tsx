@@ -1,27 +1,9 @@
 import { BasePanel } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-// import { ScrollDownIcon } from "@repo/ui"
 
 export default function InterstitialPanel() {
   const { t } = useTranslation()
-
-  // const handleScrollDown = () => {
-  //   // Scroll to the next section smoothly
-  //   // Find and scroll to the next section element
-  //   const californiaWaterSection = document.getElementById(
-  //     "california-water-panel",
-  //   )
-  //   if (californiaWaterSection) {
-  //     californiaWaterSection.scrollIntoView({ behavior: "smooth" })
-  //   } else {
-  //     // Fallback to a shorter scroll distance if next section not found
-  //     window.scrollBy({
-  //       top: 500, // Shorter distance than full viewport
-  //       behavior: "smooth",
-  //     })
-  //   }
-  // }
 
   return (
     <Box
@@ -38,25 +20,65 @@ export default function InterstitialPanel() {
         includeHeaderSpacing={false}
         sx={{
           backgroundColor: "white",
-          color: "teal",
+          color: "text.teal",
           alignItems: "left",
           justifyContent: "center",
           pointerEvents: "auto",
-          position: "relative", // Required for absolute positioning of ScrollDownIcon
+          position: "relative",
+          backgroundImage: "url('/images/collage_water.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          minHeight: "100vh",
         }}
       >
-        <Box maxWidth="876px">
-          <Stack spacing={4}>
-            <Typography variant="h2" sx={{ fontWeight: 500 }}>
-              What is California&apos;s water future?
-            </Typography>
-            <Typography variant="body2">{t("interstitial.part1")}</Typography>
-            <Typography variant="body2">{t("interstitial.part2")}</Typography>
-            <Typography variant="body2">{t("interstitial.part3")}</Typography>
-          </Stack>
+        {/* Content container for proper blending context */}
+        <Box
+          sx={{
+            position: "relative",
+            isolation: "isolate",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {/* Text content with mix-blend-mode */}
+          <Box
+            maxWidth="876px"
+            sx={{
+              position: "relative",
+              zIndex: 10,
+              backgroundColor: "transparent",
+              padding: 3,
+              borderRadius: 2,
+              "& .blend-text": {
+                mixBlendMode: "difference",
+                color: "#FFFFFF",
+                textShadow: "0 0 10px rgba(0,0,0,0.1)",
+              },
+            }}
+          >
+            <Stack spacing={4}>
+              <Typography
+                variant="h2"
+                className="blend-text"
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
+                What is California&apos;s water future?
+              </Typography>
+              <Typography variant="body2" className="blend-text">
+                {t("interstitial.part1")}
+              </Typography>
+              <Typography variant="body2" className="blend-text">
+                {t("interstitial.part2")}
+              </Typography>
+              <Typography variant="body2" className="blend-text">
+                {t("interstitial.part3")}
+              </Typography>
+            </Stack>
+          </Box>
         </Box>
-
-        {/* <ScrollDownIcon onClick={handleScrollDown} color="white" /> */}
       </BasePanel>
     </Box>
   )

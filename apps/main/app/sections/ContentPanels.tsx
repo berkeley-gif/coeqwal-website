@@ -269,9 +269,10 @@ export default function ContentPanels({
                   scenarios.
                 </Typography>
                 <Typography variant="body2" color="common.white">
-                  By exploring different water management approaches, users can understand
-                  tradeoffs between different water management strategies and
-                  their impacts on communities, agriculture, and ecosystems.
+                  By exploring different water management approaches, users can
+                  understand tradeoffs between different water management
+                  strategies and their impacts on communities, agriculture, and
+                  ecosystems.
                 </Typography>
               </Box>
             </>
@@ -303,16 +304,17 @@ export default function ContentPanels({
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
                   Informed communities can advocate effectively for water
-                  policies that meet their unique needs while staying in balance with other water needs.
+                  policies that meet their unique needs while staying in balance
+                  with other water needs.
                 </Typography>
                 <Typography variant="body2" color="common.white">
                   The COEQWAL project helps community members and
                   decision-makers understand the complex interrelationships in
                   California&apos;s water system. By providing accessible data
-                  and visualizations, we empower stakeholders to participate
-                  in water planning processes and advocate for
-                  sustainable, equitable water solutions that benefit diverse
-                  communities across the state.
+                  and visualizations, we empower stakeholders to participate in
+                  water planning processes and advocate for sustainable,
+                  equitable water solutions that benefit diverse communities
+                  across the state.
                 </Typography>
               </Box>
             </>
