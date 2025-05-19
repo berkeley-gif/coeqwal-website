@@ -313,6 +313,9 @@ importers:
       '@repo/i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@repo/motion':
+        specifier: workspace:*
+        version: link:../motion
       '@types/node':
         specifier: '>=22.13.10'
         version: 22.13.17

@@ -34,7 +34,8 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.1",
     "@mui/material": "^7.0.1",
-    "@repo/i18n": "workspace:*"
+    "@repo/i18n": "workspace:*",
+    "@repo/motion": "workspace:*"
   },
   "sideEffects": false
 }
