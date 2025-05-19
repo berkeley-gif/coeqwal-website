@@ -432,7 +432,7 @@ const theme = createTheme({
     h1: {
       fontSize: "2.5rem",
       fontWeight: 300,
-      lineHeight: 1.25,
+      lineHeight: 1,
       letterSpacing: "0.1rem",
     },
     h2: {

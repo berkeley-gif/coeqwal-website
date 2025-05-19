@@ -263,7 +263,7 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: "linear-gradient(to bottom, #81D4FA, #81D4FA)",
+        background: "linear-gradient(to bottom, #D1DDD9, #c0e3ff, #459ede)",
         backgroundSize: "100% 100%",
         width: "100%",
         overflow: "visible",
@@ -413,7 +413,7 @@ const IntroSection: React.FC = () => {
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
             }}
           >
-            LEARN
+            Learn
           </Typography>
 
           <Typography
@@ -425,7 +425,7 @@ const IntroSection: React.FC = () => {
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
             }}
           >
-            EXPLORE
+            Explore
           </Typography>
 
           <Typography
@@ -436,7 +436,7 @@ const IntroSection: React.FC = () => {
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
             }}
           >
-            EMPOWER
+            Empower
           </Typography>
 
           <Typography
