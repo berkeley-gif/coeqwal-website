@@ -9,6 +9,7 @@ interface ContentPanelsProps {
 }
 
 export default function ContentPanels({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenLearnDrawer,
 }: ContentPanelsProps = {}) {
   // Text component for the first panel
@@ -138,16 +139,16 @@ export default function ContentPanels({
             <Panel1Content />
           </Grid>
         </Grid>
-        
+
         {/* Right centered play icon */}
-        <IconButton 
+        <IconButton
           sx={{
             position: "absolute",
             right: 30,
             top: "50%",
             transform: "translateY(-50%)",
             color: "white",
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            backgroundColor: "transparent",
             "&:hover": {
               backgroundColor: "rgba(255, 255, 255, 0.3)",
             },
@@ -157,20 +158,22 @@ export default function ContentPanels({
         >
           <PlayArrowIcon sx={{ fontSize: 36 }} />
         </IconButton>
-        
+
         {/* Bottom centered play icon */}
-        <Box sx={{ 
-          display: "flex", 
-          justifyContent: "center", 
-          width: "100%", 
-          position: "absolute", 
-          bottom: 20, 
-          left: 0 
-        }}>
-          <IconButton 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            position: "absolute",
+            bottom: 20,
+            left: 0,
+          }}
+        >
+          <IconButton
             sx={{
               color: "white",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "transparent",
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.3)",
               },
@@ -178,7 +181,7 @@ export default function ContentPanels({
               height: 60,
             }}
           >
-            <PlayArrowIcon sx={{ fontSize: 36 }} />
+            <PlayArrowIcon sx={{ fontSize: 36, transform: "rotate(90deg)" }} />
           </IconButton>
         </Box>
       </BasePanel>
@@ -214,16 +217,16 @@ export default function ContentPanels({
             <Panel2Content />
           </Grid>
         </Grid>
-        
+
         {/* Right centered play icon */}
-        <IconButton 
+        <IconButton
           sx={{
             position: "absolute",
             right: 30,
             top: "50%",
             transform: "translateY(-50%)",
             color: "white",
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            backgroundColor: "transparent",
             "&:hover": {
               backgroundColor: "rgba(255, 255, 255, 0.3)",
             },
@@ -233,20 +236,22 @@ export default function ContentPanels({
         >
           <PlayArrowIcon sx={{ fontSize: 36 }} />
         </IconButton>
-        
+
         {/* Bottom centered play icon */}
-        <Box sx={{ 
-          display: "flex", 
-          justifyContent: "center", 
-          width: "100%", 
-          position: "absolute", 
-          bottom: 20, 
-          left: 0 
-        }}>
-          <IconButton 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            position: "absolute",
+            bottom: 20,
+            left: 0,
+          }}
+        >
+          <IconButton
             sx={{
               color: "white",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "transparent",
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.3)",
               },
@@ -254,7 +259,7 @@ export default function ContentPanels({
               height: 60,
             }}
           >
-            <PlayArrowIcon sx={{ fontSize: 36 }} />
+            <PlayArrowIcon sx={{ fontSize: 36, transform: "rotate(90deg)" }} />
           </IconButton>
         </Box>
       </BasePanel>
@@ -290,16 +295,16 @@ export default function ContentPanels({
             <Panel3Content />
           </Grid>
         </Grid>
-        
+
         {/* Right centered play icon */}
-        <IconButton 
+        <IconButton
           sx={{
             position: "absolute",
             right: 30,
             top: "50%",
             transform: "translateY(-50%)",
             color: "white",
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            backgroundColor: "transparent",
             "&:hover": {
               backgroundColor: "rgba(255, 255, 255, 0.3)",
             },
@@ -309,20 +314,22 @@ export default function ContentPanels({
         >
           <PlayArrowIcon sx={{ fontSize: 36 }} />
         </IconButton>
-        
+
         {/* Bottom centered play icon */}
-        <Box sx={{ 
-          display: "flex", 
-          justifyContent: "center", 
-          width: "100%", 
-          position: "absolute", 
-          bottom: 20, 
-          left: 0 
-        }}>
-          <IconButton 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            position: "absolute",
+            bottom: 20,
+            left: 0,
+          }}
+        >
+          <IconButton
             sx={{
               color: "white",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "transparent",
               "&:hover": {
                 backgroundColor: "rgba(255, 255, 255, 0.3)",
               },
@@ -330,7 +337,7 @@ export default function ContentPanels({
               height: 60,
             }}
           >
-            <PlayArrowIcon sx={{ fontSize: 36 }} />
+            <PlayArrowIcon sx={{ fontSize: 36, transform: "rotate(90deg)" }} />
           </IconButton>
         </Box>
       </BasePanel>
