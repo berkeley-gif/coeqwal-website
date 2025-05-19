@@ -349,54 +349,54 @@ const IntroSection: React.FC = () => {
   // Generate white background circles on initial render
   useEffect(() => {
     // Create 16 total white circles with a gradient opacity effect
-    const circles: WhiteCircleProps[] = [];
-    
+    const circles: WhiteCircleProps[] = []
+
     // For main intro section (top section) - create 15 circles in a grid pattern
-    const gridColumns = 5;
-    const gridRows = 3;
-    
+    const gridColumns = 5
+    const gridRows = 3
+
     for (let row = 0; row < gridRows; row++) {
       for (let col = 0; col < gridColumns; col++) {
         // Calculate base position with a grid cell
-        const baseLeft = (col / gridColumns) * 100;
-        const baseTop = (row / gridRows) * 90; // Keep in top 90%
-        
+        const baseLeft = (col / gridColumns) * 100
+        const baseTop = (row / gridRows) * 90 // Keep in top 90%
+
         // Add some controlled randomness within each cell
-        const leftOffset = (Math.random() * 0.8) * (100 / gridColumns);
-        const topOffset = (Math.random() * 0.8) * (90 / gridRows);
-        
-        const left = `${baseLeft + leftOffset}%`;
-        const top = `${baseTop + topOffset}%`;
-        
+        const leftOffset = Math.random() * 0.8 * (100 / gridColumns)
+        const topOffset = Math.random() * 0.8 * (90 / gridRows)
+
+        const left = `${baseLeft + leftOffset}%`
+        const top = `${baseTop + topOffset}%`
+
         // Size with some variation but more controlled
-        const size = 180 + Math.random() * 320;
-        
+        const size = 180 + Math.random() * 320
+
         // Opacity - gradient effect that decreases with row
-        let opacity;
+        let opacity
         if (row === 0) {
           // Top row - more visible
-          opacity = 0.18 + Math.random() * 0.12;
+          opacity = 0.18 + Math.random() * 0.12
         } else if (row === 1) {
           // Middle row - medium visibility
-          opacity = 0.12 + Math.random() * 0.08;
+          opacity = 0.12 + Math.random() * 0.08
         } else {
           // Bottom row - subtle
-          opacity = 0.05 + Math.random() * 0.07;
+          opacity = 0.05 + Math.random() * 0.07
         }
-        
-        circles.push({ left, top, size, opacity });
+
+        circles.push({ left, top, size, opacity })
       }
     }
-    
+
     // For interstitial section (bottom section) - create just 1 circle, well-positioned
     circles.push({
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
-      size: 250 + Math.random() * 150,     // Medium-large size
-      opacity: 0.04 + Math.random() * 0.03 // Very subtle
-    });
-    
-    setWhiteCircles(circles);
+      size: 250 + Math.random() * 150, // Medium-large size
+      opacity: 0.04 + Math.random() * 0.03, // Very subtle
+    })
+
+    setWhiteCircles(circles)
   }, [])
 
   // Generate circles on initial render - using only available images
@@ -406,17 +406,23 @@ const IntroSection: React.FC = () => {
     const selectedImages = [...availableImages].slice(0, 8)
 
     // Create circles with all positions (background + foreground) for the background
-    const allPositions = [...circlePositions.background, ...circlePositions.foreground]
+    const allPositions = [
+      ...circlePositions.background,
+      ...circlePositions.foreground,
+    ]
     const bgCircles = selectedImages.map((img, index) => {
       // Use the position index to determine which position to use
       const positionIndex = index % allPositions.length
-      const position = allPositions[positionIndex] || { left: "50%", top: "50%" };
+      const position = allPositions[positionIndex] || {
+        left: "50%",
+        top: "50%",
+      }
       // Call generateFixedCircleProps with the correct values
       return {
         ...generateFixedCircleProps(img, true, index),
         // Override the position with the exact one from allPositions
         left: position.left,
-        top: position.top
+        top: position.top,
       }
     })
 
@@ -448,10 +454,7 @@ const IntroSection: React.FC = () => {
       >
         {/* White background mood circles */}
         {whiteCircles.map((circle, index) => (
-          <WhiteCircle
-            key={`white-circle-${index}`}
-            {...circle}
-          />
+          <WhiteCircle key={`white-circle-${index}`} {...circle} />
         ))}
 
         <Box
