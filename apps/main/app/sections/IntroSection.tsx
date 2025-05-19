@@ -6,12 +6,12 @@ import Image from "next/image"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
-  imagePath: string  // Path to the image instead of color
+  imagePath: string // Path to the image instead of color
   left: string
   top: string
   index: number
   opacity?: number
-  size?: number  // Size for the image in pixels
+  size?: number // Size for the image in pixels
   // Animation parameters - unique for each circle
   freqX1?: number
   freqX2?: number
@@ -32,8 +32,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   left,
   top,
   index,
-  opacity = 0.7,  // Increased default opacity for images
-  size = 300,  // Default size for the images
+  opacity = 1, // Changed from 0.7 to 1 for full opacity
+  size = 300, // Default size for the images
   // Each circle gets its own unique animation characteristics
   freqX1 = 0.07,
   freqX2 = 0.04,
@@ -114,7 +114,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
         position: "absolute",
         width: `${size}px`,
         height: `${size}px`,
-        borderRadius: "50%",  // Keep circular shape
+        borderRadius: "50%", // Keep circular shape
         opacity,
         left,
         top,
@@ -123,18 +123,22 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
         y,
         transformOrigin: "center",
         pointerEvents: "none",
-        overflow: "hidden",  // Ensure the image stays within the circular boundary
+        overflow: "hidden", // Ensure the image stays within the circular boundary
       }}
     >
-      <Image 
-        src={`/images/circles/${imagePath}`}
+      <Image
+        src={`/images/circular-crops/${imagePath}`}
         alt=""
         quality={90}
         fill
         style={{
           objectFit: "cover",
           borderRadius: "50%",
+          width: "100%",
+          height: "100%",
+          objectPosition: "center",
         }}
+        sizes={`${size}px`} // Add sizes attribute to help next/image optimize
       />
     </motion.div>
   )
@@ -159,12 +163,12 @@ const IntroSection: React.FC = () => {
     >
       {/* Background Circles (below text) */}
       <ImageCircle
-        imagePath="Untitled-1.png"
+        imagePath="DWR_2021_06_22_KG_9189_water_texture.jpg"
         left="-5%"
         top="15%"
         index={0}
-        opacity={0.5}
-        size={350}
+        opacity={1}
+        size={300}
         freqX1={0.08}
         freqX2={0.03}
         freqY1={0.05}
@@ -179,12 +183,12 @@ const IntroSection: React.FC = () => {
         amplitudeY2={20}
       />
       <ImageCircle
-        imagePath="2.png"
+        imagePath="DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg"
         left="65%"
         top="10%"
         index={0}
-        opacity={0.6}
-        size={300}
+        opacity={1}
+        size={280}
         freqX1={0.06}
         freqX2={0.02}
         freqY1={0.04}
@@ -199,12 +203,12 @@ const IntroSection: React.FC = () => {
         amplitudeY2={15}
       />
       <ImageCircle
-        imagePath="3.png"
+        imagePath="DWR_2025_03_11_NS_0036_Oroville_Lake_Levels.jpg"
         left="20%"
         top="60%"
         index={0}
-        opacity={0.5}
-        size={320}
+        opacity={1}
+        size={290}
         freqX1={0.05}
         freqX2={0.09}
         freqY1={0.03}
@@ -219,12 +223,12 @@ const IntroSection: React.FC = () => {
         amplitudeY2={35}
       />
       <ImageCircle
-        imagePath="4.png"
+        imagePath="DBK_Yuba_River_aerials_0346_05_14_2009.jpg"
         left="85%"
         top="25%"
         index={0}
-        opacity={0.6}
-        size={280}
+        opacity={1}
+        size={260}
         freqX1={0.04}
         freqX2={0.075}
         freqY1={0.06}
@@ -295,12 +299,12 @@ const IntroSection: React.FC = () => {
 
       {/* Foreground Circles (above text) */}
       <ImageCircle
-        imagePath="3.png"
+        imagePath="DWR_CC_salmon_underH20-5_10_15_2012.jpg"
         left="75%"
         top="65%"
         index={20}
-        opacity={0.4}
-        size={280}
+        opacity={1}
+        size={270}
         freqX1={0.045}
         freqX2={0.085}
         freqY1={0.07}
@@ -315,12 +319,12 @@ const IntroSection: React.FC = () => {
         amplitudeY2={20}
       />
       <ImageCircle
-        imagePath="2.png"
+        imagePath="DWR_2020_10_13_FL_Lookout_Slough-0252.jpg"
         left="40%"
         top="30%"
         index={20}
-        opacity={0.3}
-        size={320}
+        opacity={1}
+        size={310}
         freqX1={0.065}
         freqX2={0.035}
         freqY1={0.08}
@@ -335,12 +339,12 @@ const IntroSection: React.FC = () => {
         amplitudeY2={25}
       />
       <ImageCircle
-        imagePath="Untitled-1.png"
+        imagePath="DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg"
         left="15%"
         top="80%"
         index={20}
-        opacity={0.4}
-        size={300}
+        opacity={1}
+        size={290}
         freqX1={0.055}
         freqX2={0.025}
         freqY1={0.09}
@@ -355,12 +359,12 @@ const IntroSection: React.FC = () => {
         amplitudeY2={30}
       />
       <ImageCircle
-        imagePath="4.png"
+        imagePath="DWR_FL_Caltrans_Sign-7163.jpg"
         left="50%"
         top="5%"
         index={20}
-        opacity={0.5}
-        size={260}
+        opacity={1}
+        size={250}
         freqX1={0.035}
         freqX2={0.065}
         freqY1={0.055}
