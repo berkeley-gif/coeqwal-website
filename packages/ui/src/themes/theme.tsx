@@ -429,9 +429,9 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontSize: "2.5rem",
-      fontWeight: 600,
+      fontWeight: 400,
       lineHeight: 1.25,
-      letterSpacing: "normal",
+      letterSpacing: "0.1rem",
     },
     h2: {
       fontSize: "3.76rem", // 57.6px
