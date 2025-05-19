@@ -151,40 +151,43 @@ export default function ContentPanels({
   }
 
   return (
-    <Box id="content-panels" sx={{ 
-      position: "relative",
-      // Custom styling to ensure proper overlapping
-      "& .active-panel-container": {
-        isolation: "isolate", // Create stacking context
-        zIndex: 1000 // Push active panels above others
-      },
-      "& .active-detail-panel": {
-        position: "relative", 
-        zIndex: 1000,
-        overflow: "visible"
-      },
-      // Custom styling for panel containers
-      "& > div > div": {
-        marginBottom: 0 // Remove any margin between panel containers
-      }
-    }}>
-      <Box 
-        sx={{ 
-          position: "relative", 
+    <Box
+      id="content-panels"
+      sx={{
+        position: "relative",
+        // Custom styling to ensure proper overlapping
+        "& .active-panel-container": {
+          isolation: "isolate", // Create stacking context
+          zIndex: 1000, // Push active panels above others
+        },
+        "& .active-detail-panel": {
+          position: "relative",
+          zIndex: 1000,
+          overflow: "visible",
+        },
+        // Custom styling for panel containers
+        "& > div > div": {
+          marginBottom: 0, // Remove any margin between panel containers
+        },
+      }}
+    >
+      <Box
+        sx={{
+          position: "relative",
           // Prevent space between panels
           "& > div": {
             marginTop: 0,
-            marginBottom: 0
+            marginBottom: 0,
           },
           // Remove any spacing from BasePanel
           "& .MuiBasePanel-root": {
             marginTop: 0,
             marginBottom: 0,
-            borderRadius: 0
+            borderRadius: 0,
           },
           // Create stacking context to handle z-index properly
           zIndex: 1,
-          overflow: "visible"
+          overflow: "visible",
         }}
       >
         {/* Panel Component - Learn */}
@@ -212,15 +215,16 @@ export default function ContentPanels({
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
                   This detailed panel provides in-depth information about
-                  California's water system and the complex journey water takes
-                  throughout the state.
+                  California`&apos;`s water system and the complex journey water
+                  takes throughout the state.
                 </Typography>
                 <Typography variant="body2" color="common.white">
-                  Understanding California's water system means appreciating its
-                  geography, climate, infrastructure, and policy frameworks. The
-                  state's water management includes a complex network of
-                  reservoirs, aqueducts, and groundwater basins that work together
-                  to meet environmental, agricultural, and urban needs.
+                  Understanding California`&apos;`s water system means
+                  appreciating its geography, climate, infrastructure, and
+                  policy frameworks. The state`&apos;`s water management
+                  includes a complex network of reservoirs, aqueducts, and
+                  groundwater basins that work together to meet environmental,
+                  agricultural, and urban needs.
                 </Typography>
               </Box>
             </>
@@ -252,15 +256,16 @@ export default function ContentPanels({
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
                   The COEQWAL modeling tools provide unprecedented insights into
-                  California's water management options under various scenarios.
+                  California`&apos;`s water management options under various
+                  scenarios.
                 </Typography>
                 <Typography variant="body2" color="common.white">
                   Our models incorporate decades of historical data, climate
                   projections, water rights frameworks, infrastructure
                   capabilities, and environmental requirements. By exploring
-                  different management approaches, users can understand tradeoffs
-                  between different water management strategies and their impacts
-                  on communities, agriculture, and ecosystems.
+                  different management approaches, users can understand
+                  tradeoffs between different water management strategies and
+                  their impacts on communities, agriculture, and ecosystems.
                 </Typography>
               </Box>
             </>
@@ -291,17 +296,18 @@ export default function ContentPanels({
               </Typography>
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                  Informed communities can advocate effectively for water policies
-                  that meet their unique needs while respecting the larger water
-                  system.
+                  Informed communities can advocate effectively for water
+                  policies that meet their unique needs while respecting the
+                  larger water system.
                 </Typography>
                 <Typography variant="body2" color="common.white">
-                  The COEQWAL project helps community members and decision-makers
-                  understand the complex interrelationships in California's water
-                  system. By providing accessible data and visualizations, we
-                  empower stakeholders to participate meaningfully in water
-                  planning processes and advocate for sustainable, equitable water
-                  solutions that benefit diverse communities across the state.
+                  The COEQWAL project helps community members and
+                  decision-makers understand the complex interrelationships in
+                  California&apos;s water system. By providing accessible data
+                  and visualizations, we empower stakeholders to participate
+                  meaningfully in water planning processes and advocate for
+                  sustainable, equitable water solutions that benefit diverse
+                  communities across the state.
                 </Typography>
               </Box>
             </>
@@ -325,7 +331,6 @@ interface PanelWithDetailProps {
 }
 
 function PanelWithDetail({
-  panelType,
   isActive,
   onToggleDetail,
   bgColor,
@@ -349,26 +354,28 @@ function PanelWithDetail({
   }, [])
 
   return (
-    <Box 
+    <Box
       className={isActive ? "active-panel-container" : ""}
-      sx={{ 
-        position: "relative", 
-        width: "100%", 
+      sx={{
+        position: "relative",
+        width: "100%",
         overflow: "visible", // Allow overflow for the detail panel
         height: containerHeight, // Fixed height to prevent content shifting
         zIndex: isActive ? 1000 : 1, // Much higher z-index when active to overlay other content
       }}
     >
-      <Box sx={{ 
-        position: "relative", 
-        width: "200%", 
-        display: "flex",
-        height: "100%",
-      }}>
+      <Box
+        sx={{
+          position: "relative",
+          width: "200%",
+          display: "flex",
+          height: "100%",
+        }}
+      >
         <motion.div
           ref={panelRef}
           className={isActive ? "active-panel" : ""}
-          style={{ 
+          style={{
             width: "50%",
             height: "100%",
             zIndex: 1,
@@ -468,7 +475,7 @@ function PanelWithDetail({
         <motion.div
           ref={detailRef}
           className={isActive ? "active-detail-panel" : ""}
-          style={{ 
+          style={{
             width: "50%",
             height: "auto", // Allow this to grow taller than the container
             zIndex: isActive ? 1000 : 1, // Higher z-index when active
