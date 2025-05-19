@@ -2,14 +2,16 @@ import React, { useRef, useEffect } from "react"
 import { BasePanel } from "@repo/ui"
 import { Box, Typography } from "@mui/material"
 import { motion, useMotionValue } from "@repo/motion"
+import Image from "next/image"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
-  color?: string
+  imagePath: string  // Path to the image instead of color
   left: string
   top: string
   index: number
   opacity?: number
+  size?: number  // Size for the image in pixels
   // Animation parameters - unique for each circle
   freqX1?: number
   freqX2?: number
@@ -25,12 +27,13 @@ interface AnimatedCircleProps {
   amplitudeY2?: number
 }
 
-const MotionCircle: React.FC<AnimatedCircleProps> = ({
-  color = "#007C92",
+const ImageCircle: React.FC<AnimatedCircleProps> = ({
+  imagePath,
   left,
   top,
   index,
-  opacity = 0.3,
+  opacity = 0.7,  // Increased default opacity for images
+  size = 300,  // Default size for the images
   // Each circle gets its own unique animation characteristics
   freqX1 = 0.07,
   freqX2 = 0.04,
@@ -109,10 +112,9 @@ const MotionCircle: React.FC<AnimatedCircleProps> = ({
     <motion.div
       style={{
         position: "absolute",
-        width: "300px",
-        height: "300px",
-        borderRadius: "50%",
-        backgroundColor: color,
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: "50%",  // Keep circular shape
         opacity,
         left,
         top,
@@ -121,8 +123,20 @@ const MotionCircle: React.FC<AnimatedCircleProps> = ({
         y,
         transformOrigin: "center",
         pointerEvents: "none",
+        overflow: "hidden",  // Ensure the image stays within the circular boundary
       }}
-    />
+    >
+      <Image 
+        src={`/images/circles/${imagePath}`}
+        alt=""
+        quality={90}
+        fill
+        style={{
+          objectFit: "cover",
+          borderRadius: "50%",
+        }}
+      />
+    </motion.div>
   )
 }
 
@@ -144,12 +158,13 @@ const IntroSection: React.FC = () => {
       }}
     >
       {/* Background Circles (below text) */}
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="Untitled-1.png"
         left="-5%"
         top="15%"
         index={0}
-        opacity={0.15}
+        opacity={0.5}
+        size={350}
         freqX1={0.08}
         freqX2={0.03}
         freqY1={0.05}
@@ -163,12 +178,13 @@ const IntroSection: React.FC = () => {
         amplitudeY1={40}
         amplitudeY2={20}
       />
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="2.png"
         left="65%"
         top="10%"
         index={0}
-        opacity={0.25}
+        opacity={0.6}
+        size={300}
         freqX1={0.06}
         freqX2={0.02}
         freqY1={0.04}
@@ -182,12 +198,13 @@ const IntroSection: React.FC = () => {
         amplitudeY1={35}
         amplitudeY2={15}
       />
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="3.png"
         left="20%"
         top="60%"
         index={0}
-        opacity={0.2}
+        opacity={0.5}
+        size={320}
         freqX1={0.05}
         freqX2={0.09}
         freqY1={0.03}
@@ -201,12 +218,13 @@ const IntroSection: React.FC = () => {
         amplitudeY1={30}
         amplitudeY2={35}
       />
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="4.png"
         left="85%"
         top="25%"
         index={0}
-        opacity={0.18}
+        opacity={0.6}
+        size={280}
         freqX1={0.04}
         freqX2={0.075}
         freqY1={0.06}
@@ -276,12 +294,13 @@ const IntroSection: React.FC = () => {
       </Box>
 
       {/* Foreground Circles (above text) */}
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="3.png"
         left="75%"
         top="65%"
         index={20}
-        opacity={0.15}
+        opacity={0.4}
+        size={280}
         freqX1={0.045}
         freqX2={0.085}
         freqY1={0.07}
@@ -295,12 +314,13 @@ const IntroSection: React.FC = () => {
         amplitudeY1={45}
         amplitudeY2={20}
       />
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="2.png"
         left="40%"
         top="30%"
         index={20}
-        opacity={0.1}
+        opacity={0.3}
+        size={320}
         freqX1={0.065}
         freqX2={0.035}
         freqY1={0.08}
@@ -314,12 +334,13 @@ const IntroSection: React.FC = () => {
         amplitudeY1={30}
         amplitudeY2={25}
       />
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="Untitled-1.png"
         left="15%"
         top="80%"
         index={20}
-        opacity={0.12}
+        opacity={0.4}
+        size={300}
         freqX1={0.055}
         freqX2={0.025}
         freqY1={0.09}
@@ -333,12 +354,13 @@ const IntroSection: React.FC = () => {
         amplitudeY1={25}
         amplitudeY2={30}
       />
-      <MotionCircle
-        color="#007C92"
+      <ImageCircle
+        imagePath="4.png"
         left="50%"
         top="5%"
         index={20}
-        opacity={0.22}
+        opacity={0.5}
+        size={260}
         freqX1={0.035}
         freqX2={0.065}
         freqY1={0.055}
