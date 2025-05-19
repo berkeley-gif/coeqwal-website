@@ -226,7 +226,7 @@ export function MultiDrawer({
             zIndex: overlay ? 1300 : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
-            backgroundColor: theme.palette.common.white, // Set default background to white
+            backgroundColor: drawerBg, // Use the tracked background color
           },
         }}
       >

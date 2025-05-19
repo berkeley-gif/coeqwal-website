@@ -7,7 +7,6 @@ import {
   WaterIcon,
   SettingsIcon,
   EngineeringIcon,
-  SwapHorizIcon,
   BarChartIcon,
   LocationOnIcon,
   OpacityIcon,
