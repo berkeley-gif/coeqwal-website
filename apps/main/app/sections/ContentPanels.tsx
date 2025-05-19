@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useRef, useLayoutEffect } from "react"
 import { Box, Typography, Grid, IconButton } from "@repo/ui/mui"
 import { BasePanel } from "@repo/ui"
 import { PlayArrowIcon } from "@repo/ui/mui"
@@ -152,126 +152,143 @@ export default function ContentPanels({
 
   return (
     <Box id="content-panels" sx={{ position: "relative" }}>
-      {/* Panel Component - Learn */}
-      <PanelWithDetail
-        panelType="learn"
-        isActive={activePanel === "learn"}
-        onToggleDetail={() => togglePanelDetail("learn")}
-        bgColor={getPanelBgColor("learn")}
-        detailBgColor={getDetailPanelBgColor("learn")}
-        title={<LearnTextContent />}
-        content={<Panel1Content />}
-        detailContent={
-          <>
-            <Typography
-              variant="h1"
-              color="common.white"
-              sx={{
-                fontSize: "5rem",
-                fontWeight: 700,
-                alignSelf: "flex-start",
-              }}
-            >
-              Learn Details
-            </Typography>
-            <Box>
-              <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                This detailed panel provides in-depth information about
-                California's water system and the complex journey water takes
-                throughout the state.
+      <Box 
+        sx={{ 
+          position: "relative", 
+          // Prevent space between panels
+          "& > div": {
+            marginTop: 0,
+            marginBottom: 0
+          },
+          // Remove any spacing from BasePanel
+          "& .MuiBasePanel-root": {
+            marginTop: 0,
+            marginBottom: 0,
+            borderRadius: 0
+          }
+        }}
+      >
+        {/* Panel Component - Learn */}
+        <PanelWithDetail
+          panelType="learn"
+          isActive={activePanel === "learn"}
+          onToggleDetail={() => togglePanelDetail("learn")}
+          bgColor={getPanelBgColor("learn")}
+          detailBgColor={getDetailPanelBgColor("learn")}
+          title={<LearnTextContent />}
+          content={<Panel1Content />}
+          detailContent={
+            <>
+              <Typography
+                variant="h1"
+                color="common.white"
+                sx={{
+                  fontSize: "5rem",
+                  fontWeight: 700,
+                  alignSelf: "flex-start",
+                }}
+              >
+                Learn Details
               </Typography>
-              <Typography variant="body2" color="common.white">
-                Understanding California's water system means appreciating its
-                geography, climate, infrastructure, and policy frameworks. The
-                state's water management includes a complex network of
-                reservoirs, aqueducts, and groundwater basins that work together
-                to meet environmental, agricultural, and urban needs.
-              </Typography>
-            </Box>
-          </>
-        }
-      />
+              <Box>
+                <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+                  This detailed panel provides in-depth information about
+                  California's water system and the complex journey water takes
+                  throughout the state.
+                </Typography>
+                <Typography variant="body2" color="common.white">
+                  Understanding California's water system means appreciating its
+                  geography, climate, infrastructure, and policy frameworks. The
+                  state's water management includes a complex network of
+                  reservoirs, aqueducts, and groundwater basins that work together
+                  to meet environmental, agricultural, and urban needs.
+                </Typography>
+              </Box>
+            </>
+          }
+        />
 
-      {/* Panel Component - Explore */}
-      <PanelWithDetail
-        panelType="explore"
-        isActive={activePanel === "explore"}
-        onToggleDetail={() => togglePanelDetail("explore")}
-        bgColor={getPanelBgColor("explore")}
-        detailBgColor={getDetailPanelBgColor("explore")}
-        title={<EmpowerTextContent />}
-        content={<Panel2Content />}
-        detailContent={
-          <>
-            <Typography
-              variant="h1"
-              color="common.white"
-              sx={{
-                fontSize: "5rem",
-                fontWeight: 700,
-                alignSelf: "flex-start",
-              }}
-            >
-              Explore Details
-            </Typography>
-            <Box>
-              <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                The COEQWAL modeling tools provide unprecedented insights into
-                California's water management options under various scenarios.
+        {/* Panel Component - Explore */}
+        <PanelWithDetail
+          panelType="explore"
+          isActive={activePanel === "explore"}
+          onToggleDetail={() => togglePanelDetail("explore")}
+          bgColor={getPanelBgColor("explore")}
+          detailBgColor={getDetailPanelBgColor("explore")}
+          title={<EmpowerTextContent />}
+          content={<Panel2Content />}
+          detailContent={
+            <>
+              <Typography
+                variant="h1"
+                color="common.white"
+                sx={{
+                  fontSize: "5rem",
+                  fontWeight: 700,
+                  alignSelf: "flex-start",
+                }}
+              >
+                Explore Details
               </Typography>
-              <Typography variant="body2" color="common.white">
-                Our models incorporate decades of historical data, climate
-                projections, water rights frameworks, infrastructure
-                capabilities, and environmental requirements. By exploring
-                different management approaches, users can understand tradeoffs
-                between different water management strategies and their impacts
-                on communities, agriculture, and ecosystems.
-              </Typography>
-            </Box>
-          </>
-        }
-      />
+              <Box>
+                <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+                  The COEQWAL modeling tools provide unprecedented insights into
+                  California's water management options under various scenarios.
+                </Typography>
+                <Typography variant="body2" color="common.white">
+                  Our models incorporate decades of historical data, climate
+                  projections, water rights frameworks, infrastructure
+                  capabilities, and environmental requirements. By exploring
+                  different management approaches, users can understand tradeoffs
+                  between different water management strategies and their impacts
+                  on communities, agriculture, and ecosystems.
+                </Typography>
+              </Box>
+            </>
+          }
+        />
 
-      {/* Panel Component - Empower */}
-      <PanelWithDetail
-        panelType="empower"
-        isActive={activePanel === "empower"}
-        onToggleDetail={() => togglePanelDetail("empower")}
-        bgColor={getPanelBgColor("empower")}
-        detailBgColor={getDetailPanelBgColor("empower")}
-        title={<ActTextContent />}
-        content={<Panel3Content />}
-        detailContent={
-          <>
-            <Typography
-              variant="h1"
-              color="common.white"
-              sx={{
-                fontSize: "5rem",
-                fontWeight: 700,
-                alignSelf: "flex-start",
-              }}
-            >
-              Empower Details
-            </Typography>
-            <Box>
-              <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                Informed communities can advocate effectively for water policies
-                that meet their unique needs while respecting the larger water
-                system.
+        {/* Panel Component - Empower */}
+        <PanelWithDetail
+          panelType="empower"
+          isActive={activePanel === "empower"}
+          onToggleDetail={() => togglePanelDetail("empower")}
+          bgColor={getPanelBgColor("empower")}
+          detailBgColor={getDetailPanelBgColor("empower")}
+          title={<ActTextContent />}
+          content={<Panel3Content />}
+          detailContent={
+            <>
+              <Typography
+                variant="h1"
+                color="common.white"
+                sx={{
+                  fontSize: "5rem",
+                  fontWeight: 700,
+                  alignSelf: "flex-start",
+                }}
+              >
+                Empower Details
               </Typography>
-              <Typography variant="body2" color="common.white">
-                The COEQWAL project helps community members and decision-makers
-                understand the complex interrelationships in California's water
-                system. By providing accessible data and visualizations, we
-                empower stakeholders to participate meaningfully in water
-                planning processes and advocate for sustainable, equitable water
-                solutions that benefit diverse communities across the state.
-              </Typography>
-            </Box>
-          </>
-        }
-      />
+              <Box>
+                <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+                  Informed communities can advocate effectively for water policies
+                  that meet their unique needs while respecting the larger water
+                  system.
+                </Typography>
+                <Typography variant="body2" color="common.white">
+                  The COEQWAL project helps community members and decision-makers
+                  understand the complex interrelationships in California's water
+                  system. By providing accessible data and visualizations, we
+                  empower stakeholders to participate meaningfully in water
+                  planning processes and advocate for sustainable, equitable water
+                  solutions that benefit diverse communities across the state.
+                </Typography>
+              </Box>
+            </>
+          }
+        />
+      </Box>
     </Box>
   )
 }
@@ -298,11 +315,40 @@ function PanelWithDetail({
   content,
   detailContent,
 }: PanelWithDetailProps) {
+  // Track height of panel container for seamless matching
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [containerHeight, setContainerHeight] = useState<string>("auto")
+
+  // Measure the main panel height to set container height
+  useLayoutEffect(() => {
+    if (panelRef.current) {
+      // Get initial height of the main panel
+      const height = panelRef.current.offsetHeight
+      setContainerHeight(`${height}px`)
+    }
+  }, [])
+
   return (
-    <Box sx={{ position: "relative", width: "100%" }}>
-      <Box sx={{ position: "relative", width: "200%", display: "flex" }}>
+    <Box 
+      sx={{ 
+        position: "relative", 
+        width: "100%", 
+        overflow: "hidden",
+        height: containerHeight, // Fixed height to prevent content shifting
+      }}
+    >
+      <Box sx={{ 
+        position: "relative", 
+        width: "200%", 
+        display: "flex",
+        height: "100%",
+      }}>
         <motion.div
-          style={{ width: "50%" }}
+          ref={panelRef}
+          style={{ 
+            width: "50%",
+            height: "100%",
+          }}
           animate={{ x: isActive ? "-100%" : "0%" }}
           transition={{
             type: "spring",
@@ -319,6 +365,8 @@ function PanelWithDetail({
               py: 12, // vertical padding
               color: "white",
               position: "relative", // For absolute positioning of icons
+              borderRadius: 0, // No border radius
+              height: "100%", // Fill the full height
             }}
           >
             <Grid container spacing={6} alignItems="flex-start">
@@ -393,7 +441,10 @@ function PanelWithDetail({
         </motion.div>
 
         <motion.div
-          style={{ width: "50%" }}
+          style={{ 
+            width: "50%",
+            height: "100%",
+          }}
           animate={{ x: isActive ? "-100%" : "0%" }}
           transition={{
             type: "spring",
@@ -408,9 +459,11 @@ function PanelWithDetail({
             sx={{
               backgroundColor: detailBgColor,
               py: 12, // vertical padding
-              height: "100%",
               color: "white",
               position: "relative",
+              borderRadius: 0, // No border radius
+              height: "100%", // Fill the full height
+              overflow: "auto", // Allow scrolling if content is too long
             }}
           >
             <Grid container spacing={6} alignItems="flex-start">
