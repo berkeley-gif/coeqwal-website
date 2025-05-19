@@ -263,16 +263,102 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: "linear-gradient(to bottom, #f69a93, #81D4FA)",
-        backgroundImage:
-          "url('/images/collage_water.png'), linear-gradient(to bottom, #f69a93, #81D4FA)",
-        backgroundSize: "cover, 100% 100%",
-        backgroundPosition: "center, center",
-        backgroundRepeat: "no-repeat, no-repeat",
+        background: "linear-gradient(to bottom, #81D4FA, #81D4FA)",
+        backgroundSize: "100% 100%",
         width: "100%",
         overflow: "visible",
       }}
     >
+      {/* Background images */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "75%",
+            height: "150%",
+            transform: "translateX(-16.67%)",
+          }}
+        >
+          <Image
+            src="/images/home_collage/left_side.png"
+            alt=""
+            fill
+            quality={100}
+            priority
+            sizes="75vw"
+            style={{
+              objectFit: "contain",
+              objectPosition: "left bottom",
+              pointerEvents: "none",
+            }}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            width: "75%",
+            height: "150%",
+            transform: "translateX(16.67%)",
+          }}
+        >
+          <Image
+            src="/images/home_collage/right_side.png"
+            alt=""
+            fill
+            quality={100}
+            priority
+            sizes="75vw"
+            style={{
+              objectFit: "contain",
+              objectPosition: "right bottom",
+              pointerEvents: "none",
+            }}
+          />
+        </Box>
+
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50vh",
+            left: 0,
+            width: "150%",
+            height: "75%",
+            zIndex: 20,
+            pointerEvents: "none",
+            transform: "translateX(-16.67%)",
+          }}
+        >
+          <Image
+            src="/images/home_collage/birds_top.png"
+            alt=""
+            fill
+            quality={100}
+            priority
+            sizes="150vw"
+            style={{
+              objectFit: "contain",
+              objectPosition: "center",
+              pointerEvents: "none",
+            }}
+          />
+        </Box>
+      </Box>
+
       {/* First section with bubbles - limited to 100vh */}
       <BasePanel
         fullHeight

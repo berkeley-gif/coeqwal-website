@@ -236,7 +236,7 @@ export default function Home() {
         onSectionClick={handleSectionClick}
         showSecondaryNav={false}
         secondaryNavItems={[]}
-        showRailButton={true}
+        showRailButton={false}
       />
 
       {/* ===== Main Content Area ===== */}

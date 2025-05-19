@@ -242,7 +242,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    backgroundColor: drawerBg,
+                    background: "linear-gradient(to right, #FFAC6E, #60aacb)",
                     color: theme.palette.common.white,
                     padding: 2,
                   }}
