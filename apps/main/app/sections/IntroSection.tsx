@@ -305,12 +305,91 @@ const generateFixedCircleProps = (
 //   }
 // }
 
+// Circle component for background white circles
+interface WhiteCircleProps {
+  left: string
+  top: string
+  size: number
+  opacity: number
+}
+
+const WhiteCircle: React.FC<WhiteCircleProps> = ({
+  left,
+  top,
+  size,
+  opacity,
+}) => {
+  return (
+    <Box
+      sx={{
+        position: "absolute",
+        width: `${size}px`,
+        height: `${size}px`,
+        borderRadius: "50%",
+        backgroundColor: "#FFFFFF",
+        opacity,
+        left,
+        top,
+        zIndex: 0, // Very low z-index to ensure it's behind everything
+        pointerEvents: "none",
+      }}
+    />
+  )
+}
+
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
   // State to store the generated circles
   const [backgroundCircles, setBackgroundCircles] = useState<
     AnimatedCircleProps[]
   >([])
+  // State for white background mood circles
+  const [whiteCircles, setWhiteCircles] = useState<WhiteCircleProps[]>([])
+
+  // Generate white background circles on initial render
+  useEffect(() => {
+    // Create 25 total white circles but distribute them better to avoid clumping
+    const circles: WhiteCircleProps[] = [];
+    
+    // For main intro section (top section) - create 24 circles in a grid pattern
+    const gridColumns = 6;
+    const gridRows = 4;
+    
+    for (let row = 0; row < gridRows; row++) {
+      for (let col = 0; col < gridColumns; col++) {
+        // Calculate base position with a grid cell
+        const baseLeft = (col / gridColumns) * 100;
+        const baseTop = (row / gridRows) * 90; // Keep in top 90%
+        
+        // Add some controlled randomness within each cell
+        const leftOffset = (Math.random() * 0.8) * (100 / gridColumns);
+        const topOffset = (Math.random() * 0.8) * (90 / gridRows);
+        
+        const left = `${baseLeft + leftOffset}%`;
+        const top = `${baseTop + topOffset}%`;
+        
+        // Size with some variation but more controlled
+        const size = 180 + Math.random() * 320;
+        
+        // Opacity - vary slightly but keep most subtle
+        const opacity = (row + col) % 5 === 0
+          ? 0.18 + Math.random() * 0.12 // Slightly more visible for some strategic circles
+          : 0.05 + Math.random() * 0.12; // Subtle for most circles
+        
+        circles.push({ left, top, size, opacity });
+      }
+    }
+    
+    // For interstitial section (bottom section) - create just 1 circle, well-positioned
+    circles.push({
+      left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
+      top: `${110 + Math.random() * 10}%`, // Just below the fold
+      size: 250 + Math.random() * 150,     // Medium-large size
+      opacity: 0.08                        // Very subtle
+    });
+    
+    setWhiteCircles(circles);
+  }, [])
 
   // Generate circles on initial render - using only available images
   useEffect(() => {
@@ -359,6 +438,14 @@ const IntroSection: React.FC = () => {
           pointerEvents: "none",
         }}
       >
+        {/* White background mood circles */}
+        {whiteCircles.map((circle, index) => (
+          <WhiteCircle
+            key={`white-circle-${index}`}
+            {...circle}
+          />
+        ))}
+
         <Box
           sx={{
             position: "absolute",
