@@ -88,4 +88,4 @@ export const KenBurnsMapEffect: React.FC<KenBurnsMapEffectProps> = ({
   }, [activeSection, enabled, kenBurnsActive, mapRef, mapStore.viewState])
 
   return null
-} 
+}

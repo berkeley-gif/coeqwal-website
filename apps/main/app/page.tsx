@@ -11,7 +11,7 @@ import type { MapboxMapRef } from "@repo/map"
 import MapContainer from "./components/MapContainer"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
-import HeroSection from "./sections/HeroSection"
+import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
 import InterstitialPanel from "./sections/InterstitialPanel"
 import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
@@ -27,7 +27,7 @@ import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
 
 // Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
-  hero: "hero",
+  intro: "intro",
   interstitial: "interstitial",
   californiaWater: "california-water",
   managingWater: "managing-water",
@@ -323,8 +323,8 @@ export default function Home() {
             position: "relative",
           }}
         >
-          {/* Landing Panel */}
-          <HeroSection />
+          {/* Intro Panel */}
+          <IntroSection />
 
           {/* Interstitial Panel */}
           <InterstitialPanel />
