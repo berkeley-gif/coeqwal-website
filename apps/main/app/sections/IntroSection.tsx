@@ -152,13 +152,10 @@ const circularImages = [
   "Untitled-1.png",
   "DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
   "DWR_2020_10_13_FL_Lookout_Slough-0252.jpg",
-  "DWR_2021_06_22_KG_9189_water_texture.jpg",
   "DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
   "DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
-  "DWR_2024_09_27_XM_0691_Native_American_Day.jpg",
   "DWR_2025_03_11_NS_0036_Oroville_Lake_Levels.jpg",
-  "DWR_CC_salmon_underH20-5_10_15_2012.jpg",
-  "DWR_FL_Caltrans_Sign-7163.jpg"
+  "DWR_CC_salmon_underH20-5_10_15_2012.jpg"
 ]
 
 // Function to generate a random value within a range
