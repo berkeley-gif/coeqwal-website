@@ -9,12 +9,17 @@ interface ContentPanelsProps {
   onOpenLearnDrawer?: (sectionId: string) => void
 }
 
+// Define panel types for better type checking
+type PanelType = "learn" | "explore" | "empower" | null
+
 export default function ContentPanels({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenLearnDrawer,
 }: ContentPanelsProps = {}) {
   // State to track if we're showing the detail panel
   const [showDetailPanel, setShowDetailPanel] = useState(false)
+  // Track which panel's details we're showing
+  const [activePanel, setActivePanel] = useState<PanelType>(null)
 
   // Text component for the first panel
   const LearnTextContent = () => (
@@ -111,7 +116,8 @@ export default function ContentPanels({
   )
 
   // Function to trigger transition to detail panel
-  const handleShowDetail = () => {
+  const handleShowDetail = (panelType: PanelType) => {
+    setActivePanel(panelType)
     setShowDetailPanel(true)
   }
 
@@ -120,16 +126,137 @@ export default function ContentPanels({
     setShowDetailPanel(false)
   }
 
+  // Get details content based on active panel
+  const getDetailContent = () => {
+    switch (activePanel) {
+      case "learn":
+        return (
+          <>
+            <Typography
+              variant="h1"
+              color="common.white"
+              sx={{
+                fontSize: "5rem",
+                fontWeight: 700,
+                alignSelf: "flex-start",
+              }}
+            >
+              Learn Details
+            </Typography>
+            <Box>
+              <Typography
+                variant="body2"
+                color="common.white"
+                sx={{ mb: 4 }}
+              >
+                This detailed panel provides in-depth information about California's
+                water system and the complex journey water takes throughout the state.
+              </Typography>
+              <Typography variant="body2" color="common.white">
+                Understanding California's water system means appreciating its geography,
+                climate, infrastructure, and policy frameworks. The state's water management
+                includes a complex network of reservoirs, aqueducts, and groundwater basins 
+                that work together to meet environmental, agricultural, and urban needs.
+              </Typography>
+            </Box>
+          </>
+        )
+      case "explore":
+        return (
+          <>
+            <Typography
+              variant="h1"
+              color="common.white"
+              sx={{
+                fontSize: "5rem",
+                fontWeight: 700,
+                alignSelf: "flex-start",
+              }}
+            >
+              Explore Details
+            </Typography>
+            <Box>
+              <Typography
+                variant="body2"
+                color="common.white"
+                sx={{ mb: 4 }}
+              >
+                The COEQWAL modeling tools provide unprecedented insights into 
+                California's water management options under various scenarios.
+              </Typography>
+              <Typography variant="body2" color="common.white">
+                Our models incorporate decades of historical data, climate projections,
+                water rights frameworks, infrastructure capabilities, and environmental
+                requirements. By exploring different management approaches, users can
+                understand tradeoffs between different water management strategies and
+                their impacts on communities, agriculture, and ecosystems.
+              </Typography>
+            </Box>
+          </>
+        )
+      case "empower":
+        return (
+          <>
+            <Typography
+              variant="h1"
+              color="common.white"
+              sx={{
+                fontSize: "5rem",
+                fontWeight: 700,
+                alignSelf: "flex-start",
+              }}
+            >
+              Empower Details
+            </Typography>
+            <Box>
+              <Typography
+                variant="body2"
+                color="common.white"
+                sx={{ mb: 4 }}
+              >
+                Informed communities can advocate effectively for water policies
+                that meet their unique needs while respecting the larger water system.
+              </Typography>
+              <Typography variant="body2" color="common.white">
+                The COEQWAL project helps community members and decision-makers
+                understand the complex interrelationships in California's water system.
+                By providing accessible data and visualizations, we empower stakeholders
+                to participate meaningfully in water planning processes and advocate
+                for sustainable, equitable water solutions that benefit diverse communities
+                across the state.
+              </Typography>
+            </Box>
+          </>
+        )
+      default:
+        return null
+    }
+  }
+
+  // Get background color for detail panel based on active panel
+  const getDetailPanelBgColor = () => {
+    switch (activePanel) {
+      case "learn":
+        return "#134970" // Darker blue than the Learn panel
+      case "explore":
+        return "#1E657D" // Darker teal than the Explore panel
+      case "empower":
+        return "#0A3D50" // Darker teal than the Empower panel
+      default:
+        return "#005066" // Default dark teal
+    }
+  }
+
   return (
     <Box sx={{ position: "relative", overflow: "hidden", width: "100%" }}>
       {/* Creating a container that's twice the viewport width with both panels side by side */}
       <motion.div
-        style={{
+        style={{ 
           display: "flex",
           width: "200%", // Double the width to contain both panels
           position: "relative",
         }}
-        animate={{
+        animate={{ 
           x: showDetailPanel ? "-50%" : "0%", // Move left by 50% when showing detail
         }}
         transition={{
@@ -141,7 +268,7 @@ export default function ContentPanels({
         {/* Left side - Original stacked content panels */}
         <Box
           id="content-panels"
-          sx={{
+          sx={{ 
             width: "50%", // 50% of the container (100% of viewport)
             flexShrink: 0,
           }}
@@ -180,7 +307,7 @@ export default function ContentPanels({
 
             {/* Right centered play icon */}
             <IconButton
-              onClick={handleShowDetail}
+              onClick={() => handleShowDetail("learn")}
               sx={{
                 position: "absolute",
                 right: 30,
@@ -261,7 +388,7 @@ export default function ContentPanels({
 
             {/* Right centered play icon */}
             <IconButton
-              onClick={handleShowDetail}
+              onClick={() => handleShowDetail("explore")}
               sx={{
                 position: "absolute",
                 right: 30,
@@ -342,7 +469,7 @@ export default function ContentPanels({
 
             {/* Right centered play icon */}
             <IconButton
-              onClick={handleShowDetail}
+              onClick={() => handleShowDetail("empower")}
               sx={{
                 position: "absolute",
                 right: 30,
@@ -392,7 +519,7 @@ export default function ContentPanels({
 
         {/* Right side - Detail panel (connected visually) */}
         <Box
-          sx={{
+          sx={{ 
             width: "50%", // 50% of the container (100% of viewport)
             flexShrink: 0,
           }}
@@ -401,7 +528,7 @@ export default function ContentPanels({
             paddingVariant="wide"
             fullHeight={false}
             sx={{
-              backgroundColor: "#005066", // Darker teal for detail panel
+              backgroundColor: getDetailPanelBgColor(), // Dynamic color based on active panel
               py: 12,
               minHeight: "100vh", // Match the height of stack panels
               color: "white",
@@ -419,40 +546,8 @@ export default function ContentPanels({
                   pt: 0,
                 }}
               >
-                <Typography
-                  variant="h1"
-                  color="common.white"
-                  sx={{
-                    fontSize: "5rem",
-                    fontWeight: 700,
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  Details
-                </Typography>
-              </Grid>
-              <Grid
-                size={{ xs: 12, md: 8 }}
-                sx={{ display: "flex", alignItems: "flex-start" }}
-              >
-                <Box>
-                  <Typography
-                    variant="body2"
-                    color="common.white"
-                    sx={{ mb: 4 }}
-                  >
-                    This is the detail panel that appears connected to the right
-                    of the main panels. When the user clicks on any right arrow,
-                    both panels shift leftward together as a single unit,
-                    revealing this content.
-                  </Typography>
-                  <Typography variant="body2" color="common.white">
-                    This detail panel could contain deeper information about the
-                    topics in the main panels, including detailed explanations,
-                    charts, graphs, or other visualizations that help users
-                    better understand California water systems.
-                  </Typography>
-                </Box>
+                {/* Dynamic title and content based on active panel */}
+                {getDetailContent()}
               </Grid>
             </Grid>
 

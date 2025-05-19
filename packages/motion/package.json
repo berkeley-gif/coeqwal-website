@@ -27,7 +27,8 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@repo/i18n": "workspace:*"
+    "@repo/i18n": "workspace:*",
+    "@repo/ui": "workspace:*"
   },
   "dependencies": {
     "flubber": "^0.4.2",
