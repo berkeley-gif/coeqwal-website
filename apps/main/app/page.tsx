@@ -23,7 +23,7 @@ import { useDrawerStore } from "@repo/state"
 import { useMapStore, mapActions } from "@repo/state/map"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 import { Slide } from "@mui/material"
-import { KenBurnsMapEffect } from "./utils/mapEffects"
+import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
 
 // Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
@@ -74,10 +74,7 @@ export default function Home() {
   }, []) // Empty dependency array ensures this runs once before component mounts
 
   // Keep our own reference to the Ken Burns effect for cleanup
-  const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
-
-  // Track if the effect is running
-  const [kenBurnsActive, setKenBurnsActive] = useState(false)
+  // const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
 
   // Ensure map starts in the correct position
   useEffect(() => {
@@ -94,206 +91,8 @@ export default function Home() {
     })
   }, [uncontrolledRef, mapStore.viewState])
 
-  // Create and prepare the Ken Burns effect
-  useEffect(() => {
-    // Initialize effect only when map reference is available
-    if (!uncontrolledRef.current || kenBurnsEffectRef.current) return
-
-    // Destructure the viewState properties to use inside this effect
-    // This captures the values in the closure without needing them in dependencies
-    const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
-
-    console.log("📸 Creating subtle ambient Ken Burns effect")
-
-    // Create the effect
-    const effect = new KenBurnsMapEffect(uncontrolledRef)
-
-    // Set up the keyframes for a subtle ambient effect
-    effect
-      // Start with California overview
-      .addKeyframe(
-        [longitude, latitude],
-        zoom,
-        2000, // Very short first transition for immediate effect
-        bearing, // Keep default bearing
-        pitch,
-      )
-
-      // Gentle drift north
-      .addKeyframe(
-        [longitude + 0.3, latitude + 0.7],
-        zoom + 0.2, // Very slight zoom
-        8000, // Shorter duration for faster feedback
-        bearing, // Keep default bearing
-        5, // Slight pitch
-      )
-
-      // Gentle drift east
-      .addKeyframe(
-        [longitude + 0.5, latitude + 0.2],
-        zoom + 0.3,
-        20000,
-        bearing, // Keep default bearing instead of -5
-        10,
-      )
-
-      // Drift back to center
-      .addKeyframe([longitude, latitude], zoom, 15000, bearing, pitch)
-
-      .setLoop(true)
-
-    // Store the effect for later use
-    kenBurnsEffectRef.current = effect
-    console.log("✅ Ken Burns effect created successfully")
-
-    // Cleanup on unmount
-    return () => {
-      if (kenBurnsEffectRef.current) {
-        console.log("🛑 Cleaning up Ken Burns effect on page unmount")
-        kenBurnsEffectRef.current.stop()
-        kenBurnsEffectRef.current = null
-      }
-    }
-  }, [uncontrolledRef, mapStore.viewState])
-
-  // Ken Burns effect is enabled by default
-  const kenBurnsEnabled = true
-
   // pull the values out once, so eslint can track them
   const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
-
-  // Add direct scroll listener for immediate Ken Burns activation
-  useEffect(() => {
-    const handleDirectScrollCheck = () => {
-      if (
-        !kenBurnsEnabled ||
-        !kenBurnsEffectRef.current ||
-        !uncontrolledRef.current
-      )
-        return
-
-      // Check if interstitial is visible using direct DOM measurement
-      const interstitialElement = document.getElementById("interstitial")
-      if (!interstitialElement) return
-
-      const rect = interstitialElement.getBoundingClientRect()
-      // Consider visible when taking up significant portion of viewport
-      const isVisible = rect.top < window.innerHeight * 0.4 && rect.bottom > 0
-
-      if (isVisible && !kenBurnsActive) {
-        console.log(
-          "🔄 Direct scroll detection: Interstitial visible, starting Ken Burns immediately",
-        )
-        kenBurnsEffectRef.current.start()
-        setKenBurnsActive(true)
-      } else if (!isVisible && kenBurnsActive) {
-        console.log(
-          "🔄 Direct scroll detection: Interstitial no longer visible, stopping Ken Burns",
-        )
-        kenBurnsEffectRef.current.stop()
-
-        // Reset map to default position
-        uncontrolledRef.current.flyTo({
-          center: [longitude, latitude],
-          zoom,
-          bearing,
-          pitch,
-          duration: 800, // Faster transition when leaving section
-        })
-
-        setKenBurnsActive(false)
-      }
-    }
-
-    // Attach scroll listener for immediate response
-    window.addEventListener("scroll", handleDirectScrollCheck, {
-      passive: true,
-    })
-    // Run once immediately to check current state
-    handleDirectScrollCheck()
-
-    return () => window.removeEventListener("scroll", handleDirectScrollCheck)
-  }, [
-    kenBurnsActive,
-    kenBurnsEnabled,
-    longitude,
-    latitude,
-    zoom,
-    bearing,
-    pitch,
-    mapStore.viewState,
-  ])
-
-  // Original activation logic (can be kept as fallback)
-  useEffect(() => {
-    // Only proceed if map and effect are available
-    if (!kenBurnsEffectRef.current || !uncontrolledRef.current) return
-
-    // Destructure viewState properties to capture current values in the closure
-    // This avoids adding them as dependencies while preventing the ESLint warning
-    const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
-
-    // Use RAF to schedule animation updates outside React's render cycle
-    let rafId: number | null = null
-
-    const scheduleAnimationCheck = () => {
-      // Cancel any pending animation check
-      if (rafId) cancelAnimationFrame(rafId)
-
-      // Schedule new check with RAF, outside of React cycles
-      rafId = requestAnimationFrame(() => {
-        // Start effect when Interstitial panel becomes active
-        if (activeSection === navSectionIds.interstitial && kenBurnsEnabled) {
-          if (!kenBurnsActive) {
-            console.log(
-              "▶️ Starting Ken Burns effect - Interstitial panel in view",
-            )
-            kenBurnsEffectRef.current?.start()
-            setKenBurnsActive(true)
-          }
-        }
-        // Stop the effect for certain sections where it might be distracting
-        else if (
-          activeSection === navSectionIds.hero ||
-          activeSection === navSectionIds.combinedPanel
-        ) {
-          if (kenBurnsActive) {
-            console.log(
-              "⏸️ Stopping Ken Burns effect - Different section in view",
-            )
-            kenBurnsEffectRef.current?.stop()
-
-            // Reset map to default position when stopping the effect
-            if (uncontrolledRef.current) {
-              uncontrolledRef.current.flyTo({
-                center: [longitude, latitude],
-                zoom: zoom,
-                bearing: bearing,
-                pitch: pitch,
-                duration: 1000, // Smooth transition over 1 second
-              })
-            }
-
-            setKenBurnsActive(false)
-          }
-        }
-      })
-    }
-
-    // Run initially
-    scheduleAnimationCheck()
-
-    // Cleanup on unmount
-    return () => {
-      if (rafId) cancelAnimationFrame(rafId)
-    }
-  }, [
-    activeSection,
-    kenBurnsActive,
-    kenBurnsEnabled,
-    uncontrolledRef,
-    mapStore.viewState,
-  ])
 
   // Show drawer after content panels moved up 50% of viewport
   const [showDrawer, setShowDrawer] = useState(false)
@@ -480,6 +279,11 @@ export default function Home() {
         }}
       >
         <MapContainer uncontrolledRef={uncontrolledRef} />
+        <KenBurnsMapEffect
+          mapRef={uncontrolledRef}
+          enabled={true}
+          activeSection={activeSection}
+        />
       </Box>
 
       {/* ===== MultiDrawer with tabs ===== */}
