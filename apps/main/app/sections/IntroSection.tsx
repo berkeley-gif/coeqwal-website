@@ -348,12 +348,12 @@ const IntroSection: React.FC = () => {
 
   // Generate white background circles on initial render
   useEffect(() => {
-    // Create 25 total white circles but distribute them better to avoid clumping
+    // Create 16 total white circles with a gradient opacity effect
     const circles: WhiteCircleProps[] = [];
     
-    // For main intro section (top section) - create 24 circles in a grid pattern
-    const gridColumns = 6;
-    const gridRows = 4;
+    // For main intro section (top section) - create 15 circles in a grid pattern
+    const gridColumns = 5;
+    const gridRows = 3;
     
     for (let row = 0; row < gridRows; row++) {
       for (let col = 0; col < gridColumns; col++) {
@@ -371,10 +371,18 @@ const IntroSection: React.FC = () => {
         // Size with some variation but more controlled
         const size = 180 + Math.random() * 320;
         
-        // Opacity - vary slightly but keep most subtle
-        const opacity = (row + col) % 5 === 0
-          ? 0.18 + Math.random() * 0.12 // Slightly more visible for some strategic circles
-          : 0.05 + Math.random() * 0.12; // Subtle for most circles
+        // Opacity - gradient effect that decreases with row
+        let opacity;
+        if (row === 0) {
+          // Top row - more visible
+          opacity = 0.18 + Math.random() * 0.12;
+        } else if (row === 1) {
+          // Middle row - medium visibility
+          opacity = 0.12 + Math.random() * 0.08;
+        } else {
+          // Bottom row - subtle
+          opacity = 0.05 + Math.random() * 0.07;
+        }
         
         circles.push({ left, top, size, opacity });
       }
@@ -385,7 +393,7 @@ const IntroSection: React.FC = () => {
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
       size: 250 + Math.random() * 150,     // Medium-large size
-      opacity: 0.08                        // Very subtle
+      opacity: 0.04 + Math.random() * 0.03 // Very subtle
     });
     
     setWhiteCircles(circles);
