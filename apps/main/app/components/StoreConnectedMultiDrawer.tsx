@@ -3,7 +3,7 @@
 import React from "react"
 import { MultiDrawer } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
-import type { TabKey } from "@repo/ui"
+import type { TabKey, SecondaryNavItem } from "@repo/ui"
 
 interface StoreConnectedMultiDrawerProps {
   drawerWidth?: number
@@ -11,7 +11,8 @@ interface StoreConnectedMultiDrawerProps {
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
-  secondaryNavItems?: any[]
+  secondaryNavItems?: SecondaryNavItem[]
+  showRailButton?: boolean
 }
 
 /**
@@ -20,10 +21,7 @@ interface StoreConnectedMultiDrawerProps {
 export function StoreConnectedMultiDrawer({
   drawerWidth,
   overlay = false,
-  activeSection,
-  onSectionClick,
-  showSecondaryNav,
-  secondaryNavItems,
+  showRailButton = false,
 }: StoreConnectedMultiDrawerProps) {
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
@@ -47,6 +45,7 @@ export function StoreConnectedMultiDrawer({
       onDrawerStateChange={handleDrawerStateChange}
       overlay={overlay}
       drawerContent={content}
+      showRailButton={showRailButton}
     />
   )
 }

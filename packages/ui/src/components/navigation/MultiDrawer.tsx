@@ -107,6 +107,12 @@ export interface MultiDrawerProps {
    * Optional drawer content that can be passed to drawer components
    */
   drawerContent?: Record<string, unknown>
+
+  /**
+   * When true, displays a vertical rail button on the left side for toggling the drawer
+   * @default false
+   */
+  showRailButton?: boolean
 }
 
 // Map of tab keys to display titles
@@ -128,6 +134,7 @@ export function MultiDrawer({
   activeTab: controlledActiveTab,
   overlay = false,
   drawerContent = {},
+  showRailButton = false,
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -178,6 +185,27 @@ export function MultiDrawer({
 
   return (
     <>
+      {/* Rail button - only shown when showRailButton is true */}
+      {showRailButton && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: "50%",
+            left: 0,
+            transform: "translateY(-50%)",
+            zIndex: theme.zIndex.drawer - 1,
+          }}
+        >
+          <RailButton
+            label={tabTitles.glossary}
+            onClick={() => toggleTab("glossary")}
+            active={activeTab === "glossary"}
+            bgColor="#3F7DA2" // Slightly darker than the active color
+            hoverColor="#5195BD" // Slightly lighter than active color
+          />
+        </Box>
+      )}
+
       {/* Main drawer with glossary content */}
       <Drawer
         anchor="right"

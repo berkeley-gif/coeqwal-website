@@ -2,7 +2,6 @@
 
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { Box } from "@repo/ui/mui"
-import { HeaderHome } from "@repo/ui"
 import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
@@ -239,6 +238,7 @@ export default function Home() {
         onSectionClick={handleSectionClick}
         showSecondaryNav={false}
         secondaryNavItems={[]}
+        showRailButton={false}
       />
 
       {/* ===== Main Content Area ===== */}
