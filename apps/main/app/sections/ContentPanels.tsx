@@ -224,21 +224,16 @@ export default function ContentPanels({
                   alignSelf: "flex-start",
                 }}
               >
-                Learn Details
+                Learn
               </Typography>
               <Box>
-                <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                  This detailed panel provides in-depth information about
-                  California`&apos;`s water system and the complex journey water
-                  takes throughout the state.
-                </Typography>
                 <Typography variant="body2" color="common.white">
                   Understanding California`&apos;`s water system means
                   appreciating its geography, climate, infrastructure, and
                   policy frameworks. The state`&apos;`s water management
                   includes a complex network of reservoirs, aqueducts, and
                   groundwater basins that work together to meet environmental,
-                  agricultural, and urban needs.
+                  agricultural, and community needs.
                 </Typography>
               </Box>
             </>
@@ -265,19 +260,16 @@ export default function ContentPanels({
                   alignSelf: "flex-start",
                 }}
               >
-                Explore Details
+                Explore
               </Typography>
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                  The COEQWAL modeling tools provide unprecedented insights into
+                  The COEQWAL modeling tools can provide insights into
                   California`&apos;`s water management options under various
                   scenarios.
                 </Typography>
                 <Typography variant="body2" color="common.white">
-                  Our models incorporate decades of historical data, climate
-                  projections, water rights frameworks, infrastructure
-                  capabilities, and environmental requirements. By exploring
-                  different management approaches, users can understand
+                  By exploring different water management approaches, users can understand
                   tradeoffs between different water management strategies and
                   their impacts on communities, agriculture, and ecosystems.
                 </Typography>
@@ -306,20 +298,19 @@ export default function ContentPanels({
                   alignSelf: "flex-start",
                 }}
               >
-                Empower Details
+                Empower
               </Typography>
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
                   Informed communities can advocate effectively for water
-                  policies that meet their unique needs while respecting the
-                  larger water system.
+                  policies that meet their unique needs while staying in balance with other water needs.
                 </Typography>
                 <Typography variant="body2" color="common.white">
                   The COEQWAL project helps community members and
                   decision-makers understand the complex interrelationships in
                   California&apos;s water system. By providing accessible data
                   and visualizations, we empower stakeholders to participate
-                  meaningfully in water planning processes and advocate for
+                  in water planning processes and advocate for
                   sustainable, equitable water solutions that benefit diverse
                   communities across the state.
                 </Typography>

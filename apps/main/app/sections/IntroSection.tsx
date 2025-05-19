@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { BasePanel } from "@repo/ui"
 import { Box, Typography } from "@mui/material"
 import { motion, useMotionValue } from "@repo/motion"
@@ -144,7 +144,104 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   )
 }
 
+// List of all available images in the circular-crops directory
+const circularImages = [
+  "2.png",
+  "3.png",
+  "4.png",
+  "Untitled-1.png",
+  "DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
+  "DWR_2020_10_13_FL_Lookout_Slough-0252.jpg",
+  "DWR_2021_06_22_KG_9189_water_texture.jpg",
+  "DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
+  "DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
+  "DWR_2024_09_27_XM_0691_Native_American_Day.jpg",
+  "DWR_2025_03_11_NS_0036_Oroville_Lake_Levels.jpg",
+  "DWR_CC_salmon_underH20-5_10_15_2012.jpg",
+  "DWR_FL_Caltrans_Sign-7163.jpg"
+]
+
+// Function to generate a random value within a range
+const getRandomInRange = (min: number, max: number): number => {
+  return Math.random() * (max - min) + min
+}
+
+// Function to generate random circle configuration
+const generateRandomCircleProps = (imagePath: string, isBackground: boolean): AnimatedCircleProps => {
+  // Position the circle randomly, but keep it visible on the screen
+  const left = `${getRandomInRange(-10, 90)}%`
+  const top = `${getRandomInRange(0, 80)}%`
+  
+  // Determine z-index based on whether it's a background or foreground circle
+  const index = isBackground ? 0 : 20
+  
+  // Random size within specified range (smaller for better aesthetic)
+  const size = getRandomInRange(250, 320)
+  
+  // Generate random animation parameters
+  const freqX1 = getRandomInRange(0.03, 0.09)
+  const freqX2 = getRandomInRange(0.02, 0.08)
+  const freqY1 = getRandomInRange(0.03, 0.09)
+  const freqY2 = getRandomInRange(0.02, 0.08)
+  
+  // Random phases for more variation
+  const phaseX1 = getRandomInRange(0, 3.5)
+  const phaseX2 = getRandomInRange(0, 3.5)
+  const phaseY1 = getRandomInRange(0, 3.5)
+  const phaseY2 = getRandomInRange(0, 3.5)
+  
+  // Random amplitudes for motion
+  const amplitudeX1 = getRandomInRange(20, 50)
+  const amplitudeX2 = getRandomInRange(15, 40)
+  const amplitudeY1 = getRandomInRange(20, 45)
+  const amplitudeY2 = getRandomInRange(15, 40)
+  
+  return {
+    imagePath,
+    left,
+    top,
+    index,
+    opacity: 1,
+    size,
+    freqX1,
+    freqX2,
+    freqY1,
+    freqY2,
+    phaseX1,
+    phaseX2,
+    phaseY1,
+    phaseY2,
+    amplitudeX1,
+    amplitudeX2,
+    amplitudeY1,
+    amplitudeY2
+  }
+}
+
 const IntroSection: React.FC = () => {
+  // State to store the generated circles
+  const [backgroundCircles, setBackgroundCircles] = useState<AnimatedCircleProps[]>([])
+  const [foregroundCircles, setForegroundCircles] = useState<AnimatedCircleProps[]>([])
+  
+  // Generate circles on initial render
+  useEffect(() => {
+    // Shuffle the images array to randomize which images are used
+    const shuffledImages = [...circularImages].sort(() => Math.random() - 0.5)
+    
+    // Create 4 background circles
+    const bgCircles = shuffledImages.slice(0, 4).map(img => 
+      generateRandomCircleProps(img, true)
+    )
+    
+    // Create 4 foreground circles (using different images)
+    const fgCircles = shuffledImages.slice(4, 8).map(img => 
+      generateRandomCircleProps(img, false)
+    )
+    
+    setBackgroundCircles(bgCircles)
+    setForegroundCircles(fgCircles)
+  }, [])
+
   return (
     <BasePanel
       id="intro"
@@ -162,86 +259,9 @@ const IntroSection: React.FC = () => {
       }}
     >
       {/* Background Circles (below text) */}
-      <ImageCircle
-        imagePath="DWR_2021_06_22_KG_9189_water_texture.jpg"
-        left="-5%"
-        top="15%"
-        index={0}
-        opacity={1}
-        size={300}
-        freqX1={0.08}
-        freqX2={0.03}
-        freqY1={0.05}
-        freqY2={0.02}
-        phaseX1={0}
-        phaseX2={1.5}
-        phaseY1={2.2}
-        phaseY2={3.1}
-        amplitudeX1={50}
-        amplitudeX2={30}
-        amplitudeY1={40}
-        amplitudeY2={20}
-      />
-      <ImageCircle
-        imagePath="DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg"
-        left="65%"
-        top="10%"
-        index={0}
-        opacity={1}
-        size={280}
-        freqX1={0.06}
-        freqX2={0.02}
-        freqY1={0.04}
-        freqY2={0.07}
-        phaseX1={1.2}
-        phaseX2={3.4}
-        phaseY1={0.5}
-        phaseY2={2.7}
-        amplitudeX1={30}
-        amplitudeX2={20}
-        amplitudeY1={35}
-        amplitudeY2={15}
-      />
-      <ImageCircle
-        imagePath="DWR_2025_03_11_NS_0036_Oroville_Lake_Levels.jpg"
-        left="20%"
-        top="60%"
-        index={0}
-        opacity={1}
-        size={290}
-        freqX1={0.05}
-        freqX2={0.09}
-        freqY1={0.03}
-        freqY2={0.06}
-        phaseX1={2.1}
-        phaseX2={0.8}
-        phaseY1={3.0}
-        phaseY2={1.4}
-        amplitudeX1={40}
-        amplitudeX2={25}
-        amplitudeY1={30}
-        amplitudeY2={35}
-      />
-      <ImageCircle
-        imagePath="DBK_Yuba_River_aerials_0346_05_14_2009.jpg"
-        left="85%"
-        top="25%"
-        index={0}
-        opacity={1}
-        size={260}
-        freqX1={0.04}
-        freqX2={0.075}
-        freqY1={0.06}
-        freqY2={0.03}
-        phaseX1={3.5}
-        phaseX2={2.3}
-        phaseY1={1.7}
-        phaseY2={0.6}
-        amplitudeX1={45}
-        amplitudeX2={15}
-        amplitudeY1={25}
-        amplitudeY2={40}
-      />
+      {backgroundCircles.map((circle, index) => (
+        <ImageCircle key={`bg-circle-${index}`} {...circle} />
+      ))}
 
       {/* Text content on top of background circles */}
       <Box
@@ -298,86 +318,9 @@ const IntroSection: React.FC = () => {
       </Box>
 
       {/* Foreground Circles (above text) */}
-      <ImageCircle
-        imagePath="DWR_CC_salmon_underH20-5_10_15_2012.jpg"
-        left="75%"
-        top="65%"
-        index={20}
-        opacity={1}
-        size={270}
-        freqX1={0.045}
-        freqX2={0.085}
-        freqY1={0.07}
-        freqY2={0.04}
-        phaseX1={1.9}
-        phaseX2={3.2}
-        phaseY1={0.7}
-        phaseY2={2.5}
-        amplitudeX1={35}
-        amplitudeX2={25}
-        amplitudeY1={45}
-        amplitudeY2={20}
-      />
-      <ImageCircle
-        imagePath="DWR_2020_10_13_FL_Lookout_Slough-0252.jpg"
-        left="40%"
-        top="30%"
-        index={20}
-        opacity={1}
-        size={310}
-        freqX1={0.065}
-        freqX2={0.035}
-        freqY1={0.08}
-        freqY2={0.05}
-        phaseX1={2.8}
-        phaseX2={0.9}
-        phaseY1={3.6}
-        phaseY2={1.3}
-        amplitudeX1={20}
-        amplitudeX2={40}
-        amplitudeY1={30}
-        amplitudeY2={25}
-      />
-      <ImageCircle
-        imagePath="DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg"
-        left="15%"
-        top="80%"
-        index={20}
-        opacity={1}
-        size={290}
-        freqX1={0.055}
-        freqX2={0.025}
-        freqY1={0.09}
-        freqY2={0.045}
-        phaseX1={0.4}
-        phaseX2={2.6}
-        phaseY1={1.8}
-        phaseY2={3.3}
-        amplitudeX1={45}
-        amplitudeX2={20}
-        amplitudeY1={25}
-        amplitudeY2={30}
-      />
-      <ImageCircle
-        imagePath="DWR_FL_Caltrans_Sign-7163.jpg"
-        left="50%"
-        top="5%"
-        index={20}
-        opacity={1}
-        size={250}
-        freqX1={0.035}
-        freqX2={0.065}
-        freqY1={0.055}
-        freqY2={0.08}
-        phaseX1={3.7}
-        phaseX2={1.1}
-        phaseY1={2.4}
-        phaseY2={0.3}
-        amplitudeX1={25}
-        amplitudeX2={35}
-        amplitudeY1={20}
-        amplitudeY2={40}
-      />
+      {foregroundCircles.map((circle, index) => (
+        <ImageCircle key={`fg-circle-${index}`} {...circle} />
+      ))}
     </BasePanel>
   )
 }
