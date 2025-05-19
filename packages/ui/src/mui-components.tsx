@@ -79,6 +79,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 
 // Export individually imported icons
 export {
@@ -107,6 +108,7 @@ export {
   CloseIcon,
   ArrowRightIcon,
   FiberManualRecordIcon,
+  PlayArrowIcon,
 }
 
 // Export the full icons library for access to other icons as needed

@@ -127,7 +127,6 @@ const MotionCircle: React.FC<AnimatedCircleProps> = ({
 }
 
 const IntroSection: React.FC = () => {
-
   return (
     <BasePanel
       id="intro"
