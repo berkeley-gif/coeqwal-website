@@ -91,9 +91,6 @@ export default function Home() {
     })
   }, [uncontrolledRef, mapStore.viewState])
 
-  // pull the values out once, so eslint can track them
-  const { longitude, latitude, zoom, bearing, pitch } = mapStore.viewState
-
   // Show drawer after content panels moved up 50% of viewport
   const [showDrawer, setShowDrawer] = useState(false)
 

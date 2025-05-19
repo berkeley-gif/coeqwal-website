@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react"
 import { BasePanel } from "@repo/ui"
-import { Box, Typography, useTheme } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import { motion, useMotionValue } from "@repo/motion"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
@@ -127,7 +127,6 @@ const MotionCircle: React.FC<AnimatedCircleProps> = ({
 }
 
 const IntroSection: React.FC = () => {
-  const theme = useTheme()
 
   return (
     <BasePanel
