@@ -107,12 +107,6 @@ export interface MultiDrawerProps {
    * Optional drawer content that can be passed to drawer components
    */
   drawerContent?: Record<string, unknown>
-
-  /**
-   * Controls visibility of the rail+drawer from parent (used for scroll fade).
-   * If omitted, component is always visible.
-   */
-  visible?: boolean
 }
 
 // Map of tab keys to display titles
@@ -134,7 +128,6 @@ export function MultiDrawer({
   activeTab: controlledActiveTab,
   overlay = false,
   drawerContent = {},
-  visible = true,
 }: MultiDrawerProps) {
   const theme = useTheme()
 

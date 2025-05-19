@@ -21,8 +21,8 @@ import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
 import { useMapStore, mapActions } from "@repo/state/map"
+import { StoreConnectedHeader } from "./components/StoreConnectedHeader"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
-import { Slide } from "@mui/material"
 import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
 
 // Make sure these IDs match the section IDs used in the HeaderHome component
@@ -73,9 +73,6 @@ export default function Home() {
     })
   }, []) // Empty dependency array ensures this runs once before component mounts
 
-  // Keep our own reference to the Ken Burns effect for cleanup
-  // const kenBurnsEffectRef = useRef<KenBurnsMapEffect | null>(null)
-
   // Ensure map starts in the correct position
   useEffect(() => {
     if (!uncontrolledRef.current) return
@@ -91,35 +88,12 @@ export default function Home() {
     })
   }, [uncontrolledRef, mapStore.viewState])
 
-  // Show drawer after content panels moved up 50% of viewport
-  const [showDrawer, setShowDrawer] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const elem = document.getElementById("content-panels")
-      if (!elem) return
-      const rect = elem.getBoundingClientRect()
-      const threshold = window.innerHeight * 0.5
-      setShowDrawer(rect.top < threshold)
-    }
-    handleScroll()
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
     scrollToSection(sectionId)
     // Close drawer through the store
     closeDrawer()
   }
-
-  // Get navigation items with the current active section and translation function
-  // const navigationItems = getNavigationItems(
-  //   activeSection,
-  //   handleSectionClick,
-  //   t,
-  // )
 
   // Handler to open specific drawer tabs - using the store
   const handleOpenThemesDrawer = (operationId?: string) => {
@@ -230,40 +204,14 @@ export default function Home() {
     setActiveDrawerTab("glossary")
   }
 
-  // Create the secondary navigation items
-  // const secondaryNavItems = useMemo<SecondaryNavItem[]>(
-  //   () => [
-  //     {
-  //       key: "home",
-  //       label: "HOME",
-  //       sectionId: "hero",
-  //     },
-  //     {
-  //       key: "californiaWater",
-  //       label: "California Water",
-  //       sectionId: "california-water",
-  //     },
-  //     {
-  //       key: "managingWater",
-  //       label: "MANAGING WATER",
-  //       sectionId: "managing-water",
-  //     },
-  //     {
-  //       key: "explore",
-  //       label: "EXPLORE SCENARIOS",
-  //       sectionId: "invitation",
-  //     },
-  //     {
-  //       key: "scenarioSearch",
-  //       label: "SCENARIO SEARCH",
-  //       sectionId: "combined-panel",
-  //     },
-  //   ],
-  //   [],
-  // )
-
   return (
     <>
+      {/* Always visible header */}
+      <StoreConnectedHeader
+        activeSection={activeSection}
+        onSectionClick={handleSectionClick}
+      />
+
       {/* ===== Background Map Layer ===== */}
       <Box
         sx={{
@@ -283,20 +231,15 @@ export default function Home() {
         />
       </Box>
 
-      {/* ===== MultiDrawer with tabs ===== */}
-      <Slide in={showDrawer} timeout={600} mountOnEnter unmountOnExit>
-        <Box>
-          <StoreConnectedMultiDrawer
-            drawerWidth={360}
-            overlay={true}
-            visible={showDrawer}
-            activeSection={activeSection}
-            onSectionClick={handleSectionClick}
-            showSecondaryNav={false}
-            secondaryNavItems={[]}
-          />
-        </Box>
-      </Slide>
+      {/* ===== MultiDrawer - Always visible ===== */}
+      <StoreConnectedMultiDrawer
+        drawerWidth={360}
+        overlay={true}
+        activeSection={activeSection}
+        onSectionClick={handleSectionClick}
+        showSecondaryNav={false}
+        secondaryNavItems={[]}
+      />
 
       {/* ===== Main Content Area ===== */}
       <Box
