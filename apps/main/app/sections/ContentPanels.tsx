@@ -182,10 +182,6 @@ export default function ContentPanels({
           overflow: "visible",
           width: "100%", // Same width as parent
         },
-        // Custom styling for panel containers
-        "& > div > div": {
-          marginBottom: 0, // Remove any margin between panel containers
-        },
       }}
     >
       <Box
@@ -371,15 +367,36 @@ function PanelWithDetail({
     }
   }, [])
 
+  // Update container height when detail panel becomes active
+  useEffect(() => {
+    if (!isActive || !detailRef.current || !panelRef.current) return
+
+    // Get heights of both panels
+    const detailHeight = detailRef.current.offsetHeight
+    const mainHeight = panelRef.current.offsetHeight
+
+    // Use the taller of the two panels
+    const newHeight = Math.max(detailHeight, mainHeight)
+    setContainerHeight(`${newHeight}px`)
+
+    // Cleanup - reset to main panel height when detail becomes inactive
+    return () => {
+      if (panelRef.current) {
+        setContainerHeight(`${panelRef.current.offsetHeight}px`)
+      }
+    }
+  }, [isActive])
+
   return (
     <Box
       className={isActive ? "active-panel-container" : ""}
       sx={{
         position: "relative",
         width: "100%", // Keep container at 100% width
-        overflow: "hidden", // Hide overflow on the container
-        height: containerHeight, // Fixed height to prevent content shifting
+        overflow: isActive ? "visible" : "hidden", // Allow overflow when panel is active
+        height: containerHeight, // Dynamic height based on content
         zIndex: isActive ? 1000 : 1, // Much higher z-index when active
+        transition: "height 0.4s ease-in-out", // Smooth height transition
       }}
     >
       {/* Main panel */}
@@ -396,9 +413,9 @@ function PanelWithDetail({
           x: isActive ? "-100%" : "0%", // Slide left when active
         }}
         transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
+          type: "tween", // Use tween instead of spring for no bounce
+          duration: 0.4, // Duration in seconds
+          ease: "easeInOut", // Smooth acceleration and deceleration
         }}
       >
         {/* Main Panel */}
@@ -501,9 +518,9 @@ function PanelWithDetail({
           x: isActive ? "-100%" : "0%", // Slide left when active
         }}
         transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
+          type: "tween", // Use tween instead of spring for no bounce
+          duration: 0.4, // Duration in seconds
+          ease: "easeInOut", // Smooth acceleration and deceleration
         }}
       >
         {/* Detail Panel */}
