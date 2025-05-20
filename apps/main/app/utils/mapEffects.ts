@@ -297,3 +297,4 @@ export function createHeroKenBurnsEffect(
 
   return effect
 }
+ 

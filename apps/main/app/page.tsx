@@ -288,7 +288,7 @@ export default function Home() {
             <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
 
-          {/* California Water panel with two columns */}
+          California Water panel with two columns
           <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Managing Water panel with two columns */}

@@ -628,24 +628,24 @@ function PanelWithDetail({
             position: "relative", // For absolute positioning of icons
             borderRadius: 0, // No border radius
             userSelect: "text", // Ensure text is selectable
-          }}
-        >
-          <Grid container spacing={6} alignItems="flex-start">
-            <Grid
-              size={{ xs: 12, md: 4 }}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "flex-start",
-                pt: 0,
+        }}
+      >
+        <Grid container spacing={6} alignItems="flex-start">
+          <Grid
+            size={{ xs: 12, md: 4 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 0,
                 pointerEvents: "auto",
-              }}
-            >
+            }}
+          >
               {title}
-            </Grid>
-            <Grid
-              size={{ xs: 12, md: 8 }}
+          </Grid>
+          <Grid
+            size={{ xs: 12, md: 8 }}
               sx={{ 
                 display: "flex", 
                 alignItems: "flex-start",
@@ -659,7 +659,7 @@ function PanelWithDetail({
           {/* Right centered play icon */}
           <IconButton
             onClick={onToggleDetail}
-            sx={{
+        sx={{
               position: "absolute",
               right: 30,
               top: "50%",
@@ -703,7 +703,7 @@ function PanelWithDetail({
               />
             </IconButton>
           </Box>
-        </BasePanel>
+      </BasePanel>
       </motion.div>
 
       {/* Detail panel - positioned absolutely, outside viewport initially */}
@@ -740,17 +740,17 @@ function PanelWithDetail({
             position: "relative",
             borderRadius: 0, // No border radius
             userSelect: "text", // Ensure text is selectable
-          }}
-        >
-          <Grid container spacing={6} alignItems="flex-start">
-            <Grid
+        }}
+      >
+        <Grid container spacing={6} alignItems="flex-start">
+          <Grid
               size={{ xs: 12, md: 10 }}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "flex-start",
-                pt: 0,
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "flex-start",
+              pt: 0,
                 pointerEvents: "auto",
               }}
             >
@@ -805,7 +805,7 @@ function PanelWithDetail({
               />
             </IconButton>
           </Box>
-        </BasePanel>
+      </BasePanel>
       </motion.div>
     </Box>
   )
