@@ -180,7 +180,7 @@ const circlePositions = {
   // Background circles (appear behind text)
   background: [
     { left: "25%", top: "10%" },
-    { left: "40%", top: "15%" },
+    { left: "40%", top: "5%" },
     { left: "60%", top: "15%" },
     { left: "80%", top: "10%" },
     { left: "50%", top: "45%" },
@@ -575,7 +575,7 @@ const IntroSection: React.FC = () => {
         background: "linear-gradient(to bottom, #218dba, #218dba, #459ede)",
         backgroundSize: "100% 100%",
         width: "100%",
-        overflow: "visible",
+        overflow: "hidden",
       }}
     >
       {/* Background images */}
@@ -600,8 +600,8 @@ const IntroSection: React.FC = () => {
             position: "absolute",
             bottom: 0,
             left: 0,
-            width: "75%",
-            height: "150%",
+            width: "60%",
+            height: "130%", // Set to a reasonable percentage of viewport height
             transform: "translateX(-16.67%)",
           }}
         >
@@ -625,9 +625,9 @@ const IntroSection: React.FC = () => {
             position: "absolute",
             bottom: 0,
             right: 0,
-            width: "75%",
-            height: "150%",
-            transform: "translateX(16.67%)",
+            width: "60%", 
+            height: "130%", // Set to a reasonable percentage of viewport height
+            transform: "translateX(5%)",
           }}
         >
           <Image
@@ -650,11 +650,11 @@ const IntroSection: React.FC = () => {
             position: "fixed",
             top: "50vh",
             left: 0,
-            width: "150%",
-            height: "75%",
+            width: "100%",
+            height: "65%",
             zIndex: 20,
             pointerEvents: "none",
-            transform: "translateX(-16.67%)",
+            transform: "translateX(0)",
           }}
         >
           <Image
@@ -663,7 +663,7 @@ const IntroSection: React.FC = () => {
             fill
             quality={100}
             priority
-            sizes="150vw"
+            sizes="100vw"
             style={{
               objectFit: "contain",
               objectPosition: "center",
@@ -716,13 +716,14 @@ const IntroSection: React.FC = () => {
             ml: { xs: 3, md: 6 },
             position: "relative",
             zIndex: 10, // Higher z-index for text
+            mt: { xs: 6, md: 12 }, // Hack: dd top margin to push the text content down
           }}
         >
           <Typography
             variant="h1"
             sx={{
               color: "white",
-              mb: 4, // 32px spacing
+              mb: 3, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
@@ -740,8 +741,8 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "white",
-              mb: 4, // 32px spacing
-              fontSize: "108px",
+              mb: 3,
+              fontSize: "100px",
               fontWeight: 600,
               lineHeight: 0.8,
               // textShadow:
@@ -759,7 +760,7 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "white",
               mb: 4, // 32px spacing
-              fontSize: "108px",
+              fontSize: "100px",
               fontWeight: 600,
               lineHeight: 0.8,
               // textShadow:
@@ -777,7 +778,7 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "white",
               mt: 2, // 16px top margin
-              fontSize: "62px",
+              fontSize: "56px",
               fontWeight: 500,
               lineHeight: 0.8,
               // textShadow:
@@ -794,9 +795,8 @@ const IntroSection: React.FC = () => {
             variant="body2"
             sx={{
               color: "white",
-              fontSize: "20px",
               mt: 3,
-              maxWidth: "400px",
+              maxWidth: "500px",
             }}
           >
             Explore California&apos;s water system and discover
@@ -809,7 +809,7 @@ const IntroSection: React.FC = () => {
             sx={{
               display: "flex",
               justifyContent: "center",
-              width: "400px",
+              width: "500px",
               mt: 0,
             }}
           >
@@ -865,6 +865,7 @@ const IntroSection: React.FC = () => {
           position: "relative",
           backgroundColor: "transparent", // No background image here anymore since it's on the parent
           minHeight: "100vh",
+          paddingTop: "500px", // Add substantial top padding to create more space
         }}
       >
         {/* Content container for proper blending context */}
@@ -882,34 +883,28 @@ const IntroSection: React.FC = () => {
             sx={{
               position: "relative",
               zIndex: 10,
-              backgroundColor: "transparent",
-              padding: 3,
-              borderRadius: 2,
-              "& .blend-text": {
-                color: (theme) => theme.palette.primary.dark,
-                textShadow: "0 0 10px rgba(0,0,0,0.1)",
-              },
+              mb: 20
             }}
           >
             <Stack spacing={4}>
               <Typography
                 variant="h2"
-                className="blend-text"
                 sx={{
                   fontWeight: 500,
+                  color: "white",
                 }}
               >
                 What is California&apos;s water future?
               </Typography>
-              <Typography variant="body2" className="blend-text">
+              <Typography variant="body2" color="white">
                 {t("interstitial.part1")}
               </Typography>
-              <Typography variant="body2" className="blend-text">
+              <Typography variant="body2" color="white">
                 {t("interstitial.part2")}
               </Typography>
-              <Typography variant="body2" className="blend-text">
+              {/* <Typography variant="body2" color="white">
                 {t("interstitial.part3")}
-              </Typography>
+              </Typography> */}
             </Stack>
           </Box>
         </Box>
