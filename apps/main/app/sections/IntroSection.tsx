@@ -940,46 +940,52 @@ const IntroSection: React.FC = () => {
                   })}
               </Typography>
               <Typography variant="body2" color="white">
-                {t("interstitial.part2")
-                  .split("scenarios")
-                  .map((part, i, array) => {
-                    // If this is the last part, no need to add the highlighted word
-                    if (i === array.length - 1) return part
+                {(() => {
+                  const text = t("interstitial.part2")
+                  const scenariosIndex = text.indexOf("scenarios")
 
-                    return (
-                      <React.Fragment key={i}>
-                        {part}
-                        <Box
-                          component="span"
-                          sx={{
-                            backgroundColor: "#257dbd", // Same as conveyance background
-                            color: "white",
-                            px: 1,
-                            py: 0.3,
-                            mx: 0.1,
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative", // Add explicit position
-                            "&:hover": {
-                              backgroundColor: "#13629b", // Same hover color as conveyance
-                            },
-                          }}
-                          onClick={() => {
-                            // Open glossary drawer with Water scenarios term
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: "Water scenarios",
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          scenarios
-                        </Box>
-                      </React.Fragment>
-                    )
-                  })}
+                  // If "scenarios" is not found, return the original text
+                  if (scenariosIndex === -1) return text
+
+                  // Split into three parts: before, the word itself, and after
+                  const beforeText = text.substring(0, scenariosIndex)
+                  const afterText = text.substring(scenariosIndex + 9) // 9 is length of "scenarios"
+
+                  return (
+                    <>
+                      {beforeText}
+                      <Box
+                        component="span"
+                        sx={{
+                          backgroundColor: "#257dbd", // Same as conveyance background
+                          color: "white",
+                          px: 1,
+                          py: 0.3,
+                          mx: 0.1,
+                          borderRadius: 1,
+                          cursor: "pointer",
+                          display: "inline-block",
+                          position: "relative", // Add explicit position
+                          "&:hover": {
+                            backgroundColor: "#13629b", // Same hover color as conveyance
+                          },
+                        }}
+                        onClick={() => {
+                          // Open glossary drawer with Water scenarios term
+                          const drawerStore = useDrawerStore.getState()
+                          drawerStore.setDrawerContent({
+                            selectedSection: "glossary",
+                            selectedTerm: "Water scenarios",
+                          })
+                          drawerStore.openDrawer("glossary")
+                        }}
+                      >
+                        scenarios
+                      </Box>
+                      {afterText}
+                    </>
+                  )
+                })()}
               </Typography>
               {/* <Typography variant="body2" color="white">
                 {t("interstitial.part3")}
