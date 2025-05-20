@@ -1,7 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Drawer, useTheme, Typography, Fade } from "@mui/material"
+import {
+  Box,
+  Drawer,
+  useTheme,
+  Typography,
+  Fade,
+  IconButton,
+} from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
 
 // Content components
 import { CurrentOpsContent } from "./drawer-content"
@@ -245,11 +253,24 @@ export function MultiDrawer({
                     background: "linear-gradient(to right, #FFAC6E, #60aacb)",
                     color: theme.palette.common.white,
                     padding: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
                   <Typography variant="h5" sx={{ fontWeight: 500 }}>
                     {tabTitles.glossary}
                   </Typography>
+                  <IconButton
+                    onClick={close}
+                    size="small"
+                    aria-label="close drawer"
+                    sx={{
+                      color: theme.palette.common.white,
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
                 </Box>
                 <Box
                   sx={{
@@ -263,6 +284,9 @@ export function MultiDrawer({
                     onClose={close}
                     selectedSection={
                       drawerContent.selectedSection as string | undefined
+                    }
+                    selectedTerm={
+                      drawerContent.selectedTerm as string | undefined
                     }
                   />
                 </Box>

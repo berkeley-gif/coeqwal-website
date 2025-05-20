@@ -15,12 +15,15 @@ import {
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance"
 import CompareIcon from "@mui/icons-material/Compare"
 import Psychology from "@mui/icons-material/Psychology"
+import React from "react"
 
 export interface CurrentOpsContentProps {
   /** Function called when the close button is clicked */
   onClose: () => void
   /** Selected section ID passed from the drawer store */
   selectedSection?: string
+  /** Selected term to scroll to */
+  selectedTerm?: string
 }
 
 // Glossary term type definition
@@ -105,8 +108,22 @@ const glossaryTerms: GlossaryTerm[] = [
 /**
  * Content component for the Glossary tab in the MultiDrawer
  */
-export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
+export function CurrentOpsContent({
+  onClose,
+  selectedTerm,
+}: CurrentOpsContentProps) {
   const theme = useTheme()
+  const termRefs = React.useRef<Record<string, HTMLDivElement | null>>({})
+
+  // Scroll to selected term when the component mounts or selectedTerm changes
+  React.useEffect(() => {
+    if (selectedTerm && termRefs.current[selectedTerm]) {
+      termRefs.current[selectedTerm]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }, [selectedTerm])
 
   return (
     <ContentWrapper title="Glossary" onClose={onClose}>
@@ -131,7 +148,25 @@ export function CurrentOpsContent({ onClose }: CurrentOpsContentProps) {
 
         <Stack spacing={3}>
           {glossaryTerms.map((term, index) => (
-            <Box key={index}>
+            <Box
+              key={index}
+              ref={(el) => {
+                // Store reference to the term's DOM element
+                termRefs.current[term.term] = el as HTMLDivElement | null
+              }}
+              sx={
+                selectedTerm === term.term
+                  ? {
+                      scrollMarginTop: "20px",
+                      backgroundColor: "rgba(255, 172, 110, 0.1)",
+                      p: 2,
+                      borderRadius: 2,
+                      border: "1px solid rgba(255, 172, 110, 0.3)",
+                      transition: "background-color 0.3s ease",
+                    }
+                  : {}
+              }
+            >
               <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
                 <Box
                   sx={{

@@ -1,8 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, IconButton, useTheme } from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close"
+import { Box, useTheme } from "@mui/material"
 
 export interface ContentWrapperProps {
   /** Title displayed at the top of the content section */
@@ -19,9 +18,9 @@ export interface ContentWrapperProps {
 
 /**
  * Wrapper component for drawer content sections
- * Provides consistent styling and a close button
+ * Provides consistent styling without a close button (now in drawer header)
  */
-export function ContentWrapper({ children, onClose }: ContentWrapperProps) {
+export function ContentWrapper({ children }: ContentWrapperProps) {
   const theme = useTheme()
 
   return (
@@ -29,16 +28,6 @@ export function ContentWrapper({ children, onClose }: ContentWrapperProps) {
       className="drawer-content-wrapper"
       sx={theme.mixins.drawerContent.contentWrapper}
     >
-      <Box sx={theme.mixins.drawerContent.headerBox}>
-        <IconButton
-          onClick={onClose}
-          size="small"
-          aria-label="close"
-          sx={theme.mixins.drawerContent.closeButton}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </Box>
       {children}
     </Box>
   )

@@ -5,6 +5,7 @@ import { motion, useMotionValue } from "@repo/motion"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import { useDrawerStore } from "@repo/state"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
@@ -625,7 +626,7 @@ const IntroSection: React.FC = () => {
             position: "absolute",
             bottom: 0,
             right: 0,
-            width: "60%", 
+            width: "60%",
             height: "130%", // Set to a reasonable percentage of viewport height
             transform: "translateX(5%)",
           }}
@@ -788,7 +789,7 @@ const IntroSection: React.FC = () => {
             }}
             className="inter-font"
           >
-            Rethink California Water.
+            Rethink California Water
           </Typography>
 
           <Typography
@@ -883,7 +884,7 @@ const IntroSection: React.FC = () => {
             sx={{
               position: "relative",
               zIndex: 10,
-              mb: 20
+              mb: 20,
             }}
           >
             <Stack spacing={4}>
@@ -897,7 +898,46 @@ const IntroSection: React.FC = () => {
                 What is California&apos;s water future?
               </Typography>
               <Typography variant="body2" color="white">
-                {t("interstitial.part1")}
+                {t("interstitial.part1")
+                  .split("conveyance")
+                  .map((part, i, array) => {
+                    // If this is the last part, no need to add the highlighted word
+                    if (i === array.length - 1) return part
+
+                    return (
+                      <React.Fragment key={i}>
+                        {part}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative", // Add explicit position
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with conveyance term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Conveyance",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          conveyance
+                        </Box>
+                      </React.Fragment>
+                    )
+                  })}
               </Typography>
               <Typography variant="body2" color="white">
                 {t("interstitial.part2")}
