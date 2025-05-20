@@ -240,7 +240,7 @@ export default function Home() {
           width: "100%",
           height: "100%",
           zIndex: -1,
-          background: "#218dba", /* Changed from gradient to solid sky blue */
+          background: "#218dba" /* Changed from gradient to solid sky blue */,
           backgroundSize: "100% 100%",
         }}
       />

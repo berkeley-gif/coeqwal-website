@@ -82,11 +82,13 @@ export const OPERATION_CARDS = () => [
     term: "current operations",
     bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
     titleColor: WATER_PALETTE.currentOperations.secondary,
+    isSingular: false, // plural - use "do"
     subOptions: [
       {
         id: "use-as-comparison",
         label: "Use as comparison",
         term: "current operations",
+        isSingular: false, // plural - use "do"
       },
     ],
   },
@@ -110,27 +112,32 @@ export const OPERATION_CARDS = () => [
     term: "limiting groundwater pumping",
     bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
     titleColor: WATER_PALETTE.groundwaterManagement.secondary,
+    isSingular: true, // singular - use "does"
     subOptions: [
       {
         id: "sjv-only",
         label: "...in the San Joaquin Valley only",
         term: "SJV groundwater limits",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "both-valleys",
         label: "...in both the Sacramento and San Joaquin Valleys",
         term: "valley-wide groundwater limits",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "sjv-reduced-acreage",
         label: "...in the San Joaquin Valley and reduced agricultural acreage",
         term: "SJV groundwater & acreage limits",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "both-valleys-reduced-acreage",
         label:
           "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
         term: "valley-wide groundwater & acreage limits",
+        isSingular: false, // singular - use "does"
       },
     ],
   },
@@ -140,34 +147,40 @@ export const OPERATION_CARDS = () => [
     term: "changing stream flows",
     bullet: { color: WATER_PALETTE.streamFlowManagement.primary, size: 24 },
     titleColor: WATER_PALETTE.streamFlowManagement.secondary,
+    isSingular: true, // singular - use "does"
     subOptions: [
       {
         id: "no-environmental-flows",
         label: "...with no environmental flow requirements",
         term: "no environmental flows",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "functional-flows-balance",
         label:
           "...with functional flows to balance water needs with ecosystem support",
         term: "balanced functional flows",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "functional-flows-reduced",
         label:
           "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
         term: "reduced ag & functional flows",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "enhanced-functional-flows-salmon",
         label: "...with enhanced functional flows to support salmon",
         term: "salmon-enhancing flows",
+        isSingular: false, // singular - use "does"
       },
       {
         id: "enhanced-functional-flows-salmon-reduced",
         label:
           "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
         term: "reduced ag & salmon-enhancing flows",
+        isSingular: false, // singular - use "does"
       },
     ],
   },
@@ -177,28 +190,33 @@ export const OPERATION_CARDS = () => [
     term: "prioritizing drinking water",
     bullet: { color: WATER_PALETTE.urbanWaterPriorities.primary, size: 24 },
     titleColor: WATER_PALETTE.urbanWaterPriorities.secondary,
+    isSingular: true, // singular - use "does"
     subOptions: [
       {
         id: "adjust-urban-demand",
         label: "...by adjusting urban demand patterns",
         term: "adjusted urban demand",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "prioritize-impacted-communities",
         label:
           "...by prioritizing drinking water for the most impacted communities",
         term: "impacted communities priority",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "prioritize-underserved-communities",
         label:
           "...by prioritizing drinking water for all historically-underserved communities",
         term: "underserved communities priority",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "prioritize-all-communities",
         label: "...for all communities across the system",
         term: "all communities priority",
+        isSingular: true, // singular - use "does"
       },
     ],
   },
@@ -208,31 +226,37 @@ export const OPERATION_CARDS = () => [
     term: "balancing Delta water uses",
     bullet: { color: WATER_PALETTE.deltaBalance.primary, size: 24 },
     titleColor: WATER_PALETTE.deltaBalance.secondary,
+    isSingular: true, // singular - use "does"
     subOptions: [
       {
         id: "delta-outflows-tier1",
         label: "...by increasing Delta outflows",
         term: "increasing Delta outflows",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "reduce-sacramento-valley-deliveries",
         label: "...by reducing Sacramento Valley deliveries",
         term: "reduced Sacramento deliveries",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "more-carryover-storage-shasta",
         label: "...by requiring more carryover storage in Shasta Reservoir",
         term: "more Shasta carryover",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "less-carryover-storage-shasta",
         label: "...by allowing less carryover storage in Shasta Reservoir",
         term: "less Shasta carryover",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "reduce-delta-exports-tier1",
         label: "...by reducing Delta exports",
         term: "reducingDelta exports",
+        isSingular: true, // singular - use "does"
       },
     ],
   },
@@ -242,23 +266,88 @@ export const OPERATION_CARDS = () => [
     term: "adding infrastructure",
     bullet: { color: WATER_PALETTE.infrastructure.primary, size: 24 },
     titleColor: WATER_PALETTE.infrastructure.secondary,
+    isSingular: true, // singular - use "does"
     subOptions: [
       {
         id: "delta-conveyance-tunnel",
         label: "...Delta conveyance tunnel",
         term: "Delta tunnel",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "delta-conveyance-reduced-groundwater",
         label:
           "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
         term: "Delta tunnel & reduced pumping",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "delta-conveyance-functional-flows",
         label: "...Delta conveyance with functional flows",
         term: "Delta tunnel & functional flows",
+        isSingular: true, // singular - use "does"
       },
+    ],
+  },
+]
+
+// Also export a standalone version that doesn't require calling the function
+// This helps avoid circular dependencies
+export const OPERATION_CARD_DEFINITIONS = [
+  {
+    id: "current-operations",
+    isSingular: false,
+    subOptions: [{ id: "use-as-comparison", isSingular: false }],
+  },
+  {
+    id: "limit-groundwater",
+    isSingular: true,
+    subOptions: [
+      { id: "sjv-only", isSingular: false },
+      { id: "both-valleys", isSingular: false },
+      { id: "sjv-reduced-acreage", isSingular: false },
+      { id: "both-valleys-reduced-acreage", isSingular: false },
+    ],
+  },
+  {
+    id: "change-stream-flows",
+    isSingular: true,
+    subOptions: [
+      { id: "no-environmental-flows", isSingular: false },
+      { id: "functional-flows-balance", isSingular: false },
+      { id: "functional-flows-reduced", isSingular: false },
+      { id: "enhanced-functional-flows-salmon", isSingular: false },
+      { id: "enhanced-functional-flows-salmon-reduced", isSingular: false },
+    ],
+  },
+  {
+    id: "prioritize-drinking-water",
+    isSingular: true,
+    subOptions: [
+      { id: "adjust-urban-demand", isSingular: true },
+      { id: "prioritize-impacted-communities", isSingular: true },
+      { id: "prioritize-underserved-communities", isSingular: true },
+      { id: "prioritize-all-communities", isSingular: true },
+    ],
+  },
+  {
+    id: "balance-delta-uses",
+    isSingular: true,
+    subOptions: [
+      { id: "delta-outflows-tier1", isSingular: true },
+      { id: "reduce-sacramento-valley-deliveries", isSingular: true },
+      { id: "more-carryover-storage-shasta", isSingular: true },
+      { id: "less-carryover-storage-shasta", isSingular: true },
+      { id: "reduce-delta-exports-tier1", isSingular: true },
+    ],
+  },
+  {
+    id: "new-infrastructure",
+    isSingular: true,
+    subOptions: [
+      { id: "delta-conveyance-tunnel", isSingular: true },
+      { id: "delta-conveyance-reduced-groundwater", isSingular: true },
+      { id: "delta-conveyance-functional-flows", isSingular: true },
     ],
   },
 ]

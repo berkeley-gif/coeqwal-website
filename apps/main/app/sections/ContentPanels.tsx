@@ -533,11 +533,11 @@ export default function ContentPanels({
                       Understanding today&apos;s water system operations
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Explore how California&apos;s water system currently operates
-                      under existing policies, regulations, and infrastructure
-                      constraints. This baseline scenario shows water
-                      deliveries, environmental flows, and system outcomes under
-                      current management practices.
+                      Explore how California&apos;s water system currently
+                      operates under existing policies, regulations, and
+                      infrastructure constraints. This baseline scenario shows
+                      water deliveries, environmental flows, and system outcomes
+                      under current management practices.
                     </Typography>
                     <Box
                       sx={{

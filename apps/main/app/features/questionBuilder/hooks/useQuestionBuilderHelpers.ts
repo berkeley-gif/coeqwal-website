@@ -5,11 +5,12 @@ import {
   useQuestionBuilder,
   questionBuilderActions,
 } from "../context/QuestionBuilderContext"
-import { OPERATION_THEMES } from "../data/constants"
+import { OPERATION_CARD_DEFINITIONS } from "../components/OperationsSelector"
 import {
   CANONICAL_OUTCOME_TYPES,
   CANONICAL_REGIONS,
   OUTCOME_CATEGORIES,
+  OPERATION_THEMES,
 } from "../data/constants"
 import { useTranslation } from "@repo/i18n"
 
@@ -468,26 +469,19 @@ export const useQuestionBuilderHelpers = () => {
 
   // Get operation's grammatical number (singular/plural)
   const isOperationSingular = useCallback((operationId: string) => {
-    // Find the operation in OPERATION_THEMES
-    for (const theme of OPERATION_THEMES) {
-      for (const option of theme.options) {
-        // Check if this is the main option we're looking for
-        if (option.id === operationId) {
-          // Return isSingular if defined, default to true
-          return "isSingular" in option ? option.isSingular : true
-        }
+    // Look in main cards
+    for (const card of OPERATION_CARD_DEFINITIONS) {
+      if (card.id === operationId) {
+        return card.isSingular !== undefined ? card.isSingular : true
+      }
 
-        // Check if it's a subtype
-        if ("subtypes" in option && option.subtypes) {
-          for (const subtype of option.subtypes) {
-            if (subtype.id === operationId) {
-              // Subtypes default to the parent's isSingular if defined
-              return "isSingular" in subtype
-                ? subtype.isSingular
-                : "isSingular" in option
-                  ? option.isSingular
-                  : true
-            }
+      // Check in sub-options
+      if (card.subOptions) {
+        for (const subOption of card.subOptions) {
+          if (subOption.id === operationId) {
+            return subOption.isSingular !== undefined
+              ? subOption.isSingular
+              : true
           }
         }
       }
