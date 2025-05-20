@@ -571,7 +571,8 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: "linear-gradient(to bottom, #D1DDD9, #c0e3ff, #459ede)",
+        // background: "linear-gradient(to bottom, #D1DDD9, #c0e3ff, #459ede)",
+        background: "linear-gradient(to bottom, #218dba, #218dba, #459ede)",
         backgroundSize: "100% 100%",
         width: "100%",
         overflow: "visible",
@@ -720,13 +721,13 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#274472",
+              color: "white",
               mb: 4, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow:
-                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              // textShadow:
+              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -738,13 +739,13 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#274472",
+              color: "white",
               mb: 4, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow:
-                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              // textShadow:
+              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -756,13 +757,13 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#274472",
+              color: "white",
               mb: 4, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow:
-                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+                // textShadow:
+                //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -774,13 +775,13 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h4"
             sx={{
-              color: "#274472",
+              color: "white",
               mt: 2, // 16px top margin
               fontSize: "62px",
               fontWeight: 500,
               lineHeight: 0.8,
-              textShadow:
-                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              // textShadow:
+              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -792,8 +793,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "#274472",
-              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              color: "white",
               fontSize: "20px",
               mt: 3,
               maxWidth: "400px",
@@ -815,12 +815,12 @@ const IntroSection: React.FC = () => {
           >
             <PlayArrowIcon
               sx={{
-                color: "#274472",
+                color: "white",
                 fontSize: 50,
                 transform: "rotate(90deg)",
-                filter:
-                  "drop-shadow(-1px -1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px 1px 0 white) drop-shadow(0px 0px 8px rgba(255,255,255,0.7))",
-                cursor: "pointer",
+                // filter:
+                //   "drop-shadow(-0.5px -0.5px 0 white) drop-shadow(0.5px -0.5px 0 white) drop-shadow(-0.5px 0.5px 0 white) drop-shadow(0.5px 0.5px 0 white)",
+                // cursor: "pointer",
                 pointerEvents: "auto",
               }}
               onClick={() => {
