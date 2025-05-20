@@ -68,7 +68,7 @@ const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <CompareIcon />,
-    term: "Water scenarios",
+    term: "Scenarios",
     definition:
       "Alternative sets of water management decisions modeled to explore different possible futures. Scenarios can help answer questions like: What if we prioritized fish flows in spring? What if we changed reservoir release timing? These are tools to explore tradeoffs and impacts.",
     seeAlso: "water management decisions",

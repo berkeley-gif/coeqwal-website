@@ -940,7 +940,46 @@ const IntroSection: React.FC = () => {
                   })}
               </Typography>
               <Typography variant="body2" color="white">
-                {t("interstitial.part2")}
+                {t("interstitial.part2")
+                  .split("scenarios")
+                  .map((part, i, array) => {
+                    // If this is the last part, no need to add the highlighted word
+                    if (i === array.length - 1) return part
+
+                    return (
+                      <React.Fragment key={i}>
+                        {part}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd", // Same as conveyance background
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative", // Add explicit position
+                            "&:hover": {
+                              backgroundColor: "#13629b", // Same hover color as conveyance
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with Water scenarios term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Water scenarios",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          scenarios
+                        </Box>
+                      </React.Fragment>
+                    )
+                  })}
               </Typography>
               {/* <Typography variant="body2" color="white">
                 {t("interstitial.part3")}
