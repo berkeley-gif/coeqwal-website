@@ -866,7 +866,7 @@ const IntroSection: React.FC = () => {
           position: "relative",
           backgroundColor: "transparent", // No background image here anymore since it's on the parent
           minHeight: "100vh",
-          paddingTop: "500px", // Add substantial top padding to create more space
+          paddingTop: "400px", // Add substantial top padding to create more space
         }}
       >
         {/* Content container for proper blending context */}
