@@ -507,23 +507,244 @@ export default function ContentPanels({
                   fontSize: "5rem",
                   fontWeight: 700,
                   alignSelf: "flex-start",
+                  pointerEvents: "auto",
+                  mb: 4,
+                  width: "100%",
                 }}
               >
                 Explore
               </Typography>
-              <Box>
-                <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
-                  The COEQWAL modeling tools can provide insights into
-                  California`&apos;`s water management options under various
-                  scenarios.
-                </Typography>
-                <Typography variant="body2" color="common.white">
-                  By exploring different water management approaches, users can
-                  understand tradeoffs between different water management
-                  strategies and their impacts on communities, agriculture, and
-                  ecosystems.
-                </Typography>
-              </Box>
+              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      California Water
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      A natural system shaped by terrain, climate, and time
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Water in California begins as snow, rain, and runoff. It
+                      travels through rivers, sinks into groundwater, or flows
+                      out to sea. From the mountains to the Delta, understanding
+                      how water moves through the state is the first step toward
+                      shaping its future.
+                    </Typography>
+                    <Box
+                      component="a"
+                      href="https://flow.coeqwal.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      Learn more: How water moves through California →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Managing California&apos;s Water
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Who decides where water goes—and when?
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      California&apos;s water is managed by a patchwork of agencies,
+                      laws, and agreements. Decisions about storage, delivery,
+                      and environmental flows affect nearly every part of the
+                      state, every season.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Learn more: How California&apos;s water is managed →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                {/* Growing Challenges Card */}
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Growing Challenges
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Climate change and equity are reshaping the water system
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      California faces rising temperatures, shrinking snowpack,
+                      and more frequent droughts. These changes strain already
+                      stressed water supplies—and not all communities are
+                      impacted equally. Some experience chronic shortages,
+                      contamination, or lack meaningful access to water
+                      decisions.
+                    </Typography>
+                    <Box sx={{ mt: "auto" }}>
+                      <Box
+                        sx={{
+                          color: "#FFAC6E",
+                          textDecoration: "none",
+                          display: "block",
+                          fontWeight: 500,
+                          mb: 1,
+                          cursor: "default",
+                        }}
+                      >
+                        Learn more: Climate change and California water →
+                      </Box>
+                      <Box
+                        sx={{
+                          color: "#FFAC6E",
+                          textDecoration: "none",
+                          display: "block",
+                          fontWeight: 500,
+                          cursor: "default",
+                        }}
+                      >
+                        Learn more: Equity in California water →
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid>
+
+                {/* Exploring California's Water Futures Card */}
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Exploring California&apos;s Water Futures
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      What if we made different choices?
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      The COEQWAL project uses the CalSim3 model—trusted by
+                      state and federal agencies—to simulate a range of
+                      alternative water futures. These scenarios explore how
+                      changes in policy, climate, and priorities could shape
+                      water availability, distribution, and outcomes across
+                      California.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Learn more: Exploring water futures with CalSim3 →
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
             </>
           }
         />
