@@ -706,7 +706,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#007C92",
+              color: "#274472",
               mb: 4, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
@@ -723,7 +723,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#007C92",
+              color: "#274472",
               mb: 4, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
@@ -740,7 +740,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#007C92",
+              color: "#274472",
               mb: 4, // 32px spacing
               fontSize: "108px",
               fontWeight: 600,
@@ -757,7 +757,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h4"
             sx={{
-              color: "#007C92",
+              color: "#274472",
               mt: 2, // 16px top margin
               fontSize: "62px",
               fontWeight: 500,
@@ -774,7 +774,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "#007C92",
+              color: "#274472",
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontSize: "20px",
             }}
