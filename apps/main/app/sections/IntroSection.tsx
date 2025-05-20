@@ -481,13 +481,13 @@ const IntroSection: React.FC = () => {
         let opacity
         if (row === 0) {
           // Top row - more visible
-          opacity = 0.18 + Math.random() * 0.12
+          opacity = 0.06 + Math.random() * 0.08
         } else if (row === 1) {
           // Middle row - medium visibility
-          opacity = 0.12 + Math.random() * 0.08
+          opacity = 0.04 + Math.random() * 0.05
         } else {
           // Bottom row - subtle
-          opacity = 0.05 + Math.random() * 0.07
+          opacity = 0.01 + Math.random() * 0.04
         }
 
         // Add animation parameters with slight variations
@@ -521,7 +521,7 @@ const IntroSection: React.FC = () => {
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
       size: 250 + Math.random() * 150, // Medium-large size
-      opacity: 0.04 + Math.random() * 0.03, // Very subtle
+      opacity: 0.02 + Math.random() * 0.02, // Very subtle
       // Add gentler animation for the lower circle
       freqX1: 0.02,
       freqX2: 0.015,
@@ -762,8 +762,8 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-                // textShadow:
-                //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
+              // textShadow:
+              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
