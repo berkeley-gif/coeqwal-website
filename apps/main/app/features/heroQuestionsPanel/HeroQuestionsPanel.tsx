@@ -406,7 +406,7 @@ export function HeroQuestionsPanel({
           sx={{
             fontFamily: '"akzidenz-grotesk-next-pro", sans-serif',
             fontWeight: 800,
-            color: "common.black",
+            color: theme.palette.primary.dark,
             whiteSpace: "nowrap",
             lineHeight: 1.1,
             fontSize: "clamp(2rem, 6vw, 6rem)",
@@ -415,7 +415,7 @@ export function HeroQuestionsPanel({
         >
           {bottomHeadline}
         </Typography>
-        <Typography variant="body2" sx={{ color: "common.black" }}>
+        <Typography variant="body2" sx={{ color: theme.palette.primary.dark }}>
           {bottomText}
         </Typography>
       </Box>

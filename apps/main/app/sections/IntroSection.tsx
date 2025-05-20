@@ -779,7 +779,7 @@ const IntroSection: React.FC = () => {
               fontSize: "20px",
             }}
           >
-            Rethink California water.Explore California&apos;s water system and
+            Explore California&apos;s water system and
             discover possibilities for the future of water in our state.
           </Typography>
         </Box>

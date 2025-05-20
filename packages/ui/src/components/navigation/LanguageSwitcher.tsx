@@ -23,7 +23,7 @@ export function LanguageSwitcher() {
       <ToggleButton
         value="es"
         sx={{
-          borderLeft: "1px solid black",
+          borderLeft: "1px solid #274472",
         }}
       >
         Español

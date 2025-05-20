@@ -487,7 +487,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   width: "280px",
                   border: "1px solid rgba(0, 0, 0, 0.12)",
                   borderRadius: `${theme.borderRadius.card}px !important`,
-                  color: "black",
+                  color: theme.palette.primary.dark,
                   backgroundColor: theme.palette.common.white,
                   boxShadow: "none",
                   overflow: "hidden",
@@ -502,9 +502,9 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       size="large"
                       sx={{
                         marginTop: "0",
-                        color: "black",
+                        color: theme.palette.primary.dark,
                         "&.Mui-checked": {
-                          color: "black",
+                          color: theme.palette.primary.dark,
                         },
                       }}
                     />
@@ -514,7 +514,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h5"
                       sx={{
                         fontWeight: 500,
-                        color: "black",
+                        color: theme.palette.primary.dark,
                         lineHeight: 1.2,
                       }}
                     >
@@ -564,7 +564,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   borderRadius: "999px",
                   boxShadow: "none",
                   padding: theme.spacing(1.5, 3),
-                  bgcolor: "black",
+                  bgcolor: theme.palette.primary.dark,
                   color: "white",
                   fontSize: "1.1rem",
                   fontWeight: 600,
@@ -649,7 +649,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
               <IconButton
                 onClick={handleSwapClick}
                 sx={{
-                  bgcolor: "black",
+                  bgcolor: theme.palette.primary.dark,
                   color: "white",
                   width: 64,
                   height: 64,

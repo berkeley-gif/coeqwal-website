@@ -61,7 +61,7 @@ const themeValues = {
 
   // Palette colors
   palette: {
-    black: "#000000",
+    black: "#274472",
     white: "#FFFFFF",
     teal: "#007C92", // Teal color for primary typeface
     neutral: {
@@ -365,7 +365,7 @@ const theme = createTheme({
     primary: {
       main: themeValues.palette.white,
       light: themeValues.palette.neutral.light,
-      dark: themeValues.palette.neutral.dark,
+      dark: "#274472",
     },
     secondary: {
       main: themeValues.palette.black,
@@ -416,7 +416,7 @@ const theme = createTheme({
       main: "#4b8fb4",
     },
     text: {
-      primary: themeValues.palette.black,
+      primary: "#274472",
       secondary: themeValues.palette.white,
       teal: themeValues.palette.teal,
     },

@@ -3,6 +3,7 @@ import EditableNeedsRenderer from "./EditableNeedsRenderer"
 import { Box, Typography, Button, CheckIcon } from "@repo/ui/mui"
 import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
 import { BLANK_WATER_NEED } from "./constants"
+import { useTheme } from "@mui/material/styles"
 
 type WaterNeedEditorProps = {
   currentWaterNeed: WaterNeedSetting
@@ -22,6 +23,8 @@ const WaterNeedEditor = ({
     })
     setCurrentWaterNeed(BLANK_WATER_NEED)
   }
+
+  const theme = useTheme()
 
   return (
     <Box
@@ -72,8 +75,8 @@ const WaterNeedEditor = ({
             size="medium"
             onClick={addNeedToList}
             sx={{
-              color: "black",
-              borderColor: "black",
+              color: theme.palette.primary.dark,
+              borderColor: theme.palette.primary.dark,
               width: "fit-content",
             }}
           >

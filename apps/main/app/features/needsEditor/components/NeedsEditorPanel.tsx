@@ -11,6 +11,7 @@ import {
   ExpandMoreIcon,
   ArrowRightIcon,
 } from "@repo/ui/mui"
+import { useTheme } from "@mui/material/styles"
 
 import AddedWaterNeeds from "./AddedNeedsList"
 import WaterNeedEditor from "./WaterNeedEditor"
@@ -26,6 +27,8 @@ const NeedsEditorPanel: React.FC = () => {
 
   const [currentWaterNeedSetting, setCurrentWaterNeedSetting] =
     useState<WaterNeedSetting>(BLANK_WATER_NEED)
+
+  const theme = useTheme()
 
   const addNewNeed = (type: string) => {
     const defaultSetting = WATER_NEED_TYPES.find(
@@ -146,8 +149,8 @@ const NeedsEditorPanel: React.FC = () => {
             size="medium"
             onClick={() => setNeedsList([])}
             sx={{
-              color: "black",
-              borderColor: "black",
+              color: theme.palette.primary.dark,
+              borderColor: theme.palette.primary.dark,
               width: "fit-content",
               height: "fit-content",
             }}

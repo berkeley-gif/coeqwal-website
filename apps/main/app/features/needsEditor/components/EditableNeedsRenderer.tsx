@@ -429,7 +429,7 @@ const EditableNeedsRenderer = ({
                 variant="text"
                 size="small"
                 endIcon={<VisibilityIcon />}
-                sx={{ textTransform: "none", color: "black" }}
+                sx={{ textTransform: "none", color: theme.palette.primary.dark }}
                 onClick={() => {
                   // Add your "Learn More" action here
                   console.log("Learn more clicked")
@@ -485,8 +485,8 @@ const EditableNeedsRenderer = ({
               variant="outlined"
               color="primary"
               sx={{
-                borderColor: "black",
-                color: "black",
+                borderColor: theme.palette.primary.dark,
+                color: theme.palette.primary.dark,
                 width: "fit-content",
                 height: "fit-content",
               }}
@@ -553,7 +553,7 @@ const EditableNeedsRenderer = ({
                         variant="outlined"
                         color="success"
                         sx={{
-                          borderColor: "success.main",
+                          borderColor: theme.palette.primary.dark,
                         }}
                         disabled={
                           !isInputValid(
@@ -580,8 +580,8 @@ const EditableNeedsRenderer = ({
                     variant="outlined"
                     color="primary"
                     sx={{
-                      borderColor: "black",
-                      color: "black",
+                      borderColor: theme.palette.primary.dark,
+                      color: theme.palette.primary.dark,
                       width: "fit-content",
                       height: "fit-content",
                     }}
@@ -604,7 +604,7 @@ const EditableNeedsRenderer = ({
           startIcon={<AddIcon />}
           onClick={handleAddRule}
           size="small"
-          sx={{ color: "black", borderColor: "black" }}
+          sx={{ color: theme.palette.primary.dark, borderColor: theme.palette.primary.dark }}
         >
           Add another rule
         </Button>
@@ -613,7 +613,7 @@ const EditableNeedsRenderer = ({
             variant="outlined"
             startIcon={<BarChartIcon />}
             size="small"
-            sx={{ color: "black", borderColor: "black" }}
+            sx={{ color: theme.palette.primary.dark, borderColor: theme.palette.primary.dark }}
           >
             View as an Exceedance Plot
           </Button>
