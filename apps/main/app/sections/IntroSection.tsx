@@ -111,8 +111,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     <motion.div
       style={{
         position: "absolute",
-        width: `${size}px`,
-        height: `${size}px`,
+        width: `${size + 30}px`, // Slightly larger to accommodate the halo
+        height: `${size + 30}px`, // Slightly larger to accommodate the halo
         borderRadius: "50%",
         opacity,
         left,
@@ -122,23 +122,36 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
         y,
         transformOrigin: "center",
         pointerEvents: "none",
-        overflow: "hidden",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(255, 255, 255, 0.25)", // Semi-transparent white halo
       }}
     >
-      <Image
-        src={`/images/circular-crops/${imagePath}`}
-        alt=""
-        quality={90}
-        fill
+      <div
         style={{
-          objectFit: "cover",
+          width: `${size}px`,
+          height: `${size}px`,
           borderRadius: "50%",
-          width: "100%",
-          height: "100%",
-          objectPosition: "center",
+          overflow: "hidden",
+          position: "relative",
         }}
-        sizes={`${size}px`}
-      />
+      >
+        <Image
+          src={`/images/circular-crops/${imagePath}`}
+          alt=""
+          quality={90}
+          fill
+          style={{
+            objectFit: "cover",
+            borderRadius: "50%",
+            width: "100%",
+            height: "100%",
+            objectPosition: "center",
+          }}
+          sizes={`${size}px`}
+        />
+      </div>
     </motion.div>
   )
 }
@@ -779,8 +792,8 @@ const IntroSection: React.FC = () => {
               fontSize: "20px",
             }}
           >
-            Explore California&apos;s water system and
-            discover possibilities for the future of water in our state.
+            Explore California&apos;s water system and discover possibilities
+            for the future of water in our state.
           </Typography>
         </Box>
 
@@ -806,7 +819,7 @@ const IntroSection: React.FC = () => {
         paddingVariant="wide"
         includeHeaderSpacing={false}
         sx={{
-          color: "white",
+          color: (theme) => theme.palette.primary.dark,
           alignItems: "left",
           justifyContent: "center",
           pointerEvents: "auto",
@@ -834,8 +847,7 @@ const IntroSection: React.FC = () => {
               padding: 3,
               borderRadius: 2,
               "& .blend-text": {
-                mixBlendMode: "difference",
-                color: "#FFFFFF",
+                color: (theme) => theme.palette.primary.dark,
                 textShadow: "0 0 10px rgba(0,0,0,0.1)",
               },
             }}

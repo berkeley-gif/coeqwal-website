@@ -429,7 +429,10 @@ const EditableNeedsRenderer = ({
                 variant="text"
                 size="small"
                 endIcon={<VisibilityIcon />}
-                sx={{ textTransform: "none", color: theme.palette.primary.dark }}
+                sx={{
+                  textTransform: "none",
+                  color: theme.palette.primary.dark,
+                }}
                 onClick={() => {
                   // Add your "Learn More" action here
                   console.log("Learn more clicked")
@@ -604,7 +607,10 @@ const EditableNeedsRenderer = ({
           startIcon={<AddIcon />}
           onClick={handleAddRule}
           size="small"
-          sx={{ color: theme.palette.primary.dark, borderColor: theme.palette.primary.dark }}
+          sx={{
+            color: theme.palette.primary.dark,
+            borderColor: theme.palette.primary.dark,
+          }}
         >
           Add another rule
         </Button>
@@ -613,7 +619,10 @@ const EditableNeedsRenderer = ({
             variant="outlined"
             startIcon={<BarChartIcon />}
             size="small"
-            sx={{ color: theme.palette.primary.dark, borderColor: theme.palette.primary.dark }}
+            sx={{
+              color: theme.palette.primary.dark,
+              borderColor: theme.palette.primary.dark,
+            }}
           >
             View as an Exceedance Plot
           </Button>
