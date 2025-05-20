@@ -82,7 +82,7 @@
       "decisions": "decisions",
       "decisions_sub": "decisions"
     },
-    "scenarioSingular": "scenario",
+    "scenarioSingular": "scenarios",
     "scenarioPlural": "scenarios",
     "singularVerb": "does",
     "pluralVerb": "do",
@@ -95,8 +95,8 @@
       "in": "in",
       "to": "to",
       "under": "under",
-      "increase": "increase",
-      "decrease": "decrease",
+      "increase": "increased",
+      "decrease": "decreased",
       "affect": "affect",
       "with": "with"
     },
