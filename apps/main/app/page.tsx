@@ -6,8 +6,9 @@ import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
 import { useScrollTracking } from "./hooks/useScrollTracking"
 import { sectionIds } from "./config/navigation"
-import type { MapboxMapRef } from "@repo/map"
-import MapContainer from "./components/MapContainer"
+// Commenting out map-related imports - uncomment to re-enable the map
+// import type { MapboxMapRef } from "@repo/map"
+// import MapContainer from "./components/MapContainer"
 import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
 import IntroSection from "./sections/IntroSection"
@@ -18,10 +19,12 @@ import ChallengesSection from "./sections/ChallengesSection"
 import CalSimSection from "./sections/CalSimSection"
 import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
-import { useMapStore, mapActions } from "@repo/state/map"
+// Commenting out map store - uncomment to re-enable the map
+// import { useMapStore, mapActions } from "@repo/state/map"
 import { StoreConnectedHeader } from "./components/StoreConnectedHeader"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
-import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
+// Commenting out map effect - uncomment to re-enable the map
+// import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
 
 // Make sure these IDs match the section IDs used in the HeaderHome component
 const navSectionIds = {
@@ -47,6 +50,8 @@ export default function Home() {
   const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
   const { activeSection, scrollToSection } = useScrollTracking(allSectionIds)
 
+  // Commenting out map-related code - uncomment to re-enable the map
+  /*
   // For the uncontrolled map, we'll store its ref so we can call flyTo
   const uncontrolledRef = useRef<MapboxMapRef | null>(
     null,
@@ -84,6 +89,7 @@ export default function Home() {
       pitch: mapStore.viewState.pitch,
     })
   }, [uncontrolledRef, mapStore.viewState])
+  */
 
   // Custom scroll handler that also closes the drawer
   const handleSectionClick = (sectionId: string) => {
@@ -210,6 +216,7 @@ export default function Home() {
       />
 
       {/* ===== Background Map Layer ===== */}
+      {/* Commenting out map-related code - uncomment to re-enable the map
       <Box
         sx={{
           position: "fixed",
@@ -227,6 +234,21 @@ export default function Home() {
           activeSection={activeSection}
         />
       </Box>
+      */}
+
+      {/* Simple gradient background to replace the map */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: -1,
+          background: "linear-gradient(to bottom, #D1DDD9, #218dba, #459ede)",
+          backgroundSize: "100% 100%",
+        }}
+      />
 
       {/* ===== MultiDrawer - Always visible ===== */}
       <StoreConnectedMultiDrawer
