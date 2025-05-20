@@ -112,8 +112,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     <motion.div
       style={{
         position: "absolute",
-        width: `${size + 60}px`, // Doubled from +30px to +60px for a larger halo
-        height: `${size + 60}px`, // Doubled from +30px to +60px for a larger halo
+        width: `${size + 40}px`, // halo
+        height: `${size + 40}px`, // halo
         borderRadius: "50%",
         opacity,
         left,
@@ -126,7 +126,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.25)", // Semi-transparent white halo
+        backgroundColor: "rgba(255, 255, 255, 0.16)", // Semi-transparent white halo
       }}
     >
       <div
