@@ -4,7 +4,7 @@ import { Box, Typography, Stack } from "@mui/material"
 import { motion, useMotionValue } from "@repo/motion"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
@@ -725,7 +725,8 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow:
+                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -742,7 +743,8 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow:
+                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -759,7 +761,8 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow:
+                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -776,7 +779,8 @@ const IntroSection: React.FC = () => {
               fontSize: "62px",
               fontWeight: 500,
               lineHeight: 0.8,
-              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow:
+                "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -803,19 +807,30 @@ const IntroSection: React.FC = () => {
           {/* Play arrow icon pointing down */}
           <Box
             sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              width: '400px',
+              display: "flex",
+              justifyContent: "center",
+              width: "400px",
               mt: 0,
             }}
           >
-            <PlayArrowIcon 
-              sx={{ 
+            <PlayArrowIcon
+              sx={{
                 color: "#274472",
                 fontSize: 50,
-                transform: 'rotate(90deg)',
-                filter: 'drop-shadow(-1px -1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px 1px 0 white) drop-shadow(0px 0px 8px rgba(255,255,255,0.7))',
-              }} 
+                transform: "rotate(90deg)",
+                filter:
+                  "drop-shadow(-1px -1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px 1px 0 white) drop-shadow(0px 0px 8px rgba(255,255,255,0.7))",
+                cursor: "pointer",
+                pointerEvents: "auto",
+              }}
+              onClick={() => {
+                // Scroll to the interstitial section using its ID
+                const interstitialSection =
+                  document.getElementById("interstitial")
+                if (interstitialSection) {
+                  interstitialSection.scrollIntoView({ behavior: "smooth" })
+                }
+              }}
             />
           </Box>
         </Box>
@@ -838,6 +853,7 @@ const IntroSection: React.FC = () => {
 
       {/* Second section with interstitial content - flows naturally after the first section */}
       <BasePanel
+        id="interstitial"
         fullHeight={false}
         paddingVariant="wide"
         includeHeaderSpacing={false}
