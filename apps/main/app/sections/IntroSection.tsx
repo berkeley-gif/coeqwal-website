@@ -179,10 +179,10 @@ const availableImages = [
 const circlePositions = {
   // Background circles (appear behind text)
   background: [
-    { left: "35%", top: "15%" },
-    { left: "60%", top: "10%" },
-    { left: "60%", top: "25%" },
-    { left: "75%", top: "10%" },
+    { left: "25%", top: "10%" },
+    { left: "40%", top: "15%" },
+    { left: "60%", top: "15%" },
+    { left: "80%", top: "10%" },
     { left: "50%", top: "45%" },
   ],
 
@@ -190,7 +190,7 @@ const circlePositions = {
   foreground: [
     { left: "35%", top: "65%" },
     { left: "60%", top: "70%" },
-    { left: "75%", top: "55%" },
+    { left: "70%", top: "50%" },
   ],
 }
 
