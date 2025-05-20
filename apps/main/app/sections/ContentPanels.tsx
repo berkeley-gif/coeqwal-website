@@ -534,39 +534,52 @@ function PanelWithDetail({
   // Track height of panel container for seamless matching
   const panelRef = useRef<HTMLDivElement>(null)
   const detailRef = useRef<HTMLDivElement>(null)
+  const [mainPanelHeight, setMainPanelHeight] = useState<number>(0)
+  const [detailPanelHeight, setDetailPanelHeight] = useState<number>(0)
   const [containerHeight, setContainerHeight] = useState<string>("auto")
+  const [fixOnFirstRender, setFixOnFirstRender] = useState<boolean>(true)
 
-  // Measure the main panel height to set container height
-  useLayoutEffect(() => {
-    if (panelRef.current) {
-      // Get initial height of the main panel
-      const height = panelRef.current.offsetHeight
-      setContainerHeight(`${height}px`)
-    }
-  }, [])
-
-  // Update container height when detail panel becomes active
+  // Handle resize events to recalculate panel heights
   useEffect(() => {
-    if (!isActive || !detailRef.current || !panelRef.current) return
-
-    // Get heights of both panels
-    const detailHeight = detailRef.current.offsetHeight
-    const mainHeight = panelRef.current.offsetHeight
-
-    // Capture the current ref element to use in cleanup function
-    const currentPanelElement = panelRef.current
-
-    // Use the taller of the two panels
-    const newHeight = Math.max(detailHeight, mainHeight)
-    setContainerHeight(`${newHeight}px`)
-
-    // Cleanup - reset to main panel height when detail becomes inactive
-    return () => {
-      if (currentPanelElement) {
-        setContainerHeight(`${currentPanelElement.offsetHeight}px`)
+    const updateHeights = () => {
+      if (panelRef.current) {
+        setMainPanelHeight(panelRef.current.offsetHeight)
       }
-    }
-  }, [isActive])
+      if (detailRef.current) {
+        setDetailPanelHeight(detailRef.current.offsetHeight)
+      }
+      
+      // After first measurements, clear the first render flag
+      setFixOnFirstRender(false)
+    };
+
+    // Initial measurement with a slight delay to ensure content is rendered
+    const initialTimer = setTimeout(updateHeights, 100);
+
+    // Set up resize observer to detect content changes
+    const resizeObserver = new ResizeObserver(updateHeights);
+    if (panelRef.current) resizeObserver.observe(panelRef.current);
+    if (detailRef.current) resizeObserver.observe(detailRef.current);
+
+    // Clean up
+    return () => {
+      clearTimeout(initialTimer);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  // Update container height based on active panel
+  useEffect(() => {
+    // Add a small delay to ensure measurements are accurate after animations
+    const timer = setTimeout(() => {
+      const height = isActive ? detailPanelHeight : mainPanelHeight;
+      if (height > 0) {
+        setContainerHeight(`${height}px`);
+      }
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [isActive, mainPanelHeight, detailPanelHeight]);
 
   return (
     <Box
@@ -574,8 +587,9 @@ function PanelWithDetail({
       sx={{
         position: "relative",
         width: "100%", // Keep container at 100% width
-        overflow: isActive ? "visible" : "hidden", // Allow overflow when panel is active
+        overflow: "visible", // Allow overflow for both panels
         height: containerHeight, // Dynamic height based on content
+        minHeight: fixOnFirstRender ? "400px" : "auto", // Minimum height on first render to prevent jumping
         zIndex: isActive ? 1000 : 1, // Much higher z-index when active
         transition: "height 0.4s ease-in-out", // Smooth height transition
       }}
@@ -586,13 +600,16 @@ function PanelWithDetail({
         className={isActive ? "active-panel" : ""}
         style={{
           width: "100%", // Full width of container
-          height: "100%",
-          position: "relative", // Keep in normal flow
-          willChange: "transform", // Hint for browser optimization
+          position: "absolute", // Position absolutely to overlap
+          top: 0,
+          left: 0,
+          willChange: "transform, opacity", // Hint for browser optimization
           userSelect: "text", // Ensure text is selectable
+          zIndex: isActive ? 1 : 2, // Lower z-index when active (behind detail)
         }}
         animate={{
           x: isActive ? "-100%" : "0%", // Slide left when active
+          opacity: isActive ? 0.3 : 1, // Fade out slightly when not active
         }}
         transition={{
           type: "tween", // Use tween instead of spring for no bounce
@@ -610,7 +627,6 @@ function PanelWithDetail({
             color: "white",
             position: "relative", // For absolute positioning of icons
             borderRadius: 0, // No border radius
-            height: "100%", // Fill the full height
             userSelect: "text", // Ensure text is selectable
           }}
         >
@@ -699,12 +715,13 @@ function PanelWithDetail({
           top: 0,
           left: "100%", // Start positioned to the right of viewport
           width: "100%", // Same width as main panel
-          height: "auto", // Let it grow taller if needed
-          willChange: "transform",
+          willChange: "transform, opacity", // Hint for browser optimization
           userSelect: "text", // Ensure text is selectable
+          zIndex: isActive ? 2 : 1, // Higher z-index when active (in front)
         }}
         animate={{
           x: isActive ? "-100%" : "0%", // Slide left when active
+          opacity: isActive ? 1 : 0.3, // Fade in when active
         }}
         transition={{
           type: "tween", // Use tween instead of spring for no bounce
@@ -722,8 +739,6 @@ function PanelWithDetail({
             color: "white",
             position: "relative",
             borderRadius: 0, // No border radius
-            minHeight: "100%", // At least as tall as container
-            height: "auto", // Grow with content
             userSelect: "text", // Ensure text is selectable
           }}
         >
