@@ -236,6 +236,7 @@ export default function ContentPanels({
           onToggleDetail={() => togglePanelDetail("learn")}
           bgColor={getPanelBgColor("learn")}
           detailBgColor={getDetailPanelBgColor("learn")}
+          addBorder={true}
           title={<LearnTextContent />}
           content={<Panel1Content />}
           detailContent={
@@ -344,10 +345,10 @@ export default function ContentPanels({
                       Who decides where water goes—and when?
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      California&apos;s water is managed by a patchwork of agencies,
-                      laws, and agreements. Decisions about storage, delivery,
-                      and environmental flows affect nearly every part of the
-                      state, every season.
+                      California&apos;s water is managed by a patchwork of
+                      agencies, laws, and agreements. Decisions about storage,
+                      delivery, and environmental flows affect nearly every part
+                      of the state, every season.
                     </Typography>
                     <Box
                       sx={{
@@ -382,7 +383,7 @@ export default function ContentPanels({
                       fontWeight={600}
                       sx={{ mb: 1 }}
                     >
-                      Growing Challenges
+                      Managing Groundwater in a Changing Agricultural Landscape
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -393,40 +394,26 @@ export default function ContentPanels({
                         fontStyle: "italic",
                       }}
                     >
-                      Climate change and equity are reshaping the water system
+                      Sustainable strategies for groundwater basins
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      California faces rising temperatures, shrinking snowpack,
-                      and more frequent droughts. These changes strain already
-                      stressed water supplies—and not all communities are
-                      impacted equally. Some experience chronic shortages,
-                      contamination, or lack meaningful access to water
-                      decisions.
+                      Explore scenarios for implementing the Sustainable
+                      Groundwater Management Act (SGMA) in agricultural regions
+                      where land use changes are expected. These scenarios
+                      examine different pathways for groundwater sustainability
+                      and their impacts on agriculture.
                     </Typography>
-                    <Box sx={{ mt: "auto" }}>
-                      <Box
-                        sx={{
-                          color: "#FFAC6E",
-                          textDecoration: "none",
-                          display: "block",
-                          fontWeight: 500,
-                          mb: 1,
-                          cursor: "default",
-                        }}
-                      >
-                        Learn more: Climate change and California water →
-                      </Box>
-                      <Box
-                        sx={{
-                          color: "#FFAC6E",
-                          textDecoration: "none",
-                          display: "block",
-                          fontWeight: 500,
-                          cursor: "default",
-                        }}
-                      >
-                        Learn more: Equity in California water →
-                      </Box>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Explore groundwater sustainability scenarios →
                     </Box>
                   </Box>
                 </Grid>
@@ -532,7 +519,7 @@ export default function ContentPanels({
                       fontWeight={600}
                       sx={{ mb: 1 }}
                     >
-                      California Water
+                      Current Operations for California Water
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -543,71 +530,14 @@ export default function ContentPanels({
                         fontStyle: "italic",
                       }}
                     >
-                      A natural system shaped by terrain, climate, and time
+                      Understanding today&apos;s water system operations
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Water in California begins as snow, rain, and runoff. It
-                      travels through rivers, sinks into groundwater, or flows
-                      out to sea. From the mountains to the Delta, understanding
-                      how water moves through the state is the first step toward
-                      shaping its future.
-                    </Typography>
-                    <Box
-                      component="a"
-                      href="https://flow.coeqwal.org/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{
-                        color: "#FFAC6E",
-                        textDecoration: "none",
-                        display: "block",
-                        mt: "auto",
-                        fontWeight: 500,
-                        "&:hover": {
-                          textDecoration: "underline",
-                        },
-                      }}
-                    >
-                      Learn more: How water moves through California →
-                    </Box>
-                  </Box>
-                </Grid>
-
-                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <Box
-                    sx={{
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      borderRadius: 2,
-                      p: 4,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      fontWeight={600}
-                      sx={{ mb: 1 }}
-                    >
-                      Managing California&apos;s Water
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      color="white"
-                      sx={{
-                        mb: 2,
-                        opacity: 0.8,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      Who decides where water goes—and when?
-                    </Typography>
-                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      California&apos;s water is managed by a patchwork of agencies,
-                      laws, and agreements. Decisions about storage, delivery,
-                      and environmental flows affect nearly every part of the
-                      state, every season.
+                      Explore how California&apos;s water system currently operates
+                      under existing policies, regulations, and infrastructure
+                      constraints. This baseline scenario shows water
+                      deliveries, environmental flows, and system outcomes under
+                      current management practices.
                     </Typography>
                     <Box
                       sx={{
@@ -619,12 +549,11 @@ export default function ContentPanels({
                         cursor: "default",
                       }}
                     >
-                      Learn more: How California&apos;s water is managed →
+                      Explore current operations scenarios →
                     </Box>
                   </Box>
                 </Grid>
 
-                {/* Growing Challenges Card */}
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <Box
                     sx={{
@@ -642,7 +571,7 @@ export default function ContentPanels({
                       fontWeight={600}
                       sx={{ mb: 1 }}
                     >
-                      Growing Challenges
+                      Managing River Flows for the Environment
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -653,82 +582,14 @@ export default function ContentPanels({
                         fontStyle: "italic",
                       }}
                     >
-                      Climate change and equity are reshaping the water system
+                      Balancing ecosystem needs with human uses
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      California faces rising temperatures, shrinking snowpack,
-                      and more frequent droughts. These changes strain already
-                      stressed water supplies—and not all communities are
-                      impacted equally. Some experience chronic shortages,
-                      contamination, or lack meaningful access to water
-                      decisions.
-                    </Typography>
-                    <Box sx={{ mt: "auto" }}>
-                      <Box
-                        sx={{
-                          color: "#FFAC6E",
-                          textDecoration: "none",
-                          display: "block",
-                          fontWeight: 500,
-                          mb: 1,
-                          cursor: "default",
-                        }}
-                      >
-                        Learn more: Climate change and California water →
-                      </Box>
-                      <Box
-                        sx={{
-                          color: "#FFAC6E",
-                          textDecoration: "none",
-                          display: "block",
-                          fontWeight: 500,
-                          cursor: "default",
-                        }}
-                      >
-                        Learn more: Equity in California water →
-                      </Box>
-                    </Box>
-                  </Box>
-                </Grid>
-
-                {/* Exploring California's Water Futures Card */}
-                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <Box
-                    sx={{
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      borderRadius: 2,
-                      p: 4,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      fontWeight={600}
-                      sx={{ mb: 1 }}
-                    >
-                      Exploring California&apos;s Water Futures
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      color="white"
-                      sx={{
-                        mb: 2,
-                        opacity: 0.8,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      What if we made different choices?
-                    </Typography>
-                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      The COEQWAL project uses the CalSim3 model—trusted by
-                      state and federal agencies—to simulate a range of
-                      alternative water futures. These scenarios explore how
-                      changes in policy, climate, and priorities could shape
-                      water availability, distribution, and outcomes across
-                      California.
+                      Examine scenarios that prioritize environmental flows to
+                      support river ecosystems while managing trade-offs with
+                      other water uses. These approaches explore how strategic
+                      flow management can benefit fish, wildlife, and river
+                      health.
                     </Typography>
                     <Box
                       sx={{
@@ -740,7 +601,271 @@ export default function ContentPanels({
                         cursor: "default",
                       }}
                     >
-                      Learn more: Exploring water futures with CalSim3 →
+                      Explore environmental flow scenarios →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                {/* Managing Groundwater Card */}
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Managing Groundwater in a Changing Agricultural Landscape
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Sustainable strategies for groundwater basins
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Explore scenarios for implementing the Sustainable
+                      Groundwater Management Act (SGMA) in agricultural regions
+                      where land use changes are expected. These scenarios
+                      examine different pathways for groundwater sustainability
+                      and their impacts on agriculture.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Explore groundwater sustainability scenarios →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                {/* Prioritizing Drinking Water Card */}
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Prioritizing Drinking Water for California Communities
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Ensuring safe, affordable water access for all
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Investigate scenarios that prioritize drinking water
+                      access for communities, particularly those historically
+                      underserved. These approaches explore how water management
+                      decisions impact drinking water quality, availability, and
+                      affordability across diverse communities.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Explore drinking water access scenarios →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Improving Delta Outflows for the Environment
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Supporting the Delta ecosystem and San Francisco Bay
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Compare scenarios that enhance Delta outflows to support
+                      the estuary ecosystem and San Francisco Bay. These
+                      scenarios explore the relationship between outflow timing,
+                      volume, and ecological responses in this critical
+                      transition zone.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Explore Delta outflow scenarios →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Sustaining Uses in the Delta for Communities and Farms
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Protecting in-Delta water users and livelihoods
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Analyze scenarios that focus on sustaining water quality
+                      and availability for Delta communities and agriculture.
+                      These approaches examine how to balance the needs of those
+                      who live and work in the Delta with other competing water
+                      demands.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Explore in-Delta water use scenarios →
+                    </Box>
+                  </Box>
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                  <Box
+                    sx={{
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      borderRadius: 2,
+                      p: 4,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <Typography
+                      variant="h4"
+                      color="white"
+                      fontWeight={600}
+                      sx={{ mb: 1 }}
+                    >
+                      Improving Reliability of Delta Exports for Farms and
+                      Cities
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="white"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Ensuring consistent water deliveries to users south of the
+                      Delta
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Review scenarios designed to improve the reliability of
+                      water exports from the Delta for agricultural and urban
+                      users in Central and Southern California. These approaches
+                      consider operational changes and infrastructure
+                      modifications to enhance water supply reliability.
+                    </Typography>
+                    <Box
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        cursor: "default",
+                      }}
+                    >
+                      Explore Delta export reliability scenarios →
                     </Box>
                   </Box>
                 </Grid>
@@ -807,6 +932,7 @@ interface PanelWithDetailProps {
   content: React.ReactNode
   detailContent: React.ReactNode
   hideDetailArrow?: boolean
+  addBorder?: boolean
 }
 
 function PanelWithDetail({
@@ -818,6 +944,7 @@ function PanelWithDetail({
   content,
   detailContent,
   hideDetailArrow = false,
+  addBorder = false,
 }: PanelWithDetailProps) {
   // Track height of panel container for seamless matching
   const panelRef = useRef<HTMLDivElement>(null)
@@ -916,6 +1043,7 @@ function PanelWithDetail({
             position: "relative", // For absolute positioning of icons
             borderRadius: 0, // No border radius
             userSelect: "text", // Ensure text is selectable
+            border: addBorder ? `5px solid ${bgColor}` : "none", // Add border with same color as background
           }}
         >
           <Grid container spacing={6} alignItems="flex-start">
@@ -942,7 +1070,7 @@ function PanelWithDetail({
             >
               {content}
             </Grid>
-                    </Grid>
+          </Grid>
 
           {/* Right centered play icon - only shown when not hidden */}
           {!hideDetailArrow && (
