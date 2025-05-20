@@ -4,6 +4,7 @@ import { Box, Typography, Stack } from "@mui/material"
 import { motion, useMotionValue } from "@repo/motion"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 // Create a Circle component using multiple overlapping harmonic oscillations
 interface AnimatedCircleProps {
@@ -788,14 +789,35 @@ const IntroSection: React.FC = () => {
             variant="body2"
             sx={{
               color: "#274472",
+              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontSize: "20px",
               mt: 3,
+              maxWidth: "400px",
             }}
           >
             Explore California&apos;s water system and discover
             <br />
             possibilities for the future of water in our state.
           </Typography>
+
+          {/* Play arrow icon pointing down */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              width: '400px',
+              mt: 0,
+            }}
+          >
+            <PlayArrowIcon 
+              sx={{ 
+                color: "#274472",
+                fontSize: 50,
+                transform: 'rotate(90deg)',
+                filter: 'drop-shadow(-1px -1px 0 white) drop-shadow(1px -1px 0 white) drop-shadow(-1px 1px 0 white) drop-shadow(1px 1px 0 white) drop-shadow(0px 0px 8px rgba(255,255,255,0.7))',
+              }} 
+            />
+          </Box>
         </Box>
 
         {/* Foreground Circles section is kept for code structure but not rendering any circles */}
