@@ -3,7 +3,6 @@
 import { Box, Typography, useTheme, Divider, Stack } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 import {
-  LibraryBooksIcon,
   WaterIcon,
   SettingsIcon,
   EngineeringIcon,

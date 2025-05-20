@@ -942,26 +942,31 @@ const IntroSection: React.FC = () => {
               <Typography variant="body2" color="white">
                 {(() => {
                   const text = t("interstitial.part2")
-                  
+
                   // First check for COEQWAL and split if found
                   const coeqwalIndex = text.indexOf("COEQWAL")
                   if (coeqwalIndex !== -1) {
                     // Text before COEQWAL
                     const beforeText = text.substring(0, coeqwalIndex)
-                    
+
                     // Get text after COEQWAL to look for "scenarios"
                     const afterCoeqwalText = text.substring(coeqwalIndex + 7) // 7 is length of "COEQWAL"
-                    
+
                     // Look for "scenarios" in the remaining text
                     const scenariosIndex = afterCoeqwalText.indexOf("scenarios")
-                    
+
                     if (scenariosIndex !== -1) {
                       // Text between COEQWAL and scenarios
-                      const betweenText = afterCoeqwalText.substring(0, scenariosIndex)
-                      
+                      const betweenText = afterCoeqwalText.substring(
+                        0,
+                        scenariosIndex,
+                      )
+
                       // Text after scenarios
-                      const afterScenariosText = afterCoeqwalText.substring(scenariosIndex + 9) // 9 is length of "scenarios"
-                      
+                      const afterScenariosText = afterCoeqwalText.substring(
+                        scenariosIndex + 9,
+                      ) // 9 is length of "scenarios"
+
                       return (
                         <>
                           {beforeText}
@@ -1026,7 +1031,7 @@ const IntroSection: React.FC = () => {
                         </>
                       )
                     }
-                    
+
                     // If scenarios not found, just highlight COEQWAL
                     return (
                       <>
@@ -1063,7 +1068,7 @@ const IntroSection: React.FC = () => {
                       </>
                     )
                   }
-                  
+
                   // If COEQWAL not found, check for scenarios only
                   const scenariosIndex = text.indexOf("scenarios")
                   if (scenariosIndex !== -1) {

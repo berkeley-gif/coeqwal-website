@@ -210,4 +210,3 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
 }
 
 export default LearnCardCarousel
- 

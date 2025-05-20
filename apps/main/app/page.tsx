@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, /* useRef, useEffect, useLayoutEffect */ } from "react"
+import React, { useState /* useRef, useEffect, useLayoutEffect */ } from "react"
 import { Box } from "@repo/ui/mui"
 import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
@@ -13,11 +13,6 @@ import CombinedPanel from "./features/combinedPanel/CombinedPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
-import CaliforniaWaterSection from "./sections/CaliforniaWaterSection"
-import ManagingWaterSection from "./sections/ManagingWaterSection"
-import ChallengesSection from "./sections/ChallengesSection"
-import CalSimSection from "./sections/CalSimSection"
-import InvitationSection from "./sections/InvitationSection"
 import { useDrawerStore } from "@repo/state"
 // Commenting out map store - uncomment to re-enable the map
 // import { useMapStore, mapActions } from "@repo/state/map"
@@ -172,40 +167,40 @@ export default function Home() {
     setActiveDrawerTab("glossary")
   }
 
-  const handleOpenCurrentOpsDrawer = (sectionId?: string) => {
-    // Check if the currentOps drawer is already open
-    if (activeDrawerTab === "glossary") {
-      // Check if this is the same section that's currently selected
-      const drawerStore = useDrawerStore.getState()
-      const currentSection = drawerStore.content?.selectedSection as
-        | string
-        | undefined
+  // const handleOpenCurrentOpsDrawer = (sectionId?: string) => {
+  //   // Check if the currentOps drawer is already open
+  //   if (activeDrawerTab === "glossary") {
+  //     // Check if this is the same section that's currently selected
+  //     const drawerStore = useDrawerStore.getState()
+  //     const currentSection = drawerStore.content?.selectedSection as
+  //       | string
+  //       | undefined
 
-      if (currentSection === sectionId) {
-        // Same section - close the drawer (toggle behavior)
-        closeDrawer()
+  //     if (currentSection === sectionId) {
+  //       // Same section - close the drawer (toggle behavior)
+  //       closeDrawer()
 
-        // Keep the legacy state in sync for components not yet migrated
-        setDrawerOpen(false)
-        setActiveDrawerTab(null)
-        return
-      } else {
-        // Different section - just update the content instead of closing
-        drawerStore.setDrawerContent({ selectedSection: sectionId })
-        return
-      }
-    }
+  //       // Keep the legacy state in sync for components not yet migrated
+  //       setDrawerOpen(false)
+  //       setActiveDrawerTab(null)
+  //       return
+  //     } else {
+  //       // Different section - just update the content instead of closing
+  //       drawerStore.setDrawerContent({ selectedSection: sectionId })
+  //       return
+  //     }
+  //   }
 
-    // Store the section ID in the drawer content if provided
-    if (sectionId) {
-      useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
-    }
-    openDrawer("glossary")
+  //   // Store the section ID in the drawer content if provided
+  //   if (sectionId) {
+  //     useDrawerStore.getState().setDrawerContent({ selectedSection: sectionId })
+  //   }
+  //   openDrawer("glossary")
 
-    // Keep the legacy state in sync for components not yet migrated
-    setDrawerOpen(true)
-    setActiveDrawerTab("glossary")
-  }
+  //   // Keep the legacy state in sync for components not yet migrated
+  //   setDrawerOpen(true)
+  //   setActiveDrawerTab("glossary")
+  // }
 
   return (
     <>
@@ -288,23 +283,23 @@ export default function Home() {
             <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
 
-          California Water panel with two columns
-          <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          {/* California Water panel with two columns */}
+          {/* <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} /> */}
 
           {/* Managing Water panel with two columns */}
-          <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          {/* <ManagingWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} /> */}
 
           {/* Challenges panel with two columns */}
-          <ChallengesSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          {/* <ChallengesSection onOpenLearnDrawer={handleOpenLearnDrawer} /> */}
 
           {/* CalSim panel with two columns */}
-          <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} />
+          {/* <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} /> */}
 
           {/* Invitation panel with two columns */}
-          <InvitationSection
+          {/* <InvitationSection
             onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
             onOpenThemesDrawer={handleOpenThemesDrawer}
-          />
+          /> */}
 
           {/* Needs Editor Panel */}
           {/* <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">

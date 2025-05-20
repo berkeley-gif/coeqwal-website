@@ -79,8 +79,8 @@
     "defaultTerms": {
       "waterAvailability": "outcomes",
       "outcomes": "outcomes",
-      "decisions": "new scenarios",
-      "decisions_sub": "new scenarios"
+      "decisions": "decisions",
+      "decisions_sub": "decisions"
     },
     "scenarioSingular": "scenario",
     "scenarioPlural": "scenarios",
@@ -88,7 +88,7 @@
     "pluralVerb": "do",
     "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
     "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} with {{climate}}?",
-    "swappedFormat": "For different {{outcome}}, which {{operation}} could we try?",
+    "swappedFormat": "For {{outcome}}, which {{operation}} could we consider?",
     "swappedFormatNoChange": "For {{outcome}}, which {{operation}} could we consider?",
     "connectors": {
       "and": "and",
