@@ -756,6 +756,7 @@ export default function ContentPanels({
           onToggleDetail={() => togglePanelDetail("empower")}
           bgColor={getPanelBgColor("empower")}
           detailBgColor={getDetailPanelBgColor("empower")}
+          hideDetailArrow={true}
           title={<ActTextContent />}
           content={<Panel3Content />}
           detailContent={
@@ -805,6 +806,7 @@ interface PanelWithDetailProps {
   title: React.ReactNode
   content: React.ReactNode
   detailContent: React.ReactNode
+  hideDetailArrow?: boolean
 }
 
 function PanelWithDetail({
@@ -815,6 +817,7 @@ function PanelWithDetail({
   title,
   content,
   detailContent,
+  hideDetailArrow = false,
 }: PanelWithDetailProps) {
   // Track height of panel container for seamless matching
   const panelRef = useRef<HTMLDivElement>(null)
@@ -939,27 +942,29 @@ function PanelWithDetail({
             >
               {content}
             </Grid>
-          </Grid>
+                    </Grid>
 
-          {/* Right centered play icon */}
-          <IconButton
-            onClick={onToggleDetail}
-            sx={{
-              position: "absolute",
-              right: 30,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "white",
-              backgroundColor: "transparent",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.3)",
-              },
-              width: 60,
-              height: 60,
-            }}
-          >
-            <PlayArrowIcon sx={{ fontSize: 36 }} />
-          </IconButton>
+          {/* Right centered play icon - only shown when not hidden */}
+          {!hideDetailArrow && (
+            <IconButton
+              onClick={onToggleDetail}
+              sx={{
+                position: "absolute",
+                right: 30,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "white",
+                backgroundColor: "transparent",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.3)",
+                },
+                width: 60,
+                height: 60,
+              }}
+            >
+              <PlayArrowIcon sx={{ fontSize: 36 }} />
+            </IconButton>
+          )}
 
           {/* Bottom scroll icon */}
           <Box
