@@ -1330,8 +1330,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         } else {
           return (
             <>
-              To these {outcomePart} with {climateElement}, which{" "}
-              {operationsPart} could we consider?
+              To achieve these{" "}
+              <ColoredText color={theme.palette.cool.main}>
+                {t("questionBuilder.defaultTerms.outcomes")}
+              </ColoredText>{" "}
+              with {climateElement}, which {operationsPart} could we consider?
             </>
           )
         }
@@ -1342,7 +1345,14 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         <TranslatedQuestion
           translationKey="questionBuilder.swappedFormat"
           values={{
-            outcome: outcomePart,
+            outcome: (
+              <>
+                achieve{" "}
+                <ColoredText color={theme.palette.cool.main}>
+                  {t("questionBuilder.defaultTerms.outcomes")}
+                </ColoredText>
+              </>
+            ),
             operation: operationsPart,
             scenarioText: scenarioText,
           }}
