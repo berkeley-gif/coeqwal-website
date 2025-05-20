@@ -341,13 +341,13 @@ export const useQuestionBuilderHelpers = () => {
     (text: string) => {
       // First, check if we should use Spanish
       const useSpanish = locale === "es"
-      
+
       // Get all operation cards for term lookup
       const operationCards = OPERATION_CARD_DEFINITIONS
-      
+
       // Check if we're in swapped mode
       const isSwapped = state.swapped
-      
+
       // Helper function to find term for an operation ID based on swapped state
       const getTermForOperation = (opId: string): string => {
         // First check in main operation cards
@@ -363,7 +363,7 @@ export const useQuestionBuilderHelpers = () => {
             }
             return opId
           }
-          
+
           // Check in sub-options if they exist
           if (card.subOptions) {
             for (const subOption of card.subOptions) {
@@ -381,28 +381,26 @@ export const useQuestionBuilderHelpers = () => {
             }
           }
         }
-        
+
         // Fallback: special formatting for certain IDs
-        const specialCases: Record<string, string> = {
-          "removing-flow-reqs": useSpanish
+        if (text === "removing-flow-reqs") {
+          return useSpanish
             ? "eliminar requisitos de flujo de afluentes"
-            : "removing tributary flow requirements",
-          "delta-conveyance": useSpanish
+            : "removing tributary flow requirements"
+        }
+
+        if (text === "delta-conveyance") {
+          return useSpanish
             ? "túnel de transporte del Delta"
-            : "Delta conveyance tunnel",
+            : "Delta conveyance tunnel"
         }
-        
-        // Check if the text is a special case
-        if (text in specialCases) {
-          return specialCases[text]
-        }
-        
+
         return opId // Final fallback
       }
-      
+
       // Get the appropriate term for this operation based on swapped state
-      let translatedText = getTermForOperation(text)
-      
+      const translatedText = getTermForOperation(text)
+
       // List of prefixes that indicate proper nouns that should keep capitalization
       const properNounPrefixes = [
         "Alt ",
@@ -426,18 +424,18 @@ export const useQuestionBuilderHelpers = () => {
         "Proyecto",
         "Túnel",
       ]
-      
+
       // Keep original case for proper nouns
       for (const prefix of properNounPrefixes) {
         if (translatedText.startsWith(prefix)) {
           return translatedText
         }
       }
-      
+
       // Otherwise, make first letter lowercase
       return translatedText.charAt(0).toLowerCase() + translatedText.slice(1)
     },
-    [locale, state.swapped]
+    [locale, state.swapped],
   )
 
   // Get operation's short text

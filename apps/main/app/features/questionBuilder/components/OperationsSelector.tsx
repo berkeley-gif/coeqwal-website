@@ -76,22 +76,22 @@ const WATER_PALETTE = {
 
 // TypeScript interfaces for operation cards
 interface OperationSubOption {
-  id: string;
-  label?: string;
-  term?: string;
-  switchedTerm?: string;
-  isSingular: boolean;
+  id: string
+  label?: string
+  term?: string
+  switchedTerm?: string
+  isSingular: boolean
 }
 
 interface OperationCard {
-  id: string;
-  title?: string;
-  term?: string;
-  switchedTerm?: string;
-  bullet?: { color: string; size: number };
-  titleColor?: string;
-  isSingular: boolean;
-  subOptions?: OperationSubOption[];
+  id: string
+  title?: string
+  term?: string
+  switchedTerm?: string
+  bullet?: { color: string; size: number }
+  titleColor?: string
+  isSingular: boolean
+  subOptions?: OperationSubOption[]
 }
 
 // Card data for the operation cards
@@ -325,7 +325,13 @@ export const OPERATION_CARD_DEFINITIONS: OperationCard[] = [
     id: "current-operations",
     isSingular: false,
     switchedTerm: "current operations",
-    subOptions: [{ id: "use-as-comparison", isSingular: false, switchedTerm: "current operations" }],
+    subOptions: [
+      {
+        id: "use-as-comparison",
+        isSingular: false,
+        switchedTerm: "current operations",
+      },
+    ],
   },
   {
     id: "limit-groundwater",
@@ -333,10 +339,30 @@ export const OPERATION_CARD_DEFINITIONS: OperationCard[] = [
     switchedTerm: "groundwater limitation",
     term: "limiting groundwater pumping",
     subOptions: [
-      { id: "sjv-only", isSingular: true, switchedTerm: "San Joaquin Valley groundwater", term: "SJV groundwater limits" },
-      { id: "both-valleys", isSingular: false, switchedTerm: "valley-wide groundwater", term: "valley-wide groundwater limits" },
-      { id: "sjv-reduced-acreage", isSingular: false, switchedTerm: "San Joaquin Valley groundwater & acreage", term: "SJV groundwater & acreage limits" },
-      { id: "both-valleys-reduced-acreage", isSingular: false, switchedTerm: "valley-wide groundwater & acreage", term: "valley-wide groundwater & acreage limits" },
+      {
+        id: "sjv-only",
+        isSingular: true,
+        switchedTerm: "San Joaquin Valley groundwater",
+        term: "SJV groundwater limits",
+      },
+      {
+        id: "both-valleys",
+        isSingular: false,
+        switchedTerm: "valley-wide groundwater",
+        term: "valley-wide groundwater limits",
+      },
+      {
+        id: "sjv-reduced-acreage",
+        isSingular: false,
+        switchedTerm: "San Joaquin Valley groundwater & acreage",
+        term: "SJV groundwater & acreage limits",
+      },
+      {
+        id: "both-valleys-reduced-acreage",
+        isSingular: false,
+        switchedTerm: "valley-wide groundwater & acreage",
+        term: "valley-wide groundwater & acreage limits",
+      },
     ],
   },
   {
@@ -384,12 +410,12 @@ export const OPERATION_CARD_DEFINITIONS: OperationCard[] = [
 
 // Define the SubOption interface explicitly for the component
 interface SubOption {
-  id: string;
-  label: string;
-  selected: boolean;
-  term?: string;
-  switchedTerm?: string;
-  isSingular: boolean;
+  id: string
+  label: string
+  selected: boolean
+  term?: string
+  switchedTerm?: string
+  isSingular: boolean
 }
 
 const OperationsSelector: React.FC<OperationsSelectorProps> = ({
@@ -434,10 +460,12 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     const lowercaseSearch = searchTerm.toLowerCase()
     return OPERATION_CARDS().filter(
       (op) =>
-        (op.title?.toLowerCase().includes(lowercaseSearch) || false) ||
-        (op.subOptions?.some((sub) =>
-          sub.label?.toLowerCase().includes(lowercaseSearch)
-        ) || false)
+        op.title?.toLowerCase().includes(lowercaseSearch) ||
+        false ||
+        op.subOptions?.some((sub) =>
+          sub.label?.toLowerCase().includes(lowercaseSearch),
+        ) ||
+        false,
     )
   }, [searchTerm])
 
@@ -446,10 +474,11 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     return filteredOperations.map((op) => {
       const mainOptionSelected = selectedOperations.includes(op.id)
 
-      const subOptionsWithState = op.subOptions?.map((sub) => ({
-        ...sub,
-        selected: selectedOperations.includes(sub.id),
-      })) || []
+      const subOptionsWithState =
+        op.subOptions?.map((sub) => ({
+          ...sub,
+          selected: selectedOperations.includes(sub.id),
+        })) || []
 
       return {
         ...op,
@@ -831,7 +860,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
           {operationCardsWithState.map((op) => (
             <OperationCard
               key={op.id}
-              title={op.title || ''}
+              title={op.title || ""}
               bullet={op.bullet}
               titleColor={op.titleColor}
               subOptions={op.subOptions as SubOption[]}

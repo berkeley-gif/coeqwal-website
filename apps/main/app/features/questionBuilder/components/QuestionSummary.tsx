@@ -52,20 +52,20 @@ interface QuestionSummaryProps {
 
 // Define the expected operation card structure for type checking
 interface OpCard {
-  id: string;
-  title: string;
-  term: string;
-  switchedTerm?: string;
-  bullet: { color: string; size: number };
-  titleColor: string;
-  isSingular: boolean;
+  id: string
+  title: string
+  term: string
+  switchedTerm?: string
+  bullet: { color: string; size: number }
+  titleColor: string
+  isSingular: boolean
   subOptions: {
-    id: string;
-    label: string;
-    term: string;
-    switchedTerm?: string;
-    isSingular: boolean;
-  }[];
+    id: string
+    label: string
+    term: string
+    switchedTerm?: string
+    isSingular: boolean
+  }[]
 }
 
 const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
@@ -174,14 +174,18 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         for (const card of operationCards) {
           if (card.id === opId) {
             // Use term appropriate for the current state
-            return swapped && card.switchedTerm ? card.switchedTerm : (card.term || opId)
+            return swapped && card.switchedTerm
+              ? card.switchedTerm
+              : card.term || opId
           }
 
           // Then check sub-options
           for (const subOp of card.subOptions) {
             if (subOp.id === opId) {
               // Use term appropriate for the current state
-              return swapped && subOp.switchedTerm ? subOp.switchedTerm : (subOp.term || opId)
+              return swapped && subOp.switchedTerm
+                ? subOp.switchedTerm
+                : subOp.term || opId
             }
           }
         }
