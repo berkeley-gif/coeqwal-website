@@ -253,7 +253,9 @@ export default function ContentPanels({
                   width: "100%",
                 }}
               >
-                Learn
+                Learn about
+                <br />
+                California Central Valley water
               </Typography>
               <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
@@ -273,7 +275,7 @@ export default function ContentPanels({
                       fontWeight={600}
                       sx={{ mb: 1 }}
                     >
-                      California Water
+                      Central Valley Water
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -284,13 +286,13 @@ export default function ContentPanels({
                         fontStyle: "italic",
                       }}
                     >
-                      A natural system shaped by terrain, climate, and time
+                      A natural system fed by rain and snowpack
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Water in California begins as snow, rain, and runoff. It
-                      travels through rivers, sinks into groundwater, or flows
-                      out to sea. From the mountains to the Delta, understanding
-                      how water moves through the state is the first step toward
+                      Water in California begins as precipitation. It travels
+                      through rivers, sinks into groundwater, or flows out to
+                      sea. From the mountains to the Delta, understanding how
+                      water moves through the state is the first step toward
                       shaping its future.
                     </Typography>
                     <Box
@@ -383,37 +385,50 @@ export default function ContentPanels({
                       fontWeight={600}
                       sx={{ mb: 1 }}
                     >
-                      Managing Groundwater in a Changing Agricultural Landscape
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      color="white"
-                      sx={{
-                        mb: 2,
-                        opacity: 0.8,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      Sustainable strategies for groundwater basins
+                      Growing Challenges
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Explore scenarios for implementing the Sustainable
-                      Groundwater Management Act (SGMA) in agricultural regions
-                      where land use changes are expected. These scenarios
-                      examine different pathways for groundwater sustainability
-                      and their impacts on agriculture.
+                      California faces increasing water challenges from climate
+                      change, aging infrastructure, and deepening inequities in
+                      water access. Understanding these challenges and their
+                      impacts on communities is essential for developing
+                      effective, equitable solutions.
                     </Typography>
                     <Box
+                      component="a"
+                      href="https://flow.coeqwal.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mb: 1,
+                        fontWeight: 500,
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      Learn more: Climate change and California water →
+                    </Box>
+                    <Box
+                      component="a"
+                      href="https://flow.coeqwal.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       sx={{
                         color: "#FFAC6E",
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
                         fontWeight: 500,
-                        cursor: "default",
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
                       }}
                     >
-                      Explore groundwater sustainability scenarios →
+                      Learn more: Equity in California water →
                     </Box>
                   </Box>
                 </Grid>
@@ -499,7 +514,7 @@ export default function ContentPanels({
                   width: "100%",
                 }}
               >
-                Explore
+                Explore scenario themes
               </Typography>
               <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
