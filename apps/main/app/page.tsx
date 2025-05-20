@@ -266,7 +266,7 @@ export default function Home() {
         sx={{
           position: "relative",
           zIndex: 20,
-          pointerEvents: "none",
+          pointerEvents: "auto",
           width: "100%",
         }}
       >

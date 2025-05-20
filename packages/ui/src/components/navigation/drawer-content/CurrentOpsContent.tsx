@@ -15,6 +15,7 @@ import {
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance"
 import CompareIcon from "@mui/icons-material/Compare"
 import Psychology from "@mui/icons-material/Psychology"
+import Diversity3Icon from "@mui/icons-material/Diversity3"
 import React from "react"
 
 export interface CurrentOpsContentProps {
@@ -37,7 +38,7 @@ interface GlossaryTerm {
 // Array of glossary terms with Material Icons
 const glossaryTerms: GlossaryTerm[] = [
   {
-    icon: <LibraryBooksIcon />,
+    icon: <Diversity3Icon />,
     term: "COEQWAL",
     definition:
       "A collaborative project focused on expanding access to water data, exploring alternative water management decisions, and supporting more equitable and inclusive stewardship of California's water system.",

@@ -1011,11 +1011,11 @@ const IntroSection: React.FC = () => {
                               },
                             }}
                             onClick={() => {
-                              // Open glossary drawer with Water scenarios term
+                              // Open glossary drawer with Scenarios term
                               const drawerStore = useDrawerStore.getState()
                               drawerStore.setDrawerContent({
                                 selectedSection: "glossary",
-                                selectedTerm: "Water scenarios",
+                                selectedTerm: "Scenarios",
                               })
                               drawerStore.openDrawer("glossary")
                             }}
@@ -1091,11 +1091,11 @@ const IntroSection: React.FC = () => {
                             },
                           }}
                           onClick={() => {
-                            // Open glossary drawer with Water scenarios term
+                            // Open glossary drawer with Scenarios term
                             const drawerStore = useDrawerStore.getState()
                             drawerStore.setDrawerContent({
                               selectedSection: "glossary",
-                              selectedTerm: "Water scenarios",
+                              selectedTerm: "Scenarios",
                             })
                             drawerStore.openDrawer("glossary")
                           }}

@@ -78,15 +78,15 @@ export default function ContentPanels({
 
   // First panel content - Understanding California Water
   const Panel1Content = () => (
-    <Box>
-      <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+    <Box sx={{ pointerEvents: "auto" }}>
+      <Typography variant="body2" color="common.white" sx={{ mb: 4, pointerEvents: "auto" }}>
         Water in California travels remarkable distances. Most of it falls far
         from where it is needed. By understanding how
         water flows and how policies and management decisions balance water
         needs across the state, you can participate in shaping our shared water
         future.
       </Typography>
-      <Typography variant="body2" color="common.white">
+      <Typography variant="body2" color="common.white" sx={{ pointerEvents: "auto" }}>
         Use our California Water Learning Library to deepen your understanding,
         explore key topics, and become an informed advocate.
       </Typography>
@@ -95,13 +95,13 @@ export default function ContentPanels({
 
   // Second panel content - COEQWAL Project Modeling
   const Panel2Content = () => (
-    <Box>
-      <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+    <Box sx={{ pointerEvents: "auto" }}>
+      <Typography variant="body2" color="common.white" sx={{ mb: 4, pointerEvents: "auto" }}>
         The COEQWAL project is using the same computer models as the state
         Department of Water Resources and the U.S. Bureau of Reclamation to
         model a broad range of water management and climate scenarios.
       </Typography>
-      <Typography variant="body2" color="common.white">
+      <Typography variant="body2" color="common.white" sx={{ pointerEvents: "auto" }}>
         Explore these scenario themes and empower your community with actionable
         insights to advocate for water solutions.
       </Typography>
@@ -110,13 +110,13 @@ export default function ContentPanels({
 
   // Third panel content - Community Impact
   const Panel3Content = () => (
-    <Box>
-      <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
+    <Box sx={{ pointerEvents: "auto" }}>
+      <Typography variant="body2" color="common.white" sx={{ mb: 4, pointerEvents: "auto" }}>
         How will policy changes impact your community&apos;s water supply and
         environment? What strategies could help your community achieve their
         water goals?
       </Typography>
-      <Typography variant="body2" color="common.white">
+      <Typography variant="body2" color="common.white" sx={{ pointerEvents: "auto" }}>
         Search our scenario data, identify actionable strategies, and take
         informed steps to advocate effectively for your community&apos;s water
         future.
@@ -170,16 +170,19 @@ export default function ContentPanels({
         width: "100%", // Full width of parent
         maxWidth: "100%", // Ensure it doesn't exceed parent width
         boxSizing: "border-box", // Include padding in width calculation
+        userSelect: "text", // Ensure text is selectable
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
           isolation: "isolate", // Create stacking context
           zIndex: 1000, // Push active panels above others
+          userSelect: "text", // Ensure text is selectable
         },
         "& .active-detail-panel": {
           position: "absolute", // Absolutely position detail panels
           zIndex: 1000,
           overflow: "visible",
           width: "100%", // Same width as parent
+          userSelect: "text", // Ensure text is selectable
         },
       }}
     >
@@ -220,21 +223,219 @@ export default function ContentPanels({
                 sx={{
                   fontSize: "5rem",
                   fontWeight: 700,
-                  alignSelf: "flex-start",
+                  alignSelf: "center",
+                  pointerEvents: "auto",
+                  mb: 4,
+                  width: "100%",
+                  textAlign: "center",
                 }}
               >
                 Learn
               </Typography>
-              <Box>
-                <Typography variant="body2" color="common.white">
-                  Understanding California&apos;s water system means
-                  appreciating its geography, climate, infrastructure, and
-                  policy frameworks. State and federal water management
-                  includes a complex network of reservoirs, aqueducts, and
-                  groundwater basins that work together to meet environmental,
-                  agricultural, and community needs.
-                </Typography>
-              </Box>
+              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto", justifyContent: "center" }}>
+                <Grid
+                  size={{ xs: 12, md: 6 }}
+                  sx={{ pointerEvents: "auto" }}
+                >
+                  <Box sx={{ 
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: 2,
+                    p: 3,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}>
+                    <Typography variant="h4" color="white" fontWeight={600} sx={{ mb: 1 }}>
+                      California Water
+                    </Typography>
+                    <Typography variant="subtitle1" color="white" sx={{ 
+                      mb: 2,
+                      opacity: 0.8,
+                      fontStyle: "italic"
+                    }}>
+                      A natural system shaped by terrain, climate, and time
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      Water in California begins as snow, rain, and runoff. It travels through rivers, sinks into groundwater, 
+                      or flows out to sea. From the mountains to the Delta, understanding how water moves through the state is 
+                      the first step toward shaping its future.
+                    </Typography>
+                    <Box 
+                      component="a"
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        "&:hover": {
+                          textDecoration: "underline"
+                        }
+                      }}
+                      onClick={() => onOpenLearnDrawer?.("water-movement")}
+                    >
+                      Learn more: How water moves through California →
+                    </Box>
+                  </Box>
+                </Grid>
+                
+                <Grid
+                  size={{ xs: 12, md: 6 }}
+                  sx={{ pointerEvents: "auto" }}
+                >
+                  <Box sx={{ 
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: 2,
+                    p: 3,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}>
+                    <Typography variant="h4" color="white" fontWeight={600} sx={{ mb: 1 }}>
+                      Managing California's Water
+                    </Typography>
+                    <Typography variant="subtitle1" color="white" sx={{ 
+                      mb: 2,
+                      opacity: 0.8,
+                      fontStyle: "italic"
+                    }}>
+                      Who decides where water goes—and when?
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      California's water is managed by a patchwork of agencies, laws, and agreements. Decisions about storage, 
+                      delivery, and environmental flows affect nearly every part of the state, every season.
+                    </Typography>
+                    <Box 
+                      component="a"
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        "&:hover": {
+                          textDecoration: "underline"
+                        }
+                      }}
+                      onClick={() => onOpenLearnDrawer?.("management")}
+                    >
+                      Learn more: How California's water is managed →
+                    </Box>
+                  </Box>
+                </Grid>
+                
+                {/* Growing Challenges Card */}
+                <Grid
+                  size={{ xs: 12, md: 6 }}
+                  sx={{ pointerEvents: "auto" }}
+                >
+                  <Box sx={{ 
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: 2,
+                    p: 3,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}>
+                    <Typography variant="h4" color="white" fontWeight={600} sx={{ mb: 1 }}>
+                      Growing Challenges
+                    </Typography>
+                    <Typography variant="subtitle1" color="white" sx={{ 
+                      mb: 2,
+                      opacity: 0.8,
+                      fontStyle: "italic"
+                    }}>
+                      Climate change and equity are reshaping the water system
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      California faces rising temperatures, shrinking snowpack, and more frequent droughts. 
+                      These changes strain already stressed water supplies—and not all communities are impacted equally. 
+                      Some experience chronic shortages, contamination, or lack meaningful access to water decisions.
+                    </Typography>
+                    <Box sx={{ mt: "auto" }}>
+                      <Box 
+                        component="a"
+                        sx={{
+                          color: "#FFAC6E",
+                          textDecoration: "none",
+                          display: "block",
+                          fontWeight: 500,
+                          mb: 1,
+                          "&:hover": {
+                            textDecoration: "underline"
+                          }
+                        }}
+                        onClick={() => onOpenLearnDrawer?.("climate-change")}
+                      >
+                        Learn more: Climate change and California water →
+                      </Box>
+                      <Box 
+                        component="a"
+                        sx={{
+                          color: "#FFAC6E",
+                          textDecoration: "none",
+                          display: "block",
+                          fontWeight: 500,
+                          "&:hover": {
+                            textDecoration: "underline"
+                          }
+                        }}
+                        onClick={() => onOpenLearnDrawer?.("equity")}
+                      >
+                        Learn more: Equity in California water →
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid>
+                
+                {/* Exploring California's Water Futures Card */}
+                <Grid
+                  size={{ xs: 12, md: 6 }}
+                  sx={{ pointerEvents: "auto" }}
+                >
+                  <Box sx={{ 
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    borderRadius: 2,
+                    p: 3,
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}>
+                    <Typography variant="h4" color="white" fontWeight={600} sx={{ mb: 1 }}>
+                      🔮 Exploring California's Water Futures
+                    </Typography>
+                    <Typography variant="subtitle1" color="white" sx={{ 
+                      mb: 2,
+                      opacity: 0.8,
+                      fontStyle: "italic"
+                    }}>
+                      What if we made different choices?
+                    </Typography>
+                    <Typography variant="body1" color="white" sx={{ mb: 3 }}>
+                      The COEQWAL project uses the CalSim3 model—trusted by state and federal agencies—to 
+                      simulate a range of alternative water futures. These scenarios explore how changes in 
+                      policy, climate, and priorities could shape water availability, distribution, and 
+                      outcomes across California.
+                    </Typography>
+                    <Box 
+                      component="a"
+                      sx={{
+                        color: "#FFAC6E",
+                        textDecoration: "none",
+                        display: "block",
+                        mt: "auto",
+                        fontWeight: 500,
+                        "&:hover": {
+                          textDecoration: "underline"
+                        }
+                      }}
+                      onClick={() => onOpenLearnDrawer?.("calsim3")}
+                    >
+                      Learn more: Exploring water futures with CalSim3 →
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
             </>
           }
         />
@@ -403,6 +604,7 @@ function PanelWithDetail({
           height: "100%",
           position: "relative", // Keep in normal flow
           willChange: "transform", // Hint for browser optimization
+          userSelect: "text", // Ensure text is selectable
         }}
         animate={{
           x: isActive ? "-100%" : "0%", // Slide left when active
@@ -424,6 +626,7 @@ function PanelWithDetail({
             position: "relative", // For absolute positioning of icons
             borderRadius: 0, // No border radius
             height: "100%", // Fill the full height
+            userSelect: "text", // Ensure text is selectable
           }}
         >
           <Grid container spacing={6} alignItems="flex-start">
@@ -435,13 +638,18 @@ function PanelWithDetail({
                 alignItems: "flex-start",
                 justifyContent: "flex-start",
                 pt: 0,
+                pointerEvents: "auto",
               }}
             >
               {title}
             </Grid>
             <Grid
               size={{ xs: 12, md: 8 }}
-              sx={{ display: "flex", alignItems: "flex-start" }}
+              sx={{ 
+                display: "flex", 
+                alignItems: "flex-start",
+                pointerEvents: "auto", 
+              }}
             >
               {content}
             </Grid>
@@ -508,6 +716,7 @@ function PanelWithDetail({
           width: "100%", // Same width as main panel
           height: "auto", // Let it grow taller if needed
           willChange: "transform",
+          userSelect: "text", // Ensure text is selectable
         }}
         animate={{
           x: isActive ? "-100%" : "0%", // Slide left when active
@@ -530,6 +739,7 @@ function PanelWithDetail({
             borderRadius: 0, // No border radius
             minHeight: "100%", // At least as tall as container
             height: "auto", // Grow with content
+            userSelect: "text", // Ensure text is selectable
           }}
         >
           <Grid container spacing={6} alignItems="flex-start">
@@ -541,6 +751,7 @@ function PanelWithDetail({
                 alignItems: "flex-start",
                 justifyContent: "flex-start",
                 pt: 0,
+                pointerEvents: "auto",
               }}
             >
               {detailContent}
