@@ -646,16 +646,15 @@ const IntroSection: React.FC = () => {
           />
         </Box>
 
-        <Box
+        {/* <Box
           sx={{
-            position: "fixed",
-            top: "50vh",
+            position: "absolute",
+            top: "100vh",
             left: 0,
             width: "100%",
-            height: "65%",
+            height: "80%",
             zIndex: 20,
             pointerEvents: "none",
-            transform: "translateX(0)",
           }}
         >
           <Image
@@ -667,11 +666,12 @@ const IntroSection: React.FC = () => {
             sizes="100vw"
             style={{
               objectFit: "contain",
-              objectPosition: "center",
+              objectPosition: "top center",
               pointerEvents: "none",
+              // transform: "scale(1.3)",
             }}
           />
-        </Box>
+        </Box> */}
       </Box>
 
       {/* First section with bubbles - limited to 100vh */}
@@ -725,7 +725,7 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "white",
               mb: 3, // 32px spacing
-              fontSize: "108px",
+              fontSize: "100px",
               fontWeight: 600,
               lineHeight: 0.8,
               // textShadow:
@@ -942,49 +942,173 @@ const IntroSection: React.FC = () => {
               <Typography variant="body2" color="white">
                 {(() => {
                   const text = t("interstitial.part2")
+                  
+                  // First check for COEQWAL and split if found
+                  const coeqwalIndex = text.indexOf("COEQWAL")
+                  if (coeqwalIndex !== -1) {
+                    // Text before COEQWAL
+                    const beforeText = text.substring(0, coeqwalIndex)
+                    
+                    // Get text after COEQWAL to look for "scenarios"
+                    const afterCoeqwalText = text.substring(coeqwalIndex + 7) // 7 is length of "COEQWAL"
+                    
+                    // Look for "scenarios" in the remaining text
+                    const scenariosIndex = afterCoeqwalText.indexOf("scenarios")
+                    
+                    if (scenariosIndex !== -1) {
+                      // Text between COEQWAL and scenarios
+                      const betweenText = afterCoeqwalText.substring(0, scenariosIndex)
+                      
+                      // Text after scenarios
+                      const afterScenariosText = afterCoeqwalText.substring(scenariosIndex + 9) // 9 is length of "scenarios"
+                      
+                      return (
+                        <>
+                          {beforeText}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative", // Add explicit position
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              // Open glossary drawer with COEQWAL term
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "COEQWAL",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            COEQWAL
+                          </Box>
+                          {betweenText}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd", // Same as conveyance background
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative", // Add explicit position
+                              "&:hover": {
+                                backgroundColor: "#13629b", // Same hover color as conveyance
+                              },
+                            }}
+                            onClick={() => {
+                              // Open glossary drawer with Water scenarios term
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Water scenarios",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            scenarios
+                          </Box>
+                          {afterScenariosText}
+                        </>
+                      )
+                    }
+                    
+                    // If scenarios not found, just highlight COEQWAL
+                    return (
+                      <>
+                        {beforeText}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative", // Add explicit position
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with COEQWAL term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "COEQWAL",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          COEQWAL
+                        </Box>
+                        {afterCoeqwalText}
+                      </>
+                    )
+                  }
+                  
+                  // If COEQWAL not found, check for scenarios only
                   const scenariosIndex = text.indexOf("scenarios")
+                  if (scenariosIndex !== -1) {
+                    // Split into three parts: before, the word itself, and after
+                    const beforeText = text.substring(0, scenariosIndex)
+                    const afterText = text.substring(scenariosIndex + 9) // 9 is length of "scenarios"
 
-                  // If "scenarios" is not found, return the original text
-                  if (scenariosIndex === -1) return text
+                    return (
+                      <>
+                        {beforeText}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd", // Same as conveyance background
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative", // Add explicit position
+                            "&:hover": {
+                              backgroundColor: "#13629b", // Same hover color as conveyance
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with Water scenarios term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Water scenarios",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          scenarios
+                        </Box>
+                        {afterText}
+                      </>
+                    )
+                  }
 
-                  // Split into three parts: before, the word itself, and after
-                  const beforeText = text.substring(0, scenariosIndex)
-                  const afterText = text.substring(scenariosIndex + 9) // 9 is length of "scenarios"
-
-                  return (
-                    <>
-                      {beforeText}
-                      <Box
-                        component="span"
-                        sx={{
-                          backgroundColor: "#257dbd", // Same as conveyance background
-                          color: "white",
-                          px: 1,
-                          py: 0.3,
-                          mx: 0.1,
-                          borderRadius: 1,
-                          cursor: "pointer",
-                          display: "inline-block",
-                          position: "relative", // Add explicit position
-                          "&:hover": {
-                            backgroundColor: "#13629b", // Same hover color as conveyance
-                          },
-                        }}
-                        onClick={() => {
-                          // Open glossary drawer with Water scenarios term
-                          const drawerStore = useDrawerStore.getState()
-                          drawerStore.setDrawerContent({
-                            selectedSection: "glossary",
-                            selectedTerm: "Water scenarios",
-                          })
-                          drawerStore.openDrawer("glossary")
-                        }}
-                      >
-                        scenarios
-                      </Box>
-                      {afterText}
-                    </>
-                  )
+                  // If neither term was found, return the original text
+                  return text
                 })()}
               </Typography>
               {/* <Typography variant="body2" color="white">

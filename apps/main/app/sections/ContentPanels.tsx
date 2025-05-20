@@ -81,8 +81,7 @@ export default function ContentPanels({
     <Box>
       <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
         Water in California travels remarkable distances. Most of it falls far
-        from where it is needed. Managing this journey involves one of the most
-        complex water conveyance systems in the world. By understanding how
+        from where it is needed. By understanding how
         water flows and how policies and management decisions balance water
         needs across the state, you can participate in shaping our shared water
         future.
@@ -228,9 +227,9 @@ export default function ContentPanels({
               </Typography>
               <Box>
                 <Typography variant="body2" color="common.white">
-                  Understanding California`&apos;`s water system means
+                  Understanding California&apos;s water system means
                   appreciating its geography, climate, infrastructure, and
-                  policy frameworks. The state`&apos;`s water management
+                  policy frameworks. State and federal water management
                   includes a complex network of reservoirs, aqueducts, and
                   groundwater basins that work together to meet environmental,
                   agricultural, and community needs.
