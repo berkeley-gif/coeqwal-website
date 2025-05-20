@@ -124,9 +124,12 @@
     "climateSelector": {
       "title": "climate",
       "options": {
-        "hist_adj": "current conditions",
-        "cc50": "moderate change by mid-century: +1.5°C warming, 3% less rain",
-        "cc95": "severe change by mid-century: +1.8°C warming, 9% less rain"
+        "hist_adj": "current climate",
+        "cc50": "moderate warming",
+        "cc95": "severe warming",
+        "extreme_warming": "extreme warming",
+        "extreme_drying": "extreme drying",
+        "wetter_future": "wetter future"
       }
     },
     "sectionAccordion": {
