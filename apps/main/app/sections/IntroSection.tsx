@@ -153,6 +153,7 @@ const availableImages = [
   "9.png",
   "11.png",
   "12.png",
+  "14.png",
 ]
 
 // Function to generate a random value within a range
@@ -165,6 +166,7 @@ const circlePositions = {
   // Background circles (appear behind text)
   background: [
     { left: "35%", top: "15%" },
+    { left: "60%", top: "10%" },
     { left: "60%", top: "25%" },
     { left: "75%", top: "10%" },
     { left: "50%", top: "45%" },
@@ -311,6 +313,18 @@ interface WhiteCircleProps {
   top: string
   size: number
   opacity: number
+  freqX1?: number
+  freqX2?: number
+  freqY1?: number
+  freqY2?: number
+  phaseX1?: number
+  phaseX2?: number
+  phaseY1?: number
+  phaseY2?: number
+  amplitudeX1?: number
+  amplitudeX2?: number
+  amplitudeY1?: number
+  amplitudeY2?: number
 }
 
 const WhiteCircle: React.FC<WhiteCircleProps> = ({
@@ -318,10 +332,82 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
   top,
   size,
   opacity,
+  freqX1 = 0.05,
+  freqX2 = 0.03,
+  freqY1 = 0.04,
+  freqY2 = 0.06,
+  phaseX1 = 0,
+  phaseX2 = 0,
+  phaseY1 = 0,
+  phaseY2 = 0,
+  amplitudeX1 = 20,
+  amplitudeX2 = 15,
+  amplitudeY1 = 25,
+  amplitudeY2 = 18,
 }) => {
+  // Use refs to store time-related values
+  const timeRef = useRef(Math.random() * 100) // Start at random point in animation
+
+  // Create motion values for animation
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+
+  // Use requestAnimationFrame to create continuous, organic motion
+  useEffect(() => {
+    let animationId: number
+
+    const animate = () => {
+      // Update time value - increase speed from 0.015 to 0.025 for more visible motion
+      timeRef.current += 0.025
+
+      // Calculate complex, overlapping sine wave motion
+      // X position: combine two sine waves with different frequencies and phases
+      const newX =
+        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 +
+        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2
+
+      // Y position: combine two cosine waves with different frequencies and phases
+      const newY =
+        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 +
+        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2
+
+      // Apply new values
+      x.set(newX)
+      y.set(newY)
+
+      // Continue animation
+      animationId = requestAnimationFrame(animate)
+    }
+
+    // Start animation
+    animationId = requestAnimationFrame(animate)
+
+    // Cleanup
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
+  }, [
+    amplitudeX1,
+    amplitudeX2,
+    amplitudeY1,
+    amplitudeY2,
+    freqX1,
+    freqX2,
+    freqY1,
+    freqY2,
+    phaseX1,
+    phaseX2,
+    phaseY1,
+    phaseY2,
+    x,
+    y,
+  ])
+
   return (
-    <Box
-      sx={{
+    <motion.div
+      style={{
         position: "absolute",
         width: `${size}px`,
         height: `${size}px`,
@@ -332,6 +418,9 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
         top,
         zIndex: 0, // Very low z-index to ensure it's behind everything
         pointerEvents: "none",
+        x,
+        y,
+        transformOrigin: "center",
       }}
     />
   )
@@ -357,6 +446,9 @@ const IntroSection: React.FC = () => {
 
     for (let row = 0; row < gridRows; row++) {
       for (let col = 0; col < gridColumns; col++) {
+        // Skip some cells for more natural distribution
+        if (Math.random() > 0.9) continue
+
         // Calculate base position with a grid cell
         const baseLeft = (col / gridColumns) * 100
         const baseTop = (row / gridRows) * 90 // Keep in top 90%
@@ -384,7 +476,29 @@ const IntroSection: React.FC = () => {
           opacity = 0.05 + Math.random() * 0.07
         }
 
-        circles.push({ left, top, size, opacity })
+        // Add animation parameters with slight variations
+        const freqBase = 0.03 + Math.random() * 0.03
+        const phaseBase = Math.random() * Math.PI * 2
+        const amplitudeBase = 25 + Math.random() * 20 // Increased from 15 to 25 base amplitude
+
+        circles.push({
+          left,
+          top,
+          size,
+          opacity,
+          freqX1: freqBase + Math.random() * 0.01,
+          freqX2: freqBase - Math.random() * 0.01,
+          freqY1: freqBase + Math.random() * 0.02,
+          freqY2: freqBase - Math.random() * 0.01,
+          phaseX1: phaseBase,
+          phaseX2: phaseBase + Math.PI / 2,
+          phaseY1: phaseBase + Math.PI / 4,
+          phaseY2: phaseBase + Math.PI / 3,
+          amplitudeX1: amplitudeBase + Math.random() * 10, // Increased amplitude
+          amplitudeX2: amplitudeBase - Math.random() * 5,
+          amplitudeY1: amplitudeBase + Math.random() * 12, // Increased amplitude
+          amplitudeY2: amplitudeBase - Math.random() * 3,
+        })
       }
     }
 
@@ -394,6 +508,15 @@ const IntroSection: React.FC = () => {
       top: `${110 + Math.random() * 10}%`, // Just below the fold
       size: 250 + Math.random() * 150, // Medium-large size
       opacity: 0.04 + Math.random() * 0.03, // Very subtle
+      // Add gentler animation for the lower circle
+      freqX1: 0.02,
+      freqX2: 0.015,
+      freqY1: 0.025,
+      freqY2: 0.018,
+      amplitudeX1: 15,
+      amplitudeX2: 10,
+      amplitudeY1: 12,
+      amplitudeY2: 8,
     })
 
     setWhiteCircles(circles)
