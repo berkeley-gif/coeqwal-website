@@ -50,6 +50,24 @@ interface QuestionSummaryProps {
   wasScrolled?: boolean // Keeping prop for backward compatibility but not using it
 }
 
+// Define the expected operation card structure for type checking
+interface OpCard {
+  id: string;
+  title: string;
+  term: string;
+  switchedTerm?: string;
+  bullet: { color: string; size: number };
+  titleColor: string;
+  isSingular: boolean;
+  subOptions: {
+    id: string;
+    label: string;
+    term: string;
+    switchedTerm?: string;
+    isSingular: boolean;
+  }[];
+}
+
 const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
   const theme = useTheme()
   const { t, locale } = useTranslation()
@@ -148,20 +166,22 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       }
 
       // Get all operation cards for term lookup
-      const operationCards = OPERATION_CARDS()
+      const operationCards = OPERATION_CARDS() as OpCard[]
 
       // Helper function to find term for an operation ID
       const getTermForOperation = (opId: string): string => {
         // First check main operation cards
         for (const card of operationCards) {
           if (card.id === opId) {
-            return card.term || opId
+            // Use term appropriate for the current state
+            return swapped && card.switchedTerm ? card.switchedTerm : (card.term || opId)
           }
 
           // Then check sub-options
           for (const subOp of card.subOptions) {
             if (subOp.id === opId) {
-              return subOp.term || opId
+              // Use term appropriate for the current state
+              return swapped && subOp.switchedTerm ? subOp.switchedTerm : (subOp.term || opId)
             }
           }
         }
@@ -1278,7 +1298,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         } else {
           return (
             <>
-              For {outcomeContent}
+              To {outcomeContent}
               {climateElement}, which {operationsPart} could we consider?
             </>
           )
@@ -1306,7 +1326,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         } else {
           return (
             <>
-              For these {outcomePart} with {climateElement}, which{" "}
+              To these {outcomePart} with {climateElement}, which{" "}
               {operationsPart} could we consider?
             </>
           )

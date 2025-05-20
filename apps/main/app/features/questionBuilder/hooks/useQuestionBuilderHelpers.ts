@@ -341,54 +341,68 @@ export const useQuestionBuilderHelpers = () => {
     (text: string) => {
       // First, check if we should use Spanish
       const useSpanish = locale === "es"
-
-      // Find the operation in OPERATION_THEMES to get its label/labelEs
-      let translatedText = text
-
-      // Look through all themes and options
-      for (const theme of OPERATION_THEMES) {
-        for (const option of theme.options) {
-          // Skip string options (legacy)
-          if (typeof option === "string") continue
-
-          // Check if this is the operation we're looking for
-          if (option.id === text) {
-            // Use the Spanish label if available and Spanish is selected
-            translatedText =
-              useSpanish && option.labelEs ? option.labelEs : option.label
-            break
+      
+      // Get all operation cards for term lookup
+      const operationCards = OPERATION_CARD_DEFINITIONS
+      
+      // Check if we're in swapped mode
+      const isSwapped = state.swapped
+      
+      // Helper function to find term for an operation ID based on swapped state
+      const getTermForOperation = (opId: string): string => {
+        // First check in main operation cards
+        for (const card of operationCards) {
+          if (card.id === opId) {
+            // If in swapped mode, use switchedTerm if available
+            if (isSwapped && card.switchedTerm) {
+              return card.switchedTerm
+            }
+            // Otherwise fall back to regular term or ID
+            if (card.term) {
+              return card.term
+            }
+            return opId
           }
-
-          // Check subtypes if they exist
-          if ("subtypes" in option && Array.isArray(option.subtypes)) {
-            const subtype = option.subtypes.find(
-              (sub: { id: string; labelEs?: string; label: string }) =>
-                sub.id === text,
-            )
-            if (subtype) {
-              translatedText =
-                useSpanish && subtype.labelEs ? subtype.labelEs : subtype.label
-              break
+          
+          // Check in sub-options if they exist
+          if (card.subOptions) {
+            for (const subOption of card.subOptions) {
+              if (subOption.id === opId) {
+                // If in swapped mode, use switchedTerm if available
+                if (isSwapped && subOption.switchedTerm) {
+                  return subOption.switchedTerm
+                }
+                // Otherwise fall back to regular term or ID
+                if (subOption.term) {
+                  return subOption.term
+                }
+                return opId
+              }
             }
           }
         }
+        
+        // Fallback: special formatting for certain IDs
+        const specialCases: Record<string, string> = {
+          "removing-flow-reqs": useSpanish
+            ? "eliminar requisitos de flujo de afluentes"
+            : "removing tributary flow requirements",
+          "delta-conveyance": useSpanish
+            ? "túnel de transporte del Delta"
+            : "Delta conveyance tunnel",
+        }
+        
+        // Check if the text is a special case
+        if (text in specialCases) {
+          return specialCases[text]
+        }
+        
+        return opId // Final fallback
       }
-
-      // Special formatting for parent options with IDs (fallback if not found above)
-      const specialCases: Record<string, string> = {
-        "removing-flow-reqs": useSpanish
-          ? "eliminar requisitos de flujo de afluentes"
-          : "removing tributary flow requirements",
-        "delta-conveyance": useSpanish
-          ? "túnel de transporte del Delta"
-          : "Delta conveyance tunnel",
-      }
-
-      // Check if the text is a special case
-      if (text in specialCases) {
-        return specialCases[text]
-      }
-
+      
+      // Get the appropriate term for this operation based on swapped state
+      let translatedText = getTermForOperation(text)
+      
       // List of prefixes that indicate proper nouns that should keep capitalization
       const properNounPrefixes = [
         "Alt ",
@@ -412,18 +426,18 @@ export const useQuestionBuilderHelpers = () => {
         "Proyecto",
         "Túnel",
       ]
-
+      
       // Keep original case for proper nouns
       for (const prefix of properNounPrefixes) {
         if (translatedText.startsWith(prefix)) {
           return translatedText
         }
       }
-
+      
       // Otherwise, make first letter lowercase
       return translatedText.charAt(0).toLowerCase() + translatedText.slice(1)
     },
-    [locale],
+    [locale, state.swapped]
   )
 
   // Get operation's short text

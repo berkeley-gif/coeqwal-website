@@ -74,12 +74,33 @@ const WATER_PALETTE = {
   },
 }
 
+// TypeScript interfaces for operation cards
+interface OperationSubOption {
+  id: string;
+  label?: string;
+  term?: string;
+  switchedTerm?: string;
+  isSingular: boolean;
+}
+
+interface OperationCard {
+  id: string;
+  title?: string;
+  term?: string;
+  switchedTerm?: string;
+  bullet?: { color: string; size: number };
+  titleColor?: string;
+  isSingular: boolean;
+  subOptions?: OperationSubOption[];
+}
+
 // Card data for the operation cards
-export const OPERATION_CARDS = () => [
+export const OPERATION_CARDS = (): OperationCard[] => [
   {
     id: "current-operations",
     title: "Current operations",
     term: "current operations",
+    switchedTerm: "current operations",
     bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
     titleColor: WATER_PALETTE.currentOperations.secondary,
     isSingular: false, // plural - use "do"
@@ -88,6 +109,7 @@ export const OPERATION_CARDS = () => [
         id: "use-as-comparison",
         label: "Use as comparison",
         term: "current operations",
+        switchedTerm: "current operations",
         isSingular: false, // plural - use "do"
       },
     ],
@@ -110,6 +132,7 @@ export const OPERATION_CARDS = () => [
     id: "limit-groundwater",
     title: "What if we limited groundwater pumping?",
     term: "limiting groundwater pumping",
+    switchedTerm: "groundwater limitation",
     bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
     titleColor: WATER_PALETTE.groundwaterManagement.secondary,
     isSingular: true, // singular - use "does"
@@ -117,19 +140,22 @@ export const OPERATION_CARDS = () => [
       {
         id: "sjv-only",
         label: "...in the San Joaquin Valley only",
-        term: "SJV groundwater limits",
-        isSingular: false, // singular - use "does"
+        term: "limiting groundwater pumping",
+        switchedTerm: "groundwater pumping",
+        isSingular: true, // singular - use "does"
       },
       {
         id: "both-valleys",
         label: "...in both the Sacramento and San Joaquin Valleys",
         term: "valley-wide groundwater limits",
+        switchedTerm: "valley-wide groundwater scenario",
         isSingular: false, // singular - use "does"
       },
       {
         id: "sjv-reduced-acreage",
         label: "...in the San Joaquin Valley and reduced agricultural acreage",
         term: "SJV groundwater & acreage limits",
+        switchedTerm: "San Joaquin Valley groundwater & acreage",
         isSingular: false, // singular - use "does"
       },
       {
@@ -137,6 +163,7 @@ export const OPERATION_CARDS = () => [
         label:
           "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
         term: "valley-wide groundwater & acreage limits",
+        switchedTerm: "valley-wide groundwater & acreage",
         isSingular: false, // singular - use "does"
       },
     ],
@@ -152,34 +179,34 @@ export const OPERATION_CARDS = () => [
       {
         id: "no-environmental-flows",
         label: "...with no environmental flow requirements",
-        term: "no environmental flows",
+        term: "environmental flows",
         isSingular: false, // singular - use "does"
       },
       {
         id: "functional-flows-balance",
         label:
           "...with functional flows to balance water needs with ecosystem support",
-        term: "balanced functional flows",
+        term: "environmental flows",
         isSingular: false, // singular - use "does"
       },
       {
         id: "functional-flows-reduced",
         label:
           "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
-        term: "reduced ag & functional flows",
+        term: "environmental flows",
         isSingular: false, // singular - use "does"
       },
       {
         id: "enhanced-functional-flows-salmon",
         label: "...with enhanced functional flows to support salmon",
-        term: "salmon-enhancing flows",
+        term: "environmental flows",
         isSingular: false, // singular - use "does"
       },
       {
         id: "enhanced-functional-flows-salmon-reduced",
         label:
           "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
-        term: "reduced ag & salmon-enhancing flows",
+        term: "environmental flows",
         isSingular: false, // singular - use "does"
       },
     ],
@@ -195,27 +222,27 @@ export const OPERATION_CARDS = () => [
       {
         id: "adjust-urban-demand",
         label: "...by adjusting urban demand patterns",
-        term: "adjusted urban demand",
+        term: "drinking water",
         isSingular: true, // singular - use "does"
       },
       {
         id: "prioritize-impacted-communities",
         label:
           "...by prioritizing drinking water for the most impacted communities",
-        term: "impacted communities priority",
+        term: "drinking water",
         isSingular: true, // singular - use "does"
       },
       {
         id: "prioritize-underserved-communities",
         label:
           "...by prioritizing drinking water for all historically-underserved communities",
-        term: "underserved communities priority",
+        term: "drinking water",
         isSingular: true, // singular - use "does"
       },
       {
         id: "prioritize-all-communities",
         label: "...for all communities across the system",
-        term: "all communities priority",
+        term: "drinking water",
         isSingular: true, // singular - use "does"
       },
     ],
@@ -231,31 +258,31 @@ export const OPERATION_CARDS = () => [
       {
         id: "delta-outflows-tier1",
         label: "...by increasing Delta outflows",
-        term: "increasing Delta outflows",
+        term: "Delta water uses",
         isSingular: true, // singular - use "does"
       },
       {
         id: "reduce-sacramento-valley-deliveries",
         label: "...by reducing Sacramento Valley deliveries",
-        term: "reduced Sacramento deliveries",
+        term: "Delta water uses",
         isSingular: true, // singular - use "does"
       },
       {
         id: "more-carryover-storage-shasta",
         label: "...by requiring more carryover storage in Shasta Reservoir",
-        term: "more Shasta carryover",
+        term: "Delta water uses",
         isSingular: true, // singular - use "does"
       },
       {
         id: "less-carryover-storage-shasta",
         label: "...by allowing less carryover storage in Shasta Reservoir",
-        term: "less Shasta carryover",
+        term: "Delta water uses",
         isSingular: true, // singular - use "does"
       },
       {
         id: "reduce-delta-exports-tier1",
         label: "...by reducing Delta exports",
-        term: "reducingDelta exports",
+        term: "Delta water uses",
         isSingular: true, // singular - use "does"
       },
     ],
@@ -271,20 +298,20 @@ export const OPERATION_CARDS = () => [
       {
         id: "delta-conveyance-tunnel",
         label: "...Delta conveyance tunnel",
-        term: "Delta tunnel",
+        term: "Delta infrastructure",
         isSingular: true, // singular - use "does"
       },
       {
         id: "delta-conveyance-reduced-groundwater",
         label:
           "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
-        term: "Delta tunnel & reduced pumping",
+        term: "Delta infrastructure",
         isSingular: true, // singular - use "does"
       },
       {
         id: "delta-conveyance-functional-flows",
         label: "...Delta conveyance with functional flows",
-        term: "Delta tunnel & functional flows",
+        term: "Delta infrastructure",
         isSingular: true, // singular - use "does"
       },
     ],
@@ -293,20 +320,23 @@ export const OPERATION_CARDS = () => [
 
 // Also export a standalone version that doesn't require calling the function
 // This helps avoid circular dependencies
-export const OPERATION_CARD_DEFINITIONS = [
+export const OPERATION_CARD_DEFINITIONS: OperationCard[] = [
   {
     id: "current-operations",
     isSingular: false,
-    subOptions: [{ id: "use-as-comparison", isSingular: false }],
+    switchedTerm: "current operations",
+    subOptions: [{ id: "use-as-comparison", isSingular: false, switchedTerm: "current operations" }],
   },
   {
     id: "limit-groundwater",
     isSingular: true,
+    switchedTerm: "groundwater limitation",
+    term: "limiting groundwater pumping",
     subOptions: [
-      { id: "sjv-only", isSingular: false },
-      { id: "both-valleys", isSingular: false },
-      { id: "sjv-reduced-acreage", isSingular: false },
-      { id: "both-valleys-reduced-acreage", isSingular: false },
+      { id: "sjv-only", isSingular: true, switchedTerm: "San Joaquin Valley groundwater", term: "SJV groundwater limits" },
+      { id: "both-valleys", isSingular: false, switchedTerm: "valley-wide groundwater", term: "valley-wide groundwater limits" },
+      { id: "sjv-reduced-acreage", isSingular: false, switchedTerm: "San Joaquin Valley groundwater & acreage", term: "SJV groundwater & acreage limits" },
+      { id: "both-valleys-reduced-acreage", isSingular: false, switchedTerm: "valley-wide groundwater & acreage", term: "valley-wide groundwater & acreage limits" },
     ],
   },
   {
@@ -352,6 +382,16 @@ export const OPERATION_CARD_DEFINITIONS = [
   },
 ]
 
+// Define the SubOption interface explicitly for the component
+interface SubOption {
+  id: string;
+  label: string;
+  selected: boolean;
+  term?: string;
+  switchedTerm?: string;
+  isSingular: boolean;
+}
+
 const OperationsSelector: React.FC<OperationsSelectorProps> = ({
   openThemesDrawer,
 }) => {
@@ -394,10 +434,10 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     const lowercaseSearch = searchTerm.toLowerCase()
     return OPERATION_CARDS().filter(
       (op) =>
-        op.title.toLowerCase().includes(lowercaseSearch) ||
-        op.subOptions.some((sub) =>
-          sub.label.toLowerCase().includes(lowercaseSearch),
-        ),
+        (op.title?.toLowerCase().includes(lowercaseSearch) || false) ||
+        (op.subOptions?.some((sub) =>
+          sub.label?.toLowerCase().includes(lowercaseSearch)
+        ) || false)
     )
   }, [searchTerm])
 
@@ -406,10 +446,10 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     return filteredOperations.map((op) => {
       const mainOptionSelected = selectedOperations.includes(op.id)
 
-      const subOptionsWithState = op.subOptions.map((sub) => ({
+      const subOptionsWithState = op.subOptions?.map((sub) => ({
         ...sub,
         selected: selectedOperations.includes(sub.id),
-      }))
+      })) || []
 
       return {
         ...op,
@@ -791,10 +831,10 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
           {operationCardsWithState.map((op) => (
             <OperationCard
               key={op.id}
-              title={op.title}
+              title={op.title || ''}
               bullet={op.bullet}
               titleColor={op.titleColor}
-              subOptions={op.subOptions}
+              subOptions={op.subOptions as SubOption[]}
               selected={op.selected}
               onMainOptionChange={(checked) =>
                 handleMainOptionChange(op.id, checked)
