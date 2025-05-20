@@ -223,16 +223,15 @@ export default function ContentPanels({
                 sx={{
                   fontSize: "5rem",
                   fontWeight: 700,
-                  alignSelf: "center",
+                  alignSelf: "flex-start",
                   pointerEvents: "auto",
                   mb: 4,
                   width: "100%",
-                  textAlign: "center",
                 }}
               >
                 Learn
               </Typography>
-              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto", justifyContent: "center" }}>
+              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid
                   size={{ xs: 12, md: 6 }}
                   sx={{ pointerEvents: "auto" }}
@@ -240,7 +239,7 @@ export default function ContentPanels({
                   <Box sx={{ 
                     border: "1px solid rgba(255,255,255,0.2)",
                     borderRadius: 2,
-                    p: 3,
+                    p: 4,
                     height: "100%",
                     display: "flex",
                     flexDirection: "column"
@@ -262,6 +261,9 @@ export default function ContentPanels({
                     </Typography>
                     <Box 
                       component="a"
+                      href="https://flow.coeqwal.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       sx={{
                         color: "#FFAC6E",
                         textDecoration: "none",
@@ -272,7 +274,6 @@ export default function ContentPanels({
                           textDecoration: "underline"
                         }
                       }}
-                      onClick={() => onOpenLearnDrawer?.("water-movement")}
                     >
                       Learn more: How water moves through California →
                     </Box>
@@ -286,7 +287,7 @@ export default function ContentPanels({
                   <Box sx={{ 
                     border: "1px solid rgba(255,255,255,0.2)",
                     borderRadius: 2,
-                    p: 3,
+                    p: 4,
                     height: "100%",
                     display: "flex",
                     flexDirection: "column"
@@ -306,18 +307,14 @@ export default function ContentPanels({
                       delivery, and environmental flows affect nearly every part of the state, every season.
                     </Typography>
                     <Box 
-                      component="a"
                       sx={{
                         color: "#FFAC6E",
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
                         fontWeight: 500,
-                        "&:hover": {
-                          textDecoration: "underline"
-                        }
+                        cursor: "default"
                       }}
-                      onClick={() => onOpenLearnDrawer?.("management")}
                     >
                       Learn more: How California's water is managed →
                     </Box>
@@ -332,7 +329,7 @@ export default function ContentPanels({
                   <Box sx={{ 
                     border: "1px solid rgba(255,255,255,0.2)",
                     borderRadius: 2,
-                    p: 3,
+                    p: 4,
                     height: "100%",
                     display: "flex",
                     flexDirection: "column"
@@ -354,33 +351,25 @@ export default function ContentPanels({
                     </Typography>
                     <Box sx={{ mt: "auto" }}>
                       <Box 
-                        component="a"
                         sx={{
                           color: "#FFAC6E",
                           textDecoration: "none",
                           display: "block",
                           fontWeight: 500,
                           mb: 1,
-                          "&:hover": {
-                            textDecoration: "underline"
-                          }
+                          cursor: "default"
                         }}
-                        onClick={() => onOpenLearnDrawer?.("climate-change")}
                       >
                         Learn more: Climate change and California water →
                       </Box>
                       <Box 
-                        component="a"
                         sx={{
                           color: "#FFAC6E",
                           textDecoration: "none",
                           display: "block",
                           fontWeight: 500,
-                          "&:hover": {
-                            textDecoration: "underline"
-                          }
+                          cursor: "default"
                         }}
-                        onClick={() => onOpenLearnDrawer?.("equity")}
                       >
                         Learn more: Equity in California water →
                       </Box>
@@ -396,13 +385,13 @@ export default function ContentPanels({
                   <Box sx={{ 
                     border: "1px solid rgba(255,255,255,0.2)",
                     borderRadius: 2,
-                    p: 3,
+                    p: 4,
                     height: "100%",
                     display: "flex",
                     flexDirection: "column"
                   }}>
                     <Typography variant="h4" color="white" fontWeight={600} sx={{ mb: 1 }}>
-                      🔮 Exploring California's Water Futures
+                      Exploring California's Water Futures
                     </Typography>
                     <Typography variant="subtitle1" color="white" sx={{ 
                       mb: 2,
@@ -418,18 +407,14 @@ export default function ContentPanels({
                       outcomes across California.
                     </Typography>
                     <Box 
-                      component="a"
                       sx={{
                         color: "#FFAC6E",
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
                         fontWeight: 500,
-                        "&:hover": {
-                          textDecoration: "underline"
-                        }
+                        cursor: "default"
                       }}
-                      onClick={() => onOpenLearnDrawer?.("calsim3")}
                     >
                       Learn more: Exploring water futures with CalSim3 →
                     </Box>
@@ -744,7 +729,7 @@ function PanelWithDetail({
         >
           <Grid container spacing={6} alignItems="flex-start">
             <Grid
-              size={{ xs: 12, md: 8 }}
+              size={{ xs: 12, md: 10 }}
               sx={{
                 display: "flex",
                 flexDirection: "column",
