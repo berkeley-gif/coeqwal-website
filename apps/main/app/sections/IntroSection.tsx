@@ -111,8 +111,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     <motion.div
       style={{
         position: "absolute",
-        width: `${size + 30}px`, // Slightly larger to accommodate the halo
-        height: `${size + 30}px`, // Slightly larger to accommodate the halo
+        width: `${size + 60}px`, // Doubled from +30px to +60px for a larger halo
+        height: `${size + 60}px`, // Doubled from +30px to +60px for a larger halo
         borderRadius: "50%",
         opacity,
         left,
@@ -790,10 +790,12 @@ const IntroSection: React.FC = () => {
               color: "#274472",
               textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontSize: "20px",
+              mt: 3,
             }}
           >
-            Explore California&apos;s water system and discover possibilities
-            for the future of water in our state.
+            Explore California&apos;s water system and discover
+            <br />
+            possibilities for the future of water in our state.
           </Typography>
         </Box>
 
