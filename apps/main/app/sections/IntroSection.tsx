@@ -724,7 +724,7 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -741,7 +741,7 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -758,7 +758,7 @@ const IntroSection: React.FC = () => {
               fontSize: "108px",
               fontWeight: 600,
               lineHeight: 0.8,
-              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -775,7 +775,7 @@ const IntroSection: React.FC = () => {
               fontSize: "62px",
               fontWeight: 500,
               lineHeight: 0.8,
-              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
+              textShadow: "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 10px rgba(255,255,255,0.7)",
               fontFamily:
                 '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             }}
@@ -788,7 +788,6 @@ const IntroSection: React.FC = () => {
             variant="body2"
             sx={{
               color: "#274472",
-              textShadow: "0px 0px 10px rgba(255,255,255,0.7)",
               fontSize: "20px",
               mt: 3,
             }}
