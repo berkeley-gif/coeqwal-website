@@ -40,7 +40,7 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <Diversity3Icon />,
     term: "COEQWAL",
     definition:
-      "A collaborative project focused on expanding access to water data, exploring alternative water management decisions, and supporting more equitable and inclusive stewardship of California's water system.",
+      "A collaborative project focused on exploring alternative water management decisions and supporting more equitable and inclusive stewardship of California's water system.",
   },
   {
     icon: <WaterIcon />,
@@ -58,50 +58,50 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <AccountBalanceIcon />,
     term: "U.S. Bureau of Reclamation",
     definition:
-      "A federal agency that manages water in the western U.S., including operation of the Central Valley Project in California. It works alongside state agencies and plays a key role in delivering water to farms, cities, and wildlife refuges.",
+      "A federal agency that manages water in the western U.S., including operation of the Central Valley Project in California. It works alongside state agencies and plays a key role in delivering water to farms, communities, and wildlife refuges.",
   },
   {
     icon: <SettingsIcon />,
     term: "Water management decisions",
     definition:
-      "Choices made by agencies and water operators about how water is stored, moved, and delivered across the system. These decisions affect how much water reaches farms, cities, rivers, and wetlands—and when.",
+      "Choices made by agencies and water operators about how water is stored, moved, and delivered across the system. These decisions affect how much water reaches farms, cities, rivers, and wetlands.",
   },
   {
     icon: <CompareIcon />,
     term: "Scenarios",
     definition:
-      "Alternative sets of water management decisions modeled to explore different possible futures. Scenarios can help answer questions like: What if we prioritized fish flows in spring? What if we changed reservoir release timing? These are tools to explore tradeoffs and impacts.",
+      "Alternative sets of water management decisions modeled to explore different possibilities. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? These are tools to explore tradeoffs and impacts.",
     seeAlso: "water management decisions",
   },
   {
     icon: <LocationOnIcon />,
     term: "Scenario themes",
     definition:
-      'Broad categories or ideas that organize related water scenarios—such as "climate adaptation," "ecosystem restoration," or "urban supply resilience." Themes help users find scenario groups based on shared goals or values.',
+      'Categories that organize related water scenarios. Themes help users find scenarios.',
   },
   {
     icon: <BarChartIcon />,
     term: "Scenario data",
     definition:
-      "The detailed outputs of each modeled water scenario, including things like river flows, reservoir levels, salinity, or water deliveries. This data shows the effects of specific water management decisions over time.",
+      "The detailed outputs of each modeled water scenario, including things like river flows, reservoir levels, salinity, or water deliveries. This data shows the anticipatedeffects of specific water management decisions.",
   },
   {
     icon: <OpacityIcon />,
     term: "Conveyance",
     definition:
-      "The infrastructure used to move water from one place to another, such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
+      "The movement of water through infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
   },
   {
     icon: <EngineeringIcon />,
     term: "Computer models / CalSim",
     definition:
-      "Mathematical tools used to simulate how water moves through California's system. CalSim is one such model used by state and federal agencies to test water management decisions and understand their potential impacts before they happen in real life.",
+      "Computational tools used to simulate how water moves through California's system. CalSim is one such model used by state and federal agencies to test water management decisions and understand their potential impacts before they happen in real life.",
   },
   {
     icon: <Psychology />,
     term: "Actionable insights",
     definition:
-      "Information or data that is understandable and specific enough to support decision-making, advocacy, or planning. COEQWAL helps turn complex scenario data into actionable insights for communities, agencies, and advocates alike.",
+      "Information and data that can be used to support decision-making, advocacy, or planning. COEQWAL helps turn complex scenario data into actionable insights for communities, agencies, and advocates.",
   },
 ]
 

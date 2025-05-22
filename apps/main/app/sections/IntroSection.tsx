@@ -55,6 +55,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   // Create motion values for animation
   const x = useMotionValue(0)
   const y = useMotionValue(0)
+  const scale = useMotionValue(1)
+  const haloOpacity = useMotionValue(0.16)
 
   // Use requestAnimationFrame to create continuous, organic motion
   useEffect(() => {
@@ -62,22 +64,28 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 
     const animate = () => {
       // Update time value - INCREASED SIGNIFICANTLY for faster motion
-      timeRef.current += 0.03 // 6x faster than before
+      timeRef.current += 0.05 // 10x faster than original 0.005
 
       // Calculate complex, overlapping sine wave motion
       // X position: combine two sine waves with different frequencies and phases
       const newX =
-        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 +
-        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2
+        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 * 1.5 +
+        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2 * 1.5
 
       // Y position: combine two cosine waves with different frequencies and phases
       const newY =
-        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 +
-        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2
+        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 * 1.5 +
+        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2 * 1.5
+
+      // Add subtle pulsing effect
+      const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.05
+      const newHaloOpacity = 0.16 + Math.sin(timeRef.current * 0.15) * 0.08
 
       // Apply new values
       x.set(newX)
       y.set(newY)
+      scale.set(newScale)
+      haloOpacity.set(newHaloOpacity)
 
       // Continue animation
       animationId = requestAnimationFrame(animate)
@@ -107,6 +115,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     phaseY2,
     x,
     y,
+    scale,
+    haloOpacity,
   ])
 
   return (
@@ -122,12 +132,14 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
         zIndex: index,
         x,
         y,
+        scale,
         transformOrigin: "center",
         pointerEvents: "none",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "rgba(255, 255, 255, 0.16)", // Semi-transparent white halo
+        boxShadow: "0 0 15px 5px rgba(255, 255, 255, 0.2)",
       }}
     >
       <div
@@ -238,11 +250,11 @@ const generateFixedCircleProps = (
   const phaseY1 = basePhase + 0.5
   const phaseY2 = basePhase + 1.8
 
-  // Fixed amplitudes with small variations
-  const baseAmplitude = 30
-  const amplitudeX1 = baseAmplitude + positionIndex * 3
+  // Fixed amplitudes with increased variations
+  const baseAmplitude = 40 // Increased from 30
+  const amplitudeX1 = baseAmplitude + positionIndex * 4
   const amplitudeX2 = baseAmplitude - positionIndex * 2
-  const amplitudeY1 = baseAmplitude + positionIndex * 2
+  const amplitudeY1 = baseAmplitude + positionIndex * 3
   const amplitudeY2 = baseAmplitude - positionIndex * 1
 
   return {
@@ -366,29 +378,37 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
   // Create motion values for animation
   const x = useMotionValue(0)
   const y = useMotionValue(0)
+  const circleOpacity = useMotionValue(opacity)
+  const circleScale = useMotionValue(1)
 
   // Use requestAnimationFrame to create continuous, organic motion
   useEffect(() => {
     let animationId: number
 
     const animate = () => {
-      // Update time value - increase speed from 0.015 to 0.025 for more visible motion
-      timeRef.current += 0.025
+      // Update time value - increase speed from 0.015 to 0.04 for more visible motion
+      timeRef.current += 0.04
 
       // Calculate complex, overlapping sine wave motion
       // X position: combine two sine waves with different frequencies and phases
       const newX =
-        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 +
-        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2
+        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 * 1.5 +
+        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2 * 1.5
 
       // Y position: combine two cosine waves with different frequencies and phases
       const newY =
-        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 +
-        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2
+        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 * 1.5 +
+        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2 * 1.5
+      
+      // Add subtle pulsing effect
+      const newOpacity = opacity + Math.sin(timeRef.current * 0.08) * (opacity * 0.3)
+      const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.04
 
       // Apply new values
       x.set(newX)
       y.set(newY)
+      circleOpacity.set(newOpacity)
+      circleScale.set(newScale)
 
       // Continue animation
       animationId = requestAnimationFrame(animate)
@@ -416,8 +436,11 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
     phaseX2,
     phaseY1,
     phaseY2,
+    opacity,
     x,
     y,
+    circleOpacity,
+    circleScale,
   ])
 
   return (
@@ -428,14 +451,16 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
         height: `${size}px`,
         borderRadius: "50%",
         backgroundColor: "#FFFFFF",
-        opacity,
+        opacity: circleOpacity,
         left,
         top,
         zIndex: 0, // Very low z-index to ensure it's behind everything
         pointerEvents: "none",
         x,
         y,
+        scale: circleScale,
         transformOrigin: "center",
+        boxShadow: "0 0 10px 2px rgba(255, 255, 255, 0.1)",
       }}
     />
   )
@@ -478,23 +503,23 @@ const IntroSection: React.FC = () => {
         // Size with some variation but more controlled
         const size = 180 + Math.random() * 320
 
-        // Opacity - gradient effect that decreases with row
+        // Opacity - gradient effect that decreases with row - increased values
         let opacity
         if (row === 0) {
           // Top row - more visible
-          opacity = 0.06 + Math.random() * 0.08
+          opacity = 0.1 + Math.random() * 0.1  // Increased from 0.06-0.14 to 0.1-0.2
         } else if (row === 1) {
           // Middle row - medium visibility
-          opacity = 0.04 + Math.random() * 0.05
+          opacity = 0.07 + Math.random() * 0.07  // Increased from 0.04-0.09 to 0.07-0.14
         } else {
           // Bottom row - subtle
-          opacity = 0.01 + Math.random() * 0.04
+          opacity = 0.04 + Math.random() * 0.05  // Increased from 0.01-0.05 to 0.04-0.09
         }
 
         // Add animation parameters with slight variations
         const freqBase = 0.03 + Math.random() * 0.03
         const phaseBase = Math.random() * Math.PI * 2
-        const amplitudeBase = 25 + Math.random() * 20 // Increased from 15 to 25 base amplitude
+        const amplitudeBase = 40 + Math.random() * 25 // Increased from 25-45 to 40-65
 
         circles.push({
           left,
@@ -509,10 +534,10 @@ const IntroSection: React.FC = () => {
           phaseX2: phaseBase + Math.PI / 2,
           phaseY1: phaseBase + Math.PI / 4,
           phaseY2: phaseBase + Math.PI / 3,
-          amplitudeX1: amplitudeBase + Math.random() * 10, // Increased amplitude
-          amplitudeX2: amplitudeBase - Math.random() * 5,
-          amplitudeY1: amplitudeBase + Math.random() * 12, // Increased amplitude
-          amplitudeY2: amplitudeBase - Math.random() * 3,
+          amplitudeX1: amplitudeBase + Math.random() * 15, // Increased amplitude
+          amplitudeX2: amplitudeBase - Math.random() * 8,
+          amplitudeY1: amplitudeBase + Math.random() * 18, // Increased amplitude
+          amplitudeY2: amplitudeBase - Math.random() * 5,
         })
       }
     }
