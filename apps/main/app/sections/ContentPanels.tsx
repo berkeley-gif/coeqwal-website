@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { Box, Typography, Grid, IconButton } from "@repo/ui/mui"
 import { BasePanel } from "@repo/ui"
 import { PlayArrowIcon } from "@repo/ui/mui"
-import { motion } from "@repo/motion"
+import { motion, AnimatePresence } from "@repo/motion"
 
 // Add props interface
 interface ContentPanelsProps {
@@ -966,9 +966,25 @@ function PanelWithDetail({
   hideDetailArrow = false,
   addBorder = false,
 }: PanelWithDetailProps) {
-  // Remove all height tracking and management
+  // Simple height tracking for the container
   const panelRef = useRef<HTMLDivElement>(null)
   const detailRef = useRef<HTMLDivElement>(null)
+  const [containerHeight, setContainerHeight] = useState<string>("auto")
+
+  // Update container height when active state changes
+  useEffect(() => {
+    const updateHeight = () => {
+      const activeRef = isActive ? detailRef : panelRef
+      if (activeRef.current) {
+        const height = activeRef.current.offsetHeight
+        setContainerHeight(`${height}px`)
+      }
+    }
+
+    // Small delay to ensure content is rendered
+    const timer = setTimeout(updateHeight, 50)
+    return () => clearTimeout(timer)
+  }, [isActive])
 
   return (
     <Box
@@ -976,82 +992,188 @@ function PanelWithDetail({
       sx={{
         position: "relative",
         width: "100%",
-        overflow: "visible", // Allow natural content flow
+        overflow: "hidden", // Hide panels sliding outside the container
         overflowX: "hidden", // Prevent horizontal scrollbar
-        // Remove explicit height - let content determine height naturally
-        transition: "all 0.4s ease-in-out", // Smooth transitions for any changes
+        height: containerHeight, // Use calculated height
+        transition: "height 0.4s ease-in-out", // Smooth height transitions
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
       }}
     >
-      {/* Conditionally render either main panel or detail panel based on active state */}
-      {!isActive ? (
-        // Main panel - shown when not active
-        <motion.div
-          ref={panelRef}
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            type: "tween",
-            duration: 0.4,
-            ease: "easeInOut",
-          }}
-          style={{
-            width: "100%",
-            userSelect: "text",
-            overflow: "visible",
-          }}
-        >
-          <BasePanel
-            paddingVariant="wide"
-            fullHeight={false}
-            sx={{
-              backgroundColor: bgColor,
-              py: 12,
-              color: "white",
-              position: "relative",
-              borderRadius: 0,
+      {/* Conditionally render either main panel or detail panel with sliding animation */}
+      <AnimatePresence mode="sync">
+        {!isActive ? (
+          // Main panel - shown when not active
+          <motion.div
+            key="main-panel"
+            ref={panelRef}
+            initial={{ x: 0 }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{
+              type: "tween",
+              duration: 0.4,
+              ease: "easeInOut",
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
               userSelect: "text",
-              border: addBorder ? `5px solid ${bgColor}` : "none",
-              overflow: "visible",
+              zIndex: 1,
             }}
           >
-            <Grid container spacing={6} alignItems="flex-start">
-              <Grid
-                size={{ xs: 12, md: 4 }}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                  pt: 0,
-                  pointerEvents: "auto",
-                }}
-              >
-                {title}
+            <BasePanel
+              paddingVariant="wide"
+              fullHeight={false}
+              sx={{
+                backgroundColor: bgColor,
+                py: 12,
+                color: "white",
+                position: "relative",
+                borderRadius: 0,
+                userSelect: "text",
+                border: addBorder ? `5px solid ${bgColor}` : "none",
+                overflow: "visible",
+              }}
+            >
+              <Grid container spacing={6} alignItems="flex-start">
+                <Grid
+                  size={{ xs: 12, md: 4 }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
+                    pt: 0,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  {title}
+                </Grid>
+                <Grid
+                  size={{ xs: 12, md: 8 }}
+                  sx={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    pointerEvents: "auto",
+                  }}
+                >
+                  {content}
+                </Grid>
               </Grid>
-              <Grid
-                size={{ xs: 12, md: 8 }}
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  pointerEvents: "auto",
-                }}
-              >
-                {content}
-              </Grid>
-            </Grid>
 
-            {/* Right centered play icon - only shown when not hidden */}
-            {!hideDetailArrow && (
+              {/* Right centered play icon - only shown when not hidden */}
+              {!hideDetailArrow && (
+                <IconButton
+                  onClick={onToggleDetail}
+                  sx={{
+                    position: "absolute",
+                    right: 30,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "white",
+                    backgroundColor: "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    },
+                    width: 60,
+                    height: 60,
+                  }}
+                >
+                  <PlayArrowIcon sx={{ fontSize: 36 }} />
+                </IconButton>
+              )}
+
+              {/* Bottom scroll icon */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                  position: "absolute",
+                  bottom: 20,
+                  left: 0,
+                }}
+              >
+                <IconButton
+                  sx={{
+                    color: "white",
+                    backgroundColor: "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    },
+                    width: 60,
+                    height: 60,
+                  }}
+                >
+                  <PlayArrowIcon
+                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                  />
+                </IconButton>
+              </Box>
+            </BasePanel>
+          </motion.div>
+        ) : (
+          // Detail panel - shown when active
+          <motion.div
+            key="detail-panel"
+            ref={detailRef}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{
+              type: "tween",
+              duration: 0.4,
+              ease: "easeInOut",
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              userSelect: "text",
+              zIndex: 2,
+            }}
+          >
+            <BasePanel
+              paddingVariant="wide"
+              fullHeight={false}
+              sx={{
+                backgroundColor: detailBgColor,
+                py: 12,
+                color: "white",
+                position: "relative",
+                borderRadius: 0,
+                userSelect: "text",
+                overflow: "visible",
+              }}
+            >
+              <Grid container spacing={6} alignItems="flex-start">
+                <Grid
+                  size={{ xs: 12, md: 10 }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
+                    pt: 0,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  {detailContent}
+                </Grid>
+              </Grid>
+
+              {/* Left arrow to go back to main panel */}
               <IconButton
                 onClick={onToggleDetail}
                 sx={{
                   position: "absolute",
-                  right: 30,
+                  left: 30,
                   top: "50%",
-                  transform: "translateY(-50%)",
+                  transform: "translateY(-50%) rotate(180deg)",
                   color: "white",
                   backgroundColor: "transparent",
                   "&:hover": {
@@ -1063,134 +1185,38 @@ function PanelWithDetail({
               >
                 <PlayArrowIcon sx={{ fontSize: 36 }} />
               </IconButton>
-            )}
 
-            {/* Bottom scroll icon */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                position: "absolute",
-                bottom: 20,
-                left: 0,
-              }}
-            >
-              <IconButton
-                sx={{
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  width: 60,
-                  height: 60,
-                }}
-              >
-                <PlayArrowIcon
-                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                />
-              </IconButton>
-            </Box>
-          </BasePanel>
-        </motion.div>
-      ) : (
-        // Detail panel - shown when active
-        <motion.div
-          ref={detailRef}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            type: "tween",
-            duration: 0.4,
-            ease: "easeInOut",
-          }}
-          style={{
-            width: "100%",
-            userSelect: "text",
-            overflow: "visible",
-          }}
-        >
-          <BasePanel
-            paddingVariant="wide"
-            fullHeight={false}
-            sx={{
-              backgroundColor: detailBgColor,
-              py: 12,
-              color: "white",
-              position: "relative",
-              borderRadius: 0,
-              userSelect: "text",
-              overflow: "visible",
-            }}
-          >
-            <Grid container spacing={6} alignItems="flex-start">
-              <Grid
-                size={{ xs: 12, md: 10 }}
+              {/* Bottom centered play icon */}
+              <Box
                 sx={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  justifyContent: "flex-start",
-                  pt: 0,
-                  pointerEvents: "auto",
+                  justifyContent: "center",
+                  width: "100%",
+                  position: "absolute",
+                  bottom: 20,
+                  left: 0,
                 }}
               >
-                {detailContent}
-              </Grid>
-            </Grid>
-
-            {/* Left arrow to go back to main panel */}
-            <IconButton
-              onClick={onToggleDetail}
-              sx={{
-                position: "absolute",
-                left: 30,
-                top: "50%",
-                transform: "translateY(-50%) rotate(180deg)",
-                color: "white",
-                backgroundColor: "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.3)",
-                },
-                width: 60,
-                height: 60,
-              }}
-            >
-              <PlayArrowIcon sx={{ fontSize: 36 }} />
-            </IconButton>
-
-            {/* Bottom centered play icon */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                position: "absolute",
-                bottom: 20,
-                left: 0,
-              }}
-            >
-              <IconButton
-                sx={{
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  width: 60,
-                  height: 60,
-                }}
-              >
-                <PlayArrowIcon
-                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                />
-              </IconButton>
-            </Box>
-          </BasePanel>
-        </motion.div>
-      )}
+                <IconButton
+                  sx={{
+                    color: "white",
+                    backgroundColor: "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    },
+                    width: 60,
+                    height: 60,
+                  }}
+                >
+                  <PlayArrowIcon
+                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                  />
+                </IconButton>
+              </Box>
+            </BasePanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Box>
   )
 }
