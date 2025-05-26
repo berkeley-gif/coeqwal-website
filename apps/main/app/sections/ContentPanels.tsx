@@ -190,19 +190,24 @@ export default function ContentPanels({
       sx={{
         position: "relative",
         overflowX: "hidden", // Prevent horizontal scrolling
+        overflowY: "visible", // Allow natural vertical flow
         width: "100%", // Full width of parent
         maxWidth: "100%", // Ensure it doesn't exceed parent width
         boxSizing: "border-box", // Include padding in width calculation
         userSelect: "text", // Ensure text is selectable
+        zIndex: 100, // Much higher z-index to ensure it stays above IntroSection
+        margin: 0, // Remove any default margins
+        transform: "translateZ(0)", // Force new stacking context
+        isolation: "isolate", // Create stacking context
+        backgroundColor: "transparent", // Ensure no transparency issues
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
-          isolation: "isolate", // Create stacking context
-          zIndex: 1000, // Push active panels above others
+          zIndex: 3, // Push active panels above others (within panels layer)
           userSelect: "text", // Ensure text is selectable
         },
         "& .active-detail-panel": {
           position: "absolute", // Absolutely position detail panels
-          zIndex: 1000,
+          zIndex: 3, // Same level as active panels
           overflow: "visible",
           width: "100%", // Same width as parent
           userSelect: "text", // Ensure text is selectable
@@ -224,7 +229,7 @@ export default function ContentPanels({
             borderRadius: 0,
           },
           // Create stacking context to handle z-index properly
-          zIndex: 1,
+          zIndex: 1, // Base level within panels
           overflow: "visible",
           width: "100%", // Ensure content is limited to viewport width
         }}
@@ -264,7 +269,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -322,7 +327,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -374,7 +379,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -440,7 +445,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -523,7 +528,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -575,7 +580,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -628,7 +633,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -681,7 +686,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -733,7 +738,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -785,7 +790,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -837,7 +842,7 @@ export default function ContentPanels({
                       border: "1px solid rgba(255,255,255,0.2)",
                       borderRadius: 2,
                       p: 4,
-                      height: "100%",
+                      minHeight: "auto",
                       display: "flex",
                       flexDirection: "column",
                     }}
@@ -961,141 +966,189 @@ function PanelWithDetail({
   hideDetailArrow = false,
   addBorder = false,
 }: PanelWithDetailProps) {
-  // Track height of panel container for seamless matching
+  // Remove all height tracking and management
   const panelRef = useRef<HTMLDivElement>(null)
   const detailRef = useRef<HTMLDivElement>(null)
-  const [mainPanelHeight, setMainPanelHeight] = useState<number>(0)
-  const [detailPanelHeight, setDetailPanelHeight] = useState<number>(0)
-  const [containerHeight, setContainerHeight] = useState<string>("auto")
-  const [fixOnFirstRender, setFixOnFirstRender] = useState<boolean>(true)
-
-  // Handle resize events to recalculate panel heights
-  useEffect(() => {
-    const updateHeights = () => {
-      if (panelRef.current) {
-        setMainPanelHeight(panelRef.current.offsetHeight)
-      }
-      if (detailRef.current) {
-        setDetailPanelHeight(detailRef.current.offsetHeight)
-      }
-
-      // After first measurements, clear the first render flag
-      setFixOnFirstRender(false)
-    }
-
-    // Initial measurement with a slight delay to ensure content is rendered
-    const initialTimer = setTimeout(updateHeights, 100)
-
-    // Set up resize observer to detect content changes
-    const resizeObserver = new ResizeObserver(updateHeights)
-    if (panelRef.current) resizeObserver.observe(panelRef.current)
-    if (detailRef.current) resizeObserver.observe(detailRef.current)
-
-    // Clean up
-    return () => {
-      clearTimeout(initialTimer)
-      resizeObserver.disconnect()
-    }
-  }, [])
-
-  // Update container height based on active panel
-  useEffect(() => {
-    // Add a small delay to ensure measurements are accurate after animations
-    const timer = setTimeout(() => {
-      const height = isActive ? detailPanelHeight : mainPanelHeight
-      if (height > 0) {
-        setContainerHeight(`${height}px`)
-      }
-    }, 50)
-
-    return () => clearTimeout(timer)
-  }, [isActive, mainPanelHeight, detailPanelHeight])
 
   return (
     <Box
       className={isActive ? "active-panel-container" : ""}
       sx={{
         position: "relative",
-        width: "100%", // Keep container at 100% width
-        overflow: "visible", // Allow overflow for both panels
-        height: containerHeight, // Dynamic height based on content
-        minHeight: fixOnFirstRender ? "400px" : "auto", // Minimum height on first render to prevent jumping
-        zIndex: isActive ? 1000 : 1, // Much higher z-index when active
-        transition: "height 0.4s ease-in-out", // Smooth height transition
+        width: "100%",
+        overflow: "visible", // Allow natural content flow
+        overflowX: "hidden", // Prevent horizontal scrollbar
+        // Remove explicit height - let content determine height naturally
+        transition: "all 0.4s ease-in-out", // Smooth transitions for any changes
+        backgroundColor: "transparent",
+        zIndex: isActive ? 103 : 101,
       }}
     >
-      {/* Main panel */}
-      <motion.div
-        ref={panelRef}
-        className={isActive ? "active-panel" : ""}
-        style={{
-          width: "100%", // Full width of container
-          position: "absolute", // Position absolutely to overlap
-          top: 0,
-          left: 0,
-          willChange: "transform, opacity", // Hint for browser optimization
-          userSelect: "text", // Ensure text is selectable
-          zIndex: isActive ? 1 : 2, // Lower z-index when active (behind detail)
-        }}
-        animate={{
-          x: isActive ? "-100%" : "0%", // Slide left when active
-          opacity: isActive ? 0.3 : 1, // Fade out slightly when not active
-        }}
-        transition={{
-          type: "tween", // Use tween instead of spring for no bounce
-          duration: 0.4, // Duration in seconds
-          ease: "easeInOut", // Smooth acceleration and deceleration
-        }}
-      >
-        {/* Main Panel */}
-        <BasePanel
-          paddingVariant="wide"
-          fullHeight={false}
-          sx={{
-            backgroundColor: bgColor,
-            py: 12, // vertical padding
-            color: "white",
-            position: "relative", // For absolute positioning of icons
-            borderRadius: 0, // No border radius
-            userSelect: "text", // Ensure text is selectable
-            border: addBorder ? `5px solid ${bgColor}` : "none", // Add border with same color as background
+      {/* Conditionally render either main panel or detail panel based on active state */}
+      {!isActive ? (
+        // Main panel - shown when not active
+        <motion.div
+          ref={panelRef}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            type: "tween",
+            duration: 0.4,
+            ease: "easeInOut",
+          }}
+          style={{
+            width: "100%",
+            userSelect: "text",
+            overflow: "visible",
           }}
         >
-          <Grid container spacing={6} alignItems="flex-start">
-            <Grid
-              size={{ xs: 12, md: 4 }}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "flex-start",
-                pt: 0,
-                pointerEvents: "auto",
-              }}
-            >
-              {title}
+          <BasePanel
+            paddingVariant="wide"
+            fullHeight={false}
+            sx={{
+              backgroundColor: bgColor,
+              py: 12,
+              color: "white",
+              position: "relative",
+              borderRadius: 0,
+              userSelect: "text",
+              border: addBorder ? `5px solid ${bgColor}` : "none",
+              overflow: "visible",
+            }}
+          >
+            <Grid container spacing={6} alignItems="flex-start">
+              <Grid
+                size={{ xs: 12, md: 4 }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                  pt: 0,
+                  pointerEvents: "auto",
+                }}
+              >
+                {title}
+              </Grid>
+              <Grid
+                size={{ xs: 12, md: 8 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  pointerEvents: "auto",
+                }}
+              >
+                {content}
+              </Grid>
             </Grid>
-            <Grid
-              size={{ xs: 12, md: 8 }}
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                pointerEvents: "auto",
-              }}
-            >
-              {content}
-            </Grid>
-          </Grid>
 
-          {/* Right centered play icon - only shown when not hidden */}
-          {!hideDetailArrow && (
+            {/* Right centered play icon - only shown when not hidden */}
+            {!hideDetailArrow && (
+              <IconButton
+                onClick={onToggleDetail}
+                sx={{
+                  position: "absolute",
+                  right: 30,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "white",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  width: 60,
+                  height: 60,
+                }}
+              >
+                <PlayArrowIcon sx={{ fontSize: 36 }} />
+              </IconButton>
+            )}
+
+            {/* Bottom scroll icon */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                position: "absolute",
+                bottom: 20,
+                left: 0,
+              }}
+            >
+              <IconButton
+                sx={{
+                  color: "white",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  width: 60,
+                  height: 60,
+                }}
+              >
+                <PlayArrowIcon
+                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                />
+              </IconButton>
+            </Box>
+          </BasePanel>
+        </motion.div>
+      ) : (
+        // Detail panel - shown when active
+        <motion.div
+          ref={detailRef}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{
+            type: "tween",
+            duration: 0.4,
+            ease: "easeInOut",
+          }}
+          style={{
+            width: "100%",
+            userSelect: "text",
+            overflow: "visible",
+          }}
+        >
+          <BasePanel
+            paddingVariant="wide"
+            fullHeight={false}
+            sx={{
+              backgroundColor: detailBgColor,
+              py: 12,
+              color: "white",
+              position: "relative",
+              borderRadius: 0,
+              userSelect: "text",
+              overflow: "visible",
+            }}
+          >
+            <Grid container spacing={6} alignItems="flex-start">
+              <Grid
+                size={{ xs: 12, md: 10 }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "flex-start",
+                  pt: 0,
+                  pointerEvents: "auto",
+                }}
+              >
+                {detailContent}
+              </Grid>
+            </Grid>
+
+            {/* Left arrow to go back to main panel */}
             <IconButton
               onClick={onToggleDetail}
               sx={{
                 position: "absolute",
-                right: 30,
+                left: 30,
                 top: "50%",
-                transform: "translateY(-50%)",
+                transform: "translateY(-50%) rotate(180deg)",
                 color: "white",
                 backgroundColor: "transparent",
                 "&:hover": {
@@ -1107,139 +1160,37 @@ function PanelWithDetail({
             >
               <PlayArrowIcon sx={{ fontSize: 36 }} />
             </IconButton>
-          )}
 
-          {/* Bottom scroll icon */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              position: "absolute",
-              bottom: 20,
-              left: 0,
-            }}
-          >
-            <IconButton
-              sx={{
-                color: "white",
-                backgroundColor: "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.3)",
-                },
-                width: 60,
-                height: 60,
-              }}
-            >
-              <PlayArrowIcon
-                sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-              />
-            </IconButton>
-          </Box>
-        </BasePanel>
-      </motion.div>
-
-      {/* Detail panel - positioned absolutely, outside viewport initially */}
-      <motion.div
-        ref={detailRef}
-        className={isActive ? "active-detail-panel" : ""}
-        style={{
-          position: "absolute", // Take out of normal flow
-          top: 0,
-          left: "100%", // Start positioned to the right of viewport
-          width: "100%", // Same width as main panel
-          willChange: "transform, opacity", // Hint for browser optimization
-          userSelect: "text", // Ensure text is selectable
-          zIndex: isActive ? 2 : 1, // Higher z-index when active (in front)
-        }}
-        animate={{
-          x: isActive ? "-100%" : "0%", // Slide left when active
-          opacity: isActive ? 1 : 0.3, // Fade in when active
-        }}
-        transition={{
-          type: "tween", // Use tween instead of spring for no bounce
-          duration: 0.4, // Duration in seconds
-          ease: "easeInOut", // Smooth acceleration and deceleration
-        }}
-      >
-        {/* Detail Panel */}
-        <BasePanel
-          paddingVariant="wide"
-          fullHeight={false}
-          sx={{
-            backgroundColor: detailBgColor,
-            py: 12, // vertical padding
-            color: "white",
-            position: "relative",
-            borderRadius: 0, // No border radius
-            userSelect: "text", // Ensure text is selectable
-          }}
-        >
-          <Grid container spacing={6} alignItems="flex-start">
-            <Grid
-              size={{ xs: 12, md: 10 }}
+            {/* Bottom centered play icon */}
+            <Box
               sx={{
                 display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                justifyContent: "flex-start",
-                pt: 0,
-                pointerEvents: "auto",
+                justifyContent: "center",
+                width: "100%",
+                position: "absolute",
+                bottom: 20,
+                left: 0,
               }}
             >
-              {detailContent}
-            </Grid>
-          </Grid>
-
-          {/* Left arrow to go back to main panel */}
-          <IconButton
-            onClick={onToggleDetail}
-            sx={{
-              position: "absolute",
-              left: 30,
-              top: "50%",
-              transform: "translateY(-50%) rotate(180deg)",
-              color: "white",
-              backgroundColor: "transparent",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.3)",
-              },
-              width: 60,
-              height: 60,
-            }}
-          >
-            <PlayArrowIcon sx={{ fontSize: 36 }} />
-          </IconButton>
-
-          {/* Bottom centered play icon */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              width: "100%",
-              position: "absolute",
-              bottom: 20,
-              left: 0,
-            }}
-          >
-            <IconButton
-              sx={{
-                color: "white",
-                backgroundColor: "transparent",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.3)",
-                },
-                width: 60,
-                height: 60,
-              }}
-            >
-              <PlayArrowIcon
-                sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-              />
-            </IconButton>
-          </Box>
-        </BasePanel>
-      </motion.div>
+              <IconButton
+                sx={{
+                  color: "white",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  width: 60,
+                  height: 60,
+                }}
+              >
+                <PlayArrowIcon
+                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                />
+              </IconButton>
+            </Box>
+          </BasePanel>
+        </motion.div>
+      )}
     </Box>
   )
 }

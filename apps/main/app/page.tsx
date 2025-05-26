@@ -239,7 +239,7 @@ export default function Home() {
           left: 0,
           width: "100%",
           height: "100%",
-          zIndex: -1,
+          zIndex: (theme) => theme.zIndex.map,
           background: "#218dba" /* Changed from gradient to solid sky blue */,
           backgroundSize: "100% 100%",
         }}
@@ -260,9 +260,10 @@ export default function Home() {
       <Box
         sx={{
           position: "relative",
-          zIndex: 20,
+          zIndex: (theme) => theme.zIndex.panels,
           pointerEvents: "auto",
           width: "100%",
+          overflowX: "hidden",
         }}
       >
         {/* Main content sections */}
@@ -270,6 +271,15 @@ export default function Home() {
           component="main"
           sx={{
             position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            margin: 0,
+            padding: 0,
+            overflowX: "hidden",
+            width: "100%",
+            "& > *": {
+              margin: 0,
+            },
           }}
         >
           {/* Intro Panel */}
@@ -279,7 +289,7 @@ export default function Home() {
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
 
           {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto" }} id="combined-panel">
+          <Box sx={{ pointerEvents: "auto", margin: 0 }} id="combined-panel">
             <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
 

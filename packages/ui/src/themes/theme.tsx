@@ -130,10 +130,27 @@ const themeValues = {
 
   // Z-index values
   zIndex: {
+    // Map layer (when active)
+    map: -1,
+
+    // Main content layers
+    panels: 0, // All panels and sections
+
+    // Intro section specific layers
+    introBubbles: 0, // White bubbles
+    introBackgroundImages: 1,
+    introText: 2,
+    introForegroundImages: 3,
+
+    // Navigation layers (keep existing)
     drawer: 1200,
     modal: 1300,
     appBar: 1400,
     tooltip: 1500,
+
+    // Special cases (keep existing)
+    drawerBackdrop: 1199, // Just below drawer
+    overlay: 1250, // Between drawer and modal
   },
 }
 
@@ -534,6 +551,7 @@ const theme = createTheme({
           padding: 0;
           height: 100%;
           font-family: ${themeValues.fontFamily.primary};
+          overflow-x: hidden; /* Prevent horizontal scrollbar */
         }
         body {
           -webkit-font-smoothing: antialiased;
@@ -893,6 +911,18 @@ declare module "@mui/material/styles" {
       conveyanceProjects?: string
       climateFuture?: string
     }
+  }
+
+  // Extend the zIndex interface to include our custom values
+  interface ZIndex {
+    map: number
+    panels: number
+    introBubbles: number
+    introBackgroundImages: number
+    introText: number
+    introForegroundImages: number
+    drawerBackdrop: number
+    overlay: number
   }
 
   interface Theme {

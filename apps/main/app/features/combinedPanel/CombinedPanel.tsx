@@ -420,6 +420,8 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
       sx={(theme) => ({
         width: "100%",
         backgroundColor: theme.palette.background.default,
+        margin: 0, // Remove any default margins
+        padding: 0, // Remove any default padding
       })}
     >
       {/* Sticky header that will hold QuestionSummary */}
@@ -428,13 +430,13 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
         sx={{
           position: hasClickedSearch ? "sticky" : "relative",
           top: 0,
-          zIndex: 1000,
+          zIndex: 5, // Lower z-index for sticky header within panels
           width: "100%",
           maxWidth: "none !important",
           display: "flex",
           flexDirection: "column",
-          padding: theme.spacing(6),
-          paddingTop: `${theme.layout.headerHeight}px`,
+          padding: theme.spacing(3), // Reduced padding
+          paddingTop: theme.spacing(1), // Minimal top padding
           backgroundColor: "#FFFFFF",
           transition: "position 0.3s ease, box-shadow 0.3s ease",
           boxShadow: hasClickedSearch
@@ -448,7 +450,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
             width: "100%",
             maxWidth: "none !important",
             position: "relative",
-            zIndex: 995,
+            zIndex: 4, // Lower z-index for content within sticky header
           }}
         >
           <QuestionSummary wasScrolled={hasClickedScroll} />
@@ -477,7 +479,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   : "translateY(-10px)",
                 transition: "all 0.5s ease",
                 transitionDelay: "0.2s",
-                zIndex: 2500,
+                zIndex: 6, // Higher within the sticky header for interactive elements
               }}
             >
               {/* Climate checkbox */}
@@ -594,12 +596,13 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
         id="question-builder-content"
         fullHeight={false}
         background="light"
-        paddingVariant="wide"
+        paddingVariant="narrow"
         includeHeaderSpacing={false}
         sx={{
           width: "100%",
           position: "relative",
           pt: 0,
+          mt: 0, // Remove any top margin
         }}
       >
         {/* Anchor point for scrolling (placed at the top) */}

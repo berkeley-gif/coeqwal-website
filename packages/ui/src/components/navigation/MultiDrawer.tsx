@@ -201,7 +201,7 @@ export function MultiDrawer({
             top: "50%",
             left: 0,
             transform: "translateY(-50%)",
-            zIndex: theme.zIndex.drawer - 1,
+            zIndex: theme.zIndex.drawerBackdrop,
           }}
         >
           <RailButton
@@ -221,8 +221,8 @@ export function MultiDrawer({
         open={drawerOpen}
         onClose={close}
         sx={{
-          // Use higher z-index in overlay mode
-          zIndex: overlay ? 1300 : theme.zIndex.drawer,
+          // Use overlay z-index in overlay mode, otherwise use drawer z-index
+          zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
           position: "relative",
           ".MuiDrawer-paper": {
             width: drawerWidth,
@@ -231,7 +231,7 @@ export function MultiDrawer({
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflow: "hidden", // Prevent scrollbar flicker during transitions
-            zIndex: overlay ? 1300 : theme.zIndex.drawer,
+            zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
             backgroundColor: drawerBg, // Use the tracked background color

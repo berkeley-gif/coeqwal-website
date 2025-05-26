@@ -38,7 +38,7 @@ const SortableScenarioCard = React.memo(
         ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
         : undefined,
       transition,
-      zIndex: isDragging ? 10 : 1,
+      zIndex: isDragging ? 6 : 1,
       opacity: isDragging ? 0.8 : 1,
       position: "relative" as const,
       gridColumn: isExpanded ? "1 / -1" : "auto",

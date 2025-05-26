@@ -77,7 +77,7 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <LocationOnIcon />,
     term: "Scenario themes",
     definition:
-      'Categories that organize related water scenarios. Themes help users find scenarios.',
+      "Categories that organize related water scenarios. Themes help users find scenarios.",
   },
   {
     icon: <BarChartIcon />,
