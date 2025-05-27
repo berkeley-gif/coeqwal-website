@@ -57,44 +57,46 @@ export default function AnimatedCurve({
           setDimensions({ width, height: responsiveHeight[breakpoint] || 350 })
         }
       }
-    }, 300) // Debounce with a delay of 300ms
+    }, 300)
 
     const resizeObserver = new ResizeObserver((entries) =>
       handleResize(entries),
     )
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
-    }
-
+    if (containerRef.current) resizeObserver.observe(containerRef.current)
     return () => {
       resizeObserver.disconnect()
       handleResize.cancel()
     }
   }, [breakpoint])
 
-  const xScale = useMemo(() => {
-    return d3
-      .scaleLinear()
-      .domain([-0.5, months.length - 1 + 0.5])
-      .range([margin.left, dimensions.width - margin.right])
-  }, [dimensions.width])
+  const xScale = useMemo(
+    () =>
+      d3
+        .scaleLinear()
+        .domain([-0.5, months.length - 1 + 0.5])
+        .range([margin.left, dimensions.width - margin.right]),
+    [dimensions.width],
+  )
 
-  const yScale = useMemo(() => {
-    return d3
-      .scaleLinear()
-      .domain([0, 1])
-      .range([dimensions.height - margin.bottom, margin.top])
-  }, [dimensions.height])
+  const yScale = useMemo(
+    () =>
+      d3
+        .scaleLinear()
+        .domain([0, 1])
+        .range([dimensions.height - margin.bottom, margin.top]),
+    [dimensions.height],
+  )
 
-  const areaGen = useMemo(() => {
-    return d3
-      .area<{ x: number; y: number }>()
-      .x((d) => xScale(d.x))
-      .y0(dimensions.height - margin.bottom)
-      .y1((d) => yScale(d.y))
-      .curve(d3.curveBasis)
-  }, [xScale, yScale, dimensions.height])
+  const areaGen = useMemo(
+    () =>
+      d3
+        .area<{ x: number; y: number }>()
+        .x((d) => xScale(d.x))
+        .y0(dimensions.height - margin.bottom)
+        .y1((d) => yScale(d.y))
+        .curve(d3.curveBasis),
+    [xScale, yScale, dimensions.height],
+  )
 
   const lineGen = d3
     .line<{ x: number; y: number }>()
@@ -108,6 +110,7 @@ export default function AnimatedCurve({
   useEffect(() => {
     if (!svgRef.current || !pathRef.current) return
 
+    // Prepare rough.js group
     const rc = rough.svg(svgRef.current)
     const g = pathRef.current
     g.innerHTML = ""
@@ -120,40 +123,132 @@ export default function AnimatedCurve({
       roughness: 0.5,
     }
 
-    // Draw initial white gamma curve
-    const startShape = rc.path(snowArea, {
-      ...style,
-      fill: "#f2f0ef",
-      stroke: "#f2f0ef",
-      disableMultiStroke: true,
-    })
-    g.appendChild(startShape)
+    // Create a flat baseline at the bottom
+    //const flatData = snowData.map((d) => ({ x: d.x, y: 0 }))
+    //const flatArea = areaGen(flatData)!
 
-    // Animate the transition
-    const interpolator = FlubberInterpolate(snowArea, meltArea)
-    const duration = 1500
-    const start = Date.now()
+    // Create smooth steps for both transitions
+    const stepsToFlat = 8
+    const stepsToMelt = 8
 
-    const tick = () => {
-      const t = Math.min((Date.now() - start) / duration, 1)
-      const d = interpolator(t)
-      const color = d3.interpolateRgb("#f2f0ef", "steelblue")(t)
+    // Create smooth transitions for snow to flat
+    const snowToFlatCurves = []
+    for (let i = 0; i <= stepsToFlat; i++) {
+      const t = i / stepsToFlat
 
-      g.innerHTML = ""
-      const morphShape = rc.path(d, {
-        ...style,
-        fill: color,
-        stroke: color,
+      // Use cubic easing for smoother transition
+      const easedT = easeInOutCubic(t)
+
+      const intermediateData = snowData.map((d) => {
+        // Gradually reduce height to zero
+        return { x: d.x, y: d.y * (1 - easedT) }
       })
-      g.appendChild(morphShape)
 
-      if (t < 1) requestAnimationFrame(tick)
+      snowToFlatCurves.push(areaGen(intermediateData))
     }
 
-    if (!startMorph) return
+    // Create smooth transitions for flat to melt
+    const flatToMeltCurves = []
+    for (let i = 0; i <= stepsToMelt; i++) {
+      const t = i / stepsToMelt
 
-    requestAnimationFrame(tick)
-  }, [dimensions, areaGen, xScale, yScale, snowArea, meltArea, startMorph])
+      // Use cubic easing for smoother transition
+      const easedT = easeInOutCubic(t)
+
+      const intermediateData = meltData.map((d) => {
+        // Gradually increase from zero to melt curve
+        return { x: d.x, y: d.y * easedT }
+      })
+
+      flatToMeltCurves.push(areaGen(intermediateData))
+    }
+
+    // Create interpolators for each segment
+    const snowToFlatInterpolators: ((t: number) => string)[] = []
+
+    for (let i = 0; i < snowToFlatCurves.length - 1; i++) {
+      const from = snowToFlatCurves[i]
+      const to = snowToFlatCurves[i + 1]
+
+      if (from && to) {
+        snowToFlatInterpolators.push(FlubberInterpolate(from, to))
+      }
+    }
+
+    const flatToMeltInterpolators: ((t: number) => string)[] = []
+    for (let i = 0; i < flatToMeltCurves.length - 1; i++) {
+      const from = flatToMeltCurves[i]
+      const to = flatToMeltCurves[i + 1]
+
+      if (from && to) {
+        flatToMeltInterpolators.push(FlubberInterpolate(from, to))
+      }
+    }
+
+    // Animation timing
+    const totalDuration = 3000 // ms
+    const phase1Duration = totalDuration * 0.5 // First half for snow to flat
+    const phase2Duration = totalDuration * 0.5 // Second half for flat to melt
+    const startTime = Date.now()
+
+    function tick() {
+      const elapsed = Date.now() - startTime
+      const tAll = Math.min(elapsed / totalDuration, 1)
+
+      let pathD: string
+      let fillColor: string
+
+      // First phase: snow to flat
+      if (tAll < 0.5) {
+        const phaseProgress = elapsed / phase1Duration
+        const segmentDuration = 1 / snowToFlatInterpolators.length
+        const segmentIndex = Math.min(
+          Math.floor(phaseProgress / segmentDuration),
+          snowToFlatInterpolators.length - 1,
+        )
+        const segmentT =
+          (phaseProgress - segmentIndex * segmentDuration) / segmentDuration
+
+        // pathD = snowToFlatInterpolators[segmentIndex](segmentT)
+        pathD = snowToFlatInterpolators[segmentIndex]!(segmentT)
+        // Gradual color change from snow white to a medium color
+        fillColor = d3.interpolateRgb("#f2f0ef", "#a7bfd0")(tAll * 2)
+      }
+      // Second phase: flat to melt
+      else {
+        const phaseElapsed = elapsed - phase1Duration
+        const phaseProgress = phaseElapsed / phase2Duration
+        const segmentDuration = 1 / flatToMeltInterpolators.length
+        const segmentIndex = Math.min(
+          Math.floor(phaseProgress / segmentDuration),
+          flatToMeltInterpolators.length - 1,
+        )
+        const segmentT =
+          (phaseProgress - segmentIndex * segmentDuration) / segmentDuration
+
+        // pathD = flatToMeltInterpolators[segmentIndex](segmentT)
+        pathD = flatToMeltInterpolators[segmentIndex]!(segmentT)
+        // Continue color change from medium to steelblue
+        fillColor = d3.interpolateRgb("#a7bfd0", "steelblue")((tAll - 0.5) * 2)
+      }
+
+      // Redraw
+      g.innerHTML = ""
+      const shape = rc.path(pathD, {
+        ...style,
+        fill: fillColor,
+        stroke: fillColor,
+      })
+      g.appendChild(shape)
+
+      if (tAll < 1) requestAnimationFrame(tick)
+    }
+
+    // Kick off when triggered
+    if (startMorph) {
+      requestAnimationFrame(tick)
+    }
+  }, [dimensions, areaGen, snowArea, meltArea, startMorph])
 
   return (
     <div
@@ -165,7 +260,8 @@ export default function AnimatedCurve({
       }}
     >
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height}>
-        <motion.path
+        {/* Snow line outline */}
+        {/* <motion.path
           d={lineGen(snowData)!}
           stroke="#f2f0ef"
           strokeWidth={2}
@@ -173,9 +269,29 @@ export default function AnimatedCurve({
           variants={axisVariants}
           initial="hidden"
           animate={startMorph ? "visible" : "hidden"}
-          custom={1}
+          custom={2.5}
+        /> */}
+        {/* {startMorph && (
+        <path
+          d={lineGen(snowData)!}
+          stroke="#f2f0ef"
+          strokeWidth={2}
+          fill="none"
+        />
+      )} */}
+
+        <motion.path
+          d={lineGen(snowData)!}
+          stroke="#f2f0ef"
+          strokeWidth={2}
+          fill="none"
+          variants={opacityVariants}
+          initial="hidden"
+          animate={startAnimation ? "visible" : "hidden"}
+          custom={8.5}
         />
 
+        {/* Labels */}
         <motion.text
           x={xScale(4)}
           y={yScale(0.8)}
@@ -185,7 +301,7 @@ export default function AnimatedCurve({
           variants={opacityTextVariants}
           initial="hidden"
           animate={startMorph ? "visible" : "hidden"}
-          custom={2}
+          custom={3}
         >
           Snowpack
         </motion.text>
@@ -204,6 +320,7 @@ export default function AnimatedCurve({
           Snowmelt
         </motion.text>
 
+        {/* Axes and area-morph group */}
         <XAxis
           size={dimensions}
           xScale={xScale}
@@ -221,10 +338,9 @@ export default function AnimatedCurve({
           initial="hidden"
           animate={startAnimation ? "visible" : "hidden"}
           custom={7.5}
-          onAnimationComplete={() => {
-            setStartMorph(true)
-          }}
+          onAnimationComplete={() => setStartMorph(true)}
         />
+
         <Annotation
           startAnimation={startAnimation}
           dimensions={dimensions}
@@ -236,6 +352,11 @@ export default function AnimatedCurve({
       </svg>
     </div>
   )
+}
+
+// Easing function for smoother animation
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
 function Annotation({
