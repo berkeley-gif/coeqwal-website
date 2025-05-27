@@ -63,8 +63,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     let animationId: number
 
     const animate = () => {
-      // Update time value - INCREASED SIGNIFICANTLY for faster motion
-      timeRef.current += 0.05 // 10x faster than original 0.005
+      // Update time value - slowed down for gentler motion
+      timeRef.current += 0.015 // Reduced from 0.04 for slower animation
 
       // Calculate complex, overlapping sine wave motion
       // X position: combine two sine waves with different frequencies and phases
@@ -386,8 +386,8 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
     let animationId: number
 
     const animate = () => {
-      // Update time value - increase speed from 0.015 to 0.04 for more visible motion
-      timeRef.current += 0.04
+      // Update time value - slowed down for gentler motion
+      timeRef.current += 0.015 // Reduced from 0.04 for slower animation
 
       // Calculate complex, overlapping sine wave motion
       // X position: combine two sine waves with different frequencies and phases
@@ -503,17 +503,17 @@ const IntroSection: React.FC = () => {
         // Size with some variation but more controlled
         const size = 180 + Math.random() * 320
 
-        // Opacity - gradient effect that decreases with row - increased values
+        // Opacity - gradient effect that decreases with row - halved values for subtlety
         let opacity
         if (row === 0) {
           // Top row - more visible
-          opacity = 0.1 + Math.random() * 0.1 // Increased from 0.06-0.14 to 0.1-0.2
+          opacity = 0.05 + Math.random() * 0.05 // Halved from 0.1-0.2 to 0.05-0.1
         } else if (row === 1) {
           // Middle row - medium visibility
-          opacity = 0.07 + Math.random() * 0.07 // Increased from 0.04-0.09 to 0.07-0.14
+          opacity = 0.035 + Math.random() * 0.035 // Halved from 0.07-0.14 to 0.035-0.07
         } else {
           // Bottom row - subtle
-          opacity = 0.04 + Math.random() * 0.05 // Increased from 0.01-0.05 to 0.04-0.09
+          opacity = 0.02 + Math.random() * 0.025 // Halved from 0.04-0.09 to 0.02-0.045
         }
 
         // Add animation parameters with slight variations
@@ -547,7 +547,7 @@ const IntroSection: React.FC = () => {
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
       size: 250 + Math.random() * 150, // Medium-large size
-      opacity: 0.02 + Math.random() * 0.02, // Very subtle
+      opacity: 0.01 + Math.random() * 0.01, // Halved from 0.02-0.04 to 0.01-0.02
       // Add gentler animation for the lower circle
       freqX1: 0.02,
       freqX2: 0.015,
