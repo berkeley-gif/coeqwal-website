@@ -90,8 +90,12 @@ export function HeaderHome({
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
     lineHeight: 1.1, // Line height for text wrapping
-    height: "36px", // Fixed height to match language switcher
-    minHeight: "36px", // Ditto
+    height: "40px", // Increased height for more prominence
+    minHeight: "40px", // Ditto
+    fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontWeight: 600,
+    border: "1px solid",
+    borderColor: "#274472", // Border matches button fill color
   }
   const { locale, isLoading } = useTranslation()
 
