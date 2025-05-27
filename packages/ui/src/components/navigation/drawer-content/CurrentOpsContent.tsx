@@ -128,9 +128,21 @@ export function CurrentOpsContent({
 }: CurrentOpsContentProps) {
   const theme = useTheme()
   const termRefs = React.useRef<Record<string, HTMLDivElement | null>>({})
+  
+  // Internal state to track the currently highlighted term
+  // This allows us to update highlighting when clicking internal links
+  const [internalSelectedTerm, setInternalSelectedTerm] = React.useState<string | undefined>(selectedTerm)
+
+  // Update internal state when external selectedTerm changes
+  React.useEffect(() => {
+    setInternalSelectedTerm(selectedTerm)
+  }, [selectedTerm])
 
   // Function to handle clicking on a term link within the glossary
   const handleTermClick = (termName: string) => {
+    // Update the internal selected term state for highlighting
+    setInternalSelectedTerm(termName)
+    
     if (termRefs.current[termName]) {
       termRefs.current[termName]?.scrollIntoView({
         behavior: "smooth",
@@ -292,13 +304,13 @@ export function CurrentOpsContent({
 
   // Scroll to selected term when the component mounts or selectedTerm changes
   React.useEffect(() => {
-    if (selectedTerm && termRefs.current[selectedTerm]) {
-      termRefs.current[selectedTerm]?.scrollIntoView({
+    if (internalSelectedTerm && termRefs.current[internalSelectedTerm]) {
+      termRefs.current[internalSelectedTerm]?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       })
     }
-  }, [selectedTerm])
+  }, [internalSelectedTerm])
 
   return (
     <ContentWrapper title="Glossary" onClose={onClose}>
@@ -330,7 +342,7 @@ export function CurrentOpsContent({
                 termRefs.current[term.term] = el as HTMLDivElement | null
               }}
               sx={
-                selectedTerm === term.term
+                internalSelectedTerm === term.term
                   ? {
                       scrollMarginTop: "20px",
                       backgroundColor: "rgba(255, 172, 110, 0.1)",
