@@ -164,6 +164,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     scale,
     haloOpacity,
     index,
+    originalX,
+    originalY,
   ])
 
   return (
