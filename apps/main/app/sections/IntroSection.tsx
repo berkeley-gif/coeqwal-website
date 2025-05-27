@@ -1320,6 +1320,413 @@ const IntroSection: React.FC = () => {
                 {(() => {
                   const text = t("interstitial.part2")
 
+                  // First, look for the phrase "storage, conveyance, and deliveries"
+                  const storageIndex = text.indexOf("storage")
+                  const conveyanceIndex = text.indexOf("conveyance")
+                  const deliveriesIndex = text.indexOf("deliveries")
+
+                  // Check if all three terms are found and in the expected order
+                  if (
+                    storageIndex !== -1 &&
+                    conveyanceIndex !== -1 &&
+                    deliveriesIndex !== -1 &&
+                    storageIndex < conveyanceIndex &&
+                    conveyanceIndex < deliveriesIndex
+                  ) {
+                    // Split the text into segments
+                    const beforeStorage = text.substring(0, storageIndex)
+                    const betweenStorageAndConveyance = text.substring(
+                      storageIndex + 7,
+                      conveyanceIndex,
+                    ) // 7 = "storage".length
+                    const betweenConveyanceAndDeliveries = text.substring(
+                      conveyanceIndex + 10,
+                      deliveriesIndex,
+                    ) // 10 = "conveyance".length
+                    const afterDeliveries = text.substring(deliveriesIndex + 10) // 10 = "deliveries".length
+
+                    // Now check for COEQWAL and scenarios in the remaining text
+                    const coeqwalIndex = afterDeliveries.indexOf("COEQWAL")
+
+                    if (coeqwalIndex !== -1) {
+                      const beforeCoeqwal = afterDeliveries.substring(
+                        0,
+                        coeqwalIndex,
+                      )
+                      const afterCoeqwalText = afterDeliveries.substring(
+                        coeqwalIndex + 7,
+                      ) // 7 = "COEQWAL".length
+
+                      const scenariosIndex =
+                        afterCoeqwalText.indexOf("scenarios")
+
+                      if (scenariosIndex !== -1) {
+                        const betweenCoeqwalAndScenarios =
+                          afterCoeqwalText.substring(0, scenariosIndex)
+                        const afterScenarios = afterCoeqwalText.substring(
+                          scenariosIndex + 9,
+                        ) // 9 = "scenarios".length
+
+                        return (
+                          <>
+                            {beforeStorage}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Storage",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              storage
+                            </Box>
+                            {betweenStorageAndConveyance}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Conveyance",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              conveyance
+                            </Box>
+                            {betweenConveyanceAndDeliveries}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Deliveries",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              deliveries
+                            </Box>
+                            {beforeCoeqwal}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "COEQWAL",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              COEQWAL
+                            </Box>
+                            {betweenCoeqwalAndScenarios}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Scenarios",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              scenarios
+                            </Box>
+                            {afterScenarios}
+                          </>
+                        )
+                      } else {
+                        // COEQWAL found but not scenarios
+                        return (
+                          <>
+                            {beforeStorage}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Storage",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              storage
+                            </Box>
+                            {betweenStorageAndConveyance}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Conveyance",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              conveyance
+                            </Box>
+                            {betweenConveyanceAndDeliveries}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "Deliveries",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              deliveries
+                            </Box>
+                            {beforeCoeqwal}
+                            <Box
+                              component="span"
+                              sx={{
+                                backgroundColor: "#257dbd",
+                                color: "white",
+                                px: 1,
+                                py: 0.3,
+                                mx: 0.1,
+                                borderRadius: 1,
+                                cursor: "pointer",
+                                display: "inline-block",
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: "#13629b",
+                                },
+                              }}
+                              onClick={() => {
+                                const drawerStore = useDrawerStore.getState()
+                                drawerStore.setDrawerContent({
+                                  selectedSection: "glossary",
+                                  selectedTerm: "COEQWAL",
+                                })
+                                drawerStore.openDrawer("glossary")
+                              }}
+                            >
+                              COEQWAL
+                            </Box>
+                            {afterCoeqwalText}
+                          </>
+                        )
+                      }
+                    } else {
+                      // No COEQWAL found, just link the three terms
+                      return (
+                        <>
+                          {beforeStorage}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative",
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Storage",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            storage
+                          </Box>
+                          {betweenStorageAndConveyance}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative",
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Conveyance",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            conveyance
+                          </Box>
+                          {betweenConveyanceAndDeliveries}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative",
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Deliveries",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            deliveries
+                          </Box>
+                          {afterDeliveries}
+                        </>
+                      )
+                    }
+                  }
+
+                  // Fallback to original logic if storage/conveyance/deliveries pattern not found
                   // First check for COEQWAL and split if found
                   const coeqwalIndex = text.indexOf("COEQWAL")
                   if (coeqwalIndex !== -1) {

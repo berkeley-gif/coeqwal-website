@@ -16,6 +16,7 @@ import CompareIcon from "@mui/icons-material/Compare"
 import Psychology from "@mui/icons-material/Psychology"
 import Diversity3Icon from "@mui/icons-material/Diversity3"
 import React from "react"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
 
 export interface CurrentOpsContentProps {
   /** Function called when the close button is clicked */
@@ -104,6 +105,18 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "Conveyance",
     definition:
       "The movement of water through infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
+  },
+  {
+    icon: <WaterIcon />,
+    term: "Storage",
+    definition:
+      "The holding of water in reservoirs, tanks, and other facilities for later use. Water storage allows California to capture water during wet periods and release it during dry periods, helping to balance supply and demand across seasons and years.",
+  },
+  {
+    icon: <LocalShippingIcon />,
+    term: "Deliveries",
+    definition:
+      "The distribution of water from storage and conveyance systems to end users, including farms, communities, and environmental uses. Water deliveries are managed according to water rights, contracts, and regulatory requirements.",
   },
   {
     icon: <SettingsIcon />,
