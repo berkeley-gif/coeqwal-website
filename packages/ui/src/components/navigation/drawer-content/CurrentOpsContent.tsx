@@ -96,7 +96,8 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <OpacityIcon />,
     term: "Groundwater",
     definition:
-      "Water that is stored underground in aquifers—layers of rock, sand, and soil that can hold water. Groundwater is accessed through wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs.",
+      "Water that is stored underground in aquifers—layers of rock, sand, and soil that can hold water. Groundwater is accessed through wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take years or decades to replenish.",
+    seeAlso: "Surface water",
   },
   {
     icon: <OpacityIcon />,
@@ -139,9 +140,107 @@ export function CurrentOpsContent({
   }
 
   // Function to render definition text with clickable term links
-  const renderDefinitionWithLinks = (definition: string) => {
-    // Check if "Groundwater" appears in the definition
-    if (definition.includes("Groundwater")) {
+  const renderDefinitionWithLinks = (definition: string, currentTerm: string) => {
+    // Check for both "Groundwater" and "surface water" in the definition
+    const hasGroundwater = definition.includes("Groundwater") && currentTerm !== "Groundwater"
+    const hasSurfaceWater = definition.includes("surface water") && currentTerm !== "Surface water"
+    
+    if (hasGroundwater && hasSurfaceWater) {
+      // Handle both terms - split by the first occurrence, then handle the second
+      const groundwaterIndex = definition.indexOf("Groundwater")
+      const surfaceWaterIndex = definition.indexOf("surface water")
+      
+      if (groundwaterIndex < surfaceWaterIndex) {
+        // Groundwater comes first
+        const beforeGroundwater = definition.substring(0, groundwaterIndex)
+        const afterGroundwater = definition.substring(groundwaterIndex + 11) // 11 is length of "Groundwater"
+        
+        const surfaceWaterIndexInRemainder = afterGroundwater.indexOf("surface water")
+        const beforeSurfaceWater = afterGroundwater.substring(0, surfaceWaterIndexInRemainder)
+        const afterSurfaceWater = afterGroundwater.substring(surfaceWaterIndexInRemainder + 12) // 12 is length of "surface water"
+        
+        return (
+          <>
+            {beforeGroundwater}
+            <Box
+              component="span"
+              sx={{
+                color: "#FFAC6E",
+                cursor: "pointer",
+                textDecoration: "underline",
+                "&:hover": {
+                  color: "#FF8A4A",
+                },
+              }}
+              onClick={() => handleTermClick("Groundwater")}
+            >
+              Groundwater
+            </Box>
+            {beforeSurfaceWater}
+            <Box
+              component="span"
+              sx={{
+                color: "#FFAC6E",
+                cursor: "pointer",
+                textDecoration: "underline",
+                "&:hover": {
+                  color: "#FF8A4A",
+                },
+              }}
+              onClick={() => handleTermClick("Surface water")}
+            >
+              surface water
+            </Box>
+            {afterSurfaceWater}
+          </>
+        )
+      } else {
+        // Surface water comes first
+        const beforeSurfaceWater = definition.substring(0, surfaceWaterIndex)
+        const afterSurfaceWater = definition.substring(surfaceWaterIndex + 12) // 12 is length of "surface water"
+        
+        const groundwaterIndexInRemainder = afterSurfaceWater.indexOf("Groundwater")
+        const beforeGroundwater = afterSurfaceWater.substring(0, groundwaterIndexInRemainder)
+        const afterGroundwaterFinal = afterSurfaceWater.substring(groundwaterIndexInRemainder + 11) // 11 is length of "Groundwater"
+        
+        return (
+          <>
+            {beforeSurfaceWater}
+            <Box
+              component="span"
+              sx={{
+                color: "#FFAC6E",
+                cursor: "pointer",
+                textDecoration: "underline",
+                "&:hover": {
+                  color: "#FF8A4A",
+                },
+              }}
+              onClick={() => handleTermClick("Surface water")}
+            >
+              surface water
+            </Box>
+            {beforeGroundwater}
+            <Box
+              component="span"
+              sx={{
+                color: "#FFAC6E",
+                cursor: "pointer",
+                textDecoration: "underline",
+                "&:hover": {
+                  color: "#FF8A4A",
+                },
+              }}
+              onClick={() => handleTermClick("Groundwater")}
+            >
+              Groundwater
+            </Box>
+            {afterGroundwaterFinal}
+          </>
+        )
+      }
+    } else if (hasGroundwater) {
+      // Only Groundwater
       const parts = definition.split("Groundwater")
       return (
         <>
@@ -163,7 +262,31 @@ export function CurrentOpsContent({
           {parts[1]}
         </>
       )
+    } else if (hasSurfaceWater) {
+      // Only surface water
+      const parts = definition.split("surface water")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick("Surface water")}
+          >
+            surface water
+          </Box>
+          {parts[1]}
+        </>
+      )
     }
+    
     return definition
   }
 
@@ -250,7 +373,7 @@ export function CurrentOpsContent({
                   fontSize: "0.95rem",
                 }}
               >
-                {renderDefinitionWithLinks(term.definition)}
+                {renderDefinitionWithLinks(term.definition, term.term)}
               </Typography>
 
               {term.seeAlso && (
