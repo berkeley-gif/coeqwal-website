@@ -58,6 +58,14 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   const scale = useMotionValue(1)
   const haloOpacity = useMotionValue(0.08)
 
+  // Center point for drift animation (55%, 40%)
+  const centerX = 55 // percentage
+  const centerY = 40 // percentage
+  
+  // Parse the original position percentages
+  const originalX = parseFloat(left.replace('%', ''))
+  const originalY = parseFloat(top.replace('%', ''))
+
   // Use requestAnimationFrame to create continuous, organic motion
   useEffect(() => {
     let animationId: number
@@ -67,32 +75,50 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
       timeRef.current += 0.02
 
       // Murmuration effect - coordinated flowing motion
-      // Each circle influences and is influenced by its neighbors
       const globalTime = timeRef.current * 0.1
-      const neighborInfluence = 0.3 // How much circles influence each other
       
-      // Base circular motion around the oval pattern
-      const baseFreq = 0.02
-      const circularMotionX = Math.sin(globalTime + index * 0.8) * 30
+      // Base circular motion around the oval pattern (increased amplitude)
+      const circularMotionX = Math.sin(globalTime + index * 0.8) * 25
       const circularMotionY = Math.cos(globalTime + index * 0.8) * 20
       
-      // Add flowing waves that propagate through the formation
+      // Add flowing waves that propagate through the formation (increased amplitude)
       const waveSpeed = 0.05
-      const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 25
+      const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 20
       const wave1Y = Math.cos(globalTime * waveSpeed + index * 1.2) * 15
       
       const wave2X = Math.sin(globalTime * waveSpeed * 1.3 + index * 0.7) * 15
-      const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 25
+      const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 20
       
-      // Add some individual variation to prevent perfect synchronization
+      // Add some individual variation (increased amplitude)
       const individualX = Math.sin(timeRef.current * freqX1 + phaseX1) * 8
       const individualY = Math.cos(timeRef.current * freqY1 + phaseY1) * 8
-      
-      // Combine all motion components for murmuration effect
-      const newX = circularMotionX + wave1X + wave2X + individualX
-      const newY = circularMotionY + wave1Y + wave2Y + individualY
 
-      // Subtle pulsing effect (much smaller than before)
+      // Drift-to-center animation
+      // Each circle takes a turn drifting to center based on its index
+      const driftCycleDuration = 12 // seconds for complete cycle (longer for more dramatic effect)
+      const driftPhasePerCircle = driftCycleDuration / 8 // 8 circles total
+      const currentPhase = (timeRef.current * 0.08) % driftCycleDuration // Slower overall cycle
+      const myPhaseStart = index * driftPhasePerCircle
+      const myPhaseEnd = myPhaseStart + driftPhasePerCircle * 0.7 // 70% of phase for drift
+      
+      let driftProgress = 0
+      if (currentPhase >= myPhaseStart && currentPhase <= myPhaseEnd) {
+        // This circle's turn to drift
+        const phaseProgress = (currentPhase - myPhaseStart) / (myPhaseEnd - myPhaseStart)
+        // Use sine wave for smooth in-out motion
+        driftProgress = Math.sin(phaseProgress * Math.PI)
+      }
+
+      // Calculate drift offset toward center (convert percentages to relative movement)
+      const driftX = (centerX - originalX) * driftProgress * 0.8 // 80% of the way to center
+      const driftY = (centerY - originalY) * driftProgress * 0.8
+
+      // Combine murmuration with drift (reduce murmuration during drift)
+      const murmurateFactor = 1 - driftProgress * 0.6 // Reduce murmuration when drifting
+      const newX = (circularMotionX + wave1X + wave2X + individualX) * murmurateFactor + driftX
+      const newY = (circularMotionY + wave1Y + wave2Y + individualY) * murmurateFactor + driftY
+
+      // Subtle pulsing effect
       const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.02
       const newHaloOpacity = 0.08 + Math.sin(timeRef.current * 0.15) * 0.04
 
@@ -201,39 +227,70 @@ const availableImages = [
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
   // Background circles arranged in a circle pattern
-  // Center raised to 40% and increased vertical spread
+  // Center moved left to 55% and increased radii
   background: [
     // Circle arrangement with 8 positions around the center point
-    // Center point: (60%, 40%)
-    // Radius: approximately 20% horizontal, 25% vertical for more vertical spread
+    // Center point: (55%, 40%)
+    // Radius: approximately 25% horizontal, 30% vertical for larger spread
     
     // Top position (12 o'clock)
-    { left: "60%", top: "15%" },
+    { left: "55%", top: "10%" },
     
     // Top-right position (1:30 o'clock)
-    { left: "74%", top: "23%" },
+    { left: "72%", top: "18%" },
     
     // Right position (3 o'clock)
     { left: "80%", top: "40%" },
     
     // Bottom-right position (4:30 o'clock)
-    { left: "74%", top: "57%" },
+    { left: "72%", top: "62%" },
     
-    // Bottom position (6 o'clock)
-    { left: "60%", top: "65%" },
+    // Bottom position (6 o'clock) - moved up toward center
+    { left: "55%", top: "55%" },
     
     // Bottom-left position (7:30 o'clock)
-    { left: "46%", top: "57%" },
+    { left: "38%", top: "62%" },
     
     // Left position (9 o'clock)
-    { left: "40%", top: "40%" },
+    { left: "30%", top: "40%" },
     
     // Top-left position (10:30 o'clock)
-    { left: "46%", top: "23%" },
+    { left: "38%", top: "18%" },
   ],
 
   // Keep foreground empty for now
   foreground: [],
+}
+
+// Function to add sine-based variation to circle positions around master circle
+const addPositionVariation = (basePosition: { left: string; top: string }, index: number) => {
+  // Use index as seed for consistent variation
+  const seed = index * 7.3 // Different multiplier for more variation
+  
+  // Create sine-based offsets for cloud-like positioning
+  const radiusVariation = Math.sin(seed) * 0.5 + 0.5 // 0-1 range
+  const angleVariation = Math.sin(seed * 1.7) * Math.PI * 0.4 // ±36 degrees variation
+  
+  // Convert percentage position to approximate pixel offset for calculation
+  const baseRadius = 120 + radiusVariation * 80 // 120-200px radius variation
+  const angle = (index / 8) * Math.PI * 2 + angleVariation // Base angle + variation
+  
+  // Calculate offset from base position
+  const offsetX = Math.cos(angle) * baseRadius * 0.3 // Scale down the offset
+  const offsetY = Math.sin(angle) * baseRadius * 0.3
+  
+  // Convert base percentages to numbers
+  const baseLeft = parseFloat(basePosition.left.replace('%', ''))
+  const baseTop = parseFloat(basePosition.top.replace('%', ''))
+  
+  // Apply offset (convert px to approximate percentage)
+  const newLeft = baseLeft + (offsetX / 12) // Rough px to % conversion
+  const newTop = baseTop + (offsetY / 8)
+  
+  return {
+    left: `${newLeft}%`,
+    top: `${newTop}%`
+  }
 }
 
 // Keep these for backward compatibility
@@ -542,24 +599,22 @@ const IntroSection: React.FC = () => {
     // Using 8 total circles for all positions (background + foreground)
     const selectedImages = [...availableImages].slice(0, 8)
 
-    // Create circles with all positions (background + foreground) for the background
-    const allPositions = [
-      ...circlePositions.background,
-      ...circlePositions.foreground,
-    ]
+    // Create circles with varied positions around the master circle
     const bgCircles = selectedImages.map((img, index) => {
-      // Use the position index to determine which position to use
-      const positionIndex = index % allPositions.length
-      const position = allPositions[positionIndex] || {
-        left: "50%",
-        top: "50%",
-      }
-      // Call generateFixedCircleProps with the correct values
+      // Get base position from master circle
+      const basePosition = circlePositions.background[index % circlePositions.background.length] || { left: "55%", top: "40%" }
+      
+      // Add sine-based variation to position
+      const variedPosition = addPositionVariation(basePosition, index)
+      
+      // Call generateFixedCircleProps with the base position
+      const circleProps = generateFixedCircleProps(img, true, index)
+      
+      // Override with the varied position
       return {
-        ...generateFixedCircleProps(img, true, index),
-        // Override the position with the exact one from allPositions
-        left: position.left,
-        top: position.top,
+        ...circleProps,
+        left: variedPosition.left,
+        top: variedPosition.top,
       }
     })
 
@@ -746,7 +801,7 @@ const IntroSection: React.FC = () => {
             sx={{
               color: "white",
               mt: 2, // 16px top margin
-              fontSize: "56px",
+              fontSize: "48px",
               fontWeight: 400,
               lineHeight: 0.8,
               fontFamily:
