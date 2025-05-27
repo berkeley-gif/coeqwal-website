@@ -704,13 +704,12 @@ const IntroSection: React.FC = () => {
 
       {/* First section with bubbles - limited to 100vh */}
       <BasePanel
-        fullHeight
+        id="intro-main"
+        fullHeight={false}
         includeHeaderSpacing
         sx={{
           padding: { xs: 3, md: 6 },
-          height: "100vh",
           minHeight: "100vh",
-          maxHeight: "100vh",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -853,11 +852,25 @@ const IntroSection: React.FC = () => {
                 pointerEvents: "auto",
               }}
               onClick={() => {
-                // Scroll to the interstitial section using its ID
+                // Scroll to the interstitial section with improved positioning
                 const interstitialSection =
                   document.getElementById("interstitial")
                 if (interstitialSection) {
-                  interstitialSection.scrollIntoView({ behavior: "smooth" })
+                  // Get the exact position of the interstitial section
+                  const rect = interstitialSection.getBoundingClientRect()
+                  const currentScrollTop =
+                    window.pageYOffset || document.documentElement.scrollTop
+
+                  // Calculate target position, accounting for any header offset
+                  const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
+
+                  // Use requestAnimationFrame to ensure smooth scrolling doesn't interfere with manual scrolling
+                  requestAnimationFrame(() => {
+                    window.scrollTo({
+                      top: targetPosition,
+                      behavior: "smooth",
+                    })
+                  })
                 }
               }}
             />
