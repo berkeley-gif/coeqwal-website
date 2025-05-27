@@ -702,7 +702,7 @@ const IntroSection: React.FC = () => {
         </Box> */}
       </Box>
 
-      {/* First section with bubbles - limited to 100vh */}
+      {/* First section with bubbles */}
       <BasePanel
         id="intro-main"
         fullHeight={false}

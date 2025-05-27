@@ -282,7 +282,10 @@ export default function Home() {
             },
           }}
         >
-          
+
+          {/* Intro Panel */}
+          <IntroSection />
+
           {/* Intro Panel */}
           <IntroSection />
 

@@ -7,6 +7,7 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import { useState, useEffect } from "react"
 
 type HeaderTranslations = {
   title: string
@@ -94,6 +95,57 @@ export function HeaderHome({
   }
   const { locale, isLoading } = useTranslation()
 
+  // Track scroll position for dynamic background
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    // Find the main content area or intro section to place our sentinel
+    const introSection = document.getElementById('intro') || document.querySelector('main')
+    
+    if (!introSection) {
+      return
+    }
+
+    // Create a sentinel element at the top of the content
+    const sentinel = document.createElement('div')
+    sentinel.style.position = 'absolute'
+    sentinel.style.top = '100px' // 100px down from the start of content
+    sentinel.style.left = '0'
+    sentinel.style.height = '1px'
+    sentinel.style.width = '100%'
+    sentinel.style.pointerEvents = 'none'
+    sentinel.style.visibility = 'hidden' // Make it invisible
+    sentinel.id = 'scroll-sentinel'
+    
+    // Insert the sentinel into the intro section
+    introSection.style.position = 'relative' // Ensure it's positioned for absolute children
+    introSection.appendChild(sentinel)
+
+    // Create intersection observer
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry) {
+          setIsScrolled(!entry.isIntersecting) // When sentinel is not visible, we've scrolled
+        }
+      },
+      {
+        threshold: [0, 1],
+        rootMargin: '0px'
+      }
+    )
+
+    // Start observing the sentinel
+    observer.observe(sentinel)
+
+    return () => {
+      observer.disconnect()
+      if (sentinel.parentNode) {
+        sentinel.parentNode.removeChild(sentinel)
+      }
+    }
+  }, [])
+
   // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
   const componentText =
@@ -109,16 +161,21 @@ export function HeaderHome({
     ? "black"
     : "white"
 
+  const backgroundColor = isScrolled 
+    ? "rgba(255, 255, 255, 0.5)" // Semi-transparent white background when scrolled
+    : "transparent"
+
   return (
     <AppBar
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        borderBottom: "none",
+        backgroundColor: backgroundColor,
+        borderBottom: theme.border.standard,
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
         boxShadow: "none",
+        transition: "background-color 0.3s ease",
       }}
       elevation={0}
     >

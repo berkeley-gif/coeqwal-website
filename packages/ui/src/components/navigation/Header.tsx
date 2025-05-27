@@ -145,7 +145,7 @@ export function Header({
                   disableRipple
                   onClick={() => onSectionClick?.(item.sectionId)}
                   sx={{
-                    color: textColor, // Apply the same color to all items
+                    color: textColor,
                     minWidth: "auto",
                     px: isTablet ? 1 : 2,
                     fontSize: theme.typography.nav.fontSize,
