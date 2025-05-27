@@ -64,22 +64,37 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 
     const animate = () => {
       // Update time value - slowed down for gentler motion
-      timeRef.current += 0.02 // Reduced from 0.05 for slower animation
+      timeRef.current += 0.02
 
-      // Calculate complex, overlapping sine wave motion
-      // X position: combine two sine waves with different frequencies and phases
-      const newX =
-        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 * 1.5 +
-        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2 * 1.5
+      // Murmuration effect - coordinated flowing motion
+      // Each circle influences and is influenced by its neighbors
+      const globalTime = timeRef.current * 0.1
+      const neighborInfluence = 0.3 // How much circles influence each other
+      
+      // Base circular motion around the oval pattern
+      const baseFreq = 0.02
+      const circularMotionX = Math.sin(globalTime + index * 0.8) * 30
+      const circularMotionY = Math.cos(globalTime + index * 0.8) * 20
+      
+      // Add flowing waves that propagate through the formation
+      const waveSpeed = 0.05
+      const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 25
+      const wave1Y = Math.cos(globalTime * waveSpeed + index * 1.2) * 15
+      
+      const wave2X = Math.sin(globalTime * waveSpeed * 1.3 + index * 0.7) * 15
+      const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 25
+      
+      // Add some individual variation to prevent perfect synchronization
+      const individualX = Math.sin(timeRef.current * freqX1 + phaseX1) * 8
+      const individualY = Math.cos(timeRef.current * freqY1 + phaseY1) * 8
+      
+      // Combine all motion components for murmuration effect
+      const newX = circularMotionX + wave1X + wave2X + individualX
+      const newY = circularMotionY + wave1Y + wave2Y + individualY
 
-      // Y position: combine two cosine waves with different frequencies and phases
-      const newY =
-        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 * 1.5 +
-        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2 * 1.5
-
-      // Add subtle pulsing effect
-      const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.05
-      const newHaloOpacity = 0.08 + Math.sin(timeRef.current * 0.15) * 0.08
+      // Subtle pulsing effect (much smaller than before)
+      const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.02
+      const newHaloOpacity = 0.08 + Math.sin(timeRef.current * 0.15) * 0.04
 
       // Apply new values
       x.set(newX)
@@ -117,6 +132,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     y,
     scale,
     haloOpacity,
+    index,
   ])
 
   return (
