@@ -61,10 +61,10 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   // Center point for drift animation (55%, 40%)
   const centerX = 55 // percentage
   const centerY = 40 // percentage
-  
+
   // Parse the original position percentages
-  const originalX = parseFloat(left.replace('%', ''))
-  const originalY = parseFloat(top.replace('%', ''))
+  const originalX = parseFloat(left.replace("%", ""))
+  const originalY = parseFloat(top.replace("%", ""))
 
   // Use requestAnimationFrame to create continuous, organic motion
   useEffect(() => {
@@ -76,19 +76,19 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 
       // Murmuration effect - coordinated flowing motion
       const globalTime = timeRef.current * 0.1
-      
+
       // Base circular motion around the oval pattern (increased amplitude)
       const circularMotionX = Math.sin(globalTime + index * 0.8) * 40
       const circularMotionY = Math.cos(globalTime + index * 0.8) * 30
-      
+
       // Add flowing waves that propagate through the formation (increased amplitude)
       const waveSpeed = 0.05
       const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 35
       const wave1Y = Math.cos(globalTime * waveSpeed + index * 1.2) * 25
-      
+
       const wave2X = Math.sin(globalTime * waveSpeed * 1.3 + index * 0.7) * 25
       const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 35
-      
+
       // Add some individual variation (increased amplitude)
       const individualX = Math.sin(timeRef.current * freqX1 + phaseX1) * 15
       const individualY = Math.cos(timeRef.current * freqY1 + phaseY1) * 15
@@ -100,11 +100,12 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
       const currentPhase = (timeRef.current * 0.08) % driftCycleDuration // Slower overall cycle
       const myPhaseStart = index * driftPhasePerCircle
       const myPhaseEnd = myPhaseStart + driftPhasePerCircle * 0.7 // 70% of phase for drift
-      
+
       let driftProgress = 0
       if (currentPhase >= myPhaseStart && currentPhase <= myPhaseEnd) {
         // This circle's turn to drift
-        const phaseProgress = (currentPhase - myPhaseStart) / (myPhaseEnd - myPhaseStart)
+        const phaseProgress =
+          (currentPhase - myPhaseStart) / (myPhaseEnd - myPhaseStart)
         // Use sine wave for smooth in-out motion
         driftProgress = Math.sin(phaseProgress * Math.PI)
       }
@@ -115,8 +116,12 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 
       // Combine murmuration with drift (reduce murmuration during drift)
       const murmurateFactor = 1 - driftProgress * 0.6 // Reduce murmuration when drifting
-      const newX = (circularMotionX + wave1X + wave2X + individualX) * murmurateFactor + driftX
-      const newY = (circularMotionY + wave1Y + wave2Y + individualY) * murmurateFactor + driftY
+      const newX =
+        (circularMotionX + wave1X + wave2X + individualX) * murmurateFactor +
+        driftX
+      const newY =
+        (circularMotionY + wave1Y + wave2Y + individualY) * murmurateFactor +
+        driftY
 
       // Subtle pulsing effect
       const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.02
@@ -232,28 +237,28 @@ const circlePositions = {
     // Circle arrangement with 8 positions around the center point
     // Center point: (55%, 40%)
     // Radius: approximately 25% horizontal, 30% vertical for larger spread
-    
+
     // Top position (12 o'clock)
     { left: "55%", top: "10%" },
-    
+
     // Top-right position (1:30 o'clock)
     { left: "72%", top: "18%" },
-    
+
     // Right position (3 o'clock)
     { left: "75%", top: "40%" },
-    
+
     // Bottom-right position (4:30 o'clock)
     { left: "72%", top: "62%" },
-    
+
     // Bottom position (6 o'clock) - moved up toward center
     { left: "55%", top: "45%" },
-    
+
     // Bottom-left position (7:30 o'clock)
     { left: "38%", top: "62%" },
-    
+
     // Left position (9 o'clock)
     { left: "30%", top: "40%" },
-    
+
     // Top-left position (10:30 o'clock)
     { left: "38%", top: "18%" },
   ],
@@ -263,33 +268,36 @@ const circlePositions = {
 }
 
 // Function to add sine-based variation to circle positions around master circle
-const addPositionVariation = (basePosition: { left: string; top: string }, index: number) => {
+const addPositionVariation = (
+  basePosition: { left: string; top: string },
+  index: number,
+) => {
   // Use index as seed for consistent variation
   const seed = index * 7.3 // Different multiplier for more variation
-  
+
   // Create sine-based offsets for cloud-like positioning
   const radiusVariation = Math.sin(seed) * 0.5 + 0.5 // 0-1 range
   const angleVariation = Math.sin(seed * 1.7) * Math.PI * 0.4 // ±36 degrees variation
-  
+
   // Convert percentage position to approximate pixel offset for calculation
   const baseRadius = 120 + radiusVariation * 80 // 120-200px radius variation
   const angle = (index / 8) * Math.PI * 2 + angleVariation // Base angle + variation
-  
+
   // Calculate offset from base position
   const offsetX = Math.cos(angle) * baseRadius * 0.3 // Scale down the offset
   const offsetY = Math.sin(angle) * baseRadius * 0.3
-  
+
   // Convert base percentages to numbers
-  const baseLeft = parseFloat(basePosition.left.replace('%', ''))
-  const baseTop = parseFloat(basePosition.top.replace('%', ''))
-  
+  const baseLeft = parseFloat(basePosition.left.replace("%", ""))
+  const baseTop = parseFloat(basePosition.top.replace("%", ""))
+
   // Apply offset (convert px to approximate percentage)
-  const newLeft = baseLeft + (offsetX / 12) // Rough px to % conversion
-  const newTop = baseTop + (offsetY / 8)
-  
+  const newLeft = baseLeft + offsetX / 12 // Rough px to % conversion
+  const newTop = baseTop + offsetY / 8
+
   return {
     left: `${newLeft}%`,
-    top: `${newTop}%`
+    top: `${newTop}%`,
   }
 }
 
@@ -602,14 +610,16 @@ const IntroSection: React.FC = () => {
     // Create circles with varied positions around the master circle
     const bgCircles = selectedImages.map((img, index) => {
       // Get base position from master circle
-      const basePosition = circlePositions.background[index % circlePositions.background.length] || { left: "55%", top: "40%" }
-      
+      const basePosition = circlePositions.background[
+        index % circlePositions.background.length
+      ] || { left: "55%", top: "40%" }
+
       // Add sine-based variation to position
       const variedPosition = addPositionVariation(basePosition, index)
-      
+
       // Call generateFixedCircleProps with the base position
       const circleProps = generateFixedCircleProps(img, true, index)
-      
+
       // Override with the varied position
       return {
         ...circleProps,
@@ -824,8 +834,8 @@ const IntroSection: React.FC = () => {
             }}
             className="neue-haas-text"
           >
-            Explore California&apos;s water system and discover
-            possibilities for the future of water in our state.
+            Explore California&apos;s water system and discover possibilities
+            for the future of water in our state.
           </Typography>
 
           {/* Play arrow icon pointing down */}

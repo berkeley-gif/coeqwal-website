@@ -22,24 +22,26 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
   }
 
   return (
-    <ToggleButtonGroup 
-      value={locale} 
-      exclusive 
+    <ToggleButtonGroup
+      value={locale}
+      exclusive
       onChange={handleChange}
       sx={{
         height: "40px",
         fontWeight: 600,
-        fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        fontFamily:
+          '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         ...sx,
       }}
     >
-      <ToggleButton 
+      <ToggleButton
         value="en"
         sx={{
           height: "40px",
           minHeight: "40px",
           fontWeight: 600,
-          fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          fontFamily:
+            '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         }}
       >
         English
@@ -51,7 +53,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           minHeight: "40px",
           borderLeft: "1px solid #274472",
           fontWeight: 600,
-          fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          fontFamily:
+            '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         }}
       >
         Español
