@@ -755,7 +755,7 @@ const IntroSection: React.FC = () => {
               mb: 3, // 32px spacing
               fontSize: "100px",
               fontWeight: 400,
-              lineHeight: 0.8,
+              lineHeight: 0.72,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
@@ -771,7 +771,7 @@ const IntroSection: React.FC = () => {
               mb: 3,
               fontSize: "100px",
               fontWeight: 400,
-              lineHeight: 0.8,
+              lineHeight: 0.72,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
@@ -787,7 +787,7 @@ const IntroSection: React.FC = () => {
               mb: 4, // 32px spacing
               fontSize: "100px",
               fontWeight: 400,
-              lineHeight: 0.8,
+              lineHeight: 0.72,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
@@ -800,10 +800,10 @@ const IntroSection: React.FC = () => {
             variant="h4"
             sx={{
               color: "white",
-              mt: 2, // 16px top margin
+              mt: 2.5,
               fontSize: "48px",
               fontWeight: 400,
-              lineHeight: 0.8,
+              lineHeight: 0.72,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
