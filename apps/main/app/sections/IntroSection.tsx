@@ -776,6 +776,22 @@ const IntroSection: React.FC = () => {
                 lineHeight: 1,
                 fontFamily:
                   '"sentinel", Georgia, "Times New Roman", Times, serif',
+                position: "relative",
+                px: 3,
+                py: 1,
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: "10%",
+                  left: "-5%",
+                  right: "-5%",
+                  bottom: "10%",
+                  background: "linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)", // Coral/salmon swash
+                  borderRadius: "50px 20px 40px 15px", // Organic swash shape
+                  transform: "rotate(-2deg)",
+                  zIndex: -1,
+                  opacity: 0.8,
+                },
               }}
               className="tk-sentinel"
             >
@@ -803,6 +819,22 @@ const IntroSection: React.FC = () => {
                 lineHeight: 1,
                 fontFamily:
                   '"sentinel", Georgia, "Times New Roman", Times, serif',
+                position: "relative",
+                px: 3,
+                py: 1,
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: "10%",
+                  left: "-5%",
+                  right: "-5%",
+                  bottom: "10%",
+                  background: "linear-gradient(135deg, #4ECDC4 0%, #6EDDD6 100%)", // Teal/turquoise swash
+                  borderRadius: "20px 50px 15px 40px", // Different organic swash shape
+                  transform: "rotate(1.5deg)",
+                  zIndex: -1,
+                  opacity: 0.8,
+                },
               }}
               className="tk-sentinel"
             >
@@ -829,6 +861,22 @@ const IntroSection: React.FC = () => {
                 lineHeight: 1,
                 fontFamily:
                   '"sentinel", Georgia, "Times New Roman", Times, serif',
+                position: "relative",
+                px: 3,
+                py: 1,
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: "10%",
+                  left: "-5%",
+                  right: "-5%",
+                  bottom: "10%",
+                  background: "linear-gradient(135deg, #A8E6CF 0%, #C8F2E0 100%)", // Mint green swash
+                  borderRadius: "40px 15px 50px 25px", // Another organic swash shape
+                  transform: "rotate(-1deg)",
+                  zIndex: -1,
+                  opacity: 0.8,
+                },
               }}
               className="tk-sentinel"
             >
