@@ -194,21 +194,21 @@ const circlePositions = {
   // Each row has circles positioned to align with the text layout
   background: [
     // Row 1 - Learn row: 1 circle left of "Learn", 2-3 circles to the right
-    { left: "2%", top: "5%" },    // circle to the left of Learn
-    { left: "50%", top: "5%" },   // circle to the right of Learn
-    { left: "80%", top: "5%" },   // circle to the right of Learn
-    
+    { left: "2%", top: "5%" }, // circle to the left of Learn
+    { left: "50%", top: "5%" }, // circle to the right of Learn
+    { left: "80%", top: "5%" }, // circle to the right of Learn
+
     // Row 2 - Explore row: circles distributed around "Explore" (positioned at ~65%)
-    { left: "10%", top: "25%" },   // circle to the left
-    { left: "36%", top: "25%" },   // circle to the left
-    { left: "80%", top: "25%" },   // circle to the right of Explore
-    
+    { left: "10%", top: "25%" }, // circle to the left
+    { left: "36%", top: "25%" }, // circle to the left
+    { left: "80%", top: "25%" }, // circle to the right of Explore
+
     // Row 3 - Empower row: circles distributed around centered "Empower"
-    { left: "15%", top: "60%" },   // circle to the left
-    { left: "25%", top: "58%" },   // circle to the left
-    { left: "70%", top: "62%" },   // circle to the right
-    { left: "85%", top: "59%" },   // circle to the right
-    { left: "50%", top: "5%" },   // circle to the right of Learn
+    { left: "15%", top: "60%" }, // circle to the left
+    { left: "25%", top: "58%" }, // circle to the left
+    { left: "70%", top: "62%" }, // circle to the right
+    { left: "85%", top: "59%" }, // circle to the right
+    { left: "50%", top: "5%" }, // circle to the right of Learn
   ],
 
   // Keep foreground empty for now
@@ -784,13 +784,19 @@ const IntroSection: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <defs>
-                  <linearGradient id="learnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient
+                    id="learnGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
                     <stop offset="0%" stopColor="#FF6B6B" stopOpacity="0.8" />
                     <stop offset="100%" stopColor="#FF8E8E" stopOpacity="0.8" />
                   </linearGradient>
                 </defs>
                 <path
-                  d="M15 45 C25 25, 45 15, 75 20 C120 18, 180 25, 220 35 C280 40, 320 50, 360 45 C380 42, 390 55, 385 65 C375 85, 350 95, 320 90 C280 88, 220 85, 180 80 C120 75, 80 85, 45 80 C25 78, 10 65, 15 45 Z"
+                  d="M25 65 C30 62, 35 45, 70 35 C110 32, 150 34, 190 36 C230 38, 270 40, 310 42 C340 44, 365 46, 375 50 C380 54, 378 58, 375 62 C370 68, 360 72, 340 70 C300 68, 260 66, 220 64 C180 62, 140 60, 100 62 C70 64, 45 68, 35 72 C30 74, 27 70, 25 65 Z"
                   fill="url(#learnGradient)"
                 />
               </svg>
@@ -842,13 +848,19 @@ const IntroSection: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <defs>
-                  <linearGradient id="exploreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient
+                    id="exploreGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
                     <stop offset="0%" stopColor="#4ECDC4" stopOpacity="0.8" />
                     <stop offset="100%" stopColor="#6EDDD6" stopOpacity="0.8" />
                   </linearGradient>
                 </defs>
                 <path
-                  d="M20 55 C30 30, 60 20, 95 25 C140 22, 200 28, 250 35 C300 38, 350 45, 390 50 C420 52, 435 65, 430 75 C425 90, 400 100, 370 95 C330 92, 280 88, 230 85 C180 82, 130 85, 90 88 C60 90, 35 85, 25 70 C18 62, 15 58, 20 55 Z"
+                  d="M30 70 C35 67, 40 50, 75 40 C115 37, 155 39, 195 41 C235 43, 275 45, 315 47 C345 49, 370 51, 380 55 C385 59, 383 63, 380 67 C375 73, 365 77, 345 75 C305 73, 265 71, 225 69 C185 67, 145 65, 105 67 C75 69, 50 73, 40 77 C35 79, 32 75, 30 70 Z"
                   fill="url(#exploreGradient)"
                 />
               </svg>
@@ -899,13 +911,19 @@ const IntroSection: React.FC = () => {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <defs>
-                  <linearGradient id="empowerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient
+                    id="empowerGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
                     <stop offset="0%" stopColor="#D4B05A" stopOpacity="0.8" />
                     <stop offset="100%" stopColor="#E0C070" stopOpacity="0.8" />
                   </linearGradient>
                 </defs>
                 <path
-                  d="M25 50 C35 28, 70 18, 110 23 C160 20, 230 26, 280 32 C330 36, 380 42, 420 48 C450 52, 465 62, 460 72 C455 88, 430 98, 400 95 C360 92, 310 89, 260 86 C210 83, 160 86, 120 89 C80 92, 50 88, 35 75 C28 68, 22 58, 25 50 Z"
+                  d="M35 68 C40 65, 45 48, 80 38 C120 35, 160 37, 200 39 C240 41, 280 43, 320 45 C350 47, 375 49, 385 53 C390 57, 388 61, 385 65 C380 71, 370 75, 350 73 C310 71, 270 69, 230 67 C190 65, 150 63, 110 65 C80 67, 55 71, 45 75 C40 77, 37 73, 35 68 Z"
                   fill="url(#empowerGradient)"
                 />
               </svg>
