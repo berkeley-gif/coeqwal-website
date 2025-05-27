@@ -78,20 +78,20 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
       const globalTime = timeRef.current * 0.1
       
       // Base circular motion around the oval pattern (increased amplitude)
-      const circularMotionX = Math.sin(globalTime + index * 0.8) * 25
-      const circularMotionY = Math.cos(globalTime + index * 0.8) * 20
+      const circularMotionX = Math.sin(globalTime + index * 0.8) * 40
+      const circularMotionY = Math.cos(globalTime + index * 0.8) * 30
       
       // Add flowing waves that propagate through the formation (increased amplitude)
       const waveSpeed = 0.05
-      const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 20
-      const wave1Y = Math.cos(globalTime * waveSpeed + index * 1.2) * 15
+      const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 35
+      const wave1Y = Math.cos(globalTime * waveSpeed + index * 1.2) * 25
       
-      const wave2X = Math.sin(globalTime * waveSpeed * 1.3 + index * 0.7) * 15
-      const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 20
+      const wave2X = Math.sin(globalTime * waveSpeed * 1.3 + index * 0.7) * 25
+      const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 35
       
       // Add some individual variation (increased amplitude)
-      const individualX = Math.sin(timeRef.current * freqX1 + phaseX1) * 8
-      const individualY = Math.cos(timeRef.current * freqY1 + phaseY1) * 8
+      const individualX = Math.sin(timeRef.current * freqX1 + phaseX1) * 15
+      const individualY = Math.cos(timeRef.current * freqY1 + phaseY1) * 15
 
       // Drift-to-center animation
       // Each circle takes a turn drifting to center based on its index
@@ -240,7 +240,7 @@ const circlePositions = {
     { left: "72%", top: "18%" },
     
     // Right position (3 o'clock)
-    { left: "80%", top: "40%" },
+    { left: "75%", top: "40%" },
     
     // Bottom-right position (4:30 o'clock)
     { left: "72%", top: "62%" },
