@@ -238,28 +238,28 @@ const circlePositions = {
   background: [
     // More random distribution across the viewport
     // Spread across roughly 50% of viewport width and height
-    
+
     // Upper area circles
     { left: "16%", top: "14%" },
-    
+
     // Upper right area
     { left: "72%", top: "8%" },
-    
+
     // Center-right area
     { left: "68%", top: "31%" },
-    
+
     // Lower right area
     { left: "75%", top: "54%" },
-    
+
     // Lower center area
     { left: "55%", top: "64%" },
-    
+
     // Lower left area
     { left: "35%", top: "58%" },
-    
+
     // Center-left area
     { left: "38%", top: "28%" },
-    
+
     // Upper left area
     { left: "52%", top: "21%" },
   ],
