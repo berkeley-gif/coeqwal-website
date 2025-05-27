@@ -132,9 +132,9 @@ const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <EngineeringIcon />,
-    term: "Computer models / CalSim",
+    term: "CalSim",
     definition:
-      "Computational tools used to simulate how water moves through California's system. CalSim is one such model used by state and federal agencies to test water management decisions and understand their potential impacts before they happen in real life.",
+      "Computational model used to simulate how water moves through California's system.",
   },
   {
     icon: <Psychology />,
