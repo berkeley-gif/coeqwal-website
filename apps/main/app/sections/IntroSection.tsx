@@ -770,7 +770,8 @@ const IntroSection: React.FC = () => {
               fontSize: "100px",
               fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -785,7 +786,8 @@ const IntroSection: React.FC = () => {
               fontSize: "100px",
               fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -800,7 +802,8 @@ const IntroSection: React.FC = () => {
               fontSize: "100px",
               fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -815,7 +818,8 @@ const IntroSection: React.FC = () => {
               fontSize: "48px",
               fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -935,41 +939,78 @@ const IntroSection: React.FC = () => {
                 sx={{
                   fontWeight: 500,
                   color: "white",
-                  fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
+                  fontFamily:
+                    '"sentinel", Georgia, "Times New Roman", Times, serif',
                 }}
                 className="tk-sentinel"
               >
-                What is the future<br />of California water?
+                What is the future
+                <br />
+                of California water?
               </Typography>
-              <Typography 
-                variant="body2" 
+              <Typography
+                variant="body2"
                 color="white"
                 sx={{
-                  fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                  fontFamily:
+                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
                   const text = t("interstitial.part1")
-                  
-                  // Check for all three terms: "surface water", "conveyance", and "allocation"
+
+                  // Check for all four terms: "surface water", "conveyance", "allocation", and "Central Valley"
                   const surfaceWaterIndex = text.indexOf("surface water")
                   const conveyanceIndex = text.indexOf("conveyance")
                   const allocationIndex = text.indexOf("allocation")
-                  
-                  if (surfaceWaterIndex !== -1 && conveyanceIndex !== -1 && allocationIndex !== -1) {
-                    // All three terms found - handle them in order of appearance
-                    const beforeSurfaceWater = text.substring(0, surfaceWaterIndex)
-                    const afterSurfaceWater = text.substring(surfaceWaterIndex + 13) // 13 is length of "surface water"
-                    
-                    const conveyanceIndexInRemainder = afterSurfaceWater.indexOf("conveyance")
-                    const beforeConveyance = afterSurfaceWater.substring(0, conveyanceIndexInRemainder)
-                    const afterConveyance = afterSurfaceWater.substring(conveyanceIndexInRemainder + 10) // 10 is length of "conveyance"
-                    
-                    const allocationIndexInRemainder = afterConveyance.indexOf("allocation")
-                    const beforeAllocation = afterConveyance.substring(0, allocationIndexInRemainder)
-                    const afterAllocation = afterConveyance.substring(allocationIndexInRemainder + 10) // 10 is length of "allocation"
-                    
+                  const centralValleyIndex = text.indexOf("Central Valley")
+
+                  if (
+                    surfaceWaterIndex !== -1 &&
+                    conveyanceIndex !== -1 &&
+                    allocationIndex !== -1 &&
+                    centralValleyIndex !== -1
+                  ) {
+                    // All four terms found - handle them in order of appearance
+                    const beforeSurfaceWater = text.substring(
+                      0,
+                      surfaceWaterIndex,
+                    )
+                    const afterSurfaceWater = text.substring(
+                      surfaceWaterIndex + 13,
+                    ) // 13 is length of "surface water"
+
+                    const conveyanceIndexInRemainder =
+                      afterSurfaceWater.indexOf("conveyance")
+                    const beforeConveyance = afterSurfaceWater.substring(
+                      0,
+                      conveyanceIndexInRemainder,
+                    )
+                    const afterConveyance = afterSurfaceWater.substring(
+                      conveyanceIndexInRemainder + 10,
+                    ) // 10 is length of "conveyance"
+
+                    const allocationIndexInRemainder =
+                      afterConveyance.indexOf("allocation")
+                    const beforeAllocation = afterConveyance.substring(
+                      0,
+                      allocationIndexInRemainder,
+                    )
+                    const afterAllocation = afterConveyance.substring(
+                      allocationIndexInRemainder + 10,
+                    ) // 10 is length of "allocation"
+
+                    const centralValleyIndexInRemainder =
+                      afterAllocation.indexOf("Central Valley")
+                    const beforeCentralValley = afterAllocation.substring(
+                      0,
+                      centralValleyIndexInRemainder,
+                    )
+                    const afterCentralValley = afterAllocation.substring(
+                      centralValleyIndexInRemainder + 14,
+                    ) // 14 is length of "Central Valley"
+
                     return (
                       <>
                         {beforeSurfaceWater}
@@ -1059,30 +1100,71 @@ const IntroSection: React.FC = () => {
                         >
                           allocation
                         </Box>
-                        {afterAllocation}
+                        {beforeCentralValley}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative",
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with Central Valley term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Central Valley",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          Central Valley
+                        </Box>
+                        {afterCentralValley}
                       </>
                     )
                   }
-                  
-                  // Fallback to existing logic if not all three terms are found
+
+                  // Fallback to existing logic if not all four terms are found
                   // First check for "surface water" and split if found
                   if (surfaceWaterIndex !== -1) {
                     // Text before "surface water"
-                    const beforeSurfaceWater = text.substring(0, surfaceWaterIndex)
-                    
+                    const beforeSurfaceWater = text.substring(
+                      0,
+                      surfaceWaterIndex,
+                    )
+
                     // Get text after "surface water" to look for "conveyance"
-                    const afterSurfaceWaterText = text.substring(surfaceWaterIndex + 13) // 13 is length of "surface water"
-                    
+                    const afterSurfaceWaterText = text.substring(
+                      surfaceWaterIndex + 13,
+                    ) // 13 is length of "surface water"
+
                     // Look for "conveyance" in the remaining text
-                    const conveyanceIndexInText = afterSurfaceWaterText.indexOf("conveyance")
-                    
+                    const conveyanceIndexInText =
+                      afterSurfaceWaterText.indexOf("conveyance")
+
                     if (conveyanceIndexInText !== -1) {
                       // Text between "surface water" and "conveyance"
-                      const betweenText = afterSurfaceWaterText.substring(0, conveyanceIndexInText)
-                      
+                      const betweenText = afterSurfaceWaterText.substring(
+                        0,
+                        conveyanceIndexInText,
+                      )
+
                       // Text after "conveyance"
-                      const afterConveyanceText = afterSurfaceWaterText.substring(conveyanceIndexInText + 10) // 10 is length of "conveyance"
-                      
+                      const afterConveyanceText =
+                        afterSurfaceWaterText.substring(
+                          conveyanceIndexInText + 10,
+                        ) // 10 is length of "conveyance"
+
                       return (
                         <>
                           {beforeSurfaceWater}
@@ -1147,7 +1229,7 @@ const IntroSection: React.FC = () => {
                         </>
                       )
                     }
-                    
+
                     // If conveyance not found, just highlight surface water
                     return (
                       <>
@@ -1184,55 +1266,54 @@ const IntroSection: React.FC = () => {
                       </>
                     )
                   }
-                  
-                  // If surface water not found, check for conveyance only (fallback)
-                  return text
-                    .split("conveyance")
-                    .map((part, i, array) => {
-                      // If this is the last part, no need to add the highlighted word
-                      if (i === array.length - 1) return part
 
-                      return (
-                        <React.Fragment key={i}>
-                          {part}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with conveyance term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Conveyance",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            conveyance
-                          </Box>
-                        </React.Fragment>
-                      )
-                    })
+                  // If surface water not found, check for conveyance only (fallback)
+                  return text.split("conveyance").map((part, i, array) => {
+                    // If this is the last part, no need to add the highlighted word
+                    if (i === array.length - 1) return part
+
+                    return (
+                      <React.Fragment key={i}>
+                        {part}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative",
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with conveyance term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Conveyance",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          conveyance
+                        </Box>
+                      </React.Fragment>
+                    )
+                  })
                 })()}
               </Typography>
-              <Typography 
-                variant="body2" 
+              <Typography
+                variant="body2"
                 color="white"
                 sx={{
-                  fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                  fontFamily:
+                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 }}
                 className="tk-neue-haas-grotesk-text"
               >

@@ -112,6 +112,12 @@ const glossaryTerms: GlossaryTerm[] = [
       "The process of distributing available water among different users and uses, such as agriculture, communities, and environmental needs. Water allocation decisions determine who gets water, when, and how much, based on water rights, regulations, and priorities established by law and policy.",
   },
   {
+    icon: <LocationOnIcon />,
+    term: "Central Valley",
+    definition:
+      "The large, flat valley running roughly 450 miles north to south throughout the center of California. The Central Valley forms the heart of California's agricultural region. It includes the Sacramento Valley in the north and the San Joaquin Valley in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water through the Central Valley, but also to neighboring water districts like East Bay MUD and the Los Angeles Metropolitan Water District.",
+  },
+  {
     icon: <EngineeringIcon />,
     term: "Computer models / CalSim",
     definition:
@@ -134,10 +140,12 @@ export function CurrentOpsContent({
 }: CurrentOpsContentProps) {
   const theme = useTheme()
   const termRefs = React.useRef<Record<string, HTMLDivElement | null>>({})
-  
+
   // Internal state to track the currently highlighted term
   // This allows us to update highlighting when clicking internal links
-  const [internalSelectedTerm, setInternalSelectedTerm] = React.useState<string | undefined>(selectedTerm)
+  const [internalSelectedTerm, setInternalSelectedTerm] = React.useState<
+    string | undefined
+  >(selectedTerm)
 
   // Update internal state when external selectedTerm changes
   React.useEffect(() => {
@@ -148,7 +156,7 @@ export function CurrentOpsContent({
   const handleTermClick = (termName: string) => {
     // Update the internal selected term state for highlighting
     setInternalSelectedTerm(termName)
-    
+
     if (termRefs.current[termName]) {
       termRefs.current[termName]?.scrollIntoView({
         behavior: "smooth",
@@ -158,14 +166,57 @@ export function CurrentOpsContent({
   }
 
   // Function to render definition text with clickable term links
-  const renderDefinitionWithLinks = (definition: string, currentTerm: string) => {
-    // Check for "Groundwater", "surface water", and "allocation" in the definition
-    const hasGroundwater = definition.includes("Groundwater") && currentTerm !== "Groundwater"
-    const hasSurfaceWater = definition.includes("surface water") && currentTerm !== "Surface water"
-    const hasAllocation = definition.includes("allocation") && currentTerm !== "Allocation"
-    
+  const renderDefinitionWithLinks = (
+    definition: string,
+    currentTerm: string,
+  ) => {
+    // Check for "Groundwater", "surface water", "allocation", and "Central Valley" in the definition
+    const hasGroundwater =
+      definition.includes("Groundwater") && currentTerm !== "Groundwater"
+    const hasSurfaceWater =
+      definition.includes("surface water") && currentTerm !== "Surface water"
+    const hasAllocation =
+      definition.includes("allocation") && currentTerm !== "Allocation"
+    const hasCentralValley =
+      definition.includes("Central Valley") && currentTerm !== "Central Valley"
+
+    // Handle Central Valley links
+    if (
+      hasCentralValley &&
+      !hasGroundwater &&
+      !hasSurfaceWater &&
+      !hasAllocation
+    ) {
+      const parts = definition.split("Central Valley")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick("Central Valley")}
+          >
+            Central Valley
+          </Box>
+          {parts[1]}
+        </>
+      )
+    }
+
     // Handle allocation links
-    if (hasAllocation && !hasGroundwater && !hasSurfaceWater) {
+    if (
+      hasAllocation &&
+      !hasGroundwater &&
+      !hasSurfaceWater &&
+      !hasCentralValley
+    ) {
       const parts = definition.split("allocation")
       return (
         <>
@@ -188,9 +239,14 @@ export function CurrentOpsContent({
         </>
       )
     }
-    
+
     // Handle surface water links
-    if (hasSurfaceWater && !hasGroundwater && !hasAllocation) {
+    if (
+      hasSurfaceWater &&
+      !hasGroundwater &&
+      !hasAllocation &&
+      !hasCentralValley
+    ) {
       const parts = definition.split("surface water")
       return (
         <>
@@ -213,9 +269,14 @@ export function CurrentOpsContent({
         </>
       )
     }
-    
+
     // Handle groundwater links
-    if (hasGroundwater && !hasSurfaceWater && !hasAllocation) {
+    if (
+      hasGroundwater &&
+      !hasSurfaceWater &&
+      !hasAllocation &&
+      !hasCentralValley
+    ) {
       const parts = definition.split("Groundwater")
       return (
         <>
@@ -238,21 +299,27 @@ export function CurrentOpsContent({
         </>
       )
     }
-    
+
     // For complex cases with multiple terms, handle them in order of appearance
     if (hasGroundwater && hasSurfaceWater) {
       const groundwaterIndex = definition.indexOf("Groundwater")
       const surfaceWaterIndex = definition.indexOf("surface water")
-      
+
       if (groundwaterIndex < surfaceWaterIndex) {
         // Groundwater comes first
         const beforeGroundwater = definition.substring(0, groundwaterIndex)
         const afterGroundwater = definition.substring(groundwaterIndex + 11) // 11 is length of "Groundwater"
-        
-        const surfaceWaterIndexInRemainder = afterGroundwater.indexOf("surface water")
-        const beforeSurfaceWater = afterGroundwater.substring(0, surfaceWaterIndexInRemainder)
-        const afterSurfaceWater = afterGroundwater.substring(surfaceWaterIndexInRemainder + 12) // 12 is length of "surface water"
-        
+
+        const surfaceWaterIndexInRemainder =
+          afterGroundwater.indexOf("surface water")
+        const beforeSurfaceWater = afterGroundwater.substring(
+          0,
+          surfaceWaterIndexInRemainder,
+        )
+        const afterSurfaceWater = afterGroundwater.substring(
+          surfaceWaterIndexInRemainder + 12,
+        ) // 12 is length of "surface water"
+
         return (
           <>
             {beforeGroundwater}
@@ -292,11 +359,17 @@ export function CurrentOpsContent({
         // Surface water comes first
         const beforeSurfaceWater = definition.substring(0, surfaceWaterIndex)
         const afterSurfaceWater = definition.substring(surfaceWaterIndex + 12) // 12 is length of "surface water"
-        
-        const groundwaterIndexInRemainder = afterSurfaceWater.indexOf("Groundwater")
-        const beforeGroundwater = afterSurfaceWater.substring(0, groundwaterIndexInRemainder)
-        const afterGroundwaterFinal = afterSurfaceWater.substring(groundwaterIndexInRemainder + 11) // 11 is length of "Groundwater"
-        
+
+        const groundwaterIndexInRemainder =
+          afterSurfaceWater.indexOf("Groundwater")
+        const beforeGroundwater = afterSurfaceWater.substring(
+          0,
+          groundwaterIndexInRemainder,
+        )
+        const afterGroundwaterFinal = afterSurfaceWater.substring(
+          groundwaterIndexInRemainder + 11,
+        ) // 11 is length of "Groundwater"
+
         return (
           <>
             {beforeSurfaceWater}
@@ -334,7 +407,7 @@ export function CurrentOpsContent({
         )
       }
     }
-    
+
     return definition
   }
 
