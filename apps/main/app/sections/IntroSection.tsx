@@ -234,35 +234,35 @@ const availableImages = [
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
   // Background circles arranged in a circle pattern
-  // Center moved left to 55% and reduced vertical spread
+  // Center moved to 60% and expanded vertical spread
   background: [
     // Circle arrangement with 8 positions around the center point
-    // Center point: (55%, 40%)
-    // Radius: approximately 25% horizontal, 20% vertical for tighter vertical spread
+    // Center point: (60%, 40%)
+    // Radius: approximately 25% horizontal, 25% vertical for expanded spread
     
-    // Top position (12 o'clock) - moved down
-    { left: "55%", top: "20%" },
+    // Top position (12 o'clock) - moved left and up
+    { left: "60%", top: "15%" },
     
-    // Top-right position (1:30 o'clock) - moved down
-    { left: "72%", top: "28%" },
+    // Top-right position (1:30 o'clock) - moved left
+    { left: "73%", top: "25%" },
     
-    // Right position (3 o'clock)
-    { left: "75%", top: "40%" },
+    // Right position (3 o'clock) - moved near center
+    { left: "65%", top: "40%" },
     
-    // Bottom-right position (4:30 o'clock) - moved up
-    { left: "72%", top: "52%" },
+    // Bottom-right position (4:30 o'clock) - moved left
+    { left: "73%", top: "55%" },
     
-    // Bottom position (6 o'clock) - moved up toward center
-    { left: "55%", top: "45%" },
+    // Bottom position (6 o'clock) - moved left and down
+    { left: "60%", top: "65%" },
     
-    // Bottom-left position (7:30 o'clock) - moved up
-    { left: "38%", top: "52%" },
+    // Bottom-left position (7:30 o'clock) - moved left
+    { left: "47%", top: "55%" },
     
-    // Left position (9 o'clock)
-    { left: "30%", top: "40%" },
+    // Left position (9 o'clock) - moved left
+    { left: "42%", top: "40%" },
     
-    // Top-left position (10:30 o'clock) - moved down
-    { left: "38%", top: "28%" },
+    // Top-left position (10:30 o'clock) - moved left
+    { left: "47%", top: "25%" },
   ],
 
   // Keep foreground empty for now
