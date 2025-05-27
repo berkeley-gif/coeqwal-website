@@ -246,7 +246,7 @@ const circlePositions = {
     { left: "72%", top: "62%" },
     
     // Bottom position (6 o'clock) - moved up toward center
-    { left: "55%", top: "55%" },
+    { left: "55%", top: "45%" },
     
     // Bottom-left position (7:30 o'clock)
     { left: "38%", top: "62%" },
@@ -818,6 +818,7 @@ const IntroSection: React.FC = () => {
               color: "white",
               mt: 3,
               maxWidth: "500px",
+              fontSize: "22px",
               fontFamily:
                 '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             }}
