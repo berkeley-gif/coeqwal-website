@@ -246,7 +246,7 @@ const circlePositions = {
     { left: "72%", top: "8%" },
 
     // Center-right area
-    { left: "68%", top: "31%" },
+    { left: "60%", top: "30%" },
 
     // Lower right area
     { left: "75%", top: "54%" },
@@ -768,10 +768,9 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 3, // 32px spacing
               fontSize: "100px",
-              fontWeight: 400,
+              fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -784,10 +783,9 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 3,
               fontSize: "100px",
-              fontWeight: 400,
+              fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -800,10 +798,9 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 4, // 32px spacing
               fontSize: "100px",
-              fontWeight: 400,
+              fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -816,10 +813,9 @@ const IntroSection: React.FC = () => {
               color: "white",
               mt: 2.5,
               fontSize: "48px",
-              fontWeight: 400,
+              fontWeight: 500,
               lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
             className="tk-sentinel"
           >
@@ -832,11 +828,11 @@ const IntroSection: React.FC = () => {
               color: "white",
               mt: 3,
               maxWidth: "500px",
-              fontSize: "22px",
+              fontSize: "24px",
               fontFamily:
                 '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             }}
-            className="neue-haas-text"
+            className="tk-neue-haas-grotesk-text"
           >
             Explore California&apos;s water system and discover possibilities
             for the future of water in our state.
@@ -937,22 +933,113 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  fontWeight: 400,
+                  fontWeight: 500,
                   color: "white",
+                  fontFamily: '"sentinel", Georgia, "Times New Roman", Times, serif',
                 }}
+                className="tk-sentinel"
               >
-                What is California&apos;s water future?
+                What is the future<br />of California water?
               </Typography>
-              <Typography variant="body2" color="white">
-                {t("interstitial.part1")
-                  .split("conveyance")
-                  .map((part, i, array) => {
-                    // If this is the last part, no need to add the highlighted word
-                    if (i === array.length - 1) return part
-
+              <Typography 
+                variant="body2" 
+                color="white"
+                sx={{
+                  fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                }}
+                className="tk-neue-haas-grotesk-text"
+              >
+                {(() => {
+                  const text = t("interstitial.part1")
+                  
+                  // First check for "surface water" and split if found
+                  const surfaceWaterIndex = text.indexOf("surface water")
+                  if (surfaceWaterIndex !== -1) {
+                    // Text before "surface water"
+                    const beforeSurfaceWater = text.substring(0, surfaceWaterIndex)
+                    
+                    // Get text after "surface water" to look for "conveyance"
+                    const afterSurfaceWaterText = text.substring(surfaceWaterIndex + 13) // 13 is length of "surface water"
+                    
+                    // Look for "conveyance" in the remaining text
+                    const conveyanceIndex = afterSurfaceWaterText.indexOf("conveyance")
+                    
+                    if (conveyanceIndex !== -1) {
+                      // Text between "surface water" and "conveyance"
+                      const betweenText = afterSurfaceWaterText.substring(0, conveyanceIndex)
+                      
+                      // Text after "conveyance"
+                      const afterConveyanceText = afterSurfaceWaterText.substring(conveyanceIndex + 10) // 10 is length of "conveyance"
+                      
+                      return (
+                        <>
+                          {beforeSurfaceWater}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative",
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              // Open glossary drawer with surface water term
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Surface water",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            surface water
+                          </Box>
+                          {betweenText}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative",
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              // Open glossary drawer with conveyance term
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Conveyance",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            conveyance
+                          </Box>
+                          {afterConveyanceText}
+                        </>
+                      )
+                    }
+                    
+                    // If conveyance not found, just highlight surface water
                     return (
-                      <React.Fragment key={i}>
-                        {part}
+                      <>
+                        {beforeSurfaceWater}
                         <Box
                           component="span"
                           sx={{
@@ -964,28 +1051,79 @@ const IntroSection: React.FC = () => {
                             borderRadius: 1,
                             cursor: "pointer",
                             display: "inline-block",
-                            position: "relative", // Add explicit position
+                            position: "relative",
                             "&:hover": {
                               backgroundColor: "#13629b",
                             },
                           }}
                           onClick={() => {
-                            // Open glossary drawer with conveyance term
+                            // Open glossary drawer with surface water term
                             const drawerStore = useDrawerStore.getState()
                             drawerStore.setDrawerContent({
                               selectedSection: "glossary",
-                              selectedTerm: "Conveyance",
+                              selectedTerm: "Surface water",
                             })
                             drawerStore.openDrawer("glossary")
                           }}
                         >
-                          conveyance
+                          surface water
                         </Box>
-                      </React.Fragment>
+                        {afterSurfaceWaterText}
+                      </>
                     )
-                  })}
+                  }
+                  
+                  // If surface water not found, check for conveyance only (fallback)
+                  return text
+                    .split("conveyance")
+                    .map((part, i, array) => {
+                      // If this is the last part, no need to add the highlighted word
+                      if (i === array.length - 1) return part
+
+                      return (
+                        <React.Fragment key={i}>
+                          {part}
+                          <Box
+                            component="span"
+                            sx={{
+                              backgroundColor: "#257dbd",
+                              color: "white",
+                              px: 1,
+                              py: 0.3,
+                              mx: 0.1,
+                              borderRadius: 1,
+                              cursor: "pointer",
+                              display: "inline-block",
+                              position: "relative",
+                              "&:hover": {
+                                backgroundColor: "#13629b",
+                              },
+                            }}
+                            onClick={() => {
+                              // Open glossary drawer with conveyance term
+                              const drawerStore = useDrawerStore.getState()
+                              drawerStore.setDrawerContent({
+                                selectedSection: "glossary",
+                                selectedTerm: "Conveyance",
+                              })
+                              drawerStore.openDrawer("glossary")
+                            }}
+                          >
+                            conveyance
+                          </Box>
+                        </React.Fragment>
+                      )
+                    })
+                })()}
               </Typography>
-              <Typography variant="body2" color="white">
+              <Typography 
+                variant="body2" 
+                color="white"
+                sx={{
+                  fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                }}
+                className="tk-neue-haas-grotesk-text"
+              >
                 {(() => {
                   const text = t("interstitial.part2")
 

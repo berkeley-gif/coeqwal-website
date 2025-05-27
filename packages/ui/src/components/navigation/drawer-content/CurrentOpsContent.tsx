@@ -87,6 +87,19 @@ const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <OpacityIcon />,
+    term: "Surface water",
+    definition:
+      "Surface water is water that flows over or is stored on the Earth's surface in natural or engineered systems such as rivers, channels, wetlands, and reservoirs. It plays a key role in ecosystems, agriculture, community supply, and flood control. Groundwater is the other type of water that is regulated in California.",
+    seeAlso: "Groundwater",
+  },
+  {
+    icon: <OpacityIcon />,
+    term: "Groundwater",
+    definition:
+      "Water that is stored underground in aquifers—layers of rock, sand, and soil that can hold water. Groundwater is accessed through wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs.",
+  },
+  {
+    icon: <OpacityIcon />,
     term: "Conveyance",
     definition:
       "The movement of water through infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
@@ -114,6 +127,45 @@ export function CurrentOpsContent({
 }: CurrentOpsContentProps) {
   const theme = useTheme()
   const termRefs = React.useRef<Record<string, HTMLDivElement | null>>({})
+
+  // Function to handle clicking on a term link within the glossary
+  const handleTermClick = (termName: string) => {
+    if (termRefs.current[termName]) {
+      termRefs.current[termName]?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }
+
+  // Function to render definition text with clickable term links
+  const renderDefinitionWithLinks = (definition: string) => {
+    // Check if "Groundwater" appears in the definition
+    if (definition.includes("Groundwater")) {
+      const parts = definition.split("Groundwater")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick("Groundwater")}
+          >
+            Groundwater
+          </Box>
+          {parts[1]}
+        </>
+      )
+    }
+    return definition
+  }
 
   // Scroll to selected term when the component mounts or selectedTerm changes
   React.useEffect(() => {
@@ -198,7 +250,7 @@ export function CurrentOpsContent({
                   fontSize: "0.95rem",
                 }}
               >
-                {term.definition}
+                {renderDefinitionWithLinks(term.definition)}
               </Typography>
 
               {term.seeAlso && (
@@ -211,7 +263,21 @@ export function CurrentOpsContent({
                     fontSize: "0.85rem",
                   }}
                 >
-                  See also: <i>{term.seeAlso}</i>
+                  See also:{" "}
+                  <Box
+                    component="span"
+                    sx={{
+                      color: "#FFAC6E",
+                      cursor: "pointer",
+                      textDecoration: "underline",
+                      "&:hover": {
+                        color: "#FF8A4A",
+                      },
+                    }}
+                    onClick={() => handleTermClick(term.seeAlso!)}
+                  >
+                    {term.seeAlso}
+                  </Box>
                 </Typography>
               )}
 

@@ -64,6 +64,8 @@ const themeValues = {
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     sentinel: '"sentinel", Georgia, "Times New Roman", Times, serif',
+    sofiaPro:
+      '"sofia-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions
