@@ -184,24 +184,36 @@ const availableImages = [
 
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
-  // Background circles arranged in 3 rows to align with text
+  // Background circles arranged in a circle pattern
+  // Center raised to 40% and increased vertical spread
   background: [
-    // Row 1 - Learn row: 1 circle left of "Learn", 2-3 circles to the right
-    { left: "2%", top: "5%" }, // circle to the left of Learn
-    { left: "50%", top: "5%" }, // circle to the right of Learn
-    { left: "80%", top: "5%" }, // circle to the right of Learn
-
-    // Row 2 - Explore row: circles distributed around "Explore" (positioned at ~65%)
-    { left: "10%", top: "25%" }, // circle to the left
-    { left: "36%", top: "25%" }, // circle to the left
-    { left: "80%", top: "25%" }, // circle to the right of Explore
-
-    // Row 3 - Empower row: circles distributed around centered "Empower"
-    { left: "15%", top: "60%" }, // circle to the left
-    { left: "25%", top: "58%" }, // circle to the left
-    { left: "70%", top: "62%" }, // circle to the right
-    { left: "85%", top: "59%" }, // circle to the right
-    { left: "50%", top: "5%" }, // circle to the right of Learn
+    // Circle arrangement with 8 positions around the center point
+    // Center point: (60%, 40%)
+    // Radius: approximately 20% horizontal, 25% vertical for more vertical spread
+    
+    // Top position (12 o'clock)
+    { left: "60%", top: "15%" },
+    
+    // Top-right position (1:30 o'clock)
+    { left: "74%", top: "23%" },
+    
+    // Right position (3 o'clock)
+    { left: "80%", top: "40%" },
+    
+    // Bottom-right position (4:30 o'clock)
+    { left: "74%", top: "57%" },
+    
+    // Bottom position (6 o'clock)
+    { left: "60%", top: "65%" },
+    
+    // Bottom-left position (7:30 o'clock)
+    { left: "46%", top: "57%" },
+    
+    // Left position (9 o'clock)
+    { left: "40%", top: "40%" },
+    
+    // Top-left position (10:30 o'clock)
+    { left: "46%", top: "23%" },
   ],
 
   // Keep foreground empty for now
@@ -671,7 +683,7 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 3, // 32px spacing
               fontSize: "100px",
-              fontWeight: 600,
+              fontWeight: 400,
               lineHeight: 0.8,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
@@ -687,7 +699,7 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 3,
               fontSize: "100px",
-              fontWeight: 600,
+              fontWeight: 400,
               lineHeight: 0.8,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
@@ -703,7 +715,7 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 4, // 32px spacing
               fontSize: "100px",
-              fontWeight: 600,
+              fontWeight: 400,
               lineHeight: 0.8,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
@@ -719,7 +731,7 @@ const IntroSection: React.FC = () => {
               color: "white",
               mt: 2, // 16px top margin
               fontSize: "56px",
-              fontWeight: 500,
+              fontWeight: 400,
               lineHeight: 0.8,
               fontFamily:
                 '"sentinel", Georgia, "Times New Roman", Times, serif',
@@ -741,7 +753,6 @@ const IntroSection: React.FC = () => {
             className="neue-haas-text"
           >
             Explore California&apos;s water system and discover
-            <br />
             possibilities for the future of water in our state.
           </Typography>
 
@@ -840,7 +851,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  fontWeight: 600,
+                  fontWeight: 400,
                   color: "white",
                 }}
               >
