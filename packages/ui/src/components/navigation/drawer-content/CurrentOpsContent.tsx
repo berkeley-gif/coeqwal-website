@@ -17,6 +17,7 @@ import Psychology from "@mui/icons-material/Psychology"
 import Diversity3Icon from "@mui/icons-material/Diversity3"
 import React from "react"
 import LocalShippingIcon from "@mui/icons-material/LocalShipping"
+import ThermostatIcon from "@mui/icons-material/Thermostat"
 
 export interface CurrentOpsContentProps {
   /** Function called when the close button is clicked */
@@ -135,6 +136,18 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "CalSim",
     definition:
       "Computational model used to simulate how water moves through California's system.",
+  },
+  {
+    icon: <EngineeringIcon />,
+    term: "Computer models / CalSim",
+    definition:
+      "Computational tools used to simulate how water moves through California's system. CalSim is one such model used by state and federal agencies to test water management decisions and understand their potential impacts before they happen in real life.",
+  },
+  {
+    icon: <ThermostatIcon />,
+    term: "Changing climate",
+    definition:
+      "The ongoing shifts in California's climate patterns, including rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality.",
   },
   {
     icon: <Psychology />,

@@ -1348,7 +1348,7 @@ const IntroSection: React.FC = () => {
                   }
 
                   // Build the result by processing terms in order
-                  let result = []
+                  const result: React.ReactNode[] = []
                   let currentIndex = 0
 
                   foundTerms.forEach((term, i) => {
@@ -1408,48 +1408,59 @@ const IntroSection: React.FC = () => {
                 {(() => {
                   const text = t("interstitial.part3")
 
-                  // Check for CalSim, COEQWAL and scenarios in part3
-                  const calSimIndex = text.indexOf("CalSim")
-                  const coeqwalIndex = text.indexOf("COEQWAL")
-                  const scenariosIndex = text.indexOf("scenarios")
+                  // Create an array of all terms to link and format
+                  const terms = [
+                    {
+                      name: "CalSim",
+                      glossaryTerm: "Computer models / CalSim",
+                    },
+                    { name: "COEQWAL", glossaryTerm: "COEQWAL" },
+                    { name: "scenarios", glossaryTerm: "Scenarios" },
+                    {
+                      name: "changing climate",
+                      glossaryTerm: "Changing climate",
+                    },
+                    { name: '"What if...?"', isItalic: true }, // Special case for italic formatting
+                  ]
 
-                  // If all three terms are found, handle them in order of appearance
-                  if (
-                    calSimIndex !== -1 &&
-                    coeqwalIndex !== -1 &&
-                    scenariosIndex !== -1
-                  ) {
-                    // Create an array of terms with their positions
-                    const terms = [
-                      {
-                        name: "CalSim",
-                        index: calSimIndex,
-                        length: 6,
-                        glossaryTerm: "Computer models / CalSim",
-                      },
-                      {
-                        name: "COEQWAL",
-                        index: coeqwalIndex,
-                        length: 7,
-                        glossaryTerm: "COEQWAL",
-                      },
-                      {
-                        name: "scenarios",
-                        index: scenariosIndex,
-                        length: 9,
-                        glossaryTerm: "Scenarios",
-                      },
-                    ].sort((a, b) => a.index - b.index)
+                  // Find all term positions in the text
+                  const foundTerms = terms
+                    .map((term) => ({
+                      ...term,
+                      index: text.indexOf(term.name),
+                      length: term.name.length,
+                    }))
+                    .filter((term) => term.index !== -1)
+                    .sort((a, b) => a.index - b.index)
 
-                    // Build the result by processing terms in order
-                    let result = []
-                    let currentIndex = 0
+                  if (foundTerms.length === 0) {
+                    return text
+                  }
 
-                    terms.forEach((term, i) => {
-                      // Add text before this term
-                      result.push(text.substring(currentIndex, term.index))
+                  // Build the result by processing terms in order
+                  const result: React.ReactNode[] = []
+                  let currentIndex = 0
 
-                      // Add the linked term
+                  foundTerms.forEach((term, i) => {
+                    // Add text before this term
+                    result.push(text.substring(currentIndex, term.index))
+
+                    // Add the formatted term
+                    if (term.isItalic) {
+                      // Handle italic formatting for "What if..."
+                      result.push(
+                        <Box
+                          key={i}
+                          component="span"
+                          sx={{
+                            fontStyle: "italic",
+                          }}
+                        >
+                          {term.name}
+                        </Box>,
+                      )
+                    } else {
+                      // Handle glossary term linking
                       result.push(
                         <Box
                           key={i}
@@ -1480,452 +1491,15 @@ const IntroSection: React.FC = () => {
                           {term.name}
                         </Box>,
                       )
-
-                      currentIndex = term.index + term.length
-                    })
-
-                    // Add remaining text after the last term
-                    result.push(text.substring(currentIndex))
-
-                    return <>{result}</>
-                  }
-
-                  // If both CalSim and COEQWAL are found
-                  if (calSimIndex !== -1 && coeqwalIndex !== -1) {
-                    if (calSimIndex < coeqwalIndex) {
-                      // CalSim comes first
-                      const beforeCalSim = text.substring(0, calSimIndex)
-                      const afterCalSim = text.substring(calSimIndex + 6) // 6 = "CalSim".length
-
-                      const coeqwalIndexInRemainder =
-                        afterCalSim.indexOf("COEQWAL")
-                      const betweenTerms = afterCalSim.substring(
-                        0,
-                        coeqwalIndexInRemainder,
-                      )
-                      const afterCoeqwal = afterCalSim.substring(
-                        coeqwalIndexInRemainder + 7,
-                      ) // 7 = "COEQWAL".length
-
-                      return (
-                        <>
-                          {beforeCalSim}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Computer models / CalSim",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            CalSim
-                          </Box>
-                          {betweenTerms}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "COEQWAL",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            COEQWAL
-                          </Box>
-                          {afterCoeqwal}
-                        </>
-                      )
-                    } else {
-                      // COEQWAL comes first
-                      const beforeCoeqwal = text.substring(0, coeqwalIndex)
-                      const afterCoeqwal = text.substring(coeqwalIndex + 7) // 7 = "COEQWAL".length
-
-                      const calSimIndexInRemainder =
-                        afterCoeqwal.indexOf("CalSim")
-                      const betweenTerms = afterCoeqwal.substring(
-                        0,
-                        calSimIndexInRemainder,
-                      )
-                      const afterCalSim = afterCoeqwal.substring(
-                        calSimIndexInRemainder + 6,
-                      ) // 6 = "CalSim".length
-
-                      return (
-                        <>
-                          {beforeCoeqwal}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "COEQWAL",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            COEQWAL
-                          </Box>
-                          {betweenTerms}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Computer models / CalSim",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            CalSim
-                          </Box>
-                          {afterCalSim}
-                        </>
-                      )
                     }
-                  }
 
-                  // If both COEQWAL and scenarios are found
-                  if (coeqwalIndex !== -1 && scenariosIndex !== -1) {
-                    if (coeqwalIndex < scenariosIndex) {
-                      // COEQWAL comes first
-                      const beforeCoeqwal = text.substring(0, coeqwalIndex)
-                      const afterCoeqwal = text.substring(coeqwalIndex + 7) // 7 = "COEQWAL".length
+                    currentIndex = term.index + term.length
+                  })
 
-                      const scenariosIndexInRemainder =
-                        afterCoeqwal.indexOf("scenarios")
-                      const betweenTerms = afterCoeqwal.substring(
-                        0,
-                        scenariosIndexInRemainder,
-                      )
-                      const afterScenarios = afterCoeqwal.substring(
-                        scenariosIndexInRemainder + 9,
-                      ) // 9 = "scenarios".length
+                  // Add remaining text after the last term
+                  result.push(text.substring(currentIndex))
 
-                      return (
-                        <>
-                          {beforeCoeqwal}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "COEQWAL",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            COEQWAL
-                          </Box>
-                          {betweenTerms}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Scenarios",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            scenarios
-                          </Box>
-                          {afterScenarios}
-                        </>
-                      )
-                    } else {
-                      // scenarios comes first
-                      const beforeScenarios = text.substring(0, scenariosIndex)
-                      const afterScenarios = text.substring(scenariosIndex + 9) // 9 = "scenarios".length
-
-                      const coeqwalIndexInRemainder =
-                        afterScenarios.indexOf("COEQWAL")
-                      const betweenTerms = afterScenarios.substring(
-                        0,
-                        coeqwalIndexInRemainder,
-                      )
-                      const afterCoeqwal = afterScenarios.substring(
-                        coeqwalIndexInRemainder + 7,
-                      ) // 7 = "COEQWAL".length
-
-                      return (
-                        <>
-                          {beforeScenarios}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Scenarios",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            scenarios
-                          </Box>
-                          {betweenTerms}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
-                              px: 1,
-                              py: 0.3,
-                              mx: 0.1,
-                              borderRadius: 1,
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                backgroundColor: "#13629b",
-                              },
-                            }}
-                            onClick={() => {
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "COEQWAL",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            COEQWAL
-                          </Box>
-                          {afterCoeqwal}
-                        </>
-                      )
-                    }
-                  }
-
-                  // If only CalSim is found
-                  if (calSimIndex !== -1) {
-                    const beforeText = text.substring(0, calSimIndex)
-                    const afterText = text.substring(calSimIndex + 6)
-
-                    return (
-                      <>
-                        {beforeText}
-                        <Box
-                          component="span"
-                          sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
-                            px: 1,
-                            py: 0.3,
-                            mx: 0.1,
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative",
-                            "&:hover": {
-                              backgroundColor: "#13629b",
-                            },
-                          }}
-                          onClick={() => {
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: "Computer models / CalSim",
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          CalSim
-                        </Box>
-                        {afterText}
-                      </>
-                    )
-                  }
-
-                  // If only COEQWAL is found
-                  if (coeqwalIndex !== -1) {
-                    const beforeText = text.substring(0, coeqwalIndex)
-                    const afterText = text.substring(coeqwalIndex + 7)
-
-                    return (
-                      <>
-                        {beforeText}
-                        <Box
-                          component="span"
-                          sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
-                            px: 1,
-                            py: 0.3,
-                            mx: 0.1,
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative",
-                            "&:hover": {
-                              backgroundColor: "#13629b",
-                            },
-                          }}
-                          onClick={() => {
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: "COEQWAL",
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          COEQWAL
-                        </Box>
-                        {afterText}
-                      </>
-                    )
-                  }
-
-                  // If only scenarios is found
-                  if (scenariosIndex !== -1) {
-                    const beforeText = text.substring(0, scenariosIndex)
-                    const afterText = text.substring(scenariosIndex + 9)
-
-                    return (
-                      <>
-                        {beforeText}
-                        <Box
-                          component="span"
-                          sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
-                            px: 1,
-                            py: 0.3,
-                            mx: 0.1,
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative",
-                            "&:hover": {
-                              backgroundColor: "#13629b",
-                            },
-                          }}
-                          onClick={() => {
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: "Scenarios",
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          scenarios
-                        </Box>
-                        {afterText}
-                      </>
-                    )
-                  }
-
-                  // If no terms are found, return original text
-                  return text
+                  return <>{result}</>
                 })()}
               </Typography>
             </Stack>
