@@ -758,9 +758,9 @@ const IntroSection: React.FC = () => {
               // textShadow:
               //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
-            className="inter-font"
+            className="tk-sentinel"
           >
             Learn.
           </Typography>
@@ -776,9 +776,9 @@ const IntroSection: React.FC = () => {
               // textShadow:
               //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
-            className="inter-font"
+            className="tk-sentinel"
           >
             Explore.
           </Typography>
@@ -794,9 +794,9 @@ const IntroSection: React.FC = () => {
               // textShadow:
               //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
-            className="inter-font"
+            className="tk-sentinel"
           >
             Empower.
           </Typography>
@@ -812,9 +812,9 @@ const IntroSection: React.FC = () => {
               // textShadow:
               //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
               fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
-            className="inter-font"
+            className="tk-sentinel"
           >
             Rethink California Water
           </Typography>
@@ -825,10 +825,12 @@ const IntroSection: React.FC = () => {
               color: "white",
               mt: 3,
               maxWidth: "500px",
+              fontFamily:
+                '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             }}
+            className="neue-haas-text"
           >
             Explore California&apos;s water system and discover
-            <br />
             possibilities for the future of water in our state.
           </Typography>
 
