@@ -106,6 +106,12 @@ const glossaryTerms: GlossaryTerm[] = [
       "The movement of water through infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
   },
   {
+    icon: <SettingsIcon />,
+    term: "Allocation",
+    definition:
+      "The process of distributing available water among different users and uses, such as agriculture, communities, and environmental needs. Water allocation decisions determine who gets water, when, and how much, based on water rights, regulations, and priorities established by law and policy.",
+  },
+  {
     icon: <EngineeringIcon />,
     term: "Computer models / CalSim",
     definition:
@@ -153,12 +159,88 @@ export function CurrentOpsContent({
 
   // Function to render definition text with clickable term links
   const renderDefinitionWithLinks = (definition: string, currentTerm: string) => {
-    // Check for both "Groundwater" and "surface water" in the definition
+    // Check for "Groundwater", "surface water", and "allocation" in the definition
     const hasGroundwater = definition.includes("Groundwater") && currentTerm !== "Groundwater"
     const hasSurfaceWater = definition.includes("surface water") && currentTerm !== "Surface water"
+    const hasAllocation = definition.includes("allocation") && currentTerm !== "Allocation"
     
+    // Handle allocation links
+    if (hasAllocation && !hasGroundwater && !hasSurfaceWater) {
+      const parts = definition.split("allocation")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick("Allocation")}
+          >
+            allocation
+          </Box>
+          {parts[1]}
+        </>
+      )
+    }
+    
+    // Handle surface water links
+    if (hasSurfaceWater && !hasGroundwater && !hasAllocation) {
+      const parts = definition.split("surface water")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick("Surface water")}
+          >
+            surface water
+          </Box>
+          {parts[1]}
+        </>
+      )
+    }
+    
+    // Handle groundwater links
+    if (hasGroundwater && !hasSurfaceWater && !hasAllocation) {
+      const parts = definition.split("Groundwater")
+      return (
+        <>
+          {parts[0]}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick("Groundwater")}
+          >
+            Groundwater
+          </Box>
+          {parts[1]}
+        </>
+      )
+    }
+    
+    // For complex cases with multiple terms, handle them in order of appearance
     if (hasGroundwater && hasSurfaceWater) {
-      // Handle both terms - split by the first occurrence, then handle the second
       const groundwaterIndex = definition.indexOf("Groundwater")
       const surfaceWaterIndex = definition.indexOf("surface water")
       
@@ -251,52 +333,6 @@ export function CurrentOpsContent({
           </>
         )
       }
-    } else if (hasGroundwater) {
-      // Only Groundwater
-      const parts = definition.split("Groundwater")
-      return (
-        <>
-          {parts[0]}
-          <Box
-            component="span"
-            sx={{
-              color: "#FFAC6E",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": {
-                color: "#FF8A4A",
-              },
-            }}
-            onClick={() => handleTermClick("Groundwater")}
-          >
-            Groundwater
-          </Box>
-          {parts[1]}
-        </>
-      )
-    } else if (hasSurfaceWater) {
-      // Only surface water
-      const parts = definition.split("surface water")
-      return (
-        <>
-          {parts[0]}
-          <Box
-            component="span"
-            sx={{
-              color: "#FFAC6E",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": {
-                color: "#FF8A4A",
-              },
-            }}
-            onClick={() => handleTermClick("Surface water")}
-          >
-            surface water
-          </Box>
-          {parts[1]}
-        </>
-      )
     }
     
     return definition

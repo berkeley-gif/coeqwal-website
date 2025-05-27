@@ -952,8 +952,120 @@ const IntroSection: React.FC = () => {
                 {(() => {
                   const text = t("interstitial.part1")
                   
-                  // First check for "surface water" and split if found
+                  // Check for all three terms: "surface water", "conveyance", and "allocation"
                   const surfaceWaterIndex = text.indexOf("surface water")
+                  const conveyanceIndex = text.indexOf("conveyance")
+                  const allocationIndex = text.indexOf("allocation")
+                  
+                  if (surfaceWaterIndex !== -1 && conveyanceIndex !== -1 && allocationIndex !== -1) {
+                    // All three terms found - handle them in order of appearance
+                    const beforeSurfaceWater = text.substring(0, surfaceWaterIndex)
+                    const afterSurfaceWater = text.substring(surfaceWaterIndex + 13) // 13 is length of "surface water"
+                    
+                    const conveyanceIndexInRemainder = afterSurfaceWater.indexOf("conveyance")
+                    const beforeConveyance = afterSurfaceWater.substring(0, conveyanceIndexInRemainder)
+                    const afterConveyance = afterSurfaceWater.substring(conveyanceIndexInRemainder + 10) // 10 is length of "conveyance"
+                    
+                    const allocationIndexInRemainder = afterConveyance.indexOf("allocation")
+                    const beforeAllocation = afterConveyance.substring(0, allocationIndexInRemainder)
+                    const afterAllocation = afterConveyance.substring(allocationIndexInRemainder + 10) // 10 is length of "allocation"
+                    
+                    return (
+                      <>
+                        {beforeSurfaceWater}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative",
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with surface water term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Surface water",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          surface water
+                        </Box>
+                        {beforeConveyance}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative",
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with conveyance term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Conveyance",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          conveyance
+                        </Box>
+                        {beforeAllocation}
+                        <Box
+                          component="span"
+                          sx={{
+                            backgroundColor: "#257dbd",
+                            color: "white",
+                            px: 1,
+                            py: 0.3,
+                            mx: 0.1,
+                            borderRadius: 1,
+                            cursor: "pointer",
+                            display: "inline-block",
+                            position: "relative",
+                            "&:hover": {
+                              backgroundColor: "#13629b",
+                            },
+                          }}
+                          onClick={() => {
+                            // Open glossary drawer with allocation term
+                            const drawerStore = useDrawerStore.getState()
+                            drawerStore.setDrawerContent({
+                              selectedSection: "glossary",
+                              selectedTerm: "Allocation",
+                            })
+                            drawerStore.openDrawer("glossary")
+                          }}
+                        >
+                          allocation
+                        </Box>
+                        {afterAllocation}
+                      </>
+                    )
+                  }
+                  
+                  // Fallback to existing logic if not all three terms are found
+                  // First check for "surface water" and split if found
                   if (surfaceWaterIndex !== -1) {
                     // Text before "surface water"
                     const beforeSurfaceWater = text.substring(0, surfaceWaterIndex)
@@ -962,14 +1074,14 @@ const IntroSection: React.FC = () => {
                     const afterSurfaceWaterText = text.substring(surfaceWaterIndex + 13) // 13 is length of "surface water"
                     
                     // Look for "conveyance" in the remaining text
-                    const conveyanceIndex = afterSurfaceWaterText.indexOf("conveyance")
+                    const conveyanceIndexInText = afterSurfaceWaterText.indexOf("conveyance")
                     
-                    if (conveyanceIndex !== -1) {
+                    if (conveyanceIndexInText !== -1) {
                       // Text between "surface water" and "conveyance"
-                      const betweenText = afterSurfaceWaterText.substring(0, conveyanceIndex)
+                      const betweenText = afterSurfaceWaterText.substring(0, conveyanceIndexInText)
                       
                       // Text after "conveyance"
-                      const afterConveyanceText = afterSurfaceWaterText.substring(conveyanceIndex + 10) // 10 is length of "conveyance"
+                      const afterConveyanceText = afterSurfaceWaterText.substring(conveyanceIndexInText + 10) // 10 is length of "conveyance"
                       
                       return (
                         <>
