@@ -233,36 +233,35 @@ const availableImages = [
 
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
-  // Background circles arranged in a circle pattern
-  // Center moved to 60% and expanded vertical spread
+  // Background circles arranged in a more random, spread-out pattern
+  // Distributed across a wider area for natural cloud-like appearance
   background: [
-    // Circle arrangement with 8 positions around the center point
-    // Center point: (60%, 40%)
-    // Radius: approximately 25% horizontal, 25% vertical for expanded spread
+    // More random distribution across the viewport
+    // Spread across roughly 50% of viewport width and height
     
-    // Top position (12 o'clock) - moved left and up
-    { left: "60%", top: "15%" },
+    // Upper area circles
+    { left: "16%", top: "14%" },
     
-    // Top-right position (1:30 o'clock) - moved left
-    { left: "73%", top: "25%" },
+    // Upper right area
+    { left: "72%", top: "8%" },
     
-    // Right position (3 o'clock) - moved near center
-    { left: "65%", top: "40%" },
+    // Center-right area
+    { left: "68%", top: "31%" },
     
-    // Bottom-right position (4:30 o'clock) - moved left
-    { left: "73%", top: "55%" },
+    // Lower right area
+    { left: "75%", top: "54%" },
     
-    // Bottom position (6 o'clock) - moved left and down
-    { left: "60%", top: "65%" },
+    // Lower center area
+    { left: "55%", top: "64%" },
     
-    // Bottom-left position (7:30 o'clock) - moved left
-    { left: "47%", top: "55%" },
+    // Lower left area
+    { left: "35%", top: "58%" },
     
-    // Left position (9 o'clock) - moved left
-    { left: "42%", top: "40%" },
+    // Center-left area
+    { left: "38%", top: "28%" },
     
-    // Top-left position (10:30 o'clock) - moved left
-    { left: "47%", top: "25%" },
+    // Upper left area
+    { left: "52%", top: "21%" },
   ],
 
   // Keep foreground empty for now
