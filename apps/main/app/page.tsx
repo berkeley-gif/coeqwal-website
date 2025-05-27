@@ -282,12 +282,11 @@ export default function Home() {
             },
           }}
         >
-
           {/* Intro Panel */}
           <IntroSection />
 
           {/* Intro Panel */}
-          <IntroSection />
+          {/* <IntroSection /> */}
 
           {/* Content Panels */}
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />

@@ -63,13 +63,12 @@ const themeValues = {
       '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    sentinel:
-      '"sentinel", Georgia, "Times New Roman", Times, serif',
+    sentinel: '"sentinel", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
   layout: {
-    headerHeight: 56,
+    headerHeight: 64,
     drawer: {
       width: 226,
       closedWidth: 52,
@@ -810,10 +809,10 @@ const theme = createTheme({
     MuiToolbar: {
       styleOverrides: {
         root: ({ theme }) => ({
-          height: 56,
-          minHeight: 56,
+          height: theme.layout.headerHeight,
+          minHeight: theme.layout.headerHeight,
           [theme.breakpoints.up("sm")]: {
-            minHeight: 56,
+            minHeight: theme.layout.headerHeight,
           },
         }),
       },

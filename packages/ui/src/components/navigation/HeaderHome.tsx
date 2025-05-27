@@ -100,25 +100,26 @@ export function HeaderHome({
 
   useEffect(() => {
     // Find the main content area or intro section to place our sentinel
-    const introSection = document.getElementById('intro') || document.querySelector('main')
-    
+    const introSection =
+      document.getElementById("intro") || document.querySelector("main")
+
     if (!introSection) {
       return
     }
 
     // Create a sentinel element at the top of the content
-    const sentinel = document.createElement('div')
-    sentinel.style.position = 'absolute'
-    sentinel.style.top = '100px' // 100px down from the start of content
-    sentinel.style.left = '0'
-    sentinel.style.height = '1px'
-    sentinel.style.width = '100%'
-    sentinel.style.pointerEvents = 'none'
-    sentinel.style.visibility = 'hidden' // Make it invisible
-    sentinel.id = 'scroll-sentinel'
-    
+    const sentinel = document.createElement("div")
+    sentinel.style.position = "absolute"
+    sentinel.style.top = "100px" // 100px down from the start of content
+    sentinel.style.left = "0"
+    sentinel.style.height = "1px"
+    sentinel.style.width = "100%"
+    sentinel.style.pointerEvents = "none"
+    sentinel.style.visibility = "hidden" // Make it invisible
+    sentinel.id = "scroll-sentinel"
+
     // Insert the sentinel into the intro section
-    introSection.style.position = 'relative' // Ensure it's positioned for absolute children
+    introSection.style.position = "relative" // Ensure it's positioned for absolute children
     introSection.appendChild(sentinel)
 
     // Create intersection observer
@@ -131,8 +132,8 @@ export function HeaderHome({
       },
       {
         threshold: [0, 1],
-        rootMargin: '0px'
-      }
+        rootMargin: "0px",
+      },
     )
 
     // Start observing the sentinel
@@ -161,8 +162,8 @@ export function HeaderHome({
     ? "black"
     : "white"
 
-  const backgroundColor = isScrolled 
-    ? "rgba(255, 255, 255, 0.5)" // Semi-transparent white background when scrolled
+  const backgroundColor = isScrolled
+    ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
     : "transparent"
 
   return (

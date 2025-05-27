@@ -56,15 +56,15 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   const x = useMotionValue(0)
   const y = useMotionValue(0)
   const scale = useMotionValue(1)
-  const haloOpacity = useMotionValue(0.16)
+  const haloOpacity = useMotionValue(0.08)
 
   // Use requestAnimationFrame to create continuous, organic motion
   useEffect(() => {
     let animationId: number
 
     const animate = () => {
-      // Update time value - INCREASED SIGNIFICANTLY for faster motion
-      timeRef.current += 0.05 // 10x faster than original 0.005
+      // Update time value - reduced for slower, more gentle motion
+      timeRef.current += 0.02 // Reduced from 0.05 for slower animation
 
       // Calculate complex, overlapping sine wave motion
       // X position: combine two sine waves with different frequencies and phases
@@ -79,7 +79,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 
       // Add subtle pulsing effect
       const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.05
-      const newHaloOpacity = 0.16 + Math.sin(timeRef.current * 0.15) * 0.08
+      const newHaloOpacity = 0.08 + Math.sin(timeRef.current * 0.15) * 0.08
 
       // Apply new values
       x.set(newX)
@@ -190,21 +190,29 @@ const availableImages = [
 
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
-  // Background circles (appear behind text)
+  // Background circles arranged in 3 rows to align with text
+  // Each row has circles positioned to align with the text layout
   background: [
-    { left: "25%", top: "10%" },
-    { left: "40%", top: "5%" },
-    { left: "60%", top: "15%" },
-    { left: "80%", top: "10%" },
-    { left: "50%", top: "45%" },
+    // Row 1 - Learn row: 1 circle left of "Learn", 2-3 circles to the right
+    { left: "2%", top: "5%" },    // circle to the left of Learn
+    { left: "50%", top: "5%" },   // circle to the right of Learn
+    { left: "80%", top: "5%" },   // circle to the right of Learn
+    
+    // Row 2 - Explore row: circles distributed around "Explore" (positioned at ~65%)
+    { left: "10%", top: "25%" },   // circle to the left
+    { left: "36%", top: "25%" },   // circle to the left
+    { left: "80%", top: "25%" },   // circle to the right of Explore
+    
+    // Row 3 - Empower row: circles distributed around centered "Empower"
+    { left: "15%", top: "60%" },   // circle to the left
+    { left: "25%", top: "58%" },   // circle to the left
+    { left: "70%", top: "62%" },   // circle to the right
+    { left: "85%", top: "59%" },   // circle to the right
+    { left: "50%", top: "5%" },   // circle to the right of Learn
   ],
 
-  // Foreground circles (appear in front of text)
-  foreground: [
-    { left: "35%", top: "65%" },
-    { left: "60%", top: "70%" },
-    { left: "70%", top: "50%" },
-  ],
+  // Keep foreground empty for now
+  foreground: [],
 }
 
 // Keep these for backward compatibility
@@ -234,7 +242,8 @@ const generateFixedCircleProps = (
   const index = isBackground ? 1 : 15 // Will be updated to use theme values in the component
 
   // Fixed size with small variation
-  const size = 280 + positionIndex * 10
+  // const size = 280 + positionIndex * 10
+  const size = 260 // Fixed size for all circles
 
   // Generate animation parameters with consistent variation
   const baseFreq = 0.05
@@ -251,11 +260,11 @@ const generateFixedCircleProps = (
   const phaseY2 = basePhase + 1.8
 
   // Fixed amplitudes with increased variations
-  const baseAmplitude = 40 // Increased from 30
-  const amplitudeX1 = baseAmplitude + positionIndex * 4
-  const amplitudeX2 = baseAmplitude - positionIndex * 2
-  const amplitudeY1 = baseAmplitude + positionIndex * 3
-  const amplitudeY2 = baseAmplitude - positionIndex * 1
+  const baseAmplitude = 25 // Reduced from 40 to keep circles in rows
+  const amplitudeX1 = baseAmplitude + positionIndex * 2 // Reduced variation
+  const amplitudeX2 = baseAmplitude - positionIndex * 1 // Reduced variation
+  const amplitudeY1 = baseAmplitude + positionIndex * 1.5 // Reduced variation
+  const amplitudeY2 = baseAmplitude - positionIndex * 0.5 // Reduced variation
 
   return {
     imagePath,
@@ -386,8 +395,8 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
     let animationId: number
 
     const animate = () => {
-      // Update time value - increase speed from 0.015 to 0.04 for more visible motion
-      timeRef.current += 0.04
+      // Update time value - reduced for slower, more gentle motion
+      timeRef.current += 0.015 // Reduced from 0.04 for slower animation
 
       // Calculate complex, overlapping sine wave motion
       // X position: combine two sine waves with different frequencies and phases
@@ -741,139 +750,168 @@ const IntroSection: React.FC = () => {
             display: "flex",
             flexDirection: "column",
             width: "100%",
-            ml: { xs: 3, md: 6 },
+            height: "100%",
             position: "relative",
             zIndex: (theme) => theme.zIndex.introText, // Text layer
-            mt: { xs: 6, md: 12 }, // Hack: dd top margin to push the text content down
+            justifyContent: "space-between",
+            py: { xs: 6, md: 8 }, // Vertical padding instead of margin
           }}
         >
-          <Typography
-            variant="h1"
-            sx={{
-              color: "white",
-              mb: 3, // 32px spacing
-              fontSize: "100px",
-              fontWeight: 600,
-              lineHeight: 0.8,
-              // textShadow:
-              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
-              fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            }}
-            className="inter-font"
-          >
-            Learn.
-          </Typography>
-
-          <Typography
-            variant="h1"
-            sx={{
-              color: "white",
-              mb: 3,
-              fontSize: "100px",
-              fontWeight: 600,
-              lineHeight: 0.8,
-              // textShadow:
-              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
-              fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            }}
-            className="inter-font"
-          >
-            Explore.
-          </Typography>
-
-          <Typography
-            variant="h1"
-            sx={{
-              color: "white",
-              mb: 4, // 32px spacing
-              fontSize: "100px",
-              fontWeight: 600,
-              lineHeight: 0.8,
-              // textShadow:
-              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
-              fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            }}
-            className="inter-font"
-          >
-            Empower.
-          </Typography>
-
-          <Typography
-            variant="h4"
-            sx={{
-              color: "white",
-              mt: 2, // 16px top margin
-              fontSize: "56px",
-              fontWeight: 500,
-              lineHeight: 0.8,
-              // textShadow:
-              //   "-1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, 0px 0px 3px rgba(255,255,255,0.3)",
-              fontFamily:
-                '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            }}
-            className="inter-font"
-          >
-            Rethink California Water
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: "white",
-              mt: 3,
-              maxWidth: "500px",
-            }}
-          >
-            Explore California&apos;s water system and discover
-            <br />
-            possibilities for the future of water in our state.
-          </Typography>
-
-          {/* Play arrow icon pointing down */}
+          {/* Row 1 - Learn */}
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
-              width: "500px",
-              mt: 0,
+              alignItems: "center",
+              width: "100%",
+              flex: 1, // Take equal space
+              pl: "20%", // Position text where it should align with circles
             }}
           >
-            <PlayArrowIcon
+            <Typography
+              variant="h1"
               sx={{
                 color: "white",
-                fontSize: 50,
-                transform: "rotate(90deg)",
-                // filter:
-                //   "drop-shadow(-0.5px -0.5px 0 white) drop-shadow(0.5px -0.5px 0 white) drop-shadow(-0.5px 0.5px 0 white) drop-shadow(0.5px 0.5px 0 white)",
-                // cursor: "pointer",
-                pointerEvents: "auto",
+                fontSize: "150px",
+                fontWeight: 600,
+                lineHeight: 1,
+                fontFamily:
+                  '"sentinel", Georgia, "Times New Roman", Times, serif',
               }}
-              onClick={() => {
-                // Scroll to the interstitial section with improved positioning
-                const interstitialSection =
-                  document.getElementById("interstitial")
-                if (interstitialSection) {
-                  // Get the exact position of the interstitial section
-                  const rect = interstitialSection.getBoundingClientRect()
-                  const currentScrollTop =
-                    window.pageYOffset || document.documentElement.scrollTop
+              className="tk-sentinel"
+            >
+              Learn
+            </Typography>
+          </Box>
 
-                  // Calculate target position, accounting for any header offset
-                  const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
+          {/* Row 2 - Explore */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              width: "100%",
+              flex: 1, // Take equal space
+              pr: "16%", // Position text where it should align with circles (100% - 65%)
+            }}
+          >
+            <Typography
+              variant="h1"
+              sx={{
+                color: "white",
+                fontSize: "150px",
+                fontWeight: 600,
+                lineHeight: 1,
+                fontFamily:
+                  '"sentinel", Georgia, "Times New Roman", Times, serif',
+              }}
+              className="tk-sentinel"
+            >
+              Explore
+            </Typography>
+          </Box>
 
-                  // Use requestAnimationFrame to ensure smooth scrolling doesn't interfere with manual scrolling
-                  requestAnimationFrame(() => {
-                    window.scrollTo({
-                      top: targetPosition,
-                      behavior: "smooth",
+          {/* Row 3 - Empower */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              flex: 1, // Take equal space
+            }}
+          >
+            <Typography
+              variant="h1"
+              sx={{
+                color: "white",
+                fontSize: "150px",
+                fontWeight: 600,
+                lineHeight: 1,
+                fontFamily:
+                  '"sentinel", Georgia, "Times New Roman", Times, serif',
+              }}
+              className="tk-sentinel"
+            >
+              Empower
+            </Typography>
+          </Box>
+
+          {/* Bottom content - subtitle and description */}
+          <Box
+            sx={{
+              mt: 4,
+              ml: { xs: 3, md: 6 },
+              maxWidth: "500px",
+            }}
+          >
+            <Typography
+              variant="h4"
+              sx={{
+                color: "white",
+                mb: 3,
+                fontSize: "56px",
+                fontWeight: 600,
+                lineHeight: 1,
+                fontFamily:
+                  '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              }}
+              className="inter-font"
+            >
+              Rethink California Water
+            </Typography>
+
+            <Typography
+              variant="body2"
+              sx={{
+                color: "white",
+                mb: 3,
+                maxWidth: "500px",
+              }}
+            >
+              Explore California&apos;s water system and discover
+              <br />
+              possibilities for the future of water in our state.
+            </Typography>
+
+            {/* Play arrow icon pointing down */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "500px",
+              }}
+            >
+              <PlayArrowIcon
+                sx={{
+                  color: "white",
+                  fontSize: 50,
+                  transform: "rotate(90deg)",
+                  pointerEvents: "auto",
+                }}
+                onClick={() => {
+                  // Scroll to the interstitial section with improved positioning
+                  const interstitialSection =
+                    document.getElementById("interstitial")
+                  if (interstitialSection) {
+                    // Get the exact position of the interstitial section
+                    const rect = interstitialSection.getBoundingClientRect()
+                    const currentScrollTop =
+                      window.pageYOffset || document.documentElement.scrollTop
+
+                    // Calculate target position, accounting for any header offset
+                    const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
+
+                    // Use requestAnimationFrame to ensure smooth scrolling doesn't interfere with manual scrolling
+                    requestAnimationFrame(() => {
+                      window.scrollTo({
+                        top: targetPosition,
+                        behavior: "smooth",
+                      })
                     })
-                  })
-                }
-              }}
-            />
+                  }
+                }}
+              />
+            </Box>
           </Box>
         </Box>
 
@@ -907,7 +945,7 @@ const IntroSection: React.FC = () => {
           position: "relative",
           backgroundColor: "transparent", // No background image here anymore since it's on the parent
           minHeight: "100vh",
-          paddingTop: "100px", // Reduced from 400px to eliminate gap
+          paddingTop: "160px", // Reduced from 400px to eliminate gap
         }}
       >
         {/* Content container for proper blending context */}
@@ -931,7 +969,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  fontWeight: 500,
+                  fontWeight: 600,
                   color: "white",
                 }}
               >
