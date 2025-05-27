@@ -231,7 +231,7 @@ export default function Home() {
       </Box>
       */}
 
-      {/* Simple gradient background to replace the map */}
+      {/* Simple background to replace the map */}
       <Box
         sx={{
           position: "fixed",
@@ -240,12 +240,12 @@ export default function Home() {
           width: "100%",
           height: "100%",
           zIndex: (theme) => theme.zIndex.map,
-          background: "#218dba" /* Changed from gradient to solid sky blue */,
+          background: "#218dba",
           backgroundSize: "100% 100%",
         }}
       />
 
-      {/* ===== MultiDrawer - Always visible ===== */}
+      {/* ===== MultiDrawer  ===== */}
       <StoreConnectedMultiDrawer
         drawerWidth={360}
         overlay={true}
@@ -282,6 +282,7 @@ export default function Home() {
             },
           }}
         >
+          
           {/* Intro Panel */}
           <IntroSection />
 

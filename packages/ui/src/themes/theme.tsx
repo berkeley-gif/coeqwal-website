@@ -2,37 +2,48 @@ import { createTheme, Theme } from "@mui/material/styles"
 import type { CSSProperties } from "react"
 
 // TODO:
-// - Transitions
+// - Standardized styles for transitions
 
 /* ========================================================
  TOC
  ========================================================
  1. Global theme values
-    - Palette
-    - Border radius
+    - Typography (font families)
+    - Layout dimensions
+    - Palette colors (including categories)
+    - Border radius values
     - Border styles
     - Shadows
-    - Z-Index
-    - Layout dimensions
+    - Z-Index values
+    - Reusable mixins (hover effects, drawer content)
 
  2. Theme configuration
-    - Base theme
-    - Palette
-    - Typography
-    - Shape
-    - Component overrides
-    - Global styles
-    
+    - Base theme creation
+    - Helper functions (border styles, drawer mixins)
+    - Main theme object with:
+      - Layout properties
+      - Cards typography and spacing
+      - Palette configuration
+      - Typography variants
+      - Shape settings
+      - Component overrides (MUI components)
+      - Global styles (CssBaseline)
+      - Custom mixins
+
  3. Custom theme properties
-    - Border
-    - Background
-    - Border radius
-    - DrawerContent styling
-    
+    - Border utilities
+    - Background overlays
+    - Border radius application
+    - Drawer navigation colors
+    - Exported constants
+
  4. TypeScript customizations
     - Custom palette extensions
-    - Custom theme properties
-    - Component variants
+    - Custom theme interface extensions
+    - Z-Index interface
+    - Cards interface
+    - Component variant overrides
+    - Typography variant extensions
  ========================================================
 
 
@@ -48,6 +59,12 @@ const themeValues = {
       '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     inter:
       '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    neueHaasDisplay:
+      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    neueHaasText:
+      '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    sentinel:
+      '"sentinel", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
