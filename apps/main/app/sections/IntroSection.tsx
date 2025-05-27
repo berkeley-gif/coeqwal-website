@@ -63,7 +63,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     let animationId: number
 
     const animate = () => {
-      // Update time value - reduced for slower, more gentle motion
+      // Update time value - slowed down for gentler motion
       timeRef.current += 0.02 // Reduced from 0.05 for slower animation
 
       // Calculate complex, overlapping sine wave motion
@@ -171,7 +171,6 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
 }
 
 // List of all available images in the circular-crops directory
-// This list exactly matches what's in the directory (verified via ls command)
 const availableImages = [
   "6.png",
   "2.png",
@@ -183,15 +182,9 @@ const availableImages = [
   "14.png",
 ]
 
-// Function to generate a random value within a range
-// const getRandomInRange = (min: number, max: number): number => {
-//   return Math.random() * (max - min) + min
-// }
-
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
   // Background circles arranged in 3 rows to align with text
-  // Each row has circles positioned to align with the text layout
   background: [
     // Row 1 - Learn row: 1 circle left of "Learn", 2-3 circles to the right
     { left: "2%", top: "5%" }, // circle to the left of Learn
@@ -242,7 +235,6 @@ const generateFixedCircleProps = (
   const index = isBackground ? 1 : 15 // Will be updated to use theme values in the component
 
   // Fixed size with small variation
-  // const size = 280 + positionIndex * 10
   const size = 260 // Fixed size for all circles
 
   // Generate animation parameters with consistent variation
@@ -287,61 +279,6 @@ const generateFixedCircleProps = (
     amplitudeY2,
   }
 }
-
-// Function to generate random circle configuration
-// const generateRandomCircleProps = (
-//   imagePath: string,
-//   isBackground: boolean,
-// ): AnimatedCircleProps => {
-//   // Position the circle randomly, but keep it visible on the screen
-//   const left = `${getRandomInRange(-10, 90)}%`
-//   const top = `${getRandomInRange(0, 80)}%`
-
-//   // Determine z-index based on whether it's a background or foreground circle
-//   const index = isBackground ? 0 : 20
-
-//   // Random size within specified range (smaller for better aesthetic)
-//   const size = getRandomInRange(250, 320)
-
-//   // Generate random animation parameters
-//   const freqX1 = getRandomInRange(0.03, 0.09)
-//   const freqX2 = getRandomInRange(0.02, 0.08)
-//   const freqY1 = getRandomInRange(0.03, 0.09)
-//   const freqY2 = getRandomInRange(0.02, 0.08)
-
-//   // Random phases for more variation
-//   const phaseX1 = getRandomInRange(0, 3.5)
-//   const phaseX2 = getRandomInRange(0, 3.5)
-//   const phaseY1 = getRandomInRange(0, 3.5)
-//   const phaseY2 = getRandomInRange(0, 3.5)
-
-//   // Random amplitudes for motion
-//   const amplitudeX1 = getRandomInRange(20, 50)
-//   const amplitudeX2 = getRandomInRange(15, 40)
-//   const amplitudeY1 = getRandomInRange(20, 45)
-//   const amplitudeY2 = getRandomInRange(15, 40)
-
-//   return {
-//     imagePath,
-//     left,
-//     top,
-//     index,
-//     opacity: 1,
-//     size,
-//     freqX1,
-//     freqX2,
-//     freqY1,
-//     freqY2,
-//     phaseX1,
-//     phaseX2,
-//     phaseY1,
-//     phaseY2,
-//     amplitudeX1,
-//     amplitudeX2,
-//     amplitudeY1,
-//     amplitudeY2,
-//   }
-// }
 
 // Circle component for background white circles
 interface WhiteCircleProps {
@@ -395,7 +332,7 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
     let animationId: number
 
     const animate = () => {
-      // Update time value - reduced for slower, more gentle motion
+      // Update time value - slowed down for gentler motion
       timeRef.current += 0.015 // Reduced from 0.04 for slower animation
 
       // Calculate complex, overlapping sine wave motion
@@ -512,17 +449,17 @@ const IntroSection: React.FC = () => {
         // Size with some variation but more controlled
         const size = 180 + Math.random() * 320
 
-        // Opacity - gradient effect that decreases with row - increased values
+        // Opacity - gradient effect that decreases with row - halved values for subtlety
         let opacity
         if (row === 0) {
           // Top row - more visible
-          opacity = 0.1 + Math.random() * 0.1 // Increased from 0.06-0.14 to 0.1-0.2
+          opacity = 0.05 + Math.random() * 0.05 // Halved from 0.1-0.2 to 0.05-0.1
         } else if (row === 1) {
           // Middle row - medium visibility
-          opacity = 0.07 + Math.random() * 0.07 // Increased from 0.04-0.09 to 0.07-0.14
+          opacity = 0.035 + Math.random() * 0.035 // Halved from 0.07-0.14 to 0.035-0.07
         } else {
           // Bottom row - subtle
-          opacity = 0.04 + Math.random() * 0.05 // Increased from 0.01-0.05 to 0.04-0.09
+          opacity = 0.02 + Math.random() * 0.025 // Halved from 0.04-0.09 to 0.02-0.045
         }
 
         // Add animation parameters with slight variations
@@ -556,7 +493,7 @@ const IntroSection: React.FC = () => {
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
       size: 250 + Math.random() * 150, // Medium-large size
-      opacity: 0.02 + Math.random() * 0.02, // Very subtle
+      opacity: 0.01 + Math.random() * 0.01, // Halved from 0.02-0.04 to 0.01-0.02
       // Add gentler animation for the lower circle
       freqX1: 0.02,
       freqX2: 0.015,
@@ -606,7 +543,6 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        // background: "linear-gradient(to bottom, #D1DDD9, #c0e3ff, #459ede)",
         background: "linear-gradient(to bottom, #218dba, #218dba, #459ede)",
         backgroundSize: "100% 100%",
         width: "100%",
@@ -682,33 +618,6 @@ const IntroSection: React.FC = () => {
             }}
           />
         </Box>
-
-        {/* <Box
-          sx={{
-            position: "absolute",
-            top: "100vh",
-            left: 0,
-            width: "100%",
-            height: "80%",
-            zIndex: 20,
-            pointerEvents: "none",
-          }}
-        >
-          <Image
-            src="/images/home_collage/birds_top.png"
-            alt=""
-            fill
-            quality={100}
-            priority
-            sizes="100vw"
-            style={{
-              objectFit: "contain",
-              objectPosition: "top center",
-              pointerEvents: "none",
-              // transform: "scale(1.3)",
-            }}
-          />
-        </Box> */}
       </Box>
 
       {/* First section with bubbles */}
@@ -753,276 +662,127 @@ const IntroSection: React.FC = () => {
             height: "100%",
             position: "relative",
             zIndex: (theme) => theme.zIndex.introText, // Text layer
-            justifyContent: "space-between",
-            py: { xs: 6, md: 8 }, // Vertical padding instead of margin
+            mt: { xs: 6, md: 12 }, // Hack: dd top margin to push the text content down
           }}
         >
-          {/* Row 1 - Learn */}
-          <Box
+          <Typography
+            variant="h1"
             sx={{
-              display: "flex",
-              alignItems: "center",
-              width: "100%",
-              flex: 1, // Take equal space
-              pl: "20%", // Position text where it should align with circles
+              color: "white",
+              mb: 3, // 32px spacing
+              fontSize: "100px",
+              fontWeight: 600,
+              lineHeight: 0.8,
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
+            className="tk-sentinel"
           >
-            <Box sx={{ position: "relative", display: "inline-block" }}>
-              {/* Learn SVG Swash */}
-              <svg
-                style={{
-                  position: "absolute",
-                  top: "5%",
-                  left: "-8%",
-                  width: "116%",
-                  height: "180%",
-                  zIndex: -1,
-                  transform: "rotate(-1.5deg)",
-                }}
-                viewBox="0 0 400 120"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient
-                    id="learnGradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#FF6B6B" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#FF8E8E" stopOpacity="0.8" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M25 65 C30 62, 35 45, 70 35 C110 32, 150 34, 190 36 C230 38, 270 40, 310 42 C340 44, 365 46, 375 50 C380 54, 378 58, 375 62 C370 68, 360 72, 340 70 C300 68, 260 66, 220 64 C180 62, 140 60, 100 62 C70 64, 45 68, 35 72 C30 74, 27 70, 25 65 Z"
-                  fill="url(#learnGradient)"
-                />
-              </svg>
-              <Typography
-                variant="h1"
-                sx={{
-                  color: "white",
-                  fontSize: "150px",
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  fontFamily:
-                    '"sentinel", Georgia, "Times New Roman", Times, serif',
-                  position: "relative",
-                  px: 3,
-                  py: 1,
-                }}
-                className="tk-sentinel"
-              >
-                Learn
-              </Typography>
-            </Box>
-          </Box>
+            Learn.
+          </Typography>
 
-          {/* Row 2 - Explore */}
-          <Box
+          <Typography
+            variant="h1"
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              width: "100%",
-              flex: 1, // Take equal space
-              pr: "16%", // Position text where it should align with circles (100% - 65%)
+              color: "white",
+              mb: 3,
+              fontSize: "100px",
+              fontWeight: 600,
+              lineHeight: 0.8,
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
+            className="tk-sentinel"
           >
-            <Box sx={{ position: "relative", display: "inline-block" }}>
-              {/* Explore SVG Swash */}
-              <svg
-                style={{
-                  position: "absolute",
-                  top: "8%",
-                  left: "-6%", // Adjusted back for narrower width
-                  width: "112%", // Half of 224% = 112%
-                  height: "170%", // Keep same height
-                  zIndex: -1,
-                  transform: "rotate(1deg)",
-                }}
-                viewBox="0 0 450 120"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient
-                    id="exploreGradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#4ECDC4" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#6EDDD6" stopOpacity="0.8" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M30 70 C35 67, 40 50, 75 40 C115 37, 155 39, 195 41 C235 43, 275 45, 315 47 C345 49, 370 51, 380 55 C385 59, 383 63, 380 67 C375 73, 365 77, 345 75 C305 73, 265 71, 225 69 C185 67, 145 65, 105 67 C75 69, 50 73, 40 77 C35 79, 32 75, 30 70 Z"
-                  fill="url(#exploreGradient)"
-                />
-              </svg>
-              <Typography
-                variant="h1"
-                sx={{
-                  color: "white",
-                  fontSize: "150px",
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  fontFamily:
-                    '"sentinel", Georgia, "Times New Roman", Times, serif',
-                  position: "relative",
-                  px: 3,
-                  py: 1,
-                }}
-                className="tk-sentinel"
-              >
-                Explore
-              </Typography>
-            </Box>
-          </Box>
+            Explore.
+          </Typography>
 
-          {/* Row 3 - Empower */}
-          <Box
+          <Typography
+            variant="h1"
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "100%",
-              flex: 1, // Take equal space
+              color: "white",
+              mb: 4, // 32px spacing
+              fontSize: "100px",
+              fontWeight: 600,
+              lineHeight: 0.8,
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
             }}
+            className="tk-sentinel"
           >
-            <Box sx={{ position: "relative", display: "inline-block" }}>
-              {/* Empower SVG Swash */}
-              <svg
-                style={{
-                  position: "absolute",
-                  top: "6%",
-                  left: "-7%", // Adjusted back for narrower width
-                  width: "114%", // Half of 228% = 114%
-                  height: "176%", // Keep same height
-                  zIndex: -1,
-                  transform: "rotate(-0.5deg)",
-                }}
-                viewBox="0 0 480 120"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient
-                    id="empowerGradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor="#D4B05A" stopOpacity="0.8" />
-                    <stop offset="100%" stopColor="#E0C070" stopOpacity="0.8" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M35 68 C40 65, 45 48, 80 38 C120 35, 160 37, 200 39 C240 41, 280 43, 320 45 C350 47, 375 49, 385 53 C390 57, 388 61, 385 65 C380 71, 370 75, 350 73 C310 71, 270 69, 230 67 C190 65, 150 63, 110 65 C80 67, 55 71, 45 75 C40 77, 37 73, 35 68 Z"
-                  fill="url(#empowerGradient)"
-                />
-              </svg>
-              <Typography
-                variant="h1"
-                sx={{
-                  color: "white",
-                  fontSize: "150px",
-                  fontWeight: 600,
-                  lineHeight: 1,
-                  fontFamily:
-                    '"sentinel", Georgia, "Times New Roman", Times, serif',
-                  position: "relative",
-                  px: 3,
-                  py: 1,
-                }}
-                className="tk-sentinel"
-              >
-                Empower
-              </Typography>
-            </Box>
-          </Box>
+            Empower.
+          </Typography>
 
-          {/* Bottom content - subtitle and description */}
-          <Box
+          <Typography
+            variant="h4"
             sx={{
-              mt: 4,
-              ml: { xs: 3, md: 6 },
+              color: "white",
+              mt: 2, // 16px top margin
+              fontSize: "56px",
+              fontWeight: 500,
+              lineHeight: 0.8,
+              fontFamily:
+                '"sentinel", Georgia, "Times New Roman", Times, serif',
+            }}
+            className="tk-sentinel"
+          >
+            Rethink California Water
+          </Typography>
+
+          <Typography
+            variant="body2"
+            sx={{
+              color: "white",
+              mt: 3,
               maxWidth: "500px",
+              fontFamily:
+                '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            }}
+            className="neue-haas-text"
+          >
+            Explore California&apos;s water system and discover
+            <br />
+            possibilities for the future of water in our state.
+          </Typography>
+
+          {/* Play arrow icon pointing down */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              width: "500px",
             }}
           >
-            <Typography
-              variant="h4"
+            <PlayArrowIcon
               sx={{
                 color: "white",
-                mb: 3,
-                fontSize: "56px",
-                fontWeight: 600,
-                lineHeight: 1,
-                fontFamily:
-                  '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: 50,
+                transform: "rotate(90deg)",
+                pointerEvents: "auto",
               }}
-              className="inter-font"
-            >
-              Rethink California Water
-            </Typography>
+              onClick={() => {
+                // Scroll to the interstitial section with improved positioning
+                const interstitialSection =
+                  document.getElementById("interstitial")
+                if (interstitialSection) {
+                  // Get the exact position of the interstitial section
+                  const rect = interstitialSection.getBoundingClientRect()
+                  const currentScrollTop =
+                    window.pageYOffset || document.documentElement.scrollTop
 
-            <Typography
-              variant="body2"
-              sx={{
-                color: "white",
-                mb: 3,
-                maxWidth: "500px",
-              }}
-            >
-              Explore California&apos;s water system and discover
-              <br />
-              possibilities for the future of water in our state.
-            </Typography>
+                  // Calculate target position, accounting for any header offset
+                  const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
 
-            {/* Play arrow icon pointing down */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "500px",
-              }}
-            >
-              <PlayArrowIcon
-                sx={{
-                  color: "white",
-                  fontSize: 50,
-                  transform: "rotate(90deg)",
-                  pointerEvents: "auto",
-                }}
-                onClick={() => {
-                  // Scroll to the interstitial section with improved positioning
-                  const interstitialSection =
-                    document.getElementById("interstitial")
-                  if (interstitialSection) {
-                    // Get the exact position of the interstitial section
-                    const rect = interstitialSection.getBoundingClientRect()
-                    const currentScrollTop =
-                      window.pageYOffset || document.documentElement.scrollTop
-
-                    // Calculate target position, accounting for any header offset
-                    const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
-
-                    // Use requestAnimationFrame to ensure smooth scrolling doesn't interfere with manual scrolling
-                    requestAnimationFrame(() => {
-                      window.scrollTo({
-                        top: targetPosition,
-                        behavior: "smooth",
-                      })
+                  // Use requestAnimationFrame to ensure smooth scrolling doesn't interfere with manual scrolling
+                  requestAnimationFrame(() => {
+                    window.scrollTo({
+                      top: targetPosition,
+                      behavior: "smooth",
                     })
-                  }
-                }}
-              />
-            </Box>
+                  })
+                }
+              }}
+            />
           </Box>
         </Box>
 
@@ -1305,9 +1065,6 @@ const IntroSection: React.FC = () => {
                   return text
                 })()}
               </Typography>
-              {/* <Typography variant="body2" color="white">
-                {t("interstitial.part3")}
-              </Typography> */}
             </Stack>
           </Box>
         </Box>

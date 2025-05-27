@@ -172,7 +172,7 @@ export function HeaderHome({
       sx={{
         zIndex: theme.zIndex.appBar,
         backgroundColor: backgroundColor,
-        borderBottom: theme.border.standard,
+        borderBottom: "1px solid white",
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
         boxShadow: "none",
