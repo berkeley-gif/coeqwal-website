@@ -234,35 +234,35 @@ const availableImages = [
 // Clear configuration for circle positions - easy to edit
 const circlePositions = {
   // Background circles arranged in a circle pattern
-  // Center moved left to 55% and increased radii
+  // Center moved left to 55% and reduced vertical spread
   background: [
     // Circle arrangement with 8 positions around the center point
     // Center point: (55%, 40%)
-    // Radius: approximately 25% horizontal, 30% vertical for larger spread
-
-    // Top position (12 o'clock)
-    { left: "55%", top: "10%" },
-
-    // Top-right position (1:30 o'clock)
-    { left: "72%", top: "18%" },
-
+    // Radius: approximately 25% horizontal, 20% vertical for tighter vertical spread
+    
+    // Top position (12 o'clock) - moved down
+    { left: "55%", top: "20%" },
+    
+    // Top-right position (1:30 o'clock) - moved down
+    { left: "72%", top: "28%" },
+    
     // Right position (3 o'clock)
     { left: "75%", top: "40%" },
-
-    // Bottom-right position (4:30 o'clock)
-    { left: "72%", top: "62%" },
-
+    
+    // Bottom-right position (4:30 o'clock) - moved up
+    { left: "72%", top: "52%" },
+    
     // Bottom position (6 o'clock) - moved up toward center
     { left: "55%", top: "45%" },
-
-    // Bottom-left position (7:30 o'clock)
-    { left: "38%", top: "62%" },
-
+    
+    // Bottom-left position (7:30 o'clock) - moved up
+    { left: "38%", top: "52%" },
+    
     // Left position (9 o'clock)
     { left: "30%", top: "40%" },
-
-    // Top-left position (10:30 o'clock)
-    { left: "38%", top: "18%" },
+    
+    // Top-left position (10:30 o'clock) - moved down
+    { left: "38%", top: "28%" },
   ],
 
   // Keep foreground empty for now
@@ -721,7 +721,10 @@ const IntroSection: React.FC = () => {
         fullHeight={false}
         includeHeaderSpacing
         sx={{
-          padding: { xs: 3, md: 6 },
+          paddingTop: { xs: 3, md: 6 },
+          paddingBottom: { xs: 3, md: 6 },
+          paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
+          paddingRight: { xs: 3, md: 6 }, // Normal right padding
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
