@@ -767,36 +767,51 @@ const IntroSection: React.FC = () => {
               pl: "20%", // Position text where it should align with circles
             }}
           >
-            <Typography
-              variant="h1"
-              sx={{
-                color: "white",
-                fontSize: "150px",
-                fontWeight: 600,
-                lineHeight: 1,
-                fontFamily:
-                  '"sentinel", Georgia, "Times New Roman", Times, serif',
-                position: "relative",
-                px: 3,
-                py: 1,
-                "&::before": {
-                  content: '""',
+            <Box sx={{ position: "relative", display: "inline-block" }}>
+              {/* Learn SVG Swash */}
+              <svg
+                style={{
                   position: "absolute",
-                  top: "10%",
-                  left: "-5%",
-                  right: "-5%",
-                  bottom: "10%",
-                  background: "linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%)", // Coral/salmon swash
-                  borderRadius: "50px 20px 40px 15px", // Organic swash shape
-                  transform: "rotate(-2deg)",
+                  top: "5%",
+                  left: "-8%",
+                  width: "116%",
+                  height: "180%",
                   zIndex: -1,
-                  opacity: 0.8,
-                },
-              }}
-              className="tk-sentinel"
-            >
-              Learn
-            </Typography>
+                  transform: "rotate(-1.5deg)",
+                }}
+                viewBox="0 0 400 120"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="learnGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF6B6B" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#FF8E8E" stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M15 45 C25 25, 45 15, 75 20 C120 18, 180 25, 220 35 C280 40, 320 50, 360 45 C380 42, 390 55, 385 65 C375 85, 350 95, 320 90 C280 88, 220 85, 180 80 C120 75, 80 85, 45 80 C25 78, 10 65, 15 45 Z"
+                  fill="url(#learnGradient)"
+                />
+              </svg>
+              <Typography
+                variant="h1"
+                sx={{
+                  color: "white",
+                  fontSize: "150px",
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  fontFamily:
+                    '"sentinel", Georgia, "Times New Roman", Times, serif',
+                  position: "relative",
+                  px: 3,
+                  py: 1,
+                }}
+                className="tk-sentinel"
+              >
+                Learn
+              </Typography>
+            </Box>
           </Box>
 
           {/* Row 2 - Explore */}
@@ -810,36 +825,51 @@ const IntroSection: React.FC = () => {
               pr: "16%", // Position text where it should align with circles (100% - 65%)
             }}
           >
-            <Typography
-              variant="h1"
-              sx={{
-                color: "white",
-                fontSize: "150px",
-                fontWeight: 600,
-                lineHeight: 1,
-                fontFamily:
-                  '"sentinel", Georgia, "Times New Roman", Times, serif',
-                position: "relative",
-                px: 3,
-                py: 1,
-                "&::before": {
-                  content: '""',
+            <Box sx={{ position: "relative", display: "inline-block" }}>
+              {/* Explore SVG Swash */}
+              <svg
+                style={{
                   position: "absolute",
-                  top: "10%",
-                  left: "-5%",
-                  right: "-5%",
-                  bottom: "10%",
-                  background: "linear-gradient(135deg, #4ECDC4 0%, #6EDDD6 100%)", // Teal/turquoise swash
-                  borderRadius: "20px 50px 15px 40px", // Different organic swash shape
-                  transform: "rotate(1.5deg)",
+                  top: "8%",
+                  left: "-6%", // Adjusted back for narrower width
+                  width: "112%", // Half of 224% = 112%
+                  height: "170%", // Keep same height
                   zIndex: -1,
-                  opacity: 0.8,
-                },
-              }}
-              className="tk-sentinel"
-            >
-              Explore
-            </Typography>
+                  transform: "rotate(1deg)",
+                }}
+                viewBox="0 0 450 120"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="exploreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#4ECDC4" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#6EDDD6" stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M20 55 C30 30, 60 20, 95 25 C140 22, 200 28, 250 35 C300 38, 350 45, 390 50 C420 52, 435 65, 430 75 C425 90, 400 100, 370 95 C330 92, 280 88, 230 85 C180 82, 130 85, 90 88 C60 90, 35 85, 25 70 C18 62, 15 58, 20 55 Z"
+                  fill="url(#exploreGradient)"
+                />
+              </svg>
+              <Typography
+                variant="h1"
+                sx={{
+                  color: "white",
+                  fontSize: "150px",
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  fontFamily:
+                    '"sentinel", Georgia, "Times New Roman", Times, serif',
+                  position: "relative",
+                  px: 3,
+                  py: 1,
+                }}
+                className="tk-sentinel"
+              >
+                Explore
+              </Typography>
+            </Box>
           </Box>
 
           {/* Row 3 - Empower */}
@@ -852,36 +882,51 @@ const IntroSection: React.FC = () => {
               flex: 1, // Take equal space
             }}
           >
-            <Typography
-              variant="h1"
-              sx={{
-                color: "white",
-                fontSize: "150px",
-                fontWeight: 600,
-                lineHeight: 1,
-                fontFamily:
-                  '"sentinel", Georgia, "Times New Roman", Times, serif',
-                position: "relative",
-                px: 3,
-                py: 1,
-                "&::before": {
-                  content: '""',
+            <Box sx={{ position: "relative", display: "inline-block" }}>
+              {/* Empower SVG Swash */}
+              <svg
+                style={{
                   position: "absolute",
-                  top: "10%",
-                  left: "-5%",
-                  right: "-5%",
-                  bottom: "10%",
-                  background: "linear-gradient(135deg, #A8E6CF 0%, #C8F2E0 100%)", // Mint green swash
-                  borderRadius: "40px 15px 50px 25px", // Another organic swash shape
-                  transform: "rotate(-1deg)",
+                  top: "6%",
+                  left: "-7%", // Adjusted back for narrower width
+                  width: "114%", // Half of 228% = 114%
+                  height: "176%", // Keep same height
                   zIndex: -1,
-                  opacity: 0.8,
-                },
-              }}
-              className="tk-sentinel"
-            >
-              Empower
-            </Typography>
+                  transform: "rotate(-0.5deg)",
+                }}
+                viewBox="0 0 480 120"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="empowerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#D4B05A" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#E0C070" stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M25 50 C35 28, 70 18, 110 23 C160 20, 230 26, 280 32 C330 36, 380 42, 420 48 C450 52, 465 62, 460 72 C455 88, 430 98, 400 95 C360 92, 310 89, 260 86 C210 83, 160 86, 120 89 C80 92, 50 88, 35 75 C28 68, 22 58, 25 50 Z"
+                  fill="url(#empowerGradient)"
+                />
+              </svg>
+              <Typography
+                variant="h1"
+                sx={{
+                  color: "white",
+                  fontSize: "150px",
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  fontFamily:
+                    '"sentinel", Georgia, "Times New Roman", Times, serif',
+                  position: "relative",
+                  px: 3,
+                  py: 1,
+                }}
+                className="tk-sentinel"
+              >
+                Empower
+              </Typography>
+            </Box>
           </Box>
 
           {/* Bottom content - subtitle and description */}
