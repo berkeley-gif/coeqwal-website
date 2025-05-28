@@ -519,7 +519,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h5"
                       sx={{
                         color: theme.palette.primary.dark,
-                        fontFamily: `${neueHaasTextFont} !important`,
+                        fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
                       }}
                     >
                       {t("questionBuilder.outcomesSelector.includeClimate")}
@@ -739,7 +739,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
               <Typography 
                 variant="h4" 
                 sx={{
-                  fontFamily: `${neueHaasTextFont} !important`,
+                  fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
                 }}
               >
                 {t("scenarioResults.title")}
@@ -869,7 +869,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h6" 
                       gutterBottom
                       sx={{
-                        fontFamily: `${neueHaasTextFont} !important`,
+                        fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
                       }}
                     >
                       No scenario data available

@@ -76,7 +76,7 @@ export default function ContentPanels({
       <Typography
         variant="body2"
         color="common.white"
-        fontSize="24px"
+
         sx={{ pointerEvents: "auto", mb: 0 }}
       >
         how California water flows and operational decisions
@@ -92,7 +92,7 @@ export default function ContentPanels({
       <Typography
         variant="body2"
         fontWeight={200}
-        fontSize="24px"
+
         color="common.white"
         sx={{ pointerEvents: "auto", mb: 0 }}
       >
@@ -106,7 +106,7 @@ export default function ContentPanels({
     <Box sx={{ pointerEvents: "auto", mb: 0 }}>
       <Typography
         variant="body2"
-        fontSize="24px"
+
         color="common.white"
         sx={{ pointerEvents: "auto", mb: 0 }}
       >
