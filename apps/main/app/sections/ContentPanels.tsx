@@ -102,7 +102,8 @@ export default function ContentPanels({
       >
         The COEQWAL project is using the same computer models as the state
         Department of Water Resources and the U.S. Bureau of Reclamation to
-        model a broad range of water management and climate scenarios. Explore these scenarios by theme and empower your community with actionable
+        model a broad range of water management and climate scenarios. Explore
+        these scenarios by theme and empower your community with actionable
         insights to advocate for water solutions.
       </Typography>
     </Box>
@@ -699,8 +700,8 @@ export default function ContentPanels({
                       Investigate scenarios that prioritize drinking water
                       access for communities, particularly those historically
                       underserved. These approaches explore how water management
-                      decisions impact drinking water availability 
-                      across diverse communities.
+                      decisions impact drinking water availability across
+                      diverse communities.
                     </Typography>
                     <Box
                       sx={{
