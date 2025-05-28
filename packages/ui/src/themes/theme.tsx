@@ -467,7 +467,7 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.inter,
+      fontFamily: themeValues.fontFamily.sentinel,
       fontSize: "2.5rem",
       fontWeight: 600,
       lineHeight: 1.2,
@@ -504,11 +504,13 @@ const theme = createTheme({
       fontSize: "1.25rem", // 20px
       letterSpacing: "normal",
       lineHeight: 1.6,
+      fontFamily: themeValues.fontFamily.neueHaasText,
     },
     body2: {
-      fontSize: "1.5rem", // 24px
+      fontSize: "1.25rem", // 20px
       letterSpacing: "normal",
       lineHeight: 1.6,
+      fontFamily: themeValues.fontFamily.neueHaasText,
     },
     subtitle1: {
       fontSize: "1.25rem",

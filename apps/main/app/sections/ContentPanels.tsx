@@ -89,14 +89,6 @@ export default function ContentPanels({
         policies and management decisions balance water needs across the state,
         you can participate in shaping our shared water future.
       </Typography>
-      <Typography
-        variant="body2"
-        color="common.white"
-        sx={{ pointerEvents: "auto" }}
-      >
-        Use our California Water Learning Library to deepen your understanding,
-        explore key topics, and become an informed advocate.
-      </Typography>
     </Box>
   )
 
@@ -110,14 +102,7 @@ export default function ContentPanels({
       >
         The COEQWAL project is using the same computer models as the state
         Department of Water Resources and the U.S. Bureau of Reclamation to
-        model a broad range of water management and climate scenarios.
-      </Typography>
-      <Typography
-        variant="body2"
-        color="common.white"
-        sx={{ pointerEvents: "auto" }}
-      >
-        Explore these scenario themes and empower your community with actionable
+        model a broad range of water management and climate scenarios. Explore these scenarios by theme and empower your community with actionable
         insights to advocate for water solutions.
       </Typography>
     </Box>
