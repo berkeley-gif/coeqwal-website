@@ -949,7 +949,7 @@ const IntroSection: React.FC = () => {
                 of California water?
               </Typography>
               <Typography
-                variant="body2"
+                variant="body1"
                 color="white"
                 sx={{
                   fontFamily:
@@ -1309,7 +1309,7 @@ const IntroSection: React.FC = () => {
                 })()}
               </Typography>
               <Typography
-                variant="body2"
+                variant="body1"
                 color="white"
                 sx={{
                   fontFamily:
@@ -1325,6 +1325,10 @@ const IntroSection: React.FC = () => {
                     { name: "storage", glossaryTerm: "Storage" },
                     { name: "conveyance", glossaryTerm: "Conveyance" },
                     { name: "deliveries", glossaryTerm: "Deliveries" },
+                    {
+                      name: "operational decisions",
+                      glossaryTerm: "Operational decisions",
+                    },
                     {
                       name: "CalSim",
                       glossaryTerm: "Computer models / CalSim",
@@ -1397,7 +1401,7 @@ const IntroSection: React.FC = () => {
                 })()}
               </Typography>
               <Typography
-                variant="body2"
+                variant="body1"
                 color="white"
                 sx={{
                   fontFamily:
@@ -1410,17 +1414,12 @@ const IntroSection: React.FC = () => {
 
                   // Create an array of all terms to link and format
                   const terms = [
-                    {
-                      name: "CalSim",
-                      glossaryTerm: "Computer models / CalSim",
-                    },
                     { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                     { name: "scenarios", glossaryTerm: "Scenarios" },
                     {
                       name: "changing climate",
                       glossaryTerm: "Changing climate",
                     },
-                    { name: '"What if...?"', isItalic: true }, // Special case for italic formatting
                   ]
 
                   // Find all term positions in the text
@@ -1445,53 +1444,37 @@ const IntroSection: React.FC = () => {
                     // Add text before this term
                     result.push(text.substring(currentIndex, term.index))
 
-                    // Add the formatted term
-                    if (term.isItalic) {
-                      // Handle italic formatting for "What if..."
-                      result.push(
-                        <Box
-                          key={i}
-                          component="span"
-                          sx={{
-                            fontStyle: "italic",
-                          }}
-                        >
-                          {term.name}
-                        </Box>,
-                      )
-                    } else {
-                      // Handle glossary term linking
-                      result.push(
-                        <Box
-                          key={i}
-                          component="span"
-                          sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
-                            px: 1,
-                            py: 0.3,
-                            mx: 0.1,
-                            borderRadius: 1,
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative",
-                            "&:hover": {
-                              backgroundColor: "#13629b",
-                            },
-                          }}
-                          onClick={() => {
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: term.glossaryTerm,
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          {term.name}
-                        </Box>,
-                      )
-                    }
+                    // Add the linked term
+                    result.push(
+                      <Box
+                        key={i}
+                        component="span"
+                        sx={{
+                          backgroundColor: "#257dbd",
+                          color: "white",
+                          px: 1,
+                          py: 0.3,
+                          mx: 0.1,
+                          borderRadius: 1,
+                          cursor: "pointer",
+                          display: "inline-block",
+                          position: "relative",
+                          "&:hover": {
+                            backgroundColor: "#13629b",
+                          },
+                        }}
+                        onClick={() => {
+                          const drawerStore = useDrawerStore.getState()
+                          drawerStore.setDrawerContent({
+                            selectedSection: "glossary",
+                            selectedTerm: term.glossaryTerm,
+                          })
+                          drawerStore.openDrawer("glossary")
+                        }}
+                      >
+                        {term.name}
+                      </Box>,
+                    )
 
                     currentIndex = term.index + term.length
                   })
@@ -1501,6 +1484,19 @@ const IntroSection: React.FC = () => {
 
                   return <>{result}</>
                 })()}
+              </Typography>
+              <Typography
+                variant="h3"
+                sx={{
+                  color: "white",
+                  fontFamily:
+                    '"sentinel", Georgia, "Times New Roman", Times, serif',
+                  mt: 2,
+                  pl: 40,
+                }}
+                className="tk-sentinel"
+              >
+                &quot;What if...?&quot;
               </Typography>
             </Stack>
           </Box>

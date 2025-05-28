@@ -69,6 +69,12 @@ const glossaryTerms: GlossaryTerm[] = [
       "Choices made by agencies and water operators about how water is stored, moved, and delivered across the system. These decisions affect how much water reaches farms, cities, rivers, and wetlands.",
   },
   {
+    icon: <SettingsIcon />,
+    term: "Operational decisions",
+    definition:
+      "Day-to-day and seasonal choices made by water system operators about how to manage water infrastructure. These include decisions about when to release water from reservoirs, how much water to pump through canals, and how to balance competing demands for water across the system.",
+  },
+  {
     icon: <CompareIcon />,
     term: "Scenarios",
     definition:
