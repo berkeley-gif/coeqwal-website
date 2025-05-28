@@ -76,7 +76,7 @@ export default function ContentPanels({
     </Typography>
   )
 
-  // First panel content - Understanding California Water
+  // First panel content - Water literacy modules
   const Panel1Content = () => (
     <Box sx={{ pointerEvents: "auto" }}>
       <Typography
@@ -92,7 +92,7 @@ export default function ContentPanels({
     </Box>
   )
 
-  // Second panel content - COEQWAL Project Modeling
+  // Second panel content - Themes
   const Panel2Content = () => (
     <Box sx={{ pointerEvents: "auto" }}>
       <Typography
@@ -107,7 +107,7 @@ export default function ContentPanels({
     </Box>
   )
 
-  // Third panel content - Community Impact
+  // Third panel content - Empower
   const Panel3Content = () => (
     <Box sx={{ pointerEvents: "auto", mb: 0 }}>
       <Typography
@@ -146,17 +146,17 @@ export default function ContentPanels({
     }
   }
 
-  // Get background color for detail panels (slightly darker)
+  // Get background color for detail panels (same for now)
   const getDetailPanelBgColor = (panelType: PanelType) => {
     switch (panelType) {
       case "learn":
-        return "#134970" // Darker blue
+        return "#1A3F6A" // Deep blue
       case "explore":
-        return "#1E657D" // Darker teal blue
+        return "#2f84ab" // Teal blue
       case "empower":
-        return "#0A3D50" // Darker teal
+        return "#135773" // Dark teal
       default:
-        return "#134970" // Fallback
+        return "#1A3F6A" // Fallback
     }
   }
 
@@ -213,6 +213,7 @@ export default function ContentPanels({
           bgColor={getPanelBgColor("learn")}
           detailBgColor={getDetailPanelBgColor("learn")}
           addBorder={true}
+          hideBottomArrow={true}
           title={<LearnTextContent />}
           content={<Panel1Content />}
           detailContent={
@@ -474,6 +475,7 @@ export default function ContentPanels({
           onToggleDetail={() => togglePanelDetail("explore")}
           bgColor={getPanelBgColor("explore")}
           detailBgColor={getDetailPanelBgColor("explore")}
+          hideBottomArrow={true}
           title={<EmpowerTextContent />}
           content={<Panel2Content />}
           detailContent={
@@ -924,6 +926,7 @@ interface PanelWithDetailProps {
   detailContent: React.ReactNode
   hideDetailArrow?: boolean
   addBorder?: boolean
+  hideBottomArrow?: boolean
 }
 
 function PanelWithDetail({
@@ -936,6 +939,7 @@ function PanelWithDetail({
   detailContent,
   hideDetailArrow = false,
   addBorder = false,
+  hideBottomArrow = false,
 }: PanelWithDetailProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mainPanelRef = useRef<HTMLDivElement>(null)
@@ -1072,25 +1076,27 @@ function PanelWithDetail({
               )}
 
               {/* Bottom scroll icon - absolutely positioned within the panel */}
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  bottom: 20,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  width: 60,
-                  height: 60,
-                }}
-              >
-                <PlayArrowIcon
-                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                />
-              </IconButton>
+              {!hideBottomArrow && (
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    bottom: 20,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    color: "white",
+                    backgroundColor: "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    },
+                    width: 60,
+                    height: 60,
+                  }}
+                >
+                  <PlayArrowIcon
+                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                  />
+                </IconButton>
+              )}
             </BasePanel>
           </motion.div>
         ) : (
@@ -1150,8 +1156,8 @@ function PanelWithDetail({
                 sx={{
                   position: "absolute",
                   left: 30,
-                  top: "50%",
-                  transform: "translateY(-50%) rotate(180deg)",
+                  top: 120,
+                  transform: "rotate(180deg)",
                   color: "white",
                   backgroundColor: "transparent",
                   "&:hover": {
@@ -1165,25 +1171,27 @@ function PanelWithDetail({
               </IconButton>
 
               {/* Bottom scroll icon - absolutely positioned within the panel */}
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  bottom: 20,
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  color: "white",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  width: 60,
-                  height: 60,
-                }}
-              >
-                <PlayArrowIcon
-                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                />
-              </IconButton>
+              {!hideBottomArrow && (
+                <IconButton
+                  sx={{
+                    position: "absolute",
+                    bottom: 20,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    color: "white",
+                    backgroundColor: "transparent",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+                    },
+                    width: 60,
+                    height: 60,
+                  }}
+                >
+                  <PlayArrowIcon
+                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                  />
+                </IconButton>
+              )}
             </BasePanel>
           </motion.div>
         )}
