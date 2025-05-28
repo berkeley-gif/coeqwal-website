@@ -119,14 +119,7 @@ export default function ContentPanels({
       >
         How will policy changes impact your community&apos;s water supply and
         environment? What strategies could help your community achieve their
-        water goals?
-      </Typography>
-      <Typography
-        variant="body2"
-        color="common.white"
-        sx={{ pointerEvents: "auto" }}
-      >
-        Search our scenario data, identify actionable strategies, and take
+        water goals? Search our scenario data, identify actionable strategies, and take
         informed steps to advocate effectively for your community&apos;s water
         future.
       </Typography>
@@ -203,11 +196,6 @@ export default function ContentPanels({
       <Box
         sx={{
           position: "relative",
-          // Prevent space between panels
-          "& > div": {
-            marginTop: 0,
-            marginBottom: 0,
-          },
           // Remove any spacing from BasePanel
           "& .MuiBasePanel-root": {
             marginTop: 0,
@@ -952,38 +940,52 @@ function PanelWithDetail({
   hideDetailArrow = false,
   addBorder = false,
 }: PanelWithDetailProps) {
-  // Simple height tracking for the container
-  const panelRef = useRef<HTMLDivElement>(null)
-  const detailRef = useRef<HTMLDivElement>(null)
-  const [containerHeight, setContainerHeight] = useState<string>("auto")
+  const containerRef = useRef<HTMLDivElement>(null)
+  const mainPanelRef = useRef<HTMLDivElement>(null)
+  const detailPanelRef = useRef<HTMLDivElement>(null)
 
-  // Update container height when active state changes
+  // Update container height based on active panel
   useEffect(() => {
     const updateHeight = () => {
-      const activeRef = isActive ? detailRef : panelRef
-      if (activeRef.current) {
-        const height = activeRef.current.offsetHeight
-        setContainerHeight(`${height}px`)
+      if (!containerRef.current) return
+      
+      const activeRef = isActive ? detailPanelRef.current : mainPanelRef.current
+      if (activeRef) {
+        const height = activeRef.offsetHeight
+        containerRef.current.style.height = `${height}px`
       }
     }
 
-    // Small delay to ensure content is rendered
-    const timer = setTimeout(updateHeight, 50)
-    return () => clearTimeout(timer)
+    // Use a small delay to ensure content is rendered
+    const timer = setTimeout(updateHeight, 100)
+    
+    // Also update on window resize
+    const handleResize = () => {
+      setTimeout(updateHeight, 100)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    
+    return () => {
+      clearTimeout(timer)
+      window.removeEventListener('resize', handleResize)
+    }
   }, [isActive])
 
   return (
     <Box
+      ref={containerRef}
       className={isActive ? "active-panel-container" : ""}
       sx={{
         position: "relative",
         width: "100%",
         overflow: "hidden", // Hide panels sliding outside the container
         overflowX: "hidden", // Prevent horizontal scrollbar
-        height: containerHeight, // Use calculated height
-        transition: "height 0.4s ease-in-out", // Smooth height transitions
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
+        // Initial height will be set by useEffect
+        minHeight: "auto",
+        transition: "height 0.3s ease-out", // Smooth height transitions
       }}
     >
       {/* Conditionally render either main panel or detail panel with sliding animation */}
@@ -992,7 +994,7 @@ function PanelWithDetail({
           // Main panel - shown when not active
           <motion.div
             key="main-panel"
-            ref={panelRef}
+            ref={mainPanelRef}
             initial={{ x: 0 }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
@@ -1105,7 +1107,7 @@ function PanelWithDetail({
           // Detail panel - shown when active
           <motion.div
             key="detail-panel"
-            ref={detailRef}
+            ref={detailPanelRef}
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -1206,3 +1208,4 @@ function PanelWithDetail({
     </Box>
   )
 }
+
