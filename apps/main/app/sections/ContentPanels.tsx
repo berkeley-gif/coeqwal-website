@@ -714,8 +714,8 @@ export default function ContentPanels({
                       Investigate scenarios that prioritize drinking water
                       access for communities, particularly those historically
                       underserved. These approaches explore how water management
-                      decisions impact drinking water quality, availability, and
-                      affordability across diverse communities.
+                      decisions impact drinking water availability 
+                      across diverse communities.
                     </Typography>
                     <Box
                       sx={{
