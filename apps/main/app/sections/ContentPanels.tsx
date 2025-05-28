@@ -84,10 +84,8 @@ export default function ContentPanels({
         color="common.white"
         sx={{ mb: 4, pointerEvents: "auto" }}
       >
-        Water in California travels remarkable distances. Most of it falls far
-        from where it is needed. By understanding how water flows and how
-        policies and management decisions balance water needs across the state,
-        you can participate in shaping our shared water future.
+        how California water flows and operational decisions balance water needs
+        across the state
       </Typography>
     </Box>
   )
@@ -100,11 +98,7 @@ export default function ContentPanels({
         color="common.white"
         sx={{ mb: 4, pointerEvents: "auto" }}
       >
-        The COEQWAL project is using the same computer models as the state
-        Department of Water Resources and the U.S. Bureau of Reclamation to
-        model a broad range of water management and climate scenarios. Explore
-        these scenarios by theme and empower your community with actionable
-        insights to advocate for water solutions.
+        COEQWAL&apos;s water management scenarios by theme
       </Typography>
     </Box>
   )
@@ -119,9 +113,9 @@ export default function ContentPanels({
       >
         How will policy changes impact your community&apos;s water supply and
         environment? What strategies could help your community achieve their
-        water goals? Search our scenario data, identify actionable strategies, and take
-        informed steps to advocate effectively for your community&apos;s water
-        future.
+        water goals? Search our scenario data, identify actionable strategies,
+        and take informed steps to advocate effectively for your
+        community&apos;s water future.
       </Typography>
     </Box>
   )
@@ -948,7 +942,7 @@ function PanelWithDetail({
   useEffect(() => {
     const updateHeight = () => {
       if (!containerRef.current) return
-      
+
       const activeRef = isActive ? detailPanelRef.current : mainPanelRef.current
       if (activeRef) {
         const height = activeRef.offsetHeight
@@ -958,17 +952,17 @@ function PanelWithDetail({
 
     // Use a small delay to ensure content is rendered
     const timer = setTimeout(updateHeight, 100)
-    
+
     // Also update on window resize
     const handleResize = () => {
       setTimeout(updateHeight, 100)
     }
-    
-    window.addEventListener('resize', handleResize)
-    
+
+    window.addEventListener("resize", handleResize)
+
     return () => {
       clearTimeout(timer)
-      window.removeEventListener('resize', handleResize)
+      window.removeEventListener("resize", handleResize)
     }
   }, [isActive])
 
@@ -1208,4 +1202,3 @@ function PanelWithDetail({
     </Box>
   )
 }
-
