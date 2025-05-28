@@ -813,10 +813,7 @@ const IntroSection: React.FC = () => {
               color: "white",
               mt: 3,
               maxWidth: "500px",
-              fontSize: "24px",
-              fontFamily:
-                '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-            }}
+        }}
             className="tk-neue-haas-grotesk-text"
           >
             Explore California&apos;s water system and discover possibilities

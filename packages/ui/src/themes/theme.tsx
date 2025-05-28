@@ -507,16 +507,17 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.125rem",
+      fontSize: "1.375rem",
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "1.5625rem",
+      lineHeight: "1.925rem",
     },
     body2: {
-      fontSize: "1.25rem", // 20px
-      letterSpacing: "normal",
-      lineHeight: 1.6,
       fontFamily: themeValues.fontFamily.neueHaasText,
+      fontSize: "1.375rem",
+      fontWeight: 400,
+      letterSpacing: "unset",
+      lineHeight: "1.925rem",
     },
     subtitle1: {
       fontSize: "1.25rem",
