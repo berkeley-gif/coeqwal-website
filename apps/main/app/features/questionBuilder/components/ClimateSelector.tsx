@@ -115,7 +115,8 @@ const ClimateSelector: React.FC = () => {
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-            fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+            fontFamily:
+              '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
           }}
         >
           <ColoredText color={theme.palette.climate.main}>

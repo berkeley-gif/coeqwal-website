@@ -76,7 +76,6 @@ export default function ContentPanels({
       <Typography
         variant="body2"
         color="common.white"
-
         sx={{ pointerEvents: "auto", mb: 0 }}
       >
         how California water flows and operational decisions
@@ -92,7 +91,6 @@ export default function ContentPanels({
       <Typography
         variant="body2"
         fontWeight={200}
-
         color="common.white"
         sx={{ pointerEvents: "auto", mb: 0 }}
       >
@@ -106,7 +104,6 @@ export default function ContentPanels({
     <Box sx={{ pointerEvents: "auto", mb: 0 }}>
       <Typography
         variant="body2"
-
         color="common.white"
         sx={{ pointerEvents: "auto", mb: 0 }}
       >
@@ -235,11 +232,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Central Valley Water
                     </Typography>
                     <Typography
@@ -292,11 +285,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Managing California&apos;s Water
                     </Typography>
                     <Typography
@@ -343,11 +332,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Growing Challenges
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
@@ -408,11 +393,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Exploring California&apos;s Water Futures
                     </Typography>
                     <Typography
@@ -489,11 +470,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Current Operations for California Water
                     </Typography>
                     <Typography
@@ -540,11 +517,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Managing River Flows for the Environment
                     </Typography>
                     <Typography
@@ -592,11 +565,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Managing Groundwater in a Changing Agricultural Landscape
                     </Typography>
                     <Typography
@@ -644,11 +613,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Prioritizing Drinking Water for California Communities
                     </Typography>
                     <Typography
@@ -695,11 +660,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Improving Delta Outflows for the Environment
                     </Typography>
                     <Typography
@@ -746,11 +707,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Sustaining Uses in the Delta for Communities and Farms
                     </Typography>
                     <Typography
@@ -797,11 +754,7 @@ export default function ContentPanels({
                       flexDirection: "column",
                     }}
                   >
-                    <Typography
-                      variant="h4"
-                      color="white"
-                      sx={{ mb: 1 }}
-                    >
+                    <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Improving Reliability of Delta Exports for Farms and
                       Cities
                     </Typography>

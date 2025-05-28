@@ -80,9 +80,6 @@ const AVAILABLE_METRICS = [
   "X2",
 ]
 
-// Font family for Neue Haas Grotesk Text (for CombinedPanel headers)
-const neueHaasTextFont = '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
-
 // Content component that uses the context
 const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
   const theme = useTheme()
@@ -519,7 +516,8 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h5"
                       sx={{
                         color: theme.palette.primary.dark,
-                        fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+                        fontFamily:
+                          '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
                       }}
                     >
                       {t("questionBuilder.outcomesSelector.includeClimate")}
@@ -736,10 +734,11 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                 mb: 2,
               }}
             >
-              <Typography 
-                variant="h4" 
+              <Typography
+                variant="h4"
                 sx={{
-                  fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+                  fontFamily:
+                    '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
                 }}
               >
                 {t("scenarioResults.title")}
@@ -865,11 +864,12 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       borderRadius: "8px",
                     }}
                   >
-                    <Typography 
-                      variant="h6" 
+                    <Typography
+                      variant="h6"
                       gutterBottom
                       sx={{
-                        fontFamily: '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+                        fontFamily:
+                          '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
                       }}
                     >
                       No scenario data available
