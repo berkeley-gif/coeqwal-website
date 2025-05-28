@@ -82,10 +82,12 @@ export default function ContentPanels({
       <Typography
         variant="body2"
         color="common.white"
-        sx={{ mb: 4, pointerEvents: "auto" }}
+        fontSize="24px"
+        sx={{ pointerEvents: "auto", mb: 0 }}
       >
-        how California water flows and operational decisions balance water needs
-        across the state
+        how California water flows and operational decisions
+        <br />
+        balance water needs across the state
       </Typography>
     </Box>
   )
@@ -95,27 +97,28 @@ export default function ContentPanels({
     <Box sx={{ pointerEvents: "auto" }}>
       <Typography
         variant="body2"
+        fontWeight={200}
+        fontSize="24px"
         color="common.white"
-        sx={{ mb: 4, pointerEvents: "auto" }}
+        sx={{ pointerEvents: "auto", mb: 0 }}
       >
-        COEQWAL&apos;s water management scenarios by theme
+        COEQWAL&apos;s &quot;what if&quot; scenarios by theme
       </Typography>
     </Box>
   )
 
   // Third panel content - Community Impact
   const Panel3Content = () => (
-    <Box sx={{ pointerEvents: "auto" }}>
+    <Box sx={{ pointerEvents: "auto", mb: 0 }}>
       <Typography
         variant="body2"
+        fontSize="24px"
         color="common.white"
-        sx={{ mb: 4, pointerEvents: "auto" }}
+        sx={{ pointerEvents: "auto", mb: 0 }}
       >
-        How will policy changes impact your community&apos;s water supply and
-        environment? What strategies could help your community achieve their
-        water goals? Search our scenario data, identify actionable strategies,
-        and take informed steps to advocate effectively for your
-        community&apos;s water future.
+        your community with specific data that helps you understand
+        <br />
+        the impacts of operational decisions
       </Typography>
     </Box>
   )
@@ -1020,7 +1023,7 @@ function PanelWithDetail({
                 overflow: "visible",
               }}
             >
-              <Grid container spacing={6} alignItems="flex-start">
+              <Grid container spacing={6} alignItems="center">
                 <Grid
                   size={{ xs: 12, md: 4 }}
                   sx={{
@@ -1068,33 +1071,26 @@ function PanelWithDetail({
                 </IconButton>
               )}
 
-              {/* Bottom scroll icon */}
-              <Box
+              {/* Bottom scroll icon - absolutely positioned within the panel */}
+              <IconButton
                 sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
                   position: "absolute",
                   bottom: 20,
-                  left: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  color: "white",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  width: 60,
+                  height: 60,
                 }}
               >
-                <IconButton
-                  sx={{
-                    color: "white",
-                    backgroundColor: "transparent",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
-                    },
-                    width: 60,
-                    height: 60,
-                  }}
-                >
-                  <PlayArrowIcon
-                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                  />
-                </IconButton>
-              </Box>
+                <PlayArrowIcon
+                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                />
+              </IconButton>
             </BasePanel>
           </motion.div>
         ) : (
@@ -1168,33 +1164,26 @@ function PanelWithDetail({
                 <PlayArrowIcon sx={{ fontSize: 36 }} />
               </IconButton>
 
-              {/* Bottom centered play icon */}
-              <Box
+              {/* Bottom scroll icon - absolutely positioned within the panel */}
+              <IconButton
                 sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
                   position: "absolute",
                   bottom: 20,
-                  left: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  color: "white",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  width: 60,
+                  height: 60,
                 }}
               >
-                <IconButton
-                  sx={{
-                    color: "white",
-                    backgroundColor: "transparent",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
-                    },
-                    width: 60,
-                    height: 60,
-                  }}
-                >
-                  <PlayArrowIcon
-                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
-                  />
-                </IconButton>
-              </Box>
+                <PlayArrowIcon
+                  sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                />
+              </IconButton>
             </BasePanel>
           </motion.div>
         )}
