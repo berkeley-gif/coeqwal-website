@@ -913,7 +913,7 @@ const IntroSection: React.FC = () => {
           position: "relative",
           backgroundColor: "transparent", // No background image here anymore since it's on the parent
           minHeight: "100vh",
-          paddingTop: "160px", // Reduced from 400px to eliminate gap
+          paddingTop: "160px",
         }}
       >
         {/* Content container for proper blending context */}
@@ -930,7 +930,7 @@ const IntroSection: React.FC = () => {
             sx={{
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText,
-              mb: 20,
+              mb: 10,
             }}
           >
             <Stack spacing={4}>
