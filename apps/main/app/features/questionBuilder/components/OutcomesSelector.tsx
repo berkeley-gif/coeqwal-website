@@ -124,6 +124,7 @@ const OutcomesSelector: React.FC = () => {
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
+            fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
           }}
         >
           {swapped ? (

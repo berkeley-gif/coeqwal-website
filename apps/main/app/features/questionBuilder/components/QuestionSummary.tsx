@@ -1452,6 +1452,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           lineHeight: theme.cards.typography.hero.lineHeight,
           textAlign: "center",
           fontWeight: 400,
+          fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
           width: "100%",
           margin: "0 auto",
           backgroundColor: "white",

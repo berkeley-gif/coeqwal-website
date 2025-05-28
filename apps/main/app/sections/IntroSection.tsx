@@ -766,12 +766,7 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "white",
-              mb: 3, // 32px spacing
-              fontSize: "100px",
-              fontWeight: 500,
-              lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              mb: 2, // Keep margin-bottom for spacing
             }}
             className="tk-sentinel"
           >
@@ -782,12 +777,7 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "white",
-              mb: 3,
-              fontSize: "100px",
-              fontWeight: 500,
-              lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              mb: 2,
             }}
             className="tk-sentinel"
           >
@@ -798,12 +788,7 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "white",
-              mb: 4, // 32px spacing
-              fontSize: "100px",
-              fontWeight: 500,
-              lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              mb: 2, // Keep margin-bottom for spacing
             }}
             className="tk-sentinel"
           >
@@ -811,15 +796,11 @@ const IntroSection: React.FC = () => {
           </Typography>
 
           <Typography
-            variant="h4"
+            variant="h3"
             sx={{
               color: "white",
               mt: 2.5,
-              fontSize: "48px",
-              fontWeight: 500,
-              lineHeight: 0.72,
-              fontFamily:
-                '"sentinel", Georgia, "Times New Roman", Times, serif',
+              mb: 2, // 1rem equivalent (16px)
             }}
             className="tk-sentinel"
           >
@@ -937,10 +918,8 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  fontWeight: 500,
                   color: "white",
-                  fontFamily:
-                    '"sentinel", Georgia, "Times New Roman", Times, serif',
+                  mb: 3, // 1.5rem equivalent (24px)
                 }}
                 className="tk-sentinel"
               >
@@ -951,10 +930,6 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 color="white"
-                sx={{
-                  fontFamily:
-                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
@@ -1311,10 +1286,6 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 color="white"
-                sx={{
-                  fontFamily:
-                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
@@ -1403,10 +1374,6 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 color="white"
-                sx={{
-                  fontFamily:
-                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
@@ -1489,8 +1456,6 @@ const IntroSection: React.FC = () => {
                 variant="h3"
                 sx={{
                   color: "white",
-                  fontFamily:
-                    '"sentinel", Georgia, "Times New Roman", Times, serif',
                   mt: 2,
                   pl: 40,
                 }}

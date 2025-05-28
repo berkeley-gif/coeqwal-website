@@ -468,43 +468,49 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontFamily: themeValues.fontFamily.sentinel,
-      fontSize: "2.5rem",
-      fontWeight: 600,
-      lineHeight: 1.2,
+      fontSize: "5rem",
+      fontWeight: 400,
+      lineHeight: "5rem",
     },
     h2: {
-      fontSize: "3.76rem", // 57.6px
-      fontWeight: 500,
-      lineHeight: 1.15,
-      letterSpacing: "normal",
+      fontFamily: themeValues.fontFamily.sentinel,
+      fontSize: "3.75rem",
+      fontWeight: 400,
+      lineHeight: "4.0625rem",
+      // letterSpacing: "-1.8px",
     },
     h3: {
-      fontSize: "3rem", // 48px
-      fontWeight: 500,
-      lineHeight: 1.2,
-      letterSpacing: "normal",
+      fontFamily: themeValues.fontFamily.sentinel,
+      fontSize: "2.5rem",
+      fontWeight: 300,
+      lineHeight: "2.8125rem",
+      letterSpacing: "-1.2px",
     },
     h4: {
+      fontFamily: themeValues.fontFamily.sentinel,
       fontSize: "1.25rem", // unchanged (20px)
       fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
     h5: {
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.15rem",
       fontWeight: 500,
       letterSpacing: "normal",
     },
     h6: {
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.05rem",
       fontWeight: 500,
       letterSpacing: "normal",
     },
     body1: {
-      fontSize: "1.25rem", // 20px
-      letterSpacing: "normal",
-      lineHeight: 1.6,
       fontFamily: themeValues.fontFamily.neueHaasText,
+      fontSize: "1.125rem",
+      fontWeight: 400,
+      letterSpacing: "unset",
+      lineHeight: "1.5625rem",
     },
     body2: {
       fontSize: "1.25rem", // 20px

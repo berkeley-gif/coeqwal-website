@@ -37,8 +37,6 @@ export default function ContentPanels({
       variant="h1"
       color="common.white"
       sx={{
-        fontSize: "5rem",
-        fontWeight: 700,
         alignSelf: "flex-start",
       }}
     >
@@ -52,8 +50,6 @@ export default function ContentPanels({
       variant="h1"
       color="common.white"
       sx={{
-        fontSize: "5rem",
-        fontWeight: 700,
         alignSelf: "flex-start",
       }}
     >
@@ -67,8 +63,6 @@ export default function ContentPanels({
       variant="h1"
       color="common.white"
       sx={{
-        fontSize: "5rem",
-        fontWeight: 700,
         alignSelf: "flex-start",
       }}
     >
@@ -222,12 +216,7 @@ export default function ContentPanels({
                 variant="h1"
                 color="common.white"
                 sx={{
-                  fontSize: "5rem",
-                  fontWeight: 700,
                   alignSelf: "flex-start",
-                  pointerEvents: "auto",
-                  mb: 4,
-                  width: "100%",
                 }}
               >
                 Learn about
@@ -249,7 +238,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Central Valley Water
@@ -307,7 +295,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Managing California&apos;s Water
@@ -359,7 +346,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Growing Challenges
@@ -425,7 +411,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Exploring California&apos;s Water Futures
@@ -484,8 +469,6 @@ export default function ContentPanels({
                 variant="h1"
                 color="common.white"
                 sx={{
-                  fontSize: "5rem",
-                  fontWeight: 700,
                   alignSelf: "flex-start",
                   pointerEvents: "auto",
                   mb: 4,
@@ -509,7 +492,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Current Operations for California Water
@@ -561,7 +543,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Managing River Flows for the Environment
@@ -614,7 +595,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Managing Groundwater in a Changing Agricultural Landscape
@@ -667,7 +647,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Prioritizing Drinking Water for California Communities
@@ -719,7 +698,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Improving Delta Outflows for the Environment
@@ -771,7 +749,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Sustaining Uses in the Delta for Communities and Farms
@@ -823,7 +800,6 @@ export default function ContentPanels({
                     <Typography
                       variant="h4"
                       color="white"
-                      fontWeight={600}
                       sx={{ mb: 1 }}
                     >
                       Improving Reliability of Delta Exports for Farms and
@@ -883,8 +859,6 @@ export default function ContentPanels({
                 variant="h1"
                 color="common.white"
                 sx={{
-                  fontSize: "5rem",
-                  fontWeight: 700,
                   alignSelf: "flex-start",
                 }}
               >

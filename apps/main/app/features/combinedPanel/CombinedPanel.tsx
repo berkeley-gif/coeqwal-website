@@ -80,6 +80,9 @@ const AVAILABLE_METRICS = [
   "X2",
 ]
 
+// Font family for Neue Haas Grotesk Text (for CombinedPanel headers)
+const neueHaasTextFont = '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+
 // Content component that uses the context
 const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
   const theme = useTheme()
@@ -515,9 +518,8 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                     <Typography
                       variant="h5"
                       sx={{
-                        fontWeight: 500,
                         color: theme.palette.primary.dark,
-                        lineHeight: 1.2,
+                        fontFamily: `${neueHaasTextFont} !important`,
                       }}
                     >
                       {t("questionBuilder.outcomesSelector.includeClimate")}
@@ -734,7 +736,14 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                 mb: 2,
               }}
             >
-              <Typography variant="h4">{t("scenarioResults.title")}</Typography>
+              <Typography 
+                variant="h4" 
+                sx={{
+                  fontFamily: `${neueHaasTextFont} !important`,
+                }}
+              >
+                {t("scenarioResults.title")}
+              </Typography>
 
               {/* Metric selector */}
               <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -856,7 +865,13 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       borderRadius: "8px",
                     }}
                   >
-                    <Typography variant="h6" gutterBottom>
+                    <Typography 
+                      variant="h6" 
+                      gutterBottom
+                      sx={{
+                        fontFamily: `${neueHaasTextFont} !important`,
+                      }}
+                    >
                       No scenario data available
                     </Typography>
                     <Typography variant="body1">
