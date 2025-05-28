@@ -768,7 +768,6 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 2, // Keep margin-bottom for spacing
             }}
-            className="tk-sentinel"
           >
             Learn.
           </Typography>
@@ -779,7 +778,6 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 2,
             }}
-            className="tk-sentinel"
           >
             Explore.
           </Typography>
@@ -790,7 +788,6 @@ const IntroSection: React.FC = () => {
               color: "white",
               mb: 2, // Keep margin-bottom for spacing
             }}
-            className="tk-sentinel"
           >
             Empower.
           </Typography>
@@ -802,7 +799,6 @@ const IntroSection: React.FC = () => {
               mt: 2.5,
               mb: 2, // 1rem equivalent (16px)
             }}
-            className="tk-sentinel"
           >
             Rethink California Water
           </Typography>
@@ -918,7 +914,6 @@ const IntroSection: React.FC = () => {
                   color: "white",
                   mb: 3, // 1.5rem equivalent (24px)
                 }}
-                className="tk-sentinel"
               >
                 What is the future
                 <br />
@@ -1456,7 +1451,6 @@ const IntroSection: React.FC = () => {
                   mt: 2,
                   pl: 40,
                 }}
-                className="tk-sentinel"
               >
                 &quot;What if...?&quot;
               </Typography>

@@ -66,6 +66,8 @@ const themeValues = {
     sentinel: '"sentinel", Georgia, "Times New Roman", Times, serif',
     sofiaPro:
       '"sofia-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    // TEST FONT - Tiempos Headline
+    tiemposHeadline: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
@@ -467,43 +469,39 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.sentinel,
+      fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "5rem",
       fontWeight: 400,
       lineHeight: "5rem",
     },
     h2: {
-      fontFamily: themeValues.fontFamily.sentinel,
+      fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "3.75rem",
       fontWeight: 400,
       lineHeight: "4.0625rem",
       // letterSpacing: "-1.8px",
     },
     h3: {
-      fontFamily: themeValues.fontFamily.sentinel,
+      fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "2.5rem",
       fontWeight: 300,
       lineHeight: "2.8125rem",
-      letterSpacing: "-1.2px",
     },
     h4: {
       fontFamily: themeValues.fontFamily.sentinel,
       fontSize: "1.25rem", // unchanged (20px)
       fontWeight: 500,
-      letterSpacing: "normal",
       lineHeight: 1.4,
     },
     h5: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.15rem",
       fontWeight: 500,
-      letterSpacing: "normal",
     },
     h6: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.05rem",
       fontWeight: 500,
-      letterSpacing: "normal",
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
@@ -562,6 +560,48 @@ const theme = createTheme({
       styleOverrides: `
         @import url("https://use.typekit.net/rxm7kha.css");
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+        
+        /* Tiempos Headline Font - All Weights */
+        @font-face {
+          font-family: 'Tiempos Headline';
+          src: url('/fonts/test-tiempos-headline-light.woff2') format('woff2');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Headline';
+          src: url('/fonts/test-tiempos-headline-regular.woff2') format('woff2');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Headline';
+          src: url('/fonts/test-tiempos-headline-medium.woff2') format('woff2');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Headline';
+          src: url('/fonts/test-tiempos-headline-semibold.woff2') format('woff2');
+          font-weight: 600;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Headline';
+          src: url('/fonts/test-tiempos-headline-bold.woff2') format('woff2');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
         *, *::before, *::after {
           box-sizing: border-box;
         }
