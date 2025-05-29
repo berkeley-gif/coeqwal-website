@@ -768,7 +768,7 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "#2e3a6c",
-              mb: 2, // Keep margin-bottom for spacing
+              mb: 2,
             }}
           >
             Learn.
@@ -890,6 +890,9 @@ const IntroSection: React.FC = () => {
           backgroundColor: "transparent", // No background image here anymore since it's on the parent
           minHeight: "100vh",
           paddingTop: "160px",
+          paddingBottom: "160px",
+          paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
+          paddingRight: { xs: 3, md: 6 }, // Normal right padding
         }}
       >
         {/* Content container for proper blending context */}
@@ -902,7 +905,7 @@ const IntroSection: React.FC = () => {
         >
           {/* Text content with mix-blend-mode */}
           <Box
-            maxWidth="876px"
+            maxWidth="720px"
             sx={{
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText,
