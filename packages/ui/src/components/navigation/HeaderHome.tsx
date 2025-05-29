@@ -108,7 +108,7 @@ export function HeaderHome({
     sentinel.style.position = "absolute"
     sentinel.style.top = "100px" // 100px down from the start of content
     sentinel.style.left = "0"
-    sentinel.style.height = "1px"
+    sentinel.style.height = "10px" // Slightly larger height for better detection
     sentinel.style.width = "100%"
     sentinel.style.pointerEvents = "none"
     sentinel.style.visibility = "hidden" // Make it invisible
@@ -118,17 +118,28 @@ export function HeaderHome({
     introSection.style.position = "relative" // Ensure it's positioned for absolute children
     introSection.appendChild(sentinel)
 
+    // Debounce the state update
+    let timeoutId: number | null = null
+
     // Create intersection observer
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
         if (entry) {
-          setIsScrolled(!entry.isIntersecting) // When sentinel is not visible, we've scrolled
+          // Clear any pending timeout
+          if (timeoutId) {
+            clearTimeout(timeoutId)
+          }
+          
+          // Debounce the state update to prevent rapid switching
+          timeoutId = window.setTimeout(() => {
+            setIsScrolled(!entry.isIntersecting) // When sentinel is not visible, we've scrolled
+          }, 50) // 50ms debounce
         }
       },
       {
-        threshold: [0, 1],
-        rootMargin: "0px",
+        threshold: [0],
+        rootMargin: "-50px 0px", // Add some margin to prevent edge flickering
       },
     )
 
@@ -136,6 +147,9 @@ export function HeaderHome({
     observer.observe(sentinel)
 
     return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
       observer.disconnect()
       if (sentinel.parentNode) {
         sentinel.parentNode.removeChild(sentinel)
@@ -171,14 +185,19 @@ export function HeaderHome({
         backgroundColor: "#2e3a6c",
         borderRadius: "16px",
         margin: "16px",
-        width: "calc(100% - 32px)", // Account for 16px margins on both sides
+        width: isScrolled ? "200px" : "calc(100% - 32px)",
         border: "none",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        transition: "width 4s cubic-bezier(0.4, 0, 0.2, 1)", // Slower, more elegant easing
+        left: 0, // Keep anchored to left when shrinking
       }
     : {
         backgroundColor: backgroundColor,
         borderBottom: "1px solid white",
         borderRadius: theme.borderRadius.none,
+        width: isScrolled ? "140px" : "100%", // Shrink to 140px when scrolled  
+        transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)", // Slower, more elegant easing
+        left: 0, // Keep anchored to left when shrinking
       }
 
   const buttonVariant = isMobile ? "text" : "standard"
@@ -206,7 +225,11 @@ export function HeaderHome({
       }}
       elevation={0}
     >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
+      <Toolbar sx={{ 
+        justifyContent: "space-between",
+        overflow: "hidden", // Clip content that doesn't fit when header shrinks
+        width: "100%",
+      }}>
         <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
           <Logo />
         </Box>
