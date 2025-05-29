@@ -991,19 +991,20 @@ const IntroSection: React.FC = () => {
                       <>
                         {beforeSurfaceWater}
                         <Box
-                          component="span"
+                          component="mark"
                           sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
+                            backgroundColor: "#ffff00",
+
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            borderRadius: 1,
+                            lineHeight: "0em",
+                            paddingBottom: "0.5em",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              backgroundColor: "#13629b",
+                              backgroundColor: "#ffeb3b",
                             },
                           }}
                           onClick={() => {
@@ -1020,19 +1021,20 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeConveyance}
                         <Box
-                          component="span"
+                          component="mark"
                           sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
+                            backgroundColor: "#ffff00",
+
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            borderRadius: 1,
+                            lineHeight: "0em",
+                            paddingBottom: "0.5em",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              backgroundColor: "#13629b",
+                              backgroundColor: "#ffeb3b",
                             },
                           }}
                           onClick={() => {
@@ -1049,19 +1051,20 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeAllocation}
                         <Box
-                          component="span"
+                          component="mark"
                           sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
+                            backgroundColor: "#ffff00",
+
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            borderRadius: 1,
+                            lineHeight: "0em",
+                            paddingBottom: "0.5em",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              backgroundColor: "#13629b",
+                              backgroundColor: "#ffeb3b",
                             },
                           }}
                           onClick={() => {
@@ -1078,19 +1081,20 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeCentralValley}
                         <Box
-                          component="span"
+                          component="mark"
                           sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
+                            backgroundColor: "#ffff00",
+
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            borderRadius: 1,
+                            lineHeight: "0em",
+                            paddingBottom: "0.5em",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              backgroundColor: "#13629b",
+                              backgroundColor: "#ffeb3b",
                             },
                           }}
                           onClick={() => {
@@ -1145,19 +1149,20 @@ const IntroSection: React.FC = () => {
                         <>
                           {beforeSurfaceWater}
                           <Box
-                            component="span"
+                            component="mark"
                             sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
+                              backgroundColor: "#ffff00",
+
                               px: 1,
                               py: 0.1,
                               mx: 0.1,
-                              borderRadius: 1,
+                              lineHeight: "0em",
+                              paddingBottom: "0.5em",
                               cursor: "pointer",
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                backgroundColor: "#13629b",
+                                backgroundColor: "#ffeb3b",
                               },
                             }}
                             onClick={() => {
@@ -1174,19 +1179,20 @@ const IntroSection: React.FC = () => {
                           </Box>
                           {betweenText}
                           <Box
-                            component="span"
+                            component="mark"
                             sx={{
-                              backgroundColor: "#257dbd",
-                              color: "white",
+                              backgroundColor: "#ffff00",
+
                               px: 1,
                               py: 0.1,
                               mx: 0.1,
-                              borderRadius: 1,
+                              lineHeight: "0em",
+                              paddingBottom: "0.5em",
                               cursor: "pointer",
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                backgroundColor: "#13629b",
+                                backgroundColor: "#ffeb3b",
                               },
                             }}
                             onClick={() => {
@@ -1211,19 +1217,20 @@ const IntroSection: React.FC = () => {
                       <>
                         {beforeSurfaceWater}
                         <Box
-                          component="span"
+                          component="mark"
                           sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
+                            backgroundColor: "#ffff00",
+
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            borderRadius: 1,
+                            lineHeight: "0em",
+                            paddingBottom: "0.5em",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              backgroundColor: "#13629b",
+                              backgroundColor: "#ffeb3b",
                             },
                           }}
                           onClick={() => {
@@ -1252,19 +1259,20 @@ const IntroSection: React.FC = () => {
                       <React.Fragment key={i}>
                         {part}
                         <Box
-                          component="span"
+                          component="mark"
                           sx={{
-                            backgroundColor: "#257dbd",
-                            color: "white",
+                            backgroundColor: "#ffff00",
+
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            borderRadius: 1,
+                            lineHeight: "0em",
+                            paddingBottom: "0.5em",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              backgroundColor: "#13629b",
+                              backgroundColor: "#ffeb3b",
                             },
                           }}
                           onClick={() => {
@@ -1335,19 +1343,19 @@ const IntroSection: React.FC = () => {
                     result.push(
                       <Box
                         key={i}
-                        component="span"
+                        component="mark"
                         sx={{
-                          backgroundColor: "#257dbd",
-                          color: "white",
+                          backgroundColor: "#ffff00",
                           px: 1,
                           py: 0.1,
                           mx: 0.1,
-                          borderRadius: 1,
+                          lineHeight: "0em",
+                          paddingBottom: "0.5em",
                           cursor: "pointer",
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            backgroundColor: "#13629b",
+                            backgroundColor: "#ffeb3b",
                           },
                         }}
                         onClick={() => {
@@ -1416,19 +1424,19 @@ const IntroSection: React.FC = () => {
                     result.push(
                       <Box
                         key={i}
-                        component="span"
+                        component="mark"
                         sx={{
-                          backgroundColor: "#257dbd",
-                          color: "white",
+                          backgroundColor: "#ffff00",
                           px: 1,
                           py: 0.1,
                           mx: 0.1,
-                          borderRadius: 1,
+                          lineHeight: "0em",
+                          paddingBottom: "0.5em",
                           cursor: "pointer",
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            backgroundColor: "#13629b",
+                            backgroundColor: "#ffeb3b",
                           },
                         }}
                         onClick={() => {
