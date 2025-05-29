@@ -913,7 +913,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  color: "white",
+                  color: "#2e3a6c",
                   mb: 3, // 1.5rem equivalent (24px)
                 }}
               >
@@ -923,7 +923,7 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                color="white"
+                sx={{ color: "#2e3a6c" }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
@@ -1279,7 +1279,7 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                color="white"
+                sx={{ color: "#2e3a6c" }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
@@ -1367,7 +1367,7 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                color="white"
+                sx={{ color: "#2e3a6c" }}
                 className="tk-neue-haas-grotesk-text"
               >
                 {(() => {
@@ -1449,7 +1449,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h3"
                 sx={{
-                  color: "white",
+                  color: "#2e3a6c",
                   mt: 2,
                   pl: 40,
                 }}
