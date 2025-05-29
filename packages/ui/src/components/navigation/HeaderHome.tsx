@@ -97,6 +97,7 @@ export function HeaderHome({
   // Track scroll position for dynamic background
   const [isScrolled, setIsScrolled] = useState(false)
   const [shrunkWidth, setShrunkWidth] = useState<number | null>(null)
+  const [isExpanding, setIsExpanding] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   // Measure the content width when in shrunk state
@@ -155,7 +156,15 @@ export function HeaderHome({
 
           // Debounce the state update to prevent rapid switching
           timeoutId = window.setTimeout(() => {
-            setIsScrolled(!entry.isIntersecting) // When sentinel is not visible, we've scrolled
+            const newIsScrolled = !entry.isIntersecting
+            setIsScrolled(newIsScrolled)
+            
+            // If we're transitioning from scrolled to not scrolled, start expanding
+            if (!newIsScrolled) {
+              setIsExpanding(true)
+            } else {
+              setIsExpanding(false)
+            }
           }, 50) // 50ms debounce
         }
       },
@@ -247,12 +256,21 @@ export function HeaderHome({
     color: headerTextColor, // Use header text color for buttons
   }
 
+  // Determine if buttons should be visible
+  const shouldShowButtons = !isScrolled && !isExpanding
+
   return (
     <MotionAppBar
       animate={{ width: getAnimatedWidth() }}
       transition={{
         duration: 0.8,
         ease: [0.4, 0, 0.2, 1], // Cubic bezier for smooth easing
+      }}
+      onAnimationComplete={() => {
+        // When animation completes and we're not scrolled, show buttons
+        if (!isScrolled) {
+          setIsExpanding(false)
+        }
       }}
       position="fixed"
       sx={{
@@ -374,7 +392,7 @@ export function HeaderHome({
             }),
           })}
         >
-          {!isScrolled && (
+          {shouldShowButtons && (
             <>
               <Button
                 variant={buttonVariant}
