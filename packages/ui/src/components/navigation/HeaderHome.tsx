@@ -7,7 +7,7 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
 
 const MotionAppBar = motion.create(AppBar)
@@ -96,6 +96,25 @@ export function HeaderHome({
 
   // Track scroll position for dynamic background
   const [isScrolled, setIsScrolled] = useState(false)
+  const [shrunkWidth, setShrunkWidth] = useState<number | null>(null)
+  const toolbarRef = useRef<HTMLDivElement>(null)
+
+  // Measure the content width when in shrunk state
+  useEffect(() => {
+    if (isScrolled && toolbarRef.current) {
+      // Wait for DOM to update, then measure
+      setTimeout(() => {
+        if (toolbarRef.current) {
+          const logoWidth =
+            toolbarRef.current.children[0]?.getBoundingClientRect().width || 0
+          const glossaryWidth =
+            toolbarRef.current.children[1]?.getBoundingClientRect().width || 0
+          const padding = 32 // Account for padding
+          setShrunkWidth(logoWidth + glossaryWidth + padding)
+        }
+      }, 50)
+    }
+  }, [isScrolled])
 
   useEffect(() => {
     // Find the main content area or intro section to place our sentinel
@@ -133,7 +152,7 @@ export function HeaderHome({
           if (timeoutId) {
             clearTimeout(timeoutId)
           }
-          
+
           // Debounce the state update to prevent rapid switching
           timeoutId = window.setTimeout(() => {
             setIsScrolled(!entry.isIntersecting) // When sentinel is not visible, we've scrolled
@@ -183,27 +202,36 @@ export function HeaderHome({
     : "transparent"
 
   // Conditional styling based on variant
-  const variantStyles = variant === "rounded" 
-    ? {
-        backgroundColor: "#2e3a6c",
-        borderRadius: "16px",
-        margin: "16px",
-        border: "none",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        left: 0, // Keep anchored to left when shrinking
-      }
-    : {
-        backgroundColor: backgroundColor,
-        borderBottom: "1px solid white",
-        borderRadius: theme.borderRadius.none,
-        left: 0, // Keep anchored to left when shrinking
-      }
+  const variantStyles =
+    variant === "rounded"
+      ? {
+          backgroundColor: "#2e3a6c",
+          borderRadius: "16px",
+          margin: "16px",
+          border: "none",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          left: 0, // Keep anchored to left when shrinking
+        }
+      : {
+          backgroundColor: backgroundColor,
+          borderBottom: "1px solid white",
+          borderRadius: theme.borderRadius.none,
+          left: 0, // Keep anchored to left when shrinking
+        }
 
-  // Animation values for framer-motion
-  const animateProps = {
-    width: variant === "rounded" 
-      ? (isScrolled ? "200px" : "calc(100% - 32px)")
-      : (isScrolled ? "140px" : "100%")
+  // Calculate width for smooth animation
+  const getAnimatedWidth = () => {
+    if (variant === "rounded") {
+      if (isScrolled && shrunkWidth) {
+        return `${shrunkWidth}px`
+      }
+      return "calc(100% - 32px)"
+    } else {
+      if (isScrolled && shrunkWidth) {
+        return `${shrunkWidth}px`
+      }
+      return "100%"
+    }
   }
 
   const buttonVariant = isMobile ? "text" : "standard"
@@ -221,26 +249,30 @@ export function HeaderHome({
 
   return (
     <MotionAppBar
-      animate={animateProps}
-      transition={{ 
-        duration: 0.8, 
-        ease: [0.4, 0, 0.2, 1] // Cubic bezier for smooth easing
+      animate={{ width: getAnimatedWidth() }}
+      transition={{
+        duration: 0.8,
+        ease: [0.4, 0, 0.2, 1], // Cubic bezier for smooth easing
       }}
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
         ...variantStyles,
         color: headerTextColor,
-        boxShadow: variant === "rounded" ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none",
+        boxShadow:
+          variant === "rounded" ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none",
         transition: "background-color 0.3s ease",
       }}
       elevation={0}
     >
-      <Toolbar sx={{ 
-        justifyContent: "space-between",
-        overflow: "hidden", // Clip content that doesn't fit when header shrinks
-        width: "100%",
-      }}>
+      <Toolbar
+        ref={toolbarRef}
+        sx={{
+          justifyContent: "space-between",
+          overflow: "hidden", // Clip content that doesn't fit when header shrinks
+          width: "100%",
+        }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
           <Logo />
         </Box>

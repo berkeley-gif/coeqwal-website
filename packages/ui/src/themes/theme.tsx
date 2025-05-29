@@ -67,7 +67,8 @@ const themeValues = {
     sofiaPro:
       '"sofia-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     // TEST FONT - Tiempos Headline
-    tiemposHeadline: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+    tiemposHeadline:
+      '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
