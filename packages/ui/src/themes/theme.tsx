@@ -826,10 +826,10 @@ const theme = createTheme({
           padding: "1px 15px", // to account for border width
           textTransform: "none",
           backgroundColor: "transparent", // Default background for unselected
-          color: theme.palette.primary.contrastText, // Default text color for unselected
+          color: theme.palette.common.white, // Default text color for unselected
           boxShadow: "none",
           "&:hover": {
-            backgroundColor: theme.palette.common.white, // White hover background
+            backgroundColor: theme.palette.primary.transparent,
           },
           "&.Mui-selected": {
             backgroundColor: theme.palette.primary.main, // Background for selected
