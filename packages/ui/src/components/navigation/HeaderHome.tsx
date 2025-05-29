@@ -7,10 +7,12 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
 
 const MotionAppBar = motion.create(AppBar)
+const MotionStack = motion.create(Stack)
 
 type HeaderTranslations = {
   title: string
@@ -98,6 +100,7 @@ export function HeaderHome({
   const [isScrolled, setIsScrolled] = useState(false)
   const [shrunkWidth, setShrunkWidth] = useState<number | null>(null)
   const [isExpanding, setIsExpanding] = useState(false)
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
 
   // Measure the content width when in shrunk state
@@ -157,8 +160,18 @@ export function HeaderHome({
           // Debounce the state update to prevent rapid switching
           timeoutId = window.setTimeout(() => {
             const newIsScrolled = !entry.isIntersecting
+            console.log('Intersection observer:', { 
+              isIntersecting: entry.isIntersecting, 
+              newIsScrolled, 
+              scrollY: window.scrollY 
+            })
             setIsScrolled(newIsScrolled)
-            
+
+            // Reset manual expansion when we detect scroll changes
+            if (newIsScrolled) {
+              setIsManuallyExpanded(false)
+            }
+
             // If we're transitioning from scrolled to not scrolled, start expanding
             if (!newIsScrolled) {
               setIsExpanding(true)
@@ -231,12 +244,12 @@ export function HeaderHome({
   // Calculate width for smooth animation
   const getAnimatedWidth = () => {
     if (variant === "rounded") {
-      if (isScrolled && shrunkWidth) {
+      if (!headerIsExpanded && shrunkWidth) {
         return `${shrunkWidth}px`
       }
       return "calc(100% - 32px)"
     } else {
-      if (isScrolled && shrunkWidth) {
+      if (!headerIsExpanded && shrunkWidth) {
         return `${shrunkWidth}px`
       }
       return "100%"
@@ -257,7 +270,10 @@ export function HeaderHome({
   }
 
   // Determine if buttons should be visible
-  const shouldShowButtons = !isScrolled && !isExpanding
+  const shouldShowButtons = (!isScrolled && !isExpanding) || isManuallyExpanded
+
+  // Determine if header should appear expanded
+  const headerIsExpanded = !isScrolled || isManuallyExpanded
 
   return (
     <MotionAppBar
@@ -267,8 +283,8 @@ export function HeaderHome({
         ease: [0.4, 0, 0.2, 1], // Cubic bezier for smooth easing
       }}
       onAnimationComplete={() => {
-        // When animation completes and we're not scrolled, show buttons
-        if (!isScrolled) {
+        // When animation completes and we're not scrolled or manually expanded, show buttons
+        if (!isScrolled || isManuallyExpanded) {
           setIsExpanding(false)
         }
       }}
@@ -373,46 +389,47 @@ export function HeaderHome({
           direction="row"
           spacing={2}
           alignItems="center"
-          sx={(theme) => ({
-            // If drawer is on the right side
-            ...(drawerPosition === "right" && {
-              paddingRight: drawerOpen
-                ? `calc(${theme.layout.drawer.width}px + 16px)` // Wide padding when drawer is open
-                : `calc(${theme.layout.drawer.closedWidth}px + 16px)`, // Narrower padding when drawer is closed
-            }),
-            // If drawer is on the left side
-            ...(drawerPosition === "left" && {
-              paddingRight: "16px",
-            }),
-            transition: theme.transitions.create("padding", {
-              easing: theme.transitions.easing.sharp,
-              duration: drawerOpen
-                ? theme.transitions.duration.enteringScreen
-                : theme.transitions.duration.leavingScreen,
-            }),
-          })}
+          sx={{
+            paddingRight: "8px",
+          }}
         >
-          {shouldShowButtons && (
-            <>
-              <Button
-                variant={buttonVariant}
-                sx={{
-                  ...buttonStyle,
-                }}
-              >
-                {componentText.buttons.getData}
-              </Button>
-              <Button
-                variant={buttonVariant}
-                sx={{
-                  ...buttonStyle,
-                }}
-              >
-                {componentText.buttons.about}
-              </Button>
-              <LanguageSwitcher />
-            </>
-          )}
+          {/* Fading buttons group */}
+          <MotionStack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            animate={{
+              opacity: shouldShowButtons ? 1 : 0,
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut",
+            }}
+          >
+            {shouldShowButtons && (
+              <>
+                <Button
+                  variant={buttonVariant}
+                  sx={{
+                    ...buttonStyle,
+                  }}
+                >
+                  {componentText.buttons.getData}
+                </Button>
+                <Button
+                  variant={buttonVariant}
+                  sx={{
+                    ...buttonStyle,
+                  }}
+                >
+                  {componentText.buttons.about}
+                </Button>
+                <LanguageSwitcher />
+              </>
+            )}
+          </MotionStack>
+
+          {/* Glossary button - always visible */}
           <Button
             variant={buttonVariant}
             onClick={onGlossaryClick}
@@ -427,6 +444,31 @@ export function HeaderHome({
           >
             {componentText.buttons.glossary}
           </Button>
+
+          {/* Expand button - only visible when collapsed */}
+          {isScrolled && !isManuallyExpanded && (
+            <Button
+              variant="text"
+              onClick={() => {
+                console.log('Expand button clicked - manually expanding header')
+                setIsManuallyExpanded(true)
+                setIsExpanding(true)
+              }}
+              sx={{
+                minWidth: "auto",
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                padding: 0,
+                color: headerTextColor,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <PlayArrowIcon sx={{ fontSize: 20 }} />
+            </Button>
+          )}
         </Stack>
       </Toolbar>
     </MotionAppBar>
