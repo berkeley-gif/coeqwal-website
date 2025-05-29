@@ -637,7 +637,9 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: "linear-gradient(to bottom, #218dba, #218dba, #459ede)",
+        // Original gradient background (commented out for reference):
+        // background: "linear-gradient(to bottom, #218dba, #218dba, #459ede)",
+        background: "#A3DDE8",
         backgroundSize: "100% 100%",
         width: "100%",
         overflow: "hidden",
@@ -765,7 +767,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "white",
+              color: "#2e3a6c",
               mb: 2, // Keep margin-bottom for spacing
             }}
           >
@@ -775,7 +777,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "white",
+              color: "#2e3a6c",
               mb: 2,
             }}
           >
@@ -785,7 +787,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "white",
+              color: "#2e3a6c",
               mb: 2, // Keep margin-bottom for spacing
             }}
           >
@@ -795,7 +797,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h3"
             sx={{
-              color: "white",
+              color: "#2e3a6c",
               mt: 2.5,
               mb: 2, // 1rem equivalent (16px)
             }}
@@ -806,7 +808,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "white",
+              color: "#2e3a6c",
               mt: 3,
               maxWidth: "500px",
             }}
@@ -826,7 +828,7 @@ const IntroSection: React.FC = () => {
           >
             <PlayArrowIcon
               sx={{
-                color: "white",
+                color: "#2e3a6c",
                 fontSize: 50,
                 transform: "rotate(90deg)",
                 pointerEvents: "auto",

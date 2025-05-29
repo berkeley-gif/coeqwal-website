@@ -39,6 +39,7 @@ interface HeaderProps {
   secondaryNavItems?: SecondaryNavItem[]
   onGlossaryClick?: () => void
   isGlossaryActive?: boolean
+  variant?: "default" | "rounded"
 }
 
 const translations: TranslationsMap = {
@@ -83,21 +84,11 @@ export function HeaderHome({
   secondaryNavItems = [], // Default to empty array, bc optional
   onGlossaryClick,
   isGlossaryActive = false,
+  variant = "default",
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const isTablet = useMediaQuery(theme.breakpoints.down("md"))
-  const buttonVariant = isMobile ? "text" : "standard"
-  const buttonStyle = {
-    lineHeight: 1.1, // Line height for text wrapping
-    height: "40px", // Increased height for more prominence
-    minHeight: "40px", // Ditto
-    fontFamily:
-      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    fontWeight: 600,
-    border: "1px solid",
-    borderColor: "#274472", // Border matches button fill color
-  }
   const { locale, isLoading } = useTranslation()
 
   // Track scroll position for dynamic background
@@ -167,20 +158,50 @@ export function HeaderHome({
     ? "black"
     : "white"
 
+  // Text color - white for rounded variant, dynamic for default
+  const headerTextColor = variant === "rounded" ? "white" : textColor
+
   const backgroundColor = isScrolled
     ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
     : "transparent"
+
+  // Conditional styling based on variant
+  const variantStyles = variant === "rounded" 
+    ? {
+        backgroundColor: "#2e3a6c",
+        borderRadius: "16px",
+        margin: "16px",
+        width: "calc(100% - 32px)", // Account for 16px margins on both sides
+        border: "none",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+      }
+    : {
+        backgroundColor: backgroundColor,
+        borderBottom: "1px solid white",
+        borderRadius: theme.borderRadius.none,
+      }
+
+  const buttonVariant = isMobile ? "text" : "standard"
+  const buttonStyle = {
+    lineHeight: 1.1, // Line height for text wrapping
+    height: "40px", // Increased height for more prominence
+    minHeight: "40px", // Ditto
+    fontFamily:
+      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontWeight: 600,
+    border: "1px solid",
+    borderColor: variant === "rounded" ? "white" : "#274472", // Border matches header text color
+    color: headerTextColor, // Use header text color for buttons
+  }
 
   return (
     <AppBar
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: backgroundColor,
-        borderBottom: "1px solid white",
-        color: theme.palette.text.primary,
-        borderRadius: theme.borderRadius.none,
-        boxShadow: "none",
+        ...variantStyles,
+        color: headerTextColor,
+        boxShadow: variant === "rounded" ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none",
         transition: "background-color 0.3s ease",
       }}
       elevation={0}
@@ -215,7 +236,7 @@ export function HeaderHome({
                   disableRipple
                   onClick={() => onSectionClick?.(item.sectionId)}
                   sx={{
-                    color: textColor, // Apply the same color to all items
+                    color: headerTextColor, // Apply the header text color to all items
                     minWidth: "auto",
                     px: isTablet ? 1 : 2,
                     fontSize: theme.typography.nav.fontSize,
@@ -242,7 +263,7 @@ export function HeaderHome({
                         left: "50%",
                         transform: "translateX(-50%)",
                         fontSize: 24,
-                        color: textColor,
+                        color: headerTextColor,
                         animation: "fadeIn 0.3s ease-in-out",
                         "@keyframes fadeIn": {
                           "0%": {

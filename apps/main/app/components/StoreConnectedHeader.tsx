@@ -39,6 +39,7 @@ export function StoreConnectedHeader({
 
   return (
     <HeaderHome
+      variant="rounded"
       activeSection={activeSection}
       onSectionClick={onSectionClick}
       showSecondaryNav={showSecondaryNav}
