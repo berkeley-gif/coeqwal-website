@@ -829,7 +829,7 @@ const theme = createTheme({
           color: theme.palette.common.white, // Default text color for unselected
           boxShadow: "none",
           "&:hover": {
-            backgroundColor: theme.palette.primary.transparent,
+            backgroundColor: "transparent",
           },
           "&.Mui-selected": {
             backgroundColor: theme.palette.primary.main, // Background for selected

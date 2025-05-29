@@ -81,8 +81,6 @@ const sectionParentMap: Record<string, string | undefined> = {
 }
 
 export function HeaderHome({
-  drawerOpen = false,
-  drawerPosition = "right",
   activeSection,
   onSectionClick,
   showSecondaryNav = false,
