@@ -605,21 +605,21 @@ const IntroSection: React.FC = () => {
   // Generate circles on initial render - using only available images
   useEffect(() => {
     // Select consistent images from the available ones
-    // Using 8 total circles for all positions (background + foreground)
-    const selectedImages = [...availableImages].slice(0, 8)
+    // Using 7 total circles (skip the first one) for all positions (background + foreground)
+    const selectedImages = [...availableImages].slice(0, 8).slice(1) // Remove first circle
 
     // Create circles with varied positions around the master circle
     const bgCircles = selectedImages.map((img, index) => {
-      // Get base position from master circle
+      // Get base position from master circle (adjust index since we skipped first circle)
       const basePosition = circlePositions.background[
-        index % circlePositions.background.length
+        (index + 1) % circlePositions.background.length
       ] || { left: "55%", top: "40%" }
 
       // Add sine-based variation to position
-      const variedPosition = addPositionVariation(basePosition, index)
+      const variedPosition = addPositionVariation(basePosition, index + 1)
 
-      // Call generateFixedCircleProps with the base position
-      const circleProps = generateFixedCircleProps(img, true, index)
+      // Call generateFixedCircleProps with the base position (adjust index)
+      const circleProps = generateFixedCircleProps(img, true, index + 1)
 
       // Override with the varied position
       return {
