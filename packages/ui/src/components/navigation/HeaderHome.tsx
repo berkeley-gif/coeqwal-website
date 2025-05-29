@@ -8,6 +8,9 @@ import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { useState, useEffect } from "react"
+import { motion } from "@repo/motion"
+
+const MotionAppBar = motion.create(AppBar)
 
 type HeaderTranslations = {
   title: string
@@ -185,20 +188,23 @@ export function HeaderHome({
         backgroundColor: "#2e3a6c",
         borderRadius: "16px",
         margin: "16px",
-        width: isScrolled ? "200px" : "calc(100% - 32px)",
         border: "none",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        transition: "width 4s cubic-bezier(0.4, 0, 0.2, 1)", // Slower, more elegant easing
         left: 0, // Keep anchored to left when shrinking
       }
     : {
         backgroundColor: backgroundColor,
         borderBottom: "1px solid white",
         borderRadius: theme.borderRadius.none,
-        width: isScrolled ? "140px" : "100%", // Shrink to 140px when scrolled  
-        transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)", // Slower, more elegant easing
         left: 0, // Keep anchored to left when shrinking
       }
+
+  // Animation values for framer-motion
+  const animateProps = {
+    width: variant === "rounded" 
+      ? (isScrolled ? "200px" : "calc(100% - 32px)")
+      : (isScrolled ? "140px" : "100%")
+  }
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
@@ -214,7 +220,12 @@ export function HeaderHome({
   }
 
   return (
-    <AppBar
+    <MotionAppBar
+      animate={animateProps}
+      transition={{ 
+        duration: 0.8, 
+        ease: [0.4, 0, 0.2, 1] // Cubic bezier for smooth easing
+      }}
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
@@ -307,6 +318,7 @@ export function HeaderHome({
           </Stack>
         )}
 
+        {/* Main navigation buttons */}
         <Stack
           direction="row"
           spacing={2}
@@ -330,23 +342,27 @@ export function HeaderHome({
             }),
           })}
         >
-          <Button
-            variant={buttonVariant}
-            sx={{
-              ...buttonStyle,
-            }}
-          >
-            {componentText.buttons.getData}
-          </Button>
-          <Button
-            variant={buttonVariant}
-            sx={{
-              ...buttonStyle,
-            }}
-          >
-            {componentText.buttons.about}
-          </Button>
-          <LanguageSwitcher />
+          {!isScrolled && (
+            <>
+              <Button
+                variant={buttonVariant}
+                sx={{
+                  ...buttonStyle,
+                }}
+              >
+                {componentText.buttons.getData}
+              </Button>
+              <Button
+                variant={buttonVariant}
+                sx={{
+                  ...buttonStyle,
+                }}
+              >
+                {componentText.buttons.about}
+              </Button>
+              <LanguageSwitcher />
+            </>
+          )}
           <Button
             variant={buttonVariant}
             onClick={onGlossaryClick}
@@ -363,6 +379,6 @@ export function HeaderHome({
           </Button>
         </Stack>
       </Toolbar>
-    </AppBar>
+    </MotionAppBar>
   )
 }
