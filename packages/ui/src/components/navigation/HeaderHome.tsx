@@ -101,7 +101,15 @@ export function HeaderHome({
   const [shrunkWidth, setShrunkWidth] = useState<number | null>(null)
   const [isExpanding, setIsExpanding] = useState(false)
   const [isManuallyExpanded, setIsManuallyExpanded] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const isInitializedRef = useRef(false)
+  const isManuallyExpandedRef = useRef(false)
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    isManuallyExpandedRef.current = isManuallyExpanded
+  }, [isManuallyExpanded])
 
   // Measure the content width when in shrunk state
   useEffect(() => {
@@ -160,20 +168,21 @@ export function HeaderHome({
           // Debounce the state update to prevent rapid switching
           timeoutId = window.setTimeout(() => {
             const newIsScrolled = !entry.isIntersecting
-            console.log("Intersection observer:", {
-              isIntersecting: entry.isIntersecting,
-              newIsScrolled,
-              scrollY: window.scrollY,
-            })
             setIsScrolled(newIsScrolled)
 
-            // Reset manual expansion when we detect scroll changes
-            if (newIsScrolled) {
+            // Mark as initialized after first stable detection
+            if (!isInitializedRef.current) {
+              isInitializedRef.current = true
+              setIsInitialized(true)
+            }
+
+            // Reset manual expansion when returning to top
+            if (!newIsScrolled && isManuallyExpandedRef.current) {
               setIsManuallyExpanded(false)
             }
 
-            // If we're transitioning from scrolled to not scrolled, start expanding
-            if (!newIsScrolled) {
+            // Set expanding state only for natural scroll-to-top transitions
+            if (!newIsScrolled && !isManuallyExpandedRef.current) {
               setIsExpanding(true)
             } else {
               setIsExpanding(false)
@@ -271,10 +280,14 @@ export function HeaderHome({
 
   // Determine if buttons should be visible
   const shouldShowButtons =
-    (!isScrolled && !isExpanding) || (isManuallyExpanded && !isExpanding)
+    isInitialized &&
+    // Always show buttons when not scrolled (natural expanded state)
+    (!isScrolled ||
+      // Or when manually expanded (but still scrolled)
+      (isScrolled && isManuallyExpanded && !isExpanding))
 
   // Determine if header should appear expanded
-  const headerIsExpanded = !isScrolled || isManuallyExpanded
+  const headerIsExpanded = !isScrolled || (isScrolled && isManuallyExpanded)
 
   return (
     <MotionAppBar
@@ -284,8 +297,8 @@ export function HeaderHome({
         ease: [0.4, 0, 0.2, 1], // Cubic bezier for smooth easing
       }}
       onAnimationComplete={() => {
-        // When animation completes and we're not scrolled or manually expanded, show buttons
-        if (!isScrolled || isManuallyExpanded) {
+        // Only handle expanding state for natural scroll-to-top transitions
+        if (isExpanding) {
           setIsExpanding(false)
         }
       }}
@@ -394,6 +407,31 @@ export function HeaderHome({
             paddingRight: "8px",
           }}
         >
+          {/* Close button - only visible when manually expanded */}
+          {isManuallyExpanded && (
+            <Button
+              variant="text"
+              onClick={() => {
+                setIsManuallyExpanded(false)
+              }}
+              sx={{
+                minWidth: "auto",
+                width: "40px",
+                height: "40px",
+                borderRadius: "50%",
+                padding: 0,
+                color: headerTextColor,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <PlayArrowIcon
+                sx={{ fontSize: 20, transform: "rotate(180deg)" }}
+              />
+            </Button>
+          )}
+
           {/* Fading buttons group */}
           <MotionStack
             direction="row"
@@ -451,7 +489,6 @@ export function HeaderHome({
             <Button
               variant="text"
               onClick={() => {
-                console.log("Expand button clicked - manually expanding header")
                 setIsManuallyExpanded(true)
                 setIsExpanding(true)
               }}
