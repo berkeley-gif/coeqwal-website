@@ -477,9 +477,8 @@ const theme = createTheme({
     h2: {
       fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "3.75rem",
-      fontWeight: 400,
-      lineHeight: "4.0625rem",
-      // letterSpacing: "-1.8px",
+      fontWeight: 500,
+      lineHeight: "4.25rem",
     },
     h3: {
       fontFamily: themeValues.fontFamily.tiemposHeadline,
@@ -505,17 +504,17 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.375rem",
+      fontSize: "1.3rem",
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "1.925rem",
+      lineHeight: "2rem",
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.375rem",
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "1.925rem",
+      lineHeight: "2rem",
     },
     subtitle1: {
       fontSize: "1.25rem",

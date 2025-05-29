@@ -252,10 +252,10 @@ const circlePositions = {
     { left: "75%", top: "54%" },
 
     // Lower center area
-    { left: "55%", top: "64%" },
+    { left: "55%", top: "60%" },
 
     // Lower left area
-    { left: "35%", top: "58%" },
+    { left: "40%", top: "58%" },
 
     // Center-left area
     { left: "38%", top: "28%" },
