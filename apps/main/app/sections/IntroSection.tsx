@@ -35,7 +35,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
   top,
   index,
   opacity = 1,
-  size = 300,
+  size = 35, // vmin - increased from 29 for bigger bubbles
   freqX1 = 0.07,
   freqX2 = 0.04,
   freqY1 = 0.05,
@@ -172,8 +172,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     <motion.div
       style={{
         position: "absolute",
-        width: `${size + 40}px`,
-        height: `${size + 40}px`,
+        width: `${size + 4}vmin`, // 4vmin padding equivalent to 40px at reference viewport
+        height: `${size + 4}vmin`,
         borderRadius: "50%",
         opacity,
         left,
@@ -193,8 +193,8 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
     >
       <div
         style={{
-          width: `${size}px`,
-          height: `${size}px`,
+          width: `${size}vmin`,
+          height: `${size}vmin`,
           borderRadius: "50%",
           overflow: "hidden",
           position: "relative",
@@ -231,7 +231,7 @@ const availableImages = [
   "14.png",
 ]
 
-// Clear configuration for circle positions - easy to edit
+// Clear configuration for circle positions - set up for easy editing
 const circlePositions = {
   // Background circles arranged in a more random, spread-out pattern
   // Distributed across a wider area for natural cloud-like appearance
@@ -329,7 +329,7 @@ const generateFixedCircleProps = (
   const index = isBackground ? 1 : 15 // Will be updated to use theme values in the component
 
   // Fixed size with small variation
-  const size = 260 // Fixed size for all circles
+  const size = 30 // vmin - increased from 25 for bigger bubbles
 
   // Generate animation parameters with consistent variation
   const baseFreq = 0.05
@@ -488,8 +488,8 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
     <motion.div
       style={{
         position: "absolute",
-        width: `${size}px`,
-        height: `${size}px`,
+        width: `${size}vmin`,
+        height: `${size}vmin`,
         borderRadius: "50%",
         backgroundColor: "#FFFFFF",
         opacity: circleOpacity,
@@ -541,7 +541,9 @@ const IntroSection: React.FC = () => {
         const top = `${baseTop + topOffset}%`
 
         // Size with some variation but more controlled
-        const size = 180 + Math.random() * 320
+        const baseSize = 21 // vmin - increased from 17.5 for bigger bubbles
+        const sizeVariation = 37 // vmin - increased from 31 for bigger bubbles
+        const size = baseSize + Math.random() * sizeVariation // 21vmin to 58vmin
 
         // Opacity - gradient effect that decreases with row - slightly decreased for subtlety
         let opacity
@@ -583,10 +585,12 @@ const IntroSection: React.FC = () => {
     }
 
     // For interstitial section (bottom section) - create just 1 circle, well-positioned
+    const interstitialBaseSize = 29 // vmin - increased from 24 for bigger bubbles
+    const interstitialSizeVariation = 18 // vmin - increased from 15 for bigger bubbles
     circles.push({
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
-      size: 250 + Math.random() * 150, // Medium-large size
+      size: interstitialBaseSize + Math.random() * interstitialSizeVariation, // 29vmin to 47vmin
       opacity: 0.025 + Math.random() * 0.025, // Decreased from 0.03-0.06 to 0.025-0.05
       // Add gentler animation for the lower circle
       freqX1: 0.02,
