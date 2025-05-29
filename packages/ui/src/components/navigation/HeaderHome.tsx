@@ -160,10 +160,10 @@ export function HeaderHome({
           // Debounce the state update to prevent rapid switching
           timeoutId = window.setTimeout(() => {
             const newIsScrolled = !entry.isIntersecting
-            console.log('Intersection observer:', { 
-              isIntersecting: entry.isIntersecting, 
-              newIsScrolled, 
-              scrollY: window.scrollY 
+            console.log("Intersection observer:", {
+              isIntersecting: entry.isIntersecting,
+              newIsScrolled,
+              scrollY: window.scrollY,
             })
             setIsScrolled(newIsScrolled)
 
@@ -270,7 +270,8 @@ export function HeaderHome({
   }
 
   // Determine if buttons should be visible
-  const shouldShowButtons = (!isScrolled && !isExpanding) || isManuallyExpanded
+  const shouldShowButtons =
+    (!isScrolled && !isExpanding) || (isManuallyExpanded && !isExpanding)
 
   // Determine if header should appear expanded
   const headerIsExpanded = !isScrolled || isManuallyExpanded
@@ -450,7 +451,7 @@ export function HeaderHome({
             <Button
               variant="text"
               onClick={() => {
-                console.log('Expand button clicked - manually expanding header')
+                console.log("Expand button clicked - manually expanding header")
                 setIsManuallyExpanded(true)
                 setIsExpanding(true)
               }}
