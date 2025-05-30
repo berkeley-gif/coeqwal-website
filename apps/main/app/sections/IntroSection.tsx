@@ -240,28 +240,28 @@ const circlePositions = {
     // Spread across roughly 50% of viewport width and height
 
     // Upper area circles
-    { left: "16%", top: "14%" },
+    { left: "16%", top: "10%" },
 
     // Upper right area
-    { left: "72%", top: "8%" },
+    { left: "72%", top: "6%" },
 
     // Center-right area
-    { left: "60%", top: "30%" },
+    { left: "60%", top: "24%" },
 
     // Lower right area
-    { left: "75%", top: "54%" },
+    { left: "75%", top: "48%" },
 
     // Lower center area
-    { left: "55%", top: "60%" },
+    { left: "55%", top: "54%" },
 
     // Lower left area
-    { left: "40%", top: "58%" },
+    { left: "40%", top: "52%" },
 
     // Center-left area
-    { left: "38%", top: "28%" },
+    { left: "38%", top: "22%" },
 
     // Upper left area
-    { left: "52%", top: "21%" },
+    { left: "52%", top: "18%" },
   ],
 
   // Keep foreground empty for now
@@ -347,10 +347,10 @@ const generateFixedCircleProps = (
 
   // Fixed amplitudes with increased variations
   const baseAmplitude = 25 // Reduced from 40 to keep circles in rows
-  const amplitudeX1 = baseAmplitude + positionIndex * 2 // Reduced variation
-  const amplitudeX2 = baseAmplitude - positionIndex * 1 // Reduced variation
-  const amplitudeY1 = baseAmplitude + positionIndex * 1.5 // Reduced variation
-  const amplitudeY2 = baseAmplitude - positionIndex * 0.5 // Reduced variation
+  const amplitudeX1 = baseAmplitude + positionIndex * 2
+  const amplitudeX2 = baseAmplitude - positionIndex * 1
+  const amplitudeY1 = baseAmplitude + positionIndex * 1.5
+  const amplitudeY2 = baseAmplitude - positionIndex * 0.5
 
   return {
     imagePath,
@@ -541,21 +541,21 @@ const IntroSection: React.FC = () => {
         const top = `${baseTop + topOffset}%`
 
         // Size with some variation but more controlled
-        const baseSize = 21 // vmin - increased from 17.5 for bigger bubbles
-        const sizeVariation = 37 // vmin - increased from 31 for bigger bubbles
-        const size = baseSize + Math.random() * sizeVariation // 21vmin to 58vmin
+        const baseSize = 18 // vmin - decreased from 21 for smaller bubbles
+        const sizeVariation = 30 // vmin - decreased from 37 for smaller bubbles
+        const size = baseSize + Math.random() * sizeVariation // 18vmin to 48vmin
 
-        // Opacity - gradient effect that decreases with row - slightly decreased for subtlety
+        // Opacity - gradient effect that decreases with row - slightly increased for visibility
         let opacity
         if (row === 0) {
           // Top row - more visible
-          opacity = 0.06 + Math.random() * 0.05 // Decreased from 0.08-0.15 to 0.06-0.11
+          opacity = 0.08 + Math.random() * 0.05 // Increased from 0.06-0.11 to 0.08-0.13
         } else if (row === 1) {
           // Middle row - medium visibility
-          opacity = 0.045 + Math.random() * 0.04 // Decreased from 0.06-0.11 to 0.045-0.085
+          opacity = 0.065 + Math.random() * 0.04 // Increased from 0.045-0.085 to 0.065-0.105
         } else {
           // Bottom row - subtle
-          opacity = 0.03 + Math.random() * 0.03 // Decreased from 0.04-0.08 to 0.03-0.06
+          opacity = 0.05 + Math.random() * 0.03 // Increased from 0.03-0.06 to 0.05-0.08
         }
 
         // Add animation parameters with slight variations
@@ -585,13 +585,13 @@ const IntroSection: React.FC = () => {
     }
 
     // For interstitial section (bottom section) - create just 1 circle, well-positioned
-    const interstitialBaseSize = 29 // vmin - increased from 24 for bigger bubbles
-    const interstitialSizeVariation = 18 // vmin - increased from 15 for bigger bubbles
+    const interstitialBaseSize = 25 // vmin - decreased from 29 for smaller bubbles
+    const interstitialSizeVariation = 15 // vmin - decreased from 18 for smaller bubbles
     circles.push({
       left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
       top: `${110 + Math.random() * 10}%`, // Just below the fold
-      size: interstitialBaseSize + Math.random() * interstitialSizeVariation, // 29vmin to 47vmin
-      opacity: 0.025 + Math.random() * 0.025, // Decreased from 0.03-0.06 to 0.025-0.05
+      size: interstitialBaseSize + Math.random() * interstitialSizeVariation, // 25vmin to 40vmin
+      opacity: 0.045 + Math.random() * 0.025, // Increased from 0.025-0.05 to 0.045-0.07
       // Add gentler animation for the lower circle
       freqX1: 0.02,
       freqX2: 0.015,
@@ -897,7 +897,7 @@ const IntroSection: React.FC = () => {
           // paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
           paddingLeft: "20vw",
           paddingRight: { xs: 3, md: 6 }, // Normal right padding
-          mt: 40,
+          mt: 50,
         }}
       >
         {/* Content container for proper blending context */}
