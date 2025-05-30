@@ -38,6 +38,7 @@ export default function ContentPanels({
       color="common.white"
       sx={{
         alignSelf: "flex-start",
+        fontWeight: 600
       }}
     >
       Learn
@@ -51,6 +52,7 @@ export default function ContentPanels({
       color="common.white"
       sx={{
         alignSelf: "flex-start",
+        fontWeight: 600
       }}
     >
       Explore
@@ -64,6 +66,7 @@ export default function ContentPanels({
       color="common.white"
       sx={{
         alignSelf: "flex-start",
+        fontWeight: 600
       }}
     >
       Empower
@@ -127,11 +130,11 @@ export default function ContentPanels({
   const getPanelBgColor = (panelType: PanelType) => {
     switch (panelType) {
       case "learn":
-        return "#1A3F6A" // Deep blue
+        return "#303a68" // Deep blue
       case "explore":
-        return "#2f84ab" // Teal blue
+        return "#458bb6" // Teal blue
       case "empower":
-        return "#135773" // Dark teal
+        return "rgb(19, 87, 115)" // Dark teal
       default:
         return "#1A3F6A" // Fallback
     }

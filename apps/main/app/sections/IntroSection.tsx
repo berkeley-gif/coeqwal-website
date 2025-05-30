@@ -642,7 +642,7 @@ const IntroSection: React.FC = () => {
       sx={{
         position: "relative",
         // Original gradient background (commented out for reference):
-        // background: "linear-gradient(to bottom, #218dba, #218dba, #459ede)",
+        // background: "linear-gradient(to bottom, #A3DDE8, #A3DDE8, #458bb6)",
         background: "#A3DDE8",
         backgroundSize: "100% 100%",
         width: "100%",
