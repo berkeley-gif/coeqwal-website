@@ -48,13 +48,13 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <WaterIcon />,
     term: "California water system",
     definition:
-      "A vast, interconnected network of rivers, reservoirs, aqueducts, dams, canals, and pumps that moves water across the state—from mountains and rivers to cities, farms, and ecosystems. It is one of the most complex water systems in the world.",
+      "A vast, interconnected network of rivers, reservoirs, aqueducts, dams, canals, and pumps that moves water across the state—from mountains and rivers to communities, farms, and ecosystems. It is one of the most complex water systems in the world.",
   },
   {
     icon: <AccountBalanceIcon />,
     term: "California Department of Water Resources (DWR)",
     definition:
-      "A state agency that manages California's water resources. DWR operates much of the State Water Project and plays a central role in planning, modeling, and regulating water use in California.",
+      "A state agency that manages California's water resources. DWR operates the State Water Project and plays a central role in planning, modeling, and regulating water use in California.",
   },
   {
     icon: <AccountBalanceIcon />,
@@ -66,7 +66,7 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <SettingsIcon />,
     term: "Water management decisions",
     definition:
-      "Choices made by agencies and water operators about how water is stored, moved, and delivered across the system. These decisions affect how much water reaches farms, cities, rivers, and wetlands.",
+      "Choices made by agencies and water operators about how water is stored, moved, and delivered across the system. These decisions affect how much water reaches farms, communities, rivers, and wetlands.",
   },
   {
     icon: <SettingsIcon />,
@@ -85,13 +85,13 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <LocationOnIcon />,
     term: "Scenario themes",
     definition:
-      "Categories that organize related water scenarios. Themes help users find scenarios.",
+      "Groups of related scenarios.",
   },
   {
     icon: <BarChartIcon />,
     term: "Scenario data",
     definition:
-      "The detailed outputs of each modeled water scenario, including things like river flows, reservoir levels, salinity, or water deliveries. This data shows the anticipatedeffects of specific water management decisions.",
+      "The detailed outputs of each modeled water scenario, including things like river flows, reservoir levels, salinity, and water deliveries. This data shows the anticipated effects of specific water management decisions.",
   },
   {
     icon: <OpacityIcon />,
@@ -141,13 +141,7 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <EngineeringIcon />,
     term: "CalSim",
     definition:
-      "Computational model used to simulate how water moves through California's system.",
-  },
-  {
-    icon: <EngineeringIcon />,
-    term: "Computer models / CalSim",
-    definition:
-      "Computational tools used to simulate how water moves through California's system. CalSim is one such model used by state and federal agencies to test water management decisions and understand their potential impacts before they happen in real life.",
+      "Computational model used to simulate how water moves through California's Central Valley water system. CalSim is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management decisions could impact the Central Valley.",
   },
   {
     icon: <ThermostatIcon />,
