@@ -700,7 +700,7 @@ const IntroSection: React.FC = () => {
             left: 0,
             width: "100%",
             height: "100%",
-            transform: "translateX(-16.67%)",
+            // transform: "translateX(-16.67%)",
           }}
         >
           <Image
@@ -895,7 +895,7 @@ const IntroSection: React.FC = () => {
           paddingTop: "160px",
           paddingBottom: "160px",
           // paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
-          paddingLeft: "10vw",
+          paddingLeft: "20vw",
           paddingRight: { xs: 3, md: 6 }, // Normal right padding
           mt: 40,
         }}
@@ -910,11 +910,11 @@ const IntroSection: React.FC = () => {
         >
           {/* Text content with mix-blend-mode */}
           <Box
-            maxWidth="720px"
+            maxWidth="800px"
             sx={{
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText,
-              mb: 40,
+              mb: 48,
             }}
           >
             <Stack spacing={4}>

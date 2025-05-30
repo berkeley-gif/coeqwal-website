@@ -33,28 +33,26 @@ export default function ContentPanels({
 
   // Text component for the first panel
   const LearnTextContent = () => (
-    <Box sx={{ pointerEvents: "auto" }}>
+    <Box sx={{ pointerEvents: "auto", minWidth: "300px" }}>
       <Typography
-        component="span"
-        variant="h1"
-        color="common.white"
+        variant="h2"
         sx={{
+          color: "common.white",
           alignSelf: "flex-start",
           fontWeight: 600,
-          mr: 2, // Right margin to space between title and content
+          mb: 1, // Margin bottom to space below header
         }}
       >
         Learn
       </Typography>
       <Typography
-        component="span"
         variant="body2"
-        color="common.white"
         sx={{
+          color: "common.white",
           pointerEvents: "auto",
-          fontFamily:
-            '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+          maxWidth: "620px",
         }}
+        className="tk-neue-haas-grotesk-text"
       >
         how California water flows and operational decisions balance water needs
         across the state
@@ -64,29 +62,25 @@ export default function ContentPanels({
 
   // Text component for the second panel
   const EmpowerTextContent = () => (
-    <Box sx={{ pointerEvents: "auto" }}>
+    <Box sx={{ pointerEvents: "auto", minWidth: "300px" }}>
       <Typography
-        component="span"
-        variant="h1"
-        color="common.white"
+        variant="h2"
         sx={{
+          color: "common.white",
           alignSelf: "flex-start",
           fontWeight: 600,
-          mr: 2, // Right margin to space between title and content
+          mb: 1, // Margin bottom to space below header
         }}
       >
         Explore
       </Typography>
       <Typography
-        component="span"
         variant="body2"
-        fontSize="1.5rem"
-        color="common.white"
         sx={{
+          color: "common.white",
           pointerEvents: "auto",
-          fontFamily:
-            '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
         }}
+        className="tk-neue-haas-grotesk-text"
       >
         COEQWAL&apos;s &quot;what if&quot; scenarios by theme
       </Typography>
@@ -95,29 +89,26 @@ export default function ContentPanels({
 
   // Text component for the third panel
   const ActTextContent = () => (
-    <Box sx={{ pointerEvents: "auto" }}>
+    <Box sx={{ pointerEvents: "auto", minWidth: "300px" }}>
       <Typography
-        component="span"
-        variant="h1"
-        color="common.white"
+        variant="h2"
         sx={{
+          color: "common.white",
           alignSelf: "flex-start",
           fontWeight: 600,
-          mr: 2, // Right margin to space between title and content
+          mb: 1, // Margin bottom to space below header
         }}
       >
         Empower
       </Typography>
       <Typography
-        component="span"
         variant="body2"
-        fontSize="1.5rem"
-        color="common.white"
         sx={{
+          color: "common.white",
           pointerEvents: "auto",
-          fontFamily:
-            '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+          maxWidth: "620px",
         }}
+        className="tk-neue-haas-grotesk-text"
       >
         your community with data that helps you understand the impacts of
         operational decisions
