@@ -698,8 +698,8 @@ const IntroSection: React.FC = () => {
             position: "absolute",
             bottom: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
+            width: "80%",
+            height: "80%",
             // transform: "translateX(-16.67%)",
           }}
         >

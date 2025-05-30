@@ -40,7 +40,6 @@ export default function ContentPanels({
           color: "common.white",
           alignSelf: "flex-start",
           fontWeight: 600,
-          mb: 1, // Margin bottom to space below header
         }}
       >
         Learn
@@ -69,7 +68,6 @@ export default function ContentPanels({
           color: "common.white",
           alignSelf: "flex-start",
           fontWeight: 600,
-          mb: 1, // Margin bottom to space below header
         }}
       >
         Explore
@@ -96,7 +94,6 @@ export default function ContentPanels({
           color: "common.white",
           alignSelf: "flex-start",
           fontWeight: 600,
-          mb: 1, // Margin bottom to space below header
         }}
       >
         Empower
