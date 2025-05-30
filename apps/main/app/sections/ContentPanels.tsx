@@ -295,9 +295,9 @@ export default function ContentPanels({
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
                       California&apos;s water is managed by a patchwork of
-                      agencies, laws, and agreements. Decisions about Central Valley water storage,
-                      delivery, and environmental flows affect nearly every part
-                      of the state.
+                      agencies, laws, and agreements. Decisions about Central
+                      Valley water storage, delivery, and environmental flows
+                      affect nearly every part of the state.
                     </Typography>
                     <Box
                       sx={{
@@ -330,7 +330,12 @@ export default function ContentPanels({
                       Growing Challenges
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      California faces increasing water challenges from ecosystem alteration, groundwater depletion, climate change, and long-term inequities in water access. Understanding these challenges and their impacts on communities is essential for developing effective, equitable solutions.
+                      California faces increasing water challenges from
+                      ecosystem alteration, groundwater depletion, climate
+                      change, and long-term inequities in water access.
+                      Understanding these challenges and their impacts on
+                      communities is essential for developing effective,
+                      equitable solutions.
                     </Typography>
                     <Box
                       component="a"
@@ -397,12 +402,12 @@ export default function ContentPanels({
                       What if we made different choices?
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      The COEQWAL project uses the CalSim3 computational model, the same model used by
-                      state and federal agencies, to simulate a range of
-                      alternative water futures. These scenarios explore how
-                      changes in policy, priorities, and climate could shape
-                      water availability, distribution, and outcomes across
-                      California.
+                      The COEQWAL project uses the CalSim3 computational model,
+                      the same model used by state and federal agencies, to
+                      simulate a range of alternative water futures. These
+                      scenarios explore how changes in policy, priorities, and
+                      climate could shape water availability, distribution, and
+                      outcomes across California.
                     </Typography>
                     <Box
                       sx={{
