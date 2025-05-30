@@ -792,7 +792,7 @@ const IntroSection: React.FC = () => {
             variant="h1"
             sx={{
               color: "#2e3a6c",
-              mb: 2, // Keep margin-bottom for spacing
+              mb: 2,
             }}
           >
             Empower.
@@ -813,7 +813,7 @@ const IntroSection: React.FC = () => {
             variant="body2"
             sx={{
               color: "#2e3a6c",
-              mt: 3,
+              // mt: 3,
               maxWidth: "500px",
             }}
             className="tk-neue-haas-grotesk-text"

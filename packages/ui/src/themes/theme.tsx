@@ -473,7 +473,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "5rem",
       fontWeight: 700,
-      lineHeight: "5rem",
+      lineHeight: "4.6rem",
     },
     h2: {
       fontFamily: themeValues.fontFamily.tiemposHeadline,
