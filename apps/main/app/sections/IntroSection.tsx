@@ -673,34 +673,9 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "absolute",
             bottom: 0,
-            left: 0,
-            width: "60%",
-            height: "130%", // Set to a reasonable percentage of viewport height
-            transform: "translateX(-16.67%)",
-          }}
-        >
-          <Image
-            src="/images/home_collage/left_side.png"
-            alt=""
-            fill
-            quality={100}
-            priority
-            sizes="75vw"
-            style={{
-              objectFit: "contain",
-              objectPosition: "left bottom",
-              pointerEvents: "none",
-            }}
-          />
-        </Box>
-
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
             right: 0,
-            width: "60%",
-            height: "130%", // Set to a reasonable percentage of viewport height
+            width: "100%",
+            height: "100%",
             transform: "translateX(5%)",
           }}
         >
@@ -714,6 +689,30 @@ const IntroSection: React.FC = () => {
             style={{
               objectFit: "contain",
               objectPosition: "right bottom",
+              pointerEvents: "none",
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            transform: "translateX(-16.67%)",
+          }}
+        >
+          <Image
+            src="/images/home_collage/left_side.png"
+            alt=""
+            fill
+            quality={100}
+            priority
+            sizes="75vw"
+            style={{
+              objectFit: "contain",
+              objectPosition: "left bottom",
               pointerEvents: "none",
             }}
           />
@@ -895,8 +894,10 @@ const IntroSection: React.FC = () => {
           minHeight: "100vh",
           paddingTop: "160px",
           paddingBottom: "160px",
-          paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
+          // paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
+          paddingLeft: "10vw",
           paddingRight: { xs: 3, md: 6 }, // Normal right padding
+          mt: 40,
         }}
       >
         {/* Content container for proper blending context */}
@@ -913,7 +914,7 @@ const IntroSection: React.FC = () => {
             sx={{
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText,
-              mb: 10,
+              mb: 40,
             }}
           >
             <Stack spacing={4}>
@@ -921,7 +922,7 @@ const IntroSection: React.FC = () => {
                 variant="h2"
                 sx={{
                   color: "#2e3a6c",
-                  mb: 3, // 1.5rem equivalent (24px)
+                  mb: 3,
                 }}
               >
                 What is the future
