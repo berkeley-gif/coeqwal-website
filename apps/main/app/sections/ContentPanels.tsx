@@ -464,7 +464,7 @@ export default function ContentPanels({
                     }}
                   >
                     <Typography variant="h4" color="white" sx={{ mb: 1 }}>
-                      Current Operations for California Water
+                      Current operations
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -473,15 +473,13 @@ export default function ContentPanels({
                         mb: 2,
                         opacity: 0.8,
                       }}
-                    >
-                      Understanding today&apos;s water system operations
-                    </Typography>
+                    ></Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Explore how California&apos;s water system currently
-                      operates under existing policies, regulations, and
-                      infrastructure constraints. This baseline scenario shows
-                      water deliveries, environmental flows, and system outcomes
-                      under current management practices.
+                      Baseline scenarios show how California manages water
+                      today. They serve as a reference point for current
+                      operations – the laws, regulations, priorities, and
+                      decisions that affect how California’s water supply is
+                      managed.
                     </Typography>
                     <Box
                       sx={{
@@ -510,7 +508,7 @@ export default function ContentPanels({
                     }}
                   >
                     <Typography variant="h4" color="white" sx={{ mb: 1 }}>
-                      Managing River Flows for the Environment
+                      Managing river flows for the environment
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -523,11 +521,12 @@ export default function ContentPanels({
                       Balancing ecosystem needs with human uses
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Examine scenarios that prioritize environmental flows to
-                      support river ecosystems while managing trade-offs with
-                      other water uses. These approaches explore how strategic
-                      flow management can benefit fish, wildlife, and river
-                      health.
+                      Natural river systems have high flows in winter and low
+                      flows in summer, supporting native fish, plants, and
+                      wildlife. Today, the storage and diversion of water
+                      especially for farms and communities have altered river
+                      flow patterns. This means that rivers may no longer have
+                      the water that ecosystems need.
                     </Typography>
                     <Box
                       sx={{
@@ -570,11 +569,13 @@ export default function ContentPanels({
                       Sustainable strategies for groundwater basins
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Explore scenarios for implementing the Sustainable
-                      Groundwater Management Act (SGMA) in agricultural regions
-                      where land use changes are expected. These scenarios
-                      examine different pathways for groundwater sustainability
-                      and their impacts on agriculture.
+                      In California, too much groundwater pumping has caused
+                      wells to dry, crops to fail, and the ground to sink. To
+                      prevent further impacts from groundwater overdraft, the
+                      Sustainable Groundwater Management Act (SGMA) requires
+                      local groundwater agencies to limit their pumping. These
+                      scenarios examine different pathways for groundwater
+                      sustainability and their impacts on agriculture.
                     </Typography>
                     <Box
                       sx={{
@@ -617,11 +618,13 @@ export default function ContentPanels({
                       Ensuring safe, affordable water access for all
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Investigate scenarios that prioritize drinking water
-                      access for communities, particularly those historically
-                      underserved. These approaches explore how water management
-                      decisions impact drinking water availability across
-                      diverse communities.
+                      All Californians need water for drinking, cooking,
+                      cleaning, and running businesses, schools, and hospitals.
+                      But because of infrastructure problems and the way water
+                      allocations are prioritized, some communities don’t always
+                      get the water they need. In these scenarios, we focus on
+                      giving priority to community water needs and measure how
+                      that affects both communities and other water users.
                     </Typography>
                     <Box
                       sx={{
@@ -663,11 +666,15 @@ export default function ContentPanels({
                       Supporting the Delta ecosystem and San Francisco Bay
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Compare scenarios that enhance Delta outflows to support
-                      the estuary ecosystem and San Francisco Bay. These
-                      scenarios explore the relationship between outflow timing,
-                      volume, and ecological responses in this critical
-                      transition zone.
+                      The Sacramento and San Joaquin Rivers carry water from
+                      tributaries draining the Sierra Nevada to the Delta, where
+                      water flows out to San Francisco Bay and the Pacific
+                      Ocean. However, much of the water that would naturally
+                      flow to the Bay is either diverted upstream or exported to
+                      the south, significantly reducing Delta outflows. The
+                      reduction in these flows has a detrimental impact on
+                      ecosystem health and the sustainability of many aquatic
+                      species.
                     </Typography>
                     <Box
                       sx={{
@@ -709,11 +716,15 @@ export default function ContentPanels({
                       Protecting in-Delta water users and livelihoods
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Analyze scenarios that focus on sustaining water quality
-                      and availability for Delta communities and agriculture.
-                      These approaches examine how to balance the needs of those
-                      who live and work in the Delta with other competing water
-                      demands.
+                      Communities and farms in the Delta need freshwater water
+                      for drinking water, recreation, and irrigation. However,
+                      waters of the Delta can become too salty when river flows
+                      are reduced from drought or reservoir operations.
+                      California’s water agencies must carefully manage how
+                      reservoir operations, river flows, diversions for human
+                      uses, and Delta exports affect water quality in the Delta.
+                      This is becoming more challenging as rising sea levels
+                      increase salinity in the Delta.
                     </Typography>
                     <Box
                       sx={{
@@ -743,7 +754,7 @@ export default function ContentPanels({
                   >
                     <Typography variant="h4" color="white" sx={{ mb: 1 }}>
                       Improving Reliability of Delta Exports for Farms and
-                      Cities
+                      Communities
                     </Typography>
                     <Typography
                       variant="subtitle1"
@@ -757,11 +768,15 @@ export default function ContentPanels({
                       Delta
                     </Typography>
                     <Typography variant="body1" color="white" sx={{ mb: 3 }}>
-                      Review scenarios designed to improve the reliability of
-                      water exports from the Delta for agricultural and urban
-                      users in Central and Southern California. These approaches
-                      consider operational changes and infrastructure
-                      modifications to enhance water supply reliability.
+                      California’s water system is designed and managed to move
+                      water from the wetter Sacramento Basin in northern
+                      California to the drier San Joaquin Basin and Southern
+                      California metropolitan region in the south. This system
+                      relies on controlling the flow of freshwater through the
+                      Delta to export facilities in the south. Changes in
+                      operations, regulations, and infrastructure to improve
+                      Delta exports will affect all other aspects of the water
+                      system.
                     </Typography>
                     <Box
                       sx={{
@@ -1066,7 +1081,7 @@ function PanelWithDetail({
                 sx={{
                   position: "absolute",
                   left: 30,
-                  top: 120,
+                  top: 100,
                   transform: "rotate(180deg)",
                   color: "white",
                   backgroundColor: "transparent",
