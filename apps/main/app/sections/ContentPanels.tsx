@@ -119,8 +119,8 @@ export default function ContentPanels({
             '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
         }}
       >
-        your community with data that helps you understand the impacts
-        of operational decisions
+        your community with data that helps you understand the impacts of
+        operational decisions
       </Typography>
     </Box>
   )

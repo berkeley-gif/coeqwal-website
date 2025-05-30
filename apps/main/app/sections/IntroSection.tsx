@@ -994,12 +994,11 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "#ffff00",
-
                             px: 1,
                             py: 0.1,
                             mx: 0.1,
-                            lineHeight: "0em",
-                            paddingBottom: "0.5em",
+                            lineHeight: 0,
+                            paddingBottom: "0.5rem",
                             cursor: "pointer",
                             display: "inline-block",
                             position: "relative",
