@@ -84,8 +84,7 @@ const glossaryTerms: GlossaryTerm[] = [
   {
     icon: <LocationOnIcon />,
     term: "Scenario themes",
-    definition:
-      "Groups of related scenarios.",
+    definition: "Groups of related scenarios.",
   },
   {
     icon: <BarChartIcon />,
@@ -206,6 +205,41 @@ export function CurrentOpsContent({
     const hasCentralValley =
       definition.includes("Central Valley") && currentTerm !== "Central Valley"
 
+    // Helper function to create clickable links for a single term
+    const createLinksForSingleTerm = (
+      text: string,
+      termToLink: string,
+      displayTerm: string,
+    ): React.ReactNode => {
+      const parts = text.split(termToLink)
+      if (parts.length === 1) return text // No term found
+
+      return parts.reduce<React.ReactNode>((result, part, index) => {
+        if (index === 0) return part
+
+        return (
+          <>
+            {result}
+            <Box
+              component="span"
+              sx={{
+                color: "#FFAC6E",
+                cursor: "pointer",
+                textDecoration: "underline",
+                "&:hover": {
+                  color: "#FF8A4A",
+                },
+              }}
+              onClick={() => handleTermClick(displayTerm)}
+            >
+              {termToLink}
+            </Box>
+            {part}
+          </>
+        )
+      }, "")
+    }
+
     // Handle Central Valley links
     if (
       hasCentralValley &&
@@ -213,26 +247,10 @@ export function CurrentOpsContent({
       !hasSurfaceWater &&
       !hasAllocation
     ) {
-      const parts = definition.split("Central Valley")
-      return (
-        <>
-          {parts[0]}
-          <Box
-            component="span"
-            sx={{
-              color: "#FFAC6E",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": {
-                color: "#FF8A4A",
-              },
-            }}
-            onClick={() => handleTermClick("Central Valley")}
-          >
-            Central Valley
-          </Box>
-          {parts[1]}
-        </>
+      return createLinksForSingleTerm(
+        definition,
+        "Central Valley",
+        "Central Valley",
       )
     }
 
@@ -243,27 +261,7 @@ export function CurrentOpsContent({
       !hasSurfaceWater &&
       !hasCentralValley
     ) {
-      const parts = definition.split("allocation")
-      return (
-        <>
-          {parts[0]}
-          <Box
-            component="span"
-            sx={{
-              color: "#FFAC6E",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": {
-                color: "#FF8A4A",
-              },
-            }}
-            onClick={() => handleTermClick("Allocation")}
-          >
-            allocation
-          </Box>
-          {parts[1]}
-        </>
-      )
+      return createLinksForSingleTerm(definition, "allocation", "Allocation")
     }
 
     // Handle surface water links
@@ -273,26 +271,10 @@ export function CurrentOpsContent({
       !hasAllocation &&
       !hasCentralValley
     ) {
-      const parts = definition.split("surface water")
-      return (
-        <>
-          {parts[0]}
-          <Box
-            component="span"
-            sx={{
-              color: "#FFAC6E",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": {
-                color: "#FF8A4A",
-              },
-            }}
-            onClick={() => handleTermClick("Surface water")}
-          >
-            surface water
-          </Box>
-          {parts[1]}
-        </>
+      return createLinksForSingleTerm(
+        definition,
+        "surface water",
+        "Surface water",
       )
     }
 
@@ -303,27 +285,7 @@ export function CurrentOpsContent({
       !hasAllocation &&
       !hasCentralValley
     ) {
-      const parts = definition.split("Groundwater")
-      return (
-        <>
-          {parts[0]}
-          <Box
-            component="span"
-            sx={{
-              color: "#FFAC6E",
-              cursor: "pointer",
-              textDecoration: "underline",
-              "&:hover": {
-                color: "#FF8A4A",
-              },
-            }}
-            onClick={() => handleTermClick("Groundwater")}
-          >
-            Groundwater
-          </Box>
-          {parts[1]}
-        </>
-      )
+      return createLinksForSingleTerm(definition, "Groundwater", "Groundwater")
     }
 
     // For complex cases with multiple terms, handle them in order of appearance
