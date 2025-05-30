@@ -50,10 +50,10 @@ export default function ContentPanels({
         component="span"
         variant="body2"
         color="common.white"
-        sx={{ 
+        sx={{
           pointerEvents: "auto",
-          fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
-          fontStyle: "italic",
+          fontFamily:
+            '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
         }}
       >
         how California water flows and operational decisions balance water needs
@@ -80,12 +80,12 @@ export default function ContentPanels({
       <Typography
         component="span"
         variant="body2"
-        fontWeight={200}
+        fontSize="1.5rem"
         color="common.white"
-        sx={{ 
+        sx={{
           pointerEvents: "auto",
-          fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
-          fontStyle: "italic",
+          fontFamily:
+            '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
         }}
       >
         COEQWAL&apos;s &quot;what if&quot; scenarios by theme
@@ -111,59 +111,16 @@ export default function ContentPanels({
       <Typography
         component="span"
         variant="body2"
+        fontSize="1.5rem"
         color="common.white"
-        sx={{ 
+        sx={{
           pointerEvents: "auto",
-          fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
-          fontStyle: "italic",
+          fontFamily:
+            '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
         }}
       >
         your community with specific data that helps you understand the impacts
         of operational decisions
-      </Typography>
-    </Box>
-  )
-
-  // First panel content - Water literacy modules
-  const Panel1Content = () => (
-    <Box sx={{ pointerEvents: "auto" }}>
-      <Typography
-        variant="body2"
-        color="common.white"
-        sx={{ pointerEvents: "auto", mb: 0 }}
-      >
-        how California water flows and operational decisions
-        <br />
-        balance water needs across the state
-      </Typography>
-    </Box>
-  )
-
-  // Second panel content - Themes
-  const Panel2Content = () => (
-    <Box sx={{ pointerEvents: "auto" }}>
-      <Typography
-        variant="body2"
-        fontWeight={200}
-        color="common.white"
-        sx={{ pointerEvents: "auto", mb: 0 }}
-      >
-        COEQWAL&apos;s &quot;what if&quot; scenarios by theme
-      </Typography>
-    </Box>
-  )
-
-  // Third panel content - Empower
-  const Panel3Content = () => (
-    <Box sx={{ pointerEvents: "auto", mb: 0 }}>
-      <Typography
-        variant="body2"
-        color="common.white"
-        sx={{ pointerEvents: "auto", mb: 0 }}
-      >
-        your community with specific data that helps you understand
-        <br />
-        the impacts of operational decisions
       </Typography>
     </Box>
   )
@@ -294,7 +251,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       A natural system fed by rain and snowpack
@@ -347,7 +303,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Who decides where water goes—and when?
@@ -455,7 +410,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       What if we made different choices?
@@ -531,7 +485,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Understanding today&apos;s water system operations
@@ -578,7 +531,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Balancing ecosystem needs with human uses
@@ -626,7 +578,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Sustainable strategies for groundwater basins
@@ -674,7 +625,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Ensuring safe, affordable water access for all
@@ -721,7 +671,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Supporting the Delta ecosystem and San Francisco Bay
@@ -768,7 +717,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Protecting in-Delta water users and livelihoods
@@ -816,7 +764,6 @@ export default function ContentPanels({
                       sx={{
                         mb: 2,
                         opacity: 0.8,
-                        fontStyle: "italic",
                       }}
                     >
                       Ensuring consistent water deliveries to users south of the
@@ -878,10 +825,10 @@ export default function ContentPanels({
                   component="span"
                   variant="body2"
                   color="common.white"
-                  sx={{ 
+                  sx={{
                     pointerEvents: "auto",
-                    fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
-                    fontStyle: "italic",
+                    fontFamily:
+                      '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
                   }}
                 >
                   The COEQWAL project helps community members and
