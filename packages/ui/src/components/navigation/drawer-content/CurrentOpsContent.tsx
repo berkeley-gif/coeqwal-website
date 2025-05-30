@@ -205,39 +205,38 @@ export function CurrentOpsContent({
     const hasCentralValley =
       definition.includes("Central Valley") && currentTerm !== "Central Valley"
 
-    // Helper function to create clickable links for a single term
+    // Helper function to create clickable links for a single term (first occurrence only)
     const createLinksForSingleTerm = (
       text: string,
       termToLink: string,
       displayTerm: string,
     ): React.ReactNode => {
-      const parts = text.split(termToLink)
-      if (parts.length === 1) return text // No term found
-
-      return parts.reduce<React.ReactNode>((result, part, index) => {
-        if (index === 0) return part
-
-        return (
-          <>
-            {result}
-            <Box
-              component="span"
-              sx={{
-                color: "#FFAC6E",
-                cursor: "pointer",
-                textDecoration: "underline",
-                "&:hover": {
-                  color: "#FF8A4A",
-                },
-              }}
-              onClick={() => handleTermClick(displayTerm)}
-            >
-              {termToLink}
-            </Box>
-            {part}
-          </>
-        )
-      }, "")
+      const firstIndex = text.indexOf(termToLink)
+      if (firstIndex === -1) return text // No term found
+      
+      const beforeTerm = text.substring(0, firstIndex)
+      const afterTerm = text.substring(firstIndex + termToLink.length)
+      
+      return (
+        <>
+          {beforeTerm}
+          <Box
+            component="span"
+            sx={{
+              color: "#FFAC6E",
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#FF8A4A",
+              },
+            }}
+            onClick={() => handleTermClick(displayTerm)}
+          >
+            {termToLink}
+          </Box>
+          {afterTerm}
+        </>
+      )
     }
 
     // Handle Central Valley links
