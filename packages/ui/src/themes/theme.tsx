@@ -478,13 +478,13 @@ const theme = createTheme({
     h2: {
       fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "3.75rem",
-      fontWeight: 500,
+      fontWeight: 700,
       lineHeight: "4.25rem",
     },
     h3: {
       fontFamily: themeValues.fontFamily.tiemposHeadline,
       fontSize: "2.5rem",
-      fontWeight: 500,
+      fontWeight: 700,
       lineHeight: "2.8125rem",
     },
     h4: {

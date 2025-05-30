@@ -50,7 +50,11 @@ export default function ContentPanels({
         component="span"
         variant="body2"
         color="common.white"
-        sx={{ pointerEvents: "auto" }}
+        sx={{ 
+          pointerEvents: "auto",
+          fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+          fontStyle: "italic",
+        }}
       >
         how California water flows and operational decisions balance water needs
         across the state
@@ -78,7 +82,11 @@ export default function ContentPanels({
         variant="body2"
         fontWeight={200}
         color="common.white"
-        sx={{ pointerEvents: "auto" }}
+        sx={{ 
+          pointerEvents: "auto",
+          fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+          fontStyle: "italic",
+        }}
       >
         COEQWAL&apos;s &quot;what if&quot; scenarios by theme
       </Typography>
@@ -104,7 +112,11 @@ export default function ContentPanels({
         component="span"
         variant="body2"
         color="common.white"
-        sx={{ pointerEvents: "auto" }}
+        sx={{ 
+          pointerEvents: "auto",
+          fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+          fontStyle: "italic",
+        }}
       >
         your community with specific data that helps you understand the impacts
         of operational decisions
@@ -862,7 +874,16 @@ export default function ContentPanels({
                   policies that meet their unique needs while staying in balance
                   with other water needs.
                 </Typography>
-                <Typography variant="body2" color="common.white">
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="common.white"
+                  sx={{ 
+                    pointerEvents: "auto",
+                    fontFamily: '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+                    fontStyle: "italic",
+                  }}
+                >
                   The COEQWAL project helps community members and
                   decision-makers understand the complex interrelationships in
                   California&apos;s water system. By providing accessible data
