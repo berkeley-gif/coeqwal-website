@@ -33,44 +33,83 @@ export default function ContentPanels({
 
   // Text component for the first panel
   const LearnTextContent = () => (
-    <Typography
-      variant="h1"
-      color="common.white"
-      sx={{
-        alignSelf: "flex-start",
-        fontWeight: 600
-      }}
-    >
-      Learn
-    </Typography>
+    <Box sx={{ pointerEvents: "auto" }}>
+      <Typography
+        component="span"
+        variant="h1"
+        color="common.white"
+        sx={{
+          alignSelf: "flex-start",
+          fontWeight: 600,
+          mr: 2, // Right margin to space between title and content
+        }}
+      >
+        Learn
+      </Typography>
+      <Typography
+        component="span"
+        variant="body2"
+        color="common.white"
+        sx={{ pointerEvents: "auto" }}
+      >
+        how California water flows and operational decisions balance water needs
+        across the state
+      </Typography>
+    </Box>
   )
 
   // Text component for the second panel
   const EmpowerTextContent = () => (
-    <Typography
-      variant="h1"
-      color="common.white"
-      sx={{
-        alignSelf: "flex-start",
-        fontWeight: 600
-      }}
-    >
-      Explore
-    </Typography>
+    <Box sx={{ pointerEvents: "auto" }}>
+      <Typography
+        component="span"
+        variant="h1"
+        color="common.white"
+        sx={{
+          alignSelf: "flex-start",
+          fontWeight: 600,
+          mr: 2, // Right margin to space between title and content
+        }}
+      >
+        Explore
+      </Typography>
+      <Typography
+        component="span"
+        variant="body2"
+        fontWeight={200}
+        color="common.white"
+        sx={{ pointerEvents: "auto" }}
+      >
+        COEQWAL&apos;s &quot;what if&quot; scenarios by theme
+      </Typography>
+    </Box>
   )
 
   // Text component for the third panel
   const ActTextContent = () => (
-    <Typography
-      variant="h1"
-      color="common.white"
-      sx={{
-        alignSelf: "flex-start",
-        fontWeight: 600
-      }}
-    >
-      Empower
-    </Typography>
+    <Box sx={{ pointerEvents: "auto" }}>
+      <Typography
+        component="span"
+        variant="h1"
+        color="common.white"
+        sx={{
+          alignSelf: "flex-start",
+          fontWeight: 600,
+          mr: 2, // Right margin to space between title and content
+        }}
+      >
+        Empower
+      </Typography>
+      <Typography
+        component="span"
+        variant="body2"
+        color="common.white"
+        sx={{ pointerEvents: "auto" }}
+      >
+        your community with specific data that helps you understand the impacts
+        of operational decisions
+      </Typography>
+    </Box>
   )
 
   // First panel content - Water literacy modules
@@ -209,7 +248,6 @@ export default function ContentPanels({
           addBorder={true}
           hideBottomArrow={true}
           title={<LearnTextContent />}
-          content={<Panel1Content />}
           detailContent={
             <>
               <Typography
@@ -446,7 +484,6 @@ export default function ContentPanels({
           detailBgColor={getDetailPanelBgColor("explore")}
           hideBottomArrow={true}
           title={<EmpowerTextContent />}
-          content={<Panel2Content />}
           detailContent={
             <>
               <Typography
@@ -808,7 +845,6 @@ export default function ContentPanels({
           detailBgColor={getDetailPanelBgColor("empower")}
           hideDetailArrow={true}
           title={<ActTextContent />}
-          content={<Panel3Content />}
           detailContent={
             <>
               <Typography
@@ -852,7 +888,7 @@ interface PanelWithDetailProps {
   bgColor: string
   detailBgColor: string
   title: React.ReactNode
-  content: React.ReactNode
+  content?: React.ReactNode // Make content optional
   detailContent: React.ReactNode
   hideDetailArrow?: boolean
   addBorder?: boolean
@@ -865,7 +901,7 @@ function PanelWithDetail({
   bgColor,
   detailBgColor,
   title,
-  content,
+  content, // Now optional
   detailContent,
   hideDetailArrow = false,
   addBorder = false,
@@ -957,31 +993,20 @@ function PanelWithDetail({
                 overflow: "visible",
               }}
             >
-              <Grid container spacing={6} alignItems="center">
-                <Grid
-                  size={{ xs: 12, md: 4 }}
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    justifyContent: "flex-start",
-                    pt: 0,
-                    pointerEvents: "auto",
-                  }}
-                >
-                  {title}
-                </Grid>
-                <Grid
-                  size={{ xs: 12, md: 8 }}
-                  sx={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    pointerEvents: "auto",
-                  }}
-                >
-                  {content}
-                </Grid>
-              </Grid>
+              {/* Single column layout since title and content are now combined */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  width: "100%",
+                  pointerEvents: "auto",
+                }}
+              >
+                {title}
+                {content && content}{" "}
+                {/* Render content if provided (for backward compatibility) */}
+              </Box>
 
               {/* Right centered play icon - only shown when not hidden */}
               {!hideDetailArrow && (
