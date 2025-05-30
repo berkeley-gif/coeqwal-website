@@ -69,6 +69,9 @@ const themeValues = {
     // TEST FONT - Tiempos Headline
     tiemposHeadline:
       '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+    // Acumin Pro from Adobe fonts
+    acuminPro:
+      '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions
@@ -504,14 +507,14 @@ const theme = createTheme({
       fontWeight: 500,
     },
     body1: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.acuminPro,
       fontSize: "1.3rem",
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: "2rem",
     },
     body2: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.acuminPro,
       fontSize: "1.375rem",
       fontWeight: 400,
       letterSpacing: "unset",
