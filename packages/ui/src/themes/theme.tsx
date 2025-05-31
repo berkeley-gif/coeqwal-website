@@ -69,9 +69,14 @@ const themeValues = {
     // TEST FONT - Tiempos Headline
     tiemposHeadline:
       '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
+    // TEST FONT - Tiempos Text
+    tiemposText:
+      '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
     // Acumin Pro from Adobe fonts
     acuminPro:
       '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    // Calluna from Adobe fonts
+    calluna: '"calluna", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
@@ -473,21 +478,21 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.tiemposHeadline,
+      fontFamily: themeValues.fontFamily.tiemposText,
       fontSize: "5rem",
-      fontWeight: 700,
+      fontWeight: 600,
       lineHeight: "4.6rem",
     },
     h2: {
-      fontFamily: themeValues.fontFamily.tiemposHeadline,
+      fontFamily: themeValues.fontFamily.tiemposText,
       fontSize: "3.75rem",
-      fontWeight: 700,
+      fontWeight: 500,
       lineHeight: "4.25rem",
     },
     h3: {
-      fontFamily: themeValues.fontFamily.tiemposHeadline,
+      fontFamily: themeValues.fontFamily.tiemposText,
       fontSize: "2.5rem",
-      fontWeight: 700,
+      fontWeight: 500,
       lineHeight: "2.8125rem",
     },
     h4: {
@@ -600,6 +605,39 @@ const theme = createTheme({
         @font-face {
           font-family: 'Tiempos Headline';
           src: url('/fonts/test-tiempos-headline-bold.woff2') format('woff2');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        /* Tiempos Text Font - All Weights */
+        @font-face {
+          font-family: 'Tiempos Text';
+          src: url('/fonts/test-tiempos-text-regular.woff2') format('woff2');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Text';
+          src: url('/fonts/test-tiempos-text-medium.woff2') format('woff2');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Text';
+          src: url('/fonts/test-tiempos-text-semibold.woff2') format('woff2');
+          font-weight: 600;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Tiempos Text';
+          src: url('/fonts/test-tiempos-text-bold.woff2') format('woff2');
           font-weight: 700;
           font-style: normal;
           font-display: swap;
