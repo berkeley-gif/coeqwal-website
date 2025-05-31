@@ -77,8 +77,8 @@
   },
   "questionBuilder": {
     "defaultTerms": {
-      "waterAvailability": "outcomes",
-      "outcomes": "outcomes",
+      "waterAvailability": "water outcomes",
+      "outcomes": "water outcomes",
       "decisions": "decisions",
       "decisions_sub": "decisions"
     },
