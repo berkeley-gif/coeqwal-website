@@ -513,14 +513,14 @@ const theme = createTheme({
     body1: {
       fontFamily: themeValues.fontFamily.acuminPro,
       fontSize: "1.3rem",
-      fontWeight: 400,
+      fontWeight: 500,
       letterSpacing: "unset",
       lineHeight: "2rem",
     },
     body2: {
       fontFamily: themeValues.fontFamily.acuminPro,
       fontSize: "1.3rem",
-      fontWeight: 400,
+      fontWeight: 500,
       letterSpacing: "unset",
       lineHeight: "2rem",
     },
