@@ -996,7 +996,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "4px solid #2e3a6c",
+                            borderBottom: "5px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1006,7 +1006,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "4px solid #1a2547",
+                              borderBottom: "5px solid #1a2547",
                             },
                           }}
                           onClick={() => {
@@ -1026,7 +1026,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "4px solid #2e3a6c",
+                            borderBottom: "5px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1036,7 +1036,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "4px solid #1a2547",
+                              borderBottom: "5px solid #1a2547",
                             },
                           }}
                           onClick={() => {
@@ -1056,7 +1056,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "4px solid #2e3a6c",
+                            borderBottom: "5px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1066,7 +1066,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "4px solid #1a2547",
+                              borderBottom: "5px solid #1a2547",
                             },
                           }}
                           onClick={() => {
@@ -1086,7 +1086,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "4px solid #2e3a6c",
+                            borderBottom: "5px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1096,7 +1096,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "4px solid #1a2547",
+                              borderBottom: "5px solid #1a2547",
                             },
                           }}
                           onClick={() => {
@@ -1154,7 +1154,7 @@ const IntroSection: React.FC = () => {
                             component="mark"
                             sx={{
                               backgroundColor: "transparent",
-                              borderBottom: "4px solid #2e3a6c",
+                              borderBottom: "5px solid #2e3a6c",
                               color: "#2e3a6c",
                               py: 0.1,
                               mx: 0.2,
@@ -1164,7 +1164,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: "4px solid #1a2547",
+                                borderBottom: "5px solid #1a2547",
                               },
                             }}
                             onClick={() => {
@@ -1184,7 +1184,7 @@ const IntroSection: React.FC = () => {
                             component="mark"
                             sx={{
                               backgroundColor: "transparent",
-                              borderBottom: "4px solid #2e3a6c",
+                              borderBottom: "5px solid #2e3a6c",
                               color: "#2e3a6c",
                               py: 0.1,
                               mx: 0.2,
@@ -1194,7 +1194,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: "4px solid #1a2547",
+                                borderBottom: "5px solid #1a2547",
                               },
                             }}
                             onClick={() => {
@@ -1222,7 +1222,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "4px solid #2e3a6c",
+                            borderBottom: "5px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1232,7 +1232,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "4px solid #1a2547",
+                              borderBottom: "5px solid #1a2547",
                             },
                           }}
                           onClick={() => {
@@ -1264,7 +1264,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "4px solid #2e3a6c",
+                            borderBottom: "5px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1274,7 +1274,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "4px solid #1a2547",
+                              borderBottom: "5px solid #1a2547",
                             },
                           }}
                           onClick={() => {
@@ -1348,7 +1348,7 @@ const IntroSection: React.FC = () => {
                         component="mark"
                         sx={{
                           backgroundColor: "transparent",
-                          borderBottom: "4px solid #2e3a6c",
+                          borderBottom: "5px solid #2e3a6c",
                           color: "#2e3a6c",
                           py: 0.1,
                           mx: 0.2,
@@ -1358,7 +1358,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: "4px solid #1a2547",
+                            borderBottom: "5px solid #1a2547",
                           },
                         }}
                         onClick={() => {
@@ -1430,7 +1430,7 @@ const IntroSection: React.FC = () => {
                         component="mark"
                         sx={{
                           backgroundColor: "transparent",
-                          borderBottom: "4px solid #2e3a6c",
+                          borderBottom: "5px solid #2e3a6c",
                           color: "#2e3a6c",
                           py: 0.1,
                           mx: 0.2,
@@ -1440,7 +1440,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: "4px solid #1a2547",
+                            borderBottom: "5px solid #1a2547",
                           },
                         }}
                         onClick={() => {
