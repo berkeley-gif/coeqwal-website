@@ -894,9 +894,8 @@ const IntroSection: React.FC = () => {
           minHeight: "100vh",
           paddingTop: "160px",
           paddingBottom: "160px",
-          // paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
-          paddingLeft: "20vw",
-          paddingRight: { xs: 3, md: 6 }, // Normal right padding
+          paddingLeft: { xs: 3, md: 6 },
+          paddingRight: { xs: 3, md: 6 },
           mt: 50,
         }}
       >
@@ -906,6 +905,8 @@ const IntroSection: React.FC = () => {
             position: "relative",
             width: "100%",
             height: "100%",
+            display: "flex",
+            justifyContent: "center",
           }}
         >
           {/* Text content with mix-blend-mode */}
@@ -914,7 +915,7 @@ const IntroSection: React.FC = () => {
             sx={{
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText,
-              mb: 48,
+              mb: 36,
             }}
           >
             <Stack spacing={4}>
@@ -1469,7 +1470,6 @@ const IntroSection: React.FC = () => {
                 sx={{
                   color: "#2e3a6c",
                   mt: 2,
-                  pl: 40,
                 }}
               >
                 &quot;What if...?&quot;
