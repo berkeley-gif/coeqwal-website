@@ -996,6 +996,7 @@ const IntroSection: React.FC = () => {
                           sx={{
                             backgroundColor: "transparent",
                             borderBottom: "4px solid #2e3a6c",
+                            color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: 0,
@@ -1025,6 +1026,7 @@ const IntroSection: React.FC = () => {
                           sx={{
                             backgroundColor: "transparent",
                             borderBottom: "4px solid #2e3a6c",
+                            color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1054,6 +1056,7 @@ const IntroSection: React.FC = () => {
                           sx={{
                             backgroundColor: "transparent",
                             borderBottom: "4px solid #2e3a6c",
+                            color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1083,6 +1086,7 @@ const IntroSection: React.FC = () => {
                           sx={{
                             backgroundColor: "transparent",
                             borderBottom: "4px solid #2e3a6c",
+                            color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1150,6 +1154,7 @@ const IntroSection: React.FC = () => {
                             sx={{
                               backgroundColor: "transparent",
                               borderBottom: "4px solid #2e3a6c",
+                              color: "#2e3a6c",
                               py: 0.1,
                               mx: 0.2,
                               lineHeight: "0em",
@@ -1179,6 +1184,7 @@ const IntroSection: React.FC = () => {
                             sx={{
                               backgroundColor: "transparent",
                               borderBottom: "4px solid #2e3a6c",
+                              color: "#2e3a6c",
                               py: 0.1,
                               mx: 0.2,
                               lineHeight: "0em",
@@ -1216,6 +1222,7 @@ const IntroSection: React.FC = () => {
                           sx={{
                             backgroundColor: "transparent",
                             borderBottom: "4px solid #2e3a6c",
+                            color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1257,6 +1264,7 @@ const IntroSection: React.FC = () => {
                           sx={{
                             backgroundColor: "transparent",
                             borderBottom: "4px solid #2e3a6c",
+                            color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1340,6 +1348,7 @@ const IntroSection: React.FC = () => {
                         sx={{
                           backgroundColor: "transparent",
                           borderBottom: "4px solid #2e3a6c",
+                          color: "#2e3a6c",
                           py: 0.1,
                           mx: 0.2,
                           lineHeight: "0em",
@@ -1421,6 +1430,7 @@ const IntroSection: React.FC = () => {
                         sx={{
                           backgroundColor: "transparent",
                           borderBottom: "4px solid #2e3a6c",
+                          color: "#2e3a6c",
                           py: 0.1,
                           mx: 0.2,
                           lineHeight: "0em",
