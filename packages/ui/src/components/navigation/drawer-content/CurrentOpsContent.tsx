@@ -213,10 +213,10 @@ export function CurrentOpsContent({
     ): React.ReactNode => {
       const firstIndex = text.indexOf(termToLink)
       if (firstIndex === -1) return text // No term found
-      
+
       const beforeTerm = text.substring(0, firstIndex)
       const afterTerm = text.substring(firstIndex + termToLink.length)
-      
+
       return (
         <>
           {beforeTerm}

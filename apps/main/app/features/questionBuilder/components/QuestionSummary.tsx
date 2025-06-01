@@ -1330,7 +1330,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         } else {
           return (
             <>
-              To achieve these{" "}
+              If we want to achieve certain{" "}
               <ColoredText color={theme.palette.cool.main}>
                 {t("questionBuilder.defaultTerms.outcomes")}
               </ColoredText>{" "}
@@ -1347,7 +1347,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           values={{
             outcome: (
               <>
-                achieve{" "}
+                achieve certain{" "}
                 <ColoredText color={theme.palette.cool.main}>
                   {t("questionBuilder.defaultTerms.outcomes")}
                 </ColoredText>

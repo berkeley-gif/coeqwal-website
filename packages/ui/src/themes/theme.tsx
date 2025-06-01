@@ -70,8 +70,7 @@ const themeValues = {
     tiemposHeadline:
       '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
     // TEST FONT - Tiempos Text
-    tiemposText:
-      '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
+    tiemposText: '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
     // Acumin Pro from Adobe fonts
     acuminPro:
       '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
