@@ -1081,7 +1081,7 @@ function PanelWithDetail({
                 sx={{
                   position: "absolute",
                   left: 30,
-                  top: 100,
+                  top: 108,
                   transform: "rotate(180deg)",
                   color: "white",
                   backgroundColor: "transparent",
