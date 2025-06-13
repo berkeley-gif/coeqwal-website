@@ -499,8 +499,8 @@ const theme = createTheme({
       lineHeight: 1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.sentinel,
-      fontSize: "1.25rem", // unchanged (20px)
+      fontFamily: themeValues.fontFamily.tiemposText,
+      fontSize: "1.25rem",
       fontWeight: 500,
       lineHeight: 1.4,
     },
