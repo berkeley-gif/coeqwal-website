@@ -76,6 +76,10 @@ const themeValues = {
       '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     // Calluna from Adobe fonts
     calluna: '"calluna", Georgia, "Times New Roman", Times, serif',
+    // New test fonts
+    crimsonText: '"Crimson Text", Georgia, "Times New Roman", Times, serif',
+    charter: '"charter-bt-pro", Georgia, "Times New Roman", Times, serif',
+    georgia: 'Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
@@ -469,7 +473,7 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: themeValues.fontFamily.primary,
+    fontFamily: themeValues.fontFamily.acuminPro,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -478,21 +482,21 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontFamily: themeValues.fontFamily.tiemposText,
-      fontSize: "5rem",
-      fontWeight: 600,
-      lineHeight: "4.6rem",
+      fontSize: "5.75rem",
+      fontWeight: 500,
+      lineHeight: 0.85,
     },
     h2: {
       fontFamily: themeValues.fontFamily.tiemposText,
       fontSize: "3.75rem",
       fontWeight: 500,
-      lineHeight: "4.25rem",
+      lineHeight: 1,
     },
     h3: {
       fontFamily: themeValues.fontFamily.tiemposText,
-      fontSize: "2.5rem",
+      fontSize: "2.2rem",
       fontWeight: 500,
-      lineHeight: "2.8125rem",
+      lineHeight: 1,
     },
     h4: {
       fontFamily: themeValues.fontFamily.sentinel,
@@ -511,16 +515,16 @@ const theme = createTheme({
       fontWeight: 500,
     },
     body1: {
-      fontFamily: themeValues.fontFamily.acuminPro,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.3rem",
-      fontWeight: 500,
+      fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: "2rem",
     },
     body2: {
-      fontFamily: themeValues.fontFamily.acuminPro,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.3rem",
-      fontWeight: 500,
+      fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: "2rem",
     },
@@ -567,6 +571,7 @@ const theme = createTheme({
       styleOverrides: `
         @import url("https://use.typekit.net/rxm7kha.css");
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap");
         
         /* Tiempos Headline Font - All Weights */
         @font-face {
@@ -637,6 +642,31 @@ const theme = createTheme({
         @font-face {
           font-family: 'Tiempos Text';
           src: url('/fonts/test-tiempos-text-bold.woff2') format('woff2');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        /* Crimson Text Font */
+        @font-face {
+          font-family: 'Crimson Text';
+          src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlp2gwHKFkZgtmSR3NB0oRJfbwhT.woff2') format('woff2');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Crimson Text';
+          src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlppgwHKFkZgtmSR3NB0oRJX1C1GA9c.woff2') format('woff2');
+          font-weight: 600;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'Crimson Text';
+          src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlppgwHKFkZgtmSR3NB0oRJX1C1GA9c.woff2') format('woff2');
           font-weight: 700;
           font-style: normal;
           font-display: swap;

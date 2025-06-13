@@ -815,7 +815,7 @@ const IntroSection: React.FC = () => {
               // mt: 3,
               maxWidth: "500px",
             }}
-            className="tk-neue-haas-grotesk-text"
+            className="tk-acumin-pro"
           >
             Explore California&apos;s water system and discover possibilities
             for the future of water in our state.
@@ -933,7 +933,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{ color: "#2e3a6c" }}
-                className="tk-neue-haas-grotesk-text"
+                className="tk-acumin-pro"
               >
                 {(() => {
                   const text = t("interstitial.part1")
@@ -996,7 +996,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "5px solid #2e3a6c",
+                            borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1026,7 +1026,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "5px solid #2e3a6c",
+                            borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1056,7 +1056,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "5px solid #2e3a6c",
+                            borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1086,7 +1086,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "5px solid #2e3a6c",
+                            borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1154,7 +1154,7 @@ const IntroSection: React.FC = () => {
                             component="mark"
                             sx={{
                               backgroundColor: "transparent",
-                              borderBottom: "5px solid #2e3a6c",
+                              borderBottom: "3px solid #2e3a6c",
                               color: "#2e3a6c",
                               py: 0.1,
                               mx: 0.2,
@@ -1184,7 +1184,7 @@ const IntroSection: React.FC = () => {
                             component="mark"
                             sx={{
                               backgroundColor: "transparent",
-                              borderBottom: "5px solid #2e3a6c",
+                              borderBottom: "3px solid #2e3a6c",
                               color: "#2e3a6c",
                               py: 0.1,
                               mx: 0.2,
@@ -1222,7 +1222,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "5px solid #2e3a6c",
+                            borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1264,7 +1264,7 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "5px solid #2e3a6c",
+                            borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
                             mx: 0.2,
@@ -1297,7 +1297,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{ color: "#2e3a6c" }}
-                className="tk-neue-haas-grotesk-text"
+                className="tk-acumin-pro"
               >
                 {(() => {
                   const text = t("interstitial.part2")
@@ -1348,7 +1348,7 @@ const IntroSection: React.FC = () => {
                         component="mark"
                         sx={{
                           backgroundColor: "transparent",
-                          borderBottom: "5px solid #2e3a6c",
+                          borderBottom: "3px solid #2e3a6c",
                           color: "#2e3a6c",
                           py: 0.1,
                           mx: 0.2,
@@ -1386,7 +1386,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{ color: "#2e3a6c" }}
-                className="tk-neue-haas-grotesk-text"
+                className="tk-acumin-pro"
               >
                 {(() => {
                   const text = t("interstitial.part3")
@@ -1430,7 +1430,7 @@ const IntroSection: React.FC = () => {
                         component="mark"
                         sx={{
                           backgroundColor: "transparent",
-                          borderBottom: "5px solid #2e3a6c",
+                          borderBottom: "3px solid #2e3a6c",
                           color: "#2e3a6c",
                           py: 0.1,
                           mx: 0.2,
@@ -1472,7 +1472,7 @@ const IntroSection: React.FC = () => {
                   mt: 2,
                 }}
               >
-                &quot;What if...?&quot;
+                what if...?
               </Typography>
             </Stack>
           </Box>

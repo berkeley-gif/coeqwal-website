@@ -23,6 +23,20 @@ export default function RootLayout({
           href="https://use.typekit.net"
           crossOrigin="anonymous"
         />
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body>
         <FontLoader kitId="rxm7kha" />
