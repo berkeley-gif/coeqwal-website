@@ -19,8 +19,6 @@ interface StoreConnectedHeaderProps {
 export function StoreConnectedHeader({
   activeSection,
   onSectionClick,
-  showSecondaryNav,
-  secondaryNavItems,
 }: StoreConnectedHeaderProps) {
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
@@ -39,12 +37,7 @@ export function StoreConnectedHeader({
 
   return (
     <HeaderHome
-      variant="rounded"
-      activeSection={activeSection}
-      onSectionClick={onSectionClick}
-      showSecondaryNav={true}
-      secondaryNavItems={secondaryNavItems}
-      drawerOpen={isOpen}
+      backgroundColor={"white"} 
       onGlossaryClick={handleGlossaryToggle}
       isGlossaryActive={activeTab === "glossary"}
     />

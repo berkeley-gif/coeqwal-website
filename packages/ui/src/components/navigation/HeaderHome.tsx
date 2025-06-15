@@ -6,22 +6,20 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-// import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
 
 interface HeaderProps {
-  // drawerOpen?: boolean
-  // drawerPosition?: "left" | "right"
-  // activeSection?: string
-  // onSectionClick?: (sectionId: string) => void
-  // showSecondaryNav?: boolean
-  // secondaryNavItems?: SecondaryNavItem[]
+  backgroundColor: "white"
   onGlossaryClick?: () => void
   isGlossaryActive?: boolean
-  // variant?: "default" | "rounded"
 }
+
+// Transition
+
+const MotionAppBar = motion.create(AppBar)
+const MotionStack = motion.create(Stack)
 
 // Translation
 
@@ -58,48 +56,16 @@ const translations: TranslationsMap = {
   },
 }
 
-// Transition
-
-const MotionAppBar = motion.create(AppBar)
-const MotionStack = motion.create(Stack)
-
-// Incoming: secondary nav option
-// export interface SecondaryNavItem {
-//   key: string
-//   label: string
-//   sectionId: string
-// }
-
-// Define which sections should have BLACK text (all others will have white)
-// TODO: generalize this
-// const blackSections = [
-//   "hero", // Home section
-//   "combined-panel", // Scenario search section
-// ]
-
-// This maps sections to their parent section in the UI
-// Used for arrow display when scrolling through combined sections
-// const sectionParentMap: Record<string, string | undefined> = {
-//   challenges: "managing-water", // Map challenges section to managing-water button
-//   calsim: "managing-water",
-// }
-
 export function HeaderHome({
-  // activeSection,
-  // onSectionClick,
-  // showSecondaryNav = false,
-  // secondaryNavItems = [], // Default to empty array, bc optional
   onGlossaryClick,
   isGlossaryActive = false,
-  // variant = "default",
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  // const isTablet = useMediaQuery(theme.breakpoints.down("md"))
   const { locale, isLoading } = useTranslation()
 
+  // Transition
   // todo: refine these states into fewer
-
   // Track scroll position for dynamic background
   const [isScrolled, setIsScrolled] = useState(false)
   const [shrunkWidth, setShrunkWidth] = useState<number | null>(null)
@@ -219,25 +185,13 @@ export function HeaderHome({
   const componentText =
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
-  // Only show secondary navigation if explicitly enabled and not on mobile
-  // const displaySecondaryNav =
-  //   showSecondaryNav && !isMobile && secondaryNavItems.length > 0
-
-  // Determine the text color for all navigation items based on active section
-  // Default to white, switch to black for specific sections
-  // const textColor = "white"
-
-  // Text color - white for rounded variant, dynamic for default
   const headerTextColor = "white"
-
-  // const backgroundColor = isScrolled
-  //   ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
-  //   : "transparent"
 
   // Conditional styling based on variant
   const variantStyles =
 {
-          backgroundColor: "#2e3a6c",
+          backgroundColor: theme.palette.neutral.main,
+          // buttonBackgroundColor: theme.palette.common.black,
           borderRadius: "16px",
           margin: "16px",
           border: "none",
@@ -255,6 +209,7 @@ export function HeaderHome({
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
+    backgroundColor: "theme.palette.black",
     lineHeight: 1.1, // Line height for text wrapping
     height: "40px", // Increased height for more prominence
     minHeight: "40px", // Ditto
@@ -461,7 +416,8 @@ export function HeaderHome({
             onClick={onGlossaryClick}
             sx={{
               ...buttonStyle,
-              backgroundColor: isGlossaryActive ? "#60aacb" : undefined,
+              // backgroundColor: isGlossaryActive ? "#60aacb" : undefined,
+
               color: isGlossaryActive ? "white" : undefined,
               "&:hover": {
                 backgroundColor: isGlossaryActive ? "#7cbad5" : undefined,

@@ -73,13 +73,13 @@ const themeValues = {
 
   // Palette colors
   palette: {
-    black: "rgb(42,82, 135)",
+    dark: "rgb(42,82, 135)",
     white: "#FFFFFF",
     background: "#ACDDE9",
     teal: "#007C92",
     neutral: {
       light: "#AAAAAA",
-      medium: "rgba(42,82, 135, 0.2)",
+      medium: "rgb(146,193,213)",
       dark: "#666666",
     },
     colors: {
@@ -389,7 +389,7 @@ const theme = createTheme({
   // Palette (some are fixed MUI theme properties, some are custom)
   palette: {
     common: {
-      black: themeValues.palette.black,
+      black: themeValues.palette.dark,
       white: themeValues.palette.white,
     },
     primary: {
@@ -398,7 +398,7 @@ const theme = createTheme({
       dark: "#274472",
     },
     secondary: {
-      main: themeValues.palette.black,
+      main: themeValues.palette.dark,
       light: themeValues.palette.neutral.light,
       dark: themeValues.palette.neutral.dark,
     },
