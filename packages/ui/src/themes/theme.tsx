@@ -57,29 +57,9 @@ const themeValues = {
   fontFamily: {
     primary:
       '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    inter:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    neueHaasDisplay:
-      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    sentinel: '"sentinel", Georgia, "Times New Roman", Times, serif',
-    sofiaPro:
-      '"sofia-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    // TEST FONT - Tiempos Headline
-    tiemposHeadline:
-      '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
-    // TEST FONT - Tiempos Text
     tiemposText: '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
-    // Acumin Pro from Adobe fonts
-    acuminPro:
-      '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    // Calluna from Adobe fonts
-    calluna: '"calluna", Georgia, "Times New Roman", Times, serif',
-    // New test fonts
-    crimsonText: '"Crimson Text", Georgia, "Times New Roman", Times, serif',
-    charter: '"charter-bt-pro", Georgia, "Times New Roman", Times, serif',
-    georgia: 'Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions
@@ -93,12 +73,13 @@ const themeValues = {
 
   // Palette colors
   palette: {
-    black: "#274472",
+    black: "rgb(42,82, 135)",
     white: "#FFFFFF",
-    teal: "#007C92", // Teal color for primary typeface
+    background: "#ACDDE9",
+    teal: "#007C92",
     neutral: {
       light: "#AAAAAA",
-      medium: "#888888",
+      medium: "rgba(42,82, 135, 0.2)",
       dark: "#666666",
     },
     colors: {
