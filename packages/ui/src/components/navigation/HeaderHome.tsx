@@ -11,6 +11,18 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
 
+interface HeaderProps {
+  // drawerOpen?: boolean
+  // drawerPosition?: "left" | "right"
+  // activeSection?: string
+  // onSectionClick?: (sectionId: string) => void
+  // showSecondaryNav?: boolean
+  // secondaryNavItems?: SecondaryNavItem[]
+  onGlossaryClick?: () => void
+  isGlossaryActive?: boolean
+  // variant?: "default" | "rounded"
+}
+
 // Translation
 
 type HeaderTranslations = {
@@ -25,30 +37,6 @@ type HeaderTranslations = {
 type TranslationsMap = {
   en: HeaderTranslations
   es: HeaderTranslations
-}
-
-// Transition
-
-const MotionAppBar = motion.create(AppBar)
-const MotionStack = motion.create(Stack)
-
-// Incoming: secondary nav option
-// export interface SecondaryNavItem {
-//   key: string
-//   label: string
-//   sectionId: string
-// }
-
-interface HeaderProps {
-  // drawerOpen?: boolean
-  // drawerPosition?: "left" | "right"
-  // activeSection?: string
-  // onSectionClick?: (sectionId: string) => void
-  // showSecondaryNav?: boolean
-  // secondaryNavItems?: SecondaryNavItem[]
-  onGlossaryClick?: () => void
-  isGlossaryActive?: boolean
-  variant?: "default" | "rounded"
 }
 
 const translations: TranslationsMap = {
@@ -69,6 +57,18 @@ const translations: TranslationsMap = {
     },
   },
 }
+
+// Transition
+
+const MotionAppBar = motion.create(AppBar)
+const MotionStack = motion.create(Stack)
+
+// Incoming: secondary nav option
+// export interface SecondaryNavItem {
+//   key: string
+//   label: string
+//   sectionId: string
+// }
 
 // Define which sections should have BLACK text (all others will have white)
 // TODO: generalize this
@@ -91,12 +91,14 @@ export function HeaderHome({
   // secondaryNavItems = [], // Default to empty array, bc optional
   onGlossaryClick,
   isGlossaryActive = false,
-  variant = "default",
+  // variant = "default",
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   // const isTablet = useMediaQuery(theme.breakpoints.down("md"))
   const { locale, isLoading } = useTranslation()
+
+  // todo: refine these states into fewer
 
   // Track scroll position for dynamic background
   const [isScrolled, setIsScrolled] = useState(false)
@@ -147,7 +149,7 @@ export function HeaderHome({
     sentinel.style.height = "10px" // Slightly larger height for better detection
     sentinel.style.width = "100%"
     sentinel.style.pointerEvents = "none"
-    sentinel.style.visibility = "hidden" // Make it invisible
+    sentinel.style.visibility = "hidden"
     sentinel.id = "scroll-sentinel"
 
     // Insert the sentinel into the intro section
@@ -223,10 +225,10 @@ export function HeaderHome({
 
   // Determine the text color for all navigation items based on active section
   // Default to white, switch to black for specific sections
-  const textColor = "white"
+  // const textColor = "white"
 
   // Text color - white for rounded variant, dynamic for default
-  const headerTextColor = variant === "rounded" ? "white" : textColor
+  const headerTextColor = "white"
 
   // const backgroundColor = isScrolled
   //   ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
@@ -245,18 +247,11 @@ export function HeaderHome({
 
   // Calculate width for smooth animation
   const getAnimatedWidth = () => {
-    if (variant === "rounded") {
       if (!headerIsExpanded && shrunkWidth) {
         return `${shrunkWidth}px`
       }
       return "calc(100% - 32px)"
-    } else {
-      if (!headerIsExpanded && shrunkWidth) {
-        return `${shrunkWidth}px`
-      }
-      return "100%"
-    }
-  }
+    } 
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
@@ -267,7 +262,7 @@ export function HeaderHome({
       '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     fontWeight: 600,
     border: "1px solid",
-    borderColor: variant === "rounded" ? "white" : "#274472", // Border matches header text color
+    borderColor: "white",
     color: headerTextColor, // Use header text color for buttons
   }
 
@@ -300,8 +295,7 @@ export function HeaderHome({
         zIndex: theme.zIndex.appBar,
         ...variantStyles,
         color: headerTextColor,
-        boxShadow:
-          variant === "rounded" ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none",
+        boxShadow: "none",
         transition: "background-color 0.3s ease",
       }}
       elevation={0}
