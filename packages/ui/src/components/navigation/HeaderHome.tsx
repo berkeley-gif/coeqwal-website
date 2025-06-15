@@ -6,13 +6,12 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+// import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
 
-const MotionAppBar = motion.create(AppBar)
-const MotionStack = motion.create(Stack)
+// Translation
 
 type HeaderTranslations = {
   title: string
@@ -28,20 +27,25 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
+// Transition
+
+const MotionAppBar = motion.create(AppBar)
+const MotionStack = motion.create(Stack)
+
 // Incoming: secondary nav option
-export interface SecondaryNavItem {
-  key: string
-  label: string
-  sectionId: string
-}
+// export interface SecondaryNavItem {
+//   key: string
+//   label: string
+//   sectionId: string
+// }
 
 interface HeaderProps {
-  drawerOpen?: boolean
-  drawerPosition?: "left" | "right"
-  activeSection?: string
-  onSectionClick?: (sectionId: string) => void
-  showSecondaryNav?: boolean
-  secondaryNavItems?: SecondaryNavItem[]
+  // drawerOpen?: boolean
+  // drawerPosition?: "left" | "right"
+  // activeSection?: string
+  // onSectionClick?: (sectionId: string) => void
+  // showSecondaryNav?: boolean
+  // secondaryNavItems?: SecondaryNavItem[]
   onGlossaryClick?: () => void
   isGlossaryActive?: boolean
   variant?: "default" | "rounded"
@@ -68,30 +72,30 @@ const translations: TranslationsMap = {
 
 // Define which sections should have BLACK text (all others will have white)
 // TODO: generalize this
-const blackSections = [
-  "hero", // Home section
-  "combined-panel", // Scenario search section
-]
+// const blackSections = [
+//   "hero", // Home section
+//   "combined-panel", // Scenario search section
+// ]
 
 // This maps sections to their parent section in the UI
 // Used for arrow display when scrolling through combined sections
-const sectionParentMap: Record<string, string | undefined> = {
-  challenges: "managing-water", // Map challenges section to managing-water button
-  calsim: "managing-water",
-}
+// const sectionParentMap: Record<string, string | undefined> = {
+//   challenges: "managing-water", // Map challenges section to managing-water button
+//   calsim: "managing-water",
+// }
 
 export function HeaderHome({
-  activeSection,
-  onSectionClick,
-  showSecondaryNav = false,
-  secondaryNavItems = [], // Default to empty array, bc optional
+  // activeSection,
+  // onSectionClick,
+  // showSecondaryNav = false,
+  // secondaryNavItems = [], // Default to empty array, bc optional
   onGlossaryClick,
   isGlossaryActive = false,
   variant = "default",
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"))
+  // const isTablet = useMediaQuery(theme.breakpoints.down("md"))
   const { locale, isLoading } = useTranslation()
 
   // Track scroll position for dynamic background
@@ -214,37 +218,28 @@ export function HeaderHome({
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
   // Only show secondary navigation if explicitly enabled and not on mobile
-  const displaySecondaryNav =
-    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
+  // const displaySecondaryNav =
+  //   showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   // Determine the text color for all navigation items based on active section
   // Default to white, switch to black for specific sections
-  const textColor = blackSections.includes(activeSection || "")
-    ? "black"
-    : "white"
+  const textColor = "white"
 
   // Text color - white for rounded variant, dynamic for default
   const headerTextColor = variant === "rounded" ? "white" : textColor
 
-  const backgroundColor = isScrolled
-    ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
-    : "transparent"
+  // const backgroundColor = isScrolled
+  //   ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
+  //   : "transparent"
 
   // Conditional styling based on variant
   const variantStyles =
-    variant === "rounded"
-      ? {
+{
           backgroundColor: "#2e3a6c",
           borderRadius: "16px",
           margin: "16px",
           border: "none",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          left: 0, // Keep anchored to left when shrinking
-        }
-      : {
-          backgroundColor: backgroundColor,
-          borderBottom: "1px solid white",
-          borderRadius: theme.borderRadius.none,
           left: 0, // Keep anchored to left when shrinking
         }
 
@@ -324,7 +319,7 @@ export function HeaderHome({
         </Box>
 
         {/* Optional secondary navigation menu */}
-        {displaySecondaryNav && (
+        {/* {displaySecondaryNav && (
           <Stack
             direction="row"
             spacing={1}
@@ -394,7 +389,7 @@ export function HeaderHome({
               )
             })}
           </Stack>
-        )}
+        )} */}
 
         {/* Main navigation buttons */}
         <Stack

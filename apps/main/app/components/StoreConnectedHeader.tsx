@@ -42,7 +42,7 @@ export function StoreConnectedHeader({
       variant="rounded"
       activeSection={activeSection}
       onSectionClick={onSectionClick}
-      showSecondaryNav={showSecondaryNav}
+      showSecondaryNav={true}
       secondaryNavItems={secondaryNavItems}
       drawerOpen={isOpen}
       onGlossaryClick={handleGlossaryToggle}
