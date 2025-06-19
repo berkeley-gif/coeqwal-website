@@ -1,8 +1,7 @@
 "use client"
 
 import { Box, Typography, Stack } from "@repo/ui/mui"
-import { motion } from "@repo/motion"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import Underline from "./helpers/Underline"
@@ -11,27 +10,20 @@ import { useMap } from "@repo/map"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { stateMapViewState } from "./helpers/mapViews"
 
+//TODO: fix the mapcontainer issue
+//TODO: check ui accessibility is fully supported
+
 function Opener() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.opener
   const { sectionRef, isSectionActive } = useActiveSection("opener", {
     amount: 0.5,
   })
-  const [startAnimation, setStartAnimation] = useState(false)
-  const [animationComplete, setAnimationComplete] = useState(false)
   const hasSeen = useRef(false)
   const breakpoint = useBreakpoint()
   const mapViewState = stateMapViewState[breakpoint]
   const { flyTo } = useMap()
-
-  const opacityFloatVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 2, type: "spring", delay: 1, once: true },
-    },
-  }
+  const isMapReady = useStoryStore((state) => state.isMapReady)
 
   //TODO: temporary fix because mapcontainer is loading the wrong view state by default
   const load = useCallback(() => {
@@ -48,6 +40,8 @@ function Opener() {
   }, [flyTo, mapViewState])
 
   useEffect(() => {
+    if (!isMapReady) return
+    // Only perform actions when the map is ready
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
@@ -62,7 +56,7 @@ function Opener() {
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [isSectionActive, load, isMapReady])
 
   return (
     <Box
@@ -87,27 +81,21 @@ function Opener() {
           <Typography variant="body1">{content?.p1}</Typography>
           <Typography variant="body1">{content?.p2}</Typography>
         </Box>
-        <motion.div
+        <Box
           className="paragraph"
+          component="article"
           aria-labelledby="opener-throughline"
-          variants={opacityFloatVariants}
-          initial="hidden"
-          animate="visible"
-          onAnimationComplete={() => {
-            setStartAnimation(true)
-            setAnimationComplete(true)
-          }}
         >
           <Typography id="throughline-heading" variant="body1">
             {content?.throughline.p11}
-            <Underline startAnimation={startAnimation}>
+            <Underline startAnimation={isMapReady}>
               {content?.throughline.p12}
             </Underline>
             {content?.throughline.p13}
           </Typography>
-        </motion.div>
+        </Box>
       </Stack>
-      <ScrollIndicator animationComplete={animationComplete} delay={1} />
+      <ScrollIndicator animationComplete={isMapReady} delay={1} />
     </Box>
   )
 }

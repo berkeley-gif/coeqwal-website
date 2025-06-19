@@ -5,12 +5,12 @@ export const riverLayerStyle = {
     "line-join": "round",
   },
   paint: {
-    "line-color": "#3d8ec9",
+    "line-color": "#50B1E7",
     "line-width": 3,
     "line-opacity": 0,
   },
   layer: {
-    "source-layer": "combinedRivers-avtojv",
+    "source-layer": "three_socal_rivers-behi1n",
   },
 }
 
@@ -34,11 +34,11 @@ export const canalLayerStyle = {
 export const deltaWaterLayerStyle = {
   type: "fill",
   paint: {
-    "fill-color": "#031a35",
+    "fill-color": "#50B1E7",
     "fill-opacity": 0,
   },
   layer: {
-    "source-layer": "delta_water-cxxi58",
+    "source-layer": "delta_freshwater_flow-2cexx5",
   },
 }
 
@@ -49,7 +49,7 @@ export const deltaWetlandLayerStyle = {
     "fill-opacity": 0,
   },
   layer: {
-    "source-layer": "delta_freshwater_wetland-5wdgh4",
+    "source-layer": "delta_freshwater_wetland-dle9vo",
   },
 }
 
@@ -73,12 +73,12 @@ export const snowpackPaintStyle = {
   "fill-color": [
     "case",
     ["==", ["get", "contour"], "3"],
-    "rgba(242, 240, 239, 0.8)",
+    "rgba(172, 221, 233, 0.8)",
     ["==", ["get", "contour"], "2"],
-    "rgba(242, 240, 239, 0.6)",
+    "rgba(172, 221, 233, 0.6)",
     ["==", ["get", "contour"], "1"],
-    "rgba(242, 240, 239, 0.4)",
-    "rgba(242, 240, 239, 0.2)",
+    "rgba(172, 221, 233, 0.4)",
+    "rgba(172, 221, 233, 0.2)",
   ] as unknown as string,
   "fill-opacity-transition": {
     duration: 1000,

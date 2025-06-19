@@ -40,3 +40,16 @@ export const Sentence: React.FC<MotionTextProps> = ({
     </MotionTypography>
   )
 }
+
+//For scroll-based animations
+export const StaticSentence: React.FC<MotionTextProps> = ({
+  children,
+  variant = "body1",
+  ...typographyProps
+}) => {
+  return (
+    <MotionTypography variant={variant} {...typographyProps}>
+      {children}
+    </MotionTypography>
+  )
+}

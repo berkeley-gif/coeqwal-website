@@ -1,5 +1,6 @@
 :root{
-    --primary-color: #031a35;
+    --primary-color: #1a4472;
+    --primary-color-transparent: #1a447280;
     --dark-color: #021224;
     --light-color: #1a3a5c;
     --text-color: #f2f0ef;
@@ -12,6 +13,7 @@ header {
 }
 
 /* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
+/* But this creates a second scroll bar*/
 html{
     position: relative;
 }
@@ -26,7 +28,6 @@ html{
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 0;
 }
 
 #story-container{
@@ -178,11 +179,11 @@ html{
 
 #section-container{
     position: fixed;
-    right: 10px;
+    right: 30px;
     padding: 10px;
     z-index: 2;
     font-size: 0.9rem;
-    background-color: rgba(3, 26, 53, 0.4);
+    background-color: var(--primary-color-transparent);
 }
 
 @media (min-width: 1536px) {

@@ -124,7 +124,7 @@ export const concentricTransform: Record<string, benefitConfig> = {
   },
 }
 
-interface visibleIconTransformConfig {
+export interface visibleIconTransformConfig {
   x: string
   aboveY: string
   belowY: string

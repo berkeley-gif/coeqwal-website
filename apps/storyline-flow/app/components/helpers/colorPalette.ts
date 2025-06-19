@@ -1,0 +1,46 @@
+const OceanWaterCandidates = {
+  1: "#031a35", // Original chosen color in alpha
+  2: "#093a6a", // Website old main blue
+  3: "#1a4472",
+}
+
+const RiverWaterCandidates = {
+  1: "#0f235e", // Original chosen color in mapbox studio
+  2: "#3d84c9", // Original chosen color in alpha
+  3: "#1a4472",
+  4: "#75cddb",
+}
+
+const FreshWaterCandidates = {
+  1: "#75cddb", // too green, but could be used for highlighted river
+  2: "#acdde9", // could be used for snow
+  3: "#50B1E7", // too bright
+  4: "#3d8ec9", // Original chosen color in alpha
+}
+
+const SnowWaterCandidates = {
+  1: "#f2f0ef", // Original chosen color in alpha,
+  2: "#acdde9",
+}
+
+export const OceanWaterColor = OceanWaterCandidates[3]
+export const FreshWaterColor = FreshWaterCandidates[4] // Precipitation
+export const RiverWaterColor = RiverWaterCandidates[4]
+export const SnowWaterColor = SnowWaterCandidates[2]
+export const OffWhiteColor = "#f2f0ef" // Used to replace pure white color
+
+export const FreshWaterColorScale = [
+  `${FreshWaterColor}30`,
+  `${FreshWaterColor}50`,
+  `${FreshWaterColor}70`,
+  `${FreshWaterColor}`,
+]
+
+export const SnowWaterColorScale = [
+  `${SnowWaterColor}50`,
+  `${SnowWaterColor}70`,
+  `${SnowWaterColor}`,
+]
+
+export const WebsiteMainBlue = "#2a5287"
+export const WebsiteMainBlueLight = "#acdde9"

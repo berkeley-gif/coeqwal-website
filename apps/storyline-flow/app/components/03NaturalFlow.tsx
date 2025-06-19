@@ -155,7 +155,7 @@ function WaterFlow() {
           custom={5.5}
           onAnimationComplete={() => setAnimationComplete(true)}
         >
-          <span style={{ fontWeight: "bold", color: "#3d8ec9" }}>
+          <span style={{ fontWeight: "bold", color: "#75cddb" }}>
             {content?.p42}
           </span>
         </Sentence>
@@ -347,7 +347,7 @@ function Wetland() {
   const init = useCallback(() => {
     addSource("delta-water", {
       type: "vector",
-      url: "mapbox://yskuo.6mkxbslj",
+      url: "mapbox://coeqwal.97rr9qs8",
     })
     addLayer(
       "delta-water-layer",
@@ -359,7 +359,7 @@ function Wetland() {
     )
     addSource("delta-wetland", {
       type: "vector",
-      url: "mapbox://yskuo.90ys4c1j",
+      url: "mapbox://coeqwal.29dkicxr",
     })
     addLayer(
       "delta-wetland-layer",
@@ -611,7 +611,7 @@ function Delta() {
         id="sticky-section"
         className="container-center"
         style={{
-          backgroundColor: "#031a35",
+          backgroundColor: "#1a4472",
           height: "50vh",
           overflowY: "hidden",
           overflowX: "hidden",
@@ -747,7 +747,7 @@ function Transition() {
         className="container-center"
         height="130vh"
         width="100%"
-        sx={{ backgroundColor: "#031a35" }}
+        sx={{ backgroundColor: "#1a4472" }}
       >
         <Box className="paragraph" sx={{ p: 1 }}>
           <Typography variant="h2">{content?.transition}</Typography>

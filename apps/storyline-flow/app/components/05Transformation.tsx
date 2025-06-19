@@ -40,7 +40,7 @@ function Transformation() {
   const init = useCallback(() => {
     addSource("delta-canal", {
       type: "vector",
-      url: "mapbox://yskuo.dagkiwwv",
+      url: "mapbox://coeqwal.104i13rb",
     })
 
     addLayer(
@@ -49,7 +49,7 @@ function Transformation() {
       canalLayerStyle.type,
       canalLayerStyle.paint,
       canalLayerStyle.layout,
-      { "source-layer": "delta_canal-40ddl9" },
+      { "source-layer": "delta_canal-25v6sz" },
     )
   }, [addLayer, addSource])
 

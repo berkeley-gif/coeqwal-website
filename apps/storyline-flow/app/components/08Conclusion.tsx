@@ -58,7 +58,7 @@ function Resolution() {
           sx={{
             position: "sticky",
             bottom: 0,
-            backgroundColor: "#031a35",
+            backgroundColor: "#1a4472",
             width: "100%",
           }}
         >

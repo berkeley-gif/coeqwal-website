@@ -7,12 +7,6 @@ import "./main.css"
 
 import Opener from "./components/01Opener"
 import SectionWaterSource from "./components/02WaterSource"
-import SectionWaterFlow from "./components/03NaturalFlow"
-import SectionHuman from "./components/04Human"
-import SectionTransformation from "./components/05Transformation"
-import SectionBenefits from "./components/06Benefits"
-import SectionImpact from "./components/07Impact"
-import Conclusion from "./components/08Conclusion"
 import {
   AnimatePresence,
   motion,
@@ -24,51 +18,67 @@ import useStoryStore from "./store"
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
 import { HeaderStory } from "@repo/motion/components"
 import SourceAnnouncer from "./components/helpers/SourceAnnouncer"
+import {
+  OffWhiteColor,
+  RiverWaterColor,
+} from "./components/helpers/colorPalette"
 
 const MotionBox = motion.create(Box)
 
 //TODO: potentially replace all the visibiltiy hook with scroll opacity hook
 //TODO: instead of width 100%, it might need to be max-content
-//NOTE: check if we really need to preload
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [isMapLoaded, setIsMapLoaded] = useState(true)
   const fetchStoryline = useStoryStore((state) => state.fetchStoryline)
-  //const loadedSections = useStoryStore((state) => state.loadedSections);
-  //const markSectionAsLoaded = useStoryStore((state) => state.markSectionAsLoaded);
+  const isMapReady = useStoryStore((state) => state.isMapReady)
+  const setMapReady = useStoryStore((state) => state.setMapReady)
 
   useEffect(() => {
     fetchStoryline()
   }, [fetchStoryline])
 
   return (
-    <Box id="meta-container">
-      <AnimatePresence>{!isMapLoaded && <Loader />}</AnimatePresence>
+    <Box sx={{ pointerEvents: "none" }}>
+      <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
       <HeaderStory />
       <SectionIndicator />
-      <div id="map-container">
+      <Box
+        sx={{
+          // This chunk has to be here, so that the scroll bar works as expected ?!?!?!
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: (theme) => theme.zIndex.map,
+        }}
+      >
         <MapContainer
           onLoad={() => {
-            setIsMapLoaded(true)
+            setMapReady(true)
+            console.log("🗺️ Map loaded")
           }}
         />
-      </div>
-      <div
+      </Box>
+      <Box
+        component="main"
         ref={containerRef}
-        id="story-container"
-        tabIndex={-1} // Ensure focusable for screen readers
-        style={{ height: "100%", width: "100%" }}
-        aria-label="Story about water transformation in California"
+        sx={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          margin: 0,
+          padding: 0,
+          overflowX: "hidden",
+          width: "100%",
+          "& > *": {
+            margin: 0,
+          },
+        }}
       >
         <Opener />
         <SectionWaterSource />
-        <SectionWaterFlow />
-        <SectionHuman />
-        <SectionTransformation />
-        <SectionBenefits />
-        <SectionImpact />
-        <Conclusion />
-      </div>
+      </Box>
       <SourceAnnouncer />
     </Box>
   )
@@ -121,7 +131,9 @@ function SectionIndicator() {
             <Box className="section-component" sx={{ gap: 1 }}>
               <Typography variant="body2">{division.name}</Typography>
               <Box className="section-circle">
-                <WaterDropIcon color={isActive ? "#3d8ec9" : "#f2f0ef"} />
+                <WaterDropIcon
+                  color={isActive ? RiverWaterColor : OffWhiteColor}
+                />
               </Box>
             </Box>
           </motion.div>

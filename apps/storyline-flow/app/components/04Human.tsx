@@ -213,7 +213,7 @@ function Drinking() {
   const init = useCallback(() => {
     addSource("canal", {
       type: "geojson",
-      data: "/rivers/drinking.geojson",
+      data: "/rivers/drinking.geojson", //TODO: check this source
     })
 
     addLayer(
@@ -226,7 +226,7 @@ function Drinking() {
 
     addSource("river-combined", {
       type: "vector",
-      url: "mapbox://yskuo.a2firbty",
+      url: "mapbox://coeqwal.0rzbpybk",
     })
 
     addLayer(

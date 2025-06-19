@@ -1,7 +1,7 @@
 import { motion } from "@repo/motion"
 import { labelVariants } from "@repo/motion/variants"
 
-export interface IconProps {
+export interface DeprecatedIconProps {
   color?: string
   transform?: string
   delay?: number
@@ -15,7 +15,7 @@ export function VisibleIcon({
   delay = 0.5,
   animation = "hidden",
   onAnimationComplete = () => {},
-}: IconProps) {
+}: DeprecatedIconProps) {
   return (
     <motion.path
       style={{
@@ -37,7 +37,7 @@ export function ArticleIcon({
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
-}: IconProps) {
+}: DeprecatedIconProps) {
   return (
     <motion.path
       style={{
@@ -58,7 +58,7 @@ export function PeopleIcon({
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
-}: IconProps) {
+}: DeprecatedIconProps) {
   return (
     <>
       <motion.path
@@ -92,7 +92,7 @@ export function AlmondIcon({
   transform = "translate(0, 0)",
   delay = 0.5,
   animation = "hidden",
-}: IconProps) {
+}: DeprecatedIconProps) {
   return (
     <>
       <motion.path
@@ -147,7 +147,7 @@ export function MoneyBagIcon({
   color = "#f2f0ef",
   delay = 0.5,
   animation = "hidden",
-}: IconProps) {
+}: DeprecatedIconProps) {
   return (
     <>
       <motion.path
@@ -169,7 +169,7 @@ export function FarmIcon({
   color = "#f2f0ef",
   delay = 0.5,
   animation = "hidden",
-}: IconProps) {
+}: DeprecatedIconProps) {
   return (
     <>
       <motion.path

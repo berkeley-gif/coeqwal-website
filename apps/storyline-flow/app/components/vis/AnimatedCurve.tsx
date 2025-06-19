@@ -212,7 +212,7 @@ export default function AnimatedCurve({
         // pathD = snowToFlatInterpolators[segmentIndex](segmentT)
         pathD = snowToFlatInterpolators[segmentIndex]!(segmentT)
         // Gradual color change from snow white to a medium color
-        fillColor = d3.interpolateRgb("#f2f0ef", "#a7bfd0")(tAll * 2)
+        fillColor = d3.interpolateRgb("#acdde9", "#a7bfd0")(tAll * 2)
       }
       // Second phase: flat to melt
       else {
@@ -229,7 +229,7 @@ export default function AnimatedCurve({
         // pathD = flatToMeltInterpolators[segmentIndex](segmentT)
         pathD = flatToMeltInterpolators[segmentIndex]!(segmentT)
         // Continue color change from medium to steelblue
-        fillColor = d3.interpolateRgb("#a7bfd0", "steelblue")((tAll - 0.5) * 2)
+        fillColor = d3.interpolateRgb("#a7bfd0", "#50B1E7")((tAll - 0.5) * 2)
       }
 
       // Redraw
@@ -261,28 +261,10 @@ export default function AnimatedCurve({
     >
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height}>
         {/* Snow line outline */}
-        {/* <motion.path
-          d={lineGen(snowData)!}
-          stroke="#f2f0ef"
-          strokeWidth={2}
-          fill="none"
-          variants={axisVariants}
-          initial="hidden"
-          animate={startMorph ? "visible" : "hidden"}
-          custom={2.5}
-        /> */}
-        {/* {startMorph && (
-        <path
-          d={lineGen(snowData)!}
-          stroke="#f2f0ef"
-          strokeWidth={2}
-          fill="none"
-        />
-      )} */}
 
         <motion.path
           d={lineGen(snowData)!}
-          stroke="#f2f0ef"
+          stroke="#acdde9"
           strokeWidth={2}
           fill="none"
           variants={opacityVariants}
@@ -295,7 +277,7 @@ export default function AnimatedCurve({
         <motion.text
           x={xScale(4)}
           y={yScale(0.8)}
-          fill="#f2f0ef"
+          style={{ fill: "#acdde9 !important" }}
           fontSize="1rem"
           textAnchor="middle"
           variants={opacityTextVariants}
@@ -309,7 +291,7 @@ export default function AnimatedCurve({
         <motion.text
           x={xScale(9.5)}
           y={yScale(0.8)}
-          style={{ fill: "#4682B4 !important" }}
+          style={{ fill: "#50B1E7 !important" }}
           fontSize="1rem"
           textAnchor="middle"
           variants={opacityTextVariants}

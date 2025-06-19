@@ -5,6 +5,7 @@ import { Storyline } from "./story"
 interface StoryState {
   storyline: Storyline | null
   activeSection: string
+  isMapReady: boolean
   loadedSections: Set<string>
   markerLayer: {
     points: MarkerType[]
@@ -16,6 +17,7 @@ interface StoryState {
   }
   breakpoint: string
   setActiveSection: (section: string) => void
+  setMapReady: (isReady: boolean) => void
   fetchStoryline: () => Promise<void>
   markSectionAsLoaded: (section: string) => void
   setMarkers: (markers: MarkerType[], style: string) => void
@@ -26,11 +28,13 @@ interface StoryState {
 const useStoryStore = create<StoryState>((set) => ({
   storyline: null,
   activeSection: "opener",
+  isMapReady: false,
   loadedSections: new Set(["opener", "precipitation"]), // Initialize with the first section loaded
   markerLayer: { points: [], style: "rough-circle" },
   textMarkerLayer: { points: [], style: "text" },
   breakpoint: "xl",
   setActiveSection: (section: string) => set({ activeSection: section }),
+  setMapReady: (isReady: boolean) => set({ isMapReady: isReady }),
   markSectionAsLoaded: (section: string) =>
     set((state) => {
       const updatedLoadedSections = new Set(state.loadedSections)
