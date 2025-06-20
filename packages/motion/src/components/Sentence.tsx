@@ -8,7 +8,7 @@ interface MotionTextProps
   extends Omit<TypographyProps & MotionProps, "children"> {
   children?: React.ReactNode
   animationDisabled?: boolean
-  options?: { amount: number }
+  options?: { amount?: number; once?: boolean; duration?: number }
 }
 
 const MotionTypography = motion.create(Typography)
@@ -19,7 +19,7 @@ export const Sentence: React.FC<MotionTextProps> = ({
   variants = springUpTextVariants,
   initial = "hidden",
   whileInView = "visible",
-  options = { amount: 0.5 },
+  options = { amount: 0.5, once: true },
   custom = 0,
   ...typographyProps
 }) => {
@@ -29,10 +29,7 @@ export const Sentence: React.FC<MotionTextProps> = ({
       variants={variants}
       initial={initial}
       whileInView={whileInView}
-      viewport={{
-        once: true,
-        ...options,
-      }}
+      viewport={options}
       custom={custom}
       {...typographyProps}
     >

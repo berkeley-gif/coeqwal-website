@@ -3,16 +3,16 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
 import rough from "roughjs"
-import { motion } from "@repo/motion"
+import { motion, MotionValue, useTransform } from "@repo/motion"
 import { FlubberInterpolate } from "@repo/motion"
 import { debounce } from "lodash"
 import { useBreakpoint } from "@repo/ui/hooks"
+import { usePlayAnimationOnce } from "@repo/motion/hooks"
 import {
-  axisVariants,
-  horizontalGrowRectVariants,
-  opacityTextVariants,
-  opacityVariants,
-} from "@repo/motion/variants"
+  FreshWaterColor,
+  OffWhiteColor,
+  SnowWaterColor,
+} from "../helpers/colorPalette"
 
 const startMonth = 9 // October
 const months = Array.from({ length: 12 }, (_, i) =>
@@ -33,11 +33,11 @@ const snowData = getSnowCurve()
 const meltData = getMeltCurve()
 
 export default function AnimatedCurve({
-  startAnimation = false,
   selectedMonth = 0,
+  scrollYProgress,
 }: {
-  startAnimation: boolean
   selectedMonth: number
+  scrollYProgress: MotionValue<number>
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
@@ -47,7 +47,6 @@ export default function AnimatedCurve({
     width: 0,
     height: responsiveHeight[breakpoint] || 350,
   })
-  const [startMorph, setStartMorph] = useState(false)
 
   useEffect(() => {
     const handleResize = debounce((entries: ResizeObserverEntry[]) => {
@@ -104,9 +103,6 @@ export default function AnimatedCurve({
     .y((d) => yScale(d.y))
     .curve(d3.curveBasis)
 
-  const snowArea = areaGen(snowData)!
-  const meltArea = areaGen(meltData)!
-
   useEffect(() => {
     if (!svgRef.current || !pathRef.current) return
 
@@ -123,84 +119,24 @@ export default function AnimatedCurve({
       roughness: 0.5,
     }
 
-    // Create a flat baseline at the bottom
-    //const flatData = snowData.map((d) => ({ x: d.x, y: 0 }))
-    //const flatArea = areaGen(flatData)!
+    const snowToFlatInterpolators = PathInterpolate(snowData, areaGen, true)
+    const flatToMeltInterpolators = PathInterpolate(meltData, areaGen, false)
 
-    // Create smooth steps for both transitions
-    const stepsToFlat = 8
-    const stepsToMelt = 8
+    const scrollRange: [number, number] = [0.65, 0.75]
+    function updateMorphBasedOnScroll(scrollProgress: number) {
+      const clampedScroll = Math.max(
+        scrollRange[0],
+        Math.min(scrollRange[1], scrollProgress),
+      )
+      const tAll =
+        (clampedScroll - scrollRange[0]) / (scrollRange[1] - scrollRange[0]) // Normalize to 0-1
 
-    // Create smooth transitions for snow to flat
-    const snowToFlatCurves = []
-    for (let i = 0; i <= stepsToFlat; i++) {
-      const t = i / stepsToFlat
+      let pathD
+      let fillColor
 
-      // Use cubic easing for smoother transition
-      const easedT = easeInOutCubic(t)
-
-      const intermediateData = snowData.map((d) => {
-        // Gradually reduce height to zero
-        return { x: d.x, y: d.y * (1 - easedT) }
-      })
-
-      snowToFlatCurves.push(areaGen(intermediateData))
-    }
-
-    // Create smooth transitions for flat to melt
-    const flatToMeltCurves = []
-    for (let i = 0; i <= stepsToMelt; i++) {
-      const t = i / stepsToMelt
-
-      // Use cubic easing for smoother transition
-      const easedT = easeInOutCubic(t)
-
-      const intermediateData = meltData.map((d) => {
-        // Gradually increase from zero to melt curve
-        return { x: d.x, y: d.y * easedT }
-      })
-
-      flatToMeltCurves.push(areaGen(intermediateData))
-    }
-
-    // Create interpolators for each segment
-    const snowToFlatInterpolators: ((t: number) => string)[] = []
-
-    for (let i = 0; i < snowToFlatCurves.length - 1; i++) {
-      const from = snowToFlatCurves[i]
-      const to = snowToFlatCurves[i + 1]
-
-      if (from && to) {
-        snowToFlatInterpolators.push(FlubberInterpolate(from, to))
-      }
-    }
-
-    const flatToMeltInterpolators: ((t: number) => string)[] = []
-    for (let i = 0; i < flatToMeltCurves.length - 1; i++) {
-      const from = flatToMeltCurves[i]
-      const to = flatToMeltCurves[i + 1]
-
-      if (from && to) {
-        flatToMeltInterpolators.push(FlubberInterpolate(from, to))
-      }
-    }
-
-    // Animation timing
-    const totalDuration = 3000 // ms
-    const phase1Duration = totalDuration * 0.5 // First half for snow to flat
-    const phase2Duration = totalDuration * 0.5 // Second half for flat to melt
-    const startTime = Date.now()
-
-    function tick() {
-      const elapsed = Date.now() - startTime
-      const tAll = Math.min(elapsed / totalDuration, 1)
-
-      let pathD: string
-      let fillColor: string
-
-      // First phase: snow to flat
+      // First phase: snow to flat (0 to 0.5)
       if (tAll < 0.5) {
-        const phaseProgress = elapsed / phase1Duration
+        const phaseProgress = tAll * 2 // Scale to 0-1 for this phase
         const segmentDuration = 1 / snowToFlatInterpolators.length
         const segmentIndex = Math.min(
           Math.floor(phaseProgress / segmentDuration),
@@ -209,15 +145,11 @@ export default function AnimatedCurve({
         const segmentT =
           (phaseProgress - segmentIndex * segmentDuration) / segmentDuration
 
-        // pathD = snowToFlatInterpolators[segmentIndex](segmentT)
-        pathD = snowToFlatInterpolators[segmentIndex]!(segmentT)
-        // Gradual color change from snow white to a medium color
-        fillColor = d3.interpolateRgb("#acdde9", "#a7bfd0")(tAll * 2)
-      }
-      // Second phase: flat to melt
-      else {
-        const phaseElapsed = elapsed - phase1Duration
-        const phaseProgress = phaseElapsed / phase2Duration
+        pathD = snowToFlatInterpolators[segmentIndex]?.(segmentT)
+        // Gradual color change from snow white to medium color
+        fillColor = d3.interpolateRgb(SnowWaterColor, "#a7bfd0")(phaseProgress)
+      } else {
+        const phaseProgress = (tAll - 0.5) * 2 // Scale to 0-1 for this phase
         const segmentDuration = 1 / flatToMeltInterpolators.length
         const segmentIndex = Math.min(
           Math.floor(phaseProgress / segmentDuration),
@@ -226,29 +158,39 @@ export default function AnimatedCurve({
         const segmentT =
           (phaseProgress - segmentIndex * segmentDuration) / segmentDuration
 
-        // pathD = flatToMeltInterpolators[segmentIndex](segmentT)
-        pathD = flatToMeltInterpolators[segmentIndex]!(segmentT)
+        pathD = flatToMeltInterpolators[segmentIndex]?.(segmentT)
         // Continue color change from medium to steelblue
-        fillColor = d3.interpolateRgb("#a7bfd0", "#50B1E7")((tAll - 0.5) * 2)
+        fillColor = d3.interpolateRgb("#a7bfd0", "#50B1E7")(phaseProgress)
       }
 
-      // Redraw
       g.innerHTML = ""
-      const shape = rc.path(pathD, {
+      const shape = rc.path(pathD ?? "", {
         ...style,
         fill: fillColor,
         stroke: fillColor,
       })
       g.appendChild(shape)
-
-      if (tAll < 1) requestAnimationFrame(tick)
     }
 
-    // Kick off when triggered
-    if (startMorph) {
-      requestAnimationFrame(tick)
+    // Initial render at current scroll position
+    updateMorphBasedOnScroll(scrollYProgress.get())
+
+    // Subscribe to scroll progress changes
+    const unsubscribe = scrollYProgress.on("change", updateMorphBasedOnScroll)
+
+    // Cleanup
+    return () => {
+      unsubscribe()
     }
-  }, [dimensions, areaGen, snowArea, meltArea, startMorph])
+  }, [dimensions, areaGen, scrollYProgress])
+
+  const snowPathControl = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.55, 0.6],
+    [0, 1],
+  )
+
+  const freshWaterControl = useTransform(scrollYProgress, [0.7, 0.75], [0, 1])
 
   return (
     <div
@@ -260,44 +202,32 @@ export default function AnimatedCurve({
       }}
     >
       <svg ref={svgRef} width={dimensions.width} height={dimensions.height}>
-        {/* Snow line outline */}
-
         <motion.path
           d={lineGen(snowData)!}
-          stroke="#acdde9"
+          stroke={SnowWaterColor}
           strokeWidth={2}
           fill="none"
-          variants={opacityVariants}
-          initial="hidden"
-          animate={startAnimation ? "visible" : "hidden"}
-          custom={8.5}
+          style={{ opacity: snowPathControl }}
         />
 
-        {/* Labels */}
         <motion.text
-          x={xScale(4)}
+          x={xScale(5)}
           y={yScale(0.8)}
-          style={{ fill: "#acdde9 !important" }}
+          fill={SnowWaterColor}
+          style={{ opacity: snowPathControl }}
           fontSize="1rem"
           textAnchor="middle"
-          variants={opacityTextVariants}
-          initial="hidden"
-          animate={startMorph ? "visible" : "hidden"}
-          custom={3}
         >
-          Snowpack
+          Snow-forming precipitation
         </motion.text>
 
         <motion.text
           x={xScale(9.5)}
           y={yScale(0.8)}
-          style={{ fill: "#50B1E7 !important" }}
+          fill={FreshWaterColor}
+          style={{ opacity: freshWaterControl }}
           fontSize="1rem"
           textAnchor="middle"
-          variants={opacityTextVariants}
-          initial="hidden"
-          animate={startMorph ? "visible" : "hidden"}
-          custom={2}
         >
           Snowmelt
         </motion.text>
@@ -306,25 +236,18 @@ export default function AnimatedCurve({
         <XAxis
           size={dimensions}
           xScale={xScale}
-          startAnimation={startAnimation}
+          scrollYProgress={scrollYProgress}
         />
         <YAxis
           size={dimensions}
           yScale={yScale}
-          startAnimation={startAnimation}
+          scrollYProgress={scrollYProgress}
         />
 
-        <motion.g
-          ref={pathRef}
-          variants={opacityVariants}
-          initial="hidden"
-          animate={startAnimation ? "visible" : "hidden"}
-          custom={7.5}
-          onAnimationComplete={() => setStartMorph(true)}
-        />
+        <motion.g ref={pathRef} style={{ opacity: snowPathControl }} />
 
         <Annotation
-          startAnimation={startAnimation}
+          scrollYProgress={scrollYProgress}
           dimensions={dimensions}
           xScale={xScale}
           yScale={yScale}
@@ -342,7 +265,7 @@ function easeInOutCubic(t: number): number {
 }
 
 function Annotation({
-  startAnimation,
+  scrollYProgress,
   dimensions,
   xScale,
   yScale,
@@ -353,7 +276,7 @@ function Annotation({
   xScale: d3.ScaleLinear<number, number>
   yScale: d3.ScaleLinear<number, number>
   monthIdx: number
-  startAnimation: boolean
+  scrollYProgress: MotionValue<number>
   snowData: { x: number; y: number }[]
 }) {
   const width = xScale(5) - xScale(0) < 0 ? 0 : xScale(5) - xScale(0)
@@ -373,33 +296,33 @@ function Annotation({
     ? [parseFloat(numbers[0]), parseFloat(numbers[1])]
     : [0, 0]
 
+  const rectGrowth = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.5, 0.65],
+    [0, width],
+  )
+  const textOpacity = usePlayAnimationOnce(scrollYProgress, [0.5, 0.6], [0, 1])
+
   return (
     <g id="annotation" transform={`translate(${0}, ${0})`}>
       <path ref={pathRef} d={lineGen(snowData)!} fill="none" stroke="none" />
       <motion.rect
-        variants={horizontalGrowRectVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={{ width, delay: 4 }}
         x={xScale(0)}
         y={0}
-        width={width}
+        width={rectGrowth}
         height={dimensions.height - margin.bottom}
-        fill="#f2f0ef"
+        fill={OffWhiteColor}
         opacity={0.1}
       />
       <motion.text
         x={xScale(2.5)}
         y={0}
         dy="1rem"
-        fill="#f2f0ef"
+        fill={OffWhiteColor}
         fontSize="1rem"
         fontWeight="bold"
         textAnchor="middle"
-        variants={opacityTextVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={4.5}
+        style={{ opacity: textOpacity }}
       >
         Wet season
       </motion.text>
@@ -409,38 +332,48 @@ function Annotation({
         x2={xScale(monthIdx)}
         y1={0}
         y2={dimensions.height - margin.bottom}
-        stroke="#f2f0ef"
+        stroke={OffWhiteColor}
         strokeWidth={1}
         strokeDasharray="1 1"
-        variants={opacityVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={7.5}
+        style={{ opacity: textOpacity }}
       />
       <motion.circle
         cx={position[0]}
         cy={position[1]}
         r={3}
-        fill="#f2f0ef"
-        variants={opacityVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={7.5}
+        fill={OffWhiteColor}
+        style={{ opacity: textOpacity }}
       />
     </g>
   )
 }
 
 function YAxis({
-  startAnimation,
+  scrollYProgress,
   size,
   yScale,
 }: {
   size: { width: number; height: number }
   yScale: d3.ScaleLinear<number, number>
-  startAnimation: boolean
+  scrollYProgress: MotionValue<number>
 }) {
   const labels = ["Low", "High"]
+  const axisPathLength = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.55, 0.6],
+    [0, 1],
+  )
+  const lowLabelControl = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.5, 0.6],
+    [0, 1],
+  )
+  const highLabelControl = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.55, 0.65],
+    [0, 1],
+  )
+
   return (
     <motion.g
       transform={`translate(${margin.left},0)`}
@@ -451,11 +384,8 @@ function YAxis({
       {[0, 1].map((tick, i) => (
         <g key={i} transform={`translate(0,${yScale(tick)})`}>
           <motion.text
-            variants={opacityTextVariants}
-            initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={1.8 + i * 1.5}
-            fill="#f2f0ef"
+            style={{ opacity: i === 0 ? lowLabelControl : highLabelControl }}
+            fill={OffWhiteColor}
             dx="-1em"
             dy="0.25em"
             fontSize="0.9rem"
@@ -465,36 +395,27 @@ function YAxis({
           </motion.text>
           <motion.line
             x2={-6}
-            stroke="#f2f0ef"
-            variants={axisVariants}
-            initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={1.8 + i * 1.5}
+            stroke={OffWhiteColor}
+            pathLength={i === 0 ? lowLabelControl : highLabelControl}
           />
         </g>
       ))}
       <motion.line
-        variants={axisVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={1.8}
+        pathLength={axisPathLength}
         y1={size.height - margin.bottom}
         y2={margin.top}
-        stroke="#f2f0ef"
+        stroke={OffWhiteColor}
         strokeWidth={1}
         className="domain"
       />
       <motion.text
         x={0}
         y={size.height / 2}
-        fill="#f2f0ef"
+        fill={OffWhiteColor}
         dx={"-3rem"}
         fontSize="1rem"
         textAnchor="end"
-        variants={opacityTextVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={3}
+        style={{ opacity: axisPathLength }}
       >
         Volume
       </motion.text>
@@ -503,53 +424,88 @@ function YAxis({
 }
 
 function XAxis({
-  startAnimation,
+  scrollYProgress,
   size,
   xScale,
 }: {
   size: { width: number; height: number }
   xScale: d3.ScaleLinear<number, number>
-  startAnimation: boolean
+  scrollYProgress: MotionValue<number>
 }) {
+  const axisPathLength = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.5, 0.6],
+    [0, 1],
+  )
+
   return (
     <g transform={`translate(0,${size.height - margin.bottom})`}>
       {months.map((month, i) => (
         <g key={i} transform={`translate(${xScale(i)}, 0)`}>
-          <motion.text
-            fill="#f2f0ef"
-            dy="1.5em"
-            textAnchor="middle"
-            fontSize="1rem"
-            variants={opacityTextVariants}
-            initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={0.3 + i * 0.1}
-          >
-            {month}
-          </motion.text>
-          <motion.line
-            y2="5"
-            stroke="#f2f0ef"
-            variants={axisVariants}
-            initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={0.3 + i * 0.1}
-          />
+          <XTick scrollYProgress={scrollYProgress} idx={i} month={month} />
         </g>
       ))}
       <motion.line
         x1={margin.left}
         x2={size.width}
-        stroke="#f2f0ef"
+        stroke={OffWhiteColor}
         strokeWidth={1}
-        variants={axisVariants}
-        initial="hidden"
-        animate={startAnimation ? "visible" : "hidden"}
-        custom={0.3}
+        pathLength={axisPathLength}
         className="domain"
       />
     </g>
   )
+}
+
+function XTick({
+  scrollYProgress,
+  idx,
+  month,
+}: {
+  scrollYProgress: MotionValue<number>
+  idx: number
+  month: string
+}) {
+  const range: [number, number] = [0.45 + 0.01 * idx, 0.53 + 0.01 * idx]
+  const tickControl = usePlayAnimationOnce(scrollYProgress, range, [0, 1])
+
+  return (
+    <>
+      <motion.text
+        fill={OffWhiteColor}
+        dy="1.5em"
+        textAnchor="middle"
+        fontSize="1rem"
+        style={{ opacity: tickControl }}
+      >
+        {month}
+      </motion.text>
+      <motion.line y2="5" stroke={OffWhiteColor} pathLength={tickControl} />
+    </>
+  )
+}
+
+function PathInterpolate(
+  data: { x: number; y: number }[],
+  areaGenerate: d3.Area<{ x: number; y: number }>,
+  toFlat = true,
+  steps = 8,
+) {
+  const dataToCurve: string[] = Array.from({ length: steps + 1 }, (_, i) => {
+    const t = i / steps
+    const easedT = easeInOutCubic(t)
+
+    const intermediateData = data.map((d) => ({
+      x: d.x,
+      y: toFlat ? d.y * (1 - easedT) : d.y * easedT,
+    }))
+
+    return areaGenerate(intermediateData) as string
+  })
+  const interpolator = dataToCurve.slice(0, -1).map((from, i) => {
+    return FlubberInterpolate(from, dataToCurve[i + 1]!)
+  })
+  return interpolator
 }
 
 function getSnowCurve(shape = 5, scale = 0.6) {

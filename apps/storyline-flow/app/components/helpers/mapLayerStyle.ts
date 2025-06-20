@@ -1,3 +1,5 @@
+import { FreshWaterColor } from "./colorPalette"
+
 export const riverLayerStyle = {
   type: "line",
   layout: {
@@ -5,7 +7,7 @@ export const riverLayerStyle = {
     "line-join": "round",
   },
   paint: {
-    "line-color": "#50B1E7",
+    "line-color": FreshWaterColor,
     "line-width": 3,
     "line-opacity": 0,
   },
@@ -34,7 +36,7 @@ export const canalLayerStyle = {
 export const deltaWaterLayerStyle = {
   type: "fill",
   paint: {
-    "fill-color": "#50B1E7",
+    "fill-color": FreshWaterColor,
     "fill-opacity": 0,
   },
   layer: {
@@ -94,6 +96,6 @@ export const boundaryPaintStyle = {
   paint: {
     "line-color": "#f2f0ef",
     "line-width": 6,
-    "line-opacity": 0.7,
+    "line-opacity": 1,
   },
 }

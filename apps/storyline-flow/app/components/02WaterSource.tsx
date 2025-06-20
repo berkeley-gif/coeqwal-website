@@ -21,7 +21,6 @@ import { useBreakpoint } from "@repo/ui/hooks"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import { springUpTextVariants } from "@repo/motion/variants"
 import Legend from "./helpers/Legend"
-import ScrollIndicator from "./helpers/ScrollIndicator"
 import {
   FreshWaterColorScale,
   SnowWaterColorScale,
@@ -50,6 +49,7 @@ function SectionWaterSource() {
   )
 }
 
+//TODO: possibly make this part scroll-based too
 function Precipitation() {
   const { addLayer, addSource, setPaintProperty } = useMap()
   const storyline = useStoryStore((state) => state.storyline)
@@ -142,7 +142,7 @@ function Precipitation() {
           <Typography variant="body1">{content?.p3}</Typography>
           <Typography variant="body1">{content?.p4}</Typography>
           <Typography variant="caption" sx={{ opacity: 0.7 }}>
-            Data source : 30-year (1991-2020) normals from{" "}
+            Map data source : 30-year (1991-2020) normals from{" "}
             <a
               href="https://prism.oregonstate.edu/normals/"
               target="_blank"
@@ -178,14 +178,6 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
     const points = markers[year] || []
     setMarkers(points, "rough-circle")
   }
-
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      console.log(latest)
-    })
-
-    return () => unsubscribe()
-  }, [scrollYProgress])
 
   useEffect(() => {
     if (isSectionActive) {
@@ -309,11 +301,12 @@ const mountainMarker = {
 
 function Snowpack() {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
+
   const content = storyline?.snowpack
   const { sectionRef, isSectionActive } = useActiveSection("snowpack", {
     amount: 0.5,
   })
-  const [startAnimation, setStartAnimation] = useState(false)
   const [monthIdx, setMonthIdx] = useState(0)
   const hasSeen = useRef(false)
   const { flyTo, setPaintProperty, addSource, setFilter, addLayer } = useMap()
@@ -323,6 +316,11 @@ function Snowpack() {
   const colors = SnowWaterColorScale
   const labels = ["1", "6.5", "13", "20 ft."]
   const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const init = useCallback(() => {
     addSource("snowpack", {
@@ -372,6 +370,7 @@ function Snowpack() {
   }, [setMarkers, setPaintProperty])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
@@ -388,56 +387,93 @@ function Snowpack() {
         return
       }
     }
-  }, [init, isSectionActive, load, unload])
+  }, [init, isSectionActive, load, unload, isMapReady])
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.05, 0.35],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.15, 0.45],
+    [0, 1],
+  )
+  const titleOpacity = useTransform(scrollYProgress, [0.25, 0.55], [0, 1])
 
   return (
     <Box
       ref={sectionRef}
       className="container"
-      height="150vh"
-      sx={{ justifyContent: "center" }}
+      height="120vh"
+      sx={{ justifyContent: "space-around" }}
       tabIndex={-1}
       role="region"
     >
-      <Box className="paragraph">
-        <Sentence variant="h3" gutterBottom custom={0}>
-          {content?.title1}
-          <Legend colors={colors} labels={labels}>
-            {content?.title2}
-          </Legend>{" "}
-          {content?.title3}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence custom={2}>{content?.p2}</Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence
-          custom={3}
-          onAnimationComplete={() => setStartAnimation(true)}
+      <Stack
+        spacing={3}
+        direction="column"
+        component="section"
+        role="region"
+        sx={{ width: "100%" }}
+      >
+        <Box className="paragraph">
+          <Typography variant="h3" gutterBottom>
+            {content?.title1}
+            <Legend colors={colors} labels={labels}>
+              {content?.title2}
+            </Legend>{" "}
+            {content?.title3}
+          </Typography>
+        </Box>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: firstParagraphOpacity }}
         >
-          {content?.p3}
-        </Sentence>
-      </Box>
+          <Typography variant="body1">{content?.p1}</Typography>
+          <Typography variant="body1">{content?.p2}</Typography>
+        </motion.div>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: secondParagraphOpacity }}
+        >
+          <Typography variant="body1"> {content?.p3}</Typography>
+          <Typography variant="body1">
+            Slide to see the snowpack change over time!
+          </Typography>
+        </motion.div>
+      </Stack>
       <Box
         className="paragraph"
         style={{ height: "fit-content", width: "100%" }}
       >
-        <Sentence custom={3} variant="h6">
+        <MotionTypography variant="h4" style={{ opacity: titleOpacity }}>
           {"From Snow to Snowmelt \u2014 an Illustration"}
-        </Sentence>
+        </MotionTypography>
+        <MotionTypography variant="caption">
+          Map data source: Snowpack spatial accumulation from{" "}
+          <a
+            href="https://www.nohrsc.noaa.gov/snowfall/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            NOAA
+          </a>
+          .
+        </MotionTypography>
         <AnimatedCurve
-          startAnimation={startAnimation}
           selectedMonth={monthIdx}
+          scrollYProgress={scrollYProgress}
         />
         {/* <PathMorphing />*/}
         <div id="month-slider">
           <MotionSlider
             variants={springUpTextVariants}
             initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={7}
+            whileInView="visible"
+            viewport={{ amount: 0.1, once: true }}
+            custom={0}
             min={0}
             max={11}
             value={monthIdx}
@@ -477,8 +513,9 @@ function Snowpack() {
             gutterBottom
             variants={springUpTextVariants}
             initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={8}
+            whileInView="visible"
+            viewport={{ amount: 0.1, once: true }}
+            custom={0}
             onAnimationComplete={() => {
               setAnimationComplete(true)
               setPaintProperty("snowpack-layer", "fill-opacity", 1)
@@ -488,7 +525,6 @@ function Snowpack() {
           </MotionTypography>
         </div>
       </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }

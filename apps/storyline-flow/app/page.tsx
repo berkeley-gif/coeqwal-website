@@ -22,11 +22,14 @@ import {
   OffWhiteColor,
   RiverWaterColor,
 } from "./components/helpers/colorPalette"
+import SectionDelta from "./components/03NaturalFlow"
+import SectionHuman from "./components/04Human"
 
 const MotionBox = motion.create(Box)
 
 //TODO: potentially replace all the visibiltiy hook with scroll opacity hook
 //TODO: instead of width 100%, it might need to be max-content
+//IMPORTANT!: "overflowX: hidden" breaks the sticky behavior of delta section
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
   const fetchStoryline = useStoryStore((state) => state.fetchStoryline)
@@ -69,7 +72,6 @@ export default function StoryContainer() {
           flexDirection: "column",
           margin: 0,
           padding: 0,
-          overflowX: "hidden",
           width: "100%",
           "& > *": {
             margin: 0,
@@ -78,6 +80,8 @@ export default function StoryContainer() {
       >
         <Opener />
         <SectionWaterSource />
+        <SectionDelta />
+        <SectionHuman />
       </Box>
       <SourceAnnouncer />
     </Box>
@@ -145,7 +149,7 @@ function SectionIndicator() {
 
 function Loader() {
   return (
-    <motion.div id="loader" exit={{ opacity: 0 }}>
+    <motion.div id="loader" exit={{ opacity: 0 }} className="filled-container">
       <CircularProgress color="inherit" />
     </motion.div>
   )

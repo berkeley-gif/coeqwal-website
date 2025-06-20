@@ -1,12 +1,11 @@
 "use client"
 
 import { useMap } from "@repo/map"
-import { Box, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Stack, Typography } from "@repo/ui/mui"
 import { canalLayerStyle, riverLayerStyle } from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Sentence } from "@repo/motion/components"
 import { MarkerType } from "./helpers/mapMarkers"
 import { useFetchData } from "../hooks/useFetchData"
 import {
@@ -20,7 +19,9 @@ import {
   reclamationMapViewState,
 } from "./helpers/mapViews"
 import { useBreakpoint } from "@repo/ui/hooks"
-import ScrollIndicator from "./helpers/ScrollIndicator"
+import { motion, useScroll, useTransform } from "@repo/motion"
+
+const MotionTypography = motion.create(Typography)
 
 function SectionHuman() {
   const [mineMarkers, setMineMarkers] = useState<Record<string, MarkerType[]>>(
@@ -45,6 +46,7 @@ function SectionHuman() {
 
 function Header({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.economy
   const { sectionRef, isSectionActive } = useActiveSection("goldrush", {
     amount: 0.5,
@@ -55,7 +57,11 @@ function Header({ markers }: { markers: MarkerType[] }) {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = goldRushMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     setTimeout(() => {
@@ -80,6 +86,7 @@ function Header({ markers }: { markers: MarkerType[] }) {
   }, [setMarkers, setTextMarkers])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
@@ -95,7 +102,19 @@ function Header({ markers }: { markers: MarkerType[] }) {
         return
       }
     }
-  }, [isSectionActive, load, unload])
+  }, [isSectionActive, load, unload, isMapReady])
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.5],
+    [0, 1],
+  )
+
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
 
   return (
     <Box
@@ -104,27 +123,29 @@ function Header({ markers }: { markers: MarkerType[] }) {
       height="100vh"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence variant="h3" gutterBottom custom={0}>
-          {content?.title}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence
-          custom={1}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p2}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstParagraphOpacity }}
+      >
+        <Typography variant="h3" gutterBottom>
+          {" "}
+          {content?.title}{" "}
+        </Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondParagraphOpacity }}
+      >
+        <Typography variant="body1">{content?.p1}</Typography>
+        <Typography variant="body1"> {content?.p2}</Typography>
+      </motion.div>
     </Box>
   )
 }
 
 function Irrigation({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.economy.irrigation
   const { sectionRef, isSectionActive } = useActiveSection("irrigation", {
     amount: 0.5,
@@ -135,7 +156,11 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
   const { flyTo, setPaintProperty } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = reclamationMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     flyTo({
@@ -164,6 +189,7 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
   }, [setMarkers, setTextMarkers])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
@@ -179,26 +205,45 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
         return
       }
     }
-  }, [isSectionActive, load, unload])
+  }, [isSectionActive, load, unload, isMapReady])
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.5],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
 
   return (
-    <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
-      <Box ref={sectionRef} className="paragraph">
-        <Sentence custom={0}>{content?.p1}</Sentence>
-        <Sentence
-          custom={1}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p2}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+    <Box
+      ref={sectionRef}
+      className="container"
+      height="100vh"
+      sx={{ justifyContent: "center" }}
+    >
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstParagraphOpacity }}
+      >
+        <Typography>{content?.p1}</Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondParagraphOpacity }}
+      >
+        <Typography>{content?.p2}</Typography>
+      </motion.div>
     </Box>
   )
 }
 
 function Drinking() {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.economy.drinking
   const { sectionRef, isSectionActive } = useActiveSection("drinking", {
     amount: 0.5,
@@ -208,7 +253,18 @@ function Drinking() {
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const breakpoint = useBreakpoint()
   const mapViewState = drinkingMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (value) => {
+      console.log(value)
+    })
+    return unsubscribe
+  }, [scrollYProgress])
 
   const init = useCallback(() => {
     addSource("canal", {
@@ -259,6 +315,7 @@ function Drinking() {
   }, [setPaintProperty, setTextMarkers])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log('initialize stuff')
@@ -275,7 +332,23 @@ function Drinking() {
         return
       }
     }
-  }, [isSectionActive, load, unload, init])
+  }, [isSectionActive, load, unload, init, isMapReady])
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.4],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.35, 0.55],
+    [0, 1],
+  )
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
 
   return (
     <Box
@@ -285,18 +358,18 @@ function Drinking() {
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">
-        <Sentence custom={0}>
-          {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence
-          custom={2}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p3}
-        </Sentence>
+        <Stack spacing={5} direction="column">
+          <MotionTypography style={{ opacity: firstParagraphOpacity }}>
+            {content?.p1}
+          </MotionTypography>
+          <MotionTypography style={{ opacity: secondParagraphOpacity }}>
+            {content?.p2}
+          </MotionTypography>
+          <MotionTypography style={{ opacity: thirdParagraphOpacity }}>
+            {content?.p3}
+          </MotionTypography>
+        </Stack>
       </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }
