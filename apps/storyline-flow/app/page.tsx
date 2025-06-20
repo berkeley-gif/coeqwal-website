@@ -24,6 +24,10 @@ import {
 } from "./components/helpers/colorPalette"
 import SectionDelta from "./components/03NaturalFlow"
 import SectionHuman from "./components/04Human"
+import SectionTransformation from "./components/05Transformation"
+import SectionBenefits from "./components/06Benefits"
+import SectionImpact from "./components/07Impact"
+import Conclusion from "./components/08Conclusion"
 
 const MotionBox = motion.create(Box)
 
@@ -82,6 +86,10 @@ export default function StoryContainer() {
         <SectionWaterSource />
         <SectionDelta />
         <SectionHuman />
+        <SectionTransformation />
+        <SectionBenefits />
+        <SectionImpact />
+        <Conclusion />
       </Box>
       <SourceAnnouncer />
     </Box>

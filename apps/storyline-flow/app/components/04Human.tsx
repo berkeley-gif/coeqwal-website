@@ -259,13 +259,6 @@ function Drinking() {
     offset: ["start end", "end center"],
   })
 
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (value) => {
-      console.log(value)
-    })
-    return unsubscribe
-  }, [scrollYProgress])
-
   const init = useCallback(() => {
     addSource("canal", {
       type: "geojson",

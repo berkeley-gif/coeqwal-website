@@ -26,7 +26,7 @@ export const canalLayerStyle = {
     "source-layer": "drinking-34z621",
   },
   paint: {
-    "line-color": "#072c6c", // A darker blue contrasting with #3d8ec9
+    "line-color": "#F8A42D",
     "line-width": 3,
     "line-opacity": 0,
     "line-dasharray": [2, 2] as unknown as string,

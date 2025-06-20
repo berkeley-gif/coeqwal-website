@@ -12,7 +12,7 @@ const portion = {
   xs: 0.35,
   sm: 0.35,
   md: 0.35,
-  lg: 0.25,
+  lg: 0.2,
   xl: 0.35,
 }
 

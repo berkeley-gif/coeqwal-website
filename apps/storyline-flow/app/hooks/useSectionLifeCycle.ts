@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react"
+import useStoryStore from "../store"
 
 export const useSectionLifecycle = (
   isSectionActive: boolean,
@@ -10,6 +11,7 @@ export const useSectionLifecycle = (
   const initRef = useRef(init)
   const loadRef = useRef(load)
   const unloadRef = useRef(unload)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
 
   // Update refs when functions change
   useEffect(() => {
@@ -19,6 +21,7 @@ export const useSectionLifecycle = (
   }, [init, load, unload])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         console.log("initialize stuff")
@@ -30,5 +33,5 @@ export const useSectionLifecycle = (
       console.log("unload stuff")
       unloadRef.current()
     }
-  }, [isSectionActive]) // Only depend on isSectionActive
+  }, [isSectionActive, isMapReady]) // Only depend on isSectionActive
 }

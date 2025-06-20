@@ -1,15 +1,17 @@
 "use client"
 
-import { Box, Stack } from "@repo/ui/mui"
+import { Box, Stack, Typography } from "@repo/ui/mui"
 import useStoryStore from "../store"
 import AnimatedWaves from "./helpers/AnimatedWave"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import useActiveSection from "../hooks/useActiveSection"
-import { Sentence } from "@repo/motion/components"
-import ScrollIndicator from "./helpers/ScrollIndicator"
-import { motion, useScroll, useSpring, useTransform } from "@repo/motion"
-
-const MotionBox = motion.create(Box)
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "@repo/motion"
 
 function Conclusion() {
   return (
@@ -27,9 +29,15 @@ function Resolution() {
     amount: 0.5,
   })
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+  const viewportRef = useRef<HTMLDivElement>(null)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  })
 
   useEffect(() => {
-    const element = sectionRef.current
+    const element = viewportRef.current
     if (!element) return
 
     // Create a ResizeObserver to watch the container size
@@ -48,17 +56,38 @@ function Resolution() {
     }
   }, [sectionRef])
 
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      console.log(latest)
+    })
+    return unsubscribe
+  }, [scrollYProgress])
+
+  const firstSentenceOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
+  const secondSentenceOpacity = useTransform(
+    scrollYProgress,
+    [0.6, 0.7],
+    [0, 1],
+  )
+  const thirdSentenceOpacity = useTransform(scrollYProgress, [0.9, 1], [0, 1])
+
   return (
     <>
-      <Box id="conclusion" style={{ height: "100%", zIndex: 1 }}>
+      <Box id="conclusion" style={{ position: "relative" }}>
         <Box
           ref={sectionRef}
-          className="container-center"
+          height="100vh" // Control this to determine how long the section is visible
+          width="100%"
+          sx={{ position: "relative" }}
+        ></Box>
+
+        <Box
+          className="container-center filled-container sticky-container"
           height="100vh"
+          ref={viewportRef}
           sx={{
             position: "sticky",
             bottom: 0,
-            backgroundColor: "#1a4472",
             width: "100%",
           }}
         >
@@ -75,31 +104,38 @@ function Resolution() {
               justifyContent: "space-around",
             }}
           >
-            <Box className="paragraph" sx={{ margin: "1rem 0" }}>
-              <Sentence variant="h3" custom={0}>
+            <motion.div
+              className="paragraph"
+              style={{ margin: "1rem 0", opacity: firstSentenceOpacity }}
+            >
+              <Typography variant="h3">
                 {content?.transition.subtitle}
-              </Sentence>
-            </Box>
+              </Typography>
+            </motion.div>
             <Stack spacing={12} direction="column">
-              <Box className="paragraph">
-                <Sentence variant="h3" custom={2}>
+              <motion.div
+                className="paragraph"
+                style={{ opacity: secondSentenceOpacity }}
+              >
+                <Typography variant="h3">
                   {content?.transition.p11} <br />
                   {content?.transition.p12}
-                </Sentence>
-              </Box>
-              <Box className="paragraph">
-                <Sentence variant="h3" custom={4}>
+                </Typography>
+              </motion.div>
+              <motion.div
+                className="paragraph"
+                style={{ opacity: thirdSentenceOpacity }}
+              >
+                <Typography variant="h3" gutterBottom>
                   {content?.transition.p2}
-                </Sentence>
-              </Box>
-              <Box className="paragraph">
-                <Sentence variant="h3" custom={6}>
+                </Typography>
+                <Typography variant="h3">
                   <span style={{ fontWeight: "bold" }}>
                     <u>{content?.ending.p11}</u>
                   </span>{" "}
                   {content?.ending.p12}
-                </Sentence>
-              </Box>
+                </Typography>
+              </motion.div>
             </Stack>
           </Box>
         </Box>
@@ -114,73 +150,124 @@ function Builder() {
   const { sectionRef } = useActiveSection("tension", {
     amount: 0.5,
   })
-  const [animationComplete, setAnimationComplete] = useState(false)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end start"],
+    offset: ["start center", "end end"],
+  })
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
+  const [currentParagraph, setCurrentParagraph] = useState<number>(0)
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const paragraphIndex = Math.min(3, Math.floor(latest * 4))
+    setCurrentParagraph(paragraphIndex)
   })
 
-  /*useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    console.log("scrollYProgress:", latest); //around 0.84
-  });*/
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 20,
-  })
-  const opacity = useTransform(smoothProgress, [0, 0.2], [0, 1])
+  const paragraphVariants = {
+    initial: {
+      opacity: 0,
+      y: 30,
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -30,
+      transition: {
+        duration: 0.4,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+  }
 
   return (
     <>
-      <Box style={{ width: "100%", height: "100%", zIndex: 1 }}>
-        <MotionBox
+      <Box height="auto" width="100%" style={{ position: "relative" }}>
+        <Box
           ref={sectionRef}
-          className="container-center"
-          height="100vh"
+          height="300vh" // Control this to determine how long the section is visible
           width="100%"
-          sx={{ backgroundColor: "#031a35" }}
-          style={{ opacity }}
+          sx={{ position: "relative" }}
+        ></Box>
+
+        <motion.div
+          className="container-center filled-container sticky-container"
+          style={{ opacity: sectionOpacity, height: "100vh", width: "100%" }}
         >
-          <Stack spacing={12} direction="column">
-            <Box className="paragraph">
-              <Sentence variant="h3" gutterBottom custom={0.2}>
-                {content?.subtitle}
-              </Sentence>
-              <Sentence variant="h3" custom={2.2}>
-                {content?.caption}
-              </Sentence>
-            </Box>
-            <Box className="paragraph">
-              <Sentence variant="h3" custom={4.2}>
-                {content?.p11}{" "}
-                <span style={{ fontWeight: "bold" }}>{content?.p12}</span>{" "}
-                {content?.p13} <br />
-                {content?.p14}{" "}
-                <span style={{ fontWeight: "bold" }}>{content?.p15}</span>{" "}
-                {content?.p16}
-              </Sentence>
-            </Box>
-            <Box className="paragraph">
-              <Sentence variant="h3" custom={6.2}>
-                {content?.p2}
-              </Sentence>
-              <Sentence variant="h3" custom={7.2}>
-                {content?.p3}
-              </Sentence>
-            </Box>
-            <Box className="paragraph">
-              <Sentence
-                variant="h3"
-                custom={8.2}
-                onAnimationComplete={() => setAnimationComplete(true)}
+          <AnimatePresence mode="wait">
+            {currentParagraph == 0 && (
+              <motion.div
+                className="paragraph"
+                key="paragraph-0"
+                variants={paragraphVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
               >
-                {content?.p41} <br />
-                {content?.p42}
-              </Sentence>
-            </Box>
-          </Stack>
-          <ScrollIndicator animationComplete={animationComplete} />
-        </MotionBox>
+                <Typography variant="h3" gutterBottom>
+                  {content?.subtitle}
+                </Typography>
+                <Typography variant="h3">{content?.caption}</Typography>
+              </motion.div>
+            )}
+            {currentParagraph == 1 && (
+              <motion.div
+                className="paragraph"
+                key="paragraph-1"
+                variants={paragraphVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <Typography variant="h3" gutterBottom>
+                  {content?.p11}{" "}
+                  <span style={{ fontWeight: "bold" }}>{content?.p12}</span>{" "}
+                  {content?.p13}
+                </Typography>
+                <Typography variant="h3">
+                  {content?.p14}{" "}
+                  <span style={{ fontWeight: "bold" }}>{content?.p15}</span>{" "}
+                  {content?.p16}
+                </Typography>
+              </motion.div>
+            )}
+            {currentParagraph == 2 && (
+              <motion.div
+                className="paragraph"
+                key="paragraph-2"
+                variants={paragraphVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <Typography variant="h3" gutterBottom>
+                  {content?.p2}
+                </Typography>
+                <Typography variant="h3">{content?.p3}</Typography>
+              </motion.div>
+            )}
+            {currentParagraph == 3 && (
+              <motion.div
+                className="paragraph"
+                key="paragraph-3"
+                variants={paragraphVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <Typography variant="h3" gutterBottom>
+                  {content?.p41}
+                </Typography>
+                <Typography variant="h3">{content?.p42}</Typography>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </Box>
     </>
   )

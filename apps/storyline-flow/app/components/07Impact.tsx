@@ -1,7 +1,7 @@
 "use client"
 
-import { Box, LibraryBooksIcon } from "@repo/ui/mui"
-import { useCallback, useState } from "react"
+import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
+import { useCallback } from "react"
 import {
   impactClimateMapViewState,
   impactDeltaMapViewState,
@@ -13,9 +13,8 @@ import { useMap } from "@repo/map"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
-import { Sentence } from "@repo/motion/components"
 import { useBreakpoint } from "@repo/ui/hooks"
-import ScrollIndicator from "./helpers/ScrollIndicator"
+import { motion, useScroll, useTransform } from "@repo/motion"
 
 function SectionImpact() {
   return (
@@ -34,32 +33,39 @@ function Transition() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.benefits
   const { sectionRef } = useActiveSection("turning", { amount: 0.5 })
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
+
+  const firstSentenceOpacity = useTransform(scrollYProgress, [0.5, 0.8], [0, 1])
+
+  const secondSentenceOpacity = useTransform(scrollYProgress, [0.7, 1], [0, 1])
 
   return (
     <Box
       ref={sectionRef}
       className="container"
-      height="100vh"
-      sx={{ justifyContent: "center" }}
+      height="120vh"
+      sx={{ justifyContent: "end" }}
     >
-      <Box className="paragraph">
-        <Sentence variant="h3" gutterBottom custom={0}>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstSentenceOpacity }}
+      >
+        <Typography variant="body1" gutterBottom>
           {content?.p4}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence
-          variant="h3"
-          gutterBottom
-          sx={{ fontWeight: "bold" }}
-          custom={2}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
+        </Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondSentenceOpacity }}
+      >
+        <Typography variant="body1" gutterBottom sx={{ fontWeight: "bold" }}>
           {content?.transition}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+        </Typography>
+      </motion.div>
     </Box>
   )
 }
@@ -73,8 +79,12 @@ function Salmon() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactSalmonMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
   const setMarkers = useStoryStore((state) => state.setMarkers)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     const marker = {
@@ -100,6 +110,22 @@ function Salmon() {
 
   useSectionLifecycle(isSectionActive, () => {}, load, unload)
 
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.5],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
+
   return (
     <Box
       ref={sectionRef}
@@ -107,24 +133,28 @@ function Salmon() {
       height="100vh"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence custom={0}>{content?.p1}</Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence
-          custom={2}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstParagraphOpacity }}
+      >
+        <Typography>{content?.p1}</Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondParagraphOpacity }}
+      >
+        <Typography>{content?.p2}</Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: thirdParagraphOpacity }}
+      >
+        <Typography>
           {content?.p31}{" "}
-          <span style={{ fontWeight: "bold" }}>
-            <u>{content?.p32}</u>
-          </span>{" "}
-          <LibraryBooksIcon
-            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-          />{" "}
+          <span style={{ fontWeight: "bold" }}>{content?.p32}</span>{" "}
           {content?.p33}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+        </Typography>
+      </motion.div>
     </Box>
   )
 }
@@ -138,7 +168,10 @@ function Delta() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactDeltaMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     flyTo({
@@ -158,6 +191,22 @@ function Delta() {
     () => {},
   )
 
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.5],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
+
   return (
     <Box
       ref={sectionRef}
@@ -165,28 +214,35 @@ function Delta() {
       height="100vh"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence custom={0}>
-          <span style={{ fontWeight: "bold" }}>
-            <u>{content?.p11}</u>
-          </span>{" "}
-          <LibraryBooksIcon
-            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-          />{" "}
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstParagraphOpacity }}
+      >
+        <Typography>
+          <span style={{ fontWeight: "bold" }}>{content?.p11}</span>{" "}
           {content?.p12}
-        </Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence custom={2}>
+        </Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondParagraphOpacity }}
+      >
+        <Typography>
+          {"At this meeting point of major rivers with the San Francisco Bay, "}
+        </Typography>
+        <Typography>
+          {"we’re attempting to manage a complex, dynamic nexus of water."}
+        </Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: thirdParagraphOpacity }}
+      >
+        <Typography>
           {content?.p3} {content?.p4}{" "}
-        </Sentence>
-        <Sentence
-          custom={3}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p5}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+        </Typography>
+        <Typography>{content?.p5}</Typography>
+      </motion.div>
     </Box>
   )
 }
@@ -201,7 +257,11 @@ function Groundwater() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactGroundMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     flyTo({
@@ -221,36 +281,53 @@ function Groundwater() {
     () => {},
   )
 
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.5],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.7, 0.9],
+    [0, 1],
+  )
+
   return (
     <Box
       ref={sectionRef}
       className="container"
       height="100vh"
-      sx={{ justifyContent: "center" }}
+      sx={{ justifyContent: "space-around" }}
     >
-      <Box className="paragraph">
-        <Sentence custom={0}>{content?.p1}</Sentence>
-        <Sentence custom={1}>
-          {content?.p21}{" "}
-          <span style={{ fontWeight: "bold" }}>
-            <u>{content?.p22}</u>
-          </span>{" "}
-          <LibraryBooksIcon
-            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-          />
-          {""}
-          {content?.p23}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence
-          custom={2.5}
-          onAnimationComplete={() => setAnimationComplete(true)}
+      <Stack direction="column" spacing={2}>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: firstParagraphOpacity }}
         >
-          {content?.p3}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+          <Typography>{content?.p1}</Typography>
+        </motion.div>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: secondParagraphOpacity }}
+        >
+          <Typography>
+            {content?.p21}{" "}
+            <span style={{ fontWeight: "bold" }}>{content?.p22}</span>
+            {content?.p23}
+          </Typography>
+        </motion.div>
+      </Stack>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: thirdParagraphOpacity }}
+      >
+        <Typography>{content?.p3}</Typography>
+      </motion.div>
     </Box>
   )
 }
@@ -264,7 +341,11 @@ function Drinking() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactDrinkingMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     flyTo({
@@ -284,33 +365,40 @@ function Drinking() {
     () => {},
   )
 
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.5],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.7, 0.9],
+    [0, 1],
+  )
+
   return (
     <Box
       ref={sectionRef}
       className="container"
-      height="90vh"
-      sx={{ justifyContent: "center" }}
+      height="80vh"
+      sx={{ justifyContent: "space-around" }}
     >
-      <Box className="paragraph">
-        <Sentence custom={1}>{content?.p1}</Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence
-          custom={2}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstParagraphOpacity }}
+      >
+        <Typography>{content?.p1}</Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondParagraphOpacity }}
+      >
+        <Typography>
           {content?.p21}{" "}
-          <span style={{ fontWeight: "bold" }}>
-            <u>{content?.p22}</u>
-          </span>{" "}
-          <LibraryBooksIcon
-            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-          />
-          {""}
+          <span style={{ fontWeight: "bold" }}>{content?.p22}</span>
           {content?.p23}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+        </Typography>
+      </motion.div>
     </Box>
   )
 }
@@ -324,7 +412,11 @@ function Climate() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactClimateMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     flyTo({
@@ -344,6 +436,17 @@ function Climate() {
     () => {},
   )
 
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.5],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
+
   return (
     <Box
       ref={sectionRef}
@@ -351,25 +454,36 @@ function Climate() {
       height="100vh"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence custom={0}>
-          <span style={{ fontWeight: "bold" }}>
-            <u>{content?.p11}</u>
-          </span>{" "}
-          <LibraryBooksIcon
-            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
-          />{" "}
-          {content?.p12}
-        </Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence
-          custom={2}
-          onAnimationComplete={() => setAnimationComplete(true)}
+      <Stack direction="column" spacing={12}>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: firstParagraphOpacity }}
         >
-          {content?.p3}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+          <Typography>
+            <span style={{ fontWeight: "bold" }}>
+              <u>{content?.p11}</u>
+            </span>{" "}
+            <LibraryBooksIcon
+              sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+            />{" "}
+            {content?.p12}
+          </Typography>
+        </motion.div>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: secondParagraphOpacity }}
+        >
+          <Typography>
+            {
+              "We’re already seeing reduced winter snowpack, more extreme droughts, "
+            }
+          </Typography>
+          <Typography>
+            {"and sea level rise pushing saltwater farther into the Delta."}
+          </Typography>
+          <Typography>{content?.p3}</Typography>
+        </motion.div>
+      </Stack>
     </Box>
   )
 }

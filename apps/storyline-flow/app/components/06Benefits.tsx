@@ -1,6 +1,6 @@
 "use client"
 
-import { Box } from "@repo/ui/mui"
+import { Box, Typography } from "@repo/ui/mui"
 import { useCallback, useEffect, useRef, useState } from "react"
 import {
   cityMapViewState,
@@ -10,12 +10,12 @@ import {
 import { useMap } from "@repo/map"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
-import { Sentence } from "@repo/motion/components"
 import ConcentricCircle from "./vis/ConcentricCircle"
 import { PeopleIcon, MoneyBagIcon, FarmIcon } from "./helpers/Icons"
 import React from "react"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { concentricTransform } from "./helpers/breakpoints"
+import { motion, useScroll, useTransform } from "@repo/motion"
 
 function SectionBenefits() {
   return (
@@ -68,6 +68,7 @@ const markers = [
 
 function City() {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.impact
   const { sectionRef, isSectionActive } = useActiveSection("city", {
     amount: 0.5,
@@ -78,6 +79,11 @@ function City() {
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const breakpoint = useBreakpoint()
   const mapViewState = cityMapViewState[breakpoint]
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const load = useCallback(() => {
     flyTo({
@@ -93,6 +99,7 @@ function City() {
   }, [flyTo, mapViewState, setTextMarkers, setPaintProperty])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log("initialize stuff")
@@ -108,7 +115,18 @@ function City() {
         return
       }
     }
-  }, [isSectionActive, load, setTextMarkers])
+  }, [isSectionActive, load, setTextMarkers, isMapReady])
+
+  const sentenceOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1])
+
+  useEffect(() => {
+    const unsubscribe = sentenceOpacity.on("change", (value) => {
+      if (value > 0.8) {
+        setStartAnimation(true)
+      }
+    })
+    return unsubscribe
+  }, [sentenceOpacity])
 
   return (
     <Box
@@ -132,14 +150,9 @@ function City() {
         startAnimation={startAnimation}
         radius={concentricTransform[breakpoint]?.norcal?.radius ?? 10}
       />
-      <Box className="paragraph">
-        <Sentence
-          custom={0}
-          onAnimationComplete={() => setStartAnimation(true)}
-        >
-          {content?.benefits.p1}
-        </Sentence>
-      </Box>
+      <motion.div className="paragraph" style={{ opacity: sentenceOpacity }}>
+        <Typography>{content?.benefits.p1}</Typography>
+      </motion.div>
       <ConcentricCircle
         size={
           concentricTransform[breakpoint]?.socal?.size ?? {
@@ -160,6 +173,7 @@ function City() {
 
 function Agriculture() {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.impact
   const { sectionRef, isSectionActive } = useActiveSection("agriculture", {
     amount: 0.5,
@@ -169,6 +183,11 @@ function Agriculture() {
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = valleyMapViewState[breakpoint]
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const almondData = {
     past: { year: "in 1980 \u2014", value: 15998697724, annotation: "16B" },
@@ -193,6 +212,7 @@ function Agriculture() {
   }, [flyTo, mapViewState])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         console.log("initialize stuff")
@@ -207,7 +227,18 @@ function Agriculture() {
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [isSectionActive, load, isMapReady])
+
+  const sentenceOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
+
+  useEffect(() => {
+    const unsubscribe = sentenceOpacity.on("change", (value) => {
+      if (value > 0.8) {
+        setStartAnimation(true)
+      }
+    })
+    return unsubscribe
+  }, [sentenceOpacity])
 
   return (
     <Box
@@ -217,14 +248,9 @@ function Agriculture() {
       width="70vw"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence
-          custom={0}
-          onAnimationComplete={() => setStartAnimation(true)}
-        >
-          {content?.benefits.p2}
-        </Sentence>
-      </Box>
+      <motion.div className="paragraph" style={{ opacity: sentenceOpacity }}>
+        <Typography> {content?.benefits.p2}</Typography>
+      </motion.div>
       <ConcentricCircle
         size={
           concentricTransform[breakpoint]?.agriculture?.size ?? {
@@ -245,6 +271,7 @@ function Agriculture() {
 
 function Economy() {
   const storyline = useStoryStore((state) => state.storyline)
+  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.impact.benefits
   const { sectionRef, isSectionActive } = useActiveSection("economy", {
     amount: 0.5,
@@ -254,6 +281,11 @@ function Economy() {
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
   const mapViewState = stateMapViewState[breakpoint]
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
   const economyData = {
     past: { year: "in 1980 \u2014", value: 327958, annotation: "$327B" },
@@ -274,6 +306,7 @@ function Economy() {
   }, [flyTo, mapViewState])
 
   useEffect(() => {
+    if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
         //console.log("initialize stuff")
@@ -288,7 +321,18 @@ function Economy() {
         return
       }
     }
-  }, [isSectionActive, load])
+  }, [isSectionActive, load, isMapReady])
+
+  const sentenceOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
+
+  useEffect(() => {
+    const unsubscribe = sentenceOpacity.on("change", (value) => {
+      if (value > 0.8) {
+        setStartAnimation(true)
+      }
+    })
+    return unsubscribe
+  }, [sentenceOpacity])
 
   return (
     <Box
@@ -298,14 +342,9 @@ function Economy() {
       width="90vw"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence
-          custom={0}
-          onAnimationComplete={() => setStartAnimation(true)}
-        >
-          {content?.p3}
-        </Sentence>
-      </Box>
+      <motion.div className="paragraph" style={{ opacity: sentenceOpacity }}>
+        <Typography>{content?.p3}</Typography>
+      </motion.div>
       <ConcentricCircle
         size={
           concentricTransform[breakpoint]?.economy?.size ?? {
