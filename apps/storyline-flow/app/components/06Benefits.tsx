@@ -16,6 +16,7 @@ import React from "react"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { concentricTransform } from "./helpers/breakpoints"
 import { motion, useScroll, useTransform } from "@repo/motion"
+import { cityBoundaryLayerStyle } from "./helpers/mapLayerStyle"
 
 function SectionBenefits() {
   return (
@@ -73,7 +74,7 @@ function City() {
   const { sectionRef, isSectionActive } = useActiveSection("city", {
     amount: 0.5,
   })
-  const { flyTo, setPaintProperty } = useMap()
+  const { flyTo, setPaintProperty, addSource, addLayer } = useMap()
   const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
@@ -84,6 +85,21 @@ function City() {
     target: sectionRef,
     offset: ["start end", "end center"],
   })
+
+  const init = useCallback(() => {
+    addSource("city-boundary", {
+      type: "vector",
+      url: "mapbox://coeqwal.7j5glhyx",
+    })
+    addLayer(
+      "city-boundary-layer",
+      "city-boundary",
+      cityBoundaryLayerStyle.type,
+      cityBoundaryLayerStyle.paint,
+      cityBoundaryLayerStyle.layout,
+      cityBoundaryLayerStyle.layer,
+    )
+  }, [addSource, addLayer])
 
   const load = useCallback(() => {
     flyTo({
@@ -96,12 +112,14 @@ function City() {
     })
     setTextMarkers(markers, "text")
     setPaintProperty("canal-layer", "line-opacity", 0)
+    setPaintProperty("city-boundary-layer", "line-opacity", 1)
   }, [flyTo, mapViewState, setTextMarkers, setPaintProperty])
 
   useEffect(() => {
     if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
+        init()
         //console.log("initialize stuff")
       }
       hasSeen.current = true
@@ -110,12 +128,20 @@ function City() {
       if (hasSeen.current) {
         //console.log("unload stuff")
         setTextMarkers([], "text")
+        setPaintProperty("city-boundary-layer", "line-opacity", 0)
       } else {
         //console.log('not seen yet, dont do anything')
         return
       }
     }
-  }, [isSectionActive, load, setTextMarkers, isMapReady])
+  }, [
+    isSectionActive,
+    load,
+    setTextMarkers,
+    isMapReady,
+    setPaintProperty,
+    init,
+  ])
 
   const sentenceOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1])
 
@@ -132,7 +158,7 @@ function City() {
     <Box
       ref={sectionRef}
       className="container"
-      height="120vh"
+      height="130vh"
       width="80vw"
       sx={{ justifyContent: "center" }}
     >
@@ -152,6 +178,27 @@ function City() {
       />
       <motion.div className="paragraph" style={{ opacity: sentenceOpacity }}>
         <Typography>{content?.benefits.p1}</Typography>
+        <Typography variant="caption">
+          Data source:{" "}
+          <a
+            href="https://www2.census.gov/library/publications/decennial/1960/population-volume-1/vol-01-06-c.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            1960
+          </a>{" "}
+          and{" "}
+          <a
+            href="https://www.census.gov/quickfacts/geo/chart/santaclaracountycalifornia/PST045224"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            2024
+          </a>{" "}
+          from the U.S. Census Bureau
+        </Typography>
       </motion.div>
       <ConcentricCircle
         size={
@@ -190,12 +237,17 @@ function Agriculture() {
   })
 
   const almondData = {
-    past: { year: "in 1980 \u2014", value: 15998697724, annotation: "16B" },
+    past: { year: "in 1980 \u2014", value: 13987139000, annotation: "14B" },
     present: {
+      year: "in 2023 \u2014",
+      value: 59389887000,
+      annotation: "59.3B",
+    },
+    /*present: {
       year: "in 2022 \u2014",
       value: 132351395410,
       annotation: "132B",
-    },
+    },*/
     icon: FarmIcon,
     title: "Yield",
   }
@@ -244,12 +296,24 @@ function Agriculture() {
     <Box
       ref={sectionRef}
       className="container"
-      height="100vh"
+      height="70vh"
       width="70vw"
       sx={{ justifyContent: "center" }}
     >
       <motion.div className="paragraph" style={{ opacity: sentenceOpacity }}>
         <Typography> {content?.benefits.p2}</Typography>
+        <Typography variant="caption">
+          Data source: Cash receipts by state from{" "}
+          <a
+            href="https://data.ers.usda.gov/reports.aspx?ID=4052#Pf221faeb8bdd40be9b9db688e7036405_19_17iT0R0x5"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            United States Department of Agriculture
+          </a>{" "}
+          in current dollars
+        </Typography>
       </motion.div>
       <ConcentricCircle
         size={
@@ -338,12 +402,24 @@ function Economy() {
     <Box
       ref={sectionRef}
       className="container"
-      height="120vh"
+      height="130vh"
       width="90vw"
       sx={{ justifyContent: "center" }}
     >
       <motion.div className="paragraph" style={{ opacity: sentenceOpacity }}>
         <Typography>{content?.p3}</Typography>
+        <Typography variant="caption">
+          Data source: GDP by state from{" "}
+          <a
+            href="https://www.bea.gov/data/gdp/gdp-state"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            U.S. Bureau of Economic Analysis
+          </a>{" "}
+          in current dollars
+        </Typography>
       </motion.div>
       <ConcentricCircle
         size={

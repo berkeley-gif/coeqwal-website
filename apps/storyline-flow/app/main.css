@@ -304,7 +304,7 @@ transform: scale(1.2); /* Slightly enlarge the active indicator */
 
 .mapboxgl-popup-content{
     color: var(--text-color);
-    background-color: var(--light-color);
+    background-color: var(--light-color) !important;
     border-radius: 10px;
 }
 .mapboxgl-popup-close-button{

@@ -11,6 +11,7 @@ import { useBreakpoint } from "@repo/ui/hooks"
 import { DAMS } from "./helpers/data/dams"
 import { canalLayerStyle } from "./helpers/mapLayerStyle"
 import { motion, useScroll, useTransform } from "@repo/motion"
+import { InfrastructureColor } from "./helpers/colorPalette"
 
 const MotionTypography = motion.create(Typography)
 
@@ -168,17 +169,23 @@ function Transformation() {
           <Stack spacing={0} direction="column">
             <MotionTypography style={{ opacity: secondParagraphOpacity }}>
               {content?.p21}{" "}
-              <span style={{ fontWeight: "bold" }}>{content?.p22}</span>{" "}
+              <span style={{ fontWeight: "bold", color: InfrastructureColor }}>
+                {content?.p22}
+              </span>{" "}
               {content?.p23}
             </MotionTypography>
             <MotionTypography style={{ opacity: thirdParagraphOpacity }}>
               {content?.p31}{" "}
-              <span style={{ fontWeight: "bold" }}>{content?.p32}</span>{" "}
+              <span style={{ fontWeight: "bold", color: InfrastructureColor }}>
+                {content?.p32}
+              </span>{" "}
               {content?.p33}
             </MotionTypography>
             <MotionTypography style={{ opacity: fourthParagraphOpacity }}>
               {content?.p41}{" "}
-              <span style={{ fontWeight: "bold" }}>{content?.p42}</span>{" "}
+              <span style={{ fontWeight: "bold", color: InfrastructureColor }}>
+                {content?.p42}
+              </span>{" "}
               {content?.p43}
             </MotionTypography>
           </Stack>

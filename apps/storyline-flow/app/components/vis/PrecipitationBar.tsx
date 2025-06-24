@@ -384,7 +384,7 @@ function VisibleIcon({
     <motion.g
       initial={{ scale: 0 }}
       animate={{
-        scale: [0.85, 1, 0.85], // Oscillate between 1 and 1.2
+        scale: [0.8, 1, 0.8], // Oscillate between 1 and 1.2
       }}
       transition={{
         duration: 2, // Duration of one cycle

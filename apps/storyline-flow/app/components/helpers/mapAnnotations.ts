@@ -103,6 +103,20 @@ const ColoradoRiverAqueduct = {
   longitude: -115.8132,
 }
 
+export const ShastaDam = {
+  id: "shasta-dam",
+  name: "Shasta Dam",
+  latitude: 40.718,
+  longitude: -122.42,
+}
+
+export const SacramentoDelta = {
+  id: "delta-sac-sanjoaquin",
+  name: "Sacramento-San Joaquin Delta",
+  latitude: 38.0422,
+  longitude: -121.878,
+}
+
 export const FlowTextLabels = [
   SierraNevadaMountains,
   SacramentoRiver,

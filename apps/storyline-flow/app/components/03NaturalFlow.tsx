@@ -512,7 +512,7 @@ function Wetland() {
           className="paragraph"
           style={{ opacity: firstParagraphOpacity }}
         >
-          <Typography variant="body1">{content?.valley.p2} </Typography>
+          <Typography variant="body1">{content?.valley.p2}</Typography>
           <Typography variant="body1">{content?.valley.p3}</Typography>
           <Typography variant="body1">{content?.valley.p4}</Typography>
         </motion.div>
@@ -534,6 +534,17 @@ function Wetland() {
           style={{ opacity: thirdParagraphOpacity }}
         >
           <Typography variant="body1">{content?.transition.p2}</Typography>
+          <Typography variant="caption">
+            GIS data source:{" "}
+            <a
+              href="https://www.sfei.org/projects/sacramento-san-joaquin-delta-historical-ecology-study#toc-associated-data"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              San Francisco Estuary Institute
+            </a>
+          </Typography>
         </motion.div>
       </Stack>
     </Box>
@@ -803,8 +814,23 @@ function Delta() {
             <MotionTypography
               variant="body1"
               style={{ opacity: thirdSentenceOpacity }}
+              gutterBottom
             >
               {content?.p5}
+            </MotionTypography>
+            <MotionTypography
+              variant="caption"
+              style={{ opacity: firstParagraphOpacity }}
+            >
+              GIS data source:{" "}
+              <a
+                href="https://gis.data.cnra.ca.gov/maps/3efc635b27344a3da989ca1e7108f5e0/explore?location=38.104861%2C-121.568577%2C9.99"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "inherit", textDecoration: "underline" }}
+              >
+                California Natural Resources Agency
+              </a>
             </MotionTypography>
           </Box>
         </motion.div>
@@ -816,6 +842,7 @@ function Delta() {
 //TODO: sometimes see a 1px gap between this and Delta (found out the delta section is not high enough??)
 function Transition() {
   const storyline = useStoryStore((state) => state.storyline)
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const content = storyline?.delta
   const { sectionRef, isSectionActive } = useActiveSection("transition", {
     amount: 0.5,
@@ -840,7 +867,8 @@ function Transition() {
         duration: 1000,
       },
     })
-  }, [flyTo, mapViewState])
+    setTextMarkers([], "text")
+  }, [flyTo, mapViewState, setTextMarkers])
 
   useEffect(() => {
     if (isSectionActive) {

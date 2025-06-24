@@ -20,6 +20,7 @@ import {
 } from "./helpers/mapViews"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { motion, useScroll, useTransform } from "@repo/motion"
+import { InfrastructureColor } from "./helpers/colorPalette"
 
 const MotionTypography = motion.create(Typography)
 
@@ -64,20 +65,13 @@ function Header({ markers }: { markers: MarkerType[] }) {
   })
 
   const load = useCallback(() => {
-    setTimeout(() => {
-      flyTo({
-        longitude: mapViewState?.longitude ?? 0,
-        latitude: mapViewState?.latitude ?? 0,
-        zoom: mapViewState?.zoom ?? 1,
-        transitionOptions: {
-          duration: 2000,
-        },
-      })
-    }, 1000)
-    setTimeout(() => {
-      setMarkers(markers, "rough-circle")
-      setTextMarkers(GoldRushTextLabels, "text")
-    }, 2000)
+    flyTo({
+      longitude: mapViewState?.longitude ?? 0,
+      latitude: mapViewState?.latitude ?? 0,
+      zoom: mapViewState?.zoom ?? 1,
+    })
+    setMarkers(markers, "rough-circle")
+    setTextMarkers(GoldRushTextLabels, "text")
   }, [flyTo, markers, setMarkers, setTextMarkers, mapViewState])
 
   const unload = useCallback(() => {
@@ -359,7 +353,11 @@ function Drinking() {
             {content?.p2}
           </MotionTypography>
           <MotionTypography style={{ opacity: thirdParagraphOpacity }}>
-            {content?.p3}
+            It required water rights and major investments as{" "}
+            <span style={{ color: InfrastructureColor }}>
+              water infrastructure
+            </span>{" "}
+            began to crisscross the state
           </MotionTypography>
         </Stack>
       </Box>

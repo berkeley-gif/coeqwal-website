@@ -1,4 +1,20 @@
-import { FreshWaterColor } from "./colorPalette"
+import {
+  FreshWaterColor,
+  InfrastructureColor,
+  OffWhiteColor,
+  WetlandColor,
+} from "./colorPalette"
+
+const hexToRgb = (hex: string, opacity: number = 1) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+  if (!result) return "rgba(0, 0, 0, 1)"
+  const { r, g, b } = {
+    r: parseInt(result[1] || "0", 16),
+    g: parseInt(result[2] || "0", 16),
+    b: parseInt(result[3] || "0", 16),
+  }
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`
+}
 
 export const riverLayerStyle = {
   type: "line",
@@ -26,10 +42,10 @@ export const canalLayerStyle = {
     "source-layer": "drinking-34z621",
   },
   paint: {
-    "line-color": "#F8A42D",
+    "line-color": InfrastructureColor,
     "line-width": 3,
     "line-opacity": 0,
-    "line-dasharray": [2, 2] as unknown as string,
+    //"line-dasharray": [2, 2] as unknown as string,
   },
 }
 
@@ -47,11 +63,27 @@ export const deltaWaterLayerStyle = {
 export const deltaWetlandLayerStyle = {
   type: "fill",
   paint: {
-    "fill-color": "rgba(37, 90, 22, 0.3)",
+    "fill-color": hexToRgb(WetlandColor, 0.6),
     "fill-opacity": 0,
   },
   layer: {
     "source-layer": "delta_freshwater_wetland-dle9vo",
+  },
+}
+
+export const cityBoundaryLayerStyle = {
+  type: "line",
+  layout: {
+    "line-cap": "round",
+    "line-join": "round",
+  },
+  paint: {
+    "line-color": OffWhiteColor,
+    "line-width": 2,
+    "line-opacity": 0,
+  },
+  layer: {
+    "source-layer": "city_boundaries_bay_socal-ccd0v4",
   },
 }
 
@@ -94,7 +126,7 @@ export const boundaryPaintStyle = {
     "line-cap": "round",
   },
   paint: {
-    "line-color": "#f2f0ef",
+    "line-color": OffWhiteColor,
     "line-width": 6,
     "line-opacity": 1,
   },

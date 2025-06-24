@@ -142,7 +142,7 @@ function Precipitation() {
           <Typography variant="body1">{content?.p3}</Typography>
           <Typography variant="body1">{content?.p4}</Typography>
           <Typography variant="caption" sx={{ opacity: 0.7 }}>
-            Map data source : 30-year (1991-2020) normals from{" "}
+            GIS data source : 30-year (1991-2020) normals from{" "}
             <a
               href="https://prism.oregonstate.edu/normals/"
               target="_blank"
@@ -451,7 +451,7 @@ function Snowpack() {
           {"From Snow to Snowmelt \u2014 an Illustration"}
         </MotionTypography>
         <MotionTypography variant="caption">
-          Map data source: Snowpack spatial accumulation from{" "}
+          GIS data source: Snowpack spatial accumulation from{" "}
           <a
             href="https://www.nohrsc.noaa.gov/snowfall/"
             target="_blank"

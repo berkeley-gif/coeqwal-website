@@ -11,6 +11,11 @@ import {
   Typography,
   FiberManualRecordIcon,
 } from "@repo/ui/mui"
+import {
+  InfrastructureColor,
+  OceanWaterColor,
+  OffWhiteColor,
+} from "./colorPalette"
 
 export type MarkerType = {
   id: string
@@ -25,8 +30,8 @@ export type MarkerType = {
 }
 
 export function DamLayer({ markers }: { markers: MarkerType[] }) {
-  const width = 20
-  const height = 9
+  const height = 12.99 // Height for an equilateral triangle with side length 15
+  const width = 15 // Side length of the equilateral triangle
 
   return (
     <>
@@ -47,11 +52,9 @@ export function DamLayer({ markers }: { markers: MarkerType[] }) {
               left: 0,
             }}
           >
-            <rect
-              width={width}
-              height={height}
-              fill="#072c6c" // Darker blue color for dams
-              stroke="#0a4a9c" // Lighter blue color derived from #072c6c
+            <polygon
+              points={`0,${height} ${width / 2},0 ${width},${height}`}
+              fill={InfrastructureColor} // Darker blue color for dams
               strokeWidth="1"
             />
           </motion.svg>
@@ -389,7 +392,7 @@ export function RoughCircleMarker({
     >
       <motion.path
         d={path}
-        stroke="#f2f0ef"
+        stroke={OffWhiteColor}
         style={{ strokeWidth: 4 }}
         fill="none"
         initial={{ pathLength: 0 }}
@@ -408,7 +411,7 @@ export function TextMarker({ text }: { text: string }) {
         fontFamily: "akzidenz-grotesk-next-pro",
         position: "relative", // Parent container for positioning
         display: "inline-block",
-        backgroundColor: "rgba(3, 26, 53, 0.7)", // Background color
+        backgroundColor: `${OceanWaterColor}`, // Background color
         padding: "4px 8px", // Padding to create space around the text
         color: "white", // Text color
         fontSize: "14px", // Font size

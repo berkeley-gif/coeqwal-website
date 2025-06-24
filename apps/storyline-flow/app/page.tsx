@@ -17,7 +17,6 @@ import { DIVISION } from "./components/helpers/sectionDivision"
 import useStoryStore from "./store"
 import { WaterDropIcon } from "./components/helpers/WaterIcon"
 import { HeaderStory } from "@repo/motion/components"
-import SourceAnnouncer from "./components/helpers/SourceAnnouncer"
 import {
   OffWhiteColor,
   RiverWaterColor,
@@ -45,7 +44,7 @@ export default function StoryContainer() {
   }, [fetchStoryline])
 
   return (
-    <Box sx={{ pointerEvents: "none" }}>
+    <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
       <HeaderStory />
       <SectionIndicator />
@@ -80,6 +79,7 @@ export default function StoryContainer() {
           "& > *": {
             margin: 0,
           },
+          pointerEvents: "none",
         }}
       >
         <Opener />
@@ -91,8 +91,8 @@ export default function StoryContainer() {
         <SectionImpact />
         <Conclusion />
       </Box>
-      <SourceAnnouncer />
-    </Box>
+      {/*<SourceAnnouncer />*/}
+    </>
   )
 }
 

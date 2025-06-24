@@ -15,6 +15,7 @@ import useStoryStore from "../store"
 import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { motion, useScroll, useTransform } from "@repo/motion"
+import { SacramentoDelta, ShastaDam } from "./helpers/mapAnnotations"
 
 function SectionImpact() {
   return (
@@ -47,8 +48,8 @@ function Transition() {
     <Box
       ref={sectionRef}
       className="container"
-      height="120vh"
-      sx={{ justifyContent: "end" }}
+      height="80vh"
+      sx={{ justifyContent: "center" }}
     >
       <motion.div
         className="paragraph"
@@ -79,7 +80,7 @@ function Salmon() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactSalmonMapViewState[breakpoint]
-  const setMarkers = useStoryStore((state) => state.setMarkers)
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -87,26 +88,17 @@ function Salmon() {
   })
 
   const load = useCallback(() => {
-    const marker = {
-      id: "1",
-      name: "Red Bluff",
-      longitude: -122.2358,
-      latitude: 40.1786,
-    }
     flyTo({
       longitude: mapViewState?.longitude ?? 0,
       latitude: mapViewState?.latitude ?? 0,
       zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
     })
-    setMarkers([marker], "rough-circle")
-  }, [flyTo, mapViewState, setMarkers])
+    setTextMarkers([ShastaDam], "text")
+  }, [flyTo, mapViewState, setTextMarkers])
 
   const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-  }, [setMarkers])
+    setTextMarkers([], "text")
+  }, [setTextMarkers])
 
   useSectionLifecycle(isSectionActive, () => {}, load, unload)
 
@@ -172,6 +164,7 @@ function Delta() {
     target: sectionRef,
     offset: ["start end", "end center"],
   })
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const load = useCallback(() => {
     flyTo({
@@ -182,7 +175,8 @@ function Delta() {
         duration: 2000,
       },
     })
-  }, [flyTo, mapViewState])
+    setTextMarkers([SacramentoDelta], "text")
+  }, [flyTo, mapViewState, setTextMarkers])
 
   useSectionLifecycle(
     isSectionActive,
@@ -257,6 +251,7 @@ function Groundwater() {
   const { flyTo } = useMap()
   const breakpoint = useBreakpoint()
   const mapViewState = impactGroundMapViewState[breakpoint]
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -272,7 +267,8 @@ function Groundwater() {
         duration: 2000,
       },
     })
-  }, [flyTo, mapViewState])
+    setTextMarkers([], "text")
+  }, [flyTo, mapViewState, setTextMarkers])
 
   useSectionLifecycle(
     isSectionActive,

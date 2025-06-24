@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 import { motion } from "@repo/motion"
 import "./concentric-circle.css"
-import { IconProps } from "../helpers/Icons"
+import { DeprecatedIconProps as IconProps } from "../helpers/Icons"
 
 type Entry = {
   year: string

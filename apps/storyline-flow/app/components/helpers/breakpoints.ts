@@ -81,7 +81,7 @@ export const concentricTransform: Record<string, benefitConfig> = {
   lg: {
     norcal: {
       size: { width: 300, height: 400 },
-      shift: [0.8, 0.05],
+      shift: [0.6, 0.05],
       radius: 35,
     },
     socal: {
@@ -91,7 +91,7 @@ export const concentricTransform: Record<string, benefitConfig> = {
     },
     agriculture: {
       size: { width: 400, height: 400 },
-      shift: [0.5, 0.3],
+      shift: [0.5, 0.0],
       radius: 35,
     },
     economy: {
@@ -103,17 +103,17 @@ export const concentricTransform: Record<string, benefitConfig> = {
   xl: {
     norcal: {
       size: { width: 600, height: 400 },
-      shift: [1, 0.3],
+      shift: [0.1, 0.3],
       radius: 50,
     },
     socal: {
       size: { width: 800, height: 400 },
-      shift: [0.8, 0.27],
+      shift: [0.5, 0.3],
       radius: 50,
     },
     agriculture: {
       size: { width: 600, height: 400 },
-      shift: [0.5, 0.7],
+      shift: [0.5, 0.2],
       radius: 50,
     },
     economy: {

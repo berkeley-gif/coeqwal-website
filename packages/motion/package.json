@@ -2,11 +2,24 @@
   "name": "@repo/motion",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./variants": "./src/variants/index.ts",
-    "./hooks": "./src/hooks/index.ts",
-    "./components": "./src/components/index.ts"
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./variants": {
+      "import": "./src/variants/index.ts",
+      "types": "./src/variants/index.ts"
+    },
+    "./hooks": {
+      "import": "./src/hooks/index.ts",
+      "types": "./src/hooks/index.ts"
+    },
+    "./components": {
+      "import": "./src/components/index.ts",
+      "types": "./src/components/index.ts"
+    }
   },
   "scripts": {
     "build": "tsc --skipLibCheck",
