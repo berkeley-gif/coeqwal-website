@@ -340,7 +340,7 @@ function Annotation({
       <motion.circle
         cx={position[0]}
         cy={position[1]}
-        r={3}
+        r={5}
         fill={OffWhiteColor}
         style={{ opacity: textOpacity }}
       />

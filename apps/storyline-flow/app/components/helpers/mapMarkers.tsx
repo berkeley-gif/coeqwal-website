@@ -136,12 +136,12 @@ export function MarkerWithCarouselPopup({
   const images = marker.images || [] // Fallback to single image if no array
 
   const nextImage = () => {
-    console.log("you clicked next")
+    //console.log("you clicked next")
     setCurrentImgIndex((prev) => (prev + 1) % images.length)
   }
 
   const prevImage = () => {
-    console.log("you clicked prev")
+    //console.log("you clicked prev")
     setCurrentImgIndex((prev) => (prev - 1 + images.length) % images.length)
   }
 
@@ -391,6 +391,7 @@ export function RoughCircleMarker({
       }}
     >
       <motion.path
+        className="glow-circle"
         d={path}
         stroke={OffWhiteColor}
         style={{ strokeWidth: 4 }}

@@ -212,6 +212,12 @@ function BarChart({
   const transform = visibleIconTransform[
     breakpoint
   ] as visibleIconTransformConfig
+  const [yearHovered, setYearHovered] = useState<number | null>(null)
+  const [yearClicked, setYearClicked] = useState<number | null>(null)
+
+  useEffect(() => {
+    console.log("Year clicked:", yearClicked)
+  }, [yearClicked])
 
   return (
     <>
@@ -237,6 +243,8 @@ function BarChart({
                 if (idx === data.length - 1) setFinished(true)
               }}
               transform={transform}
+              yearHovered={yearHovered}
+              yearClicked={yearClicked}
             />
             <rect
               x={xPos - 2} // consider stroke-width
@@ -261,14 +269,21 @@ function BarChart({
                   })
                 }
               }}
+              onMouseOver={() => {
+                setYearHovered(d.year)
+              }}
               onClick={() => {
                 if (yearLabels.includes(d.year)) {
                   getSelectedYear(d.year.toString())
+                  setYearClicked(d.year)
+                } else {
+                  setYearClicked(null)
                 }
               }}
-              onMouseLeave={() =>
+              onMouseLeave={() => {
                 setTooltip((prev) => ({ ...prev, visible: false }))
-              }
+                setYearHovered(null)
+              }}
             />
           </g>
         )
@@ -289,6 +304,8 @@ function Bar({
   hasPhoto = false,
   onAnimationComplete,
   transform,
+  yearHovered,
+  yearClicked,
 }: {
   d: PrecipitationDatum
   xPos: number
@@ -301,11 +318,13 @@ function Bar({
   hasPhoto?: boolean
   onAnimationComplete?: () => void
   transform: visibleIconTransformConfig
+  yearHovered: number | null
+  yearClicked: number | null
 }) {
   const [animationPlayed, setAnimationPlayed] = useState(false)
 
   const range = useMemo(
-    (): [number, number] => [0.5 + idx * 0.02, 0.75 + idx * 0.02],
+    (): [number, number] => [0.5 + idx * 0.01, 0.7 + idx * 0.01],
     [idx],
   )
   const opacity = useTransform(
@@ -361,6 +380,9 @@ function Bar({
         </motion.text>
         {hasPhoto && (
           <VisibleIcon
+            isHovered={yearHovered === d.year}
+            yearClicked={yearClicked}
+            isClicked={yearClicked === d.year}
             opacity={opacity}
             transform={`translate(${transform.x}, ${d.anomaly < 0 ? transform.belowY : transform.aboveY})`}
             onAnimationComplete={onAnimationComplete}
@@ -373,34 +395,54 @@ function Bar({
 
 function VisibleIcon({
   opacity,
+  isHovered,
+  yearClicked,
+  isClicked,
   transform,
   onAnimationComplete,
 }: {
   opacity: MotionValue<number>
   transform: string
+  isHovered: boolean
+  isClicked: boolean
+  yearClicked: number | null
   onAnimationComplete?: () => void
 }) {
+  const animatedScale = isHovered ? 1.1 : isClicked ? 1 : [0.8, 1, 0.8]
+
   return (
     <motion.g
       initial={{ scale: 0 }}
       animate={{
-        scale: [0.8, 1, 0.8], // Oscillate between 1 and 1.2
+        scale: animatedScale, // Oscillate between 1 and 1.2
       }}
       transition={{
-        duration: 2, // Duration of one cycle
-        repeat: Infinity, // Infinite animation
+        duration: isHovered || isClicked ? 0.2 : 1.5, // Duration of one cycle
+        repeat: isHovered || isClicked ? 0 : Infinity, // Infinite animation
         repeatType: "reverse", // Reverse direction after each cycle
       }}
     >
-      <motion.path
-        style={{
-          opacity: opacity,
-          fill: OffWhiteColor,
-          transform: transform,
-        }}
-        onAnimationComplete={onAnimationComplete}
-        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
-      ></motion.path>
+      {yearClicked === null || isClicked ? (
+        <motion.path
+          style={{
+            opacity: opacity,
+            fill: OffWhiteColor,
+            transform: transform,
+          }}
+          onAnimationComplete={onAnimationComplete}
+          d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+        ></motion.path>
+      ) : (
+        <motion.path
+          style={{
+            opacity: opacity,
+            fill: OffWhiteColor,
+            transform: transform,
+          }}
+          onAnimationComplete={onAnimationComplete}
+          d="M12 17.5C8.2 17.5 4.8 15.4 3.2 12H1C2.7 16.4 7 19.5 12 19.5S21.3 16.4 23 12H20.8C19.2 15.4 15.8 17.5 12 17.5Z"
+        ></motion.path>
+      )}
     </motion.g>
   )
 }
@@ -542,7 +584,7 @@ function Tick({
   idx: number
   scrollYProgress: MotionValue<number>
 }) {
-  const range: [number, number] = [0.5 + idx * 0.02, 0.7 + idx * 0.02]
+  const range: [number, number] = [0.5 + idx * 0.01, 0.7 + idx * 0.01]
   const tickOpacity = usePlayAnimationOnce(scrollYProgress, range, [0, 1])
 
   return (

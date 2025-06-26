@@ -24,13 +24,13 @@ export const useSectionLifecycle = (
     if (!isMapReady) return
     if (isSectionActive) {
       if (!hasSeen.current) {
-        console.log("initialize stuff")
+        //console.log("initialize stuff")
         initRef.current()
         hasSeen.current = true
       }
       loadRef.current()
     } else if (hasSeen.current) {
-      console.log("unload stuff")
+      //console.log("unload stuff")
       unloadRef.current()
     }
   }, [isSectionActive, isMapReady]) // Only depend on isSectionActive

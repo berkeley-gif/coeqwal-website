@@ -1,12 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@repo/ui/mui"
-import { useCallback, useEffect, useRef, useState } from "react"
-import {
-  cityMapViewState,
-  stateMapViewState,
-  valleyMapViewState,
-} from "./helpers/mapViews"
+import { useEffect, useState } from "react"
 import { useMap } from "@repo/map"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
@@ -15,8 +10,12 @@ import { PeopleIcon, MoneyBagIcon, FarmIcon } from "./helpers/Icons"
 import React from "react"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { concentricTransform } from "./helpers/breakpoints"
-import { motion, useScroll, useTransform } from "@repo/motion"
-import { cityBoundaryLayerStyle } from "./helpers/mapLayerStyle"
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "@repo/motion"
 
 function SectionBenefits() {
   return (
@@ -69,79 +68,34 @@ const markers = [
 
 function City() {
   const storyline = useStoryStore((state) => state.storyline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.impact
-  const { sectionRef, isSectionActive } = useActiveSection("city", {
+  const { sectionRef } = useActiveSection("city", {
     amount: 0.5,
   })
-  const { flyTo, setPaintProperty, addSource, addLayer } = useMap()
-  const hasSeen = useRef(false)
+  const { setPaintProperty } = useMap()
   const [startAnimation, setStartAnimation] = useState(false)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
   const breakpoint = useBreakpoint()
-  const mapViewState = cityMapViewState[breakpoint]
+  const [hasSetMarkers, setHasSetMarkers] = useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
 
-  const init = useCallback(() => {
-    addSource("city-boundary", {
-      type: "vector",
-      url: "mapbox://coeqwal.7j5glhyx",
-    })
-    addLayer(
-      "city-boundary-layer",
-      "city-boundary",
-      cityBoundaryLayerStyle.type,
-      cityBoundaryLayerStyle.paint,
-      cityBoundaryLayerStyle.layout,
-      cityBoundaryLayerStyle.layer,
-    )
-  }, [addSource, addLayer])
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setTextMarkers(markers, "text")
-    setPaintProperty("canal-layer", "line-opacity", 0)
-    setPaintProperty("city-boundary-layer", "line-opacity", 1)
-  }, [flyTo, mapViewState, setTextMarkers, setPaintProperty])
-
-  useEffect(() => {
-    if (!isMapReady) return
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        init()
-        //console.log("initialize stuff")
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.3 && latest < 0.8) {
+      setPaintProperty("city-boundary-layer", "line-opacity", 1)
+      if (!hasSetMarkers) {
+        setTextMarkers(markers, "text")
+        setHasSetMarkers(true)
       }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log("unload stuff")
-        setTextMarkers([], "text")
-        setPaintProperty("city-boundary-layer", "line-opacity", 0)
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
+    } else if (latest < 0.3 || latest > 0.8) {
+      setPaintProperty("city-boundary-layer", "line-opacity", 0)
+      setTextMarkers([], "text")
+      setHasSetMarkers(false)
     }
-  }, [
-    isSectionActive,
-    load,
-    setTextMarkers,
-    isMapReady,
-    setPaintProperty,
-    init,
-  ])
+  })
 
   const sentenceOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1])
 
@@ -220,16 +174,12 @@ function City() {
 
 function Agriculture() {
   const storyline = useStoryStore((state) => state.storyline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.impact
-  const { sectionRef, isSectionActive } = useActiveSection("agriculture", {
+  const { sectionRef } = useActiveSection("agriculture", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
-  const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
-  const mapViewState = valleyMapViewState[breakpoint]
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -243,43 +193,9 @@ function Agriculture() {
       value: 59389887000,
       annotation: "59.3B",
     },
-    /*present: {
-      year: "in 2022 \u2014",
-      value: 132351395410,
-      annotation: "132B",
-    },*/
     icon: FarmIcon,
     title: "Yield",
   }
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-  }, [flyTo, mapViewState])
-
-  useEffect(() => {
-    if (!isMapReady) return
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        console.log("initialize stuff")
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        console.log("unload stuff")
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
-    }
-  }, [isSectionActive, load, isMapReady])
 
   const sentenceOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
 
@@ -335,16 +251,12 @@ function Agriculture() {
 
 function Economy() {
   const storyline = useStoryStore((state) => state.storyline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.impact.benefits
-  const { sectionRef, isSectionActive } = useActiveSection("economy", {
+  const { sectionRef } = useActiveSection("economy", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
-  const hasSeen = useRef(false)
   const [startAnimation, setStartAnimation] = useState(false)
   const breakpoint = useBreakpoint()
-  const mapViewState = stateMapViewState[breakpoint]
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -357,35 +269,6 @@ function Economy() {
     icon: MoneyBagIcon,
     title: "GDP",
   }
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-  }, [flyTo, mapViewState])
-
-  useEffect(() => {
-    if (!isMapReady) return
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log("initialize stuff")
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log("unload stuff")
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
-    }
-  }, [isSectionActive, load, isMapReady])
 
   const sentenceOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
 

@@ -2,18 +2,9 @@
 
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
 import { useCallback } from "react"
-import {
-  impactClimateMapViewState,
-  impactDeltaMapViewState,
-  impactDrinkingMapViewState,
-  impactGroundMapViewState,
-  impactSalmonMapViewState,
-} from "./helpers/mapViews"
-import { useMap } from "@repo/map"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
-import { useBreakpoint } from "@repo/ui/hooks"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import { SacramentoDelta, ShastaDam } from "./helpers/mapAnnotations"
 
@@ -77,9 +68,6 @@ function Salmon() {
   const { sectionRef, isSectionActive } = useActiveSection("impact-salmon", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = impactSalmonMapViewState[breakpoint]
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const { scrollYProgress } = useScroll({
@@ -88,13 +76,8 @@ function Salmon() {
   })
 
   const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-    })
     setTextMarkers([ShastaDam], "text")
-  }, [flyTo, mapViewState, setTextMarkers])
+  }, [setTextMarkers])
 
   const unload = useCallback(() => {
     setTextMarkers([], "text")
@@ -157,9 +140,6 @@ function Delta() {
   const { sectionRef, isSectionActive } = useActiveSection("impact-delta", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = impactDeltaMapViewState[breakpoint]
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
@@ -167,16 +147,8 @@ function Delta() {
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
     setTextMarkers([SacramentoDelta], "text")
-  }, [flyTo, mapViewState, setTextMarkers])
+  }, [setTextMarkers])
 
   useSectionLifecycle(
     isSectionActive,
@@ -248,9 +220,6 @@ function Groundwater() {
     "impact-groundwater",
     { amount: 0.5 },
   )
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = impactGroundMapViewState[breakpoint]
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
 
   const { scrollYProgress } = useScroll({
@@ -259,16 +228,8 @@ function Groundwater() {
   })
 
   const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
     setTextMarkers([], "text")
-  }, [flyTo, mapViewState, setTextMarkers])
+  }, [setTextMarkers])
 
   useSectionLifecycle(
     isSectionActive,
@@ -331,35 +292,14 @@ function Groundwater() {
 function Drinking() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.drinking
-  const { sectionRef, isSectionActive } = useActiveSection("impact-water", {
+  const { sectionRef } = useActiveSection("impact-water", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = impactDrinkingMapViewState[breakpoint]
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-  }, [flyTo, mapViewState])
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    load,
-    () => {},
-  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -402,35 +342,14 @@ function Drinking() {
 function Climate() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact.climate
-  const { sectionRef, isSectionActive } = useActiveSection("impact-climate", {
+  const { sectionRef } = useActiveSection("impact-climate", {
     amount: 0.5,
   })
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = impactClimateMapViewState[breakpoint]
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-  }, [flyTo, mapViewState])
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    load,
-    () => {},
-  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,

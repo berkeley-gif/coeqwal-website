@@ -98,6 +98,7 @@ export const precipitationPaintStyle = {
     "rgba(77, 166, 255, 0.3)",
     "rgba(77, 166, 255, 0.1)",
   ] as unknown as string,
+  "fill-opacity": 0,
   "fill-opacity-transition": {
     duration: 1000,
   } as unknown as string,
@@ -114,6 +115,7 @@ export const snowpackPaintStyle = {
     "rgba(172, 221, 233, 0.4)",
     "rgba(172, 221, 233, 0.2)",
   ] as unknown as string,
+  "fill-opacity": 0,
   "fill-opacity-transition": {
     duration: 1000,
   } as unknown as string,

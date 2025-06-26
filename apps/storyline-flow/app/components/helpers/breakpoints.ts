@@ -153,9 +153,9 @@ export const visibleIconTransform: Record<string, visibleIconTransformConfig> =
       belowY: "1.0em",
     },
     xl: {
-      x: "-0.45em",
-      aboveY: "-1.7em",
-      belowY: "0.7em",
+      x: "-0.48em",
+      aboveY: "-1.9em",
+      belowY: "0.9em",
     },
   }
 

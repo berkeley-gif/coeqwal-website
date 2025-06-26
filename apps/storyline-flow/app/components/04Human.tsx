@@ -2,10 +2,9 @@
 
 import { useMap } from "@repo/map"
 import { Box, Stack, Typography } from "@repo/ui/mui"
-import { canalLayerStyle, riverLayerStyle } from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useState } from "react"
 import { MarkerType } from "./helpers/mapMarkers"
 import { useFetchData } from "../hooks/useFetchData"
 import {
@@ -14,13 +13,13 @@ import {
   IrrigationTextLabels,
 } from "./helpers/mapAnnotations"
 import {
-  drinkingMapViewState,
-  goldRushMapViewState,
-  reclamationMapViewState,
-} from "./helpers/mapViews"
-import { useBreakpoint } from "@repo/ui/hooks"
-import { motion, useScroll, useTransform } from "@repo/motion"
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "@repo/motion"
 import { InfrastructureColor } from "./helpers/colorPalette"
+import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 
 const MotionTypography = motion.create(Typography)
 
@@ -47,56 +46,40 @@ function SectionHuman() {
 
 function Header({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.economy
   const { sectionRef, isSectionActive } = useActiveSection("goldrush", {
     amount: 0.5,
   })
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const hasSeen = useRef(false)
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = goldRushMapViewState[breakpoint]
+  const [hasSetMarkers, setHasSetMarkers] = useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
 
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-    })
-    setMarkers(markers, "rough-circle")
-    setTextMarkers(GoldRushTextLabels, "text")
-  }, [flyTo, markers, setMarkers, setTextMarkers, mapViewState])
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.2 && latest < 0.9 && !hasSetMarkers) {
+      setMarkers(markers, "rough-circle")
+      setTextMarkers(GoldRushTextLabels, "text")
+      setHasSetMarkers(true)
+      return
+    }
+  })
 
   const unload = useCallback(() => {
     setMarkers([], "rough-circle")
     setTextMarkers([], "text")
+    setHasSetMarkers(false)
   }, [setMarkers, setTextMarkers])
 
-  useEffect(() => {
-    if (!isMapReady) return
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log('unload stuff')
-        unload()
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
-    }
-  }, [isSectionActive, load, unload, isMapReady])
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    () => {},
+    unload,
+  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -139,67 +122,40 @@ function Header({ markers }: { markers: MarkerType[] }) {
 
 function Irrigation({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.economy.irrigation
   const { sectionRef, isSectionActive } = useActiveSection("irrigation", {
     amount: 0.5,
   })
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const hasSeen = useRef(false)
-  const { flyTo, setPaintProperty } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = reclamationMapViewState[breakpoint]
+  const [hasSetMarkers, setHasSetMarkers] = useState(false)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
 
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setMarkers(markers, "rough-circle")
-    setTextMarkers(IrrigationTextLabels, "text")
-    setPaintProperty("canal-layer", "line-opacity", 0)
-  }, [
-    flyTo,
-    markers,
-    setMarkers,
-    setTextMarkers,
-    mapViewState,
-    setPaintProperty,
-  ])
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.4 && latest < 0.9 && !hasSetMarkers) {
+      setMarkers(markers, "rough-circle")
+      setTextMarkers(IrrigationTextLabels, "text")
+      setHasSetMarkers(true)
+      return
+    }
+  })
 
   const unload = useCallback(() => {
     setMarkers([], "rough-circle")
     setTextMarkers([], "text")
+    setHasSetMarkers(false)
   }, [setMarkers, setTextMarkers])
 
-  useEffect(() => {
-    if (!isMapReady) return
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log('unload stuff')
-        unload()
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
-    }
-  }, [isSectionActive, load, unload, isMapReady])
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    () => {},
+    unload,
+  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,
@@ -237,89 +193,41 @@ function Irrigation({ markers }: { markers: MarkerType[] }) {
 
 function Drinking() {
   const storyline = useStoryStore((state) => state.storyline)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
   const content = storyline?.economy.drinking
   const { sectionRef, isSectionActive } = useActiveSection("drinking", {
     amount: 0.5,
   })
-  const { addSource, addLayer, setPaintProperty, flyTo } = useMap()
-  const hasSeen = useRef(false)
+  const { setPaintProperty } = useMap()
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const breakpoint = useBreakpoint()
-  const mapViewState = drinkingMapViewState[breakpoint]
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end center"],
   })
 
-  const init = useCallback(() => {
-    addSource("canal", {
-      type: "geojson",
-      data: "/rivers/drinking.geojson", //TODO: check this source
-    })
-
-    addLayer(
-      "canal-layer",
-      "canal",
-      canalLayerStyle.type,
-      canalLayerStyle.paint,
-      canalLayerStyle.layout,
-    )
-
-    addSource("river-combined", {
-      type: "vector",
-      url: "mapbox://coeqwal.0rzbpybk",
-    })
-
-    addLayer(
-      "river-combined-layer",
-      "river-combined",
-      riverLayerStyle.type,
-      riverLayerStyle.paint,
-      riverLayerStyle.layout,
-      riverLayerStyle.layer,
-    )
-  }, [addSource, addLayer])
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setPaintProperty("river-combined-layer", "line-opacity", 1)
-    setPaintProperty("canal-layer", "line-opacity", 1)
-    setTextMarkers(DrinkingTextLabels, "text")
-  }, [flyTo, setPaintProperty, setTextMarkers, mapViewState])
-
-  const unload = useCallback(() => {
-    setPaintProperty("river-combined-layer", "line-opacity", 0)
-    setTextMarkers([], "text")
-  }, [setPaintProperty, setTextMarkers])
-
-  useEffect(() => {
-    if (!isMapReady) return
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-        init()
-      }
-      hasSeen.current = true
-      load()
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.4 && latest < 1) {
+      setPaintProperty("river-combined-layer", "line-opacity", 1)
+      setPaintProperty("canal-layer", "line-opacity", 1)
+      return
     } else {
-      if (hasSeen.current) {
-        unload()
-        //console.log('unload stuff')
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
+      setPaintProperty("river-combined-layer", "line-opacity", 0)
+      if (latest < 0.4) {
+        setPaintProperty("canal-layer", "line-opacity", 0)
       }
     }
-  }, [isSectionActive, load, unload, init, isMapReady])
+  })
+
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    () => {
+      setTextMarkers(DrinkingTextLabels, "text")
+    },
+    () => {
+      setTextMarkers([], "text")
+    },
+  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,

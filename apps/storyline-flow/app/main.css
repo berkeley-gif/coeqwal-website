@@ -174,6 +174,14 @@ html{
     border-radius: 50%;
 }
 
+.overflow-text{
+    min-width: 0;
+    flex-shrink: 1;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
 /* source */
 
 #source-container{
@@ -247,8 +255,25 @@ html{
   }
   
 .section-circle.active {
-transform: scale(1.2); /* Slightly enlarge the active indicator */
+    transform: scale(1.2); /* Slightly enlarge the active indicator */
 }
+
+.glow-circle{
+    transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: pathGlowFlicker 3s ease-in-out infinite;
+}
+
+@keyframes pathGlowFlicker {
+    0%, 100% {
+      filter: drop-shadow(0 0 6px rgba(240, 240, 239, 0.9)) drop-shadow(0 0 12px rgba(240, 240, 239,  0.6));
+    }
+    25%, 70%{
+      filter: drop-shadow(0 0 4px rgba(240, 240, 239, 0.4)) drop-shadow(0 0 9px rgba(240, 240, 239,  0.2));
+    }
+    50% {
+      filter: drop-shadow(0 0 8px rgba(240, 240, 239, 0.6)) drop-shadow(0 0 14px rgba(240, 240, 239,  0.4));
+    }
+  }
 
 /* popup */
 .popup {

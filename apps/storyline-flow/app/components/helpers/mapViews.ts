@@ -6,7 +6,7 @@ interface MapViewState {
   pitch: number
 }
 
-interface ResponsiveMapViewState {
+export interface ResponsiveMapViewState {
   xs?: MapViewState
   sm?: MapViewState
   md?: MapViewState

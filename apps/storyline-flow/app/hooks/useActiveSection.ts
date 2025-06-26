@@ -21,13 +21,6 @@ const useActiveSection = (
     }
   }, [isInView, setActiveSection, sectionName])
 
-  // Triggers when first loading everyone, but later on works as expected
-  useEffect(() => {
-    if (!isSectionActive) {
-      //console.log("📝 section is now inactive:", sectionName);
-    }
-  }, [isSectionActive, sectionName])
-
   return {
     sectionRef,
     isSectionActive,

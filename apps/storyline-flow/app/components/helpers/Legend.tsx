@@ -54,8 +54,8 @@ const Legend: React.FC<UnderlineLegendProps> = ({
         variants={opacityVariants}
         initial="hidden"
         whileInView={"visible"}
-        transition={{ once: true }}
-        custom={0.5}
+        viewport={{ once: true }}
+        custom={0}
         style={{
           position: "absolute",
           padding: "1.5px",
@@ -93,8 +93,8 @@ const Legend: React.FC<UnderlineLegendProps> = ({
         variants={opacityVariants}
         initial="hidden"
         whileInView={"visible"}
-        transition={{ once: true }}
-        custom={0.7}
+        viewport={{ once: true }}
+        custom={0}
         style={{
           position: "absolute",
           bottom: -4,
