@@ -45,6 +45,7 @@ function Transformation() {
     if (latest > 0.4 && latest < 0.9) {
       setPaintProperty("canal-layer", "line-opacity", 1)
       setPaintProperty("delta-canal-layer", "line-opacity", 1)
+      setPaintProperty("nhd-rivers-layer", "line-opacity", 1)
       //setPaintProperty("river-sac-layer", "line-opacity", 1)
       //setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
       if (!hasSetMarkers) {
@@ -55,6 +56,7 @@ function Transformation() {
       setMarkers([], "dam")
       setHasSetMarkers(false)
       setPaintProperty("delta-canal-layer", "line-opacity", 0)
+      setPaintProperty("nhd-rivers-layer", "line-opacity", 0)
       //setPaintProperty("river-sac-layer", "line-opacity", 0)
       //setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
       if (latest > 0.9) {

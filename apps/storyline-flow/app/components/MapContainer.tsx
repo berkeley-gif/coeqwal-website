@@ -270,7 +270,7 @@ export default function MapContainer({
     // transformation
     addSource("delta-canal", {
       type: "vector",
-      url: "mapbox://coeqwal.104i13rb",
+      url: "mapbox://coeqwal.85rgmvo5",
     })
     addLayer(
       "delta-canal-layer",
@@ -278,7 +278,22 @@ export default function MapContainer({
       canalLayerStyle.type,
       canalLayerStyle.paint,
       canalLayerStyle.layout,
-      { "source-layer": "delta_canal-25v6sz" },
+      { "source-layer": "delta_canal_v2-8yjrvw" },
+    )
+    addSource("nhd-rivers", {
+      type: "vector",
+      url: "mapbox://coeqwal.al55aatu",
+    })
+    addLayer(
+      "nhd-rivers-layer",
+      "nhd-rivers",
+      riverLayerStyle.type,
+      {
+        ...riverLayerStyle.paint,
+        "line-width": 1,
+      },
+      riverLayerStyle.layout,
+      { "source-layer": "NHD_Major_Rivers-20250414T053-d0wqhi" },
     )
     // city
     addSource("city-boundary", {

@@ -1,7 +1,12 @@
 "use client"
 
 import React, { useMemo, useRef } from "react"
-import { motion, MotionValue, useTransform } from "@repo/motion"
+import {
+  motion,
+  MotionValue,
+  useMotionValueEvent,
+  useTransform,
+} from "@repo/motion"
 import "./pictogram.css"
 import { OffWhiteColor } from "../helpers/colorPalette"
 
@@ -40,6 +45,7 @@ function Pictogram({
   rowCount = 10,
 }: PictogramProps) {
   const svgRef = useRef<SVGSVGElement>(null)
+  const [displayStatus, setDisplayStatus] = React.useState("none")
 
   const setup = useMemo(() => {
     const totalOpacity = reversed ? 0.9 : 0.3
@@ -115,14 +121,23 @@ function Pictogram({
     [0, 1, 1, 0],
   )
 
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest < 0.1 || latest >= 1) {
+      setDisplayStatus("none")
+    } else {
+      setDisplayStatus("visible")
+    }
+  })
+
   return (
-    <div
+    <motion.div
       style={{
         width: size.width,
         height: size.height,
         position: "fixed",
         left: config.shift.left,
         top: config.shift.top,
+        display: displayStatus,
       }}
     >
       <svg ref={svgRef} width="100%" height="100%">
@@ -202,7 +217,7 @@ function Pictogram({
           )}
         </g>
       </svg>
-    </div>
+    </motion.div>
   )
 }
 
