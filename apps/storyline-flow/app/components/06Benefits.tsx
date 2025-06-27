@@ -6,6 +6,7 @@ import { useMap } from "@repo/map"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
 import ConcentricCircle from "./vis/ConcentricCircle"
+import Pictogram from "./vis/Pictogram"
 import { PeopleIcon, MoneyBagIcon, FarmIcon } from "./helpers/Icons"
 import React from "react"
 import { useBreakpoint } from "@repo/ui/hooks"
@@ -18,35 +19,15 @@ import {
 } from "@repo/motion"
 
 function SectionBenefits() {
+  const pictogram = true
+
   return (
     <>
-      <City />
+      {pictogram ? <CityPictogram /> : <CityConcentric />}
       <Agriculture />
       <Economy />
     </>
   )
-}
-
-const norCalData = {
-  past: { year: "in 1960 \u2014 ", value: 3373827, annotation: "3.37M" },
-  present: {
-    year: "in 2024 \u2014",
-    value: 6551627 * 2.5,
-    annotation: "6.55M",
-  },
-  icon: PeopleIcon,
-  title: "SF Bay",
-}
-
-const soCalData = {
-  past: { year: "in 1960 \u2014 ", value: 9007878, annotation: "9.00M" },
-  present: {
-    year: "in 2024 \u2014",
-    value: 22095061 * 2.5,
-    annotation: "22.01M",
-  },
-  icon: PeopleIcon,
-  title: "SoCal",
 }
 
 const markers = [
@@ -66,7 +47,173 @@ const markers = [
   },
 ]
 
-function City() {
+function CityPictogram() {
+  const storyline = useStoryStore((state) => state.storyline)
+  const content = storyline?.impact
+  const { sectionRef } = useActiveSection("city", {
+    amount: 0.2,
+  })
+  const { setPaintProperty } = useMap()
+  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+  const breakpoint = useBreakpoint() as keyof typeof pictogramTransform
+  const [hasSetMarkers, setHasSetMarkers] = useState(false)
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
+
+  const norCalData = {
+    past: { year: "in 1960 \u2014 ", value: 3373827, annotation: "3.37M" },
+    present: {
+      year: "in 2024 \u2014",
+      value: 6551627,
+      annotation: "6.55M",
+    },
+    icon: PeopleIcon,
+    title: "SF Bay",
+  }
+
+  const soCalData = {
+    past: { year: "in 1960 \u2014 ", value: 9007878, annotation: "9.00M" },
+    present: {
+      year: "in 2024 \u2014",
+      value: 22095061,
+      annotation: "22.01M",
+    },
+    icon: PeopleIcon,
+    title: "SoCal",
+  }
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.2 && latest < 0.95) {
+      setPaintProperty("city-boundary-layer", "line-opacity", 1)
+      if (!hasSetMarkers) {
+        setTextMarkers(markers, "text")
+        setHasSetMarkers(true)
+      }
+    } else if (latest < 0.2 || latest > 0.95) {
+      setPaintProperty("city-boundary-layer", "line-opacity", 0)
+      setTextMarkers([], "text")
+      setHasSetMarkers(false)
+    }
+  })
+
+  const sentenceOpacity = useTransform(scrollYProgress, [0.1, 0.3], [0, 1])
+
+  const pictogramTransform = {
+    lg: {
+      norcal: {
+        shift: {
+          left: "38%",
+          top: "2%",
+        },
+        scale: "scale(0.6)",
+        iconSize: 24,
+        spacing: 2,
+      },
+      socal: {
+        shift: {
+          left: "61%",
+          top: "37%",
+        },
+        scale: "scale(0.6)",
+        iconSize: 24,
+        spacing: 2,
+      },
+    },
+    xl: {
+      norcal: {
+        shift: {
+          left: "45%",
+          top: "2%",
+        },
+        scale: "scale(0.8)",
+        iconSize: 32,
+        spacing: 2.5,
+      },
+      socal: {
+        shift: {
+          left: "60%",
+          top: "40%",
+        },
+        scale: "scale(0.8)",
+        iconSize: 32,
+        spacing: 2.5,
+      },
+    },
+  }
+
+  return (
+    <Box
+      height="auto"
+      width="100%"
+      sx={{
+        position: "relative",
+      }}
+      tabIndex={-1}
+      role="region"
+    >
+      <Box ref={sectionRef} height="150vh" width="100%"></Box>
+
+      <Box
+        className="sticky-container container"
+        sx={{ justifyContent: "center" }}
+      >
+        <Pictogram
+          partialValue={norCalData.past.value}
+          totalValue={norCalData.present.value}
+          partialLabel={"in 1960 \u2014 3.37M"}
+          totalLabel={"in 2024 \u2014 6.55M"}
+          size={{ width: 600, height: 300 }}
+          config={pictogramTransform[breakpoint]?.norcal}
+          scrollYProgress={scrollYProgress}
+        />
+        <motion.div
+          className="paragraph"
+          style={{ opacity: sentenceOpacity, marginTop: "5rem" }}
+        >
+          <Typography>{content?.benefits.p1}</Typography>
+          <Typography variant="caption">
+            Data source:{" "}
+            <a
+              href="https://www2.census.gov/library/publications/decennial/1960/population-volume-1/vol-01-06-c.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              1960
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://www.census.gov/quickfacts/geo/chart/santaclaracountycalifornia/PST045224"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              2024
+            </a>{" "}
+            from the U.S. Census Bureau.
+          </Typography>
+          <Typography variant="caption">
+            {" Each icon represents 1 million people."}
+          </Typography>
+        </motion.div>
+        <Pictogram
+          partialValue={soCalData.past.value}
+          totalValue={soCalData.present.value}
+          partialLabel={"in 1960 \u2014 9.00M"}
+          totalLabel={"in 2024 \u2014 22.01M"}
+          size={{ width: 600, height: 320 }}
+          config={pictogramTransform[breakpoint]?.socal}
+          scrollYProgress={scrollYProgress}
+        />
+      </Box>
+    </Box>
+  )
+}
+
+function CityConcentric() {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.impact
   const { sectionRef } = useActiveSection("city", {
@@ -82,6 +229,28 @@ function City() {
     target: sectionRef,
     offset: ["start end", "end center"],
   })
+
+  const norCalData = {
+    past: { year: "in 1960 \u2014 ", value: 3373827, annotation: "3.37M" },
+    present: {
+      year: "in 2024 \u2014",
+      value: 6551627 * 2.5,
+      annotation: "6.55M",
+    },
+    icon: PeopleIcon,
+    title: "SF Bay",
+  }
+
+  const soCalData = {
+    past: { year: "in 1960 \u2014 ", value: 9007878, annotation: "9.00M" },
+    present: {
+      year: "in 2024 \u2014",
+      value: 22095061 * 2.5,
+      annotation: "22.01M",
+    },
+    icon: PeopleIcon,
+    title: "SoCal",
+  }
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (latest > 0.3 && latest < 0.8) {
@@ -151,7 +320,10 @@ function City() {
           >
             2024
           </a>{" "}
-          from the U.S. Census Bureau
+          from the U.S. Census Bureau.
+        </Typography>
+        <Typography variant="caption">
+          {" The circle radius linearly scales with the growth rate."}
         </Typography>
       </motion.div>
       <ConcentricCircle
@@ -186,7 +358,7 @@ function Agriculture() {
     offset: ["start end", "end center"],
   })
 
-  const almondData = {
+  const prodData = {
     past: { year: "in 1980 \u2014", value: 13987139000, annotation: "14B" },
     present: {
       year: "in 2023 \u2014",
@@ -228,7 +400,10 @@ function Agriculture() {
           >
             United States Department of Agriculture
           </a>{" "}
-          in current dollars
+          in current dollars.
+        </Typography>
+        <Typography variant="caption">
+          {" The circle radius linearly scales with the growth rate."}
         </Typography>
       </motion.div>
       <ConcentricCircle
@@ -238,7 +413,7 @@ function Agriculture() {
             height: 0,
           }
         }
-        data={almondData}
+        data={prodData}
         shift={concentricTransform[breakpoint]?.agriculture?.shift ?? [0, 0]}
         clipId="almond"
         delay={1}
@@ -301,7 +476,10 @@ function Economy() {
           >
             U.S. Bureau of Economic Analysis
           </a>{" "}
-          in current dollars
+          in current dollars.
+        </Typography>
+        <Typography variant="caption">
+          {" The circle radius linearly scales with the growth rate."}
         </Typography>
       </motion.div>
       <ConcentricCircle

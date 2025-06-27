@@ -296,6 +296,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
       }
     },
 
+    project: (lng: number, lat: number) => {
+      const map = mapRef.current?.getMap()
+      if (!map) {
+        console.warn("project called but mapRef is null")
+        return null
+      }
+      try {
+        return map.project([lng, lat])
+      } catch (err) {
+        console.error(`Failed to project coordinates (${lng}, ${lat}):`, err)
+        return null
+      }
+    },
+
     setMarkers: (newMarkers) => {
       setMarkersState(newMarkers)
     },

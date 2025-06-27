@@ -64,6 +64,7 @@ function ConcentricCircle({
   }, [size, shift])
 
   const growth = data.present.value / data.past.value
+  //const growth = Math.sqrt(data.present.value / data.past.value)
 
   return (
     <svg width="100%" height="100%">

@@ -1,6 +1,12 @@
 .pictogram-line{
     stroke: #f2f0ef;
-    stroke-width: 7px
+    stroke-width: 5px
+}
+
+.pictogram-title{
+    font-size: 1.3rem;
+    text-anchor: start;
+    dominant-baseline: middle
 }
 
 .pictogram-label{

@@ -53,7 +53,7 @@ export function DamLayer({ markers }: { markers: MarkerType[] }) {
             }}
           >
             <polygon
-              points={`0,${height} ${width / 2},0 ${width},${height}`}
+              points={`${width / 2},${height} 0,0 ${width},0`}
               fill={InfrastructureColor} // Darker blue color for dams
               strokeWidth="1"
             />

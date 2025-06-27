@@ -8,7 +8,7 @@ interface IconProps {
 }
 
 //TODO: figure out scaling
-function PeopleIcon({
+function PeoplePictogramIcon({
   fillPercentage = 100,
   size = 50,
   reversed = false,
@@ -53,4 +53,4 @@ function PeopleIcon({
   )
 }
 
-export default PeopleIcon
+export default PeoplePictogramIcon

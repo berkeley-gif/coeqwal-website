@@ -1,30 +1,27 @@
 "use client"
 
-import React, { useRef, useEffect, useState } from "react"
-import { Box } from "@repo/ui/mui"
-import { motion } from "@repo/motion"
-import {
-  labelVariants,
-  axisVariants,
-  popUpVariants,
-} from "@repo/motion/variants"
+import React, { useMemo, useRef } from "react"
+import { motion, MotionValue, useTransform } from "@repo/motion"
 import "./pictogram.css"
+import { OffWhiteColor } from "../helpers/colorPalette"
 
 interface PictogramProps {
   partialValue: number
   totalValue: number
+  partialLabel: string
+  totalLabel: string
+  iconSize?: number
+  size: { width: number; height: number }
+  config: {
+    shift: { left: string; top: string }
+    scale: string
+    iconSize: number
+    spacing: number
+  }
+  scrollYProgress: MotionValue<number>
   unit?: number
-  size?: number
-  title?: string
   rowCount?: number
   reversed?: boolean
-  labels?: string[]
-  Icon: React.FC<{
-    fillPercentage?: number
-    size?: number
-    reversed?: boolean
-    style?: React.CSSProperties
-  }>
 }
 
 //TODO" don't use pure white
@@ -32,180 +29,362 @@ interface PictogramProps {
 function Pictogram({
   partialValue,
   totalValue,
-  Icon,
-  unit = 1,
-  size = 50,
-  title = "Pictogram",
-  reversed = false,
+  partialLabel,
+  totalLabel,
+  scrollYProgress,
+  size,
+  config,
+  iconSize = 16,
+  unit = 1000000,
+  reversed = true,
   rowCount = 10,
-  labels = [],
 }: PictogramProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [border, setBorder] = useState({ x: 0, y: 0, width: 0, height: 0 })
+  const svgRef = useRef<SVGSVGElement>(null)
 
-  const totalOpacity = reversed ? 1 : 0.5
-  const partialOpacity = reversed ? 0.5 : 1
-  const numerator = parseFloat((partialValue / unit).toFixed(2)) // Number of filled icons
-  const denominator = parseFloat((totalValue / unit).toFixed(2))
+  const setup = useMemo(() => {
+    const totalOpacity = reversed ? 0.9 : 0.3
+    const partialOpacity = reversed ? 0.3 : 0.9
+    const numerator = parseFloat((partialValue / unit).toFixed(2)) // Number of filled icons
+    const denominator = parseFloat((totalValue / unit).toFixed(2))
 
-  const totalRoundUp = Math.floor(denominator) // Complete icons
-  const totalFraction = parseFloat((denominator - totalRoundUp).toFixed(2)) // Whether there are incomplete
-  const iconCount = totalRoundUp + (totalFraction > 0 ? 1 : 0)
+    const totalRoundUp = Math.floor(denominator) // Complete icons
+    const totalFraction = parseFloat((denominator - totalRoundUp).toFixed(2)) // Whether there are incomplete
+    const iconCount = totalRoundUp + (totalFraction > 0 ? 1 : 0)
 
-  const filledRoundUp = Math.floor(numerator) // Complete icons
-  const filledFraction = parseFloat((numerator - filledRoundUp).toFixed(2)) // Whether there are incomplete
+    const filledRoundUp = Math.floor(numerator) // Complete icons
+    const filledFraction = parseFloat((numerator - filledRoundUp).toFixed(2)) // Whether there are incomplete
 
-  const icons = Array.from({ length: iconCount }, (_, index) => index)
+    const icons = Array.from({ length: iconCount }, (_, index) => index)
 
-  const layout: number[][] = []
-  for (let i = 0; i < icons.length; i += rowCount) {
-    layout.push(icons.slice(i, i + rowCount))
-  }
+    const layout: number[][] = []
+    for (let i = 0; i < icons.length; i += rowCount) {
+      layout.push(icons.slice(i, i + rowCount))
+    }
+    return {
+      totalOpacity,
+      partialOpacity,
+      totalRoundUp,
+      totalFraction,
+      filledRoundUp,
+      filledFraction,
+      icons,
+      layout,
+      iconCount,
+    }
+  }, [partialValue, totalValue, unit, reversed, rowCount])
 
   const decideDisplay = (iconIdx: number): [number, number] => {
     let fill = 100
-    let opacity = totalOpacity
+    let opacity = setup.totalOpacity
     //console.log(count, filledRoundUp, filledFraction, totalRoundUp, totalFraction)
-    if (iconIdx < filledRoundUp) {
-      opacity = partialOpacity
-    } else if (iconIdx === filledRoundUp && filledFraction > 0) {
-      fill = filledFraction * 100
-      opacity = partialOpacity
-    } else if (iconIdx === totalRoundUp && totalFraction > 0) {
-      fill = totalFraction * 100
-      opacity = totalOpacity
+    if (iconIdx < setup.filledRoundUp) {
+      opacity = setup.partialOpacity
+    } else if (iconIdx === setup.filledRoundUp && setup.filledFraction > 0) {
+      fill = setup.filledFraction * 100
+      opacity = setup.partialOpacity
+    } else if (iconIdx === setup.totalRoundUp && setup.totalFraction > 0) {
+      fill = setup.totalFraction * 100
+      opacity = setup.totalOpacity
     }
     return [fill, opacity]
   }
 
-  useEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect()
-      setBorder(rect)
-    }
-  }, [])
+  const iconSpacing = iconSize * config.spacing
+  const layoutHeight = setup.layout.length * iconSpacing
+  const layoutWidth =
+    Math.min(rowCount, Math.max(...setup.layout.map((row) => row.length))) *
+    iconSpacing
+
+  const svgHeight = size.height
+  const svgWidth = size.width
+  const verticalOffset = (svgHeight - layoutHeight) / 2
+  const horizontalOffset = (svgWidth - layoutWidth) / 2
+
+  const lineX = horizontalOffset - iconSpacing
+  const lineStartY = verticalOffset - iconSpacing * 1
+  const lineEndY = verticalOffset + layoutHeight + iconSpacing * 1
+
+  const backgroundRectGrowth = useTransform(
+    scrollYProgress,
+    [0.35, 0.55, 0.9, 1],
+    ["0%", "90%", "90%", "0%"],
+  )
+  const backgroundLineGrowth = useTransform(
+    scrollYProgress,
+    [0.35, 0.55, 0.9, 1],
+    [0, 1, 1, 0],
+  )
 
   return (
-    <Box
+    <div
       style={{
-        display: "flex",
-        width: "100%",
-        height: "100%",
-        alignItems: "center",
+        width: size.width,
+        height: size.height,
+        position: "fixed",
+        left: config.shift.left,
+        top: config.shift.top,
       }}
     >
-      <Box
-        ref={ref}
-        style={{ display: "flex", width: "10rem", height: "100%" }}
-      >
-        <svg width="100%" height="100%">
-          <motion.text
-            className="pictogram-label"
-            y="50%"
-            x="85%"
-            variants={labelVariants}
-            initial="hidden"
-            whileInView="visible"
+      <svg ref={svgRef} width="100%" height="100%">
+        <defs>
+          <clipPath
+            id={`clip-${setup.filledFraction * 100}-reversed`}
+            clipPathUnits="objectBoundingBox"
           >
-            {title}
-          </motion.text>
-          {labels.map((label, idx) => (
-            <motion.text
+            <rect
+              x={setup.filledFraction}
+              y={0}
+              width={1 - setup.filledFraction}
+              height={1}
+            />
+          </clipPath>
+          {[setup.filledFraction, setup.totalFraction].map((fraction, idx) => (
+            <clipPath
+              id={`clip-${fraction * 100}`}
+              clipPathUnits="objectBoundingBox"
               key={idx}
-              y="50%"
-              x="85%"
-              dy={`${(idx + 1) * 1.5 + 1}rem`}
-              className="pictogram-city-label"
             >
-              {label}
-            </motion.text>
+              <rect x={0} y={0} width={fraction} height={1} />
+            </clipPath>
           ))}
-          <motion.line
-            x1={border.width}
-            x2={border.width}
-            y2={border.height}
-            y1={0}
-            className="pictogram-line"
-            variants={axisVariants}
-            initial="hidden"
-            whileInView="visible"
-          ></motion.line>
-        </svg>
-      </Box>
-      <Box style={{ margin: 20 }}>
-        {layout.map((row, idx) => (
-          <div key={idx} style={{ display: "flex" }}>
-            {row.map((iconIdx) => {
+        </defs>
+
+        <motion.rect
+          x={lineX - 2.5}
+          y={lineStartY}
+          width={backgroundRectGrowth}
+          height={lineEndY - lineStartY}
+          fill="#1a447280"
+        />
+        <motion.line
+          x1={lineX}
+          x2={lineX}
+          y1={lineStartY}
+          y2={lineEndY}
+          pathLength={backgroundLineGrowth}
+          className="pictogram-line"
+        ></motion.line>
+
+        <g transform={`translate(${horizontalOffset}, ${verticalOffset})`}>
+          {setup.layout.map((row) =>
+            row.map((iconIdx) => {
               const [percentage, opacity] = decideDisplay(iconIdx)
-              if (iconIdx === filledRoundUp && filledFraction > 0) {
-                return (
-                  <motion.div
-                    variants={popUpVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    custom={iconIdx}
-                    key={iconIdx}
-                    style={{ position: "relative", width: size, height: size }}
-                  >
-                    {totalOpacity < partialOpacity && (
-                      <Icon
-                        fillPercentage={100 - percentage}
-                        reversed={true}
-                        size={size}
-                        style={{
-                          opacity: totalOpacity,
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                        }}
-                      />
-                    )}
-                    <Icon
-                      fillPercentage={percentage}
-                      size={size}
-                      style={{
-                        opacity: opacity,
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                      }}
-                    />
-                    {partialOpacity < totalOpacity && (
-                      <Icon
-                        fillPercentage={100 - percentage}
-                        reversed={true}
-                        size={size}
-                        style={{
-                          opacity: totalOpacity,
-                          position: "absolute",
-                          top: 0,
-                          left: 0,
-                        }}
-                      />
-                    )}
-                  </motion.div>
-                )
-              }
+              const x = (iconIdx % rowCount) * iconSpacing
+              const y = Math.floor(iconIdx / rowCount) * iconSpacing
+
+              const isFractional =
+                (iconIdx === setup.filledRoundUp && setup.filledFraction > 0) ||
+                (iconIdx === setup.totalRoundUp && setup.totalFraction > 0)
+              const isLastIcon = iconIdx === setup.iconCount - 1
+
+              const clipPath = isFractional ? `url(#clip-${percentage})` : ""
+
               return (
-                <motion.div
+                <IconContainer
                   key={iconIdx}
-                  variants={popUpVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  custom={iconIdx}
-                >
-                  <Icon
-                    fillPercentage={percentage}
-                    size={size}
-                    style={{ opacity: opacity }}
-                  />
-                </motion.div>
+                  idx={iconIdx}
+                  scrollYProgress={scrollYProgress}
+                  config={config}
+                  clipPath={clipPath}
+                  percentage={percentage}
+                  opacity={opacity}
+                  isFractional={isFractional}
+                  isLastIcon={isLastIcon}
+                  x={x}
+                  y={y}
+                  partialLabel={partialLabel}
+                  totalLabel={totalLabel}
+                  partialCount={setup.filledRoundUp}
+                  totalCount={setup.totalRoundUp}
+                />
               )
-            })}
-          </div>
-        ))}
-      </Box>
-    </Box>
+            }),
+          )}
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+function IconContainer({
+  idx,
+  scrollYProgress,
+  config,
+  clipPath,
+  percentage,
+  opacity,
+  isFractional,
+  isLastIcon,
+  x,
+  y,
+  partialLabel,
+  totalLabel,
+  partialCount,
+  totalCount,
+}: {
+  idx: number
+  scrollYProgress: MotionValue<number>
+  config: {
+    shift: { left: string; top: string }
+    scale: string
+    iconSize: number
+    spacing: number
+  }
+  clipPath?: string
+  percentage: number
+  opacity: number
+  isFractional?: boolean
+  isLastIcon?: boolean
+  x: number
+  y: number
+  partialLabel?: string
+  totalLabel?: string
+  partialCount: number
+  totalCount: number
+}) {
+  const partialGrowth = useTransform(
+    scrollYProgress,
+    [0.4 + 0.01 * partialCount, 0.5 + 0.01 * partialCount, 0.9, 1],
+    [
+      "inset(100% 0 0 0)",
+      "inset(0 0 0 0)",
+      "inset(0 0 0 0)",
+      "inset(100% 0 0 0)",
+    ],
+  )
+  const partialOpacity = useTransform(
+    scrollYProgress,
+    [0.4 + 0.01 * partialCount, 0.5 + 0.01 * partialCount, 0.9, 1],
+    [0, 1, 1, 0],
+  )
+
+  const totalGrowth = useTransform(
+    scrollYProgress,
+    [0.5 + 0.01 * totalCount, 0.6 + 0.01 * totalCount, 0.9, 1],
+    [
+      "inset(100% 0 0 0)",
+      "inset(0 0 0 0)",
+      "inset(0 0 0 0)",
+      "inset(100% 0 0 0)",
+    ],
+  )
+  const totalOpacity = useTransform(
+    scrollYProgress,
+    [0.5 + 0.01 * totalCount, 0.6 + 0.01 * totalCount, 0.9, 1],
+    [0, 1, 1, 0],
+  )
+
+  return (
+    <>
+      <PeopleIcon
+        idx={idx}
+        scrollYProgress={scrollYProgress}
+        clipPath={clipPath}
+        transform={`translate(${x}, ${y}) ${config.scale}`}
+        opacity={opacity}
+      />
+      {isFractional && !isLastIcon && (
+        <>
+          <PeopleIcon
+            idx={idx}
+            scrollYProgress={scrollYProgress}
+            clipPath={`url(#clip-${percentage}-reversed)`}
+            transform={`translate(${x}, ${y}) ${config.scale}`}
+            opacity={1}
+          />
+          <motion.line
+            x1={x + (config.iconSize * percentage) / 100}
+            y1={y + config.iconSize}
+            x2={x + (config.iconSize * percentage) / 100}
+            y2={y - 30}
+            style={{ clipPath: partialGrowth }}
+            stroke="#f2f0ef"
+            strokeWidth="2"
+            strokeDasharray="2,2"
+          />
+          <motion.text
+            fontSize="1rem"
+            x={x + (config.iconSize * percentage) / 100}
+            y={y - 30}
+            dx="-0.5rem"
+            style={{
+              dominantBaseline: "middle",
+              textAnchor: "end",
+              opacity: partialOpacity,
+            }}
+            dy="0.7rem"
+          >
+            {partialLabel}
+          </motion.text>
+        </>
+      )}
+      {isLastIcon && (
+        <>
+          <motion.line
+            x1={x + (config.iconSize * percentage) / 100}
+            y1={y}
+            x2={x + (config.iconSize * percentage) / 100}
+            y2={y + config.iconSize + 30}
+            style={{ clipPath: totalGrowth }}
+            stroke="#f2f0ef"
+            strokeWidth="2"
+            strokeDasharray="2,2"
+          />
+          <motion.text
+            fontSize="1rem"
+            x={x + (config.iconSize * percentage) / 100}
+            y={y + config.iconSize}
+            dx="0.5rem"
+            style={{
+              dominantBaseline: "middle",
+              textAnchor: "start",
+              fontWeight: "bold",
+              opacity: totalOpacity,
+            }}
+            dy="1rem"
+          >
+            {totalLabel}
+          </motion.text>
+        </>
+      )}
+    </>
+  )
+}
+
+function PeopleIcon({
+  idx,
+  scrollYProgress,
+  transform,
+  opacity,
+  clipPath = "",
+  fill = OffWhiteColor,
+}: {
+  idx: number
+  scrollYProgress: MotionValue<number>
+  transform: string
+  opacity: number
+  clipPath?: string
+  fill?: string
+}) {
+  const growth = useTransform(
+    scrollYProgress,
+    [0.35 + 0.01 * idx, 0.55 + 0.01 * idx, 0.9, 1],
+    [0, 1, 1, 0],
+  )
+
+  return (
+    <g transform={transform}>
+      <motion.g style={{ opacity, scale: growth }} clipPath={clipPath}>
+        <path
+          d="M10 10C10 4.475 14.475 0 20 0C25.525 0 30 4.475 30 10C30 15.525 25.525 20 20 20C14.475 20 10 15.525 10 10Z"
+          fill={fill}
+        />
+        <path
+          d="M20 25C8.95 25 0 29.5 0 35V40H40V35C40 29.5 31.05 25 20 25Z"
+          fill={fill}
+        />
+      </motion.g>
+    </g>
   )
 }
 

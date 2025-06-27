@@ -47,7 +47,7 @@ function SectionHuman() {
 function Header({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy
-  const { sectionRef, isSectionActive } = useActiveSection("goldrush", {
+  const { sectionRef } = useActiveSection("goldrush", {
     amount: 0.5,
   })
   const setMarkers = useStoryStore((state) => state.setMarkers)
@@ -65,21 +65,12 @@ function Header({ markers }: { markers: MarkerType[] }) {
       setTextMarkers(GoldRushTextLabels, "text")
       setHasSetMarkers(true)
       return
+    } else if (latest < 0.2 || latest > 0.9) {
+      setMarkers([], "rough-circle")
+      setTextMarkers([], "text")
+      setHasSetMarkers(false)
     }
   })
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setTextMarkers([], "text")
-    setHasSetMarkers(false)
-  }, [setMarkers, setTextMarkers])
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {},
-    unload,
-  )
 
   const firstParagraphOpacity = useTransform(
     scrollYProgress,

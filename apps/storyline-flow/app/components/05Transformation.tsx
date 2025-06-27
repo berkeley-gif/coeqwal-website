@@ -45,6 +45,8 @@ function Transformation() {
     if (latest > 0.4 && latest < 0.9) {
       setPaintProperty("canal-layer", "line-opacity", 1)
       setPaintProperty("delta-canal-layer", "line-opacity", 1)
+      //setPaintProperty("river-sac-layer", "line-opacity", 1)
+      //setPaintProperty("river-sanjoaquin-layer", "line-opacity", 1)
       if (!hasSetMarkers) {
         setHasSetMarkers(true)
         setMarkers(DAMS, "dam")
@@ -53,6 +55,8 @@ function Transformation() {
       setMarkers([], "dam")
       setHasSetMarkers(false)
       setPaintProperty("delta-canal-layer", "line-opacity", 0)
+      //setPaintProperty("river-sac-layer", "line-opacity", 0)
+      //setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
       if (latest > 0.9) {
         setPaintProperty("canal-layer", "line-opacity", 0)
       }
@@ -131,7 +135,14 @@ function Transformation() {
               <span style={{ fontWeight: "bold", color: InfrastructureColor }}>
                 {content?.p22}
               </span>{" "}
-              {content?.p23}
+              {
+                //content?.p23
+                "water behind "
+              }
+              <span style={{ color: InfrastructureColor }}>
+                {"dams \u25bc"}
+              </span>{" "}
+              {"in the wet season, so it can be released later in the year."}
             </MotionTypography>
             <MotionTypography style={{ opacity: thirdParagraphOpacity }}>
               {content?.p31}{" "}

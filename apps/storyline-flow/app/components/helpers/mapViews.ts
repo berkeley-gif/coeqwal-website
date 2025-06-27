@@ -152,7 +152,7 @@ export const drinkingMapViewState: ResponsiveMapViewState = {
 
 export const cityMapViewState: ResponsiveMapViewState = {
   lg: {
-    longitude: -122.8427,
+    longitude: -120.3427,
     latitude: 35.808,
     zoom: 5.8,
     bearing: 0,
