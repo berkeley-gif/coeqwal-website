@@ -27,6 +27,7 @@ import SectionTransformation from "./components/05Transformation"
 import SectionBenefits from "./components/06Benefits"
 import SectionImpact from "./components/07Impact"
 import Conclusion from "./components/08Conclusion"
+import { FloatImageTooltip } from "./components/helpers/Tooltip"
 
 const MotionBox = motion.create(Box)
 
@@ -38,16 +39,26 @@ export default function StoryContainer() {
   const fetchStoryline = useStoryStore((state) => state.fetchStoryline)
   const isMapReady = useStoryStore((state) => state.isMapReady)
   const setMapReady = useStoryStore((state) => state.setMapReady)
+  const tooltipContent = useStoryStore((state) => state.tooltipContent)
+  const setTooltipContent = useStoryStore((state) => state.setTooltipContent)
 
   useEffect(() => {
     fetchStoryline()
   }, [fetchStoryline])
+
+  const closeTooltip = () => setTooltipContent(null)
 
   return (
     <>
       <AnimatePresence>{!isMapReady && <Loader />}</AnimatePresence>
       <HeaderStory />
       <SectionIndicator />
+      {tooltipContent && (
+        <>
+          <div onClick={closeTooltip} className="popup-closer"></div>
+          <FloatImageTooltip marker={tooltipContent} />
+        </>
+      )}
       <Box
         sx={{
           // This chunk has to be here, so that the scroll bar works as expected ?!?!?!

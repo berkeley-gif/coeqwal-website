@@ -17,6 +17,7 @@ interface StoryState {
   }
   breakpoint: string
   selectedMonthSnowpack: string
+  tooltipContent: MarkerType | null
   setActiveSection: (section: string) => void
   setMapReady: (isReady: boolean) => void
   fetchStoryline: () => Promise<void>
@@ -25,6 +26,7 @@ interface StoryState {
   setTextMarkers: (markers: MarkerType[], style: string) => void
   setBreakpoint: (breakpoint: string) => void
   setSelectedMonthSnowpack: (month: string) => void
+  setTooltipContent: (content: MarkerType | null) => void
 }
 
 const useStoryStore = create<StoryState>((set) => {
@@ -37,6 +39,7 @@ const useStoryStore = create<StoryState>((set) => {
     textMarkerLayer: { points: [], style: "text" },
     breakpoint: "xl",
     selectedMonthSnowpack: "10",
+    tooltipContent: null,
     setActiveSection: (section: string) => set({ activeSection: section }),
     setMapReady: (isReady: boolean) => set({ isMapReady: isReady }),
     markSectionAsLoaded: (section: string) =>
@@ -64,6 +67,8 @@ const useStoryStore = create<StoryState>((set) => {
     setBreakpoint: (breakpoint: string) => set({ breakpoint: breakpoint }),
     setSelectedMonthSnowpack: (month: string) =>
       set({ selectedMonthSnowpack: month }),
+    setTooltipContent: (content: MarkerType | null) =>
+      set({ tooltipContent: content }),
   }
 })
 

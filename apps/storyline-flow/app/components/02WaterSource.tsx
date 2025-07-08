@@ -148,11 +148,13 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   })
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const [currentPoints, setCurrentPoints] = useState<MarkerType[]>([])
+  const setTooltipContent = useStoryStore((state) => state.setTooltipContent)
 
   const getSelectedYear = (year: string) => {
     const points = markers[year] || []
     setMarkers(points, "rough-circle")
     setCurrentPoints(points)
+    setTooltipContent(points[0] || null) // Set the first point as tooltip content
   }
 
   useSectionLifecycle(

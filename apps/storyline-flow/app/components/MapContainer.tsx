@@ -5,10 +5,10 @@ import { Map, useMap, MapRef } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import * as mapViews from "./helpers/mapViews"
 import {
-  CarouselLayer,
   DamLayer,
   TextMarker,
   TextMarkersLayer,
+  TooltipLayer,
 } from "./helpers/mapMarkers"
 import { AnimatePresence } from "@repo/motion"
 import useStoryStore from "../store"
@@ -341,7 +341,7 @@ export default function MapContainer({
     (activeSection: string) => {
       switch (activeSection) {
         case "precipitation":
-          console.log("why didnt work")
+          //console.log("why didnt work")
           //setPaintProperty("precipitation-vector-layer", "fill-opacity", 1)
           return
         case "snowpack":
@@ -351,7 +351,7 @@ export default function MapContainer({
           ] as unknown as string)
           return
         default:
-          console.log("testing", activeSection)
+          //console.log("testing", activeSection)
           return
       }
     },
@@ -434,7 +434,8 @@ export default function MapContainer({
       >
         <AnimatePresence>
           {markerLayer.style === "rough-circle" && (
-            <CarouselLayer markers={markerLayer.points} />
+            //<CarouselLayer markers={markerLayer.points} />
+            <TooltipLayer markers={markerLayer.points} />
           )}
           {markerLayer.style === "text" && (
             <TextMarkersLayer

@@ -69,8 +69,10 @@ const storyTheme = createTheme({
     },
     body2: {
       ...baseTheme.typography.body2,
-      fontSize: "0.8929rem",
+      fontSize: "1rem",
+      color: "rgba(242, 240, 239, 0.7)",
       letterSpacing: "normal",
+      lineHeight: 1.5,
     },
     caption: {
       ...baseTheme.typography.caption,

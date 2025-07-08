@@ -16,7 +16,7 @@ const useActiveSection = (
   useEffect(() => {
     if (isInView) {
       setActiveSection(sectionName) // Update the active section in the store
-      console.log("📝 section is now active:", sectionName)
+      //console.log("📝 section is now active:", sectionName)
       //markSectionAsLoaded(sectionName); // Mark the section as loaded
     }
   }, [isInView, setActiveSection, sectionName])

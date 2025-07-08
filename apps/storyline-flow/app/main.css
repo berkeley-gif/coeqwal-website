@@ -220,6 +220,24 @@ html{
     #source-container{
         left: 80%;
     }
+    .popup{
+        max-width: 500px;
+    }
+    .popup-top{
+        transform: translateX(-50%) ;
+    }
+
+    .popup-bottom{
+        transform: translateX(-50%) translateY(-100%);
+    }
+
+    .popup-left{
+        transform: translateY(-50%);
+    }
+
+    .popup-right{
+        transform: translateY(-50%) translateX(-100%);
+    }
 }
 
 @media (min-width: 1200px) {
@@ -228,6 +246,24 @@ html{
     }
     #source-container{
         left: 70%;
+    }
+    .popup{
+        max-width: 500px;
+    }
+    .popup-top{
+        transform: translateX(-50%) translateY(-10%) scale(0.8);
+    }
+
+    .popup-bottom{
+        transform: translateX(-50%) translateY(-90%) scale(0.8);
+    }
+
+    .popup-left{
+        transform: translateY(-50%) translateX(-10%) scale(0.8);
+    }
+
+    .popup-right{
+        transform: translateY(-50%) translateX(-90%) scale(0.8);
     }
 }
 
@@ -278,7 +314,40 @@ html{
 /* popup */
 .popup {
     width: 100%;
-    max-width: 500px;
+    z-index: 4;
+    position: fixed;
+    padding: 1em;
+    display: flex; /* Use flexbox for centering */
+    flex-direction: column; /* Stack content vertically */
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    background-color: var(--light-color) !important;
+    border-radius: 10px;
+}
+
+.popup-closer{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+}
+
+.popup-close-button{
+    position: absolute;
+    top: 0.3em;
+    right: 0.5em;
+    color: #9CA3AF;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+.popup-close-button:hover{
+    color: var(--text-color);
 }
   
 /* Carousel container */
@@ -354,23 +423,3 @@ html{
     border-left-color: var(--light-color) !important;
     }
 
-.popup{
-    width: 600px;
-    padding: 1em;
-    display: flex; /* Use flexbox for centering */
-    flex-direction: column; /* Stack content vertically */
-    justify-content: center; /* Center content vertically */
-    align-items: center; /* Center content horizontally */
-}
-
-.popup p{
-    font-size: 1rem;
-    margin-top: 1em;
-    line-height: 1.2;
-}
-
-.popup h3{
-    font-size: 1.2rem;
-    margin: 0.7em 0;
-
-}
