@@ -25,6 +25,7 @@ import {
 } from "./helpers/mapLayerStyle"
 import { SierraNevadaMountains, TextAnnotation } from "./helpers/mapAnnotations"
 import * as turf from "@turf/turf"
+import { OceanWaterColor } from "./helpers/colorPalette"
 
 interface MapContainerProps {
   onLoad?: () => void
@@ -86,7 +87,7 @@ const sectionConfig: Record<string, SectionConfig> = {
     textAnnotations: [],
   },
   transformation: {
-    viewState: mapViews.stateMapViewState,
+    viewState: mapViews.stateZoomedMapViewState,
     textAnnotations: [],
   },
   city: {
@@ -282,7 +283,7 @@ export default function MapContainer({
     )
     addSource("nhd-rivers", {
       type: "vector",
-      url: "mapbox://coeqwal.al55aatu",
+      url: "mapbox://coeqwal.8mz01pu4",
     })
     addLayer(
       "nhd-rivers-layer",
@@ -290,10 +291,11 @@ export default function MapContainer({
       riverLayerStyle.type,
       {
         ...riverLayerStyle.paint,
+        "line-color": OceanWaterColor,
         "line-width": 1,
       },
       riverLayerStyle.layout,
-      { "source-layer": "NHD_Major_Rivers-20250414T053-d0wqhi" },
+      { "source-layer": "hydrology" },
     )
     // city
     addSource("city-boundary", {

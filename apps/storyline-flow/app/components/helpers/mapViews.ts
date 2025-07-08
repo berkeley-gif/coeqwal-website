@@ -33,16 +33,16 @@ export const stateMapViewState: ResponsiveMapViewState = {
 
 export const stateZoomedMapViewState: ResponsiveMapViewState = {
   xl: {
-    longitude: -124.065258143334,
+    longitude: -126.465258143334,
     latitude: 37.33091086711717,
-    zoom: 7,
+    zoom: 6,
     bearing: 0,
     pitch: 0,
   },
   lg: {
     longitude: -125.6652581433317,
     latitude: 37.44352,
-    zoom: 7,
+    zoom: 5.4,
     bearing: 0,
     pitch: 0,
   },

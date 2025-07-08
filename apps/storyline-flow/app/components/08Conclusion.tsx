@@ -56,13 +56,6 @@ function Resolution() {
     }
   }, [sectionRef])
 
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (latest) => {
-      console.log(latest)
-    })
-    return unsubscribe
-  }, [scrollYProgress])
-
   const firstSentenceOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
   const secondSentenceOpacity = useTransform(
     scrollYProgress,

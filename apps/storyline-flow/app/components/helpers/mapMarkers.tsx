@@ -130,7 +130,7 @@ export function MarkerWithCarouselPopup({
   marker: MarkerType
   StyledMarker: React.FC<{ idx: number }>
 }) {
-  const [isPopupVisible, setIsPopupVisible] = useState(false)
+  const [isPopupVisible, setIsPopupVisible] = useState(true)
   const [currentImgIndex, setCurrentImgIndex] = useState(0)
 
   const images = marker.images || [] // Fallback to single image if no array
@@ -187,9 +187,9 @@ export function MarkerWithCarouselPopup({
                 )}
               </Box>
 
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="h6">{marker.name}</Typography>
-                <Typography variant="body2">
+              <Box>
+                <Typography variant="h3">{marker.name}</Typography>
+                <Typography variant="caption">
                   {marker.captions
                     ? marker.captions[currentImgIndex] || ""
                     : ""}
@@ -300,7 +300,7 @@ export function MarkerWithPopup({
   marker: MarkerType
   StyledMarker: React.FC<{ idx: number }>
 }) {
-  const [isPopupVisible, setIsPopupVisible] = useState(false)
+  const [isPopupVisible, setIsPopupVisible] = useState(true)
 
   return (
     <>
@@ -415,7 +415,7 @@ export function TextMarker({ text }: { text: string }) {
         backgroundColor: `${OceanWaterColor}`, // Background color
         padding: "4px 8px", // Padding to create space around the text
         color: "white", // Text color
-        fontSize: "14px", // Font size
+        fontSize: "1rem", // Font size
         lineHeight: "1", // Ensures the text height matches its line height
         textAlign: "center", // Centers the text horizontally
         textAnchor: "middle", // Centers the text vertically

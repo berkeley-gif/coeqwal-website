@@ -4,6 +4,174 @@ interface concentricConfig {
   radius: number
 }
 
+export interface pictogramConfig {
+  shift: {
+    left: string
+    top: string
+  }
+  scale: string
+  iconSize: number
+  spacing: number
+  animation: {
+    showLine: boolean
+    unit: number
+    generalControl: [number, number]
+    partialControl: [number, number]
+    totalControl: [number, number]
+  }
+  mode: "people-norcal" | "people-socal" | "economy" | "agriculture"
+}
+
+interface pictogramBenefitConfig {
+  norcal: pictogramConfig
+  socal: pictogramConfig
+  agriculture?: pictogramConfig
+  economy?: pictogramConfig
+}
+
+export const pictogramTransform: Record<string, pictogramBenefitConfig> = {
+  lg: {
+    norcal: {
+      shift: {
+        left: "4%",
+        top: "13%",
+      },
+      scale: "scale(0.6)",
+      iconSize: 24,
+      spacing: 2,
+      animation: {
+        showLine: true,
+        unit: 0.01,
+        generalControl: [0.35, 0.55],
+        partialControl: [0.4, 0.5],
+        totalControl: [0.5, 0.6],
+      },
+      mode: "people-norcal",
+    },
+    socal: {
+      shift: {
+        left: "13%",
+        top: "60%",
+      },
+      scale: "scale(0.6)",
+      iconSize: 24,
+      spacing: 2,
+      animation: {
+        showLine: true,
+        unit: 0.01,
+        generalControl: [0.35, 0.55],
+        partialControl: [0.4, 0.5],
+        totalControl: [0.5, 0.6],
+      },
+      mode: "people-socal",
+    },
+    agriculture: {
+      shift: {
+        left: "5%",
+        top: "15%",
+      },
+      scale: "scale(1.4)",
+      iconSize: 25.2,
+      spacing: 2.1,
+      animation: {
+        showLine: false,
+        unit: 0.005,
+        generalControl: [0.1, 0.3],
+        partialControl: [0.15, 0.35],
+        totalControl: [0.25, 0.45],
+      },
+      mode: "agriculture",
+    },
+    economy: {
+      shift: {
+        left: "5%",
+        top: "25%",
+      },
+      scale: "scale(1.4)",
+      iconSize: 28,
+      spacing: 2.2,
+      animation: {
+        showLine: false,
+        unit: 0.005,
+        generalControl: [0.1, 0.3],
+        partialControl: [0.15, 0.35],
+        totalControl: [0.25, 0.45],
+      },
+      mode: "economy",
+    },
+  },
+  xl: {
+    norcal: {
+      shift: {
+        left: "15%",
+        top: "10%",
+      },
+      scale: "scale(0.8)",
+      iconSize: 32,
+      spacing: 2.5,
+      animation: {
+        showLine: true,
+        unit: 0.01,
+        generalControl: [0.35, 0.55],
+        partialControl: [0.4, 0.5],
+        totalControl: [0.4, 0.5],
+      },
+      mode: "people-norcal",
+    },
+    socal: {
+      shift: {
+        left: "24%",
+        top: "65%",
+      },
+      scale: "scale(0.8)",
+      iconSize: 32,
+      spacing: 2.5,
+      animation: {
+        showLine: true,
+        unit: 0.01,
+        generalControl: [0.35, 0.55],
+        partialControl: [0.4, 0.5],
+        totalControl: [0.5, 0.6],
+      },
+      mode: "people-socal",
+    },
+    agriculture: {
+      shift: {
+        left: "8%",
+        top: "20%",
+      },
+      scale: "scale(1.8)",
+      iconSize: 32.4,
+      spacing: 2.8,
+      animation: {
+        showLine: false,
+        unit: 0.01,
+        generalControl: [0, 0.2],
+        partialControl: [0.1, 0.3],
+        totalControl: [0.15, 0.35],
+      },
+      mode: "agriculture",
+    },
+    economy: {
+      shift: {
+        left: "8%",
+        top: "20%",
+      },
+      scale: "scale(1.8)",
+      iconSize: 36,
+      spacing: 3,
+      animation: {
+        showLine: false,
+        unit: 0.01,
+        generalControl: [0.1, 0.3],
+        partialControl: [0.15, 0.35],
+        totalControl: [0.25, 0.45],
+      },
+      mode: "economy",
+    },
+  },
+}
+
 interface benefitConfig {
   norcal: concentricConfig
   socal: concentricConfig

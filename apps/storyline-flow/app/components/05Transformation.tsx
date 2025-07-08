@@ -52,7 +52,7 @@ function Transformation() {
         setHasSetMarkers(true)
         setMarkers(DAMS, "dam")
       }
-    } else if (latest < 0.4 || latest > 0.9) {
+    } else if (latest < 0.35 || latest > 0.95) {
       setMarkers([], "dam")
       setHasSetMarkers(false)
       setPaintProperty("delta-canal-layer", "line-opacity", 0)
