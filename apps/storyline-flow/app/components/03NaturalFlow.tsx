@@ -254,7 +254,7 @@ function Valley() {
     <Box
       ref={sectionRef}
       className="container"
-      height="100vh"
+      height="80vh"
       tabIndex={-1}
       sx={{ justifyContent: "center" }}
       role="region"
@@ -542,7 +542,7 @@ function Delta() {
     >
       <Box
         ref={sectionRef}
-        height="300vh" // Control this to determine how long the section is visible
+        height="250vh" // Control this to determine how long the section is visible
         width="100%"
         sx={{ position: "relative" }}
       ></Box>

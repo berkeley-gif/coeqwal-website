@@ -1,27 +1,70 @@
 {
-  "salmon": {
-    "longitude": -122.2358,
-    "latitude": 40.1786,
-    "name": "Red Bluff"
-  },
-  "delta": {
-    "longitude": -121.64,
-    "latitude": 38.1106,
-    "name": "Sacremento-San Joaquin Delta"
-  },
-  "groundwater": {
-    "longitude": -119.6817,
-    "latitude": 36.0794,
-    "name": "Lake Tulare"
-  },
-  "drinkingwater": {
-    "longitude": -118.987,
-    "latitude": 36.0583,
-    "name": "East Porterville"
-  },
-  "climate": {
-    "longitude": -122.1628,
-    "latitude": 37.8422,
-    "name": "Sherman Island"
-  }
+  "salmon": [
+    {
+      "id": "1",
+      "name": "Endangered Chinook Salmon",
+      "latitude": 40.871593,
+      "longitude": -122.239844,
+      "images": [
+        "/impact/2022_10_26_FL_0388_Shasta_Structure.jpg",
+        "/impact/2023_11_08_XM_0007_juvenile_salmon_collection.jpg",
+        "/impact/2022_10_26_FL_7210_Shasta_Structure.jpg"
+      ],
+      "captions": [
+        "At Dekkas Rock on Shasta Lake, the Juvenile Salmonid Collection System (JSCS) pilot project tests the feasibility of collecting young salmon migrating from habitats upstream of Shasta Dam.",
+        "California Department of Water Resources Environmental Scientist Kevin Marr, left, and Environmental Science Associates’ Nolan Santala prepare to release juvenile salmon as part of the JSCS Pilot Project",
+        "Shad fish swim along the JSCS at Dekkas Rock at Shasta Lake in Lakehead, California, within Shasta County. This is a first step of the project in restoring endangered Chinook salmon to their historical spawning grounds."
+      ],
+      "source": "California Department of Water Resources, 2022 - 2023",
+      "anchor": "top"
+    }
+  ],
+  "delta": [
+    {
+      "id": "2",
+      "name": "Lookout Slough Tidal Habitat",
+      "longitude": -121.810768,
+      "latitude": 38.292135,
+      "images": ["/impact/2024_02_27_SN_0118_Lookout_Slough_Aerial.jpg"],
+      "captions": [
+        "An aerial view of the Lookout Slough Tidal Habitat Restoration and Flood Improvement Project in Solano County — a multi-benefit effort to restore tidal wetlands, create habitat for Delta Smelt and other fish, increase flood capacity in the Yolo Bypass, and reduce flood risk in the Sacramento area. Features include a 25-foot setback levee, 20 miles of tidal channels, and native habitat restoration."
+      ],
+      "source": "California Department of Water Resources, 2024",
+      "anchor": "top"
+    }
+  ],
+  "drinkingwater": [
+    {
+      "id": "3",
+      "name": "East Porterville Water Supply",
+      "longitude": -118.96766474280508,
+      "latitude": 36.05701242320462,
+      "images": [
+        "/impact/FL_Porterville-5031.jpg",
+        "/impact/FL_Porterville-9218_12_14_2017.jpg",
+        "/impact/FL_Porterville-9191.jpg"
+      ],
+      "captions": [
+        "In 2016, hundreds of East Porterville residents have gone without a sustainable water supply since their properties’ wells went dry during California’s five-year drought. A third pump and motor will be installed in the empty bay at the East Porterville Booster Pump Station.",
+        "Engineers at the California Department of Water Resources have led the way toward sustainability by designing a distribution system that eventually will deliver water from the City of Porterville to 1,800 homes in its neighboring community to the east.",
+        "From left, homeowners Leonicio Ramirez and his daughter Tania Ramirez are the first residents to receive water through a water distribution system in East Porterville."
+      ],
+      "source": "California Department of Water Resources, 2016",
+      "anchor": "right"
+    }
+  ],
+  "climate": [
+    {
+      "id": "4",
+      "name": "Emergency Drought Salinity Barrier",
+      "longitude": -121.6763,
+      "latitude": 38.058702,
+      "images": ["/impact/2022_04_20_AI_0008_Drought_Barrier.jpg"],
+      "captions": [
+        "The completed Emergency Drought Salinity Barrier on the West False River near Oakley, in the Sacramento–San Joaquin Delta, Contra Costa County. The 750-foot-wide rock barrier helps block the tidal push of saltwater from San Francisco Bay into the central Delta."
+      ],
+      "source": "California Department of Water Resources, 2022",
+      "anchor": "top"
+    }
+  ]
 }

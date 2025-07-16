@@ -150,6 +150,7 @@ function Builder() {
   const sectionOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1])
   const [currentParagraph, setCurrentParagraph] = useState<number>(0)
 
+  //TODO: double check this so that the first paragraph stays longer
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     const paragraphIndex = Math.min(3, Math.floor(latest * 4))
     setCurrentParagraph(paragraphIndex)
@@ -183,7 +184,7 @@ function Builder() {
       <Box height="auto" width="100%" style={{ position: "relative" }}>
         <Box
           ref={sectionRef}
-          height="300vh" // Control this to determine how long the section is visible
+          height="200vh" // Control this to determine how long the section is visible
           width="100%"
           sx={{ position: "relative" }}
         ></Box>

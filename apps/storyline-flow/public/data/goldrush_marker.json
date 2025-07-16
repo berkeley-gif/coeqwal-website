@@ -1,39 +1,19 @@
 {
   "mining": [
     {
-      "id": "1",
-      "name": "Toxic debris into rivers (1864)",
-      "latitude": 39.2112,
-      "longitude": -121.2936,
-      "images": ["/historical/miningSluice01.jpg"],
-      "captions": [
-        "Two wooden sluices (in the valley below the road) carry mining debris into the Yuba River. Debris often contained “slickens”, a toxic mix of heavy metals, like mercury. Carried downstream, the waste blocked rivers and buried floodplains, causing flooding, navigation problems, burial of salmon spawning grounds, and decreased tidal range. A Supreme Court case in 1892 ended the disastrous hydraulic mining practices, though the consequences plague California’s waters to this day"
-      ],
-      "source": "Lawrence and Houseworth, ca. 1864",
-      "anchor": "right"
-    },
-    {
       "id": "2",
       "name": "High-powered gold mining (1867)",
       "latitude": 39.3061,
       "longitude": -121.1613,
-      "images": ["/historical/miningCorral01.jpg"],
+      "images": [
+        "/historical/miningSluice01.jpg",
+        "/historical/miningCorral01.jpg"
+      ],
       "captions": [
+        "Two wooden sluices (in the valley below the road) carry mining debris into the Yuba River. Debris often contained “slickens”, a toxic mix of heavy metals, like mercury. Carried downstream, the waste blocked rivers and buried floodplains, causing flooding, navigation problems, burial of salmon spawning grounds, and decreased tidal range. A Supreme Court case in 1892 ended the disastrous hydraulic mining practices, though the consequences plague California’s waters to this day",
         "Miners at their “monitors”, an iron nozzle attached to a hose, used in hydraulic mining during the Gold Rush. The high-powered jets allowed miners to remove massive amounts of gravel from ancient riverbeds. The debris washed into sluices where miners searched for gold. The debris was often discharged into the nearest river."
       ],
       "source": "Houseworth at French Corral Mine, ca. 1867",
-      "anchor": "right"
-    },
-    {
-      "id": "3",
-      "name": "High elevation dams (1868)",
-      "latitude": 39.4489,
-      "longitude": -120.6531,
-      "images": ["/historical/miningBowman01.jpg"],
-      "captions": [
-        "Upstream of the mines, dams often collected water to divert into flumes that brought water to mining sites at high pressure. Pictured is a predecessor of the Bowman Dam on Canyon Creek, a major tributary of the South Yuba River in Nevada County."
-      ],
-      "source": "Watkins, ca. 1868",
       "anchor": "right"
     }
   ],
