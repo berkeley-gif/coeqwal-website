@@ -4,7 +4,7 @@ import { useMap } from "@repo/map"
 import { Box, Stack, Typography } from "@repo/ui/mui"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import { MarkerType } from "./helpers/mapMarkers"
 import { useFetchData } from "../hooks/useFetchData"
 import {
@@ -35,10 +35,15 @@ function SectionHuman() {
     },
   )
 
+  //<Irrigation markers={mineMarkers.irrigation || []} />
   return (
     <>
-      <Header markers={mineMarkers.mining || []} />
-      <Irrigation markers={mineMarkers.irrigation || []} />
+      <Header
+        markers={[
+          ...(mineMarkers.mining ?? []),
+          ...(mineMarkers.irrigation ?? []),
+        ]}
+      />
       <Drinking />
     </>
   )
@@ -62,7 +67,7 @@ function Header({ markers }: { markers: MarkerType[] }) {
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (latest > 0.2 && latest < 0.9 && !hasSetMarkers) {
       setMarkers(markers, "rough-circle")
-      setTextMarkers(GoldRushTextLabels, "text")
+      setTextMarkers([...GoldRushTextLabels, ...IrrigationTextLabels], "text")
       setHasSetMarkers(true)
       return
     } else if (latest < 0.2 || latest > 0.9) {
@@ -81,6 +86,12 @@ function Header({ markers }: { markers: MarkerType[] }) {
   const secondParagraphOpacity = useTransform(
     scrollYProgress,
     [0.4, 0.6],
+    [0, 1],
+  )
+
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
     [0, 1],
   )
 
@@ -107,76 +118,12 @@ function Header({ markers }: { markers: MarkerType[] }) {
         <Typography variant="body1">{content?.p1}</Typography>
         <Typography variant="body1"> {content?.p2}</Typography>
       </motion.div>
-    </Box>
-  )
-}
-
-function Irrigation({ markers }: { markers: MarkerType[] }) {
-  const storyline = useStoryStore((state) => state.storyline)
-  const content = storyline?.economy.irrigation
-  const { sectionRef, isSectionActive } = useActiveSection("irrigation", {
-    amount: 0.5,
-  })
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const [hasSetMarkers, setHasSetMarkers] = useState(false)
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end center"],
-  })
-
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (latest > 0.4 && latest < 0.9 && !hasSetMarkers) {
-      setMarkers(markers, "rough-circle")
-      setTextMarkers(IrrigationTextLabels, "text")
-      setHasSetMarkers(true)
-      return
-    }
-  })
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setTextMarkers([], "text")
-    setHasSetMarkers(false)
-  }, [setMarkers, setTextMarkers])
-
-  useSectionLifecycle(
-    isSectionActive,
-    () => {},
-    () => {},
-    unload,
-  )
-
-  const firstParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.3, 0.5],
-    [0, 1],
-  )
-  const secondParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.4, 0.6],
-    [0, 1],
-  )
-
-  return (
-    <Box
-      ref={sectionRef}
-      className="container"
-      height="100vh"
-      sx={{ justifyContent: "center" }}
-    >
       <motion.div
         className="paragraph"
-        style={{ opacity: firstParagraphOpacity }}
+        style={{ opacity: thirdParagraphOpacity, marginTop: "5%" }}
       >
-        <Typography>{content?.p1}</Typography>
-      </motion.div>
-      <motion.div
-        className="paragraph"
-        style={{ opacity: secondParagraphOpacity }}
-      >
-        <Typography>{content?.p2}</Typography>
+        <Typography>{content?.irrigation.p1}</Typography>
+        <Typography>{content?.irrigation.p2}</Typography>
       </motion.div>
     </Box>
   )
@@ -244,7 +191,7 @@ function Drinking() {
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">
-        <Stack spacing={5} direction="column">
+        <Stack spacing={2} direction="column">
           <MotionTypography style={{ opacity: firstParagraphOpacity }}>
             {content?.p1}
           </MotionTypography>

@@ -118,15 +118,15 @@ export const riverDeltaMapViewState: ResponsiveMapViewState = {
 
 export const goldRushMapViewState: ResponsiveMapViewState = {
   lg: {
-    longitude: -122.5613,
-    latitude: 39.306,
-    zoom: 7.7,
+    longitude: -122.7613,
+    latitude: 38.306,
+    zoom: 7.3,
     bearing: 0,
     pitch: 0,
   },
   xl: {
-    longitude: -123.1613,
-    latitude: 39.306,
+    longitude: -122.8613,
+    latitude: 38.706,
     zoom: 7.8,
     bearing: 0,
     pitch: 0,
