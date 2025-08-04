@@ -9,11 +9,11 @@ import { Logo } from "../common/Logo"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
-
 interface HeaderProps {
   backgroundColor: "white"
   onGlossaryClick?: () => void
   isGlossaryActive?: boolean
+  onDataClick?: () => void
 }
 
 // Transition
@@ -59,6 +59,7 @@ const translations: TranslationsMap = {
 export function HeaderHome({
   onGlossaryClick,
   isGlossaryActive = false,
+  onDataClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -391,6 +392,7 @@ export function HeaderHome({
               <>
                 <Button
                   variant={buttonVariant}
+                  onClick={onDataClick}
                   sx={{
                     ...buttonStyle,
                   }}

@@ -4,6 +4,7 @@ import React from "react"
 import { HeaderHome } from "@repo/ui"
 import type { SecondaryNavItem } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
+import { useRouter } from "next/navigation"
 
 interface StoreConnectedHeaderProps {
   activeSection?: string
@@ -20,6 +21,8 @@ export function StoreConnectedHeader({
   activeSection,
   onSectionClick,
 }: StoreConnectedHeaderProps) {
+  const router = useRouter()
+  
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
   const isOpen = useDrawerStore((state) => state.isOpen)
@@ -35,11 +38,17 @@ export function StoreConnectedHeader({
     }
   }
 
+  // Handle data page navigation
+  const handleDataClick = () => {
+    router.push("/data")
+  }
+
   return (
     <HeaderHome
       backgroundColor={"white"} 
       onGlossaryClick={handleGlossaryToggle}
       isGlossaryActive={activeTab === "glossary"}
+      onDataClick={handleDataClick}
     />
   )
 }

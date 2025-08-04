@@ -52,6 +52,32 @@ import type { CSSProperties } from "react"
  Change these values to update the theme across the site
  */
 
+// ===============================================================================
+// FONT TESTING CONTROL - Easy way to experiment with different h1 fonts!
+// ===============================================================================
+// 
+// To test different fonts:
+// 1. Change the value below to any of the available options
+// 2. Save the file
+// 3. The browser will automatically reload with the new font
+//
+// Available font options and their characteristics:
+//
+// 'tiemposText'    - Current default serif font (elegant, editorial)
+// 'ppEiko'         - Sans-serif, weights: 100 (thin), 500 (medium), 900 (heavy)
+// 'ppFragmentSans' - Modern sans-serif, weights: 300 (light), 400 (regular), 800 (extrabold)
+// 'ppFragmentSerif'- Modern serif, weights: 300 (light), 400 (regular), 800 (extrabold)  
+// 'ppFragmentGlare'- Display serif with flare, weights: 300 (light), 400 (regular), 800 (extrabold)
+// 'ppKyoto'        - Rounded sans-serif, weights: 100 (thin), 300 (light), 500 (medium), 800 (extrabold)
+// 'ppObjectSans'   - Geometric sans-serif, weights: 400 (regular), 900 (heavy)
+// 'gtSuperDisplay' - Premium display font, weights: 300 (light), 400 (regular), 500 (medium), 700 (bold), 900 (super)
+// 'gtSuperText'    - Premium text font, weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
+//
+// To also experiment with different font weights, you can modify the fontWeight 
+// property in the h1 definition below (currently set to 500)
+//
+const EXPERIMENTAL_H1_FONT = 'tiemposText' // Default: current font
+
 const themeValues = {
   // Typography
   fontFamily: {
@@ -60,6 +86,16 @@ const themeValues = {
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     tiemposText: '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
+    // Experimental fonts for testing
+    ppEiko: '"PP Eiko", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragment: '"PP Fragment", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragmentSans: '"PP Fragment Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragmentSerif: '"PP Fragment Serif", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragmentGlare: '"PP Fragment Glare", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppKyoto: '"PP Kyoto", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppObjectSans: '"PP Object Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    gtSuperDisplay: '"GT Super Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    gtSuperText: '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions
@@ -454,7 +490,7 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: themeValues.fontFamily.acuminPro,
+    fontFamily: themeValues.fontFamily.primary,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -462,9 +498,9 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.tiemposText,
+      fontFamily: themeValues.fontFamily[EXPERIMENTAL_H1_FONT],
       fontSize: "5.75rem",
-      fontWeight: 500,
+      fontWeight: 500, // 🎨 Change this to experiment with font weights! See available weights in EXPERIMENTAL_H1_FONT comments above
       lineHeight: 0.85,
     },
     h2: {
@@ -649,6 +685,238 @@ const theme = createTheme({
           font-family: 'Crimson Text';
           src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlppgwHKFkZgtmSR3NB0oRJX1C1GA9c.woff2') format('woff2');
           font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Eiko Font Family */
+        @font-face {
+          font-family: 'PP Eiko';
+          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Thin.otf') format('opentype');
+          font-weight: 100;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Eiko';
+          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Medium.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Eiko';
+          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Heavy.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Fragment Sans Font Family */
+        @font-face {
+          font-family: 'PP Fragment Sans';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansLight.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Sans';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansRegular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Sans';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansExtraBold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Fragment Serif Font Family */
+        @font-face {
+          font-family: 'PP Fragment Serif';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifLight.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Serif';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifRegular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Serif';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifExtraBold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Fragment Glare Font Family */
+        @font-face {
+          font-family: 'PP Fragment Glare';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareLight.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Glare';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareRegular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Glare';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareExtraBold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Kyoto Font Family */
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Thin.otf') format('opentype');
+          font-weight: 100;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Light.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Medium.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Extrabold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Object Sans Font Family */
+        @font-face {
+          font-family: 'PP Object Sans';
+          src: url('/fonts/PP Object Sans - Free for personal use v2.3/PPObjectSans-Regular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Object Sans';
+          src: url('/fonts/PP Object Sans - Free for personal use v2.3/PPObjectSans-Heavy.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* GT Super Display Font Family */
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Light-Trial.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Regular-Trial.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Medium-Trial.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Bold-Trial.otf') format('opentype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Super-Trial.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* GT Super Text Font Family */
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Book-Trial.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Regular-Trial.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Medium-Trial.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Bold-Trial.otf') format('opentype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Black-Trial.otf') format('opentype');
+          font-weight: 900;
           font-style: normal;
           font-display: swap;
         }
