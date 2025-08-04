@@ -53,30 +53,16 @@ import type { CSSProperties } from "react"
  */
 
 // ===============================================================================
-// FONT TESTING CONTROL - Easy way to experiment with different h1 fonts!
+// HEADLINE TYPOGRAPHY - GT Super Font Family
 // ===============================================================================
 // 
-// To test different fonts:
-// 1. Change the value below to any of the available options
-// 2. Save the file
-// 3. The browser will automatically reload with the new font
+// All headlines now use GT Super Text for a cohesive, premium look:
+// • h1, h2, h3, h4, h5, h6: GT Super Text (consistent editorial style throughout)
 //
-// Available font options and their characteristics:
+// GT Super Text weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
+// GT Super Display weights: 300 (light), 400 (regular), 500 (medium), 700 (bold), 900 (super)
 //
-// 'tiemposText'    - Current default serif font (elegant, editorial)
-// 'ppEiko'         - Sans-serif, weights: 100 (thin), 500 (medium), 900 (heavy)
-// 'ppFragmentSans' - Modern sans-serif, weights: 300 (light), 400 (regular), 800 (extrabold)
-// 'ppFragmentSerif'- Modern serif, weights: 300 (light), 400 (regular), 800 (extrabold)  
-// 'ppFragmentGlare'- Display serif with flare, weights: 300 (light), 400 (regular), 800 (extrabold)
-// 'ppKyoto'        - Rounded sans-serif, weights: 100 (thin), 300 (light), 500 (medium), 800 (extrabold)
-// 'ppObjectSans'   - Geometric sans-serif, weights: 400 (regular), 900 (heavy)
-// 'gtSuperDisplay' - Premium display font, weights: 300 (light), 400 (regular), 500 (medium), 700 (bold), 900 (super)
-// 'gtSuperText'    - Premium text font, weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
-//
-// To also experiment with different font weights, you can modify the fontWeight 
-// property in the h1 definition below (currently set to 500)
-//
-const EXPERIMENTAL_H1_FONT = 'tiemposText' // Default: current font
+const H1_FONT = 'gtSuperText' // GT Super Text for h1 headlines
 
 const themeValues = {
   // Typography
@@ -498,36 +484,36 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily[EXPERIMENTAL_H1_FONT],
+      fontFamily: themeValues.fontFamily[H1_FONT],
       fontSize: "5.75rem",
-      fontWeight: 500, // 🎨 Change this to experiment with font weights! See available weights in EXPERIMENTAL_H1_FONT comments above
+      fontWeight: 500, // 🎨 Change this to experiment with font weights! See available weights in comments above
       lineHeight: 0.85,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.tiemposText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: "3.75rem",
       fontWeight: 500,
       lineHeight: 1,
     },
     h3: {
-      fontFamily: themeValues.fontFamily.tiemposText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: "2.2rem",
       fontWeight: 500,
       lineHeight: 1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.tiemposText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: "1.25rem",
       fontWeight: 500,
       lineHeight: 1.4,
     },
     h5: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: "1.15rem",
       fontWeight: 500,
     },
     h6: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: "1.05rem",
       fontWeight: 500,
     },

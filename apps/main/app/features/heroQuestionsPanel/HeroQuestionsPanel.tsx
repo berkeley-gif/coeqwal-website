@@ -90,7 +90,7 @@ export function HeroQuestionsPanel({
   backgroundImages,
   backgroundPositions,
   bottomHeadline = "Learn. Explore. Empower.",
-  bottomText = "Explore California's water system and discover possibilities for the future of water in our state.",
+  bottomText = "Explore a range of Central Valley water scenarios and discover possibilities for the future of water in our state.",
   ...panelProps
 }: HeroQuestionsPanelProps) {
   const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
