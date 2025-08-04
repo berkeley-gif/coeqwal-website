@@ -191,8 +191,8 @@ export function HeaderHome({
   // Conditional styling based on variant
   const variantStyles =
 {
-          backgroundColor: theme.palette.neutral.main,
-          // buttonBackgroundColor: theme.palette.common.black,
+          backgroundColor: theme.palette.nature.whisper,
+          // buttonBackgroundColor: theme.palette.utility.black,
           borderRadius: "16px",
           margin: "16px",
           border: "none",
@@ -210,7 +210,7 @@ export function HeaderHome({
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
-    backgroundColor: "theme.palette.black",
+    backgroundColor: theme.palette.utility.black,
     lineHeight: 1.1, // Line height for text wrapping
     height: "40px", // Increased height for more prominence
     minHeight: "40px", // Ditto

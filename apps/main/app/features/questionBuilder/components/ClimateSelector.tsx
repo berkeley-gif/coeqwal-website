@@ -68,7 +68,7 @@ const ClimateSelector: React.FC = () => {
   const checkboxStyles = {
     color: "rgba(0, 0, 0, 0.54)",
     "&.Mui-checked": {
-      color: theme.palette.climate.main,
+      color: theme.palette.nature.teal,
     },
   }
 
@@ -118,7 +118,7 @@ const ClimateSelector: React.FC = () => {
 
           }}
         >
-          <ColoredText color={theme.palette.climate.main}>
+          <ColoredText color={theme.palette.nature.teal}>
             {t("questionBuilder.climateSelector.title")}
           </ColoredText>
         </Typography>

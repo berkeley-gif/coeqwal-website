@@ -641,7 +641,7 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: "linear-gradient(to bottom, #79bed8, #64a3d7)",
+        background: (theme) => `linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})`,
         backgroundSize: "100% 100%",
         width: "100%",
         overflow: "hidden",
@@ -769,7 +769,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mb: 2,
             }}
           >
@@ -779,7 +779,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mb: 2,
             }}
           >
@@ -789,7 +789,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mb: 2,
             }}
           >
@@ -799,7 +799,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h3"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mt: 2.5,
               mb: 2, // 1rem equivalent (16px)
             }}
@@ -810,7 +810,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               maxWidth: "500px",
             }}
           >
@@ -828,7 +828,7 @@ const IntroSection: React.FC = () => {
           >
             <PlayArrowIcon
               sx={{
-                color: "#2e3a6c",
+                color: (theme) => theme.palette.blue.darkest,
                 fontSize: "3rem", // Using rem units for consistency
                 transform: "rotate(90deg)",
                 pointerEvents: "auto",
@@ -920,7 +920,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  color: "#2e3a6c",
+                  color: (theme) => theme.palette.blue.darkest,
                   mb: 3,
                 }}
               >
@@ -930,7 +930,7 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: "#2e3a6c" }}
+                sx={{ color: (theme) => theme.palette.blue.darkest }}
                 
               >
                 {(() => {
@@ -994,8 +994,8 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                     
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: 0,
@@ -1004,7 +1004,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                             },
                           }}
                           onClick={() => {
@@ -1024,8 +1024,8 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                     
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1034,7 +1034,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                             },
                           }}
                           onClick={() => {
@@ -1054,8 +1054,8 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                     
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1064,7 +1064,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                             },
                           }}
                           onClick={() => {
@@ -1084,8 +1084,8 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                     
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1094,7 +1094,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                             },
                           }}
                           onClick={() => {
@@ -1152,8 +1152,8 @@ const IntroSection: React.FC = () => {
                             component="mark"
                             sx={{
                       
-                              borderBottom: "3px solid #2e3a6c",
-                              color: "#2e3a6c",
+                              borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                              color: (theme) => theme.palette.blue.darkest,
                               py: 0.1,
                               mx: 0.2,
                               lineHeight: "0em",
@@ -1162,7 +1162,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: "5px solid #1a2547",
+                                borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                               },
                             }}
                             onClick={() => {
@@ -1182,8 +1182,8 @@ const IntroSection: React.FC = () => {
                             component="mark"
                             sx={{
                       
-                              borderBottom: "3px solid #2e3a6c",
-                              color: "#2e3a6c",
+                              borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                              color: (theme) => theme.palette.blue.darkest,
                               py: 0.1,
                               mx: 0.2,
                               lineHeight: "0em",
@@ -1192,7 +1192,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: "5px solid #1a2547",
+                                borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                               },
                             }}
                             onClick={() => {
@@ -1220,8 +1220,8 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                     
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1230,7 +1230,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                             },
                           }}
                           onClick={() => {
@@ -1262,8 +1262,8 @@ const IntroSection: React.FC = () => {
                           component="mark"
                           sx={{
                     
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1272,7 +1272,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                             },
                           }}
                           onClick={() => {
@@ -1294,7 +1294,7 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: "#2e3a6c" }}
+                sx={{ color: (theme) => theme.palette.blue.darkest }}
                 
               >
                 {(() => {
@@ -1346,8 +1346,8 @@ const IntroSection: React.FC = () => {
                         component="mark"
                         sx={{
                   
-                          borderBottom: "3px solid #2e3a6c",
-                          color: "#2e3a6c",
+                          borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                          color: (theme) => theme.palette.blue.darkest,
                           py: 0.1,
                           mx: 0.2,
                           lineHeight: "0em",
@@ -1356,7 +1356,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: "5px solid #1a2547",
+                            borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                           },
                         }}
                         onClick={() => {
@@ -1383,7 +1383,7 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: "#2e3a6c" }}
+                sx={{ color: (theme) => theme.palette.blue.darkest }}
                 
               >
                 {(() => {
@@ -1428,8 +1428,8 @@ const IntroSection: React.FC = () => {
                         component="mark"
                         sx={{
                   
-                          borderBottom: "3px solid #2e3a6c",
-                          color: "#2e3a6c",
+                          borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                          color: (theme) => theme.palette.blue.darkest,
                           py: 0.1,
                           mx: 0.2,
                           lineHeight: "0em",
@@ -1438,7 +1438,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: "5px solid #1a2547",
+                            borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
                           },
                         }}
                         onClick={() => {
@@ -1466,7 +1466,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h3"
                 sx={{
-                  color: "#2e3a6c",
+                  color: (theme) => theme.palette.blue.darkest,
                   mt: 2,
                 }}
               >

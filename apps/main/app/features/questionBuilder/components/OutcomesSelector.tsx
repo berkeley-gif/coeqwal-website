@@ -135,7 +135,7 @@ const OutcomesSelector: React.FC = () => {
                   "{{waterAvailability}}",
                 )[0]
               } */}
-              <ColoredText color={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.blue.bright}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </ColoredText>
               {t("questionBuilder.outcomesSelector.swappedTitle").split(
@@ -145,7 +145,7 @@ const OutcomesSelector: React.FC = () => {
           ) : (
             <>
               {" "}
-              <ColoredText color={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.blue.bright}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </ColoredText>
               {t("questionBuilder.outcomesSelector.title").split(

@@ -139,7 +139,7 @@ export default function CaliforniaWaterSection({
                 transition: "opacity 1s ease",
                 textAlign: "center",
 
-                color: "#F2F0EF",
+                color: (theme) => theme.palette.utility.white,
                 px: 1,
                 py: 1,
                 borderRadius: "4px",

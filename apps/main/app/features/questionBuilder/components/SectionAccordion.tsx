@@ -139,7 +139,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   }
 
   const activeArrowStyle = {
-    color: theme.palette.pop.main,
+    color: theme.palette.accent.gold,
     filter: "drop-shadow(0px 0px 2px rgba(255, 87, 51, 0.5))",
   }
 

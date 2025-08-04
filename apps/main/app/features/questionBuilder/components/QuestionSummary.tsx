@@ -159,7 +159,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     const getOperationsPart = () => {
       if (selectedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>
+          <ColoredText color={theme.palette.accent.gold}>
             {t("questionBuilder.defaultTerms.decisions")}
           </ColoredText>
         )
@@ -232,7 +232,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         const termText = getTermForOperation(op)
 
         formattedOperations.push(
-          <ColoredText key={op} color={theme.palette.pop.main}>
+          <ColoredText key={op} color={theme.palette.accent.gold}>
             {termText}
             {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
@@ -247,7 +247,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
             : `removing ${flowReqSubtypes.join(" and ")} tributary flow requirements`
 
         formattedOperations.push(
-          <ColoredText key="flow-reqs" color={theme.palette.pop.main}>
+          <ColoredText key="flow-reqs" color={theme.palette.accent.gold}>
             {flowText}
             {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
@@ -263,7 +263,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
             : `conveyance tunnel (${conveyanceSubtypes.join(", ")})`
 
         formattedOperations.push(
-          <ColoredText key="conveyance" color={theme.palette.pop.main}>
+          <ColoredText key="conveyance" color={theme.palette.accent.gold}>
             {conveyanceText}
             {swapped ? ` ${t("questionBuilder.scenarioSingular")}` : ""}
           </ColoredText>,
@@ -278,7 +278,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       // Handle empty array case to prevent reduce error
       if (formattedOperations.length === 0) {
         return (
-          <ColoredText color={theme.palette.pop.main}>
+          <ColoredText color={theme.palette.accent.gold}>
             {t("questionBuilder.defaultTerms.decisions")}
           </ColoredText>
         )
@@ -322,7 +322,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
     // Helper function to create colored text elements
     const createColoredText = (text: string) => {
-      return <ColoredText color={theme.palette.cool.main}>{text}</ColoredText>
+      return <ColoredText color={theme.palette.blue.bright}>{text}</ColoredText>
     }
 
     // Format type selections - handle colored text and join with "and"
@@ -468,7 +468,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         return (
           <>
             in{" "}
-            <ColoredText color={theme.palette.cool.main}>
+            <ColoredText color={theme.palette.blue.bright}>
               {needsThePrefix ? "the " : ""}
               {text.slice(3)}{" "}
               {/* Remove "in " prefix since we add it explicitly */}
@@ -572,7 +572,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               region === "San Joaquin Valley"
 
             return (
-              <ColoredText key={region} color={theme.palette.cool.main}>
+              <ColoredText key={region} color={theme.palette.blue.bright}>
                 {needsThePrefix ? "the " : ""}
                 {text.slice(3)}
               </ColoredText>
@@ -619,7 +619,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               increaseTypeOutcomes.push(
                 <ColoredText
                   key={`inc-${type}`}
-                  color={theme.palette.cool.main}
+                  color={theme.palette.blue.bright}
                 >
                   {formattedText}
                 </ColoredText>,
@@ -628,7 +628,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               decreaseTypeOutcomes.push(
                 <ColoredText
                   key={`dec-${type}`}
-                  color={theme.palette.cool.main}
+                  color={theme.palette.blue.bright}
                 >
                   {formattedText}
                 </ColoredText>,
@@ -640,7 +640,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
             affectTypeOutcomes.push(
               <ColoredText
                 key={`affect-${type}`}
-                color={theme.palette.cool.main}
+                color={theme.palette.blue.bright}
               >
                 {formattedText}
               </ColoredText>,
@@ -675,7 +675,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               increaseTypeOutcomes.push(
                 <ColoredText
                   key={`inc-${fullId}`}
-                  color={theme.palette.cool.main}
+                  color={theme.palette.blue.bright}
                 >
                   {subtypeText}
                 </ColoredText>,
@@ -684,7 +684,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               decreaseTypeOutcomes.push(
                 <ColoredText
                   key={`dec-${fullId}`}
-                  color={theme.palette.cool.main}
+                  color={theme.palette.blue.bright}
                 >
                   {subtypeText}
                 </ColoredText>,
@@ -695,7 +695,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
             affectTypeOutcomes.push(
               <ColoredText
                 key={`affect-${fullId}`}
-                color={theme.palette.cool.main}
+                color={theme.palette.blue.bright}
               >
                 {subtypeText}
               </ColoredText>,
@@ -711,13 +711,13 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           if (deltaOutflow in operationDirections) {
             if (operationDirections[deltaOutflow] === "increase") {
               increaseTypeOutcomes.push(
-                <ColoredText key={`inc-delta`} color={theme.palette.cool.main}>
+                <ColoredText key={`inc-delta`} color={theme.palette.blue.bright}>
                   {formattedText}
                 </ColoredText>,
               )
             } else {
               decreaseTypeOutcomes.push(
-                <ColoredText key={`dec-delta`} color={theme.palette.cool.main}>
+                <ColoredText key={`dec-delta`} color={theme.palette.blue.bright}>
                   {formattedText}
                 </ColoredText>,
               )
@@ -725,7 +725,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           } else {
             // FALLBACK: If no direction is set, use the "affect" group
             affectTypeOutcomes.push(
-              <ColoredText key={`affect-delta`} color={theme.palette.cool.main}>
+              <ColoredText key={`affect-delta`} color={theme.palette.blue.bright}>
                 {formattedText}
               </ColoredText>,
             )
@@ -746,7 +746,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               increaseMetricOutcomes.push(
                 <ColoredText
                   key={`inc-${metric}`}
-                  color={theme.palette.cool.main}
+                  color={theme.palette.blue.bright}
                 >
                   {formattedText}
                 </ColoredText>,
@@ -755,7 +755,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
               decreaseMetricOutcomes.push(
                 <ColoredText
                   key={`dec-${metric}`}
-                  color={theme.palette.cool.main}
+                  color={theme.palette.blue.bright}
                 >
                   {formattedText}
                 </ColoredText>,
@@ -766,7 +766,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
             affectMetricOutcomes.push(
               <ColoredText
                 key={`affect-${metric}`}
-                color={theme.palette.cool.main}
+                color={theme.palette.blue.bright}
               >
                 {formattedText}
               </ColoredText>,
@@ -780,7 +780,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           if (increaseTypeOutcomes.length === 1) {
             increaseTypeGroup = (
               <>
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.connectors.increase")}
                 </ColoredText>{" "}
                 {increaseTypeOutcomes[0]}
@@ -789,7 +789,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           } else {
             increaseTypeGroup = (
               <>
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.connectors.increase")}
                 </ColoredText>{" "}
                 {increaseTypeOutcomes.reduce((prev, curr, idx) => (
@@ -814,7 +814,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           if (decreaseTypeOutcomes.length === 1) {
             decreaseTypeGroup = (
               <>
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.connectors.decrease")}
                 </ColoredText>{" "}
                 {decreaseTypeOutcomes[0]}
@@ -823,7 +823,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           } else {
             decreaseTypeGroup = (
               <>
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.connectors.decrease")}
                 </ColoredText>{" "}
                 {decreaseTypeOutcomes.reduce((prev, curr, idx) => (
@@ -848,7 +848,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           if (affectTypeOutcomes.length === 1) {
             affectTypeGroup = (
               <>
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.connectors.affect")}
                 </ColoredText>{" "}
                 {affectTypeOutcomes[0]}
@@ -857,7 +857,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           } else {
             affectTypeGroup = (
               <>
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.connectors.affect")}
                 </ColoredText>{" "}
                 {affectTypeOutcomes.reduce((prev, curr, idx) => (
@@ -1039,7 +1039,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         // If no selections, show default
         if (parts.length === 0) {
           return (
-            <ColoredText color={theme.palette.cool.main}>
+            <ColoredText color={theme.palette.blue.bright}>
               {t("questionBuilder.defaultTerms.waterAvailability")}
             </ColoredText>
           )
@@ -1153,7 +1153,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           // Always use water availability instead of outcomes
           result = (
             <>
-              <ColoredText color={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.blue.bright}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </ColoredText>{" "}
               {formattedRegion}
@@ -1177,7 +1177,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         // Default to "outcomes" if nothing is selected
         if (!result) {
           result = (
-            <ColoredText color={theme.palette.cool.main}>
+            <ColoredText color={theme.palette.blue.bright}>
               {t("questionBuilder.defaultTerms.waterAvailability")}
             </ColoredText>
           )
@@ -1204,7 +1204,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
       // Convert array of climate IDs to array of ColoredText components with translated labels
       const formattedClimates = selectedClimate.map((id) => (
-        <ColoredText key={id} color={theme.palette.climate.main}>
+        <ColoredText key={id} color={theme.palette.nature.teal}>
           {t(`questionBuilder.climateSelector.options.${id}`)}
         </ColoredText>
       ))
@@ -1282,7 +1282,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
         const outcomeContent = onlyRegionSelected ? (
           <>
             {locale === "es" ? "cambiar " : "change "}
-            <ColoredText color={theme.palette.cool.main}>
+            <ColoredText color={theme.palette.blue.bright}>
               {t("questionBuilder.defaultTerms.waterAvailability")}
             </ColoredText>{" "}
             {outcomePart}
@@ -1331,7 +1331,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           return (
             <>
               If we want to achieve certain{" "}
-              <ColoredText color={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.blue.bright}>
                 {t("questionBuilder.defaultTerms.outcomes")}
               </ColoredText>{" "}
               with {climateElement}, which {operationsPart} could we consider?
@@ -1348,7 +1348,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
             outcome: (
               <>
                 achieve certain{" "}
-                <ColoredText color={theme.palette.cool.main}>
+                <ColoredText color={theme.palette.blue.bright}>
                   {t("questionBuilder.defaultTerms.outcomes")}
                 </ColoredText>
               </>
@@ -1410,9 +1410,9 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     selectedOperations,
     outcomesBySection,
     operationDirections,
-    theme.palette.cool.main,
-    theme.palette.pop.main,
-    theme.palette.climate.main,
+    theme.palette.blue.bright,
+    theme.palette.accent.gold,
+    theme.palette.nature.teal,
     shouldUseDo,
     formatOutcomeText,
     t,

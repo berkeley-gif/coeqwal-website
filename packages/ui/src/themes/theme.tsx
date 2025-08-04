@@ -118,51 +118,57 @@ const themeValues = {
     },
   },
 
-  // Palette colors
+  // Color Palette - California Water Theme
   palette: {
-    dark: "rgb(42,82, 135)",
-    white: "#FFFFFF",
-    background: "#ACDDE9",
-    teal: "#007C92",
-    neutral: {
-      light: "#AAAAAA",
-      medium: "rgb(146,193,213)",
-      dark: "#666666",
+    // Core brand colors (from gradient)
+    brand: {
+      sky: "#87CEEB",        // Top of gradient - sky blue
+      water: "#64a3d7",      // Bottom of gradient - water blue
     },
-    colors: {
-      primary: "#AAAAAA",
-      secondary: "#888888",
-      tertiary: "#666666",
+    
+    // Text and UI blues (organized by intensity)
+    blue: {
+      darkest: "#3a4574",    // Deep navy - primary text
+      dark: "#186b88",       // Dark teal - secondary text  
+      medium: "#2d89b6",     // Medium blue - accent text
+      bright: "#449cd9",     // Bright blue - links/interactive
+      light: "#77a2d9",      // Light blue - subtle elements
     },
-    pop: {
-      main: "#FF5733", // Orange for operations
-      light: "#FF8866",
-      dark: "#CC4422",
+    
+    // Accent colors - warm tones
+    accent: {
+      gold: "#ffd87e",       // Golden yellow - highlights
+      cream: "#fdf0a0",      // Light yellow - backgrounds
     },
-    cool: {
-      main: "#3498DB", // Cool blue for outcomes
-      light: "#5DADE2",
-      dark: "#2874A6",
+    
+    // Nature colors - greens and teals
+    nature: {
+      teal: "#76b9aa",       // Medium teal - natural elements
+      sage: "#9fd5cb",       // Light teal - subtle backgrounds
+      mint: "#b1e1c3",       // Pale green - very light elements
+      whisper: "#d1ebc7",    // Very light green - backgrounds
     },
-    climate: {
-      main: "#27AE60", // Green for climate
-      light: "#58D68D",
-      dark: "#1E8449",
+    
+    // Utility colors
+    utility: {
+      white: "#FFFFFF",
+      black: "#000000",
     },
-    // Category-specific colors
+    
+    // Legacy support - will be phased out
     categories: {
-      groundwaterManagement: "#4CAF50", // Leafy green, ag/groundwater
-      riverFlows: "#2196F3", // Cool blue, river systems
-      urbanWaterPriorities: "#9C27B0", // Plum purple, civic-focused
-      deltaBalance: "#FF9800", // Amber/orange, delta ecosystems
-      infrastructure: "#607D8B", // Slate gray, engineered systems
-      noFlowRequirements: "#F44336", // Red, disruption/emergency
-      carryoverRequirements: "#00ACC1", // Aqua, reservoir logic
-      deltaOutflows: "#FF5722", // Burnt orange, flow export
-      urbanDemand: "#8BC34A", // Light green, consumption
-      exportReductions: "#3F51B5", // Deep indigo, regulatory
-      conveyanceProjects: "#795548", // Earthy brown, infrastructure
-      climateFuture: "#E91E63", // Bright magenta, emphasis
+      groundwaterManagement: "#76b9aa", // Using nature.teal
+      riverFlows: "#2d89b6", // Using blue.medium
+      urbanWaterPriorities: "#449cd9", // Using blue.bright
+      deltaBalance: "#ffd87e", // Using accent.gold
+      infrastructure: "#3a4574", // Using blue.darkest
+      noFlowRequirements: "#186b88", // Using blue.dark
+      carryoverRequirements: "#77a2d9", // Using blue.light
+      deltaOutflows: "#87CEEB", // Using brand.sky
+      urbanDemand: "#9fd5cb", // Using nature.sage
+      exportReductions: "#64a3d7", // Using brand.water
+      conveyanceProjects: "#b1e1c3", // Using nature.mint
+      climateFuture: "#ffd87e", // Using accent.gold
     },
   },
 
@@ -433,52 +439,56 @@ const theme = createTheme({
       },
     },
   },
-  // Palette (some are fixed MUI theme properties, some are custom)
+  // Palette - California Water Theme (MUI integration)
   palette: {
     common: {
-      black: themeValues.palette.dark,
-      white: themeValues.palette.white,
+      black: themeValues.palette.utility.black,
+      white: themeValues.palette.utility.white,
     },
     primary: {
-      main: themeValues.palette.white,
-      light: themeValues.palette.neutral.light,
-      dark: "#274472",
+      main: themeValues.palette.blue.darkest,
+      light: themeValues.palette.blue.light,
+      dark: themeValues.palette.blue.dark,
     },
     secondary: {
-      main: themeValues.palette.dark,
-      light: themeValues.palette.neutral.light,
-      dark: themeValues.palette.neutral.dark,
+      main: themeValues.palette.brand.water,
+      light: themeValues.palette.brand.sky,
+      dark: themeValues.palette.blue.medium,
     },
-    neutral: {
-      main: themeValues.palette.neutral.medium,
-      light: themeValues.palette.neutral.light,
-      dark: themeValues.palette.neutral.dark,
+    // Add our new color groups to MUI palette
+    brand: {
+      sky: themeValues.palette.brand.sky,
+      water: themeValues.palette.brand.water,
     },
-    pop: {
-      main: themeValues.palette.pop.main,
-      light: themeValues.palette.pop.light,
-      dark: themeValues.palette.pop.dark,
+    blue: {
+      darkest: themeValues.palette.blue.darkest,
+      dark: themeValues.palette.blue.dark,
+      medium: themeValues.palette.blue.medium,
+      bright: themeValues.palette.blue.bright,
+      light: themeValues.palette.blue.light,
     },
-    cool: {
-      main: themeValues.palette.cool.main,
-      light: themeValues.palette.cool.light,
-      dark: themeValues.palette.cool.dark,
+    accent: {
+      gold: themeValues.palette.accent.gold,
+      cream: themeValues.palette.accent.cream,
     },
-    climate: {
-      main: themeValues.palette.climate.main,
-      light: themeValues.palette.climate.light,
-      dark: themeValues.palette.climate.dark,
+    nature: {
+      teal: themeValues.palette.nature.teal,
+      sage: themeValues.palette.nature.sage,
+      mint: themeValues.palette.nature.mint,
+      whisper: themeValues.palette.nature.whisper,
+    },
+    utility: {
+      white: themeValues.palette.utility.white,
+      black: themeValues.palette.utility.black,
     },
     categories: {
-      groundwaterManagement:
-        themeValues.palette.categories.groundwaterManagement,
+      groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
       riverFlows: themeValues.palette.categories.riverFlows,
       urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
       deltaBalance: themeValues.palette.categories.deltaBalance,
       infrastructure: themeValues.palette.categories.infrastructure,
       noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
-      carryoverRequirements:
-        themeValues.palette.categories.carryoverRequirements,
+      carryoverRequirements: themeValues.palette.categories.carryoverRequirements,
       deltaOutflows: themeValues.palette.categories.deltaOutflows,
       urbanDemand: themeValues.palette.categories.urbanDemand,
       exportReductions: themeValues.palette.categories.exportReductions,
@@ -486,18 +496,15 @@ const theme = createTheme({
       climateFuture: themeValues.palette.categories.climateFuture,
     },
     background: {
-      default: themeValues.palette.white,
-      paper: themeValues.palette.neutral.light,
-    },
-    interstitial: {
-      main: "#4b8fb4",
+      default: themeValues.palette.utility.white,
+      paper: themeValues.palette.nature.whisper,
     },
     text: {
-      primary: "#274472",
-      secondary: themeValues.palette.white,
-      teal: themeValues.palette.teal,
+      primary: themeValues.palette.blue.darkest,
+      secondary: themeValues.palette.blue.medium,
+      disabled: themeValues.palette.blue.light,
     },
-    divider: themeValues.palette.white,
+    divider: themeValues.palette.nature.sage,
   },
   // Type family, sizes, and weights
   typography: {
@@ -1267,13 +1274,33 @@ export default theme
 
 // Custom palette colors and theme properties
 declare module "@mui/material/styles" {
-  // Custom palette colors
+  // Custom palette colors - California Water Theme
   interface Palette {
-    interstitial: Palette["primary"]
-    neutral: Palette["primary"]
-    pop: Palette["primary"]
-    cool: Palette["primary"]
-    climate: Palette["primary"]
+    brand: {
+      sky: string
+      water: string
+    }
+    blue: {
+      darkest: string
+      dark: string
+      medium: string
+      bright: string
+      light: string
+    }
+    accent: {
+      gold: string
+      cream: string
+    }
+    nature: {
+      teal: string
+      sage: string
+      mint: string
+      whisper: string
+    }
+    utility: {
+      white: string
+      black: string
+    }
     categories: {
       groundwaterManagement: string
       riverFlows: string
@@ -1295,11 +1322,31 @@ declare module "@mui/material/styles" {
   }
 
   interface PaletteOptions {
-    interstitial?: PaletteOptions["primary"]
-    neutral?: PaletteOptions["primary"]
-    pop?: PaletteOptions["primary"]
-    cool?: PaletteOptions["primary"]
-    climate?: PaletteOptions["primary"]
+    brand?: {
+      sky?: string
+      water?: string
+    }
+    blue?: {
+      darkest?: string
+      dark?: string
+      medium?: string
+      bright?: string
+      light?: string
+    }
+    accent?: {
+      gold?: string
+      cream?: string
+    }
+    nature?: {
+      teal?: string
+      sage?: string
+      mint?: string
+      whisper?: string
+    }
+    utility?: {
+      white?: string
+      black?: string
+    }
     categories?: {
       groundwaterManagement?: string
       riverFlows?: string
