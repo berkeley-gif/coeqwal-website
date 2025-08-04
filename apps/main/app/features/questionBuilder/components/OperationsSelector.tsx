@@ -533,7 +533,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     border: "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: `${theme.borderRadius.card}px`,
     overflow: "hidden",
-    backgroundColor: theme.palette.common.white,
+    
     padding: theme.spacing(1, 2),
     display: "flex",
     alignItems: "center",
@@ -730,10 +730,10 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             py: 0.5,
             fontWeight: 400,
             color: "rgba(0, 0, 0, 0.42)",
-            backgroundColor: "transparent",
+  
             border: "none",
             "&:hover": {
-              backgroundColor: "transparent",
+    
               color: "rgba(0, 0, 0, 0.6)",
               textDecoration: "underline",
             },
@@ -794,14 +794,14 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             // High-performance scrollbar styling
             "&::-webkit-scrollbar": {
               width: "14px",
-              backgroundColor: "transparent",
+    
             },
             "&::-webkit-scrollbar-track": {
-              backgroundColor: "transparent",
+    
               margin: theme.spacing(1),
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#00000030",
+    
               border: "4px solid white",
               borderRadius: "24px",
             },

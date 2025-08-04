@@ -154,7 +154,7 @@ export function HeroQuestionsPanel({
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: theme.palette.common.white,
+        
         maxWidth: "100vw",
         overflow: "hidden",
       }}

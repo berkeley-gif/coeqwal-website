@@ -13,7 +13,7 @@ export default function MapStateDisplay() {
         top: 16,
         left: 16,
         zIndex: 100,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
+
         color: "white",
         padding: 2,
         borderRadius: 1,

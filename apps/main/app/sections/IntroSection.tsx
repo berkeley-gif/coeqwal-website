@@ -187,7 +187,7 @@ const ImageCircle: React.FC<AnimatedCircleProps> = ({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.16)",
+
         border: "2px solid rgba(255, 255, 255, 0.1)",
       }}
     >
@@ -491,7 +491,7 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
         width: `${size}vmin`,
         height: `${size}vmin`,
         borderRadius: "50%",
-        backgroundColor: "#FFFFFF",
+
         opacity: circleOpacity,
         left,
         top,
@@ -641,9 +641,7 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        // Original gradient background (commented out for reference):
-        // background: "linear-gradient(to bottom, #A3DDE8, #A3DDE8, #458bb6)",
-        background: "#A3DDE8",
+        background: "linear-gradient(to bottom, #79bed8, #64a3d7)",
         backgroundSize: "100% 100%",
         width: "100%",
         overflow: "hidden",
@@ -723,6 +721,7 @@ const IntroSection: React.FC = () => {
       <BasePanel
         id="intro-main"
         fullHeight={false}
+        background="transparent"
         includeHeaderSpacing
         sx={{
           paddingTop: { xs: 3, md: 6 },
@@ -735,7 +734,7 @@ const IntroSection: React.FC = () => {
           justifyContent: "center",
           position: "relative",
           overflow: "visible",
-          backgroundColor: "transparent",
+  
         }}
       >
         {/* Background Circles (below text) - contained within the first 100vh */}
@@ -880,6 +879,7 @@ const IntroSection: React.FC = () => {
       <BasePanel
         id="interstitial"
         fullHeight={false}
+        background="transparent"
         paddingVariant="wide"
         includeHeaderSpacing={false}
         sx={{
@@ -888,7 +888,7 @@ const IntroSection: React.FC = () => {
           justifyContent: "center",
           pointerEvents: "auto",
           position: "relative",
-          backgroundColor: "transparent", // No background image here anymore since it's on the parent
+   // No background image here anymore since it's on the parent
           minHeight: "100vh",
           paddingTop: "160px",
           paddingBottom: "160px",
@@ -993,7 +993,7 @@ const IntroSection: React.FC = () => {
                         <Box
                           component="mark"
                           sx={{
-                            backgroundColor: "transparent",
+                    
                             borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
@@ -1023,7 +1023,7 @@ const IntroSection: React.FC = () => {
                         <Box
                           component="mark"
                           sx={{
-                            backgroundColor: "transparent",
+                    
                             borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
@@ -1053,7 +1053,7 @@ const IntroSection: React.FC = () => {
                         <Box
                           component="mark"
                           sx={{
-                            backgroundColor: "transparent",
+                    
                             borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
@@ -1083,7 +1083,7 @@ const IntroSection: React.FC = () => {
                         <Box
                           component="mark"
                           sx={{
-                            backgroundColor: "transparent",
+                    
                             borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
@@ -1151,7 +1151,7 @@ const IntroSection: React.FC = () => {
                           <Box
                             component="mark"
                             sx={{
-                              backgroundColor: "transparent",
+                      
                               borderBottom: "3px solid #2e3a6c",
                               color: "#2e3a6c",
                               py: 0.1,
@@ -1181,7 +1181,7 @@ const IntroSection: React.FC = () => {
                           <Box
                             component="mark"
                             sx={{
-                              backgroundColor: "transparent",
+                      
                               borderBottom: "3px solid #2e3a6c",
                               color: "#2e3a6c",
                               py: 0.1,
@@ -1219,7 +1219,7 @@ const IntroSection: React.FC = () => {
                         <Box
                           component="mark"
                           sx={{
-                            backgroundColor: "transparent",
+                    
                             borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
@@ -1261,7 +1261,7 @@ const IntroSection: React.FC = () => {
                         <Box
                           component="mark"
                           sx={{
-                            backgroundColor: "transparent",
+                    
                             borderBottom: "3px solid #2e3a6c",
                             color: "#2e3a6c",
                             py: 0.1,
@@ -1345,7 +1345,7 @@ const IntroSection: React.FC = () => {
                         key={i}
                         component="mark"
                         sx={{
-                          backgroundColor: "transparent",
+                  
                           borderBottom: "3px solid #2e3a6c",
                           color: "#2e3a6c",
                           py: 0.1,
@@ -1427,7 +1427,7 @@ const IntroSection: React.FC = () => {
                         key={i}
                         component="mark"
                         sx={{
-                          backgroundColor: "transparent",
+                  
                           borderBottom: "3px solid #2e3a6c",
                           color: "#2e3a6c",
                           py: 0.1,

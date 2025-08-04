@@ -240,8 +240,6 @@ export default function Home() {
           width: "100%",
           height: "100%",
           zIndex: (theme) => theme.zIndex.map,
-          background: "#218dba",
-          backgroundSize: "100% 100%",
         }}
       />
 
@@ -284,9 +282,6 @@ export default function Home() {
         >
           {/* Intro Panel */}
           <IntroSection />
-
-          {/* Intro Panel */}
-          {/* <IntroSection /> */}
 
           {/* Content Panels */}
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />

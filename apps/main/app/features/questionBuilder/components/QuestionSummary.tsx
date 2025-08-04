@@ -1431,7 +1431,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
   return (
     <Box
       style={{
-        backgroundColor: "transparent",
+
         width: "100%",
         position: "relative",
         zIndex: 1000,
@@ -1455,7 +1455,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
 
           width: "100%",
           margin: "0 auto",
-          backgroundColor: "white",
+
           paddingTop: isExploratoryMode ? "30px" : "40px",
           paddingBottom: isExploratoryMode ? "12px" : 0,
           paddingLeft: "5%",

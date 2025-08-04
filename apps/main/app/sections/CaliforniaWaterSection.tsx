@@ -138,7 +138,7 @@ export default function CaliforniaWaterSection({
                 opacity: showARLabel ? 1 : 0,
                 transition: "opacity 1s ease",
                 textAlign: "center",
-                backgroundColor: "rgba(2, 18, 36, 0.9)",
+
                 color: "#F2F0EF",
                 px: 1,
                 py: 1,

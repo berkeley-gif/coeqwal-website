@@ -165,7 +165,7 @@ export default function ContentPanels({
         margin: 0, // Remove any default margins
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
-        backgroundColor: "transparent", // Ensure no transparency issues
+        
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
           zIndex: 3, // Push active panels above others (within panels layer)
@@ -986,9 +986,9 @@ function PanelWithDetail({
                     top: "50%",
                     transform: "translateY(-50%)",
                     color: "white",
-                    backgroundColor: "transparent",
+        
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+          
                     },
                     width: 60,
                     height: 60,
@@ -1007,9 +1007,9 @@ function PanelWithDetail({
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: "white",
-                    backgroundColor: "transparent",
+        
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+          
                     },
                     width: 60,
                     height: 60,
@@ -1082,9 +1082,9 @@ function PanelWithDetail({
                   top: 108,
                   transform: "rotate(180deg)",
                   color: "white",
-                  backgroundColor: "transparent",
+      
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+        
                   },
                   width: 60,
                   height: 60,
@@ -1102,9 +1102,9 @@ function PanelWithDetail({
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: "white",
-                    backgroundColor: "transparent",
+        
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+          
                     },
                     width: 60,
                     height: 60,

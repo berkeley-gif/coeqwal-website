@@ -419,7 +419,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
     <Box
       sx={(theme) => ({
         width: "100%",
-        backgroundColor: theme.palette.background.default,
+        
         margin: 0, // Remove any default margins
         padding: 0, // Remove any default padding
       })}
@@ -437,7 +437,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
           flexDirection: "column",
           padding: theme.spacing(3), // Reduced padding
           paddingTop: theme.spacing(1), // Minimal top padding
-          backgroundColor: "#FFFFFF",
+          
           transition: "position 0.3s ease, box-shadow 0.3s ease",
           boxShadow: hasClickedSearch
             ? "0 2px 8px rgba(0, 0, 0, 0.08)"
@@ -490,7 +490,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   border: "1px solid rgba(0, 0, 0, 0.12)",
                   borderRadius: `${theme.borderRadius.card}px !important`,
                   color: theme.palette.primary.dark,
-                  backgroundColor: theme.palette.common.white,
+    
                   boxShadow: "none",
                   overflow: "hidden",
                 }}
@@ -586,7 +586,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
       {/* <Box
         sx={(theme) => ({
           height: "65px",
-          backgroundColor: theme.palette.background.default,
+          
         })}
       /> */}
 
