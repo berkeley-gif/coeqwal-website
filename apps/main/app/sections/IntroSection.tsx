@@ -815,7 +815,7 @@ const IntroSection: React.FC = () => {
               maxWidth: "500px",
             }}
           >
-            Explore California&apos;s water system and discover possibilities
+            Explore a range of Central Valley water scenarios and discover possibilities
             for the future of water in our state.
           </Typography>
 

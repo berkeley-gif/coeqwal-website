@@ -53,16 +53,41 @@ import type { CSSProperties } from "react"
  */
 
 // ===============================================================================
-// HEADLINE TYPOGRAPHY - GT Super Font Family
+// TYPOGRAPHY SCALE - Harmonious Type System
 // ===============================================================================
-// 
-// All headlines now use GT Super Text for a cohesive, premium look:
-// • h1, h2, h3, h4, h5, h6: GT Super Text (consistent editorial style throughout)
 //
+// Using a Perfect Fourth (1.333) type scale for mathematical harmony
+// Base: 1.25rem body text, scaling up for headlines
+//
+// Scale progression:
+// • h1: 5.75rem (92px) - Hero headlines "Learn. Explore. Empower."
+// • h2: 3.75rem (60px) - Section headlines "What is the future..."  
+// • h3: 2.8rem (44.8px) - Subsection headlines "Rethink California Water"
+// • h4: 2.1rem (33.6px) - Card titles and smaller headlines
+// • h5: 1.575rem (25.2px) - Labels and minor headlines
+// • h6: 1.18rem (18.9px) - Small headlines and captions
+// • body1: 1.25rem (20px) - Primary body text
+// • body2: 1.125rem (18px) - Secondary body text
+//
+// All headlines use GT Super Text for cohesive editorial style
 // GT Super Text weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
-// GT Super Display weights: 300 (light), 400 (regular), 500 (medium), 700 (bold), 900 (super)
 //
 const H1_FONT = 'gtSuperText' // GT Super Text for h1 headlines
+
+// Type scale configuration using Perfect Fourth (1.333) ratio
+const typeScale = {
+  // Base sizes for the scale
+  baseBody: '1.25rem',    // 20px - comfortable reading size
+  smallBody: '1.125rem',  // 18px - secondary text
+  
+  // Headline sizes (keeping h1 & h2 for visual consistency, harmonizing the rest)
+  h1: '5.75rem',  // 92px - Hero size (unchanged)
+  h2: '3.75rem',  // 60px - Major section headers (unchanged)
+  h3: '2.8rem',   // 44.8px - Subsection headers (harmonious with scale)
+  h4: '2.1rem',   // 33.6px - Card titles (h3 ÷ 1.333)
+  h5: '1.575rem', // 25.2px - Minor headlines (h4 ÷ 1.333)
+  h6: '1.18rem',  // 18.9px - Small headlines (h5 ÷ 1.333)
+}
 
 const themeValues = {
   // Typography
@@ -485,61 +510,67 @@ const theme = createTheme({
     fontWeightBold: 700,
     h1: {
       fontFamily: themeValues.fontFamily[H1_FONT],
-      fontSize: "5.75rem",
-      fontWeight: 500, // 🎨 Change this to experiment with font weights! See available weights in comments above
+      fontSize: typeScale.h1,
+      fontWeight: 500,
       lineHeight: 0.85,
     },
     h2: {
       fontFamily: themeValues.fontFamily.gtSuperText,
-      fontSize: "3.75rem",
+      fontSize: typeScale.h2,
       fontWeight: 500,
-      lineHeight: 1,
+      lineHeight: 0.95,
     },
     h3: {
       fontFamily: themeValues.fontFamily.gtSuperText,
-      fontSize: "2.2rem",
+      fontSize: typeScale.h3,
       fontWeight: 500,
-      lineHeight: 1,
+      lineHeight: 1.1,
     },
     h4: {
       fontFamily: themeValues.fontFamily.gtSuperText,
-      fontSize: "1.25rem",
+      fontSize: typeScale.h4,
       fontWeight: 500,
-      lineHeight: 1.4,
+      lineHeight: 1.2,
     },
     h5: {
       fontFamily: themeValues.fontFamily.gtSuperText,
-      fontSize: "1.15rem",
+      fontSize: typeScale.h5,
       fontWeight: 500,
+      lineHeight: 1.3,
     },
     h6: {
       fontFamily: themeValues.fontFamily.gtSuperText,
-      fontSize: "1.05rem",
+      fontSize: typeScale.h6,
       fontWeight: 500,
+      lineHeight: 1.4,
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.3rem",
+      fontSize: typeScale.baseBody,
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "2rem",
+      lineHeight: 1.6, // 1.6 ratio for comfortable reading
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.3rem",
+      fontSize: typeScale.smallBody,
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "2rem",
+      lineHeight: 1.6, // Consistent line height ratio
     },
     subtitle1: {
-      fontSize: "1.25rem",
+      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontSize: typeScale.baseBody, // 1.25rem - matches body1 for consistency
+      fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
     },
     subtitle2: {
-      fontSize: "1.1rem",
+      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontSize: typeScale.smallBody, // 1.125rem - matches body2 for consistency
+      fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
-      lineHeight: 1.5,
+      lineHeight: 1.6,
     },
     button: {
       fontSize: "0.95rem",
