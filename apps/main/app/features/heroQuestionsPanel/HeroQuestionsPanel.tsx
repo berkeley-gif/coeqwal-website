@@ -404,7 +404,6 @@ export function HeroQuestionsPanel({
         <Typography
           variant="h1"
           sx={{
-            fontFamily: '"akzidenz-grotesk-next-pro", sans-serif',
             fontWeight: 800,
             color: theme.palette.primary.dark,
             whiteSpace: "nowrap",

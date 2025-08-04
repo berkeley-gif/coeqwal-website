@@ -812,10 +812,8 @@ const IntroSection: React.FC = () => {
             variant="body2"
             sx={{
               color: "#2e3a6c",
-              // mt: 3,
               maxWidth: "500px",
             }}
-            className="tk-acumin-pro"
           >
             Explore California&apos;s water system and discover possibilities
             for the future of water in our state.
@@ -832,7 +830,7 @@ const IntroSection: React.FC = () => {
             <PlayArrowIcon
               sx={{
                 color: "#2e3a6c",
-                fontSize: 50,
+                fontSize: "3rem", // Using rem units for consistency
                 transform: "rotate(90deg)",
                 pointerEvents: "auto",
               }}
@@ -933,7 +931,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{ color: "#2e3a6c" }}
-                className="tk-acumin-pro"
+                
               >
                 {(() => {
                   const text = t("interstitial.part1")
@@ -1297,7 +1295,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{ color: "#2e3a6c" }}
-                className="tk-acumin-pro"
+                
               >
                 {(() => {
                   const text = t("interstitial.part2")
@@ -1386,7 +1384,7 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="body1"
                 sx={{ color: "#2e3a6c" }}
-                className="tk-acumin-pro"
+                
               >
                 {(() => {
                   const text = t("interstitial.part3")

@@ -147,13 +147,13 @@ export default function CaliforniaWaterSection({
             >
               <Typography
                 variant="body1"
-                sx={{ fontSize: "1rem", color: "white", fontWeight: 600 }}
+                sx={{ color: "white", fontWeight: 600 }}
               >
                 {t("californiaWater.arLabel.title")}
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ fontSize: "1rem", color: "white", fontWeight: 400 }}
+                sx={{ color: "white", fontWeight: 400 }}
               >
                 {t("californiaWater.arLabel.date")}
               </Typography>

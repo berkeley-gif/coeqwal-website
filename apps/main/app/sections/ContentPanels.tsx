@@ -51,7 +51,7 @@ export default function ContentPanels({
           pointerEvents: "auto",
           maxWidth: "620px",
         }}
-        className="tk-neue-haas-grotesk-text"
+        
       >
         how California water flows and operational decisions balance water needs
         across the state
@@ -78,7 +78,7 @@ export default function ContentPanels({
           color: "common.white",
           pointerEvents: "auto",
         }}
-        className="tk-neue-haas-grotesk-text"
+        
       >
         COEQWAL&apos;s &quot;what if&quot; scenarios by theme
       </Typography>
@@ -105,7 +105,7 @@ export default function ContentPanels({
           pointerEvents: "auto",
           maxWidth: "620px",
         }}
-        className="tk-neue-haas-grotesk-text"
+        
       >
         your community with data that helps you understand the impacts of
         operational decisions
@@ -829,8 +829,6 @@ export default function ContentPanels({
                   color="common.white"
                   sx={{
                     pointerEvents: "auto",
-                    fontFamily:
-                      '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
                   }}
                 >
                   The COEQWAL project helps community members and
@@ -996,7 +994,7 @@ function PanelWithDetail({
                     height: 60,
                   }}
                 >
-                  <PlayArrowIcon sx={{ fontSize: 36 }} />
+                  <PlayArrowIcon sx={{ fontSize: "2.25rem" }} />
                 </IconButton>
               )}
 
@@ -1018,7 +1016,7 @@ function PanelWithDetail({
                   }}
                 >
                   <PlayArrowIcon
-                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                    sx={{ fontSize: "2.25rem", transform: "rotate(90deg)" }}
                   />
                 </IconButton>
               )}
@@ -1092,7 +1090,7 @@ function PanelWithDetail({
                   height: 60,
                 }}
               >
-                <PlayArrowIcon sx={{ fontSize: 36 }} />
+                <PlayArrowIcon sx={{ fontSize: "2.25rem" }} />
               </IconButton>
 
               {/* Bottom scroll icon - absolutely positioned within the panel */}
@@ -1113,7 +1111,7 @@ function PanelWithDetail({
                   }}
                 >
                   <PlayArrowIcon
-                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                    sx={{ fontSize: "2.25rem", transform: "rotate(90deg)" }}
                   />
                 </IconButton>
               )}
