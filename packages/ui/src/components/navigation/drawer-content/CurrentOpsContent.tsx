@@ -466,7 +466,7 @@ export function CurrentOpsContent({
                   variant="h6"
                   sx={{
                     fontWeight: 600,
-                    color: "black",
+                    color: (theme) => theme.palette.blue.darkest,
                     fontSize: "1.1rem",
                   }}
                 >

@@ -1025,9 +1025,9 @@ const theme = createTheme({
             fontSize: "0.95rem",
             fontWeight: 500,
             color: theme.palette.common.white,
-            backgroundColor: theme.palette.common.black,
+            backgroundColor: theme.palette.blue.darkest,
             "&:hover": {
-              backgroundColor: "#333333",
+              backgroundColor: theme.palette.blue.dark,
               opacity: 0.9,
             },
           }),

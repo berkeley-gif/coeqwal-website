@@ -212,7 +212,7 @@ export const OperationCard: React.FC<OperationCardProps> = ({
                   /* Checked = white box + primary-color checkmark */
                   "&.Mui-checked .MuiSvgIcon-root": {
                     fill: theme.palette.primary.main,
-                    backgroundColor: "black",
+                    backgroundColor: (theme) => theme.palette.blue.darkest,
                     color: theme.palette.primary.main,
                   },
                 }}

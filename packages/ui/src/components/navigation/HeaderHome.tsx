@@ -210,7 +210,7 @@ export function HeaderHome({
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
-    backgroundColor: theme.palette.utility.black,
+    backgroundColor: theme.palette.blue.darkest,
     lineHeight: 1.1, // Line height for text wrapping
     height: "40px", // Increased height for more prominence
     minHeight: "40px", // Ditto

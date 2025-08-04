@@ -13,6 +13,7 @@ type HeaderTranslations = {
   buttons: {
     getData: string
     about: string
+    glossary: string
   }
 }
 
@@ -35,6 +36,9 @@ interface HeaderProps {
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
+  // Glossary functionality
+  onGlossaryClick?: () => void
+  onDataClick?: () => void
 }
 
 const translations: TranslationsMap = {
@@ -43,6 +47,7 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Data",
       about: "About COEQWAL",
+      glossary: "Glossary",
     },
   },
   es: {
@@ -50,13 +55,14 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Datos sin procesar",
       about: "Sobre COEQWAL",
+      glossary: "Glosario",
     },
   },
 }
 
-// Define which sections should have BLACK text (all others will have white)
-// TODO: generalize this
-const blackSections = [
+// Define which sections should have BLUE text (all others will have white)
+// Using theme blue color instead of black for better brand consistency
+const blueSections = [
   "hero", // Home section
   "combined-panel", // Scenario search section
 ]
@@ -75,6 +81,8 @@ export function Header({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [], // Default to empty array, bc optional
+  onGlossaryClick,
+  onDataClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -97,9 +105,9 @@ export function Header({
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   // Determine the text color for all navigation items based on active section
-  // Default to white, switch to black for specific sections
-  const textColor = blackSections.includes(activeSection || "")
-    ? "black"
+  // Default to white, switch to theme blue for specific sections
+  const textColor = blueSections.includes(activeSection || "")
+    ? theme.palette.blue.darkest
     : "white"
 
   return (
@@ -218,8 +226,15 @@ export function Header({
         >
           <Button
             variant={buttonVariant}
+            onClick={onDataClick}
             sx={{
               ...buttonStyle,
+              color: textColor,
+              "&:hover": {
+                backgroundColor: textColor === "white" 
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : (theme) => `${theme.palette.blue.darkest}15`, // 15 = ~8% opacity
+              },
             }}
           >
             {componentText.buttons.getData}
@@ -228,10 +243,33 @@ export function Header({
             variant={buttonVariant}
             sx={{
               ...buttonStyle,
+              color: textColor,
+              "&:hover": {
+                backgroundColor: textColor === "white" 
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : (theme) => `${theme.palette.blue.darkest}15`, // 15 = ~8% opacity
+              },
             }}
           >
             {componentText.buttons.about}
           </Button>
+          {onGlossaryClick && (
+            <Button
+              variant={buttonVariant}
+              onClick={onGlossaryClick}
+              sx={{
+                ...buttonStyle,
+                color: textColor,
+                "&:hover": {
+                  backgroundColor: textColor === "white" 
+                    ? "rgba(255, 255, 255, 0.1)"
+                    : (theme) => `${theme.palette.blue.darkest}15`, // 15 = ~8% opacity
+                },
+              }}
+            >
+              {componentText.buttons.glossary}
+            </Button>
+          )}
           <LanguageSwitcher />
         </Stack>
       </Toolbar>

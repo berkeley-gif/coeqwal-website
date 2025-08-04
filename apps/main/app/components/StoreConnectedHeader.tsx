@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { HeaderHome } from "@repo/ui"
+import { Header } from "@repo/ui"
 import type { SecondaryNavItem } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 import { useRouter } from "next/navigation"
@@ -14,7 +14,7 @@ interface StoreConnectedHeaderProps {
 }
 
 /**
- * Connects the HeaderHome component to the drawer store
+ * Connects the Header component to the drawer store
  * Always visible regardless of scroll position
  */
 export function StoreConnectedHeader({
@@ -25,7 +25,6 @@ export function StoreConnectedHeader({
   
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
-  const isOpen = useDrawerStore((state) => state.isOpen)
   const openDrawer = useDrawerStore((state) => state.openDrawer)
   const closeDrawer = useDrawerStore((state) => state.closeDrawer)
 
@@ -44,11 +43,12 @@ export function StoreConnectedHeader({
   }
 
   return (
-    <HeaderHome
-      backgroundColor={"white"} 
+    <Header
+      activeSection={activeSection}
+      onSectionClick={onSectionClick}
       onGlossaryClick={handleGlossaryToggle}
-      isGlossaryActive={activeTab === "glossary"}
       onDataClick={handleDataClick}
+      showSecondaryNav={false}
     />
   )
 }
