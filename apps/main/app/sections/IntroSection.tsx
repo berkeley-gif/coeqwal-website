@@ -19,38 +19,38 @@ const IntroSection: React.FC = () => {
   const markerSpecs = [
     { 
       src: "/images/markers/shasta.png", 
-      right: { xs: "25%", sm: "28%", md: "32%", lg: "32%", xl: "32%" }, 
-      top: "10px", 
+      right: { xs: "25%", sm: "28%", md: "45%", lg: "45%", xl: "45%" }, 
+      top: "30px", 
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
     },
     { 
       src: "/images/markers/drinking_water.png", 
-      right: { xs: "13%", sm: "16%", md: "20%", lg: "20%", xl: "20%" }, 
-      top: "60%", 
+      right: { xs: "13%", sm: "16%", md: "36%", lg: "36%", xl: "36%" }, 
+      top: "50%", 
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
     },
     { 
       src: "/images/markers/los_angeles.png", 
-      right: { xs: "1%", sm: "2%", md: "4%", lg: "4%", xl: "4%" }, 
-      top: "72%", 
+      right: { xs: "1%", sm: "2%", md: "20%", lg: "20%", xl: "20%" }, 
+      top: "62%", 
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
     },
     { 
       src: "/images/markers/farmers.png", 
-      right: { xs: "3%", sm: "5%", md: "8%", lg: "8%", xl: "8%" }, 
-      top: "44%", 
+      right: { xs: "3%", sm: "5%", md: "22%", lg: "22%", xl: "22%" }, 
+      top: "38%", 
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
     },
     { 
       src: "/images/markers/salmon.png", 
-      right: { xs: "9%", sm: "12%", md: "16%", lg: "16%", xl: "16%" }, 
+      right: { xs: "9%", sm: "12%", md: "30%", lg: "30%", xl: "30%" }, 
       top: "16%", 
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
     },
     { 
       src: "/images/markers/atta.png", 
-      right: { xs: "21%", sm: "24%", md: "28%", lg: "28%", xl: "28%" }, 
-      top: "34%", 
+      right: { xs: "21%", sm: "24%", md: "43%", lg: "43%", xl: "43%" }, 
+      top: "30%", 
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
     },
   ] as const
@@ -194,7 +194,7 @@ const IntroSection: React.FC = () => {
           height: "100vh",
           background: `url('/images/california.png')`,
           backgroundSize: { xs: "auto 90%", sm: "auto 95%", md: "auto 100%", lg: "auto 100%", xl: "auto 100%" },
-          backgroundPosition: { xs: "90% center", sm: "92% center", md: "95% center", lg: "95% center", xl: "95% center" },
+          backgroundPosition: { xs: "80% center", sm: "82% center", md: "85% center", lg: "85% center", xl: "85% center" },
           backgroundRepeat: "no-repeat",
           overflow: "hidden",
           zIndex: 0,
