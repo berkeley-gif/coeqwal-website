@@ -16,12 +16,12 @@ const IntroSection: React.FC = () => {
   // Marker specifications for floating icons around the California silhouette
   // Positioned relative to the 100vh first panel
   const markerSpecs = [
-    { src: "/images/markers/shasta.png", right: "25%", top: "15%", size: 180 },
-    { src: "/images/markers/drinking_water.png", right: "35%", top: "35%", size: 180 },
-    { src: "/images/markers/los_angeles.png", right: "45%", top: "70%", size: 180 },
-    { src: "/images/markers/farmers.png", right: "30%", top: "50%", size: 180 },
-    { src: "/images/markers/salmon.png", right: "20%", top: "25%", size: 180 },
-    { src: "/images/markers/atta.png", right: "40%", top: "20%", size: 180 },
+    { src: "/images/markers/shasta.png", right: "30%", top: "10px", size: 220 },
+    { src: "/images/markers/drinking_water.png", right: "16%", top: "60%", size: 220 },
+    { src: "/images/markers/los_angeles.png", right: "1%", top: "72%", size: 220 },
+    { src: "/images/markers/farmers.png", right: "2%", top: "44%", size: 220 },
+    { src: "/images/markers/salmon.png", right: "15%", top: "16%", size: 220 },
+    { src: "/images/markers/atta.png", right: "26%", top: "34%", size: 220 },
   ] as const
   /* Legacy bubble code removed
   const [backgroundCircles, setBackgroundCircles] = useState<
@@ -191,9 +191,9 @@ const IntroSection: React.FC = () => {
           id="intro-main"
           fullHeight={false}
           background="transparent"
-          includeHeaderSpacing
+          includeHeaderSpacing={false}
           sx={{
-            paddingTop: { xs: 3, md: 6 },
+            paddingTop: { xs: "calc(64px + 3rem)", md: "calc(80px + 6rem)" }, // Header height + original padding
             paddingBottom: { xs: 3, md: 6 },
             paddingLeft: { xs: 6, md: 20 },
             paddingRight: { xs: 3, md: 6 },
@@ -354,7 +354,7 @@ const IntroSection: React.FC = () => {
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right_side.png')
           `,
-          backgroundSize: "auto 80%, auto 80%",
+          backgroundSize: "auto 80%, auto calc(100vh - 80px)",
           backgroundPosition: "left bottom, right bottom",
           backgroundRepeat: "no-repeat, no-repeat",
           overflow: "hidden",
