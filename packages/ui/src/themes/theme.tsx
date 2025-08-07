@@ -525,7 +525,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: typeScale.h2,
       fontWeight: 500,
-      lineHeight: 0.95,
+      lineHeight: 1.05,
     },
     h3: {
       fontFamily: themeValues.fontFamily.gtSuperText,

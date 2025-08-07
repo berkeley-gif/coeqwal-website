@@ -14,15 +14,45 @@ import { useDrawerStore } from "@repo/state"
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
 
-  // Marker specifications for floating icons around the California silhouette
-  // Positioned relative to the 100vh first panel
+  // Responsive marker specifications that align with California silhouette
+  // Positions adjust based on screen size to maintain alignment with background image
   const markerSpecs = [
-    { src: "/images/markers/shasta.png", right: "32%", top: "10px", size: 220 },
-    { src: "/images/markers/drinking_water.png", right: "20%", top: "60%", size: 220 },
-    { src: "/images/markers/los_angeles.png", right: "4%", top: "72%", size: 220 },
-    { src: "/images/markers/farmers.png", right: "8%", top: "44%", size: 220 },
-    { src: "/images/markers/salmon.png", right: "16%", top: "16%", size: 220 },
-    { src: "/images/markers/atta.png", right: "28%", top: "34%", size: 220 },
+    { 
+      src: "/images/markers/shasta.png", 
+      right: { xs: "25%", sm: "28%", md: "32%", lg: "32%", xl: "32%" }, 
+      top: "10px", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/drinking_water.png", 
+      right: { xs: "13%", sm: "16%", md: "20%", lg: "20%", xl: "20%" }, 
+      top: "60%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/los_angeles.png", 
+      right: { xs: "1%", sm: "2%", md: "4%", lg: "4%", xl: "4%" }, 
+      top: "72%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/farmers.png", 
+      right: { xs: "3%", sm: "5%", md: "8%", lg: "8%", xl: "8%" }, 
+      top: "44%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/salmon.png", 
+      right: { xs: "9%", sm: "12%", md: "16%", lg: "16%", xl: "16%" }, 
+      top: "16%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/atta.png", 
+      right: { xs: "21%", sm: "24%", md: "28%", lg: "28%", xl: "28%" }, 
+      top: "34%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
   ] as const
   /* Legacy bubble code removed
   const [backgroundCircles, setBackgroundCircles] = useState<
@@ -163,8 +193,8 @@ const IntroSection: React.FC = () => {
           width: "100vw",
           height: "100vh",
           background: `url('/images/california.png')`,
-          backgroundSize: "auto 100%",
-          backgroundPosition: "95% center",
+          backgroundSize: { xs: "auto 90%", sm: "auto 95%", md: "auto 100%", lg: "auto 100%", xl: "auto 100%" },
+          backgroundPosition: { xs: "90% center", sm: "92% center", md: "95% center", lg: "95% center", xl: "95% center" },
           backgroundRepeat: "no-repeat",
           overflow: "hidden",
           zIndex: 0,
@@ -377,12 +407,13 @@ const IntroSection: React.FC = () => {
           width: "100vw",
           height: "100vh",
           background: `
+            url('/images/home_collage/birds_top.png'),
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right_side.png')
           `,
-          backgroundSize: "auto 80%, auto calc(100vh - 80px)",
-          backgroundPosition: "left bottom, right bottom",
-          backgroundRepeat: "no-repeat, no-repeat",
+          backgroundSize: "auto 40%, auto 80%, auto calc(100vh - 80px)",
+          backgroundPosition: "left top, left bottom, right bottom",
+          backgroundRepeat: "no-repeat, no-repeat, no-repeat",
           overflow: "hidden",
         }}
       >
@@ -431,9 +462,9 @@ const IntroSection: React.FC = () => {
                   mb: 3,
                 }}
               >
-                What is the future
+                What is California&apos;s
                 <br />
-                of California water?
+                water future?
               </Typography>
               <Typography
                 variant="body1"
@@ -977,7 +1008,7 @@ const IntroSection: React.FC = () => {
                   mt: 2,
                 }}
               >
-                what if...?
+                what if we did things differently?
               </Typography>
             </Stack>
           </Box>

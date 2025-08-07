@@ -2,13 +2,15 @@
 
 import { motion } from "@repo/motion"
 import Image from "next/image"
+import { Box } from "@mui/material"
+import { SxProps, Theme } from "@mui/material/styles"
 
 interface FloatingMarkerProps {
   src: string
   top: string // e.g. "25%" or "65px"
-  left?: string // optional if using right
-  right?: string // optional alternative to left
-  size?: number | string // px or CSS size
+  left?: string | Record<string, string> // responsive left positioning
+  right?: string | Record<string, string> // responsive right positioning
+  size?: number | string | Record<string, number | string> // responsive size
 }
 
 export default function FloatingMarker({ src, left, right, top, size = 80 }: FloatingMarkerProps) {
@@ -20,16 +22,52 @@ export default function FloatingMarker({ src, left, right, top, size = 80 }: Flo
   const bobDuration = 3 + Math.random() * 2 // 3-5 seconds
   const driftDuration = 8 + Math.random() * 6 // 8-14 seconds
 
+  // Create responsive sx props
+  const sxProps: SxProps<Theme> = {
+    position: "absolute",
+    top,
+    ...(left && { left }),
+    ...(right && { right }),
+    // Handle responsive size
+    width: typeof size === "object" ? 
+      Object.fromEntries(
+        Object.entries(size).map(([key, value]) => [
+          key, 
+          typeof value === "number" ? `${value}px` : value
+        ])
+      ) : 
+      typeof size === "number" ? `${size}px` : size,
+    height: typeof size === "object" ? 
+      Object.fromEntries(
+        Object.entries(size).map(([key, value]) => [
+          key, 
+          typeof value === "number" ? `${value}px` : value
+        ])
+      ) : 
+      typeof size === "number" ? `${size}px` : size,
+  }
+
+  // Calculate sizes prop for Image component (for responsive loading)
+  const getSizesString = () => {
+    if (typeof size === "object") {
+      // For responsive sizes, create a sizes string
+      const entries = Object.entries(size)
+      return entries.map(([breakpoint, value]) => {
+        const sizeValue = typeof value === "number" ? `${value}px` : value
+        if (breakpoint === "xs") return `(max-width: 600px) ${sizeValue}`
+        if (breakpoint === "sm") return `(max-width: 900px) ${sizeValue}`
+        if (breakpoint === "md") return `(max-width: 1200px) ${sizeValue}`
+        if (breakpoint === "lg") return `(max-width: 1536px) ${sizeValue}`
+        return sizeValue
+      }).join(", ")
+    }
+    return typeof size === "number" ? `${size}px` : size || "80px"
+  }
+
   return (
-    <motion.div
-      style={{
-        position: "absolute",
-        ...(left ? { left } : {}),
-        ...(right ? { right } : {}),
-        top,
-        width: typeof size === "number" ? `${size}px` : size,
-        height: typeof size === "number" ? `${size}px` : size,
-      }}
+    <Box
+      component={motion.div}
+      sx={sxProps}
       animate={{
         // Vertical bobbing motion
         y: [0, -bobAmount, 0],
@@ -63,10 +101,10 @@ export default function FloatingMarker({ src, left, right, top, size = 80 }: Flo
         src={src}
         alt=""
         fill
-        sizes={typeof size === "number" ? `${size}px` : size}
+        sizes={getSizesString()}
         priority
         style={{ objectFit: "contain", pointerEvents: "none" }}
       />
-    </motion.div>
+    </Box>
   )
 }
