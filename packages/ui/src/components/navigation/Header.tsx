@@ -13,6 +13,7 @@ type HeaderTranslations = {
   buttons: {
     getData: string
     about: string
+    glossary: string
   }
 }
 
@@ -35,6 +36,9 @@ interface HeaderProps {
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
+  // Glossary functionality
+  onGlossaryClick?: () => void
+  onDataClick?: () => void
 }
 
 const translations: TranslationsMap = {
@@ -43,6 +47,7 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Data",
       about: "About COEQWAL",
+      glossary: "Glossary",
     },
   },
   es: {
@@ -50,13 +55,14 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Datos sin procesar",
       about: "Sobre COEQWAL",
+      glossary: "Glosario",
     },
   },
 }
 
-// Define which sections should have BLACK text (all others will have white)
-// TODO: generalize this
-const blackSections = [
+// Define which sections should have BLUE text (all others will have white)
+// Using theme blue color instead of black for better brand consistency
+const blueSections = [
   "hero", // Home section
   "combined-panel", // Scenario search section
 ]
@@ -75,6 +81,8 @@ export function Header({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [], // Default to empty array, bc optional
+  onGlossaryClick,
+  onDataClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -97,9 +105,9 @@ export function Header({
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
   // Determine the text color for all navigation items based on active section
-  // Default to white, switch to black for specific sections
-  const textColor = blackSections.includes(activeSection || "")
-    ? "black"
+  // Default to white, switch to theme blue for specific sections
+  const textColor = blueSections.includes(activeSection || "")
+    ? theme.palette.blue.darkest
     : "white"
 
   return (
@@ -218,8 +226,36 @@ export function Header({
         >
           <Button
             variant={buttonVariant}
+            onClick={onDataClick}
             sx={{
               ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
             }}
           >
             {componentText.buttons.getData}
@@ -228,10 +264,77 @@ export function Header({
             variant={buttonVariant}
             sx={{
               ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
             }}
           >
             {componentText.buttons.about}
           </Button>
+          {onGlossaryClick && (
+            <Button
+              variant={buttonVariant}
+              onClick={onGlossaryClick}
+              sx={{
+                ...buttonStyle,
+                color: textColor,
+                position: "relative",
+                overflow: "hidden",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  backgroundColor: "white",
+                  color: (theme) => theme.palette.blue.darkest,
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
+                  "&::before": {
+                    opacity: 1,
+                  },
+                },
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: "-100%",
+                  width: "100%",
+                  height: "100%",
+                  background: textColor === "white"
+                    ? "linear-gradient(90deg, transparent, rgba(118, 185, 170, 0.1), transparent)"
+                    : "linear-gradient(90deg, transparent, rgba(255, 216, 126, 0.1), transparent)",
+                  transition: "left 0.5s ease",
+                  opacity: 0,
+                },
+                "&:hover::before": {
+                  left: "100%",
+                },
+              }}
+            >
+              {componentText.buttons.glossary}
+            </Button>
+          )}
           <LanguageSwitcher />
         </Stack>
       </Toolbar>

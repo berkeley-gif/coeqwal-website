@@ -125,7 +125,7 @@ export interface MultiDrawerProps {
 
 // Map of tab keys to display titles
 const tabTitles: Record<TabKey, string> = {
-  glossary: "GLOSSARY",
+  glossary: "Glossary",
 }
 
 /**
@@ -250,7 +250,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    background: "linear-gradient(to right, #FFAC6E, #60aacb)",
+                    background: "#2e3a6c",
                     color: theme.palette.common.white,
                     padding: 2,
                     display: "flex",

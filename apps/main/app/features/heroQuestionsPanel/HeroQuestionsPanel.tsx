@@ -90,7 +90,7 @@ export function HeroQuestionsPanel({
   backgroundImages,
   backgroundPositions,
   bottomHeadline = "Learn. Explore. Empower.",
-  bottomText = "Explore California's water system and discover possibilities for the future of water in our state.",
+  bottomText = "Explore a range of Central Valley water scenarios and discover possibilities for the future of water in our state.",
   ...panelProps
 }: HeroQuestionsPanelProps) {
   const [visibleBubbles, setVisibleBubbles] = useState<number[]>([])
@@ -154,7 +154,7 @@ export function HeroQuestionsPanel({
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: theme.palette.common.white,
+        
         maxWidth: "100vw",
         overflow: "hidden",
       }}
@@ -404,7 +404,6 @@ export function HeroQuestionsPanel({
         <Typography
           variant="h1"
           sx={{
-            fontFamily: '"akzidenz-grotesk-next-pro", sans-serif',
             fontWeight: 800,
             color: theme.palette.primary.dark,
             whiteSpace: "nowrap",

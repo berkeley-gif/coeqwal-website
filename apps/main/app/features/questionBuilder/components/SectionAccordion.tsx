@@ -103,7 +103,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     border: "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: `${theme.borderRadius.card}px !important`,
     overflow: "hidden",
-    backgroundColor: theme.palette.common.white,
+    
   }
 
   const accordionSummaryStyles = {
@@ -111,12 +111,12 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
     "& .MuiAccordionSummary-content": {
       margin: theme.spacing(0.5, 0),
     },
-    backgroundColor: theme.palette.common.white,
+    
   }
 
   const accordionDetailsStyles = {
     padding: theme.spacing(0, 2, 2, 2),
-    backgroundColor: theme.palette.common.white,
+    
     marginTop: "-0.4rem",
   }
 
@@ -139,7 +139,7 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
   }
 
   const activeArrowStyle = {
-    color: theme.palette.pop.main,
+    color: theme.palette.accent.gold,
     filter: "drop-shadow(0px 0px 2px rgba(255, 87, 51, 0.5))",
   }
 

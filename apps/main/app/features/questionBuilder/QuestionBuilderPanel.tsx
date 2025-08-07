@@ -81,7 +81,7 @@ const QuestionBuilderContent = ({
           justifyContent: "center",
           alignItems: "center",
           position: "relative",
-          backgroundColor: theme.palette.background.default,
+
         })}
       >
         {/* Sticky Question Summary */}
@@ -142,13 +142,13 @@ const QuestionBuilderContent = ({
               width: 56,
               height: 56,
               borderRadius: "50%",
-              backgroundColor: "rgba(0, 0, 0, 0.2)",
+    
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: theme.palette.common.white,
               "&:hover": {
-                backgroundColor: "rgba(0, 0, 0, 0.3)",
+      
               },
             })}
           >

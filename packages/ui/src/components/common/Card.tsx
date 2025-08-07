@@ -37,7 +37,7 @@ const StyledCard = styled(Paper, {
     borderLeft: `4px solid ${theme.palette.secondary.main}`,
   }),
   ...(color === "pop" && {
-    borderLeft: `4px solid ${theme.palette.pop.main}`,
+            borderLeft: `4px solid ${theme.palette.accent.gold}`,
   }),
 
   // Softer hover shadow

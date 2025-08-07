@@ -155,8 +155,7 @@ export default function HeroSection() {
         color="white"
         sx={{
           "& .MuiIconButton-root": {
-            backgroundColor: "rgba(0, 0, 0, 0.4)",
-            "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.6)" },
+            
           },
         }}
       />

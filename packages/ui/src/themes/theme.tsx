@@ -52,34 +52,61 @@ import type { CSSProperties } from "react"
  Change these values to update the theme across the site
  */
 
+// ===============================================================================
+// TYPOGRAPHY SCALE - Harmonious Type System
+// ===============================================================================
+//
+// Using a Perfect Fourth (1.333) type scale for mathematical harmony
+// Base: 1.25rem body text, scaling up for headlines
+//
+// Scale progression:
+// • h1: 5.75rem (92px) - Hero headlines "Learn. Explore. Empower."
+// • h2: 3.75rem (60px) - Section headlines "What is the future..."  
+// • h3: 2.8rem (44.8px) - Subsection headlines "Rethink California Water"
+// • h4: 2.1rem (33.6px) - Card titles and smaller headlines
+// • h5: 1.575rem (25.2px) - Labels and minor headlines
+// • h6: 1.18rem (18.9px) - Small headlines and captions
+// • body1: 1.25rem (20px) - Primary body text
+// • body2: 1.125rem (18px) - Secondary body text
+//
+// All headlines use GT Super Text for cohesive editorial style
+// GT Super Text weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
+//
+const H1_FONT = 'gtSuperText' // GT Super Text for h1 headlines
+
+// Type scale configuration using Perfect Fourth (1.333) ratio
+const typeScale = {
+  // Base sizes for the scale
+  baseBody: '1.25rem',    // 20px - comfortable reading size
+  smallBody: '1.125rem',  // 18px - secondary text
+  
+  // Headline sizes (keeping h1 & h2 for visual consistency, harmonizing the rest)
+  h1: '5.75rem',  // 92px - Hero size (unchanged)
+  h2: '3.75rem',  // 60px - Major section headers (unchanged)
+  h3: '2.8rem',   // 44.8px - Subsection headers (harmonious with scale)
+  h4: '2.1rem',   // 33.6px - Card titles (h3 ÷ 1.333)
+  h5: '1.575rem', // 25.2px - Minor headlines (h4 ÷ 1.333)
+  h6: '1.18rem',  // 18.9px - Small headlines (h5 ÷ 1.333)
+}
+
 const themeValues = {
   // Typography
   fontFamily: {
     primary:
       '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    inter:
-      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    neueHaasDisplay:
-      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    sentinel: '"sentinel", Georgia, "Times New Roman", Times, serif',
-    sofiaPro:
-      '"sofia-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    // TEST FONT - Tiempos Headline
-    tiemposHeadline:
-      '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
-    // TEST FONT - Tiempos Text
     tiemposText: '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
-    // Acumin Pro from Adobe fonts
-    acuminPro:
-      '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    // Calluna from Adobe fonts
-    calluna: '"calluna", Georgia, "Times New Roman", Times, serif',
-    // New test fonts
-    crimsonText: '"Crimson Text", Georgia, "Times New Roman", Times, serif',
-    charter: '"charter-bt-pro", Georgia, "Times New Roman", Times, serif',
-    georgia: 'Georgia, "Times New Roman", Times, serif',
+    // Experimental fonts for testing
+    ppEiko: '"PP Eiko", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragment: '"PP Fragment", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragmentSans: '"PP Fragment Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragmentSerif: '"PP Fragment Serif", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppFragmentGlare: '"PP Fragment Glare", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppKyoto: '"PP Kyoto", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ppObjectSans: '"PP Object Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    gtSuperDisplay: '"GT Super Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    gtSuperText: '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions
@@ -91,50 +118,63 @@ const themeValues = {
     },
   },
 
-  // Palette colors
+  // Color Palette - California Water Theme
   palette: {
-    black: "#274472",
-    white: "#FFFFFF",
-    teal: "#007C92", // Teal color for primary typeface
-    neutral: {
-      light: "#AAAAAA",
-      medium: "#888888",
-      dark: "#666666",
+    // Core brand colors (from gradient)
+    brand: {
+      sky: "#92C1D5",        // Top of gradient - sky blue
+      water: "#64A4D6",      // Bottom of gradient - water blue
     },
-    colors: {
-      primary: "#AAAAAA",
-      secondary: "#888888",
-      tertiary: "#666666",
+    
+    // Text and UI blues (organized by intensity)
+    blue: {
+      darkest: "#3a4574",    // Deep navy - primary text
+      dark: "#186b88",       // Dark teal - secondary text  
+      medium: "#2d89b6",     // Medium blue - accent text
+      bright: "#449cd9",     // Bright blue - links/interactive
+      light: "#77a2d9",      // Light blue - subtle elements
     },
-    pop: {
-      main: "#FF5733", // Orange for operations
-      light: "#FF8866",
-      dark: "#CC4422",
+    
+    // Accent colors - warm tones
+    accent: {
+      gold: "#ffd87e",       // Golden yellow - highlights
+      cream: "#fdf0a0",      // Light yellow - backgrounds
     },
-    cool: {
-      main: "#3498DB", // Cool blue for outcomes
-      light: "#5DADE2",
-      dark: "#2874A6",
+    
+    // Nature colors - greens and teals
+    nature: {
+      teal: "#76b9aa",       // Medium teal - natural elements
+      sage: "#9fd5cb",       // Light teal - subtle backgrounds
+      mint: "#b1e1c3",       // Pale green - very light elements
+      whisper: "#d1ebc7",    // Very light green - backgrounds
     },
-    climate: {
-      main: "#27AE60", // Green for climate
-      light: "#58D68D",
-      dark: "#1E8449",
+    
+    // Utility colors
+    utility: {
+      white: "#FFFFFF",
+      black: "#000000",
     },
-    // Category-specific colors
+    
+    // Ambient/mood elements
+    ambient: {
+      rippleWhite: "rgba(255, 255, 255, 0.16)", // Water ripples - white at 16% opacity
+      rippleBlue: "rgba(42, 82, 135, 0.16)",    // Water ripples - blue (#2A5287) at 16% opacity
+    },
+    
+    // Legacy support - will be phased out
     categories: {
-      groundwaterManagement: "#4CAF50", // Leafy green, ag/groundwater
-      riverFlows: "#2196F3", // Cool blue, river systems
-      urbanWaterPriorities: "#9C27B0", // Plum purple, civic-focused
-      deltaBalance: "#FF9800", // Amber/orange, delta ecosystems
-      infrastructure: "#607D8B", // Slate gray, engineered systems
-      noFlowRequirements: "#F44336", // Red, disruption/emergency
-      carryoverRequirements: "#00ACC1", // Aqua, reservoir logic
-      deltaOutflows: "#FF5722", // Burnt orange, flow export
-      urbanDemand: "#8BC34A", // Light green, consumption
-      exportReductions: "#3F51B5", // Deep indigo, regulatory
-      conveyanceProjects: "#795548", // Earthy brown, infrastructure
-      climateFuture: "#E91E63", // Bright magenta, emphasis
+      groundwaterManagement: "#76b9aa", // Using nature.teal
+      riverFlows: "#2d89b6", // Using blue.medium
+      urbanWaterPriorities: "#449cd9", // Using blue.bright
+      deltaBalance: "#ffd87e", // Using accent.gold
+      infrastructure: "#3a4574", // Using blue.darkest
+      noFlowRequirements: "#186b88", // Using blue.dark
+      carryoverRequirements: "#77a2d9", // Using blue.light
+      deltaOutflows: "#87CEEB", // Using brand.sky
+      urbanDemand: "#9fd5cb", // Using nature.sage
+      exportReductions: "#64a3d7", // Using brand.water
+      conveyanceProjects: "#b1e1c3", // Using nature.mint
+      climateFuture: "#ffd87e", // Using accent.gold
     },
   },
 
@@ -405,52 +445,60 @@ const theme = createTheme({
       },
     },
   },
-  // Palette (some are fixed MUI theme properties, some are custom)
+  // Palette - California Water Theme (MUI integration)
   palette: {
     common: {
-      black: themeValues.palette.black,
-      white: themeValues.palette.white,
+      black: themeValues.palette.utility.black,
+      white: themeValues.palette.utility.white,
     },
     primary: {
-      main: themeValues.palette.white,
-      light: themeValues.palette.neutral.light,
-      dark: "#274472",
+      main: themeValues.palette.blue.darkest,
+      light: themeValues.palette.blue.light,
+      dark: themeValues.palette.blue.dark,
     },
     secondary: {
-      main: themeValues.palette.black,
-      light: themeValues.palette.neutral.light,
-      dark: themeValues.palette.neutral.dark,
+      main: themeValues.palette.brand.water,
+      light: themeValues.palette.brand.sky,
+      dark: themeValues.palette.blue.medium,
     },
-    neutral: {
-      main: themeValues.palette.neutral.medium,
-      light: themeValues.palette.neutral.light,
-      dark: themeValues.palette.neutral.dark,
+    // Add our new color groups to MUI palette
+    brand: {
+      sky: themeValues.palette.brand.sky,
+      water: themeValues.palette.brand.water,
     },
-    pop: {
-      main: themeValues.palette.pop.main,
-      light: themeValues.palette.pop.light,
-      dark: themeValues.palette.pop.dark,
+    blue: {
+      darkest: themeValues.palette.blue.darkest,
+      dark: themeValues.palette.blue.dark,
+      medium: themeValues.palette.blue.medium,
+      bright: themeValues.palette.blue.bright,
+      light: themeValues.palette.blue.light,
     },
-    cool: {
-      main: themeValues.palette.cool.main,
-      light: themeValues.palette.cool.light,
-      dark: themeValues.palette.cool.dark,
+    accent: {
+      gold: themeValues.palette.accent.gold,
+      cream: themeValues.palette.accent.cream,
     },
-    climate: {
-      main: themeValues.palette.climate.main,
-      light: themeValues.palette.climate.light,
-      dark: themeValues.palette.climate.dark,
+    nature: {
+      teal: themeValues.palette.nature.teal,
+      sage: themeValues.palette.nature.sage,
+      mint: themeValues.palette.nature.mint,
+      whisper: themeValues.palette.nature.whisper,
+    },
+    utility: {
+      white: themeValues.palette.utility.white,
+      black: themeValues.palette.utility.black,
+    },
+    ambient: {
+      rippleWhite: themeValues.palette.ambient.rippleWhite,
+      rippleBlue: themeValues.palette.ambient.rippleBlue,
     },
     categories: {
-      groundwaterManagement:
-        themeValues.palette.categories.groundwaterManagement,
+      groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
       riverFlows: themeValues.palette.categories.riverFlows,
       urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
       deltaBalance: themeValues.palette.categories.deltaBalance,
       infrastructure: themeValues.palette.categories.infrastructure,
       noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
-      carryoverRequirements:
-        themeValues.palette.categories.carryoverRequirements,
+      carryoverRequirements: themeValues.palette.categories.carryoverRequirements,
       deltaOutflows: themeValues.palette.categories.deltaOutflows,
       urbanDemand: themeValues.palette.categories.urbanDemand,
       exportReductions: themeValues.palette.categories.exportReductions,
@@ -458,22 +506,19 @@ const theme = createTheme({
       climateFuture: themeValues.palette.categories.climateFuture,
     },
     background: {
-      default: themeValues.palette.white,
-      paper: themeValues.palette.neutral.light,
-    },
-    interstitial: {
-      main: "#4b8fb4",
+      default: themeValues.palette.utility.white,
+      paper: themeValues.palette.nature.whisper,
     },
     text: {
-      primary: "#274472",
-      secondary: themeValues.palette.white,
-      teal: themeValues.palette.teal,
+      primary: themeValues.palette.blue.darkest,
+      secondary: themeValues.palette.blue.medium,
+      disabled: themeValues.palette.blue.light,
     },
-    divider: themeValues.palette.white,
+    divider: themeValues.palette.nature.sage,
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: themeValues.fontFamily.acuminPro,
+    fontFamily: themeValues.fontFamily.primary,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -481,62 +526,68 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.tiemposText,
-      fontSize: "5.75rem",
+      fontFamily: themeValues.fontFamily[H1_FONT],
+      fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 0.85,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.tiemposText,
-      fontSize: "3.75rem",
+      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontSize: typeScale.h2,
       fontWeight: 500,
-      lineHeight: 1,
+      lineHeight: 1.05,
     },
     h3: {
-      fontFamily: themeValues.fontFamily.tiemposText,
-      fontSize: "2.2rem",
+      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontSize: typeScale.h3,
       fontWeight: 500,
-      lineHeight: 1,
+      lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.tiemposText,
-      fontSize: "1.25rem",
+      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontSize: typeScale.h4,
+      fontWeight: 500,
+      lineHeight: 1.2,
+    },
+    h5: {
+      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontSize: typeScale.h5,
+      fontWeight: 500,
+      lineHeight: 1.3,
+    },
+    h6: {
+      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontSize: typeScale.h6,
       fontWeight: 500,
       lineHeight: 1.4,
     },
-    h5: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.15rem",
-      fontWeight: 500,
-    },
-    h6: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.05rem",
-      fontWeight: 500,
-    },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.3rem",
+      fontSize: typeScale.baseBody,
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "2rem",
+      lineHeight: 1.6, // 1.6 ratio for comfortable reading
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.3rem",
+      fontSize: typeScale.smallBody,
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: "2rem",
+      lineHeight: 1.6, // Consistent line height ratio
     },
     subtitle1: {
-      fontSize: "1.25rem",
+      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontSize: typeScale.baseBody, // 1.25rem - matches body1 for consistency
+      fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
     },
     subtitle2: {
-      fontSize: "1.1rem",
+      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontSize: typeScale.smallBody, // 1.125rem - matches body2 for consistency
+      fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
-      lineHeight: 1.5,
+      lineHeight: 1.6,
     },
     button: {
       fontSize: "0.95rem",
@@ -671,6 +722,238 @@ const theme = createTheme({
           font-style: normal;
           font-display: swap;
         }
+
+        /* PP Eiko Font Family */
+        @font-face {
+          font-family: 'PP Eiko';
+          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Thin.otf') format('opentype');
+          font-weight: 100;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Eiko';
+          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Medium.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Eiko';
+          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Heavy.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Fragment Sans Font Family */
+        @font-face {
+          font-family: 'PP Fragment Sans';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansLight.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Sans';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansRegular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Sans';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansExtraBold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Fragment Serif Font Family */
+        @font-face {
+          font-family: 'PP Fragment Serif';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifLight.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Serif';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifRegular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Serif';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifExtraBold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Fragment Glare Font Family */
+        @font-face {
+          font-family: 'PP Fragment Glare';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareLight.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Glare';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareRegular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Fragment Glare';
+          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareExtraBold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Kyoto Font Family */
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Thin.otf') format('opentype');
+          font-weight: 100;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Light.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Medium.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Kyoto';
+          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Extrabold.otf') format('opentype');
+          font-weight: 800;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* PP Object Sans Font Family */
+        @font-face {
+          font-family: 'PP Object Sans';
+          src: url('/fonts/PP Object Sans - Free for personal use v2.3/PPObjectSans-Regular.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'PP Object Sans';
+          src: url('/fonts/PP Object Sans - Free for personal use v2.3/PPObjectSans-Heavy.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* GT Super Display Font Family */
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Light-Trial.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Regular-Trial.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Medium-Trial.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Bold-Trial.otf') format('opentype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Display';
+          src: url('/fonts/GT-Super-Display-Super-Trial.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* GT Super Text Font Family */
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Book-Trial.otf') format('opentype');
+          font-weight: 300;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Regular-Trial.otf') format('opentype');
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Medium-Trial.otf') format('opentype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Bold-Trial.otf') format('opentype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        
+        @font-face {
+          font-family: 'GT Super Text';
+          src: url('/fonts/GT-Super-Text-Black-Trial.otf') format('opentype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
         
         *, *::before, *::after {
           box-sizing: border-box;
@@ -752,9 +1035,9 @@ const theme = createTheme({
             fontSize: "0.95rem",
             fontWeight: 500,
             color: theme.palette.common.white,
-            backgroundColor: theme.palette.common.black,
+            backgroundColor: theme.palette.blue.darkest,
             "&:hover": {
-              backgroundColor: "#333333",
+              backgroundColor: theme.palette.blue.dark,
               opacity: 0.9,
             },
           }),
@@ -1001,13 +1284,37 @@ export default theme
 
 // Custom palette colors and theme properties
 declare module "@mui/material/styles" {
-  // Custom palette colors
+  // Custom palette colors - California Water Theme
   interface Palette {
-    interstitial: Palette["primary"]
-    neutral: Palette["primary"]
-    pop: Palette["primary"]
-    cool: Palette["primary"]
-    climate: Palette["primary"]
+    brand: {
+      sky: string
+      water: string
+    }
+    blue: {
+      darkest: string
+      dark: string
+      medium: string
+      bright: string
+      light: string
+    }
+    accent: {
+      gold: string
+      cream: string
+    }
+    nature: {
+      teal: string
+      sage: string
+      mint: string
+      whisper: string
+    }
+    utility: {
+      white: string
+      black: string
+    }
+    ambient: {
+      rippleWhite: string
+      rippleBlue: string
+    }
     categories: {
       groundwaterManagement: string
       riverFlows: string
@@ -1029,11 +1336,35 @@ declare module "@mui/material/styles" {
   }
 
   interface PaletteOptions {
-    interstitial?: PaletteOptions["primary"]
-    neutral?: PaletteOptions["primary"]
-    pop?: PaletteOptions["primary"]
-    cool?: PaletteOptions["primary"]
-    climate?: PaletteOptions["primary"]
+    brand?: {
+      sky?: string
+      water?: string
+    }
+    blue?: {
+      darkest?: string
+      dark?: string
+      medium?: string
+      bright?: string
+      light?: string
+    }
+    accent?: {
+      gold?: string
+      cream?: string
+    }
+    nature?: {
+      teal?: string
+      sage?: string
+      mint?: string
+      whisper?: string
+    }
+    utility?: {
+      white?: string
+      black?: string
+    }
+    ambient?: {
+      rippleWhite?: string
+      rippleBlue?: string
+    }
     categories?: {
       groundwaterManagement?: string
       riverFlows?: string

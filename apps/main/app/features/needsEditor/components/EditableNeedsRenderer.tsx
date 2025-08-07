@@ -265,7 +265,7 @@ const EditableNeedsRenderer = ({
             }}
           >
             {isFieldSelected ? (
-              <ColoredText color={theme.palette.pop.main}>
+              <ColoredText color={theme.palette.accent.gold}>
                 <React.Fragment key={index}>{part}</React.Fragment>
               </ColoredText>
             ) : (
@@ -407,7 +407,7 @@ const EditableNeedsRenderer = ({
           <Box
             sx={{
               width: "5px",
-              backgroundColor: "#ccc",
+      
               mx: 2,
             }}
             id="divider"
@@ -442,7 +442,7 @@ const EditableNeedsRenderer = ({
               </Button>
               <Typography variant="h5">
                 <>Select</> <>a</>
-                <ColoredText color={theme.palette.pop.main}>
+                <ColoredText color={theme.palette.accent.gold}>
                   {" "}
                   {editingField.name}
                 </ColoredText>
@@ -515,7 +515,7 @@ const EditableNeedsRenderer = ({
             >
               <Typography variant="h5" sx={{ mb: 2 }}>
                 Edit
-                <ColoredText color={theme.palette.pop.main}>
+                <ColoredText color={theme.palette.accent.gold}>
                   {" "}
                   {editingField.name}
                 </ColoredText>

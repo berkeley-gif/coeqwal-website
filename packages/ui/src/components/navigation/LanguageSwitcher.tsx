@@ -31,6 +31,16 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
         fontWeight: 600,
         fontFamily:
           '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        border: "none",
+        "& .MuiToggleButtonGroup-grouped": {
+          border: "none",
+          "&:not(:first-of-type)": {
+            borderLeft: (theme) => `1px solid ${theme.palette.blue.darkest}`,
+          },
+          "&.Mui-disabled": {
+            border: "none",
+          },
+        },
         ...sx,
       }}
     >
@@ -39,9 +49,50 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
         sx={{
           height: "40px",
           minHeight: "40px",
+          border: "none",
+          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
           fontWeight: 600,
           fontFamily:
             '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          position: "relative",
+          overflow: "hidden",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover": {
+            backgroundColor: "white",
+            color: (theme) => theme.palette.blue.darkest,
+            border: "none",
+            transform: "translateY(-1px)",
+            boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            "&::before": {
+              opacity: 1,
+            },
+          },
+          "&.Mui-selected": {
+            backgroundColor: (theme) => theme.palette.blue.darkest,
+            color: "white",
+            border: "none",
+            boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.dark}`,
+            "&:hover": {
+              backgroundColor: (theme) => theme.palette.blue.dark,
+              border: "none",
+              transform: "translateY(-1px)",
+              boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
+            },
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "-100%",
+            width: "100%",
+            height: "100%",
+            background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+            transition: "left 0.5s ease",
+            opacity: 0,
+          },
+          "&:hover::before": {
+            left: "100%",
+          },
         }}
       >
         English
@@ -51,10 +102,50 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
         sx={{
           height: "40px",
           minHeight: "40px",
-          borderLeft: "1px solid #274472",
+          border: "none",
+          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
           fontWeight: 600,
           fontFamily:
             '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          position: "relative",
+          overflow: "hidden",
+          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          "&:hover": {
+            backgroundColor: "white",
+            color: (theme) => theme.palette.blue.darkest,
+            border: "none",
+            transform: "translateY(-1px)",
+            boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            "&::before": {
+              opacity: 1,
+            },
+          },
+          "&.Mui-selected": {
+            backgroundColor: (theme) => theme.palette.blue.darkest,
+            color: "white",
+            border: "none",
+            boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.dark}`,
+            "&:hover": {
+              backgroundColor: (theme) => theme.palette.blue.dark,
+              border: "none",
+              transform: "translateY(-1px)",
+              boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
+            },
+          },
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: "-100%",
+            width: "100%",
+            height: "100%",
+            background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+            transition: "left 0.5s ease",
+            opacity: 0,
+          },
+          "&:hover::before": {
+            left: "100%",
+          },
         }}
       >
         Español
