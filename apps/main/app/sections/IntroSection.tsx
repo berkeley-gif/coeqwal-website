@@ -424,25 +424,29 @@ const IntroSection: React.FC = () => {
           includeHeaderSpacing={false}
           sx={{
             color: (theme) => theme.palette.primary.dark,
-            alignItems: "left",
-            justifyContent: "center",
-            pointerEvents: "auto",
-            position: "relative",
-            height: "100vh",
-            paddingTop: "160px",
-            paddingBottom: "160px",
-            paddingLeft: { xs: 3, md: 6 },
+            paddingLeft: { xs: 6, md: 20 },
             paddingRight: { xs: 3, md: 6 },
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            overflow: "visible",
           }}
         >
+        {/* Spacer for header */}
+        <Box sx={{ height: { xs: "64px", md: "80px" } }} />
+        
         {/* Content container for proper blending context */}
         <Box
           sx={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            flex: 1, // Take up remaining space
+            position: "relative",
+            zIndex: (theme) => theme.zIndex.introText, // Text layer
           }}
         >
           {/* Text content with mix-blend-mode */}
@@ -529,9 +533,9 @@ const IntroSection: React.FC = () => {
                       <>
                         {beforeSurfaceWater}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
-                    
+                            backgroundColor: "transparent",
                             borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                             color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
@@ -542,7 +546,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -559,9 +563,9 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeConveyance}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
-                    
+                            backgroundColor: "transparent",
                             borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                             color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
@@ -572,7 +576,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -589,9 +593,9 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeAllocation}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
-                    
+                            backgroundColor: "transparent",
                             borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                             color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
@@ -602,7 +606,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -619,9 +623,9 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeCentralValley}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
-                    
+                            backgroundColor: "transparent",
                             borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                             color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
@@ -632,7 +636,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -687,9 +691,9 @@ const IntroSection: React.FC = () => {
                         <>
                           {beforeSurfaceWater}
                           <Box
-                            component="mark"
+                            component="span"
                             sx={{
-                      
+                              backgroundColor: "transparent",
                               borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                               color: (theme) => theme.palette.blue.darkest,
                               py: 0.1,
@@ -700,7 +704,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                                borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                               },
                             }}
                             onClick={() => {
@@ -717,9 +721,9 @@ const IntroSection: React.FC = () => {
                           </Box>
                           {betweenText}
                           <Box
-                            component="mark"
+                            component="span"
                             sx={{
-                      
+                              backgroundColor: "transparent",
                               borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                               color: (theme) => theme.palette.blue.darkest,
                               py: 0.1,
@@ -730,7 +734,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                                borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                               },
                             }}
                             onClick={() => {
@@ -755,9 +759,9 @@ const IntroSection: React.FC = () => {
                       <>
                         {beforeSurfaceWater}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
-                    
+                            backgroundColor: "transparent",
                             borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                             color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
@@ -768,7 +772,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -797,9 +801,9 @@ const IntroSection: React.FC = () => {
                       <React.Fragment key={i}>
                         {part}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
-                    
+                            backgroundColor: "transparent",
                             borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                             color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
@@ -810,7 +814,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -881,9 +885,9 @@ const IntroSection: React.FC = () => {
                     result.push(
                       <Box
                         key={i}
-                        component="mark"
+                        component="span"
                         sx={{
-                  
+                          backgroundColor: "transparent",
                           borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                           color: (theme) => theme.palette.blue.darkest,
                           py: 0.1,
@@ -894,7 +898,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                            borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                           },
                         }}
                         onClick={() => {
@@ -963,9 +967,9 @@ const IntroSection: React.FC = () => {
                     result.push(
                       <Box
                         key={i}
-                        component="mark"
+                        component="span"
                         sx={{
-                  
+                          backgroundColor: "transparent",
                           borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
                           color: (theme) => theme.palette.blue.darkest,
                           py: 0.1,
@@ -976,7 +980,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: (theme) => `5px solid ${theme.palette.blue.dark}`,
+                            borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                           },
                         }}
                         onClick={() => {

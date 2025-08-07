@@ -418,16 +418,6 @@ export function CurrentOpsContent({
           paddingBottom: 4,
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            ...theme.mixins.drawerContent.headingText,
-            fontSize: "1.1rem",
-            marginBottom: 2,
-          }}
-        >
-          Water Terms Glossary
-        </Typography>
 
         <Stack spacing={3}>
           {glossaryTerms.map((term, index) => (
