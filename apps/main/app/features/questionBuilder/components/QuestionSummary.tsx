@@ -166,7 +166,7 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
       }
 
       // Get all operation cards for term lookup
-      const operationCards = OPERATION_CARDS() as OpCard[]
+      const operationCards = OPERATION_CARDS(theme) as OpCard[]
 
       // Helper function to find term for an operation ID
       const getTermForOperation = (opId: string): string => {

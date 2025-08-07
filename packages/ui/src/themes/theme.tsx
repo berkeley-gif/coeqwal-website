@@ -161,6 +161,11 @@ const themeValues = {
       rippleBlue: "rgba(42, 82, 135, 0.16)",    // Water ripples - blue (#2A5287) at 16% opacity
     },
     
+    // Interstitial panel color
+    interstitial: {
+      main: "#4b8fb4", // Medium blue for interstitial backgrounds
+    },
+    
     // Legacy support - will be phased out
     categories: {
       groundwaterManagement: "#76b9aa", // Using nature.teal
@@ -490,6 +495,9 @@ const theme = createTheme({
     ambient: {
       rippleWhite: themeValues.palette.ambient.rippleWhite,
       rippleBlue: themeValues.palette.ambient.rippleBlue,
+    },
+    interstitial: {
+      main: themeValues.palette.interstitial.main,
     },
     categories: {
       groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
@@ -1315,6 +1323,9 @@ declare module "@mui/material/styles" {
       rippleWhite: string
       rippleBlue: string
     }
+    interstitial: {
+      main: string
+    }
     categories: {
       groundwaterManagement: string
       riverFlows: string
@@ -1364,6 +1375,9 @@ declare module "@mui/material/styles" {
     ambient?: {
       rippleWhite?: string
       rippleBlue?: string
+    }
+    interstitial?: {
+      main?: string
     }
     categories?: {
       groundwaterManagement?: string

@@ -417,12 +417,12 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
 
   return (
     <Box
-      sx={(theme) => ({
+      sx={{
         width: "100%",
         
         margin: 0, // Remove any default margins
         padding: 0, // Remove any default padding
-      })}
+      }}
     >
       {/* Sticky header that will hold QuestionSummary */}
       <Box

@@ -14,7 +14,7 @@ interface RippleProps {
   color: string
 }
 
-const Ripple = ({ centerX, centerY, delay, duration, maxSize, opacity, color }: RippleProps) => {
+const Ripple = ({ centerX, centerY, maxSize, color }: RippleProps) => {
   // Generate random floating parameters like the markers
   const bobDelay = Math.random() * 3
   const driftDelay = Math.random() * 5
@@ -73,6 +73,13 @@ interface WaterRipplesProps {
   count?: number
 }
 
+interface Zone {
+  x: [number, number]
+  y: [number, number]
+  density: number
+  preferredSize: number
+}
+
 export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
   const theme = useTheme()
   
@@ -90,7 +97,7 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
     ]
     
     // Create distribution zones - main milky way plus scattered outliers
-    const zones = [
+    const zones: Zone[] = [
       // Main California area - denser coverage
       { x: [25, 75], y: [25, 75], density: 0.5, preferredSize: 1 }, // Medium, main cluster
       // Left area - larger bubbles
@@ -103,11 +110,20 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
       { x: [15, 85], y: [75, 95], density: 0.05, preferredSize: 1 }, // Medium, scattered below
     ]
     
-    const bubbles: any[] = []
+    const bubbles: Array<{
+      id: string
+      centerX: string
+      centerY: string
+      delay: number
+      duration: number
+      maxSize: number
+      opacity: number
+      color: string
+    }> = []
     let colorIndex = Math.floor(Math.random() * 2) // Start with random color
     
     // Distribute bubbles across zones
-    zones.forEach((zone, zoneIndex) => {
+    zones.forEach((zone) => {
       const bubblesInZone = Math.ceil(count * zone.density)
       
       for (let i = 0; i < bubblesInZone && bubbles.length < count; i++) {
@@ -132,19 +148,19 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
         const finalY = Math.max(zone.y[0], Math.min(zone.y[1], y))
         
         // Size selection with some variation
-        const sizeCategory = sizeCategories[zone.preferredSize]
+        const sizeCategory = sizeCategories[zone.preferredSize] || { size: 160, weight: 2 } // Fallback to medium size
         const sizeVariation = 20 + Math.random() * 40 // ±20px variation
         const finalSize = sizeCategory.size + (Math.random() - 0.5) * sizeVariation
         
         bubbles.push({
-          id: bubbles.length,
+          id: `bubble-${bubbles.length}`,
           centerX: `${finalX}%`,
           centerY: `${finalY}%`,
           delay: Math.random() * 10, // Longer stagger for better effect
           duration: 4 + Math.random() * 4, // 4-8 seconds
           maxSize: Math.max(100, Math.min(280, finalSize)), // Clamp size
           opacity: 1,
-          color: colors[colorIndex % 2], // Alternate colors
+          color: colors[colorIndex % 2] || colors[0]!, // Alternate colors with fallback
         })
         
         // Alternate color, but with occasional breaks for natural feel
@@ -156,19 +172,19 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
     
     // If we need more bubbles, fill remaining with balanced approach
     while (bubbles.length < count) {
-      const remainingZone = zones[bubbles.length % zones.length]
+      const remainingZone = zones[bubbles.length % zones.length] || zones[0]! // Fallback to first zone
       const x = remainingZone.x[0] + Math.random() * (remainingZone.x[1] - remainingZone.x[0])
       const y = remainingZone.y[0] + Math.random() * (remainingZone.y[1] - remainingZone.y[0])
       
       bubbles.push({
-        id: bubbles.length,
+        id: `bubble-${bubbles.length}`,
         centerX: `${x}%`,
         centerY: `${y}%`,
         delay: Math.random() * 10,
         duration: 4 + Math.random() * 4,
         maxSize: 140 + Math.random() * 80,
         opacity: 1,
-        color: colors[colorIndex % 2],
+        color: colors[colorIndex % 2] || colors[0]!, // Alternate colors with fallback
       })
       colorIndex++
     }
