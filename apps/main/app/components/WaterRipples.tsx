@@ -79,16 +79,94 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
       "rgba(42, 82, 135, 0.16)",   // #2A5287 at 16% opacity
     ]
     
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      centerX: `${5 + Math.random() * 90}%`, // Spread across full width (5-95%)
-      centerY: `${25 + Math.random() * 50}%`, // Vertical band across middle
-      delay: Math.random() * 8, // Stagger over 8 seconds
-      duration: 5 + Math.random() * 3, // 5-8 seconds per ripple cycle (faster)
-      maxSize: 180 + Math.random() * 80, // 180-260px diameter (marker scale)
-      opacity: 1, // Not used anymore, opacity is in backgroundColor
-      color: colors[Math.floor(Math.random() * colors.length)], // Random color selection
-    }))
+    // Define size categories for visual hierarchy
+    const sizeCategories = [
+      { size: 200, weight: 3 }, // Large bubbles
+      { size: 160, weight: 2 }, // Medium bubbles  
+      { size: 120, weight: 1 }, // Small bubbles
+    ]
+    
+    // Create aesthetically pleasing distribution zones
+    const zones = [
+      // Left third - fewer, larger bubbles
+      { x: [8, 35], y: [20, 80], density: 0.3, preferredSize: 0 }, // Large
+      // Center third - mixed sizes, medium density
+      { x: [30, 70], y: [25, 75], density: 0.4, preferredSize: 1 }, // Medium
+      // Right third - more, smaller bubbles
+      { x: [65, 92], y: [20, 80], density: 0.3, preferredSize: 2 }, // Small
+    ]
+    
+    const bubbles: any[] = []
+    let colorIndex = Math.floor(Math.random() * 2) // Start with random color
+    
+    // Distribute bubbles across zones
+    zones.forEach((zone, zoneIndex) => {
+      const bubblesInZone = Math.ceil(count * zone.density)
+      
+      for (let i = 0; i < bubblesInZone && bubbles.length < count; i++) {
+        // Calculate position within zone with golden ratio spacing
+        const phi = (1 + Math.sqrt(5)) / 2 // Golden ratio
+        const goldenAngle = 2 * Math.PI / (phi * phi)
+        
+        const angle = i * goldenAngle
+        const radius = Math.sqrt(i / bubblesInZone) * 0.8 // Spiral outward
+        
+        // Convert polar to cartesian within zone bounds
+        const centerX = (zone.x[0] + zone.x[1]) / 2
+        const centerY = (zone.y[0] + zone.y[1]) / 2
+        const rangeX = (zone.x[1] - zone.x[0]) / 2
+        const rangeY = (zone.y[1] - zone.y[0]) / 2
+        
+        const x = centerX + Math.cos(angle) * radius * rangeX
+        const y = centerY + Math.sin(angle) * radius * rangeY
+        
+        // Ensure bounds
+        const finalX = Math.max(zone.x[0], Math.min(zone.x[1], x))
+        const finalY = Math.max(zone.y[0], Math.min(zone.y[1], y))
+        
+        // Size selection with some variation
+        const sizeCategory = sizeCategories[zone.preferredSize]
+        const sizeVariation = 20 + Math.random() * 40 // ±20px variation
+        const finalSize = sizeCategory.size + (Math.random() - 0.5) * sizeVariation
+        
+        bubbles.push({
+          id: bubbles.length,
+          centerX: `${finalX}%`,
+          centerY: `${finalY}%`,
+          delay: Math.random() * 10, // Longer stagger for better effect
+          duration: 4 + Math.random() * 4, // 4-8 seconds
+          maxSize: Math.max(100, Math.min(280, finalSize)), // Clamp size
+          opacity: 1,
+          color: colors[colorIndex % 2], // Alternate colors
+        })
+        
+        // Alternate color, but with occasional breaks for natural feel
+        if (Math.random() > 0.2) { // 80% chance to alternate
+          colorIndex++
+        }
+      }
+    })
+    
+    // If we need more bubbles, fill remaining with balanced approach
+    while (bubbles.length < count) {
+      const remainingZone = zones[bubbles.length % zones.length]
+      const x = remainingZone.x[0] + Math.random() * (remainingZone.x[1] - remainingZone.x[0])
+      const y = remainingZone.y[0] + Math.random() * (remainingZone.y[1] - remainingZone.y[0])
+      
+      bubbles.push({
+        id: bubbles.length,
+        centerX: `${x}%`,
+        centerY: `${y}%`,
+        delay: Math.random() * 10,
+        duration: 4 + Math.random() * 4,
+        maxSize: 140 + Math.random() * 80,
+        opacity: 1,
+        color: colors[colorIndex % 2],
+      })
+      colorIndex++
+    }
+    
+    return bubbles.slice(0, count) // Ensure exact count
   }, [count])
 
   return (
