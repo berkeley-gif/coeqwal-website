@@ -73,7 +73,7 @@ const QuestionBuilderContent = ({
     <Box sx={{ width: "100%" }}>
       {/* Full height hero section with centered question summary */}
       <Box
-        sx={(theme) => ({
+        sx={{
           height: "100vh",
           width: "100%",
           display: "flex",
@@ -82,7 +82,7 @@ const QuestionBuilderContent = ({
           alignItems: "center",
           position: "relative",
 
-        })}
+        }}
       >
         {/* Sticky Question Summary */}
         {showQuestionBuilder && showSummary && (

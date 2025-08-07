@@ -28,6 +28,7 @@ import {
   SearchIcon,
   Button,
 } from "@repo/ui/mui"
+import type { Theme } from "@mui/material/styles"
 import { Card, OperationCard } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { ColoredText } from "./ui"
@@ -39,7 +40,7 @@ interface OperationsSelectorProps {
 }
 
 // Organized palette for water operations using theme colors
-const getWaterPalette = (theme: any) => ({
+const getWaterPalette = (theme: Theme) => ({
   currentOperations: {
     primary: theme.palette.blue.light, // Light blue
     secondary: theme.palette.blue.medium,
@@ -95,7 +96,7 @@ interface OperationCard {
 }
 
 // Card data for the operation cards
-export const OPERATION_CARDS = (theme: any): OperationCard[] => {
+export const OPERATION_CARDS = (theme: Theme): OperationCard[] => {
   const WATER_PALETTE = getWaterPalette(theme)
   return [
   {

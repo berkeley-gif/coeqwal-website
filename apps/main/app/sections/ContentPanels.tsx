@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
+import type { Theme } from "@mui/material/styles"
 import { BasePanel } from "@repo/ui"
 import { PlayArrowIcon } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
@@ -126,7 +127,7 @@ export default function ContentPanels({
   }
 
   // Get background color for each panel
-  const getPanelBgColor = (panelType: PanelType, theme: any) => {
+  const getPanelBgColor = (panelType: PanelType, theme: Theme) => {
     switch (panelType) {
       case "learn":
         return theme.palette.blue.darkest // Deep blue
@@ -140,7 +141,7 @@ export default function ContentPanels({
   }
 
   // Get background color for detail panels (same for now)
-  const getDetailPanelBgColor = (panelType: PanelType, theme: any) => {
+  const getDetailPanelBgColor = (panelType: PanelType, theme: Theme) => {
     switch (panelType) {
       case "learn":
         return theme.palette.blue.dark // Deep blue
