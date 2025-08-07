@@ -182,7 +182,7 @@ const IntroSection: React.FC = () => {
           overflow: "hidden",
         }}
       >
-        <WaterRipples count={12} />
+        <WaterRipples count={16} />
       </Box>
 
       {/* Water ripples in front of California image (behind markers) */}
@@ -195,7 +195,7 @@ const IntroSection: React.FC = () => {
           overflow: "hidden",
         }}
       >
-        <WaterRipples count={12} />
+        <WaterRipples count={16} />
       </Box>
 
       {/* Floating markers overlay */}
