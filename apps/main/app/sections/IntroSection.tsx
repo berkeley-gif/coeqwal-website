@@ -17,12 +17,12 @@ const IntroSection: React.FC = () => {
   // Marker specifications for floating icons around the California silhouette
   // Positioned relative to the 100vh first panel
   const markerSpecs = [
-    { src: "/images/markers/shasta.png", right: "30%", top: "10px", size: 220 },
-    { src: "/images/markers/drinking_water.png", right: "16%", top: "60%", size: 220 },
-    { src: "/images/markers/los_angeles.png", right: "1%", top: "72%", size: 220 },
-    { src: "/images/markers/farmers.png", right: "2%", top: "44%", size: 220 },
-    { src: "/images/markers/salmon.png", right: "15%", top: "16%", size: 220 },
-    { src: "/images/markers/atta.png", right: "26%", top: "34%", size: 220 },
+    { src: "/images/markers/shasta.png", right: "32%", top: "10px", size: 220 },
+    { src: "/images/markers/drinking_water.png", right: "20%", top: "60%", size: 220 },
+    { src: "/images/markers/los_angeles.png", right: "4%", top: "72%", size: 220 },
+    { src: "/images/markers/farmers.png", right: "8%", top: "44%", size: 220 },
+    { src: "/images/markers/salmon.png", right: "16%", top: "16%", size: 220 },
+    { src: "/images/markers/atta.png", right: "28%", top: "34%", size: 220 },
   ] as const
   /* Legacy bubble code removed
   const [backgroundCircles, setBackgroundCircles] = useState<
@@ -164,7 +164,7 @@ const IntroSection: React.FC = () => {
           height: "100vh",
           background: `url('/images/california.png')`,
           backgroundSize: "auto 100%",
-          backgroundPosition: "right center",
+          backgroundPosition: "95% center",
           backgroundRepeat: "no-repeat",
           overflow: "hidden",
           zIndex: 0,

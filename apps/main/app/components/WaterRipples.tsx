@@ -86,14 +86,14 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
       { size: 120, weight: 1 }, // Small bubbles
     ]
     
-    // Create aesthetically pleasing distribution zones
+    // Create aesthetically pleasing distribution zones - moved 5% left
     const zones = [
       // Left third - fewer, larger bubbles
-      { x: [8, 35], y: [20, 80], density: 0.3, preferredSize: 0 }, // Large
+      { x: [3, 30], y: [20, 80], density: 0.3, preferredSize: 0 }, // Large
       // Center third - mixed sizes, medium density
-      { x: [30, 70], y: [25, 75], density: 0.4, preferredSize: 1 }, // Medium
+      { x: [25, 65], y: [25, 75], density: 0.4, preferredSize: 1 }, // Medium
       // Right third - more, smaller bubbles
-      { x: [65, 92], y: [20, 80], density: 0.3, preferredSize: 2 }, // Small
+      { x: [60, 87], y: [20, 80], density: 0.3, preferredSize: 2 }, // Small
     ]
     
     const bubbles: any[] = []
