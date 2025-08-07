@@ -5,6 +5,7 @@ import { motion, useMotionValue } from "@repo/motion"
 import Image from "next/image"
 import { useTranslation } from "@repo/i18n"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import FloatingMarker from "../components/FloatingMarker"
 import { useDrawerStore } from "@repo/state"
 
 // Create a Circle component using multiple overlapping harmonic oscillations
@@ -508,17 +509,21 @@ const WhiteCircle: React.FC<WhiteCircleProps> = ({
 
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
-  // State to store the generated circles
+
+  // Marker specifications for floating icons around the California silhouette
+  const markerSpecs = [
+    { src: "/images/markers/shasta.png", right: "32%", top: "40px", size: 180 },
+    { src: "/images/markers/drinking_water.png", left: "60%", top: "36%", size: 180 },
+    { src: "/images/markers/los_angeles.png", left: "28%", top: "40%", size: 180 },
+    { src: "/images/markers/farmers.png", left: "45%", top: "35%", size: 180 },
+    { src: "/images/markers/salmon.png", right: "20%", top: "2%", size: 180 },
+    { src: "/images/markers/atta.png", right: "32%", top: "10%", size: 180 },
+  ] as const
+  /* Legacy bubble code removed
   const [backgroundCircles, setBackgroundCircles] = useState<
     AnimatedCircleProps[]
   >([])
-  // State for white background mood circles
-  const [whiteCircles, setWhiteCircles] = useState<WhiteCircleProps[]>([])
-
-  // Generate white background circles on initial render
-  useEffect(() => {
-    // Create 16 total white circles with a gradient opacity effect
-    const circles: WhiteCircleProps[] = []
+  // (Deprecated) whiteCircles feature removed
 
     // For main intro section (top section) - create 15 circles in a grid pattern
     const gridColumns = 5
@@ -603,11 +608,11 @@ const IntroSection: React.FC = () => {
       amplitudeY2: 8,
     })
 
-    setWhiteCircles(circles)
-  }, [])
+  */
+  
 
-  // Generate circles on initial render - using only available images
-  useEffect(() => {
+  // (deprecated background bubble generator removed)
+/*
     // Select consistent images from the available ones
     // Using 7 total circles (skip the first one) for all positions (background + foreground)
     const selectedImages = [...availableImages].slice(0, 8).slice(1) // Remove first circle
@@ -633,8 +638,8 @@ const IntroSection: React.FC = () => {
       }
     })
 
-    setBackgroundCircles(bgCircles)
-  }, [])
+    // setBackgroundCircles removed
+*/
 
   return (
     <Box
@@ -642,17 +647,16 @@ const IntroSection: React.FC = () => {
       sx={{
         position: "relative",
         background: (theme) => `
-          url('/images/california_nevada.png'),
+          url('/images/california.png'),
           linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
         `,
-        backgroundSize: "90% auto, 100% 100%",
+        backgroundSize: "45% auto, 100% 100%",
         backgroundPosition: "100% 0, center center",
         backgroundRepeat: "no-repeat, no-repeat",
         width: "100%",
         overflow: "hidden",
-        zIndex: 0, // Base layer
-        margin: 0, // Remove any default margins
-        isolation: "isolate", // Create isolated stacking context
+        zIndex: 0, // base layer
+        isolation: "isolate", // isolated stacking context
       }}
     >
       {/* Background images */}
@@ -667,10 +671,7 @@ const IntroSection: React.FC = () => {
           pointerEvents: "none",
         }}
       >
-        {/* White background mood circles */}
-        {whiteCircles.map((circle, index) => (
-          <WhiteCircle key={`white-circle-${index}`} {...circle} />
-        ))}
+
 
         <Box
           sx={{
@@ -722,6 +723,20 @@ const IntroSection: React.FC = () => {
         </Box>
       </Box>
 
+      {/* Floating markers overlay */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: (theme) => theme.zIndex.introBackgroundImages + 1,
+          pointerEvents: "none",
+        }}
+      >
+        {markerSpecs.map((m, i) => (
+          <FloatingMarker key={i} {...m} />
+        ))}
+      </Box>
+
       {/* First section with bubbles */}
       <BasePanel
         id="intro-main"
@@ -754,9 +769,7 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {backgroundCircles.map((circle, index) => (
-            <ImageCircle key={`bg-circle-${index}`} {...circle} />
-          ))}
+
         </Box>
 
         {/* Text content on top of background circles */}
