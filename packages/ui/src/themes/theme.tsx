@@ -155,6 +155,12 @@ const themeValues = {
       black: "#000000",
     },
     
+    // Ambient/mood elements
+    ambient: {
+      rippleWhite: "rgba(255, 255, 255, 0.16)", // Water ripples - white at 16% opacity
+      rippleBlue: "rgba(42, 82, 135, 0.16)",    // Water ripples - blue (#2A5287) at 16% opacity
+    },
+    
     // Legacy support - will be phased out
     categories: {
       groundwaterManagement: "#76b9aa", // Using nature.teal
@@ -480,6 +486,10 @@ const theme = createTheme({
     utility: {
       white: themeValues.palette.utility.white,
       black: themeValues.palette.utility.black,
+    },
+    ambient: {
+      rippleWhite: themeValues.palette.ambient.rippleWhite,
+      rippleBlue: themeValues.palette.ambient.rippleBlue,
     },
     categories: {
       groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
@@ -1301,6 +1311,10 @@ declare module "@mui/material/styles" {
       white: string
       black: string
     }
+    ambient: {
+      rippleWhite: string
+      rippleBlue: string
+    }
     categories: {
       groundwaterManagement: string
       riverFlows: string
@@ -1346,6 +1360,10 @@ declare module "@mui/material/styles" {
     utility?: {
       white?: string
       black?: string
+    }
+    ambient?: {
+      rippleWhite?: string
+      rippleBlue?: string
     }
     categories?: {
       groundwaterManagement?: string

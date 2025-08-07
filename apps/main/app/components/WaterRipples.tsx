@@ -2,6 +2,7 @@
 
 import { motion } from "@repo/motion"
 import { useMemo } from "react"
+import { useTheme } from "@mui/material"
 
 interface RippleProps {
   centerX: string
@@ -73,10 +74,12 @@ interface WaterRipplesProps {
 }
 
 export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
+  const theme = useTheme()
+  
   const ripples = useMemo(() => {
     const colors = [
-      "rgba(255, 255, 255, 0.16)", // White at 16% opacity
-      "rgba(42, 82, 135, 0.16)",   // #2A5287 at 16% opacity
+      theme.palette.ambient.rippleWhite, // White at 16% opacity
+      theme.palette.ambient.rippleBlue,  // Blue (#2A5287) at 16% opacity
     ]
     
     // Define size categories for visual hierarchy
@@ -171,7 +174,7 @@ export default function WaterRipples({ count = 8 }: WaterRipplesProps) {
     }
     
     return bubbles.slice(0, count) // Ensure exact count
-  }, [count])
+  }, [count, theme.palette.ambient.rippleWhite, theme.palette.ambient.rippleBlue])
 
   return (
     <>
