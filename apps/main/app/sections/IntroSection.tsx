@@ -6,6 +6,7 @@ import { Box, Typography, Stack } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import FloatingMarker from "../components/FloatingMarker"
+import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
 
 // Legacy bubble components removed - keeping only marker functionality
@@ -19,7 +20,7 @@ const IntroSection: React.FC = () => {
     { src: "/images/markers/shasta.png", right: "30%", top: "10px", size: 220 },
     { src: "/images/markers/drinking_water.png", right: "16%", top: "60%", size: 220 },
     { src: "/images/markers/los_angeles.png", right: "1%", top: "72%", size: 220 },
-    { src: "/images/markers/farmers.png", right: "2%", top: "44git%", size: 220 },
+    { src: "/images/markers/farmers.png", right: "2%", top: "44%", size: 220 },
     { src: "/images/markers/salmon.png", right: "15%", top: "16%", size: 220 },
     { src: "/images/markers/atta.png", right: "26%", top: "34%", size: 220 },
   ] as const
@@ -171,6 +172,31 @@ const IntroSection: React.FC = () => {
         }}
       >
 
+      {/* Water ripples behind California image */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -1, // Behind everything including California image
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        <WaterRipples count={6} />
+      </Box>
+
+      {/* Water ripples in front of California image (behind markers) */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: (theme) => theme.zIndex.introBackgroundImages - 1,
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        <WaterRipples count={6} />
+      </Box>
 
       {/* Floating markers overlay */}
       <Box
