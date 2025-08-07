@@ -641,8 +641,13 @@ const IntroSection: React.FC = () => {
       id="intro"
       sx={{
         position: "relative",
-        background: (theme) => `linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})`,
-        backgroundSize: "100% 100%",
+        background: (theme) => `
+          url('/images/california_nevada.png'),
+          linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
+        `,
+        backgroundSize: "90% auto, 100% 100%",
+        backgroundPosition: "100% 0, center center",
+        backgroundRepeat: "no-repeat, no-repeat",
         width: "100%",
         overflow: "hidden",
         zIndex: 0, // Base layer

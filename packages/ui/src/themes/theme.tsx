@@ -122,8 +122,8 @@ const themeValues = {
   palette: {
     // Core brand colors (from gradient)
     brand: {
-      sky: "#87CEEB",        // Top of gradient - sky blue
-      water: "#64a3d7",      // Bottom of gradient - water blue
+      sky: "#92C1D5",        // Top of gradient - sky blue
+      water: "#64A4D6",      // Bottom of gradient - water blue
     },
     
     // Text and UI blues (organized by intensity)
