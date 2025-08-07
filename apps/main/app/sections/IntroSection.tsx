@@ -19,7 +19,7 @@ const IntroSection: React.FC = () => {
     { src: "/images/markers/shasta.png", right: "30%", top: "10px", size: 220 },
     { src: "/images/markers/drinking_water.png", right: "16%", top: "60%", size: 220 },
     { src: "/images/markers/los_angeles.png", right: "1%", top: "72%", size: 220 },
-    { src: "/images/markers/farmers.png", right: "2%", top: "44%", size: 220 },
+    { src: "/images/markers/farmers.png", right: "2%", top: "44git%", size: 220 },
     { src: "/images/markers/salmon.png", right: "15%", top: "16%", size: 220 },
     { src: "/images/markers/atta.png", right: "26%", top: "34%", size: 220 },
   ] as const
