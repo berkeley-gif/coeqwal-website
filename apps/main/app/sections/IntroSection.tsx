@@ -146,7 +146,14 @@ const IntroSection: React.FC = () => {
 */
 
   return (
-    <>
+    <Box
+      sx={{
+        background: (theme) => `
+          linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
+        `,
+        minHeight: "200vh", // Ensure gradient covers both panels
+      }}
+    >
       {/* First panel - Hero section with California background */}
       <Box
         id="intro"
@@ -154,13 +161,10 @@ const IntroSection: React.FC = () => {
           position: "relative",
           width: "100vw",
           height: "100vh",
-          background: (theme) => `
-            url('/images/california.png'),
-            linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
-          `,
-          backgroundSize: "auto 100%, 100% 100%",
-          backgroundPosition: "right center, center center",
-          backgroundRepeat: "no-repeat, no-repeat",
+          background: `url('/images/california.png')`,
+          backgroundSize: "auto 100%",
+          backgroundPosition: "right center",
+          backgroundRepeat: "no-repeat",
           overflow: "hidden",
           zIndex: 0,
           isolation: "isolate",
@@ -346,14 +350,13 @@ const IntroSection: React.FC = () => {
           position: "relative",
           width: "100vw",
           height: "100vh",
-          background: (theme) => `
+          background: `
             url('/images/home_collage/left_side.png'),
-            url('/images/home_collage/right_side.png'),
-            linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
+            url('/images/home_collage/right_side.png')
           `,
-          backgroundSize: "auto 80%, auto 80%, 100% 100%",
-          backgroundPosition: "left bottom, right bottom, center center",
-          backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+          backgroundSize: "auto 80%, auto 80%",
+          backgroundPosition: "left bottom, right bottom",
+          backgroundRepeat: "no-repeat, no-repeat",
           overflow: "hidden",
         }}
       >
@@ -955,7 +958,7 @@ const IntroSection: React.FC = () => {
         </Box>
         </BasePanel>
       </Box>
-    </>
+    </Box>
   )
 }
 
