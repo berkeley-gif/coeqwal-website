@@ -123,7 +123,7 @@ const PanelRoot = styled(Box, {
         : background === "dark"
           ? theme.palette.primary.main
           : background === "accent"
-            ? theme.palette.pop.main
+            ? theme.palette.accent.gold
             : background === "interstitial"
               ? theme.palette.interstitial.main
               : "transparent",

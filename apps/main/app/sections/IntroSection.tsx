@@ -1,524 +1,64 @@
-import React, { useState, useEffect, useRef } from "react"
+import React from "react"
 import { BasePanel } from "@repo/ui"
 import { Box, Typography, Stack } from "@mui/material"
-import { motion, useMotionValue } from "@repo/motion"
-import Image from "next/image"
+
+
 import { useTranslation } from "@repo/i18n"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import FloatingMarker from "../components/FloatingMarker"
+import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
 
-// Create a Circle component using multiple overlapping harmonic oscillations
-interface AnimatedCircleProps {
-  imagePath: string
-  left: string
-  top: string
-  index: number
-  opacity?: number
-  size?: number
-  freqX1?: number
-  freqX2?: number
-  freqY1?: number
-  freqY2?: number
-  phaseX1?: number
-  phaseX2?: number
-  phaseY1?: number
-  phaseY2?: number
-  amplitudeX1?: number
-  amplitudeX2?: number
-  amplitudeY1?: number
-  amplitudeY2?: number
-}
-
-const ImageCircle: React.FC<AnimatedCircleProps> = ({
-  imagePath,
-  left,
-  top,
-  index,
-  opacity = 1,
-  size = 35, // vmin - increased from 29 for bigger bubbles
-  freqX1 = 0.07,
-  freqX2 = 0.04,
-  freqY1 = 0.05,
-  freqY2 = 0.09,
-  phaseX1 = 0,
-  phaseX2 = 0,
-  phaseY1 = 0,
-  phaseY2 = 0,
-  amplitudeX1 = 40,
-  amplitudeX2 = 20,
-  amplitudeY1 = 30,
-  amplitudeY2 = 25,
-}) => {
-  // Use refs to store time-related values
-  const timeRef = useRef(Math.random() * 100) // Start at random point in animation
-
-  // Create motion values for animation
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const scale = useMotionValue(1)
-  const haloOpacity = useMotionValue(0.08)
-
-  // Center point for drift animation (55%, 40%)
-  const centerX = 55 // percentage
-  const centerY = 40 // percentage
-
-  // Parse the original position percentages
-  const originalX = parseFloat(left.replace("%", ""))
-  const originalY = parseFloat(top.replace("%", ""))
-
-  // Use requestAnimationFrame to create continuous, organic motion
-  useEffect(() => {
-    let animationId: number
-
-    const animate = () => {
-      // Update time value - slowed down for gentler motion
-      timeRef.current += 0.02
-
-      // Murmuration effect - coordinated flowing motion
-      const globalTime = timeRef.current * 0.1
-
-      // Base circular motion around the oval pattern (increased amplitude)
-      const circularMotionX = Math.sin(globalTime + index * 0.8) * 40
-      const circularMotionY = Math.cos(globalTime + index * 0.8) * 30
-
-      // Add flowing waves that propagate through the formation (increased amplitude)
-      const waveSpeed = 0.05
-      const wave1X = Math.sin(globalTime * waveSpeed + index * 1.2) * 35
-      const wave1Y = Math.cos(globalTime * waveSpeed + index * 1.2) * 25
-
-      const wave2X = Math.sin(globalTime * waveSpeed * 1.3 + index * 0.7) * 25
-      const wave2Y = Math.cos(globalTime * waveSpeed * 1.3 + index * 0.7) * 35
-
-      // Add some individual variation (increased amplitude)
-      const individualX = Math.sin(timeRef.current * freqX1 + phaseX1) * 15
-      const individualY = Math.cos(timeRef.current * freqY1 + phaseY1) * 15
-
-      // Drift-to-center animation
-      // Each circle takes a turn drifting to center based on its index
-      const driftCycleDuration = 12 // seconds for complete cycle (longer for more dramatic effect)
-      const driftPhasePerCircle = driftCycleDuration / 8 // 8 circles total
-      const currentPhase = (timeRef.current * 0.08) % driftCycleDuration // Slower overall cycle
-      const myPhaseStart = index * driftPhasePerCircle
-      const myPhaseEnd = myPhaseStart + driftPhasePerCircle * 0.7 // 70% of phase for drift
-
-      let driftProgress = 0
-      if (currentPhase >= myPhaseStart && currentPhase <= myPhaseEnd) {
-        // This circle's turn to drift
-        const phaseProgress =
-          (currentPhase - myPhaseStart) / (myPhaseEnd - myPhaseStart)
-        // Use sine wave for smooth in-out motion
-        driftProgress = Math.sin(phaseProgress * Math.PI)
-      }
-
-      // Calculate drift offset toward center (convert percentages to relative movement)
-      const driftX = (centerX - originalX) * driftProgress * 0.8 // 80% of the way to center
-      const driftY = (centerY - originalY) * driftProgress * 0.8
-
-      // Combine murmuration with drift (reduce murmuration during drift)
-      const murmurateFactor = 1 - driftProgress * 0.6 // Reduce murmuration when drifting
-      const newX =
-        (circularMotionX + wave1X + wave2X + individualX) * murmurateFactor +
-        driftX
-      const newY =
-        (circularMotionY + wave1Y + wave2Y + individualY) * murmurateFactor +
-        driftY
-
-      // Subtle pulsing effect
-      const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.02
-      const newHaloOpacity = 0.08 + Math.sin(timeRef.current * 0.15) * 0.04
-
-      // Apply new values
-      x.set(newX)
-      y.set(newY)
-      scale.set(newScale)
-      haloOpacity.set(newHaloOpacity)
-
-      // Continue animation
-      animationId = requestAnimationFrame(animate)
-    }
-
-    // Start animation
-    animationId = requestAnimationFrame(animate)
-
-    // Cleanup
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [
-    amplitudeX1,
-    amplitudeX2,
-    amplitudeY1,
-    amplitudeY2,
-    freqX1,
-    freqX2,
-    freqY1,
-    freqY2,
-    phaseX1,
-    phaseX2,
-    phaseY1,
-    phaseY2,
-    x,
-    y,
-    scale,
-    haloOpacity,
-    index,
-    originalX,
-    originalY,
-  ])
-
-  return (
-    <motion.div
-      style={{
-        position: "absolute",
-        width: `${size + 4}vmin`, // 4vmin padding equivalent to 40px at reference viewport
-        height: `${size + 4}vmin`,
-        borderRadius: "50%",
-        opacity,
-        left,
-        top,
-        zIndex: index,
-        x,
-        y,
-        scale,
-        transformOrigin: "center",
-        pointerEvents: "none",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.16)",
-        border: "2px solid rgba(255, 255, 255, 0.1)",
-      }}
-    >
-      <div
-        style={{
-          width: `${size}vmin`,
-          height: `${size}vmin`,
-          borderRadius: "50%",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        <Image
-          src={`/images/circular-crops/${imagePath}`}
-          alt=""
-          quality={90}
-          fill
-          style={{
-            objectFit: "cover",
-            borderRadius: "50%",
-            width: "100%",
-            height: "100%",
-            objectPosition: "center",
-          }}
-          sizes={`${size}px`}
-        />
-      </div>
-    </motion.div>
-  )
-}
-
-// List of all available images in the circular-crops directory
-const availableImages = [
-  "6.png",
-  "2.png",
-  "4.png",
-  "8.png",
-  "9.png",
-  "11.png",
-  "12.png",
-  "14.png",
-]
-
-// Clear configuration for circle positions - set up for easy editing
-const circlePositions = {
-  // Background circles arranged in a more random, spread-out pattern
-  // Distributed across a wider area for natural cloud-like appearance
-  background: [
-    // More random distribution across the viewport
-    // Spread across roughly 50% of viewport width and height
-
-    // Upper area circles
-    { left: "16%", top: "10%" },
-
-    // Upper right area
-    { left: "72%", top: "6%" },
-
-    // Center-right area
-    { left: "60%", top: "24%" },
-
-    // Lower right area
-    { left: "75%", top: "48%" },
-
-    // Lower center area
-    { left: "55%", top: "54%" },
-
-    // Lower left area
-    { left: "40%", top: "52%" },
-
-    // Center-left area
-    { left: "38%", top: "22%" },
-
-    // Upper left area
-    { left: "52%", top: "18%" },
-  ],
-
-  // Keep foreground empty for now
-  foreground: [],
-}
-
-// Function to add sine-based variation to circle positions around master circle
-const addPositionVariation = (
-  basePosition: { left: string; top: string },
-  index: number,
-) => {
-  // Use index as seed for consistent variation
-  const seed = index * 7.3 // Different multiplier for more variation
-
-  // Create sine-based offsets for cloud-like positioning
-  const radiusVariation = Math.sin(seed) * 0.5 + 0.5 // 0-1 range
-  const angleVariation = Math.sin(seed * 1.7) * Math.PI * 0.4 // ±36 degrees variation
-
-  // Convert percentage position to approximate pixel offset for calculation
-  const baseRadius = 120 + radiusVariation * 80 // 120-200px radius variation
-  const angle = (index / 8) * Math.PI * 2 + angleVariation // Base angle + variation
-
-  // Calculate offset from base position
-  const offsetX = Math.cos(angle) * baseRadius * 0.3 // Scale down the offset
-  const offsetY = Math.sin(angle) * baseRadius * 0.3
-
-  // Convert base percentages to numbers
-  const baseLeft = parseFloat(basePosition.left.replace("%", ""))
-  const baseTop = parseFloat(basePosition.top.replace("%", ""))
-
-  // Apply offset (convert px to approximate percentage)
-  const newLeft = baseLeft + offsetX / 12 // Rough px to % conversion
-  const newTop = baseTop + offsetY / 8
-
-  return {
-    left: `${newLeft}%`,
-    top: `${newTop}%`,
-  }
-}
-
-// Keep these for backward compatibility
-const backgroundPositions = circlePositions.background
-const foregroundPositions = circlePositions.foreground
-
-// Function to generate fixed circle configuration
-const generateFixedCircleProps = (
-  imagePath: string,
-  isBackground: boolean,
-  positionIndex: number,
-): AnimatedCircleProps => {
-  // Use predefined positions based on whether it's a background or foreground circle
-  const positions = isBackground ? backgroundPositions : foregroundPositions
-  // Ensure position index is within bounds
-  const safeIndex = positionIndex % positions.length
-  // Default position as fallback in case positions array is somehow empty
-  const defaultPosition = { left: "50%", top: "50%" }
-  const position = positions[safeIndex] || defaultPosition
-
-  console.log(
-    `Creating ${isBackground ? "background" : "foreground"} circle at position:`,
-    position,
-  )
-
-  // Use theme z-index values instead of hardcoded numbers
-  const index = isBackground ? 1 : 15 // Will be updated to use theme values in the component
-
-  // Fixed size with small variation
-  const size = 30 // vmin - increased from 25 for bigger bubbles
-
-  // Generate animation parameters with consistent variation
-  const baseFreq = 0.05
-  const freqX1 = baseFreq + positionIndex * 0.01
-  const freqX2 = baseFreq - positionIndex * 0.005
-  const freqY1 = baseFreq + positionIndex * 0.008
-  const freqY2 = baseFreq + positionIndex * 0.012
-
-  // Fixed phases with variation based on position index
-  const basePhase = positionIndex * 0.8
-  const phaseX1 = basePhase
-  const phaseX2 = basePhase + 1.2
-  const phaseY1 = basePhase + 0.5
-  const phaseY2 = basePhase + 1.8
-
-  // Fixed amplitudes with increased variations
-  const baseAmplitude = 25 // Reduced from 40 to keep circles in rows
-  const amplitudeX1 = baseAmplitude + positionIndex * 2
-  const amplitudeX2 = baseAmplitude - positionIndex * 1
-  const amplitudeY1 = baseAmplitude + positionIndex * 1.5
-  const amplitudeY2 = baseAmplitude - positionIndex * 0.5
-
-  return {
-    imagePath,
-    left: position.left,
-    top: position.top,
-    index,
-    opacity: 1,
-    size,
-    freqX1,
-    freqX2,
-    freqY1,
-    freqY2,
-    phaseX1,
-    phaseX2,
-    phaseY1,
-    phaseY2,
-    amplitudeX1,
-    amplitudeX2,
-    amplitudeY1,
-    amplitudeY2,
-  }
-}
-
-// Circle component for background white circles
-interface WhiteCircleProps {
-  left: string
-  top: string
-  size: number
-  opacity: number
-  freqX1?: number
-  freqX2?: number
-  freqY1?: number
-  freqY2?: number
-  phaseX1?: number
-  phaseX2?: number
-  phaseY1?: number
-  phaseY2?: number
-  amplitudeX1?: number
-  amplitudeX2?: number
-  amplitudeY1?: number
-  amplitudeY2?: number
-}
-
-const WhiteCircle: React.FC<WhiteCircleProps> = ({
-  left,
-  top,
-  size,
-  opacity,
-  freqX1 = 0.05,
-  freqX2 = 0.03,
-  freqY1 = 0.04,
-  freqY2 = 0.06,
-  phaseX1 = 0,
-  phaseX2 = 0,
-  phaseY1 = 0,
-  phaseY2 = 0,
-  amplitudeX1 = 20,
-  amplitudeX2 = 15,
-  amplitudeY1 = 25,
-  amplitudeY2 = 18,
-}) => {
-  // Use refs to store time-related values
-  const timeRef = useRef(Math.random() * 100) // Start at random point in animation
-
-  // Create motion values for animation
-  const x = useMotionValue(0)
-  const y = useMotionValue(0)
-  const circleOpacity = useMotionValue(opacity)
-  const circleScale = useMotionValue(1)
-
-  // Use requestAnimationFrame to create continuous, organic motion
-  useEffect(() => {
-    let animationId: number
-
-    const animate = () => {
-      // Update time value - slowed down for gentler motion
-      timeRef.current += 0.015 // Reduced from 0.04 for slower animation
-
-      // Calculate complex, overlapping sine wave motion
-      // X position: combine two sine waves with different frequencies and phases
-      const newX =
-        Math.sin(timeRef.current * freqX1 + phaseX1) * amplitudeX1 * 1.5 +
-        Math.sin(timeRef.current * freqX2 + phaseX2) * amplitudeX2 * 1.5
-
-      // Y position: combine two cosine waves with different frequencies and phases
-      const newY =
-        Math.cos(timeRef.current * freqY1 + phaseY1) * amplitudeY1 * 1.5 +
-        Math.cos(timeRef.current * freqY2 + phaseY2) * amplitudeY2 * 1.5
-
-      // Add subtle pulsing effect
-      const newOpacity =
-        opacity + Math.sin(timeRef.current * 0.08) * (opacity * 0.3)
-      const newScale = 1 + Math.sin(timeRef.current * 0.1) * 0.04
-
-      // Apply new values
-      x.set(newX)
-      y.set(newY)
-      circleOpacity.set(newOpacity)
-      circleScale.set(newScale)
-
-      // Continue animation
-      animationId = requestAnimationFrame(animate)
-    }
-
-    // Start animation
-    animationId = requestAnimationFrame(animate)
-
-    // Cleanup
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId)
-      }
-    }
-  }, [
-    amplitudeX1,
-    amplitudeX2,
-    amplitudeY1,
-    amplitudeY2,
-    freqX1,
-    freqX2,
-    freqY1,
-    freqY2,
-    phaseX1,
-    phaseX2,
-    phaseY1,
-    phaseY2,
-    opacity,
-    x,
-    y,
-    circleOpacity,
-    circleScale,
-  ])
-
-  return (
-    <motion.div
-      style={{
-        position: "absolute",
-        width: `${size}vmin`,
-        height: `${size}vmin`,
-        borderRadius: "50%",
-        backgroundColor: "#FFFFFF",
-        opacity: circleOpacity,
-        left,
-        top,
-        zIndex: 0, // White bubbles at introBubbles level (z-index 0)
-        pointerEvents: "none",
-        x,
-        y,
-        scale: circleScale,
-        transformOrigin: "center",
-      }}
-    />
-  )
-}
+// Legacy bubble components removed - keeping only marker functionality
 
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
-  // State to store the generated circles
+
+  // Responsive marker specifications that align with California silhouette
+  // Positions adjust based on screen size to maintain alignment with background image
+  const markerSpecs = [
+    { 
+      src: "/images/markers/shasta.png", 
+      right: { xs: "25%", sm: "28%", md: "45%", lg: "45%", xl: "45%" }, 
+      top: "30px", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/drinking_water.png", 
+      right: { xs: "13%", sm: "16%", md: "36%", lg: "36%", xl: "36%" }, 
+      top: "50%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/los_angeles.png", 
+      right: { xs: "1%", sm: "2%", md: "20%", lg: "20%", xl: "20%" }, 
+      top: "62%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/farmers.png", 
+      right: { xs: "3%", sm: "5%", md: "22%", lg: "22%", xl: "22%" }, 
+      top: "38%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/salmon.png", 
+      right: { xs: "9%", sm: "12%", md: "30%", lg: "30%", xl: "30%" }, 
+      top: "16%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+    { 
+      src: "/images/markers/atta.png", 
+      right: { xs: "21%", sm: "24%", md: "43%", lg: "43%", xl: "43%" }, 
+      top: "30%", 
+      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 }
+    },
+  ] as const
+  /* Legacy bubble code removed
   const [backgroundCircles, setBackgroundCircles] = useState<
     AnimatedCircleProps[]
   >([])
-  // State for white background mood circles
-  const [whiteCircles, setWhiteCircles] = useState<WhiteCircleProps[]>([])
-
-  // Generate white background circles on initial render
-  useEffect(() => {
-    // Create 16 total white circles with a gradient opacity effect
-    const circles: WhiteCircleProps[] = []
+  // (Deprecated) whiteCircles feature removed
 
     // For main intro section (top section) - create 15 circles in a grid pattern
     const gridColumns = 5
@@ -603,11 +143,11 @@ const IntroSection: React.FC = () => {
       amplitudeY2: 8,
     })
 
-    setWhiteCircles(circles)
-  }, [])
+  */
+  
 
-  // Generate circles on initial render - using only available images
-  useEffect(() => {
+  // (deprecated background bubble generator removed)
+/*
     // Select consistent images from the available ones
     // Using 7 total circles (skip the first one) for all positions (background + foreground)
     const selectedImages = [...availableImages].slice(0, 8).slice(1) // Remove first circle
@@ -633,111 +173,94 @@ const IntroSection: React.FC = () => {
       }
     })
 
-    setBackgroundCircles(bgCircles)
-  }, [])
+    // setBackgroundCircles removed
+*/
 
   return (
     <Box
-      id="intro"
       sx={{
-        position: "relative",
-        // Original gradient background (commented out for reference):
-        // background: "linear-gradient(to bottom, #A3DDE8, #A3DDE8, #458bb6)",
-        background: "#A3DDE8",
-        backgroundSize: "100% 100%",
-        width: "100%",
-        overflow: "hidden",
-        zIndex: 0, // Base layer
-        margin: 0, // Remove any default margins
-        isolation: "isolate", // Create isolated stacking context
+        background: (theme) => `
+          linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
+        `,
+        minHeight: "200vh", // Ensure gradient covers both panels
       }}
     >
-      {/* Background images */}
+      {/* First panel - Hero section with California background */}
+      <Box
+        id="intro"
+        sx={{
+          position: "relative",
+          width: "100vw",
+          height: "100vh",
+          background: `url('/images/california.png')`,
+          backgroundSize: { xs: "auto 90%", sm: "auto 95%", md: "auto 100%", lg: "auto 100%", xl: "auto 100%" },
+          backgroundPosition: { xs: "80% center", sm: "82% center", md: "85% center", lg: "85% center", xl: "85% center" },
+          backgroundRepeat: "no-repeat",
+          overflow: "hidden",
+          zIndex: 0,
+          isolation: "isolate",
+        }}
+      >
+
+      {/* Water ripples behind California image */}
       <Box
         sx={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: (theme) => theme.zIndex.introBackgroundImages,
+          inset: 0,
+          zIndex: -1, // Behind everything including California image
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        <WaterRipples count={16} />
+      </Box>
+
+      {/* Water ripples in front of California image (behind markers) */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: (theme) => theme.zIndex.introBackgroundImages - 1,
+          pointerEvents: "none",
+          overflow: "hidden",
+        }}
+      >
+        <WaterRipples count={16} />
+      </Box>
+
+      {/* Floating markers overlay */}
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: (theme) => theme.zIndex.introBackgroundImages + 1,
           pointerEvents: "none",
         }}
       >
-        {/* White background mood circles */}
-        {whiteCircles.map((circle, index) => (
-          <WhiteCircle key={`white-circle-${index}`} {...circle} />
+        {markerSpecs.map((m, i) => (
+          <FloatingMarker key={i} {...m} />
         ))}
-
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            right: 0,
-            width: "100%",
-            height: "100%",
-            transform: "translateX(5%)",
-          }}
-        >
-          <Image
-            src="/images/home_collage/right_side.png"
-            alt=""
-            fill
-            quality={100}
-            priority
-            sizes="75vw"
-            style={{
-              objectFit: "contain",
-              objectPosition: "right bottom",
-              pointerEvents: "none",
-            }}
-          />
-        </Box>
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            width: "80%",
-            height: "80%",
-            // transform: "translateX(-16.67%)",
-          }}
-        >
-          <Image
-            src="/images/home_collage/left_side.png"
-            alt=""
-            fill
-            quality={100}
-            priority
-            sizes="75vw"
-            style={{
-              objectFit: "contain",
-              objectPosition: "left bottom",
-              pointerEvents: "none",
-            }}
-          />
-        </Box>
       </Box>
 
-      {/* First section with bubbles */}
-      <BasePanel
-        id="intro-main"
-        fullHeight={false}
-        includeHeaderSpacing
-        sx={{
-          paddingTop: { xs: 3, md: 6 },
-          paddingBottom: { xs: 3, md: 6 },
-          paddingLeft: { xs: 6, md: 20 }, // Increased left padding to push text right
-          paddingRight: { xs: 3, md: 6 }, // Normal right padding
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          position: "relative",
-          overflow: "visible",
-          backgroundColor: "transparent",
-        }}
-      >
+        {/* Hero text content */}
+        <BasePanel
+          id="intro-main"
+          fullHeight={false}
+          background="transparent"
+          includeHeaderSpacing={false}
+          sx={{
+            paddingTop: { xs: "calc(64px + 3rem)", md: "calc(80px + 6rem)" }, // Header height + original padding
+            paddingBottom: { xs: 3, md: 6 },
+            paddingLeft: { xs: 6, md: 20 },
+            paddingRight: { xs: 3, md: 6 },
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            position: "relative",
+            overflow: "visible",
+          }}
+        >
         {/* Background Circles (below text) - contained within the first 100vh */}
         <Box
           sx={{
@@ -750,9 +273,7 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {backgroundCircles.map((circle, index) => (
-            <ImageCircle key={`bg-circle-${index}`} {...circle} />
-          ))}
+
         </Box>
 
         {/* Text content on top of background circles */}
@@ -760,17 +281,18 @@ const IntroSection: React.FC = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "flex-start",
             width: "100%",
             height: "100%",
             position: "relative",
             zIndex: (theme) => theme.zIndex.introText, // Text layer
-            mt: { xs: 6, md: 12 }, // Hack: dd top margin to push the text content down
           }}
         >
           <Typography
             variant="h1"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mb: 2,
             }}
           >
@@ -780,7 +302,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mb: 2,
             }}
           >
@@ -790,7 +312,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h1"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mb: 2,
             }}
           >
@@ -800,7 +322,7 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="h3"
             sx={{
-              color: "#2e3a6c",
+              color: (theme) => theme.palette.blue.darkest,
               mt: 2.5,
               mb: 2, // 1rem equivalent (16px)
             }}
@@ -811,13 +333,11 @@ const IntroSection: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "#2e3a6c",
-              // mt: 3,
+              color: (theme) => theme.palette.blue.darkest,
               maxWidth: "500px",
             }}
-            className="tk-acumin-pro"
           >
-            Explore California&apos;s water system and discover possibilities
+            Explore a range of Central Valley water scenarios and discover possibilities
             for the future of water in our state.
           </Typography>
 
@@ -831,8 +351,8 @@ const IntroSection: React.FC = () => {
           >
             <PlayArrowIcon
               sx={{
-                color: "#2e3a6c",
-                fontSize: 50,
+                color: (theme) => theme.palette.blue.darkest,
+                fontSize: "3rem", // Using rem units for consistency
                 transform: "rotate(90deg)",
                 pointerEvents: "auto",
               }}
@@ -876,37 +396,57 @@ const IntroSection: React.FC = () => {
         >
           {/* No foreground circles rendered */}
         </Box>
-      </BasePanel>
+        </BasePanel>
+      </Box>
 
-      {/* Second section with interstitial content - flows naturally after the first section */}
-      <BasePanel
+      {/* Second panel - Interstitial content */}
+      <Box
         id="interstitial"
-        fullHeight={false}
-        paddingVariant="wide"
-        includeHeaderSpacing={false}
         sx={{
-          color: (theme) => theme.palette.primary.dark,
-          alignItems: "left",
-          justifyContent: "center",
-          pointerEvents: "auto",
           position: "relative",
-          backgroundColor: "transparent", // No background image here anymore since it's on the parent
-          minHeight: "100vh",
-          paddingTop: "160px",
-          paddingBottom: "160px",
-          paddingLeft: { xs: 3, md: 6 },
-          paddingRight: { xs: 3, md: 6 },
-          mt: 50,
+          width: "100vw",
+          height: "100vh",
+          background: `
+            url('/images/home_collage/birds_top.png'),
+            url('/images/home_collage/left_side.png'),
+            url('/images/home_collage/right_side.png')
+          `,
+          backgroundSize: "auto 40%, auto 80%, auto calc(100vh - 80px)",
+          backgroundPosition: "left top, left bottom, right bottom",
+          backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+          overflow: "hidden",
         }}
       >
+        <BasePanel
+          fullHeight={false}
+          background="transparent"
+          paddingVariant="wide"
+          includeHeaderSpacing={false}
+          sx={{
+            color: (theme) => theme.palette.primary.dark,
+            paddingLeft: { xs: 6, md: 20 },
+            paddingRight: { xs: 3, md: 6 },
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
+            overflow: "visible",
+          }}
+        >
+        {/* Spacer for header */}
+        <Box sx={{ height: { xs: "64px", md: "80px" } }} />
+        
         {/* Content container for proper blending context */}
         <Box
           sx={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
             display: "flex",
+            flexDirection: "column",
             justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            flex: 1, // Take up remaining space
+            position: "relative",
+            zIndex: (theme) => theme.zIndex.introText, // Text layer
           }}
         >
           {/* Text content with mix-blend-mode */}
@@ -922,18 +462,18 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h2"
                 sx={{
-                  color: "#2e3a6c",
+                  color: (theme) => theme.palette.blue.darkest,
                   mb: 3,
                 }}
               >
-                What is the future
+                What is California&apos;s
                 <br />
-                of California water?
+                water future?
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: "#2e3a6c" }}
-                className="tk-acumin-pro"
+                sx={{ color: (theme) => theme.palette.blue.darkest }}
+                
               >
                 {(() => {
                   const text = t("interstitial.part1")
@@ -993,11 +533,11 @@ const IntroSection: React.FC = () => {
                       <>
                         {beforeSurfaceWater}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: 0,
@@ -1006,7 +546,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -1023,11 +563,11 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeConveyance}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1036,7 +576,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -1053,11 +593,11 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeAllocation}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1066,7 +606,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -1083,11 +623,11 @@ const IntroSection: React.FC = () => {
                         </Box>
                         {beforeCentralValley}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1096,7 +636,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -1151,11 +691,11 @@ const IntroSection: React.FC = () => {
                         <>
                           {beforeSurfaceWater}
                           <Box
-                            component="mark"
+                            component="span"
                             sx={{
                               backgroundColor: "transparent",
-                              borderBottom: "3px solid #2e3a6c",
-                              color: "#2e3a6c",
+                              borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                              color: (theme) => theme.palette.blue.darkest,
                               py: 0.1,
                               mx: 0.2,
                               lineHeight: "0em",
@@ -1164,7 +704,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: "5px solid #1a2547",
+                                borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                               },
                             }}
                             onClick={() => {
@@ -1181,11 +721,11 @@ const IntroSection: React.FC = () => {
                           </Box>
                           {betweenText}
                           <Box
-                            component="mark"
+                            component="span"
                             sx={{
                               backgroundColor: "transparent",
-                              borderBottom: "3px solid #2e3a6c",
-                              color: "#2e3a6c",
+                              borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                              color: (theme) => theme.palette.blue.darkest,
                               py: 0.1,
                               mx: 0.2,
                               lineHeight: "0em",
@@ -1194,7 +734,7 @@ const IntroSection: React.FC = () => {
                               display: "inline-block",
                               position: "relative",
                               "&:hover": {
-                                borderBottom: "5px solid #1a2547",
+                                borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                               },
                             }}
                             onClick={() => {
@@ -1219,11 +759,11 @@ const IntroSection: React.FC = () => {
                       <>
                         {beforeSurfaceWater}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1232,7 +772,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -1261,11 +801,11 @@ const IntroSection: React.FC = () => {
                       <React.Fragment key={i}>
                         {part}
                         <Box
-                          component="mark"
+                          component="span"
                           sx={{
                             backgroundColor: "transparent",
-                            borderBottom: "3px solid #2e3a6c",
-                            color: "#2e3a6c",
+                            borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                            color: (theme) => theme.palette.blue.darkest,
                             py: 0.1,
                             mx: 0.2,
                             lineHeight: "0em",
@@ -1274,7 +814,7 @@ const IntroSection: React.FC = () => {
                             display: "inline-block",
                             position: "relative",
                             "&:hover": {
-                              borderBottom: "5px solid #1a2547",
+                              borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                             },
                           }}
                           onClick={() => {
@@ -1296,8 +836,8 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: "#2e3a6c" }}
-                className="tk-acumin-pro"
+                sx={{ color: (theme) => theme.palette.blue.darkest }}
+                
               >
                 {(() => {
                   const text = t("interstitial.part2")
@@ -1345,11 +885,11 @@ const IntroSection: React.FC = () => {
                     result.push(
                       <Box
                         key={i}
-                        component="mark"
+                        component="span"
                         sx={{
                           backgroundColor: "transparent",
-                          borderBottom: "3px solid #2e3a6c",
-                          color: "#2e3a6c",
+                          borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                          color: (theme) => theme.palette.blue.darkest,
                           py: 0.1,
                           mx: 0.2,
                           lineHeight: "0em",
@@ -1358,7 +898,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: "5px solid #1a2547",
+                            borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                           },
                         }}
                         onClick={() => {
@@ -1385,8 +925,8 @@ const IntroSection: React.FC = () => {
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ color: "#2e3a6c" }}
-                className="tk-acumin-pro"
+                sx={{ color: (theme) => theme.palette.blue.darkest }}
+                
               >
                 {(() => {
                   const text = t("interstitial.part3")
@@ -1427,11 +967,11 @@ const IntroSection: React.FC = () => {
                     result.push(
                       <Box
                         key={i}
-                        component="mark"
+                        component="span"
                         sx={{
                           backgroundColor: "transparent",
-                          borderBottom: "3px solid #2e3a6c",
-                          color: "#2e3a6c",
+                          borderBottom: (theme) => `3px solid ${theme.palette.blue.darkest}`,
+                          color: (theme) => theme.palette.blue.darkest,
                           py: 0.1,
                           mx: 0.2,
                           lineHeight: "0em",
@@ -1440,7 +980,7 @@ const IntroSection: React.FC = () => {
                           display: "inline-block",
                           position: "relative",
                           "&:hover": {
-                            borderBottom: "5px solid #1a2547",
+                            borderBottom: (theme) => `5px solid ${theme.palette.blue.darkest}`,
                           },
                         }}
                         onClick={() => {
@@ -1468,16 +1008,17 @@ const IntroSection: React.FC = () => {
               <Typography
                 variant="h3"
                 sx={{
-                  color: "#2e3a6c",
+                  color: (theme) => theme.palette.blue.darkest,
                   mt: 2,
                 }}
               >
-                what if...?
+                what if we did things differently?
               </Typography>
             </Stack>
           </Box>
         </Box>
-      </BasePanel>
+        </BasePanel>
+      </Box>
     </Box>
   )
 }

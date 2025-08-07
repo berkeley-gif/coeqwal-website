@@ -419,7 +419,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
     <Box
       sx={(theme) => ({
         width: "100%",
-        backgroundColor: theme.palette.background.default,
+        
         margin: 0, // Remove any default margins
         padding: 0, // Remove any default padding
       })}
@@ -437,7 +437,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
           flexDirection: "column",
           padding: theme.spacing(3), // Reduced padding
           paddingTop: theme.spacing(1), // Minimal top padding
-          backgroundColor: "#FFFFFF",
+          
           transition: "position 0.3s ease, box-shadow 0.3s ease",
           boxShadow: hasClickedSearch
             ? "0 2px 8px rgba(0, 0, 0, 0.08)"
@@ -490,7 +490,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   border: "1px solid rgba(0, 0, 0, 0.12)",
                   borderRadius: `${theme.borderRadius.card}px !important`,
                   color: theme.palette.primary.dark,
-                  backgroundColor: theme.palette.common.white,
+    
                   boxShadow: "none",
                   overflow: "hidden",
                 }}
@@ -516,8 +516,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h5"
                       sx={{
                         color: theme.palette.primary.dark,
-                        fontFamily:
-                          '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+
                       }}
                     >
                       {t("questionBuilder.outcomesSelector.includeClimate")}
@@ -568,7 +567,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   padding: theme.spacing(1.5, 3),
                   bgcolor: theme.palette.primary.dark,
                   color: "white",
-                  fontSize: "1.1rem",
+                  
                   fontWeight: 600,
                   minHeight: "50px",
                   "&:hover": {
@@ -587,7 +586,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
       {/* <Box
         sx={(theme) => ({
           height: "65px",
-          backgroundColor: theme.palette.background.default,
+          
         })}
       /> */}
 
@@ -670,7 +669,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   cursor: "pointer",
                   mt: 1,
                   fontWeight: "medium",
-                  fontSize: "1rem",
+                  
                   textTransform: "none",
                 }}
               >
@@ -736,10 +735,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
             >
               <Typography
                 variant="h4"
-                sx={{
-                  fontFamily:
-                    '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
-                }}
+                sx={{}}
               >
                 {t("scenarioResults.title")}
               </Typography>
@@ -762,7 +758,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                     padding: "8px 12px",
                     borderRadius: "4px",
                     border: "1px solid #ccc",
-                    fontSize: "1rem",
+                    
                     minWidth: "180px",
                   }}
                 >
@@ -868,8 +864,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h6"
                       gutterBottom
                       sx={{
-                        fontFamily:
-                          '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+
                       }}
                     >
                       No scenario data available

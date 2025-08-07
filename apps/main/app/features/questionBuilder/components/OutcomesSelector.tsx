@@ -124,8 +124,7 @@ const OutcomesSelector: React.FC = () => {
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-            fontFamily:
-              '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+
           }}
         >
           {swapped ? (
@@ -136,7 +135,7 @@ const OutcomesSelector: React.FC = () => {
                   "{{waterAvailability}}",
                 )[0]
               } */}
-              <ColoredText color={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.blue.bright}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </ColoredText>
               {t("questionBuilder.outcomesSelector.swappedTitle").split(
@@ -146,7 +145,7 @@ const OutcomesSelector: React.FC = () => {
           ) : (
             <>
               {" "}
-              <ColoredText color={theme.palette.cool.main}>
+              <ColoredText color={theme.palette.blue.bright}>
                 {t("questionBuilder.defaultTerms.waterAvailability")}
               </ColoredText>
               {t("questionBuilder.outcomesSelector.title").split(
@@ -170,13 +169,13 @@ const OutcomesSelector: React.FC = () => {
             py: 0.75,
             fontWeight: 500,
             "&:hover": {
-              backgroundColor: "white",
+    
               color: theme.palette.primary.main,
               borderColor: theme.palette.primary.main,
               border: "1px solid",
             },
             "&:active": {
-              backgroundColor: "white",
+    
               color: theme.palette.primary.main,
               borderColor: theme.palette.primary.main,
               border: "1px solid",

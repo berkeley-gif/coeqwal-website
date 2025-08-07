@@ -6,13 +6,22 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import { useState, useEffect, useRef } from "react"
 import { motion } from "@repo/motion"
+interface HeaderProps {
+  backgroundColor: "white"
+  onGlossaryClick?: () => void
+  isGlossaryActive?: boolean
+  onDataClick?: () => void
+}
+
+// Transition
 
 const MotionAppBar = motion.create(AppBar)
 const MotionStack = motion.create(Stack)
+
+// Translation
 
 type HeaderTranslations = {
   title: string
@@ -26,25 +35,6 @@ type HeaderTranslations = {
 type TranslationsMap = {
   en: HeaderTranslations
   es: HeaderTranslations
-}
-
-// Incoming: secondary nav option
-export interface SecondaryNavItem {
-  key: string
-  label: string
-  sectionId: string
-}
-
-interface HeaderProps {
-  drawerOpen?: boolean
-  drawerPosition?: "left" | "right"
-  activeSection?: string
-  onSectionClick?: (sectionId: string) => void
-  showSecondaryNav?: boolean
-  secondaryNavItems?: SecondaryNavItem[]
-  onGlossaryClick?: () => void
-  isGlossaryActive?: boolean
-  variant?: "default" | "rounded"
 }
 
 const translations: TranslationsMap = {
@@ -66,34 +56,17 @@ const translations: TranslationsMap = {
   },
 }
 
-// Define which sections should have BLACK text (all others will have white)
-// TODO: generalize this
-const blackSections = [
-  "hero", // Home section
-  "combined-panel", // Scenario search section
-]
-
-// This maps sections to their parent section in the UI
-// Used for arrow display when scrolling through combined sections
-const sectionParentMap: Record<string, string | undefined> = {
-  challenges: "managing-water", // Map challenges section to managing-water button
-  calsim: "managing-water",
-}
-
 export function HeaderHome({
-  activeSection,
-  onSectionClick,
-  showSecondaryNav = false,
-  secondaryNavItems = [], // Default to empty array, bc optional
   onGlossaryClick,
   isGlossaryActive = false,
-  variant = "default",
+  onDataClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"))
   const { locale, isLoading } = useTranslation()
 
+  // Transition
+  // todo: refine these states into fewer
   // Track scroll position for dynamic background
   const [isScrolled, setIsScrolled] = useState(false)
   const [shrunkWidth, setShrunkWidth] = useState<number | null>(null)
@@ -143,7 +116,7 @@ export function HeaderHome({
     sentinel.style.height = "10px" // Slightly larger height for better detection
     sentinel.style.width = "100%"
     sentinel.style.pointerEvents = "none"
-    sentinel.style.visibility = "hidden" // Make it invisible
+    sentinel.style.visibility = "hidden"
     sentinel.id = "scroll-sentinel"
 
     // Insert the sentinel into the intro section
@@ -213,58 +186,31 @@ export function HeaderHome({
   const componentText =
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
-  // Only show secondary navigation if explicitly enabled and not on mobile
-  const displaySecondaryNav =
-    showSecondaryNav && !isMobile && secondaryNavItems.length > 0
-
-  // Determine the text color for all navigation items based on active section
-  // Default to white, switch to black for specific sections
-  const textColor = blackSections.includes(activeSection || "")
-    ? "black"
-    : "white"
-
-  // Text color - white for rounded variant, dynamic for default
-  const headerTextColor = variant === "rounded" ? "white" : textColor
-
-  const backgroundColor = isScrolled
-    ? "rgba(255, 255, 255, 0.4)" // Semi-transparent white background when scrolled
-    : "transparent"
+  const headerTextColor = "white"
 
   // Conditional styling based on variant
   const variantStyles =
-    variant === "rounded"
-      ? {
-          backgroundColor: "#2e3a6c",
+{
+          backgroundColor: theme.palette.nature.whisper,
+          // buttonBackgroundColor: theme.palette.utility.black,
           borderRadius: "16px",
           margin: "16px",
           border: "none",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           left: 0, // Keep anchored to left when shrinking
         }
-      : {
-          backgroundColor: backgroundColor,
-          borderBottom: "1px solid white",
-          borderRadius: theme.borderRadius.none,
-          left: 0, // Keep anchored to left when shrinking
-        }
 
   // Calculate width for smooth animation
   const getAnimatedWidth = () => {
-    if (variant === "rounded") {
       if (!headerIsExpanded && shrunkWidth) {
         return `${shrunkWidth}px`
       }
       return "calc(100% - 32px)"
-    } else {
-      if (!headerIsExpanded && shrunkWidth) {
-        return `${shrunkWidth}px`
-      }
-      return "100%"
-    }
-  }
+    } 
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
+    backgroundColor: theme.palette.blue.darkest,
     lineHeight: 1.1, // Line height for text wrapping
     height: "40px", // Increased height for more prominence
     minHeight: "40px", // Ditto
@@ -272,7 +218,7 @@ export function HeaderHome({
       '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     fontWeight: 600,
     border: "1px solid",
-    borderColor: variant === "rounded" ? "white" : "#274472", // Border matches header text color
+    borderColor: "white",
     color: headerTextColor, // Use header text color for buttons
   }
 
@@ -305,8 +251,7 @@ export function HeaderHome({
         zIndex: theme.zIndex.appBar,
         ...variantStyles,
         color: headerTextColor,
-        boxShadow:
-          variant === "rounded" ? "0 2px 8px rgba(0, 0, 0, 0.1)" : "none",
+        boxShadow: "none",
         transition: "background-color 0.3s ease",
       }}
       elevation={0}
@@ -324,7 +269,7 @@ export function HeaderHome({
         </Box>
 
         {/* Optional secondary navigation menu */}
-        {displaySecondaryNav && (
+        {/* {displaySecondaryNav && (
           <Stack
             direction="row"
             spacing={1}
@@ -394,7 +339,7 @@ export function HeaderHome({
               )
             })}
           </Stack>
-        )}
+        )} */}
 
         {/* Main navigation buttons */}
         <Stack
@@ -447,6 +392,7 @@ export function HeaderHome({
               <>
                 <Button
                   variant={buttonVariant}
+                  onClick={onDataClick}
                   sx={{
                     ...buttonStyle,
                   }}
@@ -472,7 +418,8 @@ export function HeaderHome({
             onClick={onGlossaryClick}
             sx={{
               ...buttonStyle,
-              backgroundColor: isGlossaryActive ? "#60aacb" : undefined,
+              // backgroundColor: isGlossaryActive ? "#60aacb" : undefined,
+
               color: isGlossaryActive ? "white" : undefined,
               "&:hover": {
                 backgroundColor: isGlossaryActive ? "#7cbad5" : undefined,

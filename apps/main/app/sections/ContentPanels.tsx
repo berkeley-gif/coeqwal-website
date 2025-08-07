@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
-import { Box, Typography, Grid, IconButton } from "@repo/ui/mui"
+import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import { BasePanel } from "@repo/ui"
 import { PlayArrowIcon } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
@@ -16,6 +16,9 @@ export default function ContentPanels({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenLearnDrawer,
 }: ContentPanelsProps = {}) {
+  // Get theme for color palette
+  const theme = useTheme()
+  
   // Track which panel is showing details (if any)
   const [activePanel, setActivePanel] = useState<PanelType>(null)
 
@@ -51,7 +54,7 @@ export default function ContentPanels({
           pointerEvents: "auto",
           maxWidth: "620px",
         }}
-        className="tk-neue-haas-grotesk-text"
+        
       >
         how California water flows and operational decisions balance water needs
         across the state
@@ -78,7 +81,7 @@ export default function ContentPanels({
           color: "common.white",
           pointerEvents: "auto",
         }}
-        className="tk-neue-haas-grotesk-text"
+        
       >
         COEQWAL&apos;s &quot;what if&quot; scenarios by theme
       </Typography>
@@ -105,7 +108,7 @@ export default function ContentPanels({
           pointerEvents: "auto",
           maxWidth: "620px",
         }}
-        className="tk-neue-haas-grotesk-text"
+        
       >
         your community with data that helps you understand the impacts of
         operational decisions
@@ -123,30 +126,30 @@ export default function ContentPanels({
   }
 
   // Get background color for each panel
-  const getPanelBgColor = (panelType: PanelType) => {
+  const getPanelBgColor = (panelType: PanelType, theme: any) => {
     switch (panelType) {
       case "learn":
-        return "#303a68" // Deep blue
+        return theme.palette.blue.darkest // Deep blue
       case "explore":
-        return "#458bb6" // Teal blue
+        return theme.palette.blue.medium // Medium blue
       case "empower":
-        return "rgb(19, 87, 115)" // Dark teal
+        return theme.palette.nature.teal // Teal green
       default:
-        return "#1A3F6A" // Fallback
+        return theme.palette.blue.dark // Fallback
     }
   }
 
   // Get background color for detail panels (same for now)
-  const getDetailPanelBgColor = (panelType: PanelType) => {
+  const getDetailPanelBgColor = (panelType: PanelType, theme: any) => {
     switch (panelType) {
       case "learn":
-        return "#1A3F6A" // Deep blue
+        return theme.palette.blue.dark // Deep blue
       case "explore":
-        return "#2f84ab" // Teal blue
+        return theme.palette.blue.medium // Medium blue
       case "empower":
-        return "#135773" // Dark teal
+        return theme.palette.blue.dark // Dark blue
       default:
-        return "#1A3F6A" // Fallback
+        return theme.palette.blue.dark // Fallback
     }
   }
 
@@ -165,7 +168,7 @@ export default function ContentPanels({
         margin: 0, // Remove any default margins
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
-        backgroundColor: "transparent", // Ensure no transparency issues
+        
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
           zIndex: 3, // Push active panels above others (within panels layer)
@@ -200,8 +203,8 @@ export default function ContentPanels({
           panelType="learn"
           isActive={activePanel === "learn"}
           onToggleDetail={() => togglePanelDetail("learn")}
-          bgColor={getPanelBgColor("learn")}
-          detailBgColor={getDetailPanelBgColor("learn")}
+          bgColor={getPanelBgColor("learn", theme)}
+          detailBgColor={getDetailPanelBgColor("learn", theme)}
           addBorder={true}
           hideBottomArrow={true}
           title={<LearnTextContent />}
@@ -254,7 +257,7 @@ export default function ContentPanels({
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -301,7 +304,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -343,7 +346,7 @@ export default function ContentPanels({
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mb: 1,
@@ -361,7 +364,7 @@ export default function ContentPanels({
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -411,7 +414,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -433,8 +436,8 @@ export default function ContentPanels({
           panelType="explore"
           isActive={activePanel === "explore"}
           onToggleDetail={() => togglePanelDetail("explore")}
-          bgColor={getPanelBgColor("explore")}
-          detailBgColor={getDetailPanelBgColor("explore")}
+          bgColor={getPanelBgColor("explore", theme)}
+          detailBgColor={getDetailPanelBgColor("explore", theme)}
           hideBottomArrow={true}
           title={<EmpowerTextContent />}
           detailContent={
@@ -483,7 +486,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -530,7 +533,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -579,7 +582,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -628,7 +631,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -678,7 +681,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -728,7 +731,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -780,7 +783,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: "#FFAC6E",
+                        color: (theme) => theme.palette.accent.gold,
                         textDecoration: "none",
                         display: "block",
                         mt: "auto",
@@ -802,8 +805,8 @@ export default function ContentPanels({
           panelType="empower"
           isActive={activePanel === "empower"}
           onToggleDetail={() => togglePanelDetail("empower")}
-          bgColor={getPanelBgColor("empower")}
-          detailBgColor={getDetailPanelBgColor("empower")}
+          bgColor={getPanelBgColor("empower", theme)}
+          detailBgColor={getDetailPanelBgColor("empower", theme)}
           hideDetailArrow={true}
           title={<ActTextContent />}
           detailContent={
@@ -829,8 +832,6 @@ export default function ContentPanels({
                   color="common.white"
                   sx={{
                     pointerEvents: "auto",
-                    fontFamily:
-                      '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
                   }}
                 >
                   The COEQWAL project helps community members and
@@ -988,15 +989,15 @@ function PanelWithDetail({
                     top: "50%",
                     transform: "translateY(-50%)",
                     color: "white",
-                    backgroundColor: "transparent",
+        
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+          
                     },
                     width: 60,
                     height: 60,
                   }}
                 >
-                  <PlayArrowIcon sx={{ fontSize: 36 }} />
+                  <PlayArrowIcon sx={{ fontSize: "2.25rem" }} />
                 </IconButton>
               )}
 
@@ -1009,16 +1010,16 @@ function PanelWithDetail({
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: "white",
-                    backgroundColor: "transparent",
+        
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+          
                     },
                     width: 60,
                     height: 60,
                   }}
                 >
                   <PlayArrowIcon
-                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                    sx={{ fontSize: "2.25rem", transform: "rotate(90deg)" }}
                   />
                 </IconButton>
               )}
@@ -1084,15 +1085,15 @@ function PanelWithDetail({
                   top: 108,
                   transform: "rotate(180deg)",
                   color: "white",
-                  backgroundColor: "transparent",
+      
                   "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.3)",
+        
                   },
                   width: 60,
                   height: 60,
                 }}
               >
-                <PlayArrowIcon sx={{ fontSize: 36 }} />
+                <PlayArrowIcon sx={{ fontSize: "2.25rem" }} />
               </IconButton>
 
               {/* Bottom scroll icon - absolutely positioned within the panel */}
@@ -1104,16 +1105,16 @@ function PanelWithDetail({
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: "white",
-                    backgroundColor: "transparent",
+        
                     "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.3)",
+          
                     },
                     width: 60,
                     height: 60,
                   }}
                 >
                   <PlayArrowIcon
-                    sx={{ fontSize: 36, transform: "rotate(90deg)" }}
+                    sx={{ fontSize: "2.25rem", transform: "rotate(90deg)" }}
                   />
                 </IconButton>
               )}

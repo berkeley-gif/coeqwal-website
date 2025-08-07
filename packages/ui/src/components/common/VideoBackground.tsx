@@ -78,7 +78,7 @@ export const VideoBackground: FC<VideoBackgroundProps> = ({
           left: 0,
           width: "100%",
           height: "100%",
-          backgroundColor: "black",
+          backgroundColor: (theme) => theme.palette.blue.darkest,
           opacity: opacity,
         }}
       />

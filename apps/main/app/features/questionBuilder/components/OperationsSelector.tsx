@@ -38,41 +38,41 @@ interface OperationsSelectorProps {
   openThemesDrawer?: (operationId?: string) => void
 }
 
-// Organized palette for water operations with primary (dot) and secondary (title) colors
-const WATER_PALETTE = {
+// Organized palette for water operations using theme colors
+const getWaterPalette = (theme: any) => ({
   currentOperations: {
-    primary: "#90B9BF", // Soft blue/gray
-    secondary: "rgba(96, 125, 139, 0.85)",
+    primary: theme.palette.blue.light, // Light blue
+    secondary: theme.palette.blue.medium,
   },
   emergencyMeasures: {
-    primary: "#C3E68B", // Light green
-    secondary: "rgba(33, 150, 243, 0.85)",
+    primary: theme.palette.nature.mint, // Light green
+    secondary: theme.palette.blue.bright,
   },
   groundwaterManagement: {
-    primary: "#FFC700", // Bright yellow
-    secondary: "rgba(244, 67, 54, 0.85)",
+    primary: theme.palette.accent.gold, // Bright yellow
+    secondary: theme.palette.blue.dark,
   },
   streamFlowManagement: {
-    primary: "#FF9C00", // Orange
-    secondary: "rgba(76, 175, 80, 0.85)",
+    primary: theme.palette.accent.gold, // Golden
+    secondary: theme.palette.nature.teal,
   },
   urbanWaterPriorities: {
-    primary: "#CF9AAD", // Soft pink
-    secondary: "rgba(156, 39, 176, 0.85)",
+    primary: theme.palette.blue.bright, // Bright blue
+    secondary: theme.palette.blue.medium,
   },
   deltaBalance: {
-    primary: "#A66484", // Purple
-    secondary: "rgba(255, 152, 0, 0.85)",
+    primary: theme.palette.blue.medium, // Medium blue
+    secondary: theme.palette.accent.gold,
   },
   infrastructure: {
-    primary: "#D96E00", // Amber/brown
-    secondary: "rgba(63, 81, 181, 0.85)",
+    primary: theme.palette.blue.darkest, // Dark blue
+    secondary: theme.palette.blue.bright,
   },
   climateAdaptation: {
-    primary: "#00ACC1", // Teal - future water, adaptation
-    secondary: "rgba(0, 172, 193, 0.85)",
+    primary: theme.palette.nature.teal, // Teal - future water, adaptation
+    secondary: theme.palette.nature.sage,
   },
-}
+})
 
 // TypeScript interfaces for operation cards
 interface OperationSubOption {
@@ -95,7 +95,9 @@ interface OperationCard {
 }
 
 // Card data for the operation cards
-export const OPERATION_CARDS = (): OperationCard[] => [
+export const OPERATION_CARDS = (theme: any): OperationCard[] => {
+  const WATER_PALETTE = getWaterPalette(theme)
+  return [
   {
     id: "current-operations",
     title: "Current operations",
@@ -317,6 +319,7 @@ export const OPERATION_CARDS = (): OperationCard[] => [
     ],
   },
 ]
+}
 
 // Also export a standalone version that doesn't require calling the function
 // This helps avoid circular dependencies
@@ -406,7 +409,7 @@ export const OPERATION_CARD_DEFINITIONS: OperationCard[] = [
       { id: "delta-conveyance-functional-flows", isSingular: true },
     ],
   },
-]
+]  // End of OPERATION_CARD_DEFINITIONS array
 
 // Define the SubOption interface explicitly for the component
 interface SubOption {
@@ -455,10 +458,10 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
 
   // Filter operations based on search term
   const filteredOperations = useMemo(() => {
-    if (!searchTerm) return OPERATION_CARDS()
+    if (!searchTerm) return OPERATION_CARDS(theme)
 
     const lowercaseSearch = searchTerm.toLowerCase()
-    return OPERATION_CARDS().filter(
+    return OPERATION_CARDS(theme).filter(
       (op) =>
         op.title?.toLowerCase().includes(lowercaseSearch) ||
         false ||
@@ -467,7 +470,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
         ) ||
         false,
     )
-  }, [searchTerm])
+  }, [searchTerm, theme])
 
   // Prepare the operation cards with selected state
   const operationCardsWithState = useMemo(() => {
@@ -533,7 +536,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     border: "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: `${theme.borderRadius.card}px`,
     overflow: "hidden",
-    backgroundColor: theme.palette.common.white,
+    
     padding: theme.spacing(1, 2),
     display: "flex",
     alignItems: "center",
@@ -689,13 +692,12 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-            fontFamily:
-              '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+
           }}
         >
           {swapped ? (
             <>
-              <ColoredText color={theme.palette.pop.main}>
+              <ColoredText color={theme.palette.accent.gold}>
                 {t("questionBuilder.defaultTerms.decisions_sub")}
               </ColoredText>
             </>
@@ -708,7 +710,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
                   <React.Fragment key={index}>
                     {part}
                     {index < array.length - 1 && (
-                      <ColoredText color={theme.palette.pop.main}>
+                      <ColoredText color={theme.palette.accent.gold}>
                         {t("questionBuilder.defaultTerms.decisions_sub")}
                       </ColoredText>
                     )}
@@ -731,10 +733,10 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             py: 0.5,
             fontWeight: 400,
             color: "rgba(0, 0, 0, 0.42)",
-            backgroundColor: "transparent",
+  
             border: "none",
             "&:hover": {
-              backgroundColor: "transparent",
+    
               color: "rgba(0, 0, 0, 0.6)",
               textDecoration: "underline",
             },
@@ -795,20 +797,20 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             // High-performance scrollbar styling
             "&::-webkit-scrollbar": {
               width: "14px",
-              backgroundColor: "transparent",
+    
             },
             "&::-webkit-scrollbar-track": {
-              backgroundColor: "transparent",
+    
               margin: theme.spacing(1),
             },
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#00000030",
+    
               border: "4px solid white",
               borderRadius: "24px",
             },
             // Firefox
             scrollbarWidth: "thin",
-            scrollbarColor: "#00000030 transparent",
+            scrollbarColor: "#77a2d930 transparent", // theme.palette.blue.light with transparency
             // Add relative positioning for the scroll indicator
             position: "relative",
             "& > div:not(:last-child)": {

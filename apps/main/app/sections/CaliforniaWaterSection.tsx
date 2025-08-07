@@ -138,8 +138,8 @@ export default function CaliforniaWaterSection({
                 opacity: showARLabel ? 1 : 0,
                 transition: "opacity 1s ease",
                 textAlign: "center",
-                backgroundColor: "rgba(2, 18, 36, 0.9)",
-                color: "#F2F0EF",
+
+                color: (theme) => theme.palette.utility.white,
                 px: 1,
                 py: 1,
                 borderRadius: "4px",
@@ -147,13 +147,13 @@ export default function CaliforniaWaterSection({
             >
               <Typography
                 variant="body1"
-                sx={{ fontSize: "1rem", color: "white", fontWeight: 600 }}
+                sx={{ color: "white", fontWeight: 600 }}
               >
                 {t("californiaWater.arLabel.title")}
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ fontSize: "1rem", color: "white", fontWeight: 400 }}
+                sx={{ color: "white", fontWeight: 400 }}
               >
                 {t("californiaWater.arLabel.date")}
               </Typography>

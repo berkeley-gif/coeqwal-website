@@ -68,7 +68,7 @@ const ClimateSelector: React.FC = () => {
   const checkboxStyles = {
     color: "rgba(0, 0, 0, 0.54)",
     "&.Mui-checked": {
-      color: theme.palette.climate.main,
+      color: theme.palette.nature.teal,
     },
   }
 
@@ -76,7 +76,7 @@ const ClimateSelector: React.FC = () => {
     alignItems: "flex-start",
     marginBottom: theme.spacing(1.5),
     "&:hover": {
-      backgroundColor: "rgba(0, 0, 0, 0.04)",
+      
       borderRadius: theme.spacing(1),
     },
     transition: "background-color 0.2s",
@@ -115,11 +115,10 @@ const ClimateSelector: React.FC = () => {
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-            fontFamily:
-              '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important',
+
           }}
         >
-          <ColoredText color={theme.palette.climate.main}>
+          <ColoredText color={theme.palette.nature.teal}>
             {t("questionBuilder.climateSelector.title")}
           </ColoredText>
         </Typography>
@@ -137,10 +136,10 @@ const ClimateSelector: React.FC = () => {
             py: 0.5,
             fontWeight: 400,
             color: "rgba(0, 0, 0, 0.42)",
-            backgroundColor: "transparent",
+  
             border: "none",
             "&:hover": {
-              backgroundColor: "transparent",
+    
               color: "rgba(0, 0, 0, 0.6)",
               textDecoration: "underline",
             },
@@ -160,7 +159,7 @@ const ClimateSelector: React.FC = () => {
           borderRadius: "12px",
           p: 2,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-          backgroundColor: includeClimate ? "white" : "rgba(0, 0, 0, 0.04)",
+  
           transition: "background-color 0.3s",
         }}
       >

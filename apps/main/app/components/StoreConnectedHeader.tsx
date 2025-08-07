@@ -1,9 +1,10 @@
 "use client"
 
 import React from "react"
-import { HeaderHome } from "@repo/ui"
+import { Header } from "@repo/ui"
 import type { SecondaryNavItem } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
+import { useRouter } from "next/navigation"
 
 interface StoreConnectedHeaderProps {
   activeSection?: string
@@ -13,18 +14,17 @@ interface StoreConnectedHeaderProps {
 }
 
 /**
- * Connects the HeaderHome component to the drawer store
+ * Connects the Header component to the drawer store
  * Always visible regardless of scroll position
  */
 export function StoreConnectedHeader({
   activeSection,
   onSectionClick,
-  showSecondaryNav,
-  secondaryNavItems,
 }: StoreConnectedHeaderProps) {
+  const router = useRouter()
+  
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
-  const isOpen = useDrawerStore((state) => state.isOpen)
   const openDrawer = useDrawerStore((state) => state.openDrawer)
   const closeDrawer = useDrawerStore((state) => state.closeDrawer)
 
@@ -37,16 +37,18 @@ export function StoreConnectedHeader({
     }
   }
 
+  // Handle data page navigation
+  const handleDataClick = () => {
+    router.push("/data")
+  }
+
   return (
-    <HeaderHome
-      variant="rounded"
+    <Header
       activeSection={activeSection}
       onSectionClick={onSectionClick}
-      showSecondaryNav={showSecondaryNav}
-      secondaryNavItems={secondaryNavItems}
-      drawerOpen={isOpen}
       onGlossaryClick={handleGlossaryToggle}
-      isGlossaryActive={activeTab === "glossary"}
+      onDataClick={handleDataClick}
+      showSecondaryNav={false}
     />
   )
 }
