@@ -8,13 +8,12 @@ import FloatingMarker from "../components/FloatingMarker"
 import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
 
-// Legacy bubble components removed - keeping only marker functionality
-
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
 
   // Responsive marker specifications that align with California silhouette
   // Positions adjust based on screen size to maintain alignment with background image
+  // TODO: needs work or a different approach
   const markerSpecs = [
     {
       src: "/images/markers/shasta.png",
@@ -53,126 +52,6 @@ const IntroSection: React.FC = () => {
       size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
     },
   ] as const
-  /* Legacy bubble code removed
-  const [backgroundCircles, setBackgroundCircles] = useState<
-    AnimatedCircleProps[]
-  >([])
-  // (Deprecated) whiteCircles feature removed
-
-    // For main intro section (top section) - create 15 circles in a grid pattern
-    const gridColumns = 5
-    const gridRows = 3
-
-    for (let row = 0; row < gridRows; row++) {
-      for (let col = 0; col < gridColumns; col++) {
-        // Skip some cells for more natural distribution
-        if (Math.random() > 0.9) continue
-
-        // Calculate base position with a grid cell
-        const baseLeft = (col / gridColumns) * 100
-        const baseTop = (row / gridRows) * 90 // Keep in top 90%
-
-        // Add some controlled randomness within each cell
-        const leftOffset = Math.random() * 0.8 * (100 / gridColumns)
-        const topOffset = Math.random() * 0.8 * (90 / gridRows)
-
-        const left = `${baseLeft + leftOffset}%`
-        const top = `${baseTop + topOffset}%`
-
-        // Size with some variation but more controlled
-        const baseSize = 18 // vmin - decreased from 21 for smaller bubbles
-        const sizeVariation = 30 // vmin - decreased from 37 for smaller bubbles
-        const size = baseSize + Math.random() * sizeVariation // 18vmin to 48vmin
-
-        // Opacity - gradient effect that decreases with row - slightly increased for visibility
-        let opacity
-        if (row === 0) {
-          // Top row - more visible
-          opacity = 0.08 + Math.random() * 0.05 // Increased from 0.06-0.11 to 0.08-0.13
-        } else if (row === 1) {
-          // Middle row - medium visibility
-          opacity = 0.065 + Math.random() * 0.04 // Increased from 0.045-0.085 to 0.065-0.105
-        } else {
-          // Bottom row - subtle
-          opacity = 0.05 + Math.random() * 0.03 // Increased from 0.03-0.06 to 0.05-0.08
-        }
-
-        // Add animation parameters with slight variations
-        const freqBase = 0.03 + Math.random() * 0.03
-        const phaseBase = Math.random() * Math.PI * 2
-        const amplitudeBase = 40 + Math.random() * 25 // Increased from 25-45 to 40-65
-
-        circles.push({
-          left,
-          top,
-          size,
-          opacity,
-          freqX1: freqBase + Math.random() * 0.01,
-          freqX2: freqBase - Math.random() * 0.01,
-          freqY1: freqBase + Math.random() * 0.02,
-          freqY2: freqBase - Math.random() * 0.01,
-          phaseX1: phaseBase,
-          phaseX2: phaseBase + Math.PI / 2,
-          phaseY1: phaseBase + Math.PI / 4,
-          phaseY2: phaseBase + Math.PI / 3,
-          amplitudeX1: amplitudeBase + Math.random() * 15, // Increased amplitude
-          amplitudeX2: amplitudeBase - Math.random() * 8,
-          amplitudeY1: amplitudeBase + Math.random() * 18, // Increased amplitude
-          amplitudeY2: amplitudeBase - Math.random() * 5,
-        })
-      }
-    }
-
-    // For interstitial section (bottom section) - create just 1 circle, well-positioned
-    const interstitialBaseSize = 25 // vmin - decreased from 29 for smaller bubbles
-    const interstitialSizeVariation = 15 // vmin - decreased from 18 for smaller bubbles
-    circles.push({
-      left: `${30 + Math.random() * 40}%`, // Center-ish horizontally
-      top: `${110 + Math.random() * 10}%`, // Just below the fold
-      size: interstitialBaseSize + Math.random() * interstitialSizeVariation, // 25vmin to 40vmin
-      opacity: 0.045 + Math.random() * 0.025, // Increased from 0.025-0.05 to 0.045-0.07
-      // Add gentler animation for the lower circle
-      freqX1: 0.02,
-      freqX2: 0.015,
-      freqY1: 0.025,
-      freqY2: 0.018,
-      amplitudeX1: 15,
-      amplitudeX2: 10,
-      amplitudeY1: 12,
-      amplitudeY2: 8,
-    })
-
-  */
-
-  // (deprecated background bubble generator removed)
-  /*
-    // Select consistent images from the available ones
-    // Using 7 total circles (skip the first one) for all positions (background + foreground)
-    const selectedImages = [...availableImages].slice(0, 8).slice(1) // Remove first circle
-
-    // Create circles with varied positions around the master circle
-    const bgCircles = selectedImages.map((img, index) => {
-      // Get base position from master circle (adjust index since we skipped first circle)
-      const basePosition = circlePositions.background[
-        (index + 1) % circlePositions.background.length
-      ] || { left: "55%", top: "40%" }
-
-      // Add sine-based variation to position
-      const variedPosition = addPositionVariation(basePosition, index + 1)
-
-      // Call generateFixedCircleProps with the base position (adjust index)
-      const circleProps = generateFixedCircleProps(img, true, index + 1)
-
-      // Override with the varied position
-      return {
-        ...circleProps,
-        left: variedPosition.left,
-        top: variedPosition.top,
-      }
-    })
-
-    // setBackgroundCircles removed
-*/
 
   return (
     <Box
@@ -466,6 +345,7 @@ const IntroSection: React.FC = () => {
                 mb: 36,
               }}
             >
+              {/* TODO: this section is a mess and needs some TLC */}
               <Stack spacing={4}>
                 <Typography
                   variant="h2"

@@ -47,7 +47,7 @@ export default function Home() {
 
   // Commenting out map-related code - uncomment to re-enable the map
   /*
-  // For the uncontrolled map, we'll store its ref so we can call flyTo
+  // For the uncontrolled map, store its ref so we can call flyTo
   const uncontrolledRef = useRef<MapboxMapRef | null>(
     null,
   ) as React.RefObject<MapboxMapRef>
@@ -210,7 +210,7 @@ export default function Home() {
         onSectionClick={handleSectionClick}
       />
 
-      {/* ===== Background Map Layer ===== */}
+      {/* Background Map Layer */}
       {/* Commenting out map-related code - uncomment to re-enable the map
       <Box
         sx={{
@@ -243,7 +243,7 @@ export default function Home() {
         }}
       />
 
-      {/* ===== MultiDrawer  ===== */}
+      {/* MultiDrawer  */}
       <StoreConnectedMultiDrawer
         drawerWidth={360}
         overlay={true}
@@ -254,7 +254,7 @@ export default function Home() {
         showRailButton={false}
       />
 
-      {/* ===== Main Content Area ===== */}
+      {/* Main Content Area */}
       <Box
         sx={{
           position: "relative",
