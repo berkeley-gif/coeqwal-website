@@ -1410,13 +1410,11 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
     selectedOperations,
     outcomesBySection,
     operationDirections,
-    theme.palette.blue.bright,
-    theme.palette.accent.gold,
-    theme.palette.nature.teal,
     shouldUseDo,
     formatOutcomeText,
     t,
     locale,
+    theme,
   ])
 
   // Update font size based on text overflow using ResizeObserver

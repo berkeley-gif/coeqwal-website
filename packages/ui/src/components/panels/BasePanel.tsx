@@ -6,7 +6,7 @@ import { styled } from "@mui/material/styles"
 
 export interface BasePanelProps extends BoxProps {
   fullHeight?: boolean
-  background?: "light" | "dark" | "accent" | "transparent" | "interstitial"
+  background?: "light" | "dark" | "accent" | "transparent"
   paddingVariant?:
     | "normal"
     | "narrow"
@@ -124,15 +124,11 @@ const PanelRoot = styled(Box, {
           ? theme.palette.primary.main
           : background === "accent"
             ? theme.palette.accent.gold
-            : background === "interstitial"
-              ? theme.palette.interstitial.main
-              : "transparent",
+            : "transparent",
 
     // Text color based on background
     color:
-      background === "dark" ||
-      background === "accent" ||
-      background === "interstitial"
+      background === "dark" || background === "accent"
         ? theme.palette.common.white
         : theme.palette.text.primary,
 
