@@ -19,6 +19,8 @@ export { Logo } from "./common/Logo"
 export { TransitionDiv } from "./common/TransitionDiv"
 export { TransitionHeadline } from "./common/TransitionHeadline"
 export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
+export { LeadingMarkerText } from "./common/LeadingMarkerText"
+export { ArrowHead } from "./icons/ArrowHead"
 export { VideoBackground } from "./common/VideoBackground"
 export { default as CustomScrollContainer } from "./common/CustomScrollContainer"
 

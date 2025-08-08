@@ -7,15 +7,15 @@ import type { CSSProperties } from "react"
 /* ========================================================
  TOC
  ========================================================
- 1. Global theme values
-    - Typography (font families)
-    - Layout dimensions
-    - Palette colors (including categories)
-    - Border radius values
-    - Border styles
-    - Shadows
-    - Z-Index values
-    - Reusable mixins (hover effects, drawer content)
+  1. Global theme values
+     - Typography (font families, type scale)
+     - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth)
+     - Palette colors (including categories, ambient)
+     - Border radius values
+     - Border styles
+     - Shadows
+     - Z-Index values
+     - Reusable mixins (hover effects, drawer content)
 
  2. Theme configuration
     - Base theme creation
@@ -104,6 +104,7 @@ const themeValues = {
     drawer: {
       width: 226,
       closedWidth: 52,
+      glossaryWidth: 360,
     },
   },
 
@@ -1211,6 +1212,12 @@ const theme = createTheme({
             marginBottom: theme.spacing(4),
           }),
         },
+        {
+          props: { variant: "h2" },
+          style: ({ theme }) => ({
+            marginBottom: theme.spacing(2.5),
+          }),
+        },
       ],
     },
   },
@@ -1377,6 +1384,7 @@ declare module "@mui/material/styles" {
       drawer: {
         width: number
         closedWidth: number
+        glossaryWidth: number
       }
     }
     border: ReturnType<typeof createBorderStyles>

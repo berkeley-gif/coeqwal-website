@@ -137,7 +137,7 @@ const tabTitles: Record<TabKey, string> = {
  * - Can be controlled from outside via HeaderHome
  */
 export function MultiDrawer({
-  drawerWidth = 360,
+  drawerWidth = undefined,
   onDrawerStateChange,
   activeTab: controlledActiveTab,
   overlay = false,
@@ -225,7 +225,7 @@ export function MultiDrawer({
           zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
           position: "relative",
           ".MuiDrawer-paper": {
-            width: drawerWidth,
+            width: drawerWidth ?? theme.layout.drawer.width ?? theme.layout.drawer.glossaryWidth,
             transition: theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
