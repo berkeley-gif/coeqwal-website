@@ -1,7 +1,3 @@
-/**
- * Custom components exports file.
- */
-
 // Navigation components
 export { Header } from "./navigation/Header"
 export { HeaderHome } from "./navigation/HeaderHome"
@@ -22,6 +18,7 @@ export { Card } from "./common/Card"
 export { Logo } from "./common/Logo"
 export { TransitionDiv } from "./common/TransitionDiv"
 export { TransitionHeadline } from "./common/TransitionHeadline"
+export { GlossaryLinkedText } from "./common/GlossaryLinkedText"
 export { VideoBackground } from "./common/VideoBackground"
 export { default as CustomScrollContainer } from "./common/CustomScrollContainer"
 

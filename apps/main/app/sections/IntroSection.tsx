@@ -1,8 +1,8 @@
 import React from "react"
-import { BasePanel, Spacer } from "@repo/ui"
+import { BasePanel, Spacer, GlossaryLinkedText } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import { PlayArrowIcon } from "@repo/ui/mui"
 import FloatingMarker from "../components/FloatingMarker"
 import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
@@ -336,7 +336,6 @@ const IntroSection: React.FC = () => {
                 mb: 36,
               }}
             >
-              {/* TODO: this section is a mess and needs some TLC */}
               <Stack spacing={4}>
                 <Typography
                   variant="h2"
@@ -353,390 +352,34 @@ const IntroSection: React.FC = () => {
                   variant="body1"
                   sx={{ color: (theme) => theme.palette.blue.darkest }}
                 >
-                  {(() => {
-                    const text = t("interstitial.part1")
-
-                    // Check for all four terms: "surface water", "conveyance", "allocation", and "Central Valley"
-                    const surfaceWaterIndex = text.indexOf("surface water")
-                    const conveyanceIndex = text.indexOf("conveyance")
-                    const allocationIndex = text.indexOf("allocation")
-                    const centralValleyIndex = text.indexOf("Central Valley")
-
-                    if (
-                      surfaceWaterIndex !== -1 &&
-                      conveyanceIndex !== -1 &&
-                      allocationIndex !== -1 &&
-                      centralValleyIndex !== -1
-                    ) {
-                      // All four terms found - handle them in order of appearance
-                      const beforeSurfaceWater = text.substring(
-                        0,
-                        surfaceWaterIndex,
-                      )
-                      const afterSurfaceWater = text.substring(
-                        surfaceWaterIndex + 13,
-                      ) // 13 is length of "surface water"
-
-                      const conveyanceIndexInRemainder =
-                        afterSurfaceWater.indexOf("conveyance")
-                      const beforeConveyance = afterSurfaceWater.substring(
-                        0,
-                        conveyanceIndexInRemainder,
-                      )
-                      const afterConveyance = afterSurfaceWater.substring(
-                        conveyanceIndexInRemainder + 10,
-                      ) // 10 is length of "conveyance"
-
-                      const allocationIndexInRemainder =
-                        afterConveyance.indexOf("allocation")
-                      const beforeAllocation = afterConveyance.substring(
-                        0,
-                        allocationIndexInRemainder,
-                      )
-                      const afterAllocation = afterConveyance.substring(
-                        allocationIndexInRemainder + 10,
-                      ) // 10 is length of "allocation"
-
-                      const centralValleyIndexInRemainder =
-                        afterAllocation.indexOf("Central Valley")
-                      const beforeCentralValley = afterAllocation.substring(
-                        0,
-                        centralValleyIndexInRemainder,
-                      )
-                      const afterCentralValley = afterAllocation.substring(
-                        centralValleyIndexInRemainder + 14,
-                      ) // 14 is length of "Central Valley"
-
-                      return (
-                        <>
-                          {beforeSurfaceWater}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "transparent",
-                              borderBottom: (theme) =>
-                                `3px solid ${theme.palette.blue.darkest}`,
-                              color: (theme) => theme.palette.blue.darkest,
-                              py: 0.1,
-                              mx: 0.2,
-                              lineHeight: 0,
-                              paddingBottom: "0.5rem",
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                borderBottom: (theme) =>
-                                  `5px solid ${theme.palette.blue.darkest}`,
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with surface water term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Surface water",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            surface water
-                          </Box>
-                          {beforeConveyance}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "transparent",
-                              borderBottom: (theme) =>
-                                `3px solid ${theme.palette.blue.darkest}`,
-                              color: (theme) => theme.palette.blue.darkest,
-                              py: 0.1,
-                              mx: 0.2,
-                              lineHeight: "0em",
-                              paddingBottom: "0.5em",
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                borderBottom: (theme) =>
-                                  `5px solid ${theme.palette.blue.darkest}`,
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with conveyance term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Conveyance",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            conveyance
-                          </Box>
-                          {beforeAllocation}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "transparent",
-                              borderBottom: (theme) =>
-                                `3px solid ${theme.palette.blue.darkest}`,
-                              color: (theme) => theme.palette.blue.darkest,
-                              py: 0.1,
-                              mx: 0.2,
-                              lineHeight: "0em",
-                              paddingBottom: "0.5em",
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                borderBottom: (theme) =>
-                                  `5px solid ${theme.palette.blue.darkest}`,
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with allocation term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Allocation",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            allocation
-                          </Box>
-                          {beforeCentralValley}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "transparent",
-                              borderBottom: (theme) =>
-                                `3px solid ${theme.palette.blue.darkest}`,
-                              color: (theme) => theme.palette.blue.darkest,
-                              py: 0.1,
-                              mx: 0.2,
-                              lineHeight: "0em",
-                              paddingBottom: "0.5em",
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                borderBottom: (theme) =>
-                                  `5px solid ${theme.palette.blue.darkest}`,
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with Central Valley term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Central Valley",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            Central Valley
-                          </Box>
-                          {afterCentralValley}
-                        </>
-                      )
-                    }
-
-                    // Fallback to existing logic if not all four terms are found
-                    // First check for "surface water" and split if found
-                    if (surfaceWaterIndex !== -1) {
-                      // Text before "surface water"
-                      const beforeSurfaceWater = text.substring(
-                        0,
-                        surfaceWaterIndex,
-                      )
-
-                      // Get text after "surface water" to look for "conveyance"
-                      const afterSurfaceWaterText = text.substring(
-                        surfaceWaterIndex + 13,
-                      ) // 13 is length of "surface water"
-
-                      // Look for "conveyance" in the remaining text
-                      const conveyanceIndexInText =
-                        afterSurfaceWaterText.indexOf("conveyance")
-
-                      if (conveyanceIndexInText !== -1) {
-                        // Text between "surface water" and "conveyance"
-                        const betweenText = afterSurfaceWaterText.substring(
-                          0,
-                          conveyanceIndexInText,
-                        )
-
-                        // Text after "conveyance"
-                        const afterConveyanceText =
-                          afterSurfaceWaterText.substring(
-                            conveyanceIndexInText + 10,
-                          ) // 10 is length of "conveyance"
-
-                        return (
-                          <>
-                            {beforeSurfaceWater}
-                            <Box
-                              component="span"
-                              sx={{
-                                backgroundColor: "transparent",
-                                borderBottom: (theme) =>
-                                  `3px solid ${theme.palette.blue.darkest}`,
-                                color: (theme) => theme.palette.blue.darkest,
-                                py: 0.1,
-                                mx: 0.2,
-                                lineHeight: "0em",
-                                paddingBottom: "0.5em",
-                                cursor: "pointer",
-                                display: "inline-block",
-                                position: "relative",
-                                "&:hover": {
-                                  borderBottom: (theme) =>
-                                    `5px solid ${theme.palette.blue.darkest}`,
-                                },
-                              }}
-                              onClick={() => {
-                                // Open glossary drawer with surface water term
-                                const drawerStore = useDrawerStore.getState()
-                                drawerStore.setDrawerContent({
-                                  selectedSection: "glossary",
-                                  selectedTerm: "Surface water",
-                                })
-                                drawerStore.openDrawer("glossary")
-                              }}
-                            >
-                              surface water
-                            </Box>
-                            {betweenText}
-                            <Box
-                              component="span"
-                              sx={{
-                                backgroundColor: "transparent",
-                                borderBottom: (theme) =>
-                                  `3px solid ${theme.palette.blue.darkest}`,
-                                color: (theme) => theme.palette.blue.darkest,
-                                py: 0.1,
-                                mx: 0.2,
-                                lineHeight: "0em",
-                                paddingBottom: "0.5em",
-                                cursor: "pointer",
-                                display: "inline-block",
-                                position: "relative",
-                                "&:hover": {
-                                  borderBottom: (theme) =>
-                                    `5px solid ${theme.palette.blue.darkest}`,
-                                },
-                              }}
-                              onClick={() => {
-                                // Open glossary drawer with conveyance term
-                                const drawerStore = useDrawerStore.getState()
-                                drawerStore.setDrawerContent({
-                                  selectedSection: "glossary",
-                                  selectedTerm: "Conveyance",
-                                })
-                                drawerStore.openDrawer("glossary")
-                              }}
-                            >
-                              conveyance
-                            </Box>
-                            {afterConveyanceText}
-                          </>
-                        )
-                      }
-
-                      // If conveyance not found, just highlight surface water
-                      return (
-                        <>
-                          {beforeSurfaceWater}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "transparent",
-                              borderBottom: (theme) =>
-                                `3px solid ${theme.palette.blue.darkest}`,
-                              color: (theme) => theme.palette.blue.darkest,
-                              py: 0.1,
-                              mx: 0.2,
-                              lineHeight: "0em",
-                              paddingBottom: "0.5em",
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                borderBottom: (theme) =>
-                                  `5px solid ${theme.palette.blue.darkest}`,
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with surface water term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Surface water",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            surface water
-                          </Box>
-                          {afterSurfaceWaterText}
-                        </>
-                      )
-                    }
-
-                    // If surface water not found, check for conveyance only (fallback)
-                    return text.split("conveyance").map((part, i, array) => {
-                      // If this is the last part, no need to add the highlighted word
-                      if (i === array.length - 1) return part
-
-                      return (
-                        <React.Fragment key={i}>
-                          {part}
-                          <Box
-                            component="span"
-                            sx={{
-                              backgroundColor: "transparent",
-                              borderBottom: (theme) =>
-                                `3px solid ${theme.palette.blue.darkest}`,
-                              color: (theme) => theme.palette.blue.darkest,
-                              py: 0.1,
-                              mx: 0.2,
-                              lineHeight: "0em",
-                              paddingBottom: "0.5em",
-                              cursor: "pointer",
-                              display: "inline-block",
-                              position: "relative",
-                              "&:hover": {
-                                borderBottom: (theme) =>
-                                  `5px solid ${theme.palette.blue.darkest}`,
-                              },
-                            }}
-                            onClick={() => {
-                              // Open glossary drawer with conveyance term
-                              const drawerStore = useDrawerStore.getState()
-                              drawerStore.setDrawerContent({
-                                selectedSection: "glossary",
-                                selectedTerm: "Conveyance",
-                              })
-                              drawerStore.openDrawer("glossary")
-                            }}
-                          >
-                            conveyance
-                          </Box>
-                        </React.Fragment>
-                      )
-                    })
-                  })()}
+                  <GlossaryLinkedText
+                    text={t("interstitial.part1")}
+                    terms={[
+                      { name: "surface water", glossaryTerm: "Surface water" },
+                      { name: "conveyance", glossaryTerm: "Conveyance" },
+                      { name: "allocation", glossaryTerm: "Allocation" },
+                      {
+                        name: "Central Valley",
+                        glossaryTerm: "Central Valley",
+                      },
+                    ]}
+                    onActivate={(glossaryTerm) => {
+                      const drawerStore = useDrawerStore.getState()
+                      drawerStore.setDrawerContent({
+                        selectedSection: "glossary",
+                        selectedTerm: glossaryTerm,
+                      })
+                      drawerStore.openDrawer("glossary")
+                    }}
+                  />
                 </Typography>
                 <Typography
                   variant="body1"
                   sx={{ color: (theme) => theme.palette.blue.darkest }}
                 >
-                  {(() => {
-                    const text = t("interstitial.part2")
-
-                    // Create an array of all terms to link with their positions
-                    const terms = [
+                  <GlossaryLinkedText
+                    text={t("interstitial.part2")}
+                    terms={[
                       { name: "storage", glossaryTerm: "Storage" },
                       { name: "conveyance", glossaryTerm: "Conveyance" },
                       { name: "deliveries", glossaryTerm: "Deliveries" },
@@ -744,163 +387,44 @@ const IntroSection: React.FC = () => {
                         name: "operational decisions",
                         glossaryTerm: "Operational decisions",
                       },
-                      {
-                        name: "CalSim",
-                        glossaryTerm: "Computer models / CalSim",
-                      },
+                      { name: "CalSim", glossaryTerm: "CalSim" },
                       { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                       { name: "scenarios", glossaryTerm: "Scenarios" },
                       { name: "climate", glossaryTerm: "Changing climate" },
-                    ]
-
-                    // Find all term positions in the text
-                    const foundTerms = terms
-                      .map((term) => ({
-                        ...term,
-                        index: text.indexOf(term.name),
-                        length: term.name.length,
-                      }))
-                      .filter((term) => term.index !== -1)
-                      .sort((a, b) => a.index - b.index)
-
-                    if (foundTerms.length === 0) {
-                      return text
-                    }
-
-                    // Build the result by processing terms in order
-                    const result: React.ReactNode[] = []
-                    let currentIndex = 0
-
-                    foundTerms.forEach((term, i) => {
-                      // Add text before this term
-                      result.push(text.substring(currentIndex, term.index))
-
-                      // Add the linked term
-                      result.push(
-                        <Box
-                          key={i}
-                          component="span"
-                          sx={{
-                            backgroundColor: "transparent",
-                            borderBottom: (theme) =>
-                              `3px solid ${theme.palette.blue.darkest}`,
-                            color: (theme) => theme.palette.blue.darkest,
-                            py: 0.1,
-                            mx: 0.2,
-                            lineHeight: "0em",
-                            paddingBottom: "0.5em",
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative",
-                            "&:hover": {
-                              borderBottom: (theme) =>
-                                `5px solid ${theme.palette.blue.darkest}`,
-                            },
-                          }}
-                          onClick={() => {
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: term.glossaryTerm,
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          {term.name}
-                        </Box>,
-                      )
-
-                      currentIndex = term.index + term.length
-                    })
-
-                    // Add remaining text after the last term
-                    result.push(text.substring(currentIndex))
-
-                    return <>{result}</>
-                  })()}
+                    ]}
+                    onActivate={(glossaryTerm) => {
+                      const drawerStore = useDrawerStore.getState()
+                      drawerStore.setDrawerContent({
+                        selectedSection: "glossary",
+                        selectedTerm: glossaryTerm,
+                      })
+                      drawerStore.openDrawer("glossary")
+                    }}
+                  />
                 </Typography>
                 <Typography
                   variant="body1"
                   sx={{ color: (theme) => theme.palette.blue.darkest }}
                 >
-                  {(() => {
-                    const text = t("interstitial.part3")
-
-                    // Create an array of all terms to link and format
-                    const terms = [
+                  <GlossaryLinkedText
+                    text={t("interstitial.part3")}
+                    terms={[
                       { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                       { name: "scenarios", glossaryTerm: "Scenarios" },
                       {
                         name: "changing climate",
                         glossaryTerm: "Changing climate",
                       },
-                    ]
-
-                    // Find all term positions in the text
-                    const foundTerms = terms
-                      .map((term) => ({
-                        ...term,
-                        index: text.indexOf(term.name),
-                        length: term.name.length,
-                      }))
-                      .filter((term) => term.index !== -1)
-                      .sort((a, b) => a.index - b.index)
-
-                    if (foundTerms.length === 0) {
-                      return text
-                    }
-
-                    // Build the result by processing terms in order
-                    const result: React.ReactNode[] = []
-                    let currentIndex = 0
-
-                    foundTerms.forEach((term, i) => {
-                      // Add text before this term
-                      result.push(text.substring(currentIndex, term.index))
-
-                      // Add the linked term
-                      result.push(
-                        <Box
-                          key={i}
-                          component="span"
-                          sx={{
-                            backgroundColor: "transparent",
-                            borderBottom: (theme) =>
-                              `3px solid ${theme.palette.blue.darkest}`,
-                            color: (theme) => theme.palette.blue.darkest,
-                            py: 0.1,
-                            mx: 0.2,
-                            lineHeight: "0em",
-                            paddingBottom: "0.5em",
-                            cursor: "pointer",
-                            display: "inline-block",
-                            position: "relative",
-                            "&:hover": {
-                              borderBottom: (theme) =>
-                                `5px solid ${theme.palette.blue.darkest}`,
-                            },
-                          }}
-                          onClick={() => {
-                            const drawerStore = useDrawerStore.getState()
-                            drawerStore.setDrawerContent({
-                              selectedSection: "glossary",
-                              selectedTerm: term.glossaryTerm,
-                            })
-                            drawerStore.openDrawer("glossary")
-                          }}
-                        >
-                          {term.name}
-                        </Box>,
-                      )
-
-                      currentIndex = term.index + term.length
-                    })
-
-                    // Add remaining text after the last term
-                    result.push(text.substring(currentIndex))
-
-                    return <>{result}</>
-                  })()}
+                    ]}
+                    onActivate={(glossaryTerm) => {
+                      const drawerStore = useDrawerStore.getState()
+                      drawerStore.setDrawerContent({
+                        selectedSection: "glossary",
+                        selectedTerm: glossaryTerm,
+                      })
+                      drawerStore.openDrawer("glossary")
+                    }}
+                  />
                 </Typography>
                 <Typography
                   variant="h3"

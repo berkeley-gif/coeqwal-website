@@ -154,7 +154,7 @@ const glossaryTerms: GlossaryTerm[] = [
     definition:
       "Information and data that can be used to support decision-making, advocacy, or planning. COEQWAL helps turn complex scenario data into actionable insights for communities, agencies, and advocates.",
   },
-]
+].sort((a, b) => a.term.localeCompare(b.term))
 
 /**
  * Content component for the Glossary tab in the MultiDrawer
