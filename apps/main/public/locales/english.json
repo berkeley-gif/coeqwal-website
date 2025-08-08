@@ -22,7 +22,7 @@
     ],
     "boldText": "From mountains to coast and north to south,",
     "part1": "Many Californians would be surprised to learn how controlled our state's surface water is. Californians share water through one of the largest and most complex conveyance and allocation systems in the world, particularly in the Central Valley. Communities, agriculture, and ecosystems are all connected by California water.",
-    "part2": "Water rights, policies, and laws guide who gets water, the amount of water they get, and when they get it. State and federal agencies make operational decisions about storage, conveyance, and deliveries based on these rules and regulations. They use an open-source computational model called CalSim to understand how their operational decisions affect where the water goes.",
+    "part2": "Our climate determines how much water falls on our state. Water rights, policies, and laws guide who gets water, the amount of water they get, and when they get it. State and federal agencies make operational decisions about storage, conveyance, and deliveries based on these rules and regulations. They use an open-source computational model called CalSim to understand how their operational decisions affect where the water goes.",
     "part3": "The COEQWAL project uses CalSim to model a broad range of alternative water management scenarios, each designed to ask,"
   },
   "secondaryNavigation": {
