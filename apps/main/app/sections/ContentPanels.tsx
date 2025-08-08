@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
-import { BasePanel } from "@repo/ui"
+import { BasePanel, LeadingMarkerText, ArrowHead } from "@repo/ui"
 import { PlayArrowIcon } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 
@@ -166,6 +166,7 @@ export default function ContentPanels({
         margin: 0, // Remove any default margins
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
+        bgcolor: (theme) => theme.palette.brand.water,
 
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
@@ -181,6 +182,70 @@ export default function ContentPanels({
         },
       }}
     >
+      {/* Learn and Explore panels */}
+      <BasePanel fullHeight={false} background="transparent" paddingVariant="wide" fullWidth panelWidth={"100vw"}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest }}>
+          {/* Text column */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <LeadingMarkerText title="Learn">
+              <Typography variant="body2">
+                how California water flows and operational decisions balance water needs across the state
+              </Typography>
+            </LeadingMarkerText>
+          </Box>
+          {/* Image column */}
+          <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
+            <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ maxWidth: "100%", height: "auto" }} />
+          </Box>
+          {/* Play column - last */}
+          <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <IconButton
+              color="inherit"
+              aria-label="play"
+              sx={(theme) => ({
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+              })}
+            >
+              <ArrowHead />
+            </IconButton>
+          </Box>
+        </Box>
+      </BasePanel>
+
+      <BasePanel fullHeight={false} background="transparent" paddingVariant="wide" fullWidth panelWidth={"100vw"}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest }}>
+          {/* Image column */}
+          <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
+            <Box component="img" src="/images/content/explore.png" alt="Explore" sx={{ maxWidth: "100%", height: "auto" }} />
+          </Box>
+          {/* Text column */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <LeadingMarkerText title="Explore">
+              <Typography variant="body2">COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme</Typography>
+            </LeadingMarkerText>
+          </Box>
+          {/* Play column - last */}
+          <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <IconButton
+              color="inherit"
+              aria-label="play"
+              sx={(theme) => ({
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+              })}
+            >
+              <ArrowHead />
+            </IconButton>
+          </Box>
+        </Box>
+      </BasePanel>
+
+      {/* Existing complex panels block (can be removed once new layout is final) */}
       <Box
         sx={{
           position: "relative",

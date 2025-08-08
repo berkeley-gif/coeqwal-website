@@ -1,8 +1,7 @@
 import React from "react"
-import { BasePanel, Spacer, GlossaryLinkedText } from "@repo/ui"
+import { BasePanel, Spacer, GlossaryLinkedText, ArrowHead } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import { PlayArrowIcon } from "@repo/ui/mui"
 import FloatingMarker from "../components/FloatingMarker"
 import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
@@ -232,20 +231,10 @@ const IntroSection: React.FC = () => {
             </Typography>
 
             {/* Play arrow icon pointing down */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "500px",
-              }}
-            >
-              <PlayArrowIcon
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  fontSize: "3rem", // Using rem units for consistency
-                  transform: "rotate(90deg)",
-                  pointerEvents: "auto",
-                }}
+            <Box sx={{ display: "flex", justifyContent: "center", width: "500px", color: (theme) => theme.palette.blue.darkest }}>
+              <ArrowHead
+                size={28}
+                style={{ transform: "rotate(90deg)", cursor: "pointer" }}
                 onClick={() => {
                   // Scroll to the next section with improved positioning
                   const interstitialSection =

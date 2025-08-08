@@ -6,6 +6,10 @@ import { styled } from "@mui/material/styles"
 
 export interface BasePanelProps extends BoxProps {
   fullHeight?: boolean
+  /** When true, panel spans full viewport width (100vw) */
+  fullWidth?: boolean
+  /** Explicit width for the panel. Use instead of sx.width for clarity */
+  panelWidth?: string | number
   background?: "light" | "dark" | "accent" | "transparent"
   paddingVariant?:
     | "normal"
@@ -30,6 +34,8 @@ export interface BasePanelProps extends BoxProps {
 const PanelRoot = styled(Box, {
   shouldForwardProp: (prop) =>
     prop !== "fullHeight" &&
+    prop !== "fullWidth" &&
+    prop !== "panelWidth" &&
     prop !== "background" &&
     prop !== "paddingVariant" &&
     prop !== "includeHeaderSpacing" &&
@@ -37,6 +43,8 @@ const PanelRoot = styled(Box, {
 })<BasePanelProps>(({
   theme,
   fullHeight,
+  fullWidth,
+  panelWidth,
   background,
   paddingVariant,
   includeHeaderSpacing,
@@ -108,7 +116,7 @@ const PanelRoot = styled(Box, {
 
   return {
     margin: 0,
-    width: "100%",
+    width: panelWidth ?? (fullWidth ? "100vw" : "100%"),
     minHeight: fullHeight ? "100vh" : "auto",
     display: "flex",
     flexDirection: "column",
@@ -149,6 +157,8 @@ const PanelRoot = styled(Box, {
 
 export function BasePanel({
   fullHeight = true,
+  fullWidth = false,
+  panelWidth,
   background = "light",
   paddingVariant = "normal",
   includeHeaderSpacing = true,
@@ -159,6 +169,8 @@ export function BasePanel({
   return (
     <PanelRoot
       fullHeight={fullHeight}
+      fullWidth={fullWidth}
+      panelWidth={panelWidth}
       background={background}
       paddingVariant={paddingVariant}
       includeHeaderSpacing={includeHeaderSpacing}
