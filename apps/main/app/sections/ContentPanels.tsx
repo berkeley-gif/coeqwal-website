@@ -1016,12 +1016,10 @@ function PanelWithDetail({
               zIndex: 1,
             }}
           >
-            <BasePanel
-              paddingVariant="wide"
-              fullHeight={false}
+            <Box
               sx={{
                 backgroundColor: "transparent",
-                py: 12,
+                p: 0,
                 color: "white",
                 position: "relative",
                 borderRadius: 0,
@@ -1083,7 +1081,7 @@ function PanelWithDetail({
                   <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
                 </IconButton>
               )}
-            </BasePanel>
+            </Box>
           </motion.div>
         ) : (
           // Detail panel - shown when active
@@ -1107,12 +1105,10 @@ function PanelWithDetail({
               zIndex: 2,
             }}
           >
-            <BasePanel
-              paddingVariant="wide"
-              fullHeight={false}
+            <Box
               sx={{
                 backgroundColor: "transparent",
-                py: 12,
+                p: 0,
                 color: "white",
                 position: "relative",
                 borderRadius: 0,
@@ -1172,7 +1168,7 @@ function PanelWithDetail({
                   <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
                 </IconButton>
               )}
-            </BasePanel>
+            </Box>
           </motion.div>
         )}
       </AnimatePresence>
