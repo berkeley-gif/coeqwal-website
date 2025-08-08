@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
 import { BasePanel, LeadingMarkerText, ArrowHead, Spacer } from "@repo/ui"
-import { PlayArrowIcon } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 
 // Add props interface
@@ -17,7 +16,6 @@ export default function ContentPanels({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onOpenLearnDrawer,
 }: ContentPanelsProps = {}) {
-  // Get theme for color palette
   const theme = useTheme()
 
   // Track which panel is showing details (if any)
@@ -123,6 +121,95 @@ export default function ContentPanels({
     }
   }
 
+  // Smooth scroll to a detail panel by id, then open it
+  const scrollToPanel = (panelId: string, panelType: PanelType) => {
+    const el = document.getElementById(panelId)
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      const currentTop = window.pageYOffset || document.documentElement.scrollTop
+      const target = rect.top + currentTop - 20
+      window.scrollTo({ top: target, behavior: "smooth" })
+    }
+    // Slight delay to allow scroll start, then toggle
+    requestAnimationFrame(() => {
+      setActivePanel(panelType === activePanel ? null : panelType)
+    })
+  }
+
+  // New simple panel UIs to be embedded inside legacy PanelWithDetail "title" slot
+  const LearnSimple = () => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
+      {/* Text column */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <LeadingMarkerText title="Learn">
+          <Typography variant="body2">
+            how California water flows and operational decisions balance water needs across the state
+          </Typography>
+        </LeadingMarkerText>
+      </Box>
+      {/* Image column */}
+      <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
+        <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ maxWidth: "100%", height: "auto" }} />
+      </Box>
+      {/* Arrow column */}
+      <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <IconButton
+          color="inherit"
+          aria-label="open-learn"
+          sx={(theme) => ({ width: { xs: 40, md: 48 }, height: { xs: 40, md: 48 }, borderRadius: theme.borderRadius.rounded, border: "none" })}
+          onClick={() => togglePanelDetail("learn")}
+        >
+          <ArrowHead />
+        </IconButton>
+      </Box>
+    </Box>
+  )
+
+  const ExploreSimple = () => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
+      {/* Image column */}
+      <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
+        <Box component="img" src="/images/content/explore.png" alt="Explore" sx={{ maxWidth: "100%", height: "auto" }} />
+      </Box>
+      {/* Text column */}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <LeadingMarkerText title="Explore">
+          <Typography variant="body2">COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme</Typography>
+        </LeadingMarkerText>
+      </Box>
+      {/* Arrow column */}
+      <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <IconButton
+          color="inherit"
+          aria-label="open-explore"
+          sx={(theme) => ({ width: { xs: 40, md: 48 }, height: { xs: 40, md: 48 }, borderRadius: theme.borderRadius.rounded, border: "none" })}
+          onClick={() => togglePanelDetail("explore")}
+        >
+          <ArrowHead />
+        </IconButton>
+      </Box>
+    </Box>
+  )
+
+  const EmpowerSimple = () => (
+    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
+      <LeadingMarkerText title="Empower" bodySpansFull>
+        <Typography variant="body2" sx={{ textAlign: "center" }}>
+          your community with data that helps you understand the impacts of operational decisions
+        </Typography>
+      </LeadingMarkerText>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <IconButton
+          color="inherit"
+          aria-label="open-empower"
+          sx={(theme) => ({ width: { xs: 40, md: 48 }, height: { xs: 40, md: 48 }, borderRadius: theme.borderRadius.rounded, border: "none" })}
+          onClick={() => togglePanelDetail("empower")}
+        >
+          <ArrowHead style={{ transform: "rotate(90deg)" }} />
+        </IconButton>
+      </Box>
+    </Box>
+  )
   // Get background color for each panel
   const getPanelBgColor = (panelType: PanelType, theme: Theme) => {
     switch (panelType) {
@@ -185,120 +272,15 @@ export default function ContentPanels({
         },
       }}
     >
-      {/* Learn and Explore panels */}
-      <BasePanel
-        fullHeight={false}
-        background="transparent"
-        paddingVariant="wide"
-        sx={{ pt: 0, pb: 0 }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest }}>
-          {/* Text column */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <LeadingMarkerText title="Learn">
-              <Typography variant="body2">
-                how California water flows and operational decisions balance water needs across the state
-              </Typography>
-            </LeadingMarkerText>
-          </Box>
-          {/* Image column */}
-          <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-            <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ maxWidth: "100%", height: "auto" }} />
-          </Box>
-          {/* Play column - last */}
-          <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <IconButton
-              color="inherit"
-              aria-label="play"
-              sx={(theme) => ({
-                width: { xs: 40, md: 48 },
-                height: { xs: 40, md: 48 },
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-              })}
-            >
-              <ArrowHead />
-            </IconButton>
-          </Box>
-        </Box>
-      </BasePanel>
+      {/* Learn panel (new UI embedded below in legacy container) */}
 
-      <BasePanel
-        fullHeight={false}
-        background="transparent"
-        paddingVariant="wide"
-        sx={{ pt: 0, pb: 0 }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest }}>
-          {/* Image column */}
-          <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-            <Box component="img" src="/images/content/explore.png" alt="Explore" sx={{ maxWidth: "100%", height: "auto" }} />
-          </Box>
-          {/* Text column */}
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <LeadingMarkerText title="Explore">
-              <Typography variant="body2">COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme</Typography>
-            </LeadingMarkerText>
-          </Box>
-          {/* Play column - last */}
-          <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <IconButton
-              color="inherit"
-              aria-label="play"
-              sx={(theme) => ({
-                width: { xs: 40, md: 48 },
-                height: { xs: 40, md: 48 },
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-              })}
-            >
-              <ArrowHead />
-            </IconButton>
-          </Box>
-        </Box>
-      </BasePanel>
+      {/* Explore panel (new UI embedded below in legacy container) */}
 
       <Spacer height={{ xs: 48, md: 96 }} />
 
-      {/* Third simple panel - Empower (single column, centered, last) */}
-      <BasePanel
-        fullHeight={false}
-        background="transparent"
-        paddingVariant="wide"
-        sx={{ pt: 0, pb: 0 }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            color: (theme) => theme.palette.blue.darkest,
-          }}
-        >
-          <LeadingMarkerText title="Empower" bodySpansFull>
-            <Typography variant="body2" sx={{ textAlign: "center" }}>
-              your community with data that helps you understand the impacts of operational decisions
-            </Typography>
-          </LeadingMarkerText>
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-            <IconButton
-              color="inherit"
-              aria-label="scroll-down"
-              sx={(theme) => ({
-                width: { xs: 40, md: 48 },
-                height: { xs: 40, md: 48 },
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-              })}
-            >
-              <ArrowHead style={{ transform: "rotate(90deg)" }} />
-            </IconButton>
-          </Box>
-        </Box>
-      </BasePanel>
+      {/* Empower panel (new UI embedded below in legacy container) */}
 
-      {/* Existing complex panels block (can be removed once new layout is final) */}
+      {/* Existing complex panels block (now using new UIs in title) */}
       <Box
         sx={{
           position: "relative",
@@ -314,7 +296,7 @@ export default function ContentPanels({
           width: "100%", // Ensure content is limited to viewport width
         }}
       >
-        {/* Panel Component - Learn */}
+        {/* Panel Component - Learn (detail only) */}
         <PanelWithDetail
           panelType="learn"
           isActive={activePanel === "learn"}
@@ -323,7 +305,7 @@ export default function ContentPanels({
           detailBgColor={getDetailPanelBgColor("learn", theme)}
           addBorder={true}
           hideBottomArrow={true}
-          title={<LearnTextContent />}
+          title={<LearnSimple />}
           detailContent={
             <>
               <Typography
@@ -547,7 +529,7 @@ export default function ContentPanels({
           }
         />
 
-        {/* Panel Component - Explore */}
+        {/* Panel Component - Explore (detail only) */}
         <PanelWithDetail
           panelType="explore"
           isActive={activePanel === "explore"}
@@ -555,7 +537,7 @@ export default function ContentPanels({
           bgColor={getPanelBgColor("explore", theme)}
           detailBgColor={getDetailPanelBgColor("explore", theme)}
           hideBottomArrow={true}
-          title={<EmpowerTextContent />}
+          title={<ExploreSimple />}
           detailContent={
             <>
               <Typography
@@ -916,7 +898,7 @@ export default function ContentPanels({
           }
         />
 
-        {/* Panel Component - Empower */}
+        {/* Panel Component - Empower (detail only) */}
         <PanelWithDetail
           panelType="empower"
           isActive={activePanel === "empower"}
@@ -924,7 +906,7 @@ export default function ContentPanels({
           bgColor={getPanelBgColor("empower", theme)}
           detailBgColor={getDetailPanelBgColor("empower", theme)}
           hideDetailArrow={true}
-          title={<ActTextContent />}
+          title={<EmpowerSimple />}
           detailContent={
             <>
               <Typography
@@ -1095,7 +1077,7 @@ function PanelWithDetail({
                 {/* Render content if provided (for backward compatibility) */}
               </Box>
 
-              {/* Right centered play icon - only shown when not hidden */}
+              {/* Right centered arrow icon - only shown when not hidden */}
               {!hideDetailArrow && (
                 <IconButton
                   onClick={onToggleDetail}
@@ -1111,11 +1093,11 @@ function PanelWithDetail({
                     height: 60,
                   }}
                 >
-                  <PlayArrowIcon sx={{ fontSize: "2.25rem" }} />
+                  <ArrowHead style={{ width: 36, height: 36 }} />
                 </IconButton>
               )}
 
-              {/* Bottom scroll icon - absolutely positioned within the panel */}
+              {/* Bottom scroll arrow - absolutely positioned within the panel */}
               {!hideBottomArrow && (
                 <IconButton
                   sx={{
@@ -1130,9 +1112,7 @@ function PanelWithDetail({
                     height: 60,
                   }}
                 >
-                  <PlayArrowIcon
-                    sx={{ fontSize: "2.25rem", transform: "rotate(90deg)" }}
-                  />
+                  <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
                 </IconButton>
               )}
             </BasePanel>
@@ -1203,10 +1183,10 @@ function PanelWithDetail({
                   height: 60,
                 }}
               >
-                <PlayArrowIcon sx={{ fontSize: "2.25rem" }} />
+                <ArrowHead style={{ width: 36, height: 36 }} />
               </IconButton>
 
-              {/* Bottom scroll icon - absolutely positioned within the panel */}
+              {/* Bottom scroll arrow - absolutely positioned within the panel */}
               {!hideBottomArrow && (
                 <IconButton
                   sx={{
@@ -1221,9 +1201,7 @@ function PanelWithDetail({
                     height: 60,
                   }}
                 >
-                  <PlayArrowIcon
-                    sx={{ fontSize: "2.25rem", transform: "rotate(90deg)" }}
-                  />
+                  <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
                 </IconButton>
               )}
             </BasePanel>
