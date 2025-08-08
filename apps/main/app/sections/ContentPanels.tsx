@@ -152,8 +152,11 @@ export default function ContentPanels({
   }
 
   return (
-    <Box
+    <BasePanel
       id="content-panels"
+      fullHeight={false}
+      background="transparent"
+      paddingVariant="wide"
       sx={{
         position: "relative",
         overflowX: "hidden", // Prevent horizontal scrolling
@@ -183,7 +186,12 @@ export default function ContentPanels({
       }}
     >
       {/* Learn and Explore panels */}
-      <BasePanel fullHeight={false} background="transparent" paddingVariant="wide" fullWidth panelWidth={"100vw"}>
+      <BasePanel
+        fullHeight={false}
+        background="transparent"
+        paddingVariant="wide"
+        sx={{ pt: 0, pb: 0 }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest }}>
           {/* Text column */}
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -215,7 +223,12 @@ export default function ContentPanels({
         </Box>
       </BasePanel>
 
-      <BasePanel fullHeight={false} background="transparent" paddingVariant="wide" fullWidth panelWidth={"100vw"}>
+      <BasePanel
+        fullHeight={false}
+        background="transparent"
+        paddingVariant="wide"
+        sx={{ pt: 0, pb: 0 }}
+      >
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest }}>
           {/* Image column */}
           <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
@@ -910,7 +923,7 @@ export default function ContentPanels({
           }
         />
       </Box>
-    </Box>
+    </BasePanel>
   )
 }
 
