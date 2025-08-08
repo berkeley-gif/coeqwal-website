@@ -1,7 +1,6 @@
 import React from "react"
 import { BasePanel } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
-
 import { useTranslation } from "@repo/i18n"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import FloatingMarker from "../components/FloatingMarker"
@@ -11,9 +10,8 @@ import { useDrawerStore } from "@repo/state"
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
 
-  // Responsive marker specifications that align with California silhouette
-  // Positions adjust based on screen size to maintain alignment with background image
-  // TODO: needs work or a different approach
+  // Hero section markers absolutely positioned to align with California map
+  // TODO: this isn't the best approach for responsive design.
   const markerSpecs = [
     {
       src: "/images/markers/shasta.png",
@@ -53,16 +51,18 @@ const IntroSection: React.FC = () => {
     },
   ] as const
 
+  // page elements
   return (
     <Box
       sx={{
         background: (theme) => `
           linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
         `,
-        minHeight: "200vh", // Ensure gradient covers both panels
+        minHeight: "200vh", // Ensure gradient covers first two panels
       }}
     >
-      {/* First panel - Hero section with California background */}
+      {/* First panel / Hero section */}
+      {/* TODO: standardize panels into components for ui package */}
       <Box
         id="intro"
         sx={{
@@ -149,7 +149,7 @@ const IntroSection: React.FC = () => {
             overflow: "visible",
           }}
         >
-          {/* Background Circles (below text) - contained within the first 100vh */}
+          {/* Background circles (below text) - contained within the first 100vh */}
           <Box
             sx={{
               position: "absolute",
@@ -244,9 +244,9 @@ const IntroSection: React.FC = () => {
                   pointerEvents: "auto",
                 }}
                 onClick={() => {
-                  // Scroll to the interstitial section with improved positioning
+                  // Scroll to the next section with improved positioning
                   const interstitialSection =
-                    document.getElementById("interstitial")
+                    document.getElementById("overview")
                   if (interstitialSection) {
                     // Get the exact position of the interstitial section
                     const rect = interstitialSection.getBoundingClientRect()
@@ -268,27 +268,12 @@ const IntroSection: React.FC = () => {
               />
             </Box>
           </Box>
-
-          {/* Foreground Circles section is kept for code structure but not rendering any circles */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              zIndex: (theme) => theme.zIndex.introForegroundImages,
-              pointerEvents: "none",
-            }}
-          >
-            {/* No foreground circles rendered */}
-          </Box>
         </BasePanel>
       </Box>
 
-      {/* Second panel - Interstitial content */}
+      {/* Second panel - Overview content */}
       <Box
-        id="interstitial"
+        id="overview"
         sx={{
           position: "relative",
           width: "100vw",
