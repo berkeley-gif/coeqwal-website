@@ -20,7 +20,7 @@ export function ArrowHead({ size = "100%", color = "currentColor", ...svgProps }
       focusable="false"
       {...svgProps}
     >
-      {/* Outer stroke to create rounded corners visually */}
+      {/* Outer rounded stroke to create softened corners */}
       <path
         d="M12 8 L12 40 L40 24 Z"
         stroke={color}
@@ -28,7 +28,7 @@ export function ArrowHead({ size = "100%", color = "currentColor", ...svgProps }
         strokeLinejoin="round"
         fill="none"
       />
-      {/* Inner fill to keep the arrow solid while preserving rounded corners from the stroke */}
+      {/* Inner fill to keep arrow solid while preserving rounded outline */}
       <polygon points="14,12 14,36 36,24" fill={color} />
     </svg>
   )

@@ -151,17 +151,6 @@ export default function ContentPanels({
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
         <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ maxWidth: "100%", height: "auto" }} />
       </Box>
-      {/* Arrow column */}
-      <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <IconButton
-          color="inherit"
-          aria-label="open-learn"
-          sx={(theme) => ({ width: { xs: 40, md: 48 }, height: { xs: 40, md: 48 }, borderRadius: theme.borderRadius.rounded, border: "none" })}
-          onClick={() => togglePanelDetail("learn")}
-        >
-          <ArrowHead />
-        </IconButton>
-      </Box>
     </Box>
   )
 
@@ -177,17 +166,6 @@ export default function ContentPanels({
           <Typography variant="body2">COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme</Typography>
         </LeadingMarkerText>
       </Box>
-      {/* Arrow column */}
-      <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <IconButton
-          color="inherit"
-          aria-label="open-explore"
-          sx={(theme) => ({ width: { xs: 40, md: 48 }, height: { xs: 40, md: 48 }, borderRadius: theme.borderRadius.rounded, border: "none" })}
-          onClick={() => togglePanelDetail("explore")}
-        >
-          <ArrowHead />
-        </IconButton>
-      </Box>
     </Box>
   )
 
@@ -198,16 +176,6 @@ export default function ContentPanels({
           your community with data that helps you understand the impacts of operational decisions
         </Typography>
       </LeadingMarkerText>
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <IconButton
-          color="inherit"
-          aria-label="open-empower"
-          sx={(theme) => ({ width: { xs: 40, md: 48 }, height: { xs: 40, md: 48 }, borderRadius: theme.borderRadius.rounded, border: "none" })}
-          onClick={() => togglePanelDetail("empower")}
-        >
-          <ArrowHead style={{ transform: "rotate(90deg)" }} />
-        </IconButton>
-      </Box>
     </Box>
   )
   // Get background color for each panel
@@ -303,7 +271,7 @@ export default function ContentPanels({
           onToggleDetail={() => togglePanelDetail("learn")}
           bgColor={getPanelBgColor("learn", theme)}
           detailBgColor={getDetailPanelBgColor("learn", theme)}
-          addBorder={true}
+          addBorder={false}
           hideBottomArrow={true}
           title={<LearnSimple />}
           detailContent={
@@ -1052,7 +1020,7 @@ function PanelWithDetail({
               paddingVariant="wide"
               fullHeight={false}
               sx={{
-                backgroundColor: bgColor,
+                backgroundColor: "transparent",
                 py: 12,
                 color: "white",
                 position: "relative",
@@ -1081,17 +1049,17 @@ function PanelWithDetail({
               {!hideDetailArrow && (
                 <IconButton
                   onClick={onToggleDetail}
-                  sx={{
+                  sx={(theme) => ({
                     position: "absolute",
                     right: 30,
                     top: "50%",
                     transform: "translateY(-50%)",
-                    color: "white",
-
-                    "&:hover": {},
+                    color: theme.palette.blue.darkest,
+                    border: "none",
+                    borderRadius: theme.borderRadius.rounded,
                     width: 60,
                     height: 60,
-                  }}
+                  })}
                 >
                   <ArrowHead style={{ width: 36, height: 36 }} />
                 </IconButton>
@@ -1100,17 +1068,17 @@ function PanelWithDetail({
               {/* Bottom scroll arrow - absolutely positioned within the panel */}
               {!hideBottomArrow && (
                 <IconButton
-                  sx={{
+                  sx={(theme) => ({
                     position: "absolute",
                     bottom: 20,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    color: "white",
-
-                    "&:hover": {},
+                    color: theme.palette.blue.darkest,
+                    border: "none",
+                    borderRadius: theme.borderRadius.rounded,
                     width: 60,
                     height: 60,
-                  }}
+                  })}
                 >
                   <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
                 </IconButton>
@@ -1143,7 +1111,7 @@ function PanelWithDetail({
               paddingVariant="wide"
               fullHeight={false}
               sx={{
-                backgroundColor: detailBgColor,
+                backgroundColor: "transparent",
                 py: 12,
                 color: "white",
                 position: "relative",
@@ -1171,17 +1139,17 @@ function PanelWithDetail({
               {/* Left arrow to go back to main panel */}
               <IconButton
                 onClick={onToggleDetail}
-                sx={{
+                sx={(theme) => ({
                   position: "absolute",
                   left: 30,
                   top: 108,
                   transform: "rotate(180deg)",
-                  color: "white",
-
-                  "&:hover": {},
+                  color: theme.palette.blue.darkest,
+                  border: "none",
+                  borderRadius: theme.borderRadius.rounded,
                   width: 60,
                   height: 60,
-                }}
+                })}
               >
                 <ArrowHead style={{ width: 36, height: 36 }} />
               </IconButton>
@@ -1189,17 +1157,17 @@ function PanelWithDetail({
               {/* Bottom scroll arrow - absolutely positioned within the panel */}
               {!hideBottomArrow && (
                 <IconButton
-                  sx={{
+                  sx={(theme) => ({
                     position: "absolute",
                     bottom: 20,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    color: "white",
-
-                    "&:hover": {},
+                    color: theme.palette.blue.darkest,
+                    border: "none",
+                    borderRadius: theme.borderRadius.rounded,
                     width: 60,
                     height: 60,
-                  }}
+                  })}
                 >
                   <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
                 </IconButton>
