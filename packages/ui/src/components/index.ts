@@ -31,6 +31,7 @@ export { HeroPanel } from "./panels/HeroPanel"
 export { TwoColumnPanel } from "./panels/TwoColumnPanel"
 export { VideoPanel } from "./panels/VideoPanel"
 export type { BasePanelProps } from "./panels/BasePanel"
+export { Spacer } from "./panels/Spacer"
 
 // Operation components
 export { default as OperationCard } from "./operations/OperationCard"
