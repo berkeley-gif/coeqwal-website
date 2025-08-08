@@ -20,15 +20,54 @@ import { ThemeRegistry } from "@repo/ui/themes/ThemeRegistry"
 import theme from "@repo/ui/themes/theme"
 ```
 
-### Theme colors
+### Theme fonts
 
-Our theme includes the following color options:
+The theme loads and uses the following font families:
 
-- Standard MUI colors (primary, secondary, etc.)
-- Custom teal color (`#007C92`) - accessible via the `teal` color prop:
-  ```tsx
-  <Typography color="teal">This text will be teal</Typography>
-  ```
+- Headlines (h1–h6): "GT Super Text"
+- Body text: "Neue Haas Grotesk Text"
+
+These are registered via global `@font-face` in the theme and can be referenced through the theme’s typography settings.
+
+### Theme palette
+
+Color groups and values exposed by the theme:
+
+- Brand
+  - sky: `#92C1D5`
+  - water: `#64A4D6`
+- Blue
+  - darkest: `#3a4574`
+  - dark: `#186b88`
+  - medium: `#2d89b6`
+  - bright: `#449cd9`
+  - light: `#77a2d9`
+- Accent
+  - gold: `#ffd87e`
+- Nature
+  - teal: `#76b9aa`
+  - sage: `#9fd5cb`
+- Utility
+  - white: `#FFFFFF`
+  - black: `#000000`
+- Ambient (for water ripples / mood bubbles)
+  - rippleWhite: `rgba(255, 255, 255, 0.16)`
+  - rippleBlue: `rgba(42, 82, 135, 0.16)`
+
+Category color mapping (for operation categories):
+
+- groundwaterManagement: `#76b9aa`
+- riverFlows: `#2d89b6`
+- urbanWaterPriorities: `#449cd9`
+- deltaBalance: `#ffd87e`
+- infrastructure: `#3a4574`
+- noFlowRequirements: `#186b88`
+- carryoverRequirements: `#77a2d9`
+- deltaOutflows: `#87CEEB`
+- urbanDemand: `#9fd5cb`
+- exportReductions: `#64a3d7`
+- conveyanceProjects: `#b1e1c3`
+- climateFuture: `#ffd87e`
 
 ### Importing components
 

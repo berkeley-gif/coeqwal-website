@@ -338,7 +338,7 @@ const IntroSection: React.FC = () => {
             }}
           >
             Explore a range of Central Valley water scenarios and discover possibilities
-            for the future of water in our state.
+            for the future of water in our state, under current conditions and under future climate.
           </Typography>
 
           {/* Play arrow icon pointing down */}

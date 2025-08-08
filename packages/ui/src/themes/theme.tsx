@@ -53,11 +53,11 @@ import type { CSSProperties } from "react"
  */
 
 // ===============================================================================
-// TYPOGRAPHY SCALE - Harmonious Type System
+// TYPOGRAPHY SCALE
 // ===============================================================================
 //
-// Using a Perfect Fourth (1.333) type scale for mathematical harmony
-// Base: 1.25rem body text, scaling up for headlines
+// Perfect Fourth (1.333) type scale
+// Base: 1.25rem body text
 //
 // Scale progression:
 // • h1: 5.75rem (92px) - Hero headlines "Learn. Explore. Empower."
@@ -72,12 +72,12 @@ import type { CSSProperties } from "react"
 // All headlines use GT Super Text for cohesive editorial style
 // GT Super Text weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
 //
+
 const H1_FONT = 'gtSuperText' // GT Super Text for h1 headlines
 
-// Type scale configuration using Perfect Fourth (1.333) ratio
 const typeScale = {
   // Base sizes for the scale
-  baseBody: '1.25rem',    // 20px - comfortable reading size
+  baseBody: '1.25rem',    // 20px - reading size
   smallBody: '1.125rem',  // 18px - secondary text
   
   // Headline sizes (keeping h1 & h2 for visual consistency, harmonizing the rest)
@@ -92,24 +92,12 @@ const typeScale = {
 const themeValues = {
   // Typography
   fontFamily: {
-    primary:
-      '"akzidenz-grotesk-next-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    tiemposText: '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
-    // Experimental fonts for testing
-    ppEiko: '"PP Eiko", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ppFragment: '"PP Fragment", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ppFragmentSans: '"PP Fragment Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ppFragmentSerif: '"PP Fragment Serif", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ppFragmentGlare: '"PP Fragment Glare", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ppKyoto: '"PP Kyoto", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ppObjectSans: '"PP Object Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    gtSuperDisplay: '"GT Super Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     gtSuperText: '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
-  // Layout dimensions
+  // Layout dimensions (necessary for layout calculations)
   layout: {
     headerHeight: 64,
     drawer: {
@@ -120,7 +108,7 @@ const themeValues = {
 
   // Color Palette - California Water Theme
   palette: {
-    // Core brand colors (from gradient)
+    // Core brand colors (see home panel gradient)
     brand: {
       sky: "#92C1D5",        // Top of gradient - sky blue
       water: "#64A4D6",      // Bottom of gradient - water blue
@@ -128,7 +116,7 @@ const themeValues = {
     
     // Text and UI blues (organized by intensity)
     blue: {
-      darkest: "#3a4574",    // Deep navy - primary text
+      darkest: "#3a4574",    // Deep navy - primary text (TODO: should be #2A5287 ?)
       dark: "#186b88",       // Dark teal - secondary text  
       medium: "#2d89b6",     // Medium blue - accent text
       bright: "#449cd9",     // Bright blue - links/interactive
@@ -138,7 +126,7 @@ const themeValues = {
     // Accent colors - warm tones
     accent: {
       gold: "#ffd87e",       // Golden yellow - highlights
-      cream: "#fdf0a0",      // Light yellow - backgrounds
+      cream: "#fdf0a0",      // Light yellow
     },
     
     // Nature colors - greens and teals
@@ -160,26 +148,20 @@ const themeValues = {
       rippleWhite: "rgba(255, 255, 255, 0.16)", // Water ripples - white at 16% opacity
       rippleBlue: "rgba(42, 82, 135, 0.16)",    // Water ripples - blue (#2A5287) at 16% opacity
     },
-    
-    // Interstitial panel color
-    interstitial: {
-      main: "#4b8fb4", // Medium blue for interstitial backgrounds
-    },
-    
-    // Legacy support - will be phased out
+  
     categories: {
-      groundwaterManagement: "#76b9aa", // Using nature.teal
-      riverFlows: "#2d89b6", // Using blue.medium
-      urbanWaterPriorities: "#449cd9", // Using blue.bright
-      deltaBalance: "#ffd87e", // Using accent.gold
-      infrastructure: "#3a4574", // Using blue.darkest
-      noFlowRequirements: "#186b88", // Using blue.dark
-      carryoverRequirements: "#77a2d9", // Using blue.light
-      deltaOutflows: "#87CEEB", // Using brand.sky
-      urbanDemand: "#9fd5cb", // Using nature.sage
-      exportReductions: "#64a3d7", // Using brand.water
-      conveyanceProjects: "#b1e1c3", // Using nature.mint
-      climateFuture: "#ffd87e", // Using accent.gold
+      groundwaterManagement: "#76b9aa", // nature.teal
+      riverFlows: "#2d89b6", // blue.medium
+      urbanWaterPriorities: "#449cd9", // blue.bright
+      deltaBalance: "#ffd87e", // accent.gold
+      infrastructure: "#3a4574", // blue.darkest
+      noFlowRequirements: "#186b88", // blue.dark
+      carryoverRequirements: "#77a2d9", // blue.light
+      deltaOutflows: "#87CEEB", // brand.sky
+      urbanDemand: "#9fd5cb", // nature.sage
+      exportReductions: "#64a3d7", // brand.water
+      conveyanceProjects: "#b1e1c3", // nature.mint
+      climateFuture: "#ffd87e", // accent.gold
     },
   },
 
@@ -187,7 +169,7 @@ const themeValues = {
   borderRadius: {
     pill: "999px",
     rounded: "8px",
-    card: "12px",
+    card: "16px",
     standard: "24px",
     none: "0px",
   },
@@ -214,18 +196,18 @@ const themeValues = {
     panels: 0, // All panels and sections
 
     // Intro section specific layers
-    introBubbles: 0, // White bubbles
+    introBubbles: 0,
     introBackgroundImages: 1,
     introText: 2,
     introForegroundImages: 3,
 
-    // Navigation layers (keep existing)
+    // Navigation layers
     drawer: 1200,
     modal: 1300,
     appBar: 1400,
     tooltip: 1500,
 
-    // Special cases (keep existing)
+    // Special cases
     drawerBackdrop: 1199, // Just below drawer
     overlay: 1250, // Between drawer and modal
   },
@@ -262,76 +244,16 @@ const hoverParagraphDarkenedMixin = {
   },
 } as const
 
-// Drawer content styling mixins
-const drawerContentMixins = {
-  contentWrapper: {
-    p: 2,
-    width: "100%",
-    height: "100%",
-    overflow: "auto",
-    color: "text.primary",
-  },
-  headerBox: {
-    display: "flex",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    mb: 2,
-  },
-  closeButton: {
-    color: "text.primary",
-  },
-  contentText: {
-    lineHeight: 1.4,
-    color: "text.primary",
-    mb: 3,
-  },
-  infoBox: {
-    mt: 2,
-    p: 2,
-    bgcolor: "rgba(0, 0, 0, 0.03)",
-    borderRadius: 1,
-  },
-  headingText: {
-    fontWeight: "bold",
-    color: "primary.dark",
-  },
-  itemBox: {
-    mb: 1.5,
-    p: 1.5,
-    borderRadius: 1,
-    bgcolor: "rgba(0, 0, 0, 0.02)",
-    cursor: "pointer",
-    transition: "all 0.2s ease",
-    "&:hover": {
-      bgcolor: "rgba(0, 0, 0, 0.05)",
-      transform: "translateX(4px)",
-    },
-  },
-  selectedItemBox: {
-    bgcolor: "rgba(0, 0, 0, 0.08)",
-    boxShadow: "0 0 0 2px rgba(0, 0, 0, 0.1)",
-  },
-  chip: {
-    color: "text.primary",
-    borderColor: "rgba(0, 0, 0, 0.23)",
-    mr: 0.5,
-    mb: 0.5,
-  },
-  icon: {
-    mr: 1.5,
-    mt: 0.5,
-    color: "primary.dark",
-  },
-  secondaryText: {
-    lineHeight: 1.4,
-    color: "text.primary",
-  },
-  bodyText: {
-    mt: 1,
-    lineHeight: 1.4,
-    color: "text.primary",
-  },
-} as const
+    // Drawer content styling mixins
+    const drawerContentMixins = {
+      contentWrapper: {
+        p: 2,
+        width: "100%",
+        height: "100%",
+        overflow: "auto",
+        color: "text.primary",
+      },
+    } as const
 
 /* ========================================================
  2. Theme configuration
@@ -496,9 +418,7 @@ const theme = createTheme({
       rippleWhite: themeValues.palette.ambient.rippleWhite,
       rippleBlue: themeValues.palette.ambient.rippleBlue,
     },
-    interstitial: {
-      main: themeValues.palette.interstitial.main,
-    },
+
     categories: {
       groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
       riverFlows: themeValues.palette.categories.riverFlows,
@@ -526,7 +446,7 @@ const theme = createTheme({
   },
   // Type family, sizes, and weights
   typography: {
-    fontFamily: themeValues.fontFamily.primary,
+    fontFamily: themeValues.fontFamily.neueHaasText,
     htmlFontSize: 16,
     fontSize: 16,
     fontWeightLight: 300,
@@ -978,13 +898,13 @@ const theme = createTheme({
           margin: 0;
           padding: 0;
           height: 100%;
-          font-family: ${themeValues.fontFamily.primary};
+          font-family: ${themeValues.fontFamily.neueHaasText}
           overflow-x: hidden; /* Prevent horizontal scrollbar */
         }
         body {
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          font-family: ${themeValues.fontFamily.primary};
+          font-family: ${themeValues.fontFamily.neueHaasText}
         }
       `,
     },
@@ -1234,14 +1154,8 @@ const theme = createTheme({
         {
           props: { variant: "body2" },
           style: ({ theme }) => ({
-            marginBottom: theme.spacing(4), // 32px between body2 paragraphs
+            marginBottom: theme.spacing(4),
           }),
-        },
-        {
-          props: { color: "teal" },
-          style: {
-            color: "#135773", // Teal color
-          },
         },
       ],
     },
@@ -1323,9 +1237,7 @@ declare module "@mui/material/styles" {
       rippleWhite: string
       rippleBlue: string
     }
-    interstitial: {
-      main: string
-    }
+
     categories: {
       groundwaterManagement: string
       riverFlows: string
@@ -1376,9 +1288,7 @@ declare module "@mui/material/styles" {
       rippleWhite?: string
       rippleBlue?: string
     }
-    interstitial?: {
-      main?: string
-    }
+
     categories?: {
       groundwaterManagement?: string
       riverFlows?: string
