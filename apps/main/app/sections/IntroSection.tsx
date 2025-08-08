@@ -879,6 +879,7 @@ const IntroSection: React.FC = () => {
                       },
                       { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                       { name: "scenarios", glossaryTerm: "Scenarios" },
+                      { name: "climate", glossaryTerm: "Changing climate" },
                     ]
 
                     // Find all term positions in the text
