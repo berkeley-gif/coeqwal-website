@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
-import { BasePanel, LeadingMarkerText, ArrowHead } from "@repo/ui"
+import { BasePanel, LeadingMarkerText, ArrowHead, Spacer } from "@repo/ui"
 import { PlayArrowIcon } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 
@@ -253,6 +253,46 @@ export default function ContentPanels({
               })}
             >
               <ArrowHead />
+            </IconButton>
+          </Box>
+        </Box>
+      </BasePanel>
+
+      <Spacer height={{ xs: 48, md: 96 }} />
+
+      {/* Third simple panel - Empower (single column, centered, last) */}
+      <BasePanel
+        fullHeight={false}
+        background="transparent"
+        paddingVariant="wide"
+        sx={{ pt: 0, pb: 0 }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            color: (theme) => theme.palette.blue.darkest,
+          }}
+        >
+          <LeadingMarkerText title="Empower" bodySpansFull>
+            <Typography variant="body2" sx={{ textAlign: "center" }}>
+              your community with data that helps you understand the impacts of operational decisions
+            </Typography>
+          </LeadingMarkerText>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <IconButton
+              color="inherit"
+              aria-label="scroll-down"
+              sx={(theme) => ({
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+              })}
+            >
+              <ArrowHead style={{ transform: "rotate(90deg)" }} />
             </IconButton>
           </Box>
         </Box>
