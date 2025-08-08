@@ -1033,35 +1033,33 @@ function PanelWithDetail({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "flex-start",
+                  justifyContent: "space-between",
+                  gap: 2,
                   width: "100%",
                   pointerEvents: "auto",
                 }}
               >
-                {title}
-                {content && content}{" "}
-                {/* Render content if provided (for backward compatibility) */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  {title}
+                  {content && content}
+                </Box>
+                {!hideDetailArrow && (
+                  <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <IconButton
+                      onClick={onToggleDetail}
+                      sx={(theme) => ({
+                        width: { xs: 40, md: 48 },
+                        height: { xs: 40, md: 48 },
+                        color: theme.palette.blue.darkest,
+                        border: "none",
+                        borderRadius: theme.borderRadius.rounded,
+                      })}
+                    >
+                      <ArrowHead style={{ width: 36, height: 36 }} />
+                    </IconButton>
+                  </Box>
+                )}
               </Box>
-
-              {/* Right centered arrow icon - only shown when not hidden */}
-              {!hideDetailArrow && (
-                <IconButton
-                  onClick={onToggleDetail}
-                  sx={(theme) => ({
-                    position: "absolute",
-                    right: 30,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: theme.palette.blue.darkest,
-                    border: "none",
-                    borderRadius: theme.borderRadius.rounded,
-                    width: 60,
-                    height: 60,
-                  })}
-                >
-                  <ArrowHead style={{ width: 36, height: 36 }} />
-                </IconButton>
-              )}
 
               {/* Bottom scroll arrow - absolutely positioned within the panel */}
               {!hideBottomArrow && (
