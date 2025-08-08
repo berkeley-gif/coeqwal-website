@@ -407,7 +407,7 @@ const EditableNeedsRenderer = ({
           <Box
             sx={{
               width: "5px",
-      
+
               mx: 2,
             }}
             id="divider"

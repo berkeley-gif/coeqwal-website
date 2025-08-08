@@ -711,13 +711,19 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           if (deltaOutflow in operationDirections) {
             if (operationDirections[deltaOutflow] === "increase") {
               increaseTypeOutcomes.push(
-                <ColoredText key={`inc-delta`} color={theme.palette.blue.bright}>
+                <ColoredText
+                  key={`inc-delta`}
+                  color={theme.palette.blue.bright}
+                >
                   {formattedText}
                 </ColoredText>,
               )
             } else {
               decreaseTypeOutcomes.push(
-                <ColoredText key={`dec-delta`} color={theme.palette.blue.bright}>
+                <ColoredText
+                  key={`dec-delta`}
+                  color={theme.palette.blue.bright}
+                >
                   {formattedText}
                 </ColoredText>,
               )
@@ -725,7 +731,10 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
           } else {
             // FALLBACK: If no direction is set, use the "affect" group
             affectTypeOutcomes.push(
-              <ColoredText key={`affect-delta`} color={theme.palette.blue.bright}>
+              <ColoredText
+                key={`affect-delta`}
+                color={theme.palette.blue.bright}
+              >
                 {formattedText}
               </ColoredText>,
             )
@@ -1429,7 +1438,6 @@ const QuestionSummary: React.FC<QuestionSummaryProps> = () => {
   return (
     <Box
       style={{
-
         width: "100%",
         position: "relative",
         zIndex: 1000,

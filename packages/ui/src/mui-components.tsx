@@ -48,6 +48,7 @@ export {
   AlertTitle,
   Tooltip,
   CircularProgress,
+  Fade,
 
   // Utility components
   useMediaQuery,

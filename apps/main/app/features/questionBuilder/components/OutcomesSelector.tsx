@@ -124,7 +124,6 @@ const OutcomesSelector: React.FC = () => {
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-
           }}
         >
           {swapped ? (
@@ -169,13 +168,11 @@ const OutcomesSelector: React.FC = () => {
             py: 0.75,
             fontWeight: 500,
             "&:hover": {
-    
               color: theme.palette.primary.main,
               borderColor: theme.palette.primary.main,
               border: "1px solid",
             },
             "&:active": {
-    
               color: theme.palette.primary.main,
               borderColor: theme.palette.primary.main,
               border: "1px solid",

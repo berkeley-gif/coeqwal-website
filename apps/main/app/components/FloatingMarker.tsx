@@ -2,7 +2,7 @@
 
 import { motion } from "@repo/motion"
 import Image from "next/image"
-import { Box } from "@mui/material"
+import { Box } from "@repo/ui/mui"
 import { SxProps, Theme } from "@mui/material/styles"
 
 interface FloatingMarkerProps {
@@ -13,7 +13,13 @@ interface FloatingMarkerProps {
   size?: number | string | Record<string, number | string> // responsive size
 }
 
-export default function FloatingMarker({ src, left, right, top, size = 80 }: FloatingMarkerProps) {
+export default function FloatingMarker({
+  src,
+  left,
+  right,
+  top,
+  size = 80,
+}: FloatingMarkerProps) {
   // Generate random parameters for each marker to create unique movement
   const bobDelay = Math.random() * 3 // 0-3 seconds
   const driftDelay = Math.random() * 5 // 0-5 seconds
@@ -29,22 +35,28 @@ export default function FloatingMarker({ src, left, right, top, size = 80 }: Flo
     ...(left && { left }),
     ...(right && { right }),
     // Handle responsive size
-    width: typeof size === "object" ? 
-      Object.fromEntries(
-        Object.entries(size).map(([key, value]) => [
-          key, 
-          typeof value === "number" ? `${value}px` : value
-        ])
-      ) : 
-      typeof size === "number" ? `${size}px` : size,
-    height: typeof size === "object" ? 
-      Object.fromEntries(
-        Object.entries(size).map(([key, value]) => [
-          key, 
-          typeof value === "number" ? `${value}px` : value
-        ])
-      ) : 
-      typeof size === "number" ? `${size}px` : size,
+    width:
+      typeof size === "object"
+        ? Object.fromEntries(
+            Object.entries(size).map(([key, value]) => [
+              key,
+              typeof value === "number" ? `${value}px` : value,
+            ]),
+          )
+        : typeof size === "number"
+          ? `${size}px`
+          : size,
+    height:
+      typeof size === "object"
+        ? Object.fromEntries(
+            Object.entries(size).map(([key, value]) => [
+              key,
+              typeof value === "number" ? `${value}px` : value,
+            ]),
+          )
+        : typeof size === "number"
+          ? `${size}px`
+          : size,
   }
 
   // Calculate sizes prop for Image component (for responsive loading)
@@ -52,14 +64,16 @@ export default function FloatingMarker({ src, left, right, top, size = 80 }: Flo
     if (typeof size === "object") {
       // For responsive sizes, create a sizes string
       const entries = Object.entries(size)
-      return entries.map(([breakpoint, value]) => {
-        const sizeValue = typeof value === "number" ? `${value}px` : value
-        if (breakpoint === "xs") return `(max-width: 600px) ${sizeValue}`
-        if (breakpoint === "sm") return `(max-width: 900px) ${sizeValue}`
-        if (breakpoint === "md") return `(max-width: 1200px) ${sizeValue}`
-        if (breakpoint === "lg") return `(max-width: 1536px) ${sizeValue}`
-        return sizeValue
-      }).join(", ")
+      return entries
+        .map(([breakpoint, value]) => {
+          const sizeValue = typeof value === "number" ? `${value}px` : value
+          if (breakpoint === "xs") return `(max-width: 600px) ${sizeValue}`
+          if (breakpoint === "sm") return `(max-width: 900px) ${sizeValue}`
+          if (breakpoint === "md") return `(max-width: 1200px) ${sizeValue}`
+          if (breakpoint === "lg") return `(max-width: 1536px) ${sizeValue}`
+          return sizeValue
+        })
+        .join(", ")
     }
     return typeof size === "number" ? `${size}px` : size || "80px"
   }
@@ -72,7 +86,7 @@ export default function FloatingMarker({ src, left, right, top, size = 80 }: Flo
         // Vertical bobbing motion
         y: [0, -bobAmount, 0],
         // Horizontal drifting motion
-        x: [-driftAmount/2, driftAmount/2, -driftAmount/2],
+        x: [-driftAmount / 2, driftAmount / 2, -driftAmount / 2],
         // Subtle rotation for more organic movement
         rotate: [-1, 1, -1],
       }}

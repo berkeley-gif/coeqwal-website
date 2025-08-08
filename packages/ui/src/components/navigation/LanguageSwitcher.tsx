@@ -62,7 +62,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             color: (theme) => theme.palette.blue.darkest,
             border: "none",
             transform: "translateY(-1px)",
-            boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            boxShadow: (theme) =>
+              `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&::before": {
               opacity: 1,
             },
@@ -76,7 +77,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
               backgroundColor: (theme) => theme.palette.blue.dark,
               border: "none",
               transform: "translateY(-1px)",
-              boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
+              boxShadow: (theme) =>
+                `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
             },
           },
           "&::before": {
@@ -86,7 +88,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             left: "-100%",
             width: "100%",
             height: "100%",
-            background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+            background:
+              "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
             transition: "left 0.5s ease",
             opacity: 0,
           },
@@ -115,7 +118,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             color: (theme) => theme.palette.blue.darkest,
             border: "none",
             transform: "translateY(-1px)",
-            boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            boxShadow: (theme) =>
+              `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&::before": {
               opacity: 1,
             },
@@ -129,7 +133,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
               backgroundColor: (theme) => theme.palette.blue.dark,
               border: "none",
               transform: "translateY(-1px)",
-              boxShadow: (theme) => `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
+              boxShadow: (theme) =>
+                `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
             },
           },
           "&::before": {
@@ -139,7 +144,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             left: "-100%",
             width: "100%",
             height: "100%",
-            background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+            background:
+              "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
             transition: "left 0.5s ease",
             opacity: 0,
           },

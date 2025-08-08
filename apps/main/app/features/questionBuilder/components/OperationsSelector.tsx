@@ -99,227 +99,228 @@ interface OperationCard {
 export const OPERATION_CARDS = (theme: Theme): OperationCard[] => {
   const WATER_PALETTE = getWaterPalette(theme)
   return [
-  {
-    id: "current-operations",
-    title: "Current operations",
-    term: "current operations",
-    switchedTerm: "current operations",
-    bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
-    titleColor: WATER_PALETTE.currentOperations.secondary,
-    isSingular: false, // plural - use "do"
-    subOptions: [
-      {
-        id: "use-as-comparison",
-        label: "Use as comparison",
-        term: "current operations",
-        switchedTerm: "current operations",
-        isSingular: false, // plural - use "do"
-      },
-    ],
-  },
-  // {
-  //   id: "remove-tucps",
-  //   title: "What if we removed temporary emergency measures (TUCP's)?",
-  //   term: "removing emergency measures",
-  //   bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
-  //   titleColor: WATER_PALETTE.emergencyMeasures.secondary,
-  //   subOptions: [
-  //     {
-  //       id: "select-tucps",
-  //       label: "Select",
-  //       term: "removing TUCPs",
-  //     },
-  //   ],
-  // },
-  {
-    id: "limit-groundwater",
-    title: "What if we limited groundwater pumping?",
-    term: "limiting groundwater pumping",
-    switchedTerm: "groundwater limitation",
-    bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
-    titleColor: WATER_PALETTE.groundwaterManagement.secondary,
-    isSingular: true, // singular - use "does"
-    subOptions: [
-      {
-        id: "sjv-only",
-        label: "...in the San Joaquin Valley only",
-        term: "limiting groundwater pumping",
-        switchedTerm: "groundwater pumping",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "both-valleys",
-        label: "...in both the Sacramento and San Joaquin Valleys",
-        term: "valley-wide groundwater limits",
-        switchedTerm: "valley-wide groundwater scenario",
-        isSingular: false, // singular - use "does"
-      },
-      {
-        id: "sjv-reduced-acreage",
-        label: "...in the San Joaquin Valley and reduced agricultural acreage",
-        term: "SJV groundwater & acreage limits",
-        switchedTerm: "San Joaquin Valley groundwater & acreage",
-        isSingular: false, // singular - use "does"
-      },
-      {
-        id: "both-valleys-reduced-acreage",
-        label:
-          "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
-        term: "valley-wide groundwater & acreage limits",
-        switchedTerm: "valley-wide groundwater & acreage",
-        isSingular: false, // singular - use "does"
-      },
-    ],
-  },
-  {
-    id: "change-stream-flows",
-    title: "What if we changed how water flows in our streams?",
-    term: "changing stream flows",
-    bullet: { color: WATER_PALETTE.streamFlowManagement.primary, size: 24 },
-    titleColor: WATER_PALETTE.streamFlowManagement.secondary,
-    isSingular: true, // singular - use "does"
-    subOptions: [
-      {
-        id: "no-environmental-flows",
-        label: "...with no environmental flow requirements",
-        term: "environmental flows",
-        isSingular: false, // singular - use "does"
-      },
-      {
-        id: "functional-flows-balance",
-        label:
-          "...with functional flows to balance water needs with ecosystem support",
-        term: "environmental flows",
-        isSingular: false, // singular - use "does"
-      },
-      {
-        id: "functional-flows-reduced",
-        label:
-          "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
-        term: "environmental flows",
-        isSingular: false, // singular - use "does"
-      },
-      {
-        id: "enhanced-functional-flows-salmon",
-        label: "...with enhanced functional flows to support salmon",
-        term: "environmental flows",
-        isSingular: false, // singular - use "does"
-      },
-      {
-        id: "enhanced-functional-flows-salmon-reduced",
-        label:
-          "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
-        term: "environmental flows",
-        isSingular: false, // singular - use "does"
-      },
-    ],
-  },
-  {
-    id: "prioritize-drinking-water",
-    title: "What if we prioritized drinking water?",
-    term: "prioritizing drinking water",
-    bullet: { color: WATER_PALETTE.urbanWaterPriorities.primary, size: 24 },
-    titleColor: WATER_PALETTE.urbanWaterPriorities.secondary,
-    isSingular: true, // singular - use "does"
-    subOptions: [
-      {
-        id: "adjust-urban-demand",
-        label: "...by adjusting urban demand patterns",
-        term: "drinking water",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "prioritize-impacted-communities",
-        label:
-          "...by prioritizing drinking water for the most impacted communities",
-        term: "drinking water",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "prioritize-underserved-communities",
-        label:
-          "...by prioritizing drinking water for all historically-underserved communities",
-        term: "drinking water",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "prioritize-all-communities",
-        label: "...for all communities across the system",
-        term: "drinking water",
-        isSingular: true, // singular - use "does"
-      },
-    ],
-  },
-  {
-    id: "balance-delta-uses",
-    title: "What if we balanced water uses in the Delta?",
-    term: "balancing Delta water uses",
-    bullet: { color: WATER_PALETTE.deltaBalance.primary, size: 24 },
-    titleColor: WATER_PALETTE.deltaBalance.secondary,
-    isSingular: true, // singular - use "does"
-    subOptions: [
-      {
-        id: "delta-outflows-tier1",
-        label: "...by increasing Delta outflows",
-        term: "Delta water uses",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "reduce-sacramento-valley-deliveries",
-        label: "...by reducing Sacramento Valley deliveries",
-        term: "Delta water uses",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "more-carryover-storage-shasta",
-        label: "...by requiring more carryover storage in Shasta Reservoir",
-        term: "Delta water uses",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "less-carryover-storage-shasta",
-        label: "...by allowing less carryover storage in Shasta Reservoir",
-        term: "Delta water uses",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "reduce-delta-exports-tier1",
-        label: "...by reducing Delta exports",
-        term: "Delta water uses",
-        isSingular: true, // singular - use "does"
-      },
-    ],
-  },
-  {
-    id: "new-infrastructure",
-    title: "What if we added new water infrastructure?",
-    term: "adding infrastructure",
-    bullet: { color: WATER_PALETTE.infrastructure.primary, size: 24 },
-    titleColor: WATER_PALETTE.infrastructure.secondary,
-    isSingular: true, // singular - use "does"
-    subOptions: [
-      {
-        id: "delta-conveyance-tunnel",
-        label: "...Delta conveyance tunnel",
-        term: "Delta infrastructure",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "delta-conveyance-reduced-groundwater",
-        label:
-          "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
-        term: "Delta infrastructure",
-        isSingular: true, // singular - use "does"
-      },
-      {
-        id: "delta-conveyance-functional-flows",
-        label: "...Delta conveyance with functional flows",
-        term: "Delta infrastructure",
-        isSingular: true, // singular - use "does"
-      },
-    ],
-  },
-]
+    {
+      id: "current-operations",
+      title: "Current operations",
+      term: "current operations",
+      switchedTerm: "current operations",
+      bullet: { color: WATER_PALETTE.currentOperations.primary, size: 24 },
+      titleColor: WATER_PALETTE.currentOperations.secondary,
+      isSingular: false, // plural - use "do"
+      subOptions: [
+        {
+          id: "use-as-comparison",
+          label: "Use as comparison",
+          term: "current operations",
+          switchedTerm: "current operations",
+          isSingular: false, // plural - use "do"
+        },
+      ],
+    },
+    // {
+    //   id: "remove-tucps",
+    //   title: "What if we removed temporary emergency measures (TUCP's)?",
+    //   term: "removing emergency measures",
+    //   bullet: { color: WATER_PALETTE.emergencyMeasures.primary, size: 24 },
+    //   titleColor: WATER_PALETTE.emergencyMeasures.secondary,
+    //   subOptions: [
+    //     {
+    //       id: "select-tucps",
+    //       label: "Select",
+    //       term: "removing TUCPs",
+    //     },
+    //   ],
+    // },
+    {
+      id: "limit-groundwater",
+      title: "What if we limited groundwater pumping?",
+      term: "limiting groundwater pumping",
+      switchedTerm: "groundwater limitation",
+      bullet: { color: WATER_PALETTE.groundwaterManagement.primary, size: 24 },
+      titleColor: WATER_PALETTE.groundwaterManagement.secondary,
+      isSingular: true, // singular - use "does"
+      subOptions: [
+        {
+          id: "sjv-only",
+          label: "...in the San Joaquin Valley only",
+          term: "limiting groundwater pumping",
+          switchedTerm: "groundwater pumping",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "both-valleys",
+          label: "...in both the Sacramento and San Joaquin Valleys",
+          term: "valley-wide groundwater limits",
+          switchedTerm: "valley-wide groundwater scenario",
+          isSingular: false, // singular - use "does"
+        },
+        {
+          id: "sjv-reduced-acreage",
+          label:
+            "...in the San Joaquin Valley and reduced agricultural acreage",
+          term: "SJV groundwater & acreage limits",
+          switchedTerm: "San Joaquin Valley groundwater & acreage",
+          isSingular: false, // singular - use "does"
+        },
+        {
+          id: "both-valleys-reduced-acreage",
+          label:
+            "...in both the Sacramento and San Joaquin Valleys with reduced agricultural acreage",
+          term: "valley-wide groundwater & acreage limits",
+          switchedTerm: "valley-wide groundwater & acreage",
+          isSingular: false, // singular - use "does"
+        },
+      ],
+    },
+    {
+      id: "change-stream-flows",
+      title: "What if we changed how water flows in our streams?",
+      term: "changing stream flows",
+      bullet: { color: WATER_PALETTE.streamFlowManagement.primary, size: 24 },
+      titleColor: WATER_PALETTE.streamFlowManagement.secondary,
+      isSingular: true, // singular - use "does"
+      subOptions: [
+        {
+          id: "no-environmental-flows",
+          label: "...with no environmental flow requirements",
+          term: "environmental flows",
+          isSingular: false, // singular - use "does"
+        },
+        {
+          id: "functional-flows-balance",
+          label:
+            "...with functional flows to balance water needs with ecosystem support",
+          term: "environmental flows",
+          isSingular: false, // singular - use "does"
+        },
+        {
+          id: "functional-flows-reduced",
+          label:
+            "...with functional flows, reduced groundwater pumping, and reduced agricultural deliveries",
+          term: "environmental flows",
+          isSingular: false, // singular - use "does"
+        },
+        {
+          id: "enhanced-functional-flows-salmon",
+          label: "...with enhanced functional flows to support salmon",
+          term: "environmental flows",
+          isSingular: false, // singular - use "does"
+        },
+        {
+          id: "enhanced-functional-flows-salmon-reduced",
+          label:
+            "...with enhanced functional flows to support salmon, reduced groundwater pumping, and reduced agricultural deliveries",
+          term: "environmental flows",
+          isSingular: false, // singular - use "does"
+        },
+      ],
+    },
+    {
+      id: "prioritize-drinking-water",
+      title: "What if we prioritized drinking water?",
+      term: "prioritizing drinking water",
+      bullet: { color: WATER_PALETTE.urbanWaterPriorities.primary, size: 24 },
+      titleColor: WATER_PALETTE.urbanWaterPriorities.secondary,
+      isSingular: true, // singular - use "does"
+      subOptions: [
+        {
+          id: "adjust-urban-demand",
+          label: "...by adjusting urban demand patterns",
+          term: "drinking water",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "prioritize-impacted-communities",
+          label:
+            "...by prioritizing drinking water for the most impacted communities",
+          term: "drinking water",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "prioritize-underserved-communities",
+          label:
+            "...by prioritizing drinking water for all historically-underserved communities",
+          term: "drinking water",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "prioritize-all-communities",
+          label: "...for all communities across the system",
+          term: "drinking water",
+          isSingular: true, // singular - use "does"
+        },
+      ],
+    },
+    {
+      id: "balance-delta-uses",
+      title: "What if we balanced water uses in the Delta?",
+      term: "balancing Delta water uses",
+      bullet: { color: WATER_PALETTE.deltaBalance.primary, size: 24 },
+      titleColor: WATER_PALETTE.deltaBalance.secondary,
+      isSingular: true, // singular - use "does"
+      subOptions: [
+        {
+          id: "delta-outflows-tier1",
+          label: "...by increasing Delta outflows",
+          term: "Delta water uses",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "reduce-sacramento-valley-deliveries",
+          label: "...by reducing Sacramento Valley deliveries",
+          term: "Delta water uses",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "more-carryover-storage-shasta",
+          label: "...by requiring more carryover storage in Shasta Reservoir",
+          term: "Delta water uses",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "less-carryover-storage-shasta",
+          label: "...by allowing less carryover storage in Shasta Reservoir",
+          term: "Delta water uses",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "reduce-delta-exports-tier1",
+          label: "...by reducing Delta exports",
+          term: "Delta water uses",
+          isSingular: true, // singular - use "does"
+        },
+      ],
+    },
+    {
+      id: "new-infrastructure",
+      title: "What if we added new water infrastructure?",
+      term: "adding infrastructure",
+      bullet: { color: WATER_PALETTE.infrastructure.primary, size: 24 },
+      titleColor: WATER_PALETTE.infrastructure.secondary,
+      isSingular: true, // singular - use "does"
+      subOptions: [
+        {
+          id: "delta-conveyance-tunnel",
+          label: "...Delta conveyance tunnel",
+          term: "Delta infrastructure",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "delta-conveyance-reduced-groundwater",
+          label:
+            "...Delta conveyance tunnel with reduced groundwater pumping and deliveries",
+          term: "Delta infrastructure",
+          isSingular: true, // singular - use "does"
+        },
+        {
+          id: "delta-conveyance-functional-flows",
+          label: "...Delta conveyance with functional flows",
+          term: "Delta infrastructure",
+          isSingular: true, // singular - use "does"
+        },
+      ],
+    },
+  ]
 }
 
 // Also export a standalone version that doesn't require calling the function
@@ -410,7 +411,7 @@ export const OPERATION_CARD_DEFINITIONS: OperationCard[] = [
       { id: "delta-conveyance-functional-flows", isSingular: true },
     ],
   },
-]  // End of OPERATION_CARD_DEFINITIONS array
+] // End of OPERATION_CARD_DEFINITIONS array
 
 // Define the SubOption interface explicitly for the component
 interface SubOption {
@@ -537,7 +538,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
     border: "1px solid rgba(0, 0, 0, 0.12)",
     borderRadius: `${theme.borderRadius.card}px`,
     overflow: "hidden",
-    
+
     padding: theme.spacing(1, 2),
     display: "flex",
     alignItems: "center",
@@ -693,7 +694,6 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-
           }}
         >
           {swapped ? (
@@ -734,10 +734,9 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             py: 0.5,
             fontWeight: 400,
             color: "rgba(0, 0, 0, 0.42)",
-  
+
             border: "none",
             "&:hover": {
-    
               color: "rgba(0, 0, 0, 0.6)",
               textDecoration: "underline",
             },
@@ -798,14 +797,11 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             // High-performance scrollbar styling
             "&::-webkit-scrollbar": {
               width: "14px",
-    
             },
             "&::-webkit-scrollbar-track": {
-    
               margin: theme.spacing(1),
             },
             "&::-webkit-scrollbar-thumb": {
-    
               border: "4px solid white",
               borderRadius: "24px",
             },

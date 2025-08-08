@@ -418,7 +418,6 @@ export function CurrentOpsContent({
           paddingBottom: 4,
         }}
       >
-
         <Stack spacing={3}>
           {glossaryTerms.map((term, index) => (
             <Box

@@ -154,9 +154,7 @@ export default function HeroSection() {
         onClick={handleScrollDown}
         color="white"
         sx={{
-          "& .MuiIconButton-root": {
-            
-          },
+          "& .MuiIconButton-root": {},
         }}
       />
     </Box>

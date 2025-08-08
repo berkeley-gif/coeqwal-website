@@ -419,7 +419,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
     <Box
       sx={{
         width: "100%",
-        
+
         margin: 0, // Remove any default margins
         padding: 0, // Remove any default padding
       }}
@@ -437,7 +437,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
           flexDirection: "column",
           padding: theme.spacing(3), // Reduced padding
           paddingTop: theme.spacing(1), // Minimal top padding
-          
+
           transition: "position 0.3s ease, box-shadow 0.3s ease",
           boxShadow: hasClickedSearch
             ? "0 2px 8px rgba(0, 0, 0, 0.08)"
@@ -490,7 +490,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   border: "1px solid rgba(0, 0, 0, 0.12)",
                   borderRadius: `${theme.borderRadius.card}px !important`,
                   color: theme.palette.primary.dark,
-    
+
                   boxShadow: "none",
                   overflow: "hidden",
                 }}
@@ -516,7 +516,6 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       variant="h5"
                       sx={{
                         color: theme.palette.primary.dark,
-
                       }}
                     >
                       {t("questionBuilder.outcomesSelector.includeClimate")}
@@ -567,7 +566,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   padding: theme.spacing(1.5, 3),
                   bgcolor: theme.palette.primary.dark,
                   color: "white",
-                  
+
                   fontWeight: 600,
                   minHeight: "50px",
                   "&:hover": {
@@ -669,7 +668,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                   cursor: "pointer",
                   mt: 1,
                   fontWeight: "medium",
-                  
+
                   textTransform: "none",
                 }}
               >
@@ -733,10 +732,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                 mb: 2,
               }}
             >
-              <Typography
-                variant="h4"
-                sx={{}}
-              >
+              <Typography variant="h4" sx={{}}>
                 {t("scenarioResults.title")}
               </Typography>
 
@@ -758,7 +754,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                     padding: "8px 12px",
                     borderRadius: "4px",
                     border: "1px solid #ccc",
-                    
+
                     minWidth: "180px",
                   }}
                 >
@@ -860,13 +856,7 @@ const CombinedPanelContent = ({ onOpenThemesDrawer }: CombinedPanelProps) => {
                       borderRadius: "8px",
                     }}
                   >
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{
-
-                      }}
-                    >
+                    <Typography variant="h6" gutterBottom sx={{}}>
                       No scenario data available
                     </Typography>
                     <Typography variant="body1">
