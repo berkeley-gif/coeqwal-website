@@ -19,7 +19,7 @@ export default function ContentPanels({
 }: ContentPanelsProps = {}) {
   // Get theme for color palette
   const theme = useTheme()
-  
+
   // Track which panel is showing details (if any)
   const [activePanel, setActivePanel] = useState<PanelType>(null)
 
@@ -55,7 +55,6 @@ export default function ContentPanels({
           pointerEvents: "auto",
           maxWidth: "620px",
         }}
-        
       >
         how California water flows and operational decisions balance water needs
         across the state
@@ -82,7 +81,6 @@ export default function ContentPanels({
           color: "common.white",
           pointerEvents: "auto",
         }}
-        
       >
         COEQWAL&apos;s &quot;what if&quot; scenarios by theme
       </Typography>
@@ -109,7 +107,6 @@ export default function ContentPanels({
           pointerEvents: "auto",
           maxWidth: "620px",
         }}
-        
       >
         your community with data that helps you understand the impacts of
         operational decisions
@@ -169,7 +166,7 @@ export default function ContentPanels({
         margin: 0, // Remove any default margins
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
-        
+
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
           zIndex: 3, // Push active panels above others (within panels layer)
@@ -990,10 +987,8 @@ function PanelWithDetail({
                     top: "50%",
                     transform: "translateY(-50%)",
                     color: "white",
-        
-                    "&:hover": {
-          
-                    },
+
+                    "&:hover": {},
                     width: 60,
                     height: 60,
                   }}
@@ -1011,10 +1006,8 @@ function PanelWithDetail({
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: "white",
-        
-                    "&:hover": {
-          
-                    },
+
+                    "&:hover": {},
                     width: 60,
                     height: 60,
                   }}
@@ -1086,10 +1079,8 @@ function PanelWithDetail({
                   top: 108,
                   transform: "rotate(180deg)",
                   color: "white",
-      
-                  "&:hover": {
-        
-                  },
+
+                  "&:hover": {},
                   width: 60,
                   height: 60,
                 }}
@@ -1106,10 +1097,8 @@ function PanelWithDetail({
                     left: "50%",
                     transform: "translateX(-50%)",
                     color: "white",
-        
-                    "&:hover": {
-          
-                    },
+
+                    "&:hover": {},
                     width: 60,
                     height: 60,
                   }}

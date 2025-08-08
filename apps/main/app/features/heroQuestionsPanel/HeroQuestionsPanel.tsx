@@ -1,11 +1,11 @@
 "use client"
 
-import { Box, Typography, useTheme } from "@mui/material"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useState, useEffect, useRef } from "react"
 import { BasePanel, TransitionHeadline } from "@repo/ui"
 import type { Theme as AppTheme } from "@mui/material/styles"
 import { PhotoWithQuestions } from "./PhotoWithQuestions"
-import { Fade } from "@mui/material"
+import { Fade } from "@repo/ui/mui"
 import { SxProps } from "@mui/material/styles"
 import type { BasePanelProps } from "@repo/ui"
 
@@ -154,7 +154,7 @@ export function HeroQuestionsPanel({
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        
+
         maxWidth: "100vw",
         overflow: "hidden",
       }}

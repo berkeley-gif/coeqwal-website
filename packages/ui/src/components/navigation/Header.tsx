@@ -249,7 +249,8 @@ export function Header({
                 left: "-100%",
                 width: "100%",
                 height: "100%",
-                background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
                 transition: "left 0.5s ease",
                 opacity: 0,
               },
@@ -284,7 +285,8 @@ export function Header({
                 left: "-100%",
                 width: "100%",
                 height: "100%",
-                background: "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
                 transition: "left 0.5s ease",
                 opacity: 0,
               },
@@ -321,9 +323,10 @@ export function Header({
                   left: "-100%",
                   width: "100%",
                   height: "100%",
-                  background: textColor === "white"
-                    ? "linear-gradient(90deg, transparent, rgba(118, 185, 170, 0.1), transparent)"
-                    : "linear-gradient(90deg, transparent, rgba(255, 216, 126, 0.1), transparent)",
+                  background:
+                    textColor === "white"
+                      ? "linear-gradient(90deg, transparent, rgba(118, 185, 170, 0.1), transparent)"
+                      : "linear-gradient(90deg, transparent, rgba(255, 216, 126, 0.1), transparent)",
                   transition: "left 0.5s ease",
                   opacity: 0,
                 },

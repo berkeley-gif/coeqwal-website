@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
-import { Box, Fade } from "@mui/material"
+import { Box, Fade } from "@repo/ui/mui"
 
 export interface QuestionSvg {
   src: string

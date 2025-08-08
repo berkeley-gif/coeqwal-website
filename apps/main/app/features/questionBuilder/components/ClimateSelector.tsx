@@ -76,7 +76,6 @@ const ClimateSelector: React.FC = () => {
     alignItems: "flex-start",
     marginBottom: theme.spacing(1.5),
     "&:hover": {
-      
       borderRadius: theme.spacing(1),
     },
     transition: "background-color 0.2s",
@@ -115,7 +114,6 @@ const ClimateSelector: React.FC = () => {
           sx={{
             lineHeight: (theme) => theme.cards.typography.hero.lineHeight,
             fontWeight: (theme) => theme.cards.typography.hero.fontWeight,
-
           }}
         >
           <ColoredText color={theme.palette.nature.teal}>
@@ -136,10 +134,9 @@ const ClimateSelector: React.FC = () => {
             py: 0.5,
             fontWeight: 400,
             color: "rgba(0, 0, 0, 0.42)",
-  
+
             border: "none",
             "&:hover": {
-    
               color: "rgba(0, 0, 0, 0.6)",
               textDecoration: "underline",
             },
@@ -159,7 +156,7 @@ const ClimateSelector: React.FC = () => {
           borderRadius: "12px",
           p: 2,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-  
+
           transition: "background-color 0.3s",
         }}
       >

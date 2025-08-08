@@ -61,7 +61,7 @@ import type { CSSProperties } from "react"
 //
 // Scale progression:
 // • h1: 5.75rem (92px) - Hero headlines "Learn. Explore. Empower."
-// • h2: 3.75rem (60px) - Section headlines "What is the future..."  
+// • h2: 3.75rem (60px) - Section headlines "What is the future..."
 // • h3: 2.8rem (44.8px) - Subsection headlines "Rethink California Water"
 // • h4: 2.1rem (33.6px) - Card titles and smaller headlines
 // • h5: 1.575rem (25.2px) - Labels and minor headlines
@@ -73,20 +73,20 @@ import type { CSSProperties } from "react"
 // GT Super Text weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
 //
 
-const H1_FONT = 'gtSuperText' // GT Super Text for h1 headlines
+const H1_FONT = "gtSuperText" // GT Super Text for h1 headlines
 
 const typeScale = {
   // Base sizes for the scale
-  baseBody: '1.25rem',    // 20px - reading size
-  smallBody: '1.125rem',  // 18px - secondary text
-  
+  baseBody: "1.25rem", // 20px - reading size
+  smallBody: "1.125rem", // 18px - secondary text
+
   // Headline sizes (keeping h1 & h2 for visual consistency, harmonizing the rest)
-  h1: '5.75rem',  // 92px - Hero size (unchanged)
-  h2: '3.75rem',  // 60px - Major section headers (unchanged)
-  h3: '2.8rem',   // 44.8px - Subsection headers (harmonious with scale)
-  h4: '2.1rem',   // 33.6px - Card titles (h3 ÷ 1.333)
-  h5: '1.575rem', // 25.2px - Minor headlines (h4 ÷ 1.333)
-  h6: '1.18rem',  // 18.9px - Small headlines (h5 ÷ 1.333)
+  h1: "5.75rem", // 92px - Hero size (unchanged)
+  h2: "3.75rem", // 60px - Major section headers (unchanged)
+  h3: "2.8rem", // 44.8px - Subsection headers (harmonious with scale)
+  h4: "2.1rem", // 33.6px - Card titles (h3 ÷ 1.333)
+  h5: "1.575rem", // 25.2px - Minor headlines (h4 ÷ 1.333)
+  h6: "1.18rem", // 18.9px - Small headlines (h5 ÷ 1.333)
 }
 
 const themeValues = {
@@ -94,7 +94,8 @@ const themeValues = {
   fontFamily: {
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    gtSuperText: '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    gtSuperText:
+      '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions (necessary for layout calculations)
@@ -110,45 +111,45 @@ const themeValues = {
   palette: {
     // Core brand colors (see home panel gradient)
     brand: {
-      sky: "#92C1D5",        // Top of gradient - sky blue
-      water: "#64A4D6",      // Bottom of gradient - water blue
+      sky: "#92C1D5", // Top of gradient - sky blue
+      water: "#64A4D6", // Bottom of gradient - water blue
     },
-    
+
     // Text and UI blues (organized by intensity)
     blue: {
-      darkest: "#3a4574",    // Deep navy - primary text (TODO: should be #2A5287 ?)
-      dark: "#186b88",       // Dark teal - secondary text  
-      medium: "#2d89b6",     // Medium blue - accent text
-      bright: "#449cd9",     // Bright blue - links/interactive
-      light: "#77a2d9",      // Light blue - subtle elements
+      darkest: "#3a4574", // Deep navy - primary text (TODO: should be #2A5287 ?)
+      dark: "#186b88", // Dark teal - secondary text
+      medium: "#2d89b6", // Medium blue - accent text
+      bright: "#449cd9", // Bright blue - links/interactive
+      light: "#77a2d9", // Light blue - subtle elements
     },
-    
+
     // Accent colors - warm tones
     accent: {
-      gold: "#ffd87e",       // Golden yellow - highlights
-      cream: "#fdf0a0",      // Light yellow
+      gold: "#ffd87e", // Golden yellow - highlights
+      cream: "#fdf0a0", // Light yellow
     },
-    
+
     // Nature colors - greens and teals
     nature: {
-      teal: "#76b9aa",       // Medium teal - natural elements
-      sage: "#9fd5cb",       // Light teal - subtle backgrounds
-      mint: "#b1e1c3",       // Pale green - very light elements
-      whisper: "#d1ebc7",    // Very light green - backgrounds
+      teal: "#76b9aa", // Medium teal - natural elements
+      sage: "#9fd5cb", // Light teal - subtle backgrounds
+      mint: "#b1e1c3", // Pale green - very light elements
+      whisper: "#d1ebc7", // Very light green - backgrounds
     },
-    
+
     // Utility colors
     utility: {
       white: "#FFFFFF",
       black: "#000000",
     },
-    
+
     // Ambient/mood elements
     ambient: {
       rippleWhite: "rgba(255, 255, 255, 0.16)", // Water ripples - white at 16% opacity
-      rippleBlue: "rgba(42, 82, 135, 0.16)",    // Water ripples - blue (#2A5287) at 16% opacity
+      rippleBlue: "rgba(42, 82, 135, 0.16)", // Water ripples - blue (#2A5287) at 16% opacity
     },
-  
+
     categories: {
       groundwaterManagement: "#76b9aa", // nature.teal
       riverFlows: "#2d89b6", // blue.medium
@@ -244,16 +245,67 @@ const hoverParagraphDarkenedMixin = {
   },
 } as const
 
-    // Drawer content styling mixins
-    const drawerContentMixins = {
-      contentWrapper: {
-        p: 2,
-        width: "100%",
-        height: "100%",
-        overflow: "auto",
-        color: "text.primary",
-      },
-    } as const
+// Drawer content styling mixins
+const drawerContentMixins = {
+  contentWrapper: {
+    p: 2,
+    width: "100%",
+    height: "100%",
+    overflow: "auto",
+    color: "text.primary",
+  },
+  contentText: {
+    lineHeight: 1.4,
+    color: "text.primary",
+    mb: 3,
+  },
+  infoBox: {
+    mt: 2,
+    p: 2,
+    bgcolor: "rgba(0, 0, 0, 0.03)",
+    borderRadius: 1,
+  },
+  headingText: {
+    fontWeight: "bold",
+    color: "primary.dark",
+  },
+  itemBox: {
+    mb: 1.5,
+    p: 1.5,
+    borderRadius: 1,
+    bgcolor: "rgba(0, 0, 0, 0.02)",
+    cursor: "pointer",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      bgcolor: "rgba(0, 0, 0, 0.05)",
+      transform: "translateX(4px)",
+    },
+  },
+  selectedItemBox: {
+    bgcolor: "rgba(0, 0, 0, 0.08)",
+    boxShadow: "0 0 0 2px rgba(0, 0, 0, 0.1)",
+  },
+  chip: {
+    color: "text.primary",
+    borderColor: "rgba(0, 0, 0, 0.23)",
+    mr: 0.5,
+    mb: 0.5,
+  },
+  icon: {
+    mr: 1.5,
+    mt: 0.5,
+    color: "primary.dark",
+  },
+  secondaryText: {
+    lineHeight: 1.4,
+    color: "text.primary",
+  },
+  bodyText: {
+    mt: 1,
+    lineHeight: 1.4,
+    color: "text.primary",
+  },
+} as const
 
 /* ========================================================
  2. Theme configuration
@@ -420,13 +472,15 @@ const theme = createTheme({
     },
 
     categories: {
-      groundwaterManagement: themeValues.palette.categories.groundwaterManagement,
+      groundwaterManagement:
+        themeValues.palette.categories.groundwaterManagement,
       riverFlows: themeValues.palette.categories.riverFlows,
       urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
       deltaBalance: themeValues.palette.categories.deltaBalance,
       infrastructure: themeValues.palette.categories.infrastructure,
       noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
-      carryoverRequirements: themeValues.palette.categories.carryoverRequirements,
+      carryoverRequirements:
+        themeValues.palette.categories.carryoverRequirements,
       deltaOutflows: themeValues.palette.categories.deltaOutflows,
       urbanDemand: themeValues.palette.categories.urbanDemand,
       exportReductions: themeValues.palette.categories.exportReductions,

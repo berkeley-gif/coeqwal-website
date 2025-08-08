@@ -22,7 +22,7 @@ export function StoreConnectedHeader({
   onSectionClick,
 }: StoreConnectedHeaderProps) {
   const router = useRouter()
-  
+
   // Get individual pieces of state from the store to avoid infinite loop
   const activeTab = useDrawerStore((state) => state.activeTab)
   const openDrawer = useDrawerStore((state) => state.openDrawer)

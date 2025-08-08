@@ -189,24 +189,23 @@ export function HeaderHome({
   const headerTextColor = "white"
 
   // Conditional styling based on variant
-  const variantStyles =
-{
-          backgroundColor: theme.palette.nature.whisper,
-          // buttonBackgroundColor: theme.palette.utility.black,
-          borderRadius: "16px",
-          margin: "16px",
-          border: "none",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          left: 0, // Keep anchored to left when shrinking
-        }
+  const variantStyles = {
+    backgroundColor: theme.palette.nature.whisper,
+    // buttonBackgroundColor: theme.palette.utility.black,
+    borderRadius: "16px",
+    margin: "16px",
+    border: "none",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    left: 0, // Keep anchored to left when shrinking
+  }
 
   // Calculate width for smooth animation
   const getAnimatedWidth = () => {
-      if (!headerIsExpanded && shrunkWidth) {
-        return `${shrunkWidth}px`
-      }
-      return "calc(100% - 32px)"
-    } 
+    if (!headerIsExpanded && shrunkWidth) {
+      return `${shrunkWidth}px`
+    }
+    return "calc(100% - 32px)"
+  }
 
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
