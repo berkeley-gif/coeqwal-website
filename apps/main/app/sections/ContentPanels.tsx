@@ -149,7 +149,7 @@ export default function ContentPanels({
       </Box>
       {/* Image column */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-        <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ maxWidth: "100%", height: "auto" }} />
+        <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ width: "100%", maxWidth: 620, height: "auto" }} />
       </Box>
     </Box>
   )
@@ -158,7 +158,7 @@ export default function ContentPanels({
     <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
       {/* Image column */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-        <Box component="img" src="/images/content/explore.png" alt="Explore" sx={{ maxWidth: "100%", height: "auto" }} />
+        <Box component="img" src="/images/content/explore.png" alt="Explore" sx={{ width: "100%", maxWidth: 620, height: "auto" }} />
       </Box>
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -176,6 +176,17 @@ export default function ContentPanels({
           your community with data that helps you understand the impacts of operational decisions
         </Typography>
       </LeadingMarkerText>
+      {/* Downward arrow after text, in document flow */}
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <IconButton
+          color="inherit"
+          aria-label="open-empower"
+          sx={(theme) => ({ width: 48, height: 48, borderRadius: theme.borderRadius.rounded, border: "none" })}
+          onClick={() => togglePanelDetail("empower")}
+        >
+          <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
+        </IconButton>
+      </Box>
     </Box>
   )
   // Get background color for each panel
@@ -933,6 +944,7 @@ interface PanelWithDetailProps {
 }
 
 function PanelWithDetail({
+  panelType,
   isActive,
   onToggleDetail,
   bgColor,
@@ -1061,23 +1073,39 @@ function PanelWithDetail({
                 )}
               </Box>
 
-              {/* Bottom scroll arrow - absolutely positioned within the panel */}
+              {/* Bottom scroll arrow */}
               {!hideBottomArrow && (
-                <IconButton
-                  sx={(theme) => ({
-                    position: "absolute",
-                    bottom: 20,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    color: theme.palette.blue.darkest,
-                    border: "none",
-                    borderRadius: theme.borderRadius.rounded,
-                    width: 60,
-                    height: 60,
-                  })}
-                >
-                  <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
-                </IconButton>
+                panelType === "empower" ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                    <IconButton
+                      sx={(theme) => ({
+                        color: theme.palette.blue.darkest,
+                        border: "none",
+                        borderRadius: theme.borderRadius.rounded,
+                        width: 60,
+                        height: 60,
+                      })}
+                    >
+                      <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <IconButton
+                    sx={(theme) => ({
+                      position: "absolute",
+                      bottom: 20,
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      color: theme.palette.blue.darkest,
+                      border: "none",
+                      borderRadius: theme.borderRadius.rounded,
+                      width: 60,
+                      height: 60,
+                    })}
+                  >
+                    <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
+                  </IconButton>
+                )
               )}
             </Box>
           </motion.div>
