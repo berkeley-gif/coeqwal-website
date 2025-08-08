@@ -1,5 +1,5 @@
 import React from "react"
-import { BasePanel } from "@repo/ui"
+import { BasePanel, Spacer } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
@@ -10,7 +10,7 @@ import { useDrawerStore } from "@repo/state"
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
 
-  // Hero section markers absolutely positioned to align with California map
+  // Hero section markers, absolutely positioned to align with California map background image
   // TODO: this isn't the best approach for responsive design.
   const markerSpecs = [
     {
@@ -137,7 +137,10 @@ const IntroSection: React.FC = () => {
           background="transparent"
           includeHeaderSpacing={false}
           sx={{
-            paddingTop: { xs: "calc(64px + 3rem)", md: "calc(80px + 6rem)" }, // Header height + original padding
+            paddingTop: (theme) => ({
+              xs: `calc(${theme.layout.headerHeight}px + 3rem)`,
+              md: `calc(${theme.layout.headerHeight}px + 6rem)`,
+            }),
             paddingBottom: { xs: 3, md: 6 },
             paddingLeft: { xs: 6, md: 20 },
             paddingRight: { xs: 3, md: 6 },
@@ -270,6 +273,9 @@ const IntroSection: React.FC = () => {
           </Box>
         </BasePanel>
       </Box>
+
+      {/* Spacer between full-screen panels */}
+      <Spacer height={{ xs: 48, md: 96 }} />
 
       {/* Second panel - Overview content */}
       <Box
