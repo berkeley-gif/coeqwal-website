@@ -80,10 +80,10 @@ const typeScale = {
   baseBody: "1.25rem", // 20px - reading size
   smallBody: "1.125rem", // 18px - secondary text
 
-  // Headline sizes (keeping h1 & h2 for visual consistency, harmonizing the rest)
-  h1: "5.75rem", // 92px - Hero size (unchanged)
-  h2: "3.75rem", // 60px - Major section headers (unchanged)
-  h3: "2.8rem", // 44.8px - Subsection headers (harmonious with scale)
+  // Headline sizes
+  h1: "5.75rem", // 92px - Hero size
+  h2: "3.75rem", // 60px - Major section headers
+  h3: "2.8rem", // 44.8px - Subsection headers
   h4: "2.1rem", // 33.6px - Card titles (h3 ÷ 1.333)
   h5: "1.575rem", // 25.2px - Minor headlines (h4 ÷ 1.333)
   h6: "1.18rem", // 18.9px - Small headlines (h5 ÷ 1.333)
@@ -143,6 +143,20 @@ const themeValues = {
     utility: {
       white: "#FFFFFF",
       black: "#000000",
+    },
+
+    // MUI greys
+    grey: {
+      50: "#f7fafc", // Very light grey for backgrounds
+      100: "#edf2f7",
+      200: "#e2e8f0",
+      300: "#cbd5e0",
+      400: "#a0aec0",
+      500: "#718096",
+      600: "#4a5568", // Dark grey for text
+      700: "#2d3748",
+      800: "#1a202c",
+      900: "#171923",
     },
 
     // Ambient/mood elements
@@ -250,13 +264,18 @@ const hoverParagraphDarkenedMixin = {
 const scenarioCardListMixin = {
   "& ul": {
     margin: 0,
-    paddingLeft: "16px",
+    paddingLeft: "20px", // Slightly more indentation
     "& li": {
-      fontSize: "1.125rem", // body2 size
-      lineHeight: 1.4,
-      marginBottom: "4px",
+      fontSize: "1rem",
+      lineHeight: 1.6, // Good reading line height
+      marginBottom: "8px", // Good spacing between items
+      color: "inherit",
       "&:last-child": {
         marginBottom: 0,
+      },
+      // Add bullet styling
+      "&::marker": {
+        color: "inherit",
       },
     },
   },
@@ -498,6 +517,18 @@ const theme = createTheme({
       white: themeValues.palette.utility.white,
       black: themeValues.palette.utility.black,
     },
+    grey: {
+      50: themeValues.palette.grey[50],
+      100: themeValues.palette.grey[100],
+      200: themeValues.palette.grey[200],
+      300: themeValues.palette.grey[300],
+      400: themeValues.palette.grey[400],
+      500: themeValues.palette.grey[500],
+      600: themeValues.palette.grey[600],
+      700: themeValues.palette.grey[700],
+      800: themeValues.palette.grey[800],
+      900: themeValues.palette.grey[900],
+    },
     ambient: {
       rippleWhite: themeValues.palette.ambient.rippleWhite,
       rippleBlue: themeValues.palette.ambient.rippleBlue,
@@ -558,25 +589,25 @@ const theme = createTheme({
       lineHeight: 1.05,
     },
     h3: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h4,
       fontWeight: 500,
       lineHeight: 1.2,
     },
     h5: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h5,
       fontWeight: 500,
       lineHeight: 1.3,
     },
     h6: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h6,
       fontWeight: 500,
       lineHeight: 1.4,
@@ -1324,9 +1355,9 @@ const theme = createTheme({
     },
     MuiTooltip: {
       defaultProps: {
-        enterDelay: 300,        // Slight delay before showing (prevents accidental triggers)
-        leaveDelay: 200,        // Delay before hiding (gives time to move cursor)
-        enterNextDelay: 100,    // Faster subsequent tooltips
+        enterDelay: 300, // Slight delay before showing (prevents accidental triggers)
+        leaveDelay: 200, // Delay before hiding (gives time to move cursor)
+        enterNextDelay: 100, // Faster subsequent tooltips
       },
       styleOverrides: {
         tooltip: ({ theme }) => ({
@@ -1352,23 +1383,23 @@ const theme = createTheme({
         // Create a safe area between trigger and tooltip
         popper: {
           '&[data-popper-placement*="top"]': {
-            '& .MuiTooltip-tooltip': {
-              marginBottom: '6px',
+            "& .MuiTooltip-tooltip": {
+              marginBottom: "6px",
             },
           },
           '&[data-popper-placement*="bottom"]': {
-            '& .MuiTooltip-tooltip': {
-              marginTop: '6px',
+            "& .MuiTooltip-tooltip": {
+              marginTop: "6px",
             },
           },
           '&[data-popper-placement*="left"]': {
-            '& .MuiTooltip-tooltip': {
-              marginRight: '6px',
+            "& .MuiTooltip-tooltip": {
+              marginRight: "6px",
             },
           },
           '&[data-popper-placement*="right"]': {
-            '& .MuiTooltip-tooltip': {
-              marginLeft: '6px',
+            "& .MuiTooltip-tooltip": {
+              marginLeft: "6px",
             },
           },
         },
@@ -1452,6 +1483,7 @@ declare module "@mui/material/styles" {
       white: string
       black: string
     }
+
     ambient: {
       rippleWhite: string
       rippleBlue: string
@@ -1503,6 +1535,7 @@ declare module "@mui/material/styles" {
       white?: string
       black?: string
     }
+
     ambient?: {
       rippleWhite?: string
       rippleBlue?: string

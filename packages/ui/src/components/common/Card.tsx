@@ -50,7 +50,7 @@ const StyledCard = styled(Paper, {
     overflow: "hidden",
     transition: "none",
     border: theme.border.none,
-    padding: theme.spacing(3),
+    padding: theme.spacing(4),
     boxShadow: "none",
 
     // Color variants as accent borders
@@ -142,28 +142,33 @@ export function ScenarioCard({
   return (
     <StyledCard width={width} height={height} sx={sx} {...rest}>
       <CardContent>
-        {/* Top line: alt color text, small caps */}
+        {/* Top line */}
         <Typography
-          variant="caption"
+          variant="overline"
           sx={{
-            color: "text.secondary",
+            color: (theme) => theme.palette.blue.medium,
             textTransform: "uppercase",
-            letterSpacing: "0.5px",
+            letterSpacing: "0.75px",
+            fontSize: "0.75rem",
+            fontWeight: 500,
             display: "block",
-            mb: 1,
+            mb: 0.5,
           }}
         >
           {topLine}
         </Typography>
 
-        {/* Headline: sans serif headline text */}
+        {/* Headline */}
         <Typography
-          variant="h5"
+          variant="h4"
           sx={{
             color: (theme) => theme.palette.blue.darkest,
-            fontFamily: (theme) => theme.typography.fontFamily,
+            fontFamily:
+              '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', // Use headline font
             fontWeight: 500,
-            mb: 1.5,
+            fontSize: "1.5rem", // 24px - slightly smaller than default h4
+            lineHeight: 1.3,
+            mb: 2,
           }}
         >
           {headline}
@@ -172,12 +177,13 @@ export function ScenarioCard({
         {/* Body text */}
         {typeof body === "string" ? (
           <Typography
-            variant="body2"
+            variant="body1"
             sx={{
               color: (theme) => theme.palette.blue.darkest,
               fontFamily: (theme) => theme.typography.fontFamily,
-              lineHeight: 1.5,
-              mb: bottomLine ? 2 : 0,
+              fontSize: "1rem", // 16px - larger than body2
+              lineHeight: 1.6,
+              mb: bottomLine ? 3 : 0,
             }}
           >
             {body}
@@ -187,7 +193,9 @@ export function ScenarioCard({
             sx={{
               color: (theme) => theme.palette.blue.darkest,
               fontFamily: (theme) => theme.typography.fontFamily,
-              mb: bottomLine ? 2 : 0,
+              fontSize: "1rem",
+              lineHeight: 1.6,
+              mb: bottomLine ? 3 : 0,
               "& .MuiTypography-root": {
                 color: (theme) => theme.palette.blue.darkest,
                 fontFamily: (theme) => theme.typography.fontFamily,
@@ -198,17 +206,24 @@ export function ScenarioCard({
           </Box>
         )}
 
-        {/* Optional bottom line with HR */}
+        {/* Optional bottom line with divider */}
         {bottomLine && (
           <>
-            <Divider sx={{ my: 2, borderColor: "text.secondary" }} />
+            <Divider
+              sx={{
+                my: 2.5,
+                borderColor: (theme) => theme.palette.grey[200],
+                opacity: 0.6,
+              }}
+            />
             {typeof bottomLine === "string" ? (
               <Typography
                 variant="body2"
                 sx={{
-                  color: (theme) => theme.palette.blue.darkest,
+                  color: (theme) => theme.palette.blue.medium,
                   fontFamily: (theme) => theme.typography.fontFamily,
-                  fontWeight: 700,
+                  fontWeight: 500,
+                  fontSize: "0.95rem",
                 }}
               >
                 {bottomLine}
@@ -216,14 +231,14 @@ export function ScenarioCard({
             ) : (
               <Box
                 sx={{
-                  color: (theme) => theme.palette.blue.darkest,
+                  color: (theme) => theme.palette.blue.medium,
                   fontFamily: (theme) => theme.typography.fontFamily,
-                  fontWeight: 700,
-                  fontSize: "1.125rem", // body2 size
+                  fontWeight: 500,
+                  fontSize: "0.95rem",
                   "& .MuiTypography-root": {
-                    color: (theme) => theme.palette.blue.darkest,
+                    color: (theme) => theme.palette.blue.medium,
                     fontFamily: (theme) => theme.typography.fontFamily,
-                    fontWeight: 700,
+                    fontWeight: 500,
                   },
                 }}
               >

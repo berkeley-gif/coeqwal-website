@@ -35,8 +35,8 @@ export const learnCards: LearnCardType[] = [
     mapCoordinates: {
       longitude: -121.5,
       latitude: 37.5,
-      zoom: 6.5
-    }
+      zoom: 6.5,
+    },
   },
   {
     title: "Climate change and California water",
