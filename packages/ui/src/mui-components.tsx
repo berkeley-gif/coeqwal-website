@@ -17,6 +17,8 @@ export {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Tabs,
+  Tab,
 
   // Typography and content
   Typography,

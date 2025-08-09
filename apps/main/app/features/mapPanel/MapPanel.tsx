@@ -10,6 +10,8 @@ import {
   Stack,
   Checkbox,
   FormControlLabel,
+  Tabs,
+  Tab,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
 import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
@@ -25,6 +27,7 @@ interface MapPanelProps {
 const MapControls = () => {
   const { flyTo } = useMap()
   const [showDropdown, setShowDropdown] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
 
   const handleCenterOnCalifornia = () => {
     flyTo(-120.759, 38.032, 6.3) // Initial view of whole state
@@ -32,6 +35,10 @@ const MapControls = () => {
 
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown)
+  }
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue)
   }
 
   return (
@@ -99,23 +106,96 @@ const MapControls = () => {
             dropdownContent={
               showDropdown ? (
                 <Box>
-                  <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
-                    Presets
-                  </Typography>
-                  <Stack spacing={0.5}>
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="SGMA"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="USBR Alternative 3"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="Delta Conveyance Tunnel -- Bethany Alternative"
-                    />
-                  </Stack>
+                  {/* Tab Navigation with Label */}
+                  <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
+                    <Box 
+                      component="span" 
+                      sx={{ 
+                        mr: 2, 
+                        fontSize: '0.95rem',
+                        fontWeight: 400,
+                        color: (theme) => theme.palette.text.primary,
+                        flexShrink: 0 
+                      }}
+                    >
+                      Choose scenarios by:
+                    </Box>
+                    <Tabs 
+                      value={activeTab} 
+                      onChange={handleTabChange}
+                      sx={{ flex: 1 }}
+                    >
+                      <Tab label="Presets" />
+                      <Tab label="Outcomes" />
+                      <Tab label="Operations" />
+                    </Tabs>
+                  </Box>
+
+                  {/* Tab Content */}
+                  {activeTab === 0 && (
+                    <Box>
+                      <Stack spacing={0.5}>
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="SGMA"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="USBR Alternative 3"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Delta Conveyance Tunnel -- Bethany Alternative"
+                        />
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {activeTab === 1 && (
+                    <Box>
+                      <Stack spacing={0.5}>
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Water Supply Reliability"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Environmental Flows"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Groundwater Sustainability"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Agricultural Impacts"
+                        />
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {activeTab === 2 && (
+                    <Box>
+                      <Stack spacing={0.5}>
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Reservoir Operations"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Delta Conveyance"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Groundwater Pumping"
+                        />
+                        <FormControlLabel
+                          control={<Checkbox size="small" />}
+                          label="Water Transfers"
+                        />
+                      </Stack>
+                    </Box>
+                  )}
                 </Box>
               ) : undefined
             }

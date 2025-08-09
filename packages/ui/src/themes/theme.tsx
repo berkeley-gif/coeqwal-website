@@ -1273,6 +1273,36 @@ const theme = createTheme({
         }),
       },
     },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          minHeight: 'auto', // Reduce default height
+        },
+        indicator: ({ theme }) => ({
+          backgroundColor: theme.palette.action.hover, // Blue indicator for active tab
+        }),
+      },
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary, // Default dark blue text for inactive tabs
+          fontSize: '0.95rem',
+          fontWeight: 400,
+          textTransform: 'none',
+          minWidth: 'auto',
+          minHeight: 'auto',
+          padding: theme.spacing(1, 2),
+          '&.Mui-selected': {
+            color: theme.palette.action.hover, // Bright blue text for selected tab
+            fontWeight: 500,
+          },
+          '&:hover': {
+            color: theme.palette.action.hover, // Bright blue on hover
+          },
+        }),
+      },
+    },
   },
   mixins: {
     ...baseTheme.mixins,
