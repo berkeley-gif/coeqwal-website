@@ -9,7 +9,11 @@ export interface LeadingMarkerTextProps {
   bodySpansFull?: boolean
 }
 
-export function LeadingMarkerText({ title, children, bodySpansFull = false }: LeadingMarkerTextProps) {
+export function LeadingMarkerText({
+  title,
+  children,
+  bodySpansFull = false,
+}: LeadingMarkerTextProps) {
   return (
     <Box
       sx={(theme) => ({
@@ -35,7 +39,9 @@ export function LeadingMarkerText({ title, children, bodySpansFull = false }: Le
         })}
       />
       {/* Headline */}
-      <Typography variant="h2" sx={{ m: 0, gridColumn: 2 }}>{title}</Typography>
+      <Typography variant="h2" sx={{ m: 0, gridColumn: 2 }}>
+        {title}
+      </Typography>
       {/* Body */}
       <Box
         sx={{
@@ -50,5 +56,3 @@ export function LeadingMarkerText({ title, children, bodySpansFull = false }: Le
 }
 
 export default LeadingMarkerText
-
-
