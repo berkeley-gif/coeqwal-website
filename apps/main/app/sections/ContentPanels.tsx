@@ -260,14 +260,43 @@ export default function ContentPanels({
           detailContent={
             <>
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+                sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}
               >
                 <IconButton
                   onClick={() => togglePanelDetail("learn")}
-                  sx={{ 
-                    color: (theme) => theme.palette.blue.darkest, 
-                    width: 48, 
-                    height: 48 
+                  sx={(theme) => {
+                    // Calculate positioning to align with first line of h2
+                    const typography = theme.typography.h2
+                    
+                    // Parse fontSize from rem to pixels (assuming 1rem = 16px)
+                    let fontSize = 16
+                    if (typeof typography.fontSize === 'string') {
+                      if (typography.fontSize.includes('rem')) {
+                        fontSize = parseFloat(typography.fontSize) * 16
+                      } else {
+                        fontSize = parseFloat(typography.fontSize)
+                      }
+                    } else if (typeof typography.fontSize === 'number') {
+                      fontSize = typography.fontSize
+                    }
+                    
+                    const lineHeight = typeof typography.lineHeight === 'number' 
+                      ? typography.lineHeight 
+                      : 1.2
+                    
+                    // Calculate the height of the first line in pixels
+                    const firstLineHeight = fontSize * lineHeight
+                    
+                    // Position arrow button to center on the first line (48px button, 28px arrow)
+                    const topOffset = (firstLineHeight - 48) / 2
+                    
+                    return {
+                      color: theme.palette.blue.darkest, 
+                      width: 48, 
+                      height: 48,
+                      position: "relative",
+                      top: Math.max(0, topOffset),
+                    }
                   }}
                 >
                   <ArrowHead
@@ -436,14 +465,43 @@ export default function ContentPanels({
           detailContent={
             <>
               <Box
-                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
+                sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}
               >
                 <IconButton
                   onClick={() => togglePanelDetail("explore")}
-                  sx={{ 
-                    color: (theme) => theme.palette.blue.darkest, 
-                    width: 48, 
-                    height: 48 
+                  sx={(theme) => {
+                    // Calculate positioning to align with first line of h2
+                    const typography = theme.typography.h2
+                    
+                    // Parse fontSize from rem to pixels (assuming 1rem = 16px)
+                    let fontSize = 16
+                    if (typeof typography.fontSize === 'string') {
+                      if (typography.fontSize.includes('rem')) {
+                        fontSize = parseFloat(typography.fontSize) * 16
+                      } else {
+                        fontSize = parseFloat(typography.fontSize)
+                      }
+                    } else if (typeof typography.fontSize === 'number') {
+                      fontSize = typography.fontSize
+                    }
+                    
+                    const lineHeight = typeof typography.lineHeight === 'number' 
+                      ? typography.lineHeight 
+                      : 1.2
+                    
+                    // Calculate the height of the first line in pixels
+                    const firstLineHeight = fontSize * lineHeight
+                    
+                    // Position arrow button to center on the first line (48px button, 28px arrow)
+                    const topOffset = (firstLineHeight - 48) / 2
+                    
+                    return {
+                      color: theme.palette.blue.darkest, 
+                      width: 48, 
+                      height: 48,
+                      position: "relative",
+                      top: Math.max(0, topOffset),
+                    }
                   }}
                 >
                   <ArrowHead
