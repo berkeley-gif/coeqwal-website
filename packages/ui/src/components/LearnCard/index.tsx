@@ -107,7 +107,7 @@ const LearnCard: React.FC<LearnCardProps> = ({
   // Determine button text based on card type and props
   const getButtonText = () => {
     if (buttonText) return buttonText
-    
+
     switch (buttonAction) {
       case "read-more":
         return "Read more"
@@ -123,7 +123,7 @@ const LearnCard: React.FC<LearnCardProps> = ({
   // Handle button click based on action type
   const handleButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent card onClick from triggering
-    
+
     switch (buttonAction) {
       case "read-more":
         if (onReadMore) onReadMore()
@@ -178,8 +178,8 @@ const LearnCard: React.FC<LearnCardProps> = ({
           variant="h6"
           component="h3"
           gutterBottom
-          title={title} 
-          sx={{ color: "#fff" }} 
+          title={title}
+          sx={{ color: "#fff" }}
         >
           {truncatedTitle}
         </Typography>

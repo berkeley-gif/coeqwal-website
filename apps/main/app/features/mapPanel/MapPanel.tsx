@@ -1,24 +1,14 @@
 "use client"
 
 import React, { useState } from "react"
-import {
-  Box,
-  Typography,
-  IconButton,
-  TextField,
-  Button,
-  Stack,
-  Checkbox,
-  FormControlLabel,
-  Tabs,
-  Tab,
-} from "@repo/ui/mui"
+import { Box, IconButton, Tabs, Tab } from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
 import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
-import { PresetsPanel, OutcomesPanel, OperationsPanel } from "./cardContent/scenarioChoiceCard"
-import SearchIcon from "@mui/icons-material/Search"
-import LayersIcon from "@mui/icons-material/Layers"
-import FilterListIcon from "@mui/icons-material/FilterList"
+import {
+  PresetsPanel,
+  OutcomesPanel,
+  OperationsPanel,
+} from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 
 interface MapPanelProps {
@@ -42,7 +32,11 @@ const MapControls = () => {
     setActiveTab(newValue)
   }
 
-  const handleViewOnMap = (coordinates: { longitude: number; latitude: number; zoom: number }) => {
+  const handleViewOnMap = (coordinates: {
+    longitude: number
+    latitude: number
+    zoom: number
+  }) => {
     flyTo(coordinates.longitude, coordinates.latitude, coordinates.zoom)
   }
 
@@ -71,7 +65,7 @@ const MapControls = () => {
         {/* Left Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <ScenarioCard
-            topLine="CHOOSE SCENARIOS. STARTING WITH:"
+            topLine="CHOOSE SCENARIOS. starting with:"
             headline="Current Operations Scenario"
             body={
               <ScenarioCardList
@@ -137,7 +131,9 @@ const MapControls = () => {
                   </Box>
 
                   {/* Tab Content */}
-                  {activeTab === 0 && <PresetsPanel onViewOnMap={handleViewOnMap} />}
+                  {activeTab === 0 && (
+                    <PresetsPanel onViewOnMap={handleViewOnMap} />
+                  )}
                   {activeTab === 1 && <OutcomesPanel />}
                   {activeTab === 2 && <OperationsPanel />}
                 </Box>
@@ -153,7 +149,7 @@ const MapControls = () => {
         {/* Center Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Search Interface */}
-          <Card
+          {/* <Card
             sx={{
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
@@ -196,9 +192,9 @@ const MapControls = () => {
                 </Button>
               </Box>
             </Stack>
-          </Card>
+          </Card> */}
 
-          <ScenarioCard
+          {/* <ScenarioCard
             topLine="MAP VISUALIZATION"
             headline="Data Layers & Controls"
             body="Toggle different data layers to visualize water infrastructure, land use patterns, and environmental flows across California."
@@ -207,10 +203,10 @@ const MapControls = () => {
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
             }}
-          />
+          /> */}
 
           {/* Layer Controls */}
-          <Card
+          {/* <Card
             sx={{
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
@@ -266,13 +262,13 @@ const MapControls = () => {
                 </IconButton>
               </Box>
             </Stack>
-          </Card>
+          </Card> */}
         </Box>
 
         {/* Right Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Example Scenario Cards */}
-          <ScenarioCard
+          {/* <ScenarioCard
             topLine="CURRENT OPERATIONS"
             headline="Baseline Water Management"
             body="This scenario represents how California manages water today, serving as a reference point for current operations and policies."
@@ -281,9 +277,9 @@ const MapControls = () => {
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
             }}
-          />
+          /> */}
 
-          <ScenarioCard
+          {/* <ScenarioCard
             topLine="ENVIRONMENTAL FLOWS"
             headline="Enhanced River Flows"
             body="Scenarios that prioritize environmental water needs with increased river flows to support ecosystem health and native species."
@@ -291,9 +287,9 @@ const MapControls = () => {
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
             }}
-          />
+          /> */}
 
-          <ScenarioCard
+          {/* <ScenarioCard
             topLine="GROUNDWATER MANAGEMENT"
             headline="Sustainable Pumping"
             body="Water futures that implement SGMA requirements for sustainable groundwater management across the Central Valley."
@@ -302,7 +298,7 @@ const MapControls = () => {
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
             }}
-          />
+          /> */}
 
           {/* Quick Actions at bottom right */}
           <Box
