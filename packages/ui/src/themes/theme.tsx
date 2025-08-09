@@ -248,18 +248,18 @@ const hoverParagraphDarkenedMixin = {
 
 // ScenarioCard list styling mixin
 const scenarioCardListMixin = {
-  '& ul': {
+  "& ul": {
     margin: 0,
-    paddingLeft: '16px',
-    '& li': {
-      fontSize: '1.125rem', // body2 size
+    paddingLeft: "16px",
+    "& li": {
+      fontSize: "1.125rem", // body2 size
       lineHeight: 1.4,
-      marginBottom: '4px',
-      '&:last-child': {
-        marginBottom: 0
-      }
-    }
-  }
+      marginBottom: "4px",
+      "&:last-child": {
+        marginBottom: 0,
+      },
+    },
+  },
 } as const
 
 // Drawer content styling mixins
@@ -512,6 +512,12 @@ const theme = createTheme({
       primary: themeValues.palette.blue.darkest,
       secondary: themeValues.palette.blue.medium,
       disabled: themeValues.palette.blue.light,
+    },
+    action: {
+      hover: themeValues.palette.blue.medium,
+      selected: themeValues.palette.blue.light,
+      disabled: themeValues.palette.blue.light,
+      disabledBackground: themeValues.palette.nature.whisper,
     },
     divider: themeValues.palette.nature.sage,
   },
@@ -1235,6 +1241,37 @@ const theme = createTheme({
           }),
         },
       ],
+    },
+    MuiCheckbox: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary, // Same as universal text color (dark blue)
+          padding: theme.spacing(0.5), // Reduced padding for condensed spacing
+          "&:hover": {
+            backgroundColor: `${theme.palette.action.hover}30`, // 30% opacity for better visibility
+          },
+          "&.Mui-checked": {
+            color: theme.palette.blue.darkest,
+          },
+          // Remove ripple animation
+          "& .MuiTouchRipple-root": {
+            display: "none",
+          },
+        }),
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          margin: 0, // Remove default margins for condensed spacing
+          "& .MuiFormControlLabel-label": {
+            fontSize: "0.95rem", // Slightly smaller text
+            lineHeight: 1.3, // Tighter line height
+            color: theme.palette.text.primary,
+            paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
+          },
+        }),
+      },
     },
   },
   mixins: {
