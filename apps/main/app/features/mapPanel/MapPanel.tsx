@@ -107,21 +107,21 @@ const MapControls = () => {
               showDropdown ? (
                 <Box>
                   {/* Tab Navigation with Label */}
-                  <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 2 }}>
-                    <Box 
-                      component="span" 
-                      sx={{ 
-                        mr: 2, 
-                        fontSize: '0.95rem',
+                  <Box sx={{ display: "flex", alignItems: "baseline", mb: 2 }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        mr: 2,
+                        fontSize: "0.95rem",
                         fontWeight: 400,
                         color: (theme) => theme.palette.text.primary,
-                        flexShrink: 0 
+                        flexShrink: 0,
                       }}
                     >
                       Choose scenarios by:
                     </Box>
-                    <Tabs 
-                      value={activeTab} 
+                    <Tabs
+                      value={activeTab}
                       onChange={handleTabChange}
                       sx={{ flex: 1 }}
                     >

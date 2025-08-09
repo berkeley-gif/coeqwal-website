@@ -98,7 +98,7 @@ const themeValues = {
       '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
-  // Layout dimensions (necessary for layout calculations)
+  // Layout dimensions (necessary for panel layout calculations)
   layout: {
     headerHeight: 64,
     drawer: {
@@ -118,7 +118,7 @@ const themeValues = {
 
     // Text and UI blues (organized by intensity)
     blue: {
-      darkest: "#3a4574", // Deep navy - primary text (TODO: should be #2A5287 ?)
+      darkest: "#3a4574", // Deep navy - primary text (TODO: should it be #2A5287 ?)
       dark: "#186b88", // Dark teal - secondary text
       medium: "#2d89b6", // Medium blue - accent text
       bright: "#449cd9", // Bright blue - links/interactive
@@ -1276,7 +1276,7 @@ const theme = createTheme({
     MuiTabs: {
       styleOverrides: {
         root: {
-          minHeight: 'auto', // Reduce default height
+          minHeight: "auto", // Reduce default height
         },
         indicator: ({ theme }) => ({
           backgroundColor: theme.palette.action.hover, // Blue indicator for active tab
@@ -1287,18 +1287,22 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.palette.text.primary, // Default dark blue text for inactive tabs
-          fontSize: '0.95rem',
+          fontSize: "0.95rem",
           fontWeight: 400,
-          textTransform: 'none',
-          minWidth: 'auto',
-          minHeight: 'auto',
+          textTransform: "none",
+          minWidth: "auto",
+          minHeight: "auto",
           padding: theme.spacing(1, 2),
-          '&.Mui-selected': {
+          "&.Mui-selected": {
             color: theme.palette.action.hover, // Bright blue text for selected tab
             fontWeight: 500,
           },
-          '&:hover': {
+          "&:hover": {
             color: theme.palette.action.hover, // Bright blue on hover
+          },
+          // Remove click ripple animation
+          "& .MuiTouchRipple-root": {
+            display: "none",
           },
         }),
       },
