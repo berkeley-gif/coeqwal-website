@@ -14,7 +14,8 @@ export { default as CustomArrowForwardIcon } from "./navigation/CustomArrowForwa
 export { default as CustomArrowDownIcon } from "./navigation/CustomArrowDownIcon"
 
 // Common components
-export { Card } from "./common/Card"
+export { Card, ScenarioCard, ScenarioCardList } from "./common/Card"
+export type { CardProps, ScenarioCardProps } from "./common/Card"
 export { Logo } from "./common/Logo"
 export { TransitionDiv } from "./common/TransitionDiv"
 export { TransitionHeadline } from "./common/TransitionHeadline"

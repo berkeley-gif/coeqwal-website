@@ -246,6 +246,22 @@ const hoverParagraphDarkenedMixin = {
   },
 } as const
 
+// ScenarioCard list styling mixin
+const scenarioCardListMixin = {
+  '& ul': {
+    margin: 0,
+    paddingLeft: '16px',
+    '& li': {
+      fontSize: '1.125rem', // body2 size
+      lineHeight: 1.4,
+      marginBottom: '4px',
+      '&:last-child': {
+        marginBottom: 0
+      }
+    }
+  }
+} as const
+
 // Drawer content styling mixins
 const drawerContentMixins = {
   contentWrapper: {
@@ -1226,6 +1242,7 @@ const theme = createTheme({
     hoverParagraph: hoverParagraphMixin,
     hoverParagraphDarkened: hoverParagraphDarkenedMixin,
     drawerContent: drawerContentMixins,
+    scenarioCardList: scenarioCardListMixin,
   },
 })
 
@@ -1256,8 +1273,9 @@ theme.drawerNavigation = {
   colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
 }
 
-// expose mixin constant for easy import if needed
+// expose mixin constants for easy import if needed
 export const hoverParagraph = hoverParagraphMixin
+export const scenarioCardList = scenarioCardListMixin
 
 export default theme
 
@@ -1539,6 +1557,7 @@ declare module "@mui/material/styles" {
     hoverParagraph: CSSProperties
     hoverParagraphDarkened: CSSProperties
     drawerContent: typeof drawerContentMixins
+    scenarioCardList: typeof scenarioCardListMixin
   }
 
   // Add custom typography variant

@@ -9,7 +9,7 @@ import { sectionIds } from "./config/navigation"
 // Commenting out map-related imports - uncomment to re-enable the map
 // import type { MapboxMapRef } from "@repo/map"
 // import MapContainer from "./components/MapContainer"
-import CombinedPanel from "./features/combinedPanel/CombinedPanel"
+import MapPanel from "./features/mapPanel/MapPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
@@ -286,9 +286,9 @@ export default function Home() {
           {/* Content Panels */}
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
 
-          {/* Combined Panel */}
-          <Box sx={{ pointerEvents: "auto", margin: 0 }} id="combined-panel">
-            <CombinedPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
+          {/* Map Panel */}
+          <Box sx={{ pointerEvents: "auto", margin: 0 }} id="map-panel">
+            <MapPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
 
           {/* California Water panel with two columns */}
