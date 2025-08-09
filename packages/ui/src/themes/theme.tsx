@@ -262,6 +262,21 @@ const scenarioCardListMixin = {
   },
 } as const
 
+// Tooltip action button mixin
+const tooltipActionButtonMixin = {
+  textTransform: "none",
+  borderRadius: themeValues.borderRadius.pill,
+  boxShadow: "none",
+  border: "none",
+  padding: "4px 12px",
+  minWidth: "auto",
+  lineHeight: 1.5,
+  fontSize: "0.8rem",
+  fontWeight: 500,
+  cursor: "pointer",
+  transition: "all 0.2s ease",
+} as const
+
 // Drawer content styling mixins
 const drawerContentMixins = {
   contentWrapper: {
@@ -1307,6 +1322,58 @@ const theme = createTheme({
         }),
       },
     },
+    MuiTooltip: {
+      defaultProps: {
+        enterDelay: 300,        // Slight delay before showing (prevents accidental triggers)
+        leaveDelay: 200,        // Delay before hiding (gives time to move cursor)
+        enterNextDelay: 100,    // Faster subsequent tooltips
+      },
+      styleOverrides: {
+        tooltip: ({ theme }) => ({
+          backgroundColor: theme.palette.common.white,
+          color: theme.palette.text.primary,
+          border: `1px solid ${theme.palette.action.hover}`,
+          borderRadius: "16px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          fontSize: "0.875rem",
+          fontWeight: 400,
+          lineHeight: 1.4,
+          padding: "16px",
+          maxWidth: "300px",
+          // Add pointer events so tooltip can be hovered
+          pointerEvents: "auto",
+        }),
+        arrow: ({ theme }) => ({
+          color: theme.palette.common.white,
+          "&::before": {
+            border: `1px solid ${theme.palette.action.hover}`,
+          },
+        }),
+        // Create a safe area between trigger and tooltip
+        popper: {
+          '&[data-popper-placement*="top"]': {
+            '& .MuiTooltip-tooltip': {
+              marginBottom: '6px',
+            },
+          },
+          '&[data-popper-placement*="bottom"]': {
+            '& .MuiTooltip-tooltip': {
+              marginTop: '6px',
+            },
+          },
+          '&[data-popper-placement*="left"]': {
+            '& .MuiTooltip-tooltip': {
+              marginRight: '6px',
+            },
+          },
+          '&[data-popper-placement*="right"]': {
+            '& .MuiTooltip-tooltip': {
+              marginLeft: '6px',
+            },
+          },
+        },
+      },
+    },
   },
   mixins: {
     ...baseTheme.mixins,
@@ -1314,6 +1381,7 @@ const theme = createTheme({
     hoverParagraphDarkened: hoverParagraphDarkenedMixin,
     drawerContent: drawerContentMixins,
     scenarioCardList: scenarioCardListMixin,
+    tooltipActionButton: tooltipActionButtonMixin,
   },
 })
 
@@ -1347,6 +1415,7 @@ theme.drawerNavigation = {
 // expose mixin constants for easy import if needed
 export const hoverParagraph = hoverParagraphMixin
 export const scenarioCardList = scenarioCardListMixin
+export const tooltipActionButton = tooltipActionButtonMixin
 
 export default theme
 
@@ -1629,6 +1698,7 @@ declare module "@mui/material/styles" {
     hoverParagraphDarkened: CSSProperties
     drawerContent: typeof drawerContentMixins
     scenarioCardList: typeof scenarioCardListMixin
+    tooltipActionButton: typeof tooltipActionButtonMixin
   }
 
   // Add custom typography variant
