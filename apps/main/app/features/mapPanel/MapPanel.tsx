@@ -1,7 +1,16 @@
 "use client"
 
-import React from "react"
-import { Box, Typography, IconButton, TextField, Button, Stack } from "@repo/ui/mui"
+import React, { useState } from "react"
+import {
+  Box,
+  Typography,
+  IconButton,
+  TextField,
+  Button,
+  Stack,
+  Checkbox,
+  FormControlLabel,
+} from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
 import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
 import SearchIcon from "@mui/icons-material/Search"
@@ -15,9 +24,14 @@ interface MapPanelProps {
 
 const MapControls = () => {
   const { flyTo } = useMap()
+  const [showDropdown, setShowDropdown] = useState(false)
 
   const handleCenterOnCalifornia = () => {
     flyTo(-120.759, 38.032, 6.3) // Initial view of whole state
+  }
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown)
   }
 
   return (
@@ -48,30 +62,72 @@ const MapControls = () => {
             topLine="CHOOSE SCENARIOS. STARTING WITH:"
             headline="Current Operations Scenario"
             body={
-              <ScenarioCardList items={[
-                "helps us understand how California manages water today",
-                "serves as a foundation to compare alternative scenarios"
-              ]} />
+              <ScenarioCardList
+                items={[
+                  "helps us understand how California manages water today",
+                  "serves as a foundation to compare alternative scenarios",
+                ]}
+              />
             }
-                          bottomLine={
-                <>
-                  Choose alternative scenarios to compare{" "}
-                  <span style={{ 
-                    fontSize: '0.875em', 
+            bottomLine={
+              <Box
+                onClick={toggleDropdown}
+                sx={{
+                  cursor: "pointer",
+                  userSelect: "none",
+                  transition: "color 0.2s ease",
+                  "&:hover": {
+                    color: (theme) => theme.palette.action.hover,
+                  },
+                }}
+              >
+                Choose alternative scenarios to compare{" "}
+                <span
+                  style={{
+                    fontSize: "0.875em",
                     lineHeight: 1,
-                    verticalAlign: 'baseline',
-                    display: 'inline-block'
-                  }}>
-                    ▼
-                  </span>
-                </>
-              }
+                    verticalAlign: "baseline",
+                    display: "inline-block",
+                    transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  ▼
+                </span>
+              </Box>
+            }
+            dropdownContent={
+              showDropdown ? (
+                <Box>
+                  <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+                    Presets
+                  </Typography>
+                  <Stack spacing={0.5}>
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="SGMA"
+                    />
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="USBR Alternative 3"
+                    />
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="Delta Conveyance Tunnel -- Bethany Alternative"
+                    />
+                  </Stack>
+                </Box>
+              ) : undefined
+            }
             sx={{
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
             }}
           />
-          
+        </Box>
+
+        {/* Center Column */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Search Interface */}
           <Card
             sx={{
@@ -86,27 +142,38 @@ const MapControls = () => {
                 variant="outlined"
                 size="small"
                 InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: "action.active" }} />,
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "action.active" }} />
+                  ),
                 }}
               />
-              
+
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <Button variant="outlined" size="small" startIcon={<FilterListIcon />}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<FilterListIcon />}
+                >
                   Operations
                 </Button>
-                <Button variant="outlined" size="small" startIcon={<FilterListIcon />}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<FilterListIcon />}
+                >
                   Outcomes
                 </Button>
-                <Button variant="outlined" size="small" startIcon={<FilterListIcon />}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<FilterListIcon />}
+                >
                   Climate
                 </Button>
               </Box>
             </Stack>
           </Card>
-        </Box>
 
-        {/* Center Column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <ScenarioCard
             topLine="MAP VISUALIZATION"
             headline="Data Layers & Controls"
@@ -117,7 +184,7 @@ const MapControls = () => {
               pointerEvents: "auto",
             }}
           />
-          
+
           {/* Layer Controls */}
           <Card
             sx={{
@@ -126,25 +193,49 @@ const MapControls = () => {
             }}
           >
             <Stack spacing={1}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Typography variant="body2">Water Infrastructure</Typography>
                 <IconButton size="small">
                   <LayersIcon />
                 </IconButton>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Typography variant="body2">Agricultural Areas</Typography>
                 <IconButton size="small">
                   <LayersIcon />
                 </IconButton>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Typography variant="body2">Urban Areas</Typography>
                 <IconButton size="small">
                   <LayersIcon />
                 </IconButton>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Typography variant="body2">Environmental Flows</Typography>
                 <IconButton size="small">
                   <LayersIcon />
@@ -167,7 +258,7 @@ const MapControls = () => {
               pointerEvents: "auto",
             }}
           />
-          
+
           <ScenarioCard
             topLine="ENVIRONMENTAL FLOWS"
             headline="Enhanced River Flows"
@@ -177,7 +268,7 @@ const MapControls = () => {
               pointerEvents: "auto",
             }}
           />
-          
+
           <ScenarioCard
             topLine="GROUNDWATER MANAGEMENT"
             headline="Sustainable Pumping"
@@ -190,7 +281,13 @@ const MapControls = () => {
           />
 
           {/* Quick Actions at bottom right */}
-          <Box sx={{ marginTop: "auto", display: "flex", justifyContent: "flex-end" }}>
+          <Box
+            sx={{
+              marginTop: "auto",
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
             <Card
               sx={{
                 p: 1,
@@ -198,7 +295,11 @@ const MapControls = () => {
                 pointerEvents: "auto",
               }}
             >
-              <IconButton onClick={handleCenterOnCalifornia} size="small" title="Center on California">
+              <IconButton
+                onClick={handleCenterOnCalifornia}
+                size="small"
+                title="Center on California"
+              >
                 <MyLocationIcon />
               </IconButton>
             </Card>
@@ -235,7 +336,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         style={{ width: "100%", height: "100%" }}
       >
         {/* Built-in Mapbox Controls */}
-        <NavigationControl position="top-right" showCompass={true} showZoom={true} />
+        <NavigationControl
+          position="top-right"
+          showCompass={true}
+          showZoom={true}
+        />
         <GeolocateControl
           position="top-right"
           trackUserLocation={true}

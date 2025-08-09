@@ -19,16 +19,14 @@ export interface ScenarioCardProps extends Omit<CardProps, "children"> {
   headline: string
   body: string | React.ReactNode
   bottomLine?: string | React.ReactNode
+  dropdownContent?: React.ReactNode
 }
 
 // Helper component to create standardized lists for ScenarioCard bodies
 export const ScenarioCardList: React.FC<{ items: string[] }> = ({ items }) => {
   const theme = useTheme()
   return (
-    <Box 
-      component="div"
-      sx={theme.mixins.scenarioCardList}
-    >
+    <Box component="div" sx={theme.mixins.scenarioCardList}>
       <ul>
         {items.map((item, index) => (
           <li key={index}>{item}</li>
@@ -39,31 +37,34 @@ export const ScenarioCardList: React.FC<{ items: string[] }> = ({ items }) => {
 }
 
 const StyledCard = styled(Paper, {
-  shouldForwardProp: (prop) => prop !== "color" && prop !== "width" && prop !== "height",
-})<{ color?: string; width?: string | number; height?: string | number }>(({ theme, color = "default", width = "100%", height = "auto" }) => ({
-  borderRadius: theme.borderRadius.card,
-  backgroundColor: theme.palette.common.white,
-  color: theme.palette.blue.darkest,
-  fontFamily: theme.typography.fontFamily,
-  width: width, // Width 100%, overrideable
-  height: height, // Height auto, overrideable
-  overflow: "hidden",
-  transition: "none",
-  border: theme.border.none,
-  padding: theme.spacing(3),
-  boxShadow: "none",
+  shouldForwardProp: (prop) =>
+    prop !== "color" && prop !== "width" && prop !== "height",
+})<{ color?: string; width?: string | number; height?: string | number }>(
+  ({ theme, color = "default", width = "100%", height = "auto" }) => ({
+    borderRadius: theme.borderRadius.card,
+    backgroundColor: theme.palette.common.white,
+    color: theme.palette.blue.darkest,
+    fontFamily: theme.typography.fontFamily,
+    width: width, // Width 100%, overrideable
+    height: height, // Height auto, overrideable
+    overflow: "hidden",
+    transition: "none",
+    border: theme.border.none,
+    padding: theme.spacing(3),
+    boxShadow: "none",
 
-  // Color variants as accent borders
-  ...(color === "primary" && {
-    borderLeft: `4px solid ${theme.palette.primary.main}`,
+    // Color variants as accent borders
+    ...(color === "primary" && {
+      borderLeft: `4px solid ${theme.palette.primary.main}`,
+    }),
+    ...(color === "secondary" && {
+      borderLeft: `4px solid ${theme.palette.secondary.main}`,
+    }),
+    ...(color === "pop" && {
+      borderLeft: `4px solid ${theme.palette.accent.gold}`,
+    }),
   }),
-  ...(color === "secondary" && {
-    borderLeft: `4px solid ${theme.palette.secondary.main}`,
-  }),
-  ...(color === "pop" && {
-    borderLeft: `4px solid ${theme.palette.accent.gold}`,
-  }),
-}))
+)
 
 const CardHeader = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(3),
@@ -132,18 +133,14 @@ export function ScenarioCard({
   headline,
   body,
   bottomLine,
+  dropdownContent,
   width,
   height,
   sx,
   ...rest
 }: ScenarioCardProps) {
   return (
-    <StyledCard
-      width={width}
-      height={height}
-      sx={sx}
-      {...rest}
-    >
+    <StyledCard width={width} height={height} sx={sx} {...rest}>
       <CardContent>
         {/* Top line: alt color text, small caps */}
         <Typography
@@ -173,7 +170,7 @@ export function ScenarioCard({
         </Typography>
 
         {/* Body text */}
-        {typeof body === 'string' ? (
+        {typeof body === "string" ? (
           <Typography
             variant="body2"
             sx={{
@@ -191,10 +188,10 @@ export function ScenarioCard({
               color: (theme) => theme.palette.blue.darkest,
               fontFamily: (theme) => theme.typography.fontFamily,
               mb: bottomLine ? 2 : 0,
-              '& .MuiTypography-root': {
+              "& .MuiTypography-root": {
                 color: (theme) => theme.palette.blue.darkest,
                 fontFamily: (theme) => theme.typography.fontFamily,
-              }
+              },
             }}
           >
             {body}
@@ -205,7 +202,7 @@ export function ScenarioCard({
         {bottomLine && (
           <>
             <Divider sx={{ my: 2, borderColor: "text.secondary" }} />
-            {typeof bottomLine === 'string' ? (
+            {typeof bottomLine === "string" ? (
               <Typography
                 variant="body2"
                 sx={{
@@ -222,17 +219,36 @@ export function ScenarioCard({
                   color: (theme) => theme.palette.blue.darkest,
                   fontFamily: (theme) => theme.typography.fontFamily,
                   fontWeight: 700,
-                  fontSize: '1.125rem', // body2 size
-                  '& .MuiTypography-root': {
+                  fontSize: "1.125rem", // body2 size
+                  "& .MuiTypography-root": {
                     color: (theme) => theme.palette.blue.darkest,
                     fontFamily: (theme) => theme.typography.fontFamily,
                     fontWeight: 700,
-                  }
+                  },
                 }}
               >
                 {bottomLine}
               </Box>
             )}
+          </>
+        )}
+
+        {/* Optional dropdown content with HR separator */}
+        {dropdownContent && (
+          <>
+            <Divider sx={{ my: 2, borderColor: "text.secondary" }} />
+            <Box
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                fontFamily: (theme) => theme.typography.fontFamily,
+                "& .MuiTypography-root": {
+                  color: (theme) => theme.palette.blue.darkest,
+                  fontFamily: (theme) => theme.typography.fontFamily,
+                },
+              }}
+            >
+              {dropdownContent}
+            </Box>
           </>
         )}
       </CardContent>
