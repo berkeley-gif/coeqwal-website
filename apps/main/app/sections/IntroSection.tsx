@@ -297,7 +297,7 @@ const IntroSection: React.FC = () => {
           paddingVariant="wide"
           includeHeaderSpacing={false}
           sx={{
-            color: (theme) => theme.palette.primary.dark,
+            color: (theme) => theme.palette.blue.darkest,
             paddingLeft: { xs: 6, md: 20 },
             paddingRight: { xs: 3, md: 6 },
             height: "100vh",
