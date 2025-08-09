@@ -209,6 +209,7 @@ export default function ContentPanels({
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
         bgcolor: (theme) => theme.palette.brand.water,
+        paddingTop: { xs: 3, md: 6 }, // Override the wide padding variant's large top padding (120px -> 24px/48px)
 
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
@@ -260,39 +261,45 @@ export default function ContentPanels({
           detailContent={
             <>
               <Box
-                sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  mb: 2,
+                }}
               >
                 <IconButton
                   onClick={() => togglePanelDetail("learn")}
                   sx={(theme) => {
                     // Calculate positioning to align with first line of h2
                     const typography = theme.typography.h2
-                    
+
                     // Parse fontSize from rem to pixels (assuming 1rem = 16px)
                     let fontSize = 16
-                    if (typeof typography.fontSize === 'string') {
-                      if (typography.fontSize.includes('rem')) {
+                    if (typeof typography.fontSize === "string") {
+                      if (typography.fontSize.includes("rem")) {
                         fontSize = parseFloat(typography.fontSize) * 16
                       } else {
                         fontSize = parseFloat(typography.fontSize)
                       }
-                    } else if (typeof typography.fontSize === 'number') {
+                    } else if (typeof typography.fontSize === "number") {
                       fontSize = typography.fontSize
                     }
-                    
-                    const lineHeight = typeof typography.lineHeight === 'number' 
-                      ? typography.lineHeight 
-                      : 1.2
-                    
+
+                    const lineHeight =
+                      typeof typography.lineHeight === "number"
+                        ? typography.lineHeight
+                        : 1.2
+
                     // Calculate the height of the first line in pixels
                     const firstLineHeight = fontSize * lineHeight
-                    
+
                     // Position arrow button to center on the first line (48px button, 28px arrow)
                     const topOffset = (firstLineHeight - 48) / 2
-                    
+
                     return {
-                      color: theme.palette.blue.darkest, 
-                      width: 48, 
+                      color: theme.palette.blue.darkest,
+                      width: 48,
                       height: 48,
                       position: "relative",
                       top: Math.max(0, topOffset),
@@ -319,11 +326,27 @@ export default function ContentPanels({
               </Box>
               <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Central Valley Water" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Central Valley Water"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       A natural system fed by rain and snowpack
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Water in California begins as precipitation. It travels
                       through rivers, sinks into groundwater, or flows out to
                       sea. From the mountains to the Delta, understanding how
@@ -351,11 +374,27 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Managing California's Water" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Managing California's Water"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Who decides where water goes and when?
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       California&apos;s water is managed by a patchwork of
                       agencies, laws, and agreements. Decisions about Central
                       Valley water storage, delivery, and environmental flows
@@ -376,8 +415,17 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Growing Challenges" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Growing Challenges"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       California faces increasing water challenges from
                       ecosystem alteration, groundwater depletion, climate
                       change, and long-term inequities in water access.
@@ -424,11 +472,27 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Exploring California's Water Futures" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Exploring California's Water Futures"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       What if we made different choices?
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       The COEQWAL project uses the CalSim3 computational model,
                       the same model used by state and federal agencies, to
                       simulate a range of alternative water futures. These
@@ -465,39 +529,45 @@ export default function ContentPanels({
           detailContent={
             <>
               <Box
-                sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  mb: 2,
+                }}
               >
                 <IconButton
                   onClick={() => togglePanelDetail("explore")}
                   sx={(theme) => {
                     // Calculate positioning to align with first line of h2
                     const typography = theme.typography.h2
-                    
+
                     // Parse fontSize from rem to pixels (assuming 1rem = 16px)
                     let fontSize = 16
-                    if (typeof typography.fontSize === 'string') {
-                      if (typography.fontSize.includes('rem')) {
+                    if (typeof typography.fontSize === "string") {
+                      if (typography.fontSize.includes("rem")) {
                         fontSize = parseFloat(typography.fontSize) * 16
                       } else {
                         fontSize = parseFloat(typography.fontSize)
                       }
-                    } else if (typeof typography.fontSize === 'number') {
+                    } else if (typeof typography.fontSize === "number") {
                       fontSize = typography.fontSize
                     }
-                    
-                    const lineHeight = typeof typography.lineHeight === 'number' 
-                      ? typography.lineHeight 
-                      : 1.2
-                    
+
+                    const lineHeight =
+                      typeof typography.lineHeight === "number"
+                        ? typography.lineHeight
+                        : 1.2
+
                     // Calculate the height of the first line in pixels
                     const firstLineHeight = fontSize * lineHeight
-                    
+
                     // Position arrow button to center on the first line (48px button, 28px arrow)
                     const topOffset = (firstLineHeight - 48) / 2
-                    
+
                     return {
-                      color: theme.palette.blue.darkest, 
-                      width: 48, 
+                      color: theme.palette.blue.darkest,
+                      width: 48,
                       height: 48,
                       position: "relative",
                       top: Math.max(0, topOffset),
@@ -526,13 +596,22 @@ export default function ContentPanels({
               </Box>
               <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Current operations" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Current operations"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Baseline scenarios show how California manages water
                       today. They serve as a reference point for current
                       operations – the laws, regulations, priorities, and
-                      decisions that affect how California&apos;s water supply is
-                      managed.
+                      decisions that affect how California&apos;s water supply
+                      is managed.
                     </Typography>
                     <Box
                       sx={{
@@ -549,11 +628,27 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Managing river flows for the environment" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Managing river flows for the environment"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Balancing ecosystem needs with human uses
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Natural river systems have high flows in winter and low
                       flows in summer, supporting native fish, plants, and
                       wildlife. Today, the storage and diversion of water
@@ -575,13 +670,28 @@ export default function ContentPanels({
                   </LeadingMarkerText>
                 </Grid>
 
-
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Managing Groundwater in a Changing Agricultural Landscape" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Managing Groundwater in a Changing Agricultural Landscape"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Sustainable strategies for groundwater basins
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       In California, too much groundwater pumping has caused
                       wells to dry, crops to fail, and the ground to sink. To
                       prevent further impacts from groundwater overdraft, the
@@ -605,18 +715,35 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Prioritizing Drinking Water for California Communities" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Prioritizing Drinking Water for California Communities"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Ensuring safe, affordable water access for all
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       All Californians need water for drinking, cooking,
                       cleaning, and running businesses, schools, and hospitals.
                       But because of infrastructure problems and the way water
-                      allocations are prioritized, some communities don&apos;t always
-                      get the water they need. In these scenarios, we focus on
-                      giving priority to community water needs and measure how
-                      that affects both communities and other water users.
+                      allocations are prioritized, some communities don&apos;t
+                      always get the water they need. In these scenarios, we
+                      focus on giving priority to community water needs and
+                      measure how that affects both communities and other water
+                      users.
                     </Typography>
                     <Box
                       sx={{
@@ -633,11 +760,27 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Improving Delta Outflows for the Environment" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Improving Delta Outflows for the Environment"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Supporting the Delta ecosystem and San Francisco Bay
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       The Sacramento and San Joaquin Rivers carry water from
                       tributaries draining the Sierra Nevada to the Delta, where
                       water flows out to San Francisco Bay and the Pacific
@@ -663,11 +806,27 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Sustaining Uses in the Delta for Communities and Farms" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Sustaining Uses in the Delta for Communities and Farms"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Protecting in-Delta water users and livelihoods
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Communities and farms in the Delta need freshwater water
                       for drinking water, recreation, and irrigation. However,
                       waters of the Delta can become too salty when river flows
@@ -693,14 +852,30 @@ export default function ContentPanels({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                  <LeadingMarkerText title="Improving Reliability of Delta Exports for Farms and Communities" headlineVariant="h4">
-                    <Typography variant="body2" sx={{ mb: 2, opacity: 0.8, color: (theme) => theme.palette.blue.darkest }}>
+                  <LeadingMarkerText
+                    title="Improving Reliability of Delta Exports for Farms and Communities"
+                    headlineVariant="h4"
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        opacity: 0.8,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
                       Ensuring consistent water deliveries to users south of the
                       Delta
                     </Typography>
-                    <Typography variant="body2" sx={{ mb: 3, color: (theme) => theme.palette.blue.darkest }}>
-                      California&apos;s water system is designed and managed to move
-                      water from the wetter Sacramento Basin in northern
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 3,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
+                      California&apos;s water system is designed and managed to
+                      move water from the wetter Sacramento Basin in northern
                       California to the drier San Joaquin Basin and Southern
                       California metropolitan region in the south. This system
                       relies on controlling the flow of freshwater through the
