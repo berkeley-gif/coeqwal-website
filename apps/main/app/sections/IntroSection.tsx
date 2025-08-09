@@ -276,7 +276,7 @@ const IntroSection: React.FC = () => {
           background: `
             url('/images/home_collage/birds_top.png'),
             url('/images/home_collage/left_side.png'),
-            url('/images/home_collage/right_side.png')
+            url('/images/home_collage/right.png')
           `,
           backgroundSize: "auto 44%, auto 80%, auto calc(100vh - 80px)",
           backgroundPosition: "left top, left bottom, right bottom",

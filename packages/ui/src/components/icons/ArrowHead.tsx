@@ -20,7 +20,6 @@ export function ArrowHead({ size = "100%", color = "currentColor", ...svgProps }
       focusable="false"
       {...svgProps}
     >
-      {/* Outer rounded stroke to create softened corners */}
       <path
         d="M12 8 L12 40 L40 24 Z"
         stroke={color}
