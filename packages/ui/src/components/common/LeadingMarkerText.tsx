@@ -34,29 +34,30 @@ export function LeadingMarkerText({
         sx={(theme) => {
           // Get the typography variant to calculate line height
           const typography = theme.typography[headlineVariant]
-          
+
           // Parse fontSize from rem to pixels (assuming 1rem = 16px)
           let fontSize = 16 // default
-          if (typeof typography.fontSize === 'string') {
-            if (typography.fontSize.includes('rem')) {
+          if (typeof typography.fontSize === "string") {
+            if (typography.fontSize.includes("rem")) {
               fontSize = parseFloat(typography.fontSize) * 16
             } else {
               fontSize = parseFloat(typography.fontSize)
             }
-          } else if (typeof typography.fontSize === 'number') {
+          } else if (typeof typography.fontSize === "number") {
             fontSize = typography.fontSize
           }
-          
-          const lineHeight = typeof typography.lineHeight === 'number' 
-            ? typography.lineHeight 
-            : 1.2
-          
+
+          const lineHeight =
+            typeof typography.lineHeight === "number"
+              ? typography.lineHeight
+              : 1.2
+
           // Calculate the height of the first line in pixels
           const firstLineHeight = fontSize * lineHeight
-          
+
           // Position circle to center on the first line
           const topOffset = (firstLineHeight - 48) / 2
-          
+
           return {
             width: 48,
             height: 48,

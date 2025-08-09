@@ -7,6 +7,10 @@ import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
+import { useRef, useState } from "react"
+
+const MotionAppBar = motion.create(AppBar)
 
 type HeaderTranslations = {
   title: string
@@ -94,6 +98,19 @@ export function Header({
     minHeight: "36px", // Ditto
   }
   const { locale, isLoading } = useTranslation()
+  
+  // Scroll-based hide/show functionality
+  const [isHidden, setIsHidden] = useState(false)
+  const { scrollY } = useScroll()
+  const lastYRef = useRef(0)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
 
   // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
@@ -111,7 +128,19 @@ export function Header({
     : "white"
 
   return (
-    <AppBar
+    <MotionAppBar
+      animate={isHidden ? "hidden" : "visible"}
+      whileHover="visible"
+      onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
+      variants={{
+        hidden: {
+          y: "-100%",
+        },
+        visible: {
+          y: "0%",
+        },
+      }}
+      transition={{ duration: 0.3 }}
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
@@ -341,6 +370,6 @@ export function Header({
           <LanguageSwitcher />
         </Stack>
       </Toolbar>
-    </AppBar>
+    </MotionAppBar>
   )
 }

@@ -297,9 +297,10 @@ const IntroSection: React.FC = () => {
           paddingVariant="wide"
           includeHeaderSpacing={false}
           sx={{
-            color: (theme) => theme.palette.blue.darkest,
+            color: (theme) => theme.palette.primary.dark,
             paddingLeft: { xs: 6, md: 20 },
             paddingRight: { xs: 3, md: 6 },
+            paddingTop: { xs: 2, md: 6 }, // Override the wide padding variant's top padding
             height: "100vh",
             display: "flex",
             flexDirection: "column",
@@ -325,7 +326,7 @@ const IntroSection: React.FC = () => {
           >
             {/* Text content with mix-blend-mode */}
             <Box
-              maxWidth="800px"
+              maxWidth="716px"
               sx={{
                 position: "relative",
                 zIndex: (theme) => theme.zIndex.introText,
@@ -334,15 +335,13 @@ const IntroSection: React.FC = () => {
             >
               <Stack spacing={4}>
                 <Typography
-                  variant="h2"
+                  variant="h3"
                   sx={{
                     color: (theme) => theme.palette.blue.darkest,
                     mb: 3,
                   }}
                 >
-                  What is California&apos;s
-                  <br />
-                  water future?
+                  What is California&apos;s water future?
                 </Typography>
                 <Typography
                   variant="body1"
@@ -423,7 +422,7 @@ const IntroSection: React.FC = () => {
                   />
                 </Typography>
                 <Typography
-                  variant="h3"
+                  variant="h4"
                   sx={{
                     color: (theme) => theme.palette.blue.darkest,
                     mt: 2,
