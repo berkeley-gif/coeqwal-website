@@ -64,13 +64,6 @@ const translations: TranslationsMap = {
   },
 }
 
-// Define which sections should have BLUE text (all others will have white)
-// Using theme blue color instead of black for better brand consistency
-const blueSections = [
-  "hero", // Home section
-  "combined-panel", // Scenario search section
-]
-
 // This maps sections to their parent section in the UI
 // Used for arrow display when scrolling through combined sections
 const sectionParentMap: Record<string, string | undefined> = {
@@ -121,11 +114,8 @@ export function Header({
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
-  // Determine the text color for all navigation items based on active section
-  // Default to white, switch to theme blue for specific sections
-  const textColor = blueSections.includes(activeSection || "")
-    ? theme.palette.blue.darkest
-    : "white"
+  // Set text color to always be white
+  const textColor = "white"
 
   return (
     <MotionAppBar
