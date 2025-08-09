@@ -136,6 +136,23 @@ export default function ContentPanels({
     })
   }
 
+  // Scroll to the next section after the content panels
+  const scrollToNextSection = () => {
+    const root = document.getElementById("content-panels")
+    if (root) {
+      const nextEl = root.nextElementSibling as HTMLElement | null
+      if (nextEl) {
+        const rect = nextEl.getBoundingClientRect()
+        const currentTop = window.pageYOffset || document.documentElement.scrollTop
+        const target = rect.top + currentTop - 20
+        window.scrollTo({ top: target, behavior: "smooth" })
+        return
+      }
+    }
+    // Fallback: scroll one viewport height
+    window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" })
+  }
+
   // New simple panel UIs to be embedded inside legacy PanelWithDetail "title" slot
   const LearnSimple = () => (
     <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
@@ -149,7 +166,7 @@ export default function ContentPanels({
       </Box>
       {/* Image column */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-        <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ width: "100%", maxWidth: 620, height: "auto" }} />
+        <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ width: "100%", maxWidth: 680, height: "auto" }} />
       </Box>
     </Box>
   )
@@ -182,7 +199,7 @@ export default function ContentPanels({
           color="inherit"
           aria-label="open-empower"
           sx={(theme) => ({ width: 48, height: 48, borderRadius: theme.borderRadius.rounded, border: "none" })}
-          onClick={() => togglePanelDetail("empower")}
+          onClick={scrollToNextSection}
         >
           <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
         </IconButton>
@@ -885,6 +902,7 @@ export default function ContentPanels({
           bgColor={getPanelBgColor("empower", theme)}
           detailBgColor={getDetailPanelBgColor("empower", theme)}
           hideDetailArrow={true}
+          hideBottomArrow={true}
           title={<EmpowerSimple />}
           detailContent={
             <>
@@ -965,7 +983,13 @@ function PanelWithDetail({
     const updateHeight = () => {
       if (!containerRef.current) return
 
-      const activeRef = isActive ? detailPanelRef.current : mainPanelRef.current
+      if (!isActive) {
+        // Let document flow determine height when showing main panel
+        containerRef.current.style.height = "auto"
+        return
+      }
+
+      const activeRef = detailPanelRef.current
       if (activeRef) {
         const height = activeRef.offsetHeight
         containerRef.current.style.height = `${height}px`
@@ -995,8 +1019,7 @@ function PanelWithDetail({
       sx={{
         position: "relative",
         width: "100%",
-        overflow: "hidden", // Hide panels sliding outside the container
-        overflowX: "hidden", // Prevent horizontal scrollbar
+        overflow: "visible",
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
         // Initial height will be set by useEffect
@@ -1019,14 +1042,7 @@ function PanelWithDetail({
               duration: 0.4,
               ease: "easeInOut",
             }}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              userSelect: "text",
-              zIndex: 1,
-            }}
+            style={{ userSelect: "text" }}
           >
             <Box
               sx={{
@@ -1055,7 +1071,7 @@ function PanelWithDetail({
                   {title}
                   {content && content}
                 </Box>
-                {!hideDetailArrow && (
+                {!hideDetailArrow && panelType !== "empower" && (
                   <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <IconButton
                       onClick={onToggleDetail}
@@ -1073,39 +1089,23 @@ function PanelWithDetail({
                 )}
               </Box>
 
-              {/* Bottom scroll arrow */}
-              {!hideBottomArrow && (
-                panelType === "empower" ? (
-                  <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                    <IconButton
-                      sx={(theme) => ({
-                        color: theme.palette.blue.darkest,
-                        border: "none",
-                        borderRadius: theme.borderRadius.rounded,
-                        width: 60,
-                        height: 60,
-                      })}
-                    >
-                      <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
-                    </IconButton>
-                  </Box>
-                ) : (
-                  <IconButton
-                    sx={(theme) => ({
-                      position: "absolute",
-                      bottom: 20,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      color: theme.palette.blue.darkest,
-                      border: "none",
-                      borderRadius: theme.borderRadius.rounded,
-                      width: 60,
-                      height: 60,
-                    })}
-                  >
-                    <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
-                  </IconButton>
-                )
+              {/* Bottom scroll arrow (outer). Do not render for Empower */}
+              {!hideBottomArrow && panelType !== "empower" && (
+                <IconButton
+                  sx={(theme) => ({
+                    position: "absolute",
+                    bottom: 20,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    color: theme.palette.blue.darkest,
+                    border: "none",
+                    borderRadius: theme.borderRadius.rounded,
+                    width: 60,
+                    height: 60,
+                  })}
+                >
+                  <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
+                </IconButton>
               )}
             </Box>
           </motion.div>
@@ -1133,7 +1133,7 @@ function PanelWithDetail({
           >
             <Box
               sx={{
-                backgroundColor: "transparent",
+                backgroundColor: (theme) => theme.palette.brand.water,
                 p: 0,
                 color: "white",
                 position: "relative",
