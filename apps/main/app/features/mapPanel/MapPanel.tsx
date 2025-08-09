@@ -15,6 +15,7 @@ import {
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
 import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
+import { PresetsPanel, OutcomesPanel, OperationsPanel } from "./cardContent/scenarioChoiceCard"
 import SearchIcon from "@mui/icons-material/Search"
 import LayersIcon from "@mui/icons-material/Layers"
 import FilterListIcon from "@mui/icons-material/FilterList"
@@ -39,6 +40,10 @@ const MapControls = () => {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue)
+  }
+
+  const handleViewOnMap = (coordinates: { longitude: number; latitude: number; zoom: number }) => {
+    flyTo(coordinates.longitude, coordinates.latitude, coordinates.zoom)
   }
 
   return (
@@ -132,70 +137,9 @@ const MapControls = () => {
                   </Box>
 
                   {/* Tab Content */}
-                  {activeTab === 0 && (
-                    <Box>
-                      <Stack spacing={0.5}>
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="SGMA"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="USBR Alternative 3"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Delta Conveyance Tunnel -- Bethany Alternative"
-                        />
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {activeTab === 1 && (
-                    <Box>
-                      <Stack spacing={0.5}>
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Water Supply Reliability"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Environmental Flows"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Groundwater Sustainability"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Agricultural Impacts"
-                        />
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {activeTab === 2 && (
-                    <Box>
-                      <Stack spacing={0.5}>
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Reservoir Operations"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Delta Conveyance"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Groundwater Pumping"
-                        />
-                        <FormControlLabel
-                          control={<Checkbox size="small" />}
-                          label="Water Transfers"
-                        />
-                      </Stack>
-                    </Box>
-                  )}
+                  {activeTab === 0 && <PresetsPanel onViewOnMap={handleViewOnMap} />}
+                  {activeTab === 1 && <OutcomesPanel />}
+                  {activeTab === 2 && <OperationsPanel />}
                 </Box>
               ) : undefined
             }
