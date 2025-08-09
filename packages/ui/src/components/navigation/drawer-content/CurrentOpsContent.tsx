@@ -154,6 +154,27 @@ const glossaryTerms: GlossaryTerm[] = [
     definition:
       "Information and data that can be used to support decision-making, advocacy, or planning. COEQWAL helps turn complex scenario data into actionable insights for communities, agencies, and advocates.",
   },
+  {
+    icon: <WaterIcon />,
+    term: "Sustainable Groundwater Management Act (SGMA)",
+    definition:
+      "A California law enacted in 2014 that requires local agencies to manage groundwater sustainably. SGMA establishes a framework for local groundwater management, requiring agencies to balance water use and recharge to avoid long-term depletion. The law aims to achieve groundwater sustainability by 2040 for high and medium priority basins.",
+    seeAlso: "Groundwater",
+  },
+  {
+    icon: <AccountBalanceIcon />,
+    term: "USBR Alternative 3",
+    definition:
+      "A scenario developed by the U.S. Bureau of Reclamation as part of their long-term planning efforts for the Central Valley Project. This alternative explores specific operational changes and infrastructure modifications to improve water delivery reliability while addressing environmental concerns.",
+    seeAlso: "U.S. Bureau of Reclamation",
+  },
+  {
+    icon: <SettingsIcon />,
+    term: "Delta Conveyance Project",
+    definition:
+      "A proposed water infrastructure project designed to improve the reliability of water deliveries from the Sacramento-San Joaquin Delta. The project includes tunnel alternatives that would convey water under the Delta, reducing impacts on fish and improving water supply reliability. The Bethany Alternative refers to a specific tunnel route ending at Bethany Reservoir instead of Clifton Court Forebay.",
+    seeAlso: "Conveyance",
+  },
 ].sort((a, b) => a.term.localeCompare(b.term))
 
 /**

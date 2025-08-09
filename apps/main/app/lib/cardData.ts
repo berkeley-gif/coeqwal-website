@@ -4,6 +4,14 @@ export interface LearnCardType {
   content: string
   image?: string
   type: "resource" | "article" | "video"
+  buttonText?: string
+  buttonAction?: "read-more" | "view-on-map" | "explore" | "custom"
+  glossaryEntry?: string
+  mapCoordinates?: {
+    longitude: number
+    latitude: number
+    zoom: number
+  }
 }
 
 // Learn cards data
@@ -14,6 +22,8 @@ export const learnCards: LearnCardType[] = [
       "Most of California's water falls as rain and snow. This precipitation is highly variable both across the state and from year to year.",
     image: "/images/DBK_Yuba_River_aerials_0346_05_14_2009.jpg",
     type: "resource",
+    buttonAction: "read-more",
+    glossaryEntry: "california-water-cycle",
   },
   {
     title: "How California's water is managed",
@@ -21,6 +31,12 @@ export const learnCards: LearnCardType[] = [
       "An introduction to the complex water infrastructure across the state.",
     image: "/images/DWR_2023_05_12_ZZ_0008_Aqueduct_Split.jpg",
     type: "article",
+    buttonAction: "view-on-map",
+    mapCoordinates: {
+      longitude: -121.5,
+      latitude: 37.5,
+      zoom: 6.5
+    }
   },
   {
     title: "Climate change and California water",
@@ -28,12 +44,16 @@ export const learnCards: LearnCardType[] = [
       "Learn about the impacts of climate change on the future of California water.",
     image: "/images/DWR_2024_04_11_AN_0010_Orchard_Rip_Groundwater_DRONE.jpg",
     type: "video",
+    buttonAction: "read-more",
+    glossaryEntry: "climate-change",
   },
   {
     title: "Equity in California water",
     content:
       "An overview of key water policies and regulations shaping water management decisions.",
     type: "resource",
+    buttonAction: "read-more",
+    glossaryEntry: "water-equity",
   },
 ]
 

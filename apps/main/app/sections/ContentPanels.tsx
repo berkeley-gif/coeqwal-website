@@ -4,6 +4,54 @@ import type { Theme } from "@mui/material/styles"
 import { BasePanel, LeadingMarkerText, ArrowHead, Spacer } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
 
+/*
+// EXAMPLE: How to use LearnCardCarousel with enhanced functionality
+import { LearnCardCarousel } from "@repo/ui"
+import { useDrawerStore } from "@repo/state"
+import { useMapStore } from "@repo/map"
+import { learnCards } from "../lib/cardData"
+
+function ExampleLearnCardUsage() {
+  const { setDrawerContent, openDrawer } = useDrawerStore()
+  const { flyTo } = useMapStore()
+
+  const handleCardReadMore = (index: number) => {
+    const card = learnCards[index]
+    if (card.glossaryEntry) {
+      setDrawerContent({
+        type: 'glossary',
+        data: { entry: card.glossaryEntry }
+      })
+      openDrawer('glossary')
+    }
+  }
+
+  const handleCardViewOnMap = (index: number) => {
+    const card = learnCards[index]
+    if (card.mapCoordinates) {
+      flyTo(card.mapCoordinates)
+      // Optionally scroll to map section
+      document.getElementById('map-panel')?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const handleCardClick = (index: number) => {
+    console.log('Card clicked:', learnCards[index].title)
+    // Handle general card click (e.g., open detail view)
+  }
+
+  return (
+    <LearnCardCarousel
+      title="Learn About California Water"
+      cards={learnCards}
+      onCardClick={handleCardClick}
+      onCardReadMore={handleCardReadMore}
+      onCardViewOnMap={handleCardViewOnMap}
+    />
+  )
+}
+*/
+
 interface ContentPanelsProps {
   onOpenLearnDrawer?: (sectionId: string) => void
 }
