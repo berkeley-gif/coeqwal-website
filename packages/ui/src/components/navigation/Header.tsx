@@ -91,7 +91,7 @@ export function Header({
     minHeight: "36px", // Ditto
   }
   const { locale, isLoading } = useTranslation()
-  
+
   // Scroll-based hide/show functionality
   const [isHidden, setIsHidden] = useState(false)
   const { scrollY } = useScroll()
