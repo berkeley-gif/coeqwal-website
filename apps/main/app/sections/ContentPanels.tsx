@@ -4,12 +4,10 @@ import type { Theme } from "@mui/material/styles"
 import { BasePanel, LeadingMarkerText, ArrowHead, Spacer } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
 
-// Add props interface
 interface ContentPanelsProps {
   onOpenLearnDrawer?: (sectionId: string) => void
 }
 
-// Define panel types for better type checking
 type PanelType = "learn" | "explore" | "empower" | null
 
 export default function ContentPanels({
@@ -33,85 +31,6 @@ export default function ContentPanels({
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Text component for the first panel
-  const LearnTextContent = () => (
-    <Box sx={{ pointerEvents: "auto", minWidth: "300px" }}>
-      <Typography
-        variant="h2"
-        sx={{
-          color: "common.white",
-          alignSelf: "flex-start",
-          fontWeight: 600,
-        }}
-      >
-        Learn
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "common.white",
-          pointerEvents: "auto",
-          maxWidth: "620px",
-        }}
-      >
-        how California water flows and operational decisions balance water needs
-        across the state
-      </Typography>
-    </Box>
-  )
-
-  // Text component for the second panel
-  const EmpowerTextContent = () => (
-    <Box sx={{ pointerEvents: "auto", minWidth: "300px" }}>
-      <Typography
-        variant="h2"
-        sx={{
-          color: "common.white",
-          alignSelf: "flex-start",
-          fontWeight: 600,
-        }}
-      >
-        Explore
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "common.white",
-          pointerEvents: "auto",
-        }}
-      >
-        COEQWAL&apos;s &quot;what if&quot; scenarios by theme
-      </Typography>
-    </Box>
-  )
-
-  // Text component for the third panel
-  const ActTextContent = () => (
-    <Box sx={{ pointerEvents: "auto", minWidth: "300px" }}>
-      <Typography
-        variant="h2"
-        sx={{
-          color: "common.white",
-          alignSelf: "flex-start",
-          fontWeight: 600,
-        }}
-      >
-        Empower
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "common.white",
-          pointerEvents: "auto",
-          maxWidth: "620px",
-        }}
-      >
-        your community with data that helps you understand the impacts of
-        operational decisions
-      </Typography>
-    </Box>
-  )
-
   // Function to toggle showing/hiding detail for a panel
   const togglePanelDetail = (panelType: PanelType) => {
     if (activePanel === panelType) {
@@ -122,19 +41,20 @@ export default function ContentPanels({
   }
 
   // Smooth scroll to a detail panel by id, then open it
-  const scrollToPanel = (panelId: string, panelType: PanelType) => {
-    const el = document.getElementById(panelId)
-    if (el) {
-      const rect = el.getBoundingClientRect()
-      const currentTop = window.pageYOffset || document.documentElement.scrollTop
-      const target = rect.top + currentTop - 20
-      window.scrollTo({ top: target, behavior: "smooth" })
-    }
-    // Slight delay to allow scroll start, then toggle
-    requestAnimationFrame(() => {
-      setActivePanel(panelType === activePanel ? null : panelType)
-    })
-  }
+  // const scrollToPanel = (panelId: string, panelType: PanelType) => {
+  //   const el = document.getElementById(panelId)
+  //   if (el) {
+  //     const rect = el.getBoundingClientRect()
+  //     const currentTop =
+  //       window.pageYOffset || document.documentElement.scrollTop
+  //     const target = rect.top + currentTop - 20
+  //     window.scrollTo({ top: target, behavior: "smooth" })
+  //   }
+  //   // Slight delay to allow scroll start, then toggle
+  //   requestAnimationFrame(() => {
+  //     setActivePanel(panelType === activePanel ? null : panelType)
+  //   })
+  // }
 
   // Scroll to the next section after the content panels
   const scrollToNextSection = () => {
@@ -143,7 +63,8 @@ export default function ContentPanels({
       const nextEl = root.nextElementSibling as HTMLElement | null
       if (nextEl) {
         const rect = nextEl.getBoundingClientRect()
-        const currentTop = window.pageYOffset || document.documentElement.scrollTop
+        const currentTop =
+          window.pageYOffset || document.documentElement.scrollTop
         const target = rect.top + currentTop - 20
         window.scrollTo({ top: target, behavior: "smooth" })
         return
@@ -153,55 +74,104 @@ export default function ContentPanels({
     window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" })
   }
 
-  // New simple panel UIs to be embedded inside legacy PanelWithDetail "title" slot
   const LearnSimple = () => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        color: (theme) => theme.palette.blue.darkest,
+        width: "100%",
+      }}
+    >
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
           <Typography variant="body2">
-            how California water flows and operational decisions balance water needs across the state
+            how California water flows and operational decisions balance water
+            needs across the state
           </Typography>
         </LeadingMarkerText>
       </Box>
       {/* Image column */}
-      <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-        <Box component="img" src="/images/content/learn.png" alt="Learn" sx={{ width: "100%", maxWidth: 680, height: "auto" }} />
+      <Box
+        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}
+      >
+        <Box
+          component="img"
+          src="/images/content/learn.png"
+          alt="Learn"
+          sx={{ width: "100%", maxWidth: 680, height: "auto" }}
+        />
       </Box>
     </Box>
   )
 
   const ExploreSimple = () => (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        color: (theme) => theme.palette.blue.darkest,
+        width: "100%",
+      }}
+    >
       {/* Image column */}
-      <Box sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}>
-        <Box component="img" src="/images/content/explore.png" alt="Explore" sx={{ width: "100%", maxWidth: 620, height: "auto" }} />
+      <Box
+        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}
+      >
+        <Box
+          component="img"
+          src="/images/content/explore.png"
+          alt="Explore"
+          sx={{ width: "100%", maxWidth: 620, height: "auto" }}
+        />
       </Box>
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LeadingMarkerText title="Explore">
-          <Typography variant="body2">COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme</Typography>
+          <Typography variant="body2">
+            COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme
+          </Typography>
         </LeadingMarkerText>
       </Box>
     </Box>
   )
 
   const EmpowerSimple = () => (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, color: (theme) => theme.palette.blue.darkest, width: "100%" }}>
-      <LeadingMarkerText title="Empower" bodySpansFull>
-        <Typography variant="body2" sx={{ textAlign: "center" }}>
-          your community with data that helps you understand the impacts of operational decisions
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        color: (theme) => theme.palette.blue.darkest,
+        width: "100%",
+        paddingTop: { xs: 3, md: 14 },
+      }}
+    >
+      <LeadingMarkerText title="Empower">
+        <Typography variant="body2">
+          your community with data that helps you understand the impacts of
+          operational decisions
         </Typography>
       </LeadingMarkerText>
-      {/* Downward arrow after text, in document flow */}
       <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <IconButton
           color="inherit"
           aria-label="open-empower"
-          sx={(theme) => ({ width: 48, height: 48, borderRadius: theme.borderRadius.rounded, border: "none" })}
+          sx={(theme) => ({
+            width: 48,
+            height: 48,
+            borderRadius: theme.borderRadius.rounded,
+            border: "none",
+          })}
           onClick={scrollToNextSection}
         >
-          <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
+          <ArrowHead
+            style={{ width: 36, height: 36, transform: "rotate(90deg)" }}
+          />
         </IconButton>
       </Box>
     </Box>
@@ -215,20 +185,6 @@ export default function ContentPanels({
         return theme.palette.blue.medium // Medium blue
       case "empower":
         return theme.palette.nature.teal // Teal green
-      default:
-        return theme.palette.blue.dark // Fallback
-    }
-  }
-
-  // Get background color for detail panels (same for now)
-  const getDetailPanelBgColor = (panelType: PanelType, theme: Theme) => {
-    switch (panelType) {
-      case "learn":
-        return theme.palette.blue.dark // Deep blue
-      case "explore":
-        return theme.palette.blue.medium // Medium blue
-      case "empower":
-        return theme.palette.blue.dark // Dark blue
       default:
         return theme.palette.blue.dark // Fallback
     }
@@ -298,21 +254,36 @@ export default function ContentPanels({
           isActive={activePanel === "learn"}
           onToggleDetail={() => togglePanelDetail("learn")}
           bgColor={getPanelBgColor("learn", theme)}
-          detailBgColor={getDetailPanelBgColor("learn", theme)}
           addBorder={false}
           hideBottomArrow={true}
           title={<LearnSimple />}
           detailContent={
             <>
-              <Typography
-                variant="h1"
-                color="common.white"
-                sx={{
-                  alignSelf: "flex-start",
-                }}
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
               >
-                Learn
-              </Typography>
+                <IconButton
+                  onClick={() => togglePanelDetail("learn")}
+                  sx={{ color: "common.white", width: 48, height: 48 }}
+                >
+                  <ArrowHead
+                    style={{
+                      width: 28,
+                      height: 28,
+                      transform: "rotate(180deg)",
+                    }}
+                  />
+                </IconButton>
+                <Typography
+                  variant="h1"
+                  color="common.white"
+                  sx={{
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  Learn
+                </Typography>
+              </Box>
               <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <Box
@@ -531,23 +502,37 @@ export default function ContentPanels({
           isActive={activePanel === "explore"}
           onToggleDetail={() => togglePanelDetail("explore")}
           bgColor={getPanelBgColor("explore", theme)}
-          detailBgColor={getDetailPanelBgColor("explore", theme)}
           hideBottomArrow={true}
           title={<ExploreSimple />}
           detailContent={
             <>
-              <Typography
-                variant="h1"
-                color="common.white"
-                sx={{
-                  alignSelf: "flex-start",
-                  pointerEvents: "auto",
-                  mb: 4,
-                  width: "100%",
-                }}
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
               >
-                Explore scenario themes
-              </Typography>
+                <IconButton
+                  onClick={() => togglePanelDetail("explore")}
+                  sx={{ color: "common.white", width: 48, height: 48 }}
+                >
+                  <ArrowHead
+                    style={{
+                      width: 28,
+                      height: 28,
+                      transform: "rotate(180deg)",
+                    }}
+                  />
+                </IconButton>
+                <Typography
+                  variant="h1"
+                  color="common.white"
+                  sx={{
+                    alignSelf: "flex-start",
+                    pointerEvents: "auto",
+                    width: "100%",
+                  }}
+                >
+                  Explore scenario themes
+                </Typography>
+              </Box>
               <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <Box
@@ -900,21 +885,48 @@ export default function ContentPanels({
           isActive={activePanel === "empower"}
           onToggleDetail={() => togglePanelDetail("empower")}
           bgColor={getPanelBgColor("empower", theme)}
-          detailBgColor={getDetailPanelBgColor("empower", theme)}
           hideDetailArrow={true}
           hideBottomArrow={true}
           title={<EmpowerSimple />}
           detailContent={
             <>
-              <Typography
-                variant="h1"
-                color="common.white"
-                sx={{
-                  alignSelf: "flex-start",
-                }}
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}
               >
-                Empower
-              </Typography>
+                <IconButton
+                  onClick={() => togglePanelDetail("empower")}
+                  sx={{ color: "common.white", width: 48, height: 48 }}
+                >
+                  <ArrowHead
+                    style={{
+                      width: 28,
+                      height: 28,
+                      transform: "rotate(180deg)",
+                    }}
+                  />
+                </IconButton>
+                <IconButton
+                  onClick={scrollToNextSection}
+                  sx={{ color: "common.white", width: 48, height: 48 }}
+                >
+                  <ArrowHead
+                    style={{
+                      width: 28,
+                      height: 28,
+                      transform: "rotate(90deg)",
+                    }}
+                  />
+                </IconButton>
+                <Typography
+                  variant="h1"
+                  color="common.white"
+                  sx={{
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  Empower
+                </Typography>
+              </Box>
               <Box>
                 <Typography variant="body2" color="common.white" sx={{ mb: 4 }}>
                   Informed communities can advocate effectively for water
@@ -952,7 +964,6 @@ interface PanelWithDetailProps {
   isActive: boolean
   onToggleDetail: () => void
   bgColor: string
-  detailBgColor: string
   title: React.ReactNode
   content?: React.ReactNode // Make content optional
   detailContent: React.ReactNode
@@ -966,7 +977,6 @@ function PanelWithDetail({
   isActive,
   onToggleDetail,
   bgColor,
-  detailBgColor,
   title,
   content, // Now optional
   detailContent,
@@ -1072,7 +1082,14 @@ function PanelWithDetail({
                   {content && content}
                 </Box>
                 {!hideDetailArrow && panelType !== "empower" && (
-                  <Box sx={{ width: { xs: 48, md: 56 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Box
+                    sx={{
+                      width: { xs: 48, md: 56 },
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     <IconButton
                       onClick={onToggleDetail}
                       sx={(theme) => ({
@@ -1092,6 +1109,7 @@ function PanelWithDetail({
               {/* Bottom scroll arrow (outer). Do not render for Empower */}
               {!hideBottomArrow && panelType !== "empower" && (
                 <IconButton
+                  onClick={onToggleDetail}
                   sx={(theme) => ({
                     position: "absolute",
                     bottom: 20,
@@ -1104,7 +1122,13 @@ function PanelWithDetail({
                     height: 60,
                   })}
                 >
-                  <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
+                  <ArrowHead
+                    style={{
+                      width: 36,
+                      height: 36,
+                      transform: "rotate(90deg)",
+                    }}
+                  />
                 </IconButton>
               )}
             </Box>
@@ -1157,43 +1181,6 @@ function PanelWithDetail({
                   {detailContent}
                 </Grid>
               </Grid>
-
-              {/* Left arrow to go back to main panel */}
-              <IconButton
-                onClick={onToggleDetail}
-                sx={(theme) => ({
-                  position: "absolute",
-                  left: 30,
-                  top: 108,
-                  transform: "rotate(180deg)",
-                  color: theme.palette.blue.darkest,
-                  border: "none",
-                  borderRadius: theme.borderRadius.rounded,
-                  width: 60,
-                  height: 60,
-                })}
-              >
-                <ArrowHead style={{ width: 36, height: 36 }} />
-              </IconButton>
-
-              {/* Bottom scroll arrow - absolutely positioned within the panel */}
-              {!hideBottomArrow && (
-                <IconButton
-                  sx={(theme) => ({
-                    position: "absolute",
-                    bottom: 20,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    color: theme.palette.blue.darkest,
-                    border: "none",
-                    borderRadius: theme.borderRadius.rounded,
-                    width: 60,
-                    height: 60,
-                  })}
-                >
-                  <ArrowHead style={{ width: 36, height: 36, transform: "rotate(90deg)" }} />
-                </IconButton>
-              )}
             </Box>
           </motion.div>
         )}

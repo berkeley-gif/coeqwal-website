@@ -8,7 +8,11 @@ export interface ArrowHeadProps extends React.SVGProps<SVGSVGElement> {
 }
 
 // Right-pointing triangular arrow with visually rounded corners
-export function ArrowHead({ size = "100%", color = "currentColor", ...svgProps }: ArrowHeadProps) {
+export function ArrowHead({
+  size = "100%",
+  color = "currentColor",
+  ...svgProps
+}: ArrowHeadProps) {
   return (
     <svg
       width={size}
@@ -34,5 +38,3 @@ export function ArrowHead({ size = "100%", color = "currentColor", ...svgProps }
 }
 
 export default ArrowHead
-
-

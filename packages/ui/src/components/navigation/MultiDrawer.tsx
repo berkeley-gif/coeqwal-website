@@ -225,7 +225,10 @@ export function MultiDrawer({
           zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
           position: "relative",
           ".MuiDrawer-paper": {
-            width: drawerWidth ?? theme.layout.drawer.width ?? theme.layout.drawer.glossaryWidth,
+            width:
+              drawerWidth ??
+              theme.layout.drawer.width ??
+              theme.layout.drawer.glossaryWidth,
             transition: theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,

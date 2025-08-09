@@ -231,7 +231,14 @@ const IntroSection: React.FC = () => {
             </Typography>
 
             {/* Play arrow icon pointing down */}
-            <Box sx={{ display: "flex", justifyContent: "center", width: "500px", color: (theme) => theme.palette.blue.darkest }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "500px",
+                color: (theme) => theme.palette.blue.darkest,
+              }}
+            >
               <ArrowHead
                 size={28}
                 style={{ transform: "rotate(90deg)", cursor: "pointer" }}
@@ -278,7 +285,7 @@ const IntroSection: React.FC = () => {
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
           `,
-          backgroundSize: "auto 44%, auto 80%, auto calc(100vh - 80px)",
+          backgroundSize: "auto 44%, auto 80%, auto 44%",
           backgroundPosition: "left top, left bottom, right bottom",
           backgroundRepeat: "no-repeat, no-repeat, no-repeat",
           overflow: "hidden",
