@@ -15,6 +15,8 @@ export interface LearnCardCarouselProps {
   title?: string
   cards: Omit<LearnCardProps, "onClick">[]
   onCardClick?: (index: number) => void
+  onCardReadMore?: (index: number) => void
+  onCardViewOnMap?: (index: number) => void
 }
 
 const CarouselContainer = styled(Box)(({ theme }) => ({
@@ -60,6 +62,8 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
   title,
   cards,
   onCardClick,
+  onCardReadMore,
+  onCardViewOnMap,
 }) => {
   const theme = useTheme()
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"))
@@ -201,6 +205,8 @@ const LearnCardCarousel: React.FC<LearnCardCarouselProps> = ({
             <LearnCard
               {...card}
               onClick={() => onCardClick && onCardClick(index)}
+              onReadMore={() => onCardReadMore && onCardReadMore(index)}
+              onViewOnMap={() => onCardViewOnMap && onCardViewOnMap(index)}
             />
           </Box>
         ))}

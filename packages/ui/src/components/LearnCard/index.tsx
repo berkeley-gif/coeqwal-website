@@ -8,6 +8,10 @@ export interface LearnCardProps {
   image?: string
   type?: "resource" | "article" | "video"
   onClick?: () => void
+  buttonText?: string
+  buttonAction?: "read-more" | "view-on-map" | "explore" | "custom"
+  onReadMore?: () => void
+  onViewOnMap?: () => void
 }
 
 interface StyledCardProps {
@@ -22,13 +26,13 @@ const StyledCard = styled(Card, {
   display: "flex",
   flexDirection: "column",
   minWidth: 0,
-  width: "100%", // Make card take full width of parent
+  width: "100%",
   height: "380px", // Consistent height for all cards
   wordWrap: "break-word",
-  backgroundColor: "transparent", // Changed from #fff to transparent
+  backgroundColor: "transparent",
   backgroundClip: "border-box",
-  border: "1px solid rgba(255, 255, 255, 0.6)", // Changed from #fff to semi-transparent white
-  borderRadius: "8px", // Added 8px border radius
+  border: "1px solid rgba(255, 255, 255, 0.6)",
+  borderRadius: "8px",
   pointerEvents: "auto", // Ensure hover effects work
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {
@@ -42,21 +46,21 @@ const CardImage = styled("img")({
   width: "100%",
   height: "100%",
   objectFit: "cover",
-  objectPosition: "center", // Center the image
+  objectPosition: "center",
 })
 
-// Updated button style to match HeaderHome
+// Updated button style to match header
 const StyledButton = styled(Button)(() => ({
   textTransform: "none",
-  borderRadius: "50rem", // Rounded pill
+  borderRadius: "50rem",
   boxShadow: "none",
   padding: "6px 16px",
   minWidth: 64,
   lineHeight: 1.75,
   fontSize: "0.95rem",
   fontWeight: 500,
-  height: "36px", // Fixed height to match HeaderHome
-  minHeight: "36px", // Min height to match HeaderHome
+  height: "36px", // Fixed height to match header
+  minHeight: "36px", // Min height to match header
 }))
 
 // Function to truncate text at word boundaries
@@ -95,11 +99,44 @@ const LearnCard: React.FC<LearnCardProps> = ({
   image,
   type = "resource",
   onClick,
+  buttonText,
+  buttonAction = "explore",
+  onReadMore,
+  onViewOnMap,
 }) => {
-  // Determine button text based on card type
+  // Determine button text based on card type and props
   const getButtonText = () => {
-    // Always return "Explore" for all card types
-    return "Explore"
+    if (buttonText) return buttonText
+    
+    switch (buttonAction) {
+      case "read-more":
+        return "Read more"
+      case "view-on-map":
+        return "View on map"
+      case "explore":
+      case "custom":
+      default:
+        return "Explore"
+    }
+  }
+
+  // Handle button click based on action type
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card onClick from triggering
+    
+    switch (buttonAction) {
+      case "read-more":
+        if (onReadMore) onReadMore()
+        break
+      case "view-on-map":
+        if (onViewOnMap) onViewOnMap()
+        break
+      case "explore":
+      case "custom":
+      default:
+        if (onClick) onClick()
+        break
+    }
   }
 
   // Calculate truncated text versions
@@ -141,8 +178,8 @@ const LearnCard: React.FC<LearnCardProps> = ({
           variant="h6"
           component="h3"
           gutterBottom
-          title={title} // Show full title on hover
-          sx={{ color: "#fff" }} // Make title text white
+          title={title} 
+          sx={{ color: "#fff" }} 
         >
           {truncatedTitle}
         </Typography>
@@ -152,9 +189,9 @@ const LearnCard: React.FC<LearnCardProps> = ({
           sx={{
             flexGrow: 1,
             mb: 3,
-            color: "#fff", // Make content text white
+            color: "#fff",
           }}
-          title={content} // Show full content on hover
+          title={content}
         >
           {truncatedContent}
         </Typography>
@@ -167,19 +204,16 @@ const LearnCard: React.FC<LearnCardProps> = ({
             sx={{
               alignSelf: "flex-end",
               backgroundColor: "transparent",
-              color: "#fff", // Changed from buttonColor to white
-              borderColor: "#fff", // Changed from buttonColor to white
+              color: "#fff",
+              borderColor: "#fff",
               pointerEvents: "auto",
               "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.2)", // Semi-transparent white on hover
-                color: "#fff", // Keep text white on hover
-                borderColor: "#fff", // Keep border white on hover
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                color: "#fff",
+                borderColor: "#fff",
               },
             }}
-            onClick={(e) => {
-              e.stopPropagation() // Prevent card onClick from triggering
-              if (onClick) onClick()
-            }}
+            onClick={handleButtonClick}
           >
             {getButtonText()}
           </StyledButton>

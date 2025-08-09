@@ -322,7 +322,7 @@ html{
     justify-content: center; /* Center content vertically */
     align-items: center; /* Center content horizontally */
     background-color: var(--light-color) !important;
-    border-radius: 10px;
+    border-radius: 16px;
 }
 
 .popup-closer{
@@ -399,7 +399,7 @@ html{
 .mapboxgl-popup-content{
     color: var(--text-color);
     background-color: var(--light-color) !important;
-    border-radius: 10px;
+    border-radius: 16px;
 }
 .mapboxgl-popup-close-button{
     color: var(--text-color);
