@@ -19,6 +19,7 @@ const MapControls = () => {
   const { flyTo } = useMap()
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
+  const [isChartExpanded, setIsChartExpanded] = useState(false)
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -54,6 +55,10 @@ const MapControls = () => {
     })
   }
 
+  const handleChartExpand = (expanded: boolean) => {
+    setIsChartExpanded(expanded)
+  }
+
   return (
     <Box
       sx={{
@@ -78,98 +83,169 @@ const MapControls = () => {
       >
         {/* Left Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <ScenarioCard
-            topLine="CHOOSE SCENARIOS. starting with:"
-            headline="Current Operations Scenario"
-            body={
-              <ScenarioCardList
-                items={[
-                  "helps us understand how California manages water today",
-                  "serves as a foundation to compare alternative scenarios",
-                ]}
-              />
-            }
-            bottomLine={
-              <Box
-                onClick={toggleDropdown}
-                sx={{
-                  cursor: "pointer",
-                  userSelect: "none",
-                  transition: "color 0.2s ease",
-                  "&:hover": {
-                    color: (theme) => theme.palette.action.hover,
-                  },
-                }}
-              >
-                Choose alternative scenarios to compare{" "}
-                <span
-                  style={{
-                    fontSize: "0.875em",
-                    lineHeight: 1,
-                    verticalAlign: "baseline",
-                    display: "inline-block",
-                    transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
-                >
-                  ▼
-                </span>
-              </Box>
-            }
-            dropdownContent={
-              showDropdown ? (
+          {/* When chart is expanded, show the card header + expanded chart */}
+          {isChartExpanded ? (
+            <Box
+              sx={{
+                backdropFilter: "blur(10px)",
+                pointerEvents: "auto",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderRadius: "16px",
+                border: "1px solid",
+                borderColor: (theme) => theme.palette.divider,
+                padding: 3,
+                display: "flex",
+                flexDirection: "column",
+                height: "calc(100vh - 200px)",
+                maxHeight: "600px",
+                minHeight: "400px",
+              }}
+            >
+              {/* Keep the header section visible */}
+              <Box sx={{ mb: 2, flexShrink: 0 }}>
                 <Box
                   sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "calc(100vh - 200px)",
-                    maxHeight: "600px",
-                    minHeight: "400px", // Minimum height for usability
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    color: (theme) => theme.palette.text.secondary,
+                    mb: 1,
                   }}
                 >
-                  {/* Tab Navigation with Label */}
-                  <Box sx={{ display: "flex", alignItems: "baseline", mb: 2, flexShrink: 0 }}>
-                    <Box
-                      component="span"
-                      sx={{
-                        mr: 2,
-                        fontSize: "0.95rem",
-                        fontWeight: 400,
-                        color: (theme) => theme.palette.text.primary,
-                        flexShrink: 0,
-                      }}
-                    >
-                      Choose scenarios by:
-                    </Box>
-                    <Tabs
-                      value={activeTab}
-                      onChange={handleTabChange}
-                      sx={{ flex: 1 }}
-                    >
-                      <Tab label="Presets" />
-                      <Tab label="Outcomes" />
-                      <Tab label="Operations" />
-                    </Tabs>
-                  </Box>
-
-                  {/* Tab Content, conditional height behavior */}
-                  {activeTab === 0 && (
-                    <PresetsPanel onViewOnMap={handleViewOnMap} />
-                  )}
-                  {activeTab === 1 && (
-                    <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                      <OutcomesPanel />
-                    </Box>
-                  )}
-                  {activeTab === 2 && <OperationsPanel />}
+                  CHOOSE SCENARIOS. starting with:
                 </Box>
-              ) : undefined
-            }
-            sx={{
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
-            }}
-          />
+                <Box
+                  sx={{
+                    fontSize: "1.5rem",
+                    fontWeight: 500,
+                    lineHeight: 1.4,
+                    color: (theme) => theme.palette.text.primary,
+                    mb: 2,
+                  }}
+                >
+                  Current Operations Scenario
+                </Box>
+                <Box sx={{ mb: 2 }}>
+                  <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
+                    <Box component="li" sx={{ fontSize: "0.95rem", fontWeight: 400, lineHeight: 1.4, marginBottom: "4px", color: "inherit" }}>
+                      helps us understand how California manages water today
+                    </Box>
+                    <Box component="li" sx={{ fontSize: "0.95rem", fontWeight: 400, lineHeight: 1.4, marginBottom: "4px", color: "inherit" }}>
+                      serves as a foundation to compare alternative scenarios
+                    </Box>
+                  </Box>
+                </Box>
+                
+                {/* HR separator */}
+                <Box
+                  sx={{
+                    borderBottom: "1px solid",
+                    borderColor: (theme) => theme.palette.divider,
+                    mb: 0,
+                  }}
+                />
+              </Box>
+              
+              {/* Expanded chart content */}
+              <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", mt: 0, pt: 0 }}>
+                <OutcomesPanel onExpandChart={handleChartExpand} />
+              </Box>
+            </Box>
+          ) : (
+            <ScenarioCard
+              topLine="CHOOSE SCENARIOS. starting with:"
+              headline="Current Operations Scenario"
+              body={
+                <ScenarioCardList
+                  items={[
+                    "helps us understand how California manages water today",
+                    "serves as a foundation to compare alternative scenarios",
+                  ]}
+                />
+              }
+              bottomLine={
+                <Box
+                  onClick={toggleDropdown}
+                  sx={{
+                    cursor: "pointer",
+                    userSelect: "none",
+                    transition: "color 0.2s ease",
+                    "&:hover": {
+                      color: (theme) => theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  Choose alternative scenarios to compare{" "}
+                  <span
+                    style={{
+                      fontSize: "0.875em",
+                      lineHeight: 1,
+                      verticalAlign: "baseline",
+                      display: "inline-block",
+                      transform: showDropdown ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.2s ease",
+                    }}
+                  >
+                    ▼
+                  </span>
+                </Box>
+              }
+              dropdownContent={
+                showDropdown ? (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "calc(100vh - 200px)",
+                      maxHeight: "600px",
+                      minHeight: "400px", // Minimum height for usability
+                    }}
+                  >
+                    {/* Normal view: Tab navigation and content */}
+                    <Box sx={{ display: "flex", alignItems: "baseline", mb: 2, flexShrink: 0 }}>
+                      <Box
+                        component="span"
+                        sx={{
+                          mr: 2,
+                          fontSize: "0.95rem",
+                          fontWeight: 400,
+                          color: (theme) => theme.palette.text.primary,
+                          flexShrink: 0,
+                        }}
+                      >
+                        Choose scenarios by:
+                      </Box>
+                      <Tabs
+                        value={activeTab}
+                        onChange={handleTabChange}
+                        sx={{ flex: 1 }}
+                      >
+                        <Tab label="Presets" />
+                        <Tab label="Outcomes" />
+                        <Tab label="Operations" />
+                      </Tabs>
+                    </Box>
+
+                    {/* Tab Content */}
+                    {activeTab === 0 && (
+                      <PresetsPanel onViewOnMap={handleViewOnMap} />
+                    )}
+                    {activeTab === 1 && (
+                      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                        <OutcomesPanel onExpandChart={handleChartExpand} />
+                      </Box>
+                    )}
+                    {activeTab === 2 && <OperationsPanel />}
+                  </Box>
+                ) : undefined
+              }
+              sx={{
+                backdropFilter: "blur(10px)",
+                pointerEvents: "auto",
+              }}
+            />
+          )}
         </Box>
 
         {/* Center Column */}
