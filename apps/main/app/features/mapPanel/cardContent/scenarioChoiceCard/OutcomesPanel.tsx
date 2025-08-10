@@ -3,17 +3,21 @@
 import React, { useState } from "react"
 import {
   Box,
-  Typography,
   Button,
   FormControlLabel,
   Checkbox,
 } from "@repo/ui/mui"
 import { VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 
-export default function OutcomesPanel() {
+interface OutcomesPanelProps {
+  onExpandChart?: (expanded: boolean) => void
+}
+
+export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
   const [showInstructions, setShowInstructions] = useState(false)
+  const [expandChart, setExpandChart] = useState(false)
 
   const handleViewModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsRelativeView(event.target.checked)
@@ -32,6 +36,12 @@ export default function OutcomesPanel() {
 
   const toggleInstructions = () => {
     setShowInstructions(!showInstructions)
+  }
+
+  const toggleExpandChart = () => {
+    const newExpandState = !expandChart
+    setExpandChart(newExpandState)
+    onExpandChart?.(newExpandState)
   }
 
   // Sample data for vertical parallel line plot
@@ -141,39 +151,81 @@ export default function OutcomesPanel() {
         minWidth: 0, // Allow shrinking below content size if needed
       }}
     >
-      {/* Collapsible instructions section */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
-        {/* Toggle button for instructions */}
-        <Button
-          variant="text"
-          onClick={toggleInstructions}
+      {/* Always visible: Instructions and Expand Chart toggle */}
+      <Box sx={{ mb: 0, mt: 0, flexShrink: 0 }}>
+        {/* Two column layout for toggle buttons */}
+        <Box
           sx={{
-            fontSize: "0.95rem",
-            fontWeight: 500,
-            color: (theme) => theme.palette.blue.bright,
-            padding: 0,
-            minWidth: "auto",
-            textTransform: "none",
-            mb: showInstructions ? 2 : 0,
-            "&:hover": {
-              color: (theme) => theme.palette.blue.darkest,
-              backgroundColor: "transparent",
-            },
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 2,
+            mb: 0,
           }}
         >
-          <span
-            style={{
-              fontSize: "0.875em",
-              marginRight: "8px",
-              display: "inline-block",
-              transform: showInstructions ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s ease",
+          {/* Show/Hide instructions button */}
+          <Button
+            variant="text"
+            onClick={toggleInstructions}
+            sx={{
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              color: (theme) => theme.palette.blue.bright,
+              padding: 0,
+              minWidth: "auto",
+              textTransform: "none",
+              justifyContent: "flex-start",
+              "&:hover": {
+                color: (theme) => theme.palette.blue.darkest,
+                backgroundColor: "transparent",
+              },
             }}
           >
-            ▼
-          </span>
-          {showInstructions ? "Hide" : "Show"} instructions
-        </Button>
+            <span
+              style={{
+                fontSize: "0.875em",
+                marginRight: "8px",
+                display: "inline-block",
+                transform: showInstructions ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+              }}
+            >
+              ▼
+            </span>
+            {showInstructions ? "Hide" : "Show"} instructions
+          </Button>
+
+          {/* Expand chart button */}
+          <Button
+            variant="text"
+            onClick={toggleExpandChart}
+            sx={{
+              fontSize: "0.95rem",
+              fontWeight: 500,
+              color: (theme) => theme.palette.blue.bright,
+              padding: 0,
+              minWidth: "auto",
+              textTransform: "none",
+              justifyContent: "flex-start",
+              "&:hover": {
+                color: (theme) => theme.palette.blue.darkest,
+                backgroundColor: "transparent",
+              },
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.875em",
+                marginRight: "8px",
+                display: "inline-block",
+                transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+              }}
+            >
+              ▼
+            </span>
+            {expandChart ? "Reduce" : "Expand"} chart
+          </Button>
+        </Box>
 
         {/* Collapsible instructions content */}
         {showInstructions && (
@@ -220,13 +272,13 @@ export default function OutcomesPanel() {
         )}
       </Box>
 
-      {/* Two equal columns for interface elements */}
+      {/* Chart controls - always visible */}
       <Box
         sx={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: 2,
-          mb: 2,
+          mb: 0,
           width: "100%",
           flexShrink: 0, // Don't shrink this control area
         }}
@@ -265,12 +317,12 @@ export default function OutcomesPanel() {
         sx={{
           flexGrow: 1, // Take up remaining vertical space
           width: "100%", 
-          minHeight: "350px", // Reasonable minimum for small viewports
-          maxHeight: "500px", // Maximum height to prevent being too tall
+          minHeight: expandChart ? "600px" : "350px", // Larger minimum when expanded
+          maxHeight: expandChart ? "none" : "500px", // No max height when expanded
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          mb: 2,
+          mb: 0,
         }}
       >
         <VerticalParallelLinePlot
