@@ -15,7 +15,7 @@ import type { CSSProperties } from "react"
      - Border styles
      - Shadows
      - Z-Index values
-     - Reusable mixins (hover effects, drawer content, form controls)
+     - Reusable mixins (hover effects, drawer content, tooltip buttons, form controls)
 
  2. Theme configuration
     - Base theme creation
@@ -1910,7 +1910,7 @@ declare module "@mui/material/Typography" {
 |
 | STANDARD SPECIFICATIONS:
 | - Size: Exact 20px × 20px dimensions
-| - Positioning: verticalAlign "super", marginTop "0px"
+| - Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
 | - Border: 1px solid using theme.palette.text.primary
 | - Background: Transparent with hover states
 | - Spacing: theme.spacing(0.5) margin
