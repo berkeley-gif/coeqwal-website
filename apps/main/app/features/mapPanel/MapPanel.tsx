@@ -15,7 +15,19 @@ interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
 }
 
-const MapControls = () => {
+interface MapControlsProps {
+  isDrawingCustomRegion: boolean
+  polygonPoints: Array<{lng: number, lat: number}>
+  onSelectRegionOnMap: () => void
+  onClearCustomRegion: () => void
+}
+
+const MapControls = ({ 
+  isDrawingCustomRegion, 
+  polygonPoints, 
+  onSelectRegionOnMap, 
+  onClearCustomRegion 
+}: MapControlsProps) => {
   const { flyTo } = useMap()
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
@@ -62,6 +74,11 @@ const MapControls = () => {
 
   const toggleRegionDropdown = () => {
     setShowRegionDropdown(!showRegionDropdown)
+  }
+
+  const handleSelectRegionOnMapClick = () => {
+    onSelectRegionOnMap()
+    setShowRegionDropdown(false) // Close dropdown when starting to draw
   }
 
   return (
@@ -320,7 +337,19 @@ const MapControls = () => {
                     label="Tulare Basin"
                   />
                   <FormControlLabel
-                    control={<Checkbox size="small" />}
+                    control={
+                      <Checkbox 
+                        size="small" 
+                        checked={isDrawingCustomRegion || polygonPoints.length > 0}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            handleSelectRegionOnMapClick()
+                          } else {
+                            onClearCustomRegion()
+                          }
+                        }}
+                      />
+                    }
                     label="Select region on map"
                     sx={{ gridColumn: "1 / -1" }} // Span full width
                   />
@@ -518,6 +547,27 @@ const MapControls = () => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  
+  // Polygon drawing state, lifted to main component
+  const [isDrawingCustomRegion, setIsDrawingCustomRegion] = useState(false)
+  const [polygonPoints, setPolygonPoints] = useState<Array<{lng: number, lat: number}>>([])
+
+  const handleSelectRegionOnMap = () => {
+    setIsDrawingCustomRegion(true)
+    setPolygonPoints([])
+  }
+
+  const handlePolygonComplete = () => {
+    if (polygonPoints.length >= 3) {
+      setIsDrawingCustomRegion(false)
+      console.log('Custom region polygon completed:', polygonPoints)
+    }
+  }
+
+  const handleClearCustomRegion = () => {
+    setIsDrawingCustomRegion(false)
+    setPolygonPoints([])
+  }
 
   return (
     <Box
@@ -542,6 +592,16 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         scrollZoom={false}
         touchZoom={true}
         touchRotate={false}
+        cursor={isDrawingCustomRegion ? "crosshair" : "default"}
+        onClick={isDrawingCustomRegion ? (evt: {lngLat: {lng: number, lat: number}}) => {
+          const { lng, lat } = evt.lngLat
+          const newPoint = { lng, lat }
+          setPolygonPoints((prev: Array<{lng: number, lat: number}>) => [...prev, newPoint])
+        } : undefined}
+        onDblClick={isDrawingCustomRegion ? (evt: {preventDefault: () => void}) => {
+          evt.preventDefault()
+          handlePolygonComplete()
+        } : undefined}
         onError={(evt: unknown) => {
           // Surface mapbox or ReactMapGL errors in the console (could be replaced with toast)
           console.error("🗺️ Map error:", evt)
@@ -560,8 +620,40 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         />
       </Map>
 
+      {/* Polygon Drawing Instructions */}
+      {isDrawingCustomRegion && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            color: "white",
+            padding: 2,
+            borderRadius: 1,
+            zIndex: (theme) => theme.zIndex.tooltip,
+            textAlign: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <Box sx={{ fontSize: "0.9rem", fontWeight: 500, mb: 0.5 }}>
+            Draw Custom Region
+          </Box>
+          <Box sx={{ fontSize: "0.8rem", opacity: 0.9 }}>
+            Click to add points • Double-click to finish
+            {polygonPoints.length > 0 && ` • ${polygonPoints.length} points`}
+          </Box>
+        </Box>
+      )}
+
       {/* Overlay Controls */}
-      <MapControls />
+      <MapControls 
+        isDrawingCustomRegion={isDrawingCustomRegion}
+        polygonPoints={polygonPoints}
+        onSelectRegionOnMap={handleSelectRegionOnMap}
+        onClearCustomRegion={handleClearCustomRegion}
+      />
     </Box>
   )
 }
