@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { Box, IconButton, Tabs, Tab, Checkbox, FormControlLabel } from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
-import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
+import { Map, useMap, NavigationControl, GeolocateControl, Marker, Source, Layer } from "@repo/map"
 import {
   PresetsPanel,
   OutcomesPanel,
@@ -618,6 +618,91 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           trackUserLocation={true}
           showUserHeading={true}
         />
+
+        {/* Polygon Drawing Visualization */}
+        {polygonPoints.length > 0 && (
+          <>
+            {/* Draw markers for each point */}
+            {polygonPoints.map((point, index) => (
+              <Marker
+                key={index}
+                longitude={point.lng}
+                latitude={point.lat}
+              >
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: "#ff6b6b",
+                    border: "2px solid white",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                    cursor: "pointer",
+                  }}
+                />
+              </Marker>
+            ))}
+
+            {/* Draw lines connecting the points */}
+            {polygonPoints.length > 1 && (
+              <Source
+                id="polygon-lines"
+                type="geojson"
+                data={{
+                  type: "Feature",
+                  properties: {},
+                  geometry: {
+                    type: "LineString",
+                    coordinates: polygonPoints.map(p => [p.lng, p.lat])
+                  }
+                }}
+              >
+                <Layer
+                  id="polygon-line"
+                  type="line"
+                  paint={{
+                    "line-color": "#ff6b6b",
+                    "line-width": 2,
+                    "line-dasharray": [2, 2]
+                  }}
+                />
+              </Source>
+            )}
+
+            {/* Draw filled polygon when we have 3+ points and not actively drawing */}
+            {polygonPoints.length >= 3 && !isDrawingCustomRegion && polygonPoints[0] && (
+              <Source
+                id="polygon-fill"
+                type="geojson"
+                data={{
+                  type: "Feature",
+                  properties: {},
+                  geometry: {
+                    type: "Polygon",
+                    coordinates: [[...polygonPoints.map(p => [p.lng, p.lat]), [polygonPoints[0].lng, polygonPoints[0].lat]]]
+                  }
+                }}
+              >
+                <Layer
+                  id="polygon-fill-layer"
+                  type="fill"
+                  paint={{
+                    "fill-color": "#ff6b6b",
+                    "fill-opacity": 0.2
+                  }}
+                />
+                <Layer
+                  id="polygon-stroke-layer"
+                  type="line"
+                  paint={{
+                    "line-color": "#ff6b6b",
+                    "line-width": 2
+                  }}
+                />
+              </Source>
+            )}
+          </>
+        )}
       </Map>
 
       {/* Polygon Drawing Instructions */}
