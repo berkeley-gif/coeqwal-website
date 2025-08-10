@@ -21,7 +21,7 @@ interface TriangleCheckboxProps {
 
 const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded }) => {
   const theme = useTheme()
-  
+
   return (
     <Box
       sx={{
@@ -80,7 +80,8 @@ const presetOptions: PresetOption[] = [
       {
         id: "sgma-sjv-only",
         label: "San Joaquin Valley only",
-        description: "SGMA implementation focused exclusively on the San Joaquin Valley groundwater basins, maintaining current land use patterns while establishing groundwater sustainability by 2040.",
+        description:
+          "SGMA implementation focused exclusively on the San Joaquin Valley groundwater basins, maintaining current land use patterns while establishing groundwater sustainability by 2040.",
         glossaryEntry: "SGMA - San Joaquin Valley Only",
         mapCoordinates: {
           longitude: -120.5,
@@ -91,7 +92,8 @@ const presetOptions: PresetOption[] = [
       {
         id: "sgma-sjv-ag-reductions",
         label: "San Joaquin Valley with agricultural reductions",
-        description: "SGMA implementation in the San Joaquin Valley that includes projected agricultural land use reductions to achieve groundwater sustainability.",
+        description:
+          "SGMA implementation in the San Joaquin Valley that includes projected agricultural land use reductions to achieve groundwater sustainability.",
         glossaryEntry: "SGMA - San Joaquin Valley with Agricultural Reductions",
         mapCoordinates: {
           longitude: -120.5,
@@ -102,7 +104,8 @@ const presetOptions: PresetOption[] = [
       {
         id: "sgma-sac-sjv",
         label: "Sacramento and San Joaquin Valleys",
-        description: "Comprehensive SGMA implementation across both the Sacramento Valley and San Joaquin Valley groundwater basins, establishing coordinated groundwater sustainability across both regions.",
+        description:
+          "Comprehensive SGMA implementation across both the Sacramento Valley and San Joaquin Valley groundwater basins, establishing coordinated groundwater sustainability across both regions.",
         glossaryEntry: "SGMA - Sacramento and San Joaquin Valleys",
         mapCoordinates: {
           longitude: -121.0,
@@ -112,9 +115,12 @@ const presetOptions: PresetOption[] = [
       },
       {
         id: "sgma-sac-sjv-ag-reductions",
-        label: "Sacramento and San Joaquin Valleys with agricultural reductions",
-        description: "The most comprehensive SGMA implementation scenario, covering both Sacramento and San Joaquin Valleys with projected agricultural land use reductions.",
-        glossaryEntry: "SGMA - Sacramento and San Joaquin Valleys with Agricultural Reductions",
+        label:
+          "Sacramento and San Joaquin Valleys with agricultural reductions",
+        description:
+          "The most comprehensive SGMA implementation scenario, covering both Sacramento and San Joaquin Valleys with projected agricultural land use reductions.",
+        glossaryEntry:
+          "SGMA - Sacramento and San Joaquin Valleys with Agricultural Reductions",
         mapCoordinates: {
           longitude: -121.0,
           latitude: 37.5,
@@ -315,9 +321,7 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
       {!isSubOption && option.subOptions ? (
         <FormControlLabel
           control={
-            <TriangleCheckbox
-              expanded={expandedOptions.has(option.id)}
-            />
+            <TriangleCheckbox expanded={expandedOptions.has(option.id)} />
           }
           label={option.label}
           onClick={() => toggleExpanded(option.id)}
@@ -397,14 +401,14 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
           <Box key={option.id}>
             {/* Render the main option */}
             {renderOption(option)}
-            
+
             {/* Render sub-options if expanded */}
             {option.subOptions && expandedOptions.has(option.id) && (
               <Box sx={{ mt: 0.5 }}>
                 <Stack spacing={0.5}>
-                  {option.subOptions.map((subOption) => (
-                    renderOption(subOption, true)
-                  ))}
+                  {option.subOptions.map((subOption) =>
+                    renderOption(subOption, true),
+                  )}
                 </Stack>
               </Box>
             )}
