@@ -18,15 +18,23 @@ interface MapPanelProps {
 interface MapControlsProps {
   isDrawingCustomRegion: boolean
   polygonPoints: Array<{lng: number, lat: number}>
+  draggedPointIndex: number | null
   onSelectRegionOnMap: () => void
   onClearCustomRegion: () => void
+  onPointDrag: (index: number, newLng: number, newLat: number) => void
+  onDragStart: (index: number) => void
+  onDragEnd: () => void
 }
 
 const MapControls = ({ 
   isDrawingCustomRegion, 
   polygonPoints, 
+  draggedPointIndex: _draggedPointIndex, // eslint-disable-line @typescript-eslint/no-unused-vars
   onSelectRegionOnMap, 
-  onClearCustomRegion 
+  onClearCustomRegion,
+  onPointDrag: _onPointDrag, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onDragStart: _onDragStart, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onDragEnd: _onDragEnd // eslint-disable-line @typescript-eslint/no-unused-vars
 }: MapControlsProps) => {
   const { flyTo } = useMap()
   const [showDropdown, setShowDropdown] = useState(false)
@@ -551,6 +559,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   // Polygon drawing state, lifted to main component
   const [isDrawingCustomRegion, setIsDrawingCustomRegion] = useState(false)
   const [polygonPoints, setPolygonPoints] = useState<Array<{lng: number, lat: number}>>([])
+  const [draggedPointIndex, setDraggedPointIndex] = useState<number | null>(null)
 
   const handleSelectRegionOnMap = () => {
     setIsDrawingCustomRegion(true)
@@ -567,6 +576,23 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const handleClearCustomRegion = () => {
     setIsDrawingCustomRegion(false)
     setPolygonPoints([])
+    setDraggedPointIndex(null)
+  }
+
+  const handlePointDrag = (index: number, newLng: number, newLat: number) => {
+    setPolygonPoints(prev => 
+      prev.map((point, i) => 
+        i === index ? { lng: newLng, lat: newLat } : point
+      )
+    )
+  }
+
+  const handleDragStart = (index: number) => {
+    setDraggedPointIndex(index)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedPointIndex(null)
   }
 
   return (
@@ -592,7 +618,14 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         scrollZoom={false}
         touchZoom={true}
         touchRotate={false}
-        cursor={isDrawingCustomRegion ? "crosshair" : "default"}
+        dragPan={draggedPointIndex === null} // Disable map dragging when dragging a vertex
+        cursor={
+          isDrawingCustomRegion 
+            ? "crosshair" 
+            : draggedPointIndex !== null 
+            ? "grabbing" 
+            : "default"
+        }
         onClick={isDrawingCustomRegion ? (evt: {lngLat: {lng: number, lat: number}}) => {
           const { lng, lat } = evt.lngLat
           const newPoint = { lng, lat }
@@ -622,22 +655,40 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         {/* Polygon Drawing Visualization */}
         {polygonPoints.length > 0 && (
           <>
-            {/* Draw markers for each point */}
+            {/* Draw draggable markers for each point */}
             {polygonPoints.map((point, index) => (
               <Marker
                 key={index}
                 longitude={point.lng}
                 latitude={point.lat}
+                draggable={!isDrawingCustomRegion}
+                onDragStart={() => handleDragStart(index)}
+                onDrag={(evt: {lngLat: {lng: number, lat: number}}) => {
+                  const { lng, lat } = evt.lngLat
+                  handlePointDrag(index, lng, lat)
+                }}
+                onDragEnd={handleDragEnd}
               >
                 <Box
                   sx={{
                     width: 12,
                     height: 12,
                     borderRadius: "50%",
-                    backgroundColor: "#ff6b6b",
+                    backgroundColor: draggedPointIndex === index ? "#ff4757" : "#ff6b6b",
                     border: "2px solid white",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                    cursor: "pointer",
+                    boxShadow: draggedPointIndex === index 
+                      ? "0 4px 8px rgba(0,0,0,0.4)" 
+                      : "0 2px 4px rgba(0,0,0,0.3)",
+                    cursor: isDrawingCustomRegion 
+                      ? "pointer" 
+                      : draggedPointIndex === index 
+                      ? "grabbing" 
+                      : "grab",
+                    transform: draggedPointIndex === index ? "scale(1.2)" : "scale(1)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      transform: "scale(1.1)",
+                    },
                   }}
                 />
               </Marker>
@@ -736,8 +787,12 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       <MapControls 
         isDrawingCustomRegion={isDrawingCustomRegion}
         polygonPoints={polygonPoints}
+        draggedPointIndex={draggedPointIndex}
         onSelectRegionOnMap={handleSelectRegionOnMap}
         onClearCustomRegion={handleClearCustomRegion}
+        onPointDrag={handlePointDrag}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       />
     </Box>
   )
