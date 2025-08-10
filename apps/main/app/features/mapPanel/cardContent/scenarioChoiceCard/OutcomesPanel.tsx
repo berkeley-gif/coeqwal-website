@@ -141,6 +141,17 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
     console.log("Line clicked:", data.name)
   }
 
+  // Calculate responsive chart height based on current state
+  const getChartHeight = () => {
+    if (expandChart) {
+      return "100%" // Expanded: Maximum available height
+    } else if (showInstructions) {
+      return "250px" // With instructions: Compressed height
+    } else {
+      return "400px" // Default: Maximized height within normal view
+    }
+  }
+
   return (
     <Box 
       sx={{
@@ -148,18 +159,18 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         flexDirection: "column",
         height: "100%",
         width: "100%",
-        minWidth: 0, // Allow shrinking below content size if needed
+        minWidth: 0,
       }}
     >
-      {/* Always visible: Instructions and Expand Chart toggle */}
-      <Box sx={{ mb: 0, mt: 0, flexShrink: 0 }}>
-        {/* Two column layout for toggle buttons */}
+      {/* Control Section - Always visible */}
+      <Box sx={{ flexShrink: 0, mb: 1 }}>
+        {/* Toggle buttons */}
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gap: 2,
-            mb: 0,
+            mb: showInstructions ? 1 : 0,
           }}
         >
           {/* Show/Hide instructions button */}
@@ -227,13 +238,15 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
           </Button>
         </Box>
 
-        {/* Collapsible instructions content */}
+        {/* Collapsible instructions */}
         {showInstructions && (
           <Box
             sx={{
               fontSize: "0.95rem",
               fontWeight: 400,
               color: (theme) => theme.palette.text.primary,
+              mt: 1,
+              mb: 1,
               animation: "fadeIn 0.2s ease-in",
               "@keyframes fadeIn": {
                 from: { opacity: 0, transform: "translateY(-10px)" },
@@ -270,21 +283,18 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
             .
           </Box>
         )}
-      </Box>
 
-      {/* Chart controls - always visible */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 2,
-          mb: 0,
-          width: "100%",
-          flexShrink: 0, // Don't shrink this control area
-        }}
-      >
-        {/* Left Column - Checkbox */}
-        <Box>
+        {/* Chart controls */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 2,
+            mt: 1,
+            mb: 1,
+            width: "100%",
+          }}
+        >
           <FormControlLabel
             control={
               <Checkbox
@@ -295,10 +305,6 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
             }
             label="view relative to current operations"
           />
-        </Box>
-
-        {/* Right Column - Checkbox */}
-        <Box>
           <FormControlLabel
             control={
               <Checkbox
@@ -312,17 +318,17 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         </Box>
       </Box>
 
-      {/* Parallel Coordinates Visualization */}
+      {/* Responsive Chart Visualization */}
       <Box
         sx={{
-          flexGrow: 1, // Take up remaining vertical space
-          width: "100%", 
-          minHeight: expandChart ? "600px" : "350px", // Larger minimum when expanded
-          maxHeight: expandChart ? "none" : "500px", // No max height when expanded
+          flexGrow: 1,
+          width: "100%",
+          height: getChartHeight(),
+          minHeight: getChartHeight(),
+          maxHeight: expandChart ? "none" : getChartHeight(),
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          mb: 0,
         }}
       >
         <VerticalParallelLinePlot
