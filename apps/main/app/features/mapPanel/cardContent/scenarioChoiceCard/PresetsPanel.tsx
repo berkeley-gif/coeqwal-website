@@ -355,7 +355,7 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
         disableFocusListener={false}
         disableHoverListener={false}
         disableTouchListener={false}
-        // Fine-tune positioning 
+        // Fine-tune positioning
         slotProps={{
           popper: {
             modifiers: [
