@@ -21,7 +21,14 @@ const MapControls = () => {
   const [activeTab, setActiveTab] = useState(0)
 
   const handleCenterOnCalifornia = () => {
-    flyTo(-120.759, 38.032, 6.3) // Initial view of whole state
+    flyTo({
+      longitude: -120.759,
+      latitude: 38.032,
+      zoom: 6.3,
+      transitionOptions: {
+        duration: 2000 // Smooth 2-second transition
+      }
+    })
   }
 
   const toggleDropdown = () => {
@@ -37,7 +44,14 @@ const MapControls = () => {
     latitude: number
     zoom: number
   }) => {
-    flyTo(coordinates.longitude, coordinates.latitude, coordinates.zoom)
+    flyTo({
+      longitude: coordinates.longitude,
+      latitude: coordinates.latitude,
+      zoom: coordinates.zoom,
+      transitionOptions: {
+        duration: 1500 // Smooth 1.5-second transition for preset locations
+      }
+    })
   }
 
   return (
@@ -354,6 +368,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           zoom: 6.3, // Optimal zoom level
         }}
         style={{ width: "100%", height: "100%" }}
+        scrollZoom={false}
       >
         {/* Built-in Mapbox Controls */}
         <NavigationControl
