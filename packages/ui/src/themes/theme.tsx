@@ -98,7 +98,7 @@ const themeValues = {
       '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
-  // Layout dimensions (necessary for panel layout calculations)
+  // Layout dimensions (for panel layout calculations)
   layout: {
     headerHeight: 64,
     drawer: {
@@ -108,9 +108,9 @@ const themeValues = {
     },
   },
 
-  // Color Palette - California Water Theme
+  // Color Palette - California Water theme
   palette: {
-    // Core brand colors (see home panel gradient)
+    // Core brand colors (as in home panel gradient)
     brand: {
       sky: "#92C1D5", // Top of gradient - sky blue
       water: "#64A4D6", // Bottom of gradient - water blue
@@ -209,7 +209,7 @@ const themeValues = {
     map: -1,
 
     // Main content layers
-    panels: 0, // All panels and sections
+    panels: 0,
 
     // Intro section specific layers
     introBubbles: 0,
@@ -518,7 +518,7 @@ const theme = createTheme({
       },
     },
   },
-  // Palette - California Water Theme (MUI integration)
+  // Palette - California Water theme (MUI integration)
   palette: {
     common: {
       black: themeValues.palette.utility.black,
@@ -534,7 +534,6 @@ const theme = createTheme({
       light: themeValues.palette.brand.sky,
       dark: themeValues.palette.blue.medium,
     },
-    // Add our new color groups to MUI palette
     brand: {
       sky: themeValues.palette.brand.sky,
       water: themeValues.palette.brand.water,
@@ -671,14 +670,14 @@ const theme = createTheme({
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // 1.25rem - matches body1 for consistency
+      fontSize: typeScale.baseBody, // 1.25rem - matches body1
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody, // 1.125rem - matches body2 for consistency
+      fontSize: typeScale.smallBody, // 1.125rem - matches body2
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.6,
@@ -1272,17 +1271,17 @@ const theme = createTheme({
           borderRadius: theme.borderRadius.pill,
           padding: "1px 15px", // to account for border width
           textTransform: "none",
-          backgroundColor: "transparent", // Default background for unselected
-          color: theme.palette.common.white, // Default text color for unselected
+          backgroundColor: "transparent",
+          color: theme.palette.common.white,
           boxShadow: "none",
           "&:hover": {
             backgroundColor: "transparent",
           },
           "&.Mui-selected": {
-            backgroundColor: theme.palette.primary.main, // Background for selected
-            color: theme.palette.primary.contrastText, // Text color for selected
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
             "&:hover": {
-              backgroundColor: theme.palette.common.white, // White hover background when selected
+              backgroundColor: theme.palette.common.white,
             },
           },
         }),
@@ -1292,7 +1291,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           "& .MuiToggleButtonGroup-grouped:not(:first-of-type)": {
-            borderLeft: `${themeValues.border.standard} ${theme.palette.divider}`, // divider line
+            borderLeft: `${themeValues.border.standard} ${theme.palette.divider}`,
           },
         }),
       },
@@ -1334,7 +1333,7 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: ({ theme }) => ({
-          // Custom elegant square checkbox - uses standardized form control base
+          // Custom square checkbox using standardized form control base
           ...formControlBaseMixin,
           borderRadius: "2px",
           border: `1px solid ${theme.palette.text.primary}`,
@@ -1344,7 +1343,7 @@ const theme = createTheme({
             backgroundColor: `${theme.palette.action.hover}30`,
           },
           "&.Mui-checked": {
-            backgroundColor: theme.palette.blue.darkest, // Fill with dark blue when checked
+            backgroundColor: theme.palette.blue.darkest,
             borderColor: theme.palette.blue.darkest,
           },
           // Remove ripple animation
@@ -1381,9 +1380,9 @@ const theme = createTheme({
     MuiRadio: {
       styleOverrides: {
         root: ({ theme }) => ({
-          // Custom elegant circular radio button - uses standardized form control base
+          // Custom elegant circular radio button, uses standardized form control base
           ...formControlBaseMixin,
-          borderRadius: "50%", // Circular for radio buttons
+          borderRadius: "50%",
           border: `1px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
           cursor: "pointer",
@@ -1392,7 +1391,7 @@ const theme = createTheme({
             backgroundColor: `${theme.palette.action.hover}30`,
           },
           "&.Mui-checked": {
-            backgroundColor: theme.palette.blue.darkest, // Fill with dark blue when checked
+            backgroundColor: theme.palette.blue.darkest,
             borderColor: theme.palette.blue.darkest,
           },
           // Remove ripple animation
@@ -1437,14 +1436,14 @@ const theme = createTheme({
           minHeight: "auto", // Reduce default height
         },
         indicator: ({ theme }) => ({
-          backgroundColor: theme.palette.action.hover, // Blue indicator for active tab
+          backgroundColor: theme.palette.action.hover,
         }),
       },
     },
     MuiTab: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: theme.palette.text.primary, // Default dark blue text for inactive tabs
+          color: theme.palette.text.primary,
           fontSize: "0.95rem",
           fontWeight: 400,
           textTransform: "none",
@@ -1452,11 +1451,11 @@ const theme = createTheme({
           minHeight: "auto",
           padding: theme.spacing(1, 2),
           "&.Mui-selected": {
-            color: theme.palette.action.hover, // Bright blue text for selected tab
+            color: theme.palette.action.hover,
             fontWeight: 500,
           },
           "&:hover": {
-            color: theme.palette.action.hover, // Bright blue on hover
+            color: theme.palette.action.hover,
           },
           // Remove click ripple animation
           "& .MuiTouchRipple-root": {
