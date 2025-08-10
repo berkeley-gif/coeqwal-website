@@ -347,7 +347,7 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
         }
         arrow
         placement="top-end"
-        // Enhanced interaction timing for button clicks
+        // Interaction timing for button clicks
         enterDelay={200}
         leaveDelay={500} // Longer delay allows button interactions
         enterNextDelay={100}
@@ -355,42 +355,34 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
         disableFocusListener={false}
         disableHoverListener={false}
         disableTouchListener={false}
-        // Fine-tune positioning
-        PopperProps={{
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, -4], // [horizontal, vertical]
+        // Fine-tune positioning 
+        slotProps={{
+          popper: {
+            modifiers: [
+              {
+                name: "offset",
+                options: {
+                  offset: [5, -10], // [horizontal, vertical]
+                },
               },
-            },
-          ],
+            ],
+          },
         }}
       >
-        <Box
+        <IconButton
+          size="small"
           sx={{
-            // Create a larger hover target area
-            padding: "4px",
-            margin: "-4px",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
+            ml: 1,
+            padding: "4px", // Larger click target
+            color: (theme) => theme.palette.action.hover,
+            "&:hover": {
+              color: (theme) => theme.palette.blue.bright,
+              backgroundColor: "transparent",
+            },
           }}
         >
-          <IconButton
-            size="small"
-            sx={{
-              ml: 1,
-              color: (theme) => theme.palette.action.hover,
-              "&:hover": {
-                color: (theme) => theme.palette.blue.bright,
-                backgroundColor: "transparent",
-              },
-            }}
-          >
-            <InfoIcon fontSize="small" />
-          </IconButton>
-        </Box>
+          <InfoIcon fontSize="small" />
+        </IconButton>
       </Tooltip>
     </Box>
   )
