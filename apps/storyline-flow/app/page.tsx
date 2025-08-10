@@ -67,7 +67,7 @@ export default function StoryContainer() {
           left: 0,
           width: "100%",
           height: "100%",
-          zIndex: (theme) => theme.zIndex.map,
+          zIndex: (theme) => theme.zIndex.mapBackground,
         }}
       >
         <MapContainer

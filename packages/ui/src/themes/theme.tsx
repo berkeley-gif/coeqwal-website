@@ -206,35 +206,35 @@ const themeValues = {
   // Z-index values
   zIndex: {
     // Background layers (negative values)
-    mapBackground: -1,     // Map when used as background
+    mapBackground: -1, // Map when used as background
     sectionBackground: -1, // Section background elements
 
     // Content layers (0-99)
-    content: 0,            // Default content layer
-    panels: 0,             // Main content panels
-    
+    content: 0, // Default content layer
+    panels: 0, // Main content panels
+
     // Intro section micro-layers (1-9)
-    introBackgroundImages: 1,  // Background decorative images
-    introText: 2,              // Text content
-    introForegroundImages: 3,  // Foreground decorative elements
-    introBubbles: 4,           // Interactive bubble elements
+    introBackgroundImages: 1, // Background decorative images
+    introText: 2, // Text content
+    introForegroundImages: 3, // Foreground decorative elements
+    introBubbles: 4, // Interactive bubble elements
 
     // Interactive layers (100-999)
-    mapControls: 1000,     // Map overlay controls and panels
+    mapControls: 1000, // Map overlay controls and panels
     floatingElements: 1100, // Floating UI elements
-    
+
     // Navigation layers (1200-1499)
-    drawerBackdrop: 1199,  // Drawer backdrop/overlay
-    drawer: 1200,          // Side drawer/navigation
-    overlay: 1250,         // General overlay elements
-    modal: 1300,           // Modal dialogs
-    appBar: 1400,          // Top navigation bar
-    
+    drawerBackdrop: 1199, // Drawer backdrop/overlay
+    drawer: 1200, // Side drawer/navigation
+    overlay: 1250, // General overlay elements
+    modal: 1300, // Modal dialogs
+    appBar: 1400, // Top navigation bar
+
     // System layers (1500+)
-    tooltip: 1500,         // Tooltips and help text
-    notification: 1600,    // Toast notifications
-    loading: 1700,         // Loading overlays
-    debug: 9999,           // Debug overlays (development)
+    tooltip: 1500, // Tooltips and help text
+    notification: 1600, // Toast notifications
+    loading: 1700, // Loading overlays
+    debug: 9999, // Debug overlays (development)
   },
 }
 
@@ -275,9 +275,10 @@ const scenarioCardListMixin = {
     margin: 0,
     paddingLeft: "20px", // Slightly more indentation
     "& li": {
-      fontSize: "1rem",
-      lineHeight: 1.6, // Good reading line height
-      marginBottom: "8px", // Good spacing between items
+      fontSize: "0.95rem",
+      fontWeight: 400,
+      lineHeight: 1.4, // Tighter line height to conserve vertical space
+      marginBottom: "4px", // Reduced spacing to conserve vertical space
       color: "inherit",
       "&:last-child": {
         marginBottom: 0,
@@ -1686,25 +1687,25 @@ declare module "@mui/material/styles" {
     // Background layers
     mapBackground: number
     sectionBackground: number
-    
+
     // Content layers
     content: number
     panels: number
-    
+
     // Intro section layers
     introBackgroundImages: number
     introText: number
     introForegroundImages: number
     introBubbles: number
-    
+
     // Interactive layers
     mapControls: number
     floatingElements: number
-    
+
     // Navigation layers
     drawerBackdrop: number
     overlay: number
-    
+
     // System layers
     notification: number
     loading: number
