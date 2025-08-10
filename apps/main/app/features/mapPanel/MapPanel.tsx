@@ -227,16 +227,22 @@ const MapControls = () => {
                       </Tabs>
                     </Box>
 
-                    {/* Tab Content */}
-                    {activeTab === 0 && (
+                                      {/* Tab Content - Responsive height allocation */}
+                  {activeTab === 0 && (
+                    <Box sx={{ flexShrink: 0 }}>
                       <PresetsPanel onViewOnMap={handleViewOnMap} />
-                    )}
-                    {activeTab === 1 && (
-                      <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
-                        <OutcomesPanel onExpandChart={handleChartExpand} />
-                      </Box>
-                    )}
-                    {activeTab === 2 && <OperationsPanel />}
+                    </Box>
+                  )}
+                  {activeTab === 1 && (
+                    <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                      <OutcomesPanel onExpandChart={handleChartExpand} />
+                    </Box>
+                  )}
+                  {activeTab === 2 && (
+                    <Box sx={{ flexShrink: 0 }}>
+                      <OperationsPanel />
+                    </Box>
+                  )}
                   </Box>
                 ) : undefined
               }
