@@ -162,6 +162,34 @@ const glossaryTerms: GlossaryTerm[] = [
     seeAlso: "Groundwater",
   },
   {
+    icon: <WaterIcon />,
+    term: "SGMA - San Joaquin Valley Only",
+    definition:
+      "SGMA implementation focused exclusively on the San Joaquin Valley groundwater basins. This scenario applies sustainable groundwater management requirements only to the southern Central Valley, maintaining current land use patterns and agricultural practices while establishing groundwater sustainability by 2040.",
+    seeAlso: "Sustainable Groundwater Management Act (SGMA)",
+  },
+  {
+    icon: <WaterIcon />,
+    term: "SGMA - San Joaquin Valley with Agricultural Reductions",
+    definition:
+      "SGMA implementation in the San Joaquin Valley that includes projected agricultural land use reductions to achieve groundwater sustainability. This scenario accounts for anticipated fallowing of farmland and shifts in crop patterns as groundwater agencies work to balance pumping with recharge.",
+    seeAlso: "Sustainable Groundwater Management Act (SGMA)",
+  },
+  {
+    icon: <WaterIcon />,
+    term: "SGMA - Sacramento and San Joaquin Valleys",
+    definition:
+      "Comprehensive SGMA implementation across both the Sacramento Valley and San Joaquin Valley groundwater basins. This scenario extends sustainable groundwater management requirements to the entire Central Valley, establishing coordinated groundwater sustainability across both regions by 2040.",
+    seeAlso: "Sustainable Groundwater Management Act (SGMA)",
+  },
+  {
+    icon: <WaterIcon />,
+    term: "SGMA - Sacramento and San Joaquin Valleys with Agricultural Reductions",
+    definition:
+      "The most comprehensive SGMA implementation scenario, covering both Sacramento and San Joaquin Valleys with projected agricultural land use reductions. This scenario models the full impact of sustainable groundwater management across the entire Central Valley, including anticipated changes in agricultural practices and land use patterns.",
+    seeAlso: "Sustainable Groundwater Management Act (SGMA)",
+  },
+  {
     icon: <AccountBalanceIcon />,
     term: "USBR Alternative 3",
     definition:

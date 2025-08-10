@@ -24,6 +24,7 @@ interface PresetOption {
     latitude: number
     zoom: number
   }
+  subOptions?: PresetOption[]
 }
 
 interface PresetsPanelProps {
@@ -41,11 +42,52 @@ const presetOptions: PresetOption[] = [
     description:
       "California law that requires local agencies to manage groundwater sustainably, balancing water use and recharge to avoid long-term depletion.",
     glossaryEntry: "Sustainable Groundwater Management Act (SGMA)",
-    mapCoordinates: {
-      longitude: -119.5,
-      latitude: 36.5,
-      zoom: 7.5,
-    },
+    subOptions: [
+      {
+        id: "sgma-sjv-only",
+        label: "San Joaquin Valley only",
+        description: "SGMA implementation focused exclusively on the San Joaquin Valley groundwater basins, maintaining current land use patterns while establishing groundwater sustainability by 2040.",
+        glossaryEntry: "SGMA - San Joaquin Valley Only",
+        mapCoordinates: {
+          longitude: -120.5,
+          latitude: 36.0,
+          zoom: 8.0,
+        },
+      },
+      {
+        id: "sgma-sjv-ag-reductions",
+        label: "San Joaquin Valley with agricultural reductions",
+        description: "SGMA implementation in the San Joaquin Valley that includes projected agricultural land use reductions to achieve groundwater sustainability.",
+        glossaryEntry: "SGMA - San Joaquin Valley with Agricultural Reductions",
+        mapCoordinates: {
+          longitude: -120.5,
+          latitude: 36.0,
+          zoom: 8.0,
+        },
+      },
+      {
+        id: "sgma-sac-sjv",
+        label: "Sacramento and San Joaquin Valleys",
+        description: "Comprehensive SGMA implementation across both the Sacramento Valley and San Joaquin Valley groundwater basins, establishing coordinated groundwater sustainability across both regions.",
+        glossaryEntry: "SGMA - Sacramento and San Joaquin Valleys",
+        mapCoordinates: {
+          longitude: -121.0,
+          latitude: 37.5,
+          zoom: 7.0,
+        },
+      },
+      {
+        id: "sgma-sac-sjv-ag-reductions",
+        label: "Sacramento and San Joaquin Valleys with agricultural reductions",
+        description: "The most comprehensive SGMA implementation scenario, covering both Sacramento and San Joaquin Valleys with projected agricultural land use reductions.",
+        glossaryEntry: "SGMA - Sacramento and San Joaquin Valleys with Agricultural Reductions",
+        mapCoordinates: {
+          longitude: -121.0,
+          latitude: 37.5,
+          zoom: 7.0,
+        },
+      },
+    ],
   },
   {
     id: "usbr-alt3",
@@ -80,6 +122,21 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
   const [recentMapCalls, setRecentMapCalls] = React.useState<Set<string>>(
     new Set(),
   )
+  const [expandedOptions, setExpandedOptions] = React.useState<Set<string>>(
+    new Set(),
+  )
+
+  const toggleExpanded = (optionId: string) => {
+    setExpandedOptions((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(optionId)) {
+        newSet.delete(optionId)
+      } else {
+        newSet.add(optionId)
+      }
+      return newSet
+    })
+  }
 
   const handleReadMore = (glossaryEntry: string, event?: React.MouseEvent) => {
     // Prevent event bubbling that might close tooltip
@@ -209,70 +266,142 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
     </Box>
   )
 
+  const renderOption = (option: PresetOption, isSubOption = false) => (
+    <Box
+      key={option.id}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        pl: isSubOption ? 3 : 0, // Indent sub-options
+      }}
+    >
+      {/* For parent options with sub-options, show dropdown triangle instead of checkbox */}
+      {!isSubOption && option.subOptions ? (
+        <Box
+          onClick={() => toggleExpanded(option.id)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flex: 1,
+            cursor: "pointer",
+            userSelect: "none",
+            transition: "color 0.2s ease",
+            "&:hover": {
+              color: (theme) => theme.palette.action.hover,
+            },
+          }}
+        >
+          <Box
+            component="span"
+            sx={{
+              fontSize: "0.875em",
+              lineHeight: 1,
+              verticalAlign: "baseline",
+              display: "inline-block",
+              transform: expandedOptions.has(option.id) ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
+              mr: 1,
+              color: (theme) => theme.palette.action.hover,
+            }}
+          >
+            ▼
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              fontSize: "0.95rem",
+              lineHeight: 1.3,
+              color: (theme) => theme.palette.text.primary,
+            }}
+          >
+            {option.label}
+          </Box>
+        </Box>
+      ) : (
+        /* For sub-options, show regular checkbox */
+        <FormControlLabel
+          control={<Checkbox size="small" />}
+          label={option.label}
+          sx={{ flex: 1 }}
+        />
+      )}
+
+      {/* Info tooltip */}
+      <Tooltip
+        title={
+          <Box>
+            <Box sx={{ mb: 1 }}>{option.description}</Box>
+            {renderTooltipActions(option)}
+          </Box>
+        }
+        arrow
+        placement="top-end"
+        // Enhanced interaction timing for button clicks
+        enterDelay={200}
+        leaveDelay={500} // Longer delay allows button interactions
+        enterNextDelay={100}
+        // Keep all interaction methods enabled
+        disableFocusListener={false}
+        disableHoverListener={false}
+        disableTouchListener={false}
+        // Fine-tune positioning
+        PopperProps={{
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, -4], // [horizontal, vertical]
+              },
+            },
+          ],
+        }}
+      >
+        <Box
+          sx={{
+            // Create a larger hover target area
+            padding: "4px",
+            margin: "-4px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton
+            size="small"
+            sx={{
+              ml: 1,
+              color: (theme) => theme.palette.action.hover,
+              "&:hover": {
+                color: (theme) => theme.palette.blue.bright,
+                backgroundColor: "transparent",
+              },
+            }}
+          >
+            <InfoIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      </Tooltip>
+    </Box>
+  )
+
   return (
     <Box>
       <Stack spacing={0.5}>
         {presetOptions.map((option) => (
-          <Box key={option.id} sx={{ display: "flex", alignItems: "center" }}>
-            <FormControlLabel
-              control={<Checkbox size="small" />}
-              label={option.label}
-              sx={{ flex: 1 }}
-            />
-            <Tooltip
-              title={
-                <Box>
-                  <Box sx={{ mb: 1 }}>{option.description}</Box>
-                  {renderTooltipActions(option)}
-                </Box>
-              }
-              arrow
-              placement="top-end"
-              // Enhanced interaction timing for button clicks
-              enterDelay={200}
-              leaveDelay={500} // Longer delay allows button interactions
-              enterNextDelay={100}
-              // Keep all interaction methods enabled
-              disableFocusListener={false}
-              disableHoverListener={false}
-              disableTouchListener={false}
-              // Fine-tune positioning
-              PopperProps={{
-                modifiers: [
-                  {
-                    name: "offset",
-                    options: {
-                      offset: [0, -4], // [horizontal, vertical]
-                    },
-                  },
-                ],
-              }}
-            >
-              <Box
-                sx={{
-                  // Create a larger hover target area
-                  padding: "4px",
-                  margin: "-4px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <IconButton
-                  size="small"
-                  sx={{
-                    ml: 1,
-                    color: (theme) => theme.palette.action.hover,
-                    "&:hover": {
-                      color: (theme) => theme.palette.blue.bright,
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  <InfoIcon fontSize="small" />
-                </IconButton>
+          <Box key={option.id}>
+            {/* Render the main option */}
+            {renderOption(option)}
+            
+            {/* Render sub-options if expanded */}
+            {option.subOptions && expandedOptions.has(option.id) && (
+              <Box sx={{ mt: 0.5 }}>
+                <Stack spacing={0.5}>
+                  {option.subOptions.map((subOption) => (
+                    renderOption(subOption, true)
+                  ))}
+                </Stack>
               </Box>
-            </Tooltip>
+            )}
           </Box>
         ))}
       </Stack>
