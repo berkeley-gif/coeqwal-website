@@ -28,8 +28,11 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }
       onClick={onClick}
       sx={{
         display: "inline-block",
-        width: "20px",
-        height: "20px",
+        width: "20px !important",
+        height: "20px !important",
+        minWidth: "20px !important", // Prevent shrinking
+        maxWidth: "20px !important", // Prevent growing
+        flexShrink: 0, // Don't shrink in flex containers
         borderRadius: "2px",
         border: `1px solid ${theme.palette.text.primary}`,
         backgroundColor: "transparent",
@@ -318,6 +321,8 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
         display: "flex",
         alignItems: "center",
         pl: isSubOption ? 3 : 0, // Indent sub-options
+        width: "100%", // Ensure full width
+        minWidth: 0, // Allow flex items to shrink below their minimum content size
       }}
     >
       {/* For parent options with sub-options, show triangle checkbox */}
@@ -330,14 +335,14 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
             />
           }
           label={option.label}
-          sx={{ flex: 1 }}
+          sx={{ width: "100%" }}
         />
       ) : (
         /* For sub-options, show regular checkbox */
         <FormControlLabel
           control={<Checkbox size="small" />}
           label={option.label}
-          sx={{ flex: 1 }}
+          sx={{ width: "100%" }}
         />
       )}
 
