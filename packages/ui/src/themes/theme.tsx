@@ -15,7 +15,7 @@ import type { CSSProperties } from "react"
      - Border styles
      - Shadows
      - Z-Index values
-     - Reusable mixins (hover effects, drawer content)
+     - Reusable mixins (hover effects, drawer content, form controls)
 
  2. Theme configuration
     - Base theme creation
@@ -294,6 +294,49 @@ const tooltipActionButtonMixin = {
   fontWeight: 500,
   cursor: "pointer",
   transition: "all 0.2s ease",
+} as const
+
+// Triangle checkbox mixin - for expandable form controls
+const triangleCheckboxMixin = {
+  display: "inline-block",
+  width: "20px !important",
+  height: "20px !important",
+  minWidth: "20px !important", // Prevent shrinking
+  maxWidth: "20px !important", // Prevent growing
+  flexShrink: 0, // Don't shrink in flex containers
+  borderRadius: "2px",
+  backgroundColor: "transparent",
+  verticalAlign: "super", // Superscript alignment (raised)
+  padding: "0",
+  marginTop: "0px", // Align with first line baseline
+  // Center the triangle content
+  lineHeight: "18px", // height minus border (20px - 2px)
+  textAlign: "center",
+  fontSize: "7px",
+  transition: "all 0.2s ease",
+  position: "relative",
+  boxSizing: "border-box !important",
+  filter: "none",
+  backdropFilter: "none",
+} as const
+
+// Form control base mixin - shared styling for all form controls
+const formControlBaseMixin = {
+  width: "20px !important",
+  height: "20px !important",
+  minWidth: "20px !important", // Prevent shrinking
+  maxWidth: "20px !important", // Prevent growing
+  flexShrink: 0, // Don't shrink in flex containers
+  backgroundColor: "transparent",
+  padding: "0",
+  marginTop: "0px", // Align with first line baseline
+  verticalAlign: "super", // Superscript alignment (raised)
+  transition: "all 0.2s ease",
+  position: "relative",
+  display: "inline-block",
+  boxSizing: "border-box",
+  filter: "none !important",
+  backdropFilter: "none !important",
 } as const
 
 // Drawer content styling mixins
@@ -1291,26 +1334,12 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: ({ theme }) => ({
-          // Custom elegant square checkbox (matches similar dropdown "checkbox")
-          width: "20px !important",
-          height: "20px !important",
-          minWidth: "20px !important", // Prevent shrinking
-          maxWidth: "20px !important", // Prevent growing
-          flexShrink: 0, // Don't shrink in flex containers
+          // Custom elegant square checkbox - uses standardized form control base
+          ...formControlBaseMixin,
           borderRadius: "2px",
           border: `1px solid ${theme.palette.text.primary}`,
-          backgroundColor: "transparent",
-          padding: "0",
           margin: theme.spacing(0.5),
-          marginTop: "0px", // Align with first line baseline
-          verticalAlign: "super", // Superscript alignment (raised)
-          transition: "all 0.2s ease",
-          position: "relative",
-          display: "inline-block",
           cursor: "pointer",
-          boxSizing: "border-box", // Ensure border is included in dimensions
-          filter: "none !important", // Ensure no additional filters
-          backdropFilter: "none !important", // Ensure no backdrop filter on the element itself
           "&:hover": {
             backgroundColor: `${theme.palette.action.hover}30`,
           },
@@ -1352,22 +1381,11 @@ const theme = createTheme({
     MuiRadio: {
       styleOverrides: {
         root: ({ theme }) => ({
-          // Custom elegant circular radio button - systematic baseline alignment
-          width: "20px !important",
-          height: "20px !important",
-          minWidth: "20px !important", // Prevent shrinking
-          maxWidth: "20px !important", // Prevent growing
-          flexShrink: 0, // Don't shrink in flex containers
+          // Custom elegant circular radio button - uses standardized form control base
+          ...formControlBaseMixin,
           borderRadius: "50%", // Circular for radio buttons
           border: `1px solid ${theme.palette.text.primary}`,
-          backgroundColor: "transparent",
-          padding: "0",
           margin: theme.spacing(0.5),
-          marginTop: "0px", // Align with first line baseline
-          verticalAlign: "super", // Superscript alignment (raised)
-          transition: "all 0.2s ease",
-          position: "relative",
-          display: "inline-block",
           cursor: "pointer",
           boxSizing: "border-box", // Ensure border is included in dimensions
           "&:hover": {
@@ -1507,6 +1525,8 @@ const theme = createTheme({
     drawerContent: drawerContentMixins,
     scenarioCardList: scenarioCardListMixin,
     tooltipActionButton: tooltipActionButtonMixin,
+    triangleCheckbox: triangleCheckboxMixin,
+    formControlBase: formControlBaseMixin,
   },
 })
 
@@ -1541,6 +1561,8 @@ theme.drawerNavigation = {
 export const hoverParagraph = hoverParagraphMixin
 export const scenarioCardList = scenarioCardListMixin
 export const tooltipActionButton = tooltipActionButtonMixin
+export const triangleCheckbox = triangleCheckboxMixin
+export const formControlBase = formControlBaseMixin
 
 export default theme
 
@@ -1826,6 +1848,8 @@ declare module "@mui/material/styles" {
     drawerContent: typeof drawerContentMixins
     scenarioCardList: typeof scenarioCardListMixin
     tooltipActionButton: typeof tooltipActionButtonMixin
+    triangleCheckbox: typeof triangleCheckboxMixin
+    formControlBase: typeof formControlBaseMixin
   }
 
   // Add custom typography variant
@@ -1850,3 +1874,52 @@ declare module "@mui/material/Typography" {
     nav: true
   }
 }
+
+/* ========================================================
+| FORM CONTROL CONVENTIONS - USAGE GUIDE
+| ========================================================
+| 
+| All form controls in the application follow standardized conventions
+| for consistent appearance and behavior across the site.
+|
+| STANDARD SPECIFICATIONS:
+| - Size: Exact 20px × 20px dimensions
+| - Positioning: verticalAlign "super", marginTop "0px"
+| - Border: 1px solid using theme.palette.text.primary
+| - Background: Transparent with hover states
+| - Spacing: theme.spacing(0.5) margin
+| - Protection: flexShrink: 0 prevents label compression
+|
+| REUSABLE MIXINS:
+| 
+| 1. theme.mixins.formControlBase
+|    - Base styling for all form controls
+|    - Use for custom checkboxes, radio buttons, etc.
+|    - Includes sizing, positioning, and interaction states
+|
+| 2. theme.mixins.triangleCheckbox  
+|    - Specialized for expandable/collapsible controls
+|    - Includes text centering for triangle symbols
+|    - Use for dropdown-style form controls
+|
+| USAGE EXAMPLES:
+|
+| Custom Checkbox:
+|   sx={{ 
+|     ...theme.mixins.formControlBase,
+|     borderRadius: "2px",
+|     border: `1px solid ${theme.palette.text.primary}`
+|   }}
+|
+| Triangle Dropdown:
+|   sx={{
+|     ...theme.mixins.triangleCheckbox,
+|     border: `1px solid ${theme.palette.text.primary}`
+|   }}
+|
+| MUI COMPONENT OVERRIDES:
+| - MuiCheckbox: Uses formControlBase + square styling
+| - MuiRadio: Uses formControlBase + circular styling  
+| - MuiFormControlLabel: alignItems "flex-start" for multi-line labels
+|
+| ======================================================== */

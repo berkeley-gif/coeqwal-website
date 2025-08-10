@@ -25,29 +25,10 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded }) => {
   return (
     <Box
       sx={{
-        display: "inline-block",
-        width: "20px !important",
-        height: "20px !important",
-        minWidth: "20px !important", // Prevent shrinking
-        maxWidth: "20px !important", // Prevent growing
-        flexShrink: 0, // Don't shrink in flex containers
-        borderRadius: "2px",
+        ...theme.mixins.triangleCheckbox,
         border: `1px solid ${theme.palette.text.primary}`,
-        backgroundColor: "transparent",
-        verticalAlign: "super", // Superscript alignment (raised)
-        padding: "0",
         margin: theme.spacing(0.5),
-        marginTop: "0px", // Align with first line baseline
-        // Center the triangle content
-        lineHeight: "18px", // height minus border (20px - 2px)
-        textAlign: "center",
-        fontSize: "7px",
         color: theme.palette.text.primary,
-        transition: "all 0.2s ease",
-        position: "relative", // Match MUI checkbox positioning
-        boxSizing: "border-box !important", // Force border-box sizing
-        filter: "none",
-        backdropFilter: "none",
         "&:hover": {
           backgroundColor: `${theme.palette.action.hover}30`,
         },
