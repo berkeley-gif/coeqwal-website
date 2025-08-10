@@ -26,8 +26,8 @@ const MapControls = () => {
       latitude: 38.032,
       zoom: 6.3,
       transitionOptions: {
-        duration: 2000 // Smooth 2-second transition
-      }
+        duration: 2000, // Smooth 2-second transition
+      },
     })
   }
 
@@ -49,8 +49,8 @@ const MapControls = () => {
       latitude: coordinates.latitude,
       zoom: coordinates.zoom,
       transitionOptions: {
-        duration: 1500 // Smooth 1.5-second transition for preset locations
-      }
+        duration: 1500, // Smooth 1.5-second transition for preset locations
+      },
     })
   }
 
