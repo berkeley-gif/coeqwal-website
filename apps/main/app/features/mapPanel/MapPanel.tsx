@@ -118,9 +118,17 @@ const MapControls = () => {
             }
             dropdownContent={
               showDropdown ? (
-                <Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "calc(100vh - 200px)",
+                    maxHeight: "600px",
+                    minHeight: "400px", // Minimum height for usability
+                  }}
+                >
                   {/* Tab Navigation with Label */}
-                  <Box sx={{ display: "flex", alignItems: "baseline", mb: 2 }}>
+                  <Box sx={{ display: "flex", alignItems: "baseline", mb: 2, flexShrink: 0 }}>
                     <Box
                       component="span"
                       sx={{
@@ -144,11 +152,15 @@ const MapControls = () => {
                     </Tabs>
                   </Box>
 
-                  {/* Tab Content */}
+                  {/* Tab Content, conditional height behavior */}
                   {activeTab === 0 && (
                     <PresetsPanel onViewOnMap={handleViewOnMap} />
                   )}
-                  {activeTab === 1 && <OutcomesPanel />}
+                  {activeTab === 1 && (
+                    <Box sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                      <OutcomesPanel />
+                    </Box>
+                  )}
                   {activeTab === 2 && <OperationsPanel />}
                 </Box>
               ) : undefined

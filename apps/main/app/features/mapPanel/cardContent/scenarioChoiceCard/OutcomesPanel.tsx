@@ -136,11 +136,13 @@ export default function OutcomesPanel() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "100%", // Take full height of parent container
+        height: "100%",
+        width: "100%",
+        minWidth: 0, // Allow shrinking below content size if needed
       }}
     >
       {/* Collapsible instructions section */}
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: 2, flexShrink: 0 }}>
         {/* Toggle button for instructions */}
         <Button
           variant="text"
@@ -223,8 +225,10 @@ export default function OutcomesPanel() {
         sx={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gap: 3,
-          mb: 4,
+          gap: 2,
+          mb: 2,
+          width: "100%",
+          flexShrink: 0, // Don't shrink this control area
         }}
       >
         {/* Left Column - Checkbox */}
@@ -260,10 +264,13 @@ export default function OutcomesPanel() {
       <Box
         sx={{
           flexGrow: 1, // Take up remaining vertical space
-          minHeight: "200px", // Minimum height for usability
+          width: "100%", 
+          minHeight: "350px", // Reasonable minimum for small viewports
+          maxHeight: "500px", // Maximum height to prevent being too tall
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          mb: 2,
         }}
       >
         <VerticalParallelLinePlot

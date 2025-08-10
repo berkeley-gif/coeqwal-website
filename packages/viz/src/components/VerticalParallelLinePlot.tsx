@@ -34,8 +34,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   title = "",
   responsive = true,
   width = 400, // Default
-  height = 300,
-  margin = { top: 20, right: 20, bottom: 30, left: 140 }, // Responsive margins
+  height = 400, // Default height
+  margin = { top: 40, right: 20, bottom: 50, left: 100 }, 
   colors = {
     default: "#1f77b4",
     highlighted: "#ff7f0e",
@@ -88,12 +88,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .range([0, innerWidth]) // Horizontal range
     })
 
-    // Position scales along y-axis (stacked vertically)
+    // Position scales along y-axis (stacked vertically) - maximum spacing between axes
     const yScale = d3
       .scalePoint()
       .domain(axes)
       .range([0, innerHeight])
-      .padding(0.1)
+      .padding(0) // Use full height for maximum axis spacing
 
     // Create main group
     const g = svg
@@ -121,19 +121,28 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("stroke", "#666")
         .attr("stroke-width", 2)
 
-      // Axis label
-      const maxLabelLength = 24 // Max characters before truncation
-      const truncatedAxis = axis.length > maxLabelLength ? 
-        axis.substring(0, maxLabelLength - 3) + "..." : axis
+      // Axis label with text wrapping
+      const words = axis.split(/\s+/)
+      const lineHeight = 14 // pixels
+      const maxWordsPerLine = 1 // One word per line for better wrapping
       
-      g.append("text")
-        .attr("x", -10)
-        .attr("y", yPos + 4)
-        .attr("text-anchor", "end")
-        .attr("font-size", "12px")
-        .attr("font-weight", "500")
-        .attr("fill", "#333")
-        .text(truncatedAxis)
+      // Group words into lines
+      const lines = []
+      for (let i = 0; i < words.length; i += maxWordsPerLine) {
+        lines.push(words.slice(i, i + maxWordsPerLine).join(' '))
+      }
+      
+      // Create text element for each line
+      lines.forEach((line, index) => {
+        g.append("text")
+          .attr("x", -10)
+          .attr("y", yPos + 4 + (index - (lines.length - 1) / 2) * lineHeight) // Center multi-line text vertically
+          .attr("text-anchor", "end") // Right align text
+          .attr("font-size", "12px")
+          .attr("font-weight", "500")
+          .attr("fill", "#333")
+          .text(line)
+      })
 
       // Tick marks and labels
       const scale = scales[axis]
