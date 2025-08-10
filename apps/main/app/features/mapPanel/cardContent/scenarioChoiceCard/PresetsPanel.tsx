@@ -27,38 +27,33 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }
     <Box
       onClick={onClick}
       sx={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "18px", // Match small checkbox size (MUI small = 18px)
-        height: "18px", // Match small checkbox size
-        borderRadius: "2px", // Match small checkbox border radius
-        border: `1px solid ${theme.palette.text.primary}`, // Match checkbox border
+        display: "inline-block",
+        width: "20px",
+        height: "20px",
+        borderRadius: "2px",
+        border: `1px solid ${theme.palette.text.primary}`,
         backgroundColor: "transparent",
         cursor: "pointer",
-        alignSelf: "flex-start", // Match checkbox alignment from theme
-        marginTop: "-2px", // Match checkbox fine-tuning from theme
-        padding: 0, // Remove padding to match checkbox inner area
-        margin: theme.spacing(0.5), // Match checkbox margin from theme
+        verticalAlign: "super", // Superscript alignment (raised)
+        padding: "0",
+        margin: theme.spacing(0.5),
+        // Center the triangle content
+        lineHeight: "18px", // height minus border (20px - 2px)
+        textAlign: "center",
+        fontSize: "7px",
+        color: theme.palette.text.primary,
+        transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
         transition: "all 0.2s ease",
+        position: "relative", // Match MUI checkbox positioning
+        boxSizing: "border-box !important", // Force border-box sizing
+        filter: "none",
+        backdropFilter: "none",
         "&:hover": {
-          backgroundColor: `${theme.palette.action.hover}30`, // Match checkbox hover from theme
+          backgroundColor: `${theme.palette.action.hover}30`,
         },
       }}
     >
-      <Box
-        component="span"
-        sx={{
-          fontSize: "7px", // Smaller triangle to fit nicely in checkbox
-          lineHeight: 1,
-          color: theme.palette.text.primary,
-          display: "inline-block",
-          transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-          transition: "transform 0.2s ease",
-        }}
-      >
-        ▼
-      </Box>
+      ▼
     </Box>
   )
 }
@@ -89,7 +84,7 @@ const presetOptions: PresetOption[] = [
     id: "sgma",
     label: "Sustainable Groundwater Management Act (SGMA)",
     description:
-      "California law that requires local agencies to manage groundwater sustainably, balancing water use and recharge to avoid long-term depletion.",
+      "California law requiring priority groundwater basins to be managed sustainably by 2040–2042 to avoid long-term depletion.",
     glossaryEntry: "Sustainable Groundwater Management Act (SGMA)",
     subOptions: [
       {
