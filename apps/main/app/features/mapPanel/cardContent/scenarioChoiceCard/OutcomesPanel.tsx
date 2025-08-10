@@ -12,6 +12,7 @@ import {
 export default function OutcomesPanel() {
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
+  const [showInstructions, setShowInstructions] = useState(false)
 
   const handleViewModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setIsRelativeView(event.target.checked)
@@ -28,45 +29,89 @@ export default function OutcomesPanel() {
     console.log("Learn more about this chart clicked")
   }
 
+  const toggleInstructions = () => {
+    setShowInstructions(!showInstructions)
+  }
+
   return (
     <Box>
-      {/* Full-width paragraph with inline learn more link */}
+      {/* Collapsible instructions section */}
       <Box sx={{ mb: 3 }}>
-        <Box
+        {/* Toggle button for instructions */}
+        <Button
+          variant="text"
+          onClick={toggleInstructions}
           sx={{
             fontSize: "0.95rem",
-            fontWeight: 400,
-            color: (theme) => theme.palette.text.primary,
+            fontWeight: 500,
+            color: (theme) => theme.palette.blue.bright,
+            padding: 0,
+            minWidth: "auto",
+            textTransform: "none",
+            mb: showInstructions ? 2 : 0,
+            "&:hover": {
+              color: (theme) => theme.palette.blue.darkest,
+              backgroundColor: "transparent",
+            },
           }}
         >
-          COEQWAL has <strong>___</strong> alternative scenarios. Each colored
-          dot represents a scenario placed by its outcome. Click on a dot to
-          preview that scenario. Slide the sliders on each outcome to isolate
-          scenarios meeting your requirements.{" "}
-          <Button
-            variant="text"
-            onClick={handleLearnMoreClick}
+          <span
+            style={{
+              fontSize: "0.875em",
+              marginRight: "8px",
+              display: "inline-block",
+              transform: showInstructions ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.2s ease",
+            }}
+          >
+            ▼
+          </span>
+          {showInstructions ? "Hide" : "Show"} instructions
+        </Button>
+
+        {/* Collapsible instructions content */}
+        {showInstructions && (
+          <Box
             sx={{
-              textDecoration: "underline",
-              color: (theme) => theme.palette.blue.bright,
-              cursor: "pointer",
-              padding: 0,
-              minWidth: "auto",
-              fontSize: "0.95rem", // Match paragraph fontSize
-              fontWeight: 500,
-              textTransform: "none",
-              verticalAlign: "baseline", // Align with text baseline
-              "&:hover": {
-                color: (theme) => theme.palette.blue.darkest,
-                backgroundColor: "transparent",
-                textDecoration: "underline",
+              fontSize: "0.95rem",
+              fontWeight: 400,
+              color: (theme) => theme.palette.text.primary,
+              animation: "fadeIn 0.2s ease-in",
+              "@keyframes fadeIn": {
+                from: { opacity: 0, transform: "translateY(-10px)" },
+                to: { opacity: 1, transform: "translateY(0)" },
               },
             }}
           >
-            Learn more about this chart
-          </Button>
-          .
-        </Box>
+            COEQWAL has <strong>___</strong> alternative scenarios. Each colored
+            dot represents a scenario placed by its outcome. Click on a dot to
+            preview that scenario. Slide the sliders on each outcome to isolate
+            scenarios meeting your requirements.{" "}
+            <Button
+              variant="text"
+              onClick={handleLearnMoreClick}
+              sx={{
+                textDecoration: "underline",
+                color: (theme) => theme.palette.blue.bright,
+                cursor: "pointer",
+                padding: 0,
+                minWidth: "auto",
+                fontSize: "0.95rem", // Match paragraph fontSize
+                fontWeight: 500,
+                textTransform: "none",
+                verticalAlign: "baseline", // Align with text baseline
+                "&:hover": {
+                  color: (theme) => theme.palette.blue.darkest,
+                  backgroundColor: "transparent",
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              Learn more about this chart
+            </Button>
+            .
+          </Box>
+        )}
       </Box>
 
       {/* Two equal columns for interface elements */}
