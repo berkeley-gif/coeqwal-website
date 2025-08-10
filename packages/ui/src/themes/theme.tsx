@@ -1299,6 +1299,7 @@ const theme = createTheme({
           backgroundColor: "transparent",
           padding: "0",
           margin: theme.spacing(0.5),
+          marginTop: "0px", // Align with first line baseline
           verticalAlign: "super", // Superscript alignment (raised)
           transition: "all 0.2s ease",
           position: "relative",
@@ -1356,6 +1357,7 @@ const theme = createTheme({
           backgroundColor: "transparent",
           padding: "0",
           margin: theme.spacing(0.5),
+          marginTop: "0px", // Align with first line baseline
           verticalAlign: "super", // Superscript alignment (raised)
           transition: "all 0.2s ease",
           position: "relative",
@@ -1395,7 +1397,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           margin: 0, // Remove default margins for condensed spacing
-          alignItems: "center", // Center align checkbox and label
+          alignItems: "flex-start", // Align checkbox with first line of text
           "& .MuiFormControlLabel-label": {
             fontSize: "0.95rem", // Slightly smaller text
             lineHeight: 1.3, // Tighter line height

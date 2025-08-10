@@ -37,6 +37,7 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }
         verticalAlign: "super", // Superscript alignment (raised)
         padding: "0",
         margin: theme.spacing(0.5),
+        marginTop: "0px", // Align with first line baseline
         // Center the triangle content
         lineHeight: "18px", // height minus border (20px - 2px)
         textAlign: "center",
