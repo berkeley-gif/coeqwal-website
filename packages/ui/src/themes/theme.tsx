@@ -62,7 +62,7 @@ import type { CSSProperties } from "react"
 // Scale progression:
 // • h1: 5.75rem (92px) - Hero headlines "Learn. Explore. Empower."
 // • h2: 3.75rem (60px) - Section headlines "What is the future..."
-// • h3: 2.8rem (44.8px) - Subsection headlines "Rethink California Water"
+// • h3: 2.8rem (44.8px) - Subsection headlines
 // • h4: 2.1rem (33.6px) - Card titles and smaller headlines
 // • h5: 1.575rem (25.2px) - Labels and minor headlines
 // • h6: 1.18rem (18.9px) - Small headlines and captions
@@ -589,13 +589,13 @@ const theme = createTheme({
       lineHeight: 1.05,
     },
     h3: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.gtSuperText,
       fontSize: typeScale.h4,
       fontWeight: 500,
       lineHeight: 1.2,
