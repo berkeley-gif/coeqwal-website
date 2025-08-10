@@ -8,6 +8,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@repo/ui/mui"
+import { VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 
 export default function OutcomesPanel() {
   const [isRelativeView, setIsRelativeView] = useState(true)
@@ -31,6 +32,103 @@ export default function OutcomesPanel() {
 
   const toggleInstructions = () => {
     setShowInstructions(!showInstructions)
+  }
+
+  // Sample data for vertical parallel line plot
+  // TODO: Replace with real scenario data
+  const axes = [
+    "Community deliveries",
+    "Agricultural deliveries",
+    "Environmental deliveries",
+    "Reservoir storage",
+    "Groundwater storage",
+    "Delta salinity",
+    "Salmon abundance",
+    "Distributional equity"
+  ]
+
+  const sampleData: VerticalParallelLineData[] = [
+    {
+      id: "baseline",
+      name: "Current Operations",
+      values: {
+        "Community deliveries": 85,
+        "Agricultural deliveries": 70,
+        "Environmental deliveries": 45,
+        "Reservoir storage": 60,
+        "Groundwater storage": 40,
+        "Delta salinity": 25,
+        "Salmon abundance": 35,
+        "Distributional equity": 65
+      },
+      highlighted: highlightBaseline
+    },
+    {
+      id: "sgma-1",
+      name: "SGMA San Joaquin Valley",
+      values: {
+        "Community deliveries": 80,
+        "Agricultural deliveries": 55,
+        "Environmental deliveries": 60,
+        "Reservoir storage": 65,
+        "Groundwater storage": 75,
+        "Delta salinity": 30,
+        "Salmon abundance": 50,
+        "Distributional equity": 70
+      }
+    },
+    {
+      id: "sgma-2", 
+      name: "SGMA with Ag Reductions",
+      values: {
+        "Community deliveries": 85,
+        "Agricultural deliveries": 45,
+        "Environmental deliveries": 70,
+        "Reservoir storage": 70,
+        "Groundwater storage": 85,
+        "Delta salinity": 35,
+        "Salmon abundance": 65,
+        "Distributional equity": 60
+      }
+    },
+    {
+      id: "delta-tunnel",
+      name: "Delta Conveyance Tunnel", 
+      values: {
+        "Community deliveries": 90,
+        "Agricultural deliveries": 75,
+        "Environmental deliveries": 55,
+        "Reservoir storage": 45,
+        "Groundwater storage": 60,
+        "Delta salinity": 45,
+        "Salmon abundance": 40,
+        "Distributional equity": 80
+      }
+    },
+    {
+      id: "usbr-alt3",
+      name: "USBR Alternative 3",
+      values: {
+        "Community deliveries": 75,
+        "Agricultural deliveries": 80,
+        "Environmental deliveries": 75,
+        "Reservoir storage": 80,
+        "Groundwater storage": 55,
+        "Delta salinity": 40,
+        "Salmon abundance": 70,
+        "Distributional equity": 85
+      }
+    }
+  ]
+
+  const handleLineHover = (data: VerticalParallelLineData | null) => {
+    // TODO: Implement hover tooltip or highlighting
+    console.log("Line hovered:", data?.name || "none")
+  }
+
+  const handleLineClick = (data: VerticalParallelLineData) => {
+    // TODO: Implement scenario selection/preview
+    console.log("Line clicked:", data.name)
   }
 
   return (
@@ -152,28 +250,29 @@ export default function OutcomesPanel() {
         </Box>
       </Box>
 
-      {/* Visualization interface */}
+      {/* Parallel Coordinates Visualization */}
       <Box
         sx={{
-          minHeight: "300px",
-          border: "2px dashed",
-          borderColor: (theme) => theme.palette.grey[300],
-          borderRadius: 2,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: (theme) => theme.palette.grey[50],
+          minHeight: "280px",
+          overflow: "hidden",
         }}
       >
-        <Typography
-          variant="body2"
-          sx={{
-            color: (theme) => theme.palette.grey[500],
-            fontStyle: "italic",
+        <VerticalParallelLinePlot
+          data={sampleData}
+          axes={axes}
+          responsive={true}
+          width={400} // Explicit width constraint to match panel
+          height={280}
+          showBaseline={highlightBaseline}
+          baselineData={sampleData.find(d => d.id === "baseline")}
+          colors={{
+            default: "#1f77b4",
+            highlighted: "#ff7f0e", 
+            background: "#f8f9fa"
           }}
-        >
-          Visualization interface will go here
-        </Typography>
+          onLineHover={handleLineHover}
+          onLineClick={handleLineClick}
+        />
       </Box>
     </Box>
   )
