@@ -46,7 +46,6 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }
         textAlign: "center",
         fontSize: "7px",
         color: theme.palette.text.primary,
-        transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
         transition: "all 0.2s ease",
         position: "relative", // Match MUI checkbox positioning
         boxSizing: "border-box !important", // Force border-box sizing
@@ -57,7 +56,16 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }
         },
       }}
     >
-      ▼
+      <Box
+        component="span"
+        sx={{
+          display: "inline-block",
+          transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s ease",
+        }}
+      >
+        ▼
+      </Box>
     </Box>
   )
 }
