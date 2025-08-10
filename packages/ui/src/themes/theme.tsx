@@ -205,27 +205,36 @@ const themeValues = {
 
   // Z-index values
   zIndex: {
-    // Map layer (when active)
-    map: -1,
+    // Background layers (negative values)
+    mapBackground: -1,     // Map when used as background
+    sectionBackground: -1, // Section background elements
 
-    // Main content layers
-    panels: 0,
+    // Content layers (0-99)
+    content: 0,            // Default content layer
+    panels: 0,             // Main content panels
+    
+    // Intro section micro-layers (1-9)
+    introBackgroundImages: 1,  // Background decorative images
+    introText: 2,              // Text content
+    introForegroundImages: 3,  // Foreground decorative elements
+    introBubbles: 4,           // Interactive bubble elements
 
-    // Intro section specific layers
-    introBubbles: 0,
-    introBackgroundImages: 1,
-    introText: 2,
-    introForegroundImages: 3,
-
-    // Navigation layers
-    drawer: 1200,
-    modal: 1300,
-    appBar: 1400,
-    tooltip: 1500,
-
-    // Special cases
-    drawerBackdrop: 1199, // Just below drawer
-    overlay: 1250, // Between drawer and modal
+    // Interactive layers (100-999)
+    mapControls: 1000,     // Map overlay controls and panels
+    floatingElements: 1100, // Floating UI elements
+    
+    // Navigation layers (1200-1499)
+    drawerBackdrop: 1199,  // Drawer backdrop/overlay
+    drawer: 1200,          // Side drawer/navigation
+    overlay: 1250,         // General overlay elements
+    modal: 1300,           // Modal dialogs
+    appBar: 1400,          // Top navigation bar
+    
+    // System layers (1500+)
+    tooltip: 1500,         // Tooltips and help text
+    notification: 1600,    // Toast notifications
+    loading: 1700,         // Loading overlays
+    debug: 9999,           // Debug overlays (development)
   },
 }
 
@@ -1672,16 +1681,34 @@ declare module "@mui/material/styles" {
     }
   }
 
-  // Extend the zIndex interface to include our custom values
+  // zIndex interface
   interface ZIndex {
-    map: number
+    // Background layers
+    mapBackground: number
+    sectionBackground: number
+    
+    // Content layers
+    content: number
     panels: number
-    introBubbles: number
+    
+    // Intro section layers
     introBackgroundImages: number
     introText: number
     introForegroundImages: number
+    introBubbles: number
+    
+    // Interactive layers
+    mapControls: number
+    floatingElements: number
+    
+    // Navigation layers
     drawerBackdrop: number
     overlay: number
+    
+    // System layers
+    notification: number
+    loading: number
+    debug: number
   }
 
   interface Theme {
@@ -1920,5 +1947,48 @@ declare module "@mui/material/Typography" {
 | - MuiCheckbox: Uses formControlBase + square styling
 | - MuiRadio: Uses formControlBase + circular styling  
 | - MuiFormControlLabel: alignItems "flex-start" for multi-line labels
+|
+| ========================================================
+|
+| Z-INDEX LAYERING SYSTEM - USAGE GUIDE
+| ========================================================
+| 
+| The z-index system is organized into logical layers to prevent
+| conflicts and ensure predictable stacking behavior:
+|
+| BACKGROUND LAYERS (negative values):
+| - mapBackground (-1): Map when used as background element
+| - sectionBackground (-1): Section background decorations
+|
+| CONTENT LAYERS (0-99):
+| - content (0): Default content layer for main sections
+| - panels (0): Main content panels and cards
+| 
+| INTRO SECTION MICRO-LAYERS (1-9):
+| - introBackgroundImages (1): Decorative background images
+| - introText (2): Text content over backgrounds
+| - introForegroundImages (3): Decorative foreground elements
+| - introBubbles (4): Interactive floating elements
+|
+| INTERACTIVE LAYERS (100-999):
+| - mapControls (1000): Map overlay controls and panels
+| - floatingElements (1100): Floating UI elements, scroll controls
+|
+| NAVIGATION LAYERS (1200-1499):
+| - drawerBackdrop (1199): Drawer backdrop/overlay
+| - drawer (1200): Side drawer/navigation
+| - overlay (1250): General overlay elements
+| - modal (1300): Modal dialogs
+| - appBar (1400): Top navigation bar
+|
+| SYSTEM LAYERS (1500+):
+| - tooltip (1500): Tooltips and help text
+| - notification (1600): Toast notifications  
+| - loading (1700): Loading overlays
+| - debug (9999): Debug overlays (development only)
+|
+| USAGE:
+| Always use theme.zIndex.layerName instead of hardcoded numbers:
+|   zIndex: (theme) => theme.zIndex.mapControls
 |
 | ======================================================== */

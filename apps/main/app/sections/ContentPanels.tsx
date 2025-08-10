@@ -252,7 +252,7 @@ export default function ContentPanels({
         maxWidth: "100%", // Ensure it doesn't exceed parent width
         boxSizing: "border-box", // Include padding in width calculation
         userSelect: "text", // Ensure text is selectable
-        zIndex: 100, // Much higher z-index to ensure it stays above IntroSection
+        zIndex: (theme) => theme.zIndex.floatingElements, // Ensure it stays above IntroSection
         margin: 0, // Remove any default margins
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
@@ -261,7 +261,7 @@ export default function ContentPanels({
 
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
-          zIndex: 3, // Push active panels above others (within panels layer)
+          zIndex: 3, // Push active panels above others (within content layer)
           userSelect: "text", // Ensure text is selectable
         },
         "& .active-detail-panel": {
@@ -292,7 +292,7 @@ export default function ContentPanels({
             borderRadius: 0,
           },
           // Create stacking context to handle z-index properly
-          zIndex: 1, // Base level within panels
+          zIndex: 1, // Base level within content layer
           overflow: "visible",
           width: "100%", // Ensure content is limited to viewport width
         }}

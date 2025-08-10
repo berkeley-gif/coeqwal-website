@@ -12,7 +12,7 @@ export default function MapStateDisplay() {
         position: "absolute",
         top: 16,
         left: 16,
-        zIndex: 100,
+        zIndex: (theme) => theme.zIndex.floatingElements,
 
         color: "white",
         padding: 2,

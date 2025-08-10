@@ -85,7 +85,7 @@ const IntroSection: React.FC = () => {
           },
           backgroundRepeat: "no-repeat",
           overflow: "hidden",
-          zIndex: 0,
+          zIndex: (theme) => theme.zIndex.content,
           isolation: "isolate",
         }}
       >
@@ -94,7 +94,7 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "absolute",
             inset: 0,
-            zIndex: -1, // Behind everything including California image
+            zIndex: (theme) => theme.zIndex.sectionBackground, // Behind everything including California image
             pointerEvents: "none",
             overflow: "hidden",
           }}
@@ -107,7 +107,7 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "absolute",
             inset: 0,
-            zIndex: (theme) => theme.zIndex.introBackgroundImages - 1,
+            zIndex: (theme) => theme.zIndex.sectionBackground,
             pointerEvents: "none",
             overflow: "hidden",
           }}
@@ -120,7 +120,7 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "absolute",
             inset: 0,
-            zIndex: (theme) => theme.zIndex.introBackgroundImages + 1,
+            zIndex: (theme) => theme.zIndex.introForegroundImages,
             pointerEvents: "none",
           }}
         >
