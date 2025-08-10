@@ -1292,8 +1292,11 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           // Custom elegant square checkbox (matches similar dropdown "checkbox")
-          width: "20px",
-          height: "20px",
+          width: "20px !important",
+          height: "20px !important",
+          minWidth: "20px !important", // Prevent shrinking
+          maxWidth: "20px !important", // Prevent growing
+          flexShrink: 0, // Don't shrink in flex containers
           borderRadius: "2px",
           border: `1px solid ${theme.palette.text.primary}`,
           backgroundColor: "transparent",
@@ -1350,8 +1353,11 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           // Custom elegant circular radio button - systematic baseline alignment
-          width: "20px",
-          height: "20px",
+          width: "20px !important",
+          height: "20px !important",
+          minWidth: "20px !important", // Prevent shrinking
+          maxWidth: "20px !important", // Prevent growing
+          flexShrink: 0, // Don't shrink in flex containers
           borderRadius: "50%", // Circular for radio buttons
           border: `1px solid ${theme.palette.text.primary}`,
           backgroundColor: "transparent",
