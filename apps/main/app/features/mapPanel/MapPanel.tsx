@@ -363,9 +363,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         mapboxToken={mapboxToken}
         mapStyle="mapbox://styles/digijill/cme5s9vy600r201rygw7q3agh"
         initialViewState={{
-          longitude: -120.759, // Center on California
-          latitude: 38.032, // Center on California
-          zoom: 6.3, // Optimal zoom level
+          longitude: -120.759,
+          latitude: 38.032,
+          zoom: 6.3,
         }}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}

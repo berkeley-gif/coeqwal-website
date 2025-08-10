@@ -1291,8 +1291,30 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: ({ theme }) => ({
+          color: theme.palette.text.primary,
+          padding: theme.spacing(0.5), // Reduced padding for condensed spacing
+          alignSelf: "flex-start",
+          marginTop: "-2px", // Fine-tune alignment with first line of text
+          "&:hover": {
+            backgroundColor: `${theme.palette.action.hover}30`, // 30% opacity for better visibility
+          },
+          "&.Mui-checked": {
+            color: theme.palette.blue.darkest,
+          },
+          // Remove ripple animation
+          "& .MuiTouchRipple-root": {
+            display: "none",
+          },
+        }),
+      },
+    },
+    MuiRadio: {
+      styleOverrides: {
+        root: ({ theme }) => ({
           color: theme.palette.text.primary, // Same as universal text color (dark blue)
           padding: theme.spacing(0.5), // Reduced padding for condensed spacing
+          alignSelf: "flex-start",
+          marginTop: "-2px", // Fine-tune alignment with first line of text
           "&:hover": {
             backgroundColor: `${theme.palette.action.hover}30`, // 30% opacity for better visibility
           },
@@ -1310,11 +1332,13 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           margin: 0, // Remove default margins for condensed spacing
+          alignItems: "flex-start",
           "& .MuiFormControlLabel-label": {
             fontSize: "0.95rem", // Slightly smaller text
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
+            paddingTop: "2px", // Fine-tune text alignment with checkbox/radio
           },
         }),
       },
