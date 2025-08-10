@@ -14,6 +14,55 @@ import { useMap } from "@repo/map"
 import InfoIcon from "@mui/icons-material/Info"
 import { useDrawerStore } from "@repo/state"
 
+// Custom triangle component that matches checkbox styling
+interface TriangleCheckboxProps {
+  expanded: boolean
+  onClick: () => void
+}
+
+const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }) => {
+  const theme = useTheme()
+  
+  return (
+    <Box
+      onClick={onClick}
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "18px", // Match small checkbox size (MUI small = 18px)
+        height: "18px", // Match small checkbox size
+        borderRadius: "2px", // Match small checkbox border radius
+        border: `1px solid ${theme.palette.text.primary}`, // Match checkbox border
+        backgroundColor: "transparent",
+        cursor: "pointer",
+        alignSelf: "flex-start", // Match checkbox alignment from theme
+        marginTop: "-2px", // Match checkbox fine-tuning from theme
+        padding: 0, // Remove padding to match checkbox inner area
+        margin: theme.spacing(0.5), // Match checkbox margin from theme
+        transition: "all 0.2s ease",
+        "&:hover": {
+          backgroundColor: `${theme.palette.action.hover}30`, // Match checkbox hover from theme
+        },
+      }}
+    >
+      <Box
+        component="span"
+        sx={{
+          fontSize: "7px", // Smaller triangle to fit nicely in checkbox
+          lineHeight: 1,
+          color: theme.palette.text.primary,
+          display: "inline-block",
+          transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 0.2s ease",
+        }}
+      >
+        ▼
+      </Box>
+    </Box>
+  )
+}
+
 interface PresetOption {
   id: string
   label: string
@@ -275,48 +324,18 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
         pl: isSubOption ? 3 : 0, // Indent sub-options
       }}
     >
-      {/* For parent options with sub-options, show dropdown triangle instead of checkbox */}
+      {/* For parent options with sub-options, show triangle checkbox */}
       {!isSubOption && option.subOptions ? (
-        <Box
-          onClick={() => toggleExpanded(option.id)}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flex: 1,
-            cursor: "pointer",
-            userSelect: "none",
-            transition: "color 0.2s ease",
-            "&:hover": {
-              color: (theme) => theme.palette.action.hover,
-            },
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              fontSize: "0.875em",
-              lineHeight: 1,
-              verticalAlign: "baseline",
-              display: "inline-block",
-              transform: expandedOptions.has(option.id) ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 0.2s ease",
-              mr: 1,
-              color: (theme) => theme.palette.action.hover,
-            }}
-          >
-            ▼
-          </Box>
-          <Box
-            component="span"
-            sx={{
-              fontSize: "0.95rem",
-              lineHeight: 1.3,
-              color: (theme) => theme.palette.text.primary,
-            }}
-          >
-            {option.label}
-          </Box>
-        </Box>
+        <FormControlLabel
+          control={
+            <TriangleCheckbox
+              expanded={expandedOptions.has(option.id)}
+              onClick={() => toggleExpanded(option.id)}
+            />
+          }
+          label={option.label}
+          sx={{ flex: 1 }}
+        />
       ) : (
         /* For sub-options, show regular checkbox */
         <FormControlLabel
