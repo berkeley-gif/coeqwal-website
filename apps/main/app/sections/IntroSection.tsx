@@ -208,7 +208,7 @@ const IntroSection: React.FC = () => {
             </Typography>
 
             <Typography
-              variant="h3"
+              variant="h4"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 mt: 2.5,
