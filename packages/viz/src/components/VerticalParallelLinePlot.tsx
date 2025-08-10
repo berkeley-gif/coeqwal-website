@@ -35,7 +35,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   responsive = true,
   width = 400, // Default
   height = 300,
-  margin = { top: 20, right: 10, bottom: 30, left: 140 }, // Optimized for 1/3 viewport width panel
+  margin = { top: 20, right: 20, bottom: 30, left: 140 }, // Responsive margins
   colors = {
     default: "#1f77b4",
     highlighted: "#ff7f0e",
@@ -57,11 +57,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Handle responsive sizing
   useEffect(() => {
     if (responsive && dimensions) {
-      // Constrain to container
-      const constrainedWidth = Math.min(dimensions.width || width, width)
-      setCurrentWidth(constrainedWidth)
-      // For narrow panels, maintain fixed height to prevent cramping
-      setCurrentHeight(height) // Use fixed height instead of responsive height
+      // Use full available width and height from container
+      setCurrentWidth(dimensions.width || width)
+      setCurrentHeight(dimensions.height || height)
+    } else {
+      // Use default dimensions if not responsive
+      setCurrentWidth(width)
+      setCurrentHeight(height)
     }
   }, [dimensions, responsive, width, height])
 

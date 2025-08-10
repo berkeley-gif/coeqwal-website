@@ -132,7 +132,13 @@ export default function OutcomesPanel() {
   }
 
   return (
-    <Box>
+    <Box 
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%", // Take full height of parent container
+      }}
+    >
       {/* Collapsible instructions section */}
       <Box sx={{ mb: 3 }}>
         {/* Toggle button for instructions */}
@@ -253,16 +259,18 @@ export default function OutcomesPanel() {
       {/* Parallel Coordinates Visualization */}
       <Box
         sx={{
-          minHeight: "280px",
+          flexGrow: 1, // Take up remaining vertical space
+          minHeight: "200px", // Minimum height for usability
           overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <VerticalParallelLinePlot
           data={sampleData}
           axes={axes}
           responsive={true}
-          width={400} // Explicit width constraint to match panel
-          height={280}
+          // Remove fixed width/height - let it be fully responsive
           showBaseline={highlightBaseline}
           baselineData={sampleData.find(d => d.id === "baseline")}
           colors={{
