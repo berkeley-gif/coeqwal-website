@@ -361,7 +361,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       {/* Full Screen Map */}
       <Map
         mapboxToken={mapboxToken}
-        mapStyle="mapbox://styles/digijill/cl122pj52001415qofin7bb1c"
+        mapStyle="mapbox://styles/digijill/cme5s9vy600r201rygw7q3agh"
         initialViewState={{
           longitude: -120.759, // Center on California
           latitude: 38.032, // Center on California
@@ -369,6 +369,12 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         }}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
+        touchZoom={true}
+        touchRotate={false}
+        onError={(evt: unknown) => {
+          // Surface mapbox or ReactMapGL errors in the console (could be replaced with toast)
+          console.error("🗺️ Map error:", evt)
+        }}
       >
         {/* Built-in Mapbox Controls */}
         <NavigationControl
