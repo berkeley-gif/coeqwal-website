@@ -315,9 +315,9 @@ const triangleCheckboxMixin = {
   flexShrink: 0, // Don't shrink in flex containers
   borderRadius: "2px",
   backgroundColor: "transparent",
-  verticalAlign: "super", // Superscript alignment (raised)
   padding: "0",
-  marginTop: "0px", // Align with first line baseline
+  alignSelf: "flex-start",
+  transform: "translateY(2px)", // Fine-tune vertical position
   // Center the triangle content
   lineHeight: "18px", // height minus border (20px - 2px)
   textAlign: "center",
@@ -338,8 +338,8 @@ const formControlBaseMixin = {
   flexShrink: 0, // Don't shrink in flex containers
   backgroundColor: "transparent",
   padding: "0",
-  marginTop: "0px", // Align with first line baseline
-  verticalAlign: "super", // Superscript alignment (raised)
+  alignSelf: "flex-start",
+  transform: "translateY(-3px)", // Fine-tune vertical position
   transition: "all 0.2s ease",
   position: "relative",
   display: "inline-block",

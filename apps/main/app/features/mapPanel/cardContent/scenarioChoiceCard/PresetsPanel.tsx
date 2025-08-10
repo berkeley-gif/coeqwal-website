@@ -28,6 +28,7 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded }) => {
         ...theme.mixins.triangleCheckbox,
         border: `1px solid ${theme.palette.text.primary}`,
         margin: theme.spacing(0.5),
+        transform: "translateY(-3px)", // Fine-tune vertical position
         color: theme.palette.text.primary,
         "&:hover": {
           backgroundColor: `${theme.palette.action.hover}30`,
