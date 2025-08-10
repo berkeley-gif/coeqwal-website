@@ -17,15 +17,13 @@ import { useDrawerStore } from "@repo/state"
 // Custom triangle component that matches checkbox styling
 interface TriangleCheckboxProps {
   expanded: boolean
-  onClick: () => void
 }
 
-const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }) => {
+const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded }) => {
   const theme = useTheme()
   
   return (
     <Box
-      onClick={onClick}
       sx={{
         display: "inline-block",
         width: "20px !important",
@@ -36,7 +34,6 @@ const TriangleCheckbox: React.FC<TriangleCheckboxProps> = ({ expanded, onClick }
         borderRadius: "2px",
         border: `1px solid ${theme.palette.text.primary}`,
         backgroundColor: "transparent",
-        cursor: "pointer",
         verticalAlign: "super", // Superscript alignment (raised)
         padding: "0",
         margin: theme.spacing(0.5),
@@ -339,11 +336,11 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
           control={
             <TriangleCheckbox
               expanded={expandedOptions.has(option.id)}
-              onClick={() => toggleExpanded(option.id)}
             />
           }
           label={option.label}
-          sx={{ width: "100%" }}
+          onClick={() => toggleExpanded(option.id)}
+          sx={{ width: "100%", cursor: "pointer" }}
         />
       ) : (
         /* For sub-options, show regular checkbox */
