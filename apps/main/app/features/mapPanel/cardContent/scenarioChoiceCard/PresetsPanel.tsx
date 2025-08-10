@@ -106,7 +106,7 @@ const presetOptions: PresetOption[] = [
         id: "sgma-sac-sjv",
         label: "Sacramento and San Joaquin Valleys",
         description:
-          "Comprehensive SGMA implementation across both the Sacramento Valley and San Joaquin Valley groundwater basins, establishing coordinated groundwater sustainability across both regions.",
+          "SGMA implementation across both the Sacramento Valley and San Joaquin Valley groundwater basins, establishing coordinated groundwater sustainability across both regions.",
         glossaryEntry: "SGMA - Sacramento and San Joaquin Valleys",
         mapCoordinates: {
           longitude: -121.0,
@@ -119,7 +119,7 @@ const presetOptions: PresetOption[] = [
         label:
           "Sacramento and San Joaquin Valleys with agricultural reductions",
         description:
-          "The most comprehensive SGMA implementation scenario, covering both Sacramento and San Joaquin Valleys with projected agricultural land use reductions.",
+          "SGMA implementation scenario covering both Sacramento and San Joaquin Valleys with projected agricultural land use reductions.",
         glossaryEntry:
           "SGMA - Sacramento and San Joaquin Valleys with Agricultural Reductions",
         mapCoordinates: {
