@@ -124,7 +124,7 @@ export default function HeroSection() {
       sx={{
         pointerEvents: "auto",
         position: "relative",
-        zIndex: 1,
+        zIndex: (theme) => theme.zIndex.content,
         height: "100vh",
       }}
     >

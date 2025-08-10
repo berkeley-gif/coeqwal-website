@@ -91,7 +91,7 @@ export const CustomScrollContainer: React.FC<CustomScrollContainerProps> = ({
           display: "flex",
           flexDirection: "column",
           gap: "4px",
-          zIndex: 1000,
+          zIndex: (theme) => theme.zIndex.floatingElements,
         }}
       >
         {/* Up button */}

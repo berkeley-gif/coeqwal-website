@@ -26,7 +26,7 @@ export function ScrollDownIcon({
         bottom: 20,
         left: "50%",
         transform: "translateX(-50%)",
-        zIndex: 10,
+        zIndex: (theme) => theme.zIndex.floatingElements,
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",

@@ -62,7 +62,7 @@ const MapControls = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 1000,
+        zIndex: (theme) => theme.zIndex.mapControls,
         pointerEvents: "none", // Refine for map interactions between map and overlay
         p: 3,
       }}

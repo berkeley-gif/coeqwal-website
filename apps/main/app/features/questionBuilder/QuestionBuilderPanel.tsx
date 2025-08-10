@@ -89,7 +89,7 @@ const QuestionBuilderContent = ({
             sx={{
               position: "sticky",
               top: (theme) => theme.layout.headerHeight,
-              zIndex: 1000,
+              zIndex: (theme) => theme.zIndex.mapControls,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
