@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Box, IconButton, Tabs, Tab } from "@repo/ui/mui"
+import { Box, IconButton, Tabs, Tab, Checkbox, FormControlLabel } from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
 import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
 import {
@@ -20,6 +20,7 @@ const MapControls = () => {
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [isChartExpanded, setIsChartExpanded] = useState(false)
+  const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -57,6 +58,10 @@ const MapControls = () => {
 
   const handleChartExpand = (expanded: boolean) => {
     setIsChartExpanded(expanded)
+  }
+
+  const toggleRegionDropdown = () => {
+    setShowRegionDropdown(!showRegionDropdown)
   }
 
   return (
@@ -256,6 +261,78 @@ const MapControls = () => {
 
         {/* Center Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Region Selection Card */}
+          <ScenarioCard
+            topLine="CHOOSE A REGION. starting with:"
+            headline="Central Valley"
+            body={null} // No list for this card
+            bottomLine={
+              <Box
+                onClick={toggleRegionDropdown}
+                sx={{
+                  cursor: "pointer",
+                  userSelect: "none",
+                  transition: "color 0.2s ease",
+                  "&:hover": {
+                    color: (theme) => theme.palette.action.hover,
+                  },
+                }}
+              >
+                Choose a different region{" "}
+                <span
+                  style={{
+                    fontSize: "0.875em",
+                    lineHeight: 1,
+                    verticalAlign: "baseline",
+                    display: "inline-block",
+                    transform: showRegionDropdown ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  ▼
+                </span>
+              </Box>
+            }
+            dropdownContent={
+              showRegionDropdown ? (
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 1,
+                    p: 2,
+                  }}
+                >
+                  <FormControlLabel
+                    control={<Checkbox size="small" />}
+                    label="Sacramento Valley"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox size="small" />}
+                    label="San Joaquin Valley"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox size="small" />}
+                    label="Delta"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox size="small" />}
+                    label="Tulare Basin"
+                  />
+                  <FormControlLabel
+                    control={<Checkbox size="small" />}
+                    label="Select region on map"
+                    sx={{ gridColumn: "1 / -1" }} // Span full width
+                  />
+                </Box>
+              ) : undefined
+            }
+            sx={{
+              backdropFilter: "blur(10px)",
+              pointerEvents: "auto",
+            }}
+          />
+
           {/* Search Interface */}
           {/* <Card
             sx={{
