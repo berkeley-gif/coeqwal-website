@@ -361,7 +361,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       {/* Full Screen Map */}
       <Map
         mapboxToken={mapboxToken}
-        mapStyle="mapbox://styles/digijill/cme5s9vy600r201rygw7q3agh"
+        mapStyle="mapbox://styles/mapbox/streets-v12"
         initialViewState={{
           longitude: -120.759,
           latitude: 38.032,
