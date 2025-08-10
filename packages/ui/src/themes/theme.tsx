@@ -1291,19 +1291,56 @@ const theme = createTheme({
     MuiCheckbox: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: theme.palette.text.primary,
-          padding: theme.spacing(0.5), // Reduced padding for condensed spacing
-          alignSelf: "flex-start",
-          marginTop: "-2px", // Fine-tune alignment with first line of text
+          // Custom elegant square checkbox (matches similar dropdown "checkbox")
+          width: "20px",
+          height: "20px",
+          borderRadius: "2px",
+          border: `1px solid ${theme.palette.text.primary}`,
+          backgroundColor: "transparent",
+          padding: "0",
+          margin: theme.spacing(0.5),
+          verticalAlign: "super", // Superscript alignment (raised)
+          transition: "all 0.2s ease",
+          position: "relative",
+          display: "inline-block",
+          cursor: "pointer",
+          boxSizing: "border-box", // Ensure border is included in dimensions
+          filter: "none !important", // Ensure no additional filters
+          backdropFilter: "none !important", // Ensure no backdrop filter on the element itself
           "&:hover": {
-            backgroundColor: `${theme.palette.action.hover}30`, // 30% opacity for better visibility
+            backgroundColor: `${theme.palette.action.hover}30`,
           },
           "&.Mui-checked": {
-            color: theme.palette.blue.darkest,
+            backgroundColor: theme.palette.blue.darkest, // Fill with dark blue when checked
+            borderColor: theme.palette.blue.darkest,
           },
           // Remove ripple animation
           "& .MuiTouchRipple-root": {
             display: "none",
+          },
+          // Hide the default MUI SVG and replace with custom checkmark
+          "& .MuiSvgIcon-root": {
+            display: "none !important", // Force hide default checkbox SVG
+            width: "0 !important",
+            height: "0 !important",
+          },
+          // Hide MUI's internal input element
+          "& input[type='checkbox']": {
+            display: "none !important",
+          },
+          // Custom checkmark using CSS - centered in inline-block
+          "&.Mui-checked::after": {
+            content: '"✓"',
+            position: "absolute",
+            color: theme.palette.common.white,
+            fontSize: "12px",
+            fontWeight: "bold",
+            lineHeight: "18px", // height minus border
+            textAlign: "center",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "100%",
           },
         }),
       },
@@ -1311,19 +1348,45 @@ const theme = createTheme({
     MuiRadio: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: theme.palette.text.primary, // Same as universal text color (dark blue)
-          padding: theme.spacing(0.5), // Reduced padding for condensed spacing
-          alignSelf: "flex-start",
-          marginTop: "-2px", // Fine-tune alignment with first line of text
+          // Custom elegant circular radio button - systematic baseline alignment
+          width: "20px",
+          height: "20px",
+          borderRadius: "50%", // Circular for radio buttons
+          border: `1px solid ${theme.palette.text.primary}`,
+          backgroundColor: "transparent",
+          padding: "0",
+          margin: theme.spacing(0.5),
+          verticalAlign: "super", // Superscript alignment (raised)
+          transition: "all 0.2s ease",
+          position: "relative",
+          display: "inline-block",
+          cursor: "pointer",
+          boxSizing: "border-box", // Ensure border is included in dimensions
           "&:hover": {
-            backgroundColor: `${theme.palette.action.hover}30`, // 30% opacity for better visibility
+            backgroundColor: `${theme.palette.action.hover}30`,
           },
           "&.Mui-checked": {
-            color: theme.palette.blue.darkest,
+            backgroundColor: theme.palette.blue.darkest, // Fill with dark blue when checked
+            borderColor: theme.palette.blue.darkest,
           },
           // Remove ripple animation
           "& .MuiTouchRipple-root": {
             display: "none",
+          },
+          // Hide the default MUI SVG and replace with custom dot
+          "& .MuiSvgIcon-root": {
+            display: "none", // Hide default radio SVG
+          },
+          // Custom dot using CSS - centered in inline-block
+          "&.Mui-checked::after": {
+            content: '""',
+            position: "absolute",
+            width: "6px",
+            height: "6px",
+            borderRadius: "50%",
+            backgroundColor: theme.palette.common.white,
+            top: "7px", // (20px - 6px) / 2 = 7px
+            left: "7px", // (20px - 6px) / 2 = 7px
           },
         }),
       },
@@ -1332,13 +1395,12 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           margin: 0, // Remove default margins for condensed spacing
-          alignItems: "flex-start",
+          alignItems: "center", // Center align checkbox and label
           "& .MuiFormControlLabel-label": {
             fontSize: "0.95rem", // Slightly smaller text
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
-            paddingTop: "2px", // Fine-tune text alignment with checkbox/radio
           },
         }),
       },
