@@ -704,7 +704,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           setPolygonPoints((prev: Array<{lng: number, lat: number}>) => [...prev, newPoint])
         } : undefined}
         onError={(evt: unknown) => {
-          // Surface mapbox or ReactMapGL errors in the console (could be replaced with toast)
+          // Surface mapbox or ReactMapGL errors in the console
           console.error("🗺️ Map error:", evt)
         }}
       >
@@ -743,10 +743,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                     height: 12,
                     borderRadius: "50%",
                     backgroundColor: draggedPointIndex === index 
-                      ? "#ff4757" 
+                      ? "#e17055" // Darker orange for dragged state
                       : isSelfIntersecting 
-                      ? "#ff9f43" 
-                      : "#ff6b6b",
+                      ? "#ff6b6b" // Red for error/self-intersection
+                      : "#ff9f43", // Orange for normal drawing
                     border: isDrawingCustomRegion && index === 0 && polygonPoints.length >= 3
                       ? "3px solid #fff" // Thicker white border for first point when ready to close
                       : "2px solid white",
@@ -794,7 +794,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   id="polygon-line"
                   type="line"
                   paint={{
-                    "line-color": isSelfIntersecting ? "#ff9f43" : "#ff6b6b",
+                    "line-color": isSelfIntersecting ? "#ff6b6b" : "#ff9f43",
                     "line-width": 2,
                     "line-dasharray": [2, 2]
                   }}
@@ -820,7 +820,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   id="polygon-fill-layer"
                   type="fill"
                   paint={{
-                    "fill-color": isSelfIntersecting ? "#ff9f43" : "#ff6b6b",
+                    "fill-color": isSelfIntersecting ? "#ff6b6b" : "#ff9f43",
                     "fill-opacity": isSelfIntersecting ? 0.15 : 0.2
                   }}
                 />
@@ -828,7 +828,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   id="polygon-stroke-layer"
                   type="line"
                   paint={{
-                    "line-color": isSelfIntersecting ? "#ff9f43" : "#ff6b6b",
+                    "line-color": isSelfIntersecting ? "#ff6b6b" : "#ff9f43",
                     "line-width": 2
                   }}
                 />
@@ -873,7 +873,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             top: 16,
             left: "50%",
             transform: "translateX(-50%)",
-            backgroundColor: "rgba(255, 159, 67, 0.95)",
+            backgroundColor: "rgba(255, 107, 107, 0.95)",
             color: "white",
             padding: 2,
             borderRadius: 1,
