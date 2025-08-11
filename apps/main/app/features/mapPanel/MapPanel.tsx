@@ -856,16 +856,38 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             borderRadius: (theme) => theme.borderRadius.card,
             zIndex: (theme) => theme.zIndex.tooltip,
             textAlign: "center",
-            pointerEvents: "none",
+            pointerEvents: polygonPoints.length > 0 ? "auto" : "none", // Enable clicks when points exist
           }}
         >
           <Box sx={{ fontSize: "0.9rem", fontWeight: 500, mb: 0.5 }}>
             Draw Custom Region
           </Box>
-          <Box sx={{ fontSize: "0.8rem", opacity: 0.9 }}>
+          <Box sx={{ fontSize: "0.8rem", opacity: 0.9, mb: polygonPoints.length > 0 ? 0.5 : 0 }}>
             Click to add points • Click first point to finish
             {polygonPoints.length > 0 && ` • ${polygonPoints.length} points`}
           </Box>
+          {polygonPoints.length > 0 && (
+            <Box
+              onClick={(e) => {
+                e.stopPropagation()
+                setPolygonPoints([])
+                setIsSelfIntersecting(false)
+                setDraggedPointIndex(null)
+              }}
+              sx={{
+                fontSize: "0.8rem",
+                color: "#ffd87e", // Use theme accent gold for visibility
+                cursor: "pointer",
+                textDecoration: "underline",
+                "&:hover": {
+                  color: "white",
+                  opacity: 0.8,
+                },
+              }}
+            >
+              Redraw
+            </Box>
+          )}
         </Box>
       )}
 
