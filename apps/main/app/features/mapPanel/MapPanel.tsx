@@ -736,6 +736,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   handlePointDrag(index, lng, lat)
                 }}
                 onDragEnd={handleDragEnd}
+                onClick={isDrawingCustomRegion && index === 0 && polygonPoints.length >= 3 ? (evt) => {
+                  evt.originalEvent.stopPropagation()
+                  handlePolygonComplete()
+                } : undefined}
               >
                 <Box
                   sx={{
