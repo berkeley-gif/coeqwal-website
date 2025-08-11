@@ -177,9 +177,9 @@ export default function OutcomesPanel() {
         flexGrow: 1, // Always use all available space
       }}
     >
-              {/* Outcomes paragraph, visible when chart not expanded */}
-        {!expandChart && (
-          <Box sx={{ flexShrink: 0 }}>
+      {/* Outcomes paragraph, visible when chart not expanded */}
+      {!expandChart && (
+        <Box sx={{ flexShrink: 0 }}>
           <Box
             sx={{
               fontSize: "0.95rem",
