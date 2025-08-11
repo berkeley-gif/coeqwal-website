@@ -4,15 +4,7 @@ import React, { useState } from "react"
 import { Box, Button, FormControlLabel, Checkbox } from "@repo/ui/mui"
 import { VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 
-interface OutcomesPanelProps {
-  onExpandChart?: (expanded: boolean) => void
-  isExpanded?: boolean // Whether the panel is in expanded mode
-}
-
-export default function OutcomesPanel({ 
-  onExpandChart, 
-  isExpanded = false 
-}: OutcomesPanelProps) {
+export default function OutcomesPanel() {
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
   const [expandChart, setExpandChart] = useState(false)
@@ -33,9 +25,7 @@ export default function OutcomesPanel({
   }
 
   const toggleExpandChart = () => {
-    const newExpandState = !expandChart
-    setExpandChart(newExpandState)
-    onExpandChart?.(newExpandState)
+    setExpandChart(!expandChart)
   }
 
   // Sample data for vertical parallel line plot
@@ -135,8 +125,6 @@ export default function OutcomesPanel({
     console.log("Line clicked:", data.name)
   }
 
-  // Chart always uses all available space - no more height calculations needed
-
   return (
     <Box
       sx={{
@@ -148,8 +136,8 @@ export default function OutcomesPanel({
         flexGrow: 1, // Always use all available space
       }}
     >
-      {/* Outcomes paragraph - visible when not expanded and chart not expanded */}
-      {!isExpanded && !expandChart && (
+      {/* Outcomes paragraph, visible when chart not expanded */}
+      {!expandChart && (
         <Box sx={{ flexShrink: 0, mb: 2 }}>
           <Box
             sx={{
@@ -181,11 +169,10 @@ export default function OutcomesPanel({
         </Box>
       )}
 
-      {/* Control Section - Always visible when not in external expanded mode */}
-      {!isExpanded && (
-        <Box sx={{ flexShrink: 0, mb: 1 }}>
-          {/* Expand chart button - always visible when not externally expanded */}
-          <Box sx={{ mb: 1 }}>
+      {/* Control Section, always visible */}
+      <Box sx={{ flexShrink: 0, mb: 1 }}>
+        {/* Expand chart button, always visible */}
+        <Box sx={{ mb: 1 }}>
           <Button
             variant="text"
             onClick={toggleExpandChart}
@@ -218,7 +205,7 @@ export default function OutcomesPanel({
           </Button>
         </Box>
 
-        {/* Chart controls - only show when chart is not expanded */}
+        {/* Chart controls, only show when chart is not expanded */}
         {!expandChart && (
           <Box
             sx={{
@@ -252,8 +239,7 @@ export default function OutcomesPanel({
             />
           </Box>
         )}
-        </Box>
-      )}
+      </Box>
 
       {/* Responsive Chart Visualization */}
       <Box
@@ -269,7 +255,7 @@ export default function OutcomesPanel({
         }}
       >
         <VerticalParallelLinePlot
-          key={`chart-${isExpanded ? 'expanded' : 'normal'}-${expandChart ? 'chart-expanded' : 'chart-normal'}`} // Force re-render on state change
+          key={`chart-${expandChart ? 'expanded' : 'normal'}`} // Force re-render on state change
           data={sampleData}
           axes={axes}
           responsive={true}
