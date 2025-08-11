@@ -249,134 +249,142 @@ const MapControls = ({
             </Box>
           ) : (
             <Box sx={{ position: "relative" }}>
-          <ScenarioCard
+              <ScenarioCard
                 topLine={isFirstCardMinimized ? "" : "CHOOSE SCENARIOS:"}
-                headline={isFirstCardMinimized ? "Scenarios" : "Current Operations Scenario"}
-                body={isFirstCardMinimized ? null : (
-              <ScenarioCardList
-                items={[
-                  "helps us understand how California manages water today",
-                  "serves as a foundation to compare alternative scenarios",
-                ]}
-              />
-                )}
-                bottomLine={isFirstCardMinimized ? null : (
-              <Box
-                onClick={toggleDropdown}
-                sx={{
-                  cursor: "pointer",
-                  userSelect: "none",
-                  transition: "color 0.2s ease",
-                  "&:hover": {
-                    color: (theme) => theme.palette.action.hover,
-                  },
-                }}
-              >
-                Choose alternative scenarios to compare{" "}
-                <span
-                  style={{
-                    fontSize: "0.875em",
-                    lineHeight: 1,
-                    verticalAlign: "baseline",
-                    display: "inline-block",
-                        transform: showDropdown
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
-                >
-                  ▼
-                </span>
-              </Box>
-                )}
-                dropdownContent={isFirstCardMinimized ? undefined : (
-              showDropdown ? (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      // Dynamic height based on active tab
-                      ...(activeTab === 1
-                        ? {
-                            // Outcomes tab: full height
-                            height: "calc(100vh - 200px)",
-                            maxHeight: "600px",
-                            minHeight: "400px",
-                          }
-                        : {
-                            // Presets/operations tabs: auto height based on content
-                            height: "auto",
-                            maxHeight: "none",
-                            minHeight: "auto",
-                          }),
-                    }}
-                  >
-                    {/* Normal view: Tab navigation and content */}
+                headline={
+                  isFirstCardMinimized
+                    ? "Scenarios"
+                    : "Current Operations Scenario"
+                }
+                body={
+                  isFirstCardMinimized ? null : (
+                    <ScenarioCardList
+                      items={[
+                        "helps us understand how California manages water today",
+                        "serves as a foundation to compare alternative scenarios",
+                      ]}
+                    />
+                  )
+                }
+                bottomLine={
+                  isFirstCardMinimized ? null : (
+                    <Box
+                      onClick={toggleDropdown}
+                      sx={{
+                        cursor: "pointer",
+                        userSelect: "none",
+                        transition: "color 0.2s ease",
+                        "&:hover": {
+                          color: (theme) => theme.palette.action.hover,
+                        },
+                      }}
+                    >
+                      Choose alternative scenarios to compare{" "}
+                      <span
+                        style={{
+                          fontSize: "0.875em",
+                          lineHeight: 1,
+                          verticalAlign: "baseline",
+                          display: "inline-block",
+                          transform: showDropdown
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                          transition: "transform 0.2s ease",
+                        }}
+                      >
+                        ▼
+                      </span>
+                    </Box>
+                  )
+                }
+                dropdownContent={
+                  isFirstCardMinimized ? undefined : showDropdown ? (
                     <Box
                       sx={{
                         display: "flex",
-                        alignItems: "baseline",
-                        mb: 2,
-                        flexShrink: 0,
+                        flexDirection: "column",
+                        // Dynamic height based on active tab
+                        ...(activeTab === 1
+                          ? {
+                              // Outcomes tab: full height
+                              height: "calc(100vh - 200px)",
+                              maxHeight: "600px",
+                              minHeight: "400px",
+                            }
+                          : {
+                              // Presets/operations tabs: auto height based on content
+                              height: "auto",
+                              maxHeight: "none",
+                              minHeight: "auto",
+                            }),
                       }}
                     >
-                    <Box
-                      component="span"
-                      sx={{
-                        mr: 2,
-                        fontSize: "0.95rem",
-                        fontWeight: 400,
-                        color: (theme) => theme.palette.text.primary,
-                        flexShrink: 0,
-                      }}
-                    >
-                      Choose scenarios by:
-                    </Box>
-                    <Tabs
-                      value={activeTab}
-                      onChange={handleTabChange}
-                      sx={{ flex: 1 }}
-                    >
-                      <Tab label="Presets" />
-                      <Tab label="Outcomes" />
-                      <Tab label="Operations" />
-                    </Tabs>
-                  </Box>
-
-                    {/* Tab Content - Responsive height allocation */}
-                    {activeTab === 0 && (
-                      <Box sx={{ flexShrink: 0 }}>
-                        <PresetsPanel
-                          onViewOnMap={handleViewOnMap}
-                          onScenarioHover={onScenarioHover}
-                          onScenarioSelect={onScenarioSelect}
-                        />
-                      </Box>
-                    )}
-                    {activeTab === 1 && (
+                      {/* Normal view: Tab navigation and content */}
                       <Box
                         sx={{
-                          flexGrow: 1,
                           display: "flex",
-                          flexDirection: "column",
-                          minHeight: 0,
+                          alignItems: "baseline",
+                          mb: 2,
+                          flexShrink: 0,
                         }}
                       >
-                        <OutcomesPanel onExpandChart={handleChartExpand} />
+                        <Box
+                          component="span"
+                          sx={{
+                            mr: 2,
+                            fontSize: "0.95rem",
+                            fontWeight: 400,
+                            color: (theme) => theme.palette.text.primary,
+                            flexShrink: 0,
+                          }}
+                        >
+                          Choose scenarios by:
+                        </Box>
+                        <Tabs
+                          value={activeTab}
+                          onChange={handleTabChange}
+                          sx={{ flex: 1 }}
+                        >
+                          <Tab label="Presets" />
+                          <Tab label="Outcomes" />
+                          <Tab label="Operations" />
+                        </Tabs>
                       </Box>
-                    )}
-                    {activeTab === 2 && (
-                      <Box sx={{ flexShrink: 0 }}>
-                        <OperationsPanel />
-                      </Box>
-                    )}
-                </Box>
-              ) : undefined
-              )}
-            sx={{
+
+                      {/* Tab Content - Responsive height allocation */}
+                      {activeTab === 0 && (
+                        <Box sx={{ flexShrink: 0 }}>
+                          <PresetsPanel
+                            onViewOnMap={handleViewOnMap}
+                            onScenarioHover={onScenarioHover}
+                            onScenarioSelect={onScenarioSelect}
+                          />
+                        </Box>
+                      )}
+                      {activeTab === 1 && (
+                        <Box
+                          sx={{
+                            flexGrow: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            minHeight: 0,
+                          }}
+                        >
+                          <OutcomesPanel onExpandChart={handleChartExpand} />
+                        </Box>
+                      )}
+                      {activeTab === 2 && (
+                        <Box sx={{ flexShrink: 0 }}>
+                          <OperationsPanel />
+                        </Box>
+                      )}
+                    </Box>
+                  ) : undefined
+                }
+                sx={{
                   opacity: isFirstCardMinimized ? 0.8 : 1,
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
+                  backdropFilter: "blur(10px)",
+                  pointerEvents: "auto",
                 }}
               />
               <Box
@@ -407,15 +415,17 @@ const MapControls = ({
                   },
                 }}
               >
-                <svg 
-                  width="12" 
-                  height="10" 
-                  viewBox="0 0 12 10" 
-                  style={{ 
-                    fill: '#3a4574',
-                    transition: 'transform 0.2s ease',
-                    transform: isFirstCardMinimized ? 'rotate(0deg)' : 'rotate(180deg)',
-                    pointerEvents: 'none'
+                <svg
+                  width="12"
+                  height="10"
+                  viewBox="0 0 12 10"
+                  style={{
+                    fill: "#3a4574",
+                    transition: "transform 0.2s ease",
+                    transform: isFirstCardMinimized
+                      ? "rotate(0deg)"
+                      : "rotate(180deg)",
+                    pointerEvents: "none",
                   }}
                 >
                   <path d="M6 0 L11 8 Q6 6 1 8 Z" />
@@ -433,84 +443,86 @@ const MapControls = ({
               topLine={isSecondCardMinimized ? "" : "CHOOSE A REGION:"}
               headline={isSecondCardMinimized ? "Region" : "Central Valley"}
               body={null} // No list for this card
-              bottomLine={isSecondCardMinimized ? null : (
-                <Box
-                  onClick={toggleRegionDropdown}
-                  sx={{
-                    cursor: "pointer",
-                    userSelect: "none",
-                    transition: "color 0.2s ease",
-                    "&:hover": {
-                      color: (theme) => theme.palette.action.hover,
-                    },
-                  }}
-                >
-                  Choose a different region{" "}
-                  <span
-                    style={{
-                      fontSize: "0.875em",
-                      lineHeight: 1,
-                      verticalAlign: "baseline",
-                      display: "inline-block",
-                      transform: showRegionDropdown
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
+              bottomLine={
+                isSecondCardMinimized ? null : (
+                  <Box
+                    onClick={toggleRegionDropdown}
+                    sx={{
+                      cursor: "pointer",
+                      userSelect: "none",
+                      transition: "color 0.2s ease",
+                      "&:hover": {
+                        color: (theme) => theme.palette.action.hover,
+                      },
                     }}
                   >
-                    ▼
-                  </span>
-                </Box>
-              )}
-              dropdownContent={isSecondCardMinimized ? undefined : (
-              showRegionDropdown ? (
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: 1,
-                    p: 2,
-                  }}
-                >
-                  <FormControlLabel
-                    control={<Checkbox size="small" />}
-                    label="Sacramento Valley"
-                  />
-                  <FormControlLabel
-                    control={<Checkbox size="small" />}
-                    label="San Joaquin Valley"
-                  />
-                  <FormControlLabel
-                    control={<Checkbox size="small" />}
-                    label="Delta"
-                  />
-                  <FormControlLabel
-                    control={<Checkbox size="small" />}
-                    label="Tulare Basin"
-                  />
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        size="small"
-                        checked={
-                          isDrawingCustomRegion || polygonPoints.length > 0
-                        }
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            handleSelectRegionOnMapClick()
-                          } else {
-                            onClearCustomRegion()
+                    Choose a different region{" "}
+                    <span
+                      style={{
+                        fontSize: "0.875em",
+                        lineHeight: 1,
+                        verticalAlign: "baseline",
+                        display: "inline-block",
+                        transform: showRegionDropdown
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "transform 0.2s ease",
+                      }}
+                    >
+                      ▼
+                    </span>
+                  </Box>
+                )
+              }
+              dropdownContent={
+                isSecondCardMinimized ? undefined : showRegionDropdown ? (
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 1,
+                      p: 2,
+                    }}
+                  >
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="Sacramento Valley"
+                    />
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="San Joaquin Valley"
+                    />
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="Delta"
+                    />
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      label="Tulare Basin"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={
+                            isDrawingCustomRegion || polygonPoints.length > 0
                           }
-                        }}
-                      />
-                    }
-                    label="Select region on map"
-                    sx={{ gridColumn: "1 / -1" }} // Span full width
-                  />
-                </Box>
-              ) : undefined
-              )}
-              sx={{ 
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              handleSelectRegionOnMapClick()
+                            } else {
+                              onClearCustomRegion()
+                            }
+                          }}
+                        />
+                      }
+                      label="Select region on map"
+                      sx={{ gridColumn: "1 / -1" }} // Span full width
+                    />
+                  </Box>
+                ) : undefined
+              }
+              sx={{
                 opacity: isSecondCardMinimized ? 0.8 : 1,
                 backdropFilter: "blur(10px)",
                 pointerEvents: "auto",
@@ -544,15 +556,17 @@ const MapControls = ({
                 },
               }}
             >
-              <svg 
-                width="12" 
-                height="10" 
-                viewBox="0 0 12 10" 
-                style={{ 
-                  fill: '#3a4574',
-                  transition: 'transform 0.2s ease',
-                  transform: isSecondCardMinimized ? 'rotate(0deg)' : 'rotate(180deg)',
-                  pointerEvents: 'none'
+              <svg
+                width="12"
+                height="10"
+                viewBox="0 0 12 10"
+                style={{
+                  fill: "#3a4574",
+                  transition: "transform 0.2s ease",
+                  transform: isSecondCardMinimized
+                    ? "rotate(0deg)"
+                    : "rotate(180deg)",
+                  pointerEvents: "none",
                 }}
               >
                 <path d="M6 0 L11 8 Q6 6 1 8 Z" />
@@ -681,287 +695,310 @@ const MapControls = ({
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Dynamic Scenario Panel */}
           <Box sx={{ position: "relative" }}>
-          <ScenarioCard
+            <ScenarioCard
               topLine={isThirdCardMinimized ? "" : "SCENARIO PREVIEW"}
               headline={
-                isThirdCardMinimized 
-                  ? "Preview" 
-                  : previewPanelTab === 0 
-                    ? "Snapshot" 
+                isThirdCardMinimized
+                  ? "Preview"
+                  : previewPanelTab === 0
+                    ? "Snapshot"
                     : "Selected Scenarios"
               }
               body={null}
-            sx={{
+              sx={{
                 opacity: isThirdCardMinimized ? 0.8 : 1,
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
-            }}
-              dropdownContent={isThirdCardMinimized ? undefined : (
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    height: "100%",
-                  }}
-                >
-                {/* Mode Selection Tabs */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "baseline",
-                    mb: 2,
-                    flexShrink: 0,
-                  }}
-                >
-                  <Tabs
-                    value={previewPanelTab}
-                    onChange={(_, value) => onPreviewTabChange(value)}
-                    sx={{ flex: 1 }}
+                backdropFilter: "blur(10px)",
+                pointerEvents: "auto",
+              }}
+              dropdownContent={
+                isThirdCardMinimized ? undefined : (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      height: "100%",
+                    }}
                   >
-                    <Tab label="Snapshot" />
-                    <Tab label="Selected scenarios" />
-                  </Tabs>
-                </Box>
-
-                {/* Tab Content */}
-                <Box
-                  sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}
-                >
-                  {/* Snapshot Tab */}
-                  {previewPanelTab === 0 && (
-                    <Box sx={{ p: 2 }}>
-                      <Box
-            sx={{
-                          mb: 2,
-                          fontSize: "0.9rem",
-                          color: (theme) => theme.palette.text.secondary,
-                          textAlign: "center",
-                          fontStyle: "italic",
-                        }}
+                    {/* Mode Selection Tabs */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "baseline",
+                        mb: 2,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Tabs
+                        value={previewPanelTab}
+                        onChange={(_, value) => onPreviewTabChange(value)}
+                        sx={{ flex: 1 }}
                       >
-                        Hover over scenarios to see snapshot
-                      </Box>
-
-                      {/* Dynamic snapshot content */}
-                      <Box
-            sx={{
-                          border: hoveredScenario ? "2px solid" : "2px dashed",
-                          borderColor: hoveredScenario
-                            ? (theme) => theme.palette.blue.bright
-                            : (theme) => theme.palette.grey[300],
-                          borderRadius: (theme) => theme.borderRadius.rounded,
-                          p: 3,
-                          textAlign: "center",
-                          minHeight: "200px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexDirection: "column",
-                          gap: 1,
-                          backgroundColor: hoveredScenario
-                            ? (theme) => `${theme.palette.blue.bright}10`
-                            : "transparent",
-                        }}
-                      >
-                        {hoveredScenario ? (
-                          <>
-                            <Box
-                              sx={{
-                                fontSize: "1rem",
-                                fontWeight: 500,
-                                color: (theme) => theme.palette.text.primary,
-                              }}
-                            >
-                              {hoveredScenario}
-                            </Box>
-                            <Box
-                              sx={{
-                                fontSize: "0.85rem",
-                                color: (theme) => theme.palette.text.secondary,
-                                mb: 2,
-                              }}
-                            >
-                              Scenario Results Snapshot
-                            </Box>
-                            <Box
-                              sx={{
-                                fontSize: "0.75rem",
-                                color: (theme) => theme.palette.text.disabled,
-                              }}
-                            >
-                              [Visualization will appear here]
-                            </Box>
-                          </>
-                        ) : (
-                          <>
-                            <Box
-                              sx={{
-                                fontSize: "0.85rem",
-                                color: (theme) => theme.palette.text.secondary,
-                              }}
-                            >
-                              No scenario hovered
-                            </Box>
-                            <Box
-                              sx={{
-                                fontSize: "0.75rem",
-                                color: (theme) => theme.palette.text.disabled,
-                              }}
-                            >
-                              Snapshot will appear here when you hover over
-                              scenarios
-                            </Box>
-                          </>
-                        )}
-                      </Box>
+                        <Tab label="Snapshot" />
+                        <Tab label="Selected scenarios" />
+                      </Tabs>
                     </Box>
-                  )}
 
-                  {/* Selected Tab - Shopping Cart */}
-                  {previewPanelTab === 1 && (
-                    <Box sx={{ p: 2 }}>
-                      {/* Selected Region */}
-                      <Box
-                        sx={{
-                          mb: 3,
-                          p: 2,
-                          backgroundColor: (theme) => theme.palette.grey[50],
-                          borderRadius: (theme) => theme.borderRadius.rounded,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            fontSize: "0.8rem",
-                            color: (theme) => theme.palette.text.secondary,
-                            mb: 0.5,
-                          }}
-                        >
-                          Region:
-                        </Box>
-                        <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-                          {selectedRegion}
-                        </Box>
-                      </Box>
-
-                      {/* Selected scenarios */}
-                      <Box sx={{ mb: 2 }}>
-                        <Box
-                          sx={{
-                            fontSize: "0.8rem",
-                            color: (theme) => theme.palette.text.secondary,
-                            mb: 1,
-                          }}
-                        >
-                          Scenarios ({selectedScenarios.length}):
-                        </Box>
-                        {selectedScenarios.length > 0 ? (
-                          selectedScenarios.map((scenario, index) => (
-                            <Box
-                              key={index}
-                              sx={{
-                                p: 1.5,
-                                mb: 1,
-                                backgroundColor: (theme) =>
-                                  theme.palette.blue.bright + "20",
-                                borderRadius: (theme) =>
-                                  theme.borderRadius.rounded,
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <Box sx={{ fontSize: "0.85rem" }}>{scenario}</Box>
-                              <Box
-                                sx={{
-                                  cursor: "pointer",
-                                  color: (theme) =>
-                                    theme.palette.text.secondary,
-                                  "&:hover": {
-                                    color: (theme) => theme.palette.error.main,
-                                  },
-                                }}
-                                onClick={() => {
-                                  onScenarioSelect(scenario) // This will toggle it off
-                                }}
-                              >
-                                ×
-                              </Box>
-                            </Box>
-                          ))
-                        ) : (
+                    {/* Tab Content */}
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                    >
+                      {/* Snapshot Tab */}
+                      {previewPanelTab === 0 && (
+                        <Box sx={{ p: 2 }}>
                           <Box
                             sx={{
-                              fontSize: "0.8rem",
-                              color: (theme) => theme.palette.text.disabled,
-                              fontStyle: "italic",
+                              mb: 2,
+                              fontSize: "0.9rem",
+                              color: (theme) => theme.palette.text.secondary,
                               textAlign: "center",
-                              p: 2,
+                              fontStyle: "italic",
                             }}
                           >
-                            No scenarios selected yet
+                            Hover over scenarios to see snapshot
+                          </Box>
+
+                          {/* Dynamic snapshot content */}
+                          <Box
+                            sx={{
+                              border: hoveredScenario
+                                ? "2px solid"
+                                : "2px dashed",
+                              borderColor: hoveredScenario
+                                ? (theme) => theme.palette.blue.bright
+                                : (theme) => theme.palette.grey[300],
+                              borderRadius: (theme) =>
+                                theme.borderRadius.rounded,
+                              p: 3,
+                              textAlign: "center",
+                              minHeight: "200px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexDirection: "column",
+                              gap: 1,
+                              backgroundColor: hoveredScenario
+                                ? (theme) => `${theme.palette.blue.bright}10`
+                                : "transparent",
+                            }}
+                          >
+                            {hoveredScenario ? (
+                              <>
+                                <Box
+                                  sx={{
+                                    fontSize: "1rem",
+                                    fontWeight: 500,
+                                    color: (theme) =>
+                                      theme.palette.text.primary,
+                                  }}
+                                >
+                                  {hoveredScenario}
+                                </Box>
+                                <Box
+                                  sx={{
+                                    fontSize: "0.85rem",
+                                    color: (theme) =>
+                                      theme.palette.text.secondary,
+                                    mb: 2,
+                                  }}
+                                >
+                                  Scenario Results Snapshot
+                                </Box>
+                                <Box
+                                  sx={{
+                                    fontSize: "0.75rem",
+                                    color: (theme) =>
+                                      theme.palette.text.disabled,
+                                  }}
+                                >
+                                  [Visualization will appear here]
+                                </Box>
+                              </>
+                            ) : (
+                              <>
+                                <Box
+                                  sx={{
+                                    fontSize: "0.85rem",
+                                    color: (theme) =>
+                                      theme.palette.text.secondary,
+                                  }}
+                                >
+                                  No scenario hovered
+                                </Box>
+                                <Box
+                                  sx={{
+                                    fontSize: "0.75rem",
+                                    color: (theme) =>
+                                      theme.palette.text.disabled,
+                                  }}
+                                >
+                                  Snapshot will appear here when you hover over
+                                  scenarios
+                                </Box>
+                              </>
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Selected Tab - Shopping Cart */}
+                      {previewPanelTab === 1 && (
+                        <Box sx={{ p: 2 }}>
+                          {/* Selected Region */}
+                          <Box
+                            sx={{
+                              mb: 3,
+                              p: 2,
+                              backgroundColor: (theme) =>
+                                theme.palette.grey[50],
+                              borderRadius: (theme) =>
+                                theme.borderRadius.rounded,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                fontSize: "0.8rem",
+                                color: (theme) => theme.palette.text.secondary,
+                                mb: 0.5,
+                              }}
+                            >
+                              Region:
+                            </Box>
+                            <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
+                              {selectedRegion}
+                            </Box>
+                          </Box>
+
+                          {/* Selected scenarios */}
+                          <Box sx={{ mb: 2 }}>
+                            <Box
+                              sx={{
+                                fontSize: "0.8rem",
+                                color: (theme) => theme.palette.text.secondary,
+                                mb: 1,
+                              }}
+                            >
+                              Scenarios ({selectedScenarios.length}):
+                            </Box>
+                            {selectedScenarios.length > 0 ? (
+                              selectedScenarios.map((scenario, index) => (
+                                <Box
+                                  key={index}
+                                  sx={{
+                                    p: 1.5,
+                                    mb: 1,
+                                    backgroundColor: (theme) =>
+                                      theme.palette.blue.bright + "20",
+                                    borderRadius: (theme) =>
+                                      theme.borderRadius.rounded,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <Box sx={{ fontSize: "0.85rem" }}>
+                                    {scenario}
+                                  </Box>
+                                  <Box
+                                    sx={{
+                                      cursor: "pointer",
+                                      color: (theme) =>
+                                        theme.palette.text.secondary,
+                                      "&:hover": {
+                                        color: (theme) =>
+                                          theme.palette.error.main,
+                                      },
+                                    }}
+                                    onClick={() => {
+                                      onScenarioSelect(scenario) // This will toggle it off
+                                    }}
+                                  >
+                                    ×
+                                  </Box>
+                                </Box>
+                              ))
+                            ) : (
+                              <Box
+                                sx={{
+                                  fontSize: "0.8rem",
+                                  color: (theme) => theme.palette.text.disabled,
+                                  fontStyle: "italic",
+                                  textAlign: "center",
+                                  p: 2,
+                                }}
+                              >
+                                No scenarios selected yet
+                              </Box>
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Compare Button at bottom */}
+                    <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
+                      <Box
+                        sx={{
+                          p: 2,
+                          backgroundColor:
+                            selectedScenarios.length > 0
+                              ? (theme) => theme.palette.blue.bright
+                              : (theme) => theme.palette.grey[200],
+                          color:
+                            selectedScenarios.length > 0
+                              ? "white"
+                              : (theme) => theme.palette.text.disabled,
+                          borderRadius: (theme) => theme.borderRadius.card,
+                          textAlign: "center",
+                          cursor:
+                            selectedScenarios.length > 0
+                              ? "pointer"
+                              : "not-allowed",
+                          transition: "all 0.2s ease",
+                          "&:hover":
+                            selectedScenarios.length > 0
+                              ? {
+                                  backgroundColor: (theme) =>
+                                    theme.palette.blue.dark,
+                                }
+                              : {},
+                        }}
+                        onClick={() => {
+                          if (selectedScenarios.length > 0) {
+                            console.log(
+                              "Navigate to exploration view with:",
+                              selectedScenarios,
+                              selectedRegion,
+                            )
+                          }
+                        }}
+                      >
+                        <Box sx={{ fontSize: "0.95rem", fontWeight: 500 }}>
+                          Explore scenarios in depth
+                        </Box>
+                        {selectedScenarios.length > 0 ? (
+                          <Box
+                            sx={{ fontSize: "0.75rem", opacity: 0.9, mt: 0.5 }}
+                          >
+                            {selectedScenarios.length} scenario
+                            {selectedScenarios.length > 1 ? "s" : ""} for{" "}
+                            {selectedRegion}
+                          </Box>
+                        ) : (
+                          <Box
+                            sx={{ fontSize: "0.75rem", opacity: 0.7, mt: 0.5 }}
+                          >
+                            Select scenarios to explore
                           </Box>
                         )}
                       </Box>
                     </Box>
-                  )}
-                </Box>
-
-                {/* Compare Button at bottom */}
-                <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                  <Box
-                    sx={{
-                      p: 2,
-                      backgroundColor:
-                        selectedScenarios.length > 0
-                          ? (theme) => theme.palette.blue.bright
-                          : (theme) => theme.palette.grey[200],
-                      color:
-                        selectedScenarios.length > 0
-                          ? "white"
-                          : (theme) => theme.palette.text.disabled,
-                      borderRadius: (theme) => theme.borderRadius.card,
-                      textAlign: "center",
-                      cursor:
-                        selectedScenarios.length > 0
-                          ? "pointer"
-                          : "not-allowed",
-                      transition: "all 0.2s ease",
-                      "&:hover":
-                        selectedScenarios.length > 0
-                          ? {
-                              backgroundColor: (theme) =>
-                                theme.palette.blue.dark,
-                            }
-                          : {},
-                    }}
-                    onClick={() => {
-                      if (selectedScenarios.length > 0) {
-                        console.log(
-                          "Navigate to exploration view with:",
-                          selectedScenarios,
-                          selectedRegion,
-                        )
-                      }
-                    }}
-                  >
-                    <Box sx={{ fontSize: "0.95rem", fontWeight: 500 }}>
-                      Explore scenarios in depth
-                    </Box>
-                    {selectedScenarios.length > 0 ? (
-                      <Box sx={{ fontSize: "0.75rem", opacity: 0.9, mt: 0.5 }}>
-                        {selectedScenarios.length} scenario
-                        {selectedScenarios.length > 1 ? "s" : ""} for{" "}
-                        {selectedRegion}
-                      </Box>
-                    ) : (
-                      <Box sx={{ fontSize: "0.75rem", opacity: 0.7, mt: 0.5 }}>
-                        Select scenarios to explore
-                      </Box>
-                    )}
                   </Box>
-                </Box>
-              </Box>
-              )}
+                )
+              }
             />
             <Box
               onClick={(e) => {
@@ -991,15 +1028,17 @@ const MapControls = ({
                 },
               }}
             >
-              <svg 
-                width="12" 
-                height="10" 
-                viewBox="0 0 12 10" 
-                style={{ 
-                  fill: '#3a4574',
-                  transition: 'transform 0.2s ease',
-                  transform: isThirdCardMinimized ? 'rotate(0deg)' : 'rotate(180deg)',
-                  pointerEvents: 'none'
+              <svg
+                width="12"
+                height="10"
+                viewBox="0 0 12 10"
+                style={{
+                  fill: "#3a4574",
+                  transition: "transform 0.2s ease",
+                  transform: isThirdCardMinimized
+                    ? "rotate(0deg)"
+                    : "rotate(180deg)",
+                  pointerEvents: "none",
                 }}
               >
                 <path d="M6 0 L11 8 Q6 6 1 8 Z" />
