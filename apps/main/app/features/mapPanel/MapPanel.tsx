@@ -25,6 +25,7 @@ import {
   OperationsPanel,
 } from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
+// Using text-based arrows to match existing dropdown arrows
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -74,6 +75,11 @@ const MapControls = ({
   const [activeTab, setActiveTab] = useState(0)
   const [isChartExpanded, setIsChartExpanded] = useState(false)
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
+
+  // Card minimize/maximize states
+  const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
+  const [isSecondCardMinimized, setIsSecondCardMinimized] = useState(false)
+  const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -242,48 +248,49 @@ const MapControls = ({
               </Box>
             </Box>
           ) : (
-            <ScenarioCard
-              topLine="CHOOSE SCENARIOS:"
-              headline="Current Operations Scenario"
-              body={
-                <ScenarioCardList
-                  items={[
-                    "helps us understand how California manages water today",
-                    "serves as a foundation to compare alternative scenarios",
-                  ]}
-                />
-              }
-              bottomLine={
-                <Box
-                  onClick={toggleDropdown}
-                  sx={{
-                    cursor: "pointer",
-                    userSelect: "none",
-                    transition: "color 0.2s ease",
-                    "&:hover": {
-                      color: (theme) => theme.palette.action.hover,
-                    },
+            <Box sx={{ position: "relative" }}>
+          <ScenarioCard
+                topLine={isFirstCardMinimized ? "" : "CHOOSE SCENARIOS:"}
+                headline={isFirstCardMinimized ? "Scenarios" : "Current Operations Scenario"}
+                body={isFirstCardMinimized ? null : (
+              <ScenarioCardList
+                items={[
+                  "helps us understand how California manages water today",
+                  "serves as a foundation to compare alternative scenarios",
+                ]}
+              />
+                )}
+                bottomLine={isFirstCardMinimized ? null : (
+              <Box
+                onClick={toggleDropdown}
+                sx={{
+                  cursor: "pointer",
+                  userSelect: "none",
+                  transition: "color 0.2s ease",
+                  "&:hover": {
+                    color: (theme) => theme.palette.action.hover,
+                  },
+                }}
+              >
+                Choose alternative scenarios to compare{" "}
+                <span
+                  style={{
+                    fontSize: "0.875em",
+                    lineHeight: 1,
+                    verticalAlign: "baseline",
+                    display: "inline-block",
+                        transform: showDropdown
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
                   }}
                 >
-                  Choose alternative scenarios to compare{" "}
-                  <span
-                    style={{
-                      fontSize: "0.875em",
-                      lineHeight: 1,
-                      verticalAlign: "baseline",
-                      display: "inline-block",
-                      transform: showDropdown
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "transform 0.2s ease",
-                    }}
-                  >
-                    ▼
-                  </span>
-                </Box>
-              }
-              dropdownContent={
-                showDropdown ? (
+                  ▼
+                </span>
+              </Box>
+                )}
+                dropdownContent={isFirstCardMinimized ? undefined : (
+              showDropdown ? (
                   <Box
                     sx={{
                       display: "flex",
@@ -313,28 +320,28 @@ const MapControls = ({
                         flexShrink: 0,
                       }}
                     >
-                      <Box
-                        component="span"
-                        sx={{
-                          mr: 2,
-                          fontSize: "0.95rem",
-                          fontWeight: 400,
-                          color: (theme) => theme.palette.text.primary,
-                          flexShrink: 0,
-                        }}
-                      >
-                        Choose scenarios by:
-                      </Box>
-                      <Tabs
-                        value={activeTab}
-                        onChange={handleTabChange}
-                        sx={{ flex: 1 }}
-                      >
-                        <Tab label="Presets" />
-                        <Tab label="Outcomes" />
-                        <Tab label="Operations" />
-                      </Tabs>
+                    <Box
+                      component="span"
+                      sx={{
+                        mr: 2,
+                        fontSize: "0.95rem",
+                        fontWeight: 400,
+                        color: (theme) => theme.palette.text.primary,
+                        flexShrink: 0,
+                      }}
+                    >
+                      Choose scenarios by:
                     </Box>
+                    <Tabs
+                      value={activeTab}
+                      onChange={handleTabChange}
+                      sx={{ flex: 1 }}
+                    >
+                      <Tab label="Presets" />
+                      <Tab label="Outcomes" />
+                      <Tab label="Operations" />
+                    </Tabs>
+                  </Box>
 
                     {/* Tab Content - Responsive height allocation */}
                     {activeTab === 0 && (
@@ -363,54 +370,99 @@ const MapControls = ({
                         <OperationsPanel />
                       </Box>
                     )}
-                  </Box>
-                ) : undefined
-              }
-              sx={{
-                backdropFilter: "blur(10px)",
-                pointerEvents: "auto",
-              }}
-            />
+                </Box>
+              ) : undefined
+              )}
+            sx={{
+                  opacity: isFirstCardMinimized ? 0.8 : 1,
+              backdropFilter: "blur(10px)",
+              pointerEvents: "auto",
+                }}
+              />
+              <Box
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  setIsFirstCardMinimized(!isFirstCardMinimized)
+                }}
+                sx={{
+                  position: "absolute",
+                  top: "8px",
+                  right: "8px",
+                  width: "24px",
+                  height: "24px",
+                  backgroundColor: (theme) => theme.palette.common.white,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  zIndex: 9999,
+                  pointerEvents: "auto",
+                  "&:hover": {
+                    backgroundColor: (theme) => theme.palette.grey[50],
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                  },
+                }}
+              >
+                <svg 
+                  width="12" 
+                  height="10" 
+                  viewBox="0 0 12 10" 
+                  style={{ 
+                    fill: '#3a4574',
+                    transition: 'transform 0.2s ease',
+                    transform: isFirstCardMinimized ? 'rotate(0deg)' : 'rotate(180deg)',
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+                </svg>
+              </Box>
+            </Box>
           )}
         </Box>
 
         {/* Center Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Region Selection Card */}
-          <ScenarioCard
-            topLine="CHOOSE A REGION:"
-            headline="Central Valley"
-            body={null} // No list for this card
-            bottomLine={
-              <Box
-                onClick={toggleRegionDropdown}
-                sx={{
-                  cursor: "pointer",
-                  userSelect: "none",
-                  transition: "color 0.2s ease",
-                  "&:hover": {
-                    color: (theme) => theme.palette.action.hover,
-                  },
-                }}
-              >
-                Choose a different region{" "}
-                <span
-                  style={{
-                    fontSize: "0.875em",
-                    lineHeight: 1,
-                    verticalAlign: "baseline",
-                    display: "inline-block",
-                    transform: showRegionDropdown
-                      ? "rotate(180deg)"
-                      : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
+          <Box sx={{ position: "relative" }}>
+            <ScenarioCard
+              topLine={isSecondCardMinimized ? "" : "CHOOSE A REGION:"}
+              headline={isSecondCardMinimized ? "Region" : "Central Valley"}
+              body={null} // No list for this card
+              bottomLine={isSecondCardMinimized ? null : (
+                <Box
+                  onClick={toggleRegionDropdown}
+                  sx={{
+                    cursor: "pointer",
+                    userSelect: "none",
+                    transition: "color 0.2s ease",
+                    "&:hover": {
+                      color: (theme) => theme.palette.action.hover,
+                    },
                   }}
                 >
-                  ▼
-                </span>
-              </Box>
-            }
-            dropdownContent={
+                  Choose a different region{" "}
+                  <span
+                    style={{
+                      fontSize: "0.875em",
+                      lineHeight: 1,
+                      verticalAlign: "baseline",
+                      display: "inline-block",
+                      transform: showRegionDropdown
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                      transition: "transform 0.2s ease",
+                    }}
+                  >
+                    ▼
+                  </span>
+                </Box>
+              )}
+              dropdownContent={isSecondCardMinimized ? undefined : (
               showRegionDropdown ? (
                 <Box
                   sx={{
@@ -457,12 +509,56 @@ const MapControls = ({
                   />
                 </Box>
               ) : undefined
-            }
-            sx={{
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
-            }}
-          />
+              )}
+              sx={{ 
+                opacity: isSecondCardMinimized ? 0.8 : 1,
+                backdropFilter: "blur(10px)",
+                pointerEvents: "auto",
+              }}
+            />
+            <Box
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setIsSecondCardMinimized(!isSecondCardMinimized)
+              }}
+              sx={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "24px",
+                height: "24px",
+                backgroundColor: (theme) => theme.palette.common.white,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                zIndex: 9999,
+                pointerEvents: "auto",
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.grey[50],
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <svg 
+                width="12" 
+                height="10" 
+                viewBox="0 0 12 10" 
+                style={{ 
+                  fill: '#3a4574',
+                  transition: 'transform 0.2s ease',
+                  transform: isSecondCardMinimized ? 'rotate(0deg)' : 'rotate(180deg)',
+                  pointerEvents: 'none'
+                }}
+              >
+                <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+              </svg>
+            </Box>
+          </Box>
 
           {/* Search Interface */}
           {/* <Card
@@ -584,22 +680,30 @@ const MapControls = ({
         {/* Right Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {/* Dynamic Scenario Panel */}
+          <Box sx={{ position: "relative" }}>
           <ScenarioCard
-            topLine="SCENARIO PREVIEW"
-            headline={previewPanelTab === 0 ? "Snapshot" : "Selected Scenarios"}
-            body={null}
+              topLine={isThirdCardMinimized ? "" : "SCENARIO PREVIEW"}
+              headline={
+                isThirdCardMinimized 
+                  ? "Preview" 
+                  : previewPanelTab === 0 
+                    ? "Snapshot" 
+                    : "Selected Scenarios"
+              }
+              body={null}
             sx={{
+                opacity: isThirdCardMinimized ? 0.8 : 1,
               backdropFilter: "blur(10px)",
               pointerEvents: "auto",
             }}
-            dropdownContent={
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                }}
-              >
+              dropdownContent={isThirdCardMinimized ? undefined : (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                  }}
+                >
                 {/* Mode Selection Tabs */}
                 <Box
                   sx={{
@@ -627,7 +731,7 @@ const MapControls = ({
                   {previewPanelTab === 0 && (
                     <Box sx={{ p: 2 }}>
                       <Box
-                        sx={{
+            sx={{
                           mb: 2,
                           fontSize: "0.9rem",
                           color: (theme) => theme.palette.text.secondary,
@@ -640,7 +744,7 @@ const MapControls = ({
 
                       {/* Dynamic snapshot content */}
                       <Box
-                        sx={{
+            sx={{
                           border: hoveredScenario ? "2px solid" : "2px dashed",
                           borderColor: hoveredScenario
                             ? (theme) => theme.palette.blue.bright
@@ -857,8 +961,51 @@ const MapControls = ({
                   </Box>
                 </Box>
               </Box>
-            }
-          />
+              )}
+            />
+            <Box
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setIsThirdCardMinimized(!isThirdCardMinimized)
+              }}
+              sx={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "24px",
+                height: "24px",
+                backgroundColor: (theme) => theme.palette.common.white,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                zIndex: 9999,
+                pointerEvents: "auto",
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.grey[50],
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <svg 
+                width="12" 
+                height="10" 
+                viewBox="0 0 12 10" 
+                style={{ 
+                  fill: '#3a4574',
+                  transition: 'transform 0.2s ease',
+                  transform: isThirdCardMinimized ? 'rotate(0deg)' : 'rotate(180deg)',
+                  pointerEvents: 'none'
+                }}
+              >
+                <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+              </svg>
+            </Box>
+          </Box>
 
           {/* Quick Actions at bottom */}
           <Box
