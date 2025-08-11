@@ -74,7 +74,6 @@ const MapControls = ({
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
 
-
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
   // Card minimize/maximize states
@@ -116,10 +115,6 @@ const MapControls = ({
     })
   }
 
-
-
-
-
   const toggleRegionDropdown = () => {
     setShowRegionDropdown(!showRegionDropdown)
   }
@@ -152,7 +147,14 @@ const MapControls = ({
         }}
       >
         {/* Left Column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            height: "100%",
+          }}
+        >
           {/* Scenario Card - height depends on active tab */}
           {activeTab === 1 ? (
             /* Outcomes: 100% height container */

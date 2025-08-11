@@ -255,7 +255,7 @@ export default function OutcomesPanel() {
         }}
       >
         <VerticalParallelLinePlot
-          key={`chart-${expandChart ? 'expanded' : 'normal'}`} // Force re-render on state change
+          key={`chart-${expandChart ? "expanded" : "normal"}`} // Force re-render on state change
           data={sampleData}
           axes={axes}
           responsive={true}
