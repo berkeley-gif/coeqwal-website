@@ -22,6 +22,7 @@ export interface VerticalParallelLinePlotProps {
     highlighted: string
     background: string
   }
+  lineColors?: string[] // Array of colors for individual lines
   showBaseline?: boolean
   baselineData?: VerticalParallelLineData
   onLineHover?: (data: VerticalParallelLineData | null) => void
@@ -41,6 +42,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     highlighted: "#ff7f0e",
     background: "#f8f9fa",
   },
+  lineColors = [], // Default to empty array
   showBaseline = false,
   baselineData,
   onLineHover,
@@ -212,9 +214,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         return line(points)
       })
       .attr("fill", "none")
-      .attr("stroke", (d) =>
-        d.highlighted ? colors.highlighted : colors.default,
-      )
+      .attr("stroke", (d, i) => {
+        if (d.highlighted) return colors.highlighted
+        return lineColors.length > i ? lineColors[i]! : colors.default
+      })
       .attr("stroke-width", (d) => (d.highlighted ? 2.5 : 1.5))
       .attr("opacity", (d) => (d.highlighted ? 0.9 : 0.6))
       .style("cursor", "pointer")
@@ -237,13 +240,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       })
 
     // Draw circles at all intersection points
-    data.forEach((d) => {
+    data.forEach((d, dataIndex) => {
       axes.forEach((axis) => {
         g.append("circle")
           .attr("cx", scales[axis]?.(d.values[axis] || 0) ?? 0) // Value position on horizontal axis
           .attr("cy", yScale(axis)!) // Axis position vertically
           .attr("r", d.highlighted ? 4 : 3) // Larger circles for highlighted lines
-          .attr("fill", d.highlighted ? colors.highlighted : colors.default)
+          .attr("fill", () => {
+            if (d.highlighted) return colors.highlighted
+            return lineColors.length > dataIndex
+              ? lineColors[dataIndex]!
+              : colors.default
+          })
           .attr("stroke", "white")
           .attr("stroke-width", 1.5)
           .style("cursor", "pointer")
@@ -280,6 +288,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     currentHeight,
     margin,
     colors,
+    lineColors,
     showBaseline,
     baselineData,
     title,
