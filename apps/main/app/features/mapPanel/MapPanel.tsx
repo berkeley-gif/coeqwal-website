@@ -876,12 +876,12 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               }}
               sx={{
                 fontSize: "0.8rem",
-                color: "#ffd87e", // Use theme accent gold for visibility
+                color: (theme) => theme.palette.blue.bright, // Match blue links in cards
                 cursor: "pointer",
-                textDecoration: "underline",
+                fontWeight: "bold",
+                textDecoration: "none",
                 "&:hover": {
-                  color: "white",
-                  opacity: 0.8,
+                  color: (theme) => theme.palette.blue.light,
                 },
               }}
             >
