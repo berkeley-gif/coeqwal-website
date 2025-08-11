@@ -35,7 +35,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   responsive = true,
   width = 400, // Default
   height = 400, // Default height
-  margin = { top: 40, right: 20, bottom: 50, left: 100 }, 
+  margin = { top: 40, right: 20, bottom: 50, left: 100 },
   colors = {
     default: "#1f77b4",
     highlighted: "#ff7f0e",
@@ -111,7 +111,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     // Draw horizontal axes
     axes.forEach((axis) => {
       const yPos = yScale(axis)!
-      
+
       // Horizontal axis line
       g.append("line")
         .attr("x1", 0)
@@ -125,13 +125,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const words = axis.split(/\s+/)
       const lineHeight = 14 // pixels
       const maxWordsPerLine = 1 // One word per line for better wrapping
-      
+
       // Group words into lines
       const lines = []
       for (let i = 0; i < words.length; i += maxWordsPerLine) {
-        lines.push(words.slice(i, i + maxWordsPerLine).join(' '))
+        lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
       }
-      
+
       // Create text element for each line
       lines.forEach((line, index) => {
         g.append("text")
@@ -146,11 +146,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       // Tick marks and labels
       const scale = scales[axis]
+      if (!scale) return
       const ticks = scale.ticks(5)
-      
+
       ticks.forEach((tick) => {
         const xPos = scale(tick)
-        
+
         // Tick mark
         g.append("line")
           .attr("x1", xPos)
@@ -174,9 +175,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     // Line generator (for horizontal axes)
     const line = d3
       .line<[string, number]>()
-      .x((d) => scales[d[0]](d[1])) // Value position on horizontal axis
-      .y((d) => yScale(d[0])!)      // Axis position vertically
-      // No curve - use straight angular lines
+      .x((d) => scales[d[0]]?.(d[1]) ?? 0) // Value position on horizontal axis
+      .y((d) => yScale(d[0])!) // Axis position vertically
+    // No curve - use straight angular lines
 
     // Draw baseline if provided
     if (showBaseline && baselineData) {
@@ -213,27 +214,27 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         return line(points)
       })
       .attr("fill", "none")
-      .attr("stroke", (d) => (d.highlighted ? colors.highlighted : colors.default))
+      .attr("stroke", (d) =>
+        d.highlighted ? colors.highlighted : colors.default,
+      )
       .attr("stroke-width", (d) => (d.highlighted ? 2.5 : 1.5))
       .attr("opacity", (d) => (d.highlighted ? 0.9 : 0.6))
       .style("cursor", "pointer")
-      .on("mouseover", function (event, d) {
+      .on("mouseover", function (_event, d) {
         // Highlight line on hover
-        d3.select(this)
-          .attr("stroke-width", 3)
-          .attr("opacity", 1)
-        
+        d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
+
         onLineHover?.(d)
       })
-      .on("mouseout", function (event, d) {
+      .on("mouseout", function (_event, d) {
         // Reset line style
         d3.select(this)
           .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
           .attr("opacity", d.highlighted ? 0.9 : 0.6)
-        
+
         onLineHover?.(null)
       })
-      .on("click", function (event, d) {
+      .on("click", function (_event, d) {
         onLineClick?.(d)
       })
 
@@ -241,22 +242,22 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     data.forEach((d) => {
       axes.forEach((axis) => {
         g.append("circle")
-          .attr("cx", scales[axis](d.values[axis] || 0)) // Value position on horizontal axis
-          .attr("cy", yScale(axis)!)                     // Axis position vertically
-          .attr("r", d.highlighted ? 4 : 3)             // Larger circles for highlighted lines
+          .attr("cx", scales[axis]?.(d.values[axis] || 0) ?? 0) // Value position on horizontal axis
+          .attr("cy", yScale(axis)!) // Axis position vertically
+          .attr("r", d.highlighted ? 4 : 3) // Larger circles for highlighted lines
           .attr("fill", d.highlighted ? colors.highlighted : colors.default)
           .attr("stroke", "white")
           .attr("stroke-width", 1.5)
           .style("cursor", "pointer")
-          .on("mouseover", function (event) {
+          .on("mouseover", function () {
             onLineHover?.(d)
             d3.select(this).attr("r", d.highlighted ? 5 : 4) // Grow on hover
           })
-          .on("mouseout", function (event) {
+          .on("mouseout", function () {
             onLineHover?.(null)
             d3.select(this).attr("r", d.highlighted ? 4 : 3) // Return to normal size
           })
-          .on("click", function (event) {
+          .on("click", function () {
             onLineClick?.(d)
           })
       })
@@ -274,7 +275,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("fill", "#333")
         .text(title)
     }
-
   }, [
     data,
     axes,

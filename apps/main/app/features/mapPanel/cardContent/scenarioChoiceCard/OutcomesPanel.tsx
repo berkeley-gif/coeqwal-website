@@ -1,12 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import {
-  Box,
-  Button,
-  FormControlLabel,
-  Checkbox,
-} from "@repo/ui/mui"
+import { Box, Button, FormControlLabel, Checkbox } from "@repo/ui/mui"
 import { VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 
 interface OutcomesPanelProps {
@@ -54,7 +49,7 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
     "Groundwater storage",
     "Delta salinity",
     "Salmon abundance",
-    "Distributional equity"
+    "Distributional equity",
   ]
 
   const sampleData: VerticalParallelLineData[] = [
@@ -69,9 +64,9 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         "Groundwater storage": 40,
         "Delta salinity": 25,
         "Salmon abundance": 35,
-        "Distributional equity": 65
+        "Distributional equity": 65,
       },
-      highlighted: highlightBaseline
+      highlighted: highlightBaseline,
     },
     {
       id: "sgma-1",
@@ -84,11 +79,11 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         "Groundwater storage": 75,
         "Delta salinity": 30,
         "Salmon abundance": 50,
-        "Distributional equity": 70
-      }
+        "Distributional equity": 70,
+      },
     },
     {
-      id: "sgma-2", 
+      id: "sgma-2",
       name: "SGMA with Ag Reductions",
       values: {
         "Community deliveries": 85,
@@ -98,12 +93,12 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         "Groundwater storage": 85,
         "Delta salinity": 35,
         "Salmon abundance": 65,
-        "Distributional equity": 60
-      }
+        "Distributional equity": 60,
+      },
     },
     {
       id: "delta-tunnel",
-      name: "Delta Conveyance Tunnel", 
+      name: "Delta Conveyance Tunnel",
       values: {
         "Community deliveries": 90,
         "Agricultural deliveries": 75,
@@ -112,8 +107,8 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         "Groundwater storage": 60,
         "Delta salinity": 45,
         "Salmon abundance": 40,
-        "Distributional equity": 80
-      }
+        "Distributional equity": 80,
+      },
     },
     {
       id: "usbr-alt3",
@@ -126,9 +121,9 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         "Groundwater storage": 55,
         "Delta salinity": 40,
         "Salmon abundance": 70,
-        "Distributional equity": 85
-      }
-    }
+        "Distributional equity": 85,
+      },
+    },
   ]
 
   const handleLineHover = (data: VerticalParallelLineData | null) => {
@@ -153,7 +148,7 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
   }
 
   return (
-    <Box 
+    <Box
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -337,11 +332,11 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
           responsive={true}
           // Remove fixed width/height - let it be fully responsive
           showBaseline={highlightBaseline}
-          baselineData={sampleData.find(d => d.id === "baseline")}
+          baselineData={sampleData.find((d) => d.id === "baseline")}
           colors={{
             default: "#1f77b4",
-            highlighted: "#ff7f0e", 
-            background: "#f8f9fa"
+            highlighted: "#ff7f0e",
+            background: "#f8f9fa",
           }}
           onLineHover={handleLineHover}
           onLineClick={handleLineClick}

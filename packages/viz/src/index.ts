@@ -6,7 +6,10 @@ export { default as DecileBarChart } from "./components/DecileBarChart"
 export { default as LineChart } from "./components/LineChart"
 export type { LineChartData, MonthlyData } from "./components/LineChart"
 export { default as VerticalParallelLinePlot } from "./components/VerticalParallelLinePlot"
-export type { VerticalParallelLineData, VerticalParallelLinePlotProps } from "./components/VerticalParallelLinePlot"
+export type {
+  VerticalParallelLineData,
+  VerticalParallelLinePlotProps,
+} from "./components/VerticalParallelLinePlot"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
