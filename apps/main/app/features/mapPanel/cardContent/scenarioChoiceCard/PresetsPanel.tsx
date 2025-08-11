@@ -68,6 +68,8 @@ interface PresetsPanelProps {
     latitude: number
     zoom: number
   }) => void
+  onScenarioHover?: (scenario: string | null) => void
+  onScenarioSelect?: (scenario: string) => void
 }
 
 const presetOptions: PresetOption[] = [
@@ -156,7 +158,11 @@ const presetOptions: PresetOption[] = [
   },
 ]
 
-export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
+export default function PresetsPanel({
+  onViewOnMap,
+  onScenarioHover,
+  onScenarioSelect,
+}: PresetsPanelProps) {
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const { withMap } = useMap()
   const theme = useTheme()
@@ -327,6 +333,8 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
           label={option.label}
           onClick={() => toggleExpanded(option.id)}
           sx={{ width: "100%", cursor: "pointer" }}
+          onMouseEnter={() => onScenarioHover?.(option.label)}
+          onMouseLeave={() => onScenarioHover?.(null)}
         />
       ) : (
         /* For sub-options, show regular checkbox */
@@ -334,6 +342,9 @@ export default function PresetsPanel({ onViewOnMap }: PresetsPanelProps) {
           control={<Checkbox size="small" />}
           label={option.label}
           sx={{ width: "100%" }}
+          onMouseEnter={() => onScenarioHover?.(option.label)}
+          onMouseLeave={() => onScenarioHover?.(null)}
+          onClick={() => onScenarioSelect?.(option.label)}
         />
       )}
 
