@@ -246,40 +246,38 @@ export default function OutcomesPanel() {
           </Button>
         </Box>
 
-        {/* Chart controls, only show when chart is not expanded */}
-        {!expandChart && (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 2,
-              mt: 1,
-              mb: 1,
-              width: "100%",
-            }}
-          >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={isRelativeView}
-                  onChange={handleViewModeChange}
-                  size="small"
-                />
-              }
-              label="view relative to current operations"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={highlightBaseline}
-                  onChange={handleHighlightBaselineChange}
-                  size="small"
-                />
-              }
-              label="highlight current operations"
-            />
-          </Box>
-        )}
+        {/* Chart controls */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 2,
+            mt: 1,
+            mb: 1,
+            width: "100%",
+          }}
+        >
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isRelativeView}
+                onChange={handleViewModeChange}
+                size="small"
+              />
+            }
+            label="view relative to current operations"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={highlightBaseline}
+                onChange={handleHighlightBaselineChange}
+                size="small"
+              />
+            }
+            label="highlight current operations"
+          />
+        </Box>
       </Box>
 
       {/* Responsive Chart Visualization */}
