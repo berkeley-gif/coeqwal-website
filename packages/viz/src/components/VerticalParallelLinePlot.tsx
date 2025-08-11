@@ -77,18 +77,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     const innerHeight = currentHeight - margin.top - margin.bottom
 
     // Create scales for each axis (horizontal orientation)
+    // Use consistent scale across all axes: -1 to 1
     const scales: Record<string, d3.ScaleLinear<number, number>> = {}
     axes.forEach((axis) => {
-      const extent = d3.extent(data, (d) => d.values[axis]) as [number, number]
-      // Add some padding to the scale
-      const padding = (extent[1] - extent[0]) * 0.1
       scales[axis] = d3
         .scaleLinear()
-        .domain([extent[0] - padding, extent[1] + padding])
+        .domain([-1, 1]) // Fixed domain for all axes
         .range([0, innerWidth]) // Horizontal range
     })
 
-    // Position scales along y-axis (stacked vertically) - maximum spacing between axes
+    // Position scales along y-axis (stacked vertically) for maximum spacing between axes
     const yScale = d3
       .scalePoint()
       .domain(axes)
@@ -147,7 +145,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       // Tick marks and labels
       const scale = scales[axis]
       if (!scale) return
-      const ticks = scale.ticks(5)
+      const ticks = [-1, -0.5, 0, 0.5, 1]
 
       ticks.forEach((tick) => {
         const xPos = scale(tick)
@@ -168,7 +166,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("text-anchor", "middle")
           .attr("font-size", "10px")
           .attr("fill", "#666")
-          .text(d3.format(".0f")(tick)) // Remove decimal places to save space
+          .text(tick.toString()) // Show exact values including -0.5 and 0.5
       })
     })
 
