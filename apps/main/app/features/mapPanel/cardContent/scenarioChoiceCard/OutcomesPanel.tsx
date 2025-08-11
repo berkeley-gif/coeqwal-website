@@ -41,8 +41,12 @@ export default function OutcomesPanel() {
     "Distributional equity",
   ]
 
-  const sampleData: VerticalParallelLineData[] = [
-    {
+  // Generate 30 diverse scenarios with gnuplot color ramp
+  const generateScenarios = (): VerticalParallelLineData[] => {
+    const scenarios: VerticalParallelLineData[] = []
+
+    // Baseline scenario (always first)
+    scenarios.push({
       id: "baseline",
       name: "Current Operations",
       values: {
@@ -56,64 +60,101 @@ export default function OutcomesPanel() {
         "Distributional equity": 0.0,
       },
       highlighted: highlightBaseline,
-    },
-    {
-      id: "sgma-1",
-      name: "SGMA San Joaquin Valley",
-      values: {
-        "Community deliveries": -0.1,
-        "Agricultural deliveries": -0.3,
-        "Environmental deliveries": 0.3,
-        "Reservoir storage": 0.1,
-        "Groundwater storage": 0.7,
-        "Delta salinity": 0.1,
-        "Salmon abundance": 0.3,
-        "Distributional equity": 0.1,
-      },
-    },
-    {
-      id: "sgma-2",
-      name: "SGMA with Ag Reductions",
-      values: {
-        "Community deliveries": 0.0,
-        "Agricultural deliveries": -0.5,
-        "Environmental deliveries": 0.5,
-        "Reservoir storage": 0.2,
-        "Groundwater storage": 0.9,
-        "Delta salinity": 0.2,
-        "Salmon abundance": 0.6,
-        "Distributional equity": -0.1,
-      },
-    },
-    {
-      id: "delta-tunnel",
-      name: "Delta Conveyance Tunnel",
-      values: {
-        "Community deliveries": 0.1,
-        "Agricultural deliveries": 0.1,
-        "Environmental deliveries": 0.1,
-        "Reservoir storage": -0.3,
-        "Groundwater storage": 0.4,
-        "Delta salinity": 0.4,
-        "Salmon abundance": 0.1,
-        "Distributional equity": 0.3,
-      },
-    },
-    {
-      id: "usbr-alt3",
-      name: "USBR Alternative 3",
-      values: {
-        "Community deliveries": -0.2,
-        "Agricultural deliveries": 0.2,
-        "Environmental deliveries": 0.6,
-        "Reservoir storage": 0.4,
-        "Groundwater storage": 0.3,
-        "Delta salinity": 0.3,
-        "Salmon abundance": 0.7,
-        "Distributional equity": 0.4,
-      },
-    },
-  ]
+    })
+
+    // Generate 29 additional scenarios with varied data
+    const scenarioNames = [
+      "SGMA San Joaquin Valley",
+      "SGMA Sacramento Valley",
+      "SGMA Delta",
+      "SGMA Tulare Basin",
+      "Delta Conveyance Tunnel",
+      "Delta Conveyance Dual",
+      "Sites Reservoir",
+      "Temperance Flat",
+      "USBR Alternative 1",
+      "USBR Alternative 2",
+      "USBR Alternative 3",
+      "USBR Alternative 4",
+      "Urban Conservation High",
+      "Urban Conservation Medium",
+      "Agricultural Efficiency",
+      "Recycled Water Expansion",
+      "Desalination Coastal",
+      "Atmospheric River Management",
+      "Floodplain Restoration",
+      "Wetlands Enhancement",
+      "Fish Passage Improvement",
+      "Climate Adaptation A",
+      "Climate Adaptation B",
+      "Drought Contingency",
+      "Flexible Operations",
+      "Coordinated Operations",
+      "Ecosystem Services",
+      "Water Trading Enhanced",
+      "Regional Cooperation",
+    ]
+
+    scenarioNames.forEach((name, index) => {
+      // Create varied but realistic data patterns
+      const baseVariation = (index + 1) / 29 // 0 to 1 progression
+      const randomSeed = index * 7 // Consistent randomization
+
+      scenarios.push({
+        id: `scenario-${index + 1}`,
+        name: name,
+        values: {
+          "Community deliveries":
+            Math.sin(baseVariation * Math.PI * 2 + randomSeed) * 0.8,
+          "Agricultural deliveries":
+            Math.cos(baseVariation * Math.PI * 1.5 + randomSeed) * 0.9,
+          "Environmental deliveries":
+            Math.sin(baseVariation * Math.PI * 3 + randomSeed + 1) * 0.7,
+          "Reservoir storage":
+            Math.cos(baseVariation * Math.PI * 2.5 + randomSeed + 2) * 0.6,
+          "Groundwater storage":
+            Math.sin(baseVariation * Math.PI * 1.8 + randomSeed + 3) * 0.9,
+          "Delta salinity":
+            Math.cos(baseVariation * Math.PI * 2.2 + randomSeed + 4) * 0.5,
+          "Salmon abundance":
+            Math.sin(baseVariation * Math.PI * 2.8 + randomSeed + 5) * 0.8,
+          "Distributional equity":
+            Math.cos(baseVariation * Math.PI * 1.6 + randomSeed + 6) * 0.6,
+        },
+      })
+    })
+
+    return scenarios
+  }
+
+  const sampleData = generateScenarios()
+
+  // Generate colors using D3's categorical10 palette, cycling through for 30 scenarios
+  const generateCategoricalColors = (count: number): string[] => {
+    // D3 categorical10 color scheme
+    const categorical10 = [
+      "#1f77b4", // blue
+      "#ff7f0e", // orange
+      "#2ca02c", // green
+      "#d62728", // red
+      "#9467bd", // purple
+      "#8c564b", // brown
+      "#e377c2", // pink
+      "#7f7f7f", // gray
+      "#bcbd22", // olive
+      "#17becf", // cyan
+    ]
+
+    const colors: string[] = []
+    for (let i = 0; i < count; i++) {
+      // Cycle through the 10 colors for all 30 scenarios
+      colors.push(categorical10[i % 10]!)
+    }
+
+    return colors
+  }
+
+  const categoricalColors = generateCategoricalColors(30)
 
   const handleLineHover = (data: VerticalParallelLineData | null) => {
     // TODO: Implement hover tooltip or highlighting
@@ -267,6 +308,7 @@ export default function OutcomesPanel() {
             highlighted: "#ff7f0e",
             background: "#f8f9fa",
           }}
+          lineColors={categoricalColors} // Use D3 categorical10 color scheme
           onLineHover={handleLineHover}
           onLineClick={handleLineClick}
         />
