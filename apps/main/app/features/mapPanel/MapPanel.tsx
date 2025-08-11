@@ -73,7 +73,7 @@ const MapControls = ({
   const { flyTo } = useMap()
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
-  const [isChartExpanded, setIsChartExpanded] = useState(false)
+
 
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
@@ -116,9 +116,7 @@ const MapControls = ({
     })
   }
 
-  const handleChartExpand = (expanded: boolean) => {
-    setIsChartExpanded(expanded)
-  }
+
 
 
 
@@ -141,7 +139,7 @@ const MapControls = ({
         bottom: 0,
         zIndex: (theme) => theme.zIndex.mapControls,
         pointerEvents: "none", // For map interactions between map and overlay
-        p: 3,
+        p: 2, // 16px padding
       }}
     >
       {/* Three Column Layout */}
@@ -154,9 +152,10 @@ const MapControls = ({
         }}
       >
         {/* Left Column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* When chart is expanded, show the card header + expanded chart */}
-          {isChartExpanded ? (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, height: "100%" }}>
+          {/* Scenario Card - height depends on active tab */}
+          {activeTab === 1 ? (
+            /* Outcomes: 100% height container */
             <Box
               sx={{
                 backdropFilter: "blur(10px)",
@@ -168,9 +167,8 @@ const MapControls = ({
                 padding: 3,
                 display: "flex",
                 flexDirection: "column",
-                height: "calc(100vh - 120px)", // Use maximum available height (less margin)
-                maxHeight: "none", // Remove height restriction for expansion
-                minHeight: "500px",
+                height: "100%", // Use all available height in column
+                minHeight: 0,
               }}
             >
               {/* Always visible scenario description section */}
@@ -246,13 +244,11 @@ const MapControls = ({
                   minHeight: 0, // Allow shrinking
                 }}
               >
-                <OutcomesPanel 
-                  onExpandChart={handleChartExpand} 
-                  isExpanded={true} // Pass expanded state
-                />
+                <OutcomesPanel />
               </Box>
             </Box>
           ) : (
+            /* Presets/Operations: content-sized */
             <Box sx={{ position: "relative" }}>
               <ScenarioCard
                 topLine={isFirstCardMinimized ? "" : "CHOOSE SCENARIOS:"}
@@ -375,9 +371,7 @@ const MapControls = ({
                             minHeight: 0,
                           }}
                         >
-                          <OutcomesPanel 
-                            onExpandChart={handleChartExpand}
-                          />
+                          <OutcomesPanel />
                         </Box>
                       )}
                       {activeTab === 2 && (
