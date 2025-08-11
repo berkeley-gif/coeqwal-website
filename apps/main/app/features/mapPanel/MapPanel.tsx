@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { Box, IconButton, Tabs, Tab, Checkbox, FormControlLabel } from "@repo/ui/mui"
 import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
 import { Map, useMap, NavigationControl, GeolocateControl, Marker, Source, Layer } from "@repo/map"
@@ -560,6 +560,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [isDrawingCustomRegion, setIsDrawingCustomRegion] = useState(false)
   const [polygonPoints, setPolygonPoints] = useState<Array<{lng: number, lat: number}>>([])
   const [draggedPointIndex, setDraggedPointIndex] = useState<number | null>(null)
+  const [isSelfIntersecting, setIsSelfIntersecting] = useState(false)
 
   const handleSelectRegionOnMap = () => {
     setIsDrawingCustomRegion(true)
@@ -577,7 +578,61 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     setIsDrawingCustomRegion(false)
     setPolygonPoints([])
     setDraggedPointIndex(null)
+    setIsSelfIntersecting(false)
   }
+
+  // Check if two line segments intersect
+  const doSegmentsIntersect = useCallback((
+    seg1: [{lng: number, lat: number}, {lng: number, lat: number}], 
+    seg2: [{lng: number, lat: number}, {lng: number, lat: number}]
+  ) => {
+    const [p1, p2] = seg1
+    const [p3, p4] = seg2
+    
+    const ccw = (A: {lng: number, lat: number}, B: {lng: number, lat: number}, C: {lng: number, lat: number}) => {
+      return (C.lat - A.lat) * (B.lng - A.lng) > (B.lat - A.lat) * (C.lng - A.lng)
+    }
+    
+    return ccw(p1, p3, p4) !== ccw(p2, p3, p4) && ccw(p1, p2, p3) !== ccw(p1, p2, p4)
+  }, [])
+
+  // Check if polygon self-intersects using line segment intersection
+  const checkSelfIntersection = useCallback((points: Array<{lng: number, lat: number}>) => {
+    if (points.length < 4) return false // Need at least 4 points to self-intersect
+    
+    const segments: Array<[{lng: number, lat: number}, {lng: number, lat: number}]> = []
+    for (let i = 0; i < points.length; i++) {
+      const next = (i + 1) % points.length
+      const currentPoint = points[i]
+      const nextPoint = points[next]
+      if (!currentPoint || !nextPoint) continue
+      segments.push([currentPoint, nextPoint])
+    }
+    
+    // Check each segment against all non-adjacent segments
+    for (let i = 0; i < segments.length; i++) {
+      for (let j = i + 2; j < segments.length; j++) {
+        // Skip adjacent segments and last-first comparison
+        if (j === segments.length - 1 && i === 0) continue
+        
+        const seg1 = segments[i]
+        const seg2 = segments[j]
+        if (seg1 && seg2 && doSegmentsIntersect(seg1, seg2)) {
+          return true
+        }
+      }
+    }
+    return false
+  }, [doSegmentsIntersect])
+
+  // Check for self-intersection whenever polygon points change
+  useEffect(() => {
+    if (polygonPoints.length >= 4) {
+      setIsSelfIntersecting(checkSelfIntersection(polygonPoints))
+    } else {
+      setIsSelfIntersecting(false)
+    }
+  }, [polygonPoints, checkSelfIntersection])
 
   const handlePointDrag = (index: number, newLng: number, newLat: number) => {
     setPolygonPoints(prev => 
@@ -628,12 +683,25 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         }
         onClick={isDrawingCustomRegion ? (evt: {lngLat: {lng: number, lat: number}}) => {
           const { lng, lat } = evt.lngLat
+          
+          // Check if clicking near the first point to close the polygon
+          if (polygonPoints.length >= 3) {
+            const firstPoint = polygonPoints[0]
+            if (firstPoint) {
+              const distance = Math.sqrt(
+                Math.pow(lng - firstPoint.lng, 2) + Math.pow(lat - firstPoint.lat, 2)
+              )
+              // If within ~0.01 degrees (roughly 1km), close the polygon
+              if (distance < 0.01) {
+                handlePolygonComplete()
+                return
+              }
+            }
+          }
+          
+          // Otherwise, add a new point
           const newPoint = { lng, lat }
           setPolygonPoints((prev: Array<{lng: number, lat: number}>) => [...prev, newPoint])
-        } : undefined}
-        onDblClick={isDrawingCustomRegion ? (evt: {preventDefault: () => void}) => {
-          evt.preventDefault()
-          handlePolygonComplete()
         } : undefined}
         onError={(evt: unknown) => {
           // Surface mapbox or ReactMapGL errors in the console (could be replaced with toast)
@@ -674,20 +742,34 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                     width: 12,
                     height: 12,
                     borderRadius: "50%",
-                    backgroundColor: draggedPointIndex === index ? "#ff4757" : "#ff6b6b",
-                    border: "2px solid white",
+                    backgroundColor: draggedPointIndex === index 
+                      ? "#ff4757" 
+                      : isSelfIntersecting 
+                      ? "#ff9f43" 
+                      : "#ff6b6b",
+                    border: isDrawingCustomRegion && index === 0 && polygonPoints.length >= 3
+                      ? "3px solid #fff" // Thicker white border for first point when ready to close
+                      : "2px solid white",
                     boxShadow: draggedPointIndex === index 
                       ? "0 4px 8px rgba(0,0,0,0.4)" 
+                      : isDrawingCustomRegion && index === 0 && polygonPoints.length >= 3
+                      ? "0 3px 6px rgba(0,0,0,0.4)" // Enhanced shadow for first point
                       : "0 2px 4px rgba(0,0,0,0.3)",
                     cursor: isDrawingCustomRegion 
                       ? "pointer" 
                       : draggedPointIndex === index 
                       ? "grabbing" 
                       : "grab",
-                    transform: draggedPointIndex === index ? "scale(1.2)" : "scale(1)",
+                    transform: draggedPointIndex === index 
+                      ? "scale(1.2)" 
+                      : isDrawingCustomRegion && index === 0 && polygonPoints.length >= 3
+                      ? "scale(1.15)" // Slightly larger first point when ready to close
+                      : "scale(1)",
                     transition: "all 0.2s ease",
                     "&:hover": {
-                      transform: "scale(1.1)",
+                      transform: isDrawingCustomRegion && index === 0 && polygonPoints.length >= 3
+                        ? "scale(1.25)" // Extra hover effect for first point
+                        : "scale(1.1)",
                     },
                   }}
                 />
@@ -712,7 +794,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   id="polygon-line"
                   type="line"
                   paint={{
-                    "line-color": "#ff6b6b",
+                    "line-color": isSelfIntersecting ? "#ff9f43" : "#ff6b6b",
                     "line-width": 2,
                     "line-dasharray": [2, 2]
                   }}
@@ -738,15 +820,15 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   id="polygon-fill-layer"
                   type="fill"
                   paint={{
-                    "fill-color": "#ff6b6b",
-                    "fill-opacity": 0.2
+                    "fill-color": isSelfIntersecting ? "#ff9f43" : "#ff6b6b",
+                    "fill-opacity": isSelfIntersecting ? 0.15 : 0.2
                   }}
                 />
                 <Layer
                   id="polygon-stroke-layer"
                   type="line"
                   paint={{
-                    "line-color": "#ff6b6b",
+                    "line-color": isSelfIntersecting ? "#ff9f43" : "#ff6b6b",
                     "line-width": 2
                   }}
                 />
@@ -777,8 +859,35 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             Draw Custom Region
           </Box>
           <Box sx={{ fontSize: "0.8rem", opacity: 0.9 }}>
-            Click to add points • Double-click to finish
+            Click to add points • Click first point to finish
             {polygonPoints.length > 0 && ` • ${polygonPoints.length} points`}
+          </Box>
+        </Box>
+      )}
+
+      {/* Self-Intersection Warning */}
+      {isSelfIntersecting && !isDrawingCustomRegion && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(255, 159, 67, 0.95)",
+            color: "white",
+            padding: 2,
+            borderRadius: 1,
+            zIndex: (theme) => theme.zIndex.tooltip,
+            textAlign: "center",
+            pointerEvents: "none",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+          }}
+        >
+          <Box sx={{ fontSize: "0.9rem", fontWeight: 500, mb: 0.5 }}>
+            ⚠️ Self-Intersecting Polygon
+          </Box>
+          <Box sx={{ fontSize: "0.8rem", opacity: 0.9 }}>
+            Drag vertices to fix overlapping edges
           </Box>
         </Box>
       )}
