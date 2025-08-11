@@ -26,12 +26,12 @@ export default function CalSimSection({
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
         p: "16px 16px 16px 8px",
-        borderRadius: "8px",
+        borderRadius: (theme) => theme.borderRadius.card,
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
               p: "16px 16px 16px 8px",
-              borderRadius: "8px",
+              borderRadius: (theme) => theme.borderRadius.card,
             }
           : {}),
       })}

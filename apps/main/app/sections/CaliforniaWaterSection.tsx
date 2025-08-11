@@ -42,12 +42,12 @@ export default function CaliforniaWaterSection({
       sx={(theme) => ({
         ...theme.mixins.hoverParagraph,
         p: "16px 16px 16px 8px",
-        borderRadius: "8px",
+        borderRadius: (theme) => theme.borderRadius.card,
         ...(darkenParagraphs
           ? {
               ...theme.mixins.hoverParagraphDarkened,
               p: "16px 16px 16px 8px",
-              borderRadius: "8px",
+              borderRadius: (theme) => theme.borderRadius.card,
             }
           : {}),
       })}
@@ -142,7 +142,7 @@ export default function CaliforniaWaterSection({
                 color: (theme) => theme.palette.utility.white,
                 px: 1,
                 py: 1,
-                borderRadius: "4px",
+                borderRadius: (theme) => theme.borderRadius.rounded,
               }}
             >
               <Typography

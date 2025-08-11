@@ -779,7 +779,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
           height: "60vh",
           mt: 1, // Reduced from mt: 3
           border: "1px solid rgba(0, 0, 0, 0.12)",
-          borderRadius: "12px",
+          borderRadius: (theme) => theme.borderRadius.card,
           p: 1,
           overflow: "hidden",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
@@ -803,7 +803,7 @@ const OperationsSelector: React.FC<OperationsSelectorProps> = ({
             },
             "&::-webkit-scrollbar-thumb": {
               border: "4px solid white",
-              borderRadius: "24px",
+              borderRadius: (theme) => theme.borderRadius.card,
             },
             // Firefox
             scrollbarWidth: "thin",
