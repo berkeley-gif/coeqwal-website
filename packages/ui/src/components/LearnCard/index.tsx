@@ -21,7 +21,7 @@ interface StyledCardProps {
 // Use shouldForwardProp to prevent cardType from being passed to the DOM
 const StyledCard = styled(Card, {
   shouldForwardProp: (prop) => prop !== "cardType",
-})<StyledCardProps>(() => ({
+})<StyledCardProps>(({ theme }) => ({
   position: "relative",
   display: "flex",
   flexDirection: "column",
@@ -32,7 +32,7 @@ const StyledCard = styled(Card, {
   backgroundColor: "transparent",
   backgroundClip: "border-box",
   border: "1px solid rgba(255, 255, 255, 0.6)",
-  borderRadius: "8px",
+  borderRadius: theme.borderRadius.card,
   pointerEvents: "auto", // Ensure hover effects work
   transition: "transform 0.2s, box-shadow 0.2s",
   "&:hover": {

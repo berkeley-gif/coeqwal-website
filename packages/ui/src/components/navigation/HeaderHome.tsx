@@ -192,7 +192,7 @@ export function HeaderHome({
   const variantStyles = {
     backgroundColor: theme.palette.nature.whisper,
     // buttonBackgroundColor: theme.palette.utility.black,
-    borderRadius: "16px",
+    borderRadius: theme.borderRadius.card,
     margin: "16px",
     border: "none",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",

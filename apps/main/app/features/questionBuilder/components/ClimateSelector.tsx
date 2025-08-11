@@ -153,7 +153,7 @@ const ClimateSelector: React.FC = () => {
         sx={{
           position: "relative",
           border: "1px solid rgba(0, 0, 0, 0.12)",
-          borderRadius: "12px",
+          borderRadius: (theme) => theme.borderRadius.card,
           p: 2,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
 
@@ -194,7 +194,7 @@ const ClimateSelector: React.FC = () => {
                     ? "rgba(76, 175, 80, 0.1)"
                     : "transparent",
                   padding: selectedClimate.includes(option.id) ? "2px 8px" : 0,
-                  borderRadius: "4px",
+                  borderRadius: (theme) => theme.borderRadius.rounded,
                   transition: "all 0.2s ease",
                 }}
               >

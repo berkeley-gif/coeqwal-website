@@ -57,7 +57,7 @@ const SortableScenarioCard = React.memo(
             cursor: "grab",
             color: "rgba(0, 0, 0, 0.5)",
             padding: "4px",
-            borderRadius: "4px",
+            borderRadius: "8px", // Small UI element, keep 8px
             background: "rgba(255, 255, 255, 0.5)",
             display: "flex",
             alignItems: "center",
@@ -80,7 +80,7 @@ const SortableScenarioCard = React.memo(
             cursor: "pointer",
             color: "rgba(0, 0, 0, 0.5)",
             padding: "4px",
-            borderRadius: "4px",
+            borderRadius: "8px", // Small UI element, keep 8px
             background: "rgba(255, 255, 255, 0.5)",
             display: "flex",
             alignItems: "center",

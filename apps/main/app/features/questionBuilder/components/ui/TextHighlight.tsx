@@ -19,7 +19,7 @@ export const HighlightText: React.FC<HighlightTextProps> = ({
     <span
       style={{
         backgroundColor: bgcolor,
-        borderRadius: "16px",
+        borderRadius: theme.borderRadius.card,
         padding: `${theme.spacing(0.5)} ${theme.spacing(1)}`,
         color: theme.palette.common.white,
         opacity: 0.95,
