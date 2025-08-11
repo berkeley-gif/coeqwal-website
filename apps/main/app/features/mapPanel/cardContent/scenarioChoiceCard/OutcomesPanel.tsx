@@ -6,12 +6,15 @@ import { VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 
 interface OutcomesPanelProps {
   onExpandChart?: (expanded: boolean) => void
+  isExpanded?: boolean // Whether the panel is in expanded mode
 }
 
-export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
+export default function OutcomesPanel({ 
+  onExpandChart, 
+  isExpanded = false 
+}: OutcomesPanelProps) {
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
-  const [showInstructions, setShowInstructions] = useState(false)
   const [expandChart, setExpandChart] = useState(false)
 
   const handleViewModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,10 +30,6 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
   const handleLearnMoreClick = () => {
     // TODO: Implement learn more functionality
     console.log("Learn more about this chart clicked")
-  }
-
-  const toggleInstructions = () => {
-    setShowInstructions(!showInstructions)
   }
 
   const toggleExpandChart = () => {
@@ -136,16 +135,7 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
     console.log("Line clicked:", data.name)
   }
 
-  // Calculate responsive chart height based on current state
-  const getChartHeight = () => {
-    if (expandChart) {
-      return "100%" // Expanded: Maximum available height
-    } else if (showInstructions) {
-      return "250px" // With instructions: Compressed height
-    } else {
-      return "400px" // Default: Maximized height within normal view
-    }
-  }
+  // Chart always uses all available space - no more height calculations needed
 
   return (
     <Box
@@ -155,52 +145,47 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
         height: "100%",
         width: "100%",
         minWidth: 0,
+        flexGrow: 1, // Always use all available space
       }}
     >
-      {/* Control Section - Always visible */}
-      <Box sx={{ flexShrink: 0, mb: 1 }}>
-        {/* Toggle buttons */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 2,
-            mb: showInstructions ? 1 : 0,
-          }}
-        >
-          {/* Show/Hide instructions button */}
-          <Button
-            variant="text"
-            onClick={toggleInstructions}
+      {/* Outcomes paragraph - visible when not expanded and chart not expanded */}
+      {!isExpanded && !expandChart && (
+        <Box sx={{ flexShrink: 0, mb: 2 }}>
+          <Box
             sx={{
               fontSize: "0.95rem",
-              fontWeight: 500,
-              color: (theme) => theme.palette.blue.bright,
-              padding: 0,
-              minWidth: "auto",
-              textTransform: "none",
-              justifyContent: "flex-start",
-              "&:hover": {
-                color: (theme) => theme.palette.blue.darkest,
-                backgroundColor: "transparent",
-              },
+              fontWeight: 400,
+              lineHeight: 1.4,
+              color: (theme) => theme.palette.text.primary,
+              mb: 1,
             }}
           >
-            <span
-              style={{
-                fontSize: "0.875em",
-                marginRight: "8px",
-                display: "inline-block",
-                transform: showInstructions ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.2s ease",
+            Compare scenarios across multiple outcomes to understand trade-offs
+            and synergies in California&apos;s water management.{" "}
+            <Box
+              component="span"
+              onClick={handleLearnMoreClick}
+              sx={{
+                color: (theme) => theme.palette.blue.bright,
+                cursor: "pointer",
+                fontWeight: 500,
+                textDecoration: "underline",
+                "&:hover": {
+                  color: (theme) => theme.palette.blue.darkest,
+                },
               }}
             >
-              ▼
-            </span>
-            {showInstructions ? "Hide" : "Show"} instructions
-          </Button>
+              Learn more about this chart
+            </Box>
+          </Box>
+        </Box>
+      )}
 
-          {/* Expand chart button */}
+      {/* Control Section - Always visible when not in external expanded mode */}
+      {!isExpanded && (
+        <Box sx={{ flexShrink: 0, mb: 1 }}>
+          {/* Expand chart button - always visible when not externally expanded */}
+          <Box sx={{ mb: 1 }}>
           <Button
             variant="text"
             onClick={toggleExpandChart}
@@ -233,104 +218,62 @@ export default function OutcomesPanel({ onExpandChart }: OutcomesPanelProps) {
           </Button>
         </Box>
 
-        {/* Collapsible instructions */}
-        {showInstructions && (
+        {/* Chart controls - only show when chart is not expanded */}
+        {!expandChart && (
           <Box
             sx={{
-              fontSize: "0.95rem",
-              fontWeight: 400,
-              color: (theme) => theme.palette.text.primary,
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 2,
               mt: 1,
               mb: 1,
-              animation: "fadeIn 0.2s ease-in",
-              "@keyframes fadeIn": {
-                from: { opacity: 0, transform: "translateY(-10px)" },
-                to: { opacity: 1, transform: "translateY(0)" },
-              },
+              width: "100%",
             }}
           >
-            COEQWAL has <strong>___</strong> alternative scenarios. Each colored
-            dot represents a scenario placed by its outcome. Click on a dot to
-            preview that scenario. Slide the sliders on each outcome to isolate
-            scenarios meeting your requirements.{" "}
-            <Button
-              variant="text"
-              onClick={handleLearnMoreClick}
-              sx={{
-                textDecoration: "underline",
-                color: (theme) => theme.palette.blue.bright,
-                cursor: "pointer",
-                padding: 0,
-                minWidth: "auto",
-                fontSize: "0.95rem", // Match paragraph fontSize
-                fontWeight: 500,
-                textTransform: "none",
-                verticalAlign: "baseline", // Align with text baseline
-                "&:hover": {
-                  color: (theme) => theme.palette.blue.darkest,
-                  backgroundColor: "transparent",
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              Learn more about this chart
-            </Button>
-            .
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isRelativeView}
+                  onChange={handleViewModeChange}
+                  size="small"
+                />
+              }
+              label="view relative to current operations"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={highlightBaseline}
+                  onChange={handleHighlightBaselineChange}
+                  size="small"
+                />
+              }
+              label="highlight current operations"
+            />
           </Box>
         )}
-
-        {/* Chart controls */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 2,
-            mt: 1,
-            mb: 1,
-            width: "100%",
-          }}
-        >
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={isRelativeView}
-                onChange={handleViewModeChange}
-                size="small"
-              />
-            }
-            label="view relative to current operations"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={highlightBaseline}
-                onChange={handleHighlightBaselineChange}
-                size="small"
-              />
-            }
-            label="highlight current operations"
-          />
         </Box>
-      </Box>
+      )}
 
       {/* Responsive Chart Visualization */}
       <Box
         sx={{
-          flexGrow: 1,
+          flexGrow: 1, // Always take all remaining space
           width: "100%",
-          height: getChartHeight(),
-          minHeight: getChartHeight(),
-          maxHeight: expandChart ? "none" : getChartHeight(),
+          height: "100%", // Fill parent height
+          minHeight: 0, // Allow shrinking
+          maxHeight: "none", // No height restrictions
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
         }}
       >
         <VerticalParallelLinePlot
+          key={`chart-${isExpanded ? 'expanded' : 'normal'}-${expandChart ? 'chart-expanded' : 'chart-normal'}`} // Force re-render on state change
           data={sampleData}
           axes={axes}
           responsive={true}
-          // Remove fixed width/height - let it be fully responsive
+          // Always fully responsive - no fixed height
           showBaseline={highlightBaseline}
           baselineData={sampleData.find((d) => d.id === "baseline")}
           colors={{

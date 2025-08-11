@@ -74,6 +74,7 @@ const MapControls = ({
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
   const [isChartExpanded, setIsChartExpanded] = useState(false)
+
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
   // Card minimize/maximize states
@@ -119,6 +120,8 @@ const MapControls = ({
     setIsChartExpanded(expanded)
   }
 
+
+
   const toggleRegionDropdown = () => {
     setShowRegionDropdown(!showRegionDropdown)
   }
@@ -137,7 +140,7 @@ const MapControls = ({
         right: 0,
         bottom: 0,
         zIndex: (theme) => theme.zIndex.mapControls,
-        pointerEvents: "none", // Refine for map interactions between map and overlay
+        pointerEvents: "none", // For map interactions between map and overlay
         p: 3,
       }}
     >
@@ -165,12 +168,12 @@ const MapControls = ({
                 padding: 3,
                 display: "flex",
                 flexDirection: "column",
-                height: "calc(100vh - 200px)",
-                maxHeight: "600px",
-                minHeight: "400px",
+                height: "calc(100vh - 120px)", // Use maximum available height (less margin)
+                maxHeight: "none", // Remove height restriction for expansion
+                minHeight: "500px",
               }}
             >
-              {/* Keep the header section visible */}
+              {/* Always visible scenario description section */}
               <Box sx={{ mb: 2, flexShrink: 0 }}>
                 <Box
                   sx={{
@@ -234,17 +237,19 @@ const MapControls = ({
                 />
               </Box>
 
-              {/* Expanded chart content */}
+              {/* Expanded chart content - takes all remaining space */}
               <Box
                 sx={{
                   flexGrow: 1,
                   display: "flex",
                   flexDirection: "column",
-                  mt: 0,
-                  pt: 0,
+                  minHeight: 0, // Allow shrinking
                 }}
               >
-                <OutcomesPanel onExpandChart={handleChartExpand} />
+                <OutcomesPanel 
+                  onExpandChart={handleChartExpand} 
+                  isExpanded={true} // Pass expanded state
+                />
               </Box>
             </Box>
           ) : (
@@ -306,15 +311,15 @@ const MapControls = ({
                         // Dynamic height based on active tab
                         ...(activeTab === 1
                           ? {
-                              // Outcomes tab: full height
-                              height: "calc(100vh - 200px)",
-                              maxHeight: "600px",
-                              minHeight: "400px",
+                              // Outcomes tab: ALWAYS maximize available height
+                              height: "calc(100vh - 300px)", // Account for card header + bottom margin
+                              maxHeight: "none", // Remove height restrictions
+                              minHeight: "500px", // Ensure reasonable minimum
                             }
                           : {
-                              // Presets/operations tabs: auto height based on content
+                              // Presets/Operations tabs: auto height based on content
                               height: "auto",
-                              maxHeight: "none",
+                              maxHeight: "70vh", // Prevent excessive height
                               minHeight: "auto",
                             }),
                       }}
@@ -370,7 +375,9 @@ const MapControls = ({
                             minHeight: 0,
                           }}
                         >
-                          <OutcomesPanel onExpandChart={handleChartExpand} />
+                          <OutcomesPanel 
+                            onExpandChart={handleChartExpand}
+                          />
                         </Box>
                       )}
                       {activeTab === 2 && (

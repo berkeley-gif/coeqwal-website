@@ -292,7 +292,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       ref={containerRef}
       style={{
         width: responsive ? "100%" : currentWidth,
-        height: currentHeight,
+        height: responsive ? "100%" : currentHeight,
         minHeight: 300,
       }}
     >
