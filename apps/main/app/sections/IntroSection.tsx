@@ -9,44 +9,197 @@ import { useDrawerStore } from "@repo/state"
 const IntroSection: React.FC = () => {
   const { t } = useTranslation()
 
-  // Hero section markers, absolutely positioned to align with California map background image
-  // TODO: this isn't the best approach for responsive design.
   const markerSpecs = [
+    // Row 1
     {
-      src: "/images/markers/shasta.png",
-      right: { xs: "25%", sm: "28%", md: "45%", lg: "45%", xl: "45%" },
-      top: "30px",
-      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
+      src: "/images/markers/salmon2.png",
+      right: { xs: "80%", sm: "80%", md: "80%", lg: "80%", xl: "80%" },
+      top: "5%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/drinking_water.png",
-      right: { xs: "13%", sm: "16%", md: "36%", lg: "36%", xl: "36%" },
-      top: "50%",
-      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
+      src: "/images/markers/shasta2.png",
+      right: { xs: "60%", sm: "60%", md: "60%", lg: "60%", xl: "60%" },
+      top: "5%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/los_angeles.png",
-      right: { xs: "1%", sm: "2%", md: "20%", lg: "20%", xl: "20%" },
-      top: "62%",
-      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
+      src: "/images/markers/drinking_water2.png",
+      right: { xs: "40%", sm: "40%", md: "40%", lg: "40%", xl: "40%" },
+      top: "5%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/farmers.png",
-      right: { xs: "3%", sm: "5%", md: "22%", lg: "22%", xl: "22%" },
-      top: "38%",
-      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
+      src: "/images/markers/farmers2.png",
+      right: { xs: "20%", sm: "20%", md: "20%", lg: "20%", xl: "20%" },
+      top: "5%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/salmon.png",
-      right: { xs: "9%", sm: "12%", md: "30%", lg: "30%", xl: "30%" },
-      top: "16%",
-      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
+      src: "/images/markers/atta2.png",
+      right: { xs: "0%", sm: "0%", md: "0%", lg: "0%", xl: "0%" },
+      top: "5%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+
+    // Row 2 (offset by 10%)
+    {
+      src: "/images/markers/los_angeles2.png",
+      right: { xs: "90%", sm: "90%", md: "90%", lg: "90%", xl: "90%" },
+      top: "22%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/atta.png",
-      right: { xs: "21%", sm: "24%", md: "43%", lg: "43%", xl: "43%" },
-      top: "30%",
-      size: { xs: 160, sm: 180, md: 220, lg: 220, xl: 220 },
+      src: "/images/markers/drinking_water2.png",
+      right: { xs: "70%", sm: "70%", md: "70%", lg: "70%", xl: "70%" },
+      top: "22%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    // {
+    //   src: "/images/markers/shasta2.png",
+    //   right: { xs: "50%", sm: "50%", md: "50%", lg: "50%", xl: "50%" },
+    //   top: "22%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/salmon2.png",
+    //   right: { xs: "30%", sm: "30%", md: "30%", lg: "30%", xl: "30%" },
+    //   top: "22%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    {
+      src: "/images/markers/salmon2.png",
+      right: { xs: "10%", sm: "10%", md: "10%", lg: "10%", xl: "10%" },
+      top: "22%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+
+    // Row 3
+    {
+      src: "/images/markers/farmers2.png",
+      right: { xs: "80%", sm: "80%", md: "80%", lg: "80%", xl: "80%" },
+      top: "39%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    // {
+    //   src: "/images/markers/los_angeles2.png",
+    //   right: { xs: "60%", sm: "60%", md: "60%", lg: "60%", xl: "60%" },
+    //   top: "39%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/drinking_water2.png",
+    //   right: { xs: "40%", sm: "40%", md: "40%", lg: "40%", xl: "40%" },
+    //   top: "39%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/farmers2.png",
+    //   right: { xs: "20%", sm: "20%", md: "20%", lg: "20%", xl: "20%" },
+    //   top: "39%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    {
+      src: "/images/markers/shasta2.png",
+      right: { xs: "0%", sm: "0%", md: "0%", lg: "0%", xl: "0%" },
+      top: "39%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+
+    // Row 4 (offset by 10%)
+    {
+      src: "/images/markers/salmon2.png",
+      right: { xs: "90%", sm: "90%", md: "90%", lg: "90%", xl: "90%" },
+      top: "56%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/atta2.png",
+      right: { xs: "70%", sm: "70%", md: "70%", lg: "70%", xl: "70%" },
+      top: "56%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    // {
+    //   src: "/images/markers/drinking_water2.png",
+    //   right: { xs: "50%", sm: "50%", md: "50%", lg: "50%", xl: "50%" },
+    //   top: "56%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/los_angeles2.png",
+    //   right: { xs: "30%", sm: "30%", md: "30%", lg: "30%", xl: "30%" },
+    //   top: "56%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    {
+      src: "/images/markers/farmers2.png",
+      right: { xs: "10%", sm: "10%", md: "10%", lg: "10%", xl: "10%" },
+      top: "56%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+
+    // Row 5 (bottom)
+    {
+      src: "/images/markers/shasta2.png",
+      right: { xs: "80%", sm: "80%", md: "80%", lg: "80%", xl: "80%" },
+      top: "73%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/drinking_water2.png",
+      right: { xs: "60%", sm: "60%", md: "60%", lg: "60%", xl: "60%" },
+      top: "73%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/salmon2.png",
+      right: { xs: "40%", sm: "40%", md: "40%", lg: "40%", xl: "40%" },
+      top: "73%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/atta2.png",
+      right: { xs: "20%", sm: "20%", md: "20%", lg: "20%", xl: "20%" },
+      top: "73%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/los_angeles2.png",
+      right: { xs: "0%", sm: "0%", md: "0%", lg: "0%", xl: "0%" },
+      top: "73%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+
+    // Row 6 (bottom) - Staggered (offset by 10%)
+    {
+      src: "/images/markers/farmers2.png",
+      right: { xs: "90%", sm: "90%", md: "90%", lg: "90%", xl: "90%" },
+      top: "90%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/shasta2.png",
+      right: { xs: "70%", sm: "70%", md: "70%", lg: "70%", xl: "70%" },
+      top: "90%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/drinking_water2.png",
+      right: { xs: "50%", sm: "50%", md: "50%", lg: "50%", xl: "50%" },
+      top: "90%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/salmon2.png",
+      right: { xs: "30%", sm: "30%", md: "30%", lg: "30%", xl: "30%" },
+      top: "90%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/atta2.png",
+      right: { xs: "10%", sm: "10%", md: "10%", lg: "10%", xl: "10%" },
+      top: "90%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
   ] as const
 
@@ -55,9 +208,9 @@ const IntroSection: React.FC = () => {
     <Box
       sx={{
         background: (theme) => `
-          linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
+          ${theme.palette.brand.water}
         `,
-        minHeight: "200vh", // Ensure gradient covers first two panels
+        minHeight: "200vh", //  To blend imagery between two views
       }}
     >
       {/* First panel / Hero section */}
@@ -67,54 +220,9 @@ const IntroSection: React.FC = () => {
         sx={{
           position: "relative",
           width: "100vw",
-          height: "100vh",
-          background: `url('/images/california.png')`,
-          backgroundSize: {
-            xs: "auto 90%",
-            sm: "auto 95%",
-            md: "auto 100%",
-            lg: "auto 100%",
-            xl: "auto 100%",
-          },
-          backgroundPosition: {
-            xs: "80% center",
-            sm: "82% center",
-            md: "85% center",
-            lg: "85% center",
-            xl: "85% center",
-          },
-          backgroundRepeat: "no-repeat",
-          overflow: "hidden",
-          zIndex: (theme) => theme.zIndex.content,
-          isolation: "isolate",
+          height: "100vh"
         }}
       >
-        {/* Water ripples behind California image */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: (theme) => theme.zIndex.sectionBackground, // Behind everything including California image
-            pointerEvents: "none",
-            overflow: "hidden",
-          }}
-        >
-          <WaterRipples count={16} />
-        </Box>
-
-        {/* Water ripples in front of California image (behind markers) */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: (theme) => theme.zIndex.sectionBackground,
-            pointerEvents: "none",
-            overflow: "hidden",
-          }}
-        >
-          <WaterRipples count={16} />
-        </Box>
-
         {/* Floating markers overlay */}
         <Box
           sx={{
