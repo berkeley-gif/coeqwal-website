@@ -25,6 +25,7 @@ import {
   OperationsPanel,
 } from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
+import { MapPromptDialog } from "@repo/ui"
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -40,6 +41,9 @@ interface MapControlsProps {
   onPointDrag: (index: number, newLng: number, newLat: number) => void
   onDragStart: (index: number) => void
   onDragEnd: () => void
+  // Delivery area props
+  showDeliveryAreaDropdown: boolean
+  onToggleDeliveryAreaDropdown: () => void
   // Third column panel props
   previewPanelTab: number
   hoveredScenario: string | null
@@ -61,6 +65,9 @@ const MapControls = ({
   onPointDrag: _onPointDrag, // eslint-disable-line @typescript-eslint/no-unused-vars
   onDragStart: _onDragStart, // eslint-disable-line @typescript-eslint/no-unused-vars
   onDragEnd: _onDragEnd, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // Delivery area props
+  showDeliveryAreaDropdown: _showDeliveryAreaDropdown, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onToggleDeliveryAreaDropdown,
   // Third column panel props
   previewPanelTab,
   hoveredScenario,
@@ -354,7 +361,7 @@ const MapControls = ({
                         flexShrink: 0,
                       }}
                     >
-                      Choose scenarios by:
+                      Choose by:
                     </Box>
                     <Tabs
                       value={activeTab}
@@ -363,7 +370,7 @@ const MapControls = ({
                     >
                       <Tab label="Presets" />
                       <Tab label="Outcomes" />
-                      <Tab label="Operations" />
+                      <Tab label="Climate resilience" />
                     </Tabs>
                   </Box>
                 </Box>
@@ -521,6 +528,19 @@ const MapControls = ({
                       control={
                         <Checkbox
                           size="small"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              onToggleDeliveryAreaDropdown()
+                            }
+                          }}
+                        />
+                      }
+                      label="Select delivery area"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          size="small"
                           checked={
                             isDrawingCustomRegion || polygonPoints.length > 0
                           }
@@ -534,7 +554,6 @@ const MapControls = ({
                         />
                       }
                       label="Select region on map"
-                      sx={{ gridColumn: "1 / -1" }} // Span full width
                     />
                   </Box>
                 ) : undefined
@@ -1113,6 +1132,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
 
+  // Delivery area state
+  const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] = useState(false)
+  const [isSelectingDeliveryArea, setIsSelectingDeliveryArea] = useState(false)
+
   const handleSelectRegionOnMap = () => {
     setIsDrawingCustomRegion(true)
     setPolygonPoints([])
@@ -1130,6 +1153,19 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     setPolygonPoints([])
     setDraggedPointIndex(null)
     setIsSelfIntersecting(false)
+  }
+
+  const handleToggleDeliveryAreaDropdown = () => {
+    const isChecking = !showDeliveryAreaDropdown
+    setShowDeliveryAreaDropdown(isChecking)
+    
+    if (isChecking) {
+      // Start delivery area selection mode
+      setIsSelectingDeliveryArea(true)
+    } else {
+      // Cancel delivery area selection
+      setIsSelectingDeliveryArea(false)
+    }
   }
 
   // Check if two line segments intersect
@@ -1469,37 +1505,15 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         )}
       </Map>
 
-      {/* Polygon Drawing Instructions */}
-      {isDrawingCustomRegion && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: 16,
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            color: "white",
-            padding: 2,
-            borderRadius: (theme) => theme.borderRadius.card,
-            zIndex: (theme) => theme.zIndex.tooltip,
-            textAlign: "center",
-            pointerEvents: polygonPoints.length > 0 ? "auto" : "none", // Enable clicks when points exist
-          }}
-        >
-          <Box sx={{ fontSize: "0.9rem", fontWeight: 500, mb: 0.5 }}>
-            Draw Custom Region
-          </Box>
-          <Box
-            sx={{
-              fontSize: "0.8rem",
-              opacity: 0.9,
-              mb: polygonPoints.length > 0 ? 0.5 : 0,
-            }}
-          >
-            Click to add points • Click first point to finish
-            {polygonPoints.length > 0 && ` • ${polygonPoints.length} points`}
-          </Box>
-          {polygonPoints.length > 0 && (
+      {/* Custom region drawing dialog */}
+      <MapPromptDialog
+        isVisible={isDrawingCustomRegion}
+        title="Draw Custom Region"
+        subtitle={`Click to add points • Click first point to finish${
+          polygonPoints.length > 0 ? ` • ${polygonPoints.length} points` : ""
+        }`}
+        actions={
+          polygonPoints.length > 0 ? (
             <Box
               onClick={(e) => {
                 e.stopPropagation()
@@ -1507,22 +1521,50 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 setIsSelfIntersecting(false)
                 setDraggedPointIndex(null)
               }}
-              sx={{
-                fontSize: "0.8rem",
-                color: (theme) => theme.palette.blue.bright, // Match blue links in cards
-                cursor: "pointer",
-                fontWeight: "bold",
-                textDecoration: "none",
+              sx={(theme) => ({
+                fontSize: theme.mapPromptDialog.typography.action.fontSize,
+                color: theme.palette.blue.bright,
+                cursor: theme.mapPromptDialog.typography.action.cursor,
+                fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
+                textDecoration: theme.mapPromptDialog.typography.action.textDecoration,
                 "&:hover": {
-                  color: (theme) => theme.palette.blue.light,
+                  color: theme.palette.blue.light,
                 },
-              }}
+              })}
             >
               Redraw
             </Box>
-          )}
-        </Box>
-      )}
+          ) : undefined
+        }
+      />
+
+      {/* Delivery area selection dialog */}
+      <MapPromptDialog
+        isVisible={isSelectingDeliveryArea}
+        title="Select Delivery Area"
+        subtitle="Click on a polygon on the map to select a delivery area"
+        actions={
+          <Box
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsSelectingDeliveryArea(false)
+              setShowDeliveryAreaDropdown(false)
+            }}
+            sx={(theme) => ({
+              fontSize: theme.mapPromptDialog.typography.action.fontSize,
+              color: theme.palette.blue.bright,
+              cursor: theme.mapPromptDialog.typography.action.cursor,
+              fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
+              textDecoration: theme.mapPromptDialog.typography.action.textDecoration,
+              "&:hover": {
+                color: theme.palette.blue.light,
+              },
+            })}
+          >
+            Cancel
+          </Box>
+        }
+      />
 
       {/* Self-Intersection Warning */}
       {isSelfIntersecting && !isDrawingCustomRegion && (
@@ -1551,6 +1593,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Box>
       )}
 
+
+
       {/* Overlay Controls */}
       <MapControls
         isDrawingCustomRegion={isDrawingCustomRegion}
@@ -1561,6 +1605,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         onPointDrag={handlePointDrag}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        showDeliveryAreaDropdown={showDeliveryAreaDropdown}
+        onToggleDeliveryAreaDropdown={handleToggleDeliveryAreaDropdown}
         previewPanelTab={previewPanelTab}
         hoveredScenario={hoveredScenario}
         selectedScenarios={selectedScenarios}

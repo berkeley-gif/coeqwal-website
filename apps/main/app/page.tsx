@@ -10,7 +10,7 @@ import { sectionIds } from "./config/navigation"
 // import type { MapboxMapRef } from "@repo/map"
 // import MapContainer from "./components/MapContainer"
 import MapPanel from "./features/mapPanel/MapPanel"
-// import { NeedsEditorPanel } from "./features/needsEditor/components"
+// import { NeedsEditorPanel } from "./features/needsEditor/components" // Yuya's needs editor panel
 import IntroSection from "./sections/IntroSection"
 import IntroSection2 from "./sections/IntroSection2"
 import IntroSection3 from "./sections/IntroSection3"

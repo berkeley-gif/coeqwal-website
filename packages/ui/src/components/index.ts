@@ -24,6 +24,7 @@ export { LeadingMarkerText } from "./common/LeadingMarkerText"
 export { ArrowHead } from "./icons/ArrowHead"
 export { VideoBackground } from "./common/VideoBackground"
 export { default as CustomScrollContainer } from "./common/CustomScrollContainer"
+export { default as MapPromptDialog } from "./common/MapPromptDialog"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"

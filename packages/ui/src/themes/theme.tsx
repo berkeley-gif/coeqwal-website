@@ -236,6 +236,39 @@ const themeValues = {
     loading: 1700, // Loading overlays
     debug: 9999, // Debug overlays (development)
   },
+
+  // Map prompt dialog styling
+  mapPromptDialog: {
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    textColor: "#FFFFFF",
+    borderRadius: "16px",
+    padding: "16px",
+    minWidth: "280px",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+    zIndex: 1500, // Same as tooltip layer
+    position: {
+      top: "16px",
+      centerX: true, // Indicates horizontal centering
+    },
+    typography: {
+      title: {
+        fontSize: "0.9rem",
+        fontWeight: 500,
+        marginBottom: "4px",
+      },
+      subtitle: {
+        fontSize: "0.8rem",
+        opacity: 0.9,
+        marginBottom: "4px",
+      },
+      action: {
+        fontSize: "0.8rem",
+        fontWeight: "bold",
+        cursor: "pointer",
+        textDecoration: "none",
+      },
+    },
+  },
 }
 
 // Reusable paragraph hover mixin (background + icon scale)
@@ -1566,6 +1599,9 @@ theme.drawerNavigation = {
   colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
 }
 
+// Add map prompt dialog configuration to theme
+theme.mapPromptDialog = themeValues.mapPromptDialog
+
 // expose mixin constants for easy import if needed
 export const hoverParagraph = hoverParagraphMixin
 export const scenarioCardList = scenarioCardListMixin
@@ -1740,6 +1776,37 @@ declare module "@mui/material/styles" {
     }
     drawerNavigation: {
       colors: string[]
+    }
+    mapPromptDialog: {
+      backgroundColor: string
+      textColor: string
+      borderRadius: string
+      padding: string
+      minWidth: string
+      boxShadow: string
+      zIndex: number
+      position: {
+        top: string
+        centerX: boolean
+      }
+      typography: {
+        title: {
+          fontSize: string
+          fontWeight: number
+          marginBottom: string
+        }
+        subtitle: {
+          fontSize: string
+          opacity: number
+          marginBottom: string
+        }
+        action: {
+          fontSize: string
+          fontWeight: string
+          cursor: string
+          textDecoration: string
+        }
+      }
     }
     cards: {
       typography: {
