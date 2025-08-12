@@ -4,7 +4,11 @@ import React, { useState } from "react"
 import { Box, Button, FormControlLabel, Checkbox } from "@repo/ui/mui"
 import { VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 
-export default function OutcomesPanel() {
+interface OutcomesPanelProps {
+  onExpandChange?: (isExpanded: boolean) => void
+}
+
+export default function OutcomesPanel({ onExpandChange }: OutcomesPanelProps) {
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
   const [expandChart, setExpandChart] = useState(false)
@@ -25,7 +29,9 @@ export default function OutcomesPanel() {
   }
 
   const toggleExpandChart = () => {
-    setExpandChart(!expandChart)
+    const newExpandedState = !expandChart
+    setExpandChart(newExpandedState)
+    onExpandChange?.(newExpandedState)
   }
 
   // Sample data for vertical parallel line plot
@@ -129,7 +135,7 @@ export default function OutcomesPanel() {
 
   const sampleData = generateScenarios()
 
-  // Generate colors using D3's categorical10 palette, cycling through for 30 scenarios
+  // Generate colors using d3's categorical10 palette, cycling through for 30 scenarios
   const generateCategoricalColors = (count: number): string[] => {
     // D3 categorical10 color scheme
     const categorical10 = [
@@ -199,6 +205,7 @@ export default function OutcomesPanel() {
                 cursor: "pointer",
                 fontWeight: 500,
                 textDecoration: "underline",
+                whiteSpace: "nowrap",
                 "&:hover": {
                   color: (theme) => theme.palette.blue.darkest,
                 },
@@ -265,7 +272,7 @@ export default function OutcomesPanel() {
                 size="small"
               />
             }
-            label="view relative to current operations"
+            label="relative to current operations"
           />
           <FormControlLabel
             control={

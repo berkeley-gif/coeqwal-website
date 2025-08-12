@@ -9,7 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, ScenarioCardList } from "@repo/ui"
+import { Card, ScenarioCard } from "@repo/ui"
 import {
   Map,
   useMap,
@@ -25,13 +25,13 @@ import {
   OperationsPanel,
 } from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
-// Using text-based arrows to match existing dropdown arrows
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
 }
 
 interface MapControlsProps {
+  // Region selection props
   isDrawingCustomRegion: boolean
   polygonPoints: Array<{ lng: number; lat: number }>
   draggedPointIndex: number | null
@@ -52,6 +52,7 @@ interface MapControlsProps {
 }
 
 const MapControls = ({
+  // Region selection props
   isDrawingCustomRegion,
   polygonPoints,
   draggedPointIndex: _draggedPointIndex, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -73,7 +74,7 @@ const MapControls = ({
   const { flyTo } = useMap()
   const [showDropdown, setShowDropdown] = useState(false)
   const [activeTab, setActiveTab] = useState(0)
-
+  const [isOutcomesExpanded, setIsOutcomesExpanded] = useState(false)
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
   // Card minimize/maximize states
@@ -92,6 +93,7 @@ const MapControls = ({
     })
   }
 
+  // Scenario card dropdown
   const toggleDropdown = () => {
     setShowDropdown(!showDropdown)
   }
@@ -115,6 +117,7 @@ const MapControls = ({
     })
   }
 
+  // Region card dropdown
   const toggleRegionDropdown = () => {
     setShowRegionDropdown(!showRegionDropdown)
   }
@@ -122,6 +125,10 @@ const MapControls = ({
   const handleSelectRegionOnMapClick = () => {
     onSelectRegionOnMap()
     setShowRegionDropdown(false) // Close dropdown when starting to draw
+  }
+
+  const handleOutcomesExpandChange = (isExpanded: boolean) => {
+    setIsOutcomesExpanded(isExpanded)
   }
 
   return (
@@ -137,7 +144,7 @@ const MapControls = ({
         p: 2, // 16px padding
       }}
     >
-      {/* Three Column Layout */}
+      {/* Three column layout */}
       <Box
         sx={{
           display: "grid",
@@ -146,18 +153,31 @@ const MapControls = ({
           height: "100%",
         }}
       >
-        {/* Left Column */}
+        {/* Left column/scenario card */}
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: 1,
             height: "100%",
           }}
         >
-          {/* Scenario Card - height depends on active tab */}
-          {activeTab === 1 ? (
-            /* Outcomes: 100% height container */
+          {/* Unified scenario card for all tabs */}
+          <Box
+            sx={{
+              position: "relative",
+              // Dynamic height based on active tab - container must have height for child to use 100%
+              ...(activeTab === 1
+                ? {
+                    height: "100%", // Outcomes: use full height
+                    display: "flex",
+                    flexDirection: "column",
+                  }
+                : {
+                    height: "auto", // Presets/Operations: auto height
+                  }),
+            }}
+          >
             <Box
               sx={{
                 backdropFilter: "blur(10px)",
@@ -169,273 +189,267 @@ const MapControls = ({
                 padding: 3,
                 display: "flex",
                 flexDirection: "column",
-                height: "100%", // Use all available height in column
-                minHeight: 0,
+                // Dynamic height based on active tab
+                ...(activeTab === 1
+                  ? {
+                      height: "100%", // Outcomes: use full height
+                      minHeight: 0,
+                    }
+                  : {
+                      height: "auto", // Presets/Operations: auto height
+                    }),
+                opacity: isFirstCardMinimized ? 0.8 : 1,
               }}
             >
               {/* Always visible scenario description section */}
-              <Box sx={{ mb: 2, flexShrink: 0 }}>
-                <Box
-                  sx={{
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    color: (theme) => theme.palette.text.secondary,
-                    mb: 1,
-                  }}
-                >
-                  CHOOSE SCENARIOS:
-                </Box>
-                <Box
-                  sx={{
-                    fontSize: "1.5rem",
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    color: (theme) => theme.palette.text.primary,
-                    mb: 2,
-                  }}
-                >
-                  Current Operations Scenario
-                </Box>
-                <Box sx={{ mb: 2 }}>
-                  <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
-                    <Box
-                      component="li"
-                      sx={{
-                        fontSize: "0.95rem",
-                        fontWeight: 400,
-                        lineHeight: 1.4,
-                        marginBottom: "4px",
-                        color: "inherit",
-                      }}
-                    >
-                      helps us understand how California manages water today
-                    </Box>
-                    <Box
-                      component="li"
-                      sx={{
-                        fontSize: "0.95rem",
-                        fontWeight: 400,
-                        lineHeight: 1.4,
-                        marginBottom: "4px",
-                        color: "inherit",
-                      }}
-                    >
-                      serves as a foundation to compare alternative scenarios
+              {!isFirstCardMinimized && (
+                <Box sx={{ mb: 2, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      color: (theme) => theme.palette.blue.medium,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.75px",
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      display: "block",
+                      mb: 0.5,
+                    }}
+                  >
+                    CHOOSE SCENARIOS
+                  </Box>
+                  <Box
+                    sx={{
+                      color: (theme) => theme.palette.blue.darkest,
+                      fontFamily:
+                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                      fontWeight: 500,
+                      fontSize: "1.5rem",
+                      lineHeight: 1.3,
+                      mb: 2,
+                    }}
+                  >
+                    Current Operations Scenario
+                  </Box>
+                  <Box
+                    sx={{
+                      mb: 2,
+                      color: (theme) => theme.palette.blue.darkest,
+                      fontFamily: (theme) => theme.typography.fontFamily,
+                      fontSize: "1rem",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
+                      <Box
+                        component="li"
+                        sx={{
+                          fontSize: "0.95rem",
+                          fontWeight: 400,
+                          lineHeight: 1.4,
+                          marginBottom: "4px",
+                          color: "inherit",
+                        }}
+                      >
+                        helps us understand how California manages water today
+                      </Box>
+                      <Box
+                        component="li"
+                        sx={{
+                          fontSize: "0.95rem",
+                          fontWeight: 400,
+                          lineHeight: 1.4,
+                          marginBottom: "4px",
+                          color: "inherit",
+                        }}
+                      >
+                        serves as a foundation to compare alternative scenarios
+                      </Box>
                     </Box>
                   </Box>
+
+                  {/* HR separator */}
+                  <Box
+                    sx={{
+                      borderBottom: "1px solid",
+                      borderColor: (theme) => theme.palette.grey[200],
+                      opacity: 0.6,
+                      my: 2.5,
+                      mb: 0,
+                    }}
+                  />
                 </Box>
+              )}
 
-                {/* HR separator */}
-                <Box
-                  sx={{
-                    borderBottom: "1px solid",
-                    borderColor: (theme) => theme.palette.divider,
-                    mb: 0,
-                  }}
-                />
-              </Box>
+              {/* Minimized state */}
+              {isFirstCardMinimized && (
+                <Box sx={{ mb: 2, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      color: (theme) => theme.palette.blue.darkest,
+                      fontFamily:
+                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                      fontWeight: 500,
+                      fontSize: "1.5rem",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    Scenarios
+                  </Box>
+                </Box>
+              )}
 
-              {/* Expanded chart content - takes all remaining space */}
-              <Box
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  minHeight: 0, // Allow shrinking
-                }}
-              >
-                <OutcomesPanel />
-              </Box>
-            </Box>
-          ) : (
-            /* Presets/Operations: content-sized */
-            <Box sx={{ position: "relative" }}>
-              <ScenarioCard
-                topLine={isFirstCardMinimized ? "" : "CHOOSE SCENARIOS:"}
-                headline={
-                  isFirstCardMinimized
-                    ? "Scenarios"
-                    : "Current Operations Scenario"
-                }
-                body={
-                  isFirstCardMinimized ? null : (
-                    <ScenarioCardList
-                      items={[
-                        "helps us understand how California manages water today",
-                        "serves as a foundation to compare alternative scenarios",
-                      ]}
-                    />
-                  )
-                }
-                bottomLine={
-                  isFirstCardMinimized ? null : (
-                    <Box
-                      onClick={toggleDropdown}
-                      sx={{
-                        cursor: "pointer",
-                        userSelect: "none",
-                        transition: "color 0.2s ease",
-                        "&:hover": {
-                          color: (theme) => theme.palette.action.hover,
-                        },
+              {/* Choose alternative scenarios line, hidden when chart expanded or minimized */}
+              {!isOutcomesExpanded && !isFirstCardMinimized && (
+                <Box sx={{ mb: 2, flexShrink: 0 }}>
+                  <Box
+                    onClick={toggleDropdown}
+                    sx={{
+                      cursor: "pointer",
+                      userSelect: "none",
+                      transition: "color 0.2s ease",
+                      color: (theme) => theme.palette.blue.medium,
+                      fontFamily: (theme) => theme.typography.fontFamily,
+                      fontWeight: 500,
+                      fontSize: "0.95rem",
+                      "&:hover": {
+                        color: (theme) => theme.palette.action.hover,
+                      },
+                    }}
+                  >
+                    Choose alternative scenarios to compare{" "}
+                    <span
+                      style={{
+                        fontSize: "0.875em",
+                        lineHeight: 1,
+                        verticalAlign: "baseline",
+                        display: "inline-block",
+                        transform: showDropdown
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "transform 0.2s ease",
                       }}
                     >
-                      Choose alternative scenarios to compare{" "}
-                      <span
-                        style={{
-                          fontSize: "0.875em",
-                          lineHeight: 1,
-                          verticalAlign: "baseline",
-                          display: "inline-block",
-                          transform: showDropdown
-                            ? "rotate(180deg)"
-                            : "rotate(0deg)",
-                          transition: "transform 0.2s ease",
-                        }}
-                      >
-                        ▼
-                      </span>
+                      ▼
+                    </span>
+                  </Box>
+                </Box>
+              )}
+
+              {/* Tab navigation, hidden when chart expanded or minimized */}
+              {!isOutcomesExpanded && !isFirstCardMinimized && showDropdown && (
+                <Box sx={{ mb: 2, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "baseline",
+                    }}
+                  >
+                    <Box
+                      component="span"
+                      sx={{
+                        mr: 2,
+                        fontSize: "0.95rem",
+                        fontWeight: 400,
+                        color: (theme) => theme.palette.text.primary,
+                        flexShrink: 0,
+                      }}
+                    >
+                      Choose scenarios by:
                     </Box>
-                  )
-                }
-                dropdownContent={
-                  isFirstCardMinimized ? undefined : showDropdown ? (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        // Dynamic height based on active tab
-                        ...(activeTab === 1
-                          ? {
-                              // Outcomes tab: ALWAYS maximize available height
-                              height: "calc(100vh - 300px)", // Account for card header + bottom margin
-                              maxHeight: "none", // Remove height restrictions
-                              minHeight: "500px", // Ensure reasonable minimum
-                            }
-                          : {
-                              // Presets/Operations tabs: auto height based on content
-                              height: "auto",
-                              maxHeight: "70vh", // Prevent excessive height
-                              minHeight: "auto",
-                            }),
-                      }}
+                    <Tabs
+                      value={activeTab}
+                      onChange={handleTabChange}
+                      sx={{ flex: 1 }}
                     >
-                      {/* Normal view: Tab navigation and content */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "baseline",
-                          mb: 2,
-                          flexShrink: 0,
-                        }}
-                      >
-                        <Box
-                          component="span"
-                          sx={{
-                            mr: 2,
-                            fontSize: "0.95rem",
-                            fontWeight: 400,
-                            color: (theme) => theme.palette.text.primary,
-                            flexShrink: 0,
-                          }}
-                        >
-                          Choose scenarios by:
-                        </Box>
-                        <Tabs
-                          value={activeTab}
-                          onChange={handleTabChange}
-                          sx={{ flex: 1 }}
-                        >
-                          <Tab label="Presets" />
-                          <Tab label="Outcomes" />
-                          <Tab label="Operations" />
-                        </Tabs>
-                      </Box>
+                      <Tab label="Presets" />
+                      <Tab label="Outcomes" />
+                      <Tab label="Operations" />
+                    </Tabs>
+                  </Box>
+                </Box>
+              )}
 
-                      {/* Tab Content - Responsive height allocation */}
-                      {activeTab === 0 && (
-                        <Box sx={{ flexShrink: 0 }}>
-                          <PresetsPanel
-                            onViewOnMap={handleViewOnMap}
-                            onScenarioHover={onScenarioHover}
-                            onScenarioSelect={onScenarioSelect}
-                          />
-                        </Box>
-                      )}
-                      {activeTab === 1 && (
-                        <Box
-                          sx={{
+              {/* Tab Content - Dynamic based on active tab and dropdown state */}
+              {!isFirstCardMinimized &&
+                (showDropdown || (activeTab === 1 && isOutcomesExpanded)) && (
+                  <Box
+                    sx={{
+                      // Dynamic height based on active tab
+                      ...(activeTab === 1
+                        ? {
                             flexGrow: 1,
                             display: "flex",
                             flexDirection: "column",
                             minHeight: 0,
-                          }}
-                        >
-                          <OutcomesPanel />
-                        </Box>
-                      )}
-                      {activeTab === 2 && (
-                        <Box sx={{ flexShrink: 0 }}>
-                          <OperationsPanel />
-                        </Box>
-                      )}
-                    </Box>
-                  ) : undefined
-                }
-                sx={{
-                  opacity: isFirstCardMinimized ? 0.8 : 1,
-                  backdropFilter: "blur(10px)",
-                  pointerEvents: "auto",
-                }}
-              />
-              <Box
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  setIsFirstCardMinimized(!isFirstCardMinimized)
-                }}
-                sx={{
-                  position: "absolute",
-                  top: "8px",
-                  right: "8px",
-                  width: "24px",
-                  height: "24px",
-                  backgroundColor: (theme) => theme.palette.common.white,
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  zIndex: 9999,
-                  pointerEvents: "auto",
-                  "&:hover": {
-                    backgroundColor: (theme) => theme.palette.grey[50],
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                  },
+                          }
+                        : {
+                            flexShrink: 0,
+                          }),
+                    }}
+                  >
+                    {activeTab === 0 && (
+                      <PresetsPanel
+                        onViewOnMap={handleViewOnMap}
+                        onScenarioHover={onScenarioHover}
+                        onScenarioSelect={onScenarioSelect}
+                      />
+                    )}
+                    {activeTab === 1 && (
+                      <OutcomesPanel
+                        onExpandChange={handleOutcomesExpandChange}
+                      />
+                    )}
+                    {activeTab === 2 && <OperationsPanel />}
+                  </Box>
+                )}
+            </Box>
+
+            {/* Minimize/maximize button */}
+            <Box
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setIsFirstCardMinimized(!isFirstCardMinimized)
+              }}
+              sx={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "24px",
+                height: "24px",
+                backgroundColor: (theme) => theme.palette.common.white,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                zIndex: 9999,
+                pointerEvents: "auto",
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.grey[50],
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <svg
+                width="12"
+                height="10"
+                viewBox="0 0 12 10"
+                style={{
+                  fill: "#3a4574",
+                  transition: "transform 0.2s ease",
+                  transform: isFirstCardMinimized
+                    ? "rotate(0deg)"
+                    : "rotate(180deg)",
+                  pointerEvents: "none",
                 }}
               >
-                <svg
-                  width="12"
-                  height="10"
-                  viewBox="0 0 12 10"
-                  style={{
-                    fill: "#3a4574",
-                    transition: "transform 0.2s ease",
-                    transform: isFirstCardMinimized
-                      ? "rotate(0deg)"
-                      : "rotate(180deg)",
-                    pointerEvents: "none",
-                  }}
-                >
-                  <path d="M6 0 L11 8 Q6 6 1 8 Z" />
-                </svg>
-              </Box>
+                <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+              </svg>
             </Box>
-          )}
+          </Box>
         </Box>
 
         {/* Center Column */}
