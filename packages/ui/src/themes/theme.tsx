@@ -69,11 +69,6 @@ import type { CSSProperties } from "react"
 // • body1: 1.25rem (20px) - Primary body text
 // • body2: 1.125rem (18px) - Secondary body text
 //
-// All headlines use GT Super Text for cohesive editorial style
-// GT Super Text weights: 300 (book), 400 (regular), 500 (medium), 700 (bold), 900 (black)
-//
-
-const H1_FONT = "gtSuperText" // GT Super Text for h1 headlines
 
 const typeScale = {
   // Base sizes for the scale
@@ -94,6 +89,8 @@ const themeValues = {
   fontFamily: {
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    neueHaasDisplay:
+      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     gtSuperText:
       '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
@@ -662,25 +659,25 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily[H1_FONT],
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 0.85,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h2,
       fontWeight: 500,
-      lineHeight: 1.05,
+      lineHeight: 1.2,
     },
     h3: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.gtSuperText,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h4,
       fontWeight: 500,
       lineHeight: 1.2,
