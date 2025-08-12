@@ -206,6 +206,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
     lines
       .append("path")
+      .attr("class", "data-path") // Add class for debugging
       .attr("d", (d) => {
         const points: [string, number][] = axes.map((axis) => [
           axis,
@@ -219,11 +220,20 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         return lineColors.length > i ? lineColors[i]! : colors.default
       })
       .attr("stroke-width", (d) => (d.highlighted ? 2.5 : 1.5))
-      .attr("opacity", (d) => (d.highlighted ? 0.9 : 0.6))
+      .attr("opacity", (d) => (d.highlighted ? 0.9 : 0.2)) // Transparent data lines
       .style("cursor", "pointer")
       .on("mouseover", function (_event, d) {
         // Highlight line on hover
         d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
+
+        // Highlight all corresponding circles
+        g.selectAll("circle")
+          .filter(
+            (circleData) =>
+              (circleData as VerticalParallelLineData).id === d.id,
+          )
+          .attr("r", d.highlighted ? 6 : 5)
+          .attr("opacity", 1)
 
         onLineHover?.(d)
       })
@@ -231,7 +241,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         // Reset line style
         d3.select(this)
           .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
-          .attr("opacity", d.highlighted ? 0.9 : 0.6)
+          .attr("opacity", d.highlighted ? 0.9 : 0.2)
+
+        // Reset all corresponding circles
+        g.selectAll("circle")
+          .filter(
+            (circleData) =>
+              (circleData as VerticalParallelLineData).id === d.id,
+          )
+          .attr("r", d.highlighted ? 5 : 4)
+          .attr("opacity", d.highlighted ? 1 : 0.8)
 
         onLineHover?.(null)
       })
@@ -243,9 +262,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     data.forEach((d, dataIndex) => {
       axes.forEach((axis) => {
         g.append("circle")
+          .datum(d) // Store data reference for filtering
           .attr("cx", scales[axis]?.(d.values[axis] || 0) ?? 0) // Value position on horizontal axis
           .attr("cy", yScale(axis)!) // Axis position vertically
-          .attr("r", d.highlighted ? 4 : 3) // Larger circles for highlighted lines
+          .attr("r", d.highlighted ? 5 : 4) // Larger circles for highlighted lines
           .attr("fill", () => {
             if (d.highlighted) return colors.highlighted
             return lineColors.length > dataIndex
@@ -254,14 +274,37 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           })
           .attr("stroke", "white")
           .attr("stroke-width", 1.5)
+          .attr("opacity", d.highlighted ? 1 : 0.8)
           .style("cursor", "pointer")
           .on("mouseover", function () {
             onLineHover?.(d)
-            d3.select(this).attr("r", d.highlighted ? 5 : 4) // Grow on hover
+            // Make both circle and corresponding line fully opaque
+            d3.select(this)
+              .attr("r", d.highlighted ? 6 : 5)
+              .attr("opacity", 1)
+            // Find and highlight the corresponding line
+            g.selectAll(".data-line path")
+              .filter(
+                (lineData) =>
+                  (lineData as VerticalParallelLineData).id === d.id,
+              )
+              .attr("stroke-width", 3)
+              .attr("opacity", 1)
           })
           .on("mouseout", function () {
             onLineHover?.(null)
-            d3.select(this).attr("r", d.highlighted ? 4 : 3) // Return to normal size
+            // Reset circle
+            d3.select(this)
+              .attr("r", d.highlighted ? 5 : 4)
+              .attr("opacity", d.highlighted ? 1 : 0.8)
+            // Reset corresponding line
+            g.selectAll(".data-line path")
+              .filter(
+                (lineData) =>
+                  (lineData as VerticalParallelLineData).id === d.id,
+              )
+              .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
+              .attr("opacity", d.highlighted ? 0.9 : 0.2)
           })
           .on("click", function () {
             onLineClick?.(d)
