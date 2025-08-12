@@ -180,7 +180,7 @@ export default function ContentPanels({
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LeadingMarkerText title="Explore">
           <Typography variant="body2">
-            COEQWAL&apos;s &ldquo;what if&rdquo; scenarios by theme
+            COEQWAL&apos;s scenarios by theme
           </Typography>
         </LeadingMarkerText>
       </Box>

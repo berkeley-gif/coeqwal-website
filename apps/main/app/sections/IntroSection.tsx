@@ -1,12 +1,12 @@
 import React from "react"
-import { BasePanel, Spacer, GlossaryLinkedText, ArrowHead } from "@repo/ui"
+import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
-import { useTranslation } from "@repo/i18n"
+// import { useTranslation } from "@repo/i18n"
 import FloatingMarker from "../components/FloatingMarker"
-import { useDrawerStore } from "@repo/state"
+// import { useDrawerStore } from "@repo/state"
 
 const IntroSection: React.FC = () => {
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
 
   const markerSpecs = [
     // Row 1
@@ -202,7 +202,6 @@ const IntroSection: React.FC = () => {
     },
   ] as const
 
-  // page elements
   return (
     <Box
       sx={{
@@ -362,7 +361,7 @@ const IntroSection: React.FC = () => {
       </Box>
 
       {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 48, md: 96 }} />
+      <Spacer height={{ xs: 48, md: 124 }} />
 
       {/* Second panel - Overview content */}
       <Box
@@ -370,7 +369,6 @@ const IntroSection: React.FC = () => {
         sx={{
           position: "relative",
           width: "100vw",
-          height: "100vh",
           background: `
             url('/images/home_collage/birds_top.png'),
             url('/images/home_collage/left_side.png'),
@@ -384,156 +382,85 @@ const IntroSection: React.FC = () => {
       >
         <BasePanel
           fullHeight={false}
+          fullWidth
           background="transparent"
-          paddingVariant="wide"
-          includeHeaderSpacing={false}
+          paddingVariant="very-wide"
+          includeHeaderSpacing={true}
           sx={{
             color: (theme) => theme.palette.primary.dark,
-            paddingLeft: { xs: 6, md: 20 },
-            paddingRight: { xs: 3, md: 6 },
-            paddingTop: { xs: 2, md: 6 }, // Override the wide padding variant's top padding
-            height: "100vh",
             display: "flex",
             flexDirection: "column",
             position: "relative",
             overflow: "visible",
           }}
         >
-          {/* Content container centered in viewport */}
+          {/* Text content */}
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-              height: "100vh", // Full viewport height for proper centering
               position: "relative",
-              zIndex: (theme) => theme.zIndex.introText, // Text layer
+              zIndex: (theme) => theme.zIndex.introText,
+              textAlign: "left",
             }}
           >
-            {/* Text content centered */}
-            <Box
-              maxWidth="716px"
-              sx={{
-                position: "relative",
-                zIndex: (theme) => theme.zIndex.introText,
-                textAlign: "center",
-              }}
-            >
-              <Stack spacing={4}>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    color: (theme) => theme.palette.blue.darkest,
-                    mb: 3,
-                    textAlign: "center",
-                  }}
-                >
-                  What is California&apos;s water future?
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: (theme) => theme.palette.blue.darkest,
-                    textAlign: "left",
-                  }}
-                >
-                  <GlossaryLinkedText
-                    text={t("interstitial.part1")}
-                    terms={[
-                      { name: "surface water", glossaryTerm: "Surface water" },
-                      { name: "conveyance", glossaryTerm: "Conveyance" },
-                      { name: "allocation", glossaryTerm: "Allocation" },
-                      {
-                        name: "Central Valley",
-                        glossaryTerm: "Central Valley",
-                      },
-                    ]}
-                    onActivate={(glossaryTerm) => {
-                      const drawerStore = useDrawerStore.getState()
-                      drawerStore.setDrawerContent({
-                        selectedSection: "glossary",
-                        selectedTerm: glossaryTerm,
-                      })
-                      drawerStore.openDrawer("glossary")
-                    }}
-                  />
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: (theme) => theme.palette.blue.darkest,
-                    textAlign: "left",
-                  }}
-                >
-                  <GlossaryLinkedText
-                    text={t("interstitial.part2")}
-                    terms={[
-                      { name: "storage", glossaryTerm: "Storage" },
-                      { name: "conveyance", glossaryTerm: "Conveyance" },
-                      { name: "deliveries", glossaryTerm: "Deliveries" },
-                      {
-                        name: "operational decisions",
-                        glossaryTerm: "Operational decisions",
-                      },
-                      { name: "CalSim", glossaryTerm: "CalSim" },
-                      { name: "COEQWAL", glossaryTerm: "COEQWAL" },
-                      { name: "scenarios", glossaryTerm: "Scenarios" },
-                      { name: "climate", glossaryTerm: "Changing climate" },
-                    ]}
-                    onActivate={(glossaryTerm) => {
-                      const drawerStore = useDrawerStore.getState()
-                      drawerStore.setDrawerContent({
-                        selectedSection: "glossary",
-                        selectedTerm: glossaryTerm,
-                      })
-                      drawerStore.openDrawer("glossary")
-                    }}
-                  />
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: (theme) => theme.palette.blue.darkest,
-                    textAlign: "left",
-                  }}
-                >
-                  <GlossaryLinkedText
-                    text={t("interstitial.part3")}
-                    terms={[
-                      { name: "COEQWAL", glossaryTerm: "COEQWAL" },
-                      { name: "scenarios", glossaryTerm: "Scenarios" },
-                      {
-                        name: "changing climate",
-                        glossaryTerm: "Changing climate",
-                      },
-                    ]}
-                    onActivate={(glossaryTerm) => {
-                      const drawerStore = useDrawerStore.getState()
-                      drawerStore.setDrawerContent({
-                        selectedSection: "glossary",
-                        selectedTerm: glossaryTerm,
-                      })
-                      drawerStore.openDrawer("glossary")
-                    }}
-                  />
-                </Typography>
-                <Typography
-                  variant="h4"
-                  sx={{
-                    color: (theme) => theme.palette.blue.darkest,
-                    mt: 2,
-                    textAlign: "center",
-                  }}
-                >
-                  what if we did things differently?
-                </Typography>
-              </Stack>
-            </Box>
+            <Stack spacing={4}>
+              <Typography
+                variant="h2"
+                sx={{
+                  color: (theme) => theme.palette.blue.darkest,
+                  mb: 3,
+                  textAlign: "left",
+                }}
+              >
+                The amount of water available for any purpose in California
+                depends on two things: how much precipitation we get and how we
+                manage this water. We are already having to make difficult water
+                allocation decisions. We are facing a time of climate
+                uncertainty and need to prepare for the future.
+              </Typography>
+            </Stack>
           </Box>
         </BasePanel>
       </Box>
+
+      <BasePanel
+        fullHeight={false}
+        fullWidth
+        background="transparent"
+        paddingVariant="very-wide"
+        includeHeaderSpacing={true}
+        sx={{
+          color: (theme) => theme.palette.primary.dark,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          overflow: "visible",
+        }}
+      >
+        {/* Text content */}
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: (theme) => theme.zIndex.introText,
+            textAlign: "left",
+          }}
+        >
+          <Stack spacing={4}>
+            <Typography
+              variant="h2"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                mb: 3,
+                textAlign: "left",
+              }}
+            >
+              The COEQWAL project has run 30 alternative water management
+              scenarios for the Central Valley water systems that feed most of
+              the state. For each of these scenarios, we considered 5 future
+              climate possibilities.
+            </Typography>
+          </Stack>
+        </Box>
+      </BasePanel>
     </Box>
   )
 }
