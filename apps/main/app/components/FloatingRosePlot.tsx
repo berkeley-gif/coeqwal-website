@@ -20,11 +20,11 @@ export default function FloatingRosePlot({
   quarterIndex,
 }: FloatingRosePlotProps) {
   // Four specific colors for the rose plots
-  const colors = ["5D9BE2", "A9D0BF", "FFAC6E", "9793B3"] // Blue, Mint, Orange, Purple
-  
+  const colors = ["#5D9BE2", "#A9D0BF", "#FFAC6E", "#9793B3"] // Blue, Mint, Orange, Purple
+
   // Generate different radii for each quarter (as percentages of the base size)
   const radii = [0.8, 0.6, 0.9, 0.7] // Different radii for variety
-  
+
   // Generate random parameters for each rose plot to create unique movement
   const bobDelay = Math.random() * 3 // 0-3 seconds
   const driftDelay = Math.random() * 5 // 0-5 seconds
@@ -69,21 +69,21 @@ export default function FloatingRosePlot({
     const centerX = 0
     const centerY = 0
     const endAngle = startAngle + 90 // 90 degrees for each quarter
-    
+
     // Convert angles to radians
     const startRad = (startAngle * Math.PI) / 180
     const endRad = (endAngle * Math.PI) / 180
-    
+
     // Calculate start and end points
     const x1 = centerX + radius * Math.cos(startRad)
     const y1 = centerY + radius * Math.sin(startRad)
     const x2 = centerX + radius * Math.cos(endRad)
     const y2 = centerY + radius * Math.sin(endRad)
-    
+
     // Create arc path
     const largeArcFlag = 0 // Always 0 for 90-degree arcs
     const sweepFlag = 1 // Clockwise direction
-    
+
     return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${x2} ${y2} Z`
   }
 
@@ -129,15 +129,15 @@ export default function FloatingRosePlot({
         {/* Four quarters with different radii and colors */}
         {[0, 1, 2, 3].map((quarter) => {
           const angle = quarter * 90 // 0°, 90°, 180°, 270°
-          const radius = radii[quarter] * 20 // Scale to viewBox
+          const radius = (radii[quarter] ?? 0.8) * 20 // Scale to viewBox
           const colorIndex = (quarterIndex + quarter) % colors.length
           const color = colors[colorIndex]
-          
+
           return (
             <path
               key={quarter}
               d={createQuarterPath(angle, radius)}
-              fill={`#${color}`}
+              fill={color}
               stroke="none"
               opacity={0.8}
             />

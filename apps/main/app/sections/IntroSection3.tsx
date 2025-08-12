@@ -1,45 +1,57 @@
 import React from "react"
-import { BasePanel, Spacer, GlossaryLinkedText, ArrowHead } from "@repo/ui"
-import { Box, Typography, Stack } from "@repo/ui/mui"
-import { useTranslation } from "@repo/i18n"
-import FloatingMarker from "../components/FloatingMarker"
+import { BasePanel } from "@repo/ui"
+import { Box, Typography } from "@repo/ui/mui"
+// import { useTranslation } from "@repo/i18n"
 import FloatingCircle from "../components/FloatingCircle"
 import FloatingRosePlot from "../components/FloatingRosePlot"
 import WaterRipples from "../components/WaterRipples"
-import { useDrawerStore } from "@repo/state"
 
 const IntroSection3: React.FC = () => {
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
 
   // Precise color separation for 180 circles
-  const outerColors = ["76B854", "9793B3", "A9D0BF", "5D9BE2", "75A264", "FFAC6E"] // 6 outer colors
-  const innerColors = ["969189", "5FACCA", "7198A5", "B8D7EF", "7B8EC2", "82807C"] // 6 inner colors
-  
+  const outerColors = [
+    "#76B854",
+    "#9793B3",
+    "#A9D0BF",
+    "#5D9BE2",
+    "#75A264",
+    "#FFAC6E",
+  ] // 6 outer colors
+  const innerColors = [
+    "#969189",
+    "#5FACCA",
+    "#7198A5",
+    "#B8D7EF",
+    "#7B8EC2",
+    "#82807C",
+  ] // 6 inner colors
+
   // Slightly smaller rose plot size for better grid spacing
   const circleSize = { xs: 45, sm: 50, md: 55, lg: 60, xl: 65 }
-  
+
   // Generate 180 circles in 15 rows × 12 columns grid with staggering
   const circleSpecs = []
-  
+
   for (let row = 0; row < 15; row++) {
     for (let col = 0; col < 12; col++) {
       // Add staggering to break up vertical lines
       const isEvenRow = row % 2 === 0
       const staggerOffset = isEvenRow ? 0 : 4 // Offset every other row by 4%
-      
+
       // Calculate position with tighter spacing and staggering
-      const left = `${1 + staggerOffset + (col * 7.5)}%` // Start at 1%, 7.5% spacing, with stagger
-      const top = `${1 + (row * 6.2)}%` // Start at 1%, 6.2% spacing between rows
-      
+      const left = `${1 + staggerOffset + col * 7.5}%` // Start at 1%, 7.5% spacing, with stagger
+      const top = `${1 + row * 6.2}%` // Start at 1%, 6.2% spacing between rows
+
       // Cycle through color combinations
       const outerColorIndex = (row + col) % outerColors.length
       const innerColorIndex = (row * 2 + col) % innerColors.length
-      
+
       circleSpecs.push({
         left,
         top,
-        innerColor: innerColors[innerColorIndex],
-        outerColor: outerColors[outerColorIndex]
+        innerColor: innerColors[innerColorIndex] ?? "#969189",
+        outerColor: outerColors[outerColorIndex] ?? "#76B854",
       })
     }
   }
@@ -162,13 +174,15 @@ const IntroSection3: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontFamily:
+                  '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 fontWeight: 700,
                 lineHeight: 1.2,
                 color: (theme) => theme.palette.blue.darkest,
               }}
             >
-              We have organized these scenarios according to their outcomes. You can explore these scenarios by their effects.
+              We have organized these scenarios according to their outcomes. You
+              can explore these scenarios by their effects.
             </Typography>
           </Box>
         </BasePanel>
@@ -243,13 +257,16 @@ const IntroSection3: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontFamily:
+                  '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 fontWeight: 700,
                 lineHeight: 1.2,
                 color: (theme) => theme.palette.blue.darkest,
               }}
             >
-              Since water conditions and deliveries vary from year to year and from location to location, the results of these scenarios are actually a range of possibilities.
+              Since water conditions and deliveries vary from year to year and
+              from location to location, the results of these scenarios are
+              actually a range of possibilities.
             </Typography>
           </Box>
         </BasePanel>
