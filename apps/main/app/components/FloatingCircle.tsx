@@ -99,7 +99,7 @@ export default function FloatingCircle({
           width: "100%",
           height: "100%",
           borderRadius: "50%",
-          backgroundColor: `#${outerColor}`,
+          backgroundColor: outerColor,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -112,7 +112,7 @@ export default function FloatingCircle({
             width: "60%", // Inner circle is 60% of outer circle
             height: "60%",
             borderRadius: "50%",
-            backgroundColor: `#${innerColor}`,
+            backgroundColor: innerColor,
             pointerEvents: "none",
           }}
         />

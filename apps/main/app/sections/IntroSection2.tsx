@@ -1,18 +1,17 @@
 import React from "react"
-import { BasePanel, Spacer, GlossaryLinkedText, ArrowHead } from "@repo/ui"
-import { Box, Typography, Stack } from "@repo/ui/mui"
-import { useTranslation } from "@repo/i18n"
+import { BasePanel, Spacer } from "@repo/ui"
+import { Box, Typography } from "@repo/ui/mui"
+// import { useTranslation } from "@repo/i18n"
 import FloatingMarker from "../components/FloatingMarker"
 import WaterRipples from "../components/WaterRipples"
-import { useDrawerStore } from "@repo/state"
 
 const IntroSection2: React.FC = () => {
-  const { t } = useTranslation()
+  // const { t } = useTranslation()
 
   // Hero section markers - 6 well-distributed markers for clean composition
   // Smaller size for better balance
   const markerSize = { xs: 160, sm: 190, md: 220, lg: 250, xl: 280 }
-  
+
   const markerSpecs = [
     // Top row - evenly spaced
     {
@@ -178,13 +177,16 @@ const IntroSection2: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontFamily:
+                  '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 fontWeight: 700,
                 lineHeight: 1.2,
                 color: (theme) => theme.palette.blue.darkest,
               }}
             >
-              Two main things determine how much water is allocated to a purpose in California: the amount of precipitation that falls on the state and how it is managed.
+              Two main things determine how much water is allocated to a purpose
+              in California: the amount of precipitation that falls on the state
+              and how it is managed.
             </Typography>
           </Box>
         </BasePanel>
@@ -249,7 +251,8 @@ const IntroSection2: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontFamily:
+                  '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 fontWeight: 700,
                 lineHeight: 1.2,
                 color: "white",
@@ -261,13 +264,17 @@ const IntroSection2: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontFamily:
+                  '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 fontWeight: 700,
                 lineHeight: 1.2,
                 color: "white",
               }}
             >
-              The COEQWAL project has run 30 alternative water management scenarios for the Central Valley water systems that feed most of the state. For each of these scenarios, we considered 5 future climate possibilities.
+              The COEQWAL project has run 30 alternative water management
+              scenarios for the Central Valley water systems that feed most of
+              the state. For each of these scenarios, we considered 5 future
+              climate possibilities.
             </Typography>
           </Box>
         </BasePanel>

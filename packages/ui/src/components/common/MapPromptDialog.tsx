@@ -66,7 +66,10 @@ export default function MapPromptDialog({
         sx={(theme) => ({
           fontSize: theme.mapPromptDialog.typography.subtitle.fontSize,
           opacity: theme.mapPromptDialog.typography.subtitle.opacity,
-          mb: children || actions ? theme.mapPromptDialog.typography.subtitle.marginBottom : 0,
+          mb:
+            children || actions
+              ? theme.mapPromptDialog.typography.subtitle.marginBottom
+              : 0,
         })}
       >
         {subtitle}

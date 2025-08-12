@@ -1133,7 +1133,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
 
   // Delivery area state
-  const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] = useState(false)
+  const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] =
+    useState(false)
   const [isSelectingDeliveryArea, setIsSelectingDeliveryArea] = useState(false)
 
   const handleSelectRegionOnMap = () => {
@@ -1158,7 +1159,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const handleToggleDeliveryAreaDropdown = () => {
     const isChecking = !showDeliveryAreaDropdown
     setShowDeliveryAreaDropdown(isChecking)
-    
+
     if (isChecking) {
       // Start delivery area selection mode
       setIsSelectingDeliveryArea(true)
@@ -1526,7 +1527,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 color: theme.palette.blue.bright,
                 cursor: theme.mapPromptDialog.typography.action.cursor,
                 fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
-                textDecoration: theme.mapPromptDialog.typography.action.textDecoration,
+                textDecoration:
+                  theme.mapPromptDialog.typography.action.textDecoration,
                 "&:hover": {
                   color: theme.palette.blue.light,
                 },
@@ -1555,7 +1557,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               color: theme.palette.blue.bright,
               cursor: theme.mapPromptDialog.typography.action.cursor,
               fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
-              textDecoration: theme.mapPromptDialog.typography.action.textDecoration,
+              textDecoration:
+                theme.mapPromptDialog.typography.action.textDecoration,
               "&:hover": {
                 color: theme.palette.blue.light,
               },
@@ -1592,8 +1595,6 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           </Box>
         </Box>
       )}
-
-
 
       {/* Overlay Controls */}
       <MapControls
