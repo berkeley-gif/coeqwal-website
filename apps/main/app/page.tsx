@@ -283,8 +283,8 @@ export default function Home() {
           }}
         >
           {/* Intro Panel */}
-          <IntroSection2 />
-          <IntroSection3 />
+          {/* <IntroSection2 />  Uncomment for concept */}
+          {/*<IntroSection3 /> Uncomment for concept */}
           <IntroSection />
 
           {/* Content Panels */}
