@@ -12,6 +12,8 @@ import { sectionIds } from "./config/navigation"
 import MapPanel from "./features/mapPanel/MapPanel"
 // import { NeedsEditorPanel } from "./features/needsEditor/components"
 import IntroSection from "./sections/IntroSection"
+import IntroSection2 from "./sections/IntroSection2"
+import IntroSection3 from "./sections/IntroSection3"
 import ContentPanels from "./sections/ContentPanels"
 import { useDrawerStore } from "@repo/state"
 // Commenting out map store - uncomment to re-enable the map
@@ -93,7 +95,7 @@ export default function Home() {
     closeDrawer()
   }
 
-  // Handler to open specific drawer tabs - using the store
+  // Handler to open specific drawer tabs,s using the store
   const handleOpenThemesDrawer = (operationId?: string) => {
     // Check if the themes drawer is already open
     if (activeDrawerTab === "glossary") {
@@ -281,6 +283,8 @@ export default function Home() {
           }}
         >
           {/* Intro Panel */}
+          <IntroSection2 />
+          <IntroSection3 />
           <IntroSection />
 
           {/* Content Panels */}
