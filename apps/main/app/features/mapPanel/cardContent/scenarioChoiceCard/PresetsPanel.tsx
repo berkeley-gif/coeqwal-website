@@ -408,7 +408,7 @@ export default function PresetsPanel({
 
             {/* Render sub-options if expanded */}
             {option.subOptions && expandedOptions.has(option.id) && (
-              <Box sx={{ mt: 0.5 }}>
+              <Box sx={{ mt: 0.5, mb: 1 }}>
                 <Stack spacing={0.5}>
                   {option.subOptions.map((subOption) =>
                     renderOption(subOption, true),
