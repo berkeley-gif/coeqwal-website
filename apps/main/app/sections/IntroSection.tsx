@@ -3,7 +3,6 @@ import { BasePanel, Spacer, GlossaryLinkedText, ArrowHead } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import FloatingMarker from "../components/FloatingMarker"
-import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
 
 const IntroSection: React.FC = () => {
@@ -146,7 +145,7 @@ const IntroSection: React.FC = () => {
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/drinking_water2.png",
+      src: "/images/markers/los_angeles2.png",
       right: { xs: "60%", sm: "60%", md: "60%", lg: "60%", xl: "60%" },
       top: "73%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
@@ -220,7 +219,7 @@ const IntroSection: React.FC = () => {
         sx={{
           position: "relative",
           width: "100vw",
-          height: "100vh"
+          height: "100vh",
         }}
       >
         {/* Floating markers overlay */}
@@ -272,55 +271,37 @@ const IntroSection: React.FC = () => {
             }}
           ></Box>
 
-          {/* Text content on top of background circles */}
+          {/* Text content centered horizontally and vertically */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              alignItems: "flex-start",
+              alignItems: "center",
               width: "100%",
               height: "100%",
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText, // Text layer
+              textAlign: "center",
             }}
           >
             <Typography
               variant="h1"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
-                mb: 2,
+                mb: 4,
+                textAlign: "center",
               }}
             >
-              Learn.
-            </Typography>
-
-            <Typography
-              variant="h1"
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                mb: 2,
-              }}
-            >
-              Explore.
-            </Typography>
-
-            <Typography
-              variant="h1"
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                mb: 2,
-              }}
-            >
-              Empower.
+              Tell your water story
             </Typography>
 
             <Typography
               variant="h4"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
-                mt: 2.5,
-                mb: 2, // 1rem equivalent (16px)
+                mb: 2,
+                textAlign: "center",
               }}
             >
               Rethink California Water
@@ -331,6 +312,7 @@ const IntroSection: React.FC = () => {
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 maxWidth: "500px",
+                textAlign: "center",
               }}
             >
               Explore a range of Central Valley water scenarios and discover
@@ -343,8 +325,9 @@ const IntroSection: React.FC = () => {
               sx={{
                 display: "flex",
                 justifyContent: "center",
-                width: "500px",
+                width: "100%",
                 color: (theme) => theme.palette.blue.darkest,
+                mt: 3,
               }}
             >
               <ArrowHead
@@ -416,10 +399,7 @@ const IntroSection: React.FC = () => {
             overflow: "visible",
           }}
         >
-          {/* Spacer for header */}
-          <Box sx={{ height: { xs: "64px", md: "80px" } }} />
-
-          {/* Content container for proper blending context */}
+          {/* Content container centered in viewport */}
           <Box
             sx={{
               display: "flex",
@@ -427,18 +407,18 @@ const IntroSection: React.FC = () => {
               justifyContent: "center",
               alignItems: "center",
               width: "100%",
-              flex: 1, // Take up remaining space
+              height: "100vh", // Full viewport height for proper centering
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText, // Text layer
             }}
           >
-            {/* Text content with mix-blend-mode */}
+            {/* Text content centered */}
             <Box
               maxWidth="716px"
               sx={{
                 position: "relative",
                 zIndex: (theme) => theme.zIndex.introText,
-                mb: 36,
+                textAlign: "center",
               }}
             >
               <Stack spacing={4}>
@@ -447,13 +427,17 @@ const IntroSection: React.FC = () => {
                   sx={{
                     color: (theme) => theme.palette.blue.darkest,
                     mb: 3,
+                    textAlign: "center",
                   }}
                 >
                   What is California&apos;s water future?
                 </Typography>
                 <Typography
                   variant="body1"
-                  sx={{ color: (theme) => theme.palette.blue.darkest }}
+                  sx={{
+                    color: (theme) => theme.palette.blue.darkest,
+                    textAlign: "left",
+                  }}
                 >
                   <GlossaryLinkedText
                     text={t("interstitial.part1")}
@@ -478,7 +462,10 @@ const IntroSection: React.FC = () => {
                 </Typography>
                 <Typography
                   variant="body1"
-                  sx={{ color: (theme) => theme.palette.blue.darkest }}
+                  sx={{
+                    color: (theme) => theme.palette.blue.darkest,
+                    textAlign: "left",
+                  }}
                 >
                   <GlossaryLinkedText
                     text={t("interstitial.part2")}
@@ -507,7 +494,10 @@ const IntroSection: React.FC = () => {
                 </Typography>
                 <Typography
                   variant="body1"
-                  sx={{ color: (theme) => theme.palette.blue.darkest }}
+                  sx={{
+                    color: (theme) => theme.palette.blue.darkest,
+                    textAlign: "left",
+                  }}
                 >
                   <GlossaryLinkedText
                     text={t("interstitial.part3")}
@@ -534,6 +524,7 @@ const IntroSection: React.FC = () => {
                   sx={{
                     color: (theme) => theme.palette.blue.darkest,
                     mt: 2,
+                    textAlign: "center",
                   }}
                 >
                   what if we did things differently?
