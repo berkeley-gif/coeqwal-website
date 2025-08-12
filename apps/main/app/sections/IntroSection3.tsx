@@ -4,6 +4,7 @@ import { Box, Typography, Stack } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import FloatingMarker from "../components/FloatingMarker"
 import FloatingCircle from "../components/FloatingCircle"
+import FloatingRosePlot from "../components/FloatingRosePlot"
 import WaterRipples from "../components/WaterRipples"
 import { useDrawerStore } from "@repo/state"
 
@@ -14,8 +15,8 @@ const IntroSection3: React.FC = () => {
   const outerColors = ["76B854", "9793B3", "A9D0BF", "5D9BE2", "75A264", "FFAC6E"] // 6 outer colors
   const innerColors = ["969189", "5FACCA", "7198A5", "B8D7EF", "7B8EC2", "82807C"] // 6 inner colors
   
-  // A little bigger circle size for better visibility
-  const circleSize = { xs: 40, sm: 45, md: 50, lg: 55, xl: 60 }
+  // Slightly smaller rose plot size for better grid spacing
+  const circleSize = { xs: 45, sm: 50, md: 55, lg: 60, xl: 65 }
   
   // Generate 180 circles in 15 rows × 12 columns grid with staggering
   const circleSpecs = []
@@ -173,8 +174,8 @@ const IntroSection3: React.FC = () => {
         </BasePanel>
       </Box>
 
-      {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 48, md: 96 }} />
+      {/* Spacer between full-screen panels
+      <Spacer height={{ xs: 48, md: 96 }} /> */}
 
       {/* Second panel - Overview content */}
       <Box
@@ -183,18 +184,10 @@ const IntroSection3: React.FC = () => {
           position: "relative",
           width: "100vw",
           height: "100vh",
-          background: `
-            url('/images/home_collage/birds_top.png'),
-            url('/images/home_collage/left_side.png'),
-            url('/images/home_collage/right.png')
-          `,
-          backgroundSize: "auto 44%, auto 80%, auto 44%",
-          backgroundPosition: "left top, left bottom, right bottom",
-          backgroundRepeat: "no-repeat, no-repeat, no-repeat",
-          overflow: "hidden",
         }}
       >
         <BasePanel
+          id="intro-main"
           fullHeight={false}
           background="transparent"
           includeHeaderSpacing={false}
@@ -205,11 +198,31 @@ const IntroSection3: React.FC = () => {
             flexDirection: "column",
             justifyContent: "center",
             position: "relative",
-            overflow: "hidden", // Prevent content from going beyond viewport
+            overflow: "hidden", // Prevent markers from going beyond viewport
             padding: 0, // Remove default padding for full screen
           }}
         >
-          {/* Text content with same styling as first panel */}
+          {/* Floating rose plots overlay - 4-petal rose plots */}
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              zIndex: (theme) => theme.zIndex.introBackgroundImages, // Lower z-index, below text
+              pointerEvents: "none",
+            }}
+          >
+            {circleSpecs.map((circle, i) => (
+              <FloatingRosePlot
+                key={`second-panel-rose-${i}`}
+                left={circle.left}
+                top={circle.top}
+                size={circleSize}
+                quarterIndex={i % 4} // Cycle through 0-3 to create variety
+              />
+            ))}
+          </Box>
+
+          {/* Text content with blend mode - now above floating markers */}
           <Box
             sx={{
               display: "flex",
@@ -217,13 +230,11 @@ const IntroSection3: React.FC = () => {
               justifyContent: "center",
               alignItems: "flex-start",
               width: "100%",
-              height: (theme) => `calc(100vh - ${theme.layout.headerHeight}px)`, // Match the BasePanel height exactly
-              position: "absolute",
-              top: 0,
-              left: 0,
+              height: "100%",
+              position: "relative",
               zIndex: (theme) => theme.zIndex.introForegroundImages, // Higher z-index, above markers
-              mixBlendMode: "difference", // Same blend mode as first panel
-              paddingLeft: { xs: 6, md: 20 }, // Same padding as first panel
+              mixBlendMode: "multiply", // Try different blend modes: difference, exclusion, overlay, soft-light, hard-light, color-dodge, color-burn
+              paddingLeft: { xs: 6, md: 20 }, // Restore text padding
               paddingRight: { xs: 3, md: 6 },
               paddingTop: { xs: 2, md: 4 },
               paddingBottom: { xs: 2, md: 4 },
@@ -235,22 +246,10 @@ const IntroSection3: React.FC = () => {
                 fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                 fontWeight: 700,
                 lineHeight: 1.2,
-                color: "white",
-                mb: 4, // Add margin bottom for spacing
+                color: (theme) => theme.palette.blue.darkest,
               }}
             >
-              What is California&apos;s water future?
-            </Typography>
-            <Typography
-              variant="h1"
-              sx={{
-                fontFamily: '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                fontWeight: 700,
-                lineHeight: 1.2,
-                color: "white",
-              }}
-            >
-              The COEQWAL project has run 30 alternative water management scenarios for the Central Valley water systems that feed most of the state. For each of these scenarios, we considered 5 future climate scenarios.
+              Since water conditions and deliveries vary from year to year and from location to location, the results of these scenarios are actually a range of possibilities.
             </Typography>
           </Box>
         </BasePanel>
