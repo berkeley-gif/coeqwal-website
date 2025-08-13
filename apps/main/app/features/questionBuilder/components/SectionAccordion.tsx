@@ -11,11 +11,11 @@ import {
   Checkbox,
   useTheme,
   ExpandMoreIcon,
-  Tooltip,
   IconButton,
   ArrowCircleUpIcon,
   ArrowCircleDownIcon,
 } from "@repo/ui/mui"
+import { HelpTooltip } from "@repo/ui"
 import { useQuestionBuilderHelpers } from "../hooks/useQuestionBuilderHelpers"
 import { useTranslation } from "@repo/i18n"
 
@@ -373,9 +373,9 @@ const SectionAccordion: React.FC<SectionAccordionProps> = ({
 
     // Wrap with tooltip if disabled
     return isDisabled ? (
-      <Tooltip title={tooltipMessage} arrow placement="right">
+      <HelpTooltip message={tooltipMessage}>
         <span>{checkbox}</span>
-      </Tooltip>
+      </HelpTooltip>
     ) : (
       checkbox
     )

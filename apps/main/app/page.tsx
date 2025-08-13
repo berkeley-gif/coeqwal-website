@@ -10,6 +10,7 @@ import { sectionIds } from "./config/navigation"
 // import type { MapboxMapRef } from "@repo/map"
 // import MapContainer from "./components/MapContainer"
 import MapPanel from "./features/mapPanel/MapPanel"
+import MapPanel2 from "./features/mapPanel/MapPanel2"
 // import { NeedsEditorPanel } from "./features/needsEditor/components" // Yuya's needs editor panel
 import IntroSection from "./sections/IntroSection"
 // import IntroSection2 from "./sections/IntroSection2"
@@ -290,9 +291,12 @@ export default function Home() {
           {/* Content Panels */}
           <ContentPanels onOpenLearnDrawer={handleOpenLearnDrawer} />
 
-          {/* Map Panel */}
           <Box sx={{ pointerEvents: "auto", margin: 0 }} id="map-panel">
-            <MapPanel onOpenThemesDrawer={handleOpenThemesDrawer} />
+            <MapPanel />
+          </Box>
+
+          <Box sx={{ pointerEvents: "auto", margin: 0 }} id="map-panel">
+            <MapPanel2 onOpenThemesDrawer={handleOpenThemesDrawer} />
           </Box>
 
           {/* California Water panel with two columns */}

@@ -56,18 +56,19 @@ import type { CSSProperties } from "react"
 // TYPOGRAPHY SCALE
 // ===============================================================================
 //
-// Perfect Fourth (1.333) type scale
+// Perfect Fourth (1.333) type scale using Neue Haas Grotesk
+// Headlines: Display Medium | Body text: Text Regular
 // Base: 1.25rem body text
 //
 // Scale progression:
-// • h1: 5.75rem (92px) - Hero headlines "Learn. Explore. Empower."
-// • h2: 3.75rem (60px) - Section headlines "What is the future..."
-// • h3: 2.8rem (44.8px) - Subsection headlines
-// • h4: 2.1rem (33.6px) - Card titles and smaller headlines
-// • h5: 1.575rem (25.2px) - Labels and minor headlines
-// • h6: 1.18rem (18.9px) - Small headlines and captions
-// • body1: 1.25rem (20px) - Primary body text
-// • body2: 1.125rem (18px) - Secondary body text
+// • h1: 5.75rem (92px) - Hero headlines "Tell your water story" (Display Medium)
+// • h2: 3.75rem (60px) - Section headlines "What is the future..." (Display Medium)
+// • h3: 2.8rem (44.8px) - Subsection headlines (Display Medium)
+// • h4: 2.1rem (33.6px) - Card titles and smaller headlines (Display Medium)
+// • h5: 1.575rem (25.2px) - Labels and minor headlines (Display Medium)
+// • h6: 1.18rem (18.9px) - Small headlines and captions (Display Medium)
+// • body1: 1.25rem (20px) - Primary body text (Text Regular)
+// • body2: 1.125rem (18px) - Secondary body text (Text Regular)
 //
 
 const typeScale = {
@@ -90,7 +91,7 @@ const themeValues = {
     neueHaasText:
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasDisplay:
-      '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     gtSuperText:
       '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
@@ -182,7 +183,7 @@ const themeValues = {
   borderRadius: {
     pill: "999px",
     rounded: "8px",
-    card: "16px",
+    card: "8px",
     standard: "24px",
     none: "0px",
   },
@@ -238,7 +239,7 @@ const themeValues = {
   mapPromptDialog: {
     backgroundColor: "rgba(0, 0, 0, 0.9)",
     textColor: "#FFFFFF",
-    borderRadius: "16px",
+    borderRadius: "8px",
     padding: "16px",
     minWidth: "280px",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
@@ -659,37 +660,37 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 0.85,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h2,
       fontWeight: 500,
       lineHeight: 1.2,
     },
     h3: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h4,
       fontWeight: 500,
       lineHeight: 1.2,
     },
     h5: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h5,
       fontWeight: 500,
       lineHeight: 1.3,
     },
     h6: {
-      fontFamily: themeValues.fontFamily.neueHaasText,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h6,
       fontWeight: 500,
       lineHeight: 1.4,

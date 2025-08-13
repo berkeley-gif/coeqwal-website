@@ -9,7 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard } from "@repo/ui"
+import { Card, ScenarioCard, MapMarkerTooltip } from "@repo/ui"
 import {
   Map,
   useMap,
@@ -222,7 +222,7 @@ const MapControls = ({
                       mb: 0.5,
                     }}
                   >
-                    CHOOSE SCENARIOS
+                    SCENARIO
                   </Box>
                   <Box
                     sx={{
@@ -235,7 +235,7 @@ const MapControls = ({
                       mb: 2,
                     }}
                   >
-                    Current Operations Scenario
+                    Current Operations
                   </Box>
                   <Box
                     sx={{
@@ -287,8 +287,9 @@ const MapControls = ({
                 </Box>
               )}
 
+              {/* COMMENTED OUT - Will use later */}
               {/* Minimized state */}
-              {isFirstCardMinimized && (
+              {/* {isFirstCardMinimized && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
                     sx={{
@@ -303,10 +304,10 @@ const MapControls = ({
                     Scenarios
                   </Box>
                 </Box>
-              )}
+              )} */}
 
               {/* Choose alternative scenarios line, hidden when chart expanded or minimized */}
-              {!isOutcomesExpanded && !isFirstCardMinimized && (
+              {/* {!isOutcomesExpanded && !isFirstCardMinimized && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
                     onClick={toggleDropdown}
@@ -340,10 +341,10 @@ const MapControls = ({
                     </span>
                   </Box>
                 </Box>
-              )}
+              )} */}
 
               {/* Tab navigation, hidden when chart expanded or minimized */}
-              {!isOutcomesExpanded && !isFirstCardMinimized && showDropdown && (
+              {/* {!isOutcomesExpanded && !isFirstCardMinimized && showDropdown && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
                     sx={{
@@ -374,10 +375,10 @@ const MapControls = ({
                     </Tabs>
                   </Box>
                 </Box>
-              )}
+              )} */}
 
               {/* Tab Content - Dynamic based on active tab and dropdown state */}
-              {!isFirstCardMinimized &&
+              {/* {!isFirstCardMinimized &&
                 (showDropdown || (activeTab === 1 && isOutcomesExpanded)) && (
                   <Box
                     sx={{
@@ -408,7 +409,7 @@ const MapControls = ({
                     )}
                     {activeTab === 2 && <OperationsPanel />}
                   </Box>
-                )}
+                )} */}
             </Box>
 
             {/* Minimize/maximize button */}
@@ -1504,6 +1505,179 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               )}
           </>
         )}
+
+        {/* Custom map markers */}
+        {/* Marker 1: Los Angeles area */}
+        <Marker longitude={-118.2437} latitude={34.0522}>
+          <MapMarkerTooltip
+            text="Los Angeles - Urban water demand performing well"
+            statusColor="#4CAF50"
+          >
+            <Box
+              sx={{
+                position: "relative",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+                "&:hover": {
+                  transform: "scale(1.3)",
+                },
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/map_markers/los_angeles.png"
+                alt="Los Angeles marker"
+                style={{
+                  width: "60px",
+                  height: "auto",
+                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
+                }}
+              />
+              {/* Status indicator */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  backgroundColor: "#4CAF50", // Green for good status
+                  border: "2px solid white",
+                }}
+              />
+            </Box>
+          </MapMarkerTooltip>
+        </Marker>
+
+        {/* Marker 2: Sacramento area */}
+        <Marker longitude={-121.4944} latitude={38.5816}>
+          <MapMarkerTooltip
+            text="Sacramento - Municipal water supply under stress"
+            statusColor="#ff4444"
+          >
+            <Box
+              sx={{
+                position: "relative",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+                "&:hover": {
+                  transform: "scale(1.3)",
+                },
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/map_markers/drinking_water.png"
+                alt="Sacramento drinking water marker"
+                style={{
+                  width: "60px",
+                  height: "auto",
+                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
+                }}
+              />
+              {/* Status indicator */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  backgroundColor: "#ff4444", // Red for bad status
+                  border: "2px solid white",
+                }}
+              />
+            </Box>
+          </MapMarkerTooltip>
+        </Marker>
+
+        {/* Marker 3: Central Valley (Fresno area) */}
+        <Marker longitude={-119.7871} latitude={36.7378}>
+          <MapMarkerTooltip
+            text="Central Valley - Agricultural irrigation stable"
+            statusColor="#4CAF50"
+          >
+            <Box
+              sx={{
+                position: "relative",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+                "&:hover": {
+                  transform: "scale(1.3)",
+                },
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/map_markers/farmers.png"
+                alt="Central Valley marker"
+                style={{
+                  width: "60px",
+                  height: "auto",
+                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
+                }}
+              />
+              {/* Status indicator */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  backgroundColor: "#4CAF50", // Green for good status
+                  border: "2px solid white",
+                }}
+              />
+            </Box>
+          </MapMarkerTooltip>
+        </Marker>
+
+        {/* Marker 4: Chico area */}
+        <Marker longitude={-121.8375} latitude={39.7285}>
+          <MapMarkerTooltip
+            text="Chico - Crop irrigation facing drought challenges"
+            statusColor="#ff4444"
+          >
+            <Box
+              sx={{
+                position: "relative",
+                cursor: "pointer",
+                transition: "transform 0.2s ease",
+                "&:hover": {
+                  transform: "scale(1.3)",
+                },
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/map_markers/grapes.png"
+                alt="Chico grapes marker"
+                style={{
+                  width: "60px",
+                  height: "auto",
+                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
+                }}
+              />
+              {/* Status indicator */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  backgroundColor: "#ff4444", // Red for bad status
+                  border: "2px solid white",
+                }}
+              />
+            </Box>
+          </MapMarkerTooltip>
+        </Marker>
       </Map>
 
       {/* Custom region drawing dialog */}
