@@ -6,10 +6,10 @@ import {
   Stack,
   Checkbox,
   FormControlLabel,
-  Tooltip,
   IconButton,
   useTheme,
 } from "@repo/ui/mui"
+import { InfoTooltip } from "@repo/ui"
 import { useMap } from "@repo/map"
 import InfoIcon from "@mui/icons-material/Info"
 import { useDrawerStore } from "@repo/state"
@@ -349,36 +349,9 @@ export default function PresetsPanel({
       )}
 
       {/* Info tooltip */}
-      <Tooltip
-        title={
-          <Box>
-            <Box sx={{ mb: 1 }}>{option.description}</Box>
-            {renderTooltipActions(option)}
-          </Box>
-        }
-        arrow
-        placement="top-end"
-        // Interaction timing for button clicks
-        enterDelay={200}
-        leaveDelay={500} // Longer delay allows button interactions
-        enterNextDelay={100}
-        // Keep all interaction methods enabled
-        disableFocusListener={false}
-        disableHoverListener={false}
-        disableTouchListener={false}
-        // Fine-tune positioning
-        slotProps={{
-          popper: {
-            modifiers: [
-              {
-                name: "offset",
-                options: {
-                  offset: [5, -10], // [horizontal, vertical]
-                },
-              },
-            ],
-          },
-        }}
+      <InfoTooltip
+        description={option.description}
+        actions={renderTooltipActions(option)}
       >
         <IconButton
           size="small"
@@ -394,7 +367,7 @@ export default function PresetsPanel({
         >
           <InfoIcon fontSize="small" />
         </IconButton>
-      </Tooltip>
+      </InfoTooltip>
     </Box>
   )
 
