@@ -9,9 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
-import { RoseChart } from "@repo/viz"
-import { OUTCOMES } from "../../lib/outcomes"
+import { Card, ScenarioCard } from "@repo/ui"
 import {
   Map,
   useMap,
@@ -21,18 +19,17 @@ import {
   Source,
   Layer,
 } from "@repo/map"
-// import {
-//   PresetsPanel,
-//   OutcomesPanel,
-//   OperationsPanel,
-// } from "./cardContent/scenarioChoiceCard"
+import {
+  PresetsPanel,
+  OutcomesPanel,
+  OperationsPanel,
+} from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import { MapPromptDialog } from "@repo/ui"
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
 }
-
 
 interface MapControlsProps {
   // Region selection props
@@ -91,9 +88,6 @@ const MapControls = ({
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isSecondCardMinimized, setIsSecondCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
-
-  // Chart type state for scenario snapshot
-  const [chartType, setChartType] = useState<"rose" | "bar" | "stick">("rose")
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -228,7 +222,7 @@ const MapControls = ({
                       mb: 0.5,
                     }}
                   >
-                    SCENARIO
+                    CHOOSE SCENARIOS
                   </Box>
                   <Box
                     sx={{
@@ -241,7 +235,7 @@ const MapControls = ({
                       mb: 2,
                     }}
                   >
-                    Current Operations
+                    Current Operations Scenario
                   </Box>
                   <Box
                     sx={{
@@ -287,107 +281,14 @@ const MapControls = ({
                       borderColor: (theme) => theme.palette.grey[200],
                       opacity: 0.6,
                       my: 2.5,
-                      mb: 2.5,
+                      mb: 0,
                     }}
                   />
                 </Box>
               )}
 
-              {/* Scenario Snapshot Section */}
-              {!isFirstCardMinimized && (
-                <Box sx={{ flexShrink: 0, pb: 2 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: 2,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        color: (theme) => theme.palette.blue.darkest,
-                        fontFamily: (theme) => theme.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      Scenario snapshot
-                    </Box>
-                    <Box 
-                      sx={{ 
-                        display: "flex", 
-                        alignItems: "center", 
-                        gap: 1.5,
-                        ml: "auto"
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          color: (theme) => theme.palette.text.secondary,
-                          fontFamily: (theme) => theme.typography.fontFamily,
-                          fontSize: "0.875rem",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        Choose chart type
-                      </Box>
-                      <Dropdown
-                        variant="compact"
-                        value={chartType}
-                        onChange={(e) => setChartType(e.target.value as "rose" | "bar" | "stick")}
-                        options={[
-                          { value: "rose", label: "rose" },
-                          { value: "bar", label: "bar" },
-                          { value: "stick", label: "stick" },
-                        ]}
-                      />
-                    </Box>
-                  </Box>
-                  
-                  {/* Grid layout: outcomes with charts */}
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(2, 1fr)",
-                      gap: 2,
-                      alignItems: "start",
-                    }}
-                  >
-                    {OUTCOMES.map((outcome) => (
-                      <Box
-                        key={outcome}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 1,
-                        }}
-                      >
-                        {/* Rose chart */}
-                        <RoseChart size={60} />
-                        
-                        {/* Outcome label */}
-                        <Box
-                          sx={{
-                            fontSize: "0.75rem",
-                            fontWeight: 400,
-                            lineHeight: 1.3,
-                            color: (theme) => theme.palette.text.secondary,
-                            textAlign: "center",
-                            maxWidth: "80px",
-                          }}
-                        >
-                          {outcome}
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              )}
-
-              {/* COMMENTED OUT - Will use later */}
               {/* Minimized state */}
-              {/* {isFirstCardMinimized && (
+              {isFirstCardMinimized && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
                     sx={{
@@ -402,10 +303,10 @@ const MapControls = ({
                     Scenarios
                   </Box>
                 </Box>
-              )} */}
+              )}
 
               {/* Choose alternative scenarios line, hidden when chart expanded or minimized */}
-              {/* {!isOutcomesExpanded && !isFirstCardMinimized && (
+              {!isOutcomesExpanded && !isFirstCardMinimized && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
                     onClick={toggleDropdown}
@@ -439,10 +340,10 @@ const MapControls = ({
                     </span>
                   </Box>
                 </Box>
-              )} */}
+              )}
 
               {/* Tab navigation, hidden when chart expanded or minimized */}
-              {/* {!isOutcomesExpanded && !isFirstCardMinimized && showDropdown && (
+              {!isOutcomesExpanded && !isFirstCardMinimized && showDropdown && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
                     sx={{
@@ -473,10 +374,10 @@ const MapControls = ({
                     </Tabs>
                   </Box>
                 </Box>
-              )} */}
+              )}
 
               {/* Tab Content - Dynamic based on active tab and dropdown state */}
-              {/* {!isFirstCardMinimized &&
+              {!isFirstCardMinimized &&
                 (showDropdown || (activeTab === 1 && isOutcomesExpanded)) && (
                   <Box
                     sx={{
@@ -507,7 +408,7 @@ const MapControls = ({
                     )}
                     {activeTab === 2 && <OperationsPanel />}
                   </Box>
-                )} */}
+                )}
             </Box>
 
             {/* Minimize/maximize button */}
@@ -1212,7 +1113,7 @@ const MapControls = ({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
+export default function MapPanel2({ onOpenThemesDrawer }: MapPanelProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
 
   // Polygon drawing state, lifted to main component
@@ -1603,179 +1504,6 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               )}
           </>
         )}
-
-        {/* Custom map markers */}
-        {/* Marker 1: Los Angeles area */}
-        <Marker longitude={-118.2437} latitude={34.0522}>
-          <MapMarkerTooltip
-            text="Los Angeles - Urban water demand performing well"
-            statusColor="#4CAF50"
-          >
-            <Box
-              sx={{
-                position: "relative",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": {
-                  transform: "scale(1.3)",
-                },
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/map_markers/los_angeles.png"
-                alt="Los Angeles marker"
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
-                }}
-              />
-              {/* Status indicator */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: "#4CAF50", // Green for good status
-                  border: "2px solid white",
-                }}
-              />
-            </Box>
-          </MapMarkerTooltip>
-        </Marker>
-
-        {/* Marker 2: Sacramento area */}
-        <Marker longitude={-121.4944} latitude={38.5816}>
-          <MapMarkerTooltip
-            text="Sacramento - Municipal water supply under stress"
-            statusColor="#ff4444"
-          >
-            <Box
-              sx={{
-                position: "relative",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": {
-                  transform: "scale(1.3)",
-                },
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/map_markers/drinking_water.png"
-                alt="Sacramento drinking water marker"
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
-                }}
-              />
-              {/* Status indicator */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: "#ff4444", // Red for bad status
-                  border: "2px solid white",
-                }}
-              />
-            </Box>
-          </MapMarkerTooltip>
-        </Marker>
-
-        {/* Marker 3: Central Valley (Fresno area) */}
-        <Marker longitude={-119.7871} latitude={36.7378}>
-          <MapMarkerTooltip
-            text="Central Valley - Agricultural irrigation stable"
-            statusColor="#4CAF50"
-          >
-            <Box
-              sx={{
-                position: "relative",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": {
-                  transform: "scale(1.3)",
-                },
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/map_markers/farmers.png"
-                alt="Central Valley marker"
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
-                }}
-              />
-              {/* Status indicator */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: "#4CAF50", // Green for good status
-                  border: "2px solid white",
-                }}
-              />
-            </Box>
-          </MapMarkerTooltip>
-        </Marker>
-
-        {/* Marker 4: Chico area */}
-        <Marker longitude={-121.8375} latitude={39.7285}>
-          <MapMarkerTooltip
-            text="Chico - Crop irrigation facing drought challenges"
-            statusColor="#ff4444"
-          >
-            <Box
-              sx={{
-                position: "relative",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": {
-                  transform: "scale(1.3)",
-                },
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/images/map_markers/grapes.png"
-                alt="Chico grapes marker"
-                style={{
-                  width: "60px",
-                  height: "auto",
-                  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
-                }}
-              />
-              {/* Status indicator */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: "#ff4444", // Red for bad status
-                  border: "2px solid white",
-                }}
-              />
-            </Box>
-          </MapMarkerTooltip>
-        </Marker>
       </Map>
 
       {/* Custom region drawing dialog */}
