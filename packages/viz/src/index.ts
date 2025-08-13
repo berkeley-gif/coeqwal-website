@@ -5,6 +5,8 @@ export * from "./types"
 export { default as DecileBarChart } from "./components/DecileBarChart"
 export { default as LineChart } from "./components/LineChart"
 export type { LineChartData, MonthlyData } from "./components/LineChart"
+export { default as RoseChart } from "./components/RoseChart"
+export type { RoseChartProps } from "./components/RoseChart"
 export { default as VerticalParallelLinePlot } from "./components/VerticalParallelLinePlot"
 export type {
   VerticalParallelLineData,

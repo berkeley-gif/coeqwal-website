@@ -33,6 +33,8 @@ export { InfoTooltip } from "./common/InfoTooltip"
 export type { InfoTooltipProps } from "./common/InfoTooltip"
 export { HelpTooltip } from "./common/HelpTooltip"
 export type { HelpTooltipProps } from "./common/HelpTooltip"
+export { Dropdown } from "./common/Dropdown"
+export type { DropdownProps, DropdownOption } from "./common/Dropdown"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
