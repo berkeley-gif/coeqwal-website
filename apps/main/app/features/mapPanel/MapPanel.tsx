@@ -8,6 +8,9 @@ import {
   Tab,
   Checkbox,
   FormControlLabel,
+  Select,
+  MenuItem,
+  FormControl,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip } from "@repo/ui"
 import { OUTCOMES } from "../../lib/outcomes"
@@ -176,6 +179,9 @@ const MapControls = ({
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isSecondCardMinimized, setIsSecondCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
+
+  // Chart type state for scenario snapshot
+  const [chartType, setChartType] = useState<"rose" | "bar" | "stick">("rose")
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -380,14 +386,39 @@ const MapControls = ({
                 <Box sx={{ flexShrink: 0, pb: 2 }}>
                   <Box
                     sx={{
-                      color: (theme) => theme.palette.blue.darkest,
-                      fontFamily: (theme) => theme.typography.fontFamily,
-                      fontWeight: 500,
-                      fontSize: "1.1rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
                       mb: 2,
                     }}
                   >
-                    Scenario snapshot
+                    <Box
+                      sx={{
+                        color: (theme) => theme.palette.blue.darkest,
+                        fontFamily: (theme) => theme.typography.fontFamily,
+                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      Scenario snapshot
+                    </Box>
+                    <FormControl size="small" sx={{ minWidth: 80 }}>
+                      <Select
+                        value={chartType}
+                        onChange={(e) => setChartType(e.target.value as "rose" | "bar" | "stick")}
+                        sx={{
+                          fontSize: "0.875rem",
+                          "& .MuiSelect-select": {
+                            py: 0.5,
+                            px: 1,
+                          },
+                        }}
+                      >
+                        <MenuItem value="rose">Rose</MenuItem>
+                        <MenuItem value="bar">Bar</MenuItem>
+                        <MenuItem value="stick">Stick</MenuItem>
+                      </Select>
+                    </FormControl>
                   </Box>
                   
                   {/* Grid layout: outcomes with windrose charts */}
