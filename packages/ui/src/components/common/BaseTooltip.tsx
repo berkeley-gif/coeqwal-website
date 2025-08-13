@@ -19,7 +19,7 @@ export interface BaseTooltipProps {
  * Base tooltip component that wraps the themed MUI Tooltip.
  * This serves as the foundation for all specialized tooltip components
  * and ensures consistent theming across the application.
- * 
+ *
  * Use this directly for simple tooltips, or extend it for specialized use cases.
  */
 export function BaseTooltip({
@@ -29,12 +29,7 @@ export function BaseTooltip({
   tooltipProps = {},
 }: BaseTooltipProps) {
   return (
-    <Tooltip
-      title={title}
-      arrow
-      placement={placement}
-      {...tooltipProps}
-    >
+    <Tooltip title={title} arrow placement={placement} {...tooltipProps}>
       {children}
     </Tooltip>
   )

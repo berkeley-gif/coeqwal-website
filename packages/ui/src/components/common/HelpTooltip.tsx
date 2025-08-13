@@ -14,7 +14,7 @@ export interface HelpTooltipProps extends Omit<BaseTooltipProps, "title"> {
 /**
  * Help tooltip component for simple text-based help messages.
  * Commonly used for disabled form elements or contextual help.
- * 
+ *
  * Features:
  * - Simple string-based message
  * - Optimized for help/disabled state scenarios

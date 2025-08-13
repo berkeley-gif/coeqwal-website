@@ -1,12 +1,12 @@
 export const OUTCOMES = [
   "Community deliveries",
-  "Agricultural deliveries", 
+  "Agricultural deliveries",
   "Environmental deliveries",
   "Reservoir storage",
   "Groundwater storage",
   "Delta salinity",
   "Salmon abundance",
-  "Distributional equity"
+  "Distributional equity",
 ] as const
 
-export type Outcome = typeof OUTCOMES[number]
+export type Outcome = (typeof OUTCOMES)[number]

@@ -17,7 +17,7 @@ export interface MapMarkerTooltipProps extends Omit<BaseTooltipProps, "title"> {
 /**
  * A specialized tooltip component for map markers that includes a color-coded
  * status indicator bullet point and descriptive text.
- * 
+ *
  * Extends BaseTooltip for consistent theming and behavior.
  */
 export function MapMarkerTooltip({
