@@ -8,9 +8,10 @@ import {
   Tab,
   Checkbox,
   FormControlLabel,
+  TextField,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
-import { RoseChart } from "@repo/viz"
+import { RoseChart, BarChart, StickChart } from "@repo/viz"
 import { OUTCOMES } from "../../lib/outcomes"
 import {
   Map,
@@ -32,7 +33,6 @@ import { MapPromptDialog } from "@repo/ui"
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
 }
-
 
 interface MapControlsProps {
   // Region selection props
@@ -299,26 +299,39 @@ const MapControls = ({
                   <Box
                     sx={{
                       display: "flex",
-                      alignItems: "center",
+                      alignItems: "flex-start",
                       mb: 2,
                     }}
                   >
+                    <Box>
+                      <Box
+                        sx={{
+                          color: (theme) => theme.palette.blue.darkest,
+                          fontFamily: (theme) => theme.typography.fontFamily,
+                          fontWeight: 500,
+                          fontSize: "1.1rem",
+                          mb: 0.5,
+                        }}
+                      >
+                        Scenario snapshot
+                      </Box>
+                      <Box
+                        sx={{
+                          color: (theme) => theme.palette.text.secondary,
+                          fontFamily: (theme) => theme.typography.fontFamily,
+                          fontSize: "0.875rem",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        Hover over a distribution to view on map.
+                      </Box>
+                    </Box>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
-                        fontFamily: (theme) => theme.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      Scenario snapshot
-                    </Box>
-                    <Box 
-                      sx={{ 
-                        display: "flex", 
-                        alignItems: "center", 
+                        display: "flex",
+                        alignItems: "flex-start",
                         gap: 1.5,
-                        ml: "auto"
+                        ml: "auto",
                       }}
                     >
                       <Box
@@ -334,7 +347,11 @@ const MapControls = ({
                       <Dropdown
                         variant="compact"
                         value={chartType}
-                        onChange={(e) => setChartType(e.target.value as "rose" | "bar" | "stick")}
+                        onChange={(e) =>
+                          setChartType(
+                            e.target.value as "rose" | "bar" | "stick",
+                          )
+                        }
                         options={[
                           { value: "rose", label: "rose" },
                           { value: "bar", label: "bar" },
@@ -343,7 +360,7 @@ const MapControls = ({
                       />
                     </Box>
                   </Box>
-                  
+
                   {/* Grid layout: outcomes with charts */}
                   <Box
                     sx={{
@@ -363,9 +380,11 @@ const MapControls = ({
                           gap: 1,
                         }}
                       >
-                        {/* Rose chart */}
-                        <RoseChart size={60} />
-                        
+                        {/* ChartType based on dropdown selection */}
+                        {chartType === "rose" && <RoseChart size={60} />}
+                        {chartType === "bar" && <BarChart size={60} />}
+                        {chartType === "stick" && <StickChart size={60} />}
+
                         {/* Outcome label */}
                         <Box
                           sx={{
@@ -827,18 +846,12 @@ const MapControls = ({
         </Box>
 
         {/* Right Column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", minWidth: 0 }}>
           {/* Dynamic Scenario Panel */}
           <Box sx={{ position: "relative" }}>
             <ScenarioCard
-              topLine={isThirdCardMinimized ? "" : "SCENARIO PREVIEW"}
-              headline={
-                isThirdCardMinimized
-                  ? "Preview"
-                  : previewPanelTab === 0
-                    ? "Snapshot"
-                    : "Selected Scenarios"
-              }
+              topLine={isThirdCardMinimized ? "" : "ALTERNATIVE SCENARIO & REGION"}
+              headline={"Choose an alternative scenario or region"}
               body={null}
               sx={{
                 opacity: isThirdCardMinimized ? 0.8 : 1,
@@ -1186,7 +1199,7 @@ const MapControls = ({
             sx={{
               marginTop: "auto",
               display: "flex",
-              justifyContent: "flex-end",
+              width: "100%",
             }}
           >
             <Card
@@ -1194,6 +1207,11 @@ const MapControls = ({
                 p: 1,
                 backdropFilter: "blur(10px)",
                 pointerEvents: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                width: "100%",
+                minWidth: 0,
               }}
             >
               <IconButton
@@ -1203,6 +1221,42 @@ const MapControls = ({
               >
                 <MyLocationIcon />
               </IconButton>
+              <TextField
+                placeholder="Enter location to zoom"
+                variant="outlined"
+                sx={{
+                  flexGrow: 1,
+                  flexShrink: 1,
+                  flexBasis: 0,
+                  minWidth: 0,
+                  maxWidth: "none",
+                  "& .MuiOutlinedInput-root": {
+                    height: 32,
+                    fontSize: "0.875rem",
+                    minWidth: 0,
+                    "& fieldset": {
+                      borderColor: (theme) => theme.palette.divider,
+                      borderWidth: "1px",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: (theme) => theme.palette.text.secondary,
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: (theme) => theme.palette.blue.medium,
+                      borderWidth: "1px",
+                    },
+                  },
+                  "& .MuiOutlinedInput-input": {
+                    fontSize: "0.875rem",
+                    padding: "6px 8px",
+                    minWidth: 0,
+                  },
+                  "& .MuiInputBase-input::placeholder": {
+                    fontSize: "0.875rem",
+                    opacity: 0.6,
+                  },
+                }}
+              />
             </Card>
           </Box>
         </Box>

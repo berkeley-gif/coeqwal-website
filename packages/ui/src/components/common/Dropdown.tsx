@@ -25,7 +25,7 @@ export interface DropdownProps extends Omit<SelectProps, "children"> {
 
 /**
  * Custom dropdown component
- * 
+ *
  * Features:
  * - Standard and compact variants
  * - Theme-integrated styling
@@ -44,18 +44,18 @@ export function Dropdown({
   ...props
 }: DropdownProps) {
   const isCompact = variant === "compact"
-  
+
   const selectSx = {
     // Base styling following form control conventions
     fontSize: isCompact ? "0.875rem" : "1rem",
     minWidth: isCompact ? 80 : 120,
     backgroundColor: (theme) => theme.palette.common.white,
-    
+
     // Use theme border radius
     "& .MuiOutlinedInput-notchedOutline": {
       borderRadius: (theme) => theme.borderRadius.rounded,
     },
-    
+
     // Compact variant styling
     ...(isCompact && {
       "& .MuiSelect-select": {
@@ -75,7 +75,7 @@ export function Dropdown({
         borderWidth: 1, // Keep thin border even when focused
       },
     }),
-    
+
     // Standard variant styling
     ...(!isCompact && {
       "& .MuiSelect-select": {
@@ -93,7 +93,7 @@ export function Dropdown({
         borderWidth: 2,
       },
     }),
-    
+
     // Merge user sx
     ...sx,
   }
@@ -147,7 +147,8 @@ export function Dropdown({
                   backgroundColor: (theme) => theme.palette.blue.bright + "15",
                   color: (theme) => theme.palette.blue.darkest,
                   "&:hover": {
-                    backgroundColor: (theme) => theme.palette.blue.bright + "15",
+                    backgroundColor: (theme) =>
+                      theme.palette.blue.bright + "15",
                     color: (theme) => theme.palette.blue.darkest,
                   },
                 },
@@ -158,14 +159,14 @@ export function Dropdown({
         {...props}
       >
         {placeholder && (
-          <MenuItem 
-            value="" 
-            disabled 
-            sx={{ 
-              fontStyle: "italic", 
+          <MenuItem
+            value=""
+            disabled
+            sx={{
+              fontStyle: "italic",
               color: (theme) => theme.palette.text.secondary,
               backgroundColor: (theme) => theme.palette.common.white,
-              ...menuItemProps 
+              ...menuItemProps,
             }}
           >
             {placeholder}
