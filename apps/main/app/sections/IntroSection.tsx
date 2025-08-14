@@ -548,66 +548,61 @@ const IntroSection: React.FC = () => {
       </Box>
 
       {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 48, md: 124 }} />
+      <Spacer height={{ xs: 48, md: 200 }} />
 
       {/* Second panel - Overview content */}
-      <Box
+      <BasePanel
         id="overview"
+        fullHeight={false}
+        fullWidth
+        background="transparent"
+        paddingVariant="very-wide"
+        includeHeaderSpacing={true}
         sx={{
+          color: (theme) => theme.palette.primary.dark,
+          display: "flex",
+          flexDirection: "column",
           position: "relative",
-          width: "100vw",
+          overflow: "visible",
+          // Background images positioned relative to content height
           background: `
             url('/images/home_collage/birds_top.png'),
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
           `,
-          backgroundSize: "auto 44%, auto 80%, auto 44%",
+          backgroundSize: "auto 36%, auto 30%, auto 44%",
           backgroundPosition: "left top, left bottom, right bottom",
           backgroundRepeat: "no-repeat, no-repeat, no-repeat",
-          overflow: "hidden",
         }}
       >
-        <BasePanel
-          fullHeight={false}
-          fullWidth
-          background="transparent"
-          paddingVariant="very-wide"
-          includeHeaderSpacing={true}
+        {/* Text content */}
+        <Box
           sx={{
-            color: (theme) => theme.palette.primary.dark,
-            display: "flex",
-            flexDirection: "column",
             position: "relative",
-            overflow: "visible",
+            zIndex: (theme) => theme.zIndex.introText,
+            textAlign: "left",
+            paddingTop: { xs: 6, md: 12 }, // Additional top padding to clear top image
+            paddingBottom: { xs: 6, md: 12 }, // Additional bottom padding to clear bottom images
           }}
         >
-          {/* Text content */}
-          <Box
-            sx={{
-              position: "relative",
-              zIndex: (theme) => theme.zIndex.introText,
-              textAlign: "left",
-            }}
-          >
-            <Stack spacing={4}>
-              <Typography
-                variant="h2"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  mb: 3,
-                  textAlign: "left",
-                }}
-              >
-                The amount of water available for any purpose in California
-                depends on two things: how much precipitation we get and how we
-                manage this water. We are already having to make difficult water
-                allocation decisions. We are facing a time of climate
-                uncertainty and need to prepare for the future.
-              </Typography>
-            </Stack>
-          </Box>
-        </BasePanel>
-      </Box>
+          <Stack spacing={4}>
+            <Typography
+              variant="h2"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                mb: 3,
+                textAlign: "left",
+              }}
+            >
+              The amount of water available for any purpose in California
+              depends on two things: how much precipitation we get and how we
+              manage this water. We are already having to make difficult water
+              allocation decisions. We are facing a time of climate
+              uncertainty and need to prepare for the future.
+            </Typography>
+          </Stack>
+        </Box>
+      </BasePanel>
 
       <BasePanel
         fullHeight={false}
@@ -648,6 +643,9 @@ const IntroSection: React.FC = () => {
           </Stack>
         </Box>
       </BasePanel>
+
+      {/* Spacer after second panel */}
+      <Spacer height={{ xs: 48, md: 124 }} />
     </Box>
   )
 }
