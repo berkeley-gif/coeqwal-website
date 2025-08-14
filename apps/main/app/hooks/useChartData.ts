@@ -34,18 +34,24 @@ interface ChartDataReturn {
  * Custom hook that encapsulates all chart data generation and optimization logic.
  * This prevents the need for manual useCallback/useMemo scattered throughout components.
  */
-export const useChartData = ({ highlightBaseline, expandChart }: UseChartDataOptions): ChartDataReturn => {
+export const useChartData = ({
+  highlightBaseline,
+  expandChart,
+}: UseChartDataOptions): ChartDataReturn => {
   // Memoized axes configuration
-  const axes = useMemo(() => [
-    "Community deliveries",
-    "Agricultural deliveries",
-    "Environmental deliveries",
-    "Reservoir storage",
-    "Groundwater storage",
-    "Delta salinity",
-    "Salmon abundance",
-    "Distributional equity",
-  ], [])
+  const axes = useMemo(
+    () => [
+      "Community deliveries",
+      "Agricultural deliveries",
+      "Environmental deliveries",
+      "Reservoir storage",
+      "Groundwater storage",
+      "Delta salinity",
+      "Salmon abundance",
+      "Distributional equity",
+    ],
+    [],
+  )
 
   // Memoized scenario generation function
   const generateScenarios = useCallback((): VerticalParallelLineData[] => {
@@ -139,8 +145,16 @@ export const useChartData = ({ highlightBaseline, expandChart }: UseChartDataOpt
   // Memoized color configurations
   const categoricalColors = useMemo(() => {
     const categorical10 = [
-      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+      "#1f77b4",
+      "#ff7f0e",
+      "#2ca02c",
+      "#d62728",
+      "#9467bd",
+      "#8c564b",
+      "#e377c2",
+      "#7f7f7f",
+      "#bcbd22",
+      "#17becf",
     ]
 
     const colors: string[] = []
@@ -151,59 +165,68 @@ export const useChartData = ({ highlightBaseline, expandChart }: UseChartDataOpt
     return colors
   }, [])
 
-  const chartColors = useMemo(() => ({
-    default: "#1f77b4",
-    highlighted: "#ff7f0e",
-    background: "#f8f9fa",
-  }), [])
+  const chartColors = useMemo(
+    () => ({
+      default: "#1f77b4",
+      highlighted: "#ff7f0e",
+      background: "#f8f9fa",
+    }),
+    [],
+  )
 
   // Memoized baseline data
-  const baselineData = useMemo(() => 
-    sampleData.find((d) => d.id === "baseline"), 
-    [sampleData]
+  const baselineData = useMemo(
+    () => sampleData.find((d) => d.id === "baseline"),
+    [sampleData],
   )
 
   // Memoized event handlers
-  const handlers: ChartHandlers = useMemo(() => ({
-    onLineHover: (data: VerticalParallelLineData | null) => {
-      console.log("Line hovered:", data?.name || "none")
-    },
-    onLineClick: (data: VerticalParallelLineData) => {
-      console.log("Line clicked:", data.name)
-    }
-  }), [])
+  const handlers: ChartHandlers = useMemo(
+    () => ({
+      onLineHover: (data: VerticalParallelLineData | null) => {
+        console.log("Line hovered:", data?.name || "none")
+      },
+      onLineClick: (data: VerticalParallelLineData) => {
+        console.log("Line clicked:", data.name)
+      },
+    }),
+    [],
+  )
 
   // Return chart props and key separately (React doesn't allow key in spread)
-  return useMemo(() => ({
-    // Chart props (can be spread)
-    props: {
-      // Chart data
-      data: sampleData,
+  return useMemo(
+    () => ({
+      // Chart props (can be spread)
+      props: {
+        // Chart data
+        data: sampleData,
+        axes,
+        baselineData,
+
+        // Chart styling
+        colors: chartColors,
+        lineColors: categoricalColors,
+
+        // Chart behavior
+        responsive: true,
+        showBaseline: highlightBaseline,
+
+        // Event handlers
+        ...handlers,
+      },
+
+      // Key must be passed separately
+      key: `chart-${expandChart ? "expanded" : "normal"}`,
+    }),
+    [
+      sampleData,
       axes,
       baselineData,
-      
-      // Chart styling
-      colors: chartColors,
-      lineColors: categoricalColors,
-      
-      // Chart behavior
-      responsive: true,
-      showBaseline: highlightBaseline,
-      
-      // Event handlers
-      ...handlers,
-    },
-    
-    // Key must be passed separately
-    key: `chart-${expandChart ? "expanded" : "normal"}`,
-  }), [
-    sampleData,
-    axes,
-    baselineData,
-    chartColors,
-    categoricalColors,
-    expandChart,
-    highlightBaseline,
-    handlers,
-  ])
+      chartColors,
+      categoricalColors,
+      expandChart,
+      highlightBaseline,
+      handlers,
+    ],
+  )
 }

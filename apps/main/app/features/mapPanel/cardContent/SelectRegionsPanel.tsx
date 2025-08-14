@@ -15,7 +15,7 @@ interface SelectRegionsPanelProps {
 export function SelectRegionsPanel({
   selectedRegion,
   onRegionSelect,
-  showRegionDropdown,
+  showRegionDropdown: _showRegionDropdown, // eslint-disable-line @typescript-eslint/no-unused-vars
   onToggleDeliveryAreaDropdown,
   isDrawingCustomRegion,
   polygonPoints,
@@ -33,14 +33,20 @@ export function SelectRegionsPanel({
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2, color: (theme) => theme.palette.blue.darkest }}>
+      <Typography
+        variant="h6"
+        sx={{ mb: 2, color: (theme) => theme.palette.blue.darkest }}
+      >
         Select Water Management Regions
       </Typography>
-      
+
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         {/* Predefined Regions */}
         <Box sx={{ mb: 2 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}
+          >
             Predefined Regions
           </Typography>
           <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 1 }}>
@@ -63,7 +69,10 @@ export function SelectRegionsPanel({
 
         {/* Custom Region Selection */}
         <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}
+          >
             Custom Region Selection
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -112,7 +121,9 @@ export function SelectRegionsPanel({
             }}
           >
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Current Selection: {regions.find(r => r.id === selectedRegion)?.label || selectedRegion}
+              Current Selection:{" "}
+              {regions.find((r) => r.id === selectedRegion)?.label ||
+                selectedRegion}
             </Typography>
           </Box>
         )}

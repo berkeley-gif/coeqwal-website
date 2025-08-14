@@ -34,10 +34,13 @@ export function SelectionHistoryPanel({
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2, color: (theme) => theme.palette.blue.darkest }}>
+      <Typography
+        variant="h6"
+        sx={{ mb: 2, color: (theme) => theme.palette.blue.darkest }}
+      >
         Selection History
       </Typography>
-      
+
       {!hasSelections ? (
         <Box
           sx={{
@@ -47,7 +50,8 @@ export function SelectionHistoryPanel({
           }}
         >
           <Typography variant="body2">
-            No selections made yet. Use the other tabs to select scenarios and regions.
+            No selections made yet. Use the other tabs to select scenarios and
+            regions.
           </Typography>
         </Box>
       ) : (
@@ -55,7 +59,10 @@ export function SelectionHistoryPanel({
           {/* Selected Scenarios */}
           {selectedScenarios.length > 0 && (
             <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}
+              >
                 Selected Scenarios ({selectedScenarios.length})
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -82,7 +89,10 @@ export function SelectionHistoryPanel({
           {/* Selected Region */}
           {selectedRegion && (
             <Box>
-              <Typography variant="subtitle2" sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ mb: 1, color: (theme) => theme.palette.text.secondary }}
+              >
                 Selected Region
               </Typography>
               <Box

@@ -10,7 +10,8 @@ export interface DropdownOption {
   disabled?: boolean
 }
 
-export interface DropdownProps extends Omit<SelectProps, "children" | "variant"> {
+export interface DropdownProps
+  extends Omit<SelectProps, "children" | "variant"> {
   /** Array of dropdown options */
   options: DropdownOption[]
   /** Optional label for the dropdown */
@@ -140,11 +141,13 @@ export function Dropdown({
                 color: (theme: Theme) => theme.palette.text.primary,
                 backgroundColor: (theme: Theme) => theme.palette.common.white,
                 "&:hover": {
-                  backgroundColor: (theme: Theme) => theme.palette.blue.bright + "15",
+                  backgroundColor: (theme: Theme) =>
+                    theme.palette.blue.bright + "15",
                   color: (theme: Theme) => theme.palette.blue.darkest,
                 },
                 "&.Mui-selected": {
-                  backgroundColor: (theme: Theme) => theme.palette.blue.bright + "15",
+                  backgroundColor: (theme: Theme) =>
+                    theme.palette.blue.bright + "15",
                   color: (theme: Theme) => theme.palette.blue.darkest,
                   "&:hover": {
                     backgroundColor: (theme: Theme) =>

@@ -10,7 +10,7 @@ import { sectionIds } from "./config/navigation"
 // import type { MapboxMapRef } from "@repo/map"
 // import MapContainer from "./components/MapContainer"
 import MapPanel from "./features/mapPanel/MapPanel"
-import MapPanel2 from "./features/mapPanel/MapPanel2"
+// import MapPanel2 from "./features/mapPanel/MapPanel2" // eslint-disable-line @typescript-eslint/no-unused-vars
 // import { NeedsEditorPanel } from "./features/needsEditor/components" // Yuya's needs editor panel
 import IntroSection from "./sections/IntroSection"
 // import IntroSection2 from "./sections/IntroSection2"
@@ -97,7 +97,7 @@ export default function Home() {
   }
 
   // Handler to open specific drawer tabs,s using the store
-  const handleOpenThemesDrawer = (operationId?: string) => {
+  const _handleOpenThemesDrawer = (operationId?: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
     // Check if the themes drawer is already open
     if (activeDrawerTab === "glossary") {
       // Check if this is the same operation that's currently selected
@@ -295,9 +295,9 @@ export default function Home() {
             <MapPanel />
           </Box>
 
-          <Box sx={{ pointerEvents: "auto", margin: 0 }} id="map-panel">
+          {/* <Box sx={{ pointerEvents: "auto", margin: 0 }} id="map-panel">
             <MapPanel2 onOpenThemesDrawer={handleOpenThemesDrawer} />
-          </Box>
+          </Box> */}
 
           {/* California Water panel with two columns */}
           {/* <CaliforniaWaterSection onOpenLearnDrawer={handleOpenLearnDrawer} /> */}

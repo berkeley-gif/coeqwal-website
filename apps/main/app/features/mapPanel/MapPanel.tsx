@@ -11,7 +11,12 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
-import { RoseChart, BarChart, StickChart, VerticalParallelLinePlot } from "@repo/viz"
+import {
+  RoseChart,
+  BarChart,
+  StickChart,
+  VerticalParallelLinePlot,
+} from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
 import {
@@ -74,11 +79,11 @@ const MapControls = ({
   onToggleDeliveryAreaDropdown,
   // Third column panel props
   previewPanelTab,
-  hoveredScenario,
+  hoveredScenario: _hoveredScenario, // eslint-disable-line @typescript-eslint/no-unused-vars
   selectedScenarios,
   selectedRegion,
   onPreviewTabChange,
-  onScenarioHover,
+  onScenarioHover: _onScenarioHover, // eslint-disable-line @typescript-eslint/no-unused-vars
   onScenarioSelect,
   onRegionSelect: _onRegionSelect, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: MapControlsProps) => {
@@ -109,8 +114,6 @@ const MapControls = ({
     })
   }
 
-
-
   // Region card dropdown
   const toggleRegionDropdown = useCallback(() => {
     setShowRegionDropdown(!showRegionDropdown)
@@ -121,18 +124,20 @@ const MapControls = ({
     setShowRegionDropdown(false) // Close dropdown when starting to draw
   }, [onSelectRegionOnMap])
 
-
-
   // Outcomes panel handlers
-  const handleViewModeChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsRelativeView(event.target.checked)
-  }, [])
+  const handleViewModeChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setIsRelativeView(event.target.checked)
+    },
+    [],
+  )
 
-  const handleHighlightBaselineChange = useCallback((
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setHighlightBaseline(event.target.checked)
-  }, [])
+  const handleHighlightBaselineChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setHighlightBaseline(event.target.checked)
+    },
+    [],
+  )
 
   const handleLearnMoreClick = useCallback(() => {
     console.log("Learn more about this chart clicked")
@@ -145,9 +150,9 @@ const MapControls = ({
   }, [expandChart])
 
   // ✨ Clean chart data hook encapsulates ALL optimization logic
-  const chartData = useChartData({ 
-    highlightBaseline, 
-    expandChart 
+  const chartData = useChartData({
+    highlightBaseline,
+    expandChart,
   })
 
   return (
@@ -163,15 +168,15 @@ const MapControls = ({
         p: 2, // 16px padding
       }}
     >
-              {/* Seven column layout with 2/7 width panels */}
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(7, 1fr)",
-            gap: 3,
-            height: "100%",
-          }}
-        >
+      {/* Seven column layout with 2/7 width panels */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 3,
+          height: "100%",
+        }}
+      >
         {/* Left column/scenario card */}
         <Box
           sx={{
@@ -567,21 +572,23 @@ const MapControls = ({
           </Box>
         </Box>
 
-
-
         {/* Right Column */}
-        <Box sx={{ 
-          display: "flex", 
-          flexDirection: "column", 
-          gap: 2, 
-          width: "100%", 
-          minWidth: 0,
-          gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width)
-        }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            width: "100%",
+            minWidth: 0,
+            gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width)
+          }}
+        >
           {/* Dynamic Scenario Panel */}
           <Box sx={{ position: "relative" }}>
             <ScenarioCard
-              topLine={isThirdCardMinimized ? "" : "ALTERNATIVE SCENARIO & REGION"}
+              topLine={
+                isThirdCardMinimized ? "" : "ALTERNATIVE SCENARIO & REGION"
+              }
               headline={"Choose an alternative scenario or region"}
               body={null}
               sx={{
@@ -651,8 +658,9 @@ const MapControls = ({
                                   mb: 1,
                                 }}
                               >
-                                Compare scenarios across multiple outcomes to understand trade-offs
-                                and synergies in California&apos;s water management.{" "}
+                                Compare scenarios across multiple outcomes to
+                                understand trade-offs and synergies in
+                                California&apos;s water management.{" "}
                                 <Box
                                   component="span"
                                   onClick={handleLearnMoreClick}
@@ -663,7 +671,8 @@ const MapControls = ({
                                     textDecoration: "underline",
                                     whiteSpace: "nowrap",
                                     "&:hover": {
-                                      color: (theme) => theme.palette.blue.darkest,
+                                      color: (theme) =>
+                                        theme.palette.blue.darkest,
                                     },
                                   }}
                                 >
@@ -689,7 +698,8 @@ const MapControls = ({
                                   textTransform: "none",
                                   justifyContent: "flex-start",
                                   "&:hover": {
-                                    color: (theme) => theme.palette.blue.darkest,
+                                    color: (theme) =>
+                                      theme.palette.blue.darkest,
                                     backgroundColor: "transparent",
                                   },
                                 }}
@@ -699,7 +709,9 @@ const MapControls = ({
                                     fontSize: "0.875em",
                                     marginRight: "8px",
                                     display: "inline-block",
-                                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                                    transform: expandChart
+                                      ? "rotate(180deg)"
+                                      : "rotate(0deg)",
                                     transition: "transform 0.2s ease",
                                   }}
                                 >
@@ -789,7 +801,8 @@ const MapControls = ({
                             <Box
                               sx={{
                                 color: (theme) => theme.palette.blue.darkest,
-                                fontFamily: (theme) => theme.typography.fontFamily,
+                                fontFamily: (theme) =>
+                                  theme.typography.fontFamily,
                                 fontWeight: 500,
                                 fontSize: "1.5rem",
                                 lineHeight: 1.3,
@@ -824,7 +837,9 @@ const MapControls = ({
                                   fontSize: "0.875em",
                                   marginRight: "8px",
                                   display: "inline-block",
-                                  transform: showRegionDropdown ? "rotate(180deg)" : "rotate(0deg)",
+                                  transform: showRegionDropdown
+                                    ? "rotate(180deg)"
+                                    : "rotate(0deg)",
                                   transition: "transform 0.2s ease",
                                 }}
                               >
@@ -842,8 +857,10 @@ const MapControls = ({
                                 gridTemplateColumns: "1fr 1fr",
                                 gap: 1,
                                 p: 2,
-                                backgroundColor: (theme) => theme.palette.grey[50],
-                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                backgroundColor: (theme) =>
+                                  theme.palette.grey[50],
+                                borderRadius: (theme) =>
+                                  theme.borderRadius.rounded,
                                 border: "1px solid",
                                 borderColor: (theme) => theme.palette.divider,
                               }}
@@ -882,7 +899,8 @@ const MapControls = ({
                                   <Checkbox
                                     size="small"
                                     checked={
-                                      isDrawingCustomRegion || polygonPoints.length > 0
+                                      isDrawingCustomRegion ||
+                                      polygonPoints.length > 0
                                     }
                                     onChange={(e) => {
                                       if (e.target.checked) {
