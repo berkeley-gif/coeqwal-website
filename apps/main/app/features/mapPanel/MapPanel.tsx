@@ -881,8 +881,9 @@ const MapControls = ({
                         onChange={(_, value) => onPreviewTabChange(value)}
                         sx={{ flex: 1 }}
                       >
-                        <Tab label="Snapshot" />
-                        <Tab label="Selected scenarios" />
+                        <Tab label="Select scenarios" />
+                        <Tab label="Select regions" />
+                        <Tab label="Selections" />
                       </Tabs>
                     </Box>
 
