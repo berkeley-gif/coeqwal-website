@@ -610,14 +610,14 @@ const IntroSection: React.FC = () => {
               />
               {/* Text content */}
               <Typography
-                variant="body1"
+                variant="h4"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "left",
-                  maxWidth: { xs: "300px", md: "500px" },
-                  fontSize: { xs: "1.1rem", md: "1.25rem" },
+                  textAlign: "cleft",
+                  maxWidth: { xs: "600px", md: "880px" },
                   lineHeight: 1.6,
                   letterSpacing: "0.01em",
+                  fontWeight: 400, // Reset to normal weight for body text
                 }}
               >
                 <Box component="span" sx={{ fontWeight: 600 }}>
