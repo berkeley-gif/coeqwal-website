@@ -564,6 +564,89 @@ const IntroSection: React.FC = () => {
           flexDirection: "column",
           position: "relative",
           overflow: "visible",
+          background: `
+            url('/images/home_collage/right.png')
+          `,
+          backgroundSize: "auto 44%",
+          backgroundPosition: "right bottom",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Text content */}
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: (theme) => theme.zIndex.introText,
+            textAlign: "left",
+            paddingTop: { xs: 6, md: 12 }, // Additional top padding to clear top image
+            paddingBottom: { xs: 6, md: 12 }, // Additional bottom padding to clear bottom images
+          }}
+        >
+          <Stack spacing={4}>
+            {/* Text with birds bullet */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                gap: { xs: 2, md: 3 },
+              }}
+            >
+              {/* Bullet image */}
+              <Box
+                sx={{
+                  width: { xs: 200, md: 300 },
+                  height: { xs: 200, md: 300 },
+                  flexShrink: 0,
+                  backgroundImage: "url('/images/home_collage/birds_top.png')",
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  // Align center of birds with first lines of text
+                  mt: { xs: -4, md: -6 },
+                }}
+              />
+              {/* Text content */}
+              <Typography
+                variant="h4"
+                sx={{
+                  color: (theme) => theme.palette.blue.darkest,
+                  textAlign: "cleft",
+                  maxWidth: { xs: "600px", md: "880px" },
+                  lineHeight: 1.6,
+                  letterSpacing: "0.01em",
+                  fontWeight: 400,
+                }}
+              >
+                <Box component="span" sx={{ fontWeight: 600 }}>
+                  The amount of water available
+                </Box>{" "}
+                for any purpose in California depends on two things: how much 
+                precipitation we get and how we manage this water. We are already 
+                having to make difficult water allocation decisions. We are facing 
+                a time of climate uncertainty and need to prepare for the future.
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
+      </BasePanel>
+
+      {/* Spacer between panels */}
+      <Spacer height={{ xs: 48, md: 100 }} />
+
+      {/* Third panel - Another birds bullet paragraph */}
+      <BasePanel
+        fullHeight={false}
+        fullWidth
+        background="transparent"
+        paddingVariant="very-wide"
+        includeHeaderSpacing={true}
+        sx={{
+          color: (theme) => theme.palette.primary.dark,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          overflow: "visible",
           // Background images positioned relative to content height
           background: `
             url('/images/home_collage/left_side.png'),
@@ -571,7 +654,7 @@ const IntroSection: React.FC = () => {
           `,
           backgroundSize: "auto 30%, auto 44%",
           backgroundPosition: "left bottom, right bottom",
-          backgroundRepeat: "no-repeat, no-repeat, no-repeat",
+          backgroundRepeat: "no-repeat, no-repeat",
         }}
       >
         {/* Text content */}
@@ -613,7 +696,90 @@ const IntroSection: React.FC = () => {
                 variant="h4"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "cleft",
+                  textAlign: "left",
+                  maxWidth: { xs: "600px", md: "880px" },
+                  lineHeight: 1.6,
+                  letterSpacing: "0.01em",
+                  fontWeight: 400, // Reset to normal weight for body text
+                }}
+              >
+                <Box component="span" sx={{ fontWeight: 600 }}>
+                  The COEQWAL project has run
+                </Box>{" "}
+                30 alternative water management scenarios for the Central Valley 
+                water systems that feed most of the state. For each of these 
+                scenarios, we considered 5 future climate possibilities.
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
+      </BasePanel>
+
+      {/* Spacer between panels */}
+      <Spacer height={{ xs: 48, md: 100 }} />
+
+      {/* Fourth panel */}
+      <BasePanel
+        fullHeight={false}
+        fullWidth
+        background="transparent"
+        paddingVariant="very-wide"
+        includeHeaderSpacing={true}
+        sx={{
+          color: (theme) => theme.palette.primary.dark,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          overflow: "visible",
+          // Background images positioned relative to content height
+          background: `
+            url('/images/home_collage/left_side.png'),
+          `,
+          backgroundSize: "auto 30%, auto 44%",
+          backgroundPosition: "left bottom, right bottom",
+          backgroundRepeat: "no-repeat, no-repeat",
+        }}
+      >
+        {/* Text content */}
+        <Box
+          sx={{
+            position: "relative",
+            zIndex: (theme) => theme.zIndex.introText,
+            textAlign: "left",
+            paddingTop: { xs: 6, md: 12 }, // Additional top padding to clear top image
+            paddingBottom: { xs: 6, md: 12 }, // Additional bottom padding to clear bottom images
+          }}
+        >
+          <Stack spacing={4}>
+            {/* Text with birds bullet */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "center",
+                gap: { xs: 2, md: 3 },
+              }}
+            >
+              {/* Birds bullet image */}
+              <Box
+                sx={{
+                  width: { xs: 200, md: 300 },
+                  height: { xs: 200, md: 300 },
+                  flexShrink: 0,
+                  backgroundImage: "url('/images/home_collage/birds_top.png')",
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  // Align center of birds with first line of text
+                  mt: { xs: -4, md: -6 }, // Negative margin to center with first line
+                }}
+              />
+              {/* Text content */}
+              <Typography
+                variant="h4"
+                sx={{
+                  color: (theme) => theme.palette.blue.darkest,
+                  textAlign: "left",
                   maxWidth: { xs: "600px", md: "880px" },
                   lineHeight: 1.6,
                   letterSpacing: "0.01em",
