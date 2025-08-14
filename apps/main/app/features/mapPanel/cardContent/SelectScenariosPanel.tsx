@@ -13,20 +13,47 @@ export function SelectScenariosPanel({
   onScenarioHover,
 }: SelectScenariosPanelProps) {
   const scenarios = [
-    { id: "baseline", label: "Baseline Scenario", description: "Current water management practices" },
-    { id: "conservation", label: "Conservation Focus", description: "Increased water conservation measures" },
-    { id: "infrastructure", label: "Infrastructure Investment", description: "Major infrastructure improvements" },
-    { id: "climate-adaptation", label: "Climate Adaptation", description: "Climate-resilient water management" },
-    { id: "groundwater", label: "Groundwater Management", description: "Enhanced groundwater sustainability" },
-    { id: "ecosystem", label: "Ecosystem Restoration", description: "Environmental flow priorities" },
+    {
+      id: "baseline",
+      label: "Baseline Scenario",
+      description: "Current water management practices",
+    },
+    {
+      id: "conservation",
+      label: "Conservation Focus",
+      description: "Increased water conservation measures",
+    },
+    {
+      id: "infrastructure",
+      label: "Infrastructure Investment",
+      description: "Major infrastructure improvements",
+    },
+    {
+      id: "climate-adaptation",
+      label: "Climate Adaptation",
+      description: "Climate-resilient water management",
+    },
+    {
+      id: "groundwater",
+      label: "Groundwater Management",
+      description: "Enhanced groundwater sustainability",
+    },
+    {
+      id: "ecosystem",
+      label: "Ecosystem Restoration",
+      description: "Environmental flow priorities",
+    },
   ]
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2, color: (theme) => theme.palette.blue.darkest }}>
+      <Typography
+        variant="h6"
+        sx={{ mb: 2, color: (theme) => theme.palette.blue.darkest }}
+      >
         Select Water Management Scenarios
       </Typography>
-      
+
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
         {scenarios.map((scenario) => (
           <Box
@@ -58,7 +85,10 @@ export function SelectScenariosPanel({
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
                     {scenario.label}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: (theme) => theme.palette.text.secondary }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: (theme) => theme.palette.text.secondary }}
+                  >
                     {scenario.description}
                   </Typography>
                 </Box>

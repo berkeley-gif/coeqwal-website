@@ -43,9 +43,15 @@ const BarChart = ({ size = 80, tiers, seed }: BarChartProps) => {
     return Math.random()
   }
 
-    const rawValues = chartTiers.map((tier, i) => {
-    const tierWithValue = tier as { label: string; color: string; value?: number }
-    return tierWithValue.value !== undefined ? tierWithValue.value : 0.2 + generateRandomValue(i) * 0.8
+  const rawValues = chartTiers.map((tier, i) => {
+    const tierWithValue = tier as {
+      label: string
+      color: string
+      value?: number
+    }
+    return tierWithValue.value !== undefined
+      ? tierWithValue.value
+      : 0.2 + generateRandomValue(i) * 0.8
   })
   const maxValue = Math.max(...rawValues)
   const normalizedValues = rawValues.map((value) => (value / maxValue) * 0.9) // Scale to 90% of width
