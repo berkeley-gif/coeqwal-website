@@ -924,35 +924,37 @@ const MapControls = ({
                           </Box>
 
                           {/* Region Selection Dropdown Trigger */}
-                          <Box
-                            onClick={toggleRegionDropdown}
-                            sx={{
-                              cursor: "pointer",
-                              userSelect: "none",
-                              transition: "color 0.2s ease",
-                              textAlign: "center",
-                              mb: 2,
-                              color: (theme) => theme.palette.blue.bright,
-                              "&:hover": {
-                                color: (theme) => theme.palette.blue.darkest,
-                              },
-                            }}
-                          >
-                            Choose a different region{" "}
-                            <span
-                              style={{
-                                fontSize: "0.875em",
-                                lineHeight: 1,
-                                verticalAlign: "baseline",
-                                display: "inline-block",
-                                transform: showRegionDropdown
-                                  ? "rotate(180deg)"
-                                  : "rotate(0deg)",
-                                transition: "transform 0.2s ease",
+                          <Box sx={{ mb: 2, textAlign: "center" }}>
+                            <Button
+                              variant="text"
+                              onClick={toggleRegionDropdown}
+                              sx={{
+                                fontSize: "0.95rem",
+                                fontWeight: 500,
+                                color: (theme) => theme.palette.blue.bright,
+                                padding: 0,
+                                minWidth: "auto",
+                                textTransform: "none",
+                                justifyContent: "center",
+                                "&:hover": {
+                                  color: (theme) => theme.palette.blue.darkest,
+                                  backgroundColor: "transparent",
+                                },
                               }}
                             >
-                              ▼
-                            </span>
+                              <span
+                                style={{
+                                  fontSize: "0.875em",
+                                  marginRight: "8px",
+                                  display: "inline-block",
+                                  transform: showRegionDropdown ? "rotate(180deg)" : "rotate(0deg)",
+                                  transition: "transform 0.2s ease",
+                                }}
+                              >
+                                ▼
+                              </span>
+                              Choose a different region
+                            </Button>
                           </Box>
 
                           {/* Region Selection Options */}
