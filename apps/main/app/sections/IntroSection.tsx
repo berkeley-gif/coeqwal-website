@@ -483,7 +483,7 @@ const IntroSection: React.FC = () => {
             </Typography>
 
             <Typography
-              variant="h4"
+              variant="h3"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 mb: 2,
@@ -588,7 +588,6 @@ const IntroSection: React.FC = () => {
               sx={{
                 display: "flex",
                 alignItems: "flex-start",
-                justifyContent: "center",
                 gap: { xs: 2, md: 3 },
               }}
             >
@@ -612,7 +611,7 @@ const IntroSection: React.FC = () => {
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
                   textAlign: "cleft",
-                  maxWidth: { xs: "600px", md: "880px" },
+                  maxWidth: { xs: "600px", md: "820px" },
                   lineHeight: 1.6,
                   letterSpacing: "0.01em",
                   fontWeight: 400,
