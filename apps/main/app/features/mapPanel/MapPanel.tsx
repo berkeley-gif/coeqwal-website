@@ -88,7 +88,6 @@ const MapControls = ({
 
   // Card minimize/maximize states
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
-  const [isSecondCardMinimized, setIsSecondCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
 
   // Chart type state for scenario snapshot
@@ -283,15 +282,15 @@ const MapControls = ({
         p: 2, // 16px padding
       }}
     >
-      {/* Three column layout */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 3,
-          height: "100%",
-        }}
-      >
+              {/* Two column layout */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 3,
+            height: "100%",
+          }}
+        >
         {/* Left column/scenario card */}
         <Box
           sx={{
@@ -686,273 +685,7 @@ const MapControls = ({
           </Box>
         </Box>
 
-        {/* Center Column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* Region Selection Card */}
-          <Box sx={{ position: "relative" }}>
-            <ScenarioCard
-              topLine={isSecondCardMinimized ? "" : "CHOOSE A REGION:"}
-              headline={isSecondCardMinimized ? "Region" : "Central Valley"}
-              body={null} // No list for this card
-              bottomLine={
-                isSecondCardMinimized ? null : (
-                  <Box
-                    onClick={toggleRegionDropdown}
-                    sx={{
-                      cursor: "pointer",
-                      userSelect: "none",
-                      transition: "color 0.2s ease",
-                      "&:hover": {
-                        color: (theme) => theme.palette.action.hover,
-                      },
-                    }}
-                  >
-                    Choose a different region{" "}
-                    <span
-                      style={{
-                        fontSize: "0.875em",
-                        lineHeight: 1,
-                        verticalAlign: "baseline",
-                        display: "inline-block",
-                        transform: showRegionDropdown
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                        transition: "transform 0.2s ease",
-                      }}
-                    >
-                      ▼
-                    </span>
-                  </Box>
-                )
-              }
-              dropdownContent={
-                isSecondCardMinimized ? undefined : showRegionDropdown ? (
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr",
-                      gap: 1,
-                      p: 2,
-                    }}
-                  >
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="Sacramento Valley"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="San Joaquin Valley"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="Delta"
-                    />
-                    <FormControlLabel
-                      control={<Checkbox size="small" />}
-                      label="Tulare Basin"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              onToggleDeliveryAreaDropdown()
-                            }
-                          }}
-                        />
-                      }
-                      label="Select delivery area"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={
-                            isDrawingCustomRegion || polygonPoints.length > 0
-                          }
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              handleSelectRegionOnMapClick()
-                            } else {
-                              onClearCustomRegion()
-                            }
-                          }}
-                        />
-                      }
-                      label="Select region on map"
-                    />
-                  </Box>
-                ) : undefined
-              }
-              sx={{
-                opacity: isSecondCardMinimized ? 0.8 : 1,
-                backdropFilter: "blur(10px)",
-                pointerEvents: "auto",
-              }}
-            />
-            <Box
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                setIsSecondCardMinimized(!isSecondCardMinimized)
-              }}
-              sx={{
-                position: "absolute",
-                top: "8px",
-                right: "8px",
-                width: "24px",
-                height: "24px",
-                backgroundColor: (theme) => theme.palette.common.white,
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                zIndex: 9999,
-                pointerEvents: "auto",
-                "&:hover": {
-                  backgroundColor: (theme) => theme.palette.grey[50],
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                },
-              }}
-            >
-              <svg
-                width="12"
-                height="10"
-                viewBox="0 0 12 10"
-                style={{
-                  fill: "#3a4574",
-                  transition: "transform 0.2s ease",
-                  transform: isSecondCardMinimized
-                    ? "rotate(0deg)"
-                    : "rotate(180deg)",
-                  pointerEvents: "none",
-                }}
-              >
-                <path d="M6 0 L11 8 Q6 6 1 8 Z" />
-              </svg>
-            </Box>
-          </Box>
 
-          {/* Search Interface */}
-          {/* <Card
-            sx={{
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
-            }}
-          >
-            <Stack spacing={2}>
-              <TextField
-                fullWidth
-                placeholder="Search by location, operation, or outcome..."
-                variant="outlined"
-                size="small"
-                InputProps={{
-                  startAdornment: (
-                    <SearchIcon sx={{ mr: 1, color: "action.active" }} />
-                  ),
-                }}
-              />
-
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<FilterListIcon />}
-                >
-                  Operations
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<FilterListIcon />}
-                >
-                  Outcomes
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<FilterListIcon />}
-                >
-                  Climate
-                </Button>
-              </Box>
-            </Stack>
-          </Card> */}
-
-          {/* <ScenarioCard
-            topLine="MAP VISUALIZATION"
-            headline="Data Layers & Controls"
-            body="Toggle different data layers to visualize water infrastructure, land use patterns, and environmental flows across California."
-            bottomLine="4 layers available"
-            sx={{
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
-            }}
-          /> */}
-
-          {/* Layer Controls */}
-          {/* <Card
-            sx={{
-              backdropFilter: "blur(10px)",
-              pointerEvents: "auto",
-            }}
-          >
-            <Stack spacing={1}>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography variant="body2">Water Infrastructure</Typography>
-                <IconButton size="small">
-                  <LayersIcon />
-                </IconButton>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography variant="body2">Agricultural Areas</Typography>
-                <IconButton size="small">
-                  <LayersIcon />
-                </IconButton>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography variant="body2">Urban Areas</Typography>
-                <IconButton size="small">
-                  <LayersIcon />
-                </IconButton>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Typography variant="body2">Environmental Flows</Typography>
-                <IconButton size="small">
-                  <LayersIcon />
-                </IconButton>
-              </Box>
-            </Stack>
-          </Card> */}
-        </Box>
 
         {/* Right Column */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", minWidth: 0 }}>
@@ -1157,16 +890,134 @@ const MapControls = ({
                       {/* Select Regions Tab */}
                       {previewPanelTab === 1 && (
                         <Box sx={{ p: 2 }}>
+                          {/* Region Selection Header */}
                           <Box
                             sx={{
-                              fontSize: "0.9rem",
-                              color: (theme) => theme.palette.text.secondary,
-                              textAlign: "center",
-                              fontStyle: "italic",
+                              mb: 2,
+                              textAlign: "left",
                             }}
                           >
-                            Region selection content will go here
+                            <Box
+                              sx={{
+                                color: (theme) => theme.palette.blue.medium,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.75px",
+                                fontSize: "0.75rem",
+                                fontWeight: 500,
+                                mb: 0.5,
+                              }}
+                            >
+                              CHOOSE A REGION
+                            </Box>
+                            <Box
+                              sx={{
+                                color: (theme) => theme.palette.blue.darkest,
+                                fontFamily: (theme) => theme.typography.fontFamily,
+                                fontWeight: 500,
+                                fontSize: "1.5rem",
+                                lineHeight: 1.3,
+                                mb: 1,
+                              }}
+                            >
+                              Central Valley
+                            </Box>
                           </Box>
+
+                          {/* Region Selection Dropdown Trigger */}
+                          <Box
+                            onClick={toggleRegionDropdown}
+                            sx={{
+                              cursor: "pointer",
+                              userSelect: "none",
+                              transition: "color 0.2s ease",
+                              textAlign: "center",
+                              mb: 2,
+                              color: (theme) => theme.palette.blue.bright,
+                              "&:hover": {
+                                color: (theme) => theme.palette.blue.darkest,
+                              },
+                            }}
+                          >
+                            Choose a different region{" "}
+                            <span
+                              style={{
+                                fontSize: "0.875em",
+                                lineHeight: 1,
+                                verticalAlign: "baseline",
+                                display: "inline-block",
+                                transform: showRegionDropdown
+                                  ? "rotate(180deg)"
+                                  : "rotate(0deg)",
+                                transition: "transform 0.2s ease",
+                              }}
+                            >
+                              ▼
+                            </span>
+                          </Box>
+
+                          {/* Region Selection Options */}
+                          {showRegionDropdown && (
+                            <Box
+                              sx={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: 1,
+                                p: 2,
+                                backgroundColor: (theme) => theme.palette.grey[50],
+                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                border: "1px solid",
+                                borderColor: (theme) => theme.palette.divider,
+                              }}
+                            >
+                              <FormControlLabel
+                                control={<Checkbox size="small" />}
+                                label="Sacramento Valley"
+                              />
+                              <FormControlLabel
+                                control={<Checkbox size="small" />}
+                                label="San Joaquin Valley"
+                              />
+                              <FormControlLabel
+                                control={<Checkbox size="small" />}
+                                label="Delta"
+                              />
+                              <FormControlLabel
+                                control={<Checkbox size="small" />}
+                                label="Tulare Basin"
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    size="small"
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        onToggleDeliveryAreaDropdown()
+                                      }
+                                    }}
+                                  />
+                                }
+                                label="Select delivery area"
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    size="small"
+                                    checked={
+                                      isDrawingCustomRegion || polygonPoints.length > 0
+                                    }
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        handleSelectRegionOnMapClick()
+                                      } else {
+                                        onClearCustomRegion()
+                                      }
+                                    }}
+                                  />
+                                }
+                                label="Select region on map"
+                              />
+                            </Box>
+                          )}
                         </Box>
                       )}
 
