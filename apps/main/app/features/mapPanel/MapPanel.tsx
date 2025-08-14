@@ -1,6 +1,5 @@
 "use client"
-
-import React, { useState, useEffect, useCallback, useMemo } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import {
   Box,
   IconButton,
@@ -12,7 +11,8 @@ import {
   Button,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
-import { RoseChart, BarChart, StickChart, VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
+import { RoseChart, BarChart, StickChart, VerticalParallelLinePlot } from "@repo/viz"
+import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
 import {
   Map,
@@ -144,139 +144,11 @@ const MapControls = ({
     // onExpandChange?.(newExpandedState) // We can add this prop later if needed
   }, [expandChart])
 
-  const handleLineHover = useCallback((data: VerticalParallelLineData | null) => {
-    console.log("Line hovered:", data?.name || "none")
-  }, [])
-
-  const handleLineClick = useCallback((data: VerticalParallelLineData) => {
-    console.log("Line clicked:", data.name)
-  }, [])
-
-  // Sample data for vertical parallel line plot
-  const axes = useMemo(() => [
-    "Community deliveries",
-    "Agricultural deliveries",
-    "Environmental deliveries",
-    "Reservoir storage",
-    "Groundwater storage",
-    "Delta salinity",
-    "Salmon abundance",
-    "Distributional equity",
-  ], [])
-
-  // Generate scenarios with sample data
-  const generateScenarios = useCallback((): VerticalParallelLineData[] => {
-    const scenarios: VerticalParallelLineData[] = []
-
-    // Baseline scenario (always first)
-    scenarios.push({
-      id: "baseline",
-      name: "Current Operations",
-      values: {
-        "Community deliveries": 0.0,
-        "Agricultural deliveries": 0.0,
-        "Environmental deliveries": 0.0,
-        "Reservoir storage": 0.0,
-        "Groundwater storage": 0.0,
-        "Delta salinity": 0.0,
-        "Salmon abundance": 0.0,
-        "Distributional equity": 0.0,
-      },
-      highlighted: highlightBaseline,
-    })
-
-    // Generate additional scenarios with varied data
-    const scenarioNames = [
-      "SGMA San Joaquin Valley",
-      "SGMA Sacramento Valley",
-      "SGMA Delta",
-      "SGMA Tulare Basin",
-      "Delta Conveyance Tunnel",
-      "Delta Conveyance Dual",
-      "Sites Reservoir",
-      "Temperance Flat",
-      "USBR Alternative 1",
-      "USBR Alternative 2",
-      "USBR Alternative 3",
-      "USBR Alternative 4",
-      "Urban Conservation High",
-      "Urban Conservation Medium",
-      "Agricultural Efficiency",
-      "Recycled Water Expansion",
-      "Desalination Coastal",
-      "Atmospheric River Management",
-      "Floodplain Restoration",
-      "Wetlands Enhancement",
-      "Fish Passage Improvement",
-      "Climate Adaptation A",
-      "Climate Adaptation B",
-      "Drought Contingency",
-      "Flexible Operations",
-      "Coordinated Operations",
-      "Ecosystem Services",
-      "Water Trading Enhanced",
-      "Regional Cooperation",
-    ]
-
-    scenarioNames.forEach((name, index) => {
-      // Create varied but realistic data patterns
-      const baseVariation = (index + 1) / 29 // 0 to 1 progression
-      const randomSeed = index * 7 // Consistent randomization
-
-      scenarios.push({
-        id: `scenario-${index + 1}`,
-        name: name,
-        values: {
-          "Community deliveries":
-            Math.sin(baseVariation * Math.PI * 2 + randomSeed) * 0.8,
-          "Agricultural deliveries":
-            Math.cos(baseVariation * Math.PI * 1.5 + randomSeed) * 0.9,
-          "Environmental deliveries":
-            Math.sin(baseVariation * Math.PI * 3 + randomSeed + 1) * 0.7,
-          "Reservoir storage":
-            Math.cos(baseVariation * Math.PI * 2.5 + randomSeed + 2) * 0.6,
-          "Groundwater storage":
-            Math.sin(baseVariation * Math.PI * 1.8 + randomSeed + 3) * 0.9,
-          "Delta salinity":
-            Math.cos(baseVariation * Math.PI * 2.2 + randomSeed + 4) * 0.5,
-          "Salmon abundance":
-            Math.sin(baseVariation * Math.PI * 2.8 + randomSeed + 5) * 0.8,
-          "Distributional equity":
-            Math.cos(baseVariation * Math.PI * 1.6 + randomSeed + 6) * 0.6,
-        },
-      })
-    })
-
-    return scenarios
-  }, [highlightBaseline])
-
-  // Memoize expensive computations to prevent unnecessary re-renders
-  const sampleData = useMemo(() => generateScenarios(), [generateScenarios])
-
-  const categoricalColors = useMemo(() => {
-    const categorical10 = [
-      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
-    ]
-
-    const colors: string[] = []
-    for (let i = 0; i < 30; i++) {
-      colors.push(categorical10[i % 10]!)
-    }
-
-    return colors
-  }, [])
-
-  const baselineData = useMemo(() => 
-    sampleData.find((d) => d.id === "baseline"), 
-    [sampleData]
-  )
-
-  const chartColors = useMemo(() => ({
-    default: "#1f77b4",
-    highlighted: "#ff7f0e",
-    background: "#f8f9fa",
-  }), [])
+  // ✨ Clean chart data hook encapsulates ALL optimization logic
+  const chartData = useChartData({ 
+    highlightBaseline, 
+    expandChart 
+  })
 
   return (
     <Box
@@ -885,16 +757,8 @@ const MapControls = ({
                             }}
                           >
                             <VerticalParallelLinePlot
-                              key={`chart-${expandChart ? "expanded" : "normal"}`}
-                              data={sampleData}
-                              axes={axes}
-                              responsive={true}
-                              showBaseline={highlightBaseline}
-                              baselineData={baselineData}
-                              colors={chartColors}
-                              lineColors={categoricalColors}
-                              onLineHover={handleLineHover}
-                              onLineClick={handleLineClick}
+                              key={chartData.key}
+                              {...chartData.props}
                             />
                           </Box>
                         </Box>
