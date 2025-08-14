@@ -56,7 +56,7 @@ import type { CSSProperties } from "react"
 // TYPOGRAPHY SCALE
 // ===============================================================================
 //
-// Perfect Fourth (1.333) type scale using Neue Haas Grotesk
+// Perfect Fourth (1.333) type scale using Neue Haas Grotesk Display
 // Headlines: Display Medium | Body text: Text Regular
 // Base: 1.25rem body text
 //
