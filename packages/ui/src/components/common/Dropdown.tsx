@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Select, MenuItem, FormControl, InputLabel } from "../.."
-import type { SelectProps, MenuItemProps } from "@mui/material"
+import type { SelectProps, MenuItemProps, Theme } from "@mui/material"
 
 export interface DropdownOption {
   value: string
@@ -10,7 +10,7 @@ export interface DropdownOption {
   disabled?: boolean
 }
 
-export interface DropdownProps extends Omit<SelectProps, "children"> {
+export interface DropdownProps extends Omit<SelectProps, "children" | "variant"> {
   /** Array of dropdown options */
   options: DropdownOption[]
   /** Optional label for the dropdown */
@@ -49,11 +49,11 @@ export function Dropdown({
     // Base styling following form control conventions
     fontSize: isCompact ? "0.875rem" : "1rem",
     minWidth: isCompact ? 80 : 120,
-    backgroundColor: (theme) => theme.palette.common.white,
+    backgroundColor: (theme: Theme) => theme.palette.common.white,
 
     // Use theme border radius
     "& .MuiOutlinedInput-notchedOutline": {
-      borderRadius: (theme) => theme.borderRadius.rounded,
+      borderRadius: (theme: Theme) => theme.borderRadius.rounded,
     },
 
     // Compact variant styling
@@ -61,17 +61,17 @@ export function Dropdown({
       "& .MuiSelect-select": {
         py: 0.5,
         px: 1,
-        backgroundColor: (theme) => theme.palette.common.white,
+        backgroundColor: (theme: Theme) => theme.palette.common.white,
       },
       "& .MuiOutlinedInput-notchedOutline": {
-        borderColor: (theme) => theme.palette.text.secondary,
-        borderRadius: (theme) => theme.borderRadius.rounded,
+        borderColor: (theme: Theme) => theme.palette.text.secondary,
+        borderRadius: (theme: Theme) => theme.borderRadius.rounded,
       },
       "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: (theme) => theme.palette.blue.medium,
+        borderColor: (theme: Theme) => theme.palette.blue.medium,
       },
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: (theme) => theme.palette.blue.bright,
+        borderColor: (theme: Theme) => theme.palette.blue.bright,
         borderWidth: 1, // Keep thin border even when focused
       },
     }),
@@ -79,17 +79,17 @@ export function Dropdown({
     // Standard variant styling
     ...(!isCompact && {
       "& .MuiSelect-select": {
-        backgroundColor: (theme) => theme.palette.common.white,
+        backgroundColor: (theme: Theme) => theme.palette.common.white,
       },
       "& .MuiOutlinedInput-notchedOutline": {
-        borderColor: (theme) => theme.palette.text.primary,
-        borderRadius: (theme) => theme.borderRadius.rounded,
+        borderColor: (theme: Theme) => theme.palette.text.primary,
+        borderRadius: (theme: Theme) => theme.borderRadius.rounded,
       },
       "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: (theme) => theme.palette.blue.medium,
+        borderColor: (theme: Theme) => theme.palette.blue.medium,
       },
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: (theme) => theme.palette.blue.bright,
+        borderColor: (theme: Theme) => theme.palette.blue.bright,
         borderWidth: 2,
       },
     }),
@@ -104,12 +104,12 @@ export function Dropdown({
         <InputLabel
           sx={{
             fontSize: "0.875rem",
-            color: (theme) => theme.palette.text.secondary,
-            backgroundColor: (theme) => theme.palette.common.white,
-            borderRadius: (theme) => theme.borderRadius.pill,
+            color: (theme: Theme) => theme.palette.text.secondary,
+            backgroundColor: (theme: Theme) => theme.palette.common.white,
+            borderRadius: (theme: Theme) => theme.borderRadius.pill,
             px: 1.5,
             py: 0.5,
-            border: (theme) => `1px solid ${theme.palette.divider}`,
+            border: (theme: Theme) => `1px solid ${theme.palette.divider}`,
             position: "relative",
             transform: "none",
             left: 0,
@@ -128,28 +128,28 @@ export function Dropdown({
         MenuProps={{
           PaperProps: {
             sx: {
-              backgroundColor: (theme) => theme.palette.common.white,
-              boxShadow: (theme) => theme.shadows[8],
-              borderRadius: (theme) => theme.borderRadius.rounded,
-              border: (theme) => `1px solid ${theme.palette.divider}`,
+              backgroundColor: (theme: Theme) => theme.palette.common.white,
+              boxShadow: (theme: Theme) => theme.shadows[8],
+              borderRadius: (theme: Theme) => theme.borderRadius.rounded,
+              border: (theme: Theme) => `1px solid ${theme.palette.divider}`,
               mt: 0.5,
               "& .MuiMenuItem-root": {
                 fontSize: isCompact ? "0.875rem" : "1rem",
                 py: 1,
                 px: 1.5,
-                color: (theme) => theme.palette.text.primary,
-                backgroundColor: (theme) => theme.palette.common.white,
+                color: (theme: Theme) => theme.palette.text.primary,
+                backgroundColor: (theme: Theme) => theme.palette.common.white,
                 "&:hover": {
-                  backgroundColor: (theme) => theme.palette.blue.bright + "15",
-                  color: (theme) => theme.palette.blue.darkest,
+                  backgroundColor: (theme: Theme) => theme.palette.blue.bright + "15",
+                  color: (theme: Theme) => theme.palette.blue.darkest,
                 },
                 "&.Mui-selected": {
-                  backgroundColor: (theme) => theme.palette.blue.bright + "15",
-                  color: (theme) => theme.palette.blue.darkest,
+                  backgroundColor: (theme: Theme) => theme.palette.blue.bright + "15",
+                  color: (theme: Theme) => theme.palette.blue.darkest,
                   "&:hover": {
-                    backgroundColor: (theme) =>
+                    backgroundColor: (theme: Theme) =>
                       theme.palette.blue.bright + "15",
-                    color: (theme) => theme.palette.blue.darkest,
+                    color: (theme: Theme) => theme.palette.blue.darkest,
                   },
                 },
               },
@@ -164,8 +164,8 @@ export function Dropdown({
             disabled
             sx={{
               fontStyle: "italic",
-              color: (theme) => theme.palette.text.secondary,
-              backgroundColor: (theme) => theme.palette.common.white,
+              color: (theme: Theme) => theme.palette.text.secondary,
+              backgroundColor: (theme: Theme) => theme.palette.common.white,
               ...menuItemProps,
             }}
           >

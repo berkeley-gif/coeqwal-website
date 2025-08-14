@@ -9,9 +9,10 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
+  Button,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
-import { RoseChart, BarChart, StickChart } from "@repo/viz"
+import { RoseChart, BarChart, StickChart, VerticalParallelLinePlot, VerticalParallelLineData } from "@repo/viz"
 import { OUTCOMES } from "../../lib/outcomes"
 import {
   Map,
@@ -82,9 +83,7 @@ const MapControls = ({
   onRegionSelect: _onRegionSelect, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: MapControlsProps) => {
   const { flyTo } = useMap()
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [activeTab, setActiveTab] = useState(0)
-  const [isOutcomesExpanded, setIsOutcomesExpanded] = useState(false)
+
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
   // Card minimize/maximize states
@@ -94,6 +93,11 @@ const MapControls = ({
 
   // Chart type state for scenario snapshot
   const [chartType, setChartType] = useState<"rose" | "bar" | "stick">("rose")
+
+  // Outcomes panel state
+  const [isRelativeView, setIsRelativeView] = useState(true)
+  const [highlightBaseline, setHighlightBaseline] = useState(false)
+  const [expandChart, setExpandChart] = useState(false)
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -106,29 +110,7 @@ const MapControls = ({
     })
   }
 
-  // Scenario card dropdown
-  const toggleDropdown = () => {
-    setShowDropdown(!showDropdown)
-  }
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue)
-  }
-
-  const handleViewOnMap = (coordinates: {
-    longitude: number
-    latitude: number
-    zoom: number
-  }) => {
-    flyTo({
-      longitude: coordinates.longitude,
-      latitude: coordinates.latitude,
-      zoom: coordinates.zoom,
-      transitionOptions: {
-        duration: 1500, // Smooth 1.5-second transition for preset locations
-      },
-    })
-  }
 
   // Region card dropdown
   const toggleRegionDropdown = () => {
@@ -140,9 +122,153 @@ const MapControls = ({
     setShowRegionDropdown(false) // Close dropdown when starting to draw
   }
 
-  const handleOutcomesExpandChange = (isExpanded: boolean) => {
-    setIsOutcomesExpanded(isExpanded)
+
+
+  // Outcomes panel handlers
+  const handleViewModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsRelativeView(event.target.checked)
   }
+
+  const handleHighlightBaselineChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setHighlightBaseline(event.target.checked)
+  }
+
+  const handleLearnMoreClick = () => {
+    console.log("Learn more about this chart clicked")
+  }
+
+  const toggleExpandChart = () => {
+    const newExpandedState = !expandChart
+    setExpandChart(newExpandedState)
+    // onExpandChange?.(newExpandedState) // We can add this prop later if needed
+  }
+
+  const handleLineHover = (data: VerticalParallelLineData | null) => {
+    console.log("Line hovered:", data?.name || "none")
+  }
+
+  const handleLineClick = (data: VerticalParallelLineData) => {
+    console.log("Line clicked:", data.name)
+  }
+
+  // Sample data for vertical parallel line plot
+  const axes = [
+    "Community deliveries",
+    "Agricultural deliveries",
+    "Environmental deliveries",
+    "Reservoir storage",
+    "Groundwater storage",
+    "Delta salinity",
+    "Salmon abundance",
+    "Distributional equity",
+  ]
+
+  // Generate scenarios with sample data
+  const generateScenarios = (): VerticalParallelLineData[] => {
+    const scenarios: VerticalParallelLineData[] = []
+
+    // Baseline scenario (always first)
+    scenarios.push({
+      id: "baseline",
+      name: "Current Operations",
+      values: {
+        "Community deliveries": 0.0,
+        "Agricultural deliveries": 0.0,
+        "Environmental deliveries": 0.0,
+        "Reservoir storage": 0.0,
+        "Groundwater storage": 0.0,
+        "Delta salinity": 0.0,
+        "Salmon abundance": 0.0,
+        "Distributional equity": 0.0,
+      },
+      highlighted: highlightBaseline,
+    })
+
+    // Generate additional scenarios with varied data
+    const scenarioNames = [
+      "SGMA San Joaquin Valley",
+      "SGMA Sacramento Valley",
+      "SGMA Delta",
+      "SGMA Tulare Basin",
+      "Delta Conveyance Tunnel",
+      "Delta Conveyance Dual",
+      "Sites Reservoir",
+      "Temperance Flat",
+      "USBR Alternative 1",
+      "USBR Alternative 2",
+      "USBR Alternative 3",
+      "USBR Alternative 4",
+      "Urban Conservation High",
+      "Urban Conservation Medium",
+      "Agricultural Efficiency",
+      "Recycled Water Expansion",
+      "Desalination Coastal",
+      "Atmospheric River Management",
+      "Floodplain Restoration",
+      "Wetlands Enhancement",
+      "Fish Passage Improvement",
+      "Climate Adaptation A",
+      "Climate Adaptation B",
+      "Drought Contingency",
+      "Flexible Operations",
+      "Coordinated Operations",
+      "Ecosystem Services",
+      "Water Trading Enhanced",
+      "Regional Cooperation",
+    ]
+
+    scenarioNames.forEach((name, index) => {
+      // Create varied but realistic data patterns
+      const baseVariation = (index + 1) / 29 // 0 to 1 progression
+      const randomSeed = index * 7 // Consistent randomization
+
+      scenarios.push({
+        id: `scenario-${index + 1}`,
+        name: name,
+        values: {
+          "Community deliveries":
+            Math.sin(baseVariation * Math.PI * 2 + randomSeed) * 0.8,
+          "Agricultural deliveries":
+            Math.cos(baseVariation * Math.PI * 1.5 + randomSeed) * 0.9,
+          "Environmental deliveries":
+            Math.sin(baseVariation * Math.PI * 3 + randomSeed + 1) * 0.7,
+          "Reservoir storage":
+            Math.cos(baseVariation * Math.PI * 2.5 + randomSeed + 2) * 0.6,
+          "Groundwater storage":
+            Math.sin(baseVariation * Math.PI * 1.8 + randomSeed + 3) * 0.9,
+          "Delta salinity":
+            Math.cos(baseVariation * Math.PI * 2.2 + randomSeed + 4) * 0.5,
+          "Salmon abundance":
+            Math.sin(baseVariation * Math.PI * 2.8 + randomSeed + 5) * 0.8,
+          "Distributional equity":
+            Math.cos(baseVariation * Math.PI * 1.6 + randomSeed + 6) * 0.6,
+        },
+      })
+    })
+
+    return scenarios
+  }
+
+  const sampleData = generateScenarios()
+
+  // Generate colors using d3's categorical10 palette
+  const generateCategoricalColors = (count: number): string[] => {
+    const categorical10 = [
+      "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
+      "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+    ]
+
+    const colors: string[] = []
+    for (let i = 0; i < count; i++) {
+      colors.push(categorical10[i % 10]!)
+    }
+
+    return colors
+  }
+
+  const categoricalColors = generateCategoricalColors(30)
 
   return (
     <Box
@@ -179,16 +305,7 @@ const MapControls = ({
           <Box
             sx={{
               position: "relative",
-              // Dynamic height based on active tab - container must have height for child to use 100%
-              ...(activeTab === 1
-                ? {
-                    height: "100%", // Outcomes: use full height
-                    display: "flex",
-                    flexDirection: "column",
-                  }
-                : {
-                    height: "auto", // Presets/Operations: auto height
-                  }),
+              height: "auto",
             }}
           >
             <Box
@@ -202,15 +319,7 @@ const MapControls = ({
                 padding: 3,
                 display: "flex",
                 flexDirection: "column",
-                // Dynamic height based on active tab
-                ...(activeTab === 1
-                  ? {
-                      height: "100%", // Outcomes: use full height
-                      minHeight: 0,
-                    }
-                  : {
-                      height: "auto", // Presets/Operations: auto height
-                    }),
+                height: "auto",
                 opacity: isFirstCardMinimized ? 0.8 : 1,
               }}
             >
@@ -883,7 +992,7 @@ const MapControls = ({
                       >
                         <Tab label="Select scenarios" />
                         <Tab label="Select regions" />
-                        <Tab label="Selections" />
+                        <Tab label="Selection history" />
                       </Tabs>
                     </Box>
 
@@ -895,106 +1004,174 @@ const MapControls = ({
                         flexDirection: "column",
                       }}
                     >
-                      {/* Snapshot Tab */}
+                      {/* Select Scenarios Tab */}
                       {previewPanelTab === 0 && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            height: "100%",
+                            width: "100%",
+                            minWidth: 0,
+                            flexGrow: 1,
+                            p: 2,
+                          }}
+                        >
+                          {/* Outcomes paragraph, visible when chart not expanded */}
+                          {!expandChart && (
+                            <Box sx={{ flexShrink: 0 }}>
+                              <Box
+                                sx={{
+                                  fontSize: "0.95rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.4,
+                                  color: (theme) => theme.palette.text.primary,
+                                  mb: 1,
+                                }}
+                              >
+                                Compare scenarios across multiple outcomes to understand trade-offs
+                                and synergies in California&apos;s water management.{" "}
+                                <Box
+                                  component="span"
+                                  onClick={handleLearnMoreClick}
+                                  sx={{
+                                    color: (theme) => theme.palette.blue.bright,
+                                    cursor: "pointer",
+                                    fontWeight: 500,
+                                    textDecoration: "underline",
+                                    whiteSpace: "nowrap",
+                                    "&:hover": {
+                                      color: (theme) => theme.palette.blue.darkest,
+                                    },
+                                  }}
+                                >
+                                  Learn more about this chart
+                                </Box>
+                              </Box>
+                            </Box>
+                          )}
+
+                          {/* Control Section, always visible */}
+                          <Box sx={{ flexShrink: 0, mb: 1 }}>
+                            {/* Expand chart button, always visible */}
+                            <Box sx={{ mb: 1 }}>
+                              <Button
+                                variant="text"
+                                onClick={toggleExpandChart}
+                                sx={{
+                                  fontSize: "0.95rem",
+                                  fontWeight: 500,
+                                  color: (theme) => theme.palette.blue.bright,
+                                  padding: 0,
+                                  minWidth: "auto",
+                                  textTransform: "none",
+                                  justifyContent: "flex-start",
+                                  "&:hover": {
+                                    color: (theme) => theme.palette.blue.darkest,
+                                    backgroundColor: "transparent",
+                                  },
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontSize: "0.875em",
+                                    marginRight: "8px",
+                                    display: "inline-block",
+                                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                                    transition: "transform 0.2s ease",
+                                  }}
+                                >
+                                  ▼
+                                </span>
+                                {expandChart ? "Reduce" : "Expand"} chart
+                              </Button>
+                            </Box>
+
+                            {/* Chart controls */}
+                            <Box
+                              sx={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: 2,
+                                mt: 1,
+                                mb: 1,
+                                width: "100%",
+                              }}
+                            >
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={isRelativeView}
+                                    onChange={handleViewModeChange}
+                                    size="small"
+                                  />
+                                }
+                                label="relative to current operations"
+                              />
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={highlightBaseline}
+                                    onChange={handleHighlightBaselineChange}
+                                    size="small"
+                                  />
+                                }
+                                label="highlight current operations"
+                              />
+                            </Box>
+                          </Box>
+
+                          {/* Responsive Chart Visualization */}
+                          <Box
+                            sx={{
+                              flexGrow: 1,
+                              width: "100%",
+                              height: "100%",
+                              minHeight: 0,
+                              maxHeight: "none",
+                              overflow: "hidden",
+                              display: "flex",
+                              flexDirection: "column",
+                            }}
+                          >
+                            <VerticalParallelLinePlot
+                              key={`chart-${expandChart ? "expanded" : "normal"}`}
+                              data={sampleData}
+                              axes={axes}
+                              responsive={true}
+                              showBaseline={highlightBaseline}
+                              baselineData={sampleData.find((d) => d.id === "baseline")}
+                              colors={{
+                                default: "#1f77b4",
+                                highlighted: "#ff7f0e",
+                                background: "#f8f9fa",
+                              }}
+                              lineColors={categoricalColors}
+                              onLineHover={handleLineHover}
+                              onLineClick={handleLineClick}
+                            />
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Select Regions Tab */}
+                      {previewPanelTab === 1 && (
                         <Box sx={{ p: 2 }}>
                           <Box
                             sx={{
-                              mb: 2,
                               fontSize: "0.9rem",
                               color: (theme) => theme.palette.text.secondary,
                               textAlign: "center",
                               fontStyle: "italic",
                             }}
                           >
-                            Hover over scenarios to see snapshot
-                          </Box>
-
-                          {/* Dynamic snapshot content */}
-                          <Box
-                            sx={{
-                              border: hoveredScenario
-                                ? "2px solid"
-                                : "2px dashed",
-                              borderColor: hoveredScenario
-                                ? (theme) => theme.palette.blue.bright
-                                : (theme) => theme.palette.grey[300],
-                              borderRadius: (theme) =>
-                                theme.borderRadius.rounded,
-                              p: 3,
-                              textAlign: "center",
-                              minHeight: "200px",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexDirection: "column",
-                              gap: 1,
-                              backgroundColor: hoveredScenario
-                                ? (theme) => `${theme.palette.blue.bright}10`
-                                : "transparent",
-                            }}
-                          >
-                            {hoveredScenario ? (
-                              <>
-                                <Box
-                                  sx={{
-                                    fontSize: "1rem",
-                                    fontWeight: 500,
-                                    color: (theme) =>
-                                      theme.palette.text.primary,
-                                  }}
-                                >
-                                  {hoveredScenario}
-                                </Box>
-                                <Box
-                                  sx={{
-                                    fontSize: "0.85rem",
-                                    color: (theme) =>
-                                      theme.palette.text.secondary,
-                                    mb: 2,
-                                  }}
-                                >
-                                  Scenario Results Snapshot
-                                </Box>
-                                <Box
-                                  sx={{
-                                    fontSize: "0.75rem",
-                                    color: (theme) =>
-                                      theme.palette.text.disabled,
-                                  }}
-                                >
-                                  [Visualization will appear here]
-                                </Box>
-                              </>
-                            ) : (
-                              <>
-                                <Box
-                                  sx={{
-                                    fontSize: "0.85rem",
-                                    color: (theme) =>
-                                      theme.palette.text.secondary,
-                                  }}
-                                >
-                                  No scenario hovered
-                                </Box>
-                                <Box
-                                  sx={{
-                                    fontSize: "0.75rem",
-                                    color: (theme) =>
-                                      theme.palette.text.disabled,
-                                  }}
-                                >
-                                  Snapshot will appear here when you hover over
-                                  scenarios
-                                </Box>
-                              </>
-                            )}
+                            Region selection content will go here
                           </Box>
                         </Box>
                       )}
 
-                      {/* Selected Tab - Shopping Cart */}
-                      {previewPanelTab === 1 && (
+                      {/* Selection History Tab */}
+                      {previewPanelTab === 2 && (
                         <Box sx={{ p: 2 }}>
                           {/* Selected Region */}
                           <Box
