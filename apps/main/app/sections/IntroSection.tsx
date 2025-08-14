@@ -566,12 +566,11 @@ const IntroSection: React.FC = () => {
           overflow: "visible",
           // Background images positioned relative to content height
           background: `
-            url('/images/home_collage/birds_top.png'),
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
           `,
-          backgroundSize: "auto 36%, auto 30%, auto 44%",
-          backgroundPosition: "left top, left bottom, right bottom",
+          backgroundSize: "auto 30%, auto 44%",
+          backgroundPosition: "left bottom, right bottom",
           backgroundRepeat: "no-repeat, no-repeat, no-repeat",
         }}
       >
@@ -586,20 +585,44 @@ const IntroSection: React.FC = () => {
           }}
         >
           <Stack spacing={4}>
-            <Typography
-              variant="h2"
+            {/* Text with birds bullet */}
+            <Box
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                mb: 3,
-                textAlign: "left",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: { xs: 2, md: 3 },
               }}
             >
-              The amount of water available for any purpose in California
-              depends on two things: how much precipitation we get and how we
-              manage this water. We are already having to make difficult water
-              allocation decisions. We are facing a time of climate
-              uncertainty and need to prepare for the future.
-            </Typography>
+              {/* Birds bullet image */}
+              <Box
+                sx={{
+                  width: { xs: 80, md: 120 },
+                  height: { xs: 80, md: 120 },
+                  flexShrink: 0,
+                  backgroundImage: "url('/images/home_collage/birds_top.png')",
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  // Align center of birds with first line of text
+                  mt: { xs: -1, md: -2 }, // Negative margin to center with first line
+                }}
+              />
+              {/* Text content */}
+              <Typography
+                variant="h2"
+                sx={{
+                  color: (theme) => theme.palette.blue.darkest,
+                  textAlign: "left",
+                  flex: 1,
+                }}
+              >
+                The amount of water available for any purpose in California
+                depends on two things: how much precipitation we get and how we
+                manage this water. We are already having to make difficult water
+                allocation decisions. We are facing a time of climate
+                uncertainty and need to prepare for the future.
+              </Typography>
+            </Box>
           </Stack>
         </Box>
       </BasePanel>
