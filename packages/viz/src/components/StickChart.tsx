@@ -21,11 +21,11 @@ export interface StickChartProps {
  * - Customizable colors and values
  * - Responsive sizing
  */
-export default function StickChart({
+const StickChart = ({
   size = 80,
   tiers,
   seed,
-}: StickChartProps) {
+}: StickChartProps) => {
   // Default tier configuration: red → orange → blue → green
   const defaultTiers = [
     { label: "Tier 1", color: "#f96262" }, // red
@@ -123,3 +123,5 @@ export default function StickChart({
     </svg>
   )
 }
+
+export default React.memo(StickChart)

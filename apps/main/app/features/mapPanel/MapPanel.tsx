@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import {
   Box,
   IconButton,
@@ -112,48 +112,48 @@ const MapControls = ({
 
 
   // Region card dropdown
-  const toggleRegionDropdown = () => {
+  const toggleRegionDropdown = useCallback(() => {
     setShowRegionDropdown(!showRegionDropdown)
-  }
+  }, [showRegionDropdown])
 
-  const handleSelectRegionOnMapClick = () => {
+  const handleSelectRegionOnMapClick = useCallback(() => {
     onSelectRegionOnMap()
     setShowRegionDropdown(false) // Close dropdown when starting to draw
-  }
+  }, [onSelectRegionOnMap])
 
 
 
   // Outcomes panel handlers
-  const handleViewModeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleViewModeChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setIsRelativeView(event.target.checked)
-  }
+  }, [])
 
-  const handleHighlightBaselineChange = (
+  const handleHighlightBaselineChange = useCallback((
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setHighlightBaseline(event.target.checked)
-  }
+  }, [])
 
-  const handleLearnMoreClick = () => {
+  const handleLearnMoreClick = useCallback(() => {
     console.log("Learn more about this chart clicked")
-  }
+  }, [])
 
-  const toggleExpandChart = () => {
+  const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
     setExpandChart(newExpandedState)
     // onExpandChange?.(newExpandedState) // We can add this prop later if needed
-  }
+  }, [expandChart])
 
-  const handleLineHover = (data: VerticalParallelLineData | null) => {
+  const handleLineHover = useCallback((data: VerticalParallelLineData | null) => {
     console.log("Line hovered:", data?.name || "none")
-  }
+  }, [])
 
-  const handleLineClick = (data: VerticalParallelLineData) => {
+  const handleLineClick = useCallback((data: VerticalParallelLineData) => {
     console.log("Line clicked:", data.name)
-  }
+  }, [])
 
   // Sample data for vertical parallel line plot
-  const axes = [
+  const axes = useMemo(() => [
     "Community deliveries",
     "Agricultural deliveries",
     "Environmental deliveries",
@@ -162,10 +162,10 @@ const MapControls = ({
     "Delta salinity",
     "Salmon abundance",
     "Distributional equity",
-  ]
+  ], [])
 
   // Generate scenarios with sample data
-  const generateScenarios = (): VerticalParallelLineData[] => {
+  const generateScenarios = useCallback((): VerticalParallelLineData[] => {
     const scenarios: VerticalParallelLineData[] = []
 
     // Baseline scenario (always first)
@@ -248,26 +248,35 @@ const MapControls = ({
     })
 
     return scenarios
-  }
+  }, [highlightBaseline])
 
-  const sampleData = generateScenarios()
+  // Memoize expensive computations to prevent unnecessary re-renders
+  const sampleData = useMemo(() => generateScenarios(), [generateScenarios])
 
-  // Generate colors using d3's categorical10 palette
-  const generateCategoricalColors = (count: number): string[] => {
+  const categoricalColors = useMemo(() => {
     const categorical10 = [
       "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
       "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
     ]
 
     const colors: string[] = []
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < 30; i++) {
       colors.push(categorical10[i % 10]!)
     }
 
     return colors
-  }
+  }, [])
 
-  const categoricalColors = generateCategoricalColors(30)
+  const baselineData = useMemo(() => 
+    sampleData.find((d) => d.id === "baseline"), 
+    [sampleData]
+  )
+
+  const chartColors = useMemo(() => ({
+    default: "#1f77b4",
+    highlighted: "#ff7f0e",
+    background: "#f8f9fa",
+  }), [])
 
   return (
     <Box
@@ -282,11 +291,11 @@ const MapControls = ({
         p: 2, // 16px padding
       }}
     >
-              {/* Two column layout */}
+              {/* Seven column layout with 2/7 width panels */}
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr",
+            gridTemplateColumns: "repeat(7, 1fr)",
             gap: 3,
             height: "100%",
           }}
@@ -298,6 +307,7 @@ const MapControls = ({
             flexDirection: "column",
             gap: 1,
             height: "100%",
+            gridColumn: "1 / 3", // Spans columns 1-2 (2/7 width)
           }}
         >
           {/* Unified scenario card for all tabs */}
@@ -688,7 +698,14 @@ const MapControls = ({
 
 
         {/* Right Column */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: "100%", minWidth: 0 }}>
+        <Box sx={{ 
+          display: "flex", 
+          flexDirection: "column", 
+          gap: 2, 
+          width: "100%", 
+          minWidth: 0,
+          gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width)
+        }}>
           {/* Dynamic Scenario Panel */}
           <Box sx={{ position: "relative" }}>
             <ScenarioCard
@@ -873,12 +890,8 @@ const MapControls = ({
                               axes={axes}
                               responsive={true}
                               showBaseline={highlightBaseline}
-                              baselineData={sampleData.find((d) => d.id === "baseline")}
-                              colors={{
-                                default: "#1f77b4",
-                                highlighted: "#ff7f0e",
-                                background: "#f8f9fa",
-                              }}
+                              baselineData={baselineData}
+                              colors={chartColors}
                               lineColors={categoricalColors}
                               onLineHover={handleLineHover}
                               onLineClick={handleLineClick}

@@ -22,7 +22,7 @@ export interface RoseChartProps {
  * - Customizable colors and angles
  * - Responsive sizing
  */
-export default function RoseChart({ size = 80, tiers, seed }: RoseChartProps) {
+const RoseChart = ({ size = 80, tiers, seed }: RoseChartProps) => {
   const centerX = size / 2
   const centerY = size / 2
   const innerRadius = size * 0.03
@@ -129,3 +129,5 @@ export default function RoseChart({ size = 80, tiers, seed }: RoseChartProps) {
     </svg>
   )
 }
+
+export default React.memo(RoseChart)
