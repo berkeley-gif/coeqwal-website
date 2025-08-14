@@ -96,45 +96,7 @@ export default function Home() {
     closeDrawer()
   }
 
-  // Handler to open specific drawer tabs,s using the store
-  const _handleOpenThemesDrawer = (operationId?: string) => { // eslint-disable-line @typescript-eslint/no-unused-vars
-    // Check if the themes drawer is already open
-    if (activeDrawerTab === "glossary") {
-      // Check if this is the same operation that's currently selected
-      const drawerStore = useDrawerStore.getState()
-      const currentOperation = drawerStore.content?.selectedOperation as
-        | string
-        | undefined
-
-      if (currentOperation === operationId) {
-        // Same operation - close the drawer (toggle behavior)
-        closeDrawer()
-
-        // Keep the legacy state in sync for components not yet migrated
-        setDrawerOpen(false)
-        setActiveDrawerTab(null)
-        return
-      } else {
-        // Different operation - just update the content instead of closing
-        drawerStore.setDrawerContent({ selectedOperation: operationId })
-        return
-      }
-    }
-
-    // Store the operation ID in the drawer content if provided
-    if (operationId) {
-      useDrawerStore
-        .getState()
-        .setDrawerContent({ selectedOperation: operationId })
-    }
-    openDrawer("glossary")
-
-    // Keep the legacy state in sync for components not yet migrated
-    setDrawerOpen(true)
-    setActiveDrawerTab("glossary")
-  }
-
-  // Handler to open specific drawer tabs - using the store
+  // Handler to open specific drawer tabs (using the store)
   const handleOpenLearnDrawer = (sectionId?: string) => {
     // Check if the learn drawer is already open
     if (activeDrawerTab === "glossary") {

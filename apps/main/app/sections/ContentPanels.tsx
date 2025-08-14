@@ -136,8 +136,13 @@ export default function ContentPanels({
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
           <Typography variant="body2">
-            how California water flows and operational decisions balance water
-            needs across the state
+            Communities, agriculture, and ecosystems are all connected by
+            California water. Many Californians would be surprised to learn how
+            controlled our state&apos;s water is. Californians share water
+            through one of the largest and most complex conveyance and
+            allocation systems in the world, particularly in the Central Valley.
+            Learn how California water flows and water management decisions
+            balance water needs across the state.
           </Typography>
         </LeadingMarkerText>
       </Box>
@@ -950,7 +955,7 @@ export default function ContentPanels({
           }
         />
 
-        {/* Empower panel - no detail panel, just the simple version */}
+        {/* Empower panel */}
         <Box sx={{ py: 4 }}>
           <EmpowerSimple />
         </Box>
@@ -979,7 +984,7 @@ function PanelWithDetail({
   onToggleDetail,
   bgColor,
   title,
-  content, // Now optional
+  content,
   detailContent,
   hideDetailArrow = false,
   addBorder = false,
@@ -1041,7 +1046,7 @@ function PanelWithDetail({
       {/* Conditionally render either main panel or detail panel with sliding animation */}
       <AnimatePresence mode="sync">
         {!isActive ? (
-          // Main panel - shown when not active
+          // Main panel, shown when not active
           <motion.div
             key="main-panel"
             ref={mainPanelRef}
@@ -1067,7 +1072,7 @@ function PanelWithDetail({
                 overflow: "visible",
               }}
             >
-              {/* Single column layout since title and content are now combined */}
+              {/* Single column layout */}
               <Box
                 sx={{
                   display: "flex",
@@ -1135,7 +1140,7 @@ function PanelWithDetail({
             </Box>
           </motion.div>
         ) : (
-          // Detail panel - shown when active
+          // Detail panel, shown when active
           <motion.div
             key="detail-panel"
             ref={detailPanelRef}
