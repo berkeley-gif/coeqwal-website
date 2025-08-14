@@ -12,24 +12,24 @@ const IntroSection: React.FC = () => {
     // Row 1
     {
       src: "/images/markers/atta2.png",
-      left: { 
+      left: {
         xs: "calc(14% - 70px)", // Leftmost marker - center at 14%
-        sm: "calc(14% - 80px)", 
-        md: "calc(14% - 100px)", 
-        lg: "calc(14% - 100px)", 
-        xl: "calc(14% - 100px)" 
+        sm: "calc(14% - 80px)",
+        md: "calc(14% - 100px)",
+        lg: "calc(14% - 100px)",
+        xl: "calc(14% - 100px)",
       },
       top: "5%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/farmers2.png",
-      left: { 
+      left: {
         xs: "calc(32% - 70px)", // Left marker - center at 32%
-        sm: "calc(32% - 80px)", 
-        md: "calc(32% - 100px)", 
-        lg: "calc(32% - 100px)", 
-        xl: "calc(32% - 100px)" 
+        sm: "calc(32% - 80px)",
+        md: "calc(32% - 100px)",
+        lg: "calc(32% - 100px)",
+        xl: "calc(32% - 100px)",
       },
       top: "5%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
@@ -37,86 +37,110 @@ const IntroSection: React.FC = () => {
     // Center marker
     {
       src: "/images/markers/drinking_water2.png",
-      left: { 
+      left: {
         xs: "calc(50% - 70px)", // Center marker - center at 50%
-        sm: "calc(50% - 80px)", 
-        md: "calc(50% - 100px)", 
-        lg: "calc(50% - 100px)", 
-        xl: "calc(50% - 100px)" 
+        sm: "calc(50% - 80px)",
+        md: "calc(50% - 100px)",
+        lg: "calc(50% - 100px)",
+        xl: "calc(50% - 100px)",
       },
       top: "5%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/shasta2.png",
-      left: { 
+      left: {
         xs: "calc(68% - 70px)", // Right marker - center at 68%
-        sm: "calc(68% - 80px)", 
-        md: "calc(68% - 100px)", 
-        lg: "calc(68% - 100px)", 
-        xl: "calc(68% - 100px)" 
+        sm: "calc(68% - 80px)",
+        md: "calc(68% - 100px)",
+        lg: "calc(68% - 100px)",
+        xl: "calc(68% - 100px)",
       },
       top: "5%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/salmon2.png",
-      left: { 
+      left: {
         xs: "calc(86% - 70px)", // Rightmost marker - center at 86%
-        sm: "calc(86% - 80px)", 
-        md: "calc(86% - 100px)", 
-        lg: "calc(86% - 100px)", 
-        xl: "calc(86% - 100px)" 
+        sm: "calc(86% - 80px)",
+        md: "calc(86% - 100px)",
+        lg: "calc(86% - 100px)",
+        xl: "calc(86% - 100px)",
       },
       top: "5%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
 
-    // Row 2 - Staggered offset (centers at 23%, 41%, 59%, 77%)
+    // Row 2 - Staggered offset (centers at 5%, 23%, 77%, 95%)
     {
-      src: "/images/markers/drinking_water2.png",
-      left: { 
-        xs: "calc(23% - 70px)", 
-        sm: "calc(23% - 80px)", 
-        md: "calc(23% - 100px)", 
-        lg: "calc(23% - 100px)", 
-        xl: "calc(23% - 100px)" 
+      src: "/images/markers/los_angeles2.png",
+      left: {
+        xs: "calc(5% - 70px)", // Far left marker
+        sm: "calc(5% - 80px)",
+        md: "calc(5% - 100px)",
+        lg: "calc(5% - 100px)",
+        xl: "calc(5% - 100px)",
       },
       top: "23%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
-      src: "/images/markers/los_angeles2.png",
-      left: { 
-        xs: "calc(41% - 70px)", 
-        sm: "calc(41% - 80px)", 
-        md: "calc(41% - 100px)", 
-        lg: "calc(41% - 100px)", 
-        xl: "calc(41% - 100px)" 
+      src: "/images/markers/drinking_water2.png",
+      left: {
+        xs: "calc(23% - 70px)",
+        sm: "calc(23% - 80px)",
+        md: "calc(23% - 100px)",
+        lg: "calc(23% - 100px)",
+        xl: "calc(23% - 100px)",
+      },
+      top: "23%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    // {
+    //   src: "/images/markers/los_angeles2.png",
+    //   left: {
+    //     xs: "calc(41% - 70px)",
+    //     sm: "calc(41% - 80px)",
+    //     md: "calc(41% - 100px)",
+    //     lg: "calc(41% - 100px)",
+    //     xl: "calc(41% - 100px)"
+    //   },
+    //   top: "23%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/salmon2.png",
+    //   left: {
+    //     xs: "calc(59% - 70px)",
+    //     sm: "calc(59% - 80px)",
+    //     md: "calc(59% - 100px)",
+    //     lg: "calc(59% - 100px)",
+    //     xl: "calc(59% - 100px)"
+    //   },
+    //   top: "23%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    {
+      src: "/images/markers/shasta2.png",
+      left: {
+        xs: "calc(77% - 70px)",
+        sm: "calc(77% - 80px)",
+        md: "calc(77% - 100px)",
+        lg: "calc(77% - 100px)",
+        xl: "calc(77% - 100px)",
       },
       top: "23%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/salmon2.png",
-      left: { 
-        xs: "calc(59% - 70px)", 
-        sm: "calc(59% - 80px)", 
-        md: "calc(59% - 100px)", 
-        lg: "calc(59% - 100px)", 
-        xl: "calc(59% - 100px)" 
-      },
-      top: "23%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/shasta2.png",
-      left: { 
-        xs: "calc(77% - 70px)", 
-        sm: "calc(77% - 80px)", 
-        md: "calc(77% - 100px)", 
-        lg: "calc(77% - 100px)", 
-        xl: "calc(77% - 100px)" 
+      left: {
+        xs: "calc(95% - 70px)",
+        sm: "calc(95% - 80px)",
+        md: "calc(95% - 100px)",
+        lg: "calc(95% - 100px)",
+        xl: "calc(95% - 100px)",
       },
       top: "23%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
@@ -125,110 +149,134 @@ const IntroSection: React.FC = () => {
     // Row 3 - Even row pattern (centers at 14%, 32%, 50%, 68%, 86%)
     {
       src: "/images/markers/farmers2.png",
-      left: { 
-        xs: "calc(14% - 70px)", 
-        sm: "calc(14% - 80px)", 
-        md: "calc(14% - 100px)", 
-        lg: "calc(14% - 100px)", 
-        xl: "calc(14% - 100px)" 
+      left: {
+        xs: "calc(14% - 70px)",
+        sm: "calc(14% - 80px)",
+        md: "calc(14% - 100px)",
+        lg: "calc(14% - 100px)",
+        xl: "calc(14% - 100px)",
       },
       top: "41%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
-    {
-      src: "/images/markers/shasta2.png",
-      left: { 
-        xs: "calc(32% - 70px)", 
-        sm: "calc(32% - 80px)", 
-        md: "calc(32% - 100px)", 
-        lg: "calc(32% - 100px)", 
-        xl: "calc(32% - 100px)" 
-      },
-      top: "41%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/atta2.png",
-      left: { 
-        xs: "calc(50% - 70px)", 
-        sm: "calc(50% - 80px)", 
-        md: "calc(50% - 100px)", 
-        lg: "calc(50% - 100px)", 
-        xl: "calc(50% - 100px)" 
-      },
-      top: "41%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/drinking_water2.png",
-      left: { 
-        xs: "calc(68% - 70px)", 
-        sm: "calc(68% - 80px)", 
-        md: "calc(68% - 100px)", 
-        lg: "calc(68% - 100px)", 
-        xl: "calc(68% - 100px)" 
-      },
-      top: "41%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
+    // {
+    //   src: "/images/markers/shasta2.png",
+    //   left: {
+    //     xs: "calc(32% - 70px)",
+    //     sm: "calc(32% - 80px)",
+    //     md: "calc(32% - 100px)",
+    //     lg: "calc(32% - 100px)",
+    //     xl: "calc(32% - 100px)"
+    //   },
+    //   top: "41%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/atta2.png",
+    //   left: {
+    //     xs: "calc(50% - 70px)",
+    //     sm: "calc(50% - 80px)",
+    //     md: "calc(50% - 100px)",
+    //     lg: "calc(50% - 100px)",
+    //     xl: "calc(50% - 100px)"
+    //   },
+    //   top: "41%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/drinking_water2.png",
+    //   left: {
+    //     xs: "calc(68% - 70px)",
+    //     sm: "calc(68% - 80px)",
+    //     md: "calc(68% - 100px)",
+    //     lg: "calc(68% - 100px)",
+    //     xl: "calc(68% - 100px)"
+    //   },
+    //   top: "41%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
     {
       src: "/images/markers/los_angeles2.png",
-      left: { 
-        xs: "calc(86% - 70px)", 
-        sm: "calc(86% - 80px)", 
-        md: "calc(86% - 100px)", 
-        lg: "calc(86% - 100px)", 
-        xl: "calc(86% - 100px)" 
+      left: {
+        xs: "calc(86% - 70px)",
+        sm: "calc(86% - 80px)",
+        md: "calc(86% - 100px)",
+        lg: "calc(86% - 100px)",
+        xl: "calc(86% - 100px)",
       },
       top: "41%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
 
-    // Row 4 - Staggered offset (centers at 23%, 41%, 59%, 77%)
+    // Row 4 - Staggered offset (centers at 5%, 23%, 41%, 59%, 77%, 95%)
+    {
+      src: "/images/markers/atta2.png",
+      left: {
+        xs: "calc(5% - 70px)",
+        sm: "calc(5% - 80px)",
+        md: "calc(5% - 100px)",
+        lg: "calc(5% - 100px)",
+        xl: "calc(5% - 100px)",
+      },
+      top: "59%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
     {
       src: "/images/markers/salmon2.png",
-      left: { 
-        xs: "calc(23% - 70px)", 
-        sm: "calc(23% - 80px)", 
-        md: "calc(23% - 100px)", 
-        lg: "calc(23% - 100px)", 
-        xl: "calc(23% - 100px)" 
+      left: {
+        xs: "calc(23% - 70px)",
+        sm: "calc(23% - 80px)",
+        md: "calc(23% - 100px)",
+        lg: "calc(23% - 100px)",
+        xl: "calc(23% - 100px)",
       },
       top: "59%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/atta2.png",
-      left: { 
-        xs: "calc(41% - 70px)", 
-        sm: "calc(41% - 80px)", 
-        md: "calc(41% - 100px)", 
-        lg: "calc(41% - 100px)", 
-        xl: "calc(41% - 100px)" 
+      left: {
+        xs: "calc(41% - 70px)",
+        sm: "calc(41% - 80px)",
+        md: "calc(41% - 100px)",
+        lg: "calc(41% - 100px)",
+        xl: "calc(41% - 100px)",
       },
       top: "59%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/farmers2.png",
-      left: { 
-        xs: "calc(59% - 70px)", 
-        sm: "calc(59% - 80px)", 
-        md: "calc(59% - 100px)", 
-        lg: "calc(59% - 100px)", 
-        xl: "calc(59% - 100px)" 
+      left: {
+        xs: "calc(59% - 70px)",
+        sm: "calc(59% - 80px)",
+        md: "calc(59% - 100px)",
+        lg: "calc(59% - 100px)",
+        xl: "calc(59% - 100px)",
       },
       top: "59%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/drinking_water2.png",
-      left: { 
-        xs: "calc(77% - 70px)", 
-        sm: "calc(77% - 80px)", 
-        md: "calc(77% - 100px)", 
-        lg: "calc(77% - 100px)", 
-        xl: "calc(77% - 100px)" 
+      left: {
+        xs: "calc(77% - 70px)",
+        sm: "calc(77% - 80px)",
+        md: "calc(77% - 100px)",
+        lg: "calc(77% - 100px)",
+        xl: "calc(77% - 100px)",
+      },
+      top: "59%",
+      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    },
+    {
+      src: "/images/markers/shasta2.png",
+      left: {
+        xs: "calc(95% - 70px)",
+        sm: "calc(95% - 80px)",
+        md: "calc(95% - 100px)",
+        lg: "calc(95% - 100px)",
+        xl: "calc(95% - 100px)",
       },
       top: "59%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
@@ -237,60 +285,60 @@ const IntroSection: React.FC = () => {
     // Row 5 - Even row pattern (centers at 14%, 32%, 50%, 68%, 86%)
     {
       src: "/images/markers/shasta2.png",
-      left: { 
-        xs: "calc(14% - 70px)", 
-        sm: "calc(14% - 80px)", 
-        md: "calc(14% - 100px)", 
-        lg: "calc(14% - 100px)", 
-        xl: "calc(14% - 100px)" 
+      left: {
+        xs: "calc(14% - 70px)",
+        sm: "calc(14% - 80px)",
+        md: "calc(14% - 100px)",
+        lg: "calc(14% - 100px)",
+        xl: "calc(14% - 100px)",
       },
       top: "77%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/drinking_water2.png",
-      left: { 
-        xs: "calc(32% - 70px)", 
-        sm: "calc(32% - 80px)", 
-        md: "calc(32% - 100px)", 
-        lg: "calc(32% - 100px)", 
-        xl: "calc(32% - 100px)" 
+      left: {
+        xs: "calc(32% - 70px)",
+        sm: "calc(32% - 80px)",
+        md: "calc(32% - 100px)",
+        lg: "calc(32% - 100px)",
+        xl: "calc(32% - 100px)",
       },
       top: "77%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/los_angeles2.png",
-      left: { 
-        xs: "calc(50% - 70px)", 
-        sm: "calc(50% - 80px)", 
-        md: "calc(50% - 100px)", 
-        lg: "calc(50% - 100px)", 
-        xl: "calc(50% - 100px)" 
+      left: {
+        xs: "calc(50% - 70px)",
+        sm: "calc(50% - 80px)",
+        md: "calc(50% - 100px)",
+        lg: "calc(50% - 100px)",
+        xl: "calc(50% - 100px)",
       },
       top: "77%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/salmon2.png",
-      left: { 
-        xs: "calc(68% - 70px)", 
-        sm: "calc(68% - 80px)", 
-        md: "calc(68% - 100px)", 
-        lg: "calc(68% - 100px)", 
-        xl: "calc(68% - 100px)" 
+      left: {
+        xs: "calc(68% - 70px)",
+        sm: "calc(68% - 80px)",
+        md: "calc(68% - 100px)",
+        lg: "calc(68% - 100px)",
+        xl: "calc(68% - 100px)",
       },
       top: "77%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/atta2.png",
-      left: { 
-        xs: "calc(86% - 70px)", 
-        sm: "calc(86% - 80px)", 
-        md: "calc(86% - 100px)", 
-        lg: "calc(86% - 100px)", 
-        xl: "calc(86% - 100px)" 
+      left: {
+        xs: "calc(86% - 70px)",
+        sm: "calc(86% - 80px)",
+        md: "calc(86% - 100px)",
+        lg: "calc(86% - 100px)",
+        xl: "calc(86% - 100px)",
       },
       top: "77%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
@@ -299,48 +347,48 @@ const IntroSection: React.FC = () => {
     // Row 6 - Final staggered row (centers at 23%, 41%, 59%, 77%)
     {
       src: "/images/markers/farmers2.png",
-      left: { 
-        xs: "calc(23% - 70px)", 
-        sm: "calc(23% - 80px)", 
-        md: "calc(23% - 100px)", 
-        lg: "calc(23% - 100px)", 
-        xl: "calc(23% - 100px)" 
+      left: {
+        xs: "calc(23% - 70px)",
+        sm: "calc(23% - 80px)",
+        md: "calc(23% - 100px)",
+        lg: "calc(23% - 100px)",
+        xl: "calc(23% - 100px)",
       },
       top: "95%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/shasta2.png",
-      left: { 
-        xs: "calc(41% - 70px)", 
-        sm: "calc(41% - 80px)", 
-        md: "calc(41% - 100px)", 
-        lg: "calc(41% - 100px)", 
-        xl: "calc(41% - 100px)" 
+      left: {
+        xs: "calc(41% - 70px)",
+        sm: "calc(41% - 80px)",
+        md: "calc(41% - 100px)",
+        lg: "calc(41% - 100px)",
+        xl: "calc(41% - 100px)",
       },
       top: "95%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/drinking_water2.png",
-      left: { 
-        xs: "calc(59% - 70px)", 
-        sm: "calc(59% - 80px)", 
-        md: "calc(59% - 100px)", 
-        lg: "calc(59% - 100px)", 
-        xl: "calc(59% - 100px)" 
+      left: {
+        xs: "calc(59% - 70px)",
+        sm: "calc(59% - 80px)",
+        md: "calc(59% - 100px)",
+        lg: "calc(59% - 100px)",
+        xl: "calc(59% - 100px)",
       },
       top: "95%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
     {
       src: "/images/markers/atta2.png",
-      left: { 
-        xs: "calc(77% - 70px)", 
-        sm: "calc(77% - 80px)", 
-        md: "calc(77% - 100px)", 
-        lg: "calc(77% - 100px)", 
-        xl: "calc(77% - 100px)" 
+      left: {
+        xs: "calc(77% - 70px)",
+        sm: "calc(77% - 80px)",
+        md: "calc(77% - 100px)",
+        lg: "calc(77% - 100px)",
+        xl: "calc(77% - 100px)",
       },
       top: "95%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
