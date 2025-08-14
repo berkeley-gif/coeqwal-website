@@ -590,6 +590,7 @@ const IntroSection: React.FC = () => {
               sx={{
                 display: "flex",
                 alignItems: "flex-start",
+                justifyContent: "center",
                 gap: { xs: 2, md: 3 },
               }}
             >
@@ -609,18 +610,23 @@ const IntroSection: React.FC = () => {
               />
               {/* Text content */}
               <Typography
-                variant="h2"
+                variant="body1"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
                   textAlign: "left",
-                  flex: 1,
+                  maxWidth: { xs: "300px", md: "500px" },
+                  fontSize: { xs: "1.1rem", md: "1.25rem" },
+                  lineHeight: 1.6,
+                  letterSpacing: "0.01em",
                 }}
               >
-                The amount of water available for any purpose in California
-                depends on two things: how much precipitation we get and how we
-                manage this water. We are already having to make difficult water
-                allocation decisions. We are facing a time of climate
-                uncertainty and need to prepare for the future.
+                <Box component="span" sx={{ fontWeight: 600 }}>
+                  The amount of water available
+                </Box>{" "}
+                for any purpose in California depends on two things: how much 
+                precipitation we get and how we manage this water. We are already 
+                having to make difficult water allocation decisions. We are facing 
+                a time of climate uncertainty and need to prepare for the future.
               </Typography>
             </Box>
           </Stack>
