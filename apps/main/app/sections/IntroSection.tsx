@@ -548,7 +548,7 @@ const IntroSection: React.FC = () => {
       </Box>
 
       {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 48, md: 200 }} />
+      <Spacer height={{ xs: 48, md: 100 }} />
 
       {/* Second panel - Overview content */}
       <BasePanel
@@ -596,15 +596,15 @@ const IntroSection: React.FC = () => {
               {/* Birds bullet image */}
               <Box
                 sx={{
-                  width: { xs: 80, md: 120 },
-                  height: { xs: 80, md: 120 },
+                  width: { xs: 200, md: 300 },
+                  height: { xs: 200, md: 300 },
                   flexShrink: 0,
                   backgroundImage: "url('/images/home_collage/birds_top.png')",
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
                   // Align center of birds with first line of text
-                  mt: { xs: -1, md: -2 }, // Negative margin to center with first line
+                  mt: { xs: -4, md: -6 }, // Negative margin to center with first line
                 }}
               />
               {/* Text content */}
