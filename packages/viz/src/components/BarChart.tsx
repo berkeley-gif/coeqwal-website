@@ -21,7 +21,7 @@ export interface BarChartProps {
  * - Customizable colors and values
  * - Responsive sizing
  */
-export default function BarChart({ size = 80, tiers, seed }: BarChartProps) {
+const BarChart = ({ size = 80, tiers, seed }: BarChartProps) => {
   // Default tier configuration: red → orange → blue → green
   const defaultTiers = [
     { label: "Tier 1", color: "#f96262" }, // red
@@ -106,3 +106,5 @@ export default function BarChart({ size = 80, tiers, seed }: BarChartProps) {
     </svg>
   )
 }
+
+export default React.memo(BarChart)

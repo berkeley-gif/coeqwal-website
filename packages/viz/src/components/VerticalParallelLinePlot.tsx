@@ -358,4 +358,4 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   )
 }
 
-export default VerticalParallelLinePlot
+export default React.memo(VerticalParallelLinePlot)
