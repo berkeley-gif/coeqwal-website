@@ -381,6 +381,50 @@ const formControlBaseMixin = {
   backdropFilter: "none !important",
 } as const
 
+// Card typography mixins - standardized from MapPanel card patterns
+const cardTypographyMixins = {
+  // Eyebrow text (e.g., "SCENARIO")
+  eyebrow: {
+    color: "blue.medium",
+    textTransform: "uppercase",
+    letterSpacing: "0.75px",
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    display: "block",
+    mb: 0.5,
+  } as const,
+  // Main card title (e.g., "Current Operations")
+  cardTitle: {
+    color: "blue.darkest",
+    fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontWeight: 500,
+    fontSize: "1.5rem",
+    lineHeight: 1.3,
+    mb: 1,
+  } as const,
+  // Section headers within cards (e.g., "Scenario snapshot")
+  sectionHeader: {
+    // Uses Typography variant="h6" with theme color
+    color: "blue.darkest",
+  } as const,
+  // Body text containers
+  bodyContainer: {
+    color: "blue.darkest",
+    fontFamily: "typography.fontFamily",
+    mb: 2.5,
+  } as const,
+  // Instructional text
+  instructionalText: {
+    color: "text.primary",
+    fontFamily: "typography.fontFamily",
+    // Uses Typography variant="body1"
+  } as const,
+  // Highlighted words within text
+  highlightedSpan: {
+    color: "text.secondary",
+  } as const,
+} as const
+
 // Drawer content styling mixins
 const drawerContentMixins = {
   contentWrapper: {
@@ -1595,6 +1639,7 @@ const theme = createTheme({
     hoverParagraph: hoverParagraphMixin,
     hoverParagraphDarkened: hoverParagraphDarkenedMixin,
     drawerContent: drawerContentMixins,
+    cardTypography: cardTypographyMixins,
     scenarioCardList: scenarioCardListMixin,
     tooltipActionButton: tooltipActionButtonMixin,
     triangleCheckbox: triangleCheckboxMixin,
@@ -1634,6 +1679,7 @@ theme.mapPromptDialog = themeValues.mapPromptDialog
 
 // expose mixin constants for easy import if needed
 export const hoverParagraph = hoverParagraphMixin
+export const cardTypography = cardTypographyMixins
 export const scenarioCardList = scenarioCardListMixin
 export const tooltipActionButton = tooltipActionButtonMixin
 export const triangleCheckbox = triangleCheckboxMixin
@@ -1972,6 +2018,7 @@ declare module "@mui/material/styles" {
     hoverParagraph: CSSProperties
     hoverParagraphDarkened: CSSProperties
     drawerContent: typeof drawerContentMixins
+    cardTypography: typeof cardTypographyMixins
     scenarioCardList: typeof scenarioCardListMixin
     tooltipActionButton: typeof tooltipActionButtonMixin
     triangleCheckbox: typeof triangleCheckboxMixin
