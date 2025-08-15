@@ -388,7 +388,7 @@ const MapControls = ({
                         {/* Outcome label */}
                         <Box
                           sx={{
-                            fontSize: "0.875rem",
+                            fontSize: "0.75rem",
                             fontWeight: 400,
                             lineHeight: 1.3,
                             color: (theme) => theme.palette.text.primary,
