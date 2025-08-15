@@ -12,7 +12,7 @@ import {
   Typography,
   InfoIcon,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip } from "@repo/ui"
+import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip, ActionCardButton } from "@repo/ui"
 import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
@@ -227,7 +227,7 @@ const MapControls = ({
                       fontWeight: 500,
                       fontSize: "1.5rem",
                       lineHeight: 1.3,
-                      mb: 2,
+                      mb: 1,
                     }}
                   >
                     Current Operations
@@ -239,17 +239,7 @@ const MapControls = ({
                       fontFamily: (theme) => theme.typography.fontFamily,
                     }}
                   >
-                    {/* Introductory paragraph */}
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        mb: 0.5,
-                        color: "inherit",
-                      }}
-                    >
-                      We start with the current operations scenario, which:
-                    </Typography>
-
+                    {/* Description */}
                     <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
                       <Typography
                         component="li"
@@ -269,7 +259,7 @@ const MapControls = ({
                           color: "inherit",
                         }}
                       >
-                        serves as a foundation to compare alternative scenarios.
+                        serves as a foundation to compare alternatives.
                       </Typography>
                     </Box>
                   </Box>
@@ -403,33 +393,15 @@ const MapControls = ({
                   <Box
                     sx={{ mt: 3, display: "flex", justifyContent: "center" }}
                   >
-                    <Button
-                      variant="actionCard"
+                    <ActionCardButton
+                      title="Choose alternative scenarios"
+                      subtitle="Compare different water management approaches"
                       onClick={() => {
                         console.log(
                           "Navigate to alternative scenarios selection",
                         )
                       }}
-                      sx={{ width: "100%" }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{ fontWeight: 500, mb: 0.5 }}
-                        >
-                          Choose alternative scenarios
-                        </Typography>
-                        <Box sx={{ fontSize: "0.75rem", opacity: 0.7 }}>
-                          Compare different water management approaches
-                        </Box>
-                      </Box>
-                    </Button>
+                    />
                   </Box>
                 </Box>
               )}
@@ -1049,8 +1021,13 @@ const MapControls = ({
 
                     {/* Compare Button at bottom */}
                     <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                      <Button
-                        variant="actionCard"
+                      <ActionCardButton
+                        title="Explore scenarios in depth"
+                        subtitle={
+                          selectedScenarios.length > 0
+                            ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
+                            : "Select scenarios to explore"
+                        }
                         disabled={selectedScenarios.length === 0}
                         onClick={() => {
                           if (selectedScenarios.length > 0) {
@@ -1061,34 +1038,7 @@ const MapControls = ({
                             )
                           }
                         }}
-                        sx={{ width: "100%" }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography
-                            variant="body1"
-                            sx={{ fontWeight: 500, mb: 0.5 }}
-                          >
-                            Explore scenarios in depth
-                          </Typography>
-                          {selectedScenarios.length > 0 ? (
-                            <Box sx={{ fontSize: "0.75rem", opacity: 0.9 }}>
-                              {selectedScenarios.length} scenario
-                              {selectedScenarios.length > 1 ? "s" : ""} for{" "}
-                              {selectedRegion}
-                            </Box>
-                          ) : (
-                            <Box sx={{ fontSize: "0.75rem", opacity: 0.7 }}>
-                              Select scenarios to explore
-                            </Box>
-                          )}
-                        </Box>
-                      </Button>
+                      />
                     </Box>
                   </Box>
                 )
