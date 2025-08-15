@@ -100,8 +100,8 @@ const SliderLabel = styled(Typography, {
   fontSize: "0.75rem",
   fontWeight: active ? 500 : 400,
   color: active ? theme.palette.blue.bright : theme.palette.text.secondary,
-  marginTop: labelPosition === "bottom" ? theme.spacing(1.5) : 0,
-  marginBottom: labelPosition === "top" ? theme.spacing(1.5) : 0,
+  marginTop: labelPosition === "bottom" ? theme.spacing(2.5) : 0,
+  marginBottom: labelPosition === "top" ? theme.spacing(2) : 0,
   textAlign: "center",
   minWidth: "50px",
   maxWidth: "80px", // Constrain width to encourage wrapping

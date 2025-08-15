@@ -294,16 +294,14 @@ const MapControls = ({
                         mb: 0,
                       }}
                     >
-                      <Box
+                      <Typography
+                        variant="h6"
                         sx={{
                           color: (theme) => theme.palette.blue.darkest,
-                          fontFamily: (theme) => theme.typography.fontFamily,
-                          fontWeight: 500,
-                          fontSize: "1.1rem",
                         }}
                       >
                         Scenario snapshot
-                      </Box>
+                      </Typography>
                       <InfoTooltip
                         description={
                           <Box>
@@ -338,7 +336,7 @@ const MapControls = ({
                       sx={{
                         color: (theme) => theme.palette.text.primary,
                         fontFamily: (theme) => theme.typography.fontFamily,
-                        mb: 3,
+                        mb: 2.5,
                       }}
                     >
                       <Typography variant="body1">
@@ -400,15 +398,44 @@ const MapControls = ({
                     {/* Climate heading */}
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
-                        fontFamily: (theme) => theme.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "1.1rem",
-                        mb: 0,
-                        textAlign: "left",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        mb: 0.25,
                       }}
                     >
-                      Climate
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: (theme) => theme.palette.blue.darkest,
+                        }}
+                      >
+                        Climate
+                      </Typography>
+                      <InfoTooltip
+                        description={
+                          <Box>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                              Different climate scenarios represent potential future conditions
+                              based on varying precipitation and temperature patterns.
+                              These scenarios help evaluate how water management strategies
+                              perform under different climate conditions.
+                            </Typography>
+                          </Box>
+                        }
+                        placement="top-start"
+                      >
+                        <InfoIcon
+                          sx={{
+                            fontSize: "1rem",
+                            color: (theme) => theme.palette.text.secondary,
+                            cursor: "pointer",
+                            "&:hover": {
+                              color: (theme) => theme.palette.blue.bright,
+                            },
+                          }}
+                        />
+                      </InfoTooltip>
                     </Box>
                     
                     {/* Climate slider */}
