@@ -414,12 +414,12 @@ const MapControls = ({
                     {/* Climate slider */}
                     <DiscreteSlider
                       stops={[
-                        "Very Dry",
-                        "Dry", 
-                        "Current",
-                        "Wet",
-                        "Very Wet",
-                        "Extreme Wet"
+                        "Warmer Wetter",
+                        "Historical",
+                        "Warmer Drier I",
+                        "Warmer Drier II",
+                        "Warmer Drier III",
+                        "Warmer Drier IV"
                       ]}
                       value={selectedClimate}
                       onChange={(value) => {
@@ -1208,7 +1208,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
 
   // Climate state
-  const [selectedClimate, setSelectedClimate] = useState(2) // Default to middle option
+  const [selectedClimate, setSelectedClimate] = useState(1) // Default to "Historical"
 
   // Delivery area state
   const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] =
