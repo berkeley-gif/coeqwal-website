@@ -10,12 +10,11 @@ import {
   TextField,
   Button,
   Typography,
+  InfoIcon,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
+import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip } from "@repo/ui"
 import {
-  RoseChart,
   BarChart,
-  StickChart,
   VerticalParallelLinePlot,
 } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
@@ -96,8 +95,7 @@ const MapControls = ({
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
 
-  // Chart type state for scenario snapshot
-  const [chartType, setChartType] = useState<"rose" | "bar" | "stick">("rose")
+
 
   // Outcomes panel state
   const [isRelativeView, setIsRelativeView] = useState(true)
@@ -300,80 +298,70 @@ const MapControls = ({
                     <Box>
                       <Box
                         sx={{
-                          color: (theme) => theme.palette.blue.darkest,
-                          fontFamily: (theme) => theme.typography.fontFamily,
-                          fontWeight: 500,
-                          fontSize: "1.1rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
                           mb: 0.5,
                         }}
                       >
-                        Scenario snapshot
+                        <Box
+                          sx={{
+                            color: (theme) => theme.palette.blue.darkest,
+                            fontFamily: (theme) => theme.typography.fontFamily,
+                            fontWeight: 500,
+                            fontSize: "1.1rem",
+                          }}
+                        >
+                          Scenario snapshot
+                        </Box>
+                        <InfoTooltip
+                          description={
+                            <Box>
+                              <Typography variant="body1" sx={{ mb: 1 }}>
+                                Scenarios are the result of a computational model that
+                                estimates how much water is available for each purpose
+                                in each region. This scenario has the following
+                                summary outcomes. Because specific allocations vary
+                                locally across the state as well as during wet and dry
+                                years, we use four measurements per outcome to show
+                                how much or how often the water allocated reaches
+                                certain goals.
+                              </Typography>
+                            </Box>
+                          }
+                          placement="top-start"
+                        >
+                          <InfoIcon
+                            sx={{
+                              fontSize: "1rem",
+                              color: (theme) => theme.palette.text.secondary,
+                              cursor: "pointer",
+                              "&:hover": {
+                                color: (theme) => theme.palette.blue.bright,
+                              },
+                            }}
+                          />
+                        </InfoTooltip>
                       </Box>
+
                       <Box
                         sx={{
-                          mb: 0.5,
-                        }}
-                      >
-                        <Typography variant="body1">
-                          Scenarios are the result of a computational model that
-                          estimates how much water is available for each purpose
-                          in each region. This scenario is has the following
-                          summary outcomes. Because specific allocations vary
-                          locally across the state as well as during wet and dry
-                          years, we use four measurements per outcome to show
-                          how much or how often the water allocated reaches
-                          certain goals.
-                        </Typography>
-                        <Typography variant="body1">
-                          Click on each outcome to see how its measurements are
-                          defined and how they are distributed across the
-                          state.{" "}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          color: (theme) => theme.palette.text.secondary,
+                          color: (theme) => theme.palette.text.primary,
                           fontFamily: (theme) => theme.typography.fontFamily,
                           fontSize: "0.875rem",
                           lineHeight: 1.4,
                         }}
                       >
-                        Hover over a distribution to view on map.
-                      </Box>
+                      <Typography variant="body1">
+                                <Box component="span" sx={{ color: (theme) => theme.palette.text.secondary }}>
+                                  Click
+                                </Box> on each outcome to see how its measurements are
+                                defined and how they are distributed across the
+                                state.
+                      </Typography>                
+                                </Box>
                     </Box>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 1.5,
-                        ml: "auto",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          color: (theme) => theme.palette.text.secondary,
-                          fontFamily: (theme) => theme.typography.fontFamily,
-                          fontSize: "0.875rem",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        Choose chart type
-                      </Box>
-                      <Dropdown
-                        variant="compact"
-                        value={chartType}
-                        onChange={(e) =>
-                          setChartType(
-                            e.target.value as "rose" | "bar" | "stick",
-                          )
-                        }
-                        options={[
-                          { value: "rose", label: "rose" },
-                          { value: "bar", label: "bar" },
-                          { value: "stick", label: "stick" },
-                        ]}
-                      />
-                    </Box>
+
 
                   {/* Grid layout: outcomes with charts */}
                   <Box
@@ -394,18 +382,16 @@ const MapControls = ({
                           gap: 1,
                         }}
                       >
-                        {/* ChartType based on dropdown selection */}
-                        {chartType === "rose" && <RoseChart size={60} />}
-                        {chartType === "bar" && <BarChart size={60} />}
-                        {chartType === "stick" && <StickChart size={60} />}
+                        {/* Bar chart for all outcomes */}
+                        <BarChart size={60} />
 
                         {/* Outcome label */}
                         <Box
                           sx={{
-                            fontSize: "0.75rem",
+                            fontSize: "0.875rem",
                             fontWeight: 400,
                             lineHeight: 1.3,
-                            color: (theme) => theme.palette.text.secondary,
+                            color: (theme) => theme.palette.text.primary,
                             textAlign: "center",
                             maxWidth: "80px",
                           }}
