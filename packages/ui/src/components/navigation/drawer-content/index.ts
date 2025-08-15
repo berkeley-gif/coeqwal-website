@@ -9,3 +9,6 @@ export type { CurrentOpsContentProps } from "./CurrentOpsContent"
 
 export { default as ThemesContent } from "./ThemesContent"
 export type { ThemesContentProps } from "./ThemesContent"
+
+export { default as SavedScenariosContent } from "./SavedScenariosContent"
+export type { SavedScenariosContentProps, SavedScenario } from "./SavedScenariosContent"

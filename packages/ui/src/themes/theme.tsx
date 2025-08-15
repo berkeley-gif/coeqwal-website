@@ -135,6 +135,7 @@ const themeValues = {
       sage: "#9fd5cb", // Light teal - subtle backgrounds
       mint: "#b1e1c3", // Pale green - very light elements
       whisper: "#d1ebc7", // Very light green - backgrounds
+      forest: "#7b9d3f", // Forest green - for saved scenarios tab
     },
 
     // Utility colors
@@ -595,6 +596,7 @@ const theme = createTheme({
       sage: themeValues.palette.nature.sage,
       mint: themeValues.palette.nature.mint,
       whisper: themeValues.palette.nature.whisper,
+      forest: themeValues.palette.nature.forest,
     },
     utility: {
       white: themeValues.palette.utility.white,
@@ -1667,6 +1669,7 @@ declare module "@mui/material/styles" {
       sage: string
       mint: string
       whisper: string
+      forest: string
     }
     utility: {
       white: string
@@ -1719,6 +1722,7 @@ declare module "@mui/material/styles" {
       sage?: string
       mint?: string
       whisper?: string
+      forest?: string
     }
     utility?: {
       white?: string

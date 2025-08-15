@@ -12,10 +12,11 @@ import {
 import CloseIcon from "@mui/icons-material/Close"
 
 // Content components
-import { CurrentOpsContent } from "./drawer-content"
+import { CurrentOpsContent, SavedScenariosContent } from "./drawer-content"
+import type { SavedScenario } from "./drawer-content/SavedScenariosContent"
 
 // Types
-export type TabKey = "glossary"
+export type TabKey = "glossary" | "savedScenarios"
 
 // Props for the rail buttons
 interface RailButtonProps {
@@ -47,7 +48,7 @@ function RailButton({
         alignItems: "center",
         bgcolor: active ? "#60aacb" : bgColor,
         color: "#FFFFFF", // White text to match secondary nav
-        borderRadius: "8px 0 0 8px", // Rounded corners on the left side only
+        borderRadius: "8px 0 0 8px", // Rounded corners on the left side only (tabs are on right, so round toward center)
         boxShadow: "none",
         padding: "12px 2px", // Reduced horizontal padding
         my: 0,
@@ -126,15 +127,17 @@ export interface MultiDrawerProps {
 // Map of tab keys to display titles
 const tabTitles: Record<TabKey, string> = {
   glossary: "Glossary",
+  savedScenarios: "My Scenarios",
 }
 
 /**
- * MultiDrawer component with a single Glossary tab
+ * MultiDrawer component with multiple tabs
  *
  * Features:
- * - Drawer with glossary content
- * - Smooth transitions
- * - Can be controlled from outside via HeaderHome
+ * - Drawer with multiple content types (Glossary, Saved Scenarios)
+ * - Vertical rail buttons with rotated text
+ * - Smooth transitions between tabs
+ * - Can be controlled from outside via state management
  */
 export function MultiDrawer({
   drawerWidth = undefined,
@@ -161,6 +164,7 @@ export function MultiDrawer({
   // Mapping of tab keys to background colors
   const tabBg: Record<TabKey, string> = {
     glossary: "#60aacb",
+    savedScenarios: theme.palette.nature.forest, // Green theme for scenarios
   }
 
   // Track the bg color to apply to drawer paper, preserve while closing
@@ -193,15 +197,24 @@ export function MultiDrawer({
 
   return (
     <>
-      {/* Rail button - only shown when showRailButton is true */}
+      {/* Rail buttons - only shown when showRailButton is true */}
       {showRailButton && (
         <Box
           sx={{
             position: "fixed",
             top: "50%",
-            left: 0,
+            right: drawerOpen 
+              ? (drawerWidth ?? theme.layout.drawer.width ?? theme.layout.drawer.glossaryWidth) 
+              : 0,
             transform: "translateY(-50%)",
             zIndex: theme.zIndex.drawerBackdrop,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            transition: theme.transitions.create("right", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
           }}
         >
           <RailButton
@@ -210,6 +223,13 @@ export function MultiDrawer({
             active={activeTab === "glossary"}
             bgColor="#3F7DA2" // Slightly darker than the active color
             hoverColor="#5195BD" // Slightly lighter than active color
+          />
+          <RailButton
+            label={tabTitles.savedScenarios}
+            onClick={() => toggleTab("savedScenarios")}
+            active={activeTab === "savedScenarios"}
+            bgColor="#5a7a2f" // Slightly darker than the active green
+            hoverColor="#6b8f3a" // Slightly lighter than active green
           />
         </Box>
       )}
@@ -241,6 +261,7 @@ export function MultiDrawer({
           },
         }}
       >
+        {/* Glossary Content */}
         <Fade in={activeTab === "glossary"}>
           <Box
             sx={{
@@ -290,6 +311,70 @@ export function MultiDrawer({
                     }
                     selectedTerm={
                       drawerContent.selectedTerm as string | undefined
+                    }
+                  />
+                </Box>
+              </>
+            )}
+          </Box>
+        </Fade>
+
+        {/* Saved Scenarios Content */}
+        <Fade in={activeTab === "savedScenarios"}>
+          <Box
+            sx={{
+              display: activeTab === "savedScenarios" ? "block" : "none",
+              height: "100%",
+              overflow: "auto",
+            }}
+          >
+            {activeTab === "savedScenarios" && (
+              <>
+                <Box
+                  sx={{
+                    background: "#4a5d2a", // Darker green for header
+                    color: theme.palette.common.white,
+                    padding: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                    {tabTitles.savedScenarios}
+                  </Typography>
+                  <IconButton
+                    onClick={close}
+                    size="small"
+                    aria-label="close drawer"
+                    sx={{
+                      color: theme.palette.common.white,
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    backgroundColor: theme.palette.common.white,
+                    height: "calc(100% - 56px)", // Adjust based on header height
+                    overflow: "auto",
+                  }}
+                >
+                  <SavedScenariosContent
+                    onClose={close}
+                    savedScenarios={
+                      drawerContent.savedScenarios as SavedScenario[] | undefined
+                    }
+                    onLoadScenario={
+                      drawerContent.onLoadScenario as ((scenario: SavedScenario) => void) | undefined
+                    }
+                    onDeleteScenario={
+                      drawerContent.onDeleteScenario as ((id: string) => void) | undefined
+                    }
+                    onEditScenario={
+                      drawerContent.onEditScenario as ((scenario: SavedScenario) => void) | undefined
                     }
                   />
                 </Box>
