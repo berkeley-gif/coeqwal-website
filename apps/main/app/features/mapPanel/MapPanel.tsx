@@ -356,7 +356,7 @@ const MapControls = ({
                     </Box>
                   </Box>
 
-                  {/* Grid layout: outcomes with charts */}
+                  {/* Grid layout: outcomes charts */}
                   <Box
                     sx={{
                       display: "grid",
@@ -396,7 +396,7 @@ const MapControls = ({
                   </Box>
 
                   {/* Climate selector */}
-                  <Box sx={{ mt: 3 }}>
+                  <Box sx={{ mt: 2 }}>
                     {/* Climate heading */}
                     <Box
                       sx={{
