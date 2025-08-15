@@ -53,7 +53,7 @@ const SliderStop = styled(Box, {
   backgroundColor: active ? theme.palette.blue.bright : theme.palette.grey[400],
   transition: "all 0.2s ease",
   zIndex: 1,
-  filter: active ? "drop-shadow(0 1px 3px rgba(0,0,0,0.12))" : "none",
+  boxShadow: active ? theme.shadows[1] : "none",
 }))
 
 const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) => ({
@@ -68,14 +68,17 @@ const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) 
   zIndex: 3,
   marginTop: "8px", // Space between track and pointer
   color: theme.palette.blue.bright, // Color for the SVG
+  // Drop-shadow equivalent of MUI elevation 1 TODO: figure out how to use MUI elevation correctly
   filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.12))",
   "&:hover": disabled ? {} : {
     transform: "translateX(-50%) scale(1.1)",
+    // Drop-shadow equivalent of MUI elevation 2
     filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.16))",
   },
   "&:active": disabled ? {} : {
     cursor: "grabbing",
     transform: "translateX(-50%) scale(1.05)",
+    // Elevation 1
     filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.12))",
   },
   // SVG triangle
