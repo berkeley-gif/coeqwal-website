@@ -348,8 +348,7 @@ const MapControls = ({
                         sx={{
                           color: (theme) => theme.palette.text.primary,
                           fontFamily: (theme) => theme.typography.fontFamily,
-                          fontSize: "0.875rem",
-                          lineHeight: 1.4,
+                          mb: 3,
                         }}
                       >
                       <Typography variant="body1">
@@ -359,7 +358,7 @@ const MapControls = ({
                                 defined and how they are distributed across the
                                 state.
                       </Typography>                
-                                </Box>
+                      </Box>
                     </Box>
 
 
