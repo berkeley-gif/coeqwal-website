@@ -1,0 +1,214 @@
+"use client"
+
+import React, { useRef, useState, useCallback } from "react"
+import { Box, Typography } from "../.."
+import { styled } from "@mui/material/styles"
+
+export interface DiscreteSliderProps {
+  /** Array of stop labels */
+  stops: string[]
+  /** Currently selected stop index */
+  value: number
+  /** Callback when value changes */
+  onChange: (value: number) => void
+  /** Optional disabled state */
+  disabled?: boolean
+  /** Optional custom styling */
+  sx?: object
+}
+
+const SliderContainer = styled(Box)(({ theme }) => ({
+  position: "relative",
+  width: "100%",
+  padding: theme.spacing(1, 0),
+  paddingBottom: theme.spacing(4), // Extra space for labels
+}))
+
+const SliderTrack = styled(Box)(({ theme }) => ({
+  position: "relative",
+  height: "4px",
+  backgroundColor: theme.palette.grey[300],
+  borderRadius: "2px",
+  margin: theme.spacing(3, 0, 2, 0),
+  cursor: "pointer",
+}))
+
+const SliderStop = styled(Box)<{ active: boolean }>(({ theme, active }) => ({
+  position: "absolute",
+  top: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "8px",
+  height: "8px",
+  borderRadius: "50%",
+  backgroundColor: active ? theme.palette.blue.bright : theme.palette.grey[400],
+  transition: "all 0.2s ease",
+  zIndex: 1,
+}))
+
+const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) => ({
+  position: "absolute",
+  top: "100%",
+  left: "50%",
+  transform: "translateX(-50%)",
+  width: "16px",
+  height: "12px",
+  cursor: disabled ? "not-allowed" : "grab",
+  transition: "all 0.2s ease",
+  zIndex: 3,
+  marginTop: "4px", // Space between track and pointer
+  color: theme.palette.blue.bright, // Color for the SVG
+  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+  "&:hover": disabled ? {} : {
+    transform: "translateX(-50%) scale(1.1)",
+    filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.3))",
+  },
+  "&:active": disabled ? {} : {
+    cursor: "grabbing",
+    transform: "translateX(-50%) scale(1.05)",
+  },
+  // SVG triangle
+  "& svg": {
+    width: "100%",
+    height: "100%",
+    display: "block",
+  },
+}))
+
+const SliderLabel = styled(Typography)<{ active: boolean }>(({ theme, active }) => ({
+  position: "absolute",
+  top: "100%",
+  left: "50%",
+  transform: "translateX(-50%)",
+  fontSize: "0.75rem",
+  fontWeight: active ? 500 : 400,
+  color: active ? theme.palette.blue.bright : theme.palette.text.secondary,
+  marginTop: theme.spacing(1.5),
+  textAlign: "center",
+  minWidth: "50px",
+  transition: "all 0.2s ease",
+  whiteSpace: "nowrap",
+}))
+
+/**
+ * Custom draggable discrete slider component with labeled stops.
+ * 
+ * Features:
+ * - Horizontal draggable slider with evenly spaced stops
+ * - Blue rounded rectangle pointer that snaps to stops
+ * - Hover effects and smooth transitions
+ * - Active state styling for current stop
+ * - Custom labels for each stop
+ * - Disabled state support
+ * - Foreshadows brushing interactions in parallel plots
+ */
+export function DiscreteSlider({
+  stops,
+  value,
+  onChange,
+  disabled = false,
+  sx = {},
+}: DiscreteSliderProps) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const getStopPosition = (index: number) => {
+    return stops.length > 1 ? (index / (stops.length - 1)) * 100 : 50
+  }
+
+  const getClosestStopIndex = (percentage: number) => {
+    if (stops.length <= 1) return 0
+    
+    const stopIndex = Math.round((percentage / 100) * (stops.length - 1))
+    return Math.max(0, Math.min(stops.length - 1, stopIndex))
+  }
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (disabled) return
+    setIsDragging(true)
+    e.preventDefault()
+  }, [disabled])
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDragging || !trackRef.current || disabled) return
+
+    const rect = trackRef.current.getBoundingClientRect()
+    const percentage = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+    const newIndex = getClosestStopIndex(percentage)
+    
+    if (newIndex !== value) {
+      onChange(newIndex)
+    }
+  }, [isDragging, disabled, value, onChange])
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  const handleTrackClick = useCallback((e: React.MouseEvent) => {
+    if (disabled || isDragging) return
+
+    const rect = e.currentTarget.getBoundingClientRect()
+    const percentage = ((e.clientX - rect.left) / rect.width) * 100
+    const newIndex = getClosestStopIndex(percentage)
+    onChange(newIndex)
+  }, [disabled, isDragging, onChange])
+
+  // Add global mouse event listeners for dragging
+  React.useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
+  }, [isDragging, handleMouseMove, handleMouseUp])
+
+  return (
+    <SliderContainer sx={sx}>
+      <SliderTrack ref={trackRef} onClick={handleTrackClick}>
+        {/* Render stop indicators and pointer */}
+        {stops.map((stop, index) => {
+          const position = getStopPosition(index)
+          const isActive = index === value
+
+          return (
+            <Box 
+              key={`stop-${index}`}
+              sx={{
+                position: "absolute",
+                left: `${position}%`,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            >
+              <SliderStop active={isActive} />
+              <SliderLabel active={isActive}>
+                {stop}
+              </SliderLabel>
+              {/* Show pointer only for active stop */}
+              {isActive && (
+                <SliderPointer
+                  disabled={disabled}
+                  onMouseDown={handleMouseDown}
+                >
+                  <svg viewBox="0 0 16 12" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z"
+                      fill="currentColor"
+                      stroke="none"
+                    />
+                  </svg>
+                </SliderPointer>
+              )}
+            </Box>
+          )
+        })}
+      </SliderTrack>
+    </SliderContainer>
+  )
+}
+
+export default DiscreteSlider
