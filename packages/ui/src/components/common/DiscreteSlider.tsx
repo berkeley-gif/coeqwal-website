@@ -23,7 +23,7 @@ const SliderContainer = styled(Box)<{ labelPosition: "top" | "bottom" }>(({ them
   position: "relative",
   width: "100%",
   padding: theme.spacing(1, 0),
-  paddingTop: labelPosition === "top" ? theme.spacing(4) : theme.spacing(1),
+  paddingTop: labelPosition === "top" ? theme.spacing(3) : theme.spacing(1),
   paddingBottom: labelPosition === "bottom" ? theme.spacing(4) : theme.spacing(1),
 }))
 
@@ -46,6 +46,8 @@ const SliderStop = styled(Box)<{ active: boolean }>(({ theme, active }) => ({
   backgroundColor: active ? theme.palette.blue.bright : theme.palette.grey[400],
   transition: "all 0.2s ease",
   zIndex: 1,
+  // Add elevation (drop shadow) to active stop to match pointer
+  filter: active ? "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" : "none",
 }))
 
 const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) => ({
@@ -90,8 +92,9 @@ const SliderLabel = styled(Typography)<{ active: boolean; labelPosition: "top" |
   marginBottom: labelPosition === "top" ? theme.spacing(1.5) : 0,
   textAlign: "center",
   minWidth: "50px",
+  maxWidth: "80px", // Constrain width to encourage wrapping
   transition: "all 0.2s ease",
-  whiteSpace: "nowrap",
+  lineHeight: 1.2, // Tighter line height for wrapped text
 }))
 
 /**
