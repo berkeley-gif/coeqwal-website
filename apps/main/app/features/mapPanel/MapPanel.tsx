@@ -400,6 +400,28 @@ const MapControls = ({
                       </Box>
                     ))}
                   </Box>
+
+                  {/* Choose alternative scenarios button */}
+                  <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+                    <Button
+                      variant="actionCard"
+                      onClick={() => {
+                        console.log("Navigate to alternative scenarios selection")
+                      }}
+                      sx={{ width: "100%" }}
+                    >
+                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                          Choose alternative scenarios
+                        </Typography>
+                        <Box
+                          sx={{ fontSize: "0.75rem", opacity: 0.7 }}
+                        >
+                          Compare different water management approaches
+                        </Box>
+                      </Box>
+                    </Button>
+                  </Box>
                 </Box>
               )}
 
@@ -1018,32 +1040,9 @@ const MapControls = ({
 
                     {/* Compare Button at bottom */}
                     <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                      <Box
-                        sx={{
-                          p: 2,
-                          backgroundColor:
-                            selectedScenarios.length > 0
-                              ? (theme) => theme.palette.blue.bright
-                              : (theme) => theme.palette.grey[200],
-                          color:
-                            selectedScenarios.length > 0
-                              ? "white"
-                              : (theme) => theme.palette.text.disabled,
-                          borderRadius: (theme) => theme.borderRadius.card,
-                          textAlign: "center",
-                          cursor:
-                            selectedScenarios.length > 0
-                              ? "pointer"
-                              : "not-allowed",
-                          transition: "all 0.2s ease",
-                          "&:hover":
-                            selectedScenarios.length > 0
-                              ? {
-                                  backgroundColor: (theme) =>
-                                    theme.palette.blue.dark,
-                                }
-                              : {},
-                        }}
+                      <Button
+                        variant="actionCard"
+                        disabled={selectedScenarios.length === 0}
                         onClick={() => {
                           if (selectedScenarios.length > 0) {
                             console.log(
@@ -1053,26 +1052,29 @@ const MapControls = ({
                             )
                           }
                         }}
+                        sx={{ width: "100%" }}
                       >
-                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                          Explore scenarios in depth
-                        </Typography>
-                        {selectedScenarios.length > 0 ? (
-                          <Box
-                            sx={{ fontSize: "0.75rem", opacity: 0.9, mt: 0.5 }}
-                          >
-                            {selectedScenarios.length} scenario
-                            {selectedScenarios.length > 1 ? "s" : ""} for{" "}
-                            {selectedRegion}
-                          </Box>
-                        ) : (
-                          <Box
-                            sx={{ fontSize: "0.75rem", opacity: 0.7, mt: 0.5 }}
-                          >
-                            Select scenarios to explore
-                          </Box>
-                        )}
-                      </Box>
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                          <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                            Explore scenarios in depth
+                          </Typography>
+                          {selectedScenarios.length > 0 ? (
+                            <Box
+                              sx={{ fontSize: "0.75rem", opacity: 0.9 }}
+                            >
+                              {selectedScenarios.length} scenario
+                              {selectedScenarios.length > 1 ? "s" : ""} for{" "}
+                              {selectedRegion}
+                            </Box>
+                          ) : (
+                            <Box
+                              sx={{ fontSize: "0.75rem", opacity: 0.7 }}
+                            >
+                              Select scenarios to explore
+                            </Box>
+                          )}
+                        </Box>
+                      </Button>
                     </Box>
                   </Box>
                 )
