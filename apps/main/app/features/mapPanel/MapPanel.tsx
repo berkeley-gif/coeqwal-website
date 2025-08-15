@@ -244,48 +244,40 @@ const MapControls = ({
                       mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
                       fontFamily: (theme) => theme.typography.fontFamily,
-                      fontSize: "1rem",
-                      lineHeight: 1.6,
                     }}
                   >
                     {/* Introductory paragraph */}
-                    <Box
+                    <Typography
+                      variant="body1"
                       sx={{
                         mb: 0.5,
-                        fontSize: "0.95rem",
-                        fontWeight: 400,
-                        lineHeight: 1.5,
                         color: "inherit",
                       }}
                     >
                       We start with the current operations scenario, which:
-                    </Box>
+                    </Typography>
 
                     <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
-                      <Box
+                      <Typography
                         component="li"
+                        variant="body1"
                         sx={{
-                          fontSize: "0.95rem",
-                          fontWeight: 400,
-                          lineHeight: 1.4,
                           mb: 0.5,
                           color: "inherit",
                         }}
                       >
                         helps us understand how California manages water
-                      </Box>
-                      <Box
+                      </Typography>
+                      <Typography
                         component="li"
+                        variant="body1"
                         sx={{
-                          fontSize: "0.95rem",
-                          fontWeight: 400,
-                          lineHeight: 1.4,
                           mb: 0.5,
                           color: "inherit",
                         }}
                       >
                         serves as a foundation to compare alternative scenarios.
-                      </Box>
+                      </Typography>
                     </Box>
                   </Box>
 
@@ -322,17 +314,17 @@ const MapControls = ({
                           mb: 0.5,
                         }}
                       >
-                        <Typography variant="body2">
+                        <Typography variant="body1">
                           Scenarios are the result of a computational model that
                           estimates how much water is available for each purpose
                           in each region. This scenario is has the following
                           summary outcomes. Because specific allocations vary
                           locally across the state as well as during wet and dry
-                          years, we use four measurements per outcome indicating
+                          years, we use four measurements per outcome to show
                           how much or how often the water allocated reaches
                           certain goals.
                         </Typography>
-                        <Typography variant="body2">
+                        <Typography variant="body1">
                           Click on each outcome to see how its measurements are
                           defined and how they are distributed across the
                           state.{" "}
@@ -457,7 +449,7 @@ const MapControls = ({
                       color: (theme) => theme.palette.blue.medium,
                       fontFamily: (theme) => theme.typography.fontFamily,
                       fontWeight: 500,
-                      fontSize: "0.95rem",
+                      fontSize: "1rem",
                       "&:hover": {
                         color: (theme) => theme.palette.action.hover,
                       },
@@ -495,7 +487,7 @@ const MapControls = ({
                       component="span"
                       sx={{
                         mr: 2,
-                        fontSize: "0.95rem",
+                        fontSize: "1rem",
                         fontWeight: 400,
                         color: (theme) => theme.palette.text.primary,
                         flexShrink: 0,
@@ -678,7 +670,7 @@ const MapControls = ({
                             <Box sx={{ flexShrink: 0 }}>
                               <Box
                                 sx={{
-                                  fontSize: "0.95rem",
+                                  fontSize: "1rem",
                                   fontWeight: 400,
                                   lineHeight: 1.4,
                                   color: (theme) => theme.palette.text.primary,
@@ -717,7 +709,7 @@ const MapControls = ({
                                 variant="text"
                                 onClick={toggleExpandChart}
                                 sx={{
-                                  fontSize: "0.95rem",
+                                  fontSize: "1rem",
                                   fontWeight: 500,
                                   color: (theme) => theme.palette.blue.bright,
                                   padding: 0,
@@ -846,7 +838,7 @@ const MapControls = ({
                               variant="text"
                               onClick={toggleRegionDropdown}
                               sx={{
-                                fontSize: "0.95rem",
+                                fontSize: "1rem",
                                 fontWeight: 500,
                                 color: (theme) => theme.palette.blue.bright,
                                 padding: 0,
@@ -1077,9 +1069,9 @@ const MapControls = ({
                           }
                         }}
                       >
-                        <Box sx={{ fontSize: "0.95rem", fontWeight: 500 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500 }}>
                           Explore scenarios in depth
-                        </Box>
+                        </Typography>
                         {selectedScenarios.length > 0 ? (
                           <Box
                             sx={{ fontSize: "0.75rem", opacity: 0.9, mt: 0.5 }}
