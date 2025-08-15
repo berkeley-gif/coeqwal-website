@@ -426,6 +426,7 @@ const MapControls = ({
                         onClimateChange(value)
                         console.log("Climate changed to:", value)
                       }}
+                      labelPosition="top"
                     />
                   </Box>
                 </Box>
