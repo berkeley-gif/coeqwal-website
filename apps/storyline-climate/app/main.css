@@ -1,0 +1,69 @@
+:root{
+    --primary-color: #1a4472;
+    --primary-color-transparent: #1a447280;
+    --dark-color: #021224;
+    --light-color: #1a3a5c;
+    --text-color: #f2f0ef;
+    --highlight-color: #F1B143;
+}
+
+header {
+    pointer-events: auto;
+}
+
+/* TODO: might need to set this in the story container */
+body{
+    background: var(--primary-color) !important;
+}
+
+/* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
+/* But this creates a second scroll bar*/
+html{
+    position: relative;
+}
+
+#meta-container{
+    pointer-events: none;
+}
+
+.container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 5rem;
+    padding-right: 5rem;
+    width: max-content;
+    pointer-events: auto;
+    margin-bottom: 20vh;
+}
+
+.container-center{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    pointer-events: auto;
+}
+
+
+@media (min-width: 1536px) {
+    .paragraph {
+        margin-bottom: 3rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .paragraph {
+        margin-bottom: 1.5rem;
+    }
+}
+
+
+/* specific to this story */
+
+.highlight-text{
+    color: var(--highlight-color);
+}
