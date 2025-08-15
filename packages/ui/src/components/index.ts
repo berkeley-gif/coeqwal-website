@@ -35,6 +35,8 @@ export { HelpTooltip } from "./common/HelpTooltip"
 export type { HelpTooltipProps } from "./common/HelpTooltip"
 export { Dropdown } from "./common/Dropdown"
 export type { DropdownProps, DropdownOption } from "./common/Dropdown"
+export { ActionCardButton } from "./common/ActionCardButton"
+export type { ActionCardButtonProps } from "./common/ActionCardButton"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
