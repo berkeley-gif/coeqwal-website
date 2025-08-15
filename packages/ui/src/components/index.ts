@@ -39,6 +39,8 @@ export { ActionCardButton } from "./common/ActionCardButton"
 export type { ActionCardButtonProps } from "./common/ActionCardButton"
 export { DiscreteSlider } from "./common/DiscreteSlider"
 export type { DiscreteSliderProps } from "./common/DiscreteSlider"
+export { InfoIconButton } from "./common/InfoIconButton"
+export type { InfoIconButtonProps } from "./common/InfoIconButton"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
