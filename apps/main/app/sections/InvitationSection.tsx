@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Typography, Stack, VisibilityIcon } from "@repo/ui/mui"
+import { Box, Typography, Stack, VisibilityIcon, Button } from "@repo/ui/mui"
 import {
   BasePanel,
   LearnMoreButton as ExploreButton,
@@ -148,6 +148,45 @@ export default function InvitationSection({
                 >
                   Search Scenarios
                 </SearchScenariosButton>
+              </Box>
+
+              {/* Test button for Saved Scenarios - TEMPORARY */}
+              <Box sx={{ mt: 2, mb: 3, pl: 1 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    // Open saved scenarios drawer with mock data
+                    const mockScenarios = [
+                      {
+                        id: "scenario-1",
+                        name: "High Water Demand",
+                        description: "Scenarios exploring increased urban and agricultural water demands",
+                        scenarios: ["Urban Growth A", "Agricultural Expansion", "Climate Stress"],
+                        region: "Central Valley",
+                        savedAt: new Date("2024-01-15"),
+                        tags: ["high-demand", "urban", "agriculture"],
+                      },
+                      {
+                        id: "scenario-2", 
+                        name: "Drought Resilience",
+                        description: "Testing water management under extreme drought conditions",
+                        scenarios: ["Severe Drought", "Extended Dry Period"],
+                        region: "Sacramento Valley",
+                        savedAt: new Date("2024-01-10"),
+                        tags: ["drought", "resilience"],
+                      },
+                    ];
+
+                    useDrawerStore.getState().openSavedScenariosPanel(mockScenarios, {
+                      onLoadScenario: (scenario: any) => console.log("Loading:", scenario),
+                      onDeleteScenario: (id: string) => console.log("Deleting:", id),
+                      onEditScenario: (scenario: any) => console.log("Editing:", scenario),
+                    });
+                  }}
+                  sx={{ textTransform: "none" }}
+                >
+                  🧪 Test Saved Scenarios
+                </Button>
               </Box>
             </Stack>
           </Box>
