@@ -15,6 +15,7 @@ import { Card, ScenarioCard, MapMarkerTooltip, ActionCardButton, DiscreteSlider,
 import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
+import { useDrawerStore } from "@repo/state"
 import {
   Map,
   useMap,
@@ -90,6 +91,7 @@ const MapControls = ({
   onClimateChange,
 }: MapControlsProps) => {
   const { flyTo } = useMap()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
 
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
@@ -147,6 +149,14 @@ const MapControls = ({
     setExpandChart(newExpandedState)
     // onExpandChange?.(newExpandedState) // We can add this prop later if needed
   }, [expandChart])
+
+  // Handler to open glossary to specific entry
+  const handleGlossaryOpen = useCallback((glossaryEntry: string) => {
+    setDrawerContent({
+      selectedTerm: glossaryEntry,
+    })
+    openDrawer("glossary")
+  }, [setDrawerContent, openDrawer])
 
   // ✨ Clean chart data hook encapsulates ALL optimization logic
   const chartData = useChartData({
@@ -302,22 +312,9 @@ const MapControls = ({
                         Scenario snapshot
                       </Typography>
                       <InfoIconButton
-                        mode="tooltip"
-                        tooltipContent={
-                          <Box>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                              Scenarios are the result of a computational model
-                              that estimates how much water is available for
-                              each purpose in each region. This scenario has the
-                              following summary outcomes. Because specific
-                              allocations vary locally across the state as well
-                              as during wet and dry years, we use four
-                              measurements per outcome to show how much or how
-                              often the water allocated reaches certain goals.
-                            </Typography>
-                          </Box>
-                        }
-                        placement="top-start"
+                        mode="glossary"
+                        glossaryEntry="CalSim"
+                        onGlossaryOpen={handleGlossaryOpen}
                       />
                     </Box>
 
@@ -402,18 +399,9 @@ const MapControls = ({
                         Climate
                       </Typography>
                       <InfoIconButton
-                        mode="tooltip"
-                        tooltipContent={
-                          <Box>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                              Different climate scenarios represent potential future conditions
-                              based on varying precipitation and temperature patterns.
-                              These scenarios help evaluate how water management strategies
-                              perform under different climate conditions.
-                            </Typography>
-                          </Box>
-                        }
-                        placement="top-start"
+                        mode="glossary"
+                        glossaryEntry="Changing climate"
+                        onGlossaryOpen={handleGlossaryOpen}
                       />
                     </Box>
                     

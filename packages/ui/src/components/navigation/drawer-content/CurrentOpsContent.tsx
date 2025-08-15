@@ -140,13 +140,13 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <EngineeringIcon />,
     term: "CalSim",
     definition:
-      "Computational model used to simulate how water moves through California's Central Valley water system. CalSim is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management decisions could impact the Central Valley.",
+      "Computational model used to simulate how water moves through California's Central Valley water system. CalSim is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management decisions could impact the Central Valley. Scenarios are the result of a computational model that estimates how much water is available for each purpose in each region. This scenario has the following summary outcomes. Because specific allocations vary locally across the state as well as during wet and dry years, we use four measurements per outcome to show how much or how often the water allocated reaches certain goals.",
   },
   {
     icon: <ThermostatIcon />,
     term: "Changing climate",
     definition:
-      "The ongoing shifts in California's climate patterns, including rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality.",
+      "The ongoing shifts in California's climate patterns, including rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Different climate scenarios represent potential future conditions based on varying precipitation and temperature patterns. These scenarios help evaluate how water management strategies perform under different climate conditions.",
   },
   {
     icon: <Psychology />,
