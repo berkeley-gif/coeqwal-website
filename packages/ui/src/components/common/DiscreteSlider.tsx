@@ -13,15 +13,18 @@ export interface DiscreteSliderProps {
   onChange: (value: number) => void
   /** Optional disabled state */
   disabled?: boolean
+  /** Position labels on top or bottom of slider */
+  labelPosition?: "top" | "bottom"
   /** Optional custom styling */
   sx?: object
 }
 
-const SliderContainer = styled(Box)(({ theme }) => ({
+const SliderContainer = styled(Box)<{ labelPosition: "top" | "bottom" }>(({ theme, labelPosition }) => ({
   position: "relative",
   width: "100%",
   padding: theme.spacing(1, 0),
-  paddingBottom: theme.spacing(4), // Extra space for labels
+  paddingTop: labelPosition === "top" ? theme.spacing(4) : theme.spacing(1),
+  paddingBottom: labelPosition === "bottom" ? theme.spacing(4) : theme.spacing(1),
 }))
 
 const SliderTrack = styled(Box)(({ theme }) => ({
@@ -37,8 +40,8 @@ const SliderStop = styled(Box)<{ active: boolean }>(({ theme, active }) => ({
   position: "absolute",
   top: "50%",
   transform: "translate(-50%, -50%)",
-  width: "8px",
-  height: "8px",
+  width: "16px",
+  height: "16px",
   borderRadius: "50%",
   backgroundColor: active ? theme.palette.blue.bright : theme.palette.grey[400],
   transition: "all 0.2s ease",
@@ -50,12 +53,12 @@ const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) 
   top: "100%",
   left: "50%",
   transform: "translateX(-50%)",
-  width: "16px",
-  height: "12px",
+  width: "24px",
+  height: "24px",
   cursor: disabled ? "not-allowed" : "grab",
   transition: "all 0.2s ease",
   zIndex: 3,
-  marginTop: "4px", // Space between track and pointer
+  marginTop: "8px", // Space between track and pointer
   color: theme.palette.blue.bright, // Color for the SVG
   filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
   "&:hover": disabled ? {} : {
@@ -74,15 +77,17 @@ const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) 
   },
 }))
 
-const SliderLabel = styled(Typography)<{ active: boolean }>(({ theme, active }) => ({
+const SliderLabel = styled(Typography)<{ active: boolean; labelPosition: "top" | "bottom" }>(({ theme, active, labelPosition }) => ({
   position: "absolute",
-  top: "100%",
+  top: labelPosition === "top" ? "auto" : "100%",
+  bottom: labelPosition === "top" ? "100%" : "auto",
   left: "50%",
   transform: "translateX(-50%)",
   fontSize: "0.75rem",
   fontWeight: active ? 500 : 400,
   color: active ? theme.palette.blue.bright : theme.palette.text.secondary,
-  marginTop: theme.spacing(1.5),
+  marginTop: labelPosition === "bottom" ? theme.spacing(1.5) : 0,
+  marginBottom: labelPosition === "top" ? theme.spacing(1.5) : 0,
   textAlign: "center",
   minWidth: "50px",
   transition: "all 0.2s ease",
@@ -106,6 +111,7 @@ export function DiscreteSlider({
   value,
   onChange,
   disabled = false,
+  labelPosition = "bottom",
   sx = {},
 }: DiscreteSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null)
@@ -115,12 +121,12 @@ export function DiscreteSlider({
     return stops.length > 1 ? (index / (stops.length - 1)) * 100 : 50
   }
 
-  const getClosestStopIndex = (percentage: number) => {
+  const getClosestStopIndex = useCallback((percentage: number) => {
     if (stops.length <= 1) return 0
     
     const stopIndex = Math.round((percentage / 100) * (stops.length - 1))
     return Math.max(0, Math.min(stops.length - 1, stopIndex))
-  }
+  }, [stops.length])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (disabled) return
@@ -138,7 +144,7 @@ export function DiscreteSlider({
     if (newIndex !== value) {
       onChange(newIndex)
     }
-  }, [isDragging, disabled, value, onChange])
+  }, [isDragging, disabled, value, onChange, getClosestStopIndex])
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false)
@@ -151,7 +157,7 @@ export function DiscreteSlider({
     const percentage = ((e.clientX - rect.left) / rect.width) * 100
     const newIndex = getClosestStopIndex(percentage)
     onChange(newIndex)
-  }, [disabled, isDragging, onChange])
+  }, [disabled, isDragging, onChange, getClosestStopIndex])
 
   // Add global mouse event listeners for dragging
   React.useEffect(() => {
@@ -167,7 +173,7 @@ export function DiscreteSlider({
   }, [isDragging, handleMouseMove, handleMouseUp])
 
   return (
-    <SliderContainer sx={sx}>
+    <SliderContainer labelPosition={labelPosition} sx={sx}>
       <SliderTrack ref={trackRef} onClick={handleTrackClick}>
         {/* Render stop indicators and pointer */}
         {stops.map((stop, index) => {
@@ -185,7 +191,7 @@ export function DiscreteSlider({
               }}
             >
               <SliderStop active={isActive} />
-              <SliderLabel active={isActive}>
+              <SliderLabel active={isActive} labelPosition={labelPosition}>
                 {stop}
               </SliderLabel>
               {/* Show pointer only for active stop */}
