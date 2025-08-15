@@ -483,7 +483,7 @@ const IntroSection: React.FC = () => {
             </Typography>
 
             <Typography
-              variant="h3"
+              variant="h4"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 mb: 2,
@@ -565,11 +565,12 @@ const IntroSection: React.FC = () => {
           position: "relative",
           overflow: "visible",
           background: `
+            url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
           `,
-          backgroundSize: "auto 44%",
-          backgroundPosition: "right bottom",
-          backgroundRepeat: "no-repeat",
+          backgroundSize: "auto 30%, auto 44%",
+          backgroundPosition: "left bottom, right bottom",
+          backgroundRepeat: "no-repeat, no-repeat",
         }}
       >
         {/* Text content */}
@@ -611,19 +612,21 @@ const IntroSection: React.FC = () => {
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
                   textAlign: "cleft",
-                  maxWidth: { xs: "600px", md: "820px" },
+                  maxWidth: { xs: "600px", md: "720px" },
                   lineHeight: 1.6,
                   letterSpacing: "0.01em",
-                  fontWeight: 400,
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600 }}>
-                  The amount of water available
-                </Box>{" "}
-                for any purpose in California depends on two things: how much 
-                precipitation we get and how we manage this water. We are already 
-                having to make difficult water allocation decisions. We are facing 
-                a time of climate uncertainty and need to prepare for the future.
+                The amount of water available for any purpose in California
+                depends on two things:
+                <Box component="ol" sx={{ mt: 2, pl: 3 }}>
+                  <Box component="li" sx={{ mb: 1 }}>
+                    &nbsp;how much precipitation we get
+                  </Box>
+                  <Box component="li" sx={{ mb: 1 }}>
+                    &nbsp;how we manage this water.
+                  </Box>
+                </Box>
               </Typography>
             </Box>
           </Stack>
@@ -635,6 +638,7 @@ const IntroSection: React.FC = () => {
 
       {/* Third panel - Another birds bullet paragraph */}
       <BasePanel
+        id="overview"
         fullHeight={false}
         fullWidth
         background="transparent"
@@ -646,7 +650,6 @@ const IntroSection: React.FC = () => {
           flexDirection: "column",
           position: "relative",
           overflow: "visible",
-          // Background images positioned relative to content height
           background: `
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
@@ -672,11 +675,10 @@ const IntroSection: React.FC = () => {
               sx={{
                 display: "flex",
                 alignItems: "flex-start",
-                justifyContent: "center",
                 gap: { xs: 2, md: 3 },
               }}
             >
-              {/* Birds bullet image */}
+              {/* Bullet image */}
               <Box
                 sx={{
                   width: { xs: 200, md: 300 },
@@ -686,8 +688,8 @@ const IntroSection: React.FC = () => {
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
-                  // Align center of birds with first line of text
-                  mt: { xs: -4, md: -6 }, // Negative margin to center with first line
+                  // Align center of birds with first lines of text
+                  mt: { xs: -4, md: -6 },
                 }}
               />
               {/* Text content */}
@@ -695,19 +697,15 @@ const IntroSection: React.FC = () => {
                 variant="h4"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "left",
-                  maxWidth: { xs: "600px", md: "880px" },
+                  textAlign: "cleft",
+                  maxWidth: { xs: "600px", md: "720px" },
                   lineHeight: 1.6,
                   letterSpacing: "0.01em",
-                  fontWeight: 400, // Reset to normal weight for body text
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600 }}>
-                  The COEQWAL project has run
-                </Box>{" "}
-                30 alternative water management scenarios for the Central Valley 
-                water systems that feed most of the state. For each of these 
-                scenarios, we considered 5 future climate possibilities.
+                We are already having to make difficult water allocation
+                decisions. We are facing a time of climate uncertainty and need
+                to prepare for the future.
               </Typography>
             </Box>
           </Stack>
@@ -719,6 +717,7 @@ const IntroSection: React.FC = () => {
 
       {/* Fourth panel */}
       <BasePanel
+        id="overview"
         fullHeight={false}
         fullWidth
         background="transparent"
@@ -730,9 +729,9 @@ const IntroSection: React.FC = () => {
           flexDirection: "column",
           position: "relative",
           overflow: "visible",
-          // Background images positioned relative to content height
           background: `
             url('/images/home_collage/left_side.png'),
+            url('/images/home_collage/right.png')
           `,
           backgroundSize: "auto 30%, auto 44%",
           backgroundPosition: "left bottom, right bottom",
@@ -755,11 +754,10 @@ const IntroSection: React.FC = () => {
               sx={{
                 display: "flex",
                 alignItems: "flex-start",
-                justifyContent: "center",
                 gap: { xs: 2, md: 3 },
               }}
             >
-              {/* Birds bullet image */}
+              {/* Bullet image */}
               <Box
                 sx={{
                   width: { xs: 200, md: 300 },
@@ -769,8 +767,8 @@ const IntroSection: React.FC = () => {
                   backgroundSize: "contain",
                   backgroundRepeat: "no-repeat",
                   backgroundPosition: "center",
-                  // Align center of birds with first line of text
-                  mt: { xs: -4, md: -6 }, // Negative margin to center with first line
+                  // Align center of birds with first lines of text
+                  mt: { xs: -4, md: -6 },
                 }}
               />
               {/* Text content */}
@@ -778,67 +776,22 @@ const IntroSection: React.FC = () => {
                 variant="h4"
                 sx={{
                   color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "left",
-                  maxWidth: { xs: "600px", md: "880px" },
+                  textAlign: "cleft",
+                  maxWidth: { xs: "600px", md: "720px" },
                   lineHeight: 1.6,
                   letterSpacing: "0.01em",
-                  fontWeight: 400, // Reset to normal weight for body text
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600 }}>
-                  The amount of water available
-                </Box>{" "}
-                for any purpose in California depends on two things: how much 
-                precipitation we get and how we manage this water. We are already 
-                having to make difficult water allocation decisions. We are facing 
-                a time of climate uncertainty and need to prepare for the future.
+                The COEQWAL project has run 30 alternative water management
+                scenarios for the Central Valley water systems that feed most of
+                the state. For each of these scenarios, we considered 5 future
+                climate possibilities.
               </Typography>
             </Box>
           </Stack>
         </Box>
       </BasePanel>
-
-      <BasePanel
-        fullHeight={false}
-        fullWidth
-        background="transparent"
-        paddingVariant="very-wide"
-        includeHeaderSpacing={true}
-        sx={{
-          color: (theme) => theme.palette.primary.dark,
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          overflow: "visible",
-        }}
-      >
-        {/* Text content */}
-        <Box
-          sx={{
-            position: "relative",
-            zIndex: (theme) => theme.zIndex.introText,
-            textAlign: "left",
-          }}
-        >
-          <Stack spacing={4}>
-            <Typography
-              variant="h2"
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                mb: 3,
-                textAlign: "left",
-              }}
-            >
-              The COEQWAL project has run 30 alternative water management
-              scenarios for the Central Valley water systems that feed most of
-              the state. For each of these scenarios, we considered 5 future
-              climate possibilities.
-            </Typography>
-          </Stack>
-        </Box>
-      </BasePanel>
-
-      {/* Spacer after second panel */}
+      {/* Spacer  */}
       <Spacer height={{ xs: 48, md: 124 }} />
     </Box>
   )
