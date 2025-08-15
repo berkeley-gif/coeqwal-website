@@ -31,10 +31,12 @@ const themeValues = {
   },
 }
 
+//TODO: remove the fontfamily settings to keep up with the main theme
 const storyTheme = createTheme({
   ...baseTheme,
   typography: {
     ...baseTheme.typography,
+    fontFamily: themeValues.fontFamily.tiemposText,
     allVariants: {
       color: "#f2f0ef",
     },
@@ -51,6 +53,7 @@ const storyTheme = createTheme({
     },
     h2: {
       ...baseTheme.typography.h2,
+      fontFamily: themeValues.fontFamily.tiemposText,
       "@media (min-width: 1200px)": {
         fontSize: "3.35rem",
       },
@@ -60,6 +63,8 @@ const storyTheme = createTheme({
     },
     h3: {
       ...baseTheme.typography.h3,
+      fontFamily: themeValues.fontFamily.tiemposText,
+
       "@media (min-width: 1200px)": {
         fontSize: "1.8rem",
       },
