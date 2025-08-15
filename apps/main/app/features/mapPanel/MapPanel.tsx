@@ -10,9 +10,8 @@ import {
   TextField,
   Button,
   Typography,
-  InfoIcon,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip, ActionCardButton, DiscreteSlider } from "@repo/ui"
+import { Card, ScenarioCard, MapMarkerTooltip, ActionCardButton, DiscreteSlider, InfoIconButton } from "@repo/ui"
 import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
@@ -302,8 +301,9 @@ const MapControls = ({
                       >
                         Scenario snapshot
                       </Typography>
-                      <InfoTooltip
-                        description={
+                      <InfoIconButton
+                        mode="tooltip"
+                        tooltipContent={
                           <Box>
                             <Typography variant="body1" sx={{ mb: 1 }}>
                               Scenarios are the result of a computational model
@@ -318,18 +318,7 @@ const MapControls = ({
                           </Box>
                         }
                         placement="top-start"
-                      >
-                        <InfoIcon
-                          sx={{
-                            fontSize: "1rem",
-                            color: (theme) => theme.palette.text.secondary,
-                            cursor: "pointer",
-                            "&:hover": {
-                              color: (theme) => theme.palette.blue.bright,
-                            },
-                          }}
-                        />
-                      </InfoTooltip>
+                      />
                     </Box>
 
                     <Box
@@ -412,8 +401,9 @@ const MapControls = ({
                       >
                         Climate
                       </Typography>
-                      <InfoTooltip
-                        description={
+                      <InfoIconButton
+                        mode="tooltip"
+                        tooltipContent={
                           <Box>
                             <Typography variant="body1" sx={{ mb: 1 }}>
                               Different climate scenarios represent potential future conditions
@@ -424,18 +414,7 @@ const MapControls = ({
                           </Box>
                         }
                         placement="top-start"
-                      >
-                        <InfoIcon
-                          sx={{
-                            fontSize: "1rem",
-                            color: (theme) => theme.palette.text.secondary,
-                            cursor: "pointer",
-                            "&:hover": {
-                              color: (theme) => theme.palette.blue.bright,
-                            },
-                          }}
-                        />
-                      </InfoTooltip>
+                      />
                     </Box>
                     
                     {/* Climate slider */}
