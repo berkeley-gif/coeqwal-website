@@ -37,6 +37,8 @@ export { Dropdown } from "./common/Dropdown"
 export type { DropdownProps, DropdownOption } from "./common/Dropdown"
 export { ActionCardButton } from "./common/ActionCardButton"
 export type { ActionCardButtonProps } from "./common/ActionCardButton"
+export { DiscreteSlider } from "./common/DiscreteSlider"
+export type { DiscreteSliderProps } from "./common/DiscreteSlider"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
