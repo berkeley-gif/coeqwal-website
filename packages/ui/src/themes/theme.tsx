@@ -67,13 +67,13 @@ import type { CSSProperties } from "react"
 // • h4: 2.1rem (33.6px) - Card titles and smaller headlines (Display Medium)
 // • h5: 1.575rem (25.2px) - Labels and minor headlines (Display Medium)
 // • h6: 1.18rem (18.9px) - Small headlines and captions (Display Medium)
-// • body1: 1rem (16px) - Primary body text (Text Regular)
+// • body1: 0.95rem (15.2px) - Primary body text (Text Regular)
 // • body2: 1.125rem (18px) - Secondary body text (Text Regular)
 //
 
 const typeScale = {
   // Base sizes for the scale
-  baseBody: "1rem", // 16px - standard body text
+  baseBody: "0.95rem", // 15.2px - standard body text
   smallBody: "1.125rem", // 18px - secondary text
 
   // Headline sizes
@@ -306,7 +306,7 @@ const scenarioCardListMixin = {
     margin: 0,
     paddingLeft: "20px", // Slightly more indentation
     "& li": {
-      fontSize: "1rem",
+      fontSize: "0.95rem",
       fontWeight: 400,
       lineHeight: 1.4, // Tighter line height to conserve vertical space
       marginBottom: "4px", // Reduced spacing to conserve vertical space
@@ -524,17 +524,17 @@ const theme = createTheme({
         fontWeight: 400,
       },
       body: {
-        fontSize: "1rem", // 16px - matches body1
+        fontSize: "0.95rem", // 15.2px - matches body1
         lineHeight: 1.5,
         fontWeight: 400,
       },
       caption: {
-        fontSize: "1rem", // align with body1
+        fontSize: "0.95rem", // align with body1
         lineHeight: 1.4,
         fontWeight: 400,
       },
       button: {
-        fontSize: "1rem", // align with body1
+        fontSize: "0.95rem", // align with body1
         lineHeight: 1.5,
         fontWeight: 500,
       },
@@ -711,7 +711,7 @@ const theme = createTheme({
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // 1rem - matches body1
+      fontSize: typeScale.baseBody, // 0.95rem - matches body1
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
@@ -724,13 +724,13 @@ const theme = createTheme({
       lineHeight: 1.6,
     },
     button: {
-      fontSize: "1rem", // align with body1
+      fontSize: "0.95rem", // align with body1
       letterSpacing: "normal",
       fontWeight: 500,
       textTransform: "none",
     },
     caption: {
-      fontSize: "1rem", // align with body1
+      fontSize: "0.95rem", // align with body1
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
@@ -1166,7 +1166,7 @@ const theme = createTheme({
             padding: "6px 16px",
             minWidth: 64,
             lineHeight: 1.75,
-            fontSize: "1rem", // align with body1
+            fontSize: "0.95rem", // align with body1
             fontWeight: 500,
             color: theme.palette.common.white,
             backgroundColor: theme.palette.blue.darkest,
@@ -1463,7 +1463,7 @@ const theme = createTheme({
           margin: 0, // Remove default margins for condensed spacing
           alignItems: "flex-start", // Align checkbox with first line of text
           "& .MuiFormControlLabel-label": {
-            fontSize: "1rem", // align with body1
+            fontSize: "0.95rem", // align with body1
             lineHeight: 1.3, // Tighter line height
             color: theme.palette.text.primary,
             paddingLeft: theme.spacing(0.5), // Reduced gap between checkbox and label
@@ -1485,7 +1485,7 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           color: theme.palette.text.primary,
-          fontSize: "1rem", // align with body1
+          fontSize: "0.95rem", // align with body1
           fontWeight: 400,
           textTransform: "none",
           minWidth: "auto",
