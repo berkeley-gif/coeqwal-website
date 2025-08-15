@@ -1182,6 +1182,36 @@ const theme = createTheme({
             textTransform: "none",
           },
         },
+        {
+          props: { variant: "actionCard" },
+          style: ({ theme }) => ({
+            textTransform: "none",
+            borderRadius: theme.borderRadius.card,
+            boxShadow: "none",
+            border: "none",
+            padding: "16px",
+            fontSize: "0.95rem", // align with body1
+            fontWeight: 500,
+            textAlign: "center",
+            transition: "all 0.2s ease",
+            // Default active state - using grey colors
+            backgroundColor: theme.palette.grey[200],
+            color: theme.palette.text.disabled,
+            "&:hover": {
+              backgroundColor: theme.palette.blue.bright,
+              color: theme.palette.common.white,
+            },
+            // Disabled state - same as active but with not-allowed cursor
+            "&:disabled": {
+              backgroundColor: theme.palette.grey[200],
+              color: theme.palette.text.disabled,
+              cursor: "not-allowed",
+              "&:hover": {
+                backgroundColor: theme.palette.grey[200],
+              },
+            },
+          }),
+        },
       ],
       styleOverrides: {
         root: ({ theme }) => ({
@@ -1958,6 +1988,7 @@ declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     pill: true
     standard: true
+    actionCard: true
   }
 }
 
