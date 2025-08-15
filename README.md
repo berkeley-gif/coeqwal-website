@@ -100,6 +100,7 @@ To add a new app, cd into the `apps` directory and run
 pnpm dlx create-next-app@latest <app name>
 ```
 
+To maintain consistent structure for all apps, for configurations, choose **No** for TailwindCSS, `src/` directory, and import alias; otherwise, choose **Yes**.
 This generator should create your directory and install necessary files, configurations, and dependencies. Then go to the root level and run:
 
 ```sh
