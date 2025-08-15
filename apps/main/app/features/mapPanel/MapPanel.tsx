@@ -13,10 +13,7 @@ import {
   InfoIcon,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip } from "@repo/ui"
-import {
-  BarChart,
-  VerticalParallelLinePlot,
-} from "@repo/viz"
+import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
 import {
@@ -94,8 +91,6 @@ const MapControls = ({
   // Card minimize/maximize states
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
-
-
 
   // Outcomes panel state
   const [isRelativeView, setIsRelativeView] = useState(true)
@@ -294,73 +289,76 @@ const MapControls = ({
               {/* Scenario snapshot section */}
               {!isFirstCardMinimized && (
                 <Box sx={{ flexShrink: 0, pb: 2 }}>
-
-                    <Box>
+                  <Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        mb: 0.5,
+                      }}
+                    >
                       <Box
                         sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                          mb: 0.5,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            color: (theme) => theme.palette.blue.darkest,
-                            fontFamily: (theme) => theme.typography.fontFamily,
-                            fontWeight: 500,
-                            fontSize: "1.1rem",
-                          }}
-                        >
-                          Scenario snapshot
-                        </Box>
-                        <InfoTooltip
-                          description={
-                            <Box>
-                              <Typography variant="body1" sx={{ mb: 1 }}>
-                                Scenarios are the result of a computational model that
-                                estimates how much water is available for each purpose
-                                in each region. This scenario has the following
-                                summary outcomes. Because specific allocations vary
-                                locally across the state as well as during wet and dry
-                                years, we use four measurements per outcome to show
-                                how much or how often the water allocated reaches
-                                certain goals.
-                              </Typography>
-                            </Box>
-                          }
-                          placement="top-start"
-                        >
-                          <InfoIcon
-                            sx={{
-                              fontSize: "1rem",
-                              color: (theme) => theme.palette.text.secondary,
-                              cursor: "pointer",
-                              "&:hover": {
-                                color: (theme) => theme.palette.blue.bright,
-                              },
-                            }}
-                          />
-                        </InfoTooltip>
-                      </Box>
-
-                      <Box
-                        sx={{
-                          color: (theme) => theme.palette.text.primary,
+                          color: (theme) => theme.palette.blue.darkest,
                           fontFamily: (theme) => theme.typography.fontFamily,
-                          mb: 3,
+                          fontWeight: 500,
+                          fontSize: "1.1rem",
                         }}
                       >
-                      <Typography variant="body1">
-                                <Box component="span" sx={{ color: (theme) => theme.palette.text.secondary }}>
-                                  Click
-                                </Box> on each outcome to see how its measurements are
-                                defined and how they are distributed across the
-                                state.
-                      </Typography>                
+                        Scenario snapshot
                       </Box>
+                      <InfoTooltip
+                        description={
+                          <Box>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                              Scenarios are the result of a computational model
+                              that estimates how much water is available for
+                              each purpose in each region. This scenario has the
+                              following summary outcomes. Because specific
+                              allocations vary locally across the state as well
+                              as during wet and dry years, we use four
+                              measurements per outcome to show how much or how
+                              often the water allocated reaches certain goals.
+                            </Typography>
+                          </Box>
+                        }
+                        placement="top-start"
+                      >
+                        <InfoIcon
+                          sx={{
+                            fontSize: "1rem",
+                            color: (theme) => theme.palette.text.secondary,
+                            cursor: "pointer",
+                            "&:hover": {
+                              color: (theme) => theme.palette.blue.bright,
+                            },
+                          }}
+                        />
+                      </InfoTooltip>
                     </Box>
 
+                    <Box
+                      sx={{
+                        color: (theme) => theme.palette.text.primary,
+                        fontFamily: (theme) => theme.typography.fontFamily,
+                        mb: 3,
+                      }}
+                    >
+                      <Typography variant="body1">
+                        <Box
+                          component="span"
+                          sx={{
+                            color: (theme) => theme.palette.text.secondary,
+                          }}
+                        >
+                          Click
+                        </Box>{" "}
+                        on each outcome to see how its measurements are defined
+                        and how they are distributed across the state.
+                      </Typography>
+                    </Box>
+                  </Box>
 
                   {/* Grid layout: outcomes with charts */}
                   <Box
@@ -402,21 +400,32 @@ const MapControls = ({
                   </Box>
 
                   {/* Choose alternative scenarios button */}
-                  <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+                  <Box
+                    sx={{ mt: 3, display: "flex", justifyContent: "center" }}
+                  >
                     <Button
                       variant="actionCard"
                       onClick={() => {
-                        console.log("Navigate to alternative scenarios selection")
+                        console.log(
+                          "Navigate to alternative scenarios selection",
+                        )
                       }}
                       sx={{ width: "100%" }}
                     >
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                        <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography
+                          variant="body1"
+                          sx={{ fontWeight: 500, mb: 0.5 }}
+                        >
                           Choose alternative scenarios
                         </Typography>
-                        <Box
-                          sx={{ fontSize: "0.75rem", opacity: 0.7 }}
-                        >
+                        <Box sx={{ fontSize: "0.75rem", opacity: 0.7 }}>
                           Compare different water management approaches
                         </Box>
                       </Box>
@@ -1054,22 +1063,27 @@ const MapControls = ({
                         }}
                         sx={{ width: "100%" }}
                       >
-                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                          <Typography variant="body1" sx={{ fontWeight: 500, mb: 0.5 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="body1"
+                            sx={{ fontWeight: 500, mb: 0.5 }}
+                          >
                             Explore scenarios in depth
                           </Typography>
                           {selectedScenarios.length > 0 ? (
-                            <Box
-                              sx={{ fontSize: "0.75rem", opacity: 0.9 }}
-                            >
+                            <Box sx={{ fontSize: "0.75rem", opacity: 0.9 }}>
                               {selectedScenarios.length} scenario
                               {selectedScenarios.length > 1 ? "s" : ""} for{" "}
                               {selectedRegion}
                             </Box>
                           ) : (
-                            <Box
-                              sx={{ fontSize: "0.75rem", opacity: 0.7 }}
-                            >
+                            <Box sx={{ fontSize: "0.75rem", opacity: 0.7 }}>
                               Select scenarios to explore
                             </Box>
                           )}
