@@ -19,12 +19,17 @@ export interface DiscreteSliderProps {
   sx?: object
 }
 
-const SliderContainer = styled(Box)<{ labelPosition: "top" | "bottom" }>(({ theme, labelPosition }) => ({
+const SliderContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'labelPosition',
+})<{ labelPosition: "top" | "bottom" }>(({ theme, labelPosition }) => ({
   position: "relative",
   width: "100%",
   padding: theme.spacing(1, 0),
   paddingTop: labelPosition === "top" ? theme.spacing(3) : theme.spacing(1),
   paddingBottom: labelPosition === "bottom" ? theme.spacing(4) : theme.spacing(1),
+  // Add horizontal padding to account for label widths at the edges
+  paddingLeft: "40px", // Half of maxWidth (80px) to prevent left label overflow
+  paddingRight: "40px", // Half of maxWidth (80px) to prevent right label overflow
 }))
 
 const SliderTrack = styled(Box)(({ theme }) => ({
@@ -36,7 +41,9 @@ const SliderTrack = styled(Box)(({ theme }) => ({
   cursor: "pointer",
 }))
 
-const SliderStop = styled(Box)<{ active: boolean }>(({ theme, active }) => ({
+const SliderStop = styled(Box, {
+  shouldForwardProp: (prop) => prop !== 'active',
+})<{ active: boolean }>(({ theme, active }) => ({
   position: "absolute",
   top: "50%",
   transform: "translate(-50%, -50%)",
@@ -79,7 +86,9 @@ const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) 
   },
 }))
 
-const SliderLabel = styled(Typography)<{ active: boolean; labelPosition: "top" | "bottom" }>(({ theme, active, labelPosition }) => ({
+const SliderLabel = styled(Typography, {
+  shouldForwardProp: (prop) => prop !== 'active' && prop !== 'labelPosition',
+})<{ active: boolean; labelPosition: "top" | "bottom" }>(({ theme, active, labelPosition }) => ({
   position: "absolute",
   top: labelPosition === "top" ? "auto" : "100%",
   bottom: labelPosition === "top" ? "100%" : "auto",
