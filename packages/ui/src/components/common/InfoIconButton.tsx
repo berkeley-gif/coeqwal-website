@@ -3,7 +3,7 @@
 import React from "react"
 import { InfoIcon } from "../.."
 import { InfoTooltip } from "../.."
-import { Box, Typography } from "../.."
+import { Theme } from "@mui/material/styles"
 
 export interface InfoIconButtonProps {
   /** Mode of operation - tooltip or glossary */
@@ -13,7 +13,15 @@ export interface InfoIconButtonProps {
   /** Glossary entry key for glossary mode */
   glossaryEntry?: string
   /** Tooltip placement */
-  placement?: "top" | "top-start" | "top-end" | "bottom" | "bottom-start" | "bottom-end" | "left" | "right"
+  placement?:
+    | "top"
+    | "top-start"
+    | "top-end"
+    | "bottom"
+    | "bottom-start"
+    | "bottom-end"
+    | "left"
+    | "right"
   /** Custom styling */
   sx?: object
   /** Callback for glossary mode */
@@ -22,7 +30,7 @@ export interface InfoIconButtonProps {
 
 /**
  * Reusable info icon button that can either show a tooltip or open a glossary entry.
- * 
+ *
  * Features:
  * - Tooltip mode: Shows content in a tooltip on hover
  * - Glossary mode: Opens glossary to specific entry on click
@@ -43,10 +51,10 @@ export function InfoIconButton({
 
   const iconStyles = {
     fontSize: "1rem",
-    color: (theme: any) => theme.palette.text.secondary,
+    color: (theme: Theme) => theme.palette.text.secondary,
     cursor: "pointer",
     "&:hover": {
-      color: (theme: any) => theme.palette.blue.bright,
+      color: (theme: Theme) => theme.palette.blue.bright,
     },
     ...sx,
   }
@@ -54,10 +62,7 @@ export function InfoIconButton({
   // Tooltip mode: wrap in InfoTooltip
   if (mode === "tooltip" && tooltipContent) {
     return (
-      <InfoTooltip
-        description={tooltipContent}
-        placement={placement}
-      >
+      <InfoTooltip description={tooltipContent} placement={placement}>
         <InfoIcon sx={iconStyles} />
       </InfoTooltip>
     )
@@ -65,12 +70,7 @@ export function InfoIconButton({
 
   // Glossary mode: direct click handler
   if (mode === "glossary" && glossaryEntry) {
-    return (
-      <InfoIcon 
-        sx={iconStyles}
-        onClick={handleClick}
-      />
-    )
+    return <InfoIcon sx={iconStyles} onClick={handleClick} />
   }
 
   // Fallback: just the icon without functionality

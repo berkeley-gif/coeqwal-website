@@ -11,7 +11,14 @@ import {
   Button,
   Typography,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, MapMarkerTooltip, ActionCardButton, DiscreteSlider, InfoIconButton } from "@repo/ui"
+import {
+  Card,
+  ScenarioCard,
+  MapMarkerTooltip,
+  ActionCardButton,
+  DiscreteSlider,
+  InfoIconButton,
+} from "@repo/ui"
 import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
@@ -151,12 +158,15 @@ const MapControls = ({
   }, [expandChart])
 
   // Handler to open glossary to specific entry
-  const handleGlossaryOpen = useCallback((glossaryEntry: string) => {
-    setDrawerContent({
-      selectedTerm: glossaryEntry,
-    })
-    openDrawer("glossary")
-  }, [setDrawerContent, openDrawer])
+  const handleGlossaryOpen = useCallback(
+    (glossaryEntry: string) => {
+      setDrawerContent({
+        selectedTerm: glossaryEntry,
+      })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
 
   // ✨ Clean chart data hook encapsulates ALL optimization logic
   const chartData = useChartData({
@@ -260,7 +270,7 @@ const MapControls = ({
                         component="li"
                         variant="body1"
                         sx={{
-                          mb: 0.25,
+                          mb: 0,
                           color: "inherit",
                         }}
                       >
@@ -404,7 +414,7 @@ const MapControls = ({
                         onGlossaryOpen={handleGlossaryOpen}
                       />
                     </Box>
-                    
+
                     {/* Climate slider */}
                     <DiscreteSlider
                       stops={[
@@ -413,7 +423,7 @@ const MapControls = ({
                         "Warmer Drier I",
                         "Warmer Drier II",
                         "Warmer Drier III",
-                        "Warmer Drier IV"
+                        "Warmer Drier IV",
                       ]}
                       value={selectedClimate}
                       onChange={(value) => {
@@ -599,7 +609,7 @@ const MapControls = ({
           </Box>
         </Box>
 
-        {/* Right Column - Hidden for now */}
+        {/* Right column hidden for now */}
         <Box
           sx={{
             display: "none", // Hidden
