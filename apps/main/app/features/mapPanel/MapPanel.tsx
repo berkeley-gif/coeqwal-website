@@ -9,6 +9,7 @@ import {
   FormControlLabel,
   TextField,
   Button,
+  Typography,
 } from "@repo/ui/mui"
 import { Card, ScenarioCard, MapMarkerTooltip, Dropdown } from "@repo/ui"
 import {
@@ -247,6 +248,19 @@ const MapControls = ({
                       lineHeight: 1.6,
                     }}
                   >
+                    {/* Introductory paragraph */}
+                    <Box
+                      sx={{
+                        mb: 0.5,
+                        fontSize: "0.95rem",
+                        fontWeight: 400,
+                        lineHeight: 1.5,
+                        color: "inherit",
+                      }}
+                    >
+                      We start with the current operations scenario, which:
+                    </Box>
+
                     <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
                       <Box
                         component="li"
@@ -254,11 +268,11 @@ const MapControls = ({
                           fontSize: "0.95rem",
                           fontWeight: 400,
                           lineHeight: 1.4,
-                          marginBottom: "4px",
+                          mb: 0.5,
                           color: "inherit",
                         }}
                       >
-                        helps us understand how California manages water today
+                        helps us understand how California manages water
                       </Box>
                       <Box
                         component="li"
@@ -266,11 +280,11 @@ const MapControls = ({
                           fontSize: "0.95rem",
                           fontWeight: 400,
                           lineHeight: 1.4,
-                          marginBottom: "4px",
+                          mb: 0.5,
                           color: "inherit",
                         }}
                       >
-                        serves as a foundation to compare alternative scenarios
+                        serves as a foundation to compare alternative scenarios.
                       </Box>
                     </Box>
                   </Box>
@@ -279,25 +293,18 @@ const MapControls = ({
                   <Box
                     sx={{
                       borderBottom: "1px solid",
-                      borderColor: (theme) => theme.palette.grey[200],
-                      opacity: 0.6,
+                      borderColor: (theme) => theme.palette.grey[300],
                       my: 2.5,
-                      mb: 2.5,
+                      mb: 0.5,
                     }}
                   />
                 </Box>
               )}
 
-              {/* Scenario Snapshot Section */}
+              {/* Scenario snapshot section */}
               {!isFirstCardMinimized && (
                 <Box sx={{ flexShrink: 0, pb: 2 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
+
                     <Box>
                       <Box
                         sx={{
@@ -309,6 +316,27 @@ const MapControls = ({
                         }}
                       >
                         Scenario snapshot
+                      </Box>
+                      <Box
+                        sx={{
+                          mb: 0.5,
+                        }}
+                      >
+                        <Typography variant="body2">
+                          Scenarios are the result of a computational model that
+                          estimates how much water is available for each purpose
+                          in each region. This scenario is has the following
+                          summary outcomes. Because specific allocations vary
+                          locally across the state as well as during wet and dry
+                          years, we use four measurements per outcome indicating
+                          how much or how often the water allocated reaches
+                          certain goals.
+                        </Typography>
+                        <Typography variant="body2">
+                          Click on each outcome to see how its measurements are
+                          defined and how they are distributed across the
+                          state.{" "}
+                        </Typography>
                       </Box>
                       <Box
                         sx={{
@@ -354,7 +382,6 @@ const MapControls = ({
                         ]}
                       />
                     </Box>
-                  </Box>
 
                   {/* Grid layout: outcomes with charts */}
                   <Box
