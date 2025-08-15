@@ -22,12 +22,12 @@ export interface BarChartProps {
  * - Responsive sizing
  */
 const BarChart = ({ size = 80, tiers, seed }: BarChartProps) => {
-  // Default tier configuration: red → orange → blue → green
+  // Default tier configuration: green → blue → orange → red (reversed order)
   const defaultTiers = [
-    { label: "Tier 1", color: "#f96262" }, // red
-    { label: "Tier 2", color: "#f89740" }, // orange
-    { label: "Tier 3", color: "#2064d4" }, // blue
-    { label: "Tier 4", color: "#2cc83b" }, // green
+    { label: "Tier 1", color: "#2cc83b" }, // green
+    { label: "Tier 2", color: "#2064d4" }, // blue
+    { label: "Tier 3", color: "#f89740" }, // orange
+    { label: "Tier 4", color: "#f96262" }, // red
   ]
 
   const chartTiers = tiers || defaultTiers
