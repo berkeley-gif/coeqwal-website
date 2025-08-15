@@ -53,8 +53,7 @@ const SliderStop = styled(Box, {
   backgroundColor: active ? theme.palette.blue.bright : theme.palette.grey[400],
   transition: "all 0.2s ease",
   zIndex: 1,
-  // Add elevation (drop shadow) to active stop to match pointer
-  filter: active ? "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" : "none",
+  filter: active ? "drop-shadow(0 1px 3px rgba(0,0,0,0.12))" : "none",
 }))
 
 const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) => ({
@@ -69,14 +68,15 @@ const SliderPointer = styled(Box)<{ disabled?: boolean }>(({ theme, disabled }) 
   zIndex: 3,
   marginTop: "8px", // Space between track and pointer
   color: theme.palette.blue.bright, // Color for the SVG
-  filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
+  filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.12))",
   "&:hover": disabled ? {} : {
     transform: "translateX(-50%) scale(1.1)",
-    filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.3))",
+    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.16))",
   },
   "&:active": disabled ? {} : {
     cursor: "grabbing",
     transform: "translateX(-50%) scale(1.05)",
+    filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.12))",
   },
   // SVG triangle
   "& svg": {
