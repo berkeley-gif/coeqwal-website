@@ -82,7 +82,7 @@ const typeScale = {
   h3: "2.8rem", // 44.8px - Subsection headers
   h4: "2.1rem", // 33.6px - Card titles (h3 ÷ 1.333)
   h5: "1.575rem", // 25.2px - Minor headlines (h4 ÷ 1.333)
-  h6: "1.18rem", // 18.9px - Small headlines (h5 ÷ 1.333)
+  h6: "1.1rem", // 17.6px - Section headers (Like on cards: Scenario snapshot, Climate)
 }
 
 const themeValues = {
@@ -692,7 +692,7 @@ const theme = createTheme({
     h6: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h6,
-      fontWeight: 500,
+      fontWeight: 600,
       lineHeight: 1.4,
     },
     body1: {
