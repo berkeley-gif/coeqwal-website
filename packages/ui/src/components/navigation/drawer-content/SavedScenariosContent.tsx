@@ -8,6 +8,7 @@ import {
   IconButton,
   Chip,
   Divider,
+  useTheme,
 } from "@mui/material"
 import DeleteIcon from "@mui/icons-material/Delete"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
@@ -69,14 +70,42 @@ export function SavedScenariosContent({
 
   return (
     <Box sx={{ p: 2, height: "100%" }}>
-      {/* Header */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>
-          My Saved Scenarios
-        </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          Load previously saved scenario configurations for quick comparison.
-        </Typography>
+      {/* Header section with standardized typography */}
+      <Box sx={{ mb: 2, flexShrink: 0 }}>
+        <Box sx={(theme) => ({ ...theme.mixins.cardTypography.eyebrow })}>
+          MY SCENARIOS
+        </Box>
+        <Box sx={(theme) => ({ ...theme.mixins.cardTypography.cardTitle })}>
+          Story
+        </Box>
+        
+        {/* HR separator */}
+        <Box
+          sx={{
+            borderBottom: "1px solid",
+            borderColor: (theme) => theme.palette.grey[300],
+            my: 2.5,
+            mb: 0,
+          }}
+        />
+      </Box>
+
+      {/* Instructional text */}
+      <Box sx={{ flexShrink: 0, pb: 2 }}>
+        <Box sx={(theme) => ({ ...theme.mixins.cardTypography.bodyContainer })}>
+          <Typography 
+            variant="body1" 
+            sx={(theme) => ({ ...theme.mixins.cardTypography.instructionalText })}
+          >
+            <Box
+              component="span"
+              sx={(theme) => ({ ...theme.mixins.cardTypography.highlightedSpan })}
+            >
+              Click
+            </Box>{" "}
+            on the icon to save a scenario or scenario view to your story. You can view and edit your story with the story tools.
+          </Typography>
+        </Box>
       </Box>
 
       {/* Empty state */}
@@ -87,24 +116,14 @@ export function SavedScenariosContent({
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            height: "60%",
+            flexGrow: 1,
             textAlign: "center",
             px: 2,
           }}
         >
           <Typography variant="h6" sx={{ mb: 2, color: "text.secondary" }}>
-            No Saved Scenarios
+            No saved scenarios yet
           </Typography>
-          <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
-            Save scenario configurations from the map panel to quickly access them later.
-          </Typography>
-          <Button
-            variant="outlined"
-            onClick={onClose}
-            sx={{ textTransform: "none" }}
-          >
-            Explore Scenarios
-          </Button>
         </Box>
       )}
 
