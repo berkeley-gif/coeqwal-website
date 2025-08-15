@@ -12,7 +12,7 @@ import {
   Typography,
   InfoIcon,
 } from "@repo/ui/mui"
-import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip, ActionCardButton } from "@repo/ui"
+import { Card, ScenarioCard, MapMarkerTooltip, InfoTooltip, ActionCardButton, DiscreteSlider } from "@repo/ui"
 import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
@@ -59,6 +59,9 @@ interface MapControlsProps {
   onScenarioHover: (scenario: string | null) => void
   onScenarioSelect: (scenario: string) => void
   onRegionSelect: (region: string) => void
+  // Climate props
+  selectedClimate: number
+  onClimateChange: (value: number) => void
 }
 
 const MapControls = ({
@@ -83,6 +86,9 @@ const MapControls = ({
   onScenarioHover: _onScenarioHover, // eslint-disable-line @typescript-eslint/no-unused-vars
   onScenarioSelect,
   onRegionSelect: _onRegionSelect, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // Climate props
+  selectedClimate,
+  onClimateChange,
 }: MapControlsProps) => {
   const { flyTo } = useMap()
 
@@ -245,7 +251,7 @@ const MapControls = ({
                         component="li"
                         variant="body1"
                         sx={{
-                          mb: 0.5,
+                          mb: 0.25,
                           color: "inherit",
                         }}
                       >
@@ -255,7 +261,7 @@ const MapControls = ({
                         component="li"
                         variant="body1"
                         sx={{
-                          mb: 0.5,
+                          mb: 0.25,
                           color: "inherit",
                         }}
                       >
@@ -270,7 +276,7 @@ const MapControls = ({
                       borderBottom: "1px solid",
                       borderColor: (theme) => theme.palette.grey[300],
                       my: 2.5,
-                      mb: 0.5,
+                      mb: 0,
                     }}
                   />
                 </Box>
@@ -285,7 +291,7 @@ const MapControls = ({
                         display: "flex",
                         alignItems: "center",
                         gap: 0.5,
-                        mb: 0.5,
+                        mb: 0,
                       }}
                     >
                       <Box
@@ -389,17 +395,36 @@ const MapControls = ({
                     ))}
                   </Box>
 
-                  {/* Choose alternative scenarios button */}
-                  <Box
-                    sx={{ mt: 3, display: "flex", justifyContent: "center" }}
-                  >
-                    <ActionCardButton
-                      title="Choose alternative scenarios"
-                      subtitle="Compare different water management approaches"
-                      onClick={() => {
-                        console.log(
-                          "Navigate to alternative scenarios selection",
-                        )
+                  {/* Climate selector */}
+                  <Box sx={{ mt: 3 }}>
+                    {/* Climate heading */}
+                    <Box
+                      sx={{
+                        color: (theme) => theme.palette.blue.darkest,
+                        fontFamily: (theme) => theme.typography.fontFamily,
+                        fontWeight: 500,
+                        fontSize: "1.1rem",
+                        mb: 0,
+                        textAlign: "left",
+                      }}
+                    >
+                      Climate
+                    </Box>
+                    
+                    {/* Climate slider */}
+                    <DiscreteSlider
+                      stops={[
+                        "Very Dry",
+                        "Dry", 
+                        "Current",
+                        "Wet",
+                        "Very Wet",
+                        "Extreme Wet"
+                      ]}
+                      value={selectedClimate}
+                      onChange={(value) => {
+                        onClimateChange(value)
+                        console.log("Climate changed to:", value)
                       }}
                     />
                   </Box>
@@ -1181,6 +1206,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
 
+  // Climate state
+  const [selectedClimate, setSelectedClimate] = useState(2) // Default to middle option
+
   // Delivery area state
   const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] =
     useState(false)
@@ -1323,6 +1351,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   const handleRegionSelect = (region: string) => {
     setSelectedRegion(region)
+  }
+
+  const handleClimateChange = (value: number) => {
+    setSelectedClimate(value)
   }
 
   return (
@@ -1838,6 +1870,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         onScenarioHover={handleScenarioHover}
         onScenarioSelect={handleScenarioSelect}
         onRegionSelect={handleRegionSelect}
+        selectedClimate={selectedClimate}
+        onClimateChange={handleClimateChange}
       />
     </Box>
   )
