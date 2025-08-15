@@ -17,7 +17,7 @@ export interface ActionCardButtonProps extends Omit<ButtonProps, "children"> {
 
 /**
  * Action card button component for primary actions in card interfaces.
- * 
+ *
  * Features:
  * - Consistent grey/blue styling with hover effects
  * - Main title with optional subtitle
@@ -38,7 +38,7 @@ export function ActionCardButton({
       variant="actionCard"
       // Don't use MUI's disabled prop, handle manually to preserve hover
       onClick={disabled ? undefined : onClick}
-      sx={{ 
+      sx={{
         width: "100%",
         // Manual disabled styling that preserves hover
         ...(disabled && {
@@ -55,7 +55,7 @@ export function ActionCardButton({
             color: (theme) => theme.palette.common.white,
           },
         },
-        ...sx 
+        ...sx,
       }}
       {...props}
     >
@@ -66,7 +66,10 @@ export function ActionCardButton({
           alignItems: "center",
         }}
       >
-        <Typography variant="body1" sx={{ fontWeight: 500, mb: subtitle ? 0.5 : 0 }}>
+        <Typography
+          variant="body1"
+          sx={{ fontWeight: 500, mb: subtitle ? 0.5 : 0 }}
+        >
           {title}
         </Typography>
         {subtitle && (
