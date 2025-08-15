@@ -599,10 +599,10 @@ const MapControls = ({
           </Box>
         </Box>
 
-        {/* Right Column */}
+        {/* Right Column - Hidden for now */}
         <Box
           sx={{
-            display: "flex",
+            display: "none", // Hidden
             flexDirection: "column",
             gap: 2,
             width: "100%",
