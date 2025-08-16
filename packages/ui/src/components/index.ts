@@ -63,3 +63,7 @@ export type { OperationCardProps, SubOption } from "./operations/OperationCard"
 // Learn components
 export { default as LearnCard } from "./LearnCard"
 export { default as LearnCardCarousel } from "./LearnCardCarousel"
+export { default as ScenarioTile } from "./scenario/ScenarioTile"
+
+export { useGlyphSettingsStore } from "../stores/glyphSettingsStore"
+export type { GlyphVariant } from "../stores/glyphSettingsStore"

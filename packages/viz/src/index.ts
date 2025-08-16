@@ -16,6 +16,10 @@ export type {
   VerticalParallelLineData,
   VerticalParallelLinePlotProps,
 } from "./components/VerticalParallelLinePlot"
+export { default as OutcomeGlyph } from "./components/OutcomeGlyph"
+export type { OutcomeGlyphProps } from "./components/OutcomeGlyph"
+export { default as ScenarioGlyph } from "./components/ScenarioGlyph"
+export type { ScenarioGlyphProps } from "./components/ScenarioGlyph"
 
 // Export hooks
 export { useResizeObserver } from "./hooks/useResizeObserver"
