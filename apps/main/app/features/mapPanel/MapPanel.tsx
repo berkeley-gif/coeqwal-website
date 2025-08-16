@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import {
   Box,
   IconButton,
@@ -8,6 +8,8 @@ import {
   TextField,
   Button,
   Typography,
+  Select,
+  MenuItem,
 } from "@repo/ui/mui"
 import {
   Card,
@@ -19,7 +21,7 @@ import {
   CardAccordion,
 } from "@repo/ui"
 import type { CardAccordionSection } from "@repo/ui"
-import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
+import { BarChart } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
 import { useDrawerStore } from "@repo/state"
@@ -39,6 +41,11 @@ import {
 // } from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import { MapPromptDialog } from "@repo/ui"
+import { ScenarioTile } from "@repo/ui"
+import OutcomeRangeSlider from "../../components/OutcomeRangeSlider"
+import { useScenarioFilterStore } from "@repo/state"
+import type { OutcomeName } from "@repo/state"
+import { useGlyphSettingsStore } from "@repo/ui"
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -67,6 +74,8 @@ interface MapControlsProps {
   // Climate props
   selectedClimate: number
   onClimateChange: (value: number) => void
+  // Clear selections
+  onClearSelectedScenarios: () => void
 }
 
 const MapControls = ({
@@ -92,6 +101,7 @@ const MapControls = ({
   // Climate props
   selectedClimate,
   onClimateChange,
+  onClearSelectedScenarios,
 }: MapControlsProps) => {
   const { flyTo } = useMap()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -170,141 +180,44 @@ const MapControls = ({
     expandChart,
   })
 
+  const filterStore = useScenarioFilterStore()
+  const filteredScenarios = useMemo(() => {
+    return chartData.props.data.filter((sc) => {
+      return chartData.props.axes.every((axis) => {
+        const range = filterStore.outcomeRanges[axis as OutcomeName]
+        const v = sc.values[axis] ?? 0
+        return v >= range.min && v <= range.max
+      })
+    })
+  }, [chartData.props.data, chartData.props.axes, filterStore.outcomeRanges])
+
   // Accordion sections for the third column
   const accordionSections: CardAccordionSection[] = [
     {
       id: "select-scenarios",
       title: "Select scenarios",
       content: (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-            minWidth: 0,
-          }}
-        >
-          {/* Outcomes paragraph, visible when chart not expanded */}
-          {!expandChart && (
-            <Box sx={{ flexShrink: 0 }}>
-              <Box
-                sx={{
-                  fontSize: "1rem",
-                  fontWeight: 400,
-                  lineHeight: 1.4,
-                  color: (theme) => theme.palette.text.primary,
-                  mb: 1,
-                }}
-              >
-                Compare scenarios across multiple outcomes to understand
-                trade-offs and synergies in California&apos;s water management.{" "}
-                <Box
-                  component="span"
-                  onClick={handleLearnMoreClick}
-                  sx={{
-                    color: (theme) => theme.palette.blue.bright,
-                    cursor: "pointer",
-                    fontWeight: 500,
-                    textDecoration: "underline",
-                    whiteSpace: "nowrap",
-                    "&:hover": {
-                      color: (theme) => theme.palette.blue.darkest,
-                    },
-                  }}
-                >
-                  Learn more about this chart
-                </Box>
-              </Box>
-            </Box>
-          )}
-
-          {/* Control Section, always visible */}
-          <Box sx={{ flexShrink: 0, mb: 1 }}>
-            {/* Expand chart button, always visible */}
-            <Box sx={{ mb: 1 }}>
-              <Button
-                variant="text"
-                onClick={toggleExpandChart}
-                sx={{
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  color: (theme) => theme.palette.blue.bright,
-                  padding: 0,
-                  minWidth: "auto",
-                  textTransform: "none",
-                  justifyContent: "flex-start",
-                  "&:hover": {
-                    color: (theme) => theme.palette.blue.darkest,
-                    backgroundColor: "transparent",
-                  },
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.875em",
-                    marginRight: "8px",
-                    display: "inline-block",
-                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
-                >
-                  ▼
-                </span>
-                {expandChart ? "Reduce" : "Expand"} chart
-              </Button>
-            </Box>
-
-            {/* Chart controls */}
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 2,
-                mt: 1,
-                mb: 1,
-                width: "100%",
-              }}
-            >
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={isRelativeView}
-                    onChange={handleViewModeChange}
-                    size="small"
-                  />
-                }
-                label="relative to current operations"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={highlightBaseline}
-                    onChange={handleHighlightBaselineChange}
-                    size="small"
-                  />
-                }
-                label="highlight current operations"
-              />
-            </Box>
+        <Box sx={{height:"100%", display:"flex", flexDirection:"column"}}>
+          {/* Filter sliders */}
+          <Box sx={{maxHeight:200, overflow:"auto", pr:1}}>
+            {chartData.props.axes.map((axis) => (
+              <OutcomeRangeSlider key={axis} outcome={axis as OutcomeName} />
+            ))}
           </Box>
 
-          {/* Responsive Chart Visualization */}
-          <Box
-            sx={{
-              flexGrow: 1,
-              width: "100%",
-              height: "100%",
-              minHeight: 0,
-              maxHeight: "none",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <VerticalParallelLinePlot
-              key={chartData.key}
-              {...chartData.props}
-            />
+          {/* Gallery */}
+          <Box sx={{flexGrow:1, overflow:"auto", p:1}}>
+            <Box
+              sx={{
+                display:"grid",
+                gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",
+                gap:2,
+              }}
+            >
+              {filteredScenarios.map((sc) => (
+                <ScenarioTile key={sc.id} scenario={sc} onSelect={onScenarioSelect} />
+              ))}
+            </Box>
           </Box>
         </Box>
       ),
@@ -609,16 +522,34 @@ const MapControls = ({
                   </Box>
                   <Box
                     sx={{
-                      color: (theme) => theme.palette.blue.darkest,
-                      fontFamily:
-                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                      fontWeight: 500,
-                      fontSize: "1.5rem",
-                      lineHeight: 1.3,
-                      mb: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
                     }}
                   >
-                    Current operations
+                    <Box
+                      sx={{
+                        color: (theme) => theme.palette.blue.darkest,
+                        fontFamily:
+                          '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                        fontWeight: 500,
+                        fontSize: "1.5rem",
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      Current operations
+                    </Box>
+                    {/* Glyph variant selector */}
+                    <Select
+                      size="small"
+                      value={useGlyphSettingsStore((s)=>s.variant)}
+                      onChange={(e)=> useGlyphSettingsStore.getState().setVariant(e.target.value as any)}
+                      sx={{ fontSize:"0.75rem" }}
+                    >
+                      <MenuItem value="bars">Bars</MenuItem>
+                      <MenuItem value="rose">Rose</MenuItem>
+                      <MenuItem value="quartile">Quartile</MenuItem>
+                    </Select>
                   </Box>
                   <Box
                     sx={{
@@ -1004,6 +935,39 @@ const MapControls = ({
                       px: 3, // Card padding
                     }}
                   >
+                    {/* Filter status header */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                        {selectedScenarios.length} selected
+                      </Typography>
+                      {selectedScenarios.length > 0 && (
+                        <Button
+                          variant="text"
+                          size="small"
+                          onClick={() => onClearSelectedScenarios()}
+                          sx={{
+                            textTransform: "none",
+                            fontSize: "0.875rem",
+                            color: (theme) => theme.palette.blue.bright,
+                            minWidth: "auto",
+                            padding: 0,
+                            "&:hover": {
+                              backgroundColor: "transparent",
+                              color: (theme) => theme.palette.blue.darkest,
+                            },
+                          }}
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </Box>
                     {/* Card Accordion */}
                     <CardAccordion
                       sections={accordionSections}
@@ -1315,9 +1279,15 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     setSelectedRegion(region)
   }
 
+  const handleClearSelectedScenarios = () => {
+    setSelectedScenarios([])
+  }
+
   const handleClimateChange = (value: number) => {
     setSelectedClimate(value)
   }
+
+  const glyphVariant = useGlyphSettingsStore((state: any) => state.variant)
 
   return (
     <Box
@@ -1854,6 +1824,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         onRegionSelect={handleRegionSelect}
         selectedClimate={selectedClimate}
         onClimateChange={handleClimateChange}
+        onClearSelectedScenarios={handleClearSelectedScenarios}
       />
     </Box>
   )

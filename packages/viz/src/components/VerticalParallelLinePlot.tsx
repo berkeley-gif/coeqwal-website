@@ -108,6 +108,32 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       .attr("opacity", 0.1)
       .attr("rx", 4)
 
+    // Min–max ribbons (show distribution range per outcome)
+    const axisRanges = axes.map((axis) => {
+      const vals = data.map((d) => d.values[axis] ?? 0)
+      return {
+        axis,
+        min: d3.min(vals) ?? 0,
+        max: d3.max(vals) ?? 0,
+      }
+    })
+
+    axisRanges.forEach(({ axis, min, max }) => {
+      const yPos = yScale(axis)! - 4 // place band around the axis line (8 px tall)
+      const bandHeight = 12
+      const xMin = scales[axis]!(min)
+      const xMax = scales[axis]!(max)
+
+      g.append("rect")
+        .attr("x", xMin)
+        .attr("y", yPos - (bandHeight - 8) / 2) // center band around axis
+        .attr("width", Math.max(1, xMax - xMin))
+        .attr("height", bandHeight)
+        .attr("fill", colors.default)
+        .attr("opacity", 0.25)
+        .attr("rx", 3)
+    })
+
     // Draw horizontal axes
     axes.forEach((axis) => {
       const yPos = yScale(axis)!
@@ -324,6 +350,29 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("fill", "#333")
         .text(title)
     }
+
+    // 👉 Add legend explaining band meaning
+    const legendGroup = svg.append("g")
+    const legendX = currentWidth - margin.right - 120
+    const legendY = margin.top - 10
+
+    legendGroup
+      .append("rect")
+      .attr("x", legendX)
+      .attr("y", legendY)
+      .attr("width", 18)
+      .attr("height", 10)
+      .attr("fill", colors.default)
+      .attr("opacity", 0.25)
+      .attr("rx", 2)
+
+    legendGroup
+      .append("text")
+      .attr("x", legendX + 24)
+      .attr("y", legendY + 9)
+      .attr("font-size", "12px")
+      .attr("fill", "#333")
+      .text("Scenario range")
   }, [
     data,
     axes,
