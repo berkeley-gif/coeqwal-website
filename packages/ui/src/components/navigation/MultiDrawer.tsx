@@ -258,8 +258,10 @@ export function MultiDrawer({
           sx={{
             position: "fixed",
             top: "50%",
-            right: drawerOpen 
-              ? (drawerWidth ?? theme.layout.drawer.width ?? theme.layout.drawer.glossaryWidth) 
+            right: drawerOpen
+              ? (drawerWidth ??
+                theme.layout.drawer.width ??
+                theme.layout.drawer.glossaryWidth)
               : 0,
             transform: "translateY(-50%)",
             zIndex: theme.zIndex.drawerBackdrop,
@@ -421,16 +423,24 @@ export function MultiDrawer({
                   <SavedScenariosContent
                     onClose={close}
                     savedScenarios={
-                      drawerContent.savedScenarios as SavedScenario[] | undefined
+                      drawerContent.savedScenarios as
+                        | SavedScenario[]
+                        | undefined
                     }
                     onLoadScenario={
-                      drawerContent.onLoadScenario as ((scenario: SavedScenario) => void) | undefined
+                      drawerContent.onLoadScenario as
+                        | ((scenario: SavedScenario) => void)
+                        | undefined
                     }
                     onDeleteScenario={
-                      drawerContent.onDeleteScenario as ((id: string) => void) | undefined
+                      drawerContent.onDeleteScenario as
+                        | ((id: string) => void)
+                        | undefined
                     }
                     onEditScenario={
-                      drawerContent.onEditScenario as ((scenario: SavedScenario) => void) | undefined
+                      drawerContent.onEditScenario as
+                        | ((scenario: SavedScenario) => void)
+                        | undefined
                     }
                   />
                 </Box>

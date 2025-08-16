@@ -1,12 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import {
-  Box,
-  Typography,
-  Collapse,
-  IconButton,
-} from "@mui/material"
+import { Box, Typography, Collapse, IconButton } from "@mui/material"
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
 
 export interface CardAccordionSection {
@@ -26,7 +21,7 @@ export interface CardAccordionProps {
 
 /**
  * Accordion component designed for use within cards
- * 
+ *
  * Features:
  * - Expandable/collapsible sections with smooth transitions
  * - Single or multiple expansion modes
@@ -40,13 +35,17 @@ export function CardAccordion({
   sx = {},
 }: CardAccordionProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(sections.filter(section => section.defaultExpanded).map(section => section.id))
+    new Set(
+      sections
+        .filter((section) => section.defaultExpanded)
+        .map((section) => section.id),
+    ),
   )
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newExpanded = new Set(prev)
-      
+
       if (newExpanded.has(sectionId)) {
         // Collapse this section
         newExpanded.delete(sectionId)
@@ -58,7 +57,7 @@ export function CardAccordion({
         }
         newExpanded.add(sectionId)
       }
-      
+
       return newExpanded
     })
   }
@@ -110,9 +109,7 @@ export function CardAccordion({
 
             {/* Section Content */}
             <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-              <Box sx={{ pb: 2 }}>
-                {section.content}
-              </Box>
+              <Box sx={{ pb: 2 }}>{section.content}</Box>
             </Collapse>
 
             {/* Divider (except for last item) */}

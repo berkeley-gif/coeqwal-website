@@ -160,28 +160,39 @@ export default function InvitationSection({
                       {
                         id: "scenario-1",
                         name: "High Water Demand",
-                        description: "Scenarios exploring increased urban and agricultural water demands",
-                        scenarios: ["Urban Growth A", "Agricultural Expansion", "Climate Stress"],
+                        description:
+                          "Scenarios exploring increased urban and agricultural water demands",
+                        scenarios: [
+                          "Urban Growth A",
+                          "Agricultural Expansion",
+                          "Climate Stress",
+                        ],
                         region: "Central Valley",
                         savedAt: new Date("2024-01-15"),
                         tags: ["high-demand", "urban", "agriculture"],
                       },
                       {
-                        id: "scenario-2", 
+                        id: "scenario-2",
                         name: "Drought Resilience",
-                        description: "Testing water management under extreme drought conditions",
+                        description:
+                          "Testing water management under extreme drought conditions",
                         scenarios: ["Severe Drought", "Extended Dry Period"],
                         region: "Sacramento Valley",
                         savedAt: new Date("2024-01-10"),
                         tags: ["drought", "resilience"],
                       },
-                    ];
+                    ]
 
-                    useDrawerStore.getState().openSavedScenariosPanel(mockScenarios, {
-                      onLoadScenario: (scenario: any) => console.log("Loading:", scenario),
-                      onDeleteScenario: (id: string) => console.log("Deleting:", id),
-                      onEditScenario: (scenario: any) => console.log("Editing:", scenario),
-                    });
+                    useDrawerStore
+                      .getState()
+                      .openSavedScenariosPanel(mockScenarios, {
+                        onLoadScenario: (scenario: any) =>
+                          console.log("Loading:", scenario),
+                        onDeleteScenario: (id: string) =>
+                          console.log("Deleting:", id),
+                        onEditScenario: (scenario: any) =>
+                          console.log("Editing:", scenario),
+                      })
                   }}
                   sx={{ textTransform: "none" }}
                 >

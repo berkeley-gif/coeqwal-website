@@ -396,7 +396,8 @@ const cardTypographyMixins = {
   // Main card title (e.g., "Current Operations")
   cardTitle: {
     color: "blue.darkest",
-    fontFamily: '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontFamily:
+      '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     fontWeight: 500,
     fontSize: "1.5rem",
     lineHeight: 1.3,

@@ -1,10 +1,10 @@
 export const OUTCOMES = [
   "Community deliveries",
   "Agricultural deliveries",
-  "Environmental deliveries",
+  "Environmental health",
+  "Delta health",
   "Reservoir storage",
   "Groundwater storage",
-  "Delta salinity",
   "Salmon abundance",
   "Distributional equity",
 ] as const

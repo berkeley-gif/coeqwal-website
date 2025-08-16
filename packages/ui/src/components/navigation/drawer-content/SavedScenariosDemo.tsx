@@ -12,14 +12,15 @@ const mockSavedScenarios: SavedScenario[] = [
   {
     id: "scenario-1",
     name: "High Water Demand",
-    description: "Scenarios exploring increased urban and agricultural water demands",
+    description:
+      "Scenarios exploring increased urban and agricultural water demands",
     scenarios: ["Urban Growth A", "Agricultural Expansion", "Climate Stress"],
     region: "Central Valley",
     savedAt: new Date("2024-01-15"),
     tags: ["high-demand", "urban", "agriculture"],
   },
   {
-    id: "scenario-2", 
+    id: "scenario-2",
     name: "Drought Resilience",
     description: "Testing water management under extreme drought conditions",
     scenarios: ["Severe Drought", "Extended Dry Period"],
@@ -30,9 +31,15 @@ const mockSavedScenarios: SavedScenario[] = [
   {
     id: "scenario-3",
     name: "Climate Adaptation",
-    description: "Evaluating adaptation strategies for changing climate patterns",
-    scenarios: ["Warmer Climate", "Variable Precipitation", "Sea Level Rise", "Temperature Extremes"],
-    region: "San Joaquin Valley", 
+    description:
+      "Evaluating adaptation strategies for changing climate patterns",
+    scenarios: [
+      "Warmer Climate",
+      "Variable Precipitation",
+      "Sea Level Rise",
+      "Temperature Extremes",
+    ],
+    region: "San Joaquin Valley",
     savedAt: new Date("2024-01-05"),
     tags: ["climate", "adaptation", "long-term"],
   },
@@ -73,7 +80,7 @@ export function useSavedScenariosDemo() {
   const openSavedScenarios = () => {
     openSavedScenariosPanel(mockSavedScenarios, {
       onLoadScenario: handleLoadScenario,
-      onDeleteScenario: handleDeleteScenario, 
+      onDeleteScenario: handleDeleteScenario,
       onEditScenario: handleEditScenario,
     })
   }
@@ -90,13 +97,13 @@ export function useSavedScenariosDemo() {
 
 /**
  * Example usage in a component:
- * 
+ *
  * ```tsx
  * import { useSavedScenariosDemo } from "./SavedScenariosDemo"
- * 
+ *
  * function MyComponent() {
  *   const { openSavedScenarios } = useSavedScenariosDemo()
- * 
+ *
  *   return (
  *     <Button onClick={openSavedScenarios}>
  *       Open My Scenarios
