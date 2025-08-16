@@ -1,9 +1,11 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type { DrawerState } from "./types"
-
-// Import TabKey type from types
-import type { TabKey } from "./types"
+import type {
+  DrawerState,
+  TabKey,
+  SavedScenario,
+  SavedScenariosCallbacks,
+} from "./types"
 
 export interface DrawerStoreState extends DrawerState {
   // Actions
@@ -14,7 +16,10 @@ export interface DrawerStoreState extends DrawerState {
   setDrawerContent: (content: Record<string, unknown>) => void
   // Convenience methods for specific panels
   openGlossaryPanel: () => void
-  openSavedScenariosPanel: (scenarios?: any[], callbacks?: any) => void
+  openSavedScenariosPanel: (
+    scenarios?: SavedScenario[],
+    callbacks?: SavedScenariosCallbacks,
+  ) => void
 }
 
 export const useDrawerStore = create<DrawerStoreState>()(

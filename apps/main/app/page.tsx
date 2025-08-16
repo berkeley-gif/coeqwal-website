@@ -273,12 +273,6 @@ export default function Home() {
           {/* CalSim panel with two columns */}
           {/* <CalSimSection onOpenLearnDrawer={handleOpenLearnDrawer} /> */}
 
-          {/* Invitation panel with two columns */}
-          {/* <InvitationSection
-            onOpenCurrentOpsDrawer={handleOpenCurrentOpsDrawer}
-            onOpenThemesDrawer={handleOpenThemesDrawer}
-          /> */}
-
           {/* Needs Editor Panel */}
           {/* <Box sx={{ pointerEvents: "auto" }} id="needs-editor-container">
             <NeedsEditorPanel />
