@@ -255,7 +255,7 @@ const MapControls = ({
                       mb: 1,
                     }}
                   >
-                    Current Operations
+                    Current operations
                   </Box>
                   <Box
                     sx={{
@@ -609,10 +609,10 @@ const MapControls = ({
           </Box>
         </Box>
 
-        {/* Right column hidden for now */}
+        {/* Right column, Alternative scenarios */}
         <Box
           sx={{
-            display: "none", // Hidden
+            display: "flex",
             flexDirection: "column",
             gap: 2,
             width: "100%",
@@ -624,9 +624,9 @@ const MapControls = ({
           <Box sx={{ position: "relative" }}>
             <ScenarioCard
               topLine={
-                isThirdCardMinimized ? "" : "ALTERNATIVE SCENARIO & REGION"
+                isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"
               }
-              headline={"Choose an alternative scenario or region"}
+              headline={"Alternative scenarios"}
               body={null}
               sx={{
                 opacity: isThirdCardMinimized ? 0.8 : 1,
