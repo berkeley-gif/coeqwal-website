@@ -3,7 +3,6 @@
  * This file shows how to integrate saved scenarios with the MultiDrawer
  */
 
-import React from "react"
 import { useDrawerStore } from "@repo/state"
 import type { SavedScenario } from "./SavedScenariosContent"
 
