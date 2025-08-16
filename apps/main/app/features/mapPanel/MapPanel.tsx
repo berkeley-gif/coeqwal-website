@@ -175,7 +175,6 @@ const MapControls = ({
     {
       id: "select-scenarios",
       title: "Select scenarios",
-      defaultExpanded: true,
       content: (
         <Box
           sx={{
@@ -687,14 +686,14 @@ const MapControls = ({
               {!isFirstCardMinimized && (
                 <Box sx={{ flexShrink: 0, pb: 2 }}>
                   <Box>
-                    <Box
-                      sx={{
-                        display: "flex",
+                  <Box
+                    sx={{
+                      display: "flex",
                         alignItems: "center",
                         gap: 0.5,
                         mb: 0,
-                      }}
-                    >
+                    }}
+                  >
                       <Typography
                         variant="h6"
                         sx={{
@@ -708,20 +707,20 @@ const MapControls = ({
                         glossaryEntry="CalSim"
                         onGlossaryOpen={handleGlossaryOpen}
                       />
-                    </Box>
+                      </Box>
 
-                    <Box
-                      sx={{
+                      <Box
+                        sx={{
                         color: (theme) => theme.palette.text.primary,
-                        fontFamily: (theme) => theme.typography.fontFamily,
+                          fontFamily: (theme) => theme.typography.fontFamily,
                         mb: 2.5,
                       }}
                     >
                       <Typography variant="body1">
                         <Box
                           component="span"
-                          sx={{
-                            color: (theme) => theme.palette.text.secondary,
+                        sx={{
+                          color: (theme) => theme.palette.text.secondary,
                           }}
                         >
                           Click
@@ -1037,7 +1036,7 @@ const MapControls = ({
                       <ActionCardButton
                         title="Explore scenarios in depth"
                         subtitle={
-                          selectedScenarios.length > 0
+                            selectedScenarios.length > 0
                             ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
                             : "Select scenarios to explore"
                         }
@@ -1751,13 +1750,34 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           polygonPoints.length > 0 ? ` • ${polygonPoints.length} points` : ""
         }`}
         actions={
-          polygonPoints.length > 0 ? (
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {polygonPoints.length > 0 && (
+              <Box
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setPolygonPoints([])
+                  setIsSelfIntersecting(false)
+                  setDraggedPointIndex(null)
+                }}
+                sx={(theme) => ({
+                  fontSize: theme.mapPromptDialog.typography.action.fontSize,
+                  color: theme.palette.blue.bright,
+                  cursor: theme.mapPromptDialog.typography.action.cursor,
+                  fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
+                  textDecoration:
+                    theme.mapPromptDialog.typography.action.textDecoration,
+                  "&:hover": {
+                    color: theme.palette.blue.light,
+                  },
+                })}
+              >
+                Redraw
+              </Box>
+            )}
             <Box
               onClick={(e) => {
                 e.stopPropagation()
-                setPolygonPoints([])
-                setIsSelfIntersecting(false)
-                setDraggedPointIndex(null)
+                handleClearCustomRegion()
               }}
               sx={(theme) => ({
                 fontSize: theme.mapPromptDialog.typography.action.fontSize,
@@ -1771,9 +1791,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 },
               })}
             >
-              Redraw
+              Cancel
             </Box>
-          ) : undefined
+          </Box>
         }
       />
 
