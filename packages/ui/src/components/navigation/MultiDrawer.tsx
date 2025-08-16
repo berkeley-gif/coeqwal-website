@@ -10,6 +10,7 @@ import {
   IconButton,
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
+import EditNoteIcon from "@mui/icons-material/EditNote"
 
 // Content components
 import { CurrentOpsContent, SavedScenariosContent } from "./drawer-content"
@@ -25,6 +26,7 @@ interface RailButtonProps {
   active?: boolean
   bgColor: string
   hoverColor: string
+  icon?: React.ReactNode
 }
 
 /**
@@ -36,6 +38,7 @@ function RailButton({
   active,
   bgColor,
   hoverColor,
+  icon,
 }: RailButtonProps) {
   const theme = useTheme()
 
@@ -67,22 +70,74 @@ function RailButton({
       }}
       aria-label={`Open ${label} panel`}
     >
-      <Typography
-        variant="nav"
+      <Box
         sx={{
-          fontWeight: 500, // Match secondary nav
-          fontSize: theme.typography.nav.fontSize,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0.5,
           transform: "rotate(-90deg)",
-          whiteSpace: "nowrap",
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-          color: "inherit", // Ensure text color is inherited
-          width: "180px", // Ensure enough width for rotated text
-          textAlign: "center", // Center the text
+          transformOrigin: "center",
+          width: "180px",
         }}
       >
-        {label}
-      </Typography>
+        <Typography
+          variant="nav"
+          sx={{
+            fontWeight: 500,
+            fontSize: theme.typography.nav.fontSize,
+            whiteSpace: "nowrap",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            color: "inherit",
+            textAlign: "center",
+          }}
+        >
+          {label}
+        </Typography>
+        {icon && (
+          <Box
+            component="button"
+            onClick={(e) => {
+              e.stopPropagation() // Prevent triggering the rail button
+              console.log("Save to story clicked")
+            }}
+            sx={{
+              width: "30px",
+              height: "30px",
+              borderRadius: "50%",
+              backgroundColor: "white",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ml: 0.5,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              "&:hover": {
+                transform: "scale(1.1)",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+              },
+              "&:active": {
+                transform: "scale(0.95)",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                fontSize: "1.5rem", // Doubled from 0.75rem to match larger button
+                color: active ? "#449cd9" : "#666", // Blue when tab active, gray when inactive
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {icon}
+            </Box>
+          </Box>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -230,6 +285,7 @@ export function MultiDrawer({
             active={activeTab === "savedScenarios"}
             bgColor="#5a7a2f" // Slightly darker than the active green
             hoverColor="#6b8f3a" // Slightly lighter than active green
+            icon={<EditNoteIcon />}
           />
         </Box>
       )}

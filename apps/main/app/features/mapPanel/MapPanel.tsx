@@ -397,7 +397,7 @@ const MapControls = ({
                         display: "flex",
                         alignItems: "center",
                         gap: 0.5,
-                        mb: 0.25,
+                        mb: 0.5,
                       }}
                     >
                       <Typography
