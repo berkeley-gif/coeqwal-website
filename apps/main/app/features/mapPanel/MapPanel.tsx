@@ -3,8 +3,6 @@ import React, { useState, useEffect, useCallback } from "react"
 import {
   Box,
   IconButton,
-  Tabs,
-  Tab,
   Checkbox,
   FormControlLabel,
   TextField,
@@ -18,7 +16,9 @@ import {
   ActionCardButton,
   DiscreteSlider,
   InfoIconButton,
+  CardAccordion,
 } from "@repo/ui"
+import type { CardAccordionSection } from "@repo/ui"
 import { BarChart, VerticalParallelLinePlot } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
@@ -58,11 +58,9 @@ interface MapControlsProps {
   showDeliveryAreaDropdown: boolean
   onToggleDeliveryAreaDropdown: () => void
   // Third column panel props
-  previewPanelTab: number
   hoveredScenario: string | null
   selectedScenarios: string[]
   selectedRegion: string
-  onPreviewTabChange: (tab: number) => void
   onScenarioHover: (scenario: string | null) => void
   onScenarioSelect: (scenario: string) => void
   onRegionSelect: (region: string) => void
@@ -85,11 +83,9 @@ const MapControls = ({
   showDeliveryAreaDropdown: _showDeliveryAreaDropdown, // eslint-disable-line @typescript-eslint/no-unused-vars
   onToggleDeliveryAreaDropdown,
   // Third column panel props
-  previewPanelTab,
   hoveredScenario: _hoveredScenario, // eslint-disable-line @typescript-eslint/no-unused-vars
   selectedScenarios,
   selectedRegion,
-  onPreviewTabChange,
   onScenarioHover: _onScenarioHover, // eslint-disable-line @typescript-eslint/no-unused-vars
   onScenarioSelect,
   onRegionSelect: _onRegionSelect, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -173,6 +169,392 @@ const MapControls = ({
     highlightBaseline,
     expandChart,
   })
+
+  // Accordion sections for the third column
+  const accordionSections: CardAccordionSection[] = [
+    {
+      id: "select-scenarios",
+      title: "Select scenarios",
+      defaultExpanded: true,
+      content: (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          {/* Outcomes paragraph, visible when chart not expanded */}
+          {!expandChart && (
+            <Box sx={{ flexShrink: 0 }}>
+              <Box
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 400,
+                  lineHeight: 1.4,
+                  color: (theme) => theme.palette.text.primary,
+                  mb: 1,
+                }}
+              >
+                Compare scenarios across multiple outcomes to
+                understand trade-offs and synergies in
+                California&apos;s water management.{" "}
+                <Box
+                  component="span"
+                  onClick={handleLearnMoreClick}
+                  sx={{
+                    color: (theme) => theme.palette.blue.bright,
+                    cursor: "pointer",
+                    fontWeight: 500,
+                    textDecoration: "underline",
+                    whiteSpace: "nowrap",
+                    "&:hover": {
+                      color: (theme) =>
+                        theme.palette.blue.darkest,
+                    },
+                  }}
+                >
+                  Learn more about this chart
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {/* Control Section, always visible */}
+          <Box sx={{ flexShrink: 0, mb: 1 }}>
+            {/* Expand chart button, always visible */}
+            <Box sx={{ mb: 1 }}>
+              <Button
+                variant="text"
+                onClick={toggleExpandChart}
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  color: (theme) => theme.palette.blue.bright,
+                  padding: 0,
+                  minWidth: "auto",
+                  textTransform: "none",
+                  justifyContent: "flex-start",
+                  "&:hover": {
+                    color: (theme) =>
+                      theme.palette.blue.darkest,
+                    backgroundColor: "transparent",
+                  },
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.875em",
+                    marginRight: "8px",
+                    display: "inline-block",
+                    transform: expandChart
+                      ? "rotate(180deg)"
+                      : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  ▼
+                </span>
+                {expandChart ? "Reduce" : "Expand"} chart
+              </Button>
+            </Box>
+
+            {/* Chart controls */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+                mt: 1,
+                mb: 1,
+                width: "100%",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isRelativeView}
+                    onChange={handleViewModeChange}
+                    size="small"
+                  />
+                }
+                label="relative to current operations"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={highlightBaseline}
+                    onChange={handleHighlightBaselineChange}
+                    size="small"
+                  />
+                }
+                label="highlight current operations"
+              />
+            </Box>
+          </Box>
+
+          {/* Responsive Chart Visualization */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              height: "100%",
+              minHeight: 0,
+              maxHeight: "none",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <VerticalParallelLinePlot
+              key={chartData.key}
+              {...chartData.props}
+            />
+          </Box>
+        </Box>
+      ),
+    },
+    {
+      id: "select-regions",
+      title: "Select regions",
+      content: (
+        <Box>
+          {/* Region Selection Header */}
+          <Box
+            sx={{
+              mb: 2,
+              textAlign: "left",
+            }}
+          >
+            <Box
+              sx={{
+                color: (theme) => theme.palette.blue.medium,
+                textTransform: "uppercase",
+                letterSpacing: "0.75px",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                mb: 0.5,
+              }}
+            >
+              CHOOSE A REGION
+            </Box>
+            <Box
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                fontFamily: (theme) =>
+                  theme.typography.fontFamily,
+                fontWeight: 500,
+                fontSize: "1.5rem",
+                lineHeight: 1.3,
+                mb: 1,
+              }}
+            >
+              Central Valley
+            </Box>
+          </Box>
+
+          {/* Region Selection Dropdown Trigger */}
+          <Box sx={{ mb: 2, textAlign: "center" }}>
+            <Button
+              variant="text"
+              onClick={toggleRegionDropdown}
+              sx={{
+                fontSize: "1rem",
+                fontWeight: 500,
+                color: (theme) => theme.palette.blue.bright,
+                padding: 0,
+                minWidth: "auto",
+                textTransform: "none",
+                justifyContent: "center",
+                "&:hover": {
+                  color: (theme) => theme.palette.blue.darkest,
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.875em",
+                  marginRight: "8px",
+                  display: "inline-block",
+                  transform: showRegionDropdown
+                    ? "rotate(180deg)"
+                    : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                }}
+              >
+                ▼
+              </span>
+              Choose a different region
+            </Button>
+          </Box>
+
+          {/* Region Selection Options */}
+          {showRegionDropdown && (
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 1,
+                p: 2,
+                backgroundColor: (theme) =>
+                  theme.palette.grey[50],
+                borderRadius: (theme) =>
+                  theme.borderRadius.rounded,
+                border: "1px solid",
+                borderColor: (theme) => theme.palette.divider,
+              }}
+            >
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="Sacramento Valley"
+              />
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="San Joaquin Valley"
+              />
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="Delta"
+              />
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="Tulare Basin"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        onToggleDeliveryAreaDropdown()
+                      }
+                    }}
+                  />
+                }
+                label="Select delivery area"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={
+                      isDrawingCustomRegion ||
+                      polygonPoints.length > 0
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        handleSelectRegionOnMapClick()
+                      } else {
+                        onClearCustomRegion()
+                      }
+                    }}
+                  />
+                }
+                label="Select region on map"
+              />
+            </Box>
+          )}
+        </Box>
+      ),
+    },
+    {
+      id: "selection-history",
+      title: "Selection history",
+      content: (
+        <Box>
+          {/* Selected Region */}
+          <Box
+            sx={{
+              mb: 3,
+              p: 2,
+              backgroundColor: (theme) =>
+                theme.palette.grey[50],
+              borderRadius: (theme) =>
+                theme.borderRadius.rounded,
+            }}
+          >
+            <Box
+              sx={{
+                fontSize: "0.8rem",
+                color: (theme) => theme.palette.text.secondary,
+                mb: 0.5,
+              }}
+            >
+              Region:
+            </Box>
+            <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
+              {selectedRegion}
+            </Box>
+          </Box>
+
+          {/* Selected scenarios */}
+          <Box sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                fontSize: "0.8rem",
+                color: (theme) => theme.palette.text.secondary,
+                mb: 1,
+              }}
+            >
+              Scenarios ({selectedScenarios.length}):
+            </Box>
+            {selectedScenarios.length > 0 ? (
+              selectedScenarios.map((scenario, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 1.5,
+                    mb: 1,
+                    backgroundColor: (theme) =>
+                      theme.palette.blue.bright + "20",
+                    borderRadius: (theme) =>
+                      theme.borderRadius.rounded,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box sx={{ fontSize: "0.85rem" }}>
+                    {scenario}
+                  </Box>
+                  <Box
+                    sx={{
+                      cursor: "pointer",
+                      color: (theme) =>
+                        theme.palette.text.secondary,
+                      "&:hover": {
+                        color: (theme) =>
+                          theme.palette.error.main,
+                      },
+                    }}
+                    onClick={() => {
+                      onScenarioSelect(scenario) // This will toggle it off
+                    }}
+                  >
+                    ×
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Box
+                sx={{
+                  fontSize: "0.8rem",
+                  color: (theme) => theme.palette.text.disabled,
+                  fontStyle: "italic",
+                  textAlign: "center",
+                  p: 2,
+                }}
+              >
+                No scenarios selected yet
+              </Box>
+            )}
+          </Box>
+        </Box>
+      ),
+    },
+  ]
 
   return (
     <Box
@@ -640,414 +1022,15 @@ const MapControls = ({
                       display: "flex",
                       flexDirection: "column",
                       height: "100%",
+                      px: 3, // Card padding
                     }}
                   >
-                    {/* Mode Selection Tabs */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "baseline",
-                        mb: 2,
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Tabs
-                        value={previewPanelTab}
-                        onChange={(_, value) => onPreviewTabChange(value)}
-                        sx={{ flex: 1 }}
-                      >
-                        <Tab label="Select scenarios" />
-                        <Tab label="Select regions" />
-                        <Tab label="Selection history" />
-                      </Tabs>
-                    </Box>
-
-                    {/* Tab Content */}
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                      }}
-                    >
-                      {/* Select Scenarios Tab */}
-                      {previewPanelTab === 0 && (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            height: "100%",
-                            width: "100%",
-                            minWidth: 0,
-                            flexGrow: 1,
-                            p: 2,
-                          }}
-                        >
-                          {/* Outcomes paragraph, visible when chart not expanded */}
-                          {!expandChart && (
-                            <Box sx={{ flexShrink: 0 }}>
-                              <Box
-                                sx={{
-                                  fontSize: "1rem",
-                                  fontWeight: 400,
-                                  lineHeight: 1.4,
-                                  color: (theme) => theme.palette.text.primary,
-                                  mb: 1,
-                                }}
-                              >
-                                Compare scenarios across multiple outcomes to
-                                understand trade-offs and synergies in
-                                California&apos;s water management.{" "}
-                                <Box
-                                  component="span"
-                                  onClick={handleLearnMoreClick}
-                                  sx={{
-                                    color: (theme) => theme.palette.blue.bright,
-                                    cursor: "pointer",
-                                    fontWeight: 500,
-                                    textDecoration: "underline",
-                                    whiteSpace: "nowrap",
-                                    "&:hover": {
-                                      color: (theme) =>
-                                        theme.palette.blue.darkest,
-                                    },
-                                  }}
-                                >
-                                  Learn more about this chart
-                                </Box>
-                              </Box>
-                            </Box>
-                          )}
-
-                          {/* Control Section, always visible */}
-                          <Box sx={{ flexShrink: 0, mb: 1 }}>
-                            {/* Expand chart button, always visible */}
-                            <Box sx={{ mb: 1 }}>
-                              <Button
-                                variant="text"
-                                onClick={toggleExpandChart}
-                                sx={{
-                                  fontSize: "1rem",
-                                  fontWeight: 500,
-                                  color: (theme) => theme.palette.blue.bright,
-                                  padding: 0,
-                                  minWidth: "auto",
-                                  textTransform: "none",
-                                  justifyContent: "flex-start",
-                                  "&:hover": {
-                                    color: (theme) =>
-                                      theme.palette.blue.darkest,
-                                    backgroundColor: "transparent",
-                                  },
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: "0.875em",
-                                    marginRight: "8px",
-                                    display: "inline-block",
-                                    transform: expandChart
-                                      ? "rotate(180deg)"
-                                      : "rotate(0deg)",
-                                    transition: "transform 0.2s ease",
-                                  }}
-                                >
-                                  ▼
-                                </span>
-                                {expandChart ? "Reduce" : "Expand"} chart
-                              </Button>
-                            </Box>
-
-                            {/* Chart controls */}
-                            <Box
-                              sx={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr",
-                                gap: 2,
-                                mt: 1,
-                                mb: 1,
-                                width: "100%",
-                              }}
-                            >
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    checked={isRelativeView}
-                                    onChange={handleViewModeChange}
-                                    size="small"
-                                  />
-                                }
-                                label="relative to current operations"
-                              />
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    checked={highlightBaseline}
-                                    onChange={handleHighlightBaselineChange}
-                                    size="small"
-                                  />
-                                }
-                                label="highlight current operations"
-                              />
-                            </Box>
-                          </Box>
-
-                          {/* Responsive Chart Visualization */}
-                          <Box
-                            sx={{
-                              flexGrow: 1,
-                              width: "100%",
-                              height: "100%",
-                              minHeight: 0,
-                              maxHeight: "none",
-                              overflow: "hidden",
-                              display: "flex",
-                              flexDirection: "column",
-                            }}
-                          >
-                            <VerticalParallelLinePlot
-                              key={chartData.key}
-                              {...chartData.props}
-                            />
-                          </Box>
-                        </Box>
-                      )}
-
-                      {/* Select Regions Tab */}
-                      {previewPanelTab === 1 && (
-                        <Box sx={{ p: 2 }}>
-                          {/* Region Selection Header */}
-                          <Box
-                            sx={{
-                              mb: 2,
-                              textAlign: "left",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                color: (theme) => theme.palette.blue.medium,
-                                textTransform: "uppercase",
-                                letterSpacing: "0.75px",
-                                fontSize: "0.75rem",
-                                fontWeight: 500,
-                                mb: 0.5,
-                              }}
-                            >
-                              CHOOSE A REGION
-                            </Box>
-                            <Box
-                              sx={{
-                                color: (theme) => theme.palette.blue.darkest,
-                                fontFamily: (theme) =>
-                                  theme.typography.fontFamily,
-                                fontWeight: 500,
-                                fontSize: "1.5rem",
-                                lineHeight: 1.3,
-                                mb: 1,
-                              }}
-                            >
-                              Central Valley
-                            </Box>
-                          </Box>
-
-                          {/* Region Selection Dropdown Trigger */}
-                          <Box sx={{ mb: 2, textAlign: "center" }}>
-                            <Button
-                              variant="text"
-                              onClick={toggleRegionDropdown}
-                              sx={{
-                                fontSize: "1rem",
-                                fontWeight: 500,
-                                color: (theme) => theme.palette.blue.bright,
-                                padding: 0,
-                                minWidth: "auto",
-                                textTransform: "none",
-                                justifyContent: "center",
-                                "&:hover": {
-                                  color: (theme) => theme.palette.blue.darkest,
-                                  backgroundColor: "transparent",
-                                },
-                              }}
-                            >
-                              <span
-                                style={{
-                                  fontSize: "0.875em",
-                                  marginRight: "8px",
-                                  display: "inline-block",
-                                  transform: showRegionDropdown
-                                    ? "rotate(180deg)"
-                                    : "rotate(0deg)",
-                                  transition: "transform 0.2s ease",
-                                }}
-                              >
-                                ▼
-                              </span>
-                              Choose a different region
-                            </Button>
-                          </Box>
-
-                          {/* Region Selection Options */}
-                          {showRegionDropdown && (
-                            <Box
-                              sx={{
-                                display: "grid",
-                                gridTemplateColumns: "1fr 1fr",
-                                gap: 1,
-                                p: 2,
-                                backgroundColor: (theme) =>
-                                  theme.palette.grey[50],
-                                borderRadius: (theme) =>
-                                  theme.borderRadius.rounded,
-                                border: "1px solid",
-                                borderColor: (theme) => theme.palette.divider,
-                              }}
-                            >
-                              <FormControlLabel
-                                control={<Checkbox size="small" />}
-                                label="Sacramento Valley"
-                              />
-                              <FormControlLabel
-                                control={<Checkbox size="small" />}
-                                label="San Joaquin Valley"
-                              />
-                              <FormControlLabel
-                                control={<Checkbox size="small" />}
-                                label="Delta"
-                              />
-                              <FormControlLabel
-                                control={<Checkbox size="small" />}
-                                label="Tulare Basin"
-                              />
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    size="small"
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        onToggleDeliveryAreaDropdown()
-                                      }
-                                    }}
-                                  />
-                                }
-                                label="Select delivery area"
-                              />
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    size="small"
-                                    checked={
-                                      isDrawingCustomRegion ||
-                                      polygonPoints.length > 0
-                                    }
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        handleSelectRegionOnMapClick()
-                                      } else {
-                                        onClearCustomRegion()
-                                      }
-                                    }}
-                                  />
-                                }
-                                label="Select region on map"
-                              />
-                            </Box>
-                          )}
-                        </Box>
-                      )}
-
-                      {/* Selection History Tab */}
-                      {previewPanelTab === 2 && (
-                        <Box sx={{ p: 2 }}>
-                          {/* Selected Region */}
-                          <Box
-                            sx={{
-                              mb: 3,
-                              p: 2,
-                              backgroundColor: (theme) =>
-                                theme.palette.grey[50],
-                              borderRadius: (theme) =>
-                                theme.borderRadius.rounded,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                fontSize: "0.8rem",
-                                color: (theme) => theme.palette.text.secondary,
-                                mb: 0.5,
-                              }}
-                            >
-                              Region:
-                            </Box>
-                            <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-                              {selectedRegion}
-                            </Box>
-                          </Box>
-
-                          {/* Selected scenarios */}
-                          <Box sx={{ mb: 2 }}>
-                            <Box
-                              sx={{
-                                fontSize: "0.8rem",
-                                color: (theme) => theme.palette.text.secondary,
-                                mb: 1,
-                              }}
-                            >
-                              Scenarios ({selectedScenarios.length}):
-                            </Box>
-                            {selectedScenarios.length > 0 ? (
-                              selectedScenarios.map((scenario, index) => (
-                                <Box
-                                  key={index}
-                                  sx={{
-                                    p: 1.5,
-                                    mb: 1,
-                                    backgroundColor: (theme) =>
-                                      theme.palette.blue.bright + "20",
-                                    borderRadius: (theme) =>
-                                      theme.borderRadius.rounded,
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <Box sx={{ fontSize: "0.85rem" }}>
-                                    {scenario}
-                                  </Box>
-                                  <Box
-                                    sx={{
-                                      cursor: "pointer",
-                                      color: (theme) =>
-                                        theme.palette.text.secondary,
-                                      "&:hover": {
-                                        color: (theme) =>
-                                          theme.palette.error.main,
-                                      },
-                                    }}
-                                    onClick={() => {
-                                      onScenarioSelect(scenario) // This will toggle it off
-                                    }}
-                                  >
-                                    ×
-                                  </Box>
-                                </Box>
-                              ))
-                            ) : (
-                              <Box
-                                sx={{
-                                  fontSize: "0.8rem",
-                                  color: (theme) => theme.palette.text.disabled,
-                                  fontStyle: "italic",
-                                  textAlign: "center",
-                                  p: 2,
-                                }}
-                              >
-                                No scenarios selected yet
-                              </Box>
-                            )}
-                          </Box>
-                        </Box>
-                      )}
-                    </Box>
+                    {/* Card Accordion */}
+                    <CardAccordion
+                      sections={accordionSections}
+                      allowMultiple={false} // Only one section expanded at a time
+                      sx={{ flexGrow: 1 }}
+                    />
 
                     {/* Compare Button at bottom */}
                     <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
@@ -1206,7 +1189,6 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [isSelfIntersecting, setIsSelfIntersecting] = useState(false)
 
   // Third column panel state
-  const [previewPanelTab, setPreviewPanelTab] = useState(0) // 0: Snapshot, 1: Selected
   const [hoveredScenario, setHoveredScenario] = useState<string | null>(null)
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
@@ -1338,10 +1320,6 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   }
 
   // Third column panel handlers
-  const handlePreviewTabChange = (tab: number) => {
-    setPreviewPanelTab(tab)
-  }
-
   const handleScenarioHover = (scenario: string | null) => {
     setHoveredScenario(scenario)
   }
@@ -1867,11 +1845,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         onDragEnd={handleDragEnd}
         showDeliveryAreaDropdown={showDeliveryAreaDropdown}
         onToggleDeliveryAreaDropdown={handleToggleDeliveryAreaDropdown}
-        previewPanelTab={previewPanelTab}
         hoveredScenario={hoveredScenario}
         selectedScenarios={selectedScenarios}
         selectedRegion={selectedRegion}
-        onPreviewTabChange={handlePreviewTabChange}
         onScenarioHover={handleScenarioHover}
         onScenarioSelect={handleScenarioSelect}
         onRegionSelect={handleRegionSelect}
