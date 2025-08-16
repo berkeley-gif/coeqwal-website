@@ -196,9 +196,8 @@ const MapControls = ({
                   mb: 1,
                 }}
               >
-                Compare scenarios across multiple outcomes to
-                understand trade-offs and synergies in
-                California&apos;s water management.{" "}
+                Compare scenarios across multiple outcomes to understand
+                trade-offs and synergies in California&apos;s water management.{" "}
                 <Box
                   component="span"
                   onClick={handleLearnMoreClick}
@@ -209,8 +208,7 @@ const MapControls = ({
                     textDecoration: "underline",
                     whiteSpace: "nowrap",
                     "&:hover": {
-                      color: (theme) =>
-                        theme.palette.blue.darkest,
+                      color: (theme) => theme.palette.blue.darkest,
                     },
                   }}
                 >
@@ -236,8 +234,7 @@ const MapControls = ({
                   textTransform: "none",
                   justifyContent: "flex-start",
                   "&:hover": {
-                    color: (theme) =>
-                      theme.palette.blue.darkest,
+                    color: (theme) => theme.palette.blue.darkest,
                     backgroundColor: "transparent",
                   },
                 }}
@@ -247,9 +244,7 @@ const MapControls = ({
                     fontSize: "0.875em",
                     marginRight: "8px",
                     display: "inline-block",
-                    transform: expandChart
-                      ? "rotate(180deg)"
-                      : "rotate(0deg)",
+                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
                     transition: "transform 0.2s ease",
                   }}
                 >
@@ -341,8 +336,7 @@ const MapControls = ({
             <Box
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
-                fontFamily: (theme) =>
-                  theme.typography.fontFamily,
+                fontFamily: (theme) => theme.typography.fontFamily,
                 fontWeight: 500,
                 fontSize: "1.5rem",
                 lineHeight: 1.3,
@@ -397,10 +391,8 @@ const MapControls = ({
                 gridTemplateColumns: "1fr 1fr",
                 gap: 1,
                 p: 2,
-                backgroundColor: (theme) =>
-                  theme.palette.grey[50],
-                borderRadius: (theme) =>
-                  theme.borderRadius.rounded,
+                backgroundColor: (theme) => theme.palette.grey[50],
+                borderRadius: (theme) => theme.borderRadius.rounded,
                 border: "1px solid",
                 borderColor: (theme) => theme.palette.divider,
               }}
@@ -438,10 +430,7 @@ const MapControls = ({
                 control={
                   <Checkbox
                     size="small"
-                    checked={
-                      isDrawingCustomRegion ||
-                      polygonPoints.length > 0
-                    }
+                    checked={isDrawingCustomRegion || polygonPoints.length > 0}
                     onChange={(e) => {
                       if (e.target.checked) {
                         handleSelectRegionOnMapClick()
@@ -468,10 +457,8 @@ const MapControls = ({
             sx={{
               mb: 3,
               p: 2,
-              backgroundColor: (theme) =>
-                theme.palette.grey[50],
-              borderRadius: (theme) =>
-                theme.borderRadius.rounded,
+              backgroundColor: (theme) => theme.palette.grey[50],
+              borderRadius: (theme) => theme.borderRadius.rounded,
             }}
           >
             <Box
@@ -508,24 +495,19 @@ const MapControls = ({
                     mb: 1,
                     backgroundColor: (theme) =>
                       theme.palette.blue.bright + "20",
-                    borderRadius: (theme) =>
-                      theme.borderRadius.rounded,
+                    borderRadius: (theme) => theme.borderRadius.rounded,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                   }}
                 >
-                  <Box sx={{ fontSize: "0.85rem" }}>
-                    {scenario}
-                  </Box>
+                  <Box sx={{ fontSize: "0.85rem" }}>{scenario}</Box>
                   <Box
                     sx={{
                       cursor: "pointer",
-                      color: (theme) =>
-                        theme.palette.text.secondary,
+                      color: (theme) => theme.palette.text.secondary,
                       "&:hover": {
-                        color: (theme) =>
-                          theme.palette.error.main,
+                        color: (theme) => theme.palette.error.main,
                       },
                     }}
                     onClick={() => {
@@ -686,14 +668,14 @@ const MapControls = ({
               {!isFirstCardMinimized && (
                 <Box sx={{ flexShrink: 0, pb: 2 }}>
                   <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
+                    <Box
+                      sx={{
+                        display: "flex",
                         alignItems: "center",
                         gap: 0.5,
                         mb: 0,
-                    }}
-                  >
+                      }}
+                    >
                       <Typography
                         variant="h6"
                         sx={{
@@ -707,20 +689,20 @@ const MapControls = ({
                         glossaryEntry="CalSim"
                         onGlossaryOpen={handleGlossaryOpen}
                       />
-                      </Box>
+                    </Box>
 
-                      <Box
-                        sx={{
+                    <Box
+                      sx={{
                         color: (theme) => theme.palette.text.primary,
-                          fontFamily: (theme) => theme.typography.fontFamily,
+                        fontFamily: (theme) => theme.typography.fontFamily,
                         mb: 2.5,
                       }}
                     >
                       <Typography variant="body1">
                         <Box
                           component="span"
-                        sx={{
-                          color: (theme) => theme.palette.text.secondary,
+                          sx={{
+                            color: (theme) => theme.palette.text.secondary,
                           }}
                         >
                           Click
@@ -1004,9 +986,7 @@ const MapControls = ({
           {/* Dynamic Scenario Panel */}
           <Box sx={{ position: "relative" }}>
             <ScenarioCard
-              topLine={
-                isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"
-              }
+              topLine={isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"}
               headline={"Alternative scenarios"}
               body={null}
               sx={{
@@ -1036,7 +1016,7 @@ const MapControls = ({
                       <ActionCardButton
                         title="Explore scenarios in depth"
                         subtitle={
-                            selectedScenarios.length > 0
+                          selectedScenarios.length > 0
                             ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
                             : "Select scenarios to explore"
                         }
@@ -1763,7 +1743,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   fontSize: theme.mapPromptDialog.typography.action.fontSize,
                   color: theme.palette.blue.bright,
                   cursor: theme.mapPromptDialog.typography.action.cursor,
-                  fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
+                  fontWeight:
+                    theme.mapPromptDialog.typography.action.fontWeight,
                   textDecoration:
                     theme.mapPromptDialog.typography.action.textDecoration,
                   "&:hover": {

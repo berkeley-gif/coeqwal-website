@@ -35,7 +35,7 @@ export interface SavedScenariosContentProps {
 
 /**
  * Content component for the Saved Scenarios drawer tab
- * 
+ *
  * Features:
  * - List of saved scenario configurations
  * - Load, edit, and delete actions
@@ -78,7 +78,7 @@ export function SavedScenariosContent({
         <Box sx={(theme) => ({ ...theme.mixins.cardTypography.cardTitle })}>
           Story
         </Box>
-        
+
         {/* HR separator */}
         <Box
           sx={{
@@ -93,17 +93,22 @@ export function SavedScenariosContent({
       {/* Instructional text */}
       <Box sx={{ flexShrink: 0, pb: 2 }}>
         <Box sx={(theme) => ({ ...theme.mixins.cardTypography.bodyContainer })}>
-          <Typography 
-            variant="body1" 
-            sx={(theme) => ({ ...theme.mixins.cardTypography.instructionalText })}
+          <Typography
+            variant="body1"
+            sx={(theme) => ({
+              ...theme.mixins.cardTypography.instructionalText,
+            })}
           >
             <Box
               component="span"
-              sx={(theme) => ({ ...theme.mixins.cardTypography.highlightedSpan })}
+              sx={(theme) => ({
+                ...theme.mixins.cardTypography.highlightedSpan,
+              })}
             >
               Click
             </Box>{" "}
-            on the icon to save a scenario or scenario view to your story. You can view and edit your story with the story tools.
+            on the icon to save a scenario or scenario view to your story. You
+            can view and edit your story with the story tools.
           </Typography>
         </Box>
       </Box>
@@ -169,7 +174,7 @@ export function SavedScenariosContent({
                       </Typography>
                     )}
                   </Box>
-                  
+
                   {/* Action buttons */}
                   <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
                     <IconButton
@@ -201,13 +206,19 @@ export function SavedScenariosContent({
 
                 {/* Scenario details */}
                 <Box sx={{ mb: 1 }}>
-                  <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                    Region: {scenario.region} • {scenario.scenarios.length} scenario{scenario.scenarios.length !== 1 ? 's' : ''}
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "text.secondary" }}
+                  >
+                    Region: {scenario.region} • {scenario.scenarios.length}{" "}
+                    scenario{scenario.scenarios.length !== 1 ? "s" : ""}
                   </Typography>
                 </Box>
 
                 {/* Scenarios chips */}
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}>
+                <Box
+                  sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}
+                >
                   {scenario.scenarios.slice(0, 3).map((scenarioName) => (
                     <Chip
                       key={scenarioName}
@@ -229,13 +240,15 @@ export function SavedScenariosContent({
 
                 {/* Tags */}
                 {scenario.tags && scenario.tags.length > 0 && (
-                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}>
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mb: 1 }}
+                  >
                     {scenario.tags.map((tag) => (
                       <Chip
                         key={tag}
                         label={tag}
                         size="small"
-                        sx={{ 
+                        sx={{
                           fontSize: "0.65rem",
                           backgroundColor: "action.selected",
                         }}
@@ -249,11 +262,9 @@ export function SavedScenariosContent({
                   Saved {scenario.savedAt.toLocaleDateString()}
                 </Typography>
               </Box>
-              
+
               {/* Divider between scenarios */}
-              {index < savedScenarios.length - 1 && (
-                <Divider sx={{ my: 2 }} />
-              )}
+              {index < savedScenarios.length - 1 && <Divider sx={{ my: 2 }} />}
             </Box>
           ))}
         </Box>
