@@ -21,7 +21,7 @@ import {
   CardAccordion,
 } from "@repo/ui"
 import type { CardAccordionSection } from "@repo/ui"
-import { BarChart } from "@repo/viz"
+// import { BarChart } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
 import { useDrawerStore } from "@repo/state"
@@ -46,6 +46,7 @@ import OutcomeRangeSlider from "../../components/OutcomeRangeSlider"
 import { useScenarioFilterStore } from "@repo/state"
 import type { OutcomeName } from "@repo/state"
 import { useGlyphSettingsStore } from "@repo/ui"
+import { ScenarioGlyph } from "@repo/viz"
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -450,6 +451,8 @@ const MapControls = ({
     },
   ]
 
+  const glyphVariant = useGlyphSettingsStore((s)=>s.variant)
+
   return (
     <Box
       sx={{
@@ -542,7 +545,7 @@ const MapControls = ({
                     {/* Glyph variant selector */}
                     <Select
                       size="small"
-                      value={useGlyphSettingsStore((s)=>s.variant)}
+                      value={glyphVariant}
                       onChange={(e)=> useGlyphSettingsStore.getState().setVariant(e.target.value as any)}
                       sx={{ fontSize:"0.75rem" }}
                     >
@@ -663,8 +666,12 @@ const MapControls = ({
                           gap: 1,
                         }}
                       >
-                        {/* Bar chart for all outcomes */}
-                        <BarChart size={60} />
+                        {/* Glyph for outcome */}
+                        <ScenarioGlyph
+                          size={60}
+                          variant={glyphVariant}
+                          values={[0.2,0.4,0.6,0.8]}
+                        />
 
                         {/* Outcome label */}
                         <Box
