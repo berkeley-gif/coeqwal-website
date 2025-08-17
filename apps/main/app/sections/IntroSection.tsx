@@ -506,7 +506,7 @@ const IntroSection: React.FC = () => {
             </Typography>
 
             <Typography
-              variant="body2"
+              variant="body1"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 maxWidth: "500px",

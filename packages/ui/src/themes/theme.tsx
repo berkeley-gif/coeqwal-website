@@ -67,14 +67,14 @@ import type { CSSProperties } from "react"
 // • h4: 1.9rem (30.4px) - Card titles and smaller headlines (Display Medium)
 // • h5: 1.425rem (22.8px) - Labels and minor headlines (Display Medium)
 // • h6: 1.1rem (17.6px) - Small headlines and captions (Display Medium)
-// • body1: 0.95rem (15.2px) - Primary body text (Text Regular)
-// • body2: 1.125rem (18px) - Secondary body text (Text Regular)
+// • body1: 1.25rem (20px) - Primary body text (Text Regular)
+// • body2: 1rem (16px) - Dashboard interface text (Text Regular)
 //
 
 const typeScale = {
   // Base sizes for the scale
-  baseBody: "0.95rem", // 15.2px - standard body text
-  smallBody: "1.125rem", // 18px - secondary text
+  baseBody: "1.25rem", // 20px - primary body text
+  smallBody: "1rem", // 16px - dashboard interface text
 
   // Headline sizes (moderately reduced for better proportion)
   h1: "5rem", // 80px - Hero size (reduced from 92px)
@@ -725,9 +725,9 @@ const theme = createTheme({
       lineHeight: 1.1,
     },
     h4: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h4,
-      fontWeight: 500,
+      fontWeight: 400,
       lineHeight: 1.2,
     },
     h5: {
@@ -744,40 +744,39 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody,
+      fontSize: typeScale.baseBody, // Now 1.125rem/18px - primary body text
       fontWeight: 400,
-      letterSpacing: "unset",
       lineHeight: 1.6, // 1.6 ratio for comfortable reading
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody,
+      fontSize: typeScale.smallBody, // Now 0.95rem/15.2px - dashboard interface text
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: 1.6, // Consistent line height ratio
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // 0.95rem - matches body1
+      fontSize: typeScale.baseBody, // 1.25rem - matches body1
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody, // 1.125rem - matches body2
+      fontSize: typeScale.smallBody, // 1rem - matches body2
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.6,
     },
     button: {
-      fontSize: "0.95rem", // align with body1
+      fontSize: "1.25rem", // align with body1
       letterSpacing: "normal",
       fontWeight: 500,
       textTransform: "none",
     },
     caption: {
-      fontSize: "0.95rem", // align with body1
+      fontSize: "1rem", // align with body2 (dashboard interface size)
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
@@ -1213,7 +1212,7 @@ const theme = createTheme({
             padding: "6px 16px",
             minWidth: 64,
             lineHeight: 1.75,
-            fontSize: "0.95rem", // align with body1
+            fontSize: "1rem",
             fontWeight: 500,
             color: theme.palette.common.white,
             backgroundColor: theme.palette.blue.darkest,
