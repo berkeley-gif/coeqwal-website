@@ -684,7 +684,7 @@ const IntroSection: React.FC = () => {
           <Box
             sx={{
               position: "absolute",
-              left: { xs: "5%", md: "8%" },
+              left: { xs: "5%", md: "0" },
               top: "40%",
               transform: "translateY(-50%)",
               width: { xs: 200, md: 300 },
@@ -699,26 +699,62 @@ const IntroSection: React.FC = () => {
           />
           
           {/* Text block - independently centered */}
-          <Typography
-            variant="h4"
-            sx={{
-              color: (theme) => theme.palette.blue.darkest,
-              textAlign: "left",
-              maxWidth: { xs: "600px", md: "500px" },
-              lineHeight: 1.6,
-              letterSpacing: "0.01em",
-            }}
+          <Box sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "720px" } }}>
+            <Typography
+              variant="h4"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                lineHeight: 1.6,
+                mb: 3,
+              }}
+            >
+              We are already having to make difficult water allocation
+              decisions. We are facing a time of climate uncertainty and need
+              to prepare for the future.
+            </Typography>
+            
+            <Typography
+              variant="h4"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                lineHeight: 1.6,
+              }}
+            >
+              The COEQWAL (stands for Collaboratory for Equity in Water Allocation) project has run 30 alternative water management
+              scenarios for the Central Valley water systems that feed most of
+              the state. For each of these scenarios, we considered 5 future
+              climate possibilities.
+            </Typography>
+          </Box>
+        </Box>
+        
+        {/* Scroll indicator for 3rd panel */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            color: (theme) => theme.palette.blue.darkest,
+            pb: 3,
+          }}
+        >
+          <ScrollIndicator
+            color="currentColor"
+            size={28}
+            delay={0.5}
+            scrollToId="fourth-panel"
           >
-            We are already having to make difficult water allocation
-            decisions. We are facing a time of climate uncertainty and need
-            to prepare for the future.
-          </Typography>
+            <ArrowHead
+              size={28}
+              style={{ transform: "rotate(90deg)" }}
+            />
+          </ScrollIndicator>
         </Box>
       </BasePanel>
 
       {/* Fourth panel */}
       <BasePanel
-        id="overview"
+        id="fourth-panel"
         fullHeight={false}
         fullWidth
         background="transparent"
@@ -744,52 +780,45 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "relative",
             zIndex: (theme) => theme.zIndex.introText,
-            textAlign: "left",
-            paddingTop: { xs: 6, md: 12 }, // Additional top padding to clear top image
-            paddingBottom: { xs: 6, md: 12 }, // Additional bottom padding to clear bottom images
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingTop: { xs: 6, md: 12 },
+            paddingBottom: { xs: 6, md: 12 },
           }}
         >
-          <Stack spacing={4}>
-            {/* Text with birds bullet */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: { xs: 2, md: 3 },
-              }}
-            >
-              {/* Bullet image */}
-              <Box
-                sx={{
-                  width: { xs: 200, md: 300 },
-                  height: { xs: 200, md: 300 },
-                  flexShrink: 0,
-                  backgroundImage: "url('/images/home_collage/birds_top.png')",
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  // Align center of birds with first lines of text
-                  mt: { xs: -4, md: -6 },
-                }}
-              />
-              {/* Text content */}
-              <Typography
-                variant="h4"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "cleft",
-                  maxWidth: { xs: "600px", md: "720px" },
-                  lineHeight: 1.6,
-                  letterSpacing: "0.01em",
-                }}
-              >
-                The COEQWAL project has run 30 alternative water management
-                scenarios for the Central Valley water systems that feed most of
-                the state. For each of these scenarios, we considered 5 future
-                climate possibilities.
-              </Typography>
-            </Box>
-          </Stack>
+          {/* Bullet image - absolutely positioned to not interfere with text centering */}
+          <Box
+            sx={{
+              position: "absolute",
+              left: { xs: "5%", md: "0" },
+              top: "40%",
+              transform: "translateY(-50%)",
+              width: { xs: 200, md: 300 },
+              height: { xs: 200, md: 300 },
+              backgroundImage: "url('/images/home_collage/birds_top.png')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              zIndex: -1, // Behind the text
+              opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
+            }}
+          />
+          
+          {/* Text block - independently centered */}
+          <Typography
+            variant="h4"
+            sx={{
+              color: (theme) => theme.palette.blue.darkest,
+              textAlign: "left",
+              maxWidth: { xs: "600px", md: "720px" },
+              lineHeight: 1.6,
+            }}
+          >
+            Explore different scenarios and their outcomes to understand how 
+            management decisions today shape California's water future.
+          </Typography>
         </Box>
       </BasePanel>
       {/* Spacer  */}
