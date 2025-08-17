@@ -20,7 +20,8 @@ export function LeadingMarkerText({
   return (
     <Box
       sx={(theme) => ({
-        width: 500,
+        width: "100%",
+        maxWidth: { xs: "100%", md: 600 },
         display: "grid",
         gridTemplateColumns: "48px 1fr",
         gridTemplateRows: "auto auto",

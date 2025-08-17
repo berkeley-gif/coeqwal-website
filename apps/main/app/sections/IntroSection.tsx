@@ -524,8 +524,8 @@ const IntroSection: React.FC = () => {
                 display: "flex",
                 justifyContent: "center",
                 width: "100%",
-
-                mt: 3,
+                color: (theme) => theme.palette.blue.darkest,
+                mt: 4,
               }}
             >
               <ScrollIndicator
@@ -577,7 +577,6 @@ const IntroSection: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             paddingTop: { xs: 6, md: 12 },
-            paddingBottom: { xs: 6, md: 12 },
           }}
         >
           {/* Bullet image (absolutely positioned to not interfere with text centering) */}
@@ -599,24 +598,26 @@ const IntroSection: React.FC = () => {
           />
 
           {/* Centered text block */}
-          <Typography
-            variant="body1"
-            sx={{
-              color: (theme) => theme.palette.blue.darkest,
-              textAlign: "left",
-              maxWidth: { xs: "600px", md: "500px" },
-            }}
-          >
-            California&apos;s Central Valley water depends<br />on two main things:
-            <Box component="ol" sx={{ mt: 2, pl: 3 }}>
+          <Box sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}>
+            <Typography
+              variant="body1"
+            >
+              California&apos;s Central Valley water depends<br />on two main things:
+            </Typography>
+            
+            <Box component="ol" sx={{ mt: 0, pl: 3 }}>
               <Box component="li" sx={{ mb: 1 }}>
-                &nbsp;How much rain and snow we get.
+                <Typography variant="body1">
+                  How much rain and snow we get.
+                </Typography>
               </Box>
               <Box component="li" sx={{ mb: 1 }}>
-                &nbsp;How we choose to manage it.
+                <Typography variant="body1">
+                  How we choose to manage it.
+                </Typography>
               </Box>
             </Box>
-          </Typography>
+          </Box>
         </Box>
 
         {/* Scroll indicator for 2nd panel */}
@@ -626,7 +627,7 @@ const IntroSection: React.FC = () => {
             justifyContent: "center",
             width: "100%",
             color: (theme) => theme.palette.blue.darkest,
-            pb: 3,
+            mt: 4,
           }}
         >
           <ScrollIndicator
@@ -721,7 +722,7 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
             justifyContent: "center",
             width: "100%",
             color: (theme) => theme.palette.blue.darkest,
-            pb: 3,
+            mt: 4,
           }}
         >
           <ScrollIndicator
@@ -808,6 +809,28 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
                 <Box component="li" sx={{ mb: 1 }}>
                   Use data to advocate for your community
                 </Box>
+              </Box>
+              
+              {/* Scroll indicator for 4th panel */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  width: "100%",
+                  color: (theme) => theme.palette.blue.darkest,
+                  mt: 4,
+                }}
+              >
+                <ScrollIndicator
+                  color="currentColor"
+                  size={28}
+                  delay={0.5}
+                >
+                  <ArrowHead
+                    size={28}
+                    style={{ transform: "rotate(90deg)" }}
+                  />
+                </ScrollIndicator>
               </Box>
           </Box>
         </Box>
