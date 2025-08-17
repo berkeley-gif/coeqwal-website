@@ -635,14 +635,13 @@ const IntroSection: React.FC = () => {
                   letterSpacing: "0.01em",
                 }}
               >
-                The amount of water available for any purpose in California
-                depends on two things:
+                The future of California’s water depends on two things:
                 <Box component="ol" sx={{ mt: 2, pl: 3 }}>
                   <Box component="li" sx={{ mb: 1 }}>
-                    &nbsp;how much precipitation we get
+                    &nbsp;How much rain and snow we get.
                   </Box>
                   <Box component="li" sx={{ mb: 1 }}>
-                    &nbsp;how we manage this water.
+                    &nbsp;How we choose to manage it.
                   </Box>
                 </Box>
               </Typography>
