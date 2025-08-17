@@ -1,6 +1,7 @@
 import React from "react"
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
+import { ScrollIndicator } from "@repo/motion/components"
 // import { useTranslation } from "@repo/i18n"
 import FloatingMarker from "../components/FloatingMarker"
 // import { useDrawerStore } from "@repo/state"
@@ -517,7 +518,7 @@ const IntroSection: React.FC = () => {
               conditions and future climates.
             </Typography>
 
-            {/* Play arrow icon pointing down */}
+            {/* Animated scroll indicator */}
             <Box
               sx={{
                 display: "flex",
@@ -527,9 +528,10 @@ const IntroSection: React.FC = () => {
                 mt: 3,
               }}
             >
-              <ArrowHead
+              <ScrollIndicator
+                color="currentColor"
                 size={28}
-                style={{ transform: "rotate(90deg)", cursor: "pointer" }}
+                delay={1.0}
                 onClick={() => {
                   // Scroll to the next section with improved positioning
                   const interstitialSection =
@@ -552,7 +554,12 @@ const IntroSection: React.FC = () => {
                     })
                   }
                 }}
-              />
+              >
+                <ArrowHead
+                  size={28}
+                  style={{ transform: "rotate(90deg)" }}
+                />
+              </ScrollIndicator>
             </Box>
           </Box>
         </BasePanel>
