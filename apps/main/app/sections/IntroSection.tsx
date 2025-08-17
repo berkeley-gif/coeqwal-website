@@ -750,7 +750,9 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
         </Box>
       </BasePanel>
 
-      {/* Fourth panel - Two column layout */}
+      <Spacer height={{ xs: 48, md: 160 }} />
+
+      {/* Fourth panel - California map background with right-aligned text */}
       <BasePanel
         id="fourth-panel"
         fullHeight={false}
@@ -758,20 +760,27 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
         background="transparent"
         paddingVariant="very-wide"
         includeHeaderSpacing={true}
+        sx={{
+          background: `url('/images/california.png')`,
+          backgroundSize: "contain",
+          backgroundPosition: "10% center",
+          backgroundRepeat: "no-repeat",
+          height: "140vh",
+          display: "flex",
+          alignItems: "center",
+        }}
       >
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: "center",
-            gap: { xs: 4, md: 6 },
-            minHeight: "60vh",
+            justifyContent: "flex-end",
+            width: "100%",
           }}
         >
-          {/* Left column - Text content */}
+          {/* Right-aligned text content */}
           <Box
             sx={{
-              flex: 1,
+              maxWidth: { xs: "100%", md: "45%" },
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -801,31 +810,9 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
               to advocate for your community.
             </Typography>
           </Box>
-          
-          {/* Right column - California image */}
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Box
-              component="img"
-              src="/images/california.png"
-              alt="California map"
-              sx={{
-                maxWidth: "100%",
-                height: "auto",
-                objectFit: "contain",
-                maxHeight: "50vh",
-              }}
-            />
-          </Box>
         </Box>
       </BasePanel>
-      {/* Spacer  */}
+
       <Spacer height={{ xs: 48, md: 124 }} />
     </Box>
   )
