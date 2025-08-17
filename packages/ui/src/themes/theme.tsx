@@ -67,13 +67,13 @@ import type { CSSProperties } from "react"
 // • h4: 1.9rem (30.4px) - Card titles and smaller headlines (Display Medium)
 // • h5: 1.425rem (22.8px) - Labels and minor headlines (Display Medium)
 // • h6: 1.1rem (17.6px) - Small headlines and captions (Display Medium)
-// • body1: 1.25rem (20px) - Primary body text (Text Regular)
+// • body1: 1.5rem (24px) - Primary body text (Text Regular)
 // • body2: 1rem (16px) - Dashboard interface text (Text Regular)
 //
 
 const typeScale = {
   // Base sizes for the scale
-  baseBody: "1.25rem", // 20px - primary body text
+  baseBody: "1.5rem", // 24px - primary body text
   smallBody: "1rem", // 16px - dashboard interface text
 
   // Headline sizes (moderately reduced for better proportion)
@@ -711,56 +711,65 @@ const theme = createTheme({
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 1.1,
+      color: themeValues.palette.blue.darkest,
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h2,
       fontWeight: 500,
       lineHeight: 1.2,
+      color: themeValues.palette.blue.darkest,
     },
     h3: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.1,
+      color: themeValues.palette.blue.darkest,
     },
     h4: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h4,
       fontWeight: 400,
       lineHeight: 1.2,
+      color: themeValues.palette.blue.darkest,
     },
     h5: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h5,
       fontWeight: 500,
       lineHeight: 1.3,
+      color: themeValues.palette.blue.darkest,
     },
     h6: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h6,
       fontWeight: 600,
       lineHeight: 1.4,
+      color: themeValues.palette.blue.darkest,
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // Now 1.125rem/18px - primary body text
+      fontSize: typeScale.baseBody, // Now 1.5rem/24px - primary body text
       fontWeight: 400,
-      lineHeight: 1.6, // 1.6 ratio for comfortable reading
+      lineHeight: "2.25rem", // 36px line height
+      color: themeValues.palette.blue.darkest,
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody, // Now 0.95rem/15.2px - dashboard interface text
+      fontSize: typeScale.smallBody, // Now 1rem/16px - dashboard interface text
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: 1.6, // Consistent line height ratio
+      color: themeValues.palette.blue.darkest,
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // 1.25rem - matches body1
+      fontSize: typeScale.baseBody, // 1.5rem - matches body1
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
+      color: themeValues.palette.blue.darkest,
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
@@ -768,6 +777,7 @@ const theme = createTheme({
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.6,
+      color: themeValues.palette.blue.darkest,
     },
     button: {
       fontSize: "1.25rem", // align with body1
