@@ -406,7 +406,7 @@ const IntroSection: React.FC = () => {
       }}
     >
       {/* First panel / Hero section */}
-      {/* TODO: standardize panels into components for ui package */}
+      {/* TODO: ugh nested boxes */}
       <Box
         id="intro"
         sx={{
@@ -445,7 +445,7 @@ const IntroSection: React.FC = () => {
             overflow: "visible",
           }}
         >
-          {/* Background circles (below text) - contained within the first 100vh */}
+          {/* Background circles (below text) */}
           <Box
             sx={{
               position: "absolute",
@@ -514,7 +514,7 @@ const IntroSection: React.FC = () => {
               }}
             >
               Explore a range of Central Valley water scenarios and discover
-              possibilities for the future of water in our state, under current
+              possibilities for water management in our state, under current
               conditions and future climates.
             </Typography>
 
@@ -586,7 +586,7 @@ const IntroSection: React.FC = () => {
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
           `,
-          backgroundSize: "auto 30%, auto 44%",
+          backgroundSize: "auto 40%, auto 60%",
           backgroundPosition: "left bottom, right bottom",
           backgroundRepeat: "no-repeat, no-repeat",
         }}
@@ -596,57 +596,49 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "relative",
             zIndex: (theme) => theme.zIndex.introText,
-            textAlign: "left",
-            paddingTop: { xs: 6, md: 12 }, // Additional top padding to clear top image
-            paddingBottom: { xs: 6, md: 12 }, // Additional bottom padding to clear bottom images
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingTop: { xs: 6, md: 12 },
+            paddingBottom: { xs: 6, md: 12 },
           }}
         >
-          <Stack spacing={4}>
-            {/* Text with birds bullet */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: { xs: 2, md: 3 },
-              }}
-            >
-              {/* Bullet image */}
-              <Box
-                sx={{
-                  width: { xs: 200, md: 300 },
-                  height: { xs: 200, md: 300 },
-                  flexShrink: 0,
-                  backgroundImage: "url('/images/home_collage/birds_top.png')",
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  // Align center of birds with first lines of text
-                  mt: { xs: -4, md: -6 },
-                }}
-              />
-              {/* Text content */}
-              <Typography
-                variant="h4"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "cleft",
-                  maxWidth: { xs: "600px", md: "720px" },
-                  lineHeight: 1.6,
-                  letterSpacing: "0.01em",
-                }}
-              >
-                The future of California’s water depends on two things:
-                <Box component="ol" sx={{ mt: 2, pl: 3 }}>
-                  <Box component="li" sx={{ mb: 1 }}>
-                    &nbsp;How much rain and snow we get.
-                  </Box>
-                  <Box component="li" sx={{ mb: 1 }}>
-                    &nbsp;How we choose to manage it.
-                  </Box>
-                </Box>
-              </Typography>
+          {/* Bullet image */}
+          <Box
+            sx={{
+              width: { xs: 200, md: 300 },
+              height: { xs: 200, md: 300 },
+              backgroundImage: "url('/images/home_collage/birds_top.png')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              zIndex: -1, // Behind the text
+              opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
+            }}
+          />
+          
+          {/* Centered text block */}
+          <Typography
+            variant="h4"
+            sx={{
+              color: (theme) => theme.palette.blue.darkest,
+              textAlign: "left",
+              maxWidth: { xs: "600px", md: "720px" },
+              lineHeight: 1.6,
+              letterSpacing: "0.01em",
+            }}
+          >
+            California&apos;s Central Valley water depends on two things:
+            <Box component="ol" sx={{ mt: 2, pl: 3 }}>
+              <Box component="li" sx={{ mb: 1 }}>
+                &nbsp;How much rain and snow we get.
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                &nbsp;How we choose to manage it.
+              </Box>
             </Box>
-          </Stack>
+          </Typography>
         </Box>
       </BasePanel>
 
