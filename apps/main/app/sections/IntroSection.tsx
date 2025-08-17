@@ -1,6 +1,6 @@
 import React from "react"
-import { BasePanel, TwoColumnPanel, Spacer, ArrowHead } from "@repo/ui"
-import { Box, Typography, Stack } from "@repo/ui/mui"
+import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
+import { Box, Typography } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 // import { useTranslation } from "@repo/i18n"
 import FloatingMarker from "../components/FloatingMarker"
@@ -475,7 +475,7 @@ const IntroSection: React.FC = () => {
             {/* <Typography
               variant="h1"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
+
                 mb: 4,
                 textAlign: "center",
               }}
@@ -486,7 +486,7 @@ const IntroSection: React.FC = () => {
             <Typography
               variant="h4"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
+
                 mb: 2,
                 textAlign: "center",
               }}
@@ -497,7 +497,6 @@ const IntroSection: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
                 mb: 2,
                 textAlign: "center",
               }}
@@ -510,7 +509,6 @@ const IntroSection: React.FC = () => {
             <Typography
               variant="body1"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
                 maxWidth: "500px",
                 textAlign: "center",
               }}
@@ -526,7 +524,7 @@ const IntroSection: React.FC = () => {
                 display: "flex",
                 justifyContent: "center",
                 width: "100%",
-                color: (theme) => theme.palette.blue.darkest,
+
                 mt: 3,
               }}
             >
@@ -602,16 +600,14 @@ const IntroSection: React.FC = () => {
 
           {/* Centered text block */}
           <Typography
-            variant="h4"
+            variant="body1"
             sx={{
               color: (theme) => theme.palette.blue.darkest,
               textAlign: "left",
               maxWidth: { xs: "600px", md: "500px" },
-              lineHeight: 1.6,
-              letterSpacing: "0.01em",
             }}
           >
-            California&apos;s Central Valley water depends on two things:
+            California&apos;s Central Valley water depends<br />on two main things:
             <Box component="ol" sx={{ mt: 2, pl: 3 }}>
               <Box component="li" sx={{ mb: 1 }}>
                 &nbsp;How much rain and snow we get.
@@ -699,10 +695,8 @@ const IntroSection: React.FC = () => {
           {/* Text block centered */}
           <Box sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "720px" } }}>
             <Typography
-              variant="h4"
+              variant="body1"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                lineHeight: 1.6,
                 mb: 3,
               }}
             >
@@ -710,11 +704,7 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
             </Typography>
             
             <Typography
-              variant="h4"
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                lineHeight: 1.6,
-              }}
+              variant="body1"
             >
               The COEQWAL (Collaboratory for Equity in Water Allocation) project has modeled 30 alternative water management
               scenarios for the Central Valley water systems that supply most of
@@ -785,28 +775,40 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
             }}
           >
             <Typography
-              variant="h4"
+              variant="body1"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                lineHeight: 1.6,
                 mb: 3,
               }}
             >
               The scenarios we run cover these areas of California...
             </Typography>
             
-            <Typography
-              variant="body1"
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                lineHeight: 1.6,
-              }}
-            >
-              The goal of the COEQWAL project is to make opaque water management 
-              transparent and accessible. On this site you can explore alternative 
-              water management scenarios, understand the trade-offs, and use data 
-              to advocate for your community.
-            </Typography>
+                          <Typography
+                variant="body1"
+                sx={{ mb: 2 }}
+              >
+                The goal of the COEQWAL project is to make opaque water management 
+                transparent and accessible.
+              </Typography>
+              
+              <Typography
+                variant="body1"
+                sx={{ mb: 1 }}
+              >
+                On this site you can:
+              </Typography>
+              
+              <Box component="ul" sx={{ pl: 3, mt: 1 }}>
+                <Box component="li" sx={{ mb: 1 }}>
+                  Explore alternative water management scenarios
+                </Box>
+                <Box component="li" sx={{ mb: 1 }}>
+                  Understand the trade-offs
+                </Box>
+                <Box component="li" sx={{ mb: 1 }}>
+                  Use data to advocate for your community
+                </Box>
+              </Box>
           </Box>
         </Box>
       </BasePanel>
