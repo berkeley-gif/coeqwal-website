@@ -32,6 +32,8 @@ export interface DecileChartProps extends ChartConfig {
   showValues?: boolean
   showLegend?: boolean
   compact?: boolean // when true, hide axes/legend/title for glyph use
+  showTickLabels?: boolean // show/hide tick labels on axes
+  axisColor?: string // color for axes and ticks
   barWidthPixels?: number // Width of the bar in pixels
 }
 
