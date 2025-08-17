@@ -30,7 +30,7 @@ const ScenarioTile: React.FC<ScenarioTileProps> = ({
   onHover,
   onSelect,
 }) => {
-  const variant = useGlyphSettingsStore((s: any)=>s.variant)
+  const variant = useGlyphSettingsStore((s: any) => s.variant)
 
   return (
     <Box
@@ -69,7 +69,7 @@ const ScenarioTile: React.FC<ScenarioTileProps> = ({
             key={outcome}
             size={size}
             variant={variant}
-            values={[0.2,0.4,0.6,0.8]}
+            values={[0.2, 0.4, 0.6, 0.8]}
           />
         ))}
       </Box>

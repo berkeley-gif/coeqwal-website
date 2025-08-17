@@ -12,5 +12,5 @@ export const useGlyphSettingsStore = create<GlyphSettingsState>()(
   immer<GlyphSettingsState>((set) => ({
     variant: "bars",
     setVariant: (v) => set({ variant: v }),
-  }))
+  })),
 )
