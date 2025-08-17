@@ -108,31 +108,45 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       .attr("opacity", 0.1)
       .attr("rx", 4)
 
-    // Min–max ribbons (show distribution range per outcome)
-    const axisRanges = axes.map((axis) => {
-      const vals = data.map((d) => d.values[axis] ?? 0)
-      return {
-        axis,
-        min: d3.min(vals) ?? 0,
-        max: d3.max(vals) ?? 0,
-      }
-    })
+    // Create scenario range bands (hidden by default, shown on hover)
+    const scenarioRangeGroup = g.append("g").attr("class", "scenario-ranges")
 
-    axisRanges.forEach(({ axis, min, max }) => {
-      const yPos = yScale(axis)! - 4 // place band around the axis line (8 px tall)
-      const bandHeight = 12
-      const xMin = scales[axis]!(min)
-      const xMax = scales[axis]!(max)
+    // Function to show scenario range for a specific scenario
+    const showScenarioRange = (
+      scenario: VerticalParallelLineData,
+      dataIndex: number,
+    ) => {
+      // Clear existing ranges
+      scenarioRangeGroup.selectAll("*").remove()
 
-      g.append("rect")
-        .attr("x", xMin)
-        .attr("y", yPos - (bandHeight - 8) / 2) // center band around axis
-        .attr("width", Math.max(1, xMax - xMin))
-        .attr("height", bandHeight)
-        .attr("fill", colors.default)
-        .attr("opacity", 0.25)
-        .attr("rx", 3)
-    })
+      axes.forEach((axis) => {
+        const value = scenario.values[axis] ?? 0
+        const yPos = yScale(axis)! - 4
+        const bandHeight = 12
+        const xPos = scales[axis]!(value)
+        const bandWidth = 8 // Small band around the specific value
+
+        scenarioRangeGroup
+          .append("rect")
+          .attr("x", xPos - bandWidth / 2)
+          .attr("y", yPos - (bandHeight - 8) / 2)
+          .attr("width", bandWidth)
+          .attr("height", bandHeight)
+          .attr(
+            "fill",
+            lineColors.length > dataIndex
+              ? lineColors[dataIndex]!
+              : colors.default,
+          )
+          .attr("opacity", 0.3)
+          .attr("rx", 3)
+      })
+    }
+
+    // Function to hide scenario ranges
+    const hideScenarioRange = () => {
+      scenarioRangeGroup.selectAll("*").remove()
+    }
 
     // Draw horizontal axes
     axes.forEach((axis) => {
@@ -249,6 +263,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       .attr("opacity", (d) => (d.highlighted ? 0.9 : 0.2)) // Transparent data lines
       .style("cursor", "pointer")
       .on("mouseover", function (_event, d) {
+        const dataIndex = data.findIndex((item) => item.id === d.id)
+
         // Highlight line on hover
         d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
 
@@ -260,6 +276,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           )
           .attr("r", d.highlighted ? 6 : 5)
           .attr("opacity", 1)
+
+        // Show scenario range
+        showScenarioRange(d, dataIndex)
 
         onLineHover?.(d)
       })
@@ -277,6 +296,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           )
           .attr("r", d.highlighted ? 5 : 4)
           .attr("opacity", d.highlighted ? 1 : 0.8)
+
+        // Hide scenario range
+        hideScenarioRange()
 
         onLineHover?.(null)
       })
@@ -316,6 +338,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               )
               .attr("stroke-width", 3)
               .attr("opacity", 1)
+
+            // Show scenario range
+            showScenarioRange(d, dataIndex)
           })
           .on("mouseout", function () {
             onLineHover?.(null)
@@ -331,6 +356,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               )
               .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
               .attr("opacity", d.highlighted ? 0.9 : 0.2)
+
+            // Hide scenario range
+            hideScenarioRange()
           })
           .on("click", function () {
             onLineClick?.(d)

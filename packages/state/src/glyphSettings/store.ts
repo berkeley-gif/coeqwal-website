@@ -15,5 +15,5 @@ export const useGlyphSettingsStore = create<GlyphSettingsState>()(
       set((state) => {
         state.variant = v
       }),
-  }))
+  })),
 )

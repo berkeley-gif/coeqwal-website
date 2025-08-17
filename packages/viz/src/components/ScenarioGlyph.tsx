@@ -12,7 +12,11 @@ export interface ScenarioGlyphProps {
   size?: number
 }
 
-const ScenarioGlyph: React.FC<ScenarioGlyphProps> = ({ variant, values, size = 60 }) => {
+const ScenarioGlyph: React.FC<ScenarioGlyphProps> = ({
+  variant,
+  values,
+  size = 60,
+}) => {
   switch (variant) {
     case "bars":
       return <OutcomeGlyph values={values} size={size} />

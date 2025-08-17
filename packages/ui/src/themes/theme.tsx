@@ -710,7 +710,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h1,
       fontWeight: 500,
-      lineHeight: 0.85,
+      lineHeight: 1,
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,

@@ -221,24 +221,23 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
       .attr("stroke-width", 1)
 
     // Add Y axis
-    const yAxisGroup = svg
-      .append("g")
-      .call(
-        d3
-          .axisLeft(y)
-          .ticks(5)
-          .tickFormat(showTickLabels ? (d) => formatValue(d as number) : () => ""),
-      )
-    
-    yAxisGroup.selectAll("text")
+    const yAxisGroup = svg.append("g").call(
+      d3
+        .axisLeft(y)
+        .ticks(5)
+        .tickFormat(
+          showTickLabels ? (d) => formatValue(d as number) : () => "",
+        ),
+    )
+
+    yAxisGroup
+      .selectAll("text")
       .attr("font-size", "10px")
       .attr("fill", axisColor)
-    
-    yAxisGroup.selectAll("line")
-      .attr("stroke", axisColor)
-    
-    yAxisGroup.select(".domain")
-      .attr("stroke", axisColor)
+
+    yAxisGroup.selectAll("line").attr("stroke", axisColor)
+
+    yAxisGroup.select(".domain").attr("stroke", axisColor)
 
     // Add Y axis label
     svg

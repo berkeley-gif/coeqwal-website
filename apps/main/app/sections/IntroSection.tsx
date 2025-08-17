@@ -233,30 +233,30 @@ const IntroSection: React.FC = () => {
       top: "59%",
       size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
     },
-    {
-      src: "/images/markers/atta2.png",
-      left: {
-        xs: "calc(41% - 70px)",
-        sm: "calc(41% - 80px)",
-        md: "calc(41% - 100px)",
-        lg: "calc(41% - 100px)",
-        xl: "calc(41% - 100px)",
-      },
-      top: "59%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/farmers2.png",
-      left: {
-        xs: "calc(59% - 70px)",
-        sm: "calc(59% - 80px)",
-        md: "calc(59% - 100px)",
-        lg: "calc(59% - 100px)",
-        xl: "calc(59% - 100px)",
-      },
-      top: "59%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
+    // {
+    //   src: "/images/markers/atta2.png",
+    //   left: {
+    //     xs: "calc(41% - 70px)",
+    //     sm: "calc(41% - 80px)",
+    //     md: "calc(41% - 100px)",
+    //     lg: "calc(41% - 100px)",
+    //     xl: "calc(41% - 100px)",
+    //   },
+    //   top: "59%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
+    // {
+    //   src: "/images/markers/farmers2.png",
+    //   left: {
+    //     xs: "calc(59% - 70px)",
+    //     sm: "calc(59% - 80px)",
+    //     md: "calc(59% - 100px)",
+    //     lg: "calc(59% - 100px)",
+    //     xl: "calc(59% - 100px)",
+    //   },
+    //   top: "59%",
+    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
+    // },
     {
       src: "/images/markers/drinking_water2.png",
       left: {
@@ -471,7 +471,7 @@ const IntroSection: React.FC = () => {
               textAlign: "center",
             }}
           >
-            <Typography
+            {/* <Typography
               variant="h1"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
@@ -491,6 +491,17 @@ const IntroSection: React.FC = () => {
               }}
             >
               Rethink California Water
+            </Typography> */}
+
+            <Typography
+              variant="h1"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                mb: 2,
+                textAlign: "center",
+              }}
+            >
+              Rethink<br />California Water
             </Typography>
 
             <Typography

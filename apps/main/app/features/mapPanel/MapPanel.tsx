@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, useCallback, useMemo } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import {
   Box,
   IconButton,
@@ -41,12 +41,9 @@ import {
 // } from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import { MapPromptDialog } from "@repo/ui"
-import { ScenarioTile } from "@repo/ui"
-import OutcomeRangeSlider from "../../components/OutcomeRangeSlider"
-import { useScenarioFilterStore } from "@repo/state"
-import type { OutcomeName } from "@repo/state"
+
 import { useGlyphSettingsStore } from "@repo/ui"
-import { ScenarioGlyph } from "@repo/viz"
+import { ScenarioGlyph, VerticalParallelLinePlot } from "@repo/viz"
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -181,45 +178,37 @@ const MapControls = ({
     expandChart,
   })
 
-  const filterStore = useScenarioFilterStore()
-  const filteredScenarios = useMemo(() => {
-    return chartData.props.data.filter((sc) => {
-      return chartData.props.axes.every((axis) => {
-        const range = filterStore.outcomeRanges[axis as OutcomeName]
-        const v = sc.values[axis] ?? 0
-        return v >= range.min && v <= range.max
-      })
-    })
-  }, [chartData.props.data, chartData.props.axes, filterStore.outcomeRanges])
-
   // Accordion sections for the third column
   const accordionSections: CardAccordionSection[] = [
     {
       id: "select-scenarios",
       title: "Select scenarios",
       content: (
-        <Box sx={{height:"100%", display:"flex", flexDirection:"column"}}>
-          {/* Filter sliders */}
-          <Box sx={{maxHeight:200, overflow:"auto", pr:1}}>
-            {chartData.props.axes.map((axis) => (
-              <OutcomeRangeSlider key={axis} outcome={axis as OutcomeName} />
-            ))}
-          </Box>
-
-          {/* Gallery */}
-          <Box sx={{flexGrow:1, overflow:"auto", p:1}}>
-            <Box
-              sx={{
-                display:"grid",
-                gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",
-                gap:2,
-              }}
-            >
-              {filteredScenarios.map((sc) => (
-                <ScenarioTile key={sc.id} scenario={sc} onSelect={onScenarioSelect} />
-              ))}
-            </Box>
-          </Box>
+        <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+          <VerticalParallelLinePlot
+            data={chartData.props.data.map((d) => ({
+              ...d,
+              highlighted: selectedScenarios.includes(d.id),
+            }))}
+            axes={chartData.props.axes}
+            responsive={true}
+            height={400}
+            margin={{ top: 20, right: 20, bottom: 40, left: 120 }}
+            lineColors={[
+              "#1f77b4",
+              "#ff7f0e",
+              "#2ca02c",
+              "#d62728",
+              "#9467bd",
+              "#8c564b",
+              "#e377c2",
+              "#7f7f7f",
+              "#bcbd22",
+              "#17becf",
+            ]}
+            onLineClick={(scenario) => onScenarioSelect(scenario.id)}
+            onLineHover={(scenario) => console.log("Hovered:", scenario?.name)}
+          />
         </Box>
       ),
     },
@@ -451,7 +440,7 @@ const MapControls = ({
     },
   ]
 
-  const glyphVariant = useGlyphSettingsStore((s)=>s.variant)
+  const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
   return (
     <Box
@@ -629,18 +618,22 @@ const MapControls = ({
                       <Select
                         size="small"
                         value={glyphVariant}
-                        onChange={(e)=> useGlyphSettingsStore.getState().setVariant(e.target.value as any)}
-                        sx={{ 
-                          fontSize:"0.75rem",
+                        onChange={(e) =>
+                          useGlyphSettingsStore
+                            .getState()
+                            .setVariant(e.target.value as any)
+                        }
+                        sx={{
+                          fontSize: "0.75rem",
                           "& .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "0.5px !important"
+                            borderWidth: "0.5px !important",
                           },
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "0.5px !important"
+                            borderWidth: "0.5px !important",
                           },
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "0.5px !important"
-                          }
+                            borderWidth: "0.5px !important",
+                          },
                         }}
                       >
                         <MenuItem value="bars">Bars</MenuItem>
@@ -693,8 +686,13 @@ const MapControls = ({
                         {/* Glyph for outcome */}
                         <ScenarioGlyph
                           values={(() => {
-                            const v = Math.random()*0.8 - 0.4 // -0.4..0.4 dummy median
-                            return [v-0.3, v-0.1, v, v+0.2] as [number,number,number,number]
+                            const v = Math.random() * 0.8 - 0.4 // -0.4..0.4 dummy median
+                            return [v - 0.3, v - 0.1, v, v + 0.2] as [
+                              number,
+                              number,
+                              number,
+                              number,
+                            ]
                           })()}
                           size={50}
                           variant={glyphVariant}
@@ -979,7 +977,8 @@ const MapControls = ({
                       }}
                     >
                       <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                        {selectedScenarios.length} selected
+                        30 scenarios available • {selectedScenarios.length}{" "}
+                        selected
                       </Typography>
                       {selectedScenarios.length > 0 && (
                         <Button

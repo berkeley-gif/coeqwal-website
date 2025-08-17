@@ -14,9 +14,7 @@ export interface OutcomeGlyphProps {
  */
 const OutcomeGlyph: React.FC<OutcomeGlyphProps> = ({ values, size = 60 }) => {
   const tiers = values
-    ? (
-        ["Q1", "Q2", "Q3", "Q4"] as const
-      ).map((label, idx) => ({
+    ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
         label,
         color: ["#2cc83b", "#2064d4", "#f89740", "#f96262"][idx]!,
         value: Math.abs(values[idx]), // BarChart expects positive length
