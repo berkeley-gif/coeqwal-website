@@ -516,7 +516,7 @@ const IntroSection: React.FC = () => {
               }}
             >
               Explore a range of Central Valley water scenarios and discover
-              possibilities for water management in our state, under current
+              possibilities for water management across the state, under current
               conditions and future climates.
             </Typography>
 
@@ -708,9 +708,7 @@ const IntroSection: React.FC = () => {
                 mb: 3,
               }}
             >
-              We are already having to make difficult water allocation
-              decisions. We are facing a time of climate uncertainty and need
-              to prepare for the future.
+We already face difficult choices. Climate change brings deeper droughts, bigger floods, and growing uncertainty. 
             </Typography>
             
             <Typography
@@ -720,9 +718,9 @@ const IntroSection: React.FC = () => {
                 lineHeight: 1.6,
               }}
             >
-              The COEQWAL (stands for Collaboratory for Equity in Water Allocation) project has run 30 alternative water management
-              scenarios for the Central Valley water systems that feed most of
-              the state. For each of these scenarios, we considered 5 future
+              The COEQWAL (Collaboratory for Equity in Water Allocation) project has modeled 30 alternative water management
+              scenarios for the Central Valley water systems that supply most of
+              the state. For each of these scenarios, we also modeled 5 future
               climate possibilities.
             </Typography>
           </Box>
@@ -767,12 +765,11 @@ const IntroSection: React.FC = () => {
           position: "relative",
           overflow: "visible",
           background: `
-            url('/images/home_collage/left_side.png'),
-            url('/images/home_collage/right.png')
+            url('/images/california.png')
           `,
-          backgroundSize: "auto 30%, auto 44%",
-          backgroundPosition: "left bottom, right bottom",
-          backgroundRepeat: "no-repeat, no-repeat",
+          backgroundSize: "contain",
+          backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
         }}
       >
         {/* Text content */}
