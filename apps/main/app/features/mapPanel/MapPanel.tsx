@@ -527,7 +527,7 @@ const MapControls = ({
                     sx={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 1,
+                      gap: 0.5,
                     }}
                   >
                     <Box
@@ -542,17 +542,11 @@ const MapControls = ({
                     >
                       Current operations
                     </Box>
-                    {/* Glyph variant selector */}
-                    <Select
-                      size="small"
-                      value={glyphVariant}
-                      onChange={(e)=> useGlyphSettingsStore.getState().setVariant(e.target.value as any)}
-                      sx={{ fontSize:"0.75rem" }}
-                    >
-                      <MenuItem value="bars">Bars</MenuItem>
-                      <MenuItem value="rose">Rose</MenuItem>
-                      <MenuItem value="quartile">Quartile</MenuItem>
-                    </Select>
+                    <InfoIconButton
+                      mode="glossary"
+                      glossaryEntry="Current operations"
+                      onGlossaryOpen={handleGlossaryOpen}
+                    />
                   </Box>
                   <Box
                     sx={{
@@ -606,23 +600,42 @@ const MapControls = ({
                       sx={{
                         display: "flex",
                         alignItems: "center",
-                        gap: 0.5,
+                        justifyContent: "space-between",
                         mb: 0,
                       }}
                     >
-                      <Typography
-                        variant="h6"
+                      <Box
                         sx={{
-                          color: (theme) => theme.palette.blue.darkest,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
                         }}
                       >
-                        Scenario snapshot
-                      </Typography>
-                      <InfoIconButton
-                        mode="glossary"
-                        glossaryEntry="CalSim"
-                        onGlossaryOpen={handleGlossaryOpen}
-                      />
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: (theme) => theme.palette.blue.darkest,
+                          }}
+                        >
+                          Scenario snapshot
+                        </Typography>
+                        <InfoIconButton
+                          mode="glossary"
+                          glossaryEntry="CalSim"
+                          onGlossaryOpen={handleGlossaryOpen}
+                        />
+                      </Box>
+                      {/* Glyph variant selector */}
+                      <Select
+                        size="small"
+                        value={glyphVariant}
+                        onChange={(e)=> useGlyphSettingsStore.getState().setVariant(e.target.value as any)}
+                        sx={{ fontSize:"0.75rem" }}
+                      >
+                        <MenuItem value="bars">Bars</MenuItem>
+                        <MenuItem value="rose">Rose</MenuItem>
+                        <MenuItem value="quartile">Quartile</MenuItem>
+                      </Select>
                     </Box>
 
                     <Box
@@ -701,7 +714,7 @@ const MapControls = ({
                         display: "flex",
                         alignItems: "center",
                         gap: 0.5,
-                        mb: 0.75,
+                        mb: 0.5,
                       }}
                     >
                       <Typography
