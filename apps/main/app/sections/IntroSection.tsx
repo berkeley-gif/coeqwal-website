@@ -502,7 +502,9 @@ const IntroSection: React.FC = () => {
                 textAlign: "center",
               }}
             >
-              Rethink<br />California Water
+              Rethink
+              <br />
+              California Water
             </Typography>
 
             <Typography
@@ -532,33 +534,9 @@ const IntroSection: React.FC = () => {
                 color="currentColor"
                 size={28}
                 delay={1.0}
-                onClick={() => {
-                  // Scroll to the next section with improved positioning
-                  const interstitialSection =
-                    document.getElementById("overview")
-                  if (interstitialSection) {
-                    // Get the exact position of the interstitial section
-                    const rect = interstitialSection.getBoundingClientRect()
-                    const currentScrollTop =
-                      window.pageYOffset || document.documentElement.scrollTop
-
-                    // Calculate target position, accounting for any header offset
-                    const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
-
-                    // Use requestAnimationFrame to ensure smooth scrolling doesn't interfere with manual scrolling
-                    requestAnimationFrame(() => {
-                      window.scrollTo({
-                        top: targetPosition,
-                        behavior: "smooth",
-                      })
-                    })
-                  }
-                }}
+                scrollToId="overview"
               >
-                <ArrowHead
-                  size={28}
-                  style={{ transform: "rotate(90deg)" }}
-                />
+                <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
               </ScrollIndicator>
             </Box>
           </Box>
@@ -566,7 +544,7 @@ const IntroSection: React.FC = () => {
       </Box>
 
       {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 48, md: 100 }} />
+      <Spacer height={{ xs: 48, md: 48 }} />
 
       {/* Second panel - Overview content */}
       <BasePanel
@@ -586,7 +564,7 @@ const IntroSection: React.FC = () => {
             url('/images/home_collage/left_side.png'),
             url('/images/home_collage/right.png')
           `,
-          backgroundSize: "auto 40%, auto 60%",
+          backgroundSize: "auto 40%, auto 56%",
           backgroundPosition: "left bottom, right bottom",
           backgroundRepeat: "no-repeat, no-repeat",
         }}
@@ -604,9 +582,13 @@ const IntroSection: React.FC = () => {
             paddingBottom: { xs: 6, md: 12 },
           }}
         >
-          {/* Bullet image */}
+          {/* Bullet image (absolutely positioned to not interfere with text centering) */}
           <Box
             sx={{
+              position: "absolute",
+              left: { xs: "5%", md: "8%" },
+              top: "40%",
+              transform: "translateY(-50%)",
               width: { xs: 200, md: 300 },
               height: { xs: 200, md: 300 },
               backgroundImage: "url('/images/home_collage/birds_top.png')",
@@ -617,14 +599,14 @@ const IntroSection: React.FC = () => {
               opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
             }}
           />
-          
+
           {/* Centered text block */}
           <Typography
             variant="h4"
             sx={{
               color: (theme) => theme.palette.blue.darkest,
               textAlign: "left",
-              maxWidth: { xs: "600px", md: "720px" },
+              maxWidth: { xs: "600px", md: "500px" },
               lineHeight: 1.6,
               letterSpacing: "0.01em",
             }}
@@ -640,14 +622,31 @@ const IntroSection: React.FC = () => {
             </Box>
           </Typography>
         </Box>
+
+        {/* Scroll indicator for 2nd panel */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            color: (theme) => theme.palette.blue.darkest,
+            pb: 3,
+          }}
+        >
+          <ScrollIndicator
+            color="currentColor"
+            size={28}
+            delay={0.5}
+            scrollToId="third-panel"
+          >
+            <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
+          </ScrollIndicator>
+        </Box>
       </BasePanel>
 
-      {/* Spacer between panels */}
-      <Spacer height={{ xs: 48, md: 100 }} />
-
-      {/* Third panel - Another birds bullet paragraph */}
+      {/* Third panel */}
       <BasePanel
-        id="overview"
+        id="third-panel"
         fullHeight={false}
         fullWidth
         background="transparent"
@@ -673,56 +672,49 @@ const IntroSection: React.FC = () => {
           sx={{
             position: "relative",
             zIndex: (theme) => theme.zIndex.introText,
-            textAlign: "left",
-            paddingTop: { xs: 6, md: 12 }, // Additional top padding to clear top image
-            paddingBottom: { xs: 6, md: 12 }, // Additional bottom padding to clear bottom images
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingTop: { xs: 6, md: 12 },
+            paddingBottom: { xs: 6, md: 12 },
           }}
         >
-          <Stack spacing={4}>
-            {/* Text with birds bullet */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: { xs: 2, md: 3 },
-              }}
-            >
-              {/* Bullet image */}
-              <Box
-                sx={{
-                  width: { xs: 200, md: 300 },
-                  height: { xs: 200, md: 300 },
-                  flexShrink: 0,
-                  backgroundImage: "url('/images/home_collage/birds_top.png')",
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  // Align center of birds with first lines of text
-                  mt: { xs: -4, md: -6 },
-                }}
-              />
-              {/* Text content */}
-              <Typography
-                variant="h4"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                  textAlign: "cleft",
-                  maxWidth: { xs: "600px", md: "720px" },
-                  lineHeight: 1.6,
-                  letterSpacing: "0.01em",
-                }}
-              >
-                We are already having to make difficult water allocation
-                decisions. We are facing a time of climate uncertainty and need
-                to prepare for the future.
-              </Typography>
-            </Box>
-          </Stack>
+          {/* Bullet image - absolutely positioned to not interfere with text centering */}
+          <Box
+            sx={{
+              position: "absolute",
+              left: { xs: "5%", md: "8%" },
+              top: "40%",
+              transform: "translateY(-50%)",
+              width: { xs: 200, md: 300 },
+              height: { xs: 200, md: 300 },
+              backgroundImage: "url('/images/home_collage/birds_top.png')",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              zIndex: -1, // Behind the text
+              opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
+            }}
+          />
+          
+          {/* Text block - independently centered */}
+          <Typography
+            variant="h4"
+            sx={{
+              color: (theme) => theme.palette.blue.darkest,
+              textAlign: "left",
+              maxWidth: { xs: "600px", md: "500px" },
+              lineHeight: 1.6,
+              letterSpacing: "0.01em",
+            }}
+          >
+            We are already having to make difficult water allocation
+            decisions. We are facing a time of climate uncertainty and need
+            to prepare for the future.
+          </Typography>
         </Box>
       </BasePanel>
-
-      {/* Spacer between panels */}
-      <Spacer height={{ xs: 48, md: 100 }} />
 
       {/* Fourth panel */}
       <BasePanel

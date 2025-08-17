@@ -18,6 +18,8 @@ interface ScrollIndicatorProps {
   hideDuration?: number
   /** Click handler for the indicator */
   onClick?: () => void
+  /** Target element ID to scroll to (if provided, handles scrolling automatically) */
+  scrollToId?: string
   /** Custom icon/content to animate */
   children?: React.ReactNode
   /** Additional styles */
@@ -39,11 +41,35 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   showDuration = 1.5,
   hideDuration = 0.8,
   onClick,
+  scrollToId,
   children,
   style = {},
   className,
 }) => {
   const controls = useAnimation()
+
+  // Handle scroll to target element
+  const handleScrollClick = () => {
+    if (scrollToId) {
+      const targetElement = document.getElementById(scrollToId)
+      if (targetElement) {
+        const rect = targetElement.getBoundingClientRect()
+        const currentScrollTop =
+          window.pageYOffset || document.documentElement.scrollTop
+        const targetPosition = rect.top + currentScrollTop - 20 // Small offset for better positioning
+
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: targetPosition,
+            behavior: "smooth",
+          })
+        })
+      }
+    }
+
+    // Call custom onClick if provided
+    onClick?.()
+  }
 
   useEffect(() => {
     const animateIndicator = async () => {
@@ -60,7 +86,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
 
         // Begin the pulsing/bouncing animation with pauses
         let animationRunning = true
-        
+
         const animateWithPauses = async () => {
           while (animationRunning) {
             // Animate 3 bounces
@@ -71,14 +97,14 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
                 ease: "easeInOut",
               },
             })
-            
+
             // Wait/pause for 3 cycle durations (4.5 seconds)
-            await new Promise(resolve => setTimeout(resolve, 4500))
+            await new Promise((resolve) => setTimeout(resolve, 4500))
           }
         }
-        
+
         animateWithPauses()
-        
+
         // Cleanup function to stop animation
         return () => {
           animationRunning = false
@@ -107,13 +133,13 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={controls}
-      onClick={onClick}
+      onClick={handleScrollClick}
       className={className}
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        cursor: onClick ? "pointer" : "default",
+        cursor: onClick || scrollToId ? "pointer" : "default",
         color,
         fontSize: size,
         ...style,
