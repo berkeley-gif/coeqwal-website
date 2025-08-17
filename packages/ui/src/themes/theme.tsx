@@ -60,13 +60,13 @@ import type { CSSProperties } from "react"
 // Headlines: Display Medium | Body text: Text Regular
 // Base: 1.25rem body text
 //
-// Scale progression:
-// • h1: 5.75rem (92px) - Hero headlines "Tell your water story" (Display Medium)
-// • h2: 3.75rem (60px) - Section headlines "What is the future..." (Display Medium)
-// • h3: 2.8rem (44.8px) - Subsection headlines (Display Medium)
-// • h4: 2.1rem (33.6px) - Card titles and smaller headlines (Display Medium)
-// • h5: 1.575rem (25.2px) - Labels and minor headlines (Display Medium)
-// • h6: 1.18rem (18.9px) - Small headlines and captions (Display Medium)
+// Scale progression (moderately reduced for better proportion):
+// • h1: 5rem (80px) - Hero headlines "Tell your water story" (Display Medium)
+// • h2: 3.25rem (52px) - Section headlines "What is the future..." (Display Medium)
+// • h3: 2.5rem (40px) - Subsection headlines (Display Medium)
+// • h4: 1.9rem (30.4px) - Card titles and smaller headlines (Display Medium)
+// • h5: 1.425rem (22.8px) - Labels and minor headlines (Display Medium)
+// • h6: 1.1rem (17.6px) - Small headlines and captions (Display Medium)
 // • body1: 0.95rem (15.2px) - Primary body text (Text Regular)
 // • body2: 1.125rem (18px) - Secondary body text (Text Regular)
 //
@@ -76,12 +76,12 @@ const typeScale = {
   baseBody: "0.95rem", // 15.2px - standard body text
   smallBody: "1.125rem", // 18px - secondary text
 
-  // Headline sizes
-  h1: "5.75rem", // 92px - Hero size
-  h2: "3.75rem", // 60px - Major section headers
-  h3: "2.8rem", // 44.8px - Subsection headers
-  h4: "2.1rem", // 33.6px - Card titles (h3 ÷ 1.333)
-  h5: "1.575rem", // 25.2px - Minor headlines (h4 ÷ 1.333)
+  // Headline sizes (moderately reduced for better proportion)
+  h1: "5rem", // 80px - Hero size (reduced from 92px)
+  h2: "3.25rem", // 52px - Major section headers (reduced from 60px)
+  h3: "2.5rem", // 40px - Subsection headers (reduced from 44.8px)
+  h4: "1.9rem", // 30.4px - Card titles (h3 ÷ 1.333)
+  h5: "1.425rem", // 22.8px - Minor headlines (h4 ÷ 1.333)
   h6: "1.1rem", // 17.6px - Section headers (Like on cards: Scenario snapshot, Climate)
 }
 
@@ -710,7 +710,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h1,
       fontWeight: 500,
-      lineHeight: 1,
+      lineHeight: 1.1,
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
