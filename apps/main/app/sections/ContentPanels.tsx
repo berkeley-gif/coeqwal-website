@@ -183,7 +183,7 @@ export default function ContentPanels({
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LeadingMarkerText title="Explore">
-          <Typography variant="body2">
+          <Typography variant="body1">
             COEQWAL&apos;s scenarios by theme
           </Typography>
         </LeadingMarkerText>
@@ -204,7 +204,7 @@ export default function ContentPanels({
       }}
     >
       <LeadingMarkerText title="Empower">
-        <Typography variant="body2">
+        <Typography variant="body1">
           your community with data that helps you understand the impacts of
           operational decisions
         </Typography>
