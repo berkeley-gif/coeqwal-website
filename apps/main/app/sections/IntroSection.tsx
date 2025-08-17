@@ -1,5 +1,5 @@
 import React from "react"
-import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
+import { BasePanel, TwoColumnPanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, Stack } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 // import { useTranslation } from "@repo/i18n"
@@ -750,7 +750,7 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
         </Box>
       </BasePanel>
 
-      {/* Fourth panel */}
+      {/* Fourth panel - Two column layout */}
       <BasePanel
         id="fourth-panel"
         fullHeight={false}
@@ -758,64 +758,71 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
         background="transparent"
         paddingVariant="very-wide"
         includeHeaderSpacing={true}
-        sx={{
-          color: (theme) => theme.palette.primary.dark,
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          overflow: "visible",
-          background: `
-            url('/images/california.png')
-          `,
-          backgroundSize: "contain",
-          backgroundPosition: "center bottom",
-          backgroundRepeat: "no-repeat",
-        }}
       >
-        {/* Text content */}
         <Box
           sx={{
-            position: "relative",
-            zIndex: (theme) => theme.zIndex.introText,
-            height: "100%",
             display: "flex",
+            flexDirection: { xs: "column", md: "row" },
             alignItems: "center",
-            justifyContent: "center",
-            paddingTop: { xs: 6, md: 12 },
-            paddingBottom: { xs: 6, md: 12 },
+            gap: { xs: 4, md: 6 },
+            minHeight: "60vh",
           }}
         >
-          {/* Bullet image - absolutely positioned to not interfere with text centering */}
+          {/* Left column - Text content */}
           <Box
             sx={{
-              position: "absolute",
-              left: { xs: "5%", md: "0" },
-              top: "40%",
-              transform: "translateY(-50%)",
-              width: { xs: 200, md: 300 },
-              height: { xs: 200, md: 300 },
-              backgroundImage: "url('/images/home_collage/birds_top.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              zIndex: -1, // Behind the text
-              opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
-            }}
-          />
-          
-          {/* Text block - independently centered */}
-          <Typography
-            variant="h4"
-            sx={{
-              color: (theme) => theme.palette.blue.darkest,
-              textAlign: "left",
-              maxWidth: { xs: "600px", md: "720px" },
-              lineHeight: 1.6,
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
             }}
           >
-            Explore different scenarios and their outcomes to understand how 
-            management decisions today shape California's water future.
-          </Typography>
+            <Typography
+              variant="h4"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                lineHeight: 1.6,
+                mb: 3,
+              }}
+            >
+              The scenarios we run cover these areas of California...
+            </Typography>
+            
+            <Typography
+              variant="body1"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+                lineHeight: 1.6,
+              }}
+            >
+              The goal of the COEQWAL project is to make opaque water management 
+              transparent and accessible. On this site you can explore alternative 
+              water management scenarios, understand the trade-offs, and use data 
+              to advocate for your community.
+            </Typography>
+          </Box>
+          
+          {/* Right column - California image */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Box
+              component="img"
+              src="/images/california.png"
+              alt="California map"
+              sx={{
+                maxWidth: "100%",
+                height: "auto",
+                objectFit: "contain",
+                maxHeight: "50vh",
+              }}
+            />
+          </Box>
         </Box>
       </BasePanel>
       {/* Spacer  */}
