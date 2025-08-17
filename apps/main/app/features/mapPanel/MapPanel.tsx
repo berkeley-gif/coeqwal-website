@@ -630,7 +630,18 @@ const MapControls = ({
                         size="small"
                         value={glyphVariant}
                         onChange={(e)=> useGlyphSettingsStore.getState().setVariant(e.target.value as any)}
-                        sx={{ fontSize:"0.75rem" }}
+                        sx={{ 
+                          fontSize:"0.75rem",
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderWidth: "0.5px !important"
+                          },
+                          "&:hover .MuiOutlinedInput-notchedOutline": {
+                            borderWidth: "0.5px !important"
+                          },
+                          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                            borderWidth: "0.5px !important"
+                          }
+                        }}
                       >
                         <MenuItem value="bars">Bars</MenuItem>
                         <MenuItem value="rose">Rose</MenuItem>
