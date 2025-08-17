@@ -650,7 +650,7 @@ const IntroSection: React.FC = () => {
         fullHeight={false}
         fullWidth
         background="transparent"
-        paddingVariant="very-wide"
+        paddingVariant="wide"
         includeHeaderSpacing={true}
         sx={{
           color: (theme) => theme.palette.primary.dark,
@@ -676,8 +676,6 @@ const IntroSection: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            paddingTop: { xs: 6, md: 12 },
-            paddingBottom: { xs: 6, md: 12 },
           }}
         >
           {/* Bullet image - absolutely positioned to not interfere with text centering */}
@@ -698,7 +696,7 @@ const IntroSection: React.FC = () => {
             }}
           />
           
-          {/* Text block - independently centered */}
+          {/* Text block centered */}
           <Box sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "720px" } }}>
             <Typography
               variant="h4"
@@ -812,8 +810,6 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
           </Box>
         </Box>
       </BasePanel>
-
-      <Spacer height={{ xs: 48, md: 124 }} />
     </Box>
   )
 }
