@@ -30,6 +30,8 @@ export interface DecileChartProps extends ChartConfig {
   data: DecileData[] | Record<string, number | string>
   colorScheme?: "blues" | "greens" | "purples" | "oranges" | "reds"
   showValues?: boolean
+  showLegend?: boolean
+  compact?: boolean // when true, hide axes/legend/title for glyph use
   barWidthPixels?: number // Width of the bar in pixels
 }
 

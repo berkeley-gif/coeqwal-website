@@ -577,7 +577,7 @@ const MapControls = ({
                         component="li"
                         variant="body1"
                         sx={{
-                          mb: 0.25,
+                          mb: 0,
                           color: "inherit",
                         }}
                       >
@@ -668,9 +668,12 @@ const MapControls = ({
                       >
                         {/* Glyph for outcome */}
                         <ScenarioGlyph
-                          size={60}
+                          values={(() => {
+                            const v = Math.random()*0.8 - 0.4 // -0.4..0.4 dummy median
+                            return [v-0.3, v-0.1, v, v+0.2] as [number,number,number,number]
+                          })()}
+                          size={50}
                           variant={glyphVariant}
-                          values={[0.2,0.4,0.6,0.8]}
                         />
 
                         {/* Outcome label */}
@@ -698,7 +701,7 @@ const MapControls = ({
                         display: "flex",
                         alignItems: "center",
                         gap: 0.5,
-                        mb: 0.5,
+                        mb: 0.75,
                       }}
                     >
                       <Typography
