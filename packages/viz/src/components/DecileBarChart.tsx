@@ -24,6 +24,8 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
   showValues = true,
   showLegend = true,
   compact = false,
+  showTickLabels = true,
+  axisColor = "#999",
   responsive = true,
   barWidthPixels = 30,
 }) => {
@@ -184,26 +186,28 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
           .text(`D${current.decile}: ${formatValue(current.value)}`)
       }
 
-      // Add decile markers on the left side
-      svg
-        .append("line")
-        .attr("x1", barX - 10)
-        .attr("x2", barX)
-        .attr("y1", y(current.value))
-        .attr("y2", y(current.value))
-        .attr("stroke", "#999")
-        .attr("stroke-width", 1)
+      // Add decile markers on the left side (only if tick labels are shown)
+      if (showTickLabels) {
+        svg
+          .append("line")
+          .attr("x1", barX - 10)
+          .attr("x2", barX)
+          .attr("y1", y(current.value))
+          .attr("y2", y(current.value))
+          .attr("stroke", axisColor)
+          .attr("stroke-width", 1)
 
-      svg
-        .append("text")
-        .attr("x", barX - 12)
-        .attr("y", y(current.value))
-        .attr("dy", "0.35em")
-        .attr("text-anchor", "end")
-        .attr("font-size", "10px")
-        .attr("fill", "#555")
-        .attr("font-weight", "bold")
-        .text(`D${current.decile}`)
+        svg
+          .append("text")
+          .attr("x", barX - 12)
+          .attr("y", y(current.value))
+          .attr("dy", "0.35em")
+          .attr("text-anchor", "end")
+          .attr("font-size", "10px")
+          .attr("fill", axisColor)
+          .attr("font-weight", "bold")
+          .text(`D${current.decile}`)
+      }
     }
 
     // Add a baseline
@@ -213,20 +217,28 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
       .attr("x2", innerWidth)
       .attr("y1", innerHeight)
       .attr("y2", innerHeight)
-      .attr("stroke", "#999")
+      .attr("stroke", axisColor)
       .attr("stroke-width", 1)
 
     // Add Y axis
-    svg
+    const yAxisGroup = svg
       .append("g")
       .call(
         d3
           .axisLeft(y)
           .ticks(5)
-          .tickFormat((d) => formatValue(d as number)),
+          .tickFormat(showTickLabels ? (d) => formatValue(d as number) : () => ""),
       )
-      .selectAll("text")
+    
+    yAxisGroup.selectAll("text")
       .attr("font-size", "10px")
+      .attr("fill", axisColor)
+    
+    yAxisGroup.selectAll("line")
+      .attr("stroke", axisColor)
+    
+    yAxisGroup.select(".domain")
+      .attr("stroke", axisColor)
 
     // Add Y axis label
     svg
@@ -315,6 +327,8 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
     showValues,
     showLegend,
     compact,
+    showTickLabels,
+    axisColor,
     responsive,
     barWidthPixels,
   ])

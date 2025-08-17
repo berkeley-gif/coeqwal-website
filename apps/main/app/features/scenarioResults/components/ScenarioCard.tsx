@@ -282,6 +282,8 @@ const ScenarioCard: React.FC<ScenarioCardProps> = ({
               responsive={true}
               showValues={expanded ? true : false}
               height={400}
+              barWidthPixels={40}
+              axisColor={theme.palette.grey[400]}
             />
           ) : monthlyData ? (
             <LineChart
