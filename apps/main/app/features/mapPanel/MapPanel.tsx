@@ -728,7 +728,9 @@ const MapControls = ({
                         onChange={(e) =>
                           useGlyphSettingsStore
                             .getState()
-                            .setVariant(e.target.value as "bars" | "rose" | "quartile")
+                            .setVariant(
+                              e.target.value as "bars" | "rose" | "quartile",
+                            )
                         }
                         sx={{
                           fontSize: "0.75rem",
