@@ -734,6 +734,21 @@ const MapControls = ({
                           flexDirection: "column",
                           alignItems: "center",
                           gap: 1,
+                          padding: 0.5,
+                          maxWidth: "80px",
+                          borderRadius: (theme) => theme.borderRadius.rounded,
+                          cursor: "pointer",
+                          transition: "background-color 0.2s ease",
+                          "&:hover": {
+                            backgroundColor: (theme) => theme.palette.grey[100],
+                          },
+                          "&:active": {
+                            backgroundColor: (theme) => theme.palette.grey[200],
+                          },
+                        }}
+                        onClick={() => {
+                          // TODO: Handle outcome click - open glossary or show details
+                          console.log(`Clicked on outcome: ${outcome}`)
                         }}
                       >
                         {/* Glyph for outcome */}
@@ -808,7 +823,7 @@ const MapControls = ({
 
                     {/* Climate instruction text */}
                     <Box sx={{ mb: 0 }}>
-                      <Typography variant="body2" sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
                         <Box
                           component="span"
                           sx={{
