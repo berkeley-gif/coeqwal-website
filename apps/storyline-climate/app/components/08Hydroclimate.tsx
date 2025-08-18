@@ -1,6 +1,8 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, LibraryBooksIcon, Typography } from "@repo/ui/mui"
+import { motion, useScroll, useTransform } from "@repo/motion"
+import useActiveSection from "../hooks/useActiveSection"
 
 function SectionResolution() {
   return (
@@ -12,32 +14,59 @@ function SectionResolution() {
 }
 
 function Hydroclimate() {
+  const { sectionRef } = useActiveSection("hydroclimate", { amount: 0.5 })
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.4],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
+
   return (
     <Box
       id="hydroclimate"
+      ref={sectionRef}
       className="container-center"
       height="110vh"
       sx={{ justifyContent: "center" }}
       tabIndex={-1}
       role="region"
     >
-      <Box className="paragraph" component="article">
-        <Typography variant="body1" style={{ fontWeight: "bold" }}>
-          {"This is where COEQWAL comes in."}
-        </Typography>
-      </Box>
-      <Box className="paragraph" component="article">
-        <Typography variant="body1">
-          {
-            "Using a water planning model known as CalSim, COEQWAL shines a light on possible water futures "
-          }
-        </Typography>
-        <Typography variant="body1">
-          {"by simulating the effects of climate on the water system."}
-        </Typography>
-      </Box>
+      <motion.div style={{ opacity: firstParagraphOpacity }}>
+        <Box className="paragraph" component="article">
+          <Typography variant="body1" style={{ fontWeight: "bold" }}>
+            {"This is where COEQWAL comes in."}
+          </Typography>
+        </Box>
+        <Box className="paragraph" component="article">
+          <Typography variant="body1">
+            {
+              "Using a water planning model known as CalSim, COEQWAL shines a light on possible water futures "
+            }
+          </Typography>
+          <Typography variant="body1">
+            {"by simulating the effects of climate on the water system."}
+          </Typography>
+        </Box>
+      </motion.div>
       <Box
-        style={{ height: "50%", width: "80%", backgroundColor: "#128dff" }}
+        style={{
+          height: "50%",
+          width: "80%",
+          backgroundImage: "url('/drafts/hydroclimates.png')",
+          backgroundSize: "contain",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
       ></Box>
       <Box className="paragraph" component="article">
         <Typography variant="caption">
@@ -52,16 +81,18 @@ function Hydroclimate() {
           <u>{"(Hydroclimate futures FAQ)"}</u>
         </Typography>
       </Box>
-      <Box className="paragraph" component="article">
-        <Typography variant="body1">
-          {"COEQWAL evaluates the effect of distinct hydroclimate futures, "}
-        </Typography>
-        <Typography variant="body1">
-          {
-            "which represent a range of possible changes in temperature, precipitation, and streamflow that are predicted by global climate models."
-          }
-        </Typography>
-      </Box>
+      <motion.div style={{ opacity: secondParagraphOpacity }}>
+        <Box className="paragraph" component="article">
+          <Typography variant="body1">
+            {"COEQWAL evaluates the effect of distinct hydroclimate futures, "}
+          </Typography>
+          <Typography variant="body1">
+            {
+              "which represent a range of possible changes in temperature, precipitation, and streamflow that are predicted by global climate models."
+            }
+          </Typography>
+        </Box>
+      </motion.div>
     </Box>
   )
 }
@@ -72,44 +103,115 @@ function Scenarios() {
       id="scenarios"
       className="container-center"
       height="110vh"
-      sx={{ justifyContent: "center" }}
+      sx={{
+        position: "relative",
+        justifyContent: "center",
+        backgroundImage: "url('/drafts/scenario-lines.png')",
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
       tabIndex={-1}
       role="region"
     >
-      <Box className="paragraph" component="article">
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{
+          position: "absolute",
+          textAlign: "left",
+          top: "23%",
+          left: "2rem",
+          width: "30%",
+        }}
+      >
+        <Typography variant="body1">
+          {"COEQWAL also explores the effects of "}
+          <span style={{ fontWeight: "bold" }}>
+            <u>{"different water management decisions"}</u>
+          </span>{" "}
+          <LibraryBooksIcon
+            sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+          />{" "}
+          {" and how these might limit the impacts of climate change."}
+        </Typography>
+      </Box>
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{
+          position: "absolute",
+          textAlign: "left",
+          top: "13%",
+          left: "57%",
+          width: "40%",
+        }}
+      >
+        <Typography variant="h4" style={{ color: "#F1B143" }}>
+          {"Managing Groundwater in a Changing Agricultural Landscape"}
+        </Typography>
+      </Box>
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{
+          position: "absolute",
+          textAlign: "left",
+          top: "23%",
+          left: "57%",
+          width: "40%",
+        }}
+      >
         <Typography variant="body1">
           {
-            "COEQWAL also explores the effects of different water management decisions and how these might limit the impacts of climate change."
+            "For example, COEQWAL looks at scenarios where groundwater pumping is limited under SGMA, sometimes along with cutting back farmland. These show how sustainable groundwater management can help during droughts, though it comes with trade-offs for crop production"
           }
         </Typography>
       </Box>
-      <Box className="paragraph" component="article">
-        <Typography variant="body1">
-          {
-            "For example, COEQWAL evaluates scenarios that would limit pumping of groundwater to comply with SGMA."
-          }
-        </Typography>
-        <Typography variant="body1">
-          {
-            "In some scenarios, groundwater pumping limits are coupled with reductions in agricultural land use to meet sustainable use levels."
-          }
-        </Typography>
-      </Box>
-      <Box className="paragraph" component="article">
-        <Typography variant="body1">
-          {
-            "These scenarios provide insight into how sustainable groundwater management can lessen the impacts of future droughts, "
-          }
-        </Typography>
-        <Typography variant="body1">
-          {"but also involve trade-offs with crop production."}
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{
+          position: "absolute",
+          textAlign: "left",
+          top: "39%",
+          left: "57%",
+          width: "40%",
+        }}
+      >
+        <Typography variant="h4" style={{ color: "#F1B143" }}>
+          {"Improving Reliability of Delta Exports for Farms and Cities"}
         </Typography>
       </Box>
-      <Box className="paragraph" component="article">
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{
+          position: "absolute",
+          textAlign: "left",
+          top: "48%",
+          left: "57%",
+          width: "40%",
+        }}
+      >
         <Typography variant="body1">
           {
             "COEQWAL is also evaluating scenarios that include the Delta Conveyance Project."
           }
+        </Typography>
+      </Box>
+      <Box
+        className="paragraph"
+        component="article"
+        sx={{
+          position: "absolute",
+          textAlign: "left",
+          top: "63%",
+          right: "6rem",
+        }}
+      >
+        <Typography variant="h4" style={{ color: "#F1B143" }}>
+          {"Other scenario themes"}
         </Typography>
       </Box>
     </Box>
