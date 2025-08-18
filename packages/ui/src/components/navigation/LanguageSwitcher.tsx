@@ -27,8 +27,9 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       exclusive
       onChange={handleChange}
       sx={{
-        height: "40px",
-        fontWeight: 600,
+        height: "36px",
+        fontSize: (theme) => theme.typography.button.fontSize,
+        fontWeight: (theme) => theme.typography.button.fontWeight,
         fontFamily: (theme) => theme.typography.fontFamily,
         border: "none",
         "& .MuiToggleButtonGroup-grouped": {
@@ -46,11 +47,12 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       <ToggleButton
         value="en"
         sx={{
-          height: "40px",
-          minHeight: "40px",
+          height: "36px",
+          minHeight: "36px",
           border: "none",
           boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
-          fontWeight: 600,
+          fontSize: (theme) => theme.typography.button.fontSize,
+          fontWeight: (theme) => theme.typography.button.fontWeight,
           fontFamily: (theme) => theme.typography.fontFamily,
           position: "relative",
           overflow: "hidden",
@@ -101,11 +103,12 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       <ToggleButton
         value="es"
         sx={{
-          height: "40px",
-          minHeight: "40px",
+          height: "36px",
+          minHeight: "36px",
           border: "none",
           boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
-          fontWeight: 600,
+          fontSize: (theme) => theme.typography.button.fontSize,
+          fontWeight: (theme) => theme.typography.button.fontWeight,
           fontFamily: (theme) => theme.typography.fontFamily,
           position: "relative",
           overflow: "hidden",
