@@ -720,9 +720,10 @@ const MapControls = ({
                   {/* Grid layout: outcomes charts */}
                   <Box
                     sx={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(2, 1fr)",
-                      gap: 1,
+                      display: "flex",
+                      flexWrap: "wrap",
+                      justifyContent: "center",
+                      gap: 2,
                       alignItems: "start",
                     }}
                   >
