@@ -13,6 +13,7 @@ import SectionTransition from "./components/07AdaptTransition"
 import SectionSupply from "./components/05Groundwater"
 import SectionResolution from "./components/08Hydroclimate"
 import Conclusion from "./components/09Conclusion"
+import Conveyance from "./components/06Conveyance"
 
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -40,6 +41,7 @@ export default function StoryContainer() {
         <Delta />
         <Whiplash />
         <SectionSupply />
+        <Conveyance />
         <SectionTransition />
         <SectionResolution />
         <Conclusion />
