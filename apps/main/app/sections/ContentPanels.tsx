@@ -136,12 +136,12 @@ export default function ContentPanels({
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
           <Typography variant="body1">
-            Many Californians would be surprised to learn how
-            controlled our state&apos;s water is. Californians share water
-            through one of the largest and most complex conveyance and
-            allocation systems in the world, particularly in the Central Valley.
-            Learn how California water flows and water management decisions
-            balance water needs across the state.
+            Many Californians would be surprised to learn how controlled our
+            state&apos;s water is. Californians share water through one of the
+            largest and most complex conveyance and allocation systems in the
+            world, particularly in the Central Valley. Learn how California
+            water flows and water management decisions balance water needs
+            across the state.
           </Typography>
         </LeadingMarkerText>
       </Box>
