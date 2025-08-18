@@ -598,13 +598,15 @@ const IntroSection: React.FC = () => {
           />
 
           {/* Centered text block */}
-          <Box sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}>
-            <Typography
-              variant="body1"
-            >
-              California&apos;s Central Valley water depends<br />on two main things:
+          <Box
+            sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}
+          >
+            <Typography variant="body1">
+              California&apos;s Central Valley water depends
+              <br />
+              on two main things:
             </Typography>
-            
+
             <Box component="ol" sx={{ mt: 0, pl: 3 }}>
               <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
@@ -692,29 +694,31 @@ const IntroSection: React.FC = () => {
               opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
             }}
           />
-          
+
           {/* Text block centered */}
-          <Box sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "720px" } }}>
+          <Box
+            sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "720px" } }}
+          >
             <Typography
               variant="body1"
               sx={{
                 mb: 3,
               }}
             >
-We already face difficult choices. Climate change brings deeper droughts, bigger floods, and growing uncertainty. 
+              We already face difficult choices. Climate change brings deeper
+              droughts, bigger floods, and growing uncertainty.
             </Typography>
-            
-            <Typography
-              variant="body1"
-            >
-              The COEQWAL (Collaboratory for Equity in Water Allocation) project has modeled 30 alternative water management
-              scenarios for the Central Valley water systems that supply most of
-              the state. For each of these scenarios, we also modeled 5 future
-              climate possibilities.
+
+            <Typography variant="body1">
+              The COEQWAL (Collaboratory for Equity in Water Allocation) project
+              has modeled 30 alternative water management scenarios for the
+              Central Valley water systems that supply most of the state. For
+              each of these scenarios, we also modeled 5 future climate
+              possibilities.
             </Typography>
           </Box>
         </Box>
-        
+
         {/* Scroll indicator for 3rd panel */}
         <Box
           sx={{
@@ -731,10 +735,7 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
             delay={0.5}
             scrollToId="fourth-panel"
           >
-            <ArrowHead
-              size={28}
-              style={{ transform: "rotate(90deg)" }}
-            />
+            <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
           </ScrollIndicator>
         </Box>
       </BasePanel>
@@ -783,55 +784,42 @@ We already face difficult choices. Climate change brings deeper droughts, bigger
             >
               The scenarios we run cover these areas of California...
             </Typography>
-            
-                          <Typography
-                variant="body1"
-                sx={{ mb: 2 }}
-              >
-                The goal of the COEQWAL project is to make opaque water management 
-                transparent and accessible.
-              </Typography>
-              
-              <Typography
-                variant="body1"
-                sx={{ mb: 1 }}
-              >
-                On this site you can:
-              </Typography>
-              
-              <Box component="ul" sx={{ pl: 3, mt: 1 }}>
-                <Box component="li" sx={{ mb: 1 }}>
-                  Explore alternative water management scenarios
-                </Box>
-                <Box component="li" sx={{ mb: 1 }}>
-                  Understand the trade-offs
-                </Box>
-                <Box component="li" sx={{ mb: 1 }}>
-                  Use data to advocate for your community
-                </Box>
+
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              The goal of the COEQWAL project is to make opaque water management
+              transparent and accessible.
+            </Typography>
+
+            <Typography variant="body1" sx={{ mb: 1 }}>
+              On this site you can:
+            </Typography>
+
+            <Box component="ul" sx={{ pl: 3, mt: 1 }}>
+              <Box component="li" sx={{ mb: 1 }}>
+                Explore alternative water management scenarios
               </Box>
-              
-              {/* Scroll indicator for 4th panel */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  width: "100%",
-                  color: (theme) => theme.palette.blue.darkest,
-                  mt: 4,
-                }}
-              >
-                <ScrollIndicator
-                  color="currentColor"
-                  size={28}
-                  delay={0.5}
-                >
-                  <ArrowHead
-                    size={28}
-                    style={{ transform: "rotate(90deg)" }}
-                  />
-                </ScrollIndicator>
+              <Box component="li" sx={{ mb: 1 }}>
+                Understand the trade-offs
               </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                Use data to advocate for your community
+              </Box>
+            </Box>
+
+            {/* Scroll indicator for 4th panel */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                color: (theme) => theme.palette.blue.darkest,
+                mt: 4,
+              }}
+            >
+              <ScrollIndicator color="currentColor" size={28} delay={0.5}>
+                <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
+              </ScrollIndicator>
+            </Box>
           </Box>
         </Box>
       </BasePanel>

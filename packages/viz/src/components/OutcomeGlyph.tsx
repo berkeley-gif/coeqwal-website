@@ -17,7 +17,7 @@ const OutcomeGlyph: React.FC<OutcomeGlyphProps> = ({ values, size = 60 }) => {
     ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
         label,
         color: ["#2cc83b", "#2064d4", "#f89740", "#f96262"][idx]!,
-        value: Math.abs(values[idx]), // BarChart expects positive length
+        value: Math.abs(values[idx] ?? 0), // BarChart expects positive length
       }))
     : undefined
 

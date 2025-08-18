@@ -208,7 +208,8 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "Current operations",
     definition:
       "The baseline water management scenario that represents how California's Central Valley water system operates today. This includes current operations of the State Water Project (SWP) managed by the California Department of Water Resources and the Central Valley Project (CVP) operated by the U.S. Bureau of Reclamation. Current operations involve coordinated management of reservoirs, pumping stations, and water deliveries to balance competing demands from urban areas, agriculture, and environmental needs. The system moves water from northern California rivers and reservoirs through the Sacramento-San Joaquin Delta to southern California and the Central Valley. This baseline scenario serves as the foundation for comparing alternative water management approaches and understanding potential trade-offs in water allocation decisions.",
-    seeAlso: "California Department of Water Resources (DWR), U.S. Bureau of Reclamation, Water management decisions",
+    seeAlso:
+      "California Department of Water Resources (DWR), U.S. Bureau of Reclamation, Water management decisions",
   },
   {
     icon: <SettingsIcon />,
@@ -260,7 +261,7 @@ export function CurrentOpsContent({
   ) => {
     console.log("Processing term:", currentTerm)
     console.log("Definition:", definition.substring(0, 100) + "...")
-    
+
     // Check for "Groundwater", "surface water", "allocation", "Central Valley", and "Learn more" in the definition
     const hasGroundwater =
       definition.includes("Groundwater") && currentTerm !== "Groundwater"
@@ -270,9 +271,10 @@ export function CurrentOpsContent({
       definition.includes("allocation") && currentTerm !== "Allocation"
     const hasCentralValley =
       definition.includes("Central Valley") && currentTerm !== "Central Valley"
-    const hasLearnMore =
-      definition.includes("Learn more in the Current operations scenario theme")
-    
+    const hasLearnMore = definition.includes(
+      "Learn more in the Current operations scenario theme",
+    )
+
     console.log("hasLearnMore:", hasLearnMore)
 
     // Helper function to create clickable links for a single term (first occurrence only)
@@ -361,10 +363,13 @@ export function CurrentOpsContent({
     // Handle Learn more link
     if (hasLearnMore) {
       console.log("Has Learn More link detected for:", currentTerm)
-      const learnMoreText = "Learn more in the Current operations scenario theme"
+      const learnMoreText =
+        "Learn more in the Current operations scenario theme"
       const learnMoreIndex = definition.indexOf(learnMoreText)
       const beforeLearnMore = definition.substring(0, learnMoreIndex)
-      const afterLearnMore = definition.substring(learnMoreIndex + learnMoreText.length)
+      const afterLearnMore = definition.substring(
+        learnMoreIndex + learnMoreText.length,
+      )
 
       return (
         <>

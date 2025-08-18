@@ -728,13 +728,14 @@ const MapControls = ({
                         onChange={(e) =>
                           useGlyphSettingsStore
                             .getState()
-                            .setVariant(e.target.value as any)
+                            .setVariant(e.target.value as "bars" | "rose" | "quartile")
                         }
                         sx={{
                           fontSize: "0.75rem",
                           minWidth: "100px",
                           height: "32px",
-                          backgroundColor: (theme) => theme.palette.common.white,
+                          backgroundColor: (theme) =>
+                            theme.palette.common.white,
                           borderRadius: (theme) => theme.borderRadius.rounded,
                           "& .MuiSelect-select": {
                             padding: "6px 12px",
@@ -753,7 +754,8 @@ const MapControls = ({
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
                             borderColor: (theme) => theme.palette.blue.bright,
                             borderWidth: "2px",
-                            boxShadow: (theme) => `0 0 0 1px ${theme.palette.blue.bright}20`,
+                            boxShadow: (theme) =>
+                              `0 0 0 1px ${theme.palette.blue.bright}20`,
                           },
                           "& .MuiSelect-icon": {
                             color: (theme) => theme.palette.grey[500],
@@ -770,26 +772,33 @@ const MapControls = ({
                         MenuProps={{
                           PaperProps: {
                             sx: {
-                              borderRadius: (theme) => theme.borderRadius.rounded,
+                              borderRadius: (theme) =>
+                                theme.borderRadius.rounded,
                               boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-                              border: (theme) => `1px solid ${theme.palette.grey[200]}`,
-                              backgroundColor: (theme) => theme.palette.common.white,
+                              border: (theme) =>
+                                `1px solid ${theme.palette.grey[200]}`,
+                              backgroundColor: (theme) =>
+                                theme.palette.common.white,
                               mt: 0.5,
                               "& .MuiMenuItem-root": {
                                 fontSize: "0.75rem",
                                 padding: "8px 16px",
                                 minHeight: "auto",
-                                backgroundColor: (theme) => theme.palette.common.white,
+                                backgroundColor: (theme) =>
+                                  theme.palette.common.white,
                                 "&:hover": {
-                                  backgroundColor: (theme) => theme.palette.blue.bright + "10",
+                                  backgroundColor: (theme) =>
+                                    theme.palette.blue.bright + "10",
                                   color: (theme) => theme.palette.blue.darkest,
                                 },
                                 "&.Mui-selected": {
-                                  backgroundColor: (theme) => theme.palette.blue.bright + "20",
+                                  backgroundColor: (theme) =>
+                                    theme.palette.blue.bright + "20",
                                   color: (theme) => theme.palette.blue.darkest,
                                   fontWeight: 500,
                                   "&:hover": {
-                                    backgroundColor: (theme) => theme.palette.blue.bright + "30",
+                                    backgroundColor: (theme) =>
+                                      theme.palette.blue.bright + "30",
                                   },
                                 },
                               },
@@ -806,7 +815,7 @@ const MapControls = ({
                     <Box
                       sx={{
                         mb: 0,
-                      }}  
+                      }}
                     >
                       <Typography variant="body2" sx={{ mb: 2 }}>
                         <Box
@@ -817,8 +826,8 @@ const MapControls = ({
                         >
                           Click
                         </Box>{" "}
-                        on each outcome to see how it is defined
-                        and how the results are distributed across the state on the map.
+                        on each outcome to see how it is defined and how the
+                        results are distributed across the state on the map.
                       </Typography>
                     </Box>
                   </Box>
@@ -863,38 +872,38 @@ const MapControls = ({
                           values={(() => {
                             // Generate climate-influenced dummy data based on selectedClimate
                             // 0: Warmer Wetter, 1: Historical, 2-5: Warmer Drier I-IV
-                            
+
                             // Base median value varies by outcome type
-                            const outcomeIndex = OUTCOMES.indexOf(outcome);
-                            const baseMedian = (outcomeIndex * 0.1) - 0.2; // -0.2 to 0.1 range
-                            
+                            const outcomeIndex = OUTCOMES.indexOf(outcome)
+                            const baseMedian = outcomeIndex * 0.1 - 0.2 // -0.2 to 0.1 range
+
                             // Climate affects both central tendency and variability
-                            let medianShift = 0;
-                            let variabilityMultiplier = 1;
-                            
+                            let medianShift = 0
+                            let variabilityMultiplier = 1
+
                             if (selectedClimate === 0) {
                               // Warmer Wetter - better outcomes, less variability
-                              medianShift = 0.3; // More positive = more green/blue (better)
-                              variabilityMultiplier = 0.7;
+                              medianShift = 0.3 // More positive = more green/blue (better)
+                              variabilityMultiplier = 0.7
                             } else if (selectedClimate === 1) {
                               // Historical - baseline
-                              medianShift = 0;
-                              variabilityMultiplier = 1;
+                              medianShift = 0
+                              variabilityMultiplier = 1
                             } else {
                               // Warmer Drier I-IV - worse outcomes, more variability
-                              const drierLevel = selectedClimate - 2; // 0-3
-                              medianShift = -0.2 - (drierLevel * 0.2); // Gets progressively worse: -0.2, -0.4, -0.6, -0.8 (more red/orange)
-                              variabilityMultiplier = 1.2 + (drierLevel * 0.4); // More variable: 1.2, 1.6, 2.0, 2.4
+                              const drierLevel = selectedClimate - 2 // 0-3
+                              medianShift = -0.2 - drierLevel * 0.2 // Gets progressively worse: -0.2, -0.4, -0.6, -0.8 (more red/orange)
+                              variabilityMultiplier = 1.2 + drierLevel * 0.4 // More variable: 1.2, 1.6, 2.0, 2.4
                             }
-                            
-                            const median = baseMedian + medianShift;
-                            const baseSpread = 0.4 * variabilityMultiplier;
-                            
+
+                            const median = baseMedian + medianShift
+                            const baseSpread = 0.4 * variabilityMultiplier
+
                             // Create distribution with climate-appropriate spread
-                            const q1 = median - baseSpread * 0.5;
-                            const q3 = median + baseSpread * 0.3; // Asymmetric - more downside risk
-                            const min = median - baseSpread * 0.8;
-                            
+                            const q1 = median - baseSpread * 0.5
+                            const q3 = median + baseSpread * 0.3 // Asymmetric - more downside risk
+                            const min = median - baseSpread * 0.8
+
                             return [q3, median, q1, min] as [
                               number,
                               number,
@@ -1199,7 +1208,10 @@ const MapControls = ({
                         mb: 0,
                       }}
                     >
-                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, mb: 0 }}
+                      >
                         30 scenarios available • {selectedScenarios.length}{" "}
                         selected
                       </Typography>
@@ -1542,8 +1554,6 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const handleClimateChange = (value: number) => {
     setSelectedClimate(value)
   }
-
-  const glyphVariant = useGlyphSettingsStore((state: any) => state.variant)
 
   return (
     <Box

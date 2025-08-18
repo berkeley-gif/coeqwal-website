@@ -45,7 +45,6 @@ export const useScenarioFilterStore = create<ScenarioFilterState>()(
     clearFilters: () =>
       set((state) => {
         Object.keys(state.outcomeRanges).forEach((key) => {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           state.outcomeRanges[key as OutcomeName] = { ...INITIAL_RANGE }
         })
       }),
