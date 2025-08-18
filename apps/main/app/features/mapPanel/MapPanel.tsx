@@ -863,18 +863,39 @@ const MapControls = ({
                           values={(() => {
                             // Generate climate-influenced dummy data based on selectedClimate
                             // 0: Warmer Wetter, 1: Historical, 2-5: Warmer Drier I-IV
-                            const climateMultiplier = selectedClimate === 0 
-                              ? 0.8  // Warmer Wetter - better outcomes
-                              : selectedClimate === 1 
-                              ? 0.0  // Historical - baseline
-                              : -0.3 - (selectedClimate - 2) * 0.15; // Warmer Drier - worse outcomes
                             
-                            // Add some variation based on outcome index for different patterns
+                            // Base median value varies by outcome type
                             const outcomeIndex = OUTCOMES.indexOf(outcome);
-                            const outcomeVariation = (outcomeIndex * 0.1) - 0.2;
+                            const baseMedian = (outcomeIndex * 0.1) - 0.2; // -0.2 to 0.1 range
                             
-                            const v = climateMultiplier + outcomeVariation;
-                            return [v - 0.3, v - 0.1, v, v + 0.2] as [
+                            // Climate affects both central tendency and variability
+                            let medianShift = 0;
+                            let variabilityMultiplier = 1;
+                            
+                            if (selectedClimate === 0) {
+                              // Warmer Wetter - better outcomes, less variability
+                              medianShift = 0.3; // More positive = more green/blue (better)
+                              variabilityMultiplier = 0.7;
+                            } else if (selectedClimate === 1) {
+                              // Historical - baseline
+                              medianShift = 0;
+                              variabilityMultiplier = 1;
+                            } else {
+                              // Warmer Drier I-IV - worse outcomes, more variability
+                              const drierLevel = selectedClimate - 2; // 0-3
+                              medianShift = -0.2 - (drierLevel * 0.2); // Gets progressively worse: -0.2, -0.4, -0.6, -0.8 (more red/orange)
+                              variabilityMultiplier = 1.2 + (drierLevel * 0.4); // More variable: 1.2, 1.6, 2.0, 2.4
+                            }
+                            
+                            const median = baseMedian + medianShift;
+                            const baseSpread = 0.4 * variabilityMultiplier;
+                            
+                            // Create distribution with climate-appropriate spread
+                            const q1 = median - baseSpread * 0.5;
+                            const q3 = median + baseSpread * 0.3; // Asymmetric - more downside risk
+                            const min = median - baseSpread * 0.8;
+                            
+                            return [q3, median, q1, min] as [
                               number,
                               number,
                               number,
