@@ -3,7 +3,7 @@
 import React from "react"
 import { Header } from "@repo/ui"
 import type { SecondaryNavItem } from "@repo/ui"
-import { useDrawerStore } from "@repo/state"
+
 import { useRouter } from "next/navigation"
 
 interface StoreConnectedHeaderProps {
@@ -23,19 +23,7 @@ export function StoreConnectedHeader({
 }: StoreConnectedHeaderProps) {
   const router = useRouter()
 
-  // Get individual pieces of state from the store to avoid infinite loop
-  const activeTab = useDrawerStore((state) => state.activeTab)
-  const openDrawer = useDrawerStore((state) => state.openDrawer)
-  const closeDrawer = useDrawerStore((state) => state.closeDrawer)
 
-  // Handle toggling the glossary tab
-  const handleGlossaryToggle = () => {
-    if (activeTab === "glossary") {
-      closeDrawer()
-    } else {
-      openDrawer("glossary")
-    }
-  }
 
   // Handle data page navigation
   const handleDataClick = () => {
@@ -46,7 +34,6 @@ export function StoreConnectedHeader({
     <Header
       activeSection={activeSection}
       onSectionClick={onSectionClick}
-      onGlossaryClick={handleGlossaryToggle}
       onDataClick={handleDataClick}
       showSecondaryNav={false}
     />
