@@ -94,6 +94,8 @@ const themeValues = {
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     gtSuperText:
       '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    ingeborgTrial:
+      '"Ingeborg Trial", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
   // Layout dimensions (for panel layout calculations)
@@ -707,16 +709,16 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.ingeborgTrial,
       fontSize: typeScale.h1,
-      fontWeight: 500,
+      fontWeight: 700,
       lineHeight: 1.1,
       color: themeValues.palette.blue.darkest,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.neueHaasDisplay,
+      fontFamily: themeValues.fontFamily.ingeborgTrial,
       fontSize: typeScale.h2,
-      fontWeight: 500,
+      fontWeight: 700,
       lineHeight: 1.2,
       color: themeValues.palette.blue.darkest,
     },
@@ -752,7 +754,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.baseBody, // 1.25rem/20px - primary body text
       fontWeight: 400,
-      lineHeight: "1.875rem", // 30px line height (1.5x ratio)
+      lineHeight: 1.5, // 1.5x ratio (30px at 20px font size)
       color: themeValues.palette.blue.darkest,
     },
     body2: {
@@ -1100,6 +1102,15 @@ const theme = createTheme({
           font-family: 'GT Super Display';
           src: url('/fonts/GT-Super-Display-Super-Trial.otf') format('opentype');
           font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        /* Ingeborg Trial Font Family */
+        @font-face {
+          font-family: 'Ingeborg Trial';
+          src: url('/fonts/IngeborgTrial-Bold.otf') format('opentype');
+          font-weight: 700;
           font-style: normal;
           font-display: swap;
         }
