@@ -747,7 +747,7 @@ const MapControls = ({
                               number,
                             ]
                           })()}
-                          size={50}
+                          size={56}
                           variant={glyphVariant}
                         />
 
@@ -792,6 +792,21 @@ const MapControls = ({
                         glossaryEntry="Changing climate"
                         onGlossaryOpen={handleGlossaryOpen}
                       />
+                    </Box>
+
+                    {/* Climate instruction text */}
+                    <Box sx={{ mb: 0 }}>
+                      <Typography variant="body2" sx={{ mb: 2 }}>
+                        <Box
+                          component="span"
+                          sx={{
+                            color: (theme) => theme.palette.text.secondary,
+                          }}
+                        >
+                          Slide
+                        </Box>{" "}
+                        to explore how climate affects outcomes.
+                      </Typography>
                     </Box>
 
                     {/* Climate slider */}
