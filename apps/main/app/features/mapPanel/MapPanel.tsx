@@ -739,7 +739,19 @@ const MapControls = ({
                         {/* Glyph for outcome */}
                         <ScenarioGlyph
                           values={(() => {
-                            const v = Math.random() * 0.8 - 0.4 // -0.4..0.4 dummy median
+                            // Generate climate-influenced dummy data based on selectedClimate
+                            // 0: Warmer Wetter, 1: Historical, 2-5: Warmer Drier I-IV
+                            const climateMultiplier = selectedClimate === 0 
+                              ? 0.8  // Warmer Wetter - better outcomes
+                              : selectedClimate === 1 
+                              ? 0.0  // Historical - baseline
+                              : -0.3 - (selectedClimate - 2) * 0.15; // Warmer Drier - worse outcomes
+                            
+                            // Add some variation based on outcome index for different patterns
+                            const outcomeIndex = OUTCOMES.indexOf(outcome);
+                            const outcomeVariation = (outcomeIndex * 0.1) - 0.2;
+                            
+                            const v = climateMultiplier + outcomeVariation;
                             return [v - 0.3, v - 0.1, v, v + 0.2] as [
                               number,
                               number,
