@@ -527,6 +527,7 @@ const MapControls = ({
                         fontWeight: 500,
                         fontSize: "1.5rem",
                         lineHeight: 1.3,
+                        mb: 1,
                       }}
                     >
                       Current operations scenario
@@ -606,7 +607,7 @@ const MapControls = ({
                             color: (theme) => theme.palette.blue.darkest,
                           }}
                         >
-                          Scenario snapshot
+                          Scenario outcomes
                         </Typography>
                         <InfoIconButton
                           mode="glossary"
@@ -625,14 +626,68 @@ const MapControls = ({
                         }
                         sx={{
                           fontSize: "0.75rem",
+                          minWidth: "100px",
+                          height: "32px",
+                          backgroundColor: (theme) => theme.palette.common.white,
+                          borderRadius: (theme) => theme.borderRadius.rounded,
+                          "& .MuiSelect-select": {
+                            padding: "6px 12px",
+                            display: "flex",
+                            alignItems: "center",
+                          },
                           "& .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "0.5px !important",
+                            borderWidth: "1px",
+                            borderColor: (theme) => theme.palette.grey[300],
+                            borderRadius: (theme) => theme.borderRadius.rounded,
                           },
                           "&:hover .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "0.5px !important",
+                            borderColor: (theme) => theme.palette.blue.medium,
+                            borderWidth: "1px",
                           },
                           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                            borderWidth: "0.5px !important",
+                            borderColor: (theme) => theme.palette.blue.bright,
+                            borderWidth: "2px",
+                            boxShadow: (theme) => `0 0 0 1px ${theme.palette.blue.bright}20`,
+                          },
+                          "& .MuiSelect-icon": {
+                            color: (theme) => theme.palette.grey[500],
+                            fontSize: "1.2rem",
+                            right: "8px",
+                          },
+                          "&:hover .MuiSelect-icon": {
+                            color: (theme) => theme.palette.blue.medium,
+                          },
+                          "&.Mui-focused .MuiSelect-icon": {
+                            color: (theme) => theme.palette.blue.bright,
+                          },
+                        }}
+                        MenuProps={{
+                          PaperProps: {
+                            sx: {
+                              borderRadius: (theme) => theme.borderRadius.rounded,
+                              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                              border: (theme) => `1px solid ${theme.palette.grey[200]}`,
+                              backgroundColor: (theme) => theme.palette.common.white,
+                              mt: 0.5,
+                              "& .MuiMenuItem-root": {
+                                fontSize: "0.75rem",
+                                padding: "8px 16px",
+                                minHeight: "auto",
+                                backgroundColor: (theme) => theme.palette.common.white,
+                                "&:hover": {
+                                  backgroundColor: (theme) => theme.palette.blue.bright + "10",
+                                  color: (theme) => theme.palette.blue.darkest,
+                                },
+                                "&.Mui-selected": {
+                                  backgroundColor: (theme) => theme.palette.blue.bright + "20",
+                                  color: (theme) => theme.palette.blue.darkest,
+                                  fontWeight: 500,
+                                  "&:hover": {
+                                    backgroundColor: (theme) => theme.palette.blue.bright + "30",
+                                  },
+                                },
+                              },
+                            },
                           },
                         }}
                       >
@@ -644,12 +699,10 @@ const MapControls = ({
 
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.text.primary,
-                        fontFamily: (theme) => theme.typography.fontFamily,
-                        mb: 2.5,
-                      }}
+                        mb: 0,
+                      }}  
                     >
-                      <Typography variant="body2">
+                      <Typography variant="body2" sx={{ mb: 2 }}>
                         <Box
                           component="span"
                           sx={{
@@ -658,8 +711,8 @@ const MapControls = ({
                         >
                           Click
                         </Box>{" "}
-                        on each outcome to see how its measurements are defined
-                        and how they are distributed across the state.
+                        on each outcome to see how it is defined
+                        and how the results are distributed across the state on the map.
                       </Typography>
                     </Box>
                   </Box>
