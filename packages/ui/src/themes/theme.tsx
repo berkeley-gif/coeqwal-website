@@ -780,7 +780,7 @@ const theme = createTheme({
       color: themeValues.palette.blue.darkest,
     },
     button: {
-      fontSize: "1.25rem", // align with body1
+      fontSize: "1rem", // 16px - standard for top-level UI elements
       letterSpacing: "normal",
       fontWeight: 500,
       textTransform: "none",
