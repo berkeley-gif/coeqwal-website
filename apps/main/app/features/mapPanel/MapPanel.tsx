@@ -529,11 +529,11 @@ const MapControls = ({
                         lineHeight: 1.3,
                       }}
                     >
-                      Current operations
+                      Current operations scenario
                     </Box>
                     <InfoIconButton
                       mode="glossary"
-                      glossaryEntry="Current operations"
+                      glossaryEntry="Current operations scenario"
                       onGlossaryOpen={handleGlossaryOpen}
                     />
                   </Box>
@@ -548,7 +548,7 @@ const MapControls = ({
                     <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
                       <Typography
                         component="li"
-                        variant="body1"
+                        variant="body2"
                         sx={{
                           mb: 0,
                           color: "inherit",
@@ -558,7 +558,7 @@ const MapControls = ({
                       </Typography>
                       <Typography
                         component="li"
-                        variant="body1"
+                        variant="body2"
                         sx={{
                           mb: 0,
                           color: "inherit",
@@ -649,7 +649,7 @@ const MapControls = ({
                         mb: 2.5,
                       }}
                     >
-                      <Typography variant="body1">
+                      <Typography variant="body2">
                         <Box
                           component="span"
                           sx={{
@@ -976,7 +976,7 @@ const MapControls = ({
                         mb: 1,
                       }}
                     >
-                      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         30 scenarios available • {selectedScenarios.length}{" "}
                         selected
                       </Typography>

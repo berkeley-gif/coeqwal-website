@@ -203,6 +203,20 @@ const glossaryTerms: GlossaryTerm[] = [
       "A proposed water infrastructure project designed to improve the reliability of water deliveries from the Sacramento-San Joaquin Delta. The project includes tunnel alternatives that would convey water under the Delta, reducing impacts on fish and improving water supply reliability. The Bethany Alternative refers to a specific tunnel route ending at Bethany Reservoir instead of Clifton Court Forebay.",
     seeAlso: "Conveyance",
   },
+  {
+    icon: <SettingsIcon />,
+    term: "Current operations",
+    definition:
+      "The baseline water management scenario that represents how California's Central Valley water system operates today. This includes current operations of the State Water Project (SWP) managed by the California Department of Water Resources and the Central Valley Project (CVP) operated by the U.S. Bureau of Reclamation. Current operations involve coordinated management of reservoirs, pumping stations, and water deliveries to balance competing demands from urban areas, agriculture, and environmental needs. The system moves water from northern California rivers and reservoirs through the Sacramento-San Joaquin Delta to southern California and the Central Valley. This baseline scenario serves as the foundation for comparing alternative water management approaches and understanding potential trade-offs in water allocation decisions.",
+    seeAlso: "California Department of Water Resources (DWR), U.S. Bureau of Reclamation, Water management decisions",
+  },
+  {
+    icon: <SettingsIcon />,
+    term: "Current operations scenario",
+    definition:
+      "The baseline modeling scenario used in COEQWAL analysis that represents today's water management practices in California's Central Valley. This scenario models the coordinated operations of the State Water Project (SWP) and Central Valley Project (CVP) under current institutional, regulatory, and infrastructure conditions. It includes existing reservoir operations, environmental flow requirements, and water allocation priorities as they currently exist. The current operations scenario provides the reference point for evaluating how alternative management strategies might change water outcomes for different users and regions. Learn more in the Current operations scenario theme.",
+    seeAlso: "Current operations, CalSim, Water management decisions",
+  },
 ].sort((a, b) => a.term.localeCompare(b.term))
 
 /**
