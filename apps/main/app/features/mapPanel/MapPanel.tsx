@@ -722,7 +722,7 @@ const MapControls = ({
                     sx={{
                       display: "grid",
                       gridTemplateColumns: "repeat(2, 1fr)",
-                      gap: 2,
+                      gap: 1,
                       alignItems: "start",
                     }}
                   >
