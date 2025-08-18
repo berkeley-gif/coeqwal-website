@@ -112,7 +112,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
                       timeoutId = setTimeout(resolve, 4500)
                     })
                   }
-                } catch (error) {
+                } catch {
                   // Animation interrupted, exit gracefully
                   break
                 }
@@ -122,7 +122,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
             if (animationRunning) {
               animateWithPauses()
             }
-          } catch (error) {
+          } catch {
             // Animation interrupted, exit gracefully
           }
         }, delay * 1000)
@@ -134,7 +134,7 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
             y: 20,
             transition: { duration: hideDuration },
           })
-        } catch (error) {
+        } catch {
           // Animation interrupted, exit gracefully
         }
       }
