@@ -215,7 +215,7 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "Current operations scenario",
     definition:
       "The baseline modeling scenario used in COEQWAL analysis that represents today's water management practices in California's Central Valley. This scenario models the coordinated operations of the State Water Project (SWP) and Central Valley Project (CVP) under current institutional, regulatory, and infrastructure conditions. It includes existing reservoir operations, environmental flow requirements, and water allocation priorities as they currently exist. The current operations scenario provides the reference point for evaluating how alternative management strategies might change water outcomes for different users and regions. Learn more in the Current operations scenario theme.",
-    seeAlso: "Current operations, CalSim, Water management decisions",
+    seeAlso: "CalSim, Water management decisions",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
 
@@ -258,7 +258,10 @@ export function CurrentOpsContent({
     definition: string,
     currentTerm: string,
   ) => {
-    // Check for "Groundwater", "surface water", "allocation", and "Central Valley" in the definition
+    console.log("Processing term:", currentTerm)
+    console.log("Definition:", definition.substring(0, 100) + "...")
+    
+    // Check for "Groundwater", "surface water", "allocation", "Central Valley", and "Learn more" in the definition
     const hasGroundwater =
       definition.includes("Groundwater") && currentTerm !== "Groundwater"
     const hasSurfaceWater =
@@ -267,6 +270,10 @@ export function CurrentOpsContent({
       definition.includes("allocation") && currentTerm !== "Allocation"
     const hasCentralValley =
       definition.includes("Central Valley") && currentTerm !== "Central Valley"
+    const hasLearnMore =
+      definition.includes("Learn more in the Current operations scenario theme")
+    
+    console.log("hasLearnMore:", hasLearnMore)
 
     // Helper function to create clickable links for a single term (first occurrence only)
     const createLinksForSingleTerm = (
@@ -345,9 +352,43 @@ export function CurrentOpsContent({
       hasGroundwater &&
       !hasSurfaceWater &&
       !hasAllocation &&
-      !hasCentralValley
+      !hasCentralValley &&
+      !hasLearnMore
     ) {
       return createLinksForSingleTerm(definition, "Groundwater", "Groundwater")
+    }
+
+    // Handle Learn more link
+    if (hasLearnMore) {
+      console.log("Has Learn More link detected for:", currentTerm)
+      const learnMoreText = "Learn more in the Current operations scenario theme"
+      const learnMoreIndex = definition.indexOf(learnMoreText)
+      const beforeLearnMore = definition.substring(0, learnMoreIndex)
+      const afterLearnMore = definition.substring(learnMoreIndex + learnMoreText.length)
+
+      return (
+        <>
+          {beforeLearnMore}
+          <Box
+            component="span"
+            sx={{
+              color: "#449cd9", // theme.palette.blue.bright
+              cursor: "pointer",
+              textDecoration: "underline",
+              "&:hover": {
+                color: "#77a2d9", // theme.palette.blue.light
+              },
+            }}
+            onClick={() => {
+              // TODO: Navigate to Current operations scenario theme page
+              console.log("Navigate to Current operations scenario theme")
+            }}
+          >
+            {learnMoreText}
+          </Box>
+          {afterLearnMore}
+        </>
+      )
     }
 
     // For complex cases with multiple terms, handle them in order of appearance
