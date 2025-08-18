@@ -67,14 +67,14 @@ import type { CSSProperties } from "react"
 // • h4: 1.9rem (30.4px) - Card titles and smaller headlines (Display Medium)
 // • h5: 1.425rem (22.8px) - Labels and minor headlines (Display Medium)
 // • h6: 1.1rem (17.6px) - Small headlines and captions (Display Medium)
-// • body1: 1.5rem (24px) - Primary body text (Text Regular)
+// • body1: 1.25rem (20px) - Primary body text (Text Regular)
 // • body2: 1rem (16px) - Dashboard interface text (Text Regular)
 //
 
 const typeScale = {
   // Base sizes for the scale
-  baseBody: "1.5rem", // 24px - primary body text
-  smallBody: "1rem", // 16px - dashboard interface text
+  baseBody: "1.25rem", // 20px - primary body text
+  smallBody: "0.95rem", // 15.2px - dashboard interface text
 
   // Headline sizes (moderately reduced for better proportion)
   h1: "5rem", // 80px - Hero size (reduced from 92px)
@@ -570,7 +570,7 @@ const theme = createTheme({
         fontWeight: 400,
       },
       body: {
-        fontSize: "0.95rem", // 15.2px - matches body1
+        fontSize: "0.95rem", // matches body1
         lineHeight: 1.5,
         fontWeight: 400,
       },
@@ -750,14 +750,14 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // Now 1.5rem/24px - primary body text
+      fontSize: typeScale.baseBody, // 1.25rem/20px - primary body text
       fontWeight: 400,
-      lineHeight: "2.25rem", // 36px line height
+      lineHeight: "1.875rem", // 30px line height (1.5x ratio)
       color: themeValues.palette.blue.darkest,
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody, // Now 1rem/16px - dashboard interface text
+      fontSize: typeScale.smallBody, // 0.95rem/15.2px - dashboard interface text
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: 1.6, // Consistent line height ratio

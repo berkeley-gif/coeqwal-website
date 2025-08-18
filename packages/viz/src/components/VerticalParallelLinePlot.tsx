@@ -108,46 +108,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       .attr("opacity", 0.1)
       .attr("rx", 4)
 
-    // Create scenario range bands (hidden by default, shown on hover)
-    const scenarioRangeGroup = g.append("g").attr("class", "scenario-ranges")
-
-    // Function to show scenario range for a specific scenario
-    const showScenarioRange = (
-      scenario: VerticalParallelLineData,
-      dataIndex: number,
-    ) => {
-      // Clear existing ranges
-      scenarioRangeGroup.selectAll("*").remove()
-
-      axes.forEach((axis) => {
-        const value = scenario.values[axis] ?? 0
-        const yPos = yScale(axis)! - 4
-        const bandHeight = 12
-        const xPos = scales[axis]!(value)
-        const bandWidth = 8 // Small band around the specific value
-
-        scenarioRangeGroup
-          .append("rect")
-          .attr("x", xPos - bandWidth / 2)
-          .attr("y", yPos - (bandHeight - 8) / 2)
-          .attr("width", bandWidth)
-          .attr("height", bandHeight)
-          .attr(
-            "fill",
-            lineColors.length > dataIndex
-              ? lineColors[dataIndex]!
-              : colors.default,
-          )
-          .attr("opacity", 0.3)
-          .attr("rx", 3)
-      })
-    }
-
-    // Function to hide scenario ranges
-    const hideScenarioRange = () => {
-      scenarioRangeGroup.selectAll("*").remove()
-    }
-
     // Draw horizontal axes
     axes.forEach((axis) => {
       const yPos = yScale(axis)!
@@ -263,8 +223,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       .attr("opacity", (d) => (d.highlighted ? 0.9 : 0.2)) // Transparent data lines
       .style("cursor", "pointer")
       .on("mouseover", function (_event, d) {
-        const dataIndex = data.findIndex((item) => item.id === d.id)
-
         // Highlight line on hover
         d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
 
@@ -276,9 +234,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           )
           .attr("r", d.highlighted ? 6 : 5)
           .attr("opacity", 1)
-
-        // Show scenario range
-        showScenarioRange(d, dataIndex)
 
         onLineHover?.(d)
       })
@@ -296,9 +251,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           )
           .attr("r", d.highlighted ? 5 : 4)
           .attr("opacity", d.highlighted ? 1 : 0.8)
-
-        // Hide scenario range
-        hideScenarioRange()
 
         onLineHover?.(null)
       })
@@ -338,9 +290,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               )
               .attr("stroke-width", 3)
               .attr("opacity", 1)
-
-            // Show scenario range
-            showScenarioRange(d, dataIndex)
           })
           .on("mouseout", function () {
             onLineHover?.(null)
@@ -356,9 +305,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               )
               .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
               .attr("opacity", d.highlighted ? 0.9 : 0.2)
-
-            // Hide scenario range
-            hideScenarioRange()
           })
           .on("click", function () {
             onLineClick?.(d)
@@ -378,29 +324,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("fill", "#333")
         .text(title)
     }
-
-    // 👉 Add legend explaining band meaning
-    const legendGroup = svg.append("g")
-    const legendX = currentWidth - margin.right - 120
-    const legendY = margin.top - 10
-
-    legendGroup
-      .append("rect")
-      .attr("x", legendX)
-      .attr("y", legendY)
-      .attr("width", 18)
-      .attr("height", 10)
-      .attr("fill", colors.default)
-      .attr("opacity", 0.25)
-      .attr("rx", 2)
-
-    legendGroup
-      .append("text")
-      .attr("x", legendX + 24)
-      .attr("y", legendY + 9)
-      .attr("font-size", "12px")
-      .attr("fill", "#333")
-      .text("Scenario range")
   }, [
     data,
     axes,
