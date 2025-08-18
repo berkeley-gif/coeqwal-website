@@ -72,54 +72,83 @@ export const ScrollIndicator: React.FC<ScrollIndicatorProps> = ({
   }
 
   useEffect(() => {
+    let animationRunning = true
+    let timeoutId: NodeJS.Timeout | null = null
+
     const animateIndicator = async () => {
+      if (!animationRunning) return
+
       if (animationComplete) {
         // Wait for specified delay
-        await new Promise((resolve) => setTimeout(resolve, delay * 1000))
+        timeoutId = setTimeout(async () => {
+          if (!animationRunning) return
 
-        // Start the animation sequence
-        await controls.start({
-          opacity: 1,
-          y: 0,
-          transition: { duration: showDuration },
-        })
-
-        // Begin the pulsing/bouncing animation with pauses
-        let animationRunning = true
-
-        const animateWithPauses = async () => {
-          while (animationRunning) {
-            // Animate 3 bounces
+          try {
+            // Start the animation sequence
             await controls.start({
-              y: [0, 10, 0, 10, 0, 10, 0],
-              transition: {
-                duration: 6, // seconds per pulse × 3 pulses
-                ease: "easeInOut",
-              },
+              opacity: 1,
+              y: 0,
+              transition: { duration: showDuration },
             })
 
-            // Wait/pause for 3 cycle durations (4.5 seconds)
-            await new Promise((resolve) => setTimeout(resolve, 4500))
+            // Begin the pulsing/bouncing animation with pauses
+            const animateWithPauses = async () => {
+              while (animationRunning) {
+                if (!animationRunning) break
+
+                try {
+                  // Animate 3 bounces
+                  await controls.start({
+                    y: [0, 10, 0, 10, 0, 10, 0],
+                    transition: {
+                      duration: 6, // seconds per pulse × 3 pulses
+                      ease: "easeInOut",
+                    },
+                  })
+
+                  // Wait/pause for 3 cycle durations (4.5 seconds)
+                  if (animationRunning) {
+                    await new Promise((resolve) => {
+                      timeoutId = setTimeout(resolve, 4500)
+                    })
+                  }
+                } catch (error) {
+                  // Animation interrupted, exit gracefully
+                  break
+                }
+              }
+            }
+
+            if (animationRunning) {
+              animateWithPauses()
+            }
+          } catch (error) {
+            // Animation interrupted, exit gracefully
           }
-        }
-
-        animateWithPauses()
-
-        // Cleanup function to stop animation
-        return () => {
-          animationRunning = false
-        }
+        }, delay * 1000)
       } else {
         // Hide the indicator if animation isn't complete
-        controls.start({
-          opacity: 0,
-          y: 20,
-          transition: { duration: hideDuration },
-        })
+        try {
+          controls.start({
+            opacity: 0,
+            y: 20,
+            transition: { duration: hideDuration },
+          })
+        } catch (error) {
+          // Animation interrupted, exit gracefully
+        }
       }
     }
 
     animateIndicator()
+
+    // Cleanup function
+    return () => {
+      animationRunning = false
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
   }, [
     animationComplete,
     controls,

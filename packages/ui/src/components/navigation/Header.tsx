@@ -17,7 +17,6 @@ type HeaderTranslations = {
   buttons: {
     getData: string
     about: string
-    glossary: string
   }
 }
 
@@ -26,7 +25,7 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
-// Incoming: secondary nav option
+// Secondary nav option (optional)
 export interface SecondaryNavItem {
   key: string
   label: string
@@ -40,8 +39,6 @@ interface HeaderProps {
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
-  // Glossary functionality
-  onGlossaryClick?: () => void
   onDataClick?: () => void
 }
 
@@ -49,17 +46,15 @@ const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
     buttons: {
-      getData: "Data",
       about: "About COEQWAL",
-      glossary: "Glossary",
+      getData: "Download data",
     },
   },
   es: {
     title: "COEQWAL",
     buttons: {
-      getData: "Datos sin procesar",
       about: "Sobre COEQWAL",
-      glossary: "Glosario",
+      getData: "Descargar datos",
     },
   },
 }
@@ -78,7 +73,6 @@ export function Header({
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [], // Default to empty array, bc optional
-  onGlossaryClick,
   onDataClick,
 }: HeaderProps) {
   const theme = useTheme()
@@ -245,6 +239,42 @@ export function Header({
         >
           <Button
             variant={buttonVariant}
+            sx={{
+              ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
+            }}
+          >
+            {componentText.buttons.about}
+          </Button>
+          <Button
+            variant={buttonVariant}
             onClick={onDataClick}
             sx={{
               ...buttonStyle,
@@ -280,83 +310,6 @@ export function Header({
           >
             {componentText.buttons.getData}
           </Button>
-          <Button
-            variant={buttonVariant}
-            sx={{
-              ...buttonStyle,
-              color: textColor,
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                backgroundColor: "white",
-                color: (theme) => theme.palette.blue.darkest,
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
-                "&::before": {
-                  opacity: 1,
-                },
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                background:
-                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
-                transition: "left 0.5s ease",
-                opacity: 0,
-              },
-              "&:hover::before": {
-                left: "100%",
-              },
-            }}
-          >
-            {componentText.buttons.about}
-          </Button>
-          {onGlossaryClick && (
-            <Button
-              variant={buttonVariant}
-              onClick={onGlossaryClick}
-              sx={{
-                ...buttonStyle,
-                color: textColor,
-                position: "relative",
-                overflow: "hidden",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  backgroundColor: "white",
-                  color: (theme) => theme.palette.blue.darkest,
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
-                  "&::before": {
-                    opacity: 1,
-                  },
-                },
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: "-100%",
-                  width: "100%",
-                  height: "100%",
-                  background:
-                    textColor === "white"
-                      ? "linear-gradient(90deg, transparent, rgba(118, 185, 170, 0.1), transparent)"
-                      : "linear-gradient(90deg, transparent, rgba(255, 216, 126, 0.1), transparent)",
-                  transition: "left 0.5s ease",
-                  opacity: 0,
-                },
-                "&:hover::before": {
-                  left: "100%",
-                },
-              }}
-            >
-              {componentText.buttons.glossary}
-            </Button>
-          )}
           <LanguageSwitcher />
         </Stack>
       </Toolbar>
