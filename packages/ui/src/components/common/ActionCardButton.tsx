@@ -67,7 +67,7 @@ export function ActionCardButton({
         }}
       >
         <Typography
-          variant="body1"
+          variant="body2"
           sx={{ fontWeight: 500, mb: subtitle ? 0.5 : 0 }}
         >
           {title}

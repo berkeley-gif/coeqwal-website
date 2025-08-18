@@ -184,31 +184,137 @@ const MapControls = ({
       id: "select-scenarios",
       title: "Select scenarios",
       content: (
-        <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-          <VerticalParallelLinePlot
-            data={chartData.props.data.map((d) => ({
-              ...d,
-              highlighted: selectedScenarios.includes(d.id),
-            }))}
-            axes={chartData.props.axes}
-            responsive={true}
-            height={400}
-            margin={{ top: 20, right: 20, bottom: 40, left: 120 }}
-            lineColors={[
-              "#1f77b4",
-              "#ff7f0e",
-              "#2ca02c",
-              "#d62728",
-              "#9467bd",
-              "#8c564b",
-              "#e377c2",
-              "#7f7f7f",
-              "#bcbd22",
-              "#17becf",
-            ]}
-            onLineClick={(scenario) => onScenarioSelect(scenario.id)}
-            onLineHover={(scenario) => console.log("Hovered:", scenario?.name)}
-          />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          {/* Outcomes paragraph, visible when chart not expanded */}
+          {!expandChart && (
+            <Box sx={{ flexShrink: 0 }}>
+              <Box
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 400,
+                  lineHeight: 1.4,
+                  color: (theme) => theme.palette.text.primary,
+                  mb: 1,
+                }}
+              >
+                Compare scenarios across multiple outcomes to understand
+                trade-offs and synergies in California&apos;s water management.{" "}
+                <Box
+                  component="span"
+                  onClick={handleLearnMoreClick}
+                  sx={{
+                    color: (theme) => theme.palette.blue.bright,
+                    fontSize: "0.95rem",
+                    cursor: "pointer",
+                    fontWeight: 500,
+                    textDecoration: "underline",
+                    whiteSpace: "nowrap",
+                    "&:hover": {
+                      color: (theme) => theme.palette.blue.darkest,
+                    },
+                  }}
+                >
+                  Learn more about this chart
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {/* Control Section, always visible */}
+          <Box sx={{ flexShrink: 0, mb: 1 }}>
+            {/* Expand chart button, always visible */}
+            <Box sx={{ mb: 1 }}>
+              <Button
+                variant="text"
+                onClick={toggleExpandChart}
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  color: (theme) => theme.palette.blue.bright,
+                  padding: 0,
+                  minWidth: "auto",
+                  textTransform: "none",
+                  justifyContent: "flex-start",
+                  "&:hover": {
+                    color: (theme) => theme.palette.blue.darkest,
+                    backgroundColor: "transparent",
+                  },
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.875em",
+                    marginRight: "8px",
+                    display: "inline-block",
+                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  ▼
+                </span>
+                {expandChart ? "Reduce" : "Expand"} chart
+              </Button>
+            </Box>
+
+            {/* Chart controls */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
+                mt: 1,
+                mb: 1,
+                width: "100%",
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isRelativeView}
+                    onChange={handleViewModeChange}
+                    size="small"
+                  />
+                }
+                label="relative to current operations"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={highlightBaseline}
+                    onChange={handleHighlightBaselineChange}
+                    size="small"
+                  />
+                }
+                label="highlight current operations"
+              />
+            </Box>
+          </Box>
+
+          {/* Responsive Chart Visualization */}
+          <Box
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              height: "100%",
+              minHeight: 0,
+              maxHeight: "none",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <VerticalParallelLinePlot
+              key={chartData.key}
+              {...chartData.props}
+            />
+          </Box>
         </Box>
       ),
     },
@@ -858,7 +964,7 @@ const MapControls = ({
                 </Box>
               )}
 
-              {/* COMMENTED OUT - Will use later */}
+              {/* COMMENTED OUT, may use later */}
               {/* Minimized state */}
               {/* {isFirstCardMinimized && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
@@ -1042,7 +1148,7 @@ const MapControls = ({
             gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width)
           }}
         >
-          {/* Dynamic Scenario Panel */}
+          {/* Alternative scenarios panel */}
           <Box sx={{ position: "relative" }}>
             <ScenarioCard
               topLine={isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"}
@@ -1069,10 +1175,10 @@ const MapControls = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        mb: 1,
+                        mb: 0,
                       }}
                     >
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0 }}>
                         30 scenarios available • {selectedScenarios.length}{" "}
                         selected
                       </Typography>
@@ -1175,7 +1281,7 @@ const MapControls = ({
             </Box>
           </Box>
 
-          {/* Quick Actions at bottom */}
+          {/* Quick actions atm, may use later */}
           <Box
             sx={{
               marginTop: "auto",

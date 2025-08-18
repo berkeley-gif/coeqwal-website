@@ -29,8 +29,7 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       sx={{
         height: "40px",
         fontWeight: 600,
-        fontFamily:
-          '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        fontFamily: (theme) => theme.typography.fontFamily,
         border: "none",
         "& .MuiToggleButtonGroup-grouped": {
           border: "none",
@@ -52,25 +51,24 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           border: "none",
           boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
           fontWeight: 600,
-          fontFamily:
-            '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          fontFamily: (theme) => theme.typography.fontFamily,
           position: "relative",
           overflow: "hidden",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
-            backgroundColor: "white",
+            backgroundColor: (theme) => theme.palette.common.white,
             color: (theme) => theme.palette.blue.darkest,
             border: "none",
             transform: "translateY(-1px)",
             boxShadow: (theme) =>
-              `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+              `0 4px 12px ${theme.palette.blue.darkest}66, inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&::before": {
               opacity: 1,
             },
           },
           "&.Mui-selected": {
             backgroundColor: (theme) => theme.palette.blue.darkest,
-            color: "white",
+            color: (theme) => theme.palette.common.white,
             border: "none",
             boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.dark}`,
             "&:hover": {
@@ -78,7 +76,7 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
               border: "none",
               transform: "translateY(-1px)",
               boxShadow: (theme) =>
-                `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
+                `0 4px 12px ${theme.palette.blue.darkest}66, inset 0 0 0 1px ${theme.palette.blue.dark}`,
             },
           },
           "&::before": {
@@ -88,8 +86,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             left: "-100%",
             width: "100%",
             height: "100%",
-            background:
-              "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+            background: (theme) =>
+              `linear-gradient(90deg, transparent, ${theme.palette.blue.darkest}1a, transparent)`,
             transition: "left 0.5s ease",
             opacity: 0,
           },
@@ -108,25 +106,24 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           border: "none",
           boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
           fontWeight: 600,
-          fontFamily:
-            '"neue-haas-grotesk-display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+          fontFamily: (theme) => theme.typography.fontFamily,
           position: "relative",
           overflow: "hidden",
           transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           "&:hover": {
-            backgroundColor: "white",
+            backgroundColor: (theme) => theme.palette.common.white,
             color: (theme) => theme.palette.blue.darkest,
             border: "none",
             transform: "translateY(-1px)",
             boxShadow: (theme) =>
-              `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+              `0 4px 12px ${theme.palette.blue.darkest}66, inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&::before": {
               opacity: 1,
             },
           },
           "&.Mui-selected": {
             backgroundColor: (theme) => theme.palette.blue.darkest,
-            color: "white",
+            color: (theme) => theme.palette.common.white,
             border: "none",
             boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.dark}`,
             "&:hover": {
@@ -134,7 +131,7 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
               border: "none",
               transform: "translateY(-1px)",
               boxShadow: (theme) =>
-                `0 4px 12px rgba(52, 69, 116, 0.4), inset 0 0 0 1px ${theme.palette.blue.dark}`,
+                `0 4px 12px ${theme.palette.blue.darkest}66, inset 0 0 0 1px ${theme.palette.blue.dark}`,
             },
           },
           "&::before": {
@@ -144,8 +141,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             left: "-100%",
             width: "100%",
             height: "100%",
-            background:
-              "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+            background: (theme) =>
+              `linear-gradient(90deg, transparent, ${theme.palette.blue.darkest}1a, transparent)`,
             transition: "left 0.5s ease",
             opacity: 0,
           },
