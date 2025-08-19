@@ -78,10 +78,13 @@ export function CardAccordion({
                 alignItems: "center",
                 justifyContent: "space-between",
                 py: 2,
+                px: 3, // Hack: add horizontal padding to extend hover area
+                mx: -3, // Hack: negative margin to extend to card edges
                 cursor: "pointer",
                 transition: "all 0.2s ease",
                 "&:hover": {
-                  backgroundColor: (theme) => theme.palette.action.hoverBackground,
+                  backgroundColor: (theme) => theme.palette.interaction.hoverBackground,
+                  borderRadius: (theme) => theme.borderRadius.rounded,
                 },
               }}
             >

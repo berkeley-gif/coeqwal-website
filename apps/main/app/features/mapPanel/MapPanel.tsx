@@ -215,7 +215,7 @@ const MapControls = ({
                 }}
               >
                 Compare scenarios across multiple outcomes to understand
-                trade-offs and synergies in California&apos;s water management.{" "}
+                trade-offs and co-benefits.{" "}
                 <Box
                   component="span"
                   onClick={handleLearnMoreClick}
@@ -1215,7 +1215,8 @@ const MapControls = ({
             gap: 2,
             width: "100%",
             minWidth: 0,
-            gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width)
+            gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width, same as left column)
+            marginLeft: "-60px", // Move the card 60px to the left to clear glossary tabs
           }}
         >
           {/* Alternative scenarios panel */}
