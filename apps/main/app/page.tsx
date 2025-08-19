@@ -13,8 +13,6 @@ import MapPanel from "./features/mapPanel/MapPanel"
 // import MapPanel2 from "./features/mapPanel/MapPanel2" // eslint-disable-line @typescript-eslint/no-unused-vars
 // import { NeedsEditorPanel } from "./features/needsEditor/components" // Yuya's needs editor panel
 import IntroSection from "./sections/IntroSection"
-// import IntroSection2 from "./sections/IntroSection2"
-// import IntroSection3 from "./sections/IntroSection3"
 import ContentPanels from "./sections/ContentPanels"
 import { useDrawerStore } from "@repo/state"
 // Commenting out map store - uncomment to re-enable the map

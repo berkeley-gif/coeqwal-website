@@ -2,411 +2,18 @@ import React from "react"
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
-// import { useTranslation } from "@repo/i18n"
-import FloatingMarker from "../components/FloatingMarker"
-// import { useDrawerStore } from "@repo/state"
 
 const IntroSection: React.FC = () => {
-  // const { t } = useTranslation()
-
-  const markerSpecs = [
-    // Row 1
-    {
-      src: "/images/markers/atta2.png",
-      left: {
-        xs: "calc(14% - 70px)", // Leftmost marker - center at 14%
-        sm: "calc(14% - 80px)",
-        md: "calc(14% - 100px)",
-        lg: "calc(14% - 100px)",
-        xl: "calc(14% - 100px)",
-      },
-      top: "5%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/farmers2.png",
-      left: {
-        xs: "calc(32% - 70px)", // Left marker - center at 32%
-        sm: "calc(32% - 80px)",
-        md: "calc(32% - 100px)",
-        lg: "calc(32% - 100px)",
-        xl: "calc(32% - 100px)",
-      },
-      top: "5%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    // Center marker
-    {
-      src: "/images/markers/drinking_water2.png",
-      left: {
-        xs: "calc(50% - 70px)", // Center marker - center at 50%
-        sm: "calc(50% - 80px)",
-        md: "calc(50% - 100px)",
-        lg: "calc(50% - 100px)",
-        xl: "calc(50% - 100px)",
-      },
-      top: "5%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/shasta2.png",
-      left: {
-        xs: "calc(68% - 70px)", // Right marker - center at 68%
-        sm: "calc(68% - 80px)",
-        md: "calc(68% - 100px)",
-        lg: "calc(68% - 100px)",
-        xl: "calc(68% - 100px)",
-      },
-      top: "5%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/salmon2.png",
-      left: {
-        xs: "calc(86% - 70px)", // Rightmost marker - center at 86%
-        sm: "calc(86% - 80px)",
-        md: "calc(86% - 100px)",
-        lg: "calc(86% - 100px)",
-        xl: "calc(86% - 100px)",
-      },
-      top: "5%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-
-    // Row 2 - Staggered offset (centers at 5%, 23%, 77%, 95%)
-    {
-      src: "/images/markers/los_angeles2.png",
-      left: {
-        xs: "calc(5% - 70px)", // Far left marker
-        sm: "calc(5% - 80px)",
-        md: "calc(5% - 100px)",
-        lg: "calc(5% - 100px)",
-        xl: "calc(5% - 100px)",
-      },
-      top: "23%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/drinking_water2.png",
-      left: {
-        xs: "calc(23% - 70px)",
-        sm: "calc(23% - 80px)",
-        md: "calc(23% - 100px)",
-        lg: "calc(23% - 100px)",
-        xl: "calc(23% - 100px)",
-      },
-      top: "23%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    // {
-    //   src: "/images/markers/los_angeles2.png",
-    //   left: {
-    //     xs: "calc(41% - 70px)",
-    //     sm: "calc(41% - 80px)",
-    //     md: "calc(41% - 100px)",
-    //     lg: "calc(41% - 100px)",
-    //     xl: "calc(41% - 100px)"
-    //   },
-    //   top: "23%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    // {
-    //   src: "/images/markers/salmon2.png",
-    //   left: {
-    //     xs: "calc(59% - 70px)",
-    //     sm: "calc(59% - 80px)",
-    //     md: "calc(59% - 100px)",
-    //     lg: "calc(59% - 100px)",
-    //     xl: "calc(59% - 100px)"
-    //   },
-    //   top: "23%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    {
-      src: "/images/markers/shasta2.png",
-      left: {
-        xs: "calc(77% - 70px)",
-        sm: "calc(77% - 80px)",
-        md: "calc(77% - 100px)",
-        lg: "calc(77% - 100px)",
-        xl: "calc(77% - 100px)",
-      },
-      top: "23%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/salmon2.png",
-      left: {
-        xs: "calc(95% - 70px)",
-        sm: "calc(95% - 80px)",
-        md: "calc(95% - 100px)",
-        lg: "calc(95% - 100px)",
-        xl: "calc(95% - 100px)",
-      },
-      top: "23%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-
-    // Row 3 - Even row pattern (centers at 14%, 32%, 50%, 68%, 86%)
-    {
-      src: "/images/markers/farmers2.png",
-      left: {
-        xs: "calc(14% - 70px)",
-        sm: "calc(14% - 80px)",
-        md: "calc(14% - 100px)",
-        lg: "calc(14% - 100px)",
-        xl: "calc(14% - 100px)",
-      },
-      top: "41%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    // {
-    //   src: "/images/markers/shasta2.png",
-    //   left: {
-    //     xs: "calc(32% - 70px)",
-    //     sm: "calc(32% - 80px)",
-    //     md: "calc(32% - 100px)",
-    //     lg: "calc(32% - 100px)",
-    //     xl: "calc(32% - 100px)"
-    //   },
-    //   top: "41%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    // {
-    //   src: "/images/markers/atta2.png",
-    //   left: {
-    //     xs: "calc(50% - 70px)",
-    //     sm: "calc(50% - 80px)",
-    //     md: "calc(50% - 100px)",
-    //     lg: "calc(50% - 100px)",
-    //     xl: "calc(50% - 100px)"
-    //   },
-    //   top: "41%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    // {
-    //   src: "/images/markers/drinking_water2.png",
-    //   left: {
-    //     xs: "calc(68% - 70px)",
-    //     sm: "calc(68% - 80px)",
-    //     md: "calc(68% - 100px)",
-    //     lg: "calc(68% - 100px)",
-    //     xl: "calc(68% - 100px)"
-    //   },
-    //   top: "41%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    {
-      src: "/images/markers/los_angeles2.png",
-      left: {
-        xs: "calc(86% - 70px)",
-        sm: "calc(86% - 80px)",
-        md: "calc(86% - 100px)",
-        lg: "calc(86% - 100px)",
-        xl: "calc(86% - 100px)",
-      },
-      top: "41%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-
-    // Row 4 - Staggered offset (centers at 5%, 23%, 41%, 59%, 77%, 95%)
-    {
-      src: "/images/markers/atta2.png",
-      left: {
-        xs: "calc(5% - 70px)",
-        sm: "calc(5% - 80px)",
-        md: "calc(5% - 100px)",
-        lg: "calc(5% - 100px)",
-        xl: "calc(5% - 100px)",
-      },
-      top: "59%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/salmon2.png",
-      left: {
-        xs: "calc(23% - 70px)",
-        sm: "calc(23% - 80px)",
-        md: "calc(23% - 100px)",
-        lg: "calc(23% - 100px)",
-        xl: "calc(23% - 100px)",
-      },
-      top: "59%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    // {
-    //   src: "/images/markers/atta2.png",
-    //   left: {
-    //     xs: "calc(41% - 70px)",
-    //     sm: "calc(41% - 80px)",
-    //     md: "calc(41% - 100px)",
-    //     lg: "calc(41% - 100px)",
-    //     xl: "calc(41% - 100px)",
-    //   },
-    //   top: "59%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    // {
-    //   src: "/images/markers/farmers2.png",
-    //   left: {
-    //     xs: "calc(59% - 70px)",
-    //     sm: "calc(59% - 80px)",
-    //     md: "calc(59% - 100px)",
-    //     lg: "calc(59% - 100px)",
-    //     xl: "calc(59% - 100px)",
-    //   },
-    //   top: "59%",
-    //   size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    // },
-    {
-      src: "/images/markers/drinking_water2.png",
-      left: {
-        xs: "calc(77% - 70px)",
-        sm: "calc(77% - 80px)",
-        md: "calc(77% - 100px)",
-        lg: "calc(77% - 100px)",
-        xl: "calc(77% - 100px)",
-      },
-      top: "59%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/shasta2.png",
-      left: {
-        xs: "calc(95% - 70px)",
-        sm: "calc(95% - 80px)",
-        md: "calc(95% - 100px)",
-        lg: "calc(95% - 100px)",
-        xl: "calc(95% - 100px)",
-      },
-      top: "59%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-
-    // Row 5 - Even row pattern (centers at 14%, 32%, 50%, 68%, 86%)
-    {
-      src: "/images/markers/shasta2.png",
-      left: {
-        xs: "calc(14% - 70px)",
-        sm: "calc(14% - 80px)",
-        md: "calc(14% - 100px)",
-        lg: "calc(14% - 100px)",
-        xl: "calc(14% - 100px)",
-      },
-      top: "77%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/drinking_water2.png",
-      left: {
-        xs: "calc(32% - 70px)",
-        sm: "calc(32% - 80px)",
-        md: "calc(32% - 100px)",
-        lg: "calc(32% - 100px)",
-        xl: "calc(32% - 100px)",
-      },
-      top: "77%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/los_angeles2.png",
-      left: {
-        xs: "calc(50% - 70px)",
-        sm: "calc(50% - 80px)",
-        md: "calc(50% - 100px)",
-        lg: "calc(50% - 100px)",
-        xl: "calc(50% - 100px)",
-      },
-      top: "77%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/salmon2.png",
-      left: {
-        xs: "calc(68% - 70px)",
-        sm: "calc(68% - 80px)",
-        md: "calc(68% - 100px)",
-        lg: "calc(68% - 100px)",
-        xl: "calc(68% - 100px)",
-      },
-      top: "77%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/atta2.png",
-      left: {
-        xs: "calc(86% - 70px)",
-        sm: "calc(86% - 80px)",
-        md: "calc(86% - 100px)",
-        lg: "calc(86% - 100px)",
-        xl: "calc(86% - 100px)",
-      },
-      top: "77%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-
-    // Row 6 - Final staggered row (centers at 23%, 41%, 59%, 77%)
-    {
-      src: "/images/markers/farmers2.png",
-      left: {
-        xs: "calc(23% - 70px)",
-        sm: "calc(23% - 80px)",
-        md: "calc(23% - 100px)",
-        lg: "calc(23% - 100px)",
-        xl: "calc(23% - 100px)",
-      },
-      top: "95%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/shasta2.png",
-      left: {
-        xs: "calc(41% - 70px)",
-        sm: "calc(41% - 80px)",
-        md: "calc(41% - 100px)",
-        lg: "calc(41% - 100px)",
-        xl: "calc(41% - 100px)",
-      },
-      top: "95%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/drinking_water2.png",
-      left: {
-        xs: "calc(59% - 70px)",
-        sm: "calc(59% - 80px)",
-        md: "calc(59% - 100px)",
-        lg: "calc(59% - 100px)",
-        xl: "calc(59% - 100px)",
-      },
-      top: "95%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-    {
-      src: "/images/markers/atta2.png",
-      left: {
-        xs: "calc(77% - 70px)",
-        sm: "calc(77% - 80px)",
-        md: "calc(77% - 100px)",
-        lg: "calc(77% - 100px)",
-        xl: "calc(77% - 100px)",
-      },
-      top: "95%",
-      size: { xs: 140, sm: 160, md: 200, lg: 200, xl: 200 },
-    },
-  ] as const
-
   return (
     <Box
       sx={{
         background: (theme) => `
-          ${theme.palette.brand.water}
+          linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
         `,
-        minHeight: "200vh", //  To blend imagery between two views
+        minHeight: "200vh",
       }}
     >
-      {/* First panel / Hero section */}
-      {/* TODO: ugh nested boxes */}
+      {/* Hero panel - full screen */}
       <Box
         id="intro"
         sx={{
@@ -415,7 +22,7 @@ const IntroSection: React.FC = () => {
           height: "100vh",
         }}
       >
-        {/* Floating markers overlay */}
+        {/* Circular crop images overlay */}
         <Box
           sx={{
             position: "absolute",
@@ -424,18 +31,223 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {markerSpecs.map((m, i) => (
-            <FloatingMarker key={i} {...m} />
-          ))}
+          {/* Image 1 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/1.png"
+            sx={{
+              position: "absolute",
+              width: "120px",
+              height: "120px",
+              top: "10%",
+              right: "15%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 2 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/2.png"
+            sx={{
+              position: "absolute",
+              width: "80px",
+              height: "80px",
+              top: "25%",
+              right: "8%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 3 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/3.png"
+            sx={{
+              position: "absolute",
+              width: "100px",
+              height: "100px",
+              top: "35%",
+              right: "25%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 4 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/4.png"
+            sx={{
+              position: "absolute",
+              width: "90px",
+              height: "90px",
+              bottom: "30%",
+              right: "12%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 5 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/5.png"
+            sx={{
+              position: "absolute",
+              width: "110px",
+              height: "110px",
+              bottom: "15%",
+              right: "20%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 6 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/6.png"
+            sx={{
+              position: "absolute",
+              width: "75px",
+              height: "75px",
+              top: "15%",
+              right: "35%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 7 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/7.png"
+            sx={{
+              position: "absolute",
+              width: "95px",
+              height: "95px",
+              top: "45%",
+              right: "5%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 8 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/8.png"
+            sx={{
+              position: "absolute",
+              width: "85px",
+              height: "85px",
+              bottom: "40%",
+              right: "30%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 9 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/9.png"
+            sx={{
+              position: "absolute",
+              width: "70px",
+              height: "70px",
+              top: "60%",
+              right: "18%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 10 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/10.png"
+            sx={{
+              position: "absolute",
+              width: "105px",
+              height: "105px",
+              top: "20%",
+              right: "45%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 11 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/11.png"
+            sx={{
+              position: "absolute",
+              width: "88px",
+              height: "88px",
+              bottom: "25%",
+              right: "40%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 12 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/12.png"
+            sx={{
+              position: "absolute",
+              width: "92px",
+              height: "92px",
+              top: "50%",
+              right: "40%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 13 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/13.png"
+            sx={{
+              position: "absolute",
+              width: "78px",
+              height: "78px",
+              bottom: "10%",
+              right: "35%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 14 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/14.png"
+            sx={{
+              position: "absolute",
+              width: "98px",
+              height: "98px",
+              top: "8%",
+              right: "25%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 15 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/15.png"
+            sx={{
+              position: "absolute",
+              width: "82px",
+              height: "82px",
+              top: "65%",
+              right: "8%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 16 */}
+          <Box
+            component="img"
+            src="/images/circular-crops/16.png"
+            sx={{
+              position: "absolute",
+              width: "115px",
+              height: "115px",
+              bottom: "5%",
+              right: "15%",
+              borderRadius: "50%",
+            }}
+          />
         </Box>
 
         {/* Hero text content */}
         <BasePanel
           id="intro-main"
-          paddingVariant="wide"
-          fullHeight={false}
+          paddingVariant="very-wide"
+          fullHeight={true}
           background="transparent"
-          includeHeaderSpacing={false}
+          includeHeaderSpacing={true}
           sx={{
             height: "100vh",
             display: "flex",
@@ -458,59 +270,43 @@ const IntroSection: React.FC = () => {
             }}
           ></Box>
 
-          {/* Text content centered horizontally and vertically */}
+          {/* Text content - left aligned, vertically centered minus header */}
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              alignItems: "center",
+              alignItems: "flex-start",
               width: "100%",
-              height: "100%",
+              height: `calc(100vh - 64px)`, // Full height minus header
               position: "relative",
-              zIndex: (theme) => theme.zIndex.introText, // Text layer
-              textAlign: "center",
+              zIndex: (theme) => theme.zIndex.introText,
+              textAlign: "left",
             }}
           >
-            {/* <Typography
+            {/* H1 with each word on separate line */}
+            <Typography
               variant="h1"
               sx={{
-
                 mb: 4,
-                textAlign: "center",
-              }}
-            >
-              Tell your water story
-            </Typography>
-
-            <Typography
-              variant="h4"
-              sx={{
-
-                mb: 2,
-                textAlign: "center",
-              }}
-            >
-              Rethink California Water
-            </Typography> */}
-
-            <Typography
-              variant="h1"
-              sx={{
-                mb: 2,
-                textAlign: "center",
+                textAlign: "left",
+                lineHeight: 1.1,
               }}
             >
               Rethink
               <br />
-              California Water
+              California
+              <br />
+              Water
             </Typography>
 
+            {/* Body text */}
             <Typography
               variant="body1"
               sx={{
-                maxWidth: "500px",
-                textAlign: "center",
+                textAlign: "left",
+                maxWidth: { xs: "600px", md: "500px" },
+                mb: 4,
               }}
             >
               Explore a range of Central Valley water scenarios and discover
@@ -518,25 +314,19 @@ const IntroSection: React.FC = () => {
               conditions and future climates.
             </Typography>
 
-            {/* Animated scroll indicator */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                color: (theme) => theme.palette.blue.darkest,
-                mt: 4,
-              }}
+            <ScrollIndicator
+              scrollToId="overview"
+              color={(theme) => theme.palette.blue.darkest}
+              animationComplete={true}
+              delay={1.0}
             >
-              <ScrollIndicator
-                color="currentColor"
+              <ArrowHead
                 size={28}
-                delay={1.0}
-                scrollToId="overview"
-              >
-                <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
-              </ScrollIndicator>
-            </Box>
+                style={{
+                  transform: "rotate(90deg)",
+                }}
+              />
+            </ScrollIndicator>
           </Box>
         </BasePanel>
       </Box>
@@ -556,48 +346,36 @@ const IntroSection: React.FC = () => {
           color: (theme) => theme.palette.primary.dark,
           display: "flex",
           flexDirection: "column",
-          position: "relative",
-          overflow: "visible",
-          background: `
-            url('/images/home_collage/left_side.png'),
-            url('/images/home_collage/right.png')
-          `,
-          backgroundSize: "auto 40%, auto 56%",
-          backgroundPosition: "left bottom, right bottom",
-          backgroundRepeat: "no-repeat, no-repeat",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
         }}
       >
-        {/* Text content */}
         <Box
           sx={{
             position: "relative",
-            zIndex: (theme) => theme.zIndex.introText,
-            height: "100%",
             display: "flex",
-            alignItems: "center",
+            flexDirection: "column",
             justifyContent: "center",
-            paddingTop: { xs: 6, md: 12 },
+            alignItems: "center",
+            textAlign: "center",
+            maxWidth: { xs: "600px", md: "500px" },
           }}
         >
-          {/* Bullet image (absolutely positioned to not interfere with text centering) */}
           <Box
+            component="img"
+            src="/images/circular-crops/collage_water.png"
             sx={{
               position: "absolute",
-              left: { xs: "5%", md: "8%" },
-              top: "40%",
+              left: "-120px",
+              top: "50%",
               transform: "translateY(-50%)",
-              width: { xs: 200, md: 300 },
-              height: { xs: 200, md: 300 },
-              backgroundImage: "url('/images/home_collage/birds_top.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              zIndex: -1, // Behind the text
-              opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
+              width: "80px",
+              height: "80px",
+              zIndex: (theme) => theme.zIndex.introBackgroundImages,
             }}
           />
 
-          {/* Centered text block */}
           <Box
             sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}
           >
@@ -606,7 +384,6 @@ const IntroSection: React.FC = () => {
               <br />
               on two main things:
             </Typography>
-
             <Box component="ol" sx={{ mt: 0, pl: 3 }}>
               <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
@@ -620,25 +397,20 @@ const IntroSection: React.FC = () => {
               </Box>
             </Box>
           </Box>
-        </Box>
 
-        {/* Scroll indicator for 2nd panel */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%",
-            color: (theme) => theme.palette.blue.darkest,
-            mt: 4,
-          }}
-        >
           <ScrollIndicator
-            color="currentColor"
-            size={28}
-            delay={0.5}
             scrollToId="third-panel"
+            color={(theme) => theme.palette.blue.darkest}
+            animationComplete={true}
+            delay={1.0}
+            style={{ marginTop: "2rem" }}
           >
-            <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
+            <ArrowHead
+              size={28}
+              style={{
+                transform: "rotate(90deg)",
+              }}
+            />
           </ScrollIndicator>
         </Box>
       </BasePanel>
@@ -655,87 +427,65 @@ const IntroSection: React.FC = () => {
           color: (theme) => theme.palette.primary.dark,
           display: "flex",
           flexDirection: "column",
-          position: "relative",
-          overflow: "visible",
-          background: `
-            url('/images/home_collage/left_side.png'),
-            url('/images/home_collage/right.png')
-          `,
-          backgroundSize: "auto 30%, auto 44%",
-          backgroundPosition: "left bottom, right bottom",
-          backgroundRepeat: "no-repeat, no-repeat",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
         }}
       >
-        {/* Text content */}
         <Box
           sx={{
             position: "relative",
-            zIndex: (theme) => theme.zIndex.introText,
-            height: "100%",
             display: "flex",
-            alignItems: "center",
+            flexDirection: "column",
             justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            maxWidth: { xs: "600px", md: "500px" },
           }}
         >
-          {/* Bullet image - absolutely positioned to not interfere with text centering */}
           <Box
+            component="img"
+            src="/images/circular-crops/right_side.png"
             sx={{
               position: "absolute",
-              left: { xs: "5%", md: "0" },
-              top: "40%",
+              right: "-120px",
+              top: "50%",
               transform: "translateY(-50%)",
-              width: { xs: 200, md: 300 },
-              height: { xs: 200, md: 300 },
-              backgroundImage: "url('/images/home_collage/birds_top.png')",
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              zIndex: -1, // Behind the text
-              opacity: 0.8, // Slightly transparent so it doesn't compete with text if they overlap
+              width: "80px",
+              height: "80px",
+              zIndex: (theme) => theme.zIndex.introBackgroundImages,
             }}
           />
 
-          {/* Text block centered */}
           <Box
-            sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "720px" } }}
+            sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}
           >
-            <Typography
-              variant="body1"
-              sx={{
-                mb: 3,
-              }}
-            >
-              We already face difficult choices. Climate change brings deeper
-              droughts, bigger floods, and growing uncertainty.
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              The future of California&apos;s Central Valley water depends on
+              climate change and our choices. We have to plan for both.
             </Typography>
 
             <Typography variant="body1">
-              The COEQWAL (Collaboratory for Equity in Water Allocation) project
-              has modeled 30 alternative water management scenarios for the
-              Central Valley water systems that supply most of the state. For
-              each of these scenarios, we also modeled 5 future climate
-              possibilities.
+              The COEQWAL project has run 30 alternative water management
+              scenarios for the Central Valley water systems that feed most of
+              the state. For each of these scenarios, we considered 5 future
+              climate possibilities.
             </Typography>
           </Box>
-        </Box>
 
-        {/* Scroll indicator for 3rd panel */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            width: "100%",
-            color: (theme) => theme.palette.blue.darkest,
-            mt: 4,
-          }}
-        >
           <ScrollIndicator
-            color="currentColor"
-            size={28}
-            delay={0.5}
             scrollToId="fourth-panel"
+            color={(theme) => theme.palette.blue.darkest}
+            animationComplete={true}
+            delay={1.0}
+            style={{ marginTop: "2rem" }}
           >
-            <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
+            <ArrowHead
+              size={28}
+              style={{
+                transform: "rotate(90deg)",
+              }}
+            />
           </ScrollIndicator>
         </Box>
       </BasePanel>
@@ -762,65 +512,39 @@ const IntroSection: React.FC = () => {
       >
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            width: "100%",
+            marginLeft: "auto",
+            maxWidth: "400px",
+            textAlign: "left",
+            color: (theme) => theme.palette.blue.darkest,
           }}
         >
-          {/* Right-aligned text content */}
-          <Box
-            sx={{
-              maxWidth: { xs: "100%", md: "45%" },
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-          >
-            <Typography
-              variant="body1"
-              sx={{
-                mb: 3,
-              }}
-            >
-              The scenarios we run cover these areas of California...
-            </Typography>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            The scenarios we run cover these areas of California:
+          </Typography>
 
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              The goal of the COEQWAL project is to make opaque water management
-              transparent and accessible.
-            </Typography>
-
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              On this site you can:
-            </Typography>
-
-            <Box component="ul" sx={{ pl: 3, mt: 1 }}>
-              <Box component="li" sx={{ mb: 1 }}>
-                Explore alternative water management scenarios
-              </Box>
-              <Box component="li" sx={{ mb: 1 }}>
-                Understand the trade-offs
-              </Box>
-              <Box component="li" sx={{ mb: 1 }}>
-                Use data to advocate for your community
-              </Box>
+          <Box component="ul" sx={{ mb: 3, pl: 3 }}>
+            <Box component="li" sx={{ mb: 1 }}>
+              <Typography variant="body1">Sacramento Valley</Typography>
             </Box>
-
-            {/* Scroll indicator for 4th panel */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-                color: (theme) => theme.palette.blue.darkest,
-                mt: 4,
-              }}
-            >
-              <ScrollIndicator color="currentColor" size={28} delay={0.5}>
-                <ArrowHead size={28} style={{ transform: "rotate(90deg)" }} />
-              </ScrollIndicator>
+            <Box component="li" sx={{ mb: 1 }}>
+              <Typography variant="body1">San Joaquin Valley</Typography>
+            </Box>
+            <Box component="li" sx={{ mb: 1 }}>
+              <Typography variant="body1">
+                Sacramento-San Joaquin Delta
+              </Typography>
+            </Box>
+            <Box component="li" sx={{ mb: 1 }}>
+              <Typography variant="body1">Tulare Basin</Typography>
             </Box>
           </Box>
+
+          <Typography variant="body1">
+            The goal of the COEQWAL project is to make opaque water management
+            transparent and accessible. On this site you can explore alternative
+            water management scenarios, understand the trade-offs, and use data
+            to advocate for your community.
+          </Typography>
         </Box>
       </BasePanel>
     </Box>

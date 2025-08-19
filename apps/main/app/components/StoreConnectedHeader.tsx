@@ -23,8 +23,6 @@ export function StoreConnectedHeader({
 }: StoreConnectedHeaderProps) {
   const router = useRouter()
 
-
-
   // Handle data page navigation
   const handleDataClick = () => {
     router.push("/data")
