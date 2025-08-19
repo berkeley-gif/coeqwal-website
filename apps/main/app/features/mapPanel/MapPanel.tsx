@@ -1447,6 +1447,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null)
   const [hoveredFeatureData, setHoveredFeatureData] = useState<{
     modName: string;
+    type: string | null;
     coordinates: [number, number];
   } | null>(null)
 
@@ -1822,6 +1823,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 setHoveredFeatureId(newFeatureId)
                               setHoveredFeatureData({
                 modName: feature.properties?.Sub_Name?.trim() || feature.properties?.Mod_Name || "Unknown",
+                type: feature.properties?.Type?.trim() || null,
                 coordinates: [evt.lngLat.lng, evt.lngLat.lat]
               })
               }
@@ -2015,7 +2017,14 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             anchor="bottom"
             offset={[0, -10]}
           >
-            {hoveredFeatureData.modName}
+            <div>
+              {hoveredFeatureData.modName}
+              {hoveredFeatureData.type && (
+                <div style={{ fontSize: '0.8em', opacity: 0.8, marginTop: '2px' }}>
+                  {hoveredFeatureData.type}
+                </div>
+              )}
+            </div>
           </Popup>
         )}
 
