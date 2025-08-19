@@ -710,6 +710,7 @@ const theme = createTheme({
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
       disabledBackground: themeValues.palette.nature.whisper,
+      hoverBackground: themeValues.palette.grey[100], // Light grey hover background for interactive elements
     },
     divider: themeValues.palette.nature.sage,
   },
@@ -1725,6 +1726,13 @@ export default theme
 declare module "@mui/material/styles" {
   // Custom palette colors - California Water Theme
   interface Palette {
+    action: {
+      hover: string
+      selected: string
+      disabled: string
+      disabledBackground: string
+      hoverBackground: string
+    }
     brand: {
       sky: string
       water: string

@@ -81,7 +81,7 @@ export function CardAccordion({
                 cursor: "pointer",
                 transition: "all 0.2s ease",
                 "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.02)",
+                  backgroundColor: (theme) => theme.palette.action.hoverBackground,
                 },
               }}
             >
