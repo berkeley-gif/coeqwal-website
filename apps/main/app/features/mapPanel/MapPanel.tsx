@@ -2397,6 +2397,27 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Box>
       )}
 
+      {/* Dummy data alert - lower left corner */}
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: 16,
+          left: 16,
+          backgroundColor: "rgba(255, 165, 0, 0.95)", // Orange background for info alert
+          color: "white",
+          padding: 2,
+          borderRadius: (theme) => theme.borderRadius.card,
+          zIndex: (theme) => theme.zIndex.tooltip,
+          textAlign: "center",
+          pointerEvents: "none",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+        }}
+      >
+        <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
+          📊 Dummy data
+        </Box>
+      </Box>
+
       {/* Overlay Controls */}
       <MapControls
         isDrawingCustomRegion={isDrawingCustomRegion}
