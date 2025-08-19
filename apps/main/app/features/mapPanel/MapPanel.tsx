@@ -1003,244 +1003,259 @@ const MapControls = ({
                       // Comparison mode: 4 rows with 2 comparative pairs each
                       <Box
                         sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 3, // Increased gap between rows
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns: Current, Alt, Current, Alt
+                          gap: 2,
                           width: "100%",
-                          padding: 2, // Add padding around the entire comparison area
+                          padding: 2,
+                          position: "relative", // For column background positioning
                         }}
                       >
-                        {/* Column headers */}
+                        {/* Blue column backgrounds for Current Operations */}
                         <Box
                           sx={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns for headers
-                            gap: 2, // Increased gap between headers
-                            mb: 2, // More space below headers
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            width: "calc(25% - 4px)", // First column width minus half gap
+                            backgroundColor: (theme) => theme.palette.blue.bright + "15", // Slightly lighter blue column
+                            borderRadius: (theme) => theme.borderRadius.rounded,
+                            zIndex: 0, // Behind content
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            top: 0,
+                            right: "25%", // Third column position
+                            bottom: 0,
+                            width: "calc(25% - 4px)", // Third column width minus half gap
+                            backgroundColor: (theme) => theme.palette.blue.bright + "15", // Slightly lighter blue column
+                            borderRadius: (theme) => theme.borderRadius.rounded,
+                            zIndex: 0, // Behind content
+                          }}
+                        />
+                        {/* Column headers - positioned in grid */}
+                        <Typography
+                          variant="body2"
+                          sx={{ 
+                            fontWeight: 500, 
+                            fontSize: "0.8rem",
+                            color: (theme) => theme.palette.text.secondary,
+                            textAlign: "center",
+                            zIndex: 1, // Above column backgrounds
+                            position: "relative",
+                            mb: 1,
                           }}
                         >
-                          <Typography
-                            variant="body2"
-                            sx={{ 
-                              fontWeight: 500, 
-                              fontSize: "0.8rem", // Increased header font size
-                              color: (theme) => theme.palette.text.secondary,
-                              textAlign: "center",
-                            }}
-                          >
-                            Current
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ 
-                              fontWeight: 500, 
-                              fontSize: "0.8rem", // Increased header font size
-                              color: (theme) => theme.palette.text.secondary,
-                              textAlign: "center",
-                            }}
-                          >
-                            Alternative
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ 
-                              fontWeight: 500, 
-                              fontSize: "0.8rem", // Increased header font size
-                              color: (theme) => theme.palette.text.secondary,
-                              textAlign: "center",
-                            }}
-                          >
-                            Current
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ 
-                              fontWeight: 500, 
-                              fontSize: "0.8rem", // Increased header font size
-                              color: (theme) => theme.palette.text.secondary,
-                              textAlign: "center",
-                            }}
-                          >
-                            Alternative
-                          </Typography>
-                        </Box>
+                          Current
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ 
+                            fontWeight: 500, 
+                            fontSize: "0.8rem",
+                            color: (theme) => theme.palette.text.secondary,
+                            textAlign: "center",
+                            zIndex: 1,
+                            position: "relative",
+                            mb: 1,
+                          }}
+                        >
+                          Alternative
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ 
+                            fontWeight: 500, 
+                            fontSize: "0.8rem",
+                            color: (theme) => theme.palette.text.secondary,
+                            textAlign: "center",
+                            zIndex: 1,
+                            position: "relative",
+                            mb: 1,
+                          }}
+                        >
+                          Current
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{ 
+                            fontWeight: 500, 
+                            fontSize: "0.8rem",
+                            color: (theme) => theme.palette.text.secondary,
+                            textAlign: "center",
+                            zIndex: 1,
+                            position: "relative",
+                            mb: 1,
+                          }}
+                        >
+                          Alternative
+                        </Typography>
 
-                        {/* 4 rows with 2 comparative pairs each */}
-                        {[0, 1, 2, 3].map((rowIndex) => (
-                          <Box
-                            key={`row-${rowIndex}`}
-                            sx={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns: Current, Alt, Current, Alt
-                              gap: 2, // Increased gap between glyphs
-                              alignItems: "center",
-                              mb: 1, // Space between rows
-                            }}
-                          >
-                            {/* Generate 2 pairs (4 glyphs) for this row */}
-                            {[0, 1].map((pairIndex) => {
-                              const outcomeIndex = rowIndex * 2 + pairIndex
-                              const outcome = OUTCOMES[outcomeIndex]
-                              if (!outcome) return null
+                        {/* Generate glyphs in pairs by outcome */}
+                        {OUTCOMES.map((outcome, outcomeIndex) => {
+                          // Each outcome generates 2 glyphs: current and alternative
+                          return [
+                            // Current operations glyph
+                            <Box
+                              key={`current-${outcome}`}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
+                                padding: 0.5,
+                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                cursor: "pointer",
+                                transition: "background-color 0.2s ease",
+                                zIndex: 1, // Above column backgrounds
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: (theme) => theme.palette.grey[100],
+                                },
+                                "&:active": {
+                                  backgroundColor: (theme) => theme.palette.grey[200],
+                                },
+                              }}
+                              onClick={() => {
+                                onOutcomeSelect(outcome)
+                                openDrawer("glossary")
+                                setDrawerContent({ selectedTerm: outcome })
+                              }}
+                            >
+                              <ScenarioGlyph
+                                tierColors={[
+                                  theme.palette.tiers.tier1,
+                                  theme.palette.tiers.tier2,
+                                  theme.palette.tiers.tier3,
+                                  theme.palette.tiers.tier4,
+                                ]}
+                                values={(() => {
+                                  // Current operations data
+                                  const baseMedian = outcomeIndex * 0.1 - 0.2
 
-                              return (
-                                <React.Fragment key={`pair-${outcomeIndex}`}>
-                                  {/* Current operations glyph */}
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      alignItems: "center",
-                                      gap: 1, // Match regular view gap
-                                      padding: 0.5, // Match regular view padding
-                                      borderRadius: (theme) => theme.borderRadius.rounded,
-                                      backgroundColor: (theme) => theme.palette.blue.bright + "20", // 20% blue background
-                                      cursor: "pointer",
-                                      transition: "background-color 0.2s ease",
-                                      "&:hover": {
-                                        backgroundColor: (theme) => theme.palette.grey[100],
-                                      },
-                                      "&:active": {
-                                        backgroundColor: (theme) => theme.palette.grey[200],
-                                      },
-                                    }}
-                                    onClick={() => {
-                                      onOutcomeSelect(outcome)
-                                      openDrawer("glossary")
-                                      setDrawerContent({ selectedTerm: outcome })
-                                    }}
-                                  >
-                                    <ScenarioGlyph
-                                      tierColors={[
-                                        theme.palette.tiers.tier1,
-                                        theme.palette.tiers.tier2,
-                                        theme.palette.tiers.tier3,
-                                        theme.palette.tiers.tier4,
-                                      ]}
-                                      values={(() => {
-                                        // Current operations data
-                                        const baseMedian = outcomeIndex * 0.1 - 0.2
+                                  let medianShift = 0
+                                  let variabilityMultiplier = 1
 
-                                        let medianShift = 0
-                                        let variabilityMultiplier = 1
+                                  if (selectedClimate === 0) {
+                                    medianShift = 0.3
+                                    variabilityMultiplier = 0.7
+                                  } else if (selectedClimate === 1) {
+                                    medianShift = 0
+                                    variabilityMultiplier = 1
+                                  } else {
+                                    const drierLevel = selectedClimate - 2
+                                    medianShift = -0.2 - drierLevel * 0.2
+                                    variabilityMultiplier = 1.2 + drierLevel * 0.4
+                                  }
 
-                                        if (selectedClimate === 0) {
-                                          medianShift = 0.3
-                                          variabilityMultiplier = 0.7
-                                        } else if (selectedClimate === 1) {
-                                          medianShift = 0
-                                          variabilityMultiplier = 1
-                                        } else {
-                                          const drierLevel = selectedClimate - 2
-                                          medianShift = -0.2 - drierLevel * 0.2
-                                          variabilityMultiplier = 1.2 + drierLevel * 0.4
-                                        }
+                                  const median = baseMedian + medianShift
+                                  const baseSpread = 0.4 * variabilityMultiplier
+                                  const q1 = median - baseSpread * 0.5
+                                  const q3 = median + baseSpread * 0.3
+                                  const min = median - baseSpread * 0.8
 
-                                        const median = baseMedian + medianShift
-                                        const baseSpread = 0.4 * variabilityMultiplier
-                                        const q1 = median - baseSpread * 0.5
-                                        const q3 = median + baseSpread * 0.3
-                                        const min = median - baseSpread * 0.8
+                                  return [q3, median, q1, min] as [number, number, number, number]
+                                })()}
+                                size={56}
+                                variant={glyphVariant}
+                              />
+                              <Box
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.3,
+                                  color: (theme) => theme.palette.text.primary,
+                                  textAlign: "center",
+                                  maxWidth: "80px",
+                                }}
+                              >
+                                {outcome}
+                              </Box>
+                            </Box>,
 
-                                        return [q3, median, q1, min] as [number, number, number, number]
-                                      })()}
-                                      size={56} // Match regular view size
-                                      variant={glyphVariant}
-                                    />
-                                    <Box
-                                      sx={{
-                                        fontSize: "0.75rem", // Match regular view font size
-                                        fontWeight: 400,
-                                        lineHeight: 1.3, // Match regular view line height
-                                        color: (theme) => theme.palette.text.primary,
-                                        textAlign: "center",
-                                        maxWidth: "80px", // Match regular view max width
-                                      }}
-                                    >
-                                      {outcome}
-                                    </Box>
-                                  </Box>
+                            // Alternative scenario glyph
+                            <Box
+                              key={`alternative-${outcome}`}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
+                                padding: 0.5,
+                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                cursor: "pointer",
+                                transition: "background-color 0.2s ease",
+                                zIndex: 1, // Above column backgrounds
+                                position: "relative",
+                                "&:hover": {
+                                  backgroundColor: (theme) => theme.palette.grey[100],
+                                },
+                                "&:active": {
+                                  backgroundColor: (theme) => theme.palette.grey[200],
+                                },
+                              }}
+                              onClick={() => {
+                                onOutcomeSelect(outcome)
+                                openDrawer("glossary")
+                                setDrawerContent({ selectedTerm: outcome })
+                              }}
+                            >
+                              <ScenarioGlyph
+                                tierColors={[
+                                  theme.palette.tiers.tier1,
+                                  theme.palette.tiers.tier2,
+                                  theme.palette.tiers.tier3,
+                                  theme.palette.tiers.tier4,
+                                ]}
+                                values={(() => {
+                                  // Alternative scenario data (different from current operations)
+                                  const baseMedian = outcomeIndex * 0.15 - 0.1 // Slightly different base
 
-                                  {/* Alternative scenario glyph */}
-                                  <Box
-                                    sx={{
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      alignItems: "center",
-                                      gap: 1, // Match regular view gap
-                                      padding: 0.5, // Match regular view padding
-                                      borderRadius: (theme) => theme.borderRadius.rounded,
-                                      cursor: "pointer",
-                                      transition: "background-color 0.2s ease",
-                                      "&:hover": {
-                                        backgroundColor: (theme) => theme.palette.grey[100],
-                                      },
-                                      "&:active": {
-                                        backgroundColor: (theme) => theme.palette.grey[200],
-                                      },
-                                    }}
-                                    onClick={() => {
-                                      onOutcomeSelect(outcome)
-                                      openDrawer("glossary")
-                                      setDrawerContent({ selectedTerm: outcome })
-                                    }}
-                                  >
-                                    <ScenarioGlyph
-                                      tierColors={[
-                                        theme.palette.tiers.tier1,
-                                        theme.palette.tiers.tier2,
-                                        theme.palette.tiers.tier3,
-                                        theme.palette.tiers.tier4,
-                                      ]}
-                                      values={(() => {
-                                        // Alternative scenario data (different from current operations)
-                                        const baseMedian = outcomeIndex * 0.15 - 0.1 // Slightly different base
+                                  // Alternative scenarios show different performance
+                                  let medianShift = 0.2 // Generally better performance
+                                  let variabilityMultiplier = 0.8 // Less variability
 
-                                        // Alternative scenarios show different performance
-                                        let medianShift = 0.2 // Generally better performance
-                                        let variabilityMultiplier = 0.8 // Less variability
+                                  if (selectedClimate === 0) {
+                                    medianShift = 0.4
+                                    variabilityMultiplier = 0.6
+                                  } else if (selectedClimate === 1) {
+                                    medianShift = 0.2
+                                    variabilityMultiplier = 0.8
+                                  } else {
+                                    const drierLevel = selectedClimate - 2
+                                    medianShift = 0.1 - drierLevel * 0.1 // Still better but degrades
+                                    variabilityMultiplier = 0.9 + drierLevel * 0.2
+                                  }
 
-                                        if (selectedClimate === 0) {
-                                          medianShift = 0.4
-                                          variabilityMultiplier = 0.6
-                                        } else if (selectedClimate === 1) {
-                                          medianShift = 0.2
-                                          variabilityMultiplier = 0.8
-                                        } else {
-                                          const drierLevel = selectedClimate - 2
-                                          medianShift = 0.1 - drierLevel * 0.1 // Still better but degrades
-                                          variabilityMultiplier = 0.9 + drierLevel * 0.2
-                                        }
+                                  const median = baseMedian + medianShift
+                                  const baseSpread = 0.35 * variabilityMultiplier
+                                  const q1 = median - baseSpread * 0.4
+                                  const q3 = median + baseSpread * 0.4
+                                  const min = median - baseSpread * 0.7
 
-                                        const median = baseMedian + medianShift
-                                        const baseSpread = 0.35 * variabilityMultiplier
-                                        const q1 = median - baseSpread * 0.4
-                                        const q3 = median + baseSpread * 0.4
-                                        const min = median - baseSpread * 0.7
-
-                                        return [q3, median, q1, min] as [number, number, number, number]
-                                      })()}
-                                      size={56} // Match regular view size
-                                      variant={glyphVariant}
-                                    />
-                                    <Box
-                                      sx={{
-                                        fontSize: "0.75rem", // Match regular view font size
-                                        fontWeight: 400,
-                                        lineHeight: 1.3, // Match regular view line height
-                                        color: (theme) => theme.palette.text.primary,
-                                        textAlign: "center",
-                                        maxWidth: "80px", // Match regular view max width
-                                      }}
-                                    >
-                                      {outcome}
-                                    </Box>
-                                  </Box>
-                                </React.Fragment>
-                              )
-                            })}
-                          </Box>
-                        ))}
+                                  return [q3, median, q1, min] as [number, number, number, number]
+                                })()}
+                                size={56}
+                                variant={glyphVariant}
+                              />
+                              <Box
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.3,
+                                  color: (theme) => theme.palette.text.primary,
+                                  textAlign: "center",
+                                  maxWidth: "80px",
+                                }}
+                              >
+                                {outcome}
+                              </Box>
+                            </Box>
+                          ]
+                        }).flat()}
                       </Box>
                     ) : (
                       // Normal mode: original flex layout
