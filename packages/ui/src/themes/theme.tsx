@@ -184,7 +184,7 @@ const themeValues = {
     // Outcome tier colors, ensure consistent across glyphs and glossary
     tiers: {
       tier1: "#7b9d3f", // Green, tier 1
-      tier2: "#60aacb", // Blue, tier 2  
+      tier2: "#60aacb", // Blue, tier 2
       tier3: "#FFB347", // Orange, tier 3
       tier4: "#CD5C5C", // Red - Poor performance
     },

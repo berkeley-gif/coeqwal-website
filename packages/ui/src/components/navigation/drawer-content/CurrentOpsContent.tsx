@@ -235,28 +235,30 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1", // Green theme reference
-        description: "Full demand achieved for at least 95% of years"
+        description: "Full demand achieved for at least 95% of years",
       },
       {
-        tier: "Tier 2", 
+        tier: "Tier 2",
         color: "tier2", // Light blue theme reference
-        description: "Functional minimums achieved for 100% of years"
+        description: "Functional minimums achieved for 100% of years",
       },
       {
         tier: "Tier 3",
         color: "tier3", // Orange theme reference
-        description: "Human health and safety minimums achieved for 100% of years"
+        description:
+          "Human health and safety minimums achieved for 100% of years",
       },
       {
         tier: "Tier 4",
         color: "tier4", // Red theme reference
-        description: "Human health and safety minimums not achieved for all years"
-      }
-    ]
+        description:
+          "Human health and safety minimums not achieved for all years",
+      },
+    ],
   },
   {
     icon: <LocationOnIcon />,
-    term: "Agricultural deliveries", 
+    term: "Agricultural deliveries",
     definition:
       "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agricultural water use represents the largest share of California's developed water supply.",
   },
@@ -269,54 +271,53 @@ const glossaryTerms: GlossaryTerm[] = [
   {
     icon: <LocationOnIcon />,
     term: "Delta health",
-    definition:
-      " ",
+    definition: " ",
   },
   {
     icon: <LocationOnIcon />,
     term: "Reservoir storage",
-    definition:
-      " ",
+    definition: " ",
   },
   {
     icon: <LocationOnIcon />,
     term: "Groundwater storage",
-    definition:
-      " ",
+    definition: " ",
   },
   {
     icon: <LocationOnIcon />,
     term: "Salmon abundance",
-    definition:
-      " ",
+    definition: " ",
     tiers: [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 10-year average"
+        description:
+          "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 10-year average",
       },
       {
-        tier: "Tier 2", 
+        tier: "Tier 2",
         color: "tier2",
-        description: "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 10-year average"
+        description:
+          "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 10-year average",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 10-year average"
+        description:
+          "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 10-year average",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "The change in population size does not satisfy Tier 1, 2, or 3"
-      }
-    ]
+        description:
+          "The change in population size does not satisfy Tier 1, 2, or 3",
+      },
+    ],
   },
   {
     icon: <LocationOnIcon />,
     term: "Distributional equity",
-    definition:
-      "How fairly water benefits and burdens are shared.",
+    definition: "How fairly water benefits and burdens are shared.",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
 
@@ -648,118 +649,120 @@ export function CurrentOpsContent({
                     : {}
                 }
               >
-              <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
-                <Box
-                  sx={{
-                    mr: 1.5,
-                    color: "#FFAC6E",
-                    display: "flex",
-                    alignItems: "center",
-                    fontSize: "1.5rem",
-                  }}
-                >
-                  {term.icon}
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    color: (theme) => theme.palette.blue.darkest,
-                    fontSize: "1.1rem",
-                  }}
-                >
-                  {term.term}
-                </Typography>
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  ...theme.mixins.drawerContent.bodyText,
-                  ml: "2.2rem",
-                  mb: 1,
-                }}
-              >
-                {renderDefinitionWithLinks(term.definition, term.term)}
-              </Typography>
-
-              {/* Tier legend for outcome terms */}
-              {term.tiers && (
-                <Box sx={{ ml: "2.2rem", mt: 0.5 }}>
-                  <Typography
-                    variant="body2"
+                <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
+                  <Box
                     sx={{
-                      fontWeight: 600,
-                      mb: 1,
-                      color: (theme) => theme.palette.blue.darkest,
+                      mr: 1.5,
+                      color: "#FFAC6E",
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "1.5rem",
                     }}
                   >
-                    Outcome Tiers:
+                    {term.icon}
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      color: (theme) => theme.palette.blue.darkest,
+                      fontSize: "1.1rem",
+                    }}
+                  >
+                    {term.term}
                   </Typography>
-                  <Stack spacing={2}>
-                    {term.tiers.map((tier, tierIndex) => (
-                      <Box
-                        key={tierIndex}
-                        sx={{
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: 1,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: "11px",
-                            height: "30px",
-                            backgroundColor: (theme) => theme.palette.tiers[tier.color as keyof typeof theme.palette.tiers],
-                            borderRadius: "3px",
-                            flexShrink: 0,
-                            mt: 0.5,
-                          }}
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            lineHeight: 1.2,
-                          }}
-                        >
-                          <Box component="span" sx={{ fontWeight: 500 }}>
-                            {tier.tier}:
-                          </Box>{" "}
-                          {tier.description}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Stack>
                 </Box>
-              )}
-
-              {term.seeAlso && (
                 <Typography
                   variant="body2"
                   sx={{
+                    ...theme.mixins.drawerContent.bodyText,
                     ml: "2.2rem",
-                    mt: 1,
-                    fontStyle: "italic",
-                    fontSize: "0.85rem",
+                    mb: 1,
                   }}
                 >
-                  See also:{" "}
-                  <Box
-                    component="span"
-                    sx={{
-                      color: "#FFAC6E",
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      "&:hover": {
-                        color: "#FF8A4A",
-                      },
-                    }}
-                    onClick={() => handleTermClick(term.seeAlso!)}
-                  >
-                    {term.seeAlso}
-                  </Box>
+                  {renderDefinitionWithLinks(term.definition, term.term)}
                 </Typography>
-              )}
 
+                {/* Tier legend for outcome terms */}
+                {term.tiers && (
+                  <Box sx={{ ml: "2.2rem", mt: 0.5 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        color: (theme) => theme.palette.blue.darkest,
+                      }}
+                    >
+                      Outcome Tiers:
+                    </Typography>
+                    <Stack spacing={2}>
+                      {term.tiers.map((tier, tierIndex) => (
+                        <Box
+                          key={tierIndex}
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 1,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: "11px",
+                              height: "30px",
+                              backgroundColor: (theme) =>
+                                theme.palette.tiers[
+                                  tier.color as keyof typeof theme.palette.tiers
+                                ],
+                              borderRadius: "3px",
+                              flexShrink: 0,
+                              mt: 0.5,
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              lineHeight: 1.2,
+                            }}
+                          >
+                            <Box component="span" sx={{ fontWeight: 500 }}>
+                              {tier.tier}:
+                            </Box>{" "}
+                            {tier.description}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
+                )}
+
+                {term.seeAlso && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      ml: "2.2rem",
+                      mt: 1,
+                      fontStyle: "italic",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    See also:{" "}
+                    <Box
+                      component="span"
+                      sx={{
+                        color: "#FFAC6E",
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                        "&:hover": {
+                          color: "#FF8A4A",
+                        },
+                      }}
+                      onClick={() => handleTermClick(term.seeAlso!)}
+                    >
+                      {term.seeAlso}
+                    </Box>
+                  </Typography>
+                )}
               </Box>
               {index < glossaryTerms.length - 1 && (
                 <Divider sx={{ mt: 3, mx: "1rem" }} />

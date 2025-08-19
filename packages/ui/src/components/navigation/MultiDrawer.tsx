@@ -342,9 +342,9 @@ export function MultiDrawer({
                     minHeight: "56px",
                   }}
                 >
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
+                  <Typography
+                    variant="h6"
+                    sx={{
                       fontWeight: 600,
                       color: theme.palette.common.white,
                       margin: 0,

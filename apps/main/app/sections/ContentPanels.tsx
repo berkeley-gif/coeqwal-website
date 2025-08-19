@@ -994,7 +994,9 @@ function PanelWithDetail({
   const detailPanelRef = useRef<HTMLDivElement>(null)
 
   // Smooth height animation using Framer Motion's layout animations
-  const [containerHeight, setContainerHeight] = useState<"auto" | number>("auto")
+  const [containerHeight, setContainerHeight] = useState<"auto" | number>(
+    "auto",
+  )
 
   useEffect(() => {
     if (!isActive) {
@@ -1012,7 +1014,7 @@ function PanelWithDetail({
 
     // Small delay to ensure detail panel is rendered
     const timer = setTimeout(measureHeight, 50)
-    
+
     return () => clearTimeout(timer)
   }, [isActive])
 
@@ -1185,4 +1187,3 @@ function PanelWithDetail({
     </motion.div>
   )
 }
-
