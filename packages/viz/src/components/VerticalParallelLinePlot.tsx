@@ -309,7 +309,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       const leftArrowUpdate = leftArrowEnter.merge(leftArrows as any)
       leftArrowUpdate
-        .attr("transform", (d: any) => `translate(${scales[axis]!(d.position)}, 2)`)
+        .attr("transform", (d: any) => `translate(${scales[axis]!(d.position)}, 2) scale(${arrowScale})`)
         .call(d3.drag<SVGGElement, unknown>()
           .on("start", function() {
             d3.select(this).style("cursor", "grabbing")
@@ -320,8 +320,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             const maxBound = currentRange[1] - 0.1
             const clampedValue = Math.max(-1, Math.min(maxBound, newValue))
             
-            // Update position immediately
-            d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
+            // Update position immediately (maintain scaling)
+            d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2) scale(${arrowScale})`)
             
             // Update filter range
             filterRanges.current[axis] = [clampedValue, currentRange[1]]
@@ -358,7 +358,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
       const rightArrowUpdate = rightArrowEnter.merge(rightArrows as any)
       rightArrowUpdate
-        .attr("transform", (d: any) => `translate(${scales[axis]!(d.position)}, 2)`)
+        .attr("transform", (d: any) => `translate(${scales[axis]!(d.position)}, 2) scale(${arrowScale})`)
         .call(d3.drag<SVGGElement, unknown>()
           .on("start", function() {
             d3.select(this).style("cursor", "grabbing")
@@ -369,8 +369,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             const minBound = currentRange[0] + 0.1
             const clampedValue = Math.min(1, Math.max(minBound, newValue))
             
-            // Update position immediately
-            d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
+            // Update position immediately (maintain scaling)
+            d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2) scale(${arrowScale})`)
             
             // Update filter range
             filterRanges.current[axis] = [currentRange[0], clampedValue]
