@@ -22,6 +22,89 @@ const IntroSection: React.FC = () => {
           height: "100vh",
         }}
       >
+        {/* Background circles for images */}
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: (theme) => theme.zIndex.introForegroundImages - 1,
+            pointerEvents: "none",
+          }}
+        >
+          {/* Background circle for Image 7 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "270px",
+              height: "270px",
+              top: "calc(20% - 10px)",
+              left: "calc(55% - 10px)",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          {/* Background circle for Image 12 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "220px",
+              height: "220px",
+              top: "calc(15% - 10px)",
+              left: "calc(80% - 10px)",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          {/* Background circle for Image 9 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "300px",
+              height: "300px",
+              top: "calc(50% - 10px)",
+              left: "calc(75% - 10px)",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          {/* Background circle for Image 14 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "320px",
+              height: "320px",
+              top: "calc(55% - 10px)",
+              left: "calc(50% - 10px)",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          {/* Background circle for Image 5 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "240px",
+              height: "240px",
+              top: "calc(35% - 10px)",
+              left: "calc(85% - 10px)",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          {/* Background circle for Image 11 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "260px",
+              height: "260px",
+              top: "calc(40% - 10px)",
+              left: "calc(45% - 10px)",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+        </Box>
+
         {/* Circular crop images collage - 7 selected images */}
         <Box
           sx={{
@@ -110,6 +193,20 @@ const IntroSection: React.FC = () => {
             }}
           />
         </Box>
+
+        {/* Background circle for Image 3 */}
+        <Box
+          sx={{
+            position: "absolute",
+            width: "340px",
+            height: "340px",
+            top: "calc(30% - 10px)",
+            left: "calc(60% - 10px)",
+            borderRadius: "50%",
+            backgroundColor: "rgba(42, 82, 135, 0.2)",
+            zIndex: (theme) => theme.zIndex.introForegroundImages,
+          }}
+        />
 
         {/* Image 3 - Center cluster (on top of all others) */}
         <Box
