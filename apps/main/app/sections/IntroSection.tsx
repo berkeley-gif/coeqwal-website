@@ -594,7 +594,7 @@ const IntroSection: React.FC = () => {
             sx={{
               position: "absolute",
               left: "-56%",
-              top: "28%",
+              top: "20%",
               transform: "translateY(-50%)",
               width: "280px",
               height: "280px",
