@@ -194,7 +194,6 @@ const MapControls = ({
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
 
   // Scenario presets state
-  const [sgmaEnabled, setSgmaEnabled] = useState(false)
   const [sgmaSanJoaquinOnly, setSgmaSanJoaquinOnly] = useState(false)
   const [sgmaSanJoaquinReductions, setSgmaSanJoaquinReductions] = useState(false)
   const [sgmaBothValleys, setSgmaBothValleys] = useState(false)
@@ -227,7 +226,7 @@ const MapControls = ({
 
   const handleSelectRegionOnMapClick = useCallback(() => {
     onSelectRegionOnMap()
-    setShowRegionDropdown(false) // Close dropdown when starting to draw
+    // setShowRegionDropdown(false) // Close dropdown when starting to draw
   }, [onSelectRegionOnMap])
 
   // Outcomes panel handlers
@@ -263,17 +262,7 @@ const MapControls = ({
     console.log("Learn more about this chart clicked")
   }, [])
 
-  // Scenario presets handlers
-  const handleSgmaToggle = (checked: boolean) => {
-    setSgmaEnabled(checked)
-    if (!checked) {
-      // Uncheck all sub-options when main SGMA is unchecked
-      setSgmaSanJoaquinOnly(false)
-      setSgmaSanJoaquinReductions(false)
-      setSgmaBothValleys(false)
-      setSgmaBothValleysReductions(false)
-    }
-  }
+
 
   const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
@@ -302,6 +291,97 @@ const MapControls = ({
 
   // Accordion sections for the third column
   const accordionSections: CardAccordionSection[] = [
+    {
+      id: "scenario-presets",
+      title: "Scenario presets",
+      content: (
+        <Box>
+            {/* All Options - Single column, full width */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+              {/* SGMA Section Header */}
+              <Typography
+                variant="body2"
+                sx={{ 
+                  fontWeight: 400,
+                  mb: 0.5,
+                  color: (theme) => theme.palette.text.primary,
+                }}
+              >
+                Sustainable Groundwater Management Act (SGMA)
+              </Typography>
+              
+              {/* SGMA Options - Indented to show hierarchy */}
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={sgmaSanJoaquinOnly}
+                    onChange={(e) => setSgmaSanJoaquinOnly(e.target.checked)}
+                  />
+                }
+                label="San Joaquin Valley only"
+                sx={{ ml: 2 }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={sgmaSanJoaquinReductions}
+                    onChange={(e) => setSgmaSanJoaquinReductions(e.target.checked)}
+                  />
+                }
+                label="San Joaquin Valley with agricultural reductions"
+                sx={{ ml: 2 }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={sgmaBothValleys}
+                    onChange={(e) => setSgmaBothValleys(e.target.checked)}
+                  />
+                }
+                label="Sacramento and San Joaquin Valleys"
+                sx={{ ml: 2 }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={sgmaBothValleysReductions}
+                    onChange={(e) => setSgmaBothValleysReductions(e.target.checked)}
+                  />
+                }
+                label="Sacramento and San Joaquin Valleys with agricultural reductions"
+                sx={{ ml: 2 }}
+              />
+              
+              {/* Other Options */}
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={usbrAlternative3}
+                    onChange={(e) => setUsbrAlternative3(e.target.checked)}
+                  />
+                }
+                label="USBR Alternative 3"
+                sx={{ mt: 1 }}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={deltaConveyanceTunnel}
+                    onChange={(e) => setDeltaConveyanceTunnel(e.target.checked)}
+                  />
+                }
+                label="Delta Conveyance Tunnel, Bethany Alternative"
+              />
+          </Box>
+        </Box>
+      ),
+    },
     {
       id: "select-scenarios",
       title: "Select scenarios",
@@ -467,7 +547,7 @@ const MapControls = ({
       content: (
         <Box>
           {/* Region Selection Header */}
-          <Box
+          {/* <Box
             sx={{
               mb: 2,
               textAlign: "left",
@@ -497,7 +577,7 @@ const MapControls = ({
             >
               Central Valley
             </Box>
-          </Box>
+          </Box> */}
 
           {/* Region Selection Options - Always Visible */}
           <Box
@@ -506,10 +586,10 @@ const MapControls = ({
               gridTemplateColumns: "1fr 1fr",
               gap: 1,
               p: 2,
-              backgroundColor: (theme) => theme.palette.grey[50],
-              borderRadius: (theme) => theme.borderRadius.rounded,
-              border: "1px solid",
-              borderColor: (theme) => theme.palette.divider,
+              // backgroundColor: (theme) => theme.palette.grey[50],
+              // borderRadius: (theme) => theme.borderRadius.rounded,
+              // border: "1px solid",
+              // borderColor: (theme) => theme.palette.divider,
             }}
           >
             <FormControlLabel
@@ -556,114 +636,6 @@ const MapControls = ({
                 />
               }
               label="Select region on map"
-            />
-          </Box>
-        </Box>
-      ),
-    },
-    {
-      id: "scenario-presets",
-      title: "Scenario presets",
-      content: (
-        <Box>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 1,
-              p: 2,
-              backgroundColor: (theme) => theme.palette.grey[50],
-              borderRadius: (theme) => theme.borderRadius.rounded,
-              border: "1px solid",
-              borderColor: (theme) => theme.palette.divider,
-            }}
-          >
-            {/* SGMA Section */}
-            <Box sx={{ gridColumn: "1 / -1", mb: 1 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={sgmaEnabled}
-                    onChange={(e) => handleSgmaToggle(e.target.checked)}
-                  />
-                }
-                label="Sustainable Groundwater Management Act (SGMA)"
-                sx={{ fontWeight: 500 }}
-              />
-              {/* SGMA Sub-options */}
-              <Box sx={{ ml: 3, mt: 1, display: "grid", gridTemplateColumns: "1fr", gap: 0.5 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox 
-                      size="small" 
-                      checked={sgmaSanJoaquinOnly}
-                      disabled={!sgmaEnabled}
-                      onChange={(e) => setSgmaSanJoaquinOnly(e.target.checked)}
-                    />
-                  }
-                  label="San Joaquin Valley only"
-                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox 
-                      size="small" 
-                      checked={sgmaSanJoaquinReductions}
-                      disabled={!sgmaEnabled}
-                      onChange={(e) => setSgmaSanJoaquinReductions(e.target.checked)}
-                    />
-                  }
-                  label="San Joaquin Valley with agricultural reductions"
-                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox 
-                      size="small" 
-                      checked={sgmaBothValleys}
-                      disabled={!sgmaEnabled}
-                      onChange={(e) => setSgmaBothValleys(e.target.checked)}
-                    />
-                  }
-                  label="Sacramento and San Joaquin Valleys"
-                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox 
-                      size="small" 
-                      checked={sgmaBothValleysReductions}
-                      disabled={!sgmaEnabled}
-                      onChange={(e) => setSgmaBothValleysReductions(e.target.checked)}
-                    />
-                  }
-                  label="Sacramento and San Joaquin Valleys with agricultural reductions"
-                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
-                />
-              </Box>
-            </Box>
-            
-            {/* Other Options */}
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  size="small" 
-                  checked={usbrAlternative3}
-                  onChange={(e) => setUsbrAlternative3(e.target.checked)}
-                />
-              }
-              label="USBR Alternative 3"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox 
-                  size="small" 
-                  checked={deltaConveyanceTunnel}
-                  onChange={(e) => setDeltaConveyanceTunnel(e.target.checked)}
-                />
-              }
-              label="Delta Conveyance Tunnel, Bethany Alternative"
             />
           </Box>
         </Box>
