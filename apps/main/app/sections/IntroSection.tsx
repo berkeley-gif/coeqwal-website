@@ -65,6 +65,17 @@ const IntroSection: React.FC = () => {
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "220px",
+              height: "220px",
+              top: "26%",
+              left: "75%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
 
           {/* White decorative circles - layered asymmetric pattern */}
           <Box
@@ -388,9 +399,9 @@ const IntroSection: React.FC = () => {
                 color={(theme) => theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
-              >
-                <ArrowHead
-                  size={28}
+            >
+              <ArrowHead
+                size={28}
                   style={{
                     transform: "rotate(90deg)",
                   }}
@@ -435,7 +446,7 @@ const IntroSection: React.FC = () => {
           <Box
             component="img"
             src="/images/circular-crops/collage_water.png"
-            sx={{
+              sx={{
               position: "absolute",
               left: "-120px",
               top: "50%",
@@ -455,16 +466,16 @@ const IntroSection: React.FC = () => {
               on two main things:
             </Typography>
             <Box component="ol" sx={{ mt: 0, pl: 3 }}>
-              <Box component="li" sx={{ mb: 1 }}>
+                  <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
                   How much rain and snow we get.
                 </Typography>
-              </Box>
-              <Box component="li" sx={{ mb: 1 }}>
+                  </Box>
+                  <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
                   How we choose to manage it.
                 </Typography>
-              </Box>
+                </Box>
             </Box>
           </Box>
 
@@ -516,7 +527,7 @@ const IntroSection: React.FC = () => {
           <Box
             component="img"
             src="/images/circular-crops/right_side.png"
-            sx={{
+              sx={{
               position: "absolute",
               right: "-120px",
               top: "50%",
@@ -540,8 +551,8 @@ const IntroSection: React.FC = () => {
               scenarios for the Central Valley water systems that feed most of
               the state. For each of these scenarios, we considered 5 future
               climate possibilities.
-            </Typography>
-          </Box>
+              </Typography>
+            </Box>
 
           <ScrollIndicator
             scrollToId="fourth-panel"
