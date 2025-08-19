@@ -62,6 +62,7 @@ const SortableScenarioExplorationCard = ({
   outcomes,
   isBaseline = false,
   selectedClimate = 1,
+  visualizationType = "bars",
 }: { 
   id: string
   title: string
@@ -69,6 +70,7 @@ const SortableScenarioExplorationCard = ({
   outcomes: string[]
   isBaseline?: boolean
   selectedClimate?: number
+  visualizationType?: "bars" | "rose" | "quartile"
 }) => {
   const theme = useTheme()
   const {
@@ -122,15 +124,15 @@ const SortableScenarioExplorationCard = ({
           sx={{
             display: "flex",
             justifyContent: "flex-end",
-            mb: 1,
+            mb: 0.5, // Reduced margin
             opacity: 0.5,
           }}
         >
-          <Typography sx={{ fontSize: "1.2rem", lineHeight: 1 }}>⋮⋮</Typography>
+          <Typography sx={{ fontSize: "1rem", lineHeight: 1 }}>⋮⋮</Typography>
         </Box>
 
         {/* Card header */}
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 1.5 }}> {/* Reduced margin */}
           <Typography
             variant="h6"
             sx={{
@@ -218,7 +220,7 @@ const SortableScenarioExplorationCard = ({
                   return [q3, median, q1, min] as [number, number, number, number]
                 })()}
                 size={56} // Larger size to better fill the 2x2 space
-                variant="bars"
+                variant={visualizationType}
               />
               <Typography
                 variant="caption"
@@ -2355,6 +2357,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [showExplorationPanel, setShowExplorationPanel] = useState(false)
   const [explorationScenarios, setExplorationScenarios] = useState<string[]>([])
   const [scenarioOrder, setScenarioOrder] = useState<string[]>([])
+  const [explorationVisualizationType, setExplorationVisualizationType] = useState<"bars" | "rose" | "quartile">("bars")
 
   // Mock scenario data for the exploration panel - always include current operations first
   const mockScenarioData = [
@@ -3759,6 +3762,111 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             </Button>
           </Box>
 
+          {/* Control dropdowns */}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 3,
+              mb: 3,
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Outcome dropdown */}
+            <Box sx={{ minWidth: "200px" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontWeight: 500,
+                  mb: 1,
+                }}
+              >
+                Outcome
+              </Typography>
+              <Select
+                size="small"
+                value={selectedOutcome || ""}
+                onChange={(e) => handleOutcomeSelect(e.target.value)}
+                displayEmpty
+                sx={{
+                  width: "100%",
+                  backgroundColor: theme.palette.common.white,
+                  borderRadius: theme.borderRadius.rounded,
+                }}
+              >
+                <MenuItem value="">
+                  <em>Select outcome</em>
+                </MenuItem>
+                {OUTCOMES.map((outcome) => (
+                  <MenuItem key={outcome} value={outcome}>
+                    {outcome}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Box>
+
+            {/* Visualization type dropdown */}
+            <Box sx={{ minWidth: "180px" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontWeight: 500,
+                  mb: 1,
+                }}
+              >
+                Visualization type
+              </Typography>
+              <Select
+                size="small"
+                value={explorationVisualizationType}
+                onChange={(e) => {
+                  setExplorationVisualizationType(e.target.value as "bars" | "rose" | "quartile")
+                  console.log("Visualization type changed:", e.target.value)
+                }}
+                sx={{
+                  width: "100%",
+                  backgroundColor: theme.palette.common.white,
+                  borderRadius: theme.borderRadius.rounded,
+                }}
+              >
+                <MenuItem value="bars">Bars</MenuItem>
+                <MenuItem value="rose">Rose</MenuItem>
+                <MenuItem value="quartile">Quartile</MenuItem>
+              </Select>
+            </Box>
+
+            {/* Refine region dropdown */}
+            <Box sx={{ minWidth: "180px" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: theme.palette.text.primary,
+                  fontWeight: 500,
+                  mb: 1,
+                }}
+              >
+                Refine region
+              </Typography>
+              <Select
+                size="small"
+                value={selectedRegion}
+                onChange={(e) => handleRegionSelect(e.target.value)}
+                sx={{
+                  width: "100%",
+                  backgroundColor: theme.palette.common.white,
+                  borderRadius: theme.borderRadius.rounded,
+                }}
+              >
+                <MenuItem value="Central Valley">Central Valley</MenuItem>
+                <MenuItem value="Sacramento Valley">Sacramento Valley</MenuItem>
+                <MenuItem value="San Joaquin Valley">San Joaquin Valley</MenuItem>
+                <MenuItem value="Delta">Delta</MenuItem>
+                <MenuItem value="Tulare Basin">Tulare Basin</MenuItem>
+              </Select>
+            </Box>
+          </Box>
+
           {/* Instructions */}
           <Typography
             variant="body1"
@@ -3810,6 +3918,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                       outcomes={scenario.outcomes}
                       isBaseline={scenario.isBaseline}
                       selectedClimate={selectedClimate}
+                      visualizationType={explorationVisualizationType}
                     />
                   )
                 })}
