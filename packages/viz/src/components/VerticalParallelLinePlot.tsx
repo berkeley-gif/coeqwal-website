@@ -836,7 +836,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           })
           .on("click", function () {
             onLineClick?.(d)
-              })
+          })
           }
 
           const circleSelection = animate ? circle.transition(t as any) : circle // eslint-disable-line @typescript-eslint/no-explicit-any

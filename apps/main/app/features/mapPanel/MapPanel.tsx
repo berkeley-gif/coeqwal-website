@@ -191,6 +191,7 @@ const MapControls = ({
 
   // Card minimize/maximize states
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
+  const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
 
   // Scenario presets state
@@ -1151,65 +1152,7 @@ const MapControls = ({
                     ))}
                   </Box>
 
-                  {/* Climate selector */}
-                  <Box sx={{ mt: 2 }}>
-                    {/* Climate heading */}
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                        mb: 0.5,
-                      }}
-                    >
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          color: (theme) => theme.palette.blue.darkest,
-                        }}
-                      >
-                        Climate
-                      </Typography>
-                      <InfoIconButton
-                        mode="glossary"
-                        glossaryEntry="Changing climate"
-                        onGlossaryOpen={handleGlossaryOpen}
-                      />
-                    </Box>
 
-                    {/* Climate instruction text */}
-                    <Box sx={{ mb: 0 }}>
-                      <Typography variant="body2" sx={{ mb: 1 }}>
-                        <Box
-                          component="span"
-                          sx={{
-                            color: (theme) => theme.palette.text.secondary,
-                          }}
-                        >
-                          Slide
-                        </Box>{" "}
-                        to explore how climate affects outcomes.
-                      </Typography>
-                    </Box>
-
-                    {/* Climate slider */}
-                    <DiscreteSlider
-                      stops={[
-                        "Warmer Wetter",
-                        "Historical",
-                        "Warmer Drier I",
-                        "Warmer Drier II",
-                        "Warmer Drier III",
-                        "Warmer Drier IV",
-                      ]}
-                      value={selectedClimate}
-                      onChange={(value) => {
-                        onClimateChange(value)
-                        console.log("Climate changed to:", value)
-                      }}
-                      labelPosition="top"
-                    />
-                  </Box>
                 </Box>
               )}
 
@@ -1375,6 +1318,173 @@ const MapControls = ({
                   fill: "#3a4574",
                   transition: "transform 0.2s ease",
                   transform: isFirstCardMinimized
+                    ? "rotate(0deg)"
+                    : "rotate(180deg)",
+                  pointerEvents: "none",
+                }}
+              >
+                <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+              </svg>
+            </Box>
+          </Box>
+
+          {/* Climate card */}
+          <Box
+            sx={{
+              position: "relative",
+              height: "auto",
+            }}
+          >
+            <Box
+              sx={{
+                backdropFilter: "blur(10px)",
+                pointerEvents: "auto",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderRadius: (theme) => theme.borderRadius.card,
+                border: "1px solid",
+                borderColor: (theme) => theme.palette.divider,
+                padding: 3,
+                display: "flex",
+                flexDirection: "column",
+                height: "auto",
+                opacity: isClimateCardMinimized ? 0.8 : 1,
+              }}
+            >
+              {/* Minimized state - show title only */}
+              {isClimateCardMinimized && (
+                <Box sx={{ mb: 2, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      color: (theme) => theme.palette.blue.darkest,
+                      fontFamily:
+                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                      fontWeight: 500,
+                      fontSize: "1.5rem",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    Climate
+                  </Box>
+                </Box>
+              )}
+
+              {/* Expanded state - full content */}
+              {!isClimateCardMinimized && (
+                <Box sx={{ flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      color: (theme) => theme.palette.blue.medium,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.75px",
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      display: "block",
+                      mb: 0.5,
+                    }}
+                  >
+                    CLIMATE
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      mb: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        color: (theme) => theme.palette.blue.darkest,
+                        fontFamily:
+                          '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                        fontWeight: 500,
+                        fontSize: "1.5rem",
+                        lineHeight: 1.3,
+                        mb: 0,
+                      }}
+                    >
+                      Climate
+                    </Box>
+                    <InfoIconButton
+                      mode="glossary"
+                      glossaryEntry="Changing climate"
+                      onGlossaryOpen={handleGlossaryOpen}
+                    />
+                  </Box>
+
+                  {/* Climate instruction text */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{ mb: 1 }}>
+                      <Box
+                        component="span"
+                        sx={{
+                          color: (theme) => theme.palette.text.secondary,
+                        }}
+                      >
+                        Slide
+                      </Box>{" "}
+                      to explore how climate affects outcomes.
+                    </Typography>
+                  </Box>
+
+                  {/* Climate slider */}
+                  <DiscreteSlider
+                    stops={[
+                      "Warmer Wetter",
+                      "Historical",
+                      "Warmer Drier I",
+                      "Warmer Drier II",
+                      "Warmer Drier III",
+                      "Warmer Drier IV",
+                    ]}
+                    value={selectedClimate}
+                    onChange={(value) => {
+                      onClimateChange(value)
+                      console.log("Climate changed to:", value)
+                    }}
+                    labelPosition="top"
+                  />
+                </Box>
+              )}
+            </Box>
+
+            {/* Minimize/maximize button */}
+            <Box
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setIsClimateCardMinimized(!isClimateCardMinimized)
+              }}
+              sx={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "24px",
+                height: "24px",
+                backgroundColor: (theme) => theme.palette.common.white,
+                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                zIndex: 9999,
+                pointerEvents: "auto",
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.grey[50],
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                },
+              }}
+            >
+              <svg
+                width="12"
+                height="10"
+                viewBox="0 0 12 10"
+                style={{
+                  fill: "#3a4574",
+                  transition: "transform 0.2s ease",
+                  transform: isClimateCardMinimized
                     ? "rotate(0deg)"
                     : "rotate(180deg)",
                   pointerEvents: "none",
@@ -1836,8 +1946,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   }
 
   // Handle delivery area polygon selection
-  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!isSelectingDeliveryArea) return
 
     // Get the clicked feature
@@ -2296,15 +2405,21 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 )
               }
             : isSelectingDeliveryArea
-              ? (evt: { target: any; point: any }) => {
-                  // eslint-disable-line @typescript-eslint/no-explicit-any
-                  // Handle delivery area polygon selection
-                  const features = evt.target.queryRenderedFeatures(evt.point, {
-                    layers: ["delivery-area-selection-layer"],
-                  })
+              ? (evt: { target: any; point: any }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+                  try {
+                    // Safety check: ensure layer exists before querying
+                    if (!hasLayer("delivery-area-selection-layer")) return
 
-                  if (features && features.length > 0) {
-                    handleDeliveryAreaPolygonClick({ features })
+                    // Handle delivery area polygon selection
+                    const features = evt.target.queryRenderedFeatures(evt.point, {
+                      layers: ["delivery-area-selection-layer"],
+                    })
+
+                    if (features && features.length > 0) {
+                      handleDeliveryAreaPolygonClick({ features })
+                    }
+                  } catch (error) {
+                    console.warn("Delivery area click error (non-critical):", error)
                   }
                 }
               : selectedOutcome
@@ -2313,28 +2428,35 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                     point: any // eslint-disable-line @typescript-eslint/no-explicit-any
                     lngLat: { lng: number; lat: number }
                   }) => {
-                    // Handle polygon click for zoom functionality
-                    const features = evt.target.queryRenderedFeatures(
-                      evt.point,
-                      {
-                        layers: [
-                          selectedOutcome === "Community deliveries"
-                            ? "community-deliveries-layer"
-                            : "agricultural-deliveries-layer",
-                        ],
-                      },
-                    )
+                    try {
+                      // Safety check: ensure layer exists before querying
+                      const layerName = selectedOutcome === "Community deliveries"
+                        ? "community-deliveries-layer"
+                        : "agricultural-deliveries-layer"
+                      
+                      if (!hasLayer(layerName)) return
 
-                    if (features && features.length > 0) {
-                      // Use click coordinates as zoom target (simpler than centroid calculation)
-                      flyTo({
-                        longitude: evt.lngLat.lng,
-                        latitude: evt.lngLat.lat,
-                        zoom: 8, // Moderate zoom to show polygon with surrounding context
-                        transitionOptions: {
-                          duration: 1500,
+                      // Handle polygon click for zoom functionality
+                      const features = evt.target.queryRenderedFeatures(
+                        evt.point,
+                        {
+                          layers: [layerName],
                         },
-                      })
+                      )
+
+                      if (features && features.length > 0) {
+                        // Use click coordinates as zoom target (simpler than centroid calculation)
+                        flyTo({
+                          longitude: evt.lngLat.lng,
+                          latitude: evt.lngLat.lat,
+                          zoom: 8, // Moderate zoom to show polygon with surrounding context
+                          transitionOptions: {
+                            duration: 1500,
+                          },
+                        })
+                      }
+                    } catch (error) {
+                      console.warn("Outcome polygon click error (non-critical):", error)
                     }
                   }
                 : undefined
@@ -2344,71 +2466,82 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           point: any // eslint-disable-line @typescript-eslint/no-explicit-any
           lngLat: { lng: number; lat: number }
         }) => {
-          // Check if hovering over delivery area selection polygons
-          if (isSelectingDeliveryArea) {
-            const features = evt.target.queryRenderedFeatures(evt.point, {
-              layers: ["delivery-area-selection-layer"],
-            })
+          try {
+            // Check if hovering over delivery area selection polygons
+            if (isSelectingDeliveryArea) {
+              // Safety check: ensure layer exists before querying
+              if (!hasLayer("delivery-area-selection-layer")) return
 
-            if (features && features.length > 0) {
-              const feature = features[0]
-              const featureId = feature.properties?.DU_ID || null
+              const features = evt.target.queryRenderedFeatures(evt.point, {
+                layers: ["delivery-area-selection-layer"],
+              })
 
-              // Update hover layer filter to highlight the hovered polygon
-              if (hasLayer("delivery-area-selection-hover")) {
-                evt.target.setFilter("delivery-area-selection-hover", [
-                  "==",
-                  ["get", "DU_ID"],
-                  featureId,
-                ])
+              if (features && features.length > 0) {
+                const feature = features[0]
+                const featureId = feature.properties?.DU_ID || null
+
+                // Update hover layer filter to highlight the hovered polygon
+                if (hasLayer("delivery-area-selection-hover")) {
+                  evt.target.setFilter("delivery-area-selection-hover", [
+                    "==",
+                    ["get", "DU_ID"],
+                    featureId,
+                  ])
+                }
+
+                // Change cursor to pointer
+                evt.target.getCanvas().style.cursor = "pointer"
+              } else {
+                // Clear hover when not over any polygon
+                if (hasLayer("delivery-area-selection-hover")) {
+                  evt.target.setFilter("delivery-area-selection-hover", [
+                    "==",
+                    ["get", "DU_ID"],
+                    "",
+                  ])
+                }
+                evt.target.getCanvas().style.cursor = "crosshair"
               }
-
-              // Change cursor to pointer
-              evt.target.getCanvas().style.cursor = "pointer"
-            } else {
-              // Clear hover when not over any polygon
-              if (hasLayer("delivery-area-selection-hover")) {
-                evt.target.setFilter("delivery-area-selection-hover", [
-                  "==",
-                  ["get", "DU_ID"],
-                  "",
-                ])
-              }
-              evt.target.getCanvas().style.cursor = "crosshair"
             }
-          }
-          // Check if hovering over outcome polygons
-          else if (selectedOutcome) {
-            const features = evt.target.queryRenderedFeatures(evt.point, {
-              layers: [
-                selectedOutcome === "Community deliveries"
-                  ? "community-deliveries-layer"
-                  : "agricultural-deliveries-layer",
-              ],
-            })
+            // Check if hovering over outcome polygons
+            else if (selectedOutcome) {
+              // Safety check: ensure layer exists before querying
+              const layerName = selectedOutcome === "Community deliveries"
+                ? "community-deliveries-layer"
+                : "agricultural-deliveries-layer"
+              
+              if (!hasLayer(layerName)) return
 
-            if (features && features.length > 0) {
-              const feature = features[0]
-              const newFeatureId = feature.properties?.DU_ID || null
+              const features = evt.target.queryRenderedFeatures(evt.point, {
+                layers: [layerName],
+              })
 
-              // Only update state if the feature has actually changed
-              if (newFeatureId !== hoveredFeatureId) {
-                setHoveredFeatureId(newFeatureId)
-                setHoveredFeatureData({
-                  modName: feature.properties?.Mod_Name?.trim() || null,
-                  subName: feature.properties?.Sub_Name?.trim() || null,
-                  type: feature.properties?.Type?.trim() || null,
-                  coordinates: [evt.lngLat.lng, evt.lngLat.lat],
-                })
+              if (features && features.length > 0) {
+                const feature = features[0]
+                const newFeatureId = feature.properties?.DU_ID || null
+
+                // Only update state if the feature has actually changed
+                if (newFeatureId !== hoveredFeatureId) {
+                  setHoveredFeatureId(newFeatureId)
+                  setHoveredFeatureData({
+                    modName: feature.properties?.Mod_Name?.trim() || null,
+                    subName: feature.properties?.Sub_Name?.trim() || null,
+                    type: feature.properties?.Type?.trim() || null,
+                    coordinates: [evt.lngLat.lng, evt.lngLat.lat],
+                  })
+                }
+                evt.target.getCanvas().style.cursor = "pointer"
+              } else {
+                if (hoveredFeatureId !== null) {
+                  setHoveredFeatureId(null)
+                  setHoveredFeatureData(null)
+                }
+                evt.target.getCanvas().style.cursor = ""
               }
-              evt.target.getCanvas().style.cursor = "pointer"
-            } else {
-              if (hoveredFeatureId !== null) {
-                setHoveredFeatureId(null)
-                setHoveredFeatureData(null)
-              }
-              evt.target.getCanvas().style.cursor = ""
             }
+          } catch (error) {
+            // Silently handle map interaction errors to prevent crashes
+            console.warn("Map mouse move error (non-critical):", error)
           }
         }}
         onMouseLeave={() => {
