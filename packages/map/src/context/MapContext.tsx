@@ -168,8 +168,28 @@ export function MapProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    fitBounds: () => {
-      throw new Error("fitBounds not implemented yet")
+    fitBounds: (
+      bounds: [[number, number], [number, number]],
+      pitch?: number,
+      bearing?: number,
+      padding?: number | { top: number; bottom: number; left: number; right: number },
+      transitionOptions?: { duration?: number; easing?: (t: number) => number; essential?: boolean }
+    ) => {
+      const map = mapRef.current?.getMap()
+      if (!map) return
+      
+      try {
+        map.fitBounds(bounds, {
+          pitch: pitch ?? 0,
+          bearing: bearing ?? 0,
+          padding: padding ?? 50,
+          duration: transitionOptions?.duration ?? DEFAULT_TRANSITION.duration,
+          easing: transitionOptions?.easing ?? DEFAULT_TRANSITION.easing,
+          essential: transitionOptions?.essential ?? DEFAULT_TRANSITION.essential,
+        })
+      } catch (err) {
+        console.error("Failed to fit bounds:", err)
+      }
     },
 
     addSource: (id, source) => {

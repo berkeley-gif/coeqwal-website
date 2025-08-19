@@ -1407,7 +1407,21 @@ const MapControls = ({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { addSource, addLayer, removeLayer, hasSource, hasLayer } = useMap()
+  const { addSource, addLayer, removeLayer, hasSource, hasLayer, fitBounds } = useMap()
+
+  // Calculated extents for different outcome datasets (from geojson analysis)
+  const OUTCOME_EXTENTS = {
+    "Community deliveries": {
+      // Urban areas - calculated bounds from actual data
+      bounds: [[-122.5253313401591, 35.9947689586334], [-119.73675744266775, 40.745557975898166]] as [[number, number], [number, number]],
+      center: { longitude: -121.13104439141343, latitude: 38.37016346726578, zoom: 6.2 },
+    },
+    "Agricultural deliveries": {
+      // Agriculture areas - calculated bounds from actual data
+      bounds: [[-122.73923233712331, 35.964081298197414], [-119.71028032650193, 40.751670748519366]] as [[number, number], [number, number]],
+      center: { longitude: -121.22475633181261, latitude: 38.357876023358386, zoom: 6.0 },
+    },
+  }
 
   // Polygon drawing state, lifted to main component
   const [isDrawingCustomRegion, setIsDrawingCustomRegion] = useState(false)
@@ -1429,6 +1443,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   // Outcome visualization state
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
+  const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null)
 
   // Delivery area state
   const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] =
@@ -1584,6 +1599,18 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       setSelectedOutcome(null)
     } else {
       setSelectedOutcome(outcome)
+      
+      // Zoom to extent for the selected outcome
+      const extent = OUTCOME_EXTENTS[outcome as keyof typeof OUTCOME_EXTENTS]
+      if (extent) {
+        fitBounds(
+          extent.bounds,
+          0, // pitch
+          0, // bearing
+          { top: 50, bottom: 50, left: 50, right: 50 }, // padding
+          { duration: 2000 } // transition options
+        )
+      }
     }
   }
 
@@ -1601,8 +1628,14 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     if (hasLayer("community-deliveries-layer")) {
       removeLayer("community-deliveries-layer")
     }
+    if (hasLayer("community-deliveries-hover")) {
+      removeLayer("community-deliveries-hover")
+    }
     if (hasLayer("agricultural-deliveries-layer")) {
       removeLayer("agricultural-deliveries-layer")
+    }
+    if (hasLayer("agricultural-deliveries-hover")) {
+      removeLayer("agricultural-deliveries-hover")
     }
 
     // Add layer based on selected outcome
@@ -1632,6 +1665,25 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           filter: ["==", ["get", "Class"], "Urban"], // Filter to show only Urban areas
         }
       )
+      
+      // Add hover layer for community deliveries
+      addLayer(
+        "community-deliveries-hover",
+        "delivery-units",
+        "line",
+        {
+          "line-color": "#FFFFFF", // White stroke on hover
+          "line-width": 3,
+          "line-opacity": ["case", ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""], 1, 0],
+        },
+        {
+          visibility: "visible",
+        },
+        {
+          filter: ["==", ["get", "Class"], "Urban"],
+        }
+      )
+      
       console.log("Community deliveries layer added")
     } else if (selectedOutcome === "Agricultural deliveries") {
       console.log("Adding agricultural deliveries layer...")
@@ -1659,9 +1711,28 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           filter: ["==", ["get", "Class"], "Agriculture"], // Filter to show only Agriculture areas
         }
       )
+      
+      // Add hover layer for agricultural deliveries
+      addLayer(
+        "agricultural-deliveries-hover",
+        "delivery-units",
+        "line",
+        {
+          "line-color": "#FFFFFF", // White stroke on hover
+          "line-width": 3,
+          "line-opacity": ["case", ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""], 1, 0],
+        },
+        {
+          visibility: "visible",
+        },
+        {
+          filter: ["==", ["get", "Class"], "Agriculture"],
+        }
+      )
+      
       console.log("Agricultural deliveries layer added")
     }
-  }, [selectedOutcome, addSource, addLayer, removeLayer, hasSource, hasLayer])
+  }, [selectedOutcome, hoveredFeatureId, addSource, addLayer, removeLayer, hasSource, hasLayer])
 
   return (
     <Box
@@ -1726,6 +1797,30 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               }
             : undefined
         }
+        onMouseMove={(evt) => {
+          // Check if hovering over outcome polygons
+          if (selectedOutcome) {
+            const features = evt.target.queryRenderedFeatures(evt.point, {
+              layers: [
+                selectedOutcome === "Community deliveries" 
+                  ? "community-deliveries-layer" 
+                  : "agricultural-deliveries-layer"
+              ]
+            })
+            
+            if (features && features.length > 0) {
+              const feature = features[0]
+              setHoveredFeatureId(feature.properties?.DU_ID || null)
+              evt.target.getCanvas().style.cursor = 'pointer'
+            } else {
+              setHoveredFeatureId(null)
+              evt.target.getCanvas().style.cursor = ''
+            }
+          }
+        }}
+        onMouseLeave={() => {
+          setHoveredFeatureId(null)
+        }}
         onError={(evt: unknown) => {
           // Surface mapbox or ReactMapGL errors in the console
           console.error("🗺️ Map error:", evt)
@@ -1989,8 +2084,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
         {/* Marker 3: Westlands W.D. - positioned over Westlands Water District polygon */}
         <Marker 
-          longitude={-120.55} 
-          latitude={36.57}
+          longitude={-120.58} 
+          latitude={36.58}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
           <MapMarkerTooltip
