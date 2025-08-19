@@ -1820,10 +1820,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               // Only update state if the feature has actually changed
               if (newFeatureId !== hoveredFeatureId) {
                 setHoveredFeatureId(newFeatureId)
-                setHoveredFeatureData({
-                  modName: feature.properties?.Mod_Name || "Unknown",
-                  coordinates: [evt.lngLat.lng, evt.lngLat.lat]
-                })
+                              setHoveredFeatureData({
+                modName: feature.properties?.Sub_Name?.trim() || feature.properties?.Mod_Name || "Unknown",
+                coordinates: [evt.lngLat.lng, evt.lngLat.lat]
+              })
               }
               evt.target.getCanvas().style.cursor = 'pointer'
             } else {
