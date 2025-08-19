@@ -1820,7 +1820,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                     flyTo({
                       longitude: evt.lngLat.lng,
                       latitude: evt.lngLat.lat, 
-                      zoom: 10, // Zoom in to show individual polygon detail
+                      zoom: 8, // Moderate zoom to show polygon with surrounding context
                       transitionOptions: {
                         duration: 1500,
                       },
