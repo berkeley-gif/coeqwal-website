@@ -71,15 +71,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     })
     
     if (elementType === 'circle') {
-      // Dots: Full opacity when active, invisible when filtered
+      // Dots: Full opacity when active, faint when filtered
       return passesAllFilters 
         ? 1.0  // Active dots: always full opacity (highlighted or not)
-        : 0.0  // Filtered dots: completely invisible
+        : 0.15  // Filtered dots: faint but visible for experimentation
     } else {
       // Lines: Two distinct opacity levels - active vs inactive
       return passesAllFilters 
         ? (scenario.highlighted ? 0.7 : 0.25)  // Active lines: highlighted=70%, normal=25%
-        : 0.0  // Filtered lines: completely invisible
+        : 0.08  // Filtered lines: faint but visible for experimentation
     }
   }, [axes])
 
@@ -383,8 +383,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           })
         )
 
-      // Add visual range indicator if there's an active filter
-      if (currentFilter[0] > -1 || currentFilter[1] < 1) {
+      // Add visual range indicator only if there's an active filter (not just baseline highlighting)
+      const hasActiveFilter = currentFilter[0] > -1 || currentFilter[1] < 1
+      if (hasActiveFilter) {
         axisGroup.append("line")
           .attr("class", "filter-range")
           .attr("x1", scales[axis]!(currentFilter[0]))
