@@ -2,9 +2,48 @@ import React from "react"
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
+import { motion } from "@repo/motion"
 
 const IntroSection: React.FC = () => {
   const theme = useTheme()
+  
+  // Generate animation parameters for floating effect
+  const generateFloatingAnimation = () => {
+    const bobDelay = Math.random() * 3 // 0-3 seconds
+    const driftDelay = Math.random() * 5 // 0-5 seconds  
+    const bobAmount = 8 + Math.random() * 8 // 8-16px vertical movement
+    const driftAmount = 15 + Math.random() * 15 // 15-30px horizontal drift
+    const bobDuration = 3 + Math.random() * 2 // 3-5 seconds
+    const driftDuration = 8 + Math.random() * 6 // 8-14 seconds
+    
+    return {
+      animate: {
+        y: [0, -bobAmount, 0],
+        x: [-driftAmount / 2, driftAmount / 2, -driftAmount / 2],
+        rotate: [-1, 1, -1],
+      },
+      transition: {
+        y: {
+          duration: bobDuration,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: bobDelay,
+        },
+        x: {
+          duration: driftDuration,
+          repeat: Infinity,
+          ease: "easeInOut", 
+          delay: driftDelay,
+        },
+        rotate: {
+          duration: bobDuration * 1.3,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: bobDelay * 0.7,
+        },
+      },
+    }
+  }
   
   return (
     <Box
@@ -35,6 +74,8 @@ const IntroSection: React.FC = () => {
         >
           {/* Blue decorative circles - layered asymmetric pattern */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "260px",
@@ -46,6 +87,8 @@ const IntroSection: React.FC = () => {
             }}
           />
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "180px",
@@ -57,6 +100,8 @@ const IntroSection: React.FC = () => {
             }}
           />
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "200px",
@@ -68,6 +113,8 @@ const IntroSection: React.FC = () => {
             }}
           />
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "220px",
@@ -81,6 +128,8 @@ const IntroSection: React.FC = () => {
 
           {/* White decorative circles - layered asymmetric pattern */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "230px",
@@ -92,6 +141,8 @@ const IntroSection: React.FC = () => {
             }}
           />
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "190px",
@@ -103,6 +154,8 @@ const IntroSection: React.FC = () => {
             }}
           />
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
               width: "220px",
@@ -209,7 +262,8 @@ const IntroSection: React.FC = () => {
         >
           {/* Image 7 - Top left of cluster */}
           <Box
-            component="img"
+            component={motion.img}
+            {...generateFloatingAnimation()}
             src="/images/circular-crops/7.png"
             sx={{
               position: "absolute",
@@ -222,7 +276,8 @@ const IntroSection: React.FC = () => {
           />
           {/* Image 12 - Top right of cluster */}
           <Box
-            component="img"
+            component={motion.img}
+            {...generateFloatingAnimation()}
             src="/images/circular-crops/12.png"
             sx={{
               position: "absolute",
@@ -235,7 +290,8 @@ const IntroSection: React.FC = () => {
           />
           {/* Image 9 - Bottom right of cluster */}
           <Box
-            component="img"
+            component={motion.img}
+            {...generateFloatingAnimation()}
             src="/images/circular-crops/9.png"
             sx={{
               position: "absolute",
@@ -248,7 +304,8 @@ const IntroSection: React.FC = () => {
           />
           {/* Image 14 - Bottom left of cluster */}
           <Box
-            component="img"
+            component={motion.img}
+            {...generateFloatingAnimation()}
             src="/images/circular-crops/14.png"
             sx={{
               position: "absolute",
@@ -261,7 +318,8 @@ const IntroSection: React.FC = () => {
           />
           {/* Image 5 - Right side of cluster */}
           <Box
-            component="img"
+            component={motion.img}
+            {...generateFloatingAnimation()}
             src="/images/circular-crops/5.png"
             sx={{
               position: "absolute",
@@ -274,7 +332,8 @@ const IntroSection: React.FC = () => {
           />
           {/* Image 11 - Left side of cluster */}
           <Box
-            component="img"
+            component={motion.img}
+            {...generateFloatingAnimation()}
             src="/images/circular-crops/11.png"
             sx={{
               position: "absolute",
@@ -289,6 +348,8 @@ const IntroSection: React.FC = () => {
 
         {/* Background circle for Image 3 */}
         <Box
+          component={motion.div}
+          {...generateFloatingAnimation()}
           sx={{
             position: "absolute",
             width: "340px",
@@ -303,7 +364,8 @@ const IntroSection: React.FC = () => {
 
         {/* Image 3 - Center cluster (on top of all others) */}
         <Box
-          component="img"
+          component={motion.img}
+          {...generateFloatingAnimation()}
           src="/images/circular-crops/3.png"
           sx={{
             position: "absolute",
