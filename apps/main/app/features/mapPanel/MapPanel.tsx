@@ -633,6 +633,7 @@ const MapControls = ({
                       display: "flex",
                       alignItems: "center",
                       gap: 0.5,
+                      mb: 1, // Move margin to container for proper spacing
                     }}
                   >
                     <Box
@@ -643,7 +644,7 @@ const MapControls = ({
                         fontWeight: 500,
                         fontSize: "1.5rem",
                         lineHeight: 1.3,
-                        mb: 1,
+                        mb: 0, // Remove margin to fix alignment
                       }}
                     >
                       Current operations scenario
