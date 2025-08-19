@@ -296,11 +296,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
         
+      // Make arrows bigger in expanded view (height > 500)
+      const isExpanded = currentHeight > 500
+      const arrowScale = isExpanded ? 1.4 : 1.0
+      const arrowOffset = isExpanded ? "translate(-11, -8)" : "translate(-8, -6)"
+      
       leftArrowEnter.append("path")
         .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
         .attr("fill", "#449cd9")
         .attr("stroke", "none")
-        .attr("transform", "translate(-8, -6)")
+        .attr("transform", `${arrowOffset} scale(${arrowScale})`)
 
       const leftArrowUpdate = leftArrowEnter.merge(leftArrows as any)
       leftArrowUpdate
@@ -349,7 +354,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
         .attr("fill", "#449cd9")
         .attr("stroke", "none")
-        .attr("transform", "translate(-8, -6)")
+        .attr("transform", `${arrowOffset} scale(${arrowScale})`)
 
       const rightArrowUpdate = rightArrowEnter.merge(rightArrows as any)
       rightArrowUpdate
@@ -488,6 +493,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const lineColor = lineColors.length > dataIndex ? lineColors[dataIndex]! : 
                        (d.highlighted ? colors.highlighted : colors.default)
       
+      // Check if scenario passes all filters for both opacity and stroke width
+      const passesAllFilters = axes.every(axis => {
+        const filter = filterRanges.current[axis]
+        if (!filter) return true
+        
+        const value = d.values[axis] || 0
+        return value >= filter[0] && value <= filter[1]
+      })
+      
       // Use centralized opacity calculation with separate values for lines vs circles
       const lineOpacity = getScenarioOpacity(d, 'line')
       const circleOpacity = getScenarioOpacity(d, 'circle')
@@ -500,7 +514,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("class", `line-${dataIndex}`)
           .attr("fill", "none")
           .attr("stroke", lineColor)
-          .attr("stroke-width", d.highlighted ? 2.5 : 1.5) // Original widths
+          .attr("stroke-width", passesAllFilters ? (d.highlighted ? 3.0 : 2.0) : 1.0) // Thicker for active scenarios
           .attr("opacity", lineOpacity) // Lines semi-transparent
           .style("cursor", "pointer")
                     .on("mouseover", function () {
@@ -508,7 +522,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             if (!isScenarioActive(d)) return
             
             onLineHover?.(d)
-            d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
+            d3.select(this).attr("stroke-width", 4).attr("opacity", 1) // Thicker on hover
             
             // Highlight all corresponding circles for this line
             axes.forEach((axis) => {
@@ -521,8 +535,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             onLineHover?.(null)
             const lineOpacity = getScenarioOpacity(d, 'line')
             const circleOpacity = getScenarioOpacity(d, 'circle')
+            
+            // Check if scenario is currently active for stroke width
+            const isActive = isScenarioActive(d)
+            
             d3.select(this)
-              .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
+              .attr("stroke-width", isActive ? (d.highlighted ? 3.0 : 2.0) : 1.0) // Return to active thickness
               .attr("opacity", lineOpacity) // Respect current filter state for lines
               
             // Reset all corresponding circles for this line
@@ -566,7 +584,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               
               // Highlight the corresponding line for this circle
               g.select(`.line-${dataIndex}`)
-                .attr("stroke-width", 3)
+                .attr("stroke-width", 4) // Thicker on hover
                 .attr("opacity", 1)
               
               // Highlight all other circles for this same line/scenario
@@ -585,8 +603,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                 .attr("opacity", circleOpacity) // Respect current filter state for circles
               
               // Reset the corresponding line for this circle
+              const isActive = isScenarioActive(d)
               g.select(`.line-${dataIndex}`)
-                .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
+                .attr("stroke-width", isActive ? (d.highlighted ? 3.0 : 2.0) : 1.0) // Return to active thickness
                 .attr("opacity", lineOpacity) // Respect current filter state for lines
               
               // Reset all other circles for this same line/scenario
