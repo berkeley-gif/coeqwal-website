@@ -679,17 +679,18 @@ export function CurrentOpsContent({
                         key={tierIndex}
                         sx={{
                           display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
+                          alignItems: "flex-start",
+                          gap: 1,
                         }}
                       >
                         <Box
                           sx={{
-                            width: "10px",
+                            width: "11px",
                             height: "30px",
                             backgroundColor: (theme) => theme.palette.tiers[tier.color as keyof typeof theme.palette.tiers],
-                            borderRadius: "4px",
+                            borderRadius: "3px",
                             flexShrink: 0,
+                            mt: 0.5,
                           }}
                         />
                         <Typography
