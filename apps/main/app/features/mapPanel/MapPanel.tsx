@@ -153,6 +153,8 @@ interface MapControlsProps {
   onOutcomeSelect: (outcome: string) => void
   // Clear selections
   onClearSelectedScenarios: () => void
+  // Comparison mode state
+  isInComparisonMode: boolean
 }
 
 const MapControls = ({
@@ -182,6 +184,8 @@ const MapControls = ({
   selectedOutcome: _selectedOutcome, // eslint-disable-line @typescript-eslint/no-unused-vars
   onOutcomeSelect,
   onClearSelectedScenarios,
+  // Comparison mode state
+  isInComparisonMode,
 }: MapControlsProps) => {
   const { flyTo } = useMap()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -604,8 +608,8 @@ const MapControls = ({
           </Box> */}
 
           {/* Region Selection Options - Always Visible */}
-            <Box
-              sx={{
+                <Box
+                  sx={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
                 gap: 1,
@@ -661,7 +665,7 @@ const MapControls = ({
                 }
                 label="Select region on map"
               />
-            </Box>
+          </Box>
         </Box>
       ),
     },
@@ -1001,11 +1005,11 @@ const MapControls = ({
                   >
                     {hasSelectedScenarios ? (
                       // Comparison mode: 4 rows with 2 comparative pairs each
-                      <Box
-                        sx={{
-                          display: "grid",
+                  <Box
+                    sx={{
+                      display: "grid",
                           gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns: Current, Alt, Current, Alt
-                          gap: 2,
+                      gap: 2,
                           width: "100%",
                           padding: 2,
                           position: "relative", // For column background positioning
@@ -1101,11 +1105,11 @@ const MapControls = ({
                             // Current operations glyph
                             <Box
                               key={`current-${outcome}`}
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                gap: 1,
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 1,
                                 padding: 0.5,
                                 borderRadius: (theme) => theme.borderRadius.rounded,
                                 cursor: "pointer",
@@ -1125,14 +1129,14 @@ const MapControls = ({
                                 setDrawerContent({ selectedTerm: outcome })
                               }}
                             >
-                              <ScenarioGlyph
+                        <ScenarioGlyph
                                 tierColors={[
                                   theme.palette.tiers.tier1,
                                   theme.palette.tiers.tier2,
                                   theme.palette.tiers.tier3,
                                   theme.palette.tiers.tier4,
                                 ]}
-                                values={(() => {
+                          values={(() => {
                                   // Current operations data
                                   const baseMedian = outcomeIndex * 0.1 - 0.2
 
@@ -1158,31 +1162,31 @@ const MapControls = ({
                                   const min = median - baseSpread * 0.8
 
                                   return [q3, median, q1, min] as [number, number, number, number]
-                                })()}
+                          })()}
                                 size={56}
-                                variant={glyphVariant}
-                              />
-                              <Box
-                                sx={{
-                                  fontSize: "0.75rem",
-                                  fontWeight: 400,
-                                  lineHeight: 1.3,
-                                  color: (theme) => theme.palette.text.primary,
-                                  textAlign: "center",
-                                  maxWidth: "80px",
-                                }}
-                              >
-                                {outcome}
-                              </Box>
+                          variant={glyphVariant}
+                        />
+                        <Box
+                          sx={{
+                            fontSize: "0.75rem",
+                            fontWeight: 400,
+                            lineHeight: 1.3,
+                            color: (theme) => theme.palette.text.primary,
+                            textAlign: "center",
+                            maxWidth: "80px",
+                          }}
+                        >
+                          {outcome}
+                        </Box>
                             </Box>,
 
                             // Alternative scenario glyph
-                            <Box
+                    <Box
                               key={`alternative-${outcome}`}
-                              sx={{
-                                display: "flex",
+                      sx={{
+                        display: "flex",
                                 flexDirection: "column",
-                                alignItems: "center",
+                        alignItems: "center",
                                 gap: 1,
                                 padding: 0.5,
                                 borderRadius: (theme) => theme.borderRadius.rounded,
@@ -1242,7 +1246,7 @@ const MapControls = ({
                                 variant={glyphVariant}
                               />
                               <Box
-                                sx={{
+                        sx={{
                                   fontSize: "0.75rem",
                                   fontWeight: 400,
                                   lineHeight: 1.3,
@@ -1252,7 +1256,7 @@ const MapControls = ({
                                 }}
                               >
                                 {outcome}
-                              </Box>
+                    </Box>
                             </Box>
                           ]
                         }).flat()}
@@ -1353,8 +1357,8 @@ const MapControls = ({
                             }}
                           >
                             {outcome}
-                          </Box>
-                        </Box>
+                  </Box>
+                </Box>
                       ))
                     )}
                   </Box>
@@ -1535,75 +1539,32 @@ const MapControls = ({
             </Box>
           </Box>
 
-          {/* Climate card */}
-          <Box
-            sx={{
-              position: hasSelectedScenarios ? "fixed" : "relative",
-              bottom: hasSelectedScenarios ? 16 : "auto",
-              left: hasSelectedScenarios ? "50%" : "auto",
-              transform: hasSelectedScenarios ? "translateX(-50%)" : "none",
-              height: "auto",
-              zIndex: hasSelectedScenarios ? (theme) => theme.zIndex.floatingElements : "auto",
-              transition: "all 0.3s ease-out", // Smooth transition between positions
-            }}
-          >
+          {/* Climate card - in left column when not in comparison mode */}
+          {!isInComparisonMode && (
             <Box
               sx={{
-                backdropFilter: "blur(10px)",
-                pointerEvents: "auto",
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderRadius: (theme) => theme.borderRadius.card,
-                border: "1px solid",
-                borderColor: (theme) => theme.palette.divider,
-                padding: 3,
-                display: "flex",
-                flexDirection: "column",
+                position: "relative",
                 height: "auto",
-                opacity: isClimateCardMinimized ? 0.8 : 1,
               }}
             >
-              {/* Minimized state - show title only */}
-              {isClimateCardMinimized && (
-                <Box sx={{ mb: 2, flexShrink: 0 }}>
-                  <Box
-                    sx={{
-                      color: (theme) => theme.palette.blue.darkest,
-                      fontFamily:
-                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                      fontWeight: 500,
-                      fontSize: "1.5rem",
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    Climate
-                  </Box>
-                </Box>
-              )}
-
-              {/* Expanded state - full content */}
-              {!isClimateCardMinimized && (
-                <Box sx={{ flexShrink: 0 }}>
-                  <Box
-                    sx={{
-                      color: (theme) => theme.palette.blue.medium,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.75px",
-                      fontSize: "0.75rem",
-                      fontWeight: 500,
-                      display: "block",
-                      mb: 0.5,
-                    }}
-                  >
-                    CLIMATE
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      mb: 1,
-                    }}
-                  >
+              <Box
+                sx={{
+                  backdropFilter: "blur(10px)",
+                  pointerEvents: "auto",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderRadius: (theme) => theme.borderRadius.card,
+                  border: "1px solid",
+                  borderColor: (theme) => theme.palette.divider,
+                  padding: 3,
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "auto",
+                  opacity: isClimateCardMinimized ? 0.8 : 1,
+                }}
+              >
+                {/* Minimized state - show title only */}
+                {isClimateCardMinimized && (
+                  <Box sx={{ mb: 2, flexShrink: 0 }}>
                     <Box
                       sx={{
                         color: (theme) => theme.palette.blue.darkest,
@@ -1612,100 +1573,141 @@ const MapControls = ({
                         fontWeight: 500,
                         fontSize: "1.5rem",
                         lineHeight: 1.3,
-                        mb: 0,
                       }}
                     >
                       Climate
                     </Box>
-                    <InfoIconButton
-                      mode="glossary"
-                      glossaryEntry="Changing climate"
-                      onGlossaryOpen={handleGlossaryOpen}
-                    />
                   </Box>
+                )}
 
-                  {/* Climate instruction text */}
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
+                {/* Expanded state - full content */}
+                {!isClimateCardMinimized && (
+                  <Box sx={{ flexShrink: 0 }}>
+                    <Box
+                      sx={{
+                        color: (theme) => theme.palette.blue.medium,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.75px",
+                        fontSize: "0.75rem",
+                        fontWeight: 500,
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      CLIMATE
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        mb: 1,
+                      }}
+                    >
                       <Box
-                        component="span"
                         sx={{
-                          color: (theme) => theme.palette.text.secondary,
+                          color: (theme) => theme.palette.blue.darkest,
+                          fontFamily:
+                            '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                          fontWeight: 500,
+                          fontSize: "1.5rem",
+                          lineHeight: 1.3,
+                          mb: 0,
                         }}
                       >
-                        Slide
-                      </Box>{" "}
-                      to explore how climate affects outcomes.
-                    </Typography>
+                        Climate
+                      </Box>
+                      <InfoIconButton
+                        mode="glossary"
+                        glossaryEntry="Changing climate"
+                        onGlossaryOpen={handleGlossaryOpen}
+                      />
+                    </Box>
+
+                    {/* Climate instruction text */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" sx={{ mb: 1 }}>
+                        <Box
+                          component="span"
+                          sx={{
+                            color: (theme) => theme.palette.text.secondary,
+                          }}
+                        >
+                          Slide
+                        </Box>{" "}
+                        to explore how climate affects outcomes.
+                      </Typography>
+                    </Box>
+
+                    {/* Climate slider */}
+                    <DiscreteSlider
+                      stops={[
+                        "Warmer Wetter",
+                        "Historical",
+                        "Warmer Drier I",
+                        "Warmer Drier II",
+                        "Warmer Drier III",
+                        "Warmer Drier IV",
+                      ]}
+                      value={selectedClimate}
+                      onChange={(value) => {
+                        onClimateChange(value)
+                        console.log("Climate changed to:", value)
+                      }}
+                      labelPosition="top"
+                    />
                   </Box>
+                )}
+              </Box>
 
-                  {/* Climate slider */}
-                  <DiscreteSlider
-                    stops={[
-                      "Warmer Wetter",
-                      "Historical",
-                      "Warmer Drier I",
-                      "Warmer Drier II",
-                      "Warmer Drier III",
-                      "Warmer Drier IV",
-                    ]}
-                    value={selectedClimate}
-                    onChange={(value) => {
-                      onClimateChange(value)
-                      console.log("Climate changed to:", value)
-                    }}
-                    labelPosition="top"
-                  />
-                </Box>
-              )}
-            </Box>
-
-            {/* Minimize/maximize button */}
-            <Box
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                setIsClimateCardMinimized(!isClimateCardMinimized)
-              }}
-              sx={{
-                position: "absolute",
-                top: "8px",
-                right: "8px",
-                width: "24px",
-                height: "24px",
-                backgroundColor: (theme) => theme.palette.common.white,
-                boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                zIndex: 9999,
-                pointerEvents: "auto",
-                "&:hover": {
-                  backgroundColor: (theme) => theme.palette.grey[50],
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                },
-              }}
-            >
-              <svg
-                width="12"
-                height="10"
-                viewBox="0 0 12 10"
-                style={{
-                  fill: "#3a4574",
-                  transition: "transform 0.2s ease",
-                  transform: isClimateCardMinimized
-                    ? "rotate(0deg)"
-                    : "rotate(180deg)",
-                  pointerEvents: "none",
+              {/* Minimize/maximize button */}
+              <Box
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  setIsClimateCardMinimized(!isClimateCardMinimized)
+                }}
+                sx={{
+                  position: "absolute",
+                  top: "8px",
+                  right: "8px",
+                  width: "24px",
+                  height: "24px",
+                  backgroundColor: (theme) => theme.palette.common.white,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  zIndex: 9999,
+                  pointerEvents: "auto",
+                  "&:hover": {
+                    backgroundColor: (theme) => theme.palette.grey[50],
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                  },
                 }}
               >
-                <path d="M6 0 L11 8 Q6 6 1 8 Z" />
-              </svg>
+                <svg
+                  width="12"
+                  height="10"
+                  viewBox="0 0 12 10"
+                  style={{
+                    fill: "#3a4574",
+                    transition: "transform 0.2s ease",
+                    transform: isClimateCardMinimized
+                      ? "rotate(0deg)"
+                      : "rotate(180deg)",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+                </svg>
+              </Box>
             </Box>
-          </Box>
+          )}
+
         </Box>
 
         {/* Right column, Alternative scenarios */}
@@ -1731,10 +1733,10 @@ const MapControls = ({
               flexDirection: "column",
             }}
           >
-                          <ScenarioCard
+            <ScenarioCard
                 topLine="CHOOSE AND COMPARE"
-                headline={"Alternative scenarios"}
-                body={null}
+              headline={"Alternative scenarios"}
+              body={null}
               sx={{
                 opacity: isThirdCardMinimized ? 0.8 : 1,
                 backdropFilter: "blur(10px)",
@@ -2133,6 +2135,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     const checkComparisonMode = () => {
       if (typeof window !== 'undefined') {
         const comparisonMode = (window as any).mapComparisonMode || false // eslint-disable-line @typescript-eslint/no-explicit-any
+        console.log('Checking comparison mode:', comparisonMode, 'current state:', isInComparisonMode)
         setIsInComparisonMode(comparisonMode)
       }
     }
@@ -3337,6 +3340,108 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>📊 Dummy data</Box>
       </Box>
 
+      {/* Climate card - positioned as direct child of MapPanel for proper positioning */}
+      {isInComparisonMode && (() => {
+        console.log('Rendering bottom-center Climate card')
+        return (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 16,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: (theme) => theme.zIndex.floatingElements,
+            pointerEvents: "auto",
+          }}
+        >
+          <Box
+            sx={{
+              backdropFilter: "blur(10px)",
+              backgroundColor: "rgba(255, 255, 255, 0.95)",
+              borderRadius: (theme) => theme.borderRadius.card,
+              border: "1px solid",
+              borderColor: (theme) => theme.palette.divider,
+              padding: 3,
+              display: "flex",
+              flexDirection: "column",
+              height: "auto",
+            }}
+          >
+            <Box sx={{ flexShrink: 0 }}>
+              <Box
+                sx={{
+                  color: (theme) => theme.palette.blue.medium,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.75px",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  display: "block",
+                  mb: 0.5,
+                }}
+              >
+                CLIMATE
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mb: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    color: (theme) => theme.palette.blue.darkest,
+                    fontFamily:
+                      '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                    fontWeight: 500,
+                    fontSize: "1.5rem",
+                    lineHeight: 1.3,
+                    mb: 0,
+                  }}
+                >
+                  Climate
+                </Box>
+              </Box>
+
+              {/* Climate instruction text */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <Box
+                    component="span"
+                    sx={{
+                      color: (theme) => theme.palette.text.secondary,
+                    }}
+                  >
+                    Slide
+                  </Box>{" "}
+                  to explore how climate affects outcomes.
+                </Typography>
+              </Box>
+
+              {/* Climate slider */}
+              <DiscreteSlider
+                stops={[
+                  "Warmer Wetter",
+                  "Historical",
+                  "Warmer Drier I",
+                  "Warmer Drier II",
+                  "Warmer Drier III",
+                  "Warmer Drier IV",
+                ]}
+                value={selectedClimate}
+                onChange={(value) => {
+                  handleClimateChange(value)
+                  console.log("Climate changed to:", value)
+                }}
+                labelPosition="top"
+              />
+            </Box>
+          </Box>
+        </Box>
+        )
+      })()}
+
       {/* Overlay Controls */}
       <MapControls
         isDrawingCustomRegion={isDrawingCustomRegion}
@@ -3360,6 +3465,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         selectedOutcome={selectedOutcome}
         onOutcomeSelect={handleOutcomeSelect}
         onClearSelectedScenarios={handleClearSelectedScenarios}
+        isInComparisonMode={isInComparisonMode}
       />
     </Box>
   )
