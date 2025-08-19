@@ -221,7 +221,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const leftEndpoint = scales[axis]!(-1) // Get x position of -1 value
       const leftArrow = axisGroup.append("g")
         .attr("class", "axis-arrow axis-arrow-left")
-        .attr("transform", `translate(${leftEndpoint}, 15)`) // Position below the -1 endpoint
+        .attr("transform", `translate(${leftEndpoint}, 2)`) // Position so tip touches the -1 endpoint
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
 
@@ -236,7 +236,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const rightEndpoint = scales[axis]!(1) // Get x position of +1 value
       const rightArrow = axisGroup.append("g")
         .attr("class", "axis-arrow axis-arrow-right")
-        .attr("transform", `translate(${rightEndpoint}, 15)`) // Position below the +1 endpoint
+        .attr("transform", `translate(${rightEndpoint}, 2)`) // Position so tip touches the +1 endpoint
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
 
@@ -256,7 +256,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("transform", function() {
               const isLeft = d3.select(this).classed("axis-arrow-left")
               const endpoint = isLeft ? leftEndpoint : rightEndpoint
-              return `translate(${endpoint}, 15) scale(1.1)`
+              return `translate(${endpoint}, 2) scale(1.1)`
             })
             .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.16))")
         })
@@ -267,7 +267,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("transform", function() {
               const isLeft = d3.select(this).classed("axis-arrow-left")
               const endpoint = isLeft ? leftEndpoint : rightEndpoint
-              return `translate(${endpoint}, 15)`
+              return `translate(${endpoint}, 2)`
             })
             .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
         })
