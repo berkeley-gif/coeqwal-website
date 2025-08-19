@@ -105,6 +105,7 @@ const SortableScenarioExplorationCard = ({
           p: 3,
           height: "100%",
           display: "flex",
+          
           flexDirection: "column",
           cursor: isDragging ? "grabbing" : "grab",
           "&:hover": {
@@ -3729,48 +3730,38 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             p: 3,
           }}
         >
-          {/* Header */}
+          {/* Header with inline dropdowns */}
           <Box
             sx={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: "flex-start",
               mb: 3,
+              flexWrap: "wrap",
+              gap: 3,
             }}
           >
+            {/* Left side: Title */}
             <Typography
               variant="h4"
               sx={{
                 color: theme.palette.blue.darkest,
                 fontWeight: 500,
+                flexShrink: 0,
               }}
             >
               Scenario Exploration
             </Typography>
-            <Button
-              variant="text"
-              onClick={() => setShowExplorationPanel(false)}
+
+            {/* Center: Control dropdowns */}
+            <Box
               sx={{
-                color: theme.palette.blue.bright,
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  color: theme.palette.blue.darkest,
-                },
+                display: "flex",
+                gap: 2,
+                flexWrap: "wrap",
+                alignItems: "flex-end", // Align with baseline of title
               }}
             >
-              ← Back to Map
-            </Button>
-          </Box>
-
-          {/* Control dropdowns */}
-          <Box
-            sx={{
-              display: "flex",
-              gap: 3,
-              mb: 3,
-              flexWrap: "wrap",
-            }}
-          >
             {/* Outcome dropdown */}
             <Box sx={{ minWidth: "200px" }}>
               <Typography
@@ -3865,6 +3856,23 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 <MenuItem value="Tulare Basin">Tulare Basin</MenuItem>
               </Select>
             </Box>
+            </Box>
+
+            {/* Right side: Back button */}
+            <Button
+              variant="text"
+              onClick={() => setShowExplorationPanel(false)}
+              sx={{
+                color: theme.palette.blue.bright,
+                flexShrink: 0,
+                "&:hover": {
+                  backgroundColor: "transparent",
+                  color: theme.palette.blue.darkest,
+                },
+              }}
+            >
+              ← Back to Map
+            </Button>
           </Box>
 
           {/* Instructions */}
@@ -3875,7 +3883,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               color: theme.palette.text.secondary,
             }}
           >
-            Compare scenarios in detail. Drag and drop cards to reorder them.
+            Compare scenarios in detail. Drag and drop cards to reorder them. Build your story.
           </Typography>
 
           {/* Drag and Drop Grid */}
