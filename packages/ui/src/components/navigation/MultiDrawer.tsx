@@ -316,6 +316,7 @@ export function MultiDrawer({
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
             backgroundColor: drawerBg, // Use the tracked background color
+            borderTopLeftRadius: theme.borderRadius.rounded,
           },
         }}
       >
@@ -338,9 +339,18 @@ export function MultiDrawer({
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
+                    minHeight: "56px",
                   }}
                 >
-                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: theme.palette.common.white,
+                      margin: 0,
+                      lineHeight: 1,
+                    }}
+                  >
                     {tabTitles.glossary}
                   </Typography>
                   <IconButton

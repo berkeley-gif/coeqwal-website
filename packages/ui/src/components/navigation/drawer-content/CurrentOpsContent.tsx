@@ -619,7 +619,7 @@ export function CurrentOpsContent({
                       scrollMarginTop: "20px",
                       backgroundColor: "rgba(255, 172, 110, 0.1)",
                       p: 2,
-                      borderRadius: 2,
+                      borderRadius: (theme) => theme.borderRadius.standard,
                       border: "1px solid rgba(255, 172, 110, 0.3)",
                       transition: "background-color 0.3s ease",
                     }
