@@ -712,7 +712,7 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.ingeborgTrial,
       fontSize: typeScale.h1,
       fontWeight: 700,
-      lineHeight: 1.1,
+      lineHeight: 1.05,
       color: themeValues.palette.blue.darkest,
     },
     h2: {
