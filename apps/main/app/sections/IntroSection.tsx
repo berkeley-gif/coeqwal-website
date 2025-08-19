@@ -22,6 +22,152 @@ const IntroSection: React.FC = () => {
           height: "100vh",
         }}
       >
+        {/* Decorative background circles - scattered behind everything */}
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            zIndex: (theme) => theme.zIndex.introBackgroundImages,
+            pointerEvents: "none",
+          }}
+        >
+          {/* Blue decorative circles - clustered around 75% right, 50% down */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "180px",
+              height: "180px",
+              top: "10%",
+              left: "50%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "120px",
+              height: "120px",
+              top: "25%",
+              left: "90%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "150px",
+              height: "150px",
+              top: "70%",
+              left: "60%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "90px",
+              height: "90px",
+              top: "75%",
+              left: "85%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "200px",
+              height: "200px",
+              top: "5%",
+              left: "85%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "110px",
+              height: "110px",
+              top: "65%",
+              left: "40%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
+
+          {/* White decorative circles - clustered around 75% right, 50% down */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "140px",
+              height: "140px",
+              top: "8%",
+              left: "65%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "100px",
+              height: "100px",
+              top: "35%",
+              left: "35%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "160px",
+              height: "160px",
+              top: "80%",
+              left: "70%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "80px",
+              height: "80px",
+              top: "15%",
+              left: "75%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "130px",
+              height: "130px",
+              top: "55%",
+              left: "95%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "170px",
+              height: "170px",
+              top: "45%",
+              left: "25%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+        </Box>
+
         {/* Background circles for images */}
         <Box
           sx={{
