@@ -685,10 +685,10 @@ export function CurrentOpsContent({
                       >
                         <Box
                           sx={{
-                            width: "12px",
-                            height: "8px",
-                            backgroundColor: (theme) => (theme.palette.tiers as any)[tier.color],
-                            borderRadius: "1px",
+                            width: "10px",
+                            height: "30px",
+                            backgroundColor: (theme) => theme.palette.tiers[tier.color as keyof typeof theme.palette.tiers],
+                            borderRadius: "4px",
                             flexShrink: 0,
                           }}
                         />
