@@ -192,7 +192,7 @@ const MapControls = ({
   // Card minimize/maximize states
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
-  const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
+  const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(true) // Initialize minimized
 
   // Scenario presets state
   const [sgmaSanJoaquinOnly, setSgmaSanJoaquinOnly] = useState(false)
@@ -409,7 +409,6 @@ const MapControls = ({
     {
       id: "select-scenarios",
       title: "Select scenarios",
-      defaultExpanded: true, // Open by default when returning from expanded chart
       content: (
           <Box
             sx={{
@@ -662,94 +661,6 @@ const MapControls = ({
                 label="Select region on map"
               />
             </Box>
-        </Box>
-      ),
-    },
-    {
-      id: "selection-history",
-      title: "Selection history",
-      content: (
-        <Box>
-          {/* Selected Region */}
-          <Box
-            sx={{
-              mb: 3,
-              p: 2,
-              backgroundColor: (theme) => theme.palette.grey[50],
-              borderRadius: (theme) => theme.borderRadius.rounded,
-            }}
-          >
-            <Box
-              sx={{
-                fontSize: "0.8rem",
-                color: (theme) => theme.palette.text.secondary,
-                mb: 0.5,
-              }}
-            >
-              Region:
-            </Box>
-            <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-              {selectedRegion}
-            </Box>
-          </Box>
-
-          {/* Selected scenarios */}
-          <Box sx={{ mb: 2 }}>
-            <Box
-              sx={{
-                fontSize: "0.8rem",
-                color: (theme) => theme.palette.text.secondary,
-                mb: 1,
-              }}
-            >
-              Scenarios ({selectedScenarios.length}):
-            </Box>
-            {selectedScenarios.length > 0 ? (
-              selectedScenarios.map((scenario, index) => (
-                <Box
-                  key={index}
-                  sx={{
-                    p: 1.5,
-                    mb: 1,
-                    backgroundColor: (theme) =>
-                      theme.palette.blue.bright + "20",
-                    borderRadius: (theme) => theme.borderRadius.rounded,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box sx={{ fontSize: "0.85rem" }}>{scenario}</Box>
-                  <Box
-                    sx={{
-                      cursor: "pointer",
-                      color: (theme) => theme.palette.text.secondary,
-                      "&:hover": {
-                        color: (theme) => theme.palette.error.main,
-                      },
-                    }}
-                    onClick={() => {
-                      onScenarioSelect(scenario) // This will toggle it off
-                    }}
-                  >
-                    ×
-                  </Box>
-                </Box>
-              ))
-            ) : (
-              <Box
-                sx={{
-                  fontSize: "0.8rem",
-                  color: (theme) => theme.palette.text.disabled,
-                  fontStyle: "italic",
-                  textAlign: "center",
-                  p: 2,
-                }}
-              >
-                No scenarios selected yet
-              </Box>
-            )}
-          </Box>
         </Box>
       ),
     },
@@ -1083,107 +994,317 @@ const MapControls = ({
                       gridTemplateColumns: hasSelectedScenarios ? "1fr 1fr" : undefined, // 2 columns when scenarios selected
                       flexWrap: hasSelectedScenarios ? undefined : "wrap",
                       justifyContent: hasSelectedScenarios ? "center" : "center",
-                      gap: 2,
+                      gap: hasSelectedScenarios ? 3 : 2, // More gap in comparison mode
                       alignItems: "start",
                     }}
                   >
-                    {OUTCOMES.map((outcome) => (
-                      <Box
-                        key={outcome}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 1,
-                          padding: 0.5,
-                          maxWidth: "80px",
-                          borderRadius: (theme) => theme.borderRadius.rounded,
-                          cursor: "pointer",
-                          transition: "background-color 0.2s ease",
-                          "&:hover": {
-                            backgroundColor: (theme) => theme.palette.grey[100],
-                          },
-                          "&:active": {
-                            backgroundColor: (theme) => theme.palette.grey[200],
-                          },
-                        }}
-                        onClick={() => {
-                          // Handle outcome selection for map visualization
-                          onOutcomeSelect(outcome)
-                          // Also open glossary drawer with the specific outcome term
-                          openDrawer("glossary")
-                          setDrawerContent({ selectedTerm: outcome })
-                        }}
-                      >
-                        {/* Glyph for outcome */}
-                        <ScenarioGlyph
-                          tierColors={[
-                            theme.palette.tiers.tier1,
-                            theme.palette.tiers.tier2,
-                            theme.palette.tiers.tier3,
-                            theme.palette.tiers.tier4,
-                          ]}
-                          values={(() => {
-                            // Generate climate-influenced dummy data based on selectedClimate
-                            // 0: Warmer Wetter, 1: Historical, 2-5: Warmer Drier I-IV
-
-                            // Base median value varies by outcome type
-                            const outcomeIndex = OUTCOMES.indexOf(outcome)
-                            const baseMedian = outcomeIndex * 0.1 - 0.2 // -0.2 to 0.1 range
-
-                            // Climate affects both central tendency and variability
-                            let medianShift = 0
-                            let variabilityMultiplier = 1
-
-                            if (selectedClimate === 0) {
-                              // Warmer Wetter - better outcomes, less variability
-                              medianShift = 0.3 // More positive = more green/blue (better)
-                              variabilityMultiplier = 0.7
-                            } else if (selectedClimate === 1) {
-                              // Historical - baseline
-                              medianShift = 0
-                              variabilityMultiplier = 1
-                            } else {
-                              // Warmer Drier I-IV - worse outcomes, more variability
-                              const drierLevel = selectedClimate - 2 // 0-3
-                              medianShift = -0.2 - drierLevel * 0.2 // Gets progressively worse: -0.2, -0.4, -0.6, -0.8 (more red/orange)
-                              variabilityMultiplier = 1.2 + drierLevel * 0.4 // More variable: 1.2, 1.6, 2.0, 2.4
-                            }
-
-                            const median = baseMedian + medianShift
-                            const baseSpread = 0.4 * variabilityMultiplier
-
-                            // Create distribution with climate-appropriate spread
-                            const q1 = median - baseSpread * 0.5
-                            const q3 = median + baseSpread * 0.3 // Asymmetric - more downside risk
-                            const min = median - baseSpread * 0.8
-
-                            return [q3, median, q1, min] as [
-                              number,
-                              number,
-                              number,
-                              number,
-                            ]
-                          })()}
-                          size={56}
-                          variant={glyphVariant}
-                        />
-
-                        {/* Outcome label */}
+                    {hasSelectedScenarios ? (
+                      // Comparison mode: side-by-side glyphs
+                      <>
+                        {/* Current operations glyphs (left column) */}
                         <Box
                           sx={{
-                            fontSize: "0.75rem",
-                            fontWeight: 400,
-                            lineHeight: 1.3,
-                            color: (theme) => theme.palette.text.primary,
-                            textAlign: "center",
-                            maxWidth: "80px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                            alignItems: "center",
                           }}
                         >
-                          {outcome}
+                          <Typography
+                            variant="body2"
+                            sx={{ 
+                              fontWeight: 500, 
+                              fontSize: "0.8rem",
+                              color: (theme) => theme.palette.text.secondary,
+                              textAlign: "center",
+                              mb: 1,
+                            }}
+                          >
+                            Current Operations
+                          </Typography>
+                          {OUTCOMES.map((outcome) => (
+                            <Box
+                              key={`current-${outcome}`}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
+                                padding: 1,
+                                maxWidth: "80px",
+                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                backgroundColor: (theme) => theme.palette.blue.bright + "20", // 20% blue background
+                                cursor: "pointer",
+                                transition: "background-color 0.2s ease",
+                                "&:hover": {
+                                  backgroundColor: (theme) => theme.palette.grey[100],
+                                },
+                                "&:active": {
+                                  backgroundColor: (theme) => theme.palette.grey[200],
+                                },
+                              }}
+                              onClick={() => {
+                                onOutcomeSelect(outcome)
+                                openDrawer("glossary")
+                                setDrawerContent({ selectedTerm: outcome })
+                              }}
+                            >
+                              <ScenarioGlyph
+                                tierColors={[
+                                  theme.palette.tiers.tier1,
+                                  theme.palette.tiers.tier2,
+                                  theme.palette.tiers.tier3,
+                                  theme.palette.tiers.tier4,
+                                ]}
+                                values={(() => {
+                                  // Current operations data (same as before)
+                                  const outcomeIndex = OUTCOMES.indexOf(outcome)
+                                  const baseMedian = outcomeIndex * 0.1 - 0.2
+
+                                  let medianShift = 0
+                                  let variabilityMultiplier = 1
+
+                                  if (selectedClimate === 0) {
+                                    medianShift = 0.3
+                                    variabilityMultiplier = 0.7
+                                  } else if (selectedClimate === 1) {
+                                    medianShift = 0
+                                    variabilityMultiplier = 1
+                                  } else {
+                                    const drierLevel = selectedClimate - 2
+                                    medianShift = -0.2 - drierLevel * 0.2
+                                    variabilityMultiplier = 1.2 + drierLevel * 0.4
+                                  }
+
+                                  const median = baseMedian + medianShift
+                                  const baseSpread = 0.4 * variabilityMultiplier
+                                  const q1 = median - baseSpread * 0.5
+                                  const q3 = median + baseSpread * 0.3
+                                  const min = median - baseSpread * 0.8
+
+                                  return [q3, median, q1, min] as [number, number, number, number]
+                                })()}
+                                size={56}
+                                variant={glyphVariant}
+                              />
+                              <Box
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.3,
+                                  color: (theme) => theme.palette.text.primary,
+                                  textAlign: "center",
+                                  maxWidth: "80px",
+                                }}
+                              >
+                                {outcome}
+                              </Box>
+                            </Box>
+                          ))}
                         </Box>
-                      </Box>
-                    ))}
+
+                        {/* Alternative scenario glyphs (right column) */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                            alignItems: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{ 
+                              fontWeight: 500, 
+                              fontSize: "0.8rem",
+                              color: (theme) => theme.palette.text.secondary,
+                              textAlign: "center",
+                              mb: 1,
+                            }}
+                          >
+                            Alternative Scenario
+                          </Typography>
+                          {OUTCOMES.map((outcome) => (
+                            <Box
+                              key={`alternative-${outcome}`}
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
+                                padding: 1,
+                                maxWidth: "80px",
+                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                cursor: "pointer",
+                                transition: "background-color 0.2s ease",
+                                "&:hover": {
+                                  backgroundColor: (theme) => theme.palette.grey[100],
+                                },
+                                "&:active": {
+                                  backgroundColor: (theme) => theme.palette.grey[200],
+                                },
+                              }}
+                              onClick={() => {
+                                onOutcomeSelect(outcome)
+                                openDrawer("glossary")
+                                setDrawerContent({ selectedTerm: outcome })
+                              }}
+                            >
+                              <ScenarioGlyph
+                                tierColors={[
+                                  theme.palette.tiers.tier1,
+                                  theme.palette.tiers.tier2,
+                                  theme.palette.tiers.tier3,
+                                  theme.palette.tiers.tier4,
+                                ]}
+                                values={(() => {
+                                  // Alternative scenario data (different from current operations)
+                                  const outcomeIndex = OUTCOMES.indexOf(outcome)
+                                  const baseMedian = outcomeIndex * 0.15 - 0.1 // Slightly different base
+
+                                  // Alternative scenarios show different performance
+                                  let medianShift = 0.2 // Generally better performance
+                                  let variabilityMultiplier = 0.8 // Less variability
+
+                                  if (selectedClimate === 0) {
+                                    medianShift = 0.4
+                                    variabilityMultiplier = 0.6
+                                  } else if (selectedClimate === 1) {
+                                    medianShift = 0.2
+                                    variabilityMultiplier = 0.8
+                                  } else {
+                                    const drierLevel = selectedClimate - 2
+                                    medianShift = 0.1 - drierLevel * 0.1 // Still better but degrades
+                                    variabilityMultiplier = 0.9 + drierLevel * 0.2
+                                  }
+
+                                  const median = baseMedian + medianShift
+                                  const baseSpread = 0.35 * variabilityMultiplier
+                                  const q1 = median - baseSpread * 0.4
+                                  const q3 = median + baseSpread * 0.4
+                                  const min = median - baseSpread * 0.7
+
+                                  return [q3, median, q1, min] as [number, number, number, number]
+                                })()}
+                                size={56}
+                                variant={glyphVariant}
+                              />
+                              <Box
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.3,
+                                  color: (theme) => theme.palette.text.primary,
+                                  textAlign: "center",
+                                  maxWidth: "80px",
+                                }}
+                              >
+                                {outcome}
+                              </Box>
+                            </Box>
+                          ))}
+                        </Box>
+                      </>
+                    ) : (
+                      // Normal mode: original flex layout
+                      OUTCOMES.map((outcome) => (
+                        <Box
+                          key={outcome}
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 1,
+                            padding: 0.5,
+                            maxWidth: "80px",
+                            borderRadius: (theme) => theme.borderRadius.rounded,
+                            cursor: "pointer",
+                            transition: "background-color 0.2s ease",
+                            "&:hover": {
+                              backgroundColor: (theme) => theme.palette.grey[100],
+                            },
+                            "&:active": {
+                              backgroundColor: (theme) => theme.palette.grey[200],
+                            },
+                          }}
+                          onClick={() => {
+                            // Handle outcome selection for map visualization
+                            onOutcomeSelect(outcome)
+                            // Also open glossary drawer with the specific outcome term
+                            openDrawer("glossary")
+                            setDrawerContent({ selectedTerm: outcome })
+                          }}
+                        >
+                          {/* Glyph for outcome */}
+                          <ScenarioGlyph
+                            tierColors={[
+                              theme.palette.tiers.tier1,
+                              theme.palette.tiers.tier2,
+                              theme.palette.tiers.tier3,
+                              theme.palette.tiers.tier4,
+                            ]}
+                            values={(() => {
+                              // Generate climate-influenced dummy data based on selectedClimate
+                              // 0: Warmer Wetter, 1: Historical, 2-5: Warmer Drier I-IV
+
+                              // Base median value varies by outcome type
+                              const outcomeIndex = OUTCOMES.indexOf(outcome)
+                              const baseMedian = outcomeIndex * 0.1 - 0.2 // -0.2 to 0.1 range
+
+                              // Climate affects both central tendency and variability
+                              let medianShift = 0
+                              let variabilityMultiplier = 1
+
+                              if (selectedClimate === 0) {
+                                // Warmer Wetter - better outcomes, less variability
+                                medianShift = 0.3 // More positive = more green/blue (better)
+                                variabilityMultiplier = 0.7
+                              } else if (selectedClimate === 1) {
+                                // Historical - baseline
+                                medianShift = 0
+                                variabilityMultiplier = 1
+                              } else {
+                                // Warmer Drier I-IV - worse outcomes, more variability
+                                const drierLevel = selectedClimate - 2 // 0-3
+                                medianShift = -0.2 - drierLevel * 0.2 // Gets progressively worse: -0.2, -0.4, -0.6, -0.8 (more red/orange)
+                                variabilityMultiplier = 1.2 + drierLevel * 0.4 // More variable: 1.2, 1.6, 2.0, 2.4
+                              }
+
+                              const median = baseMedian + medianShift
+                              const baseSpread = 0.4 * variabilityMultiplier
+
+                              // Create distribution with climate-appropriate spread
+                              const q1 = median - baseSpread * 0.5
+                              const q3 = median + baseSpread * 0.3 // Asymmetric - more downside risk
+                              const min = median - baseSpread * 0.8
+
+                              return [q3, median, q1, min] as [
+                                number,
+                                number,
+                                number,
+                                number,
+                              ]
+                            })()}
+                            size={56}
+                            variant={glyphVariant}
+                          />
+
+                          {/* Outcome label */}
+                          <Box
+                            sx={{
+                              fontSize: "0.75rem",
+                              fontWeight: 400,
+                              lineHeight: 1.3,
+                              color: (theme) => theme.palette.text.primary,
+                              textAlign: "center",
+                              maxWidth: "80px",
+                            }}
+                          >
+                            {outcome}
+                          </Box>
+                        </Box>
+                      ))
+                    )}
                   </Box>
 
 
@@ -1558,10 +1679,10 @@ const MapControls = ({
               flexDirection: "column",
             }}
           >
-            <ScenarioCard
-              topLine={isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"}
-              headline={"Alternative scenarios"}
-              body={null}
+                          <ScenarioCard
+                topLine="CHOOSE AND COMPARE"
+                headline={"Alternative scenarios"}
+                body={null}
               sx={{
                 opacity: isThirdCardMinimized ? 0.8 : 1,
                 backdropFilter: "blur(10px)",
