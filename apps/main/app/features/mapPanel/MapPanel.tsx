@@ -266,6 +266,7 @@ const MapControls = ({
     {
       id: "select-scenarios",
       title: "Select scenarios",
+      defaultExpanded: true, // Open by default when returning from expanded chart
       content: (
         <Box
           sx={{
