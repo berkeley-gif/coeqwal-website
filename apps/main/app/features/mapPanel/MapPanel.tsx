@@ -1815,15 +1815,22 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             
             if (features && features.length > 0) {
               const feature = features[0]
-              setHoveredFeatureId(feature.properties?.DU_ID || null)
-              setHoveredFeatureData({
-                modName: feature.properties?.Mod_Name || "Unknown",
-                coordinates: [evt.lngLat.lng, evt.lngLat.lat]
-              })
+              const newFeatureId = feature.properties?.DU_ID || null
+              
+              // Only update state if the feature has actually changed
+              if (newFeatureId !== hoveredFeatureId) {
+                setHoveredFeatureId(newFeatureId)
+                setHoveredFeatureData({
+                  modName: feature.properties?.Mod_Name || "Unknown",
+                  coordinates: [evt.lngLat.lng, evt.lngLat.lat]
+                })
+              }
               evt.target.getCanvas().style.cursor = 'pointer'
             } else {
-              setHoveredFeatureId(null)
-              setHoveredFeatureData(null)
+              if (hoveredFeatureId !== null) {
+                setHoveredFeatureId(null)
+                setHoveredFeatureData(null)
+              }
               evt.target.getCanvas().style.cursor = ''
             }
           }
@@ -2008,19 +2015,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             anchor="bottom"
             offset={[0, -10]}
           >
-            <Box
-              sx={{
-                padding: 1,
-                backgroundColor: "rgba(0, 0, 0, 0.8)",
-                color: "white",
-                borderRadius: 1,
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {hoveredFeatureData.modName}
-            </Box>
+            {hoveredFeatureData.modName}
           </Popup>
         )}
 
