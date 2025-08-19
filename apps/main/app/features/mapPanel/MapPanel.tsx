@@ -865,8 +865,9 @@ const MapControls = ({
                           },
                         }}
                         onClick={() => {
-                          // TODO: Handle outcome click - open glossary or show details
-                          console.log(`Clicked on outcome: ${outcome}`)
+                          // Open glossary drawer with the specific outcome term
+                          openDrawer("glossary")
+                          setDrawerContent({ selectedTerm: outcome })
                         }}
                       >
                         {/* Glyph for outcome */}

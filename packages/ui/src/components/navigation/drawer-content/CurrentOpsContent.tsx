@@ -218,6 +218,55 @@ const glossaryTerms: GlossaryTerm[] = [
       "The baseline modeling scenario used in COEQWAL analysis that represents today's water management practices in California's Central Valley. This scenario models the coordinated operations of the State Water Project (SWP) and Central Valley Project (CVP) under current institutional, regulatory, and infrastructure conditions. It includes existing reservoir operations, environmental flow requirements, and water allocation priorities as they currently exist. The current operations scenario provides the reference point for evaluating how alternative management strategies might change water outcomes for different users and regions. Learn more in the Current operations scenario theme.",
     seeAlso: "CalSim, Water management decisions",
   },
+  // Outcome-specific glossary entries
+  {
+    icon: <LocationOnIcon />,
+    term: "Community deliveries",
+    definition:
+      "The amount of water delivered to cities, towns, and communities for drinking water, sanitation, and municipal uses. This includes both urban and rural communities and is essential for public health and economic activity.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Agricultural deliveries", 
+    definition:
+      "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agricultural water use represents the largest share of California's developed water supply.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Environmental health",
+    definition:
+      "The condition of natural ecosystems, including rivers, wetlands, and wildlife habitats. Environmental health is measured by factors like water quality, habitat availability, and the ability of ecosystems to support native species.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Delta health",
+    definition:
+      "The ecological condition of the Sacramento-San Joaquin Delta, a critical hub where rivers converge before flowing to San Francisco Bay. Delta health depends on freshwater flows, water quality, and habitat conditions that support fish, birds, and other wildlife.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Reservoir storage",
+    definition:
+      "The amount of water stored in reservoirs and lakes throughout the state. Reservoir storage provides a buffer against droughts and helps ensure water availability during dry periods.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Groundwater storage",
+    definition:
+      "The amount of water stored underground in aquifers. Groundwater serves as a critical backup water supply during droughts, but overpumping can cause wells to dry up and land to sink.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Salmon abundance",
+    definition:
+      "The population levels of salmon species in California's rivers and streams. Salmon are an indicator species whose health reflects the overall condition of aquatic ecosystems and river flows.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Distributional equity",
+    definition:
+      "How fairly water benefits and burdens are shared across different communities, regions, and user groups. This includes access to clean water, protection from floods, and the distribution of economic impacts from water management decisions.",
+  },
 ].sort((a, b) => a.term.localeCompare(b.term))
 
 /**
