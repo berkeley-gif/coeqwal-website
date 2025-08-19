@@ -993,52 +993,45 @@ function PanelWithDetail({
   const mainPanelRef = useRef<HTMLDivElement>(null)
   const detailPanelRef = useRef<HTMLDivElement>(null)
 
-  // Update container height based on active panel
+  // Smooth height animation using Framer Motion's layout animations
+  const [containerHeight, setContainerHeight] = useState<"auto" | number>("auto")
+
   useEffect(() => {
-    const updateHeight = () => {
-      if (!containerRef.current) return
+    if (!isActive) {
+      setContainerHeight("auto")
+      return
+    }
 
-      if (!isActive) {
-        // Let document flow determine height when showing main panel
-        containerRef.current.style.height = "auto"
-        return
-      }
-
-      const activeRef = detailPanelRef.current
-      if (activeRef) {
-        const height = activeRef.offsetHeight
-        containerRef.current.style.height = `${height}px`
+    // Measure detail panel height after it's rendered
+    const measureHeight = () => {
+      if (detailPanelRef.current) {
+        const height = detailPanelRef.current.scrollHeight
+        setContainerHeight(height)
       }
     }
 
-    // Use a small delay to ensure content is rendered
-    const timer = setTimeout(updateHeight, 100)
-
-    // Also update on window resize
-    const handleResize = () => {
-      setTimeout(updateHeight, 100)
-    }
-
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      clearTimeout(timer)
-      window.removeEventListener("resize", handleResize)
-    }
+    // Small delay to ensure detail panel is rendered
+    const timer = setTimeout(measureHeight, 50)
+    
+    return () => clearTimeout(timer)
   }, [isActive])
 
   return (
-    <Box
+    <motion.div
       ref={containerRef}
       className={isActive ? "active-panel-container" : ""}
-      sx={{
+      animate={{ height: containerHeight }}
+      transition={{
+        type: "tween",
+        duration: 0.4,
+        ease: "easeInOut",
+      }}
+      style={{
         position: "relative",
         width: "100%",
         overflow: "visible",
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
-        // Initial height will be set by useEffect
-        minHeight: "auto",
       }}
     >
       {/* Conditionally render either main panel or detail panel with sliding animation */}
@@ -1189,6 +1182,7 @@ function PanelWithDetail({
           </motion.div>
         )}
       </AnimatePresence>
-    </Box>
+    </motion.div>
   )
 }
+
