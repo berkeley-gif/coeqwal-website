@@ -240,10 +240,29 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             
             d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
             
-            setAxisFilters(prev => ({
-              ...prev,
-              [axis]: [clampedValue, currentFilter[1]]
-            }))
+            // Update the filter range indicator
+            const newRightPos = scales[axis]!(currentFilter[1])
+            const newLeftPos = scales[axis]!(clampedValue)
+            axisGroup.select(".filter-range")
+              .attr("x1", newLeftPos)
+              .attr("x2", newRightPos)
+            
+            console.log(`Left arrow drag - Axis: ${axis}, New range: [${clampedValue.toFixed(2)}, ${currentFilter[1].toFixed(2)}]`)
+            
+            setAxisFilters(prev => {
+              const newFilters = {
+                ...prev,
+                [axis]: [clampedValue, currentFilter[1]]
+              }
+              console.log('All filters:', newFilters)
+              
+              // Force immediate re-render by updating the chart
+              setTimeout(() => {
+                updateChart(currentWidth, currentHeight, false)
+              }, 0)
+              
+              return newFilters
+            })
           })
           .on("end", function() {
             d3.select(this).style("cursor", "grab")
@@ -276,10 +295,29 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             
             d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
             
-            setAxisFilters(prev => ({
-              ...prev,
-              [axis]: [currentFilter[0], clampedValue]
-            }))
+            // Update the filter range indicator
+            const newLeftPos = scales[axis]!(currentFilter[0])
+            const newRightPos = scales[axis]!(clampedValue)
+            axisGroup.select(".filter-range")
+              .attr("x1", newLeftPos)
+              .attr("x2", newRightPos)
+            
+            console.log(`Right arrow drag - Axis: ${axis}, New range: [${currentFilter[0].toFixed(2)}, ${clampedValue.toFixed(2)}]`)
+            
+            setAxisFilters(prev => {
+              const newFilters = {
+                ...prev,
+                [axis]: [currentFilter[0], clampedValue]
+              }
+              console.log('All filters:', newFilters)
+              
+              // Force immediate re-render by updating the chart
+              setTimeout(() => {
+                updateChart(currentWidth, currentHeight, false)
+              }, 0)
+              
+              return newFilters
+            })
           })
           .on("end", function() {
             d3.select(this).style("cursor", "grab")
@@ -292,6 +330,19 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("fill", "#449cd9") // theme.palette.blue.bright
         .attr("stroke", "none")
         .attr("transform", "translate(-8, -6)") // Center the 16x12 arrow
+
+      // Add visual range indicator if there's an active filter
+      if (currentFilter[0] > -1 || currentFilter[1] < 1) {
+        axisGroup.append("line")
+          .attr("class", "filter-range")
+          .attr("x1", leftPosition)
+          .attr("x2", rightPosition)
+          .attr("y1", 0)
+          .attr("y2", 0)
+          .attr("stroke", "#449cd9")
+          .attr("stroke-width", 6)
+          .attr("opacity", 0.3)
+      }
 
       // Add hover effects to arrows (exact SliderPointer style)
       axisGroup.selectAll(".axis-arrow")
@@ -412,8 +463,27 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const value = d.values[axis] || 0
         const filter = axisFilters[axis]
         if (!filter) return true // No filter on this axis
-        return value >= filter[0] && value <= filter[1]
+        const visible = value >= filter[0] && value <= filter[1]
+        return visible
       })
+      
+      // Debug logging for scenarios that should be filtered
+      if (dataIndex < 10) {
+        const communityValue = d.values["Community deliveries"] || 0
+        const filter = axisFilters["Community deliveries"]
+        
+        // Log scenarios with negative values or when filtering is active
+        if (communityValue < 0 || (filter && (filter[0] > -1 || filter[1] < 1))) {
+          console.log(`🔍 Scenario ${d.name}:`, {
+            communityValue: communityValue.toFixed(3),
+            filter: filter ? `[${filter[0].toFixed(2)}, ${filter[1].toFixed(2)}]` : 'none',
+            withinRange: filter ? (communityValue >= filter[0] && communityValue <= filter[1]) : true,
+            shouldBeFiltered: filter ? !(communityValue >= filter[0] && communityValue <= filter[1]) : false,
+            isVisible,
+            dataIndex
+          })
+        }
+      }
       
       const pathData = axes.map(axis => [axis, d.values[axis] || 0] as [string, number])
 
@@ -456,7 +526,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       }
 
       const pathSelection = animate ? path.transition(t as any) : path
-      pathSelection.attr("d", lineGenerator(pathData))
+      pathSelection
+        .attr("d", lineGenerator(pathData))
+        .attr("opacity", isVisible ? (d.highlighted ? 0.9 : 0.2) : 0.02) // Update opacity based on visibility
 
       // Update circles at intersection points (original styling)
       axes.forEach((axis) => {
@@ -516,6 +588,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         circleSelection
           .attr("cx", scales[axis]!(value))
           .attr("cy", yScale(axis)!)
+          .attr("opacity", isVisible ? (d.highlighted ? 1 : 0.8) : 0.02) // Update opacity based on visibility
       })
     })
 
@@ -536,7 +609,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("x", newWidth / 2)
         .attr("y", 20)
     }
-  }, [data, axes, margin, colors, lineColors, showBaseline, baselineData, title, onLineHover, onLineClick, axisFilters])
+  }, [data, axes, currentWidth, currentHeight, margin, colors, lineColors, showBaseline, baselineData, title, onLineHover, onLineClick, axisFilters])
 
   // Initial render (no animation)
   useEffect(() => {
