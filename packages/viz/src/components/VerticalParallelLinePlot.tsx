@@ -365,15 +365,35 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               onLineHover?.(d)
               d3.select(this).attr("r", d.highlighted ? 6 : 5).attr("opacity", 1)
               
-              // Find and highlight the corresponding line (original behavior)
-              g.selectAll("path")
-                .filter((lineData: any) => lineData === undefined) // This will be handled by line hover
+              // Highlight the corresponding line for this circle
+              g.select(`.line-${dataIndex}`)
+                .attr("stroke-width", 3)
+                .attr("opacity", 1)
+              
+              // Highlight all other circles for this same line/scenario
+              axes.forEach((otherAxis) => {
+                g.select(`.circle-${dataIndex}-${otherAxis.replace(/\s+/g, '-')}`)
+                  .attr("r", d.highlighted ? 6 : 5)
+                  .attr("opacity", 1)
+              })
             })
             .on("mouseout", function () {
               onLineHover?.(null)
               d3.select(this)
                 .attr("r", d.highlighted ? 5 : 4)
                 .attr("opacity", d.highlighted ? 1 : 0.8)
+              
+              // Reset the corresponding line for this circle
+              g.select(`.line-${dataIndex}`)
+                .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
+                .attr("opacity", d.highlighted ? 0.9 : 0.2)
+              
+              // Reset all other circles for this same line/scenario
+              axes.forEach((otherAxis) => {
+                g.select(`.circle-${dataIndex}-${otherAxis.replace(/\s+/g, '-')}`)
+                  .attr("r", d.highlighted ? 5 : 4)
+                  .attr("opacity", d.highlighted ? 1 : 0.8)
+              })
             })
             .on("click", function () {
               onLineClick?.(d)
