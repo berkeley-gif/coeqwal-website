@@ -209,7 +209,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const backgroundSelection = animate
         ? background.transition(t as any) // eslint-disable-line @typescript-eslint/no-explicit-any
         : background
-      ;(backgroundSelection as any).attr("width", innerWidth).attr("height", innerHeight) // eslint-disable-line @typescript-eslint/no-explicit-any
+      ;(backgroundSelection as any)
+        .attr("width", innerWidth)
+        .attr("height", innerHeight) // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Update axes with smooth transitions
       axes.forEach((axis) => {
@@ -382,6 +384,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           ? "translate(-11, -8)"
           : "translate(-8, -6)"
 
+        // Add larger touch target with active blue outline
+        leftArrowEnter
+          .append("circle")
+          .attr("class", "touch-target")
+          .attr("r", isExpanded ? 20 : 16) // Reduced size but still larger than visual
+          .attr("fill", "transparent")
+          .attr("stroke", "#449cd9") // Active blue outline as permanent style
+          .attr("stroke-width", 1)
+          .attr("opacity", 0.3) // Subtle but visible
+          .style("cursor", "grab")
+
+        // Add visible arrow path on top
         leftArrowEnter
           .append("path")
           .attr(
@@ -391,8 +405,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("fill", "#449cd9")
           .attr("stroke", "none")
           .attr("transform", `${arrowOffset} scale(${arrowScale})`)
+          .style("pointer-events", "none") // Let touch target handle events
 
         const leftArrowUpdate = leftArrowEnter.merge(leftArrows as any)
+        
+        // Update touch target size based on expansion state
+        leftArrowUpdate
+          .select(".touch-target")
+          .attr("r", isExpanded ? 20 : 16)
+        
         leftArrowUpdate
           .attr(
             "transform",
@@ -447,6 +468,18 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .style("cursor", "grab")
           .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
 
+        // Add larger touch target with active blue outline
+        rightArrowEnter
+          .append("circle")
+          .attr("class", "touch-target")
+          .attr("r", isExpanded ? 20 : 16) // Reduced size but still larger than visual
+          .attr("fill", "transparent")
+          .attr("stroke", "#449cd9") // Active blue outline as permanent style
+          .attr("stroke-width", 1)
+          .attr("opacity", 0.3) // Subtle but visible
+          .style("cursor", "grab")
+
+        // Add visible arrow path on top
         rightArrowEnter
           .append("path")
           .attr(
@@ -456,8 +489,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("fill", "#449cd9")
           .attr("stroke", "none")
           .attr("transform", `${arrowOffset} scale(${arrowScale})`)
+          .style("pointer-events", "none") // Let touch target handle events
 
         const rightArrowUpdate = rightArrowEnter.merge(rightArrows as any)
+        
+        // Update touch target size based on expansion state
+        rightArrowUpdate
+          .select(".touch-target")
+          .attr("r", isExpanded ? 20 : 16)
+        
         rightArrowUpdate
           .attr(
             "transform",
@@ -543,7 +583,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const pathSelection = animate
           ? baselinePath.transition(t as any) // eslint-disable-line @typescript-eslint/no-explicit-any
           : baselinePath
-        ;(pathSelection as any).attr("d", baselineLineGenerator(baselinePathData)) // eslint-disable-line @typescript-eslint/no-explicit-any
+        ;(pathSelection as any).attr(
+          "d",
+          baselineLineGenerator(baselinePathData),
+        ) // eslint-disable-line @typescript-eslint/no-explicit-any
 
         // Update baseline circles - orange to match line
         axes.forEach((axis) => {

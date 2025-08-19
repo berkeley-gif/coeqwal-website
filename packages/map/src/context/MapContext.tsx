@@ -171,7 +171,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
     },
 
     fitBounds: (
-      boundsOrViewState: [[number, number], [number, number]] | Pick<ViewState, "bounds" | "pitch" | "bearing" | "transitionOptions">,
+      boundsOrViewState:
+        | [[number, number], [number, number]]
+        | Pick<ViewState, "bounds" | "pitch" | "bearing" | "transitionOptions">,
       pitch?: number,
       bearing?: number,
       padding?:
@@ -190,7 +192,8 @@ export function MapProvider({ children }: { children: ReactNode }) {
             pitch: pitch ?? 0,
             bearing: bearing ?? 0,
             padding: padding ?? 50,
-            duration: transitionOptions?.duration ?? DEFAULT_TRANSITION.duration,
+            duration:
+              transitionOptions?.duration ?? DEFAULT_TRANSITION.duration,
             easing: transitionOptions?.easing ?? DEFAULT_TRANSITION.easing,
             essential:
               transitionOptions?.essential ?? DEFAULT_TRANSITION.essential,
@@ -202,10 +205,14 @@ export function MapProvider({ children }: { children: ReactNode }) {
             pitch: viewState.pitch ?? 0,
             bearing: viewState.bearing ?? 0,
             padding: padding ?? 50,
-            duration: viewState.transitionOptions?.duration ?? DEFAULT_TRANSITION.duration,
-            easing: viewState.transitionOptions?.easing ?? DEFAULT_TRANSITION.easing,
+            duration:
+              viewState.transitionOptions?.duration ??
+              DEFAULT_TRANSITION.duration,
+            easing:
+              viewState.transitionOptions?.easing ?? DEFAULT_TRANSITION.easing,
             essential:
-              viewState.transitionOptions?.essential ?? DEFAULT_TRANSITION.essential,
+              viewState.transitionOptions?.essential ??
+              DEFAULT_TRANSITION.essential,
           })
         }
       } catch (err) {
