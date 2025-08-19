@@ -199,7 +199,7 @@ const MapControls = ({
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(true) // Initialize minimized
 
   // Scenario presets state
-  
+
   const [sgmaSanJoaquinOnly, setSgmaSanJoaquinOnly] = useState(false)
   const [sgmaSanJoaquinReductions, setSgmaSanJoaquinReductions] =
     useState(false)
@@ -211,8 +211,6 @@ const MapControls = ({
 
   // Track scenarios clicked in chart (dots and lines)
   const [clickedScenarios, setClickedScenarios] = useState<string[]>([])
-  
-
 
   // Outcomes panel state
   const [isRelativeView, setIsRelativeView] = useState(true)
@@ -276,17 +274,17 @@ const MapControls = ({
   }, [])
 
   // Handle scenario clicks from the chart (dots and lines)
-  const handleChartScenarioClick = (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleChartScenarioClick = (data: any) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     const scenarioName = data.name
-    setClickedScenarios((prev) =>
-      prev.includes(scenarioName)
-        ? prev.filter((s) => s !== scenarioName) // Remove if already clicked
-        : [...prev, scenarioName] // Add if not clicked yet
+    setClickedScenarios(
+      (prev) =>
+        prev.includes(scenarioName)
+          ? prev.filter((s) => s !== scenarioName) // Remove if already clicked
+          : [...prev, scenarioName], // Add if not clicked yet
     )
     console.log("Chart scenario clicked:", scenarioName)
   }
-
-
 
   const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
@@ -415,8 +413,8 @@ const MapControls = ({
       id: "select-scenarios",
       title: "Select scenarios",
       content: (
-          <Box
-            sx={{
+        <Box
+          sx={{
             display: "flex",
             flexDirection: "column",
             width: "100%",
@@ -426,8 +424,8 @@ const MapControls = ({
           {/* Outcomes paragraph, visible when chart not expanded */}
           {!expandChart && (
             <Box sx={{ flexShrink: 0 }}>
-            <Box
-              sx={{
+              <Box
+                sx={{
                   fontSize: "1rem",
                   fontWeight: 400,
                   lineHeight: 1.4,
@@ -440,11 +438,11 @@ const MapControls = ({
                 <Box
                   component="span"
                   onClick={handleLearnMoreClick}
-              sx={{
+                  sx={{
                     color: (theme) => theme.palette.blue.bright,
                     fontSize: "0.95rem",
                     cursor: "pointer",
-                fontWeight: 500,
+                    fontWeight: 500,
                     textDecoration: "underline",
                     whiteSpace: "nowrap",
                     "&:hover": {
@@ -453,8 +451,8 @@ const MapControls = ({
                   }}
                 >
                   Learn more about this chart
-            </Box>
-          </Box>
+                </Box>
+              </Box>
             </Box>
           )}
 
@@ -462,37 +460,37 @@ const MapControls = ({
           <Box sx={{ flexShrink: 0, mb: 1 }}>
             {/* Expand chart button, always visible */}
             <Box sx={{ mb: 1 }}>
-            <Button
-              variant="text"
+              <Button
+                variant="text"
                 onClick={toggleExpandChart}
-              sx={{
-                fontSize: "1rem",
-                fontWeight: 500,
-                color: (theme) => theme.palette.blue.bright,
-                padding: 0,
-                minWidth: "auto",
-                textTransform: "none",
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  color: (theme) => theme.palette.blue.bright,
+                  padding: 0,
+                  minWidth: "auto",
+                  textTransform: "none",
                   justifyContent: "flex-start",
-                "&:hover": {
-                  color: (theme) => theme.palette.blue.darkest,
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.875em",
-                  marginRight: "8px",
-                  display: "inline-block",
-                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s ease",
+                  "&:hover": {
+                    color: (theme) => theme.palette.blue.darkest,
+                    backgroundColor: "transparent",
+                  },
                 }}
               >
-                ▼
-              </span>
+                <span
+                  style={{
+                    fontSize: "0.875em",
+                    marginRight: "8px",
+                    display: "inline-block",
+                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  ▼
+                </span>
                 {expandChart ? "Reduce" : "Expand"} chart
-            </Button>
-          </Box>
+              </Button>
+            </Box>
 
             {/* Chart controls */}
             <Box
@@ -608,63 +606,63 @@ const MapControls = ({
           </Box> */}
 
           {/* Region Selection Options - Always Visible */}
-                <Box
-                  sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 1,
-                p: 2,
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 1,
+              p: 2,
               // backgroundColor: (theme) => theme.palette.grey[50],
               // borderRadius: (theme) => theme.borderRadius.rounded,
               // border: "1px solid",
               // borderColor: (theme) => theme.palette.divider,
-              }}
-            >
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Sacramento Valley"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="San Joaquin Valley"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Delta"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Tulare Basin"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onToggleDeliveryAreaDropdown()
-                      }
-                    }}
-                  />
-                }
-                label="Select delivery area"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={isDrawingCustomRegion || polygonPoints.length > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        handleSelectRegionOnMapClick()
-                      } else {
-                        onClearCustomRegion()
-                      }
-                    }}
-                  />
-                }
-                label="Select region on map"
-              />
+            }}
+          >
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="Sacramento Valley"
+            />
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="San Joaquin Valley"
+            />
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="Delta"
+            />
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="Tulare Basin"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      onToggleDeliveryAreaDropdown()
+                    }
+                  }}
+                />
+              }
+              label="Select delivery area"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={isDrawingCustomRegion || polygonPoints.length > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleSelectRegionOnMapClick()
+                    } else {
+                      onClearCustomRegion()
+                    }
+                  }}
+                />
+              }
+              label="Select region on map"
+            />
           </Box>
         </Box>
       ),
@@ -674,16 +672,21 @@ const MapControls = ({
   const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
   // Check if any scenarios are selected (presets, chart selections, or chart clicks)
-  const hasSelectedScenarios = selectedScenarios.length > 0 || 
+  const hasSelectedScenarios =
+    selectedScenarios.length > 0 ||
     clickedScenarios.length > 0 ||
-    sgmaSanJoaquinOnly || sgmaSanJoaquinReductions || sgmaBothValleys || 
-    sgmaBothValleysReductions || usbrAlternative3 || deltaConveyanceTunnel
+    sgmaSanJoaquinOnly ||
+    sgmaSanJoaquinReductions ||
+    sgmaBothValleys ||
+    sgmaBothValleysReductions ||
+    usbrAlternative3 ||
+    deltaConveyanceTunnel
 
   // Simple way to communicate comparison mode to parent - we'll use a ref
   useEffect(() => {
     // This is a simple way to communicate state up without complex prop drilling
-    if (typeof window !== 'undefined') {
-      (window as any).mapComparisonMode = hasSelectedScenarios // eslint-disable-line @typescript-eslint/no-explicit-any
+    if (typeof window !== "undefined") {
+      ;(window as any).mapComparisonMode = hasSelectedScenarios // eslint-disable-line @typescript-eslint/no-explicit-any
     }
   }, [hasSelectedScenarios])
 
@@ -863,21 +866,21 @@ const MapControls = ({
                           display: "flex",
                           alignItems: "center",
                           gap: 0.5,
-                      }}
-                    >
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          color: (theme) => theme.palette.blue.darkest,
                         }}
                       >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: (theme) => theme.palette.blue.darkest,
+                          }}
+                        >
                           Scenario outcomes
-                      </Typography>
-                      <InfoIconButton
-                        mode="glossary"
-                        glossaryEntry="CalSim"
-                        onGlossaryOpen={handleGlossaryOpen}
-                      />
+                        </Typography>
+                        <InfoIconButton
+                          mode="glossary"
+                          glossaryEntry="CalSim"
+                          onGlossaryOpen={handleGlossaryOpen}
+                        />
                       </Box>
                       {/* Glyph variant selector */}
                       <Select
@@ -996,20 +999,24 @@ const MapControls = ({
                   <Box
                     sx={{
                       display: hasSelectedScenarios ? "grid" : "flex",
-                      gridTemplateColumns: hasSelectedScenarios ? "1fr 1fr" : undefined, // 2 columns when scenarios selected
+                      gridTemplateColumns: hasSelectedScenarios
+                        ? "1fr 1fr"
+                        : undefined, // 2 columns when scenarios selected
                       flexWrap: hasSelectedScenarios ? undefined : "wrap",
-                      justifyContent: hasSelectedScenarios ? "center" : "center",
+                      justifyContent: hasSelectedScenarios
+                        ? "center"
+                        : "center",
                       gap: hasSelectedScenarios ? 3 : 2, // More gap in comparison mode
                       alignItems: "start",
                     }}
                   >
                     {hasSelectedScenarios ? (
                       // Comparison mode: 4 rows with 2 comparative pairs each
-                  <Box
-                    sx={{
-                      display: "grid",
+                      <Box
+                        sx={{
+                          display: "grid",
                           gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns: Current, Alt, Current, Alt
-                      gap: 2,
+                          gap: 2,
                           width: "100%",
                           padding: 2,
                           position: "relative", // For column background positioning
@@ -1023,7 +1030,8 @@ const MapControls = ({
                             left: 0,
                             bottom: 0,
                             width: "calc(25% - 4px)", // First column width minus half gap
-                            backgroundColor: (theme) => theme.palette.blue.bright + "15", // Slightly lighter blue column
+                            backgroundColor: (theme) =>
+                              theme.palette.blue.bright + "15", // Slightly lighter blue column
                             borderRadius: (theme) => theme.borderRadius.rounded,
                             zIndex: 0, // Behind content
                           }}
@@ -1035,7 +1043,8 @@ const MapControls = ({
                             right: "25%", // Third column position
                             bottom: 0,
                             width: "calc(25% - 4px)", // Third column width minus half gap
-                            backgroundColor: (theme) => theme.palette.blue.bright + "15", // Slightly lighter blue column
+                            backgroundColor: (theme) =>
+                              theme.palette.blue.bright + "15", // Slightly lighter blue column
                             borderRadius: (theme) => theme.borderRadius.rounded,
                             zIndex: 0, // Behind content
                           }}
@@ -1043,8 +1052,8 @@ const MapControls = ({
                         {/* Column headers - positioned in grid */}
                         <Typography
                           variant="body2"
-                          sx={{ 
-                            fontWeight: 500, 
+                          sx={{
+                            fontWeight: 500,
                             fontSize: "0.8rem",
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
@@ -1057,8 +1066,8 @@ const MapControls = ({
                         </Typography>
                         <Typography
                           variant="body2"
-                          sx={{ 
-                            fontWeight: 500, 
+                          sx={{
+                            fontWeight: 500,
                             fontSize: "0.8rem",
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
@@ -1071,8 +1080,8 @@ const MapControls = ({
                         </Typography>
                         <Typography
                           variant="body2"
-                          sx={{ 
-                            fontWeight: 500, 
+                          sx={{
+                            fontWeight: 500,
                             fontSize: "0.8rem",
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
@@ -1085,8 +1094,8 @@ const MapControls = ({
                         </Typography>
                         <Typography
                           variant="body2"
-                          sx={{ 
-                            fontWeight: 500, 
+                          sx={{
+                            fontWeight: 500,
                             fontSize: "0.8rem",
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
@@ -1105,22 +1114,25 @@ const MapControls = ({
                             // Current operations glyph
                             <Box
                               key={`current-${outcome}`}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 1,
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
                                 padding: 0.5,
-                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                borderRadius: (theme) =>
+                                  theme.borderRadius.rounded,
                                 cursor: "pointer",
                                 transition: "background-color 0.2s ease",
                                 zIndex: 1, // Above column backgrounds
                                 position: "relative",
                                 "&:hover": {
-                                  backgroundColor: (theme) => theme.palette.grey[100],
+                                  backgroundColor: (theme) =>
+                                    theme.palette.grey[100],
                                 },
                                 "&:active": {
-                                  backgroundColor: (theme) => theme.palette.grey[200],
+                                  backgroundColor: (theme) =>
+                                    theme.palette.grey[200],
                                 },
                               }}
                               onClick={() => {
@@ -1129,14 +1141,14 @@ const MapControls = ({
                                 setDrawerContent({ selectedTerm: outcome })
                               }}
                             >
-                        <ScenarioGlyph
+                              <ScenarioGlyph
                                 tierColors={[
                                   theme.palette.tiers.tier1,
                                   theme.palette.tiers.tier2,
                                   theme.palette.tiers.tier3,
                                   theme.palette.tiers.tier4,
                                 ]}
-                          values={(() => {
+                                values={(() => {
                                   // Current operations data
                                   const baseMedian = outcomeIndex * 0.1 - 0.2
 
@@ -1152,7 +1164,8 @@ const MapControls = ({
                                   } else {
                                     const drierLevel = selectedClimate - 2
                                     medianShift = -0.2 - drierLevel * 0.2
-                                    variabilityMultiplier = 1.2 + drierLevel * 0.4
+                                    variabilityMultiplier =
+                                      1.2 + drierLevel * 0.4
                                   }
 
                                   const median = baseMedian + medianShift
@@ -1161,44 +1174,52 @@ const MapControls = ({
                                   const q3 = median + baseSpread * 0.3
                                   const min = median - baseSpread * 0.8
 
-                                  return [q3, median, q1, min] as [number, number, number, number]
-                          })()}
+                                  return [q3, median, q1, min] as [
+                                    number,
+                                    number,
+                                    number,
+                                    number,
+                                  ]
+                                })()}
                                 size={56}
-                          variant={glyphVariant}
-                        />
-                        <Box
-                          sx={{
-                            fontSize: "0.75rem",
-                            fontWeight: 400,
-                            lineHeight: 1.3,
-                            color: (theme) => theme.palette.text.primary,
-                            textAlign: "center",
-                            maxWidth: "80px",
-                          }}
-                        >
-                          {outcome}
-                        </Box>
+                                variant={glyphVariant}
+                              />
+                              <Box
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.3,
+                                  color: (theme) => theme.palette.text.primary,
+                                  textAlign: "center",
+                                  maxWidth: "80px",
+                                }}
+                              >
+                                {outcome}
+                              </Box>
                             </Box>,
 
                             // Alternative scenario glyph
-                    <Box
+                            <Box
                               key={`alternative-${outcome}`}
-                      sx={{
-                        display: "flex",
+                              sx={{
+                                display: "flex",
                                 flexDirection: "column",
-                        alignItems: "center",
+                                alignItems: "center",
                                 gap: 1,
                                 padding: 0.5,
-                                borderRadius: (theme) => theme.borderRadius.rounded,
+                                borderRadius: (theme) =>
+                                  theme.borderRadius.rounded,
                                 cursor: "pointer",
                                 transition: "background-color 0.2s ease",
                                 zIndex: 1, // Above column backgrounds
                                 position: "relative",
                                 "&:hover": {
-                                  backgroundColor: (theme) => theme.palette.grey[100],
+                                  backgroundColor: (theme) =>
+                                    theme.palette.grey[100],
                                 },
                                 "&:active": {
-                                  backgroundColor: (theme) => theme.palette.grey[200],
+                                  backgroundColor: (theme) =>
+                                    theme.palette.grey[200],
                                 },
                               }}
                               onClick={() => {
@@ -1231,22 +1252,29 @@ const MapControls = ({
                                   } else {
                                     const drierLevel = selectedClimate - 2
                                     medianShift = 0.1 - drierLevel * 0.1 // Still better but degrades
-                                    variabilityMultiplier = 0.9 + drierLevel * 0.2
+                                    variabilityMultiplier =
+                                      0.9 + drierLevel * 0.2
                                   }
 
                                   const median = baseMedian + medianShift
-                                  const baseSpread = 0.35 * variabilityMultiplier
+                                  const baseSpread =
+                                    0.35 * variabilityMultiplier
                                   const q1 = median - baseSpread * 0.4
                                   const q3 = median + baseSpread * 0.4
                                   const min = median - baseSpread * 0.7
 
-                                  return [q3, median, q1, min] as [number, number, number, number]
+                                  return [q3, median, q1, min] as [
+                                    number,
+                                    number,
+                                    number,
+                                    number,
+                                  ]
                                 })()}
                                 size={56}
                                 variant={glyphVariant}
                               />
                               <Box
-                        sx={{
+                                sx={{
                                   fontSize: "0.75rem",
                                   fontWeight: 400,
                                   lineHeight: 1.3,
@@ -1256,8 +1284,8 @@ const MapControls = ({
                                 }}
                               >
                                 {outcome}
-                    </Box>
-                            </Box>
+                              </Box>
+                            </Box>,
                           ]
                         }).flat()}
                       </Box>
@@ -1277,10 +1305,12 @@ const MapControls = ({
                             cursor: "pointer",
                             transition: "background-color 0.2s ease",
                             "&:hover": {
-                              backgroundColor: (theme) => theme.palette.grey[100],
+                              backgroundColor: (theme) =>
+                                theme.palette.grey[100],
                             },
                             "&:active": {
-                              backgroundColor: (theme) => theme.palette.grey[200],
+                              backgroundColor: (theme) =>
+                                theme.palette.grey[200],
                             },
                           }}
                           onClick={() => {
@@ -1357,13 +1387,11 @@ const MapControls = ({
                             }}
                           >
                             {outcome}
-                  </Box>
-                </Box>
+                          </Box>
+                        </Box>
                       ))
                     )}
                   </Box>
-
-
                 </Box>
               )}
 
@@ -1707,7 +1735,6 @@ const MapControls = ({
               </Box>
             </Box>
           )}
-
         </Box>
 
         {/* Right column, Alternative scenarios */}
@@ -1734,7 +1761,7 @@ const MapControls = ({
             }}
           >
             <ScenarioCard
-                topLine="CHOOSE AND COMPARE"
+              topLine="CHOOSE AND COMPARE"
               headline={"Alternative scenarios"}
               body={null}
               sx={{
@@ -1903,33 +1930,33 @@ const MapControls = ({
                     ) : (
                       <>
                         {/* Normal Mode - Card Accordion */}
-                    <CardAccordion
-                      sections={accordionSections}
-                      allowMultiple={false} // Only one section expanded at a time
-                      sx={{ flexGrow: 1 }}
-                    />
+                        <CardAccordion
+                          sections={accordionSections}
+                          allowMultiple={false} // Only one section expanded at a time
+                          sx={{ flexGrow: 1 }}
+                        />
 
-                    {/* Compare Button at bottom */}
-                    <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                      <ActionCardButton
-                        title="Explore scenarios in depth"
-                        subtitle={
-                          selectedScenarios.length > 0
-                            ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
-                            : "Select scenarios to explore"
-                        }
-                        disabled={selectedScenarios.length === 0}
-                        onClick={() => {
-                          if (selectedScenarios.length > 0) {
-                            console.log(
-                              "Navigate to exploration view with:",
-                              selectedScenarios,
-                              selectedRegion,
-                            )
-                          }
-                        }}
-                      />
-                    </Box>
+                        {/* Compare Button at bottom */}
+                        <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
+                          <ActionCardButton
+                            title="Explore scenarios in depth"
+                            subtitle={
+                              selectedScenarios.length > 0
+                                ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
+                                : "Select scenarios to explore"
+                            }
+                            disabled={selectedScenarios.length === 0}
+                            onClick={() => {
+                              if (selectedScenarios.length > 0) {
+                                console.log(
+                                  "Navigate to exploration view with:",
+                                  selectedScenarios,
+                                  selectedRegion,
+                                )
+                              }
+                            }}
+                          />
+                        </Box>
                       </>
                     )}
                   </Box>
@@ -2133,17 +2160,17 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   // Watch for comparison mode changes from MapControls
   useEffect(() => {
     const checkComparisonMode = () => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         const comparisonMode = (window as any).mapComparisonMode || false // eslint-disable-line @typescript-eslint/no-explicit-any
-        console.log('Checking comparison mode:', comparisonMode, 'current state:', isInComparisonMode)
+
         setIsInComparisonMode(comparisonMode)
       }
     }
-    
+
     // Check immediately and set up interval to check periodically
     checkComparisonMode()
     const interval = setInterval(checkComparisonMode, 100)
-    
+
     return () => clearInterval(interval)
   }, [])
 
@@ -2180,7 +2207,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   }
 
   // Handle delivery area polygon selection
-  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!isSelectingDeliveryArea) return
 
     // Get the clicked feature
@@ -2305,19 +2333,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     setSelectedScenarios([])
   }
 
-  // Clear all scenario selections (return to original layout)
-  const handleClearAllScenarios = () => {
-    // Clear the window variable to reset comparison mode in MapControls
-    if (typeof window !== 'undefined') {
-      (window as any).mapComparisonMode = false // eslint-disable-line @typescript-eslint/no-explicit-any
-    }
-    
-    // Clear main component states
-    setSelectedScenarios([])
-    setIsInComparisonMode(false)
-  }
-
-
+  // Clear all scenario selections (return to original layout) - REMOVED since comparison dialog removed
 
   const handleClimateChange = (value: number) => {
     setSelectedClimate(value)
@@ -2617,10 +2633,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           isDrawingCustomRegion
             ? "crosshair"
             : isSelectingDeliveryArea
-            ? "crosshair"
-            : draggedPointIndex !== null
-              ? "grabbing"
-              : "default"
+              ? "crosshair"
+              : draggedPointIndex !== null
+                ? "grabbing"
+                : "default"
         }
         onClick={
           isDrawingCustomRegion
@@ -2653,21 +2669,28 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 )
               }
             : isSelectingDeliveryArea
-              ? (evt: { target: any; point: any }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+              ? (evt: { target: any; point: any }) => {
+                  // eslint-disable-line @typescript-eslint/no-explicit-any
                   try {
                     // Safety check: ensure layer exists before querying
                     if (!hasLayer("delivery-area-selection-layer")) return
 
                     // Handle delivery area polygon selection
-                    const features = evt.target.queryRenderedFeatures(evt.point, {
-                      layers: ["delivery-area-selection-layer"],
-                    })
+                    const features = evt.target.queryRenderedFeatures(
+                      evt.point,
+                      {
+                        layers: ["delivery-area-selection-layer"],
+                      },
+                    )
 
                     if (features && features.length > 0) {
                       handleDeliveryAreaPolygonClick({ features })
                     }
                   } catch (error) {
-                    console.warn("Delivery area click error (non-critical):", error)
+                    console.warn(
+                      "Delivery area click error (non-critical):",
+                      error,
+                    )
                   }
                 }
               : selectedOutcome
@@ -2678,10 +2701,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   }) => {
                     try {
                       // Safety check: ensure layer exists before querying
-                      const layerName = selectedOutcome === "Community deliveries"
-                        ? "community-deliveries-layer"
-                        : "agricultural-deliveries-layer"
-                      
+                      const layerName =
+                        selectedOutcome === "Community deliveries"
+                          ? "community-deliveries-layer"
+                          : "agricultural-deliveries-layer"
+
                       if (!hasLayer(layerName)) return
 
                       // Handle polygon click for zoom functionality
@@ -2704,10 +2728,13 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                         })
                       }
                     } catch (error) {
-                      console.warn("Outcome polygon click error (non-critical):", error)
+                      console.warn(
+                        "Outcome polygon click error (non-critical):",
+                        error,
+                      )
                     }
-              }
-            : undefined
+                  }
+                : undefined
         }
         onMouseMove={(evt: {
           target: any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -2754,10 +2781,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             // Check if hovering over outcome polygons
             else if (selectedOutcome) {
               // Safety check: ensure layer exists before querying
-              const layerName = selectedOutcome === "Community deliveries"
-                ? "community-deliveries-layer"
-                : "agricultural-deliveries-layer"
-              
+              const layerName =
+                selectedOutcome === "Community deliveries"
+                  ? "community-deliveries-layer"
+                  : "agricultural-deliveries-layer"
+
               if (!hasLayer(layerName)) return
 
               const features = evt.target.queryRenderedFeatures(evt.point, {
@@ -3236,34 +3264,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         }
       />
 
-      {/* Comparison mode dialog */}
-      <MapPromptDialog
-        isVisible={isInComparisonMode}
-        title="Compare scenarios"
-        subtitle=""
-        actions={
-          <Box
-            onClick={(e) => {
-              e.stopPropagation()
-              handleClearAllScenarios()
-              setIsInComparisonMode(false)
-            }}
-            sx={(theme) => ({
-              fontSize: theme.mapPromptDialog.typography.action.fontSize,
-              color: theme.palette.blue.bright,
-              cursor: theme.mapPromptDialog.typography.action.cursor,
-              fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
-              textDecoration:
-                theme.mapPromptDialog.typography.action.textDecoration,
-              "&:hover": {
-                color: theme.palette.blue.light,
-              },
-            })}
-          >
-            Cancel
-          </Box>
-        }
-      />
+      {/* Comparison mode dialog - REMOVED per user request */}
 
       {/* Delivery area selection dialog */}
       <MapPromptDialog
@@ -3341,9 +3342,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       </Box>
 
       {/* Climate card - positioned as direct child of MapPanel for proper positioning */}
-      {isInComparisonMode && (() => {
-        console.log('Rendering bottom-center Climate card')
-        return (
+      {isInComparisonMode && (
         <Box
           sx={{
             position: "absolute",
@@ -3439,8 +3438,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             </Box>
           </Box>
         </Box>
-        )
-      })()}
+      )}
 
       {/* Overlay Controls */}
       <MapControls

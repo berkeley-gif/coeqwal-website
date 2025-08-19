@@ -463,9 +463,9 @@ const IntroSection: React.FC = () => {
                 color={theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
-            >
-              <ArrowHead
-                size={28}
+              >
+                <ArrowHead
+                  size={28}
                   style={{
                     transform: "rotate(90deg)",
                   }}
@@ -510,7 +510,7 @@ const IntroSection: React.FC = () => {
           <Box
             component="img"
             src="/images/home_collage/birds_top.png"
-              sx={{
+            sx={{
               position: "absolute",
               left: "-70%",
               top: "30%",
@@ -530,16 +530,16 @@ const IntroSection: React.FC = () => {
               on two main things:
             </Typography>
             <Box component="ol" sx={{ mt: 1, pl: 3 }}>
-                  <Box component="li" sx={{ mb: 1 }}>
+              <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
                   How much rain and snow we get.
                 </Typography>
-                  </Box>
-                  <Box component="li" sx={{ mb: 1 }}>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
                   How we choose to manage it.
                 </Typography>
-                </Box>
+              </Box>
             </Box>
           </Box>
 
@@ -591,7 +591,7 @@ const IntroSection: React.FC = () => {
           <Box
             component="img"
             src="/images/home_collage/birds_top.png"
-              sx={{
+            sx={{
               position: "absolute",
               left: "-56%",
               top: "20%",
@@ -616,8 +616,8 @@ const IntroSection: React.FC = () => {
               Central Valley water systems that supply most of the state. For
               each of these scenarios, we also modeled 5 future climate
               possibilities.
-              </Typography>
-            </Box>
+            </Typography>
+          </Box>
 
           <ScrollIndicator
             scrollToId="fourth-panel"

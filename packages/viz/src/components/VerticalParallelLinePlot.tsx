@@ -62,7 +62,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
   // Track filter ranges for each axis [min, max] approach as this summer.
   const filterRanges = useRef<Record<string, [number, number]>>({})
-  
+
   // Track if any axis is currently being dragged (for connector line opacity)
   const isDragging = useRef<boolean>(false)
 
@@ -158,9 +158,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Observable pattern: Create update function for smooth resizing
   const updateChart = useCallback(
     (newWidth: number, newHeight: number, animate = true) => {
-    if (!data || data.length === 0 || !axes || axes.length === 0) return
+      if (!data || data.length === 0 || !axes || axes.length === 0) return
 
-    const svg = d3.select(svgRef.current)
+      const svg = d3.select(svgRef.current)
       const innerWidth = newWidth - margin.left - margin.right
       const innerHeight = newHeight - margin.top - margin.bottom
 
@@ -175,24 +175,24 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("preserveAspectRatio", "xMidYMid meet")
 
       // Create or update scales
-    const scales: Record<string, d3.ScaleLinear<number, number>> = {}
-    axes.forEach((axis) => {
+      const scales: Record<string, d3.ScaleLinear<number, number>> = {}
+      axes.forEach((axis) => {
         scales[axis] = d3.scaleLinear().domain([-1, 1]).range([0, innerWidth])
-    })
+      })
 
-    const yScale = d3
-      .scalePoint()
-      .domain(axes)
-      .range([0, innerHeight])
+      const yScale = d3
+        .scalePoint()
+        .domain(axes)
+        .range([0, innerHeight])
         .padding(0)
 
       // Update or create main group
       let g = svg.select<SVGGElement>(".chart-group")
       if (g.empty()) {
         g = svg
-      .append("g")
+          .append("g")
           .attr("class", "chart-group")
-      .attr("transform", `translate(${margin.left},${margin.top})`)
+          .attr("transform", `translate(${margin.left},${margin.top})`)
       } else {
         const selection = animate ? g.transition(t as any) : g
         selection.attr("transform", `translate(${margin.left},${margin.top})`)
@@ -204,9 +204,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         background = g
           .append("rect")
           .attr("class", "chart-background")
-      .attr("fill", colors.background)
-      .attr("opacity", 0.1)
-      .attr("rx", 4)
+          .attr("fill", colors.background)
+          .attr("opacity", 0.1)
+          .attr("rx", 4)
       }
 
       const backgroundSelection = animate
@@ -217,8 +217,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("height", innerHeight) // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Update axes with smooth transitions
-    axes.forEach((axis) => {
-      const yPos = yScale(axis)!
+      axes.forEach((axis) => {
+        const yPos = yScale(axis)!
         let axisGroup = g.select<SVGGElement>(
           `.axis-${axis.replace(/\s+/g, "-")}`,
         )
@@ -296,67 +296,67 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
         const lineSelection = animate ? axisLine.transition(t as any) : axisLine // eslint-disable-line @typescript-eslint/no-explicit-any
         ;(lineSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-        .attr("x1", 0)
-        .attr("x2", innerWidth)
+          .attr("x1", 0)
+          .attr("x2", innerWidth)
           .attr("y1", 0)
           .attr("y2", 0)
 
         // Update axis label with text wrapping (original styling)
         axisGroup.selectAll(".axis-label").remove() // Remove old labels
 
-      const words = axis.split(/\s+/)
-      const lineHeight = 14 // pixels
-      const maxWordsPerLine = 1 // One word per line for better wrapping
+        const words = axis.split(/\s+/)
+        const lineHeight = 14 // pixels
+        const maxWordsPerLine = 1 // One word per line for better wrapping
 
-      // Group words into lines
-      const lines = []
-      for (let i = 0; i < words.length; i += maxWordsPerLine) {
-        lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
-      }
+        // Group words into lines
+        const lines = []
+        for (let i = 0; i < words.length; i += maxWordsPerLine) {
+          lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
+        }
 
-      // Create text element for each line
-      lines.forEach((line, index) => {
+        // Create text element for each line
+        lines.forEach((line, index) => {
           axisGroup
             .append("text")
             .attr("class", "axis-label")
-          .attr("x", -10)
+            .attr("x", -10)
             .attr("y", 4 + (index - (lines.length - 1) / 2) * lineHeight) // Center multi-line text vertically
-          .attr("text-anchor", "end") // Right align text
-          .attr("font-size", "12px")
-          .attr("font-weight", "500")
-          .attr("fill", "#333")
-          .text(line)
-      })
+            .attr("text-anchor", "end") // Right align text
+            .attr("font-size", "12px")
+            .attr("font-weight", "500")
+            .attr("fill", "#333")
+            .text(line)
+        })
 
         // Add tick marks (original styling)
         axisGroup.selectAll(".tick-line").remove()
         axisGroup.selectAll(".tick-label").remove()
 
         const ticks = [-1, -0.5, 0, 0.5, 1] // Original fixed ticks
-      ticks.forEach((tick) => {
+        ticks.forEach((tick) => {
           const xPos = scales[axis]!(tick)
 
-        // Tick mark
+          // Tick mark
           axisGroup
             .append("line")
             .attr("class", "tick-line")
-          .attr("x1", xPos)
-          .attr("x2", xPos)
+            .attr("x1", xPos)
+            .attr("x2", xPos)
             .attr("y1", -5) // Above the line (original)
             .attr("y2", 5)
-          .attr("stroke", "#666")
-          .attr("stroke-width", 1)
+            .attr("stroke", "#666")
+            .attr("stroke-width", 1)
 
-        // Tick label
+          // Tick label
           axisGroup
             .append("text")
             .attr("class", "tick-label")
-          .attr("x", xPos)
+            .attr("x", xPos)
             .attr("y", -10) // Above the line (original)
-          .attr("text-anchor", "middle")
-          .attr("font-size", "10px")
-          .attr("fill", "#666")
-          .text(tick.toString()) // Show exact values including -0.5 and 0.5
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr("fill", "#666")
+            .text(tick.toString()) // Show exact values including -0.5 and 0.5
         })
 
         // Add slider arrows using D3 join pattern for persistence (like old code)
@@ -374,8 +374,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .data(leftArrowData)
 
         const leftArrowEnter = leftArrows
-      .enter()
-      .append("g")
+          .enter()
+          .append("g")
           .attr("class", "axis-arrow axis-arrow-left")
           .style("cursor", "grab")
           .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
@@ -398,7 +398,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
         // Add visible arrow path on top
         leftArrowEnter
-      .append("path")
+          .append("path")
           .attr(
             "d",
             "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z",
@@ -409,12 +409,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .style("pointer-events", "none") // Let touch target handle events
 
         const leftArrowUpdate = leftArrowEnter.merge(leftArrows as any)
-        
+
         // Update touch target size based on expansion state
-        leftArrowUpdate
-          .select(".touch-target")
-          .attr("r", isExpanded ? 20 : 16)
-        
+        leftArrowUpdate.select(".touch-target").attr("r", isExpanded ? 20 : 16)
+
         leftArrowUpdate
           .attr(
             "transform",
@@ -426,7 +424,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .drag<SVGGElement, any>() // eslint-disable-line @typescript-eslint/no-explicit-any
               .on("start", function () {
                 d3.select(this).style("cursor", "grabbing")
-                
+
                 // Make connector line more visible when dragging starts
                 axisGroup
                   .select(".filter-range")
@@ -460,7 +458,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               })
               .on("end", function () {
                 d3.select(this).style("cursor", "grab")
-                
+
                 // Make connector line more transparent when dragging ends
                 axisGroup
                   .select(".filter-range")
@@ -505,12 +503,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .style("pointer-events", "none") // Let touch target handle events
 
         const rightArrowUpdate = rightArrowEnter.merge(rightArrows as any)
-        
+
         // Update touch target size based on expansion state
-        rightArrowUpdate
-          .select(".touch-target")
-          .attr("r", isExpanded ? 20 : 16)
-        
+        rightArrowUpdate.select(".touch-target").attr("r", isExpanded ? 20 : 16)
+
         rightArrowUpdate
           .attr(
             "transform",
@@ -522,7 +518,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .drag<SVGGElement, any>() // eslint-disable-line @typescript-eslint/no-explicit-any
               .on("start", function () {
                 d3.select(this).style("cursor", "grabbing")
-                
+
                 // Make connector line more visible when dragging starts
                 axisGroup
                   .select(".filter-range")
@@ -556,7 +552,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               })
               .on("end", function () {
                 d3.select(this).style("cursor", "grab")
-                
+
                 // Make connector line more transparent when dragging ends
                 axisGroup
                   .select(".filter-range")
@@ -683,10 +679,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .y(([axis]) => yScale(axis)!)
       // No curve - use straight angular lines (original)
 
-    data.forEach((d, dataIndex) => {
+      data.forEach((d, dataIndex) => {
         const lineColor =
           lineColors.length > dataIndex
-              ? lineColors[dataIndex]!
+            ? lineColors[dataIndex]!
             : d.highlighted
               ? colors.highlighted
               : colors.default
@@ -780,19 +776,19 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
               .datum(d as any) // Store data reference for filtering (original) // eslint-disable-line @typescript-eslint/no-explicit-any
               .attr("fill", lineColor)
-          .attr("stroke", "white")
+              .attr("stroke", "white")
               .attr("stroke-width", 1.5) // Original width
               .attr("r", d.highlighted ? 5 : 4) // Original sizes
               .attr("opacity", circleOpacity) // Dots opaque
-          .style("cursor", "pointer")
-          .on("mouseover", function () {
+              .style("cursor", "pointer")
+              .on("mouseover", function () {
                 // Only allow hover highlighting for active (unfiltered) scenarios
                 if (!isScenarioActive(d)) return
 
-            onLineHover?.(d)
-            d3.select(this)
-              .attr("r", d.highlighted ? 6 : 5)
-              .attr("opacity", 1)
+                onLineHover?.(d)
+                d3.select(this)
+                  .attr("r", d.highlighted ? 6 : 5)
+                  .attr("opacity", 1)
 
                 // Highlight the corresponding line for this circle
                 g.select(`.line-${dataIndex}`)
@@ -805,15 +801,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                     `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
                   )
                     .attr("r", d.highlighted ? 6 : 5)
-              .attr("opacity", 1)
+                    .attr("opacity", 1)
                 })
-          })
-          .on("mouseout", function () {
-            onLineHover?.(null)
+              })
+              .on("mouseout", function () {
+                onLineHover?.(null)
                 const lineOpacity = getScenarioOpacity(d, "line")
                 const circleOpacity = getScenarioOpacity(d, "circle")
-            d3.select(this)
-              .attr("r", d.highlighted ? 5 : 4)
+                d3.select(this)
+                  .attr("r", d.highlighted ? 5 : 4)
                   .attr("opacity", circleOpacity) // Respect current filter state for circles
 
                 // Reset the corresponding line for this circle
@@ -833,10 +829,10 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
                     .attr("r", d.highlighted ? 5 : 4)
                     .attr("opacity", circleOpacity) // Respect current filter state for circles
                 })
-          })
-          .on("click", function () {
-            onLineClick?.(d)
-          })
+              })
+              .on("click", function () {
+                onLineClick?.(d)
+              })
           }
 
           const circleSelection = animate ? circle.transition(t as any) : circle // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -844,37 +840,37 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("cx", scales[axis]!(value))
             .attr("cy", yScale(axis)!)
             .attr("opacity", circleOpacity) // Dots opaque
+        })
       })
-    })
 
-    // Add title if provided
-    if (title) {
+      // Add title if provided
+      if (title) {
         let titleElement = svg.select<SVGTextElement>(".chart-title")
         if (titleElement.empty()) {
           titleElement = svg
-        .append("text")
+            .append("text")
             .attr("class", "chart-title")
-        .attr("text-anchor", "middle")
-        .attr("font-size", "16px")
-        .attr("font-weight", "600")
-        .attr("fill", "#333")
-        .text(title)
-    }
+            .attr("text-anchor", "middle")
+            .attr("font-size", "16px")
+            .attr("font-weight", "600")
+            .attr("fill", "#333")
+            .text(title)
+        }
 
         titleElement.attr("x", newWidth / 2).attr("y", 20)
       }
     },
     [
-    data,
-    axes,
-    margin,
-    colors,
-    lineColors,
-    showBaseline,
-    baselineData,
-    title,
-    onLineHover,
-    onLineClick,
+      data,
+      axes,
+      margin,
+      colors,
+      lineColors,
+      showBaseline,
+      baselineData,
+      title,
+      onLineHover,
+      onLineClick,
       getScenarioOpacity,
       isScenarioActive,
       overlayTiers,
