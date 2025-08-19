@@ -31,7 +31,7 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Image 3 - Large central */}
+          {/* Image 3 - Center cluster */}
           <Box
             component="img"
             src="/images/circular-crops/3.png"
@@ -39,12 +39,12 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "320px",
               height: "320px",
-              top: "10%",
-              right: "5%",
+              top: "35%",
+              left: "60%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 7 - Large top right */}
+          {/* Image 7 - Top left of cluster */}
           <Box
             component="img"
             src="/images/circular-crops/7.png"
@@ -52,12 +52,12 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "250px",
               height: "250px",
-              top: "5%",
-              right: "40%",
+              top: "25%",
+              left: "55%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 12 - Medium top far right */}
+          {/* Image 12 - Top right of cluster */}
           <Box
             component="img"
             src="/images/circular-crops/12.png"
@@ -65,12 +65,12 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "200px",
               height: "200px",
-              top: "2%",
-              right: "70%",
+              top: "20%",
+              left: "80%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 9 - Large bottom right */}
+          {/* Image 9 - Bottom right of cluster */}
           <Box
             component="img"
             src="/images/circular-crops/9.png"
@@ -78,12 +78,12 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "280px",
               height: "280px",
-              bottom: "15%",
-              right: "8%",
+              top: "55%",
+              left: "75%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 14 - Large bottom center */}
+          {/* Image 14 - Bottom left of cluster */}
           <Box
             component="img"
             src="/images/circular-crops/14.png"
@@ -91,12 +91,12 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "300px",
               height: "300px",
-              bottom: "5%",
-              right: "35%",
+              top: "60%",
+              left: "50%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 5 - Medium middle right */}
+          {/* Image 5 - Right side of cluster */}
           <Box
             component="img"
             src="/images/circular-crops/5.png"
@@ -104,12 +104,12 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "220px",
               height: "220px",
-              top: "35%",
-              right: "2%",
+              top: "40%",
+              left: "85%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 11 - Large bottom far right */}
+          {/* Image 11 - Left side of cluster */}
           <Box
             component="img"
             src="/images/circular-crops/11.png"
@@ -117,8 +117,8 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "240px",
               height: "240px",
-              bottom: "2%",
-              right: "65%",
+              top: "45%",
+              left: "45%",
               borderRadius: "50%",
             }}
           />
