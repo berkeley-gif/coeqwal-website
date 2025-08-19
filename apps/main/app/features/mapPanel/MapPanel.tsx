@@ -46,6 +46,7 @@ import { MapPromptDialog } from "@repo/ui"
 
 import { useGlyphSettingsStore } from "@repo/ui"
 import { ScenarioGlyph, VerticalParallelLinePlot } from "@repo/viz"
+// Using simple centroid calculation instead of turf
 
 interface MapPanelProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -1408,7 +1409,7 @@ const MapControls = ({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { addSource, addLayer, removeLayer, hasSource, hasLayer, fitBounds } = useMap()
+  const { addSource, addLayer, removeLayer, hasSource, hasLayer, fitBounds, flyTo } = useMap()
 
   // Calculated extents for different outcome datasets (from geojson analysis)
   const OUTCOME_EXTENTS = {
@@ -1802,7 +1803,31 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   ],
                 )
               }
-            : undefined
+            : selectedOutcome
+              ? (evt: any) => {
+                  // Handle polygon click for zoom functionality
+                  const features = evt.target.queryRenderedFeatures(evt.point, {
+                    layers: [
+                      selectedOutcome === "Community deliveries" 
+                        ? "community-deliveries-layer" 
+                        : "agricultural-deliveries-layer"
+                    ]
+                  })
+                  
+                  if (features && features.length > 0) {
+                    const feature = features[0]
+                    // Use click coordinates as zoom target (simpler than centroid calculation)
+                    flyTo({
+                      longitude: evt.lngLat.lng,
+                      latitude: evt.lngLat.lat, 
+                      zoom: 10, // Zoom in to show individual polygon detail
+                      transitionOptions: {
+                        duration: 1500,
+                      },
+                    })
+                  }
+                }
+              : undefined
         }
         onMouseMove={(evt: any) => {
           // Check if hovering over outcome polygons
