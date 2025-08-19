@@ -607,25 +607,25 @@ export function CurrentOpsContent({
       >
         <Stack spacing={1}>
           {glossaryTerms.map((term, index) => (
-            <Box
-              key={index}
-              ref={(el) => {
-                // Store reference to the term's DOM element
-                termRefs.current[term.term] = el as HTMLDivElement | null
-              }}
-              sx={
-                internalSelectedTerm === term.term
-                  ? {
-                      scrollMarginTop: "20px",
-                      backgroundColor: "rgba(255, 172, 110, 0.1)",
-                      p: 2,
-                      borderRadius: (theme) => theme.borderRadius.standard,
-                      border: "1px solid rgba(255, 172, 110, 0.3)",
-                      transition: "background-color 0.3s ease",
-                    }
-                  : {}
-              }
-            >
+            <React.Fragment key={index}>
+              <Box
+                ref={(el) => {
+                  // Store reference to the term's DOM element
+                  termRefs.current[term.term] = el as HTMLDivElement | null
+                }}
+                sx={
+                  internalSelectedTerm === term.term
+                    ? {
+                        scrollMarginTop: "20px",
+                        backgroundColor: "rgba(255, 172, 110, 0.1)",
+                        p: 2,
+                        borderRadius: (theme) => theme.borderRadius.standard,
+                        border: "1px solid rgba(255, 172, 110, 0.3)",
+                        transition: "background-color 0.3s ease",
+                      }
+                    : {}
+                }
+              >
               <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1 }}>
                 <Box
                   sx={{
@@ -738,10 +738,11 @@ export function CurrentOpsContent({
                 </Typography>
               )}
 
+              </Box>
               {index < glossaryTerms.length - 1 && (
                 <Divider sx={{ mt: 3, mx: "1rem" }} />
               )}
-            </Box>
+            </React.Fragment>
           ))}
         </Stack>
       </Box>
