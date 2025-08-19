@@ -71,15 +71,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     })
     
     if (elementType === 'circle') {
-      // Dots should be opaque when active, nearly invisible when filtered
+      // Dots: Full opacity when active, invisible when filtered
       return passesAllFilters 
-        ? (scenario.highlighted ? 1.0 : 0.9)  // Active dots: very opaque
-        : (scenario.highlighted ? 0.1 : 0.02) // Filtered dots: nearly invisible
+        ? 1.0  // Active dots: always full opacity (highlighted or not)
+        : 0.0  // Filtered dots: completely invisible
     } else {
-      // Lines should be semi-transparent when active, nearly invisible when filtered  
+      // Lines: Two distinct opacity levels - active vs inactive
       return passesAllFilters 
-        ? (scenario.highlighted ? 0.8 : 0.3)  // Active lines: semi-transparent
-        : (scenario.highlighted ? 0.05 : 0.01) // Filtered lines: nearly invisible
+        ? (scenario.highlighted ? 0.7 : 0.25)  // Active lines: highlighted=70%, normal=25%
+        : 0.0  // Filtered lines: completely invisible
     }
   }, [axes])
 
