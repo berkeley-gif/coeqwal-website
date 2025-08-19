@@ -197,6 +197,8 @@ const MapControls = ({
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
   const [expandChart, setExpandChart] = useState(false)
+  const [defineOutcome, setDefineOutcome] = useState(false)
+  const [overlayTiers, setOverlayTiers] = useState(false)
 
   const handleCenterOnCalifornia = () => {
     flyTo({
@@ -234,6 +236,20 @@ const MapControls = ({
     [],
   )
 
+  const handleDefineOutcomeChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setDefineOutcome(event.target.checked)
+    },
+    [],
+  )
+
+  const handleOverlayTiersChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setOverlayTiers(event.target.checked)
+    },
+    [],
+  )
+
   const handleLearnMoreClick = useCallback(() => {
     console.log("Learn more about this chart clicked")
   }, [])
@@ -259,6 +275,8 @@ const MapControls = ({
   const chartData = useChartData({
     highlightBaseline,
     expandChart,
+    defineOutcome,
+    overlayTiers,
   })
 
   // Accordion sections for the third column
@@ -377,6 +395,26 @@ const MapControls = ({
                   />
                 }
                 label="highlight current operations"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={defineOutcome}
+                    onChange={handleDefineOutcomeChange}
+                    size="small"
+                  />
+                }
+                label="define an outcome"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={overlayTiers}
+                    onChange={handleOverlayTiersChange}
+                    size="small"
+                  />
+                }
+                label="overlay tiers"
               />
             </Box>
           </Box>
@@ -1404,6 +1442,26 @@ const MapControls = ({
                               />
                             }
                             label="highlight current operations"
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={defineOutcome}
+                                onChange={handleDefineOutcomeChange}
+                                size="small"
+                              />
+                            }
+                            label="define an outcome"
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={overlayTiers}
+                                onChange={handleOverlayTiersChange}
+                                size="small"
+                              />
+                            }
+                            label="overlay tiers"
                           />
                         </Box>
 
