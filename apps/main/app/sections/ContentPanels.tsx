@@ -1039,7 +1039,6 @@ function PanelWithDetail({
         zIndex: isActive ? 103 : 101,
         // Initial height will be set by useEffect
         minHeight: "auto",
-        transition: "height 0.3s ease-out", // Smooth height transitions
       }}
     >
       {/* Conditionally render either main panel or detail panel with sliding animation */}
