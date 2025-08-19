@@ -73,6 +73,9 @@ interface MapControlsProps {
   // Climate props
   selectedClimate: number
   onClimateChange: (value: number) => void
+  // Outcome visualization props
+  selectedOutcome: string | null
+  onOutcomeSelect: (outcome: string) => void
   // Clear selections
   onClearSelectedScenarios: () => void
 }
@@ -100,6 +103,9 @@ const MapControls = ({
   // Climate props
   selectedClimate,
   onClimateChange,
+  // Outcome visualization props
+  selectedOutcome: _selectedOutcome, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onOutcomeSelect,
   onClearSelectedScenarios,
 }: MapControlsProps) => {
   const { flyTo } = useMap()
@@ -867,7 +873,9 @@ const MapControls = ({
                           },
                         }}
                         onClick={() => {
-                          // Open glossary drawer with the specific outcome term
+                          // Handle outcome selection for map visualization
+                          onOutcomeSelect(outcome)
+                          // Also open glossary drawer with the specific outcome term
                           openDrawer("glossary")
                           setDrawerContent({ selectedTerm: outcome })
                         }}
@@ -1399,6 +1407,7 @@ const MapControls = ({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  const { addSource, addLayer, removeLayer, hasSource, hasLayer } = useMap()
 
   // Polygon drawing state, lifted to main component
   const [isDrawingCustomRegion, setIsDrawingCustomRegion] = useState(false)
@@ -1417,6 +1426,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   // Climate state
   const [selectedClimate, setSelectedClimate] = useState(1) // Default to "Historical"
+
+  // Outcome visualization state
+  const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
 
   // Delivery area state
   const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] =
@@ -1565,6 +1577,61 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const handleClimateChange = (value: number) => {
     setSelectedClimate(value)
   }
+
+  const handleOutcomeSelect = (outcome: string) => {
+    if (selectedOutcome === outcome) {
+      // If clicking the same outcome, deselect it
+      setSelectedOutcome(null)
+    } else {
+      setSelectedOutcome(outcome)
+    }
+  }
+
+  // Effect to manage map layers based on selected outcome
+  useEffect(() => {
+    // Add the geospatial data source if it doesn't exist
+    if (!hasSource("delivery-units")) {
+      addSource("delivery-units", {
+        type: "geojson",
+        data: "/geospatial_data/du.geojson",
+      })
+    }
+
+    // Remove existing outcome layers
+    if (hasLayer("community-deliveries-layer")) {
+      removeLayer("community-deliveries-layer")
+    }
+
+    // Add layer based on selected outcome
+    if (selectedOutcome === "Community deliveries") {
+      console.log("Adding community deliveries layer...")
+      addLayer(
+        "community-deliveries-layer",
+        "delivery-units",
+        "fill",
+        {
+          // Simplified tier color assignment - use string length for more reliable randomization
+          "fill-color": [
+            "case",
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 0], "#7b9d3f", // Tier 1 - Green
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 1], "#60aacb", // Tier 2 - Blue  
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 2], "#FFB347", // Tier 3 - Orange
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 3], "#CD5C5C", // Tier 4 - Red
+            "#60aacb" // Fallback blue for any edge cases
+          ],
+          "fill-opacity": 0.7,
+          "fill-outline-color": "#3a4574", // Darker blue for outline
+        },
+        {
+          visibility: "visible",
+        },
+        {
+          filter: ["==", ["get", "Class"], "Urban"], // Filter to show only Urban areas
+        }
+      )
+      console.log("Community deliveries layer added")
+    }
+  }, [selectedOutcome, addSource, addLayer, removeLayer, hasSource, hasLayer])
 
   return (
     <Box
@@ -1797,7 +1864,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
         {/* Custom map markers */}
         {/* Marker 1: Los Angeles area */}
-        <Marker longitude={-118.2437} latitude={34.0522}>
+        <Marker 
+          longitude={-118.2437} 
+          latitude={34.0522}
+          anchor="bottom" // Bottom middle tip attaches to coordinates
+        >
           <MapMarkerTooltip
             text="Los Angeles - Urban water demand performing well"
             statusColor="#4CAF50"
@@ -1839,8 +1910,12 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           </MapMarkerTooltip>
         </Marker>
 
-        {/* Marker 2: Sacramento area */}
-        <Marker longitude={-121.4944} latitude={38.5816}>
+        {/* Marker 2: Sacramento area - positioned over a red delivery unit */}
+        <Marker 
+          longitude={-121.3} 
+          latitude={38.6}
+          anchor="bottom" // Bottom middle tip attaches to coordinates
+        >
           <MapMarkerTooltip
             text="Sacramento - Municipal water supply under stress"
             statusColor="#ff4444"
@@ -1883,7 +1958,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Marker>
 
         {/* Marker 3: Central Valley (Fresno area) */}
-        <Marker longitude={-119.7871} latitude={36.7378}>
+        <Marker 
+          longitude={-119.7871} 
+          latitude={36.7378}
+          anchor="bottom" // Bottom middle tip attaches to coordinates
+        >
           <MapMarkerTooltip
             text="Central Valley - Agricultural irrigation stable"
             statusColor="#4CAF50"
@@ -1926,7 +2005,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Marker>
 
         {/* Marker 4: Chico area */}
-        <Marker longitude={-121.8375} latitude={39.7285}>
+        <Marker 
+          longitude={-121.8375} 
+          latitude={39.7285}
+          anchor="bottom" // Bottom middle tip attaches to coordinates
+        >
           <MapMarkerTooltip
             text="Chico - Crop irrigation facing drought challenges"
             statusColor="#ff4444"
@@ -2101,6 +2184,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         onRegionSelect={handleRegionSelect}
         selectedClimate={selectedClimate}
         onClimateChange={handleClimateChange}
+        selectedOutcome={selectedOutcome}
+        onOutcomeSelect={handleOutcomeSelect}
         onClearSelectedScenarios={handleClearSelectedScenarios}
       />
     </Box>
