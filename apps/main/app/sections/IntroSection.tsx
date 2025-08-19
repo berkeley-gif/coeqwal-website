@@ -31,19 +31,6 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Image 3 - Center cluster */}
-          <Box
-            component="img"
-            src="/images/circular-crops/3.png"
-            sx={{
-              position: "absolute",
-              width: "320px",
-              height: "320px",
-              top: "35%",
-              left: "60%",
-              borderRadius: "50%",
-            }}
-          />
           {/* Image 7 - Top left of cluster */}
           <Box
             component="img"
@@ -123,6 +110,20 @@ const IntroSection: React.FC = () => {
             }}
           />
         </Box>
+
+        {/* Image 3 - Center cluster */}
+          <Box
+            component="img"
+            src="/images/circular-crops/3.png"
+            sx={{
+              position: "absolute",
+              width: "320px",
+              height: "320px",
+              top: "35%",
+              left: "60%",
+              borderRadius: "50%",
+            }}
+          />
 
         {/* Hero text content */}
         <BasePanel
