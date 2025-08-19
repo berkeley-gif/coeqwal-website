@@ -4,6 +4,8 @@ import { VerticalParallelLineData } from "@repo/viz"
 interface UseChartDataOptions {
   highlightBaseline: boolean
   expandChart: boolean
+  defineOutcome: boolean
+  overlayTiers: boolean
 }
 
 interface ChartHandlers {
@@ -37,6 +39,8 @@ interface ChartDataReturn {
 export const useChartData = ({
   highlightBaseline,
   expandChart,
+  defineOutcome,
+  overlayTiers,
 }: UseChartDataOptions): ChartDataReturn => {
   // Memoized axes configuration
   const axes = useMemo(
@@ -210,6 +214,8 @@ export const useChartData = ({
         // Chart behavior
         responsive: true,
         showBaseline: highlightBaseline,
+        defineOutcome,
+        overlayTiers,
 
         // Event handlers
         ...handlers,
@@ -226,6 +232,8 @@ export const useChartData = ({
       categoricalColors,
       expandChart,
       highlightBaseline,
+      defineOutcome,
+      overlayTiers,
       handlers,
     ],
   )
