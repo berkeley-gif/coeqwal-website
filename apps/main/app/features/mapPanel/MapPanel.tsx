@@ -55,22 +55,22 @@ import {
 import { useSortable } from "@dnd-kit/sortable"
 
 // Sortable scenario exploration card component
-const SortableScenarioExplorationCard = ({ 
-  id, 
-  title, 
-  description, 
+const SortableScenarioExplorationCard = ({
+  id,
+  title,
+  description,
   outcomes,
   isBaseline = false,
   selectedClimate = 1,
   visualizationType = "bars",
-}: { 
+}: {
   id: string
   title: string
   description: string
   outcomes: string[]
   isBaseline?: boolean
   selectedClimate?: number
-  visualizationType?: "bars" | "rose" | "quartile"
+  visualizationType?: "bars" | "rose" | "quartile" | "map"
 }) => {
   const theme = useTheme()
   const {
@@ -90,7 +90,7 @@ const SortableScenarioExplorationCard = ({
     opacity: isDragging ? 0.8 : 1,
     zIndex: isDragging ? 1000 : 1,
   }
-  
+
   return (
     <Box
       ref={setNodeRef}
@@ -105,7 +105,7 @@ const SortableScenarioExplorationCard = ({
           p: 3,
           height: "100%",
           display: "flex",
-          
+
           flexDirection: "column",
           cursor: isDragging ? "grabbing" : "grab",
           "&:hover": {
@@ -114,8 +114,12 @@ const SortableScenarioExplorationCard = ({
           transition: "box-shadow 0.2s ease",
           transform: isDragging ? "rotate(5deg)" : "none",
           // Special styling for baseline/current operations
-          backgroundColor: isBaseline ? theme.palette.blue.bright + "10" : theme.palette.common.white,
-          border: isBaseline ? `2px solid ${theme.palette.blue.bright}` : "1px solid rgba(0, 0, 0, 0.12)",
+          backgroundColor: isBaseline
+            ? theme.palette.blue.bright + "10"
+            : theme.palette.common.white,
+          border: isBaseline
+            ? `2px solid ${theme.palette.blue.bright}`
+            : "1px solid rgba(0, 0, 0, 0.12)",
         }}
         {...attributes}
         {...listeners}
@@ -133,7 +137,9 @@ const SortableScenarioExplorationCard = ({
         </Box>
 
         {/* Card header */}
-        <Box sx={{ mb: 1.5 }}> {/* Reduced margin */}
+        <Box sx={{ mb: 1.5 }}>
+          {" "}
+          {/* Reduced margin */}
           <Typography
             variant="h6"
             sx={{
@@ -218,10 +224,17 @@ const SortableScenarioExplorationCard = ({
                   const q3 = median + baseSpread * 0.3
                   const min = median - baseSpread * 0.8
 
-                  return [q3, median, q1, min] as [number, number, number, number]
+                  return [q3, median, q1, min] as [
+                    number,
+                    number,
+                    number,
+                    number,
+                  ]
                 })()}
                 size={56} // Larger size to better fill the 2x2 space
-                variant={visualizationType}
+                variant={
+                  visualizationType === "map" ? "bars" : visualizationType
+                } // Default to bars for map mode
               />
               <Typography
                 variant="caption"
@@ -613,8 +626,8 @@ const MapControls = ({
       id: "select-scenarios",
       title: "Select scenarios",
       content: (
-          <Box
-            sx={{
+        <Box
+          sx={{
             display: "flex",
             flexDirection: "column",
             width: "100%",
@@ -624,8 +637,8 @@ const MapControls = ({
           {/* Outcomes paragraph, visible when chart not expanded */}
           {!expandChart && (
             <Box sx={{ flexShrink: 0 }}>
-            <Box
-              sx={{
+              <Box
+                sx={{
                   fontSize: "1rem",
                   fontWeight: 400,
                   lineHeight: 1.4,
@@ -638,11 +651,11 @@ const MapControls = ({
                 <Box
                   component="span"
                   onClick={handleLearnMoreClick}
-              sx={{
+                  sx={{
                     color: (theme) => theme.palette.blue.bright,
                     fontSize: "0.95rem",
                     cursor: "pointer",
-                fontWeight: 500,
+                    fontWeight: 500,
                     textDecoration: "underline",
                     whiteSpace: "nowrap",
                     "&:hover": {
@@ -651,8 +664,8 @@ const MapControls = ({
                   }}
                 >
                   Learn more about this chart
-            </Box>
-          </Box>
+                </Box>
+              </Box>
             </Box>
           )}
 
@@ -660,37 +673,37 @@ const MapControls = ({
           <Box sx={{ flexShrink: 0, mb: 1 }}>
             {/* Expand chart button, always visible */}
             <Box sx={{ mb: 1 }}>
-            <Button
-              variant="text"
+              <Button
+                variant="text"
                 onClick={toggleExpandChart}
-              sx={{
-                fontSize: "1rem",
-                fontWeight: 500,
-                color: (theme) => theme.palette.blue.bright,
-                padding: 0,
-                minWidth: "auto",
-                textTransform: "none",
+                sx={{
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  color: (theme) => theme.palette.blue.bright,
+                  padding: 0,
+                  minWidth: "auto",
+                  textTransform: "none",
                   justifyContent: "flex-start",
-                "&:hover": {
-                  color: (theme) => theme.palette.blue.darkest,
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.875em",
-                  marginRight: "8px",
-                  display: "inline-block",
-                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
-                  transition: "transform 0.2s ease",
+                  "&:hover": {
+                    color: (theme) => theme.palette.blue.darkest,
+                    backgroundColor: "transparent",
+                  },
                 }}
               >
-                ▼
-              </span>
+                <span
+                  style={{
+                    fontSize: "0.875em",
+                    marginRight: "8px",
+                    display: "inline-block",
+                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
+                  }}
+                >
+                  ▼
+                </span>
                 {expandChart ? "Reduce" : "Expand"} chart
-            </Button>
-          </Box>
+              </Button>
+            </Box>
 
             {/* Chart controls */}
             <Box
@@ -806,8 +819,8 @@ const MapControls = ({
           </Box> */}
 
           {/* Region Selection Options - Always Visible */}
-                <Box
-                  sx={{
+          <Box
+            sx={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: 1,
@@ -1066,21 +1079,21 @@ const MapControls = ({
                           display: "flex",
                           alignItems: "center",
                           gap: 0.5,
-                      }}
-                    >
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          color: (theme) => theme.palette.blue.darkest,
                         }}
                       >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            color: (theme) => theme.palette.blue.darkest,
+                          }}
+                        >
                           Scenario outcomes
-                      </Typography>
-                      <InfoIconButton
-                        mode="glossary"
-                        glossaryEntry="CalSim"
-                        onGlossaryOpen={handleGlossaryOpen}
-                      />
+                        </Typography>
+                        <InfoIconButton
+                          mode="glossary"
+                          glossaryEntry="CalSim"
+                          onGlossaryOpen={handleGlossaryOpen}
+                        />
                       </Box>
                       {/* Glyph variant selector */}
                       <Select
@@ -1212,11 +1225,11 @@ const MapControls = ({
                   >
                     {hasSelectedScenarios ? (
                       // Comparison mode: 4 rows with 2 comparative pairs each
-                  <Box
-                    sx={{
-                      display: "grid",
+                      <Box
+                        sx={{
+                          display: "grid",
                           gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns: Current, Alt, Current, Alt
-                      gap: 2,
+                          gap: 2,
                           width: "100%",
                           padding: 2,
                           position: "relative", // For column background positioning
@@ -1314,11 +1327,11 @@ const MapControls = ({
                             // Current operations glyph
                             <Box
                               key={`current-${outcome}`}
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 1,
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: 1,
                                 padding: 0.5,
                                 borderRadius: (theme) =>
                                   theme.borderRadius.rounded,
@@ -1341,14 +1354,14 @@ const MapControls = ({
                                 setDrawerContent({ selectedTerm: outcome })
                               }}
                             >
-                        <ScenarioGlyph
+                              <ScenarioGlyph
                                 tierColors={[
                                   theme.palette.tiers.tier1,
                                   theme.palette.tiers.tier2,
                                   theme.palette.tiers.tier3,
                                   theme.palette.tiers.tier4,
                                 ]}
-                          values={(() => {
+                                values={(() => {
                                   // Current operations data
                                   const baseMedian = outcomeIndex * 0.1 - 0.2
 
@@ -1380,31 +1393,31 @@ const MapControls = ({
                                     number,
                                     number,
                                   ]
-                          })()}
+                                })()}
                                 size={56}
-                          variant={glyphVariant}
-                        />
-                        <Box
-                          sx={{
-                            fontSize: "0.75rem",
-                            fontWeight: 400,
-                            lineHeight: 1.3,
-                            color: (theme) => theme.palette.text.primary,
-                            textAlign: "center",
-                            maxWidth: "80px",
-                          }}
-                        >
-                          {outcome}
-                        </Box>
+                                variant={glyphVariant}
+                              />
+                              <Box
+                                sx={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: 400,
+                                  lineHeight: 1.3,
+                                  color: (theme) => theme.palette.text.primary,
+                                  textAlign: "center",
+                                  maxWidth: "80px",
+                                }}
+                              >
+                                {outcome}
+                              </Box>
                             </Box>,
 
                             // Alternative scenario glyph
-                    <Box
+                            <Box
                               key={`alternative-${outcome}`}
-                      sx={{
-                        display: "flex",
+                              sx={{
+                                display: "flex",
                                 flexDirection: "column",
-                        alignItems: "center",
+                                alignItems: "center",
                                 gap: 1,
                                 padding: 0.5,
                                 borderRadius: (theme) =>
@@ -1474,7 +1487,7 @@ const MapControls = ({
                                 variant={glyphVariant}
                               />
                               <Box
-                        sx={{
+                                sx={{
                                   fontSize: "0.75rem",
                                   fontWeight: 400,
                                   lineHeight: 1.3,
@@ -1484,7 +1497,7 @@ const MapControls = ({
                                 }}
                               >
                                 {outcome}
-                    </Box>
+                              </Box>
                             </Box>,
                           ]
                         }).flat()}
@@ -2130,29 +2143,34 @@ const MapControls = ({
                     ) : (
                       <>
                         {/* Normal Mode - Card Accordion */}
-                    <CardAccordion
-                      sections={accordionSections}
-                      allowMultiple={false} // Only one section expanded at a time
-                      sx={{ flexGrow: 1 }}
-                    />
+                        <CardAccordion
+                          sections={accordionSections}
+                          allowMultiple={false} // Only one section expanded at a time
+                          sx={{ flexGrow: 1 }}
+                        />
 
-                    {/* Compare Button at bottom */}
-                    <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                      <ActionCardButton
-                        title="Explore scenarios in depth"
-                        subtitle={
-                          selectedScenarios.length > 0
-                            ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
-                            : "Select scenarios to explore"
-                        }
+                        {/* Compare Button at bottom */}
+                        <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
+                          <ActionCardButton
+                            title="Explore scenarios in depth"
+                            subtitle={
+                              selectedScenarios.length > 0
+                                ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
+                                : "Select scenarios to explore"
+                            }
                             disabled={false} // Temporarily always enabled for testing
-                        onClick={() => {
-                          console.log("Explore button clicked, selectedScenarios:", selectedScenarios.length)
-                          console.log("Calling onExploreScenarios regardless for testing")
-                          onExploreScenarios()
-                        }}
-                      />
-                    </Box>
+                            onClick={() => {
+                              console.log(
+                                "Explore button clicked, selectedScenarios:",
+                                selectedScenarios.length,
+                              )
+                              console.log(
+                                "Calling onExploreScenarios regardless for testing",
+                              )
+                              onExploreScenarios()
+                            }}
+                          />
+                        </Box>
                       </>
                     )}
                   </Box>
@@ -2358,7 +2376,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [showExplorationPanel, setShowExplorationPanel] = useState(false)
   const [explorationScenarios, setExplorationScenarios] = useState<string[]>([])
   const [scenarioOrder, setScenarioOrder] = useState<string[]>([])
-  const [explorationVisualizationType, setExplorationVisualizationType] = useState<"bars" | "rose" | "quartile">("bars")
+  const [explorationVisualizationType, setExplorationVisualizationType] =
+    useState<"bars" | "rose" | "quartile" | "map">("bars")
 
   // Mock scenario data for the exploration panel - always include current operations first
   const mockScenarioData = [
@@ -2372,12 +2391,13 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     {
       id: "scenario-1",
       title: "SGMA San Joaquin Valley",
-      description: "Sustainable groundwater management in the San Joaquin Valley",
+      description:
+        "Sustainable groundwater management in the San Joaquin Valley",
       outcomes: OUTCOMES.slice(0, 4), // First 4 outcomes
       isBaseline: false,
     },
     {
-      id: "scenario-2", 
+      id: "scenario-2",
       title: "Delta Conveyance Tunnel",
       description: "Bethany Alternative tunnel configuration",
       outcomes: OUTCOMES.slice(2, 6), // Middle 4 outcomes
@@ -2385,7 +2405,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     },
     {
       id: "scenario-3",
-      title: "USBR Alternative 3", 
+      title: "USBR Alternative 3",
       description: "Bureau of Reclamation alternative water management",
       outcomes: OUTCOMES.slice(4, 8), // Last 4 outcomes
       isBaseline: false,
@@ -2573,15 +2593,15 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     console.log("handleExploreScenarios called!")
     console.log("Current selectedScenarios:", selectedScenarios)
     console.log("Mock scenario data:", mockScenarioData)
-    
+
     // Initialize with selected scenarios
-    const scenariosToExplore = mockScenarioData.map(scenario => scenario.id)
+    const scenariosToExplore = mockScenarioData.map((scenario) => scenario.id)
     setExplorationScenarios(scenariosToExplore)
     setScenarioOrder(scenariosToExplore)
     setShowExplorationPanel(true)
-    
+
     console.log("Set showExplorationPanel to true")
-    
+
     // Scroll to exploration panel
     setTimeout(() => {
       const element = document.getElementById("scenario-exploration-panel")
@@ -2905,10 +2925,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           isDrawingCustomRegion
             ? "crosshair"
             : isSelectingDeliveryArea
-            ? "crosshair"
-            : draggedPointIndex !== null
-              ? "grabbing"
-              : "default"
+              ? "crosshair"
+              : draggedPointIndex !== null
+                ? "grabbing"
+                : "default"
         }
         onClick={
           isDrawingCustomRegion
@@ -3005,8 +3025,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                         error,
                       )
                     }
-              }
-            : undefined
+                  }
+                : undefined
         }
         onMouseMove={(evt: {
           target: any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -3713,307 +3733,358 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       )}
 
       {/* Scenario Exploration Panel */}
-      {showExplorationPanel && (() => {
-        console.log("Rendering exploration panel")
-        return (
-        <Box
-          id="scenario-exploration-panel"
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: theme.palette.background.default,
-            zIndex: (theme) => theme.zIndex.modal,
-            overflow: "auto",
-            p: 3,
-          }}
-        >
-          {/* Header with inline dropdowns */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              mb: 3,
-              flexWrap: "wrap",
-              gap: 3,
-            }}
-          >
-            {/* Left side: Title */}
-            <Typography
-              variant="h4"
-              sx={{
-                color: theme.palette.blue.darkest,
-                fontWeight: 500,
-                flexShrink: 0,
-              }}
-            >
-              Scenario Exploration
-            </Typography>
-
-            {/* Center: Control dropdowns */}
+      {showExplorationPanel &&
+        (() => {
+          console.log("Rendering exploration panel")
+          return (
             <Box
+              id="scenario-exploration-panel"
               sx={{
-                display: "flex",
-                gap: 2,
-                flexWrap: "wrap",
-                alignItems: "flex-end", // Align with baseline of title
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: theme.palette.background.default,
+                zIndex: (theme) => theme.zIndex.modal,
+                overflow: "auto",
+                p: 3,
               }}
             >
-            {/* Outcome dropdown */}
-            <Box sx={{ minWidth: "200px" }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                  mb: 1,
-                }}
-              >
-                Outcome
-              </Typography>
-              <Select
-                size="small"
-                value={selectedOutcome || ""}
-                onChange={(e) => handleOutcomeSelect(e.target.value)}
-                displayEmpty
-                sx={{
-                  width: "100%",
-                  backgroundColor: theme.palette.common.white,
-                  borderRadius: theme.borderRadius.rounded,
-                }}
-              >
-                <MenuItem value="">
-                  <em>Select outcome</em>
-                </MenuItem>
-                {OUTCOMES.map((outcome) => (
-                  <MenuItem key={outcome} value={outcome}>
-                    {outcome}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
-
-            {/* Visualization type dropdown */}
-            <Box sx={{ minWidth: "180px" }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                  mb: 1,
-                }}
-              >
-                Visualization type
-              </Typography>
-              <Select
-                size="small"
-                value={explorationVisualizationType}
-                onChange={(e) => {
-                  setExplorationVisualizationType(e.target.value as "bars" | "rose" | "quartile")
-                  console.log("Visualization type changed:", e.target.value)
-                }}
-                sx={{
-                  width: "100%",
-                  backgroundColor: theme.palette.common.white,
-                  borderRadius: theme.borderRadius.rounded,
-                }}
-              >
-                <MenuItem value="bars">Bars</MenuItem>
-                <MenuItem value="rose">Rose</MenuItem>
-                <MenuItem value="quartile">Quartile</MenuItem>
-              </Select>
-            </Box>
-
-            {/* Refine region dropdown */}
-            <Box sx={{ minWidth: "180px" }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                  mb: 1,
-                }}
-              >
-                Refine region
-              </Typography>
-              <Select
-                size="small"
-                value={selectedRegion}
-                onChange={(e) => handleRegionSelect(e.target.value)}
-                sx={{
-                  width: "100%",
-                  backgroundColor: theme.palette.common.white,
-                  borderRadius: theme.borderRadius.rounded,
-                }}
-              >
-                <MenuItem value="Central Valley">Central Valley</MenuItem>
-                <MenuItem value="Sacramento Valley">Sacramento Valley</MenuItem>
-                <MenuItem value="San Joaquin Valley">San Joaquin Valley</MenuItem>
-                <MenuItem value="Delta">Delta</MenuItem>
-                <MenuItem value="Tulare Basin">Tulare Basin</MenuItem>
-              </Select>
-            </Box>
-            </Box>
-
-            {/* Right side: Back button */}
-            <Button
-              variant="text"
-              onClick={() => setShowExplorationPanel(false)}
-              sx={{
-                color: theme.palette.blue.bright,
-                flexShrink: 0,
-                "&:hover": {
-                  backgroundColor: "transparent",
-                  color: theme.palette.blue.darkest,
-                },
-              }}
-            >
-              ← Back to Map
-            </Button>
-          </Box>
-
-          {/* Instructions */}
-          <Typography
-            variant="body1"
-            sx={{
-              mb: 3,
-              color: theme.palette.text.secondary,
-            }}
-          >
-            Compare scenarios in detail. Drag and drop cards to reorder them. Build your story.
-          </Typography>
-
-          {/* Drag and Drop Grid */}
-          <DndContext
-            collisionDetection={closestCenter}
-            onDragEnd={handleScenarioDragEnd}
-          >
-            <SortableContext
-              items={scenarioOrder}
-              strategy={rectSortingStrategy}
-            >
+              {/* Header with inline dropdowns */}
               <Box
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    md: "repeat(2, 1fr)",
-                    lg: "repeat(3, 1fr)",
-                  },
-                  gridTemplateRows: "repeat(2, 400px)", // Two rows of 400px height for proper 2x2 chart sizing
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  mb: 3,
+                  flexWrap: "wrap",
                   gap: 3,
-                  minHeight: "820px", // 2 rows * 400px + gap
-                  paddingBottom: "120px", // Extra space to clear climate card
-                  // Reserve bottom-left space for climate card
-                  "& > div:nth-of-type(4)": {
-                    gridColumn: { xs: "1", md: "2", lg: "3" }, // Position 4th card in different column
-                  },
                 }}
               >
-                {scenarioOrder.map((scenarioId) => {
-                  const scenario = mockScenarioData.find(s => s.id === scenarioId)
-                  if (!scenario) return null
+                {/* Left side: Title */}
+                <Typography
+                  variant="h4"
+                  sx={{
+                    color: theme.palette.blue.darkest,
+                    fontWeight: 500,
+                    flexShrink: 0,
+                  }}
+                >
+                  Scenario Exploration
+                </Typography>
 
-                  return (
-                    <SortableScenarioExplorationCard
-                      key={scenario.id}
-                      id={scenario.id}
-                      title={scenario.title}
-                      description={scenario.description}
-                      outcomes={scenario.outcomes}
-                      isBaseline={scenario.isBaseline}
-                      selectedClimate={selectedClimate}
-                      visualizationType={explorationVisualizationType}
-                    />
-                  )
-                })}
+                {/* Center: Control dropdowns */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    flexWrap: "wrap",
+                    alignItems: "flex-end", // Align with baseline of title
+                  }}
+                >
+                  {/* Outcome dropdown */}
+                  <Box sx={{ minWidth: "200px" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.primary,
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    >
+                      Outcome
+                    </Typography>
+                    <Select
+                      size="small"
+                      value={selectedOutcome || ""}
+                      onChange={(e) => handleOutcomeSelect(e.target.value)}
+                      displayEmpty
+                      sx={{
+                        width: "100%",
+                        backgroundColor: theme.palette.common.white,
+                        borderRadius: theme.borderRadius.rounded,
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: theme.palette.common.white,
+                            borderRadius: theme.borderRadius.rounded,
+                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                            border: `1px solid ${theme.palette.grey[200]}`,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="">
+                        <em>Select outcome</em>
+                      </MenuItem>
+                      {OUTCOMES.map((outcome) => (
+                        <MenuItem key={outcome} value={outcome}>
+                          {outcome}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </Box>
+
+                  {/* Visualization type dropdown */}
+                  <Box sx={{ minWidth: "180px" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.primary,
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    >
+                      Chart type
+                    </Typography>
+                    <Select
+                      size="small"
+                      value={explorationVisualizationType}
+                      onChange={(e) => {
+                        setExplorationVisualizationType(
+                          e.target.value as
+                            | "bars"
+                            | "rose"
+                            | "quartile"
+                            | "map",
+                        )
+                        console.log(
+                          "Visualization type changed:",
+                          e.target.value,
+                        )
+                      }}
+                      sx={{
+                        width: "100%",
+                        backgroundColor: theme.palette.common.white,
+                        borderRadius: theme.borderRadius.rounded,
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: theme.palette.common.white,
+                            borderRadius: theme.borderRadius.rounded,
+                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                            border: `1px solid ${theme.palette.grey[200]}`,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="bars">Bars</MenuItem>
+                      <MenuItem value="rose">Rose</MenuItem>
+                      <MenuItem value="quartile">Quartile</MenuItem>
+                      <MenuItem value="map">Map</MenuItem>
+                    </Select>
+                  </Box>
+
+                  {/* Refine region dropdown */}
+                  <Box sx={{ minWidth: "180px" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: theme.palette.text.primary,
+                        fontWeight: 500,
+                        mb: 1,
+                      }}
+                    >
+                      Refine region
+                    </Typography>
+                    <Select
+                      size="small"
+                      value={selectedRegion}
+                      onChange={(e) => handleRegionSelect(e.target.value)}
+                      sx={{
+                        width: "100%",
+                        backgroundColor: theme.palette.common.white,
+                        borderRadius: theme.borderRadius.rounded,
+                      }}
+                      MenuProps={{
+                        PaperProps: {
+                          sx: {
+                            backgroundColor: theme.palette.common.white,
+                            borderRadius: theme.borderRadius.rounded,
+                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                            border: `1px solid ${theme.palette.grey[200]}`,
+                          },
+                        },
+                      }}
+                    >
+                      <MenuItem value="Central Valley">Central Valley</MenuItem>
+                      <MenuItem value="Sacramento Valley">
+                        Sacramento Valley
+                      </MenuItem>
+                      <MenuItem value="San Joaquin Valley">
+                        San Joaquin Valley
+                      </MenuItem>
+                      <MenuItem value="Delta">Delta</MenuItem>
+                      <MenuItem value="Tulare Basin">Tulare Basin</MenuItem>
+                    </Select>
+                  </Box>
+                </Box>
+
+                {/* Right side: Back button */}
+                <Button
+                  variant="text"
+                  onClick={() => setShowExplorationPanel(false)}
+                  sx={{
+                    color: theme.palette.blue.bright,
+                    flexShrink: 0,
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      color: theme.palette.blue.darkest,
+                    },
+                  }}
+                >
+                  ← Back to Map
+                </Button>
               </Box>
-            </SortableContext>
-          </DndContext>
 
-          {/* Climate slider - positioned in bottom-left grid space */}
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 144, // Position above the padding area
-              left: 24, // Align with grid start
-              zIndex: 10,
-              width: "calc(33.333% - 16px)", // Match grid column width minus gap
-            }}
-          >
-            <Box
-              sx={{
-                backdropFilter: "blur(10px)",
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderRadius: theme.borderRadius.card,
-                border: "1px solid",
-                borderColor: theme.palette.divider,
-                padding: 3,
-                height: "auto", // Auto height - only as tall as needed
-                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+              {/* Instructions */}
+              <Typography
+                variant="body1"
+                sx={{
+                  mb: 3,
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                Compare scenarios in detail. Drag and drop cards to reorder
+                them. Build your story.
+              </Typography>
+
+              {/* Drag and Drop Grid */}
+              <DndContext
+                collisionDetection={closestCenter}
+                onDragEnd={handleScenarioDragEnd}
+              >
+                <SortableContext
+                  items={scenarioOrder}
+                  strategy={rectSortingStrategy}
+                >
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        md: "repeat(2, 1fr)",
+                        lg: "repeat(3, 1fr)",
+                      },
+                      gridTemplateRows: "repeat(2, 400px)", // Two rows of 400px height for proper 2x2 chart sizing
+                      gap: 3,
+                      minHeight: "820px", // 2 rows * 400px + gap
+                      paddingBottom: "120px", // Extra space to clear climate card
+                      // Reserve bottom-left space for climate card
+                      "& > div:nth-of-type(4)": {
+                        gridColumn: { xs: "1", md: "2", lg: "3" }, // Position 4th card in different column
+                      },
+                    }}
+                  >
+                    {scenarioOrder.map((scenarioId) => {
+                      const scenario = mockScenarioData.find(
+                        (s) => s.id === scenarioId,
+                      )
+                      if (!scenario) return null
+
+                      return (
+                        <SortableScenarioExplorationCard
+                          key={scenario.id}
+                          id={scenario.id}
+                          title={scenario.title}
+                          description={scenario.description}
+                          outcomes={scenario.outcomes}
+                          isBaseline={scenario.isBaseline}
+                          selectedClimate={selectedClimate}
+                          visualizationType={explorationVisualizationType}
+                        />
+                      )
+                    })}
+                  </Box>
+                </SortableContext>
+              </DndContext>
+
+              {/* Climate slider - positioned in bottom-left grid space */}
               <Box
                 sx={{
-                  color: theme.palette.blue.medium,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.75px",
-                  fontSize: "0.75rem",
-                  fontWeight: 500,
-                  display: "block",
-                  mb: 0.5,
+                  position: "absolute",
+                  bottom: 144, // Position above the padding area
+                  left: 24, // Align with grid start
+                  zIndex: 10,
+                  width: "calc(33.333% - 16px)", // Match grid column width minus gap
                 }}
               >
-                CLIMATE
+                <Box
+                  sx={{
+                    backdropFilter: "blur(10px)",
+                    backgroundColor: "rgba(255, 255, 255, 0.95)",
+                    borderRadius: theme.borderRadius.card,
+                    border: "1px solid",
+                    borderColor: theme.palette.divider,
+                    padding: 3,
+                    height: "auto", // Auto height - only as tall as needed
+                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      color: theme.palette.blue.medium,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.75px",
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      display: "block",
+                      mb: 0.5,
+                    }}
+                  >
+                    CLIMATE
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: theme.palette.blue.darkest,
+                      fontWeight: 500,
+                      mb: 1,
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    Climate
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      mb: 2,
+                      fontSize: "0.9rem",
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    Adjust climate to see how it affects all scenarios
+                  </Typography>
+                  <DiscreteSlider
+                    stops={[
+                      "Warmer Wetter",
+                      "Historical",
+                      "Warmer Drier I",
+                      "Warmer Drier II",
+                      "Warmer Drier III",
+                      "Warmer Drier IV",
+                    ]}
+                    value={selectedClimate}
+                    onChange={(value) => {
+                      handleClimateChange(value)
+                      console.log(
+                        "Climate changed in exploration panel:",
+                        value,
+                      )
+                    }}
+                    labelPosition="top"
+                  />
+                </Box>
               </Box>
-              <Typography
-                variant="h6"
-                sx={{
-                  color: theme.palette.blue.darkest,
-                  fontWeight: 500,
-                  mb: 1,
-                  fontSize: "1.2rem",
-                }}
-              >
-                Climate
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.secondary,
-                  mb: 2,
-                  fontSize: "0.9rem",
-                  lineHeight: 1.4,
-                }}
-              >
-                Adjust climate to see how it affects all scenarios
-              </Typography>
-              <DiscreteSlider
-                stops={[
-                  "Warmer Wetter",
-                  "Historical",
-                  "Warmer Drier I",
-                  "Warmer Drier II",
-                  "Warmer Drier III",
-                  "Warmer Drier IV",
-                ]}
-                value={selectedClimate}
-                onChange={(value) => {
-                  handleClimateChange(value)
-                  console.log("Climate changed in exploration panel:", value)
-                }}
-                labelPosition="top"
-              />
             </Box>
-          </Box>
-        </Box>
-        )
-      })()}
+          )
+        })()}
 
       {/* Overlay Controls */}
       <MapControls
