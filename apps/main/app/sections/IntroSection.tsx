@@ -314,19 +314,27 @@ const IntroSection: React.FC = () => {
               conditions and future climates.
             </Typography>
 
-            <ScrollIndicator
-              scrollToId="overview"
-              color={(theme) => theme.palette.blue.darkest}
-              animationComplete={true}
-              delay={1.0}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                maxWidth: { xs: "600px", md: "500px" }, // Match text block width
+              }}
             >
-              <ArrowHead
-                size={28}
-                style={{
-                  transform: "rotate(90deg)",
-                }}
-              />
-            </ScrollIndicator>
+              <ScrollIndicator
+                scrollToId="overview"
+                color={(theme) => theme.palette.blue.darkest}
+                animationComplete={true}
+                delay={1.0}
+              >
+                <ArrowHead
+                  size={28}
+                  style={{
+                    transform: "rotate(90deg)",
+                  }}
+                />
+              </ScrollIndicator>
+            </Box>
           </Box>
         </BasePanel>
       </Box>
