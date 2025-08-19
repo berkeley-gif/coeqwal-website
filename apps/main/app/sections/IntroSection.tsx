@@ -39,7 +39,7 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "250px",
               height: "250px",
-              top: "25%",
+              top: "20%",
               left: "55%",
               borderRadius: "50%",
             }}
@@ -52,7 +52,7 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "200px",
               height: "200px",
-              top: "20%",
+              top: "15%",
               left: "80%",
               borderRadius: "50%",
             }}
@@ -65,7 +65,7 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "280px",
               height: "280px",
-              top: "55%",
+              top: "50%",
               left: "75%",
               borderRadius: "50%",
             }}
@@ -78,7 +78,7 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "300px",
               height: "300px",
-              top: "60%",
+              top: "55%",
               left: "50%",
               borderRadius: "50%",
             }}
@@ -91,7 +91,7 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "220px",
               height: "220px",
-              top: "40%",
+              top: "35%",
               left: "85%",
               borderRadius: "50%",
             }}
@@ -104,26 +104,27 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "240px",
               height: "240px",
-              top: "45%",
+              top: "40%",
               left: "45%",
               borderRadius: "50%",
             }}
           />
         </Box>
 
-        {/* Image 3 - Center cluster */}
-          <Box
-            component="img"
-            src="/images/circular-crops/3.png"
-            sx={{
-              position: "absolute",
-              width: "320px",
-              height: "320px",
-              top: "35%",
-              left: "60%",
-              borderRadius: "50%",
-            }}
-          />
+        {/* Image 3 - Center cluster (on top of all others) */}
+        <Box
+          component="img"
+          src="/images/circular-crops/3.png"
+          sx={{
+            position: "absolute",
+            width: "320px",
+            height: "320px",
+            top: "30%",
+            left: "60%",
+            borderRadius: "50%",
+            zIndex: (theme) => theme.zIndex.introForegroundImages + 1,
+          }}
+        />
 
         {/* Hero text content */}
         <BasePanel
