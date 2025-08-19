@@ -47,7 +47,7 @@ function Conveyance() {
           height: "60vh",
           width: "100%",
           backgroundImage: "url('/drafts/delta-adapt-salinity.png')",
-          backgroundSize: "contain",
+          backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
         }}
