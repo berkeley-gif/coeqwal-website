@@ -1601,6 +1601,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     if (hasLayer("community-deliveries-layer")) {
       removeLayer("community-deliveries-layer")
     }
+    if (hasLayer("agricultural-deliveries-layer")) {
+      removeLayer("agricultural-deliveries-layer")
+    }
 
     // Add layer based on selected outcome
     if (selectedOutcome === "Community deliveries") {
@@ -1630,6 +1633,33 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         }
       )
       console.log("Community deliveries layer added")
+    } else if (selectedOutcome === "Agricultural deliveries") {
+      console.log("Adding agricultural deliveries layer...")
+      addLayer(
+        "agricultural-deliveries-layer",
+        "delivery-units",
+        "fill",
+        {
+          // Use the same working approach as Community deliveries
+          "fill-color": [
+            "case",
+            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["1", "5", "9"]]], "#7b9d3f", // Green for IDs starting with 1,5,9
+            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["2", "6"]]], "#60aacb", // Blue for IDs starting with 2,6  
+            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["3", "7"]]], "#FFB347", // Orange for IDs starting with 3,7
+            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["4", "8", "0"]]], "#CD5C5C", // Red for IDs starting with 4,8,0
+            "#FF00FF" // Magenta fallback to identify failures
+          ],
+          "fill-opacity": 0.7,
+          "fill-outline-color": "#3a4574", // Darker blue for outline
+        },
+        {
+          visibility: "visible",
+        },
+        {
+          filter: ["==", ["get", "Class"], "Agriculture"], // Filter to show only Agriculture areas
+        }
+      )
+      console.log("Agricultural deliveries layer added")
     }
   }, [selectedOutcome, addSource, addLayer, removeLayer, hasSource, hasLayer])
 
@@ -1957,10 +1987,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           </MapMarkerTooltip>
         </Marker>
 
-        {/* Marker 3: Central Valley (Fresno area) */}
+        {/* Marker 3: Westlands W.D. - positioned over Westlands Water District polygon */}
         <Marker 
-          longitude={-119.7871} 
-          latitude={36.7378}
+          longitude={-120.55} 
+          latitude={36.57}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
           <MapMarkerTooltip
@@ -1996,7 +2026,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   width: 16,
                   height: 16,
                   borderRadius: "50%",
-                  backgroundColor: "#4CAF50", // Green for good status
+                  backgroundColor: "#4CAF50", // Green
                   border: "2px solid white",
                 }}
               />
@@ -2004,9 +2034,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           </MapMarkerTooltip>
         </Marker>
 
-        {/* Marker 4: Chico area */}
+        {/* Marker 4: Chico area - positioned over agricultural polygon to the west */}
         <Marker 
-          longitude={-121.8375} 
+          longitude={-121.95} 
           latitude={39.7285}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
