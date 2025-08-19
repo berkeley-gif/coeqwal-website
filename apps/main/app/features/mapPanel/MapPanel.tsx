@@ -2488,7 +2488,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           polygonPoints.length > 0 ? ` • ${polygonPoints.length} points` : ""
         }`}
         actions={
-          <Box sx={{ display: "flex", gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
             {polygonPoints.length > 0 && (
               <Box
                 onClick={(e) => {
