@@ -36,7 +36,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   responsive = true,
   width = 400,
   height = 400,
-  margin = { top: 40, right: 20, bottom: 50, left: 100 },
+  margin = { top: 40, right: 60, bottom: 50, left: 100 }, // Increased right margin to prevent clipping
   colors = {
     default: "#1f77b4",
     highlighted: "#ff7f0e",
@@ -213,6 +213,64 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("fill", "#666")
           .text(tick.toString()) // Show exact values including -0.5 and 0.5
       })
+
+      // Add slider arrows at both ends of each axis - pointing upward to endpoints
+      axisGroup.selectAll(".axis-arrow").remove() // Remove old arrows
+
+      // Left arrow (pointing up to -1 endpoint)
+      const leftEndpoint = scales[axis]!(-1) // Get x position of -1 value
+      const leftArrow = axisGroup.append("g")
+        .attr("class", "axis-arrow axis-arrow-left")
+        .attr("transform", `translate(${leftEndpoint}, 15)`) // Position below the -1 endpoint
+        .style("cursor", "grab")
+        .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+
+      // Use exact SVG from DiscreteSlider pointing upward
+      leftArrow.append("path")
+        .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
+        .attr("fill", "#449cd9") // theme.palette.blue.bright
+        .attr("stroke", "none")
+        .attr("transform", "translate(-8, -6)") // Center the 16x12 arrow
+
+      // Right arrow (pointing up to +1 endpoint)
+      const rightEndpoint = scales[axis]!(1) // Get x position of +1 value
+      const rightArrow = axisGroup.append("g")
+        .attr("class", "axis-arrow axis-arrow-right")
+        .attr("transform", `translate(${rightEndpoint}, 15)`) // Position below the +1 endpoint
+        .style("cursor", "grab")
+        .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+
+      // Use exact SVG from DiscreteSlider pointing upward
+      rightArrow.append("path")
+        .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
+        .attr("fill", "#449cd9") // theme.palette.blue.bright
+        .attr("stroke", "none")
+        .attr("transform", "translate(-8, -6)") // Center the 16x12 arrow
+
+      // Add hover effects to arrows (exact SliderPointer style)
+      axisGroup.selectAll(".axis-arrow")
+        .on("mouseover", function() {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", function() {
+              const isLeft = d3.select(this).classed("axis-arrow-left")
+              const endpoint = isLeft ? leftEndpoint : rightEndpoint
+              return `translate(${endpoint}, 15) scale(1.1)`
+            })
+            .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.16))")
+        })
+        .on("mouseout", function() {
+          d3.select(this)
+            .transition()
+            .duration(200)
+            .attr("transform", function() {
+              const isLeft = d3.select(this).classed("axis-arrow-left")
+              const endpoint = isLeft ? leftEndpoint : rightEndpoint
+              return `translate(${endpoint}, 15)`
+            })
+            .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+        })
     })
 
     // Handle baseline - thick orange line for current operations
