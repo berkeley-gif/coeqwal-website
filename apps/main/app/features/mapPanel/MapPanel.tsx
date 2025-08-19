@@ -1091,8 +1091,8 @@ const MapControls = ({
                                       display: "flex",
                                       flexDirection: "column",
                                       alignItems: "center",
-                                      gap: 1, // Increased gap between glyph and label
-                                      padding: 1, // Increased padding around each glyph
+                                      gap: 1, // Match regular view gap
+                                      padding: 0.5, // Match regular view padding
                                       borderRadius: (theme) => theme.borderRadius.rounded,
                                       backgroundColor: (theme) => theme.palette.blue.bright + "20", // 20% blue background
                                       cursor: "pointer",
@@ -1144,17 +1144,17 @@ const MapControls = ({
 
                                         return [q3, median, q1, min] as [number, number, number, number]
                                       })()}
-                                      size={48} // Increased size for better visibility
+                                      size={56} // Match regular view size
                                       variant={glyphVariant}
                                     />
                                     <Box
                                       sx={{
-                                        fontSize: "0.75rem", // Increased font size for better readability
+                                        fontSize: "0.75rem", // Match regular view font size
                                         fontWeight: 400,
-                                        lineHeight: 1.2,
+                                        lineHeight: 1.3, // Match regular view line height
                                         color: (theme) => theme.palette.text.primary,
                                         textAlign: "center",
-                                        maxWidth: "70px", // Increased max width for labels
+                                        maxWidth: "80px", // Match regular view max width
                                       }}
                                     >
                                       {outcome}
@@ -1167,8 +1167,8 @@ const MapControls = ({
                                       display: "flex",
                                       flexDirection: "column",
                                       alignItems: "center",
-                                      gap: 1, // Increased gap between glyph and label
-                                      padding: 1, // Increased padding around each glyph
+                                      gap: 1, // Match regular view gap
+                                      padding: 0.5, // Match regular view padding
                                       borderRadius: (theme) => theme.borderRadius.rounded,
                                       cursor: "pointer",
                                       transition: "background-color 0.2s ease",
@@ -1220,17 +1220,17 @@ const MapControls = ({
 
                                         return [q3, median, q1, min] as [number, number, number, number]
                                       })()}
-                                      size={48} // Increased size for better visibility
+                                      size={56} // Match regular view size
                                       variant={glyphVariant}
                                     />
                                     <Box
                                       sx={{
-                                        fontSize: "0.75rem", // Increased font size for better readability
+                                        fontSize: "0.75rem", // Match regular view font size
                                         fontWeight: 400,
-                                        lineHeight: 1.2,
+                                        lineHeight: 1.3, // Match regular view line height
                                         color: (theme) => theme.palette.text.primary,
                                         textAlign: "center",
-                                        maxWidth: "70px", // Increased max width for labels
+                                        maxWidth: "80px", // Match regular view max width
                                       }}
                                     >
                                       {outcome}
