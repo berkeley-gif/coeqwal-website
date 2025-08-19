@@ -48,12 +48,12 @@ import { useGlyphSettingsStore } from "@repo/ui"
 import { ScenarioGlyph, VerticalParallelLinePlot } from "@repo/viz"
 
 // Chart container component that calculates available height
-const ChartContainer = ({ 
-  expanded, 
-  chartData 
-}: { 
+const ChartContainer = ({
+  expanded,
+  chartData,
+}: {
   expanded: boolean
-  chartData: { key: string; props: any }
+  chartData: { key: string; props: Record<string, unknown> }
 }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [calculatedHeight, setCalculatedHeight] = useState(300)
@@ -63,21 +63,21 @@ const ChartContainer = ({
     const calculateHeight = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect()
-        const availableHeight = expanded 
+        const availableHeight = expanded
           ? Math.max(rect.height, window.innerHeight * 0.6) // At least 60vh when expanded
           : 300 // Default height when collapsed
-        
+
         setCalculatedHeight(availableHeight)
-        console.log('Chart container height calculated:', availableHeight)
+        console.log("Chart container height calculated:", availableHeight)
       }
     }
 
     // Calculate immediately
     calculateHeight()
-    
+
     // Recalculate after a brief delay to ensure container has resized
     const timeoutId = setTimeout(calculateHeight, 100)
-    
+
     return () => clearTimeout(timeoutId)
   }, [expanded])
 
@@ -91,8 +91,8 @@ const ChartContainer = ({
       }
     }
 
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [expanded])
 
   return (
@@ -112,7 +112,7 @@ const ChartContainer = ({
     >
       <VerticalParallelLinePlot
         key={chartData.key}
-        {...chartData.props}
+        {...(chartData.props as any)} // eslint-disable-line @typescript-eslint/no-explicit-any
         height={calculatedHeight} // Pass calculated height to chart
         responsive={false} // Disable responsive mode, use explicit height
       />
@@ -195,9 +195,11 @@ const MapControls = ({
 
   // Scenario presets state
   const [sgmaSanJoaquinOnly, setSgmaSanJoaquinOnly] = useState(false)
-  const [sgmaSanJoaquinReductions, setSgmaSanJoaquinReductions] = useState(false)
+  const [sgmaSanJoaquinReductions, setSgmaSanJoaquinReductions] =
+    useState(false)
   const [sgmaBothValleys, setSgmaBothValleys] = useState(false)
-  const [sgmaBothValleysReductions, setSgmaBothValleysReductions] = useState(false)
+  const [sgmaBothValleysReductions, setSgmaBothValleysReductions] =
+    useState(false)
   const [usbrAlternative3, setUsbrAlternative3] = useState(false)
   const [deltaConveyanceTunnel, setDeltaConveyanceTunnel] = useState(false)
 
@@ -262,8 +264,6 @@ const MapControls = ({
     console.log("Learn more about this chart clicked")
   }, [])
 
-
-
   const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
     setExpandChart(newExpandedState)
@@ -296,88 +296,92 @@ const MapControls = ({
       title: "Scenario presets",
       content: (
         <Box>
-            {/* All Options - Single column, full width */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-              {/* SGMA Section Header */}
-              <Typography
-                variant="body2"
-                sx={{ 
-                  fontWeight: 400,
-                  mb: 0.5,
-                  color: (theme) => theme.palette.text.primary,
-                }}
-              >
-                Sustainable Groundwater Management Act (SGMA)
-              </Typography>
-              
-              {/* SGMA Options - Indented to show hierarchy */}
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={sgmaSanJoaquinOnly}
-                    onChange={(e) => setSgmaSanJoaquinOnly(e.target.checked)}
-                  />
-                }
-                label="San Joaquin Valley only"
-                sx={{ ml: 2 }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={sgmaSanJoaquinReductions}
-                    onChange={(e) => setSgmaSanJoaquinReductions(e.target.checked)}
-                  />
-                }
-                label="San Joaquin Valley with agricultural reductions"
-                sx={{ ml: 2 }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={sgmaBothValleys}
-                    onChange={(e) => setSgmaBothValleys(e.target.checked)}
-                  />
-                }
-                label="Sacramento and San Joaquin Valleys"
-                sx={{ ml: 2 }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={sgmaBothValleysReductions}
-                    onChange={(e) => setSgmaBothValleysReductions(e.target.checked)}
-                  />
-                }
-                label="Sacramento and San Joaquin Valleys with agricultural reductions"
-                sx={{ ml: 2 }}
-              />
-              
-              {/* Other Options */}
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={usbrAlternative3}
-                    onChange={(e) => setUsbrAlternative3(e.target.checked)}
-                  />
-                }
-                label="USBR Alternative 3"
-                sx={{ mt: 1 }}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox 
-                    size="small" 
-                    checked={deltaConveyanceTunnel}
-                    onChange={(e) => setDeltaConveyanceTunnel(e.target.checked)}
-                  />
-                }
-                label="Delta Conveyance Tunnel, Bethany Alternative"
-              />
+          {/* All Options - Single column, full width */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            {/* SGMA Section Header */}
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 400,
+                mb: 0.5,
+                color: (theme) => theme.palette.text.primary,
+              }}
+            >
+              Sustainable Groundwater Management Act (SGMA)
+            </Typography>
+
+            {/* SGMA Options - Indented to show hierarchy */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={sgmaSanJoaquinOnly}
+                  onChange={(e) => setSgmaSanJoaquinOnly(e.target.checked)}
+                />
+              }
+              label="San Joaquin Valley only"
+              sx={{ ml: 2 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={sgmaSanJoaquinReductions}
+                  onChange={(e) =>
+                    setSgmaSanJoaquinReductions(e.target.checked)
+                  }
+                />
+              }
+              label="San Joaquin Valley with agricultural reductions"
+              sx={{ ml: 2 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={sgmaBothValleys}
+                  onChange={(e) => setSgmaBothValleys(e.target.checked)}
+                />
+              }
+              label="Sacramento and San Joaquin Valleys"
+              sx={{ ml: 2 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={sgmaBothValleysReductions}
+                  onChange={(e) =>
+                    setSgmaBothValleysReductions(e.target.checked)
+                  }
+                />
+              }
+              label="Sacramento and San Joaquin Valleys with agricultural reductions"
+              sx={{ ml: 2 }}
+            />
+
+            {/* Other Options */}
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={usbrAlternative3}
+                  onChange={(e) => setUsbrAlternative3(e.target.checked)}
+                />
+              }
+              label="USBR Alternative 3"
+              sx={{ mt: 1 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={deltaConveyanceTunnel}
+                  onChange={(e) => setDeltaConveyanceTunnel(e.target.checked)}
+                />
+              }
+              label="Delta Conveyance Tunnel, Bethany Alternative"
+            />
           </Box>
         </Box>
       ),
@@ -1397,12 +1401,14 @@ const MapControls = ({
           }}
         >
           {/* Alternative scenarios panel */}
-          <Box sx={{ 
-            position: "relative", 
-            height: expandChart ? "100%" : "auto", // Take full height when expanded
-            display: "flex",
-            flexDirection: "column",
-          }}>
+          <Box
+            sx={{
+              position: "relative",
+              height: expandChart ? "100%" : "auto", // Take full height when expanded
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             <ScenarioCard
               topLine={isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"}
               headline={"Alternative scenarios"}
@@ -1552,7 +1558,9 @@ const MapControls = ({
                                 fontSize: "0.875em",
                                 marginRight: "8px",
                                 display: "inline-block",
-                                transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                                transform: expandChart
+                                  ? "rotate(180deg)"
+                                  : "rotate(0deg)",
                                 transition: "transform 0.2s ease",
                               }}
                             >
@@ -1724,19 +1732,41 @@ const MapControls = ({
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { addSource, addLayer, removeLayer, hasSource, hasLayer, fitBounds, flyTo } = useMap()
+  const {
+    addSource,
+    addLayer,
+    removeLayer,
+    hasSource,
+    hasLayer,
+    fitBounds,
+    flyTo,
+  } = useMap()
 
   // Calculated extents for different outcome datasets (from geojson analysis)
   const OUTCOME_EXTENTS = {
     "Community deliveries": {
       // Urban areas - calculated bounds from actual data
-      bounds: [[-122.5253313401591, 35.9947689586334], [-119.73675744266775, 40.745557975898166]] as [[number, number], [number, number]],
-      center: { longitude: -121.13104439141343, latitude: 38.37016346726578, zoom: 6.2 },
+      bounds: [
+        [-122.5253313401591, 35.9947689586334],
+        [-119.73675744266775, 40.745557975898166],
+      ] as [[number, number], [number, number]],
+      center: {
+        longitude: -121.13104439141343,
+        latitude: 38.37016346726578,
+        zoom: 6.2,
+      },
     },
     "Agricultural deliveries": {
       // Agriculture areas - calculated bounds from actual data
-      bounds: [[-122.73923233712331, 35.964081298197414], [-119.71028032650193, 40.751670748519366]] as [[number, number], [number, number]],
-      center: { longitude: -121.22475633181261, latitude: 38.357876023358386, zoom: 6.0 },
+      bounds: [
+        [-122.73923233712331, 35.964081298197414],
+        [-119.71028032650193, 40.751670748519366],
+      ] as [[number, number], [number, number]],
+      center: {
+        longitude: -121.22475633181261,
+        latitude: 38.357876023358386,
+        zoom: 6.0,
+      },
     },
   }
 
@@ -1755,8 +1785,6 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
 
-
-
   // Climate state
   const [selectedClimate, setSelectedClimate] = useState(1) // Default to "Historical"
 
@@ -1764,10 +1792,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null)
   const [hoveredFeatureData, setHoveredFeatureData] = useState<{
-    modName: string | null;
-    subName: string | null;
-    type: string | null;
-    coordinates: [number, number];
+    modName: string | null
+    subName: string | null
+    type: string | null
+    coordinates: [number, number]
   } | null>(null)
 
   // Delivery area state
@@ -1808,7 +1836,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   }
 
   // Handle delivery area polygon selection
-  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => {
+  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!isSelectingDeliveryArea) return
 
     // Get the clicked feature
@@ -1816,17 +1844,15 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     if (features && features.length > 0) {
       const selectedPolygon = features[0]
       console.log("Selected delivery area polygon:", selectedPolygon.properties)
-      
+
       // Close the delivery area selection dialog
       setIsSelectingDeliveryArea(false)
       setShowDeliveryAreaDropdown(false)
-      
+
       // You could store the selected polygon data here if needed
       // setSelectedDeliveryArea(selectedPolygon)
     }
   }
-
-
 
   // Check if two line segments intersect
   const doSegmentsIntersect = useCallback(
@@ -1945,7 +1971,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       setSelectedOutcome(null)
     } else {
       setSelectedOutcome(outcome)
-      
+
       // Zoom to extent for the selected outcome
       const extent = OUTCOME_EXTENTS[outcome as keyof typeof OUTCOME_EXTENTS]
       if (extent) {
@@ -1954,7 +1980,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           0, // pitch
           0, // bearing
           { top: 50, bottom: 50, left: 50, right: 50 }, // padding
-          { duration: 2000 } // transition options
+          { duration: 2000 }, // transition options
         )
       }
     }
@@ -1983,7 +2009,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           },
           {
             visibility: "visible",
-          }
+          },
         )
       }
 
@@ -2002,7 +2028,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           },
           {
             filter: ["==", ["get", "DU_ID"], ""], // Initially show no features
-          }
+          },
         )
       }
     } else {
@@ -2014,7 +2040,14 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         removeLayer("delivery-area-selection-hover")
       }
     }
-  }, [isSelectingDeliveryArea, addSource, addLayer, removeLayer, hasSource, hasLayer])
+  }, [
+    isSelectingDeliveryArea,
+    addSource,
+    addLayer,
+    removeLayer,
+    hasSource,
+    hasLayer,
+  ])
 
   // Effect to manage map layers based on selected outcome
   useEffect(() => {
@@ -2051,11 +2084,15 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           // Simplified tier color assignment - use string length for more reliable randomization
           "fill-color": [
             "case",
-            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 0], "#7b9d3f", // Tier 1 - Green
-            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 1], "#60aacb", // Tier 2 - Blue  
-            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 2], "#FFB347", // Tier 3 - Orange
-            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 3], "#CD5C5C", // Tier 4 - Red
-            "#60aacb" // Fallback blue for any edge cases
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 0],
+            "#7b9d3f", // Tier 1 - Green
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 1],
+            "#60aacb", // Tier 2 - Blue
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 2],
+            "#FFB347", // Tier 3 - Orange
+            ["==", ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4], 3],
+            "#CD5C5C", // Tier 4 - Red
+            "#60aacb", // Fallback blue for any edge cases
           ],
           "fill-opacity": 0.7,
           "fill-outline-color": "#3a4574", // Darker blue for outline
@@ -2065,9 +2102,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         },
         {
           filter: ["==", ["get", "Class"], "Urban"], // Filter to show only Urban areas
-        }
+        },
       )
-      
+
       // Add hover layer for community deliveries
       addLayer(
         "community-deliveries-hover",
@@ -2079,20 +2116,28 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             "interpolate",
             ["linear"],
             ["zoom"],
-            5, 1,    // At zoom 5: 1px width
-            8, 2,    // At zoom 8: 2px width
-            12, 4    // At zoom 12: 4px width
+            5,
+            1, // At zoom 5: 1px width
+            8,
+            2, // At zoom 8: 2px width
+            12,
+            4, // At zoom 12: 4px width
           ],
-          "line-opacity": ["case", ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""], 1, 0],
+          "line-opacity": [
+            "case",
+            ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""],
+            1,
+            0,
+          ],
         },
         {
           visibility: "visible",
         },
         {
           filter: ["==", ["get", "Class"], "Urban"],
-        }
+        },
       )
-      
+
       console.log("Community deliveries layer added")
     } else if (selectedOutcome === "Agricultural deliveries") {
       console.log("Adding agricultural deliveries layer...")
@@ -2104,11 +2149,31 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           // Use the same working approach as Community deliveries
           "fill-color": [
             "case",
-            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["1", "5", "9"]]], "#7b9d3f", // Green for IDs starting with 1,5,9
-            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["2", "6"]]], "#60aacb", // Blue for IDs starting with 2,6  
-            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["3", "7"]]], "#FFB347", // Orange for IDs starting with 3,7
-            ["in", ["slice", ["to-string", ["get", "DU_ID"]], 0, 1], ["literal", ["4", "8", "0"]]], "#CD5C5C", // Red for IDs starting with 4,8,0
-            "#FF00FF" // Magenta fallback to identify failures
+            [
+              "in",
+              ["slice", ["to-string", ["get", "DU_ID"]], 0, 1],
+              ["literal", ["1", "5", "9"]],
+            ],
+            "#7b9d3f", // Green for IDs starting with 1,5,9
+            [
+              "in",
+              ["slice", ["to-string", ["get", "DU_ID"]], 0, 1],
+              ["literal", ["2", "6"]],
+            ],
+            "#60aacb", // Blue for IDs starting with 2,6
+            [
+              "in",
+              ["slice", ["to-string", ["get", "DU_ID"]], 0, 1],
+              ["literal", ["3", "7"]],
+            ],
+            "#FFB347", // Orange for IDs starting with 3,7
+            [
+              "in",
+              ["slice", ["to-string", ["get", "DU_ID"]], 0, 1],
+              ["literal", ["4", "8", "0"]],
+            ],
+            "#CD5C5C", // Red for IDs starting with 4,8,0
+            "#FF00FF", // Magenta fallback to identify failures
           ],
           "fill-opacity": 0.7,
           "fill-outline-color": "#3a4574", // Darker blue for outline
@@ -2118,9 +2183,9 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         },
         {
           filter: ["==", ["get", "Class"], "Agriculture"], // Filter to show only Agriculture areas
-        }
+        },
       )
-      
+
       // Add hover layer for agricultural deliveries
       addLayer(
         "agricultural-deliveries-hover",
@@ -2132,23 +2197,39 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             "interpolate",
             ["linear"],
             ["zoom"],
-            5, 1,    // At zoom 5: 1px width
-            8, 2,    // At zoom 8: 2px width
-            12, 4    // At zoom 12: 4px width
+            5,
+            1, // At zoom 5: 1px width
+            8,
+            2, // At zoom 8: 2px width
+            12,
+            4, // At zoom 12: 4px width
           ],
-          "line-opacity": ["case", ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""], 1, 0],
+          "line-opacity": [
+            "case",
+            ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""],
+            1,
+            0,
+          ],
         },
         {
           visibility: "visible",
         },
         {
           filter: ["==", ["get", "Class"], "Agriculture"],
-        }
+        },
       )
-      
+
       console.log("Agricultural deliveries layer added")
     }
-  }, [selectedOutcome, hoveredFeatureId, addSource, addLayer, removeLayer, hasSource, hasLayer])
+  }, [
+    selectedOutcome,
+    hoveredFeatureId,
+    addSource,
+    addLayer,
+    removeLayer,
+    hasSource,
+    hasLayer,
+  ])
 
   return (
     <Box
@@ -2214,32 +2295,39 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 )
               }
             : isSelectingDeliveryArea
-              ? (evt: { target: any; point: any }) => {
+              ? (evt: { target: any; point: any }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                   // Handle delivery area polygon selection
                   const features = evt.target.queryRenderedFeatures(evt.point, {
-                    layers: ["delivery-area-selection-layer"]
+                    layers: ["delivery-area-selection-layer"],
                   })
-                  
+
                   if (features && features.length > 0) {
                     handleDeliveryAreaPolygonClick({ features })
                   }
                 }
               : selectedOutcome
-                ? (evt: { target: any; point: any; lngLat: { lng: number; lat: number } }) => {
+                ? (evt: {
+                    target: any // eslint-disable-line @typescript-eslint/no-explicit-any
+                    point: any // eslint-disable-line @typescript-eslint/no-explicit-any
+                    lngLat: { lng: number; lat: number }
+                  }) => {
                     // Handle polygon click for zoom functionality
-                    const features = evt.target.queryRenderedFeatures(evt.point, {
-                      layers: [
-                        selectedOutcome === "Community deliveries" 
-                          ? "community-deliveries-layer" 
-                          : "agricultural-deliveries-layer"
-                      ]
-                    })
-                    
+                    const features = evt.target.queryRenderedFeatures(
+                      evt.point,
+                      {
+                        layers: [
+                          selectedOutcome === "Community deliveries"
+                            ? "community-deliveries-layer"
+                            : "agricultural-deliveries-layer",
+                        ],
+                      },
+                    )
+
                     if (features && features.length > 0) {
                       // Use click coordinates as zoom target (simpler than centroid calculation)
                       flyTo({
                         longitude: evt.lngLat.lng,
-                        latitude: evt.lngLat.lat, 
+                        latitude: evt.lngLat.lat,
                         zoom: 8, // Moderate zoom to show polygon with surrounding context
                         transitionOptions: {
                           duration: 1500,
@@ -2249,28 +2337,40 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   }
                 : undefined
         }
-        onMouseMove={(evt: { target: any; point: any; lngLat: { lng: number; lat: number } }) => {
+        onMouseMove={(evt: {
+          target: any // eslint-disable-line @typescript-eslint/no-explicit-any
+          point: any // eslint-disable-line @typescript-eslint/no-explicit-any
+          lngLat: { lng: number; lat: number }
+        }) => {
           // Check if hovering over delivery area selection polygons
           if (isSelectingDeliveryArea) {
             const features = evt.target.queryRenderedFeatures(evt.point, {
-              layers: ["delivery-area-selection-layer"]
+              layers: ["delivery-area-selection-layer"],
             })
-            
+
             if (features && features.length > 0) {
               const feature = features[0]
               const featureId = feature.properties?.DU_ID || null
-              
+
               // Update hover layer filter to highlight the hovered polygon
               if (hasLayer("delivery-area-selection-hover")) {
-                evt.target.setFilter("delivery-area-selection-hover", ["==", ["get", "DU_ID"], featureId])
+                evt.target.setFilter("delivery-area-selection-hover", [
+                  "==",
+                  ["get", "DU_ID"],
+                  featureId,
+                ])
               }
-              
+
               // Change cursor to pointer
               evt.target.getCanvas().style.cursor = "pointer"
             } else {
               // Clear hover when not over any polygon
               if (hasLayer("delivery-area-selection-hover")) {
-                evt.target.setFilter("delivery-area-selection-hover", ["==", ["get", "DU_ID"], ""])
+                evt.target.setFilter("delivery-area-selection-hover", [
+                  "==",
+                  ["get", "DU_ID"],
+                  "",
+                ])
               }
               evt.target.getCanvas().style.cursor = "crosshair"
             }
@@ -2279,33 +2379,33 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           else if (selectedOutcome) {
             const features = evt.target.queryRenderedFeatures(evt.point, {
               layers: [
-                selectedOutcome === "Community deliveries" 
-                  ? "community-deliveries-layer" 
-                  : "agricultural-deliveries-layer"
-              ]
+                selectedOutcome === "Community deliveries"
+                  ? "community-deliveries-layer"
+                  : "agricultural-deliveries-layer",
+              ],
             })
-            
+
             if (features && features.length > 0) {
               const feature = features[0]
               const newFeatureId = feature.properties?.DU_ID || null
-              
+
               // Only update state if the feature has actually changed
               if (newFeatureId !== hoveredFeatureId) {
                 setHoveredFeatureId(newFeatureId)
-                              setHoveredFeatureData({
-                modName: feature.properties?.Mod_Name?.trim() || null,
-                subName: feature.properties?.Sub_Name?.trim() || null,
-                type: feature.properties?.Type?.trim() || null,
-                coordinates: [evt.lngLat.lng, evt.lngLat.lat]
-              })
+                setHoveredFeatureData({
+                  modName: feature.properties?.Mod_Name?.trim() || null,
+                  subName: feature.properties?.Sub_Name?.trim() || null,
+                  type: feature.properties?.Type?.trim() || null,
+                  coordinates: [evt.lngLat.lng, evt.lngLat.lat],
+                })
               }
-              evt.target.getCanvas().style.cursor = 'pointer'
+              evt.target.getCanvas().style.cursor = "pointer"
             } else {
               if (hoveredFeatureId !== null) {
                 setHoveredFeatureId(null)
                 setHoveredFeatureData(null)
               }
-              evt.target.getCanvas().style.cursor = ''
+              evt.target.getCanvas().style.cursor = ""
             }
           }
         }}
@@ -2494,12 +2594,12 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 <div>{hoveredFeatureData.modName}</div>
               )}
               {hoveredFeatureData.subName && (
-                <div style={{ marginTop: '2px' }}>
+                <div style={{ marginTop: "2px" }}>
                   {hoveredFeatureData.subName}
                 </div>
               )}
               {hoveredFeatureData.type && (
-                <div style={{ marginTop: '2px' }}>
+                <div style={{ marginTop: "2px" }}>
                   {hoveredFeatureData.type}
                 </div>
               )}
@@ -2509,8 +2609,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
         {/* Custom map markers */}
         {/* Marker 1: Los Angeles area */}
-        <Marker 
-          longitude={-118.2437} 
+        <Marker
+          longitude={-118.2437}
           latitude={34.0522}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
@@ -2556,8 +2656,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Marker>
 
         {/* Marker 2: Sacramento area - positioned over a red delivery unit */}
-        <Marker 
-          longitude={-121.3} 
+        <Marker
+          longitude={-121.3}
           latitude={38.6}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
@@ -2603,8 +2703,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Marker>
 
         {/* Marker 3: Westlands W.D. - positioned over Westlands Water District polygon */}
-        <Marker 
-          longitude={-120.58} 
+        <Marker
+          longitude={-120.58}
           latitude={36.58}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
@@ -2650,8 +2750,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         </Marker>
 
         {/* Marker 4: Chico area - positioned over agricultural polygon to the west */}
-        <Marker 
-          longitude={-121.95} 
+        <Marker
+          longitude={-121.95}
           latitude={39.7285}
           anchor="bottom" // Bottom middle tip attaches to coordinates
         >
@@ -2825,9 +2925,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
         }}
       >
-        <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>
-          📊 Dummy data
-        </Box>
+        <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>📊 Dummy data</Box>
       </Box>
 
       {/* Overlay Controls */}

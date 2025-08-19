@@ -22,7 +22,9 @@ const ScenarioGlyph: React.FC<ScenarioGlyphProps> = ({
 }) => {
   switch (variant) {
     case "bars":
-      return <OutcomeGlyph values={values} size={size} tierColors={tierColors} />
+      return (
+        <OutcomeGlyph values={values} size={size} tierColors={tierColors} />
+      )
     case "rose": {
       return <RoseChart size={size} />
     }
