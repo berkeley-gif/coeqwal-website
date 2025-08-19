@@ -215,13 +215,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       })
     })
 
-    // Update baseline if provided (original styling)
+    // Handle baseline - thick orange line for current operations
     if (showBaseline && baselineData) {
-      const baselineColor = "#333" // Original color
+      const baselineColor = "#ff7f0e" // Bright orange for visibility
       const baselineLineGenerator = d3.line<[string, number]>()
         .x(([axis, value]) => scales[axis]!(value))
         .y(([axis]) => yScale(axis)!)
-        // No curve - straight lines (original)
+        // No curve - straight lines
 
       const baselinePathData = axes.map(
         (axis) => [axis, baselineData.values[axis] || 0] as [string, number],
@@ -233,15 +233,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("class", "baseline-path")
           .attr("fill", "none")
           .attr("stroke", baselineColor)
-          .attr("stroke-width", 3) // Original width
-          .attr("stroke-dasharray", "5,5")
-          .attr("opacity", 0.8)
+          .attr("stroke-width", 4) // Thick line for prominence
+          .attr("opacity", 0.9) // High opacity for visibility
+          // No dash array - solid line
       }
 
       const pathSelection = animate ? baselinePath.transition(t as any) : baselinePath
       pathSelection.attr("d", baselineLineGenerator(baselinePathData))
 
-      // Update baseline circles (original styling)
+      // Update baseline circles - orange to match line
       axes.forEach((axis) => {
         const value = baselineData.values[axis] || 0
         let circle = g.select<SVGCircleElement>(`.baseline-circle-${axis.replace(/\s+/g, '-')}`)
@@ -252,14 +252,43 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("fill", baselineColor)
             .attr("stroke", "white")
             .attr("stroke-width", 2)
-            .attr("r", 4)
-            .attr("opacity", 0.8)
+            .attr("r", 5) // Slightly larger for prominence
+            .attr("opacity", 0.9)
         }
 
         const circleSelection = animate ? circle.transition(t as any) : circle
         circleSelection
           .attr("cx", scales[axis]!(value))
           .attr("cy", yScale(axis)!)
+      })
+    } else {
+      // Remove baseline elements when showBaseline is false
+      const baselineRemovalTransition = animate ? d3.transition().duration(300) : null
+      
+      // Remove baseline path
+      const baselinePath = g.select(".baseline-path")
+      if (!baselinePath.empty()) {
+        if (animate) {
+          baselinePath.transition(baselineRemovalTransition as any)
+            .attr("opacity", 0)
+            .remove()
+        } else {
+          baselinePath.remove()
+        }
+      }
+      
+      // Remove baseline circles
+      axes.forEach((axis) => {
+        const circle = g.select(`.baseline-circle-${axis.replace(/\s+/g, '-')}`)
+        if (!circle.empty()) {
+          if (animate) {
+            circle.transition(baselineRemovalTransition as any)
+              .attr("opacity", 0)
+              .remove()
+          } else {
+            circle.remove()
+          }
+        }
       })
     }
 
