@@ -380,10 +380,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Central Valley Water"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -393,7 +393,7 @@ export default function ContentPanels({
                       A natural system fed by rain and snowpack
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -411,7 +411,7 @@ export default function ContentPanels({
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -428,10 +428,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Managing California's Water"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -441,7 +441,7 @@ export default function ContentPanels({
                       Who decides where water goes and when?
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -454,7 +454,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -469,10 +469,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Growing Challenges"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -491,7 +491,7 @@ export default function ContentPanels({
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         mb: 1,
@@ -509,7 +509,7 @@ export default function ContentPanels({
                       target="_blank"
                       rel="noopener noreferrer"
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -526,10 +526,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Exploring California's Water Futures"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -539,7 +539,7 @@ export default function ContentPanels({
                       What if we made different choices?
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -554,7 +554,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -650,10 +650,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Current operations"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -667,7 +667,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -682,10 +682,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Managing river flows for the environment"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -695,7 +695,7 @@ export default function ContentPanels({
                       Balancing ecosystem needs with human uses
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -710,7 +710,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -725,10 +725,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Managing Groundwater in a Changing Agricultural Landscape"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -738,7 +738,7 @@ export default function ContentPanels({
                       Sustainable strategies for groundwater basins
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -754,7 +754,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -769,10 +769,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Prioritizing Drinking Water for California Communities"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -782,7 +782,7 @@ export default function ContentPanels({
                       Ensuring safe, affordable water access for all
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -799,7 +799,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -814,10 +814,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Improving Delta Outflows for the Environment"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -827,7 +827,7 @@ export default function ContentPanels({
                       Supporting the Delta ecosystem and San Francisco Bay
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -845,7 +845,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -860,10 +860,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Sustaining Uses in the Delta for Communities and Farms"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -873,7 +873,7 @@ export default function ContentPanels({
                       Protecting in-Delta water users and livelihoods
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -891,7 +891,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -906,10 +906,10 @@ export default function ContentPanels({
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Improving Reliability of Delta Exports for Farms and Communities"
-                    headlineVariant="h4"
+                    headlineVariant="h5"
                   >
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 2,
                         opacity: 0.8,
@@ -920,7 +920,7 @@ export default function ContentPanels({
                       Delta
                     </Typography>
                     <Typography
-                      variant="body2"
+                      variant="body1"
                       sx={{
                         mb: 3,
                         color: (theme) => theme.palette.blue.darkest,
@@ -938,7 +938,7 @@ export default function ContentPanels({
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.accent.gold,
+                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
