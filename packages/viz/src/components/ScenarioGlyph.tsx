@@ -10,16 +10,19 @@ export interface ScenarioGlyphProps {
   variant: GlyphVariant
   values: [number, number, number, number] // quartiles min,q1,median,q3 (worst,w25,median,w75)
   size?: number
+  /** custom tier colors [tier1, tier2, tier3, tier4] */
+  tierColors?: [string, string, string, string]
 }
 
 const ScenarioGlyph: React.FC<ScenarioGlyphProps> = ({
   variant,
   values,
   size = 60,
+  tierColors,
 }) => {
   switch (variant) {
     case "bars":
-      return <OutcomeGlyph values={values} size={size} />
+      return <OutcomeGlyph values={values} size={size} tierColors={tierColors} />
     case "rose": {
       return <RoseChart size={size} />
     }

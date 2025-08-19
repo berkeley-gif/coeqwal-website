@@ -10,6 +10,7 @@ import {
   Typography,
   Select,
   MenuItem,
+  useTheme,
 } from "@repo/ui/mui"
 import {
   Card,
@@ -103,6 +104,7 @@ const MapControls = ({
 }: MapControlsProps) => {
   const { flyTo } = useMap()
   const { setDrawerContent, openDrawer } = useDrawerStore()
+  const theme = useTheme()
 
   const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
@@ -872,6 +874,12 @@ const MapControls = ({
                       >
                         {/* Glyph for outcome */}
                         <ScenarioGlyph
+                          tierColors={[
+                            theme.palette.tiers.tier1,
+                            theme.palette.tiers.tier2,
+                            theme.palette.tiers.tier3,
+                            theme.palette.tiers.tier4,
+                          ]}
                           values={(() => {
                             // Generate climate-influenced dummy data based on selectedClimate
                             // 0: Warmer Wetter, 1: Historical, 2-5: Warmer Drier I-IV

@@ -180,6 +180,14 @@ const themeValues = {
       conveyanceProjects: "#b1e1c3", // nature.mint
       climateFuture: "#ffd87e", // accent.gold
     },
+
+    // Outcome tier colors, ensure consistent across glyphs and glossary
+    tiers: {
+      tier1: "#2E8B57", // Green, tier 1
+      tier2: "#87CEEB", // Light blue, tier 2
+      tier3: "#FFB347", // Orange, tier 3
+      tier4: "#CD5C5C", // Red - Poor performance
+    },
   },
 
   // Border radius values
@@ -681,6 +689,12 @@ const theme = createTheme({
       exportReductions: themeValues.palette.categories.exportReductions,
       conveyanceProjects: themeValues.palette.categories.conveyanceProjects,
       climateFuture: themeValues.palette.categories.climateFuture,
+    },
+    tiers: {
+      tier1: themeValues.palette.tiers.tier1,
+      tier2: themeValues.palette.tiers.tier2,
+      tier3: themeValues.palette.tiers.tier3,
+      tier4: themeValues.palette.tiers.tier4,
     },
     background: {
       default: themeValues.palette.utility.white,
@@ -1454,12 +1468,7 @@ const theme = createTheme({
     },
     MuiTypography: {
       variants: [
-        {
-          props: { variant: "body2" },
-          style: ({ theme }) => ({
-            marginBottom: theme.spacing(4),
-          }),
-        },
+        // Removed the problematic global body2 margin - it should be applied contextually, not globally
         {
           props: { variant: "h2" },
           style: ({ theme }) => ({
@@ -1762,6 +1771,13 @@ declare module "@mui/material/styles" {
       conveyanceProjects: string
       climateFuture: string
     }
+
+    tiers: {
+      tier1: string
+      tier2: string
+      tier3: string
+      tier4: string
+    }
   }
 
   interface TypeText {
@@ -1814,6 +1830,13 @@ declare module "@mui/material/styles" {
       exportReductions?: string
       conveyanceProjects?: string
       climateFuture?: string
+    }
+
+    tiers?: {
+      tier1?: string
+      tier2?: string
+      tier3?: string
+      tier4?: string
     }
   }
 
