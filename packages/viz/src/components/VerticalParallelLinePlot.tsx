@@ -59,8 +59,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   // Track filter ranges for each axis [min, max] - elegant approach inspired by old code
   const filterRanges = useRef<Record<string, [number, number]>>({})
   
-  // Centralized filtering function - calculates opacity for any scenario
-  const getScenarioOpacity = useCallback((scenario: VerticalParallelLineData) => {
+  // Centralized filtering function - separate opacity for lines vs circles
+  const getScenarioOpacity = useCallback((scenario: VerticalParallelLineData, elementType: 'line' | 'circle') => {
     // Check if scenario passes all active filters
     const passesAllFilters = axes.every(axis => {
       const filter = filterRanges.current[axis]
@@ -70,9 +70,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       return value >= filter[0] && value <= filter[1]
     })
     
-    return passesAllFilters 
-      ? (scenario.highlighted ? 0.9 : 0.2) 
-      : (scenario.highlighted ? 0.15 : 0.05)
+    if (elementType === 'circle') {
+      // Dots should be opaque when active, nearly invisible when filtered
+      return passesAllFilters 
+        ? (scenario.highlighted ? 1.0 : 0.9)  // Active dots: very opaque
+        : (scenario.highlighted ? 0.1 : 0.02) // Filtered dots: nearly invisible
+    } else {
+      // Lines should be semi-transparent when active, nearly invisible when filtered  
+      return passesAllFilters 
+        ? (scenario.highlighted ? 0.8 : 0.3)  // Active lines: semi-transparent
+        : (scenario.highlighted ? 0.05 : 0.01) // Filtered lines: nearly invisible
+    }
   }, [axes])
 
   // Check if scenario is active (passes all filters) - for hover eligibility
@@ -90,14 +98,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   const updateScenarioVisibility = useCallback((g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
     // Update line and circle opacity based on current filter ranges
     data.forEach((scenario, scenarioIndex) => {
-      const targetOpacity = getScenarioOpacity(scenario)
+      const lineOpacity = getScenarioOpacity(scenario, 'line')
+      const circleOpacity = getScenarioOpacity(scenario, 'circle')
       
       // Smooth transitions for lines
       g.select(`.line-${scenarioIndex}`)
         .transition()
         .duration(300)
         .ease(d3.easeQuadOut)
-        .attr("opacity", targetOpacity)
+        .attr("opacity", lineOpacity)
       
       // Smooth transitions for circles
       axes.forEach((axisName) => {
@@ -105,7 +114,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .transition()
           .duration(300)
           .ease(d3.easeQuadOut)
-          .attr("opacity", targetOpacity)
+          .attr("opacity", circleOpacity)
       })
     })
   }, [data, axes, getScenarioOpacity])
@@ -478,8 +487,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const lineColor = lineColors.length > dataIndex ? lineColors[dataIndex]! : 
                        (d.highlighted ? colors.highlighted : colors.default)
       
-      // Use centralized opacity calculation for consistency
-      const targetOpacity = getScenarioOpacity(d)
+      // Use centralized opacity calculation with separate values for lines vs circles
+      const lineOpacity = getScenarioOpacity(d, 'line')
+      const circleOpacity = getScenarioOpacity(d, 'circle')
       
       const pathData = axes.map(axis => [axis, d.values[axis] || 0] as [string, number])
 
@@ -490,7 +500,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("fill", "none")
           .attr("stroke", lineColor)
           .attr("stroke-width", d.highlighted ? 2.5 : 1.5) // Original widths
-          .attr("opacity", targetOpacity) // Gentle opacity-based filtering
+          .attr("opacity", lineOpacity) // Lines semi-transparent
           .style("cursor", "pointer")
                     .on("mouseover", function () {
             // Only allow hover highlighting for active (unfiltered) scenarios
@@ -508,16 +518,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           })
           .on("mouseout", function () {
             onLineHover?.(null)
-            const currentOpacity = getScenarioOpacity(d)
+            const lineOpacity = getScenarioOpacity(d, 'line')
+            const circleOpacity = getScenarioOpacity(d, 'circle')
             d3.select(this)
               .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
-              .attr("opacity", currentOpacity) // Respect current filter state
+              .attr("opacity", lineOpacity) // Respect current filter state for lines
               
             // Reset all corresponding circles for this line
             axes.forEach((axis) => {
               g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, '-')}`)
                 .attr("r", d.highlighted ? 5 : 4)
-                .attr("opacity", currentOpacity) // Respect current filter state
+                .attr("opacity", circleOpacity) // Respect current filter state for circles
             })
           })
           .on("click", function () {
@@ -528,7 +539,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const pathSelection = animate ? path.transition(t as any) : path
       pathSelection
         .attr("d", lineGenerator(pathData))
-        .attr("opacity", targetOpacity) // Gentle opacity-based filtering
+        .attr("opacity", lineOpacity) // Lines semi-transparent
 
       // Update circles at intersection points (original styling)
       axes.forEach((axis) => {
@@ -543,7 +554,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", "white")
             .attr("stroke-width", 1.5) // Original width
             .attr("r", d.highlighted ? 5 : 4) // Original sizes
-            .attr("opacity", targetOpacity) // Gentle opacity-based filtering
+            .attr("opacity", circleOpacity) // Dots opaque
             .style("cursor", "pointer")
             .on("mouseover", function () {
               // Only allow hover highlighting for active (unfiltered) scenarios
@@ -566,21 +577,22 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             })
             .on("mouseout", function () {
               onLineHover?.(null)
-              const currentOpacity = getScenarioOpacity(d)
+              const lineOpacity = getScenarioOpacity(d, 'line')
+              const circleOpacity = getScenarioOpacity(d, 'circle')
               d3.select(this)
                 .attr("r", d.highlighted ? 5 : 4)
-                .attr("opacity", currentOpacity) // Respect current filter state
+                .attr("opacity", circleOpacity) // Respect current filter state for circles
               
               // Reset the corresponding line for this circle
               g.select(`.line-${dataIndex}`)
                 .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
-                .attr("opacity", currentOpacity) // Respect current filter state
+                .attr("opacity", lineOpacity) // Respect current filter state for lines
               
               // Reset all other circles for this same line/scenario
               axes.forEach((otherAxis) => {
                 g.select(`.circle-${dataIndex}-${otherAxis.replace(/\s+/g, '-')}`)
                   .attr("r", d.highlighted ? 5 : 4)
-                  .attr("opacity", currentOpacity) // Respect current filter state
+                  .attr("opacity", circleOpacity) // Respect current filter state for circles
               })
             })
             .on("click", function () {
@@ -592,7 +604,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         circleSelection
           .attr("cx", scales[axis]!(value))
           .attr("cy", yScale(axis)!)
-          .attr("opacity", targetOpacity) // Gentle opacity-based filtering
+          .attr("opacity", circleOpacity) // Dots opaque
       })
     })
 
