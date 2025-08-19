@@ -212,9 +212,9 @@ const MapControls = ({
   }
 
   // Region card dropdown
-  const toggleRegionDropdown = useCallback(() => {
-    setShowRegionDropdown(!showRegionDropdown)
-  }, [showRegionDropdown])
+  // const toggleRegionDropdown = useCallback(() => {
+  //   setShowRegionDropdown(!showRegionDropdown)
+  // }, [showRegionDropdown])
 
   const handleSelectRegionOnMapClick = useCallback(() => {
     onSelectRegionOnMap()
@@ -1693,14 +1693,37 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   const handleToggleDeliveryAreaDropdown = () => {
     const isChecking = !showDeliveryAreaDropdown
+    console.log("Toggle delivery area dropdown:", { isChecking, currentShowDeliveryAreaDropdown: showDeliveryAreaDropdown })
+    
     setShowDeliveryAreaDropdown(isChecking)
 
     if (isChecking) {
       // Start delivery area selection mode
+      console.log("Starting delivery area selection mode")
       setIsSelectingDeliveryArea(true)
     } else {
       // Cancel delivery area selection
+      console.log("Canceling delivery area selection mode")
       setIsSelectingDeliveryArea(false)
+    }
+  }
+
+  // Handle delivery area polygon selection
+  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => {
+    if (!isSelectingDeliveryArea) return
+
+    // Get the clicked feature
+    const features = evt.features
+    if (features && features.length > 0) {
+      const selectedPolygon = features[0]
+      console.log("Selected delivery area polygon:", selectedPolygon.properties)
+      
+      // Close the delivery area selection dialog
+      setIsSelectingDeliveryArea(false)
+      setShowDeliveryAreaDropdown(false)
+      
+      // You could store the selected polygon data here if needed
+      // setSelectedDeliveryArea(selectedPolygon)
     }
   }
 
@@ -1835,6 +1858,77 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       }
     }
   }
+
+  // Effect to manage delivery area selection polygons
+  useEffect(() => {
+    console.log("Delivery area selection effect triggered:", { isSelectingDeliveryArea })
+    
+    // Add the geospatial data source if it doesn't exist
+    if (!hasSource("delivery-units")) {
+      console.log("Adding delivery-units source...")
+      addSource("delivery-units", {
+        type: "geojson",
+        data: "/geospatial_data/du.geojson",
+      })
+    } else {
+      console.log("delivery-units source already exists")
+    }
+
+    if (isSelectingDeliveryArea) {
+      console.log("Adding delivery area selection layers...")
+      
+      // Add delivery area selection layer if not exists
+      if (!hasLayer("delivery-area-selection-layer")) {
+        console.log("Adding delivery-area-selection-layer")
+        addLayer(
+          "delivery-area-selection-layer",
+          "delivery-units",
+          "fill",
+          {
+            "fill-color": "rgba(100, 164, 214, 0.4)", // Semi-transparent blue
+            "fill-outline-color": "#64A4D6", // Blue outline
+          },
+          {
+            visibility: "visible",
+          }
+        )
+      } else {
+        console.log("delivery-area-selection-layer already exists")
+      }
+
+      // Add hover layer for delivery area selection
+      if (!hasLayer("delivery-area-selection-hover")) {
+        console.log("Adding delivery-area-selection-hover")
+        addLayer(
+          "delivery-area-selection-hover",
+          "delivery-units",
+          "fill",
+          {
+            "fill-color": "rgba(100, 164, 214, 0.7)", // More opaque on hover
+            "fill-outline-color": "#3a4574", // Darker blue outline
+          },
+          {
+            visibility: "visible",
+          },
+          {
+            filter: ["==", ["get", "DU_ID"], ""], // Initially show no features
+          }
+        )
+      } else {
+        console.log("delivery-area-selection-hover already exists")
+      }
+    } else {
+      // Remove delivery area selection layers when not selecting
+      if (hasLayer("delivery-area-selection-layer")) {
+        console.log("Removing delivery-area-selection-layer")
+        removeLayer("delivery-area-selection-layer")
+      }
+      if (hasLayer("delivery-area-selection-hover")) {
+        console.log("Removing delivery-area-selection-hover")
+        removeLayer("delivery-area-selection-hover")
+      }
+    }
+  }, [isSelectingDeliveryArea, addSource, addLayer, removeLayer, hasSource, hasLayer])
 
   // Effect to manage map layers based on selected outcome
   useEffect(() => {
@@ -1997,9 +2091,11 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         cursor={
           isDrawingCustomRegion
             ? "crosshair"
-            : draggedPointIndex !== null
-              ? "grabbing"
-              : "default"
+            : isSelectingDeliveryArea
+              ? "crosshair"
+              : draggedPointIndex !== null
+                ? "grabbing"
+                : "default"
         }
         onClick={
           isDrawingCustomRegion
@@ -2031,35 +2127,70 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                   ],
                 )
               }
-            : selectedOutcome
-              ? (evt: any) => {
-                  // Handle polygon click for zoom functionality
+            : isSelectingDeliveryArea
+              ? (evt: { target: any; point: any }) => {
+                  // Handle delivery area polygon selection
                   const features = evt.target.queryRenderedFeatures(evt.point, {
-                    layers: [
-                      selectedOutcome === "Community deliveries" 
-                        ? "community-deliveries-layer" 
-                        : "agricultural-deliveries-layer"
-                    ]
+                    layers: ["delivery-area-selection-layer"]
                   })
                   
                   if (features && features.length > 0) {
-                    const feature = features[0]
-                    // Use click coordinates as zoom target (simpler than centroid calculation)
-                    flyTo({
-                      longitude: evt.lngLat.lng,
-                      latitude: evt.lngLat.lat, 
-                      zoom: 8, // Moderate zoom to show polygon with surrounding context
-                      transitionOptions: {
-                        duration: 1500,
-                      },
-                    })
+                    handleDeliveryAreaPolygonClick({ features })
                   }
                 }
-              : undefined
+              : selectedOutcome
+                ? (evt: { target: any; point: any; lngLat: { lng: number; lat: number } }) => {
+                    // Handle polygon click for zoom functionality
+                    const features = evt.target.queryRenderedFeatures(evt.point, {
+                      layers: [
+                        selectedOutcome === "Community deliveries" 
+                          ? "community-deliveries-layer" 
+                          : "agricultural-deliveries-layer"
+                      ]
+                    })
+                    
+                    if (features && features.length > 0) {
+                      // Use click coordinates as zoom target (simpler than centroid calculation)
+                      flyTo({
+                        longitude: evt.lngLat.lng,
+                        latitude: evt.lngLat.lat, 
+                        zoom: 8, // Moderate zoom to show polygon with surrounding context
+                        transitionOptions: {
+                          duration: 1500,
+                        },
+                      })
+                    }
+                  }
+                : undefined
         }
-        onMouseMove={(evt: any) => {
+        onMouseMove={(evt: { target: any; point: any; lngLat: { lng: number; lat: number } }) => {
+          // Check if hovering over delivery area selection polygons
+          if (isSelectingDeliveryArea) {
+            const features = evt.target.queryRenderedFeatures(evt.point, {
+              layers: ["delivery-area-selection-layer"]
+            })
+            
+            if (features && features.length > 0) {
+              const feature = features[0]
+              const featureId = feature.properties?.DU_ID || null
+              
+              // Update hover layer filter to highlight the hovered polygon
+              if (hasLayer("delivery-area-selection-hover")) {
+                evt.target.setFilter("delivery-area-selection-hover", ["==", ["get", "DU_ID"], featureId])
+              }
+              
+              // Change cursor to pointer
+              evt.target.getCanvas().style.cursor = "pointer"
+            } else {
+              // Clear hover when not over any polygon
+              if (hasLayer("delivery-area-selection-hover")) {
+                evt.target.setFilter("delivery-area-selection-hover", ["==", ["get", "DU_ID"], ""])
+              }
+              evt.target.getCanvas().style.cursor = "crosshair"
+            }
+          }
           // Check if hovering over outcome polygons
-          if (selectedOutcome) {
+          else if (selectedOutcome) {
             const features = evt.target.queryRenderedFeatures(evt.point, {
               layers: [
                 selectedOutcome === "Community deliveries" 
