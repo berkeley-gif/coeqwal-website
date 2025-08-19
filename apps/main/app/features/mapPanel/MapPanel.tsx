@@ -1000,13 +1000,14 @@ const MapControls = ({
                     }}
                   >
                     {hasSelectedScenarios ? (
-                      // Comparison mode: 2 rows with 2 comparative pairs each
+                      // Comparison mode: 4 rows with 2 comparative pairs each
                       <Box
                         sx={{
                           display: "flex",
                           flexDirection: "column",
-                          gap: 2,
+                          gap: 3, // Increased gap between rows
                           width: "100%",
+                          padding: 2, // Add padding around the entire comparison area
                         }}
                       >
                         {/* Column headers */}
@@ -1014,15 +1015,15 @@ const MapControls = ({
                           sx={{
                             display: "grid",
                             gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns for headers
-                            gap: 1,
-                            mb: 1,
+                            gap: 2, // Increased gap between headers
+                            mb: 2, // More space below headers
                           }}
                         >
                           <Typography
                             variant="body2"
                             sx={{ 
                               fontWeight: 500, 
-                              fontSize: "0.7rem",
+                              fontSize: "0.8rem", // Increased header font size
                               color: (theme) => theme.palette.text.secondary,
                               textAlign: "center",
                             }}
@@ -1033,7 +1034,7 @@ const MapControls = ({
                             variant="body2"
                             sx={{ 
                               fontWeight: 500, 
-                              fontSize: "0.7rem",
+                              fontSize: "0.8rem", // Increased header font size
                               color: (theme) => theme.palette.text.secondary,
                               textAlign: "center",
                             }}
@@ -1044,7 +1045,7 @@ const MapControls = ({
                             variant="body2"
                             sx={{ 
                               fontWeight: 500, 
-                              fontSize: "0.7rem",
+                              fontSize: "0.8rem", // Increased header font size
                               color: (theme) => theme.palette.text.secondary,
                               textAlign: "center",
                             }}
@@ -1055,7 +1056,7 @@ const MapControls = ({
                             variant="body2"
                             sx={{ 
                               fontWeight: 500, 
-                              fontSize: "0.7rem",
+                              fontSize: "0.8rem", // Increased header font size
                               color: (theme) => theme.palette.text.secondary,
                               textAlign: "center",
                             }}
@@ -1071,8 +1072,9 @@ const MapControls = ({
                             sx={{
                               display: "grid",
                               gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns: Current, Alt, Current, Alt
-                              gap: 1,
+                              gap: 2, // Increased gap between glyphs
                               alignItems: "center",
+                              mb: 1, // Space between rows
                             }}
                           >
                             {/* Generate 2 pairs (4 glyphs) for this row */}
@@ -1089,8 +1091,8 @@ const MapControls = ({
                                       display: "flex",
                                       flexDirection: "column",
                                       alignItems: "center",
-                                      gap: 0.5,
-                                      padding: 0.5,
+                                      gap: 1, // Increased gap between glyph and label
+                                      padding: 1, // Increased padding around each glyph
                                       borderRadius: (theme) => theme.borderRadius.rounded,
                                       backgroundColor: (theme) => theme.palette.blue.bright + "20", // 20% blue background
                                       cursor: "pointer",
@@ -1142,17 +1144,17 @@ const MapControls = ({
 
                                         return [q3, median, q1, min] as [number, number, number, number]
                                       })()}
-                                      size={40} // Smaller for 4-column layout
+                                      size={48} // Increased size for better visibility
                                       variant={glyphVariant}
                                     />
                                     <Box
                                       sx={{
-                                        fontSize: "0.65rem",
+                                        fontSize: "0.75rem", // Increased font size for better readability
                                         fontWeight: 400,
                                         lineHeight: 1.2,
                                         color: (theme) => theme.palette.text.primary,
                                         textAlign: "center",
-                                        maxWidth: "60px",
+                                        maxWidth: "70px", // Increased max width for labels
                                       }}
                                     >
                                       {outcome}
@@ -1165,8 +1167,8 @@ const MapControls = ({
                                       display: "flex",
                                       flexDirection: "column",
                                       alignItems: "center",
-                                      gap: 0.5,
-                                      padding: 0.5,
+                                      gap: 1, // Increased gap between glyph and label
+                                      padding: 1, // Increased padding around each glyph
                                       borderRadius: (theme) => theme.borderRadius.rounded,
                                       cursor: "pointer",
                                       transition: "background-color 0.2s ease",
@@ -1218,17 +1220,17 @@ const MapControls = ({
 
                                         return [q3, median, q1, min] as [number, number, number, number]
                                       })()}
-                                      size={40} // Smaller for 4-column layout
+                                      size={48} // Increased size for better visibility
                                       variant={glyphVariant}
                                     />
                                     <Box
                                       sx={{
-                                        fontSize: "0.65rem",
+                                        fontSize: "0.75rem", // Increased font size for better readability
                                         fontWeight: 400,
                                         lineHeight: 1.2,
                                         color: (theme) => theme.palette.text.primary,
                                         textAlign: "center",
-                                        maxWidth: "60px",
+                                        maxWidth: "70px", // Increased max width for labels
                                       }}
                                     >
                                       {outcome}
