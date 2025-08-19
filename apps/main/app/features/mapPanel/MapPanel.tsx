@@ -612,7 +612,25 @@ const MapControls = ({
                 opacity: isFirstCardMinimized ? 0.8 : 1,
               }}
             >
-              {/* Always visible scenario description section */}
+              {/* Minimized state - show title only */}
+              {isFirstCardMinimized && (
+                <Box sx={{ mb: 2, flexShrink: 0 }}>
+                  <Box
+                    sx={{
+                      color: (theme) => theme.palette.blue.darkest,
+                      fontFamily:
+                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                      fontWeight: 500,
+                      fontSize: "1.5rem",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    Current operations scenario
+                  </Box>
+                </Box>
+              )}
+
+              {/* Expanded state - full content */}
               {!isFirstCardMinimized && (
                 <Box sx={{ mb: 2, flexShrink: 0 }}>
                   <Box
