@@ -782,9 +782,9 @@ const theme = createTheme({
       color: themeValues.palette.blue.darkest,
     },
     button: {
-      fontSize: "1rem", // 16px - standard for top-level UI elements
+      fontSize: "1rem", // 16px for top-level UI elements
       letterSpacing: "normal",
-      fontWeight: 500,
+      fontWeight: 400,
       textTransform: "none",
     },
     caption: {
@@ -1234,7 +1234,7 @@ const theme = createTheme({
             minWidth: 64,
             lineHeight: 1.75,
             fontSize: "1rem",
-            fontWeight: 500,
+            fontWeight: 400,
             color: theme.palette.common.white,
             backgroundColor: theme.palette.blue.darkest,
             "&:hover": {
@@ -1258,7 +1258,7 @@ const theme = createTheme({
             border: "none",
             padding: "16px",
             fontSize: "0.95rem", // align with body1
-            fontWeight: 500,
+            fontWeight: 400,
             textAlign: "center",
             transition: "all 0.2s ease",
             // Default active state - using grey colors

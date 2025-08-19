@@ -1,9 +1,11 @@
 import React from "react"
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 
 const IntroSection: React.FC = () => {
+  const theme = useTheme()
+  
   return (
     <Box
       sx={{
@@ -105,8 +107,8 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "220px",
               height: "220px",
-              top: "72%",
-              left: "50%",
+              top: "66%",
+              left: "64%",
               borderRadius: "50%",
               backgroundColor: "rgba(255, 255, 255, 0.2)",
             }}
@@ -361,7 +363,7 @@ const IntroSection: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                mb: 2
+                mb: 2,
               }}
             >
               Rethink
@@ -394,12 +396,12 @@ const IntroSection: React.FC = () => {
                 mt: 4,
               }}
             >
-              <ScrollIndicator
+                            <ScrollIndicator
                 scrollToId="overview"
-                color={(theme) => theme.palette.blue.darkest}
+                color={theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
-            >
+              >
               <ArrowHead
                 size={28}
                   style={{
@@ -481,7 +483,7 @@ const IntroSection: React.FC = () => {
 
           <ScrollIndicator
             scrollToId="third-panel"
-            color={(theme) => theme.palette.blue.darkest}
+            color={theme.palette.blue.darkest}
             animationComplete={true}
             delay={1.0}
             style={{ marginTop: "2rem" }}
@@ -556,7 +558,7 @@ const IntroSection: React.FC = () => {
 
           <ScrollIndicator
             scrollToId="fourth-panel"
-            color={(theme) => theme.palette.blue.darkest}
+            color={theme.palette.blue.darkest}
             animationComplete={true}
             delay={1.0}
             style={{ marginTop: "2rem" }}
