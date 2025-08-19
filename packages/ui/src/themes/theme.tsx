@@ -186,16 +186,16 @@ const themeValues = {
       tier1: "#7b9d3f", // Green, tier 1
       tier2: "#60aacb", // Blue, tier 2
       tier3: "#FFB347", // Orange, tier 3
-      tier4: "#CD5C5C", // Red - Poor performance
+      tier4: "#CD5C5C", // Red, tier 4
     },
   },
 
   // Border radius values
   borderRadius: {
     pill: "999px",
-    rounded: "16px", // Increased from 8px for rounder appearance
-    card: "16px", // Increased from 8px for rounder cards
-    standard: "32px", // Increased from 24px for rounder elements
+    rounded: "16px",
+    card: "16px",
+    standard: "32px",
     none: "0px",
   },
 

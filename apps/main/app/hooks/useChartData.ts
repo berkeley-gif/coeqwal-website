@@ -6,6 +6,7 @@ interface UseChartDataOptions {
   expandChart: boolean
   defineOutcome: boolean
   overlayTiers: boolean
+  onLineClick?: (data: VerticalParallelLineData) => void
 }
 
 interface ChartHandlers {
@@ -41,6 +42,7 @@ export const useChartData = ({
   expandChart,
   defineOutcome,
   overlayTiers,
+  onLineClick,
 }: UseChartDataOptions): ChartDataReturn => {
   // Memoized axes configuration
   const axes = useMemo(
@@ -192,9 +194,10 @@ export const useChartData = ({
       },
       onLineClick: (data: VerticalParallelLineData) => {
         console.log("Line clicked:", data.name)
+        onLineClick?.(data) // Call the provided callback
       },
     }),
-    [],
+    [onLineClick],
   )
 
   // Return chart props and key separately (React doesn't allow key in spread)
