@@ -34,6 +34,7 @@ import {
   Marker,
   Source,
   Layer,
+  Popup,
 } from "@repo/map"
 // import {
 //   PresetsPanel,
@@ -1444,6 +1445,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   // Outcome visualization state
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null)
+  const [hoveredFeatureData, setHoveredFeatureData] = useState<{
+    modName: string;
+    coordinates: [number, number];
+  } | null>(null)
 
   // Delivery area state
   const [showDeliveryAreaDropdown, setShowDeliveryAreaDropdown] =
@@ -1797,7 +1802,7 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               }
             : undefined
         }
-        onMouseMove={(evt) => {
+        onMouseMove={(evt: any) => {
           // Check if hovering over outcome polygons
           if (selectedOutcome) {
             const features = evt.target.queryRenderedFeatures(evt.point, {
@@ -1811,15 +1816,21 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             if (features && features.length > 0) {
               const feature = features[0]
               setHoveredFeatureId(feature.properties?.DU_ID || null)
+              setHoveredFeatureData({
+                modName: feature.properties?.Mod_Name || "Unknown",
+                coordinates: [evt.lngLat.lng, evt.lngLat.lat]
+              })
               evt.target.getCanvas().style.cursor = 'pointer'
             } else {
               setHoveredFeatureId(null)
+              setHoveredFeatureData(null)
               evt.target.getCanvas().style.cursor = ''
             }
           }
         }}
         onMouseLeave={() => {
           setHoveredFeatureId(null)
+          setHoveredFeatureData(null)
         }}
         onError={(evt: unknown) => {
           // Surface mapbox or ReactMapGL errors in the console
@@ -1985,6 +1996,32 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 </Source>
               )}
           </>
+        )}
+
+        {/* Hover popup for polygon information */}
+        {hoveredFeatureData && (
+          <Popup
+            longitude={hoveredFeatureData.coordinates[0]}
+            latitude={hoveredFeatureData.coordinates[1]}
+            closeButton={false}
+            closeOnClick={false}
+            anchor="bottom"
+            offset={[0, -10]}
+          >
+            <Box
+              sx={{
+                padding: 1,
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                color: "white",
+                borderRadius: 1,
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {hoveredFeatureData.modName}
+            </Box>
+          </Popup>
         )}
 
         {/* Custom map markers */}
