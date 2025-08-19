@@ -248,8 +248,8 @@ const themeValues = {
 
   // Map prompt dialog styling
   mapPromptDialog: {
-    backgroundColor: "rgba(0, 0, 0, 0.9)",
-    textColor: "#FFFFFF",
+    backgroundColor: "rgba(0, 0, 0, 0.7)", // More transparent while keeping same black color
+    textColor: "#FFFFFF", // Use theme white for title and subtitle
     borderRadius: "8px",
     padding: "16px",
     minWidth: "280px",

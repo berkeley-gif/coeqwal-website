@@ -55,6 +55,8 @@ export default function MapPromptDialog({
           fontSize: theme.mapPromptDialog.typography.title.fontSize,
           fontWeight: theme.mapPromptDialog.typography.title.fontWeight,
           mb: theme.mapPromptDialog.typography.title.marginBottom,
+          color: theme.mapPromptDialog.textColor, // Explicitly use white color
+          textAlign: "center", // Center the title text
         })}
       >
         {title}
@@ -70,6 +72,8 @@ export default function MapPromptDialog({
             children || actions
               ? theme.mapPromptDialog.typography.subtitle.marginBottom
               : 0,
+          color: theme.mapPromptDialog.textColor, // Explicitly use white color
+          textAlign: "center", // Center the subtitle text
         })}
       >
         {subtitle}
