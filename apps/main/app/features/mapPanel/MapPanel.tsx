@@ -206,6 +206,8 @@ const MapControls = ({
 
   // Track scenarios clicked in chart (dots and lines)
   const [clickedScenarios, setClickedScenarios] = useState<string[]>([])
+  
+
 
   // Outcomes panel state
   const [isRelativeView, setIsRelativeView] = useState(true)
@@ -278,6 +280,8 @@ const MapControls = ({
     )
     console.log("Chart scenario clicked:", scenarioName)
   }
+
+
 
   const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
@@ -407,8 +411,8 @@ const MapControls = ({
       title: "Select scenarios",
       defaultExpanded: true, // Open by default when returning from expanded chart
       content: (
-        <Box
-          sx={{
+          <Box
+            sx={{
             display: "flex",
             flexDirection: "column",
             width: "100%",
@@ -418,8 +422,8 @@ const MapControls = ({
           {/* Outcomes paragraph, visible when chart not expanded */}
           {!expandChart && (
             <Box sx={{ flexShrink: 0 }}>
-              <Box
-                sx={{
+            <Box
+              sx={{
                   fontSize: "1rem",
                   fontWeight: 400,
                   lineHeight: 1.4,
@@ -432,11 +436,11 @@ const MapControls = ({
                 <Box
                   component="span"
                   onClick={handleLearnMoreClick}
-                  sx={{
+              sx={{
                     color: (theme) => theme.palette.blue.bright,
                     fontSize: "0.95rem",
                     cursor: "pointer",
-                    fontWeight: 500,
+                fontWeight: 500,
                     textDecoration: "underline",
                     whiteSpace: "nowrap",
                     "&:hover": {
@@ -445,8 +449,8 @@ const MapControls = ({
                   }}
                 >
                   Learn more about this chart
-                </Box>
-              </Box>
+            </Box>
+          </Box>
             </Box>
           )}
 
@@ -454,37 +458,37 @@ const MapControls = ({
           <Box sx={{ flexShrink: 0, mb: 1 }}>
             {/* Expand chart button, always visible */}
             <Box sx={{ mb: 1 }}>
-              <Button
-                variant="text"
+            <Button
+              variant="text"
                 onClick={toggleExpandChart}
-                sx={{
-                  fontSize: "1rem",
-                  fontWeight: 500,
-                  color: (theme) => theme.palette.blue.bright,
-                  padding: 0,
-                  minWidth: "auto",
-                  textTransform: "none",
+              sx={{
+                fontSize: "1rem",
+                fontWeight: 500,
+                color: (theme) => theme.palette.blue.bright,
+                padding: 0,
+                minWidth: "auto",
+                textTransform: "none",
                   justifyContent: "flex-start",
-                  "&:hover": {
-                    color: (theme) => theme.palette.blue.darkest,
-                    backgroundColor: "transparent",
-                  },
+                "&:hover": {
+                  color: (theme) => theme.palette.blue.darkest,
+                  backgroundColor: "transparent",
+                },
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.875em",
+                  marginRight: "8px",
+                  display: "inline-block",
+                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
                 }}
               >
-                <span
-                  style={{
-                    fontSize: "0.875em",
-                    marginRight: "8px",
-                    display: "inline-block",
-                    transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
-                    transition: "transform 0.2s ease",
-                  }}
-                >
-                  ▼
-                </span>
+                ▼
+              </span>
                 {expandChart ? "Reduce" : "Expand"} chart
-              </Button>
-            </Box>
+            </Button>
+          </Box>
 
             {/* Chart controls */}
             <Box
@@ -600,64 +604,64 @@ const MapControls = ({
           </Box> */}
 
           {/* Region Selection Options - Always Visible */}
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 1,
-              p: 2,
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 1,
+                p: 2,
               // backgroundColor: (theme) => theme.palette.grey[50],
               // borderRadius: (theme) => theme.borderRadius.rounded,
               // border: "1px solid",
               // borderColor: (theme) => theme.palette.divider,
-            }}
-          >
-            <FormControlLabel
-              control={<Checkbox size="small" />}
-              label="Sacramento Valley"
-            />
-            <FormControlLabel
-              control={<Checkbox size="small" />}
-              label="San Joaquin Valley"
-            />
-            <FormControlLabel
-              control={<Checkbox size="small" />}
-              label="Delta"
-            />
-            <FormControlLabel
-              control={<Checkbox size="small" />}
-              label="Tulare Basin"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      onToggleDeliveryAreaDropdown()
-                    }
-                  }}
-                />
-              }
-              label="Select delivery area"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  checked={isDrawingCustomRegion || polygonPoints.length > 0}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      handleSelectRegionOnMapClick()
-                    } else {
-                      onClearCustomRegion()
-                    }
-                  }}
-                />
-              }
-              label="Select region on map"
-            />
-          </Box>
+              }}
+            >
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="Sacramento Valley"
+              />
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="San Joaquin Valley"
+              />
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="Delta"
+              />
+              <FormControlLabel
+                control={<Checkbox size="small" />}
+                label="Tulare Basin"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        onToggleDeliveryAreaDropdown()
+                      }
+                    }}
+                  />
+                }
+                label="Select delivery area"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={isDrawingCustomRegion || polygonPoints.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        handleSelectRegionOnMapClick()
+                      } else {
+                        onClearCustomRegion()
+                      }
+                    }}
+                  />
+                }
+                label="Select region on map"
+              />
+            </Box>
         </Box>
       ),
     },
@@ -758,6 +762,14 @@ const MapControls = ({
     clickedScenarios.length > 0 ||
     sgmaSanJoaquinOnly || sgmaSanJoaquinReductions || sgmaBothValleys || 
     sgmaBothValleysReductions || usbrAlternative3 || deltaConveyanceTunnel
+
+  // Simple way to communicate comparison mode to parent - we'll use a ref
+  useEffect(() => {
+    // This is a simple way to communicate state up without complex prop drilling
+    if (typeof window !== 'undefined') {
+      (window as any).mapComparisonMode = hasSelectedScenarios // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+  }, [hasSelectedScenarios])
 
   return (
     <Box
@@ -935,21 +947,21 @@ const MapControls = ({
                           display: "flex",
                           alignItems: "center",
                           gap: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          color: (theme) => theme.palette.blue.darkest,
                         }}
                       >
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            color: (theme) => theme.palette.blue.darkest,
-                          }}
-                        >
                           Scenario outcomes
-                        </Typography>
-                        <InfoIconButton
-                          mode="glossary"
-                          glossaryEntry="CalSim"
-                          onGlossaryOpen={handleGlossaryOpen}
-                        />
+                      </Typography>
+                      <InfoIconButton
+                        mode="glossary"
+                        glossaryEntry="CalSim"
+                        onGlossaryOpen={handleGlossaryOpen}
+                      />
                       </Box>
                       {/* Glyph variant selector */}
                       <Select
@@ -1716,33 +1728,33 @@ const MapControls = ({
                     ) : (
                       <>
                         {/* Normal Mode - Card Accordion */}
-                        <CardAccordion
-                          sections={accordionSections}
-                          allowMultiple={false} // Only one section expanded at a time
-                          sx={{ flexGrow: 1 }}
-                        />
+                    <CardAccordion
+                      sections={accordionSections}
+                      allowMultiple={false} // Only one section expanded at a time
+                      sx={{ flexGrow: 1 }}
+                    />
 
-                        {/* Compare Button at bottom */}
-                        <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                          <ActionCardButton
-                            title="Explore scenarios in depth"
-                            subtitle={
-                              selectedScenarios.length > 0
-                                ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
-                                : "Select scenarios to explore"
-                            }
-                            disabled={selectedScenarios.length === 0}
-                            onClick={() => {
-                              if (selectedScenarios.length > 0) {
-                                console.log(
-                                  "Navigate to exploration view with:",
-                                  selectedScenarios,
-                                  selectedRegion,
-                                )
-                              }
-                            }}
-                          />
-                        </Box>
+                    {/* Compare Button at bottom */}
+                    <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
+                      <ActionCardButton
+                        title="Explore scenarios in depth"
+                        subtitle={
+                          selectedScenarios.length > 0
+                            ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
+                            : "Select scenarios to explore"
+                        }
+                        disabled={selectedScenarios.length === 0}
+                        onClick={() => {
+                          if (selectedScenarios.length > 0) {
+                            console.log(
+                              "Navigate to exploration view with:",
+                              selectedScenarios,
+                              selectedRegion,
+                            )
+                          }
+                        }}
+                      />
+                    </Box>
                       </>
                     )}
                   </Box>
@@ -1940,6 +1952,25 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
     useState(false)
   const [isSelectingDeliveryArea, setIsSelectingDeliveryArea] = useState(false)
 
+  // Track comparison mode state
+  const [isInComparisonMode, setIsInComparisonMode] = useState(false)
+
+  // Watch for comparison mode changes from MapControls
+  useEffect(() => {
+    const checkComparisonMode = () => {
+      if (typeof window !== 'undefined') {
+        const comparisonMode = (window as any).mapComparisonMode || false // eslint-disable-line @typescript-eslint/no-explicit-any
+        setIsInComparisonMode(comparisonMode)
+      }
+    }
+    
+    // Check immediately and set up interval to check periodically
+    checkComparisonMode()
+    const interval = setInterval(checkComparisonMode, 100)
+    
+    return () => clearInterval(interval)
+  }, [])
+
   const handleSelectRegionOnMap = () => {
     setIsDrawingCustomRegion(true)
     setPolygonPoints([])
@@ -2096,6 +2127,18 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   const handleClearSelectedScenarios = () => {
     setSelectedScenarios([])
+  }
+
+  // Clear all scenario selections (return to original layout)
+  const handleClearAllScenarios = () => {
+    // Clear the window variable to reset comparison mode in MapControls
+    if (typeof window !== 'undefined') {
+      (window as any).mapComparisonMode = false // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+    
+    // Clear main component states
+    setSelectedScenarios([])
+    setIsInComparisonMode(false)
   }
 
 
@@ -2398,10 +2441,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
           isDrawingCustomRegion
             ? "crosshair"
             : isSelectingDeliveryArea
-              ? "crosshair"
-              : draggedPointIndex !== null
-                ? "grabbing"
-                : "default"
+            ? "crosshair"
+            : draggedPointIndex !== null
+              ? "grabbing"
+              : "default"
         }
         onClick={
           isDrawingCustomRegion
@@ -2487,8 +2530,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                     } catch (error) {
                       console.warn("Outcome polygon click error (non-critical):", error)
                     }
-                  }
-                : undefined
+              }
+            : undefined
         }
         onMouseMove={(evt: {
           target: any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -3013,6 +3056,35 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             >
               Cancel
             </Box>
+          </Box>
+        }
+      />
+
+      {/* Comparison mode dialog */}
+      <MapPromptDialog
+        isVisible={isInComparisonMode}
+        title="Compare scenarios"
+        subtitle=""
+        actions={
+          <Box
+            onClick={(e) => {
+              e.stopPropagation()
+              handleClearAllScenarios()
+              setIsInComparisonMode(false)
+            }}
+            sx={(theme) => ({
+              fontSize: theme.mapPromptDialog.typography.action.fontSize,
+              color: theme.palette.blue.bright,
+              cursor: theme.mapPromptDialog.typography.action.cursor,
+              fontWeight: theme.mapPromptDialog.typography.action.fontWeight,
+              textDecoration:
+                theme.mapPromptDialog.typography.action.textDecoration,
+              "&:hover": {
+                color: theme.palette.blue.light,
+              },
+            })}
+          >
+            Cancel
           </Box>
         }
       />
