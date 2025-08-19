@@ -387,8 +387,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       if (currentFilter[0] > -1 || currentFilter[1] < 1) {
         axisGroup.append("line")
           .attr("class", "filter-range")
-          .attr("x1", leftPosition)
-          .attr("x2", rightPosition)
+          .attr("x1", scales[axis]!(currentFilter[0]))
+          .attr("x2", scales[axis]!(currentFilter[1]))
           .attr("y1", 0)
           .attr("y2", 0)
           .attr("stroke", "#449cd9")
