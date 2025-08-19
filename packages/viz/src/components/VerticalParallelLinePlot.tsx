@@ -210,7 +210,54 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const axisSelection = animate ? axisGroup.transition(t as any) : axisGroup
       axisSelection.attr("transform", `translate(0, ${yPos})`)
 
-      // Update axis line (original styling)
+      // Tier overlay background (when enabled) - behind regular axis
+      if (overlayTiers) {
+        // Remove old tier segments first
+        axisGroup.selectAll(".tier-segment").remove()
+        
+        const tierColors = ["#CD5C5C", "#FFB347", "#60aacb", "#7b9d3f"] // Red, Orange, Blue, Green (tier4 to tier1)
+        
+        // Vary segment proportions based on axis index for visual interest
+        const axisIndex = axes.indexOf(axis)
+        const segmentProportions = [
+          [0.15, 0.25, 0.35, 0.25], // Axis 0: Smaller red, larger blue
+          [0.20, 0.30, 0.30, 0.20], // Axis 1: Balanced
+          [0.25, 0.20, 0.25, 0.30], // Axis 2: Larger green
+          [0.30, 0.25, 0.25, 0.20], // Axis 3: Larger red
+          [0.18, 0.32, 0.28, 0.22], // Axis 4: Varied
+          [0.22, 0.28, 0.32, 0.18], // Axis 5: Different pattern
+          [0.28, 0.22, 0.20, 0.30], // Axis 6: Green emphasis
+          [0.20, 0.35, 0.25, 0.20], // Axis 7: Orange emphasis
+        ]
+        
+        // Use modulo to cycle through patterns if more than 8 axes
+        const proportions = segmentProportions[axisIndex % segmentProportions.length] || [0.25, 0.25, 0.25, 0.25]
+        
+        // Calculate cumulative positions
+        let currentPosition = 0
+        
+        // Draw thick colored segments with varied lengths
+        tierColors.forEach((color, index) => {
+          const segmentLength = proportions[index]! * innerWidth
+          
+          axisGroup.append("line")
+            .attr("class", "tier-segment")
+            .attr("x1", currentPosition)
+            .attr("x2", currentPosition + segmentLength)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", color)
+            .attr("stroke-width", 18) // Even thicker for better visibility
+            .attr("opacity", 0.5) // Slightly more opaque
+            
+          currentPosition += segmentLength
+        })
+      } else {
+        // Remove tier segments when overlay is disabled
+        axisGroup.selectAll(".tier-segment").remove()
+      }
+
+      // Update axis line (original styling) - on top of tiers
       let axisLine = axisGroup.select<SVGLineElement>(".axis-line")
       if (axisLine.empty()) {
         axisLine = axisGroup.append("line")
