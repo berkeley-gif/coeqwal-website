@@ -78,7 +78,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     } else {
       // Lines: Two distinct opacity levels - active vs inactive
       return passesAllFilters 
-        ? (scenario.highlighted ? 0.9 : 0.5)  // Active lines: highlighted=90%, normal=50% (more prominent)
+        ? (scenario.highlighted ? 0.7 : 0.35)  // Active lines: highlighted=70%, normal=35% (more elegant)
         : 0.08  // Filtered lines: faint but visible for experimentation
     }
   }, [axes])
@@ -514,7 +514,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("class", `line-${dataIndex}`)
           .attr("fill", "none")
           .attr("stroke", lineColor)
-          .attr("stroke-width", passesAllFilters ? (d.highlighted ? 3.0 : 2.0) : 1.0) // Thicker for active scenarios
+          .attr("stroke-width", passesAllFilters ? (d.highlighted ? 2.5 : 1.8) : 1.0) // More elegant thickness for active scenarios
           .attr("opacity", lineOpacity) // Lines semi-transparent
           .style("cursor", "pointer")
                     .on("mouseover", function () {
@@ -522,7 +522,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             if (!isScenarioActive(d)) return
             
             onLineHover?.(d)
-            d3.select(this).attr("stroke-width", 4).attr("opacity", 1) // Thicker on hover
+            d3.select(this).attr("stroke-width", 3.5).attr("opacity", 1) // Elegant thickness on hover
             
             // Highlight all corresponding circles for this line
             axes.forEach((axis) => {
@@ -540,7 +540,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             const isActive = isScenarioActive(d)
             
             d3.select(this)
-              .attr("stroke-width", isActive ? (d.highlighted ? 3.0 : 2.0) : 1.0) // Return to active thickness
+              .attr("stroke-width", isActive ? (d.highlighted ? 2.5 : 1.8) : 1.0) // Return to elegant active thickness
               .attr("opacity", lineOpacity) // Respect current filter state for lines
               
             // Reset all corresponding circles for this line
@@ -605,7 +605,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               // Reset the corresponding line for this circle
               const isActive = isScenarioActive(d)
               g.select(`.line-${dataIndex}`)
-                .attr("stroke-width", isActive ? (d.highlighted ? 3.0 : 2.0) : 1.0) // Return to active thickness
+                .attr("stroke-width", isActive ? (d.highlighted ? 2.5 : 1.8) : 1.0) // Return to elegant active thickness
                 .attr("opacity", lineOpacity) // Respect current filter state for lines
               
               // Reset all other circles for this same line/scenario
