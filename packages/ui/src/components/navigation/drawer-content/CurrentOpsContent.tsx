@@ -29,11 +29,18 @@ export interface CurrentOpsContentProps {
 }
 
 // Glossary term type definition
+interface TierInfo {
+  tier: string
+  color: string
+  description: string
+}
+
 interface GlossaryTerm {
   icon: React.ReactNode
   term: string
   definition: string
   seeAlso?: string
+  tiers?: TierInfo[]
 }
 
 // Array of glossary terms with Material Icons
@@ -223,7 +230,29 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <LocationOnIcon />,
     term: "Community deliveries",
     definition:
-      "The amount of water delivered to cities, towns, and communities for drinking water, sanitation, and municipal uses. This includes both urban and rural communities and is essential for public health and economic activity.",
+      "The amount of water delivered to cities, towns, and communities for drinking water, sanitation, and municipal uses.",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1", // Green theme reference
+        description: "Full demand achieved for at least 95% of years"
+      },
+      {
+        tier: "Tier 2", 
+        color: "tier2", // Light blue theme reference
+        description: "Functional minimums achieved for 100% of years"
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3", // Orange theme reference
+        description: "Human health and safety minimums achieved for 100% of years"
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4", // Red theme reference
+        description: "Human health and safety minimums not achieved for all years"
+      }
+    ]
   },
   {
     icon: <LocationOnIcon />,
@@ -235,7 +264,7 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <LocationOnIcon />,
     term: "Environmental health",
     definition:
-      "The condition of natural ecosystems, including rivers, wetlands, and wildlife habitats. Environmental health is measured by factors like water quality, habitat availability, and the ability of ecosystems to support native species.",
+      "River flows, Delta outflows, Delta estuary health, and deliveries to wetland refuges.",
   },
   {
     icon: <LocationOnIcon />,
@@ -576,7 +605,7 @@ export function CurrentOpsContent({
           paddingBottom: 4,
         }}
       >
-        <Stack spacing={3}>
+        <Stack spacing={1}>
           {glossaryTerms.map((term, index) => (
             <Box
               key={index}
@@ -625,11 +654,60 @@ export function CurrentOpsContent({
                 sx={{
                   ...theme.mixins.drawerContent.bodyText,
                   ml: "2.2rem",
-                  fontSize: "0.95rem",
+                  mb: 1,
                 }}
               >
                 {renderDefinitionWithLinks(term.definition, term.term)}
               </Typography>
+
+              {/* Tier legend for outcome terms */}
+              {term.tiers && (
+                <Box sx={{ ml: "2.2rem", mt: 0.5 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Outcome Tiers:
+                  </Typography>
+                  <Stack spacing={2}>
+                    {term.tiers.map((tier, tierIndex) => (
+                      <Box
+                        key={tierIndex}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: "12px",
+                            height: "8px",
+                            backgroundColor: (theme) => (theme.palette.tiers as any)[tier.color],
+                            borderRadius: "1px",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            lineHeight: 1.2,
+                          }}
+                        >
+                          <Box component="span" sx={{ fontWeight: 500 }}>
+                            {tier.tier}:
+                          </Box>{" "}
+                          {tier.description}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
 
               {term.seeAlso && (
                 <Typography

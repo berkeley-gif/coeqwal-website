@@ -6,17 +6,23 @@ export interface OutcomeGlyphProps {
   values?: [number, number, number, number]
   /** size in px */
   size?: number
+  /** custom tier colors [tier1, tier2, tier3, tier4] */
+  tierColors?: [string, string, string, string]
 }
 
 /**
  * OutcomeGlyph – tiny 4-bar horizontal chart reused across dashboard.
  * If no `values` provided falls back to BarChart’s internal dummy values.
  */
-const OutcomeGlyph: React.FC<OutcomeGlyphProps> = ({ values, size = 60 }) => {
+const OutcomeGlyph: React.FC<OutcomeGlyphProps> = ({ values, size = 60, tierColors }) => {
+  // Use provided tier colors or fall back to defaults
+  const defaultColors = ["#2E8B57", "#87CEEB", "#FFB347", "#CD5C5C"] // Green, Light Blue, Orange, Red
+  const colors = tierColors || defaultColors
+  
   const tiers = values
     ? (["Q1", "Q2", "Q3", "Q4"] as const).map((label, idx) => ({
         label,
-        color: ["#2cc83b", "#2064d4", "#f89740", "#f96262"][idx]!,
+        color: colors[idx]!,
         value: Math.abs(values[idx] ?? 0), // BarChart expects positive length
       }))
     : undefined
