@@ -193,9 +193,9 @@ const themeValues = {
   // Border radius values
   borderRadius: {
     pill: "999px",
-    rounded: "8px",
-    card: "8px",
-    standard: "24px",
+    rounded: "16px", // Increased from 8px for rounder appearance
+    card: "16px", // Increased from 8px for rounder cards
+    standard: "32px", // Increased from 24px for rounder elements
     none: "0px",
   },
 
@@ -250,7 +250,7 @@ const themeValues = {
   mapPromptDialog: {
     backgroundColor: "rgba(0, 0, 0, 0.7)", // More transparent while keeping same black color
     textColor: "#FFFFFF", // Use theme white for title and subtitle
-    borderRadius: "8px",
+    borderRadius: "16px", // Updated to match new rounder theme
     padding: "16px",
     minWidth: "280px",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
