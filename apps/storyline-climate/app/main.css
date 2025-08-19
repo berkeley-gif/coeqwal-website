@@ -48,19 +48,54 @@ html{
     pointer-events: auto;
 }
 
+.filled-container{
+    background-color: var(--primary-color);
+}
+
+.sticky-container{
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    width: 100%;
+}
+
 
 @media (min-width: 1536px) {
     .paragraph {
         margin-bottom: 3rem;
+        z-index: 2; /* testing */
     }
 }
 
 @media (min-width: 1200px) {
     .paragraph {
         margin-bottom: 1.5rem;
+        z-index: 2; /* testing */
     }
 }
 
+/* for testing */
+
+.image-holder{
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
+.text-center-holder{
+    position: absolute;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
 
 /* specific to this story */
 
