@@ -6,16 +6,16 @@ import { motion } from "@repo/motion"
 
 const IntroSection: React.FC = () => {
   const theme = useTheme()
-  
+
   // Generate animation parameters for floating effect
   const generateFloatingAnimation = () => {
     const bobDelay = Math.random() * 3 // 0-3 seconds
-    const driftDelay = Math.random() * 5 // 0-5 seconds  
+    const driftDelay = Math.random() * 5 // 0-5 seconds
     const bobAmount = 8 + Math.random() * 8 // 8-16px vertical movement
     const driftAmount = 15 + Math.random() * 15 // 15-30px horizontal drift
     const bobDuration = 3 + Math.random() * 2 // 3-5 seconds
     const driftDuration = 8 + Math.random() * 6 // 8-14 seconds
-    
+
     return {
       animate: {
         y: [0, -bobAmount, 0],
@@ -32,7 +32,7 @@ const IntroSection: React.FC = () => {
         x: {
           duration: driftDuration,
           repeat: Infinity,
-          ease: "easeInOut", 
+          ease: "easeInOut",
           delay: driftDelay,
         },
         rotate: {
@@ -44,7 +44,7 @@ const IntroSection: React.FC = () => {
       },
     }
   }
-  
+
   return (
     <Box
       sx={{
@@ -458,14 +458,14 @@ const IntroSection: React.FC = () => {
                 mt: 4,
               }}
             >
-                            <ScrollIndicator
+              <ScrollIndicator
                 scrollToId="overview"
                 color={theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
               >
-              <ArrowHead
-                size={28}
+                <ArrowHead
+                  size={28}
                   style={{
                     transform: "rotate(90deg)",
                   }}
@@ -509,14 +509,14 @@ const IntroSection: React.FC = () => {
         >
           <Box
             component="img"
-            src="/images/circular-crops/collage_water.png"
-              sx={{
+            src="/images/home_collage/birds_top.png"
+            sx={{
               position: "absolute",
-              left: "-120px",
-              top: "50%",
+              left: "-70%",
+              top: "30%",
               transform: "translateY(-50%)",
-              width: "80px",
-              height: "80px",
+              width: "280px",
+              height: "280px",
               zIndex: (theme) => theme.zIndex.introBackgroundImages,
             }}
           />
@@ -529,17 +529,17 @@ const IntroSection: React.FC = () => {
               <br />
               on two main things:
             </Typography>
-            <Box component="ol" sx={{ mt: 0, pl: 3 }}>
-                  <Box component="li" sx={{ mb: 1 }}>
+            <Box component="ol" sx={{ mt: 1, pl: 3 }}>
+              <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
                   How much rain and snow we get.
                 </Typography>
-                  </Box>
-                  <Box component="li" sx={{ mb: 1 }}>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
                 <Typography variant="body1">
                   How we choose to manage it.
                 </Typography>
-                </Box>
+              </Box>
             </Box>
           </Box>
 
@@ -590,14 +590,14 @@ const IntroSection: React.FC = () => {
         >
           <Box
             component="img"
-            src="/images/circular-crops/right_side.png"
-              sx={{
+            src="/images/home_collage/birds_top.png"
+            sx={{
               position: "absolute",
-              right: "-120px",
-              top: "50%",
+              left: "-56%",
+              top: "30%",
               transform: "translateY(-50%)",
-              width: "80px",
-              height: "80px",
+              width: "280px",
+              height: "280px",
               zIndex: (theme) => theme.zIndex.introBackgroundImages,
             }}
           />
@@ -606,17 +606,18 @@ const IntroSection: React.FC = () => {
             sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}
           >
             <Typography variant="body1" sx={{ mb: 2 }}>
-              The future of California&apos;s Central Valley water depends on
-              climate change and our choices. We have to plan for both.
+              We already face difficult choices. Climate change brings deeper
+              droughts, bigger floods, and growing uncertainty.
             </Typography>
 
             <Typography variant="body1">
-              The COEQWAL project has run 30 alternative water management
-              scenarios for the Central Valley water systems that feed most of
-              the state. For each of these scenarios, we considered 5 future
-              climate possibilities.
-              </Typography>
-            </Box>
+              The COEQWAL (Collaboratory for Equity in Water Allocation) project
+              has modeled 30 alternative water management scenarios for the
+              Central Valley water systems that supply most of the state. For
+              each of these scenarios, we also modeled 5 future climate
+              possibilities.
+            </Typography>
+          </Box>
 
           <ScrollIndicator
             scrollToId="fourth-panel"
