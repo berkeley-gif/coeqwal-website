@@ -270,31 +270,53 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <LocationOnIcon />,
     term: "Delta health",
     definition:
-      "The ecological condition of the Sacramento-San Joaquin Delta, a critical hub where rivers converge before flowing to San Francisco Bay. Delta health depends on freshwater flows, water quality, and habitat conditions that support fish, birds, and other wildlife.",
+      " ",
   },
   {
     icon: <LocationOnIcon />,
     term: "Reservoir storage",
     definition:
-      "The amount of water stored in reservoirs and lakes throughout the state. Reservoir storage provides a buffer against droughts and helps ensure water availability during dry periods.",
+      " ",
   },
   {
     icon: <LocationOnIcon />,
     term: "Groundwater storage",
     definition:
-      "The amount of water stored underground in aquifers. Groundwater serves as a critical backup water supply during droughts, but overpumping can cause wells to dry up and land to sink.",
+      " ",
   },
   {
     icon: <LocationOnIcon />,
     term: "Salmon abundance",
     definition:
-      "The population levels of salmon species in California's rivers and streams. Salmon are an indicator species whose health reflects the overall condition of aquatic ecosystems and river flows.",
+      " ",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 10-year average"
+      },
+      {
+        tier: "Tier 2", 
+        color: "tier2",
+        description: "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 10-year average"
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 10-year average"
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "The change in population size does not satisfy Tier 1, 2, or 3"
+      }
+    ]
   },
   {
     icon: <LocationOnIcon />,
     term: "Distributional equity",
     definition:
-      "How fairly water benefits and burdens are shared across different communities, regions, and user groups. This includes access to clean water, protection from floods, and the distribution of economic impacts from water management decisions.",
+      "How fairly water benefits and burdens are shared.",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
 
