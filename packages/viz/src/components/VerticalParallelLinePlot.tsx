@@ -55,6 +55,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   )
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
+  
+  // Track filter ranges for each axis [min, max]
+  const [axisFilters, setAxisFilters] = useState<Record<string, [number, number]>>({})
 
   // Handle responsive sizing
   useEffect(() => {
@@ -217,13 +220,35 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       // Add slider arrows at both ends of each axis - pointing upward to endpoints
       axisGroup.selectAll(".axis-arrow").remove() // Remove old arrows
 
-      // Left arrow (pointing up to -1 endpoint)
-      const leftEndpoint = scales[axis]!(-1) // Get x position of -1 value
+      // Left arrow (pointing up to -1 endpoint) - draggable
+      const currentFilter = axisFilters[axis] || [-1, 1]
+      const leftPosition = scales[axis]!(currentFilter[0])
       const leftArrow = axisGroup.append("g")
         .attr("class", "axis-arrow axis-arrow-left")
-        .attr("transform", `translate(${leftEndpoint}, 2)`) // Position so tip touches the -1 endpoint
+        .attr("transform", `translate(${leftPosition}, 2)`) // Position at current filter value
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+        .call(d3.drag<SVGGElement, unknown>()
+          .on("start", function() {
+            d3.select(this).style("cursor", "grabbing")
+          })
+          .on("drag", function(event) {
+            const newX = Math.max(0, Math.min(innerWidth, event.x))
+            const newValue = scales[axis]!.invert(newX)
+            const maxBound = currentFilter[1] - 0.1
+            const clampedValue = Math.max(-1, Math.min(maxBound, newValue))
+            
+            d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
+            
+            setAxisFilters(prev => ({
+              ...prev,
+              [axis]: [clampedValue, currentFilter[1]]
+            }))
+          })
+          .on("end", function() {
+            d3.select(this).style("cursor", "grab")
+          })
+        )
 
       // Use exact SVG from DiscreteSlider pointing upward
       leftArrow.append("path")
@@ -232,13 +257,34 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("stroke", "none")
         .attr("transform", "translate(-8, -6)") // Center the 16x12 arrow
 
-      // Right arrow (pointing up to +1 endpoint)
-      const rightEndpoint = scales[axis]!(1) // Get x position of +1 value
+      // Right arrow (pointing up to +1 endpoint) - draggable
+      const rightPosition = scales[axis]!(currentFilter[1])
       const rightArrow = axisGroup.append("g")
         .attr("class", "axis-arrow axis-arrow-right")
-        .attr("transform", `translate(${rightEndpoint}, 2)`) // Position so tip touches the +1 endpoint
+        .attr("transform", `translate(${rightPosition}, 2)`) // Position at current filter value
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+        .call(d3.drag<SVGGElement, unknown>()
+          .on("start", function() {
+            d3.select(this).style("cursor", "grabbing")
+          })
+          .on("drag", function(event) {
+            const newX = Math.max(0, Math.min(innerWidth, event.x))
+            const newValue = scales[axis]!.invert(newX)
+            const minBound = currentFilter[0] + 0.1
+            const clampedValue = Math.min(1, Math.max(minBound, newValue))
+            
+            d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
+            
+            setAxisFilters(prev => ({
+              ...prev,
+              [axis]: [currentFilter[0], clampedValue]
+            }))
+          })
+          .on("end", function() {
+            d3.select(this).style("cursor", "grab")
+          })
+        )
 
       // Use exact SVG from DiscreteSlider pointing upward
       rightArrow.append("path")
@@ -255,8 +301,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .duration(200)
             .attr("transform", function() {
               const isLeft = d3.select(this).classed("axis-arrow-left")
-              const endpoint = isLeft ? leftEndpoint : rightEndpoint
-              return `translate(${endpoint}, 2) scale(1.1)`
+              const position = isLeft ? leftPosition : rightPosition
+              return `translate(${position}, 2) scale(1.1)`
             })
             .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.16))")
         })
@@ -266,8 +312,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .duration(200)
             .attr("transform", function() {
               const isLeft = d3.select(this).classed("axis-arrow-left")
-              const endpoint = isLeft ? leftEndpoint : rightEndpoint
-              return `translate(${endpoint}, 2)`
+              const position = isLeft ? leftPosition : rightPosition
+              return `translate(${position}, 2)`
             })
             .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
         })
@@ -361,6 +407,14 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const lineColor = lineColors.length > dataIndex ? lineColors[dataIndex]! : 
                        (d.highlighted ? colors.highlighted : colors.default)
       
+      // Check if this scenario is visible based on current filters
+      const isVisible = axes.every(axis => {
+        const value = d.values[axis] || 0
+        const filter = axisFilters[axis]
+        if (!filter) return true // No filter on this axis
+        return value >= filter[0] && value <= filter[1]
+      })
+      
       const pathData = axes.map(axis => [axis, d.values[axis] || 0] as [string, number])
 
       let path = g.select<SVGPathElement>(`.line-${dataIndex}`)
@@ -370,7 +424,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("fill", "none")
           .attr("stroke", lineColor)
           .attr("stroke-width", d.highlighted ? 2.5 : 1.5) // Original widths
-          .attr("opacity", d.highlighted ? 0.9 : 0.2) // Original opacity (0.2 for non-highlighted)
+          .attr("opacity", isVisible ? (d.highlighted ? 0.9 : 0.2) : 0.02) // Nearly invisible if filtered out
           .style("cursor", "pointer")
           .on("mouseover", function () {
             onLineHover?.(d)
@@ -417,7 +471,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", "white")
             .attr("stroke-width", 1.5) // Original width
             .attr("r", d.highlighted ? 5 : 4) // Original sizes
-            .attr("opacity", d.highlighted ? 1 : 0.8) // Original opacity
+            .attr("opacity", isVisible ? (d.highlighted ? 1 : 0.8) : 0.02) // Nearly invisible if filtered out
             .style("cursor", "pointer")
             .on("mouseover", function () {
               onLineHover?.(d)
@@ -482,7 +536,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("x", newWidth / 2)
         .attr("y", 20)
     }
-  }, [data, axes, margin, colors, lineColors, showBaseline, baselineData, title, onLineHover, onLineClick])
+  }, [data, axes, margin, colors, lineColors, showBaseline, baselineData, title, onLineHover, onLineClick, axisFilters])
 
   // Initial render (no animation)
   useEffect(() => {
