@@ -187,11 +187,20 @@ const MapControls = ({
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const theme = useTheme()
 
-  const [showRegionDropdown, setShowRegionDropdown] = useState(false)
+  // const [showRegionDropdown, setShowRegionDropdown] = useState(false)
 
   // Card minimize/maximize states
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isThirdCardMinimized, setIsThirdCardMinimized] = useState(false)
+
+  // Scenario presets state
+  const [sgmaEnabled, setSgmaEnabled] = useState(false)
+  const [sgmaSanJoaquinOnly, setSgmaSanJoaquinOnly] = useState(false)
+  const [sgmaSanJoaquinReductions, setSgmaSanJoaquinReductions] = useState(false)
+  const [sgmaBothValleys, setSgmaBothValleys] = useState(false)
+  const [sgmaBothValleysReductions, setSgmaBothValleysReductions] = useState(false)
+  const [usbrAlternative3, setUsbrAlternative3] = useState(false)
+  const [deltaConveyanceTunnel, setDeltaConveyanceTunnel] = useState(false)
 
   // Outcomes panel state
   const [isRelativeView, setIsRelativeView] = useState(true)
@@ -253,6 +262,18 @@ const MapControls = ({
   const handleLearnMoreClick = useCallback(() => {
     console.log("Learn more about this chart clicked")
   }, [])
+
+  // Scenario presets handlers
+  const handleSgmaToggle = (checked: boolean) => {
+    setSgmaEnabled(checked)
+    if (!checked) {
+      // Uncheck all sub-options when main SGMA is unchecked
+      setSgmaSanJoaquinOnly(false)
+      setSgmaSanJoaquinReductions(false)
+      setSgmaBothValleys(false)
+      setSgmaBothValleysReductions(false)
+    }
+  }
 
   const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
@@ -535,6 +556,114 @@ const MapControls = ({
                 />
               }
               label="Select region on map"
+            />
+          </Box>
+        </Box>
+      ),
+    },
+    {
+      id: "scenario-presets",
+      title: "Scenario presets",
+      content: (
+        <Box>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 1,
+              p: 2,
+              backgroundColor: (theme) => theme.palette.grey[50],
+              borderRadius: (theme) => theme.borderRadius.rounded,
+              border: "1px solid",
+              borderColor: (theme) => theme.palette.divider,
+            }}
+          >
+            {/* SGMA Section */}
+            <Box sx={{ gridColumn: "1 / -1", mb: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox 
+                    size="small" 
+                    checked={sgmaEnabled}
+                    onChange={(e) => handleSgmaToggle(e.target.checked)}
+                  />
+                }
+                label="Sustainable Groundwater Management Act (SGMA)"
+                sx={{ fontWeight: 500 }}
+              />
+              {/* SGMA Sub-options */}
+              <Box sx={{ ml: 3, mt: 1, display: "grid", gridTemplateColumns: "1fr", gap: 0.5 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      size="small" 
+                      checked={sgmaSanJoaquinOnly}
+                      disabled={!sgmaEnabled}
+                      onChange={(e) => setSgmaSanJoaquinOnly(e.target.checked)}
+                    />
+                  }
+                  label="San Joaquin Valley only"
+                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      size="small" 
+                      checked={sgmaSanJoaquinReductions}
+                      disabled={!sgmaEnabled}
+                      onChange={(e) => setSgmaSanJoaquinReductions(e.target.checked)}
+                    />
+                  }
+                  label="San Joaquin Valley with agricultural reductions"
+                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      size="small" 
+                      checked={sgmaBothValleys}
+                      disabled={!sgmaEnabled}
+                      onChange={(e) => setSgmaBothValleys(e.target.checked)}
+                    />
+                  }
+                  label="Sacramento and San Joaquin Valleys"
+                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox 
+                      size="small" 
+                      checked={sgmaBothValleysReductions}
+                      disabled={!sgmaEnabled}
+                      onChange={(e) => setSgmaBothValleysReductions(e.target.checked)}
+                    />
+                  }
+                  label="Sacramento and San Joaquin Valleys with agricultural reductions"
+                  sx={{ fontSize: "0.9rem", opacity: sgmaEnabled ? 1 : 0.5 }}
+                />
+              </Box>
+            </Box>
+            
+            {/* Other Options */}
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  size="small" 
+                  checked={usbrAlternative3}
+                  onChange={(e) => setUsbrAlternative3(e.target.checked)}
+                />
+              }
+              label="USBR Alternative 3"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox 
+                  size="small" 
+                  checked={deltaConveyanceTunnel}
+                  onChange={(e) => setDeltaConveyanceTunnel(e.target.checked)}
+                />
+              }
+              label="Delta Conveyance Tunnel, Bethany Alternative"
             />
           </Box>
         </Box>
@@ -1654,6 +1783,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([])
   const [selectedRegion, setSelectedRegion] = useState("Central Valley")
 
+
+
   // Climate state
   const [selectedClimate, setSelectedClimate] = useState(1) // Default to "Historical"
 
@@ -1693,17 +1824,13 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   const handleToggleDeliveryAreaDropdown = () => {
     const isChecking = !showDeliveryAreaDropdown
-    console.log("Toggle delivery area dropdown:", { isChecking, currentShowDeliveryAreaDropdown: showDeliveryAreaDropdown })
-    
     setShowDeliveryAreaDropdown(isChecking)
 
     if (isChecking) {
       // Start delivery area selection mode
-      console.log("Starting delivery area selection mode")
       setIsSelectingDeliveryArea(true)
     } else {
       // Cancel delivery area selection
-      console.log("Canceling delivery area selection mode")
       setIsSelectingDeliveryArea(false)
     }
   }
@@ -1726,6 +1853,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
       // setSelectedDeliveryArea(selectedPolygon)
     }
   }
+
+
 
   // Check if two line segments intersect
   const doSegmentsIntersect = useCallback(
@@ -1861,25 +1990,17 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
 
   // Effect to manage delivery area selection polygons
   useEffect(() => {
-    console.log("Delivery area selection effect triggered:", { isSelectingDeliveryArea })
-    
     // Add the geospatial data source if it doesn't exist
     if (!hasSource("delivery-units")) {
-      console.log("Adding delivery-units source...")
       addSource("delivery-units", {
         type: "geojson",
         data: "/geospatial_data/du.geojson",
       })
-    } else {
-      console.log("delivery-units source already exists")
     }
 
     if (isSelectingDeliveryArea) {
-      console.log("Adding delivery area selection layers...")
-      
       // Add delivery area selection layer if not exists
       if (!hasLayer("delivery-area-selection-layer")) {
-        console.log("Adding delivery-area-selection-layer")
         addLayer(
           "delivery-area-selection-layer",
           "delivery-units",
@@ -1892,13 +2013,10 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             visibility: "visible",
           }
         )
-      } else {
-        console.log("delivery-area-selection-layer already exists")
       }
 
       // Add hover layer for delivery area selection
       if (!hasLayer("delivery-area-selection-hover")) {
-        console.log("Adding delivery-area-selection-hover")
         addLayer(
           "delivery-area-selection-hover",
           "delivery-units",
@@ -1914,17 +2032,13 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             filter: ["==", ["get", "DU_ID"], ""], // Initially show no features
           }
         )
-      } else {
-        console.log("delivery-area-selection-hover already exists")
       }
     } else {
       // Remove delivery area selection layers when not selecting
       if (hasLayer("delivery-area-selection-layer")) {
-        console.log("Removing delivery-area-selection-layer")
         removeLayer("delivery-area-selection-layer")
       }
       if (hasLayer("delivery-area-selection-hover")) {
-        console.log("Removing delivery-area-selection-hover")
         removeLayer("delivery-area-selection-hover")
       }
     }
