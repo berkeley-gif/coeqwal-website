@@ -738,6 +738,11 @@ const MapControls = ({
 
   const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
+  // Check if any scenarios are selected (presets or chart selections)
+  const hasSelectedScenarios = selectedScenarios.length > 0 || 
+    sgmaSanJoaquinOnly || sgmaSanJoaquinReductions || sgmaBothValleys || 
+    sgmaBothValleysReductions || usbrAlternative3 || deltaConveyanceTunnel
+
   return (
     <Box
       sx={{
@@ -1046,9 +1051,10 @@ const MapControls = ({
                   {/* Grid layout: outcomes charts */}
                   <Box
                     sx={{
-                      display: "flex",
-                      flexWrap: "wrap",
-                      justifyContent: "center",
+                      display: hasSelectedScenarios ? "grid" : "flex",
+                      gridTemplateColumns: hasSelectedScenarios ? "1fr 1fr" : undefined, // 2 columns when scenarios selected
+                      flexWrap: hasSelectedScenarios ? undefined : "wrap",
+                      justifyContent: hasSelectedScenarios ? "center" : "center",
                       gap: 2,
                       alignItems: "start",
                     }}
@@ -1331,8 +1337,13 @@ const MapControls = ({
           {/* Climate card */}
           <Box
             sx={{
-              position: "relative",
+              position: hasSelectedScenarios ? "fixed" : "relative",
+              bottom: hasSelectedScenarios ? 16 : "auto",
+              left: hasSelectedScenarios ? "50%" : "auto",
+              transform: hasSelectedScenarios ? "translateX(-50%)" : "none",
               height: "auto",
+              zIndex: hasSelectedScenarios ? (theme) => theme.zIndex.floatingElements : "auto",
+              transition: "all 0.3s ease-out", // Smooth transition between positions
             }}
           >
             <Box
