@@ -204,6 +204,9 @@ const MapControls = ({
   const [usbrAlternative3, setUsbrAlternative3] = useState(false)
   const [deltaConveyanceTunnel, setDeltaConveyanceTunnel] = useState(false)
 
+  // Track scenarios clicked in chart (dots and lines)
+  const [clickedScenarios, setClickedScenarios] = useState<string[]>([])
+
   // Outcomes panel state
   const [isRelativeView, setIsRelativeView] = useState(true)
   const [highlightBaseline, setHighlightBaseline] = useState(false)
@@ -265,6 +268,17 @@ const MapControls = ({
     console.log("Learn more about this chart clicked")
   }, [])
 
+  // Handle scenario clicks from the chart (dots and lines)
+  const handleChartScenarioClick = (data: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+    const scenarioName = data.name
+    setClickedScenarios((prev) =>
+      prev.includes(scenarioName)
+        ? prev.filter((s) => s !== scenarioName) // Remove if already clicked
+        : [...prev, scenarioName] // Add if not clicked yet
+    )
+    console.log("Chart scenario clicked:", scenarioName)
+  }
+
   const toggleExpandChart = useCallback(() => {
     const newExpandedState = !expandChart
     setExpandChart(newExpandedState)
@@ -288,6 +302,7 @@ const MapControls = ({
     expandChart,
     defineOutcome,
     overlayTiers,
+    onLineClick: handleChartScenarioClick,
   })
 
   // Accordion sections for the third column
@@ -738,8 +753,9 @@ const MapControls = ({
 
   const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
-  // Check if any scenarios are selected (presets or chart selections)
+  // Check if any scenarios are selected (presets, chart selections, or chart clicks)
   const hasSelectedScenarios = selectedScenarios.length > 0 || 
+    clickedScenarios.length > 0 ||
     sgmaSanJoaquinOnly || sgmaSanJoaquinReductions || sgmaBothValleys || 
     sgmaBothValleysReductions || usbrAlternative3 || deltaConveyanceTunnel
 
@@ -2081,6 +2097,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const handleClearSelectedScenarios = () => {
     setSelectedScenarios([])
   }
+
+
 
   const handleClimateChange = (value: number) => {
     setSelectedClimate(value)
