@@ -56,8 +56,31 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
   
-  // Track filter ranges for each axis [min, max]
+  // Track filter ranges for each axis [min, max] - gentle filtering approach
   const [axisFilters, setAxisFilters] = useState<Record<string, [number, number]>>({})
+  const [isFiltering, setIsFiltering] = useState(false)
+  
+  // Gentle filtering function - uses opacity instead of DOM removal
+  const getScenarioOpacity = useCallback((scenario: VerticalParallelLineData, isHighlighted: boolean) => {
+    if (Object.keys(axisFilters).length === 0) {
+      return isHighlighted ? 0.9 : 0.2 // Default opacity when no filters
+    }
+    
+    // Check if scenario passes all filters
+    const passesAllFilters = axes.every(axis => {
+      const filter = axisFilters[axis]
+      if (!filter) return true
+      
+      const value = scenario.values[axis] || 0
+      return value >= filter[0] && value <= filter[1]
+    })
+    
+    if (passesAllFilters) {
+      return isHighlighted ? 0.9 : 0.2 // Normal opacity for visible scenarios
+    } else {
+      return isHighlighted ? 0.3 : 0.05 // Dimmed but still visible for filtered scenarios
+    }
+  }, [axisFilters, axes])
 
   // Handle responsive sizing
   useEffect(() => {
@@ -112,7 +135,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     if (g.empty()) {
       g = svg.append("g")
         .attr("class", "chart-group")
-        .attr("transform", `translate(${margin.left},${margin.top})`)
+      .attr("transform", `translate(${margin.left},${margin.top})`)
     } else {
       const selection = animate ? g.transition(t as any) : g
       selection.attr("transform", `translate(${margin.left},${margin.top})`)
@@ -249,19 +272,31 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             
             console.log(`Left arrow drag - Axis: ${axis}, New range: [${clampedValue.toFixed(2)}, ${currentFilter[1].toFixed(2)}]`)
             
-            setAxisFilters(prev => {
-              const newFilters = {
-                ...prev,
-                [axis]: [clampedValue, currentFilter[1]]
-              }
-              console.log('All filters:', newFilters)
+            // Gentle state update - no forced re-renders
+            setAxisFilters(prev => ({
+              ...prev,
+              [axis]: [clampedValue, currentFilter[1]]
+            }))
+            
+            // Smooth opacity transitions for affected scenarios
+            data.forEach((scenario, scenarioIndex) => {
+              const newOpacity = getScenarioOpacity(scenario, scenario.highlighted || false)
               
-              // Force immediate re-render by updating the chart
-              setTimeout(() => {
-                updateChart(currentWidth, currentHeight, false)
-              }, 0)
+              // Update line opacity
+              g.select(`.line-${scenarioIndex}`)
+                .transition()
+                .duration(200)
+                .ease(d3.easeQuadOut)
+                .attr("opacity", newOpacity)
               
-              return newFilters
+              // Update all circles for this scenario
+              axes.forEach((axisName) => {
+                g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, '-')}`)
+                  .transition()
+                  .duration(200)
+                  .ease(d3.easeQuadOut)
+                  .attr("opacity", newOpacity)
+              })
             })
           })
           .on("end", function() {
@@ -304,19 +339,31 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             
             console.log(`Right arrow drag - Axis: ${axis}, New range: [${currentFilter[0].toFixed(2)}, ${clampedValue.toFixed(2)}]`)
             
-            setAxisFilters(prev => {
-              const newFilters = {
-                ...prev,
-                [axis]: [currentFilter[0], clampedValue]
-              }
-              console.log('All filters:', newFilters)
+            // Gentle state update - no forced re-renders
+            setAxisFilters(prev => ({
+              ...prev,
+              [axis]: [currentFilter[0], clampedValue]
+            }))
+            
+            // Smooth opacity transitions for affected scenarios
+            data.forEach((scenario, scenarioIndex) => {
+              const newOpacity = getScenarioOpacity(scenario, scenario.highlighted || false)
               
-              // Force immediate re-render by updating the chart
-              setTimeout(() => {
-                updateChart(currentWidth, currentHeight, false)
-              }, 0)
+              // Update line opacity
+              g.select(`.line-${scenarioIndex}`)
+                .transition()
+                .duration(200)
+                .ease(d3.easeQuadOut)
+                .attr("opacity", newOpacity)
               
-              return newFilters
+              // Update all circles for this scenario
+              axes.forEach((axisName) => {
+                g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, '-')}`)
+                  .transition()
+                  .duration(200)
+                  .ease(d3.easeQuadOut)
+                  .attr("opacity", newOpacity)
+              })
             })
           })
           .on("end", function() {
@@ -386,7 +433,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       if (baselinePath.empty()) {
         baselinePath = g.append("path")
           .attr("class", "baseline-path")
-          .attr("fill", "none")
+        .attr("fill", "none")
           .attr("stroke", baselineColor)
           .attr("stroke-width", 4) // Thick line for prominence
           .attr("opacity", 0.9) // High opacity for visibility
@@ -458,32 +505,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const lineColor = lineColors.length > dataIndex ? lineColors[dataIndex]! : 
                        (d.highlighted ? colors.highlighted : colors.default)
       
-      // Check if this scenario is visible based on current filters
-      const isVisible = axes.every(axis => {
-        const value = d.values[axis] || 0
-        const filter = axisFilters[axis]
-        if (!filter) return true // No filter on this axis
-        const visible = value >= filter[0] && value <= filter[1]
-        return visible
-      })
-      
-      // Debug logging for scenarios that should be filtered
-      if (dataIndex < 10) {
-        const communityValue = d.values["Community deliveries"] || 0
-        const filter = axisFilters["Community deliveries"]
-        
-        // Log scenarios with negative values or when filtering is active
-        if (communityValue < 0 || (filter && (filter[0] > -1 || filter[1] < 1))) {
-          console.log(`🔍 Scenario ${d.name}:`, {
-            communityValue: communityValue.toFixed(3),
-            filter: filter ? `[${filter[0].toFixed(2)}, ${filter[1].toFixed(2)}]` : 'none',
-            withinRange: filter ? (communityValue >= filter[0] && communityValue <= filter[1]) : true,
-            shouldBeFiltered: filter ? !(communityValue >= filter[0] && communityValue <= filter[1]) : false,
-            isVisible,
-            dataIndex
-          })
-        }
-      }
+      // Use gentle opacity-based filtering instead of aggressive visibility checks
+      const targetOpacity = getScenarioOpacity(d, d.highlighted || false)
       
       const pathData = axes.map(axis => [axis, d.values[axis] || 0] as [string, number])
 
@@ -494,7 +517,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("fill", "none")
           .attr("stroke", lineColor)
           .attr("stroke-width", d.highlighted ? 2.5 : 1.5) // Original widths
-          .attr("opacity", isVisible ? (d.highlighted ? 0.9 : 0.2) : 0.02) // Nearly invisible if filtered out
+          .attr("opacity", targetOpacity) // Gentle opacity-based filtering
           .style("cursor", "pointer")
           .on("mouseover", function () {
             onLineHover?.(d)
@@ -503,8 +526,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             // Highlight all corresponding circles for this line
             axes.forEach((axis) => {
               g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, '-')}`)
-                .attr("r", d.highlighted ? 6 : 5)
-                .attr("opacity", 1)
+              .attr("r", d.highlighted ? 6 : 5)
+              .attr("opacity", 1)
             })
           })
           .on("mouseout", function () {
@@ -528,7 +551,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const pathSelection = animate ? path.transition(t as any) : path
       pathSelection
         .attr("d", lineGenerator(pathData))
-        .attr("opacity", isVisible ? (d.highlighted ? 0.9 : 0.2) : 0.02) // Update opacity based on visibility
+        .attr("opacity", targetOpacity) // Gentle opacity-based filtering
 
       // Update circles at intersection points (original styling)
       axes.forEach((axis) => {
@@ -543,7 +566,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke", "white")
             .attr("stroke-width", 1.5) // Original width
             .attr("r", d.highlighted ? 5 : 4) // Original sizes
-            .attr("opacity", isVisible ? (d.highlighted ? 1 : 0.8) : 0.02) // Nearly invisible if filtered out
+            .attr("opacity", targetOpacity) // Gentle opacity-based filtering
             .style("cursor", "pointer")
             .on("mouseover", function () {
               onLineHover?.(d)
@@ -588,7 +611,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         circleSelection
           .attr("cx", scales[axis]!(value))
           .attr("cy", yScale(axis)!)
-          .attr("opacity", isVisible ? (d.highlighted ? 1 : 0.8) : 0.02) // Update opacity based on visibility
+          .attr("opacity", targetOpacity) // Gentle opacity-based filtering
       })
     })
 
@@ -598,13 +621,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       if (titleElement.empty()) {
         titleElement = svg.append("text")
           .attr("class", "chart-title")
-          .attr("text-anchor", "middle")
-          .attr("font-size", "16px")
-          .attr("font-weight", "600")
-          .attr("fill", "#333")
-          .text(title)
-      }
-      
+        .attr("text-anchor", "middle")
+        .attr("font-size", "16px")
+        .attr("font-weight", "600")
+        .attr("fill", "#333")
+        .text(title)
+    }
+
       titleElement
         .attr("x", newWidth / 2)
         .attr("y", 20)
