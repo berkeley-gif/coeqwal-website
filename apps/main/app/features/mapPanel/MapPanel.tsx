@@ -1681,7 +1681,14 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         "line",
         {
           "line-color": "#FFFFFF", // White stroke on hover
-          "line-width": 3,
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            5, 1,    // At zoom 5: 1px width
+            8, 2,    // At zoom 8: 2px width
+            12, 4    // At zoom 12: 4px width
+          ],
           "line-opacity": ["case", ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""], 1, 0],
         },
         {
@@ -1727,7 +1734,14 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
         "line",
         {
           "line-color": "#FFFFFF", // White stroke on hover
-          "line-width": 3,
+          "line-width": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            5, 1,    // At zoom 5: 1px width
+            8, 2,    // At zoom 8: 2px width
+            12, 4    // At zoom 12: 4px width
+          ],
           "line-opacity": ["case", ["==", ["get", "DU_ID"], hoveredFeatureId ?? ""], 1, 0],
         },
         {
