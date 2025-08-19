@@ -19,6 +19,8 @@ const themeValues = {
       '"Tiempos Headline", Georgia, "Times New Roman", Times, serif',
     // TEST FONT - Tiempos Text
     tiemposText: '"Tiempos Text", Georgia, "Times New Roman", Times, serif',
+    // TEST FONT - Tiempos Subhead
+    ingeborgTrial: '"Ingeborg Trial", Georgia, "Times New Roman", Times, serif',
     // Acumin Pro from Adobe fonts
     acuminPro:
       '"acumin-pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -36,14 +38,12 @@ const storyTheme = createTheme({
   ...baseTheme,
   typography: {
     ...baseTheme.typography,
-    fontFamily: themeValues.fontFamily.tiemposText,
-    allVariants: {
-      color: "#f2f0ef",
-    },
+    fontFamily: themeValues.fontFamily.ingeborgTrial,
     body1: {
       ...baseTheme.typography.body1,
       fontSize: "0.875rem", // xs default
       lineHeight: 1.5,
+      color: "#f2f0ef",
       "@media (min-width: 1200px)": {
         fontSize: "1.25rem",
       },
@@ -53,7 +53,8 @@ const storyTheme = createTheme({
     },
     h2: {
       ...baseTheme.typography.h2,
-      fontFamily: themeValues.fontFamily.tiemposText,
+      fontFamily: themeValues.fontFamily.ingeborgTrial,
+      color: "#f2f0ef",
       "@media (min-width: 1200px)": {
         fontSize: "3.35rem",
       },
@@ -63,14 +64,19 @@ const storyTheme = createTheme({
     },
     h3: {
       ...baseTheme.typography.h3,
-      fontFamily: themeValues.fontFamily.tiemposText,
-
+      fontFamily: themeValues.fontFamily.ingeborgTrial,
+      color: "#f2f0ef",
       "@media (min-width: 1200px)": {
         fontSize: "1.8rem",
       },
       "@media (min-width: 1536px)": {
         fontSize: "2.778rem",
       },
+    },
+    h4: {
+      ...baseTheme.typography.h4,
+      fontFamily: themeValues.fontFamily.ingeborgTrial,
+      color: "#f2f0ef",
     },
     body2: {
       ...baseTheme.typography.body2,
@@ -187,6 +193,16 @@ const storyTheme = createTheme({
         @font-face {
           font-family: 'Crimson Text';
           src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlppgwHKFkZgtmSR3NB0oRJX1C1GA9c.woff2') format('woff2');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+
+
+        /* Ingeborg Trial Font Family */
+        @font-face {
+          font-family: 'Ingeborg Trial';
+          src: url('/fonts/IngeborgTrial-Bold.otf') format('opentype');
           font-weight: 700;
           font-style: normal;
           font-display: swap;
