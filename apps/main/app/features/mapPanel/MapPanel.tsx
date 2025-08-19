@@ -1446,7 +1446,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
   const [hoveredFeatureId, setHoveredFeatureId] = useState<string | null>(null)
   const [hoveredFeatureData, setHoveredFeatureData] = useState<{
-    modName: string;
+    modName: string | null;
+    subName: string | null;
     type: string | null;
     coordinates: [number, number];
   } | null>(null)
@@ -1822,7 +1823,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
               if (newFeatureId !== hoveredFeatureId) {
                 setHoveredFeatureId(newFeatureId)
                               setHoveredFeatureData({
-                modName: feature.properties?.Sub_Name?.trim() || feature.properties?.Mod_Name || "Unknown",
+                modName: feature.properties?.Mod_Name?.trim() || null,
+                subName: feature.properties?.Sub_Name?.trim() || null,
                 type: feature.properties?.Type?.trim() || null,
                 coordinates: [evt.lngLat.lng, evt.lngLat.lat]
               })
@@ -2018,9 +2020,16 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
             offset={[0, -10]}
           >
             <div>
-              {hoveredFeatureData.modName}
+              {hoveredFeatureData.modName && (
+                <div>{hoveredFeatureData.modName}</div>
+              )}
+              {hoveredFeatureData.subName && (
+                <div style={{ marginTop: '2px' }}>
+                  {hoveredFeatureData.subName}
+                </div>
+              )}
               {hoveredFeatureData.type && (
-                <div style={{ fontSize: '0.8em', opacity: 0.8, marginTop: '2px' }}>
+                <div style={{ marginTop: '2px' }}>
                   {hoveredFeatureData.type}
                 </div>
               )}
