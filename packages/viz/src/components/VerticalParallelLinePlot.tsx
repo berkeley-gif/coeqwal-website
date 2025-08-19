@@ -56,7 +56,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
   
-  // Track filter ranges for each axis [min, max] - elegant approach inspired by old code
+  // Track filter ranges for each axis [min, max] approach as this summer.
   const filterRanges = useRef<Record<string, [number, number]>>({})
   
   // Centralized filtering function - separate opacity for lines vs circles
@@ -78,7 +78,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     } else {
       // Lines: Two distinct opacity levels - active vs inactive
       return passesAllFilters 
-        ? (scenario.highlighted ? 0.7 : 0.25)  // Active lines: highlighted=70%, normal=25%
+        ? (scenario.highlighted ? 0.9 : 0.5)  // Active lines: highlighted=90%, normal=50% (more prominent)
         : 0.08  // Filtered lines: faint but visible for experimentation
     }
   }, [axes])
