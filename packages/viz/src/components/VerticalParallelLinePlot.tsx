@@ -3,6 +3,7 @@ import * as d3 from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
 
 export interface VerticalParallelLineData {
+  id: string
   name: string
   values: Record<string, number>
   highlighted?: boolean
@@ -142,13 +143,13 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const axisSelection = animate ? axisGroup.transition(t as any) : axisGroup
       axisSelection.attr("transform", `translate(0, ${yPos})`)
 
-      // Update axis line
+      // Update axis line (original styling)
       let axisLine = axisGroup.select<SVGLineElement>(".axis-line")
       if (axisLine.empty()) {
         axisLine = axisGroup.append("line")
           .attr("class", "axis-line")
-          .attr("stroke", "#333")
-          .attr("stroke-width", 1)
+          .attr("stroke", "#666")  // Original color
+          .attr("stroke-width", 2) // Original width
       }
       
       const lineSelection = animate ? axisLine.transition(t as any) : axisLine
@@ -158,39 +159,47 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("y1", 0)
         .attr("y2", 0)
 
-      // Update axis label
-      let axisLabel = axisGroup.select<SVGTextElement>(".axis-label")
-      if (axisLabel.empty()) {
-        axisLabel = axisGroup.append("text")
+      // Update axis label with text wrapping (original styling)
+      axisGroup.selectAll(".axis-label").remove() // Remove old labels
+
+      const words = axis.split(/\s+/)
+      const lineHeight = 14 // pixels
+      const maxWordsPerLine = 1 // One word per line for better wrapping
+
+      // Group words into lines
+      const lines = []
+      for (let i = 0; i < words.length; i += maxWordsPerLine) {
+        lines.push(words.slice(i, i + maxWordsPerLine).join(" "))
+      }
+
+      // Create text element for each line
+      lines.forEach((line, index) => {
+        axisGroup.append("text")
           .attr("class", "axis-label")
-          .attr("text-anchor", "end")
-          .attr("dy", "0.35em")
+          .attr("x", -10)
+          .attr("y", 4 + (index - (lines.length - 1) / 2) * lineHeight) // Center multi-line text vertically
+          .attr("text-anchor", "end") // Right align text
           .attr("font-size", "12px")
           .attr("font-weight", "500")
           .attr("fill", "#333")
-          .text(axis)
-      }
-      
-      axisLabel.attr("x", -10).attr("y", 0)
+          .text(line)
+      })
 
-      // Add tick marks
-      const tickCount = 5
-      const tickValues = scales[axis]!.ticks(tickCount)
-      
-      // Remove old ticks
+      // Add tick marks (original styling)
       axisGroup.selectAll(".tick-line").remove()
       axisGroup.selectAll(".tick-label").remove()
 
-      tickValues.forEach((tickValue) => {
-        const xPos = scales[axis]!(tickValue)
+      const ticks = [-1, -0.5, 0, 0.5, 1] // Original fixed ticks
+      ticks.forEach((tick) => {
+        const xPos = scales[axis]!(tick)
 
-        // Tick line
+        // Tick mark
         axisGroup.append("line")
           .attr("class", "tick-line")
           .attr("x1", xPos)
           .attr("x2", xPos)
-          .attr("y1", -3)
-          .attr("y2", 3)
+          .attr("y1", -5)  // Above the line (original)
+          .attr("y2", 5)
           .attr("stroke", "#666")
           .attr("stroke-width", 1)
 
@@ -198,21 +207,21 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         axisGroup.append("text")
           .attr("class", "tick-label")
           .attr("x", xPos)
-          .attr("y", 15)
+          .attr("y", -10)  // Above the line (original)
           .attr("text-anchor", "middle")
           .attr("font-size", "10px")
           .attr("fill", "#666")
-          .text(tickValue.toFixed(1))
+          .text(tick.toString()) // Show exact values including -0.5 and 0.5
       })
     })
 
-    // Update baseline if provided
+    // Update baseline if provided (original styling)
     if (showBaseline && baselineData) {
-      const baselineColor = "#999"
-      const lineGenerator = d3.line<[string, number]>()
+      const baselineColor = "#333" // Original color
+      const baselineLineGenerator = d3.line<[string, number]>()
         .x(([axis, value]) => scales[axis]!(value))
         .y(([axis]) => yScale(axis)!)
-        .curve(d3.curveMonotoneY)
+        // No curve - straight lines (original)
 
       const baselinePathData = axes.map(
         (axis) => [axis, baselineData.values[axis] || 0] as [string, number],
@@ -224,15 +233,15 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("class", "baseline-path")
           .attr("fill", "none")
           .attr("stroke", baselineColor)
-          .attr("stroke-width", 2)
+          .attr("stroke-width", 3) // Original width
           .attr("stroke-dasharray", "5,5")
           .attr("opacity", 0.8)
       }
 
       const pathSelection = animate ? baselinePath.transition(t as any) : baselinePath
-      pathSelection.attr("d", lineGenerator(baselinePathData))
+      pathSelection.attr("d", baselineLineGenerator(baselinePathData))
 
-      // Update baseline circles
+      // Update baseline circles (original styling)
       axes.forEach((axis) => {
         const value = baselineData.values[axis] || 0
         let circle = g.select<SVGCircleElement>(`.baseline-circle-${axis.replace(/\s+/g, '-')}`)
@@ -254,16 +263,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       })
     }
 
-    // Update data lines with smooth transitions
-    data.forEach((d, dataIndex) => {
-      const lineColor = lineColors[dataIndex] || (d.highlighted ? colors.highlighted : colors.default)
-      
-      // Create line path
-      const lineGenerator = d3.line<[string, number]>()
-        .x(([axis, value]) => scales[axis]!(value))
-        .y(([axis]) => yScale(axis)!)
-        .curve(d3.curveMonotoneY)
+    // Update data lines with original styling
+    // Line generator (no curves - original styling)
+    const lineGenerator = d3.line<[string, number]>()
+      .x(([axis, value]) => scales[axis]!(value))
+      .y(([axis]) => yScale(axis)!)
+      // No curve - use straight angular lines (original)
 
+    data.forEach((d, dataIndex) => {
+      const lineColor = lineColors.length > dataIndex ? lineColors[dataIndex]! : 
+                       (d.highlighted ? colors.highlighted : colors.default)
+      
       const pathData = axes.map(axis => [axis, d.values[axis] || 0] as [string, number])
 
       let path = g.select<SVGPathElement>(`.line-${dataIndex}`)
@@ -272,17 +282,30 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("class", `line-${dataIndex}`)
           .attr("fill", "none")
           .attr("stroke", lineColor)
-          .attr("stroke-width", d.highlighted ? 3 : 2)
-          .attr("opacity", d.highlighted ? 0.9 : 0.7)
+          .attr("stroke-width", d.highlighted ? 2.5 : 1.5) // Original widths
+          .attr("opacity", d.highlighted ? 0.9 : 0.2) // Original opacity (0.2 for non-highlighted)
+          .style("cursor", "pointer")
           .on("mouseover", function () {
             onLineHover?.(d)
-            d3.select(this).attr("stroke-width", 4).attr("opacity", 1)
+            d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
+            
+            // Highlight all corresponding circles (original behavior)
+            g.selectAll("circle")
+              .filter((circleData: any) => circleData.id === d.id)
+              .attr("r", d.highlighted ? 6 : 5)
+              .attr("opacity", 1)
           })
           .on("mouseout", function () {
             onLineHover?.(null)
             d3.select(this)
-              .attr("stroke-width", d.highlighted ? 3 : 2)
-              .attr("opacity", d.highlighted ? 0.9 : 0.7)
+              .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
+              .attr("opacity", d.highlighted ? 0.9 : 0.2)
+              
+            // Reset all corresponding circles (original behavior)
+            g.selectAll("circle")
+              .filter((circleData: any) => circleData.id === d.id)
+              .attr("r", d.highlighted ? 5 : 4)
+              .attr("opacity", d.highlighted ? 1 : 0.8)
           })
           .on("click", function () {
             onLineClick?.(d)
@@ -292,7 +315,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const pathSelection = animate ? path.transition(t as any) : path
       pathSelection.attr("d", lineGenerator(pathData))
 
-      // Update circles at intersection points
+      // Update circles at intersection points (original styling)
       axes.forEach((axis) => {
         const value = d.values[axis] || 0
         let circle = g.select<SVGCircleElement>(`.circle-${dataIndex}-${axis.replace(/\s+/g, '-')}`)
@@ -300,20 +323,26 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         if (circle.empty()) {
           circle = g.append("circle")
             .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, '-')}`)
+            .datum(d) // Store data reference for filtering (original)
             .attr("fill", lineColor)
             .attr("stroke", "white")
-            .attr("stroke-width", 2)
-            .attr("r", d.highlighted ? 5 : 3)
-            .attr("opacity", d.highlighted ? 0.9 : 0.8)
+            .attr("stroke-width", 1.5) // Original width
+            .attr("r", d.highlighted ? 5 : 4) // Original sizes
+            .attr("opacity", d.highlighted ? 1 : 0.8) // Original opacity
+            .style("cursor", "pointer")
             .on("mouseover", function () {
               onLineHover?.(d)
-              d3.select(this).attr("r", 6).attr("opacity", 1)
+              d3.select(this).attr("r", d.highlighted ? 6 : 5).attr("opacity", 1)
+              
+              // Find and highlight the corresponding line (original behavior)
+              g.selectAll("path")
+                .filter((lineData: any) => lineData === undefined) // This will be handled by line hover
             })
             .on("mouseout", function () {
               onLineHover?.(null)
               d3.select(this)
-                .attr("r", d.highlighted ? 5 : 3)
-                .attr("opacity", d.highlighted ? 0.9 : 0.8)
+                .attr("r", d.highlighted ? 5 : 4)
+                .attr("opacity", d.highlighted ? 1 : 0.8)
             })
             .on("click", function () {
               onLineClick?.(d)
