@@ -478,103 +478,65 @@ const MapControls = ({
             </Box>
           </Box>
 
-          {/* Region Selection Dropdown Trigger */}
-          <Box sx={{ mb: 2, textAlign: "center" }}>
-            <Button
-              variant="text"
-              onClick={toggleRegionDropdown}
-              sx={{
-                fontSize: "1rem",
-                fontWeight: 500,
-                color: (theme) => theme.palette.blue.bright,
-                padding: 0,
-                minWidth: "auto",
-                textTransform: "none",
-                justifyContent: "center",
-                "&:hover": {
-                  color: (theme) => theme.palette.blue.darkest,
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.875em",
-                  marginRight: "8px",
-                  display: "inline-block",
-                  transform: showRegionDropdown
-                    ? "rotate(180deg)"
-                    : "rotate(0deg)",
-                  transition: "transform 0.2s ease",
-                }}
-              >
-                ▼
-              </span>
-              Choose a different region
-            </Button>
+          {/* Region Selection Options - Always Visible */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 1,
+              p: 2,
+              backgroundColor: (theme) => theme.palette.grey[50],
+              borderRadius: (theme) => theme.borderRadius.rounded,
+              border: "1px solid",
+              borderColor: (theme) => theme.palette.divider,
+            }}
+          >
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="Sacramento Valley"
+            />
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="San Joaquin Valley"
+            />
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="Delta"
+            />
+            <FormControlLabel
+              control={<Checkbox size="small" />}
+              label="Tulare Basin"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      onToggleDeliveryAreaDropdown()
+                    }
+                  }}
+                />
+              }
+              label="Select delivery area"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  size="small"
+                  checked={isDrawingCustomRegion || polygonPoints.length > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleSelectRegionOnMapClick()
+                    } else {
+                      onClearCustomRegion()
+                    }
+                  }}
+                />
+              }
+              label="Select region on map"
+            />
           </Box>
-
-          {/* Region Selection Options */}
-          {showRegionDropdown && (
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 1,
-                p: 2,
-                backgroundColor: (theme) => theme.palette.grey[50],
-                borderRadius: (theme) => theme.borderRadius.rounded,
-                border: "1px solid",
-                borderColor: (theme) => theme.palette.divider,
-              }}
-            >
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Sacramento Valley"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="San Joaquin Valley"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Delta"
-              />
-              <FormControlLabel
-                control={<Checkbox size="small" />}
-                label="Tulare Basin"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onToggleDeliveryAreaDropdown()
-                      }
-                    }}
-                  />
-                }
-                label="Select delivery area"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={isDrawingCustomRegion || polygonPoints.length > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        handleSelectRegionOnMapClick()
-                      } else {
-                        onClearCustomRegion()
-                      }
-                    }}
-                  />
-                }
-                label="Select region on map"
-              />
-            </Box>
-          )}
         </Box>
       ),
     },
