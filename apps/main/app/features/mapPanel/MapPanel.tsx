@@ -1836,7 +1836,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
   }
 
   // Handle delivery area polygon selection
-  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (!isSelectingDeliveryArea) return
 
     // Get the clicked feature
@@ -2295,7 +2296,8 @@ export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
                 )
               }
             : isSelectingDeliveryArea
-              ? (evt: { target: any; point: any }) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+              ? (evt: { target: any; point: any }) => {
+                  // eslint-disable-line @typescript-eslint/no-explicit-any
                   // Handle delivery area polygon selection
                   const features = evt.target.queryRenderedFeatures(evt.point, {
                     layers: ["delivery-area-selection-layer"],
