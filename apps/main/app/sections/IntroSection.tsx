@@ -31,47 +31,25 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Blue decorative circles - clustered around 75% right, 50% down */}
+          {/* Blue decorative circles - layered asymmetric pattern */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "260px",
+              height: "260px",
+              top: "25%",
+              left: "35%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+            }}
+          />
           <Box
             sx={{
               position: "absolute",
               width: "180px",
               height: "180px",
-              top: "10%",
-              left: "50%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "120px",
-              height: "120px",
-              top: "25%",
-              left: "90%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "150px",
-              height: "150px",
-              top: "70%",
-              left: "60%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "90px",
-              height: "90px",
-              top: "75%",
-              left: "85%",
+              top: "8%",
+              left: "75%",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
@@ -81,65 +59,21 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "200px",
               height: "200px",
-              top: "5%",
-              left: "85%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "110px",
-              height: "110px",
-              top: "65%",
-              left: "40%",
+              top: "68%",
+              left: "88%",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
 
-          {/* White decorative circles - clustered around 75% right, 50% down */}
+          {/* White decorative circles - layered asymmetric pattern */}
           <Box
             sx={{
               position: "absolute",
-              width: "140px",
-              height: "140px",
-              top: "8%",
-              left: "65%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "100px",
-              height: "100px",
-              top: "35%",
-              left: "35%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "160px",
-              height: "160px",
-              top: "80%",
-              left: "70%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "80px",
-              height: "80px",
+              width: "230px",
+              height: "230px",
               top: "15%",
-              left: "75%",
+              left: "62%",
               borderRadius: "50%",
               backgroundColor: "rgba(255, 255, 255, 0.2)",
             }}
@@ -147,21 +81,21 @@ const IntroSection: React.FC = () => {
           <Box
             sx={{
               position: "absolute",
-              width: "130px",
-              height: "130px",
-              top: "55%",
-              left: "95%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              width: "170px",
-              height: "170px",
+              width: "190px",
+              height: "190px",
               top: "45%",
-              left: "25%",
+              left: "82%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              width: "220px",
+              height: "220px",
+              top: "72%",
+              left: "50%",
               borderRadius: "50%",
               backgroundColor: "rgba(255, 255, 255, 0.2)",
             }}
