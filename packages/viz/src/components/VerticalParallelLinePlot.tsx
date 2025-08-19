@@ -73,7 +73,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
     if (!data || data.length === 0 || !axes || axes.length === 0) return
 
     const svg = d3.select(svgRef.current)
-    svg.selectAll("*").remove()
+    
+    // Use transitions for smooth resizing
+    const t = d3.transition().duration(300).ease(d3.easeCubicOut)
+    
+    // Clear existing content with transition
+    svg.selectAll("*").transition(t).style("opacity", 0).remove()
 
     const innerWidth = currentWidth - margin.left - margin.right
     const innerHeight = currentHeight - margin.top - margin.bottom
@@ -100,13 +105,17 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`)
 
-    // Add background
+    // Add background with transition
     g.append("rect")
+      .attr("width", 0)
+      .attr("height", 0)
+      .attr("fill", colors.background)
+      .attr("opacity", 0)
+      .attr("rx", 4)
+      .transition(t)
       .attr("width", innerWidth)
       .attr("height", innerHeight)
-      .attr("fill", colors.background)
       .attr("opacity", 0.1)
-      .attr("rx", 4)
 
     // Draw horizontal axes
     axes.forEach((axis) => {
@@ -345,14 +354,21 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       style={{
         width: responsive ? "100%" : currentWidth,
         height: responsive ? "100%" : currentHeight,
-        minHeight: 300,
+        minHeight: responsive ? "100%" : 300, // Use full height when responsive, otherwise minimum 300px
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <svg
         ref={svgRef}
         width={currentWidth}
         height={currentHeight}
-        style={{ display: "block" }}
+        style={{ 
+          display: "block",
+          width: "100%",
+          height: "100%",
+          transition: "all 0.3s ease-out", // Smooth transition for chart resizing
+        }}
       />
     </div>
   )

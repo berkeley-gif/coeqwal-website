@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useRef } from "react"
 import {
   Box,
   IconButton,
@@ -46,6 +46,79 @@ import { MapPromptDialog } from "@repo/ui"
 
 import { useGlyphSettingsStore } from "@repo/ui"
 import { ScenarioGlyph, VerticalParallelLinePlot } from "@repo/viz"
+
+// Chart container component that calculates available height
+const ChartContainer = ({ 
+  expanded, 
+  chartData 
+}: { 
+  expanded: boolean
+  chartData: { key: string; props: any }
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [calculatedHeight, setCalculatedHeight] = useState(300)
+
+  // Calculate available height when expanded state changes
+  useEffect(() => {
+    const calculateHeight = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const availableHeight = expanded 
+          ? Math.max(rect.height, window.innerHeight * 0.6) // At least 60vh when expanded
+          : 300 // Default height when collapsed
+        
+        setCalculatedHeight(availableHeight)
+        console.log('Chart container height calculated:', availableHeight)
+      }
+    }
+
+    // Calculate immediately
+    calculateHeight()
+    
+    // Recalculate after a brief delay to ensure container has resized
+    const timeoutId = setTimeout(calculateHeight, 100)
+    
+    return () => clearTimeout(timeoutId)
+  }, [expanded])
+
+  // Recalculate on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (expanded && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const availableHeight = Math.max(rect.height, window.innerHeight * 0.6)
+        setCalculatedHeight(availableHeight)
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [expanded])
+
+  return (
+    <Box
+      ref={containerRef}
+      sx={{
+        flexGrow: 1,
+        width: "100%",
+        minHeight: expanded ? "60vh" : "300px",
+        height: expanded ? "100%" : "auto",
+        maxHeight: "100%",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        transition: "all 0.3s ease-out",
+      }}
+    >
+      <VerticalParallelLinePlot
+        key={chartData.key}
+        {...chartData.props}
+        height={calculatedHeight} // Pass calculated height to chart
+        responsive={false} // Disable responsive mode, use explicit height
+      />
+    </Box>
+  )
+}
 // Using simple centroid calculation instead of turf
 
 interface MapPanelProps {
@@ -1212,15 +1285,22 @@ const MapControls = ({
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: expandChart ? 0 : 2, // Remove gap when expanded to maximize height
             width: "100%",
             minWidth: 0,
             gridColumn: "6 / 8", // Spans columns 6-7 (2/7 width, same as left column)
             marginLeft: "-60px", // Move the card 60px to the left to clear glossary tabs
+            height: expandChart ? "calc(100vh - 32px)" : "auto", // Full viewport height minus margin when expanded
+            transition: "height 0.3s ease-out, gap 0.3s ease-out", // Smooth transitions for height and gap
           }}
         >
           {/* Alternative scenarios panel */}
-          <Box sx={{ position: "relative" }}>
+          <Box sx={{ 
+            position: "relative", 
+            height: expandChart ? "100%" : "auto", // Take full height when expanded
+            display: "flex",
+            flexDirection: "column",
+          }}>
             <ScenarioCard
               topLine={isThirdCardMinimized ? "" : "CHOOSE AND COMPARE"}
               headline={"Alternative scenarios"}
@@ -1229,6 +1309,10 @@ const MapControls = ({
                 opacity: isThirdCardMinimized ? 0.8 : 1,
                 backdropFilter: "blur(10px)",
                 pointerEvents: "auto",
+                height: expandChart ? "100%" : "auto", // Full height when chart is expanded
+                display: "flex",
+                flexDirection: "column",
+                transition: "height 0.3s ease-out", // Smooth height transition for card
               }}
               dropdownContent={
                 isThirdCardMinimized ? undefined : (
@@ -1277,34 +1361,123 @@ const MapControls = ({
                         </Button>
                       )}
                     </Box>
-                    {/* Card Accordion */}
-                    <CardAccordion
-                      sections={accordionSections}
-                      allowMultiple={false} // Only one section expanded at a time
-                      sx={{ flexGrow: 1 }}
-                    />
-
-                    {/* Compare Button at bottom */}
-                    <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
-                      <ActionCardButton
-                        title="Explore scenarios in depth"
-                        subtitle={
-                          selectedScenarios.length > 0
-                            ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
-                            : "Select scenarios to explore"
-                        }
-                        disabled={selectedScenarios.length === 0}
-                        onClick={() => {
-                          if (selectedScenarios.length > 0) {
-                            console.log(
-                              "Navigate to exploration view with:",
-                              selectedScenarios,
-                              selectedRegion,
-                            )
-                          }
+                    {/* Expanded Chart Mode - Full Height */}
+                    {expandChart ? (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          flexGrow: 1,
+                          minHeight: 0,
+                          height: "100%",
+                          mt: 2, // Add top margin above checkboxes when expanded
+                          transition: "all 0.3s ease-out", // Smooth transition for the entire expanded container
                         }}
-                      />
-                    </Box>
+                      >
+                        {/* Chart controls */}
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr",
+                            gap: 2,
+                            mb: 2,
+                            flexShrink: 0,
+                          }}
+                        >
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={isRelativeView}
+                                onChange={handleViewModeChange}
+                                size="small"
+                              />
+                            }
+                            label="relative to current operations"
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={highlightBaseline}
+                                onChange={handleHighlightBaselineChange}
+                                size="small"
+                              />
+                            }
+                            label="highlight current operations"
+                          />
+                        </Box>
+
+                        {/* Expand/Reduce button */}
+                        <Box sx={{ mb: 2, flexShrink: 0 }}>
+                          <Button
+                            variant="text"
+                            onClick={toggleExpandChart}
+                            sx={{
+                              fontSize: "1rem",
+                              fontWeight: 500,
+                              color: (theme) => theme.palette.blue.bright,
+                              padding: 0,
+                              minWidth: "auto",
+                              textTransform: "none",
+                              justifyContent: "flex-start",
+                              "&:hover": {
+                                color: (theme) => theme.palette.blue.darkest,
+                                backgroundColor: "transparent",
+                              },
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: "0.875em",
+                                marginRight: "8px",
+                                display: "inline-block",
+                                transform: expandChart ? "rotate(180deg)" : "rotate(0deg)",
+                                transition: "transform 0.2s ease",
+                              }}
+                            >
+                              ▼
+                            </span>
+                            {expandChart ? "Reduce" : "Expand"} chart
+                          </Button>
+                        </Box>
+
+                        {/* Full Height Chart */}
+                        <ChartContainer
+                          expanded={expandChart}
+                          chartData={chartData}
+                        />
+                      </Box>
+                    ) : (
+                      <>
+                        {/* Normal Mode - Card Accordion */}
+                        <CardAccordion
+                          sections={accordionSections}
+                          allowMultiple={false} // Only one section expanded at a time
+                          sx={{ flexGrow: 1 }}
+                        />
+
+                        {/* Compare Button at bottom */}
+                        <Box sx={{ p: 2, pt: 0, flexShrink: 0 }}>
+                          <ActionCardButton
+                            title="Explore scenarios in depth"
+                            subtitle={
+                              selectedScenarios.length > 0
+                                ? `${selectedScenarios.length} scenario${selectedScenarios.length > 1 ? "s" : ""} for ${selectedRegion}`
+                                : "Select scenarios to explore"
+                            }
+                            disabled={selectedScenarios.length === 0}
+                            onClick={() => {
+                              if (selectedScenarios.length > 0) {
+                                console.log(
+                                  "Navigate to exploration view with:",
+                                  selectedScenarios,
+                                  selectedRegion,
+                                )
+                              }
+                            }}
+                          />
+                        </Box>
+                      </>
+                    )}
                   </Box>
                 )
               }
