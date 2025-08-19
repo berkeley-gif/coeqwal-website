@@ -56,31 +56,59 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   const [currentWidth, setCurrentWidth] = useState(width)
   const [currentHeight, setCurrentHeight] = useState(height)
   
-  // Track filter ranges for each axis [min, max] - gentle filtering approach
-  const [axisFilters, setAxisFilters] = useState<Record<string, [number, number]>>({})
-  const [isFiltering, setIsFiltering] = useState(false)
+  // Track filter ranges for each axis [min, max] - elegant approach inspired by old code
+  const filterRanges = useRef<Record<string, [number, number]>>({})
   
-  // Gentle filtering function - uses opacity instead of DOM removal
-  const getScenarioOpacity = useCallback((scenario: VerticalParallelLineData, isHighlighted: boolean) => {
-    if (Object.keys(axisFilters).length === 0) {
-      return isHighlighted ? 0.9 : 0.2 // Default opacity when no filters
-    }
-    
-    // Check if scenario passes all filters
+  // Centralized filtering function - calculates opacity for any scenario
+  const getScenarioOpacity = useCallback((scenario: VerticalParallelLineData) => {
+    // Check if scenario passes all active filters
     const passesAllFilters = axes.every(axis => {
-      const filter = axisFilters[axis]
+      const filter = filterRanges.current[axis]
       if (!filter) return true
       
       const value = scenario.values[axis] || 0
       return value >= filter[0] && value <= filter[1]
     })
     
-    if (passesAllFilters) {
-      return isHighlighted ? 0.9 : 0.2 // Normal opacity for visible scenarios
-    } else {
-      return isHighlighted ? 0.3 : 0.05 // Dimmed but still visible for filtered scenarios
-    }
-  }, [axisFilters, axes])
+    return passesAllFilters 
+      ? (scenario.highlighted ? 0.9 : 0.2) 
+      : (scenario.highlighted ? 0.15 : 0.05)
+  }, [axes])
+
+  // Check if scenario is active (passes all filters) - for hover eligibility
+  const isScenarioActive = useCallback((scenario: VerticalParallelLineData) => {
+    return axes.every(axis => {
+      const filter = filterRanges.current[axis]
+      if (!filter) return true
+      
+      const value = scenario.values[axis] || 0
+      return value >= filter[0] && value <= filter[1]
+    })
+  }, [axes])
+
+  // Elegant filtering function - inspired by the old threshold approach
+  const updateScenarioVisibility = useCallback((g: d3.Selection<SVGGElement, unknown, null, undefined>) => {
+    // Update line and circle opacity based on current filter ranges
+    data.forEach((scenario, scenarioIndex) => {
+      const targetOpacity = getScenarioOpacity(scenario)
+      
+      // Smooth transitions for lines
+      g.select(`.line-${scenarioIndex}`)
+        .transition()
+        .duration(300)
+        .ease(d3.easeQuadOut)
+        .attr("opacity", targetOpacity)
+      
+      // Smooth transitions for circles
+      axes.forEach((axisName) => {
+        g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, '-')}`)
+          .transition()
+          .duration(300)
+          .ease(d3.easeQuadOut)
+          .attr("opacity", targetOpacity)
+      })
+    })
+  }, [data, axes, getScenarioOpacity])
 
   // Handle responsive sizing
   useEffect(() => {
@@ -240,143 +268,111 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .text(tick.toString()) // Show exact values including -0.5 and 0.5
       })
 
-      // Add slider arrows at both ends of each axis - pointing upward to endpoints
-      axisGroup.selectAll(".axis-arrow").remove() // Remove old arrows
+      // Add slider arrows using D3 join pattern for persistence (like old code)
+      // Store current filter in ref to persist across re-renders
+      if (!filterRanges.current[axis]) {
+        filterRanges.current[axis] = [-1, 1]
+      }
 
-      // Left arrow (pointing up to -1 endpoint) - draggable
-      const currentFilter = axisFilters[axis] || [-1, 1]
-      const leftPosition = scales[axis]!(currentFilter[0])
-      const leftArrow = axisGroup.append("g")
+      const currentFilter = filterRanges.current[axis]
+      
+      // Left arrow using D3 join pattern for persistence
+      const leftArrowData = [{ type: 'left', position: currentFilter[0] }]
+      const leftArrows = axisGroup.selectAll('.axis-arrow-left')
+        .data(leftArrowData)
+        
+      const leftArrowEnter = leftArrows.enter()
+        .append("g")
         .attr("class", "axis-arrow axis-arrow-left")
-        .attr("transform", `translate(${leftPosition}, 2)`) // Position at current filter value
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+        
+      leftArrowEnter.append("path")
+        .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
+        .attr("fill", "#449cd9")
+        .attr("stroke", "none")
+        .attr("transform", "translate(-8, -6)")
+
+      const leftArrowUpdate = leftArrowEnter.merge(leftArrows as any)
+      leftArrowUpdate
+        .attr("transform", (d: any) => `translate(${scales[axis]!(d.position)}, 2)`)
         .call(d3.drag<SVGGElement, unknown>()
           .on("start", function() {
             d3.select(this).style("cursor", "grabbing")
           })
           .on("drag", function(event) {
-            const newX = Math.max(0, Math.min(innerWidth, event.x))
-            const newValue = scales[axis]!.invert(newX)
-            const maxBound = currentFilter[1] - 0.1
+            const newValue = scales[axis]!.invert(event.x)
+            const currentRange = filterRanges.current[axis] || [-1, 1]
+            const maxBound = currentRange[1] - 0.1
             const clampedValue = Math.max(-1, Math.min(maxBound, newValue))
             
+            // Update position immediately
             d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
             
-            // Update the filter range indicator
-            const newRightPos = scales[axis]!(currentFilter[1])
-            const newLeftPos = scales[axis]!(clampedValue)
+            // Update filter range
+            filterRanges.current[axis] = [clampedValue, currentRange[1]]
+            
+            // Update range indicator
             axisGroup.select(".filter-range")
-              .attr("x1", newLeftPos)
-              .attr("x2", newRightPos)
+              .attr("x1", scales[axis]!(clampedValue))
+              .attr("x2", scales[axis]!(currentRange[1]))
             
-            console.log(`Left arrow drag - Axis: ${axis}, New range: [${clampedValue.toFixed(2)}, ${currentFilter[1].toFixed(2)}]`)
-            
-            // Gentle state update - no forced re-renders
-            setAxisFilters(prev => ({
-              ...prev,
-              [axis]: [clampedValue, currentFilter[1]]
-            }))
-            
-            // Smooth opacity transitions for affected scenarios
-            data.forEach((scenario, scenarioIndex) => {
-              const newOpacity = getScenarioOpacity(scenario, scenario.highlighted || false)
-              
-              // Update line opacity
-              g.select(`.line-${scenarioIndex}`)
-                .transition()
-                .duration(200)
-                .ease(d3.easeQuadOut)
-                .attr("opacity", newOpacity)
-              
-              // Update all circles for this scenario
-              axes.forEach((axisName) => {
-                g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, '-')}`)
-                  .transition()
-                  .duration(200)
-                  .ease(d3.easeQuadOut)
-                  .attr("opacity", newOpacity)
-              })
-            })
+            // Update scenario visibility
+            updateScenarioVisibility(g)
           })
           .on("end", function() {
             d3.select(this).style("cursor", "grab")
           })
         )
 
-      // Use exact SVG from DiscreteSlider pointing upward
-      leftArrow.append("path")
-        .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
-        .attr("fill", "#449cd9") // theme.palette.blue.bright
-        .attr("stroke", "none")
-        .attr("transform", "translate(-8, -6)") // Center the 16x12 arrow
-
-      // Right arrow (pointing up to +1 endpoint) - draggable
-      const rightPosition = scales[axis]!(currentFilter[1])
-      const rightArrow = axisGroup.append("g")
+      // Right arrow using D3 join pattern for persistence
+      const rightArrowData = [{ type: 'right', position: currentFilter[1] }]
+      const rightArrows = axisGroup.selectAll('.axis-arrow-right')
+        .data(rightArrowData)
+        
+      const rightArrowEnter = rightArrows.enter()
+        .append("g")
         .attr("class", "axis-arrow axis-arrow-right")
-        .attr("transform", `translate(${rightPosition}, 2)`) // Position at current filter value
         .style("cursor", "grab")
         .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
+        
+      rightArrowEnter.append("path")
+        .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
+        .attr("fill", "#449cd9")
+        .attr("stroke", "none")
+        .attr("transform", "translate(-8, -6)")
+
+      const rightArrowUpdate = rightArrowEnter.merge(rightArrows as any)
+      rightArrowUpdate
+        .attr("transform", (d: any) => `translate(${scales[axis]!(d.position)}, 2)`)
         .call(d3.drag<SVGGElement, unknown>()
           .on("start", function() {
             d3.select(this).style("cursor", "grabbing")
           })
           .on("drag", function(event) {
-            const newX = Math.max(0, Math.min(innerWidth, event.x))
-            const newValue = scales[axis]!.invert(newX)
-            const minBound = currentFilter[0] + 0.1
+            const newValue = scales[axis]!.invert(event.x)
+            const currentRange = filterRanges.current[axis] || [-1, 1]
+            const minBound = currentRange[0] + 0.1
             const clampedValue = Math.min(1, Math.max(minBound, newValue))
             
+            // Update position immediately
             d3.select(this).attr("transform", `translate(${scales[axis]!(clampedValue)}, 2)`)
             
-            // Update the filter range indicator
-            const newLeftPos = scales[axis]!(currentFilter[0])
-            const newRightPos = scales[axis]!(clampedValue)
+            // Update filter range
+            filterRanges.current[axis] = [currentRange[0], clampedValue]
+            
+            // Update range indicator
             axisGroup.select(".filter-range")
-              .attr("x1", newLeftPos)
-              .attr("x2", newRightPos)
+              .attr("x1", scales[axis]!(currentRange[0]))
+              .attr("x2", scales[axis]!(clampedValue))
             
-            console.log(`Right arrow drag - Axis: ${axis}, New range: [${currentFilter[0].toFixed(2)}, ${clampedValue.toFixed(2)}]`)
-            
-            // Gentle state update - no forced re-renders
-            setAxisFilters(prev => ({
-              ...prev,
-              [axis]: [currentFilter[0], clampedValue]
-            }))
-            
-            // Smooth opacity transitions for affected scenarios
-            data.forEach((scenario, scenarioIndex) => {
-              const newOpacity = getScenarioOpacity(scenario, scenario.highlighted || false)
-              
-              // Update line opacity
-              g.select(`.line-${scenarioIndex}`)
-                .transition()
-                .duration(200)
-                .ease(d3.easeQuadOut)
-                .attr("opacity", newOpacity)
-              
-              // Update all circles for this scenario
-              axes.forEach((axisName) => {
-                g.select(`.circle-${scenarioIndex}-${axisName.replace(/\s+/g, '-')}`)
-                  .transition()
-                  .duration(200)
-                  .ease(d3.easeQuadOut)
-                  .attr("opacity", newOpacity)
-              })
-            })
+            // Update scenario visibility
+            updateScenarioVisibility(g)
           })
           .on("end", function() {
             d3.select(this).style("cursor", "grab")
           })
         )
-
-      // Use exact SVG from DiscreteSlider pointing upward
-      rightArrow.append("path")
-        .attr("d", "M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z")
-        .attr("fill", "#449cd9") // theme.palette.blue.bright
-        .attr("stroke", "none")
-        .attr("transform", "translate(-8, -6)") // Center the 16x12 arrow
 
       // Add visual range indicator if there's an active filter
       if (currentFilter[0] > -1 || currentFilter[1] < 1) {
@@ -391,30 +387,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("opacity", 0.3)
       }
 
-      // Add hover effects to arrows (exact SliderPointer style)
-      axisGroup.selectAll(".axis-arrow")
-        .on("mouseover", function() {
-          d3.select(this)
-            .transition()
-            .duration(200)
-            .attr("transform", function() {
-              const isLeft = d3.select(this).classed("axis-arrow-left")
-              const position = isLeft ? leftPosition : rightPosition
-              return `translate(${position}, 2) scale(1.1)`
-            })
-            .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.16))")
-        })
-        .on("mouseout", function() {
-          d3.select(this)
-            .transition()
-            .duration(200)
-            .attr("transform", function() {
-              const isLeft = d3.select(this).classed("axis-arrow-left")
-              const position = isLeft ? leftPosition : rightPosition
-              return `translate(${position}, 2)`
-            })
-            .style("filter", "drop-shadow(0 1px 3px rgba(0,0,0,0.12))")
-        })
+
     })
 
     // Handle baseline - thick orange line for current operations
@@ -505,8 +478,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       const lineColor = lineColors.length > dataIndex ? lineColors[dataIndex]! : 
                        (d.highlighted ? colors.highlighted : colors.default)
       
-      // Use gentle opacity-based filtering instead of aggressive visibility checks
-      const targetOpacity = getScenarioOpacity(d, d.highlighted || false)
+      // Use centralized opacity calculation for consistency
+      const targetOpacity = getScenarioOpacity(d)
       
       const pathData = axes.map(axis => [axis, d.values[axis] || 0] as [string, number])
 
@@ -519,28 +492,32 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           .attr("stroke-width", d.highlighted ? 2.5 : 1.5) // Original widths
           .attr("opacity", targetOpacity) // Gentle opacity-based filtering
           .style("cursor", "pointer")
-          .on("mouseover", function () {
+                    .on("mouseover", function () {
+            // Only allow hover highlighting for active (unfiltered) scenarios
+            if (!isScenarioActive(d)) return
+            
             onLineHover?.(d)
             d3.select(this).attr("stroke-width", 3).attr("opacity", 1)
             
             // Highlight all corresponding circles for this line
             axes.forEach((axis) => {
               g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, '-')}`)
-              .attr("r", d.highlighted ? 6 : 5)
-              .attr("opacity", 1)
+                .attr("r", d.highlighted ? 6 : 5)
+                .attr("opacity", 1)
             })
           })
           .on("mouseout", function () {
             onLineHover?.(null)
+            const currentOpacity = getScenarioOpacity(d)
             d3.select(this)
               .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
-              .attr("opacity", d.highlighted ? 0.9 : 0.2)
+              .attr("opacity", currentOpacity) // Respect current filter state
               
             // Reset all corresponding circles for this line
             axes.forEach((axis) => {
               g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, '-')}`)
                 .attr("r", d.highlighted ? 5 : 4)
-                .attr("opacity", d.highlighted ? 1 : 0.8)
+                .attr("opacity", currentOpacity) // Respect current filter state
             })
           })
           .on("click", function () {
@@ -569,6 +546,9 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("opacity", targetOpacity) // Gentle opacity-based filtering
             .style("cursor", "pointer")
             .on("mouseover", function () {
+              // Only allow hover highlighting for active (unfiltered) scenarios
+              if (!isScenarioActive(d)) return
+              
               onLineHover?.(d)
               d3.select(this).attr("r", d.highlighted ? 6 : 5).attr("opacity", 1)
               
@@ -586,20 +566,21 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             })
             .on("mouseout", function () {
               onLineHover?.(null)
+              const currentOpacity = getScenarioOpacity(d)
               d3.select(this)
                 .attr("r", d.highlighted ? 5 : 4)
-                .attr("opacity", d.highlighted ? 1 : 0.8)
+                .attr("opacity", currentOpacity) // Respect current filter state
               
               // Reset the corresponding line for this circle
               g.select(`.line-${dataIndex}`)
                 .attr("stroke-width", d.highlighted ? 2.5 : 1.5)
-                .attr("opacity", d.highlighted ? 0.9 : 0.2)
+                .attr("opacity", currentOpacity) // Respect current filter state
               
               // Reset all other circles for this same line/scenario
               axes.forEach((otherAxis) => {
                 g.select(`.circle-${dataIndex}-${otherAxis.replace(/\s+/g, '-')}`)
                   .attr("r", d.highlighted ? 5 : 4)
-                  .attr("opacity", d.highlighted ? 1 : 0.8)
+                  .attr("opacity", currentOpacity) // Respect current filter state
               })
             })
             .on("click", function () {
@@ -632,7 +613,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         .attr("x", newWidth / 2)
         .attr("y", 20)
     }
-  }, [data, axes, currentWidth, currentHeight, margin, colors, lineColors, showBaseline, baselineData, title, onLineHover, onLineClick, axisFilters])
+  }, [data, axes, currentWidth, currentHeight, margin, colors, lineColors, showBaseline, baselineData, title, onLineHover, onLineClick])
 
   // Initial render (no animation)
   useEffect(() => {
