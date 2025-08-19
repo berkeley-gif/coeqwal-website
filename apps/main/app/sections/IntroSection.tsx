@@ -22,7 +22,7 @@ const IntroSection: React.FC = () => {
           height: "100vh",
         }}
       >
-        {/* Circular crop images overlay */}
+        {/* Circular crop images collage - 7 selected images */}
         <Box
           sx={{
             position: "absolute",
@@ -31,211 +31,94 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Image 1 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/1.png"
-            sx={{
-              position: "absolute",
-              width: "120px",
-              height: "120px",
-              top: "10%",
-              right: "15%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 2 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/2.png"
-            sx={{
-              position: "absolute",
-              width: "80px",
-              height: "80px",
-              top: "25%",
-              right: "8%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 3 */}
+          {/* Image 3 - Large central */}
           <Box
             component="img"
             src="/images/circular-crops/3.png"
             sx={{
               position: "absolute",
-              width: "100px",
-              height: "100px",
-              top: "35%",
-              right: "25%",
+              width: "320px",
+              height: "320px",
+              top: "10%",
+              right: "5%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 4 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/4.png"
-            sx={{
-              position: "absolute",
-              width: "90px",
-              height: "90px",
-              bottom: "30%",
-              right: "12%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 5 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/5.png"
-            sx={{
-              position: "absolute",
-              width: "110px",
-              height: "110px",
-              bottom: "15%",
-              right: "20%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 6 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/6.png"
-            sx={{
-              position: "absolute",
-              width: "75px",
-              height: "75px",
-              top: "15%",
-              right: "35%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 7 */}
+          {/* Image 7 - Large top right */}
           <Box
             component="img"
             src="/images/circular-crops/7.png"
             sx={{
               position: "absolute",
-              width: "95px",
-              height: "95px",
-              top: "45%",
-              right: "5%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 8 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/8.png"
-            sx={{
-              position: "absolute",
-              width: "85px",
-              height: "85px",
-              bottom: "40%",
-              right: "30%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 9 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/9.png"
-            sx={{
-              position: "absolute",
-              width: "70px",
-              height: "70px",
-              top: "60%",
-              right: "18%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 10 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/10.png"
-            sx={{
-              position: "absolute",
-              width: "105px",
-              height: "105px",
-              top: "20%",
-              right: "45%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 11 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/11.png"
-            sx={{
-              position: "absolute",
-              width: "88px",
-              height: "88px",
-              bottom: "25%",
+              width: "250px",
+              height: "250px",
+              top: "5%",
               right: "40%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 12 */}
+          {/* Image 12 - Medium top far right */}
           <Box
             component="img"
             src="/images/circular-crops/12.png"
             sx={{
               position: "absolute",
-              width: "92px",
-              height: "92px",
-              top: "50%",
-              right: "40%",
+              width: "200px",
+              height: "200px",
+              top: "2%",
+              right: "70%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 13 */}
+          {/* Image 9 - Large bottom right */}
           <Box
             component="img"
-            src="/images/circular-crops/13.png"
+            src="/images/circular-crops/9.png"
             sx={{
               position: "absolute",
-              width: "78px",
-              height: "78px",
-              bottom: "10%",
-              right: "35%",
+              width: "280px",
+              height: "280px",
+              bottom: "15%",
+              right: "8%",
               borderRadius: "50%",
             }}
           />
-          {/* Image 14 */}
+          {/* Image 14 - Large bottom center */}
           <Box
             component="img"
             src="/images/circular-crops/14.png"
             sx={{
               position: "absolute",
-              width: "98px",
-              height: "98px",
-              top: "8%",
-              right: "25%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 15 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/15.png"
-            sx={{
-              position: "absolute",
-              width: "82px",
-              height: "82px",
-              top: "65%",
-              right: "8%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 16 */}
-          <Box
-            component="img"
-            src="/images/circular-crops/16.png"
-            sx={{
-              position: "absolute",
-              width: "115px",
-              height: "115px",
+              width: "300px",
+              height: "300px",
               bottom: "5%",
-              right: "15%",
+              right: "35%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 5 - Medium middle right */}
+          <Box
+            component="img"
+            src="/images/circular-crops/5.png"
+            sx={{
+              position: "absolute",
+              width: "220px",
+              height: "220px",
+              top: "35%",
+              right: "2%",
+              borderRadius: "50%",
+            }}
+          />
+          {/* Image 11 - Large bottom far right */}
+          <Box
+            component="img"
+            src="/images/circular-crops/11.png"
+            sx={{
+              position: "absolute",
+              width: "240px",
+              height: "240px",
+              bottom: "2%",
+              right: "65%",
               borderRadius: "50%",
             }}
           />
@@ -288,9 +171,7 @@ const IntroSection: React.FC = () => {
             <Typography
               variant="h1"
               sx={{
-                mb: 4,
-                textAlign: "left",
-                lineHeight: 1.1,
+                mb: 2
               }}
             >
               Rethink
@@ -305,7 +186,7 @@ const IntroSection: React.FC = () => {
               variant="body1"
               sx={{
                 textAlign: "left",
-                maxWidth: { xs: "600px", md: "500px" },
+                maxWidth: { xs: "600px", md: "520px" },
                 mb: 4,
               }}
             >
@@ -314,11 +195,13 @@ const IntroSection: React.FC = () => {
               conditions and future climates.
             </Typography>
 
+            {/* Arrow positioned at text block midpoint */}
             <Box
               sx={{
+                width: { xs: "600px", md: "520px" },
                 display: "flex",
                 justifyContent: "center",
-                maxWidth: { xs: "600px", md: "500px" }, // Match text block width
+                mt: 4,
               }}
             >
               <ScrollIndicator
