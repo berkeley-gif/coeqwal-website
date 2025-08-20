@@ -7,43 +7,66 @@ import type { CSSProperties } from "react"
 /* ========================================================
  TOC
  ========================================================
-  1. Global theme values
-     - Typography (font families, type scale)
-     - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth)
-     - Palette colors (including categories, ambient)
-     - Border radius values
-     - Border styles
-     - Shadows
-     - Z-Index values
-     - Reusable mixins (hover effects, drawer content, tooltip buttons, form controls)
-
- 2. Theme configuration
-    - Base theme creation
-    - Helper functions (border styles, drawer mixins)
-    - Main theme object with:
-      - Layout properties
-      - Cards typography and spacing
-      - Palette configuration
-      - Typography variants
-      - Shape settings
-      - Component overrides (MUI components)
-      - Global styles (CssBaseline)
-      - Custom mixins
-
- 3. Custom theme properties
-    - Border utilities
-    - Background overlays
-    - Border radius application
-    - Drawer navigation colors
-    - Exported constants
-
- 4. TypeScript customizations
-    - Custom palette extensions
-    - Custom theme interface extensions
-    - Z-Index interface
-    - Cards interface
-    - Component variant overrides
-    - Typography variant extensions
+| 1. Global theme values
+|    - Typography scale (Perfect Fourth ratio with typeScale constants)
+|    - Font families (3 fonts: ingeborgTrial, neueHaasText, neueHaasDisplay)
+|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth)
+|    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
+|    - Category & tier colors for data visualization
+|    - Border radius values
+|    - Border styles
+|    - Shadows
+|    - Z-Index layering system (background, content, interactive, navigation, system)
+|    - Map prompt dialog configuration
+|
+| 2. Reusable mixins (defined before theme creation)
+|    - Scenario card list styling
+|    - Tooltip action button styling
+|    - Triangle checkbox mixin for expandable controls
+|    - Form control base mixin (standardized 20px × 20px controls)
+|    - Card typography mixins (eyebrow, cardTitle, sectionHeader, etc.)
+|    - Drawer content styling mixins
+|
+| 3. Theme configuration
+|    - Base theme creation
+|    - Helper functions (createBorderStyles, createDrawerMixins)
+|    - Main theme object with:
+|      - Custom layout properties
+|      - Cards typography scale and spacing system
+|      - California Water palette integration
+|      - Typography variants using typeScale
+|      - Shape settings
+|      - Z-index configuration
+|      - Component overrides for MUI components:
+|        * CssBaseline (incl. font imports)
+|        * Button variants (pill, standard, outlined, actionCard)
+|        * Drawer (mini-drawer with transitions)
+|        * Form controls (Checkbox, Radio, FormControlLabel)
+|        * Navigation (incl tabs)
+|        * UI components (Typography, Paper, Toolbar, Tooltip, etc.)
+|      - Custom mixins integration
+|
+| 4. Custom theme properties (post-creation)
+|    - Border utilities with palette colors
+|    - Background overlays (transparent, paragraph, overlay variants)
+|    - Border radius application
+|    - Drawer navigation color palette
+|    - Map prompt dialog configuration
+|    - Exported mixin constants
+|
+| 5. TypeScript customizations
+|    - Extended palette interface (brand, blue, accent, nature, utility, grey, ambient)
+|    - Category & tier color interfaces
+|    - Custom theme interface extensions (layout, cards, border, background, mapPromptDialog)
+|    - Z-Index interface extensions (layered system with semantic names)
+|    - Cards typography and spacing interfaces
+|    - Component variant overrides (Button, Typography)
+|    - Custom mixins interface (all reusable mixins)
+|
+| 6. Documentation & usage guides
+|    - Form control conventions and specifications
+|    - Z-index layering system guide
+|    - Usage examples and best practices
  ========================================================
 
 
@@ -56,19 +79,19 @@ import type { CSSProperties } from "react"
 // TYPOGRAPHY SCALE
 // ===============================================================================
 //
-// Perfect Fourth (1.333) type scale using Neue Haas Grotesk Display
-// Headlines: Display Medium | Body text: Text Regular
+// Perfect Fourth (1.333) type scale using mixed font families
+// Large headlines: Ingeborg Trial | Medium headlines: Neue Haas Display | Body text: Neue Haas Text
 // Base: 1.25rem body text
 //
 // Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 6rem (96px) - Hero headlines "Tell your water story" (Display Medium)
-// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Display Medium)
-// • h3: 3.375rem (54px) - Subsection headlines (Display Medium)
-// • h4: 2.53rem (40.5px) - Card titles and smaller headlines (Display Medium)
-// • h5: 1.9rem (30.4px) - Labels and minor headlines (Display Medium)
-// • h6: 1.425rem (22.8px) - Small headlines and captions (Display Medium)
-// • body1: 1.25rem (20px) - Primary body text (Text Regular)
-// • body2: 1rem (16px) - Dashboard interface text (Text Regular)
+// • h1: 6rem (96px) - Hero headlines "Rethink California Water" (Ingeborg Trial Bold)
+// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Ingeborg Trial Bold)
+// • h3: 3.375rem (54px) - Subsection headlines (Neue Haas Display Medium)
+// • h4: 2.53rem (40.5px) - Card titles and smaller headlines (Neue Haas Text Regular)
+// • h5: 1.9rem (30.4px) - Labels and minor headlines (Neue Haas Display Medium)
+// • h6: 1.425rem (22.8px) - Small headlines and captions (Neue Haas Display SemiBold)
+// • body1: 1.25rem (20px) - Primary body text (Neue Haas Text Regular)
+// • body2: 0.95rem (15.2px) - Dashboard interface text (Neue Haas Text Regular)
 //
 
 const typeScale = {
@@ -92,8 +115,6 @@ const themeValues = {
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasDisplay:
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    gtSuperText:
-      '"GT Super Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     ingeborgTrial:
       '"Ingeborg Trial", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
@@ -102,15 +123,15 @@ const themeValues = {
   layout: {
     headerHeight: 64,
     drawer: {
-      width: 226,
-      closedWidth: 52,
+      width: 360,
+      closedWidth: 60,
       glossaryWidth: 360,
     },
   },
 
   // Color Palette - California Water theme
   palette: {
-    // Core brand colors (as in home panel gradient)
+    // Core brand colors
     brand: {
       sky: "#92C1D5", // Top of gradient - sky blue
       water: "#64A4D6", // Bottom of gradient - water blue
@@ -162,8 +183,8 @@ const themeValues = {
 
     // Ambient/mood elements
     ambient: {
-      rippleWhite: "rgba(255, 255, 255, 0.16)", // Water ripples - white at 16% opacity
-      rippleBlue: "rgba(42, 82, 135, 0.16)", // Water ripples - blue (#2A5287) at 16% opacity
+      rippleWhite: "rgba(255, 255, 255, 0.16)", // Water bubbles - white at 16% opacity
+      rippleBlue: "rgba(42, 82, 135, 0.16)", // Water bubbles - blue (#2A5287) at 16% opacity
     },
 
     categories: {
@@ -280,36 +301,7 @@ const themeValues = {
   },
 }
 
-// Reusable paragraph hover mixin (background + icon scale)
-const hoverParagraphMixin = {
-  cursor: "pointer",
-  p: 1,
-  borderRadius: 1,
-  transition: "background-color 0.3s ease",
-  "&:hover": {
-    backgroundColor: "rgba(25, 118, 210, 0.1)",
-  },
-  "&:hover .MuiSvgIcon-root": {
-    color: "#42a5f5",
-    transform: "scale(1.2)",
-  },
-  "&:active": {
-    backgroundColor: "rgba(25, 118, 210, 0.16)",
-  },
-} as const
 
-// Darkened variant of the hover paragraph (used when paragraphShade flag is true)
-const hoverParagraphDarkenedMixin = {
-  ...hoverParagraphMixin,
-  backgroundColor: "rgba(54, 69, 99, 0.6)", // Payne's gray with blue and transparency
-  color: "white",
-  "&:hover": {
-    backgroundColor: "rgba(54, 69, 99, 0.7)",
-  },
-  "&:active": {
-    backgroundColor: "rgba(54, 69, 99, 0.8)",
-  },
-} as const
 
 // ScenarioCard list styling mixin
 const scenarioCardListMixin = {
@@ -831,345 +823,12 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: `
         @import url("https://use.typekit.net/rxm7kha.css");
-        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-        @import url("https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap");
         
-        /* Tiempos Headline Font - All Weights */
-        @font-face {
-          font-family: 'Tiempos Headline';
-          src: url('/fonts/test-tiempos-headline-light.woff2') format('woff2');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Headline';
-          src: url('/fonts/test-tiempos-headline-regular.woff2') format('woff2');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Headline';
-          src: url('/fonts/test-tiempos-headline-medium.woff2') format('woff2');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Headline';
-          src: url('/fonts/test-tiempos-headline-semibold.woff2') format('woff2');
-          font-weight: 600;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Headline';
-          src: url('/fonts/test-tiempos-headline-bold.woff2') format('woff2');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        /* Tiempos Text Font - All Weights */
-        @font-face {
-          font-family: 'Tiempos Text';
-          src: url('/fonts/test-tiempos-text-regular.woff2') format('woff2');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Text';
-          src: url('/fonts/test-tiempos-text-medium.woff2') format('woff2');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Text';
-          src: url('/fonts/test-tiempos-text-semibold.woff2') format('woff2');
-          font-weight: 600;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Tiempos Text';
-          src: url('/fonts/test-tiempos-text-bold.woff2') format('woff2');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        /* Crimson Text Font */
-        @font-face {
-          font-family: 'Crimson Text';
-          src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlp2gwHKFkZgtmSR3NB0oRJfbwhT.woff2') format('woff2');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Crimson Text';
-          src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlppgwHKFkZgtmSR3NB0oRJX1C1GA9c.woff2') format('woff2');
-          font-weight: 600;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'Crimson Text';
-          src: url('https://fonts.gstatic.com/s/crimsontext/v19/wlppgwHKFkZgtmSR3NB0oRJX1C1GA9c.woff2') format('woff2');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* PP Eiko Font Family */
-        @font-face {
-          font-family: 'PP Eiko';
-          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Thin.otf') format('opentype');
-          font-weight: 100;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Eiko';
-          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Medium.otf') format('opentype');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Eiko';
-          src: url('/fonts/PP Eiko-Free For Personal Use v2.0/PPEiko-Heavy.otf') format('opentype');
-          font-weight: 900;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* PP Fragment Sans Font Family */
-        @font-face {
-          font-family: 'PP Fragment Sans';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansLight.otf') format('opentype');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Fragment Sans';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansRegular.otf') format('opentype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Fragment Sans';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SansExtraBold.otf') format('opentype');
-          font-weight: 800;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* PP Fragment Serif Font Family */
-        @font-face {
-          font-family: 'PP Fragment Serif';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifLight.otf') format('opentype');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Fragment Serif';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifRegular.otf') format('opentype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Fragment Serif';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-SerifExtraBold.otf') format('opentype');
-          font-weight: 800;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* PP Fragment Glare Font Family */
-        @font-face {
-          font-family: 'PP Fragment Glare';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareLight.otf') format('opentype');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Fragment Glare';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareRegular.otf') format('opentype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Fragment Glare';
-          src: url('/fonts/PP Fragment - Free for Personal Use v2.0/otf/PPFragment-GlareExtraBold.otf') format('opentype');
-          font-weight: 800;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* PP Kyoto Font Family */
-        @font-face {
-          font-family: 'PP Kyoto';
-          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Thin.otf') format('opentype');
-          font-weight: 100;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Kyoto';
-          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Light.otf') format('opentype');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Kyoto';
-          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Medium.otf') format('opentype');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Kyoto';
-          src: url('/fonts/PP Kyoto - Free for Personal Use v1.0/otf/PPKyoto-Extrabold.otf') format('opentype');
-          font-weight: 800;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* PP Object Sans Font Family */
-        @font-face {
-          font-family: 'PP Object Sans';
-          src: url('/fonts/PP Object Sans - Free for personal use v2.3/PPObjectSans-Regular.otf') format('opentype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'PP Object Sans';
-          src: url('/fonts/PP Object Sans - Free for personal use v2.3/PPObjectSans-Heavy.otf') format('opentype');
-          font-weight: 900;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* GT Super Display Font Family */
-        @font-face {
-          font-family: 'GT Super Display';
-          src: url('/fonts/GT-Super-Display-Light-Trial.otf') format('opentype');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Display';
-          src: url('/fonts/GT-Super-Display-Regular-Trial.otf') format('opentype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Display';
-          src: url('/fonts/GT-Super-Display-Medium-Trial.otf') format('opentype');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Display';
-          src: url('/fonts/GT-Super-Display-Bold-Trial.otf') format('opentype');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Display';
-          src: url('/fonts/GT-Super-Display-Super-Trial.otf') format('opentype');
-          font-weight: 900;
-          font-style: normal;
-          font-display: swap;
-        }
-
         /* Ingeborg Trial Font Family */
         @font-face {
           font-family: 'Ingeborg Trial';
           src: url('/fonts/IngeborgTrial-Bold.otf') format('opentype');
           font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-
-        /* GT Super Text Font Family */
-        @font-face {
-          font-family: 'GT Super Text';
-          src: url('/fonts/GT-Super-Text-Book-Trial.otf') format('opentype');
-          font-weight: 300;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Text';
-          src: url('/fonts/GT-Super-Text-Regular-Trial.otf') format('opentype');
-          font-weight: 400;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Text';
-          src: url('/fonts/GT-Super-Text-Medium-Trial.otf') format('opentype');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Text';
-          src: url('/fonts/GT-Super-Text-Bold-Trial.otf') format('opentype');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-        
-        @font-face {
-          font-family: 'GT Super Text';
-          src: url('/fonts/GT-Super-Text-Black-Trial.otf') format('opentype');
-          font-weight: 900;
           font-style: normal;
           font-display: swap;
         }
@@ -1670,8 +1329,6 @@ const theme = createTheme({
   },
   mixins: {
     ...baseTheme.mixins,
-    hoverParagraph: hoverParagraphMixin,
-    hoverParagraphDarkened: hoverParagraphDarkenedMixin,
     drawerContent: drawerContentMixins,
     cardTypography: cardTypographyMixins,
     scenarioCardList: scenarioCardListMixin,
@@ -1712,7 +1369,6 @@ theme.drawerNavigation = {
 theme.mapPromptDialog = themeValues.mapPromptDialog
 
 // expose mixin constants for easy import if needed
-export const hoverParagraph = hoverParagraphMixin
 export const cardTypography = cardTypographyMixins
 export const scenarioCardList = scenarioCardListMixin
 export const tooltipActionButton = tooltipActionButtonMixin
