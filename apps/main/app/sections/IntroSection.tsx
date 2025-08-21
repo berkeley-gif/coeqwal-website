@@ -176,88 +176,7 @@ const IntroSection: React.FC = () => {
           />
         </Box>
 
-        {/* Background circles for images */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: (theme) => theme.zIndex.introForegroundImages - 1,
-            pointerEvents: "none",
-          }}
-        >
-          {/* Background circle for Image 7 (14vw image at top: 20%, left: 42%) */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(14)}
-            sx={{
-              position: "absolute",
-              width: "calc(14vw + 1.56vw)",
-              height: "calc(14vw + 1.56vw)",
-              top: "calc(20% - 0.78vw)",
-              left: "calc(42% - 0.78vw)",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          {/* Background circle for Image 12 (10vw image at top: 16%, left: 78%) */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              width: "calc(10vw + 1.11vw)",
-              height: "calc(10vw + 1.11vw)",
-              top: "calc(16% - 0.56vw)",
-              left: "calc(78% - 0.56vw)",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          {/* Background circle for Image 9 (12vw image at top: 62%, left: 68%) */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(12)}
-            sx={{
-              position: "absolute",
-              width: "calc(12vw + 1.33vw)",
-              height: "calc(12vw + 1.33vw)",
-              top: "calc(62% - 0.67vw)",
-              left: "calc(68% - 0.67vw)",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          {/* Background circle for Image 14 (10vw image at top: 42%, left: 80%) */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              width: "calc(10vw + 1.11vw)",
-              height: "calc(10vw + 1.11vw)",
-              top: "calc(42% - 0.56vw)",
-              left: "calc(80% - 0.56vw)",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          {/* Background circle for Image 11 (16vw image at top: 50%, left: 46%) */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(16)}
-            sx={{
-              position: "absolute",
-              width: "calc(16vw + 1.78vw)",
-              height: "calc(16vw + 1.78vw)",
-              top: "calc(50% - 0.89vw)",
-              left: "calc(46% - 0.89vw)",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-        </Box>
-
-        {/* Circular crop images collage - 7 images */}
+        {/* Circular crop images with halos - grouped together */}
         <Box
           sx={{
             position: "absolute",
@@ -266,109 +185,211 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Image 7 - Top left of cluster */}
+          {/* Image 7 with halo - Top left of cluster */}
           <Box
-            component={motion.img}
+            component={motion.div}
             {...generateFloatingAnimation(14)}
-            src="/images/circular-crops/8.png"
             sx={{
               position: "absolute",
-              width: "14vw",
-              height: "14vw",
               top: "20%",
               left: "42%",
-              borderRadius: "50%",
             }}
-          />
-          {/* Image 12 - Top right of cluster */}
+          >
+            {/* Halo circle for Image 7 */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "calc(14vw + 1.56vw)",
+                height: "calc(14vw + 1.56vw)",
+                top: "-0.78vw",
+                left: "-0.78vw",
+                borderRadius: "50%",
+                backgroundColor: "rgba(42, 82, 135, 0.2)",
+                zIndex: -1,
+              }}
+            />
+            <Box
+              component="img"
+              src="/images/circular-crops/8.png"
+              sx={{
+                width: "14vw",
+                height: "14vw",
+                borderRadius: "50%",
+              }}
+            />
+          </Box>
+
+          {/* Image 12 with halo - Top right of cluster */}
           <Box
-            component={motion.img}
+            component={motion.div}
             {...generateFloatingAnimation(10)}
-            src="/images/circular-crops/12.png"
             sx={{
               position: "absolute",
-              width: "10vw",
-              height: "10vw",
               top: "16%",
               left: "78%",
-              borderRadius: "50%",
             }}
-          />
-          {/* Image 9 - Bottom right of cluster */}
+          >
+            {/* Halo circle for Image 12 */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "calc(10vw + 1.11vw)",
+                height: "calc(10vw + 1.11vw)",
+                top: "-0.56vw",
+                left: "-0.56vw",
+                borderRadius: "50%",
+                backgroundColor: "rgba(42, 82, 135, 0.2)",
+                zIndex: -1,
+              }}
+            />
+            <Box
+              component="img"
+              src="/images/circular-crops/12.png"
+              sx={{
+                width: "10vw",
+                height: "10vw",
+                borderRadius: "50%",
+              }}
+            />
+          </Box>
+
+          {/* Image 9 with halo - Bottom right of cluster */}
           <Box
-            component={motion.img}
+            component={motion.div}
             {...generateFloatingAnimation(12)}
-            src="/images/circular-crops/9.png"
             sx={{
               position: "absolute",
-              width: "12vw",
-              height: "12vw",
               top: "62%",
               left: "68%",
-              borderRadius: "50%",
             }}
-          />
-          {/* Image 14 - Bottom left of cluster */}
+          >
+            {/* Halo circle for Image 9 */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "calc(12vw + 1.33vw)",
+                height: "calc(12vw + 1.33vw)",
+                top: "-0.67vw",
+                left: "-0.67vw",
+                borderRadius: "50%",
+                backgroundColor: "rgba(42, 82, 135, 0.2)",
+                zIndex: -1,
+              }}
+            />
+            <Box
+              component="img"
+              src="/images/circular-crops/9.png"
+              sx={{
+                width: "12vw",
+                height: "12vw",
+                borderRadius: "50%",
+              }}
+            />
+          </Box>
+
+          {/* Image 14 with halo - Bottom left of cluster */}
           <Box
-            component={motion.img}
+            component={motion.div}
             {...generateFloatingAnimation(10)}
-            src="/images/circular-crops/14.png"
             sx={{
               position: "absolute",
-              width: "10vw",
-              height: "10vw",
               top: "42%",
               left: "80%",
-              borderRadius: "50%",
             }}
-          />
-          {/* Image 11 - Left side of cluster */}
+          >
+            {/* Halo circle for Image 14 */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "calc(10vw + 1.11vw)",
+                height: "calc(10vw + 1.11vw)",
+                top: "-0.56vw",
+                left: "-0.56vw",
+                borderRadius: "50%",
+                backgroundColor: "rgba(42, 82, 135, 0.2)",
+                zIndex: -1,
+              }}
+            />
+            <Box
+              component="img"
+              src="/images/circular-crops/14.png"
+              sx={{
+                width: "10vw",
+                height: "10vw",
+                borderRadius: "50%",
+              }}
+            />
+          </Box>
+
+          {/* Image 11 with halo - Left side of cluster */}
           <Box
-            component={motion.img}
+            component={motion.div}
             {...generateFloatingAnimation(16)}
-            src="/images/circular-crops/4.png"
             sx={{
               position: "absolute",
-              width: "16vw",
-              height: "16vw",
               top: "50%",
               left: "46%",
-              borderRadius: "50%",
             }}
-          />
+          >
+            {/* Halo circle for Image 11 */}
+            <Box
+              sx={{
+                position: "absolute",
+                width: "calc(16vw + 1.78vw)",
+                height: "calc(16vw + 1.78vw)",
+                top: "-0.89vw",
+                left: "-0.89vw",
+                borderRadius: "50%",
+                backgroundColor: "rgba(42, 82, 135, 0.2)",
+                zIndex: -1,
+              }}
+            />
+            <Box
+              component="img"
+              src="/images/circular-crops/4.png"
+              sx={{
+                width: "16vw",
+                height: "16vw",
+                borderRadius: "50%",
+              }}
+            />
+          </Box>
         </Box>
 
-        {/* Background circle for Image 3 (18vw image at top: 25%, left: 60%) */}
+        {/* Image 3 with halo - Center cluster (on top of all others) */}
         <Box
           component={motion.div}
           {...generateFloatingAnimation(18)}
           sx={{
             position: "absolute",
-            width: "calc(18vw + 2vw)",
-            height: "calc(18vw + 2vw)",
-            top: "calc(25% - 1vw)",
-            left: "calc(60% - 1vw)",
-            borderRadius: "50%",
-            backgroundColor: "rgba(42, 82, 135, 0.2)",
-            zIndex: (theme) => theme.zIndex.introForegroundImages,
-          }}
-        />
-
-        {/* Image 3 - Center cluster (on top of all others) */}
-        <Box
-          component={motion.img}
-          {...generateFloatingAnimation(18)}
-          src="/images/circular-crops/3.png"
-          sx={{
-            position: "absolute",
-            width: "18vw",
-            height: "18vw",
             top: "25%",
             left: "60%",
-            borderRadius: "50%",
             zIndex: (theme) => theme.zIndex.introForegroundImages + 1,
           }}
-        />
+        >
+          {/* Halo circle for Image 3 */}
+          <Box
+            sx={{
+              position: "absolute",
+              width: "calc(18vw + 2vw)",
+              height: "calc(18vw + 2vw)",
+              top: "-1vw",
+              left: "-1vw",
+              borderRadius: "50%",
+              backgroundColor: "rgba(42, 82, 135, 0.2)",
+              zIndex: -1,
+            }}
+          />
+          <Box
+            component="img"
+            src="/images/circular-crops/3.png"
+            sx={{
+              width: "18vw",
+              height: "18vw",
+              borderRadius: "50%",
+            }}
+          />
+        </Box>
 
         {/* Hero text content */}
         <BasePanel
