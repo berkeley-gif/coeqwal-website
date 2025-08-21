@@ -117,6 +117,8 @@ const themeValues = {
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     ingeborgTrial:
       '"Ingeborg Trial", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    farnhamHeadline:
+      '"farnham-headline", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions (for panel layout calculations)
@@ -703,7 +705,7 @@ const theme = createTheme({
       disabled: themeValues.palette.blue.light,
       disabledBackground: themeValues.palette.nature.whisper,
     },
-    // Custom action colors for interactive elements
+    // Colors for interactive elements
     interaction: {
       hoverBackground: themeValues.palette.grey[100], // Light grey hover background for interactive elements
     },
@@ -719,16 +721,16 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.ingeborgTrial,
+      fontFamily: themeValues.fontFamily.farnhamHeadline,
       fontSize: typeScale.h1,
-      fontWeight: 700,
+      fontWeight: 500,
       lineHeight: 1.05,
       color: themeValues.palette.blue.darkest,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.ingeborgTrial,
+      fontFamily: themeValues.fontFamily.farnhamHeadline,
       fontSize: typeScale.h2,
-      fontWeight: 700,
+      fontWeight: 500,
       lineHeight: 1.2,
       color: themeValues.palette.blue.darkest,
     },

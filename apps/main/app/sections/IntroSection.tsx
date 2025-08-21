@@ -251,7 +251,7 @@ const IntroSection: React.FC = () => {
           />
         </Box>
 
-        {/* Circular crop images collage - 7 selected images */}
+        {/* Circular crop images collage - 7 images */}
         <Box
           sx={{
             position: "absolute",
@@ -264,13 +264,13 @@ const IntroSection: React.FC = () => {
           <Box
             component={motion.img}
             {...generateFloatingAnimation()}
-            src="/images/circular-crops/7.png"
+            src="/images/circular-crops/8.png"
             sx={{
               position: "absolute",
-              width: "250px",
-              height: "250px",
+              width: "14vw",
+              height: "14vw",
               top: "20%",
-              left: "55%",
+              left: "42%",
               borderRadius: "50%",
             }}
           />
@@ -281,10 +281,10 @@ const IntroSection: React.FC = () => {
             src="/images/circular-crops/12.png"
             sx={{
               position: "absolute",
-              width: "200px",
-              height: "200px",
-              top: "15%",
-              left: "80%",
+              width: "10vw",
+              height: "10vw",
+              top: "16%",
+              left: "78%",
               borderRadius: "50%",
             }}
           />
@@ -295,10 +295,10 @@ const IntroSection: React.FC = () => {
             src="/images/circular-crops/9.png"
             sx={{
               position: "absolute",
-              width: "280px",
-              height: "280px",
-              top: "50%",
-              left: "75%",
+              width: "12vw",
+              height: "12vw",
+              top: "62%",
+              left: "68%",
               borderRadius: "50%",
             }}
           />
@@ -309,24 +309,10 @@ const IntroSection: React.FC = () => {
             src="/images/circular-crops/14.png"
             sx={{
               position: "absolute",
-              width: "300px",
-              height: "300px",
-              top: "55%",
-              left: "50%",
-              borderRadius: "50%",
-            }}
-          />
-          {/* Image 5 - Right side of cluster */}
-          <Box
-            component={motion.img}
-            {...generateFloatingAnimation()}
-            src="/images/circular-crops/5.png"
-            sx={{
-              position: "absolute",
-              width: "220px",
-              height: "220px",
-              top: "35%",
-              left: "85%",
+              width: "10vw",
+              height: "10vw",
+              top: "42%",
+              left: "80%",
               borderRadius: "50%",
             }}
           />
@@ -334,13 +320,13 @@ const IntroSection: React.FC = () => {
           <Box
             component={motion.img}
             {...generateFloatingAnimation()}
-            src="/images/circular-crops/11.png"
+            src="/images/circular-crops/4.png"
             sx={{
               position: "absolute",
-              width: "240px",
-              height: "240px",
-              top: "40%",
-              left: "45%",
+              width: "16vw",
+              height: "16vw",
+              top: "50%",
+              left: "46%",
               borderRadius: "50%",
             }}
           />
@@ -369,9 +355,9 @@ const IntroSection: React.FC = () => {
           src="/images/circular-crops/3.png"
           sx={{
             position: "absolute",
-            width: "320px",
-            height: "320px",
-            top: "30%",
+            width: "18vw",
+            height: "18vw",
+            top: "25%",
             left: "60%",
             borderRadius: "50%",
             zIndex: (theme) => theme.zIndex.introForegroundImages + 1,
