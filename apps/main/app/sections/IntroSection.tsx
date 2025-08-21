@@ -177,74 +177,72 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Background circle for Image 7 */}
+          {/* Background circle for Image 7 (14vw image at top: 20%, left: 42%) */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "270px",
-              height: "270px",
-              top: "calc(20% - 10px)",
-              left: "calc(55% - 10px)",
+              width: "calc(14vw + 40px)",
+              height: "calc(14vw + 40px)",
+              top: "calc(20% - 20px)",
+              left: "calc(42% - 20px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
-          {/* Background circle for Image 12 */}
+          {/* Background circle for Image 12 (10vw image at top: 16%, left: 78%) */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "220px",
-              height: "220px",
-              top: "calc(15% - 10px)",
-              left: "calc(80% - 10px)",
+              width: "calc(10vw + 30px)",
+              height: "calc(10vw + 30px)",
+              top: "calc(16% - 15px)",
+              left: "calc(78% - 15px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
-          {/* Background circle for Image 9 */}
+          {/* Background circle for Image 9 (12vw image at top: 62%, left: 68%) */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "300px",
-              height: "300px",
-              top: "calc(50% - 10px)",
-              left: "calc(75% - 10px)",
+              width: "calc(12vw + 35px)",
+              height: "calc(12vw + 35px)",
+              top: "calc(62% - 17px)",
+              left: "calc(68% - 17px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
-          {/* Background circle for Image 14 */}
+          {/* Background circle for Image 14 (10vw image at top: 42%, left: 80%) */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "320px",
-              height: "320px",
-              top: "calc(55% - 10px)",
-              left: "calc(50% - 10px)",
+              width: "calc(10vw + 30px)",
+              height: "calc(10vw + 30px)",
+              top: "calc(42% - 15px)",
+              left: "calc(80% - 15px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
-          {/* Background circle for Image 5 */}
+          {/* Background circle for Image 11 (16vw image at top: 50%, left: 46%) */}
           <Box
+            component={motion.div}
+            {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "240px",
-              height: "240px",
-              top: "calc(35% - 10px)",
-              left: "calc(85% - 10px)",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          {/* Background circle for Image 11 */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "260px",
-              height: "260px",
-              top: "calc(40% - 10px)",
-              left: "calc(45% - 10px)",
+              width: "calc(16vw + 45px)",
+              height: "calc(16vw + 45px)",
+              top: "calc(50% - 22px)",
+              left: "calc(46% - 22px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
@@ -332,16 +330,16 @@ const IntroSection: React.FC = () => {
           />
         </Box>
 
-        {/* Background circle for Image 3 */}
+        {/* Background circle for Image 3 (18vw image at top: 25%, left: 60%) */}
         <Box
           component={motion.div}
           {...generateFloatingAnimation()}
           sx={{
             position: "absolute",
-            width: "340px",
-            height: "340px",
-            top: "calc(30% - 10px)",
-            left: "calc(60% - 10px)",
+            width: "calc(18vw + 50px)",
+            height: "calc(18vw + 50px)",
+            top: "calc(25% - 25px)",
+            left: "calc(60% - 25px)",
             borderRadius: "50%",
             backgroundColor: "rgba(42, 82, 135, 0.2)",
             zIndex: (theme) => theme.zIndex.introForegroundImages,
