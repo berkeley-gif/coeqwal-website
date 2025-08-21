@@ -1,6 +1,7 @@
 // Navigation components
 export { Header } from "./navigation/Header"
 export { HeaderHome } from "./navigation/HeaderHome"
+export type { HeaderProps } from "./navigation/HeaderHome"
 export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { LearnMoreButton } from "./navigation/LearnMoreButton"

@@ -55,13 +55,13 @@ const IntroSection: React.FC = () => {
 
   return (
     <Box
-      sx={{
-        background: (theme) => `
-          linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
-        `,
-        minHeight: "200vh",
-      }}
-    >
+        sx={{
+          background: (theme) => `
+            linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
+          `,
+          minHeight: "200vh",
+        }}
+      >
       {/* Hero panel - full screen */}
       <Box
         id="intro"
@@ -632,7 +632,6 @@ const IntroSection: React.FC = () => {
             >
               <Typography variant="body1">
                 California&apos;s Central Valley water depends
-                <br />
                 on two main things:
               </Typography>
               <Box component="ol" sx={{ mt: 1, mb: 2, pl: 3 }}>

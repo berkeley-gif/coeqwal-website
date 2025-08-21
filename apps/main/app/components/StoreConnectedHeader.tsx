@@ -2,16 +2,15 @@
 
 import React from "react"
 import { Header } from "@repo/ui"
-import type { SecondaryNavItem } from "@repo/ui"
 
 import { useRouter } from "next/navigation"
 
 interface StoreConnectedHeaderProps {
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
-  showSecondaryNav?: boolean
-  secondaryNavItems?: SecondaryNavItem[]
 }
+
+
 
 /**
  * Connects the Header component to the drawer store
@@ -33,7 +32,10 @@ export function StoreConnectedHeader({
       activeSection={activeSection}
       onSectionClick={onSectionClick}
       onDataClick={handleDataClick}
+      drawerOpen={false}
+      drawerPosition="right"
       showSecondaryNav={false}
+      secondaryNavItems={[]}
     />
   )
 }
