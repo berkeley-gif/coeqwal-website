@@ -80,15 +80,69 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Blue background circles */}
+          {/* White decorative circles */}
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(10)}
             sx={{
               position: "absolute",
-              width: "260px",
-              height: "260px",
-              top: "25%",
+              width: "10vw",
+              height: "10vw",
+              top: "18%",
+              left: "32%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            component={motion.div}
+            {...generateFloatingAnimation(18)}
+            sx={{
+              position: "absolute",
+              width: "18vw",
+              height: "18vw",
+              top: "24%",
+              left: "48%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            component={motion.div}
+            {...generateFloatingAnimation(10)}
+            sx={{
+              position: "absolute",
+              width: "10vw",
+              height: "10vw",
+              top: "65%",
+              left: "60%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+          <Box
+            component={motion.div}
+            {...generateFloatingAnimation(12)}
+            sx={{
+              position: "absolute",
+              width: "12vw",
+              height: "12vw",
+              top: "30%",
+              left: "74%",
+              borderRadius: "50%",
+              backgroundColor: "rgba(255, 255, 255, 0.2)",
+            }}
+          />
+
+          {/* Blue decorative circles */}
+          <Box
+            component={motion.div}
+            {...generateFloatingAnimation(10)}
+            sx={{
+              position: "absolute",
+              width: "10vw",
+              height: "10vw",
+              top: "18%",
               left: "35%",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
@@ -96,82 +150,28 @@ const IntroSection: React.FC = () => {
           />
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(10)}
             sx={{
               position: "absolute",
-              width: "180px",
-              height: "180px",
-              top: "8%",
-              left: "75%",
+              width: "10vw",
+              height: "10vw",
+              top: "62%",
+              left: "78%",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
           />
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(4)}
             sx={{
               position: "absolute",
-              width: "200px",
-              height: "200px",
-              top: "68%",
-              left: "88%",
+              width: "4vw",
+              height: "4vw",
+              top: "32%",
+              left: "86%",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation()}
-            sx={{
-              position: "absolute",
-              width: "220px",
-              height: "220px",
-              top: "26%",
-              left: "75%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-
-          {/* White decorative circles - layered asymmetric pattern */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation()}
-            sx={{
-              position: "absolute",
-              width: "230px",
-              height: "230px",
-              top: "15%",
-              left: "62%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation()}
-            sx={{
-              position: "absolute",
-              width: "190px",
-              height: "190px",
-              top: "45%",
-              left: "82%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation()}
-            sx={{
-              position: "absolute",
-              width: "220px",
-              height: "220px",
-              top: "66%",
-              left: "64%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
             }}
           />
         </Box>
