@@ -453,7 +453,7 @@ const IntroSection: React.FC = () => {
               variant="body1"
               sx={{
                 textAlign: "left",
-                maxWidth: { xs: "600px", md: "520px" },
+                maxWidth: (theme) => theme.layout.textContainer.maxWidth,
                 mb: 4,
               }}
             >
@@ -465,7 +465,7 @@ const IntroSection: React.FC = () => {
             {/* Arrow positioned at text block midpoint */}
             <Box
               sx={{
-                width: { xs: "600px", md: "520px" },
+                width: (theme) => theme.layout.textContainer.maxWidth,
                 display: "flex",
                 justifyContent: "center",
                 mt: 4,
@@ -535,7 +535,7 @@ const IntroSection: React.FC = () => {
           />
 
           <Box
-            sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}
+            sx={{ textAlign: "left", maxWidth: (theme) => theme.layout.textContainer.maxWidth }}
           >
             <Typography variant="body1">
               California&apos;s Central Valley water depends
@@ -621,7 +621,7 @@ const IntroSection: React.FC = () => {
           <Box
             sx={{ 
               textAlign: "left", 
-              maxWidth: { xs: "600px", md: "500px" },
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
               position: "absolute",
               top: "34%",
               left: "50%",
@@ -707,7 +707,7 @@ const IntroSection: React.FC = () => {
         <Box
           sx={{
             marginLeft: "auto",
-            maxWidth: "400px",
+            maxWidth: (theme) => theme.layout.textContainer.maxWidth,
             textAlign: "left",
             color: (theme) => theme.palette.blue.darkest,
           }}

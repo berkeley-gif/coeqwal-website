@@ -129,6 +129,9 @@ const themeValues = {
       closedWidth: 60,
       glossaryWidth: 360,
     },
+    textContainer: {
+      maxWidth: { xs: "600px", md: "520px" }, // Standardized text container width
+    },
   },
 
   // Color Palette - California Water theme
@@ -546,6 +549,9 @@ const theme = createTheme({
     drawer: {
       width: themeValues.layout.drawer.width,
       closedWidth: themeValues.layout.drawer.closedWidth,
+    },
+    textContainer: {
+      maxWidth: themeValues.layout.textContainer.maxWidth,
     },
   },
   // Card typography scale
@@ -1544,6 +1550,9 @@ declare module "@mui/material/styles" {
         width: number
         closedWidth: number
         glossaryWidth: number
+      }
+      textContainer: {
+        maxWidth: { xs: string; md: string }
       }
     }
     border: ReturnType<typeof createBorderStyles>
