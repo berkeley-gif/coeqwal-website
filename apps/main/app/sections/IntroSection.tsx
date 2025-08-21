@@ -7,20 +7,28 @@ import { motion } from "@repo/motion"
 const IntroSection: React.FC = () => {
   const theme = useTheme()
 
-  // Generate animation parameters for floating effect
-  const generateFloatingAnimation = () => {
+  // Generate animation parameters for floating effect, scaled by size
+  const generateFloatingAnimation = (sizeVw = 14) => {
+    // Scale movement based on size (18vw is largest, gets scale of 1.0)
+    const sizeScale = sizeVw / 18
+    
     const bobDelay = Math.random() * 3 // 0-3 seconds
     const driftDelay = Math.random() * 5 // 0-5 seconds
-    const bobAmount = 8 + Math.random() * 8 // 8-16px vertical movement
-    const driftAmount = 15 + Math.random() * 15 // 15-30px horizontal drift
+    const baseBobAmount = 8 + Math.random() * 8 // 8-16px base vertical movement
+    const baseDriftAmount = 15 + Math.random() * 15 // 15-30px base horizontal drift
     const bobDuration = 3 + Math.random() * 2 // 3-5 seconds
     const driftDuration = 8 + Math.random() * 6 // 8-14 seconds
+
+    // Scale movement amounts by size
+    const bobAmount = baseBobAmount * sizeScale
+    const driftAmount = baseDriftAmount * sizeScale
+    const rotateAmount = 1 * sizeScale
 
     return {
       animate: {
         y: [0, -bobAmount, 0],
         x: [-driftAmount / 2, driftAmount / 2, -driftAmount / 2],
-        rotate: [-1, 1, -1],
+        rotate: [-rotateAmount, rotateAmount, -rotateAmount],
       },
       transition: {
         y: {
@@ -180,7 +188,7 @@ const IntroSection: React.FC = () => {
           {/* Background circle for Image 7 (14vw image at top: 20%, left: 42%) */}
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(14)}
             sx={{
               position: "absolute",
               width: "calc(14vw + 1.56vw)",
@@ -194,7 +202,7 @@ const IntroSection: React.FC = () => {
           {/* Background circle for Image 12 (10vw image at top: 16%, left: 78%) */}
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(10)}
             sx={{
               position: "absolute",
               width: "calc(10vw + 1.11vw)",
@@ -208,7 +216,7 @@ const IntroSection: React.FC = () => {
           {/* Background circle for Image 9 (12vw image at top: 62%, left: 68%) */}
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(12)}
             sx={{
               position: "absolute",
               width: "calc(12vw + 1.33vw)",
@@ -222,7 +230,7 @@ const IntroSection: React.FC = () => {
           {/* Background circle for Image 14 (10vw image at top: 42%, left: 80%) */}
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(10)}
             sx={{
               position: "absolute",
               width: "calc(10vw + 1.11vw)",
@@ -236,7 +244,7 @@ const IntroSection: React.FC = () => {
           {/* Background circle for Image 11 (16vw image at top: 50%, left: 46%) */}
           <Box
             component={motion.div}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(16)}
             sx={{
               position: "absolute",
               width: "calc(16vw + 1.78vw)",
@@ -261,7 +269,7 @@ const IntroSection: React.FC = () => {
           {/* Image 7 - Top left of cluster */}
           <Box
             component={motion.img}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(14)}
             src="/images/circular-crops/8.png"
             sx={{
               position: "absolute",
@@ -275,7 +283,7 @@ const IntroSection: React.FC = () => {
           {/* Image 12 - Top right of cluster */}
           <Box
             component={motion.img}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(10)}
             src="/images/circular-crops/12.png"
             sx={{
               position: "absolute",
@@ -289,7 +297,7 @@ const IntroSection: React.FC = () => {
           {/* Image 9 - Bottom right of cluster */}
           <Box
             component={motion.img}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(12)}
             src="/images/circular-crops/9.png"
             sx={{
               position: "absolute",
@@ -303,7 +311,7 @@ const IntroSection: React.FC = () => {
           {/* Image 14 - Bottom left of cluster */}
           <Box
             component={motion.img}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(10)}
             src="/images/circular-crops/14.png"
             sx={{
               position: "absolute",
@@ -317,7 +325,7 @@ const IntroSection: React.FC = () => {
           {/* Image 11 - Left side of cluster */}
           <Box
             component={motion.img}
-            {...generateFloatingAnimation()}
+            {...generateFloatingAnimation(16)}
             src="/images/circular-crops/4.png"
             sx={{
               position: "absolute",
@@ -333,7 +341,7 @@ const IntroSection: React.FC = () => {
         {/* Background circle for Image 3 (18vw image at top: 25%, left: 60%) */}
         <Box
           component={motion.div}
-          {...generateFloatingAnimation()}
+          {...generateFloatingAnimation(18)}
           sx={{
             position: "absolute",
             width: "calc(18vw + 2vw)",
@@ -349,7 +357,7 @@ const IntroSection: React.FC = () => {
         {/* Image 3 - Center cluster (on top of all others) */}
         <Box
           component={motion.img}
-          {...generateFloatingAnimation()}
+          {...generateFloatingAnimation(18)}
           src="/images/circular-crops/3.png"
           sx={{
             position: "absolute",
