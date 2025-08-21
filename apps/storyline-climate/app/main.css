@@ -1,6 +1,7 @@
 :root{
     --primary-color: #1a4472;
     --primary-color-transparent: #1a447280;
+    --dark-color-transparent: #21212195;
     --dark-color: #021224;
     --light-color: #1a3a5c;
     --text-color: #f2f0ef;
@@ -95,6 +96,20 @@ html{
     width: 100%;
     transform: translate(-50%, -50%);
     text-align: center;
+}
+
+.selection-panel {
+    position: fixed;
+    right: 30px;
+    padding: 10px;
+    z-index: 2;
+    font-size: 0.9rem;
+    background-color: var(--dark-color-transparent)
+
+}
+
+.MuiFormControlLabel-label {
+  color: #f2f0ef !important;
 }
 
 /* specific to this story */
