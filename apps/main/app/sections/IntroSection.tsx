@@ -623,7 +623,7 @@ const IntroSection: React.FC = () => {
               textAlign: "left", 
               maxWidth: { xs: "600px", md: "500px" },
               position: "absolute",
-              top: "50%",
+              top: "34%",
               left: "50%",
               transform: "translate(-50%, -50%)",
               width: "100%",
@@ -660,22 +660,26 @@ const IntroSection: React.FC = () => {
               each of these scenarios, we also modeled 5 future climate
               possibilities.
             </Typography>
-          </Box>
 
-          <ScrollIndicator
-            scrollToId="fourth-panel"
-            color={theme.palette.blue.darkest}
-            animationComplete={true}
-            delay={1.0}
-            style={{ marginTop: "2rem" }}
-          >
-            <ArrowHead
-              size={28}
-              style={{
-                transform: "rotate(90deg)",
+            <ScrollIndicator
+              scrollToId="fourth-panel"
+              color={theme.palette.blue.darkest}
+              animationComplete={true}
+              delay={1.0}
+              style={{ 
+                marginTop: "2rem",
+                display: "flex",
+                justifyContent: "center",
               }}
-            />
-          </ScrollIndicator>
+            >
+              <ArrowHead
+                size={28}
+                style={{
+                  transform: "rotate(90deg)",
+                }}
+              />
+            </ScrollIndicator>
+          </Box>
         </Box>
       </BasePanel>
       </Box>
