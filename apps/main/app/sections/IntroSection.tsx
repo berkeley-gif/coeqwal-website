@@ -11,7 +11,7 @@ const IntroSection: React.FC = () => {
   const generateFloatingAnimation = (sizeVw = 14) => {
     // Scale movement based on size (18vw is largest, gets scale of 1.0)
     const sizeScale = sizeVw / 18
-    
+
     const bobDelay = Math.random() * 3 // 0-3 seconds
     const driftDelay = Math.random() * 5 // 0-5 seconds
     const baseBobAmount = 8 + Math.random() * 8 // 8-16px base vertical movement
@@ -71,7 +71,7 @@ const IntroSection: React.FC = () => {
           height: "100vh",
         }}
       >
-        {/* Decorative background circles - scattered behind everything */}
+        {/* Decorative background circles, scattered behind */}
         <Box
           sx={{
             position: "absolute",
@@ -176,7 +176,7 @@ const IntroSection: React.FC = () => {
           />
         </Box>
 
-        {/* Circular crop images with halos - grouped together */}
+        {/* Circular crop images with halos */}
         <Box
           sx={{
             position: "absolute",
@@ -492,7 +492,7 @@ const IntroSection: React.FC = () => {
       {/* Spacer between full-screen panels */}
       <Spacer height={{ xs: 48, md: 48 }} />
 
-      {/* Second panel - Overview content */}
+      {/* Second panel - Overview content
       <BasePanel
         id="overview"
         fullHeight={false}
@@ -571,34 +571,37 @@ const IntroSection: React.FC = () => {
             />
           </ScrollIndicator>
         </Box>
-      </BasePanel>
+      </BasePanel> */}
 
       {/* Third panel */}
-      <BasePanel
-        id="third-panel"
-        fullHeight={false}
-        fullWidth
-        background="transparent"
-        paddingVariant="wide"
-        includeHeaderSpacing={true}
+      <Box
         sx={{
-          color: (theme) => theme.palette.primary.dark,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
+          background: `url('/images/home_collage/newcollage_wetland.png')`,
+          backgroundSize: "100vw auto",
+          backgroundPosition: "top right",
+          backgroundRepeat: "no-repeat",
+          minHeight: "180vh", // Accomodates background image
         }}
+      >
+        <BasePanel
+          id="third-panel"
+          fullHeight={false}
+          fullWidth
+          background="transparent"
+          paddingVariant="none"
+          includeHeaderSpacing={true}
+          sx={{
+            color: (theme) => theme.palette.primary.dark,
+            position: "relative",
+            minHeight: "180vh",
+          }}
       >
         <Box
           sx={{
             position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            maxWidth: { xs: "600px", md: "500px" },
+            width: "100%",
+            height: "100%",
+            minHeight: "180vh",
           }}
         >
           <Box
@@ -616,8 +619,35 @@ const IntroSection: React.FC = () => {
           />
 
           <Box
-            sx={{ textAlign: "left", maxWidth: { xs: "600px", md: "500px" } }}
+            sx={{ 
+              textAlign: "left", 
+              maxWidth: { xs: "600px", md: "500px" },
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "100%",
+              px: 2,
+            }}
           >
+            <Typography variant="body1">
+              California&apos;s Central Valley water depends
+              <br />
+              on two main things:
+            </Typography>
+            <Box component="ol" sx={{ mt: 1, mb: 2, pl: 3 }}>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Typography variant="body1">
+                  How much rain and snow we get.
+                </Typography>
+              </Box>
+              <Box component="li" sx={{ mb: 1 }}>
+                <Typography variant="body1">
+                  How we choose to manage it.
+                </Typography>
+              </Box>
+            </Box>
+
             <Typography variant="body1" sx={{ mb: 2 }}>
               We already face difficult choices. Climate change brings deeper
               droughts, bigger floods, and growing uncertainty.
@@ -648,6 +678,7 @@ const IntroSection: React.FC = () => {
           </ScrollIndicator>
         </Box>
       </BasePanel>
+      </Box>
 
       <Spacer height={{ xs: 48, md: 160 }} />
 

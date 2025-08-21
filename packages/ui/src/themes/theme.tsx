@@ -303,8 +303,6 @@ const themeValues = {
   },
 }
 
-
-
 // ScenarioCard list styling mixin
 const scenarioCardListMixin = {
   "& ul": {
