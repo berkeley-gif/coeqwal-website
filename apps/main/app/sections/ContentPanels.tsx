@@ -153,7 +153,7 @@ export default function ContentPanels({
           component="img"
           src="/images/content/learn.png"
           alt="Learn"
-          sx={{ width: "100%", maxWidth: 680, height: "auto" }}
+          sx={{ width: "100%", maxWidth: 520, height: "auto" }}
         />
       </Box>
     </Box>
@@ -177,7 +177,7 @@ export default function ContentPanels({
           component="img"
           src="/images/content/explore.png"
           alt="Explore"
-          sx={{ width: "100%", maxWidth: 620, height: "auto" }}
+          sx={{ width: "100%", maxWidth: 500, height: "auto" }}
         />
       </Box>
       {/* Text column */}
