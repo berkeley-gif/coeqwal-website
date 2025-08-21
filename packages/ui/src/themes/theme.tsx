@@ -1673,6 +1673,9 @@ declare module "@mui/material/styles" {
         width?: number
         closedWidth?: number
       }
+      textContainer?: {
+        maxWidth?: { xs: string; md: string }
+      }
     }
     cards?: {
       typography?: {

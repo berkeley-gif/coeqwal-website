@@ -692,7 +692,7 @@ const IntroSection: React.FC = () => {
         fullHeight={false}
         fullWidth
         background="transparent"
-        paddingVariant="very-wide"
+        paddingVariant="content-first"
         includeHeaderSpacing={true}
         sx={{
           background: `url('/images/california.png')`,
@@ -706,10 +706,11 @@ const IntroSection: React.FC = () => {
       >
         <Box
           sx={{
-            marginLeft: "auto",
             maxWidth: (theme) => theme.layout.textContainer.maxWidth,
             textAlign: "left",
             color: (theme) => theme.palette.blue.darkest,
+            ml: "auto", // Keep it right-aligned but not as extreme
+            mr: 4, // Add some margin from the right edge
           }}
         >
           <Typography variant="body1" sx={{ mb: 3 }}>
@@ -729,7 +730,7 @@ const IntroSection: React.FC = () => {
               </Typography>
             </Box>
             <Box component="li" sx={{ mb: 1 }}>
-              <Typography variant="body1">Tulare Basin</Typography>
+              <Typography variant="body1">Tulare Basin.</Typography>
             </Box>
           </Box>
 
