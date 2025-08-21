@@ -72,7 +72,7 @@ const IntroSection: React.FC = () => {
             pointerEvents: "none",
           }}
         >
-          {/* Blue decorative circles - layered asymmetric pattern */}
+          {/* Blue background circles */}
           <Box
             component={motion.div}
             {...generateFloatingAnimation()}
@@ -197,10 +197,10 @@ const IntroSection: React.FC = () => {
             {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "calc(10vw + 30px)",
-              height: "calc(10vw + 30px)",
-              top: "calc(16% - 15px)",
-              left: "calc(78% - 15px)",
+              width: "calc(10vw + 40px)",
+              height: "calc(10vw + 40px)",
+              top: "calc(16% - 20px)",
+              left: "calc(78% - 20px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
@@ -211,10 +211,10 @@ const IntroSection: React.FC = () => {
             {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "calc(12vw + 35px)",
-              height: "calc(12vw + 35px)",
-              top: "calc(62% - 17px)",
-              left: "calc(68% - 17px)",
+              width: "calc(12vw + 40px)",
+              height: "calc(12vw + 40px)",
+              top: "calc(62% - 20px)",
+              left: "calc(68% - 20px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
@@ -225,10 +225,10 @@ const IntroSection: React.FC = () => {
             {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "calc(10vw + 30px)",
-              height: "calc(10vw + 30px)",
-              top: "calc(42% - 15px)",
-              left: "calc(80% - 15px)",
+              width: "calc(10vw + 40px)",
+              height: "calc(10vw + 40px)",
+              top: "calc(42% - 20px)",
+              left: "calc(80% - 20px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
@@ -239,10 +239,10 @@ const IntroSection: React.FC = () => {
             {...generateFloatingAnimation()}
             sx={{
               position: "absolute",
-              width: "calc(16vw + 45px)",
-              height: "calc(16vw + 45px)",
-              top: "calc(50% - 22px)",
-              left: "calc(46% - 22px)",
+              width: "calc(16vw + 40px)",
+              height: "calc(16vw + 40px)",
+              top: "calc(50% - 20px)",
+              left: "calc(46% - 20px)",
               borderRadius: "50%",
               backgroundColor: "rgba(42, 82, 135, 0.2)",
             }}
@@ -336,10 +336,10 @@ const IntroSection: React.FC = () => {
           {...generateFloatingAnimation()}
           sx={{
             position: "absolute",
-            width: "calc(18vw + 50px)",
-            height: "calc(18vw + 50px)",
-            top: "calc(25% - 25px)",
-            left: "calc(60% - 25px)",
+            width: "calc(18vw + 40px)",
+            height: "calc(18vw + 40px)",
+            top: "calc(25% - 20px)",
+            left: "calc(60% - 20px)",
             borderRadius: "50%",
             backgroundColor: "rgba(42, 82, 135, 0.2)",
             zIndex: (theme) => theme.zIndex.introForegroundImages,
