@@ -89,9 +89,9 @@ const IntroSection: React.FC = () => {
               width: "10vw",
               height: "10vw",
               top: "18%",
-              left: "32%",
+              left: "34%",
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
             }}
           />
           <Box
@@ -104,7 +104,7 @@ const IntroSection: React.FC = () => {
               top: "24%",
               left: "48%",
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
             }}
           />
           <Box
@@ -114,10 +114,10 @@ const IntroSection: React.FC = () => {
               position: "absolute",
               width: "10vw",
               height: "10vw",
-              top: "65%",
+              top: "66%",
               left: "60%",
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
             }}
           />
           <Box
@@ -130,7 +130,7 @@ const IntroSection: React.FC = () => {
               top: "30%",
               left: "74%",
               borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
             }}
           />
 
@@ -153,8 +153,8 @@ const IntroSection: React.FC = () => {
             {...generateFloatingAnimation(10)}
             sx={{
               position: "absolute",
-              width: "10vw",
-              height: "10vw",
+              width: "6vw",
+              height: "6vw",
               top: "62%",
               left: "78%",
               borderRadius: "50%",
