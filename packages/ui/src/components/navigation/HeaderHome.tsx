@@ -1,24 +1,17 @@
 "use client"
 
-import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
+import { AppBar, Toolbar, Stack, Button, Box, Menu, MenuItem } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-import PlayArrowIcon from "@mui/icons-material/PlayArrow"
-import { useState, useEffect, useRef } from "react"
-import { motion } from "@repo/motion"
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import { useState } from "react"
 export interface HeaderProps {
-  onGlossaryClick?: () => void
-  isGlossaryActive?: boolean
   onDataClick?: () => void
+  onToolsClick?: (tool: 'scenario-explorer' | 'needs-search') => void
 }
-
-// Transition
-
-const MotionAppBar = motion.create(AppBar)
-const MotionStack = motion.create(Stack)
 
 // Translation
 
@@ -27,7 +20,11 @@ type HeaderTranslations = {
   buttons: {
     getData: string
     about: string
-    glossary: string
+    tools: string
+  }
+  toolsDropdown: {
+    scenarioExplorer: string
+    needsSearch: string
   }
 }
 
@@ -42,28 +39,39 @@ const translations: TranslationsMap = {
     buttons: {
       getData: "Data",
       about: "About COEQWAL",
-      glossary: "Glossary",
+      tools: "Tools",
+    },
+    toolsDropdown: {
+      scenarioExplorer: "Scenario data explorer",
+      needsSearch: "Needs-based search",
     },
   },
   es: {
     title: "COEQWAL",
     buttons: {
-      getData: "Datos sin procesar",
+      getData: "Datos",
       about: "Sobre COEQWAL",
-      glossary: "Glosario",
+      tools: "Herramientas",
+    },
+    toolsDropdown: {
+      scenarioExplorer: "Explorador de datos de escenarios",
+      needsSearch: "Búsqueda basada en necesidades",
     },
   },
 }
 
 // NEW SIMPLIFIED HEADER
 export function HeaderHome({
-  onGlossaryClick,
-  isGlossaryActive = false,
   onDataClick,
+  onToolsClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const { locale, isLoading } = useTranslation()
+  
+  // Tools dropdown state
+  const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null)
+  const isToolsOpen = Boolean(toolsAnchorEl)
 
   // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
@@ -78,6 +86,19 @@ export function HeaderHome({
     fontFamily: theme.typography.fontFamily,
     fontWeight: 500,
     color: "white",
+  }
+
+  const handleToolsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setToolsAnchorEl(event.currentTarget)
+  }
+
+  const handleToolsClose = () => {
+    setToolsAnchorEl(null)
+  }
+
+  const handleToolSelection = (tool: 'scenario-explorer' | 'needs-search') => {
+    onToolsClick?.(tool)
+    handleToolsClose()
   }
 
   return (
@@ -114,6 +135,51 @@ export function HeaderHome({
         >
           <Button
             variant={buttonVariant}
+            onClick={handleToolsClick}
+            endIcon={<ArrowDropDownIcon />}
+            sx={{
+              ...buttonStyle,
+            }}
+          >
+            {componentText.buttons.tools}
+          </Button>
+          <Menu
+            anchorEl={toolsAnchorEl}
+            open={isToolsOpen}
+            onClose={handleToolsClose}
+            sx={{
+              "& .MuiPaper-root": {
+                backgroundColor: "rgba(42, 82, 135, 0.95)",
+                borderRadius: theme.borderRadius.card,
+                mt: 1,
+              },
+            }}
+          >
+            <MenuItem 
+              onClick={() => handleToolSelection('scenario-explorer')}
+              sx={{
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              {componentText.toolsDropdown.scenarioExplorer}
+            </MenuItem>
+            <MenuItem 
+              onClick={() => handleToolSelection('needs-search')}
+              sx={{
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              {componentText.toolsDropdown.needsSearch}
+            </MenuItem>
+          </Menu>
+          <Button
+            variant={buttonVariant}
             onClick={onDataClick}
             sx={{
               ...buttonStyle,
@@ -128,19 +194,6 @@ export function HeaderHome({
             }}
           >
             {componentText.buttons.about}
-          </Button>
-          <Button
-            variant={buttonVariant}
-            onClick={onGlossaryClick}
-            sx={{
-              ...buttonStyle,
-              backgroundColor: isGlossaryActive ? theme.palette.blue.medium : undefined,
-              "&:hover": {
-                backgroundColor: isGlossaryActive ? theme.palette.blue.bright : undefined,
-              },
-            }}
-          >
-            {componentText.buttons.glossary}
           </Button>
           <LanguageSwitcher />
         </Stack>

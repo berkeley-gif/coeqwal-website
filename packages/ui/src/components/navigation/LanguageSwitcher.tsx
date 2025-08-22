@@ -27,7 +27,7 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       exclusive
       onChange={handleChange}
       sx={{
-        height: "36px",
+        height: "40px",
         fontSize: (theme) => theme.typography.button.fontSize,
         fontWeight: (theme) => theme.typography.button.fontWeight,
         fontFamily: (theme) => theme.typography.fontFamily,
@@ -47,8 +47,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       <ToggleButton
         value="en"
         sx={{
-          height: "36px",
-          minHeight: "36px",
+          height: "40px",
+          minHeight: "40px",
           border: "none",
           boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
           fontSize: (theme) => theme.typography.button.fontSize,
@@ -103,8 +103,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       <ToggleButton
         value="es"
         sx={{
-          height: "36px",
-          minHeight: "36px",
+          height: "40px",
+          minHeight: "40px",
           border: "none",
           boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
           fontSize: (theme) => theme.typography.button.fontSize,
