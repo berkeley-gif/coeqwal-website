@@ -330,7 +330,7 @@ const ChartContainer = ({
 }
 // Using simple centroid calculation instead of turf
 
-interface MapPanelProps {
+interface ScenarioExplorerProps {
   onOpenThemesDrawer?: (operationId?: string) => void
 }
 
@@ -2295,7 +2295,9 @@ const MapControls = ({
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default function MapPanel({ onOpenThemesDrawer }: MapPanelProps) {
+export default function ScenarioExplorer({
+  onOpenThemesDrawer,
+}: ScenarioExplorerProps) {
   const theme = useTheme()
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const {
