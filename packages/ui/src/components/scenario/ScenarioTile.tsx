@@ -3,12 +3,14 @@
 import React from "react"
 import { Box, Typography } from "@repo/ui/mui"
 import { ScenarioGlyph } from "@repo/viz"
-import { useGlyphSettingsStore } from "@repo/ui"
 import type { VerticalParallelLineData } from "@repo/viz"
+
+export type GlyphVariant = "bars" | "rose" | "quartile"
 
 export interface ScenarioTileProps {
   scenario: VerticalParallelLineData
   size?: number // glyph size
+  glyphVariant?: GlyphVariant // glyph display variant
   onHover?: (id: string | null) => void
   onSelect?: (id: string) => void
 }
@@ -27,10 +29,10 @@ const OUTCOME_ORDER = [
 const ScenarioTile: React.FC<ScenarioTileProps> = ({
   scenario,
   size = 50,
+  glyphVariant = "bars",
   onHover,
   onSelect,
 }) => {
-  const variant = useGlyphSettingsStore((s) => s.variant)
 
   return (
     <Box
@@ -68,7 +70,7 @@ const ScenarioTile: React.FC<ScenarioTileProps> = ({
           <ScenarioGlyph
             key={outcome}
             size={size}
-            variant={variant}
+            variant={glyphVariant}
             values={[0.2, 0.4, 0.6, 0.8]}
           />
         ))}

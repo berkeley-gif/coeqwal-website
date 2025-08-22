@@ -44,7 +44,7 @@ import {
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import { MapPromptDialog } from "@repo/ui"
 
-import { useGlyphSettingsStore } from "@repo/ui"
+import { useGlyphSettingsStore } from "@repo/state"
 import { ScenarioGlyph, VerticalParallelLinePlot } from "@repo/viz"
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core"
 import {
