@@ -123,7 +123,7 @@ const themeValues = {
 
   // Layout dimensions (for panel layout calculations)
   layout: {
-    headerHeight: 64,
+    headerHeight: 80,
     drawer: {
       width: 360,
       closedWidth: 60,

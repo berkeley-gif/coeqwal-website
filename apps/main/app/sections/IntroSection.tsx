@@ -427,7 +427,7 @@ const IntroSection = () => {
               justifyContent: "center",
               alignItems: "flex-start",
               width: "100%",
-              height: `calc(100vh - 64px)`, // Full height minus header
+              height: `calc(100vh - ${theme.layout.headerHeight}px)`, // Full height minus header
               position: "relative",
               zIndex: (theme) => theme.zIndex.introText,
               textAlign: "left",

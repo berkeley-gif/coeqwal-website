@@ -11,12 +11,13 @@ import {
   InputLabel,
 } from "@repo/ui/mui"
 import type { SelectChangeEvent } from "@mui/material/Select"
-import { AppHeader } from "@repo/ui"
+import { AppHeader, useTheme } from "@repo/ui"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { BasePanel } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 
 export default function DataPage() {
+  const theme = useTheme()
   const [selectedDataset, setSelectedDataset] = useState("")
 
   const handleDatasetChange = (event: SelectChangeEvent<string>) => {
@@ -37,7 +38,7 @@ export default function DataPage() {
       <AppHeader />
 
       <ConnectedMultiDrawer
-        drawerWidth={360}
+        drawerWidth={theme.layout.drawer.width}
         overlay={true}
         showRailButtons={false}
       />
