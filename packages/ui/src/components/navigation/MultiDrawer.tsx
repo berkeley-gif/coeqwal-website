@@ -177,6 +177,12 @@ export interface MultiDrawerProps {
    * @default false
    */
   showRailButtons?: boolean
+
+  /**
+   * Optional offset from top to account for fixed header
+   * @default 0
+   */
+  headerOffset?: number
 }
 
 // Map of tab keys to display titles
@@ -201,6 +207,7 @@ export function MultiDrawer({
   overlay = false,
   drawerContent = {},
   showRailButtons = false,
+  headerOffset = 0,
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -257,7 +264,7 @@ export function MultiDrawer({
         <Box
           sx={{
             position: "fixed",
-            top: "50%",
+            top: `calc(50% + ${headerOffset}px)`,
             right: drawerOpen
               ? (drawerWidth ??
                 theme.layout.drawer.width ??
