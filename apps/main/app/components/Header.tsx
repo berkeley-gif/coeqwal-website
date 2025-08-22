@@ -26,9 +26,6 @@ export function Header() {
   }
 
   return (
-    <AppHeader 
-      onDataClick={handleDataClick} 
-      onToolsClick={handleToolsClick} 
-    />
+    <AppHeader onDataClick={handleDataClick} onToolsClick={handleToolsClick} />
   )
 }
