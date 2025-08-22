@@ -39,7 +39,7 @@ export default function DataPage() {
       <ConnectedMultiDrawer
         drawerWidth={360}
         overlay={true}
-        showRailButton={false}
+        showRailButtons={false}
       />
 
       {/* Background similar to main page */}
@@ -50,7 +50,7 @@ export default function DataPage() {
           left: 0,
           width: "100%",
           height: "100%",
-          zIndex: (theme) => theme.zIndex.mapBackground,
+          zIndex: (theme) => theme.zIndex.basement,
         }}
       />
 

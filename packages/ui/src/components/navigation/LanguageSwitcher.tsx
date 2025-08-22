@@ -61,7 +61,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             backgroundColor: (theme) => theme.palette.common.white,
             color: (theme) => theme.palette.blue.darkest,
             border: "none",
-            boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            boxShadow: (theme) =>
+              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&::before": {
               opacity: 1,
             },
@@ -70,11 +71,13 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             backgroundColor: (theme) => theme.palette.blue.darkest,
             color: (theme) => theme.palette.common.white,
             border: "none",
-            boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            boxShadow: (theme) =>
+              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&:hover": {
               backgroundColor: (theme) => theme.palette.blue.dark,
               border: "none",
-              boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+              boxShadow: (theme) =>
+                `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             },
           },
           "&::before": {
@@ -113,7 +116,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             backgroundColor: (theme) => theme.palette.common.white,
             color: (theme) => theme.palette.blue.darkest,
             border: "none",
-            boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            boxShadow: (theme) =>
+              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&::before": {
               opacity: 1,
             },
@@ -122,11 +126,13 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             backgroundColor: (theme) => theme.palette.blue.darkest,
             color: (theme) => theme.palette.common.white,
             border: "none",
-            boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+            boxShadow: (theme) =>
+              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             "&:hover": {
               backgroundColor: (theme) => theme.palette.blue.dark,
               border: "none",
-              boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+              boxShadow: (theme) =>
+                `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
             },
           },
           "&::before": {

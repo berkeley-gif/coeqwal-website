@@ -176,7 +176,7 @@ export interface MultiDrawerProps {
    * When true, displays a vertical rail button on the left side for toggling the drawer
    * @default false
    */
-  showRailButton?: boolean
+  showRailButtons?: boolean
 }
 
 // Map of tab keys to display titles
@@ -200,7 +200,7 @@ export function MultiDrawer({
   activeTab: controlledActiveTab,
   overlay = false,
   drawerContent = {},
-  showRailButton = false,
+  showRailButtons = false,
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -252,8 +252,8 @@ export function MultiDrawer({
 
   return (
     <>
-      {/* Rail buttons - only shown when showRailButton is true */}
-      {showRailButton && (
+      {/* Rail buttons - only shown when showRailButtons is true */}
+      {showRailButtons && (
         <Box
           sx={{
             position: "fixed",
