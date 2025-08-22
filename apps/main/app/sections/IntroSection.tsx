@@ -64,7 +64,7 @@ const IntroSection: React.FC = () => {
     >
       {/* Hero panel - full screen */}
       <Box
-        id="intro"
+        id="home"
         sx={{
           position: "relative",
           width: "100vw",
@@ -393,7 +393,7 @@ const IntroSection: React.FC = () => {
 
         {/* Hero text content */}
         <BasePanel
-          id="intro-main"
+          id="home-content"
           paddingVariant="very-wide"
           fullHeight={true}
           background="transparent"
@@ -472,7 +472,7 @@ const IntroSection: React.FC = () => {
               }}
             >
               <ScrollIndicator
-                scrollToId="third-panel"
+                scrollToId="frontmatter"
                 color={theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
@@ -557,7 +557,7 @@ const IntroSection: React.FC = () => {
           </Box>
 
           <ScrollIndicator
-            scrollToId="third-panel"
+            scrollToId="frontmatter"
             color={theme.palette.blue.darkest}
             animationComplete={true}
             delay={1.0}
@@ -584,7 +584,7 @@ const IntroSection: React.FC = () => {
         }}
       >
         <BasePanel
-          id="third-panel"
+          id="frontmatter"
           fullHeight={false}
           fullWidth
           background="transparent"
@@ -661,7 +661,7 @@ const IntroSection: React.FC = () => {
               </Typography>
 
               <ScrollIndicator
-                scrollToId="fourth-panel"
+                scrollToId="regions"
                 color={theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
@@ -687,7 +687,7 @@ const IntroSection: React.FC = () => {
 
       {/* Fourth panel - California map background with right-aligned text */}
       <BasePanel
-        id="fourth-panel"
+        id="regions"
         fullHeight={false}
         fullWidth
         background="transparent"
