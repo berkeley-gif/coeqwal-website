@@ -1,6 +1,5 @@
 // Navigation components
 export { HeaderHome as Header } from "./navigation/HeaderHome"
-export { Header as HeaderOld } from "./navigation/Header"
 export { AppHeader } from "./navigation/AppHeader"
 export type { HeaderProps } from "./navigation/HeaderHome"
 export type { AppHeaderProps } from "./navigation/AppHeader"
