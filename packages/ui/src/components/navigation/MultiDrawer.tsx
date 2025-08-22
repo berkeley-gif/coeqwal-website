@@ -322,6 +322,9 @@ export function MultiDrawer({
             zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
+            // Account for header height when in overlay mode
+            top: overlay ? `${headerOffset}px` : 0,
+            height: overlay ? `calc(100vh - ${headerOffset}px)` : "100vh",
             backgroundColor: drawerBg, // Use the tracked background color
             borderTopLeftRadius: theme.borderRadius.rounded,
           },
