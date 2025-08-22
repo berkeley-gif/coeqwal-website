@@ -1,8 +1,10 @@
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
-import { motion } from "@repo/motion"
-import { generateFloatingAnimation } from "../utils/floatingAnimation"
+import { FloatingDecorativeCircles } from "../components/FloatingDecorativeCircles"
+import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
+import { decorativeCircles } from "../config/decorativeCircles"
+import { floatingMarkers } from "../config/floatingMarkers"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -28,325 +30,17 @@ const IntroSection = () => {
           position: "relative",
         }}
       >
-        {/* Decorative background circles, scattered behind */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: (theme) => theme.zIndex.introBackgroundImages,
-            pointerEvents: "none",
-          }}
-        >
-          {/* White decorative circles */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              width: "10vw",
-              height: "10vw",
-              top: "18%",
-              left: "34%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(18)}
-            sx={{
-              position: "absolute",
-              width: "18vw",
-              height: "18vw",
-              top: "24%",
-              left: "48%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              width: "10vw",
-              height: "10vw",
-              top: "66%",
-              left: "60%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(12)}
-            sx={{
-              position: "absolute",
-              width: "12vw",
-              height: "12vw",
-              top: "30%",
-              left: "74%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            }}
-          />
+        <FloatingDecorativeCircles
+          circles={decorativeCircles}
+          zIndex={theme.zIndex.introBackgroundImages}
+        />
 
-          {/* Blue decorative circles */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              width: "10vw",
-              height: "10vw",
-              top: "18%",
-              left: "35%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              width: "6vw",
-              height: "6vw",
-              top: "62%",
-              left: "78%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(4)}
-            sx={{
-              position: "absolute",
-              width: "4vw",
-              height: "4vw",
-              top: "32%",
-              left: "86%",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-            }}
-          />
-        </Box>
-
-        {/* Circular crop images with halos */}
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: (theme) => theme.zIndex.introForegroundImages,
-            pointerEvents: "none",
-          }}
-        >
-          {/* Image 7 with halo - Top left of cluster */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(14)}
-            sx={{
-              position: "absolute",
-              top: "20%",
-              left: "42%",
-            }}
-          >
-            {/* Halo circle for Image 7 */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "calc(14vw + 1.56vw)",
-                height: "calc(14vw + 1.56vw)",
-                top: "-0.78vw",
-                left: "-0.78vw",
-                borderRadius: "50%",
-                backgroundColor: "rgba(42, 82, 135, 0.2)",
-                zIndex: -1,
-              }}
-            />
-            <Box
-              component="img"
-              src="/images/circular-crops/8.png"
-              sx={{
-                width: "14vw",
-                height: "14vw",
-                borderRadius: "50%",
-              }}
-            />
-          </Box>
-
-          {/* Image 12 with halo - Top right of cluster */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              top: "16%",
-              left: "78%",
-            }}
-          >
-            {/* Halo circle for Image 12 */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "calc(10vw + 1.11vw)",
-                height: "calc(10vw + 1.11vw)",
-                top: "-0.56vw",
-                left: "-0.56vw",
-                borderRadius: "50%",
-                backgroundColor: "rgba(42, 82, 135, 0.2)",
-                zIndex: -1,
-              }}
-            />
-            <Box
-              component="img"
-              src="/images/circular-crops/12.png"
-              sx={{
-                width: "10vw",
-                height: "10vw",
-                borderRadius: "50%",
-              }}
-            />
-          </Box>
-
-          {/* Image 9 with halo - Bottom right of cluster */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(12)}
-            sx={{
-              position: "absolute",
-              top: "62%",
-              left: "68%",
-            }}
-          >
-            {/* Halo circle for Image 9 */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "calc(12vw + 1.33vw)",
-                height: "calc(12vw + 1.33vw)",
-                top: "-0.67vw",
-                left: "-0.67vw",
-                borderRadius: "50%",
-                backgroundColor: "rgba(42, 82, 135, 0.2)",
-                zIndex: -1,
-              }}
-            />
-            <Box
-              component="img"
-              src="/images/circular-crops/9.png"
-              sx={{
-                width: "12vw",
-                height: "12vw",
-                borderRadius: "50%",
-              }}
-            />
-          </Box>
-
-          {/* Image 14 with halo - Bottom left of cluster */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(10)}
-            sx={{
-              position: "absolute",
-              top: "42%",
-              left: "80%",
-            }}
-          >
-            {/* Halo circle for Image 14 */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "calc(10vw + 1.11vw)",
-                height: "calc(10vw + 1.11vw)",
-                top: "-0.56vw",
-                left: "-0.56vw",
-                borderRadius: "50%",
-                backgroundColor: "rgba(42, 82, 135, 0.2)",
-                zIndex: -1,
-              }}
-            />
-            <Box
-              component="img"
-              src="/images/circular-crops/14.png"
-              sx={{
-                width: "10vw",
-                height: "10vw",
-                borderRadius: "50%",
-              }}
-            />
-          </Box>
-
-          {/* Image 11 with halo - Left side of cluster */}
-          <Box
-            component={motion.div}
-            {...generateFloatingAnimation(16)}
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "46%",
-            }}
-          >
-            {/* Halo circle for Image 11 */}
-            <Box
-              sx={{
-                position: "absolute",
-                width: "calc(16vw + 1.78vw)",
-                height: "calc(16vw + 1.78vw)",
-                top: "-0.89vw",
-                left: "-0.89vw",
-                borderRadius: "50%",
-                backgroundColor: "rgba(42, 82, 135, 0.2)",
-                zIndex: -1,
-              }}
-            />
-            <Box
-              component="img"
-              src="/images/circular-crops/4.png"
-              sx={{
-                width: "16vw",
-                height: "16vw",
-                borderRadius: "50%",
-              }}
-            />
-          </Box>
-        </Box>
-
-        {/* Image 3 with halo - Center cluster (on top of all others) */}
-        <Box
-          component={motion.div}
-          {...generateFloatingAnimation(18)}
-          sx={{
-            position: "absolute",
-            top: "25%",
-            left: "60%",
-            zIndex: (theme) => theme.zIndex.introForegroundImages + 1,
-          }}
-        >
-          {/* Halo circle for Image 3 */}
-          <Box
-            sx={{
-              position: "absolute",
-              width: "calc(18vw + 2vw)",
-              height: "calc(18vw + 2vw)",
-              top: "-1vw",
-              left: "-1vw",
-              borderRadius: "50%",
-              backgroundColor: "rgba(42, 82, 135, 0.2)",
-              zIndex: -1,
-            }}
-          />
-          <Box
-            component="img"
-            src="/images/circular-crops/3.png"
-            sx={{
-              width: "18vw",
-              height: "18vw",
-              borderRadius: "50%",
-            }}
-          />
-        </Box>
+        {/* Floating image markers with halos */}
+        <FloatingImageMarkers
+          markers={floatingMarkers}
+          zIndex={theme.zIndex.introForegroundImages}
+          showHalos={true}
+        />
 
         {/* Hero text content */}
         <BasePanel
@@ -391,7 +85,7 @@ const IntroSection = () => {
               textAlign: "left",
             }}
           >
-            {/* H1 with each word on separate line */}
+
             <Typography
               variant="h1"
               sx={{
