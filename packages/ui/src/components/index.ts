@@ -55,20 +55,15 @@ export type { InfoIconButtonProps } from "./common/InfoIconButton"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
-export { HeroPanel } from "./panels/HeroPanel"
 export { TwoColumnPanel } from "./panels/TwoColumnPanel"
 export { VideoPanel } from "./panels/VideoPanel"
 export type { BasePanelProps } from "./panels/BasePanel"
 export { Spacer } from "./panels/Spacer"
 
-// Operation components
-export { default as OperationCard } from "./operations/OperationCard"
-export type { OperationCardProps, SubOption } from "./operations/OperationCard"
-
 // Learn components
 export { default as LearnCard } from "./LearnCard"
 export { default as LearnCardCarousel } from "./LearnCardCarousel"
 export { default as ScenarioTile } from "./scenario/ScenarioTile"
+export type { GlyphVariant } from "./scenario/ScenarioTile"
 
-export { useGlyphSettingsStore } from "../stores/glyphSettingsStore"
-export type { GlyphVariant } from "../stores/glyphSettingsStore"
+

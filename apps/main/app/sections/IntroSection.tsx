@@ -17,12 +17,15 @@ const IntroSection = () => {
       }}
     >
       {/* Full screen home panel */}
-      <Box
+      <BasePanel
         id="home"
+        fullHeight={true}
+        fullWidth={true}
+        background="transparent"
+        paddingVariant="none"
+        includeHeaderSpacing={false}
         sx={{
           position: "relative",
-          width: "100vw",
-          height: "100vh",
         }}
       >
         {/* Decorative background circles, scattered behind */}
@@ -441,7 +444,7 @@ const IntroSection = () => {
             </Box>
           </Box>
         </BasePanel>
-      </Box>
+      </BasePanel>
 
       {/* Spacer between full-screen panels */}
       <Spacer height={{ xs: 48, md: 48 }} />
