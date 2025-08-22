@@ -1,8 +1,8 @@
 "use client"
 
-import React from "react"
+import type { SVGProps } from "react"
 
-export interface ArrowHeadProps extends React.SVGProps<SVGSVGElement> {
+export interface ArrowHeadProps extends SVGProps<SVGSVGElement> {
   size?: number | string
   color?: string
 }

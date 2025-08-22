@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { Button, Box, Typography } from "../.."
 import type { ButtonProps } from "@mui/material/Button"
 
