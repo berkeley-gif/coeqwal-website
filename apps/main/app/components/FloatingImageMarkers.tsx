@@ -39,7 +39,7 @@ export function FloatingImageMarkers({
   const getHaloDimensions = (imageSize: number) => {
     const haloSize = (imageSize / 18) * 2 // Proportional to largest image
     const offset = -(haloSize / 2)
-    
+
     return {
       width: `calc(${imageSize}vw + ${haloSize}vw)`,
       height: `calc(${imageSize}vw + ${haloSize}vw)`,
@@ -88,7 +88,7 @@ export function FloatingImageMarkers({
                 }}
               />
             )}
-            
+
             {/* Circular image */}
             <Box
               component="img"

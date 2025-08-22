@@ -33,7 +33,6 @@ const ScenarioTile: React.FC<ScenarioTileProps> = ({
   onHover,
   onSelect,
 }) => {
-
   return (
     <Box
       onMouseEnter={() => onHover?.(scenario.id)}
