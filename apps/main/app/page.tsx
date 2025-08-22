@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, useTheme } from "@repo/ui/mui"
-import { AppHeader } from "@repo/ui"
+import { Header } from "./components/Header"
 import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       {/* Header */}
-      <AppHeader />
+      <Header />
 
       {/* Side drawer */}
       <ConnectedMultiDrawer
