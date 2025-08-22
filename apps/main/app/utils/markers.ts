@@ -1,3 +1,6 @@
+
+// Currently not in use, but anticipated use
+
 // Marker type definition
 export interface MarkerData {
   id: string | number
