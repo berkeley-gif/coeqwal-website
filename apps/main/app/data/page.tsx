@@ -11,7 +11,7 @@ import {
   InputLabel,
 } from "@repo/ui/mui"
 import type { SelectChangeEvent } from "@mui/material/Select"
-import { StoreConnectedHeader } from "../components/StoreConnectedHeader"
+import { Header } from "../components/Header"
 import { StoreConnectedMultiDrawer } from "../components/StoreConnectedMultiDrawer"
 import { BasePanel } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
@@ -34,7 +34,7 @@ export default function DataPage() {
   return (
     <>
       {/* Same header as main page */}
-      <StoreConnectedHeader />
+      <Header />
 
       {/* Same drawer as main page */}
       <StoreConnectedMultiDrawer

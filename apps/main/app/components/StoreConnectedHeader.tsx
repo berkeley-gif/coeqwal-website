@@ -1,15 +1,13 @@
 "use client"
 
 import React from "react"
-import { Header } from "@repo/ui"
-
+import { Header as HeaderHome } from "@repo/ui"
 import { useRouter } from "next/navigation"
 
 /**
- * Connects the Header component to the drawer store
- * Always visible regardless of scroll position
+ * Main application header component
  */
-export function StoreConnectedHeader() {
+export function Header() {
   const router = useRouter()
 
   // Handle data page navigation
@@ -29,6 +27,6 @@ export function StoreConnectedHeader() {
   }
 
   return (
-    <Header onDataClick={handleDataClick} onToolsClick={handleToolsClick} />
+    <HeaderHome onDataClick={handleDataClick} onToolsClick={handleToolsClick} />
   )
 }

@@ -4,12 +4,11 @@ import React, { useState } from "react"
 import { Box } from "@repo/ui/mui"
 import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
-// Removed scroll tracking - only ScrollIndicator components need section IDs
 import MapPanel from "./features/mapPanel/MapPanel"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
 import { useDrawerStore } from "@repo/state"
-import { StoreConnectedHeader } from "./components/StoreConnectedHeader"
+import { Header } from "./components/Header"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
 
 export default function Home() {
@@ -147,7 +146,7 @@ export default function Home() {
   return (
     <>
       {/* Always visible header */}
-      <StoreConnectedHeader />
+      <Header />
 
       {/* Background Map Layer */}
       {/* Commenting out map-related code - uncomment to re-enable the map
