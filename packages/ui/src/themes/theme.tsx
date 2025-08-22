@@ -121,7 +121,7 @@ const themeValues = {
       '"farnham-headline", Georgia, "Times New Roman", Times, serif',
   },
 
-  // Layout dimensions (for panel layout calculations)
+  // Layout dimensions
   layout: {
     headerHeight: 80,
     drawer: {
@@ -130,7 +130,7 @@ const themeValues = {
       glossaryWidth: 360,
     },
     textContainer: {
-      maxWidth: { xs: "600px", md: "520px" }, // Standardized text container width
+      maxWidth: { xs: "600px", md: "520px" },
     },
   },
 
