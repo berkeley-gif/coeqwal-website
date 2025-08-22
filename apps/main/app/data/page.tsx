@@ -11,8 +11,8 @@ import {
   InputLabel,
 } from "@repo/ui/mui"
 import type { SelectChangeEvent } from "@mui/material/Select"
-import { Header } from "../components/Header"
-import { StoreConnectedMultiDrawer } from "../components/StoreConnectedMultiDrawer"
+import { AppHeader } from "@repo/ui"
+import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { BasePanel } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 
@@ -34,10 +34,9 @@ export default function DataPage() {
   return (
     <>
       {/* Same header as main page */}
-      <Header />
+      <AppHeader />
 
-      {/* Same drawer as main page */}
-      <StoreConnectedMultiDrawer
+      <ConnectedMultiDrawer
         drawerWidth={360}
         overlay={true}
         showRailButton={false}

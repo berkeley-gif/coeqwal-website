@@ -1,10 +1,9 @@
-import React from "react"
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 import { motion } from "@repo/motion"
 
-const IntroSection: React.FC = () => {
+const IntroSection = () => {
   const theme = useTheme()
 
   // Generate animation parameters for floating effect, scaled by size
