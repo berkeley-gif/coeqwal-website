@@ -27,15 +27,21 @@ export function StoreConnectedHeader({
     router.push("/data")
   }
 
+  // Handle tools dropdown clicks
+  const handleToolsClick = (tool: 'scenario-explorer' | 'needs-search') => {
+    if (tool === 'scenario-explorer') {
+      // TODO: Navigate to scenario data explorer
+      console.log("Navigate to scenario data explorer")
+    } else if (tool === 'needs-search') {
+      // TODO: Navigate to needs-based search
+      console.log("Navigate to needs-based search")
+    }
+  }
+
   return (
     <Header
-      activeSection={activeSection}
-      onSectionClick={onSectionClick}
       onDataClick={handleDataClick}
-      drawerOpen={false}
-      drawerPosition="right"
-      showSecondaryNav={false}
-      secondaryNavItems={[]}
+      onToolsClick={handleToolsClick}
     />
   )
 }

@@ -1,6 +1,6 @@
 // Navigation components
-export { Header } from "./navigation/Header"
-export { HeaderHome } from "./navigation/HeaderHome"
+export { HeaderHome as Header } from "./navigation/HeaderHome"
+export { Header as HeaderOld } from "./navigation/Header"
 export type { HeaderProps } from "./navigation/HeaderHome"
 export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
