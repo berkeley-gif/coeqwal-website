@@ -14,7 +14,7 @@ export interface AppMultiDrawerProps {
 }
 
 /**
- * Application multi-drawer component - pure UI component that accepts state as props
+ * Application multi-drawer component with state accepted as props
  */
 export function AppMultiDrawer({
   drawerWidth = 360,

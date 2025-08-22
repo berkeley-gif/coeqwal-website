@@ -30,7 +30,7 @@ interface RailButtonProps {
 }
 
 /**
- * Button component for the mini rail - vertical tab style with vertical text
+ * Button component for the mini rail, vertical tab style with vertical text
  */
 function RailButton({
   label,
@@ -50,7 +50,7 @@ function RailButton({
         justifyContent: "center",
         alignItems: "center",
         bgcolor: active ? "#60aacb" : bgColor,
-        color: "#FFFFFF", // White text to match secondary nav
+        color: "#FFFFFF",
         borderRadius: "8px 0 0 8px", // Rounded corners on the left side only (tabs are on right, so round toward center)
         boxShadow: "none",
         padding: "12px 2px", // Reduced horizontal padding
@@ -62,7 +62,7 @@ function RailButton({
         borderRight: active
           ? `4px solid ${theme.palette.primary.dark}`
           : "none",
-        border: "none", // Remove border
+        border: "none",
         transition: "all 0.2s ease",
         "&:hover": {
           bgcolor: active ? "#60aacb" : hoverColor,
@@ -126,8 +126,8 @@ function RailButton({
           >
             <Box
               sx={{
-                fontSize: "1.5rem", // Doubled from 0.75rem to match larger button
-                color: active ? "#449cd9" : "#666", // Blue when tab active, gray when inactive
+                fontSize: "1.5rem",
+                color: active ? "#449cd9" : "#666",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

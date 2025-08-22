@@ -30,7 +30,7 @@ const SliderContainer = styled(Box, {
     labelPosition === "bottom" ? theme.spacing(4) : theme.spacing(1),
   // Add horizontal padding to account for label widths at the edges
   paddingLeft: "40px", // Half of maxWidth (80px) to prevent left label overflow
-  paddingRight: "40px", // Half of maxWidth (80px) to prevent right label overflow
+  paddingRight: "40px", // Ditto, for right side
 }))
 
 const SliderTrack = styled(Box)(({ theme }) => ({

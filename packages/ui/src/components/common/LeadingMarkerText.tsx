@@ -30,7 +30,7 @@ export function LeadingMarkerText({
         alignItems: "start",
       })}
     >
-      {/* Leading marker (accent circle) - positioned relative to first line of headline */}
+      {/* Leading marker (accent circle) positioned relative to first line of headline */}
       <Box
         sx={(theme) => {
           // Get the typography variant to calculate line height
@@ -67,7 +67,7 @@ export function LeadingMarkerText({
             gridColumn: 1,
             gridRow: 1,
             position: "relative",
-            top: Math.max(0, topOffset), // Ensure we don't go negative
+            top: Math.max(0, topOffset), // Ensure it doesn't go negative
           }
         }}
       />

@@ -23,7 +23,7 @@ export interface BasePanelProps extends BoxProps {
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
   /**
-   * Optional background image that will cover the entire panel.  Useful for hero sections
+   * Optional background image (poster image) that will cover the entire panel.  Useful for hero sections
    * or full-bleed graphics. When provided, the image is applied with
    * `background-size: cover` and `background-position: center` so it fills the
    * viewport while maintaining aspect ratio.
