@@ -17,14 +17,14 @@ export default function Home() {
       {/* Header */}
       <AppHeader />
 
-      {/* Side Drawer */}
+      {/* Side drawer */}
       <ConnectedMultiDrawer
         drawerWidth={theme.layout.drawer.width}
         overlay={true}
         showRailButtons={true}
       />
 
-      {/* Main Content Area */}
+      {/* Main content */}
       <Box
         component="main"
         sx={{
@@ -33,7 +33,7 @@ export default function Home() {
           overflowX: "hidden",
         }}
       >
-          {/* Page Sections */}
+          {/* Panel sections */}
           <IntroSection />
           <ContentPanels onOpenLearnDrawer={handleOpenGlossary} />
           <Box id="map-panel">

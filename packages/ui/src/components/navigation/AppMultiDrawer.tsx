@@ -6,7 +6,7 @@ import type { TabKey } from "./MultiDrawer"
 export interface AppMultiDrawerProps {
   drawerWidth?: number
   overlay?: boolean
-  showRailButton?: boolean
+  showRailButtons?: boolean
   activeTab?: TabKey | null
   drawerContent?: any
   onDrawerStateChange?: (open: boolean, tab: TabKey | null) => void
@@ -19,7 +19,7 @@ export interface AppMultiDrawerProps {
 export function AppMultiDrawer({
   drawerWidth = 360,
   overlay = false,
-  showRailButton = true,
+  showRailButtons = true,
   activeTab = null,
   drawerContent = null,
   onDrawerStateChange,
@@ -32,7 +32,7 @@ export function AppMultiDrawer({
       onDrawerStateChange={onDrawerStateChange}
       overlay={overlay}
       drawerContent={drawerContent}
-      showRailButton={showRailButton}
+      showRailButtons={showRailButtons}
       headerOffset={headerOffset}
     />
   )
