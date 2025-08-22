@@ -1,8 +1,6 @@
 "use client"
 
-import React from "react"
 import { HeaderHome } from "./HeaderHome"
-import { useRouter } from "next/navigation"
 
 export interface AppHeaderProps {
   onDataClick?: () => void
@@ -13,28 +11,20 @@ export interface AppHeaderProps {
  * Main application header component with navigation and routing logic
  */
 export function AppHeader({ onDataClick, onToolsClick }: AppHeaderProps = {}) {
-  const router = useRouter()
-
-  // Handle data page navigation
+  // Default handlers that just log - applications should provide their own
   const handleDataClick = () => {
     if (onDataClick) {
       onDataClick()
     } else {
-      router.push("/data")
+      console.log("Data click - no handler provided")
     }
   }
 
-  // Handle tools dropdown clicks
   const handleToolsClick = (tool: "scenario-explorer" | "needs-search") => {
     if (onToolsClick) {
       onToolsClick(tool)
     } else {
-      // Default behavior
-      if (tool === "scenario-explorer") {
-        console.log("Navigate to scenario data explorer")
-      } else if (tool === "needs-search") {
-        console.log("Navigate to needs-based search")
-      }
+      console.log(`Tools click: ${tool} - no handler provided`)
     }
   }
 

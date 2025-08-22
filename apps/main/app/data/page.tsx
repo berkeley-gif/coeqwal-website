@@ -11,7 +11,8 @@ import {
   InputLabel,
 } from "@repo/ui/mui"
 import type { SelectChangeEvent } from "@mui/material/Select"
-import { AppHeader, useTheme } from "@repo/ui"
+import { useTheme } from "@repo/ui"
+import { Header } from "../components/Header"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { BasePanel } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
@@ -35,7 +36,7 @@ export default function DataPage() {
   return (
     <>
       {/* Same header as main page */}
-      <AppHeader />
+      <Header />
 
       <ConnectedMultiDrawer
         drawerWidth={theme.layout.drawer.width}
