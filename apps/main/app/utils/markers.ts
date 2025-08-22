@@ -1,4 +1,3 @@
-
 // Currently not in use, but anticipated use
 
 // Marker type definition
