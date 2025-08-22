@@ -27,7 +27,7 @@ export const floatingMarkers: ImageMarker[] = [
     left: "42%",
   },
   {
-    id: "image-12", 
+    id: "image-12",
     imageSrc: "/images/circular-crops/12.png",
     imageSize: 10,
     top: "16%",
@@ -35,7 +35,7 @@ export const floatingMarkers: ImageMarker[] = [
   },
   {
     id: "image-9",
-    imageSrc: "/images/circular-crops/9.png", 
+    imageSrc: "/images/circular-crops/9.png",
     imageSize: 12,
     top: "62%",
     left: "68%",
@@ -43,7 +43,7 @@ export const floatingMarkers: ImageMarker[] = [
   {
     id: "image-14",
     imageSrc: "/images/circular-crops/14.png",
-    imageSize: 10, 
+    imageSize: 10,
     top: "42%",
     left: "80%",
   },
@@ -51,10 +51,10 @@ export const floatingMarkers: ImageMarker[] = [
     id: "image-11",
     imageSrc: "/images/circular-crops/4.png",
     imageSize: 16,
-    top: "50%", 
+    top: "50%",
     left: "46%",
   },
-  
+
   // Center image - on top of all others
   {
     id: "image-3",

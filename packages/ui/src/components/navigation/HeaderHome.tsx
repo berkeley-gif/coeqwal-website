@@ -111,7 +111,7 @@ export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: "rgba(42, 82, 135, 0.2)", // Blue decorative circle color
+        backgroundColor: "rgba(42, 82, 135, 0.2)", // Blue circle color
         borderRadius: theme.borderRadius.card,
         margin: "16px",
         width: "calc(100% - 32px)",

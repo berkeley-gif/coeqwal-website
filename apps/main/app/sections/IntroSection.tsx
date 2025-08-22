@@ -24,208 +24,119 @@ const IntroSection = () => {
         fullHeight={true}
         fullWidth={true}
         background="transparent"
-        paddingVariant="none"
-        includeHeaderSpacing={false}
+        paddingVariant="very-wide"
+        includeHeaderSpacing={true}
         sx={{
           position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "flex-start",
         }}
       >
-        {/* Ambient background circles, scattered behind */}
-        <FloatingAmbientCircles
-          circles={ambientCircles}
-          zIndex={theme.zIndex.introBackgroundImages}
-        />
-
-        {/* Floating image markers with halos */}
-        <FloatingImageMarkers
-          markers={floatingMarkers}
-          zIndex={theme.zIndex.introForegroundImages}
-          showHalos={true}
-        />
-
-        {/* Hero text content */}
-        <BasePanel
-          id="home-content"
-          paddingVariant="very-wide"
-          fullHeight={true}
-          background="transparent"
-          includeHeaderSpacing={true}
+        {/* Ambient background circles, positioned to cover full viewport */}
+        <Box
           sx={{
-            height: "100vh",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            position: "relative",
-            overflow: "visible",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: theme.zIndex.introBackgroundImages,
+            pointerEvents: "none",
           }}
         >
-          {/* Background circles (below text) */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              zIndex: (theme) => theme.zIndex.introBackgroundImages,
-              pointerEvents: "none",
-            }}
-          ></Box>
+          <FloatingAmbientCircles circles={ambientCircles} zIndex={1} />
+        </Box>
 
-          {/* Text content - left aligned, vertically centered minus header */}
-          <Box
+        {/* Floating image markers, positioned to cover full viewport */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: theme.zIndex.introForegroundImages,
+            pointerEvents: "none",
+          }}
+        >
+          <FloatingImageMarkers
+            markers={floatingMarkers}
+            showHalos={true}
+            zIndex={1}
+          />
+        </Box>
+
+        {/* Hero text content */}
+        <Box
+          id="home-content"
+          sx={{
+            position: "relative",
+            zIndex: theme.zIndex.introText,
+          }}
+        >
+          <Typography
+            variant="h1"
+            component="h1"
             sx={{
+              mb: 2,
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
               alignItems: "flex-start",
-              width: "100%",
-              height: `calc(100vh - ${theme.layout.headerHeight}px)`, // Full height minus header
-              position: "relative",
-              zIndex: (theme) => theme.zIndex.introText,
-              textAlign: "left",
+              "& > span": {
+                lineHeight: 1.05, // Match theme h1 lineHeight
+              },
             }}
           >
+            <span>Rethink</span>
+            <span>California</span>
+            <span>Water</span>
+          </Typography>
 
-            <Typography
-              variant="h1"
-              sx={{
-                mb: 2,
-              }}
-            >
-              Rethink
-              <br />
-              California
-              <br />
-              Water
-            </Typography>
+          {/* Body text */}
+          <Typography
+            variant="body1"
+            sx={{
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
+              mb: 4,
+            }}
+          >
+            Explore a range of Central Valley water scenarios and discover
+            possibilities for water management across the state, under current
+            conditions and future climates.
+          </Typography>
 
-            {/* Body text */}
-            <Typography
-              variant="body1"
-              sx={{
-                textAlign: "left",
-                maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-                mb: 4,
-              }}
+          {/* Arrow positioned at text block midpoint */}
+          <Box
+            sx={{
+              width: (theme) => theme.layout.textContainer.maxWidth,
+              display: "flex",
+              justifyContent: "center",
+              mt: 4,
+            }}
+          >
+            <ScrollIndicator
+              scrollToId="frontmatter"
+              color={theme.palette.blue.darkest}
+              animationComplete={true}
+              delay={1.0}
             >
-              Explore a range of Central Valley water scenarios and discover
-              possibilities for water management across the state, under current
-              conditions and future climates.
-            </Typography>
-
-            {/* Arrow positioned at text block midpoint */}
-            <Box
-              sx={{
-                width: (theme) => theme.layout.textContainer.maxWidth,
-                display: "flex",
-                justifyContent: "center",
-                mt: 4,
-              }}
-            >
-              <ScrollIndicator
-                scrollToId="frontmatter"
-                color={theme.palette.blue.darkest}
-                animationComplete={true}
-                delay={1.0}
-              >
-                <ArrowHead
-                  size={28}
-                  style={{
-                    transform: "rotate(90deg)",
-                  }}
-                />
-              </ScrollIndicator>
-            </Box>
+              <ArrowHead
+                size={28}
+                style={{
+                  transform: "rotate(90deg)",
+                }}
+              />
+            </ScrollIndicator>
           </Box>
-        </BasePanel>
+        </Box>
       </BasePanel>
 
       {/* Spacer between full-screen panels */}
       <Spacer height={{ xs: 48, md: 48 }} />
 
-      {/* Second panel - Overview content
-      <BasePanel
-        id="overview"
-        fullHeight={false}
-        fullWidth
-        background="transparent"
-        paddingVariant="very-wide"
-        includeHeaderSpacing={true}
-        sx={{
-          color: (theme) => theme.palette.primary.dark,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh",
-        }}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            maxWidth: { xs: "600px", md: "500px" },
-          }}
-        >
-          <Box
-            component="img"
-            src="/images/home_collage/birds_top.png"
-            sx={{
-              position: "absolute",
-              left: "-70%",
-              top: "30%",
-              transform: "translateY(-50%)",
-              width: "280px",
-              height: "280px",
-              zIndex: (theme) => theme.zIndex.introBackgroundImages,
-            }}
-          />
-
-          <Box
-            sx={{ textAlign: "left", maxWidth: (theme) => theme.layout.textContainer.maxWidth }}
-          >
-            <Typography variant="body1">
-              California&apos;s Central Valley water depends
-              <br />
-              on two main things:
-            </Typography>
-            <Box component="ol" sx={{ mt: 1, pl: 3 }}>
-              <Box component="li" sx={{ mb: 1 }}>
-                <Typography variant="body1">
-                  How much rain and snow we get.
-                </Typography>
-              </Box>
-              <Box component="li" sx={{ mb: 1 }}>
-                <Typography variant="body1">
-                  How we choose to manage it.
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          <ScrollIndicator
-            scrollToId="frontmatter"
-            color={theme.palette.blue.darkest}
-            animationComplete={true}
-            delay={1.0}
-            style={{ marginTop: "2rem" }}
-          >
-            <ArrowHead
-              size={28}
-              style={{
-                transform: "rotate(90deg)",
-              }}
-            />
-          </ScrollIndicator>
-        </Box>
-      </BasePanel> */}
-
-      {/* Third panel */}
+      {/* Frontmatter panel(s) */}
       <Box
         sx={{
           background: `url('/images/home_collage/newcollage_wetland.png')`,
@@ -337,7 +248,7 @@ const IntroSection = () => {
 
       <Spacer height={{ xs: 48, md: 160 }} />
 
-      {/* Fourth panel - California map background with right-aligned text */}
+      {/* California map background with right-aligned text */}
       <BasePanel
         id="regions"
         fullHeight={false}

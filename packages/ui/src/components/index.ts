@@ -65,5 +65,3 @@ export { default as LearnCard } from "./LearnCard"
 export { default as LearnCardCarousel } from "./LearnCardCarousel"
 export { default as ScenarioTile } from "./scenario/ScenarioTile"
 export type { GlyphVariant } from "./scenario/ScenarioTile"
-
-

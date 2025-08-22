@@ -1,10 +1,10 @@
 /**
  * Generate animation parameters for floating effect, scaled by element size
- * 
+ *
  * Creates proportional movement for floating elements where larger elements
  * move more dramatically (feeling closer) and smaller elements move subtly
  * (feeling farther away), to create depth.
- * 
+ *
  * @param sizeVw - The viewport width size of the element (e.g., 18 for "18vw")
  * @returns Framer Motion animation configuration object
  */
