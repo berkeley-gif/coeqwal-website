@@ -11,8 +11,8 @@ export interface OutcomeGlyphProps {
 }
 
 /**
- * OutcomeGlyph – tiny 4-bar horizontal chart reused across dashboard.
- * If no `values` provided falls back to BarChart’s internal dummy values.
+ * OutcomeGlyph – small multiple 4-bar horizontal chart reused across dashboard.
+ * If no `values` provided falls back to BarChart’s internal dummy values for demo.
  */
 const OutcomeGlyph: React.FC<OutcomeGlyphProps> = ({
   values,
