@@ -4,34 +4,13 @@ import React, { useState } from "react"
 import { Box } from "@repo/ui/mui"
 import type { TabKey } from "@repo/ui"
 // import { useTranslation } from "@repo/i18n"
-import { useScrollTracking } from "./hooks/useScrollTracking"
-import { sectionIds } from "./config/navigation"
-// Commenting out map-related imports - uncomment to re-enable the map
-// import type { MapboxMapRef } from "@repo/map"
-// import MapContainer from "./components/MapContainer"
+// Removed scroll tracking - only ScrollIndicator components need section IDs
 import MapPanel from "./features/mapPanel/MapPanel"
-// import MapPanel2 from "./features/mapPanel/MapPanel2" // eslint-disable-line @typescript-eslint/no-unused-vars
-// import { NeedsEditorPanel } from "./features/needsEditor/components" // Yuya's needs editor panel
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
 import { useDrawerStore } from "@repo/state"
-// Commenting out map store - uncomment to re-enable the map
-// import { useMapStore, mapActions } from "@repo/state/map"
 import { StoreConnectedHeader } from "./components/StoreConnectedHeader"
 import { StoreConnectedMultiDrawer } from "./components/StoreConnectedMultiDrawer"
-// Commenting out map effect - uncomment to re-enable the map
-// import { KenBurnsMapEffect } from "./components/KenBurnsMapEffect"
-
-// Make sure these IDs match the section IDs used in the HeaderHome component
-const navSectionIds = {
-  intro: "intro",
-  californiaWater: "california-water",
-  managingWater: "managing-water",
-  challenges: "challenges",
-  calsim: "calsim",
-  invitation: "invitation",
-  combinedPanel: "combined-panel",
-}
 
 export default function Home() {
   // const { t } = useTranslation()
@@ -41,10 +20,6 @@ export default function Home() {
   const [activeDrawerTab, setActiveDrawerTab] = useState<TabKey | null>(null)
   // Get actions from the Zustand drawer store
   const { openDrawer, closeDrawer } = useDrawerStore.getState()
-
-  // Track all sections including the ones for the top navigation
-  const allSectionIds = [...sectionIds, ...Object.values(navSectionIds)]
-  const { activeSection, scrollToSection } = useScrollTracking(allSectionIds)
 
   // Commenting out map-related code - uncomment to re-enable the map
   /*
@@ -87,9 +62,13 @@ export default function Home() {
   }, [uncontrolledRef, mapStore.viewState])
   */
 
-  // Custom scroll handler that also closes the drawer
+  // Simple scroll handler that closes the drawer
   const handleSectionClick = (sectionId: string) => {
-    scrollToSection(sectionId)
+    // Simple scroll to element by ID
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
+    }
     // Close drawer through the store
     closeDrawer()
   }
@@ -168,10 +147,7 @@ export default function Home() {
   return (
     <>
       {/* Always visible header */}
-      <StoreConnectedHeader
-        activeSection={activeSection}
-        onSectionClick={handleSectionClick}
-      />
+      <StoreConnectedHeader />
 
       {/* Background Map Layer */}
       {/* Commenting out map-related code - uncomment to re-enable the map
@@ -189,7 +165,7 @@ export default function Home() {
         <KenBurnsMapEffect
           mapRef={uncontrolledRef}
           enabled={true}
-          activeSection={activeSection}
+          activeSection=""
         />
       </Box>
       */}
@@ -210,7 +186,6 @@ export default function Home() {
       <StoreConnectedMultiDrawer
         drawerWidth={360}
         overlay={true}
-        activeSection={activeSection}
         onSectionClick={handleSectionClick}
         showSecondaryNav={false}
         secondaryNavItems={[]}

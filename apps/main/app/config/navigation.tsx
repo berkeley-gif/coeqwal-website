@@ -5,14 +5,16 @@ interface NavItem {
 }
 
 // All section IDs in order (used for scroll tracking)
+// These should match the actual HTML element IDs in the sections
 export const sectionIds = [
-  "hero",
   "intro",
+  "third-panel", 
+  "fourth-panel",
+  "content-panels",
   "california-water",
-  "managing-water",
+  "managing-water", 
   "challenges",
   "calsim",
-  "invitation",
   "combined-panel",
 ]
 
