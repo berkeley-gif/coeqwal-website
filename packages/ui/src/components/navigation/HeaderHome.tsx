@@ -89,7 +89,7 @@ export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
     height: "40px",
     minHeight: "40px",
     fontFamily: theme.typography.fontFamily,
-    fontWeight: (theme) => theme.typography.button.fontWeight,
+    fontWeight: theme.typography.button.fontWeight,
     color: "white",
   }
 
