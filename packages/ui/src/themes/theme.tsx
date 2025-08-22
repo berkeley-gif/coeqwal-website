@@ -800,7 +800,7 @@ const theme = createTheme({
     button: {
       fontSize: "1rem", // 16px for top-level UI elements
       letterSpacing: "normal",
-      fontWeight: 400,
+      fontWeight: 500,
       textTransform: "none",
     },
     caption: {
