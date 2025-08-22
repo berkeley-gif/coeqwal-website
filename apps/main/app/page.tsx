@@ -3,15 +3,13 @@
 import { Box, useTheme } from "@repo/ui/mui"
 import { AppHeader } from "@repo/ui"
 import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
-import { useGlossaryHandler } from "./hooks/useGlossaryHandler"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
-import MapPanel from "./features/mapPanel/MapPanel"
+import ScenarioExplorer from "./features/scenarioExplorer/ScenarioExplorer"
 
 export default function Home() {
   const theme = useTheme()
-  const { handleOpenGlossary } = useGlossaryHandler()
-  
+
   return (
     <>
       {/* Header */}
@@ -33,12 +31,10 @@ export default function Home() {
           overflowX: "hidden",
         }}
       >
-          {/* Panel sections */}
-          <IntroSection />
-          <ContentPanels onOpenLearnDrawer={handleOpenGlossary} />
-          <Box id="map-panel">
-            <MapPanel />
-          </Box>
+        {/* Panel sections */}
+        <IntroSection />
+        <ContentPanels />
+        <ScenarioExplorer />
       </Box>
     </>
   )
