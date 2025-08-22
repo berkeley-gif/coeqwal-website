@@ -55,13 +55,13 @@ const IntroSection: React.FC = () => {
 
   return (
     <Box
-        sx={{
-          background: (theme) => `
+      sx={{
+        background: (theme) => `
             linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
           `,
-          minHeight: "200vh",
-        }}
-      >
+        minHeight: "200vh",
+      }}
+    >
       {/* Hero panel - full screen */}
       <Box
         id="intro"
@@ -472,7 +472,7 @@ const IntroSection: React.FC = () => {
               }}
             >
               <ScrollIndicator
-                scrollToId="overview"
+                scrollToId="third-panel"
                 color={theme.palette.blue.darkest}
                 animationComplete={true}
                 delay={1.0}
@@ -631,8 +631,8 @@ const IntroSection: React.FC = () => {
               }}
             >
               <Typography variant="body1">
-                California&apos;s Central Valley water depends
-                on two main things:
+                California&apos;s Central Valley water depends on two main
+                things:
               </Typography>
               <Box component="ol" sx={{ mt: 1, mb: 2, pl: 3 }}>
                 <Box component="li" sx={{ mb: 1 }}>
@@ -739,6 +739,25 @@ const IntroSection: React.FC = () => {
             water management scenarios, understand the trade-offs, and use data
             to advocate for your community.
           </Typography>
+
+          <ScrollIndicator
+            scrollToId="content-panels"
+            color={theme.palette.blue.darkest}
+            animationComplete={true}
+            delay={1.0}
+            style={{
+              marginTop: "2rem",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <ArrowHead
+              size={28}
+              style={{
+                transform: "rotate(90deg)",
+              }}
+            />
+          </ScrollIndicator>
         </Box>
       </BasePanel>
     </Box>

@@ -1,6 +1,14 @@
 "use client"
 
-import { AppBar, Toolbar, Stack, Button, Box, Menu, MenuItem } from "@mui/material"
+import {
+  AppBar,
+  Toolbar,
+  Stack,
+  Button,
+  Box,
+  Menu,
+  MenuItem,
+} from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
@@ -10,7 +18,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { useState } from "react"
 export interface HeaderProps {
   onDataClick?: () => void
-  onToolsClick?: (tool: 'scenario-explorer' | 'needs-search') => void
+  onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
 }
 
 // Translation
@@ -61,14 +69,11 @@ const translations: TranslationsMap = {
 }
 
 // NEW SIMPLIFIED HEADER
-export function HeaderHome({
-  onDataClick,
-  onToolsClick,
-}: HeaderProps) {
+export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const { locale, isLoading } = useTranslation()
-  
+
   // Tools dropdown state
   const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null)
   const isToolsOpen = Boolean(toolsAnchorEl)
@@ -96,7 +101,7 @@ export function HeaderHome({
     setToolsAnchorEl(null)
   }
 
-  const handleToolSelection = (tool: 'scenario-explorer' | 'needs-search') => {
+  const handleToolSelection = (tool: "scenario-explorer" | "needs-search") => {
     onToolsClick?.(tool)
     handleToolsClose()
   }
@@ -155,8 +160,8 @@ export function HeaderHome({
               },
             }}
           >
-            <MenuItem 
-              onClick={() => handleToolSelection('scenario-explorer')}
+            <MenuItem
+              onClick={() => handleToolSelection("scenario-explorer")}
               sx={{
                 color: "white",
                 "&:hover": {
@@ -166,8 +171,8 @@ export function HeaderHome({
             >
               {componentText.toolsDropdown.scenarioExplorer}
             </MenuItem>
-            <MenuItem 
-              onClick={() => handleToolSelection('needs-search')}
+            <MenuItem
+              onClick={() => handleToolSelection("needs-search")}
               sx={{
                 color: "white",
                 "&:hover": {
