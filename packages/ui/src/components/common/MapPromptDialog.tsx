@@ -18,8 +18,6 @@ interface MapPromptDialogProps {
 
 /**
  * Reusable map prompt dialog component for map interactions.
- * Used for drawing custom regions, selecting delivery areas, etc.
- * Styled according to the theme's mapPromptDialog specs.
  */
 export default function MapPromptDialog({
   isVisible,

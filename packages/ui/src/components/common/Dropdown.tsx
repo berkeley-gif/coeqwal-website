@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { Select, MenuItem, FormControl, InputLabel } from "../.."
 import type { SelectProps, MenuItemProps, Theme } from "@mui/material"
 
@@ -95,7 +94,7 @@ export function Dropdown({
       },
     }),
 
-    // Merge user sx
+    // Merge instance sx
     ...sx,
   }
 

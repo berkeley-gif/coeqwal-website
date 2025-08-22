@@ -125,7 +125,7 @@ export function Card({
 }
 
 /**
- * Scenario Card component for displaying water scenario choices
+ * Scenario Card component for displaying scenario choices
  * Features: alt color small caps top line, sans serif headline, body text, optional bottom line with HR
  */
 export function ScenarioCard({

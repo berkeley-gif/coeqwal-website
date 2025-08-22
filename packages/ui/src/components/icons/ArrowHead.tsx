@@ -7,7 +7,7 @@ export interface ArrowHeadProps extends SVGProps<SVGSVGElement> {
   color?: string
 }
 
-// Right-pointing triangular arrow with visually rounded corners
+// Right-pointing triangular arrow with rounded corners
 export function ArrowHead({
   size = "100%",
   color = "currentColor",

@@ -27,7 +27,6 @@ export interface CardAccordionProps {
  * - Single or multiple expansion modes
  * - Consistent styling with card design system
  * - Accessible keyboard navigation
- * - Uses theme typography mixins
  */
 export function CardAccordion({
   sections,
