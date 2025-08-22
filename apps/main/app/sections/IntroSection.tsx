@@ -1,9 +1,9 @@
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
-import { FloatingDecorativeCircles } from "../components/FloatingDecorativeCircles"
+import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
-import { decorativeCircles } from "../config/decorativeCircles"
+import { ambientCircles } from "../config/ambientCircles"
 import { floatingMarkers } from "../config/floatingMarkers"
 
 const IntroSection = () => {
@@ -30,8 +30,9 @@ const IntroSection = () => {
           position: "relative",
         }}
       >
-        <FloatingDecorativeCircles
-          circles={decorativeCircles}
+        {/* Ambient background circles, scattered behind */}
+        <FloatingAmbientCircles
+          circles={ambientCircles}
           zIndex={theme.zIndex.introBackgroundImages}
         />
 
