@@ -10,10 +10,6 @@ export interface ContentWrapperProps {
   children: React.ReactNode
   /** Function called when the close button is clicked */
   onClose: () => void
-  /**
-   * @deprecated No longer used since we now handle background color in the parent component
-   */
-  bgColor?: string
 }
 
 /**
