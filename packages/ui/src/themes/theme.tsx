@@ -241,7 +241,7 @@ const themeValues = {
   // Z-index values
   zIndex: {
     // Background layers (negative values)
-    mapBackground: -1, // Map when used as background
+    basement: -1, // Map when used as background
     sectionBackground: -1, // Section background elements
 
     // Content layers (0-99)
@@ -1516,7 +1516,7 @@ declare module "@mui/material/styles" {
   // zIndex interface
   interface ZIndex {
     // Background layers
-    mapBackground: number
+    basement: number
     sectionBackground: number
 
     // Content layers
@@ -1828,7 +1828,7 @@ declare module "@mui/material/Typography" {
 | conflicts and ensure predictable stacking behavior:
 |
 | BACKGROUND LAYERS (negative values):
-| - mapBackground (-1): Map when used as background element
+| - basement (-1): Map when used as background element
 | - sectionBackground (-1): Section background decorations
 |
 | CONTENT LAYERS (0-99):

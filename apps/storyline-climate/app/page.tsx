@@ -2,7 +2,13 @@
 
 import { useRef, useState } from "react"
 import { HeaderStory } from "@repo/motion/components"
-import { Box, FormControl, FormControlLabel, Radio, RadioGroup,  } from "@repo/ui/mui"
+import {
+  Box,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+} from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
@@ -23,9 +29,11 @@ export default function StoryContainer() {
   return (
     <>
       <HeaderStory />
-      <SelectionPanel updateOnPlot={(value) => {
-        setUseNewPlot(value === "new")
-      }} />
+      <SelectionPanel
+        updateOnPlot={(value) => {
+          setUseNewPlot(value === "new")
+        }}
+      />
       <Box
         component="main"
         ref={containerRef}
@@ -67,14 +75,13 @@ export default function StoryContainer() {
             <Conclusion />
           </>
         )}
-
       </Box>
     </>
   )
 }
 
 function SelectionPanel({
-  updateOnPlot
+  updateOnPlot,
 }: {
   updateOnPlot: (value: string) => void
 }) {
@@ -102,31 +109,55 @@ function SelectionPanel({
         },
       }}
       transition={{ duration: 0.3 }}
-      className='selection-panel'
+      className="selection-panel"
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 1
+        gap: 1,
       }}
     >
       <Box>
         <FormControl>
           Opener (not implemented yet)
-          <RadioGroup row name="row-radio-buttons-group" defaultValue={"oroville"}>
-            <FormControlLabel value="oroville" control={<Radio />} label="Oroville" />
-            <FormControlLabel value="temperature" control={<Radio />} label="Temperature" />
-            <FormControlLabel value="sealevel" control={<Radio />} label="Sea Level" />
+          <RadioGroup
+            row
+            name="row-radio-buttons-group"
+            defaultValue={"oroville"}
+          >
+            <FormControlLabel
+              value="oroville"
+              control={<Radio />}
+              label="Oroville"
+            />
+            <FormControlLabel
+              value="temperature"
+              control={<Radio />}
+              label="Temperature"
+            />
+            <FormControlLabel
+              value="sealevel"
+              control={<Radio />}
+              label="Sea Level"
+            />
           </RadioGroup>
         </FormControl>
       </Box>
       <Box>
         <FormControl>
           Plot
-          <RadioGroup row name="row-radio-buttons-group" defaultValue={"original"}
+          <RadioGroup
+            row
+            name="row-radio-buttons-group"
+            defaultValue={"original"}
             onChange={(event) => {
               updateOnPlot(event.target.value)
-            }}>
-            <FormControlLabel value="original" control={<Radio />} label="Original" />
+            }}
+          >
+            <FormControlLabel
+              value="original"
+              control={<Radio />}
+              label="Original"
+            />
             <FormControlLabel value="new" control={<Radio />} label="New" />
           </RadioGroup>
         </FormControl>

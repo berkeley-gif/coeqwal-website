@@ -8,11 +8,11 @@ interface NavItem {
 // These should match the actual HTML element IDs in the sections
 export const sectionIds = [
   "intro",
-  "third-panel", 
+  "third-panel",
   "fourth-panel",
   "content-panels",
   "california-water",
-  "managing-water", 
+  "managing-water",
   "challenges",
   "calsim",
   "combined-panel",
