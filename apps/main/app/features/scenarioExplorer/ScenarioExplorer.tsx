@@ -2467,7 +2467,7 @@ export default function ScenarioExplorer({
     // Get the clicked feature
     const features = evt.features
     if (features && features.length > 0) {
-      const selectedPolygon = features[0]
+      const selectedPolygon = features[0] as any // eslint-disable-line @typescript-eslint/no-explicit-any
       console.log("Selected delivery area polygon:", selectedPolygon.properties)
 
       // Close the delivery area selection dialog
@@ -2964,7 +2964,7 @@ export default function ScenarioExplorer({
                     if (!hasLayer("delivery-area-selection-layer")) return
 
                     // Handle delivery area polygon selection
-                    const features = evt.target.queryRenderedFeatures(
+                    const features = (evt.target as any).queryRenderedFeatures( // eslint-disable-line @typescript-eslint/no-explicit-any
                       evt.point,
                       {
                         layers: ["delivery-area-selection-layer"],
