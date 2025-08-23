@@ -8,7 +8,7 @@ export interface AppMultiDrawerProps {
   overlay?: boolean
   showRailButtons?: boolean
   activeTab?: TabKey | null
-  drawerContent?: any
+  drawerContent?: Record<string, unknown>
   onDrawerStateChange?: (open: boolean, tab: TabKey | null) => void
   headerOffset?: number
 }
@@ -21,7 +21,7 @@ export function AppMultiDrawer({
   overlay = false,
   showRailButtons = true,
   activeTab = null,
-  drawerContent = null,
+  drawerContent = undefined,
   onDrawerStateChange,
   headerOffset = 0,
 }: AppMultiDrawerProps) {

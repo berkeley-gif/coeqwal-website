@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useEffect, useState, useCallback } from "react"
 import * as d3 from "d3"
 import { useResizeObserver } from "../hooks/useResizeObserver"
@@ -62,9 +63,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
   // Track filter ranges for each axis [min, max] approach as this summer.
   const filterRanges = useRef<Record<string, [number, number]>>({})
-
-  // Track if any axis is currently being dragged (for connector line opacity)
-  const isDragging = useRef<boolean>(false)
 
   // Centralized filtering function - separate opacity for lines vs circles
   const getScenarioOpacity = useCallback(
@@ -210,11 +208,11 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       }
 
       const backgroundSelection = animate
-        ? background.transition(t as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        ? background.transition(t as any)
         : background
       ;(backgroundSelection as any)
         .attr("width", innerWidth)
-        .attr("height", innerHeight) // eslint-disable-line @typescript-eslint/no-explicit-any
+        .attr("height", innerHeight)
 
       // Update axes with smooth transitions
       axes.forEach((axis) => {
@@ -294,8 +292,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             .attr("stroke-width", 2) // Original width
         }
 
-        const lineSelection = animate ? axisLine.transition(t as any) : axisLine // eslint-disable-line @typescript-eslint/no-explicit-any
-        ;(lineSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        const lineSelection = animate ? axisLine.transition(t as any) : axisLine
+        ;(lineSelection as any)
           .attr("x1", 0)
           .attr("x2", innerWidth)
           .attr("y1", 0)
@@ -421,7 +419,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           )
           .call(
             d3
-              .drag<SVGGElement, any>() // eslint-disable-line @typescript-eslint/no-explicit-any
+              .drag<SVGGElement, any>()
               .on("start", function () {
                 d3.select(this).style("cursor", "grabbing")
 
@@ -515,7 +513,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
           )
           .call(
             d3
-              .drag<SVGGElement, any>() // eslint-disable-line @typescript-eslint/no-explicit-any
+              .drag<SVGGElement, any>()
               .on("start", function () {
                 d3.select(this).style("cursor", "grabbing")
 
@@ -604,12 +602,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         }
 
         const pathSelection = animate
-          ? baselinePath.transition(t as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+          ? baselinePath.transition(t as any)
           : baselinePath
         ;(pathSelection as any).attr(
           "d",
           baselineLineGenerator(baselinePathData),
-        ) // eslint-disable-line @typescript-eslint/no-explicit-any
+        )
 
         // Update baseline circles - orange to match line
         axes.forEach((axis) => {
@@ -629,8 +627,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("opacity", 0.9)
           }
 
-          const circleSelection = animate ? circle.transition(t as any) : circle // eslint-disable-line @typescript-eslint/no-explicit-any
-          ;(circleSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+          const circleSelection = animate ? circle.transition(t as any) : circle
+          ;(circleSelection as any)
             .attr("cx", scales[axis]!(value))
             .attr("cy", yScale(axis)!)
         })
@@ -758,8 +756,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             })
         }
 
-        const pathSelection = animate ? path.transition(t as any) : path // eslint-disable-line @typescript-eslint/no-explicit-any
-        ;(pathSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+        const pathSelection = animate ? path.transition(t as any) : path
+        ;(pathSelection as any)
           .attr("d", lineGenerator(pathData))
           .attr("opacity", lineOpacity) // Lines semi-transparent
 
@@ -774,7 +772,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             circle = g
               .append("circle")
               .attr("class", `circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
-              .datum(d as any) // Store data reference for filtering (original) // eslint-disable-line @typescript-eslint/no-explicit-any
+              .datum(d as any) // Store data reference for filtering (original)
               .attr("fill", lineColor)
               .attr("stroke", "white")
               .attr("stroke-width", 1.5) // Original width
@@ -835,8 +833,8 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               })
           }
 
-          const circleSelection = animate ? circle.transition(t as any) : circle // eslint-disable-line @typescript-eslint/no-explicit-any
-          ;(circleSelection as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+          const circleSelection = animate ? circle.transition(t as any) : circle
+          ;(circleSelection as any)
             .attr("cx", scales[axis]!(value))
             .attr("cy", yScale(axis)!)
             .attr("opacity", circleOpacity) // Dots opaque
@@ -875,6 +873,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       isScenarioActive,
       overlayTiers,
       updateScenarioVisibility,
+      currentHeight
     ],
   )
 
