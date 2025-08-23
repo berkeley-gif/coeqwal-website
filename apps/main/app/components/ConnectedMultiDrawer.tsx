@@ -1,6 +1,6 @@
 "use client"
 
-import { AppMultiDrawer, type AppMultiDrawerProps } from "@repo/ui"
+import { AppMultiDrawer } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 import { useTheme } from "@repo/ui/mui"
 import type { TabKey } from "@repo/ui"

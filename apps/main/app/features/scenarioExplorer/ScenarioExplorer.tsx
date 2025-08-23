@@ -386,7 +386,7 @@ const MapControls = ({
   selectedScenarios,
   selectedRegion,
   onScenarioHover: _onScenarioHover, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onScenarioSelect,
+  onScenarioSelect: _onScenarioSelect, // eslint-disable-line @typescript-eslint/no-unused-vars
   onRegionSelect: _onRegionSelect, // eslint-disable-line @typescript-eslint/no-unused-vars
   // Climate props
   selectedClimate,
@@ -487,8 +487,7 @@ const MapControls = ({
   }, [])
 
   // Handle scenario clicks from the chart (dots and lines)
-  const handleChartScenarioClick = (data: any) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleChartScenarioClick = (data: { name: string }) => {
     const scenarioName = data.name
     setClickedScenarios(
       (prev) =>
@@ -2294,9 +2293,8 @@ const MapControls = ({
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function ScenarioExplorer({
-  onOpenThemesDrawer,
+  onOpenThemesDrawer: _onOpenThemesDrawer, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: ScenarioExplorerProps) {
   const theme = useTheme()
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
@@ -2376,7 +2374,6 @@ export default function ScenarioExplorer({
 
   // Scenario exploration panel state
   const [showExplorationPanel, setShowExplorationPanel] = useState(false)
-  const [explorationScenarios, setExplorationScenarios] = useState<string[]>([])
   const [scenarioOrder, setScenarioOrder] = useState<string[]>([])
   const [explorationVisualizationType, setExplorationVisualizationType] =
     useState<"bars" | "rose" | "quartile" | "map">("bars")
@@ -2464,8 +2461,7 @@ export default function ScenarioExplorer({
   }
 
   // Handle delivery area polygon selection
-  const handleDeliveryAreaPolygonClick = (evt: { features: any[] }) => {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const handleDeliveryAreaPolygonClick = (evt: { features: unknown[] }) => {
     if (!isSelectingDeliveryArea) return
 
     // Get the clicked feature
@@ -2598,7 +2594,6 @@ export default function ScenarioExplorer({
 
     // Initialize with selected scenarios
     const scenariosToExplore = mockScenarioData.map((scenario) => scenario.id)
-    setExplorationScenarios(scenariosToExplore)
     setScenarioOrder(scenariosToExplore)
     setShowExplorationPanel(true)
 
@@ -2963,8 +2958,7 @@ export default function ScenarioExplorer({
                 )
               }
             : isSelectingDeliveryArea
-              ? (evt: { target: any; point: any }) => {
-                  // eslint-disable-line @typescript-eslint/no-explicit-any
+              ? (evt: { target: unknown; point: unknown }) => {
                   try {
                     // Safety check: ensure layer exists before querying
                     if (!hasLayer("delivery-area-selection-layer")) return
