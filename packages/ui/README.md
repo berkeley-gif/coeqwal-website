@@ -9,7 +9,7 @@ Our theme system provides a complete design foundation built on MUI with brandin
 ### Import patterns
 
 - `@repo/ui/themes` - Theme Registry and theme configuration
-- `@repo/ui` - Custom COEQWAL components  
+- `@repo/ui` - Custom COEQWAL components
 - `@repo/ui/mui` - MUI components and icons
 
 ### Quick start
@@ -27,13 +27,15 @@ import theme from "@repo/ui/themes/theme"
 The theme uses a Perfect Fourth (1.333) scale with font family assignments:
 
 ### Font families
-- **Headlines (h1, h2)**: Farnham Headline  
+
+- **Headlines (h1, h2)**: Farnham Headline
 - **Display text (h3, h5, h6)**: Neue Haas Display
 - **Body & UI text**: Neue Haas Text
 
 ### Typography scale
+
 - **h1**: 6rem (96px) - Hero headlines
-- **h2**: 4.5rem (72px) - Section headlines  
+- **h2**: 4.5rem (72px) - Section headlines
 - **h3**: 3.375rem (54px) - Subsection headlines
 - **h4**: 2.53rem (40.5px) - Card titles
 - **h5**: 1.9rem (30.4px) - Minor headlines
@@ -42,27 +44,34 @@ The theme uses a Perfect Fourth (1.333) scale with font family assignments:
 - **body2**: 0.95rem (15.2px) - Dashboard interface text
 
 ### Compact UI typography
+
 For dialogs, tooltips, and form controls:
+
 - **compact.title**: 0.9rem - Dialog titles
-- **compact.subtitle**: 0.8rem - Dialog subtitles  
+- **compact.subtitle**: 0.8rem - Dialog subtitles
 - **compact.caption**: 0.75rem - Form labels
 - **compact.micro**: 0.7rem - Helper text
 
 ## Spacing & layout
 
 ### Standard spacing
+
 Uses MUI's 8px base unit system with theme-specific additions.
 
 ### Compact spacing
+
 For UI elements requiring tighter spacing:
+
 - **xs**: 2px - Micro spacing
 - **sm**: 4px - Tight spacing
-- **md**: 8px - Compact spacing  
+- **md**: 8px - Compact spacing
 - **lg**: 12px - Medium compact
 - **xl**: 16px - Standard compact
 
 ### Control dimensions
+
 Standardized form control sizes:
+
 - **Standard**: 20px × 20px (default)
 - **Compact**: 16px × 16px (dense interfaces)
 - **Micro**: 12px × 12px (indicators)
@@ -70,14 +79,16 @@ Standardized form control sizes:
 ## Color system
 
 ### Palette
+
 - **Brand**: Sky blue and water blue gradients
-- **Blue**: 5-step scale from darkest navy to light blue  
+- **Blue**: 5-step scale from darkest navy to light blue
 - **Accent**: Gold and cream highlights
 - **Nature**: Teal, sage, mint, and forest greens
 - **Utility**: Black and white
 - **Ambient**: Translucent ripple effects
 
 ### Specialized Ccolors
+
 - **Categories**: 12 distinct colors for operation categories
 - **Tiers**: 4-tier outcome colors (green, blue, orange, red)
 - **Interactive**: Hover and selection states
@@ -85,14 +96,18 @@ Standardized form control sizes:
 ## Component system
 
 ### Reusable mixins
+
 Pre-built styling patterns for common UI elements:
+
 - **Form Controls**: Standardized 20px form elements
 - **Card Typography**: Eyebrow, titles, body text patterns
 - **Tooltip Actions**: Pill-style button styling
 - **Drawer Content**: Navigation and content styling
 
 ### Z-Index system
+
 Organized layering system prevents stacking conflicts:
+
 - **Background** (-1): Maps, section backgrounds
 - **Content** (0-99): Panels, main content
 - **Interactive** (1000-1199): Map controls, floating elements
@@ -100,6 +115,7 @@ Organized layering system prevents stacking conflicts:
 - **System** (1500+): Tooltips, notifications, debug
 
 ### Border & shadows
+
 - **Border Radius**: pill, rounded, card, standard, none
 - **Border Styles**: standard, thin, thick variations
 - **Shadows**: Minimal shadow system
@@ -107,11 +123,12 @@ Organized layering system prevents stacking conflicts:
 ## Usage examples
 
 ### Accessing theme values
+
 ```typescript
 // Typography
 sx={{ fontSize: theme.typography.compact.title }}
 
-// Spacing  
+// Spacing
 sx={{ margin: theme.spacing(theme.cards.spacing.compact.sm) }}
 
 // Colors
@@ -125,6 +142,7 @@ sx={{ ...theme.mixins.formControlBase }}
 ```
 
 ### Using Mixins
+
 ```typescript
 // Card typography
 sx={(theme) => ({ ...theme.mixins.cardTypography.eyebrow })}
@@ -141,7 +159,7 @@ sx={{ ...theme.mixins.tooltipActionButton }}
 The theme file (`src/themes/theme.tsx`) contains comprehensive documentation including:
 
 - **Complete color specifications** with hex values
-- **Typography scale ratios** and font family assignments  
+- **Typography scale ratios** and font family assignments
 - **Spacing system details** with pixel equivalents
 - **Z-index layering guide** with usage patterns
 - **Form control conventions** with sizing guidelines

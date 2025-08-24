@@ -873,7 +873,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       isScenarioActive,
       overlayTiers,
       updateScenarioVisibility,
-      currentHeight
+      currentHeight,
     ],
   )
 

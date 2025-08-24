@@ -4,7 +4,6 @@ import { Box, Typography } from "@mui/material"
 import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { VideoBackground } from "../common/VideoBackground"
 
-
 // Create an extended interface that doesn't conflict with BasePanelProps
 interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
   title: string

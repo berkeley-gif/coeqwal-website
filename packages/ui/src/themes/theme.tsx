@@ -109,7 +109,7 @@ import type { CSSProperties } from "react"
 
 // ===============================================================================
 // SPECS FOR THEME VALUES (need to be defined before theme creation)
-// =============================================================================== 
+// ===============================================================================
 
 const typeScale = {
   // Base sizes for the scale
@@ -135,11 +135,11 @@ const typeScale = {
 
 // Compact spacing constants for use in mixins
 const compactSpacing = {
-  xs: "2px",   // 0.25 * 8px
-  sm: "4px",   // 0.5 * 8px  
-  md: "8px",   // 1 * 8px
-  lg: "12px",  // 1.5 * 8px
-  xl: "16px",  // 2 * 8px
+  xs: "2px", // 0.25 * 8px
+  sm: "4px", // 0.5 * 8px
+  md: "8px", // 1 * 8px
+  lg: "12px", // 1.5 * 8px
+  xl: "16px", // 2 * 8px
 } as const
 
 const themeValues = {
@@ -167,8 +167,8 @@ const themeValues = {
     // Compact control dimensions for UI elements
     controls: {
       standard: 20, // Standard form control size (20px × 20px)
-      compact: 16,  // Compact form control size (16px × 16px) 
-      micro: 12,    // Micro form control size (12px × 12px)
+      compact: 16, // Compact form control size (16px × 16px)
+      micro: 12, // Micro form control size (12px × 12px)
     },
   },
 
@@ -230,7 +230,8 @@ const themeValues = {
       rippleBlue: "rgba(42, 82, 135, 0.16)", // Water bubbles - blue (#2A5287) at 16% opacity
     },
 
-    categories: { // Not used yet, categories have changed
+    categories: {
+      // Not used yet, categories have changed
       groundwaterManagement: "#76b9aa", // nature.teal
       riverFlows: "#2d89b6", // blue.medium
       urbanWaterPriorities: "#449cd9", // blue.bright
@@ -309,7 +310,7 @@ const themeValues = {
     loading: 1700, // Loading overlays
     debug: 9999, // Debug overlays (development)
   },
-  
+
   // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
   mapPromptDialog: {
     backgroundColor: "rgba(0, 0, 0, 0.8)", // theme.background.overlay.dark
@@ -652,10 +653,10 @@ const theme = createTheme({
       // Compact spacing system for UI elements (dialogs, tooltips, form controls)
       compact: {
         xs: 0.25, // 2px - micro spacing
-        sm: 0.5,  // 4px - tight spacing
-        md: 1,    // 8px - compact spacing
-        lg: 1.5,  // 12px - medium compact
-        xl: 2,    // 16px - standard compact
+        sm: 0.5, // 4px - tight spacing
+        md: 1, // 8px - compact spacing
+        lg: 1.5, // 12px - medium compact
+        xl: 2, // 16px - standard compact
       },
     },
   },

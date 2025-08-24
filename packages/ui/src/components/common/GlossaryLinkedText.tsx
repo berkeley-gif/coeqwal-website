@@ -37,7 +37,6 @@ export function GlossaryLinkedText({
   linkColor,
   underlineColor,
 }: GlossaryLinkedTextProps) {
-
   if (!text || terms.length === 0) return <>{text}</>
 
   // Build a single regex that matches any of the terms
@@ -77,8 +76,8 @@ export function GlossaryLinkedText({
         component="span"
         sx={{
           backgroundColor: "transparent",
-          borderBottom: `${underlinePx}px solid ${underlineColor || '#3a4574'}`, // Default blue color
-          color: linkColor || color || '#3a4574', // Default blue color
+          borderBottom: `${underlinePx}px solid ${underlineColor || "#3a4574"}`, // Default blue color
+          color: linkColor || color || "#3a4574", // Default blue color
           py: 0.1,
           mx: 0.2,
           lineHeight: 0,
@@ -87,7 +86,7 @@ export function GlossaryLinkedText({
           display: "inline-block",
           position: "relative",
           "&:hover": {
-            borderBottom: `${underlineHoverPx}px solid ${underlineColor || '#3a4574'}`, // Default blue color
+            borderBottom: `${underlineHoverPx}px solid ${underlineColor || "#3a4574"}`, // Default blue color
           },
         }}
         onClick={() => onActivate(glossaryTerm)}
