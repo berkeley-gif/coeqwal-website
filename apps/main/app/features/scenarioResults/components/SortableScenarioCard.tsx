@@ -1,5 +1,6 @@
 import React from "react"
 import { useSortable } from "@dnd-kit/sortable"
+import { Box } from "@repo/ui/mui"
 import ScenarioCard from "./ScenarioCard"
 
 interface SortableScenarioCardProps {
@@ -48,50 +49,54 @@ const SortableScenarioCard = React.memo(
 
     return (
       <div ref={setNodeRef} style={style} data-expanded={isExpanded}>
-        <div
-          style={{
+        {/* Drag handle */}
+        <Box
+          sx={{
             position: "absolute",
             top: "10px",
             right: "10px",
             zIndex: 2,
             cursor: "grab",
             color: "rgba(0, 0, 0, 0.5)",
-            padding: "4px",
-            borderRadius: "8px", // Small UI element, keep 8px
+            padding: (theme) => theme.spacing(0.5),
+            borderRadius: (theme) => theme.spacing(1),
             background: "rgba(255, 255, 255, 0.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             width: "20px",
             height: "20px",
+            fontSize: (theme) => theme.typography.compact.caption.fontSize,
           }}
-          {...attributes}
-          {...listeners}
+          // spread operators that apply drag-and-drop functionality from the @dnd-kit/sortable library
+          {...attributes} // accessibility attributes that make the draggable element screen-reader friendly
+          {...listeners} // event handlers that enable drag functionality
         >
           ⋮⋮
-        </div>
-        <div
+        </Box>
+        <Box
           onClick={onExpand}
-          style={{
+          sx={{
             position: "absolute",
             top: "10px",
             right: "40px",
             zIndex: 2,
             cursor: "pointer",
             color: "rgba(0, 0, 0, 0.5)",
-            padding: "4px",
-            borderRadius: "8px", // Small UI element, keep 8px
+            padding: (theme) => theme.spacing(0.5),
+            borderRadius: (theme) => theme.spacing(1),
             background: "rgba(255, 255, 255, 0.5)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             width: "20px",
             height: "20px",
+            fontSize: (theme) => theme.typography.compact.caption.fontSize,
             fontWeight: "bold",
           }}
         >
           {isExpanded ? "↓" : "↔"}
-        </div>
+        </Box>
         <ScenarioCard
           title={title}
           scenarioNumber={scenarioNumber}

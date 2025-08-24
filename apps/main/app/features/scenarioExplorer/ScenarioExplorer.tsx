@@ -22,7 +22,6 @@ import {
   CardAccordion,
 } from "@repo/ui"
 import type { CardAccordionSection } from "@repo/ui"
-// import { BarChart } from "@repo/viz"
 import { useChartData } from "../../hooks/useChartData"
 import { OUTCOMES } from "../../lib/outcomes"
 import { useDrawerStore } from "@repo/state"
@@ -36,11 +35,6 @@ import {
   Layer,
   Popup,
 } from "@repo/map"
-// import {
-//   PresetsPanel,
-//   OutcomesPanel,
-//   OperationsPanel,
-// } from "./cardContent/scenarioChoiceCard"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import { MapPromptDialog } from "@repo/ui"
 
@@ -96,7 +90,7 @@ const SortableScenarioExplorationCard = ({
       ref={setNodeRef}
       style={style}
       sx={{
-        height: "400px", // Larger height to nicely fit 2x2 bar charts
+        height: "400px", // Larger height for 2x2 bar charts
         minHeight: "400px",
       }}
     >
@@ -133,7 +127,7 @@ const SortableScenarioExplorationCard = ({
             opacity: 0.5,
           }}
         >
-          <Typography sx={{ fontSize: "1rem", lineHeight: 1 }}>⋮⋮</Typography>
+          <Typography sx={{ fontSize: (theme) => theme.typography.button.fontSize, lineHeight: 1 }}>⋮⋮</Typography>
         </Box>
 
         {/* Card header */}
@@ -169,7 +163,7 @@ const SortableScenarioExplorationCard = ({
             gap: 3, // Larger gap for better spacing in bigger cards
             flexGrow: 1,
             alignItems: "center", // Center the glyphs vertically
-            padding: 1, // Add padding around the grid
+            padding: 1,
           }}
         >
           {outcomes.map((outcome, index) => (
@@ -193,7 +187,7 @@ const SortableScenarioExplorationCard = ({
                   theme.palette.tiers.tier4,
                 ]}
                 values={(() => {
-                  // Generate climate-influenced values
+                  // Generate hydroclimate values
                   const outcomeIndex = outcomes.indexOf(outcome)
                   const baseMedian = outcomeIndex * 0.1 - 0.2
 
@@ -212,7 +206,7 @@ const SortableScenarioExplorationCard = ({
                     variabilityMultiplier = 1.2 + drierLevel * 0.4
                   }
 
-                  // For non-baseline scenarios, add some improvement
+                  // For non-baseline scenarios, add some dummy data improvement
                   if (!isBaseline) {
                     medianShift += 0.1 + index * 0.05 // Each alternative performs slightly better
                     variabilityMultiplier *= 0.9 // Less variability
@@ -231,7 +225,7 @@ const SortableScenarioExplorationCard = ({
                     number,
                   ]
                 })()}
-                size={56} // Larger size to better fill the 2x2 space
+                size={56} // Fill the 2x2 space
                 variant={
                   visualizationType === "map" ? "bars" : visualizationType
                 } // Default to bars for map mode
@@ -239,7 +233,7 @@ const SortableScenarioExplorationCard = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontSize: "0.75rem", // Slightly larger text
+                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
                   textAlign: "center",
                   lineHeight: 1.3,
                   maxWidth: "90px", // Wider text area
@@ -256,7 +250,7 @@ const SortableScenarioExplorationCard = ({
   )
 }
 
-// Chart container component that calculates available height
+// Chart container component that calculates available height for D3
 const ChartContainer = ({
   expanded,
   chartData,
@@ -328,7 +322,6 @@ const ChartContainer = ({
     </Box>
   )
 }
-// Using simple centroid calculation instead of turf
 
 interface ScenarioExplorerProps {
   onOpenThemesDrawer?: (operationId?: string) => void
@@ -404,8 +397,6 @@ const MapControls = ({
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const theme = useTheme()
 
-  // const [showRegionDropdown, setShowRegionDropdown] = useState(false)
-
   // Card minimize/maximize states
   const [isFirstCardMinimized, setIsFirstCardMinimized] = useState(false)
   const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
@@ -443,10 +434,6 @@ const MapControls = ({
     })
   }
 
-  // Region card dropdown
-  // const toggleRegionDropdown = useCallback(() => {
-  //   setShowRegionDropdown(!showRegionDropdown)
-  // }, [showRegionDropdown])
 
   const handleSelectRegionOnMapClick = useCallback(() => {
     onSelectRegionOnMap()
@@ -794,23 +781,14 @@ const MapControls = ({
             <Box
               sx={{
                 color: (theme) => theme.palette.blue.medium,
-                textTransform: "uppercase",
-                letterSpacing: "0.75px",
-                fontSize: "0.75rem",
-                fontWeight: 500,
-                mb: 0.5,
+                ...(theme.mixins.cardTypography.eyebrow as any),
               }}
             >
               CHOOSE A REGION
             </Box>
             <Box
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                fontFamily: (theme) => theme.typography.fontFamily,
-                fontWeight: 500,
-                fontSize: "1.5rem",
-                lineHeight: 1.3,
-                mb: 1,
+                ...(theme.mixins.cardTypography.cardTitle as any),
               }}
             >
               Central Valley
@@ -962,8 +940,7 @@ const MapControls = ({
                   <Box
                     sx={{
                       color: (theme) => theme.palette.blue.darkest,
-                      fontFamily:
-                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                      fontFamily: (theme) => theme.typography.fontFamily,
                       fontWeight: 500,
                       fontSize: "1.5rem",
                       lineHeight: 1.3,
@@ -982,7 +959,7 @@ const MapControls = ({
                       color: (theme) => theme.palette.blue.medium,
                       textTransform: "uppercase",
                       letterSpacing: "0.75px",
-                      fontSize: "0.75rem",
+                      fontSize: (theme) => theme.typography.compact.caption.fontSize,
                       fontWeight: 500,
                       display: "block",
                       mb: 0.5,
@@ -1106,7 +1083,7 @@ const MapControls = ({
                             )
                         }
                         sx={{
-                          fontSize: "0.75rem",
+                          fontSize: (theme) => theme.typography.compact.caption.fontSize,
                           minWidth: "100px",
                           height: "32px",
                           backgroundColor: (theme) =>
@@ -1156,7 +1133,7 @@ const MapControls = ({
                                 theme.palette.common.white,
                               mt: 0.5,
                               "& .MuiMenuItem-root": {
-                                fontSize: "0.75rem",
+                                fontSize: (theme) => theme.typography.compact.caption.fontSize,
                                 padding: "8px 16px",
                                 minHeight: "auto",
                                 backgroundColor: (theme) =>
@@ -1266,7 +1243,7 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: "0.8rem",
+                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1, // Above column backgrounds
@@ -1280,7 +1257,7 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: "0.8rem",
+                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1,
@@ -1294,7 +1271,7 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: "0.8rem",
+                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1,
@@ -1308,7 +1285,7 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: "0.8rem",
+                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1,
@@ -1398,7 +1375,7 @@ const MapControls = ({
                               />
                               <Box
                                 sx={{
-                                  fontSize: "0.75rem",
+                                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
                                   fontWeight: 400,
                                   lineHeight: 1.3,
                                   color: (theme) => theme.palette.text.primary,
@@ -1487,7 +1464,7 @@ const MapControls = ({
                               />
                               <Box
                                 sx={{
-                                  fontSize: "0.75rem",
+                                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
                                   fontWeight: 400,
                                   lineHeight: 1.3,
                                   color: (theme) => theme.palette.text.primary,
@@ -1590,7 +1567,7 @@ const MapControls = ({
                           {/* Outcome label */}
                           <Box
                             sx={{
-                              fontSize: "0.75rem",
+                              fontSize: (theme) => theme.typography.compact.caption.fontSize,
                               fontWeight: 400,
                               lineHeight: 1.3,
                               color: (theme) => theme.palette.text.primary,
@@ -1614,8 +1591,7 @@ const MapControls = ({
                   <Box
                     sx={{
                       color: (theme) => theme.palette.blue.darkest,
-                      fontFamily:
-                        '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                      fontFamily: (theme) => theme.typography.fontFamily,
                       fontWeight: 500,
                       fontSize: "1.5rem",
                       lineHeight: 1.3,
@@ -1828,7 +1804,7 @@ const MapControls = ({
                         color: (theme) => theme.palette.blue.medium,
                         textTransform: "uppercase",
                         letterSpacing: "0.75px",
-                        fontSize: "0.75rem",
+                        fontSize: (theme) => theme.typography.compact.caption.fontSize,
                         fontWeight: 500,
                         display: "block",
                         mb: 0.5,
@@ -2018,7 +1994,7 @@ const MapControls = ({
                           onClick={() => onClearSelectedScenarios()}
                           sx={{
                             textTransform: "none",
-                            fontSize: "0.875rem",
+                            fontSize: (theme) => theme.typography.nav.fontSize,
                             color: (theme) => theme.palette.blue.bright,
                             minWidth: "auto",
                             padding: 0,
@@ -2260,7 +2236,7 @@ const MapControls = ({
                   maxWidth: "none",
                   "& .MuiOutlinedInput-root": {
                     height: 32,
-                    fontSize: "0.875rem",
+                    fontSize: (theme) => theme.typography.nav.fontSize,
                     minWidth: 0,
                     "& fieldset": {
                       borderColor: (theme) => theme.palette.divider,
@@ -2275,12 +2251,12 @@ const MapControls = ({
                     },
                   },
                   "& .MuiOutlinedInput-input": {
-                    fontSize: "0.875rem",
+                    fontSize: (theme) => theme.typography.nav.fontSize,
                     padding: "6px 8px",
                     minWidth: 0,
                   },
                   "& .MuiInputBase-input::placeholder": {
-                    fontSize: "0.875rem",
+                    fontSize: (theme) => theme.typography.nav.fontSize,
                     opacity: 0.6,
                   },
                 }}
@@ -2668,7 +2644,7 @@ export default function ScenarioExplorer({
           "fill",
           {
             "fill-color": "rgba(100, 164, 214, 0.4)", // Semi-transparent blue
-            "fill-outline-color": "#64A4D6", // Blue outline
+            "fill-outline-color": theme.palette.brand.water, // Blue outline
           },
           {
             visibility: "visible",
@@ -2684,7 +2660,7 @@ export default function ScenarioExplorer({
           "fill",
           {
             "fill-color": "rgba(100, 164, 214, 0.7)", // More opaque on hover
-            "fill-outline-color": "#3a4574", // Darker blue outline
+            "fill-outline-color": theme.palette.blue.darkest, // Darker blue outline
           },
           {
             visibility: "visible",
@@ -2710,6 +2686,8 @@ export default function ScenarioExplorer({
     removeLayer,
     hasSource,
     hasLayer,
+    theme.palette.blue.darkest,
+    theme.palette.brand.water,
   ])
 
   // Effect to manage map layers based on selected outcome
@@ -2758,7 +2736,7 @@ export default function ScenarioExplorer({
             "#60aacb", // Fallback blue for any edge cases
           ],
           "fill-opacity": 0.7,
-          "fill-outline-color": "#3a4574", // Darker blue for outline
+          "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
         },
         {
           visibility: "visible",
@@ -2774,7 +2752,7 @@ export default function ScenarioExplorer({
         "delivery-units",
         "line",
         {
-          "line-color": "#FFFFFF", // White stroke on hover
+          "line-color": theme.palette.utility.white, // White stroke on hover
           "line-width": [
             "interpolate",
             ["linear"],
@@ -2839,7 +2817,7 @@ export default function ScenarioExplorer({
             "#FF00FF", // Magenta fallback to identify failures
           ],
           "fill-opacity": 0.7,
-          "fill-outline-color": "#3a4574", // Darker blue for outline
+          "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
         },
         {
           visibility: "visible",
@@ -2855,7 +2833,7 @@ export default function ScenarioExplorer({
         "delivery-units",
         "line",
         {
-          "line-color": "#FFFFFF", // White stroke on hover
+          "line-color": theme.palette.utility.white, // White stroke on hover
           "line-width": [
             "interpolate",
             ["linear"],
@@ -2892,6 +2870,8 @@ export default function ScenarioExplorer({
     removeLayer,
     hasSource,
     hasLayer,
+    theme.palette.blue.darkest,
+    theme.palette.utility.white,
   ])
 
   return (
@@ -3601,10 +3581,10 @@ export default function ScenarioExplorer({
             boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
           }}
         >
-          <Box sx={{ fontSize: "0.9rem", fontWeight: 500, mb: 0.5 }}>
+          <Box sx={{ fontSize: (theme) => theme.typography.compact.title.fontSize, fontWeight: 500, mb: 0.5 }}>
             ⚠️ Self-Intersecting Polygon
           </Box>
-          <Box sx={{ fontSize: "0.8rem", opacity: 0.9 }}>
+          <Box sx={{ fontSize: (theme) => theme.typography.compact.subtitle.fontSize, opacity: 0.9 }}>
             Drag vertices to fix overlapping edges
           </Box>
         </Box>
@@ -3626,7 +3606,7 @@ export default function ScenarioExplorer({
           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
         }}
       >
-        <Box sx={{ fontSize: "0.9rem", fontWeight: 500 }}>📊 Dummy data</Box>
+        <Box sx={{ fontSize: (theme) => theme.typography.compact.title.fontSize, fontWeight: 500 }}>📊 Dummy data</Box>
       </Box>
 
       {/* Climate card - positioned as direct child of MapPanel for proper positioning */}
@@ -3660,7 +3640,7 @@ export default function ScenarioExplorer({
                   color: (theme) => theme.palette.blue.medium,
                   textTransform: "uppercase",
                   letterSpacing: "0.75px",
-                  fontSize: "0.75rem",
+                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
                   fontWeight: 500,
                   display: "block",
                   mb: 0.5,
@@ -4027,7 +4007,7 @@ export default function ScenarioExplorer({
                       color: theme.palette.blue.medium,
                       textTransform: "uppercase",
                       letterSpacing: "0.75px",
-                      fontSize: "0.75rem",
+                      fontSize: (theme) => theme.typography.compact.caption.fontSize,
                       fontWeight: 500,
                       display: "block",
                       mb: 0.5,
@@ -4051,7 +4031,7 @@ export default function ScenarioExplorer({
                     sx={{
                       color: theme.palette.text.secondary,
                       mb: 2,
-                      fontSize: "0.9rem",
+                      fontSize: (theme) => theme.typography.compact.title.fontSize,
                       lineHeight: 1.4,
                     }}
                   >

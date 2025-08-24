@@ -188,7 +188,7 @@ export default function OutcomesPanel({ onExpandChange }: OutcomesPanelProps) {
         <Box sx={{ flexShrink: 0 }}>
           <Box
             sx={{
-              fontSize: "0.95rem",
+              fontSize: (theme) => theme.typography.body2.fontSize,
               fontWeight: 400,
               lineHeight: 1.4,
               color: (theme) => theme.palette.text.primary,
@@ -225,7 +225,7 @@ export default function OutcomesPanel({ onExpandChange }: OutcomesPanelProps) {
             variant="text"
             onClick={toggleExpandChart}
             sx={{
-              fontSize: "0.95rem",
+              fontSize: (theme) => theme.typography.body2.fontSize,
               fontWeight: 500,
               color: (theme) => theme.palette.blue.bright,
               padding: 0,

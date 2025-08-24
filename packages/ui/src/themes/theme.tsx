@@ -864,6 +864,29 @@ const theme = createTheme({
       letterSpacing: "normal",
       lineHeight: 1.4,
     },
+    // Compact typography variants for dialogs, tooltips, form labels
+    compact: {
+      title: {
+        fontSize: typeScale.compact.title, // 0.9rem
+        fontWeight: 500,
+        lineHeight: 1.4,
+      },
+      subtitle: {
+        fontSize: typeScale.compact.subtitle, // 0.8rem
+        fontWeight: 400,
+        lineHeight: 1.4,
+      },
+      caption: {
+        fontSize: typeScale.compact.caption, // 0.75rem
+        fontWeight: 400,
+        lineHeight: 1.3,
+      },
+      micro: {
+        fontSize: typeScale.compact.micro, // 0.7rem
+        fontWeight: 400,
+        lineHeight: 1.3,
+      },
+    },
   },
   shape: {
     borderRadius: parseInt(themeValues.borderRadius.standard, 10),
@@ -1843,9 +1866,21 @@ declare module "@mui/material/styles" {
   // Add custom typography variant
   interface TypographyVariants {
     nav: React.CSSProperties
+    compact: {
+      title: React.CSSProperties
+      subtitle: React.CSSProperties
+      caption: React.CSSProperties
+      micro: React.CSSProperties
+    }
   }
   interface TypographyVariantsOptions {
     nav?: React.CSSProperties
+    compact?: {
+      title?: React.CSSProperties
+      subtitle?: React.CSSProperties
+      caption?: React.CSSProperties
+      micro?: React.CSSProperties
+    }
   }
 }
 
