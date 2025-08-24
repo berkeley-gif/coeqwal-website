@@ -1871,33 +1871,57 @@ declare module "@mui/material/Typography" {
 | All form controls in the application follow standardized conventions
 | for consistent appearance and behavior across the site.
 |
+| CONTROL DIMENSIONS:
+| - Standard: 20px × 20px (theme.layout.controls.standard)
+| - Compact: 16px × 16px (theme.layout.controls.compact)
+| - Micro: 12px × 12px (theme.layout.controls.micro)
+|
 | STANDARD SPECIFICATIONS:
-| - Size: Exact 20px × 20px dimensions
+| - Size: Uses theme.layout.controls.standard (20px × 20px)
 | - Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
 | - Border: 1px solid using theme.palette.text.primary
 | - Background: Transparent with hover states
 | - Spacing: theme.spacing(0.5) margin
 | - Protection: flexShrink: 0 prevents label compression
 |
+| COMPACT SPACING SYSTEM:
+| - xs: 2px (compactSpacing.xs) - micro spacing
+| - sm: 4px (compactSpacing.sm) - tight spacing
+| - md: 8px (compactSpacing.md) - compact spacing
+| - lg: 12px (compactSpacing.lg) - medium compact
+| - xl: 16px (compactSpacing.xl) - standard compact
+|
+| TYPOGRAPHY FOR CONTROLS:
+| - Labels: typeScale.compact.caption (0.75rem/12px)
+| - Helper text: typeScale.compact.micro (0.7rem/11.2px)
+| - Form titles: typeScale.compact.title (0.9rem/14.4px)
+|
 | REUSABLE MIXINS:
 | 
 | 1. theme.mixins.formControlBase
-|    - Base styling for all form controls
-|    - Use for custom checkboxes, radio buttons, etc.
+|    - Base styling for all standard form controls
+|    - Uses theme.layout.controls.standard (20px × 20px)
 |    - Includes sizing, positioning, and interaction states
 |
 | 2. theme.mixins.triangleCheckbox  
 |    - Specialized for expandable/collapsible controls
-|    - Includes text centering for triangle symbols
-|    - Use for dropdown-style form controls
+|    - Uses standardized control dimensions and compact typography
+|    - Includes text centering for triangle symbols (typeScale.compact.micro)
 |
 | USAGE EXAMPLES:
 |
-| Custom Checkbox:
+| Standard Checkbox:
 |   sx={{ 
 |     ...theme.mixins.formControlBase,
 |     borderRadius: "2px",
 |     border: `1px solid ${theme.palette.text.primary}`
+|   }}
+|
+| Compact Control (custom):
+|   sx={{
+|     width: `${theme.layout.controls.compact}px`,
+|     height: `${theme.layout.controls.compact}px`,
+|     fontSize: theme.typography.compact.micro
 |   }}
 |
 | Triangle Dropdown:
@@ -1906,10 +1930,21 @@ declare module "@mui/material/Typography" {
 |     border: `1px solid ${theme.palette.text.primary}`
 |   }}
 |
+| Form Label with Compact Typography:
+|   sx={{
+|     fontSize: theme.typography.compact.caption,
+|     marginBottom: compactSpacing.sm
+|   }}
+|
 | MUI COMPONENT OVERRIDES:
-| - MuiCheckbox: Uses formControlBase + square styling
-| - MuiRadio: Uses formControlBase + circular styling  
+| - MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
+| - MuiRadio: Uses formControlBase + circular styling + 20px dimensions
 | - MuiFormControlLabel: alignItems "flex-start" for multi-line labels
+|
+| SIZING GUIDELINES:
+| - Standard (20px): Default for most form controls
+| - Compact (16px): Dense interfaces, secondary controls
+| - Micro (12px): Indicators, status controls, tight spaces
 |
 | ========================================================
 |
@@ -1933,7 +1968,7 @@ declare module "@mui/material/Typography" {
 | - introForegroundImages (3): Decorative foreground elements
 | - introBubbles (4): Interactive floating elements
 |
-| INTERACTIVE LAYERS (100-999):
+| INTERACTIVE LAYERS (1000-1199):
 | - mapControls (1000): Map overlay controls and panels
 | - floatingElements (1100): Floating UI elements, scroll controls
 |
@@ -1945,7 +1980,7 @@ declare module "@mui/material/Typography" {
 | - appBar (1400): Top navigation bar
 |
 | SYSTEM LAYERS (1500+):
-| - tooltip (1500): Tooltips and help text
+| - tooltip (1500): Tooltips, help text, and map prompt dialogs
 | - notification (1600): Toast notifications  
 | - loading (1700): Loading overlays
 | - debug (9999): Debug overlays (development only)
@@ -1953,5 +1988,6 @@ declare module "@mui/material/Typography" {
 | USAGE:
 | Always use theme.zIndex.layerName instead of hardcoded numbers:
 |   zIndex: (theme) => theme.zIndex.mapControls
+||   zIndex: (theme) => theme.zIndex.tooltip
 |
 | ======================================================== */
