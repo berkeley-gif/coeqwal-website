@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Box, Paper, PaperProps, Typography, Divider } from "@mui/material"
-import { styled, useTheme } from "@mui/material/styles"
+import { styled } from "@mui/material/styles"
 
 export interface CardProps extends Omit<PaperProps, "color"> {
   children: React.ReactNode
@@ -23,10 +23,15 @@ export interface ScenarioCardProps extends Omit<CardProps, "children"> {
 }
 
 // Helper component to create standardized lists for ScenarioCard bodies
-export const ScenarioCardList: React.FC<{ items: string[] }> = ({ items }) => {
-  const theme = useTheme()
+export const ScenarioCardList: React.FC<{ 
+  items: string[];
+  listStyles?: React.CSSProperties;
+}> = ({ items, listStyles }) => {
   return (
-    <Box component="div" sx={theme.mixins.scenarioCardList}>
+    <Box 
+      component="div" 
+      sx={listStyles}
+    >
       <ul>
         {items.map((item, index) => (
           <li key={index}>{item}</li>

@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material"
 import { BasePanel, type BasePanelProps } from "./BasePanel"
 import { VideoBackground } from "../common/VideoBackground"
-import theme from "../../themes/theme"
+
 
 // Create an extended interface that doesn't conflict with BasePanelProps
 interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
@@ -13,6 +13,7 @@ interface VideoPanelProps extends Omit<BasePanelProps, "content"> {
   posterSrc: string
   overlayOpacity?: number
   paragraphBgColor?: string
+  bottomSpacing?: number | string
   children?: React.ReactNode
 }
 
@@ -46,6 +47,7 @@ export function VideoPanel({
   posterSrc,
   overlayOpacity = 1,
   paragraphBgColor,
+  bottomSpacing = 96, // Default equivalent to theme.spacing(12)
   children,
   ...panelProps
 }: VideoPanelProps) {
@@ -90,7 +92,7 @@ export function VideoPanel({
           position: "relative",
           zIndex: 2,
           justifyContent: "flex-end",
-          paddingBottom: theme.spacing(12),
+          paddingBottom: bottomSpacing,
         }}
       >
         <Box
