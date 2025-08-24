@@ -5,27 +5,27 @@ import type { CSSProperties } from "react"
 // - Standardized styles for transitions
 
 /* ========================================================
- TOC
+ TABLE OF CONTENTS
  ========================================================
 | 1. Global theme values
 |    - Typography scale (Perfect Fourth ratio with typeScale constants)
-|    - Font families (3 fonts: ingeborgTrial, neueHaasText, neueHaasDisplay)
-|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth)
+|    - Font families neueHaasText, neueHaasDisplay, farnhamHeadline)
+|    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer)
 |    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
 |    - Category & tier colors for data visualization
 |    - Border radius values
 |    - Border styles
 |    - Shadows
-|    - Z-Index layering system (background, content, interactive, navigation, system)
+|    - Z-Index layering system (5 layers: background, content, interactive, navigation, system)
 |    - Map prompt dialog configuration
 |
 | 2. Reusable mixins (defined before theme creation)
 |    - Scenario card list styling
 |    - Tooltip action button styling
-|    - Triangle checkbox mixin for expandable controls
+|    - Checkbox with dropdown mixin for expandable controls
 |    - Form control base mixin (standardized 20px × 20px controls)
-|    - Card typography mixins (eyebrow, cardTitle, sectionHeader, etc.)
-|    - Drawer content styling mixins
+|    - Card typography mixins (eyebrow, cardTitle, sectionHeader, bodyContainer, etc.)
+|    - Drawer content styling mixins (contentWrapper, itemBox, chips, etc.)
 |
 | 3. Theme configuration
 |    - Base theme creation
@@ -79,13 +79,13 @@ import type { CSSProperties } from "react"
 // TYPOGRAPHY SCALE
 // ===============================================================================
 //
-// Perfect Fourth (1.333) type scale using mixed font families
-// Large headlines: Ingeborg Trial | Medium headlines: Neue Haas Display | Body text: Neue Haas Text
-// Base: 1.25rem body text
+// Perfect Fourth (1.333) type scale
+// Headlines: Farnham Headline (h1, h2) | UI display text: Neue Haas Display (h3, h5, h6) | Body text: Neue Haas Text (h4, body, UI)
+// Base: 1.25rem (20px) primary body text
 //
 // Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 6rem (96px) - Hero headlines "Rethink California Water" (Ingeborg Trial Bold)
-// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Ingeborg Trial Bold)
+// • h1: 6rem (96px) - Hero headlines "Rethink California Water" (Farnham Headline Medium)
+// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Farnham Headline Medium)
 // • h3: 3.375rem (54px) - Subsection headlines (Neue Haas Display Medium)
 // • h4: 2.53rem (40.5px) - Card titles and smaller headlines (Neue Haas Text Regular)
 // • h5: 1.9rem (30.4px) - Labels and minor headlines (Neue Haas Display Medium)
@@ -93,6 +93,17 @@ import type { CSSProperties } from "react"
 // • body1: 1.25rem (20px) - Primary body text (Neue Haas Text Regular)
 // • body2: 0.95rem (15.2px) - Dashboard interface text (Neue Haas Text Regular)
 //
+// Additional variants:
+// • subtitle1: 1.25rem (20px) - Medium weight body text (Neue Haas Text Medium)
+// • subtitle2: 0.95rem (15.2px) - Medium weight interface text (Neue Haas Text Medium)
+// • button: 1rem (16px) - UI button text (Medium weight, no transform)
+// • caption: 1rem (16px) - Aligned with body2 for consistency
+// • nav: 0.875rem (14px) - Navigation text (custom variant)
+//
+
+// ===============================================================================
+// SPECS FOR THEME VALUES (need to be defined before theme creation)
+// =============================================================================== 
 
 const typeScale = {
   // Base sizes for the scale
@@ -106,7 +117,24 @@ const typeScale = {
   h4: "2.53rem", // 40.5px - Card titles (h3 ÷ 1.333)
   h5: "1.9rem", // 30.4px - Minor headlines (h4 ÷ 1.333)
   h6: "1.425rem", // 22.8px - Section headers (h5 ÷ 1.333)
+
+  // Compact UI typography for dialogs, tooltips, form labels
+  compact: {
+    title: "0.9rem", // 14.4px
+    subtitle: "0.8rem", // 12.8px
+    caption: "0.75rem", // 12px
+    micro: "0.7rem", // 11.2px (form helpers)
+  },
 }
+
+// Compact spacing constants for use in mixins
+const compactSpacing = {
+  xs: "2px",   // 0.25 * 8px
+  sm: "4px",   // 0.5 * 8px  
+  md: "8px",   // 1 * 8px
+  lg: "12px",  // 1.5 * 8px
+  xl: "16px",  // 2 * 8px
+} as const
 
 const themeValues = {
   // Typography
@@ -115,13 +143,11 @@ const themeValues = {
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasDisplay:
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    ingeborgTrial:
-      '"Ingeborg Trial", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     farnhamHeadline:
       '"farnham-headline", Georgia, "Times New Roman", Times, serif',
   },
 
-  // Layout dimensions
+  // Layout dimensions, for layout calculations
   layout: {
     headerHeight: 80,
     drawer: {
@@ -131,6 +157,12 @@ const themeValues = {
     },
     textContainer: {
       maxWidth: { xs: "600px", md: "520px" },
+    },
+    // Compact control dimensions for UI elements
+    controls: {
+      standard: 20, // Standard form control size (20px × 20px)
+      compact: 16,  // Compact form control size (16px × 16px) 
+      micro: 12,    // Micro form control size (12px × 12px)
     },
   },
 
@@ -174,13 +206,13 @@ const themeValues = {
 
     // MUI greys
     grey: {
-      50: "#f7fafc", // Very light grey for backgrounds
+      50: "#f7fafc", // Very light grey for background hovers
       100: "#edf2f7",
       200: "#e2e8f0",
       300: "#cbd5e0",
       400: "#a0aec0",
       500: "#718096",
-      600: "#4a5568", // Dark grey for text
+      600: "#4a5568", // Dark grey for ui text
       700: "#2d3748",
       800: "#1a202c",
       900: "#171923",
@@ -192,7 +224,7 @@ const themeValues = {
       rippleBlue: "rgba(42, 82, 135, 0.16)", // Water bubbles - blue (#2A5287) at 16% opacity
     },
 
-    categories: {
+    categories: { // Not used yet, categories have changed
       groundwaterManagement: "#76b9aa", // nature.teal
       riverFlows: "#2d89b6", // blue.medium
       urbanWaterPriorities: "#449cd9", // blue.bright
@@ -207,7 +239,7 @@ const themeValues = {
       climateFuture: "#ffd87e", // accent.gold
     },
 
-    // Outcome tier colors, ensure consistent across glyphs and glossary
+    // Outcome tier colors, used
     tiers: {
       tier1: "#7b9d3f", // Green, tier 1
       tier2: "#60aacb", // Blue, tier 2
@@ -271,33 +303,33 @@ const themeValues = {
     loading: 1700, // Loading overlays
     debug: 9999, // Debug overlays (development)
   },
-
-  // Map prompt dialog styling
+  
+  // Map prompt dialog box styling, used for the small map prompt dialog box that appears in context
   mapPromptDialog: {
-    backgroundColor: "rgba(0, 0, 0, 0.7)", // More transparent while keeping same black color
-    textColor: "#FFFFFF", // Use theme white for title and subtitle
-    borderRadius: "16px", // Updated to match new rounder theme
-    padding: "16px",
+    backgroundColor: "rgba(0, 0, 0, 0.8)", // theme.background.overlay.dark
+    textColor: "#FFFFFF", // theme.palette.utility.white
+    borderRadius: "16px", // theme.borderRadius.card
+    padding: "16px", // theme.borderRadius.card
     minWidth: "280px",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-    zIndex: 1500, // Same as tooltip layer
+    zIndex: 1500, // theme.zIndex.tooltip
     position: {
-      top: "16px",
-      centerX: true, // Indicates horizontal centering
+      top: "16px", // theme.borderRadius.card
+      centerX: true, // Horizontal centering
     },
     typography: {
       title: {
-        fontSize: "0.9rem",
+        fontSize: typeScale.compact.title, // 0.9rem
         fontWeight: 500,
-        marginBottom: "4px",
+        marginBottom: compactSpacing.sm, // 4px compact spacing
       },
       subtitle: {
-        fontSize: "0.8rem",
+        fontSize: typeScale.compact.subtitle, // 0.8rem
         opacity: 0.9,
-        marginBottom: "4px",
+        marginBottom: compactSpacing.sm, // 4px compact spacing
       },
       action: {
-        fontSize: "0.8rem",
+        fontSize: typeScale.compact.subtitle, // 0.8rem
         fontWeight: "bold",
         cursor: "pointer",
         textDecoration: "none",
@@ -310,17 +342,18 @@ const themeValues = {
 const scenarioCardListMixin = {
   "& ul": {
     margin: 0,
-    paddingLeft: "20px", // Slightly more indentation
+    paddingLeft: `${themeValues.layout.controls.standard}px`, // 20px standardized
     "& li": {
-      fontSize: "0.95rem",
+      fontSize: typeScale.smallBody, // 0.95rem - dashboard interface text
       fontWeight: 400,
-      lineHeight: 1.4, // Tighter line height to conserve vertical space
-      marginBottom: "4px", // Reduced spacing to conserve vertical space
+      lineHeight: 1.4, // Tighter to conserve vertical space
+      marginBottom: compactSpacing.sm, // 4px compact spacing
+
       color: "inherit",
       "&:last-child": {
         marginBottom: 0,
       },
-      // Add bullet styling
+      // Bullet styling
       "&::marker": {
         color: "inherit",
       },
@@ -334,22 +367,22 @@ const tooltipActionButtonMixin = {
   borderRadius: themeValues.borderRadius.pill,
   boxShadow: "none",
   border: "none",
-  padding: "4px 12px",
+  padding: `${compactSpacing.sm} ${compactSpacing.lg}`, // 4px 12px compact spacing
   minWidth: "auto",
   lineHeight: 1.5,
-  fontSize: "0.8rem",
+  fontSize: typeScale.compact.subtitle, // 0.8rem - compact dialog subtitles
   fontWeight: 500,
   cursor: "pointer",
   transition: "all 0.2s ease",
 } as const
 
-// Triangle checkbox mixin - for expandable form controls
+// Triangle checkbox mixin (for expandable form controls)
 const triangleCheckboxMixin = {
   display: "inline-block",
-  width: "20px !important",
-  height: "20px !important",
-  minWidth: "20px !important", // Prevent shrinking
-  maxWidth: "20px !important", // Prevent growing
+  width: `${themeValues.layout.controls.standard}px !important`,
+  height: `${themeValues.layout.controls.standard}px !important`,
+  minWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent shrinking
+  maxWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent growing
   flexShrink: 0, // Don't shrink in flex containers
   borderRadius: "2px",
   backgroundColor: "transparent",
@@ -357,9 +390,9 @@ const triangleCheckboxMixin = {
   alignSelf: "flex-start",
   transform: "translateY(2px)", // Fine-tune vertical position
   // Center the triangle content
-  lineHeight: "18px", // height minus border (20px - 2px)
+  lineHeight: `${themeValues.layout.controls.standard - 2}px`, // height minus border (20px - 2px)
   textAlign: "center",
-  fontSize: "7px",
+  fontSize: typeScale.compact.micro, // 0.7rem
   transition: "all 0.2s ease",
   position: "relative",
   boxSizing: "border-box !important",
@@ -367,12 +400,12 @@ const triangleCheckboxMixin = {
   backdropFilter: "none",
 } as const
 
-// Form control base mixin - shared styling for all form controls
+// Form control base mixin (shared styling for all form controls)
 const formControlBaseMixin = {
-  width: "20px !important",
-  height: "20px !important",
-  minWidth: "20px !important", // Prevent shrinking
-  maxWidth: "20px !important", // Prevent growing
+  width: `${themeValues.layout.controls.standard}px !important`,
+  height: `${themeValues.layout.controls.standard}px !important`,
+  minWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent shrinking
+  maxWidth: `${themeValues.layout.controls.standard}px !important`, // Prevent growing
   flexShrink: 0, // Don't shrink in flex containers
   backgroundColor: "transparent",
   padding: "0",
@@ -386,14 +419,14 @@ const formControlBaseMixin = {
   backdropFilter: "none !important",
 } as const
 
-// Card typography mixins - standardized from MapPanel card patterns
+// Card typography mixins (standardized from MapPanel card patterns)
 const cardTypographyMixins = {
   // Eyebrow text (e.g., "SCENARIO")
   eyebrow: {
     color: "blue.medium",
     textTransform: "uppercase",
     letterSpacing: "0.75px",
-    fontSize: "0.75rem",
+    fontSize: typeScale.compact.caption, // 0.75rem - compact captions/labels
     fontWeight: 500,
     display: "block",
     mb: 0.5,
@@ -401,10 +434,9 @@ const cardTypographyMixins = {
   // Main card title (e.g., "Current Operations")
   cardTitle: {
     color: "blue.darkest",
-    fontFamily:
-      '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontFamily: themeValues.fontFamily.neueHaasText,
     fontWeight: 500,
-    fontSize: "1.5rem",
+    fontSize: "1.5rem", // Could use typeScale.h6 but this is specifically for cards
     lineHeight: 1.3,
     mb: 1,
   } as const,
@@ -610,6 +642,14 @@ const theme = createTheme({
       },
       tellMoreIcon: {
         marginLeft: "auto", // Aligns right within card header row
+      },
+      // Compact spacing system for UI elements (dialogs, tooltips, form controls)
+      compact: {
+        xs: 0.25, // 2px - micro spacing
+        sm: 0.5,  // 4px - tight spacing
+        md: 1,    // 8px - compact spacing
+        lg: 1.5,  // 12px - medium compact
+        xl: 2,    // 16px - standard compact
       },
     },
   },
@@ -1371,8 +1411,30 @@ theme.drawerNavigation = {
   colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
 }
 
-// Add map prompt dialog configuration to theme
-theme.mapPromptDialog = themeValues.mapPromptDialog
+// Add map prompt dialog configuration to theme with theme variables
+theme.mapPromptDialog = {
+  ...themeValues.mapPromptDialog,
+  backgroundColor: theme.background.overlay.dark,
+  textColor: theme.palette.utility.white,
+  borderRadius: theme.borderRadius.card,
+  padding: theme.borderRadius.card,
+  zIndex: theme.zIndex.tooltip,
+  position: {
+    ...themeValues.mapPromptDialog.position,
+    top: theme.borderRadius.card,
+  },
+  typography: {
+    ...themeValues.mapPromptDialog.typography,
+    title: {
+      ...themeValues.mapPromptDialog.typography.title,
+      marginBottom: `${theme.spacing(theme.cards.spacing.compact.sm)}px`, // Use compact spacing
+    },
+    subtitle: {
+      ...themeValues.mapPromptDialog.typography.subtitle,
+      marginBottom: `${theme.spacing(theme.cards.spacing.compact.sm)}px`, // Use compact spacing
+    },
+  },
+}
 
 // expose mixin constants for easy import if needed
 export const cardTypography = cardTypographyMixins
@@ -1554,6 +1616,11 @@ declare module "@mui/material/styles" {
       textContainer: {
         maxWidth: { xs: string; md: string }
       }
+      controls: {
+        standard: number
+        compact: number
+        micro: number
+      }
     }
     border: ReturnType<typeof createBorderStyles>
     background: {
@@ -1662,6 +1729,13 @@ declare module "@mui/material/styles" {
         tellMoreIcon: {
           marginLeft: string
         }
+        compact: {
+          xs: number
+          sm: number
+          md: number
+          lg: number
+          xl: number
+        }
       }
     }
   }
@@ -1675,6 +1749,11 @@ declare module "@mui/material/styles" {
       }
       textContainer?: {
         maxWidth?: { xs: string; md: string }
+      }
+      controls?: {
+        standard?: number
+        compact?: number
+        micro?: number
       }
     }
     cards?: {
@@ -1732,6 +1811,13 @@ declare module "@mui/material/styles" {
         }
         tellMoreIcon?: {
           marginLeft?: string
+        }
+        compact?: {
+          xs?: number
+          sm?: number
+          md?: number
+          lg?: number
+          xl?: number
         }
       }
     }
