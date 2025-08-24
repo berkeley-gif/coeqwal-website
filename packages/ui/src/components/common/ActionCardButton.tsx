@@ -12,6 +12,10 @@ export interface ActionCardButtonProps extends Omit<ButtonProps, "children"> {
   disabled?: boolean
   /** Click handler */
   onClick?: () => void
+  /** Hover background color */
+  hoverBackgroundColor?: string
+  /** Hover text color */
+  hoverTextColor?: string
 }
 
 /**
@@ -29,6 +33,8 @@ export function ActionCardButton({
   subtitle,
   disabled = false,
   onClick,
+  hoverBackgroundColor = "#666666", // Default neutral gray
+  hoverTextColor = "#FFFFFF", // Default white
   sx = {},
   ...props
 }: ActionCardButtonProps) {
@@ -45,13 +51,13 @@ export function ActionCardButton({
         }),
         // Ensure all text turns white on hover
         "&:hover": {
-          backgroundColor: (theme) => theme.palette.blue.bright,
-          color: (theme) => theme.palette.common.white,
+          backgroundColor: hoverBackgroundColor,
+          color: hoverTextColor,
           "& .MuiTypography-root": {
-            color: (theme) => theme.palette.common.white,
+            color: hoverTextColor,
           },
           "& .ActionCardButton-subtitle": {
-            color: (theme) => theme.palette.common.white,
+            color: hoverTextColor,
           },
         },
         ...sx,
