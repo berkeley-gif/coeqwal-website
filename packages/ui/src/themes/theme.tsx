@@ -100,6 +100,12 @@ import type { CSSProperties } from "react"
 // • caption: 1rem (16px) - Aligned with body2 for consistency
 // • nav: 0.875rem (14px) - Navigation text (custom variant)
 //
+// Compact UI variants (for dialogs, tooltips, form labels):
+// • compact.title: 0.9rem (14.4px) - Compact dialog titles
+// • compact.subtitle: 0.8rem (12.8px) - Compact dialog subtitles
+// • compact.caption: 0.75rem (12px) - Compact captions/labels
+// • compact.micro: 0.7rem (11.2px) - Micro text (form helpers)
+//
 
 // ===============================================================================
 // SPECS FOR THEME VALUES (need to be defined before theme creation)
