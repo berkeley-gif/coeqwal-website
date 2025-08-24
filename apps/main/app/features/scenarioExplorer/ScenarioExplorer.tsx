@@ -2134,6 +2134,8 @@ const MapControls = ({
                                 : "Select scenarios to explore"
                             }
                             disabled={false} // Temporarily always enabled for testing
+                            hoverBackgroundColor={theme.palette.blue.bright}
+                            hoverTextColor={theme.palette.common.white}
                             onClick={() => {
                               console.log(
                                 "Explore button clicked, selectedScenarios:",
