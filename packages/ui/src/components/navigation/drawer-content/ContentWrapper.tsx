@@ -18,12 +18,12 @@ export interface ContentWrapperProps {
  * Wrapper component for drawer content sections
  * Provides consistent styling without a close button (now in drawer header)
  */
-export function ContentWrapper({ children, wrapperStyles }: ContentWrapperProps) {
+export function ContentWrapper({
+  children,
+  wrapperStyles,
+}: ContentWrapperProps) {
   return (
-    <Box
-      className="drawer-content-wrapper"
-      sx={wrapperStyles}
-    >
+    <Box className="drawer-content-wrapper" sx={wrapperStyles}>
       {children}
     </Box>
   )

@@ -23,15 +23,12 @@ export interface ScenarioCardProps extends Omit<CardProps, "children"> {
 }
 
 // Helper component to create standardized lists for ScenarioCard bodies
-export const ScenarioCardList: React.FC<{ 
-  items: string[];
-  listStyles?: React.CSSProperties;
+export const ScenarioCardList: React.FC<{
+  items: string[]
+  listStyles?: React.CSSProperties
 }> = ({ items, listStyles }) => {
   return (
-    <Box 
-      component="div" 
-      sx={listStyles}
-    >
+    <Box component="div" sx={listStyles}>
       <ul>
         {items.map((item, index) => (
           <li key={index}>{item}</li>

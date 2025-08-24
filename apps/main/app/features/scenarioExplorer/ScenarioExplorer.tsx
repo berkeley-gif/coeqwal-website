@@ -127,7 +127,14 @@ const SortableScenarioExplorationCard = ({
             opacity: 0.5,
           }}
         >
-          <Typography sx={{ fontSize: (theme) => theme.typography.button.fontSize, lineHeight: 1 }}>⋮⋮</Typography>
+          <Typography
+            sx={{
+              fontSize: (theme) => theme.typography.button.fontSize,
+              lineHeight: 1,
+            }}
+          >
+            ⋮⋮
+          </Typography>
         </Box>
 
         {/* Card header */}
@@ -233,7 +240,8 @@ const SortableScenarioExplorationCard = ({
               <Typography
                 variant="caption"
                 sx={{
-                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                  fontSize: (theme) =>
+                    theme.typography.compact.caption.fontSize,
                   textAlign: "center",
                   lineHeight: 1.3,
                   maxWidth: "90px", // Wider text area
@@ -433,7 +441,6 @@ const MapControls = ({
       },
     })
   }
-
 
   const handleSelectRegionOnMapClick = useCallback(() => {
     onSelectRegionOnMap()
@@ -959,7 +966,8 @@ const MapControls = ({
                       color: (theme) => theme.palette.blue.medium,
                       textTransform: "uppercase",
                       letterSpacing: "0.75px",
-                      fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                      fontSize: (theme) =>
+                        theme.typography.compact.caption.fontSize,
                       fontWeight: 500,
                       display: "block",
                       mb: 0.5,
@@ -1083,7 +1091,8 @@ const MapControls = ({
                             )
                         }
                         sx={{
-                          fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                          fontSize: (theme) =>
+                            theme.typography.compact.caption.fontSize,
                           minWidth: "100px",
                           height: "32px",
                           backgroundColor: (theme) =>
@@ -1133,7 +1142,8 @@ const MapControls = ({
                                 theme.palette.common.white,
                               mt: 0.5,
                               "& .MuiMenuItem-root": {
-                                fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                                fontSize: (theme) =>
+                                  theme.typography.compact.caption.fontSize,
                                 padding: "8px 16px",
                                 minHeight: "auto",
                                 backgroundColor: (theme) =>
@@ -1243,7 +1253,8 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
+                            fontSize: (theme) =>
+                              theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1, // Above column backgrounds
@@ -1257,7 +1268,8 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
+                            fontSize: (theme) =>
+                              theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1,
@@ -1271,7 +1283,8 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
+                            fontSize: (theme) =>
+                              theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1,
@@ -1285,7 +1298,8 @@ const MapControls = ({
                           variant="body2"
                           sx={{
                             fontWeight: 500,
-                            fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
+                            fontSize: (theme) =>
+                              theme.typography.compact.subtitle.fontSize,
                             color: (theme) => theme.palette.text.secondary,
                             textAlign: "center",
                             zIndex: 1,
@@ -1375,7 +1389,8 @@ const MapControls = ({
                               />
                               <Box
                                 sx={{
-                                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                                  fontSize: (theme) =>
+                                    theme.typography.compact.caption.fontSize,
                                   fontWeight: 400,
                                   lineHeight: 1.3,
                                   color: (theme) => theme.palette.text.primary,
@@ -1464,7 +1479,8 @@ const MapControls = ({
                               />
                               <Box
                                 sx={{
-                                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                                  fontSize: (theme) =>
+                                    theme.typography.compact.caption.fontSize,
                                   fontWeight: 400,
                                   lineHeight: 1.3,
                                   color: (theme) => theme.palette.text.primary,
@@ -1567,7 +1583,8 @@ const MapControls = ({
                           {/* Outcome label */}
                           <Box
                             sx={{
-                              fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                              fontSize: (theme) =>
+                                theme.typography.compact.caption.fontSize,
                               fontWeight: 400,
                               lineHeight: 1.3,
                               color: (theme) => theme.palette.text.primary,
@@ -1804,7 +1821,8 @@ const MapControls = ({
                         color: (theme) => theme.palette.blue.medium,
                         textTransform: "uppercase",
                         letterSpacing: "0.75px",
-                        fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                        fontSize: (theme) =>
+                          theme.typography.compact.caption.fontSize,
                         fontWeight: 500,
                         display: "block",
                         mb: 0.5,
@@ -2946,7 +2964,7 @@ export default function ScenarioExplorer({
                     if (!hasLayer("delivery-area-selection-layer")) return
 
                     // Handle delivery area polygon selection
-                    const features = (evt.target as any).queryRenderedFeatures( // eslint-disable-line @typescript-eslint/no-explicit-any
+                    const features = (evt.target as { queryRenderedFeatures: (point: unknown, options: { layers: string[] }) => unknown[] }).queryRenderedFeatures(
                       evt.point,
                       {
                         layers: ["delivery-area-selection-layer"],
@@ -3583,10 +3601,21 @@ export default function ScenarioExplorer({
             boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
           }}
         >
-          <Box sx={{ fontSize: (theme) => theme.typography.compact.title.fontSize, fontWeight: 500, mb: 0.5 }}>
+          <Box
+            sx={{
+              fontSize: (theme) => theme.typography.compact.title.fontSize,
+              fontWeight: 500,
+              mb: 0.5,
+            }}
+          >
             ⚠️ Self-Intersecting Polygon
           </Box>
-          <Box sx={{ fontSize: (theme) => theme.typography.compact.subtitle.fontSize, opacity: 0.9 }}>
+          <Box
+            sx={{
+              fontSize: (theme) => theme.typography.compact.subtitle.fontSize,
+              opacity: 0.9,
+            }}
+          >
             Drag vertices to fix overlapping edges
           </Box>
         </Box>
@@ -3608,7 +3637,14 @@ export default function ScenarioExplorer({
           boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
         }}
       >
-        <Box sx={{ fontSize: (theme) => theme.typography.compact.title.fontSize, fontWeight: 500 }}>📊 Dummy data</Box>
+        <Box
+          sx={{
+            fontSize: (theme) => theme.typography.compact.title.fontSize,
+            fontWeight: 500,
+          }}
+        >
+          📊 Dummy data
+        </Box>
       </Box>
 
       {/* Climate card - positioned as direct child of MapPanel for proper positioning */}
@@ -3642,7 +3678,8 @@ export default function ScenarioExplorer({
                   color: (theme) => theme.palette.blue.medium,
                   textTransform: "uppercase",
                   letterSpacing: "0.75px",
-                  fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                  fontSize: (theme) =>
+                    theme.typography.compact.caption.fontSize,
                   fontWeight: 500,
                   display: "block",
                   mb: 0.5,
@@ -4009,7 +4046,8 @@ export default function ScenarioExplorer({
                       color: theme.palette.blue.medium,
                       textTransform: "uppercase",
                       letterSpacing: "0.75px",
-                      fontSize: (theme) => theme.typography.compact.caption.fontSize,
+                      fontSize: (theme) =>
+                        theme.typography.compact.caption.fontSize,
                       fontWeight: 500,
                       display: "block",
                       mb: 0.5,
@@ -4033,7 +4071,8 @@ export default function ScenarioExplorer({
                     sx={{
                       color: theme.palette.text.secondary,
                       mb: 2,
-                      fontSize: (theme) => theme.typography.compact.title.fontSize,
+                      fontSize: (theme) =>
+                        theme.typography.compact.title.fontSize,
                       lineHeight: 1.4,
                     }}
                   >
