@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, TypographyProps, useTheme } from "@repo/ui/mui"
+import { Box, TypographyProps } from "@repo/ui/mui"
 
 export interface GlossaryTermConfig {
   name: string
@@ -17,6 +17,8 @@ export interface GlossaryLinkedTextProps {
   underlineHoverPx?: number
   caseSensitive?: boolean
   wordBoundary?: boolean
+  linkColor?: string
+  underlineColor?: string
 }
 
 function escapeRegExp(input: string): string {
@@ -32,8 +34,9 @@ export function GlossaryLinkedText({
   underlineHoverPx = 5,
   caseSensitive = false,
   wordBoundary = true,
+  linkColor,
+  underlineColor,
 }: GlossaryLinkedTextProps) {
-  const theme = useTheme()
 
   if (!text || terms.length === 0) return <>{text}</>
 
@@ -74,8 +77,8 @@ export function GlossaryLinkedText({
         component="span"
         sx={{
           backgroundColor: "transparent",
-          borderBottom: `${underlinePx}px solid ${theme.palette.blue.darkest}`,
-          color: color || theme.palette.blue.darkest,
+          borderBottom: `${underlinePx}px solid ${underlineColor || '#3a4574'}`, // Default blue color
+          color: linkColor || color || '#3a4574', // Default blue color
           py: 0.1,
           mx: 0.2,
           lineHeight: 0,
@@ -84,7 +87,7 @@ export function GlossaryLinkedText({
           display: "inline-block",
           position: "relative",
           "&:hover": {
-            borderBottom: `${underlineHoverPx}px solid ${theme.palette.blue.darkest}`,
+            borderBottom: `${underlineHoverPx}px solid ${underlineColor || '#3a4574'}`, // Default blue color
           },
         }}
         onClick={() => onActivate(glossaryTerm)}
