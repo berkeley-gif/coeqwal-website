@@ -19,7 +19,8 @@ export default function Home() {
       <ConnectedMultiDrawer
         drawerWidth={theme.layout.drawer.width}
         overlay={true}
-        showRailButtons={true}
+/*         overlay={!isTablet}
+        showRailButtons={true} */
       />
 
       {/* Main content */}
@@ -28,7 +29,8 @@ export default function Home() {
         sx={{
           position: "relative",
           zIndex: (theme) => theme.zIndex.panels,
-          overflowX: "hidden",
+          overflowX: "clip",
+          overflowY: "visible",
         }}
       >
         {/* Panel sections */}
