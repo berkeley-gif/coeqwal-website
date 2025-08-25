@@ -7,7 +7,7 @@ import { icons } from "@repo/ui/mui"
 
 const { Download } = icons
 
-interface DownloadButtonProps extends Omit<ButtonProps, 'onClick' | 'href'> {
+interface DownloadButtonProps extends Omit<ButtonProps, "onClick" | "href"> {
   fileId: string
   filename: string
   downloadUrl?: string
@@ -27,7 +27,9 @@ export default function DownloadButton({
   ...props
 }: DownloadButtonProps) {
   // Use the provided downloadUrl or fall back to the old Lambda function
-  const finalUrl = downloadUrl || `https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/coeqwalPresignDownload?id=${fileId}`
+  const finalUrl =
+    downloadUrl ||
+    `https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/coeqwalPresignDownload?id=${fileId}`
 
   return (
     <Button

@@ -2964,12 +2964,16 @@ export default function ScenarioExplorer({
                     if (!hasLayer("delivery-area-selection-layer")) return
 
                     // Handle delivery area polygon selection
-                    const features = (evt.target as { queryRenderedFeatures: (point: unknown, options: { layers: string[] }) => unknown[] }).queryRenderedFeatures(
-                      evt.point,
-                      {
-                        layers: ["delivery-area-selection-layer"],
-                      },
-                    )
+                    const features = (
+                      evt.target as {
+                        queryRenderedFeatures: (
+                          point: unknown,
+                          options: { layers: string[] },
+                        ) => unknown[]
+                      }
+                    ).queryRenderedFeatures(evt.point, {
+                      layers: ["delivery-area-selection-layer"],
+                    })
 
                     if (features && features.length > 0) {
                       handleDeliveryAreaPolygonClick({ features })
