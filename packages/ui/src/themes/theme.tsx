@@ -9,7 +9,7 @@ import type { CSSProperties } from "react"
  ========================================================
 | 1. Global theme values
 |    - Typography scale (Perfect Fourth ratio with typeScale constants)
-|    - Font families neueHaasText, neueHaasDisplay, farnhamHeadline)
+|    - Font families neueHaasText, neueHaasDisplay
 |    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer)
 |    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
 |    - Category & tier colors for data visualization
@@ -80,12 +80,12 @@ import type { CSSProperties } from "react"
 // ===============================================================================
 //
 // Perfect Fourth (1.333) type scale
-// Headlines: Farnham Headline (h1, h2) | UI display text: Neue Haas Display (h3, h5, h6) | Body text: Neue Haas Text (h4, body, UI)
+// Headlines: Neue Haas Display (h1, h2, h3, h5, h6) | Body text: Neue Haas Text (h4, body1, body2, UI)
 // Base: 1.25rem (20px) primary body text
 //
 // Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 6rem (96px) - Hero headlines "Rethink California Water" (Farnham Headline Medium)
-// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Farnham Headline Medium)
+// • h1: 6rem (96px) - Hero headlines "Rethink California Water" (Neue Haas Display Medium)
+// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Neue Haas Display Medium)
 // • h3: 3.375rem (54px) - Subsection headlines (Neue Haas Display Medium)
 // • h4: 2.53rem (40.5px) - Card titles and smaller headlines (Neue Haas Text Regular)
 // • h5: 1.9rem (30.4px) - Labels and minor headlines (Neue Haas Display Medium)
@@ -149,8 +149,6 @@ const themeValues = {
       '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
     neueHaasDisplay:
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-    farnhamHeadline:
-      '"farnham-headline", Georgia, "Times New Roman", Times, serif',
   },
 
   // Layout dimensions, for layout calculations
@@ -772,14 +770,14 @@ const theme = createTheme({
     fontWeightMedium: 500,
     fontWeightBold: 700,
     h1: {
-      fontFamily: themeValues.fontFamily.farnhamHeadline,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 1.05,
       color: themeValues.palette.blue.darkest,
     },
     h2: {
-      fontFamily: themeValues.fontFamily.farnhamHeadline,
+      fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h2,
       fontWeight: 500,
       lineHeight: 1.2,
