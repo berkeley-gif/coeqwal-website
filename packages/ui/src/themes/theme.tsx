@@ -84,12 +84,12 @@ import type { CSSProperties } from "react"
 // Base: 1.25rem (20px) primary body text
 //
 // Scale progression using Perfect Fourth ratio (1.333):
-// • h1: 6rem (96px) - Hero headlines "Rethink California Water" (Neue Haas Display Medium)
-// • h2: 4.5rem (72px) - Section headlines "What is the future..." (Neue Haas Display Medium)
-// • h3: 3.375rem (54px) - Subsection headlines (Neue Haas Display Medium)
-// • h4: 2.53rem (40.5px) - Card titles and smaller headlines (Neue Haas Text Regular)
-// • h5: 1.9rem (30.4px) - Labels and minor headlines (Neue Haas Display Medium)
-// • h6: 1.425rem (22.8px) - Small headlines and captions (Neue Haas Display SemiBold)
+// • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water" (Neue Haas Display Medium)
+// • h2: 4.35rem (69.6px) - Section headlines "What is the future..." (Neue Haas Display Medium)
+// • h3: 3.26rem (52.2px) - Subsection headlines (Neue Haas Display Medium)
+// • h4: 2.45rem (39.2px) - Card titles and smaller headlines (Neue Haas Text Regular)
+// • h5: 1.84rem (29.4px) - Labels and minor headlines (Neue Haas Display Medium)
+// • h6: 1.38rem (22.1px) - Small headlines and captions (Neue Haas Display SemiBold)
 // • body1: 1.25rem (20px) - Primary body text (Neue Haas Text Regular)
 // • body2: 0.95rem (15.2px) - Dashboard interface text (Neue Haas Text Regular)
 //
@@ -116,13 +116,13 @@ const typeScale = {
   baseBody: "1.25rem", // 20px - primary body text
   smallBody: "0.95rem", // 15.2px - dashboard interface text
 
-  // Headline sizes using Perfect Fourth ratio (1.333)
-  h1: "6rem", // 96px - Hero size
-  h2: "4.5rem", // 72px - Major section headers (h1 ÷ 1.333)
-  h3: "3.375rem", // 54px - Subsection headers (h2 ÷ 1.333)
-  h4: "2.53rem", // 40.5px - Card titles (h3 ÷ 1.333)
-  h5: "1.9rem", // 30.4px - Minor headlines (h4 ÷ 1.333)
-  h6: "1.425rem", // 22.8px - Section headers (h5 ÷ 1.333)
+  // Headline sizes using Perfect Fourth ratio (1.333) - refined scale
+  h1: "5.8rem", // 92.8px - Hero size
+  h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
+  h3: "3.26rem", // 52.2px - Subsection headers (h2 ÷ 1.333)
+  h4: "2.45rem", // 39.2px - Card titles (h3 ÷ 1.333)
+  h5: "1.84rem", // 29.4px - Minor headlines (h4 ÷ 1.333)
+  h6: "1.38rem", // 22.1px - Section headers (h5 ÷ 1.333)
 
   // Compact UI typography for dialogs, tooltips, form labels
   compact: {
@@ -773,35 +773,35 @@ const theme = createTheme({
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h1,
       fontWeight: 500,
-      lineHeight: 1.05,
+      lineHeight: 1.0, // Tighter for large hero text
       color: themeValues.palette.blue.darkest,
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h2,
       fontWeight: 500,
-      lineHeight: 1.2,
+      lineHeight: 1.1, // Slightly tighter for section headers
       color: themeValues.palette.blue.darkest,
     },
     h3: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h3,
       fontWeight: 500,
-      lineHeight: 1.1,
+      lineHeight: 1.15, // Balanced for subsection headers
       color: themeValues.palette.blue.darkest,
     },
     h4: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h4,
       fontWeight: 400,
-      lineHeight: 1.2,
+      lineHeight: 1.25, // Slightly more open for card titles
       color: themeValues.palette.blue.darkest,
     },
     h5: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h5,
       fontWeight: 500,
-      lineHeight: 1.3,
+      lineHeight: 1.35, // Good balance for minor headlines
       color: themeValues.palette.blue.darkest,
     },
     h6: {
@@ -1074,6 +1074,13 @@ const theme = createTheme({
         }),
       },
     },
+    MuiMenu: {
+      styleOverrides: {
+        paper: ({ theme }) => ({
+          backgroundColor: theme.palette.common.white,
+        }),
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: ({ theme }) => ({
@@ -1215,6 +1222,10 @@ const theme = createTheme({
       styleOverrides: {
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.card,
+          // Ensure dropdown panels and menus have white backgrounds
+          "&.MuiMenu-paper, &.MuiSelect-paper": {
+            backgroundColor: theme.palette.common.white,
+          },
         }),
       },
     },
@@ -2005,9 +2016,11 @@ declare module "@mui/material/Typography" {
 | - MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
 | - MuiRadio: Uses formControlBase + circular styling + 20px dimensions
 | - MuiFormControlLabel: alignItems "flex-start" for multi-line labels
-| - MuiOutlinedInput: ALWAYS white background, never green/transparent
-| - MuiSelect: ALWAYS white background for dropdowns
-| - MuiTextField: ALWAYS white background for text inputs
+| - MuiOutlinedInput: White background
+| - MuiSelect: White background for dropdowns
+| - MuiTextField: White background for text inputs
+| - MuiMenu: White background for dropdown panels
+| - MuiPaper: White background for menu/select panels
 |
 | SIZING GUIDELINES:
 | - Standard (20px): Default for most form controls
