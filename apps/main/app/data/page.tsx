@@ -13,7 +13,6 @@ import {
   Grid,
   IconButton,
   CircularProgress,
-
 } from "@repo/ui/mui"
 import type { SelectChangeEvent } from "@mui/material/Select"
 import { Header } from "../components/Header"
@@ -30,35 +29,35 @@ const STATIC_SCENARIOS: Scenario[] = [
     files: {
       zip: {
         key: "scenario/s0020/run/s0020_DCRadjBL_2020LU_wTUCP.zip",
-        filename: "s0020_DCRadjBL_2020LU_wTUCP.zip"
+        filename: "s0020_DCRadjBL_2020LU_wTUCP.zip",
       },
       output_csv: {
         key: "scenario/s0020/csv/s0020_calsim_output.csv",
-        filename: "s0020_calsim_output.csv"
+        filename: "s0020_calsim_output.csv",
       },
       sv_csv: {
         key: "scenario/s0020/csv/s0020_sv_input.csv",
-        filename: "s0020_sv_input.csv"
-      }
-    }
+        filename: "s0020_sv_input.csv",
+      },
+    },
   },
   {
     scenario_id: "s0021",
     files: {
       zip: {
         key: "scenario/s0021/run/s0021_DCRadjBL_2020LU_woTUCP.zip",
-        filename: "s0021_DCRadjBL_2020LU_woTUCP.zip"
+        filename: "s0021_DCRadjBL_2020LU_woTUCP.zip",
       },
       output_csv: {
         key: "scenario/s0021/csv/s0021_calsim_output.csv",
-        filename: "s0021_calsim_output.csv"
+        filename: "s0021_calsim_output.csv",
       },
       sv_csv: {
         key: "scenario/s0021/csv/s0021_sv_input.csv",
-        filename: "s0021_sv_input.csv"
-      }
-    }
-  }
+        filename: "s0021_sv_input.csv",
+      },
+    },
+  },
 ]
 
 export default function DataPage() {
@@ -77,7 +76,7 @@ export default function DataPage() {
       setScenarios(STATIC_SCENARIOS)
       setLoading(false)
     }, 500)
-    
+
     return () => clearTimeout(timer)
   }, [])
 
@@ -90,16 +89,20 @@ export default function DataPage() {
   }
 
   // Filter scenarios that have zip files
-  const zipScenarios = scenarios.filter(scenario => scenario.files.zip)
-  
+  const zipScenarios = scenarios.filter((scenario) => scenario.files.zip)
+
   // Filter scenarios that have CSV files (either output_csv or sv_csv)
-  const csvScenarios = scenarios.filter(scenario => 
-    scenario.files.output_csv || scenario.files.sv_csv
+  const csvScenarios = scenarios.filter(
+    (scenario) => scenario.files.output_csv || scenario.files.sv_csv,
   )
 
   // Get selected scenario data
-  const selectedZipScenario = scenarios.find(s => s.scenario_id === selectedZipDataset)
-  const selectedCsvScenario = scenarios.find(s => s.scenario_id === selectedCsvDataset)
+  const selectedZipScenario = scenarios.find(
+    (s) => s.scenario_id === selectedZipDataset,
+  )
+  const selectedCsvScenario = scenarios.find(
+    (s) => s.scenario_id === selectedCsvDataset,
+  )
 
   return (
     <>
@@ -140,7 +143,13 @@ export default function DataPage() {
             color: (theme) => theme.palette.blue.darkest,
           }}
         >
-          <Container maxWidth="lg" sx={{ py: 8, pt: (theme) => `calc(${theme.layout.headerHeight}px + 32px)` }}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              py: 8,
+              pt: (theme) => `calc(${theme.layout.headerHeight}px + 32px)`,
+            }}
+          >
             {/* Header with back arrow */}
             <Box
               sx={{
@@ -227,21 +236,20 @@ export default function DataPage() {
                     }}
                   >
                     Access complete CalSim3 model run files in zipped format.
-                    These files include input and output data in WRESL and DSS formats,
-                    providing full scenario configuration details.
+                    These files include input and output data in WRESL and DSS
+                    formats, providing full scenario configuration details.
                   </Typography>
 
                   {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
-                      <FormControl 
-                        fullWidth 
-                        sx={{ mb: 3 }}
-                      >
+                      <FormControl fullWidth sx={{ mb: 3 }}>
                         <InputLabel id="zip-dataset-select-label">
                           Select dataset
                         </InputLabel>
@@ -257,8 +265,12 @@ export default function DataPage() {
                             <em>Choose scenario</em>
                           </MenuItem>
                           {zipScenarios.map((scenario) => (
-                            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id}>
-                              {scenario.files.zip?.filename || scenario.scenario_id}
+                            <MenuItem
+                              key={scenario.scenario_id}
+                              value={scenario.scenario_id}
+                            >
+                              {scenario.files.zip?.filename ||
+                                scenario.scenario_id}
                             </MenuItem>
                           ))}
                         </Select>
@@ -270,7 +282,10 @@ export default function DataPage() {
                           <DownloadButton
                             fileId={selectedZipDataset}
                             filename={selectedZipScenario.files.zip.filename}
-                            downloadUrl={getDownloadUrl(selectedZipDataset, 'zip')}
+                            downloadUrl={getDownloadUrl(
+                              selectedZipDataset,
+                              "zip",
+                            )}
                           />
                         </Box>
                       )}
@@ -293,7 +308,8 @@ export default function DataPage() {
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
-                    Download CalSim3 scenario input and output data in csv format
+                    Download CalSim3 scenario input and output data in csv
+                    format
                   </Typography>
                   <Typography
                     variant="body1"
@@ -302,20 +318,20 @@ export default function DataPage() {
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
-                    Access COEQWAL CalSim3 SV input and variable output data in csv format.
+                    Access COEQWAL CalSim3 SV input and variable output data in
+                    csv format.
                   </Typography>
 
                   {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", py: 2 }}
+                    >
                       <CircularProgress />
                     </Box>
                   ) : (
                     <>
                       {/* Dropdown for dataset selection */}
-                      <FormControl 
-                        fullWidth 
-                        sx={{ mb: 3 }}
-                      >
+                      <FormControl fullWidth sx={{ mb: 3 }}>
                         <InputLabel id="csv-dataset-select-label">
                           Select dataset
                         </InputLabel>
@@ -331,7 +347,10 @@ export default function DataPage() {
                             <em>Choose scenario</em>
                           </MenuItem>
                           {csvScenarios.map((scenario) => (
-                            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id}>
+                            <MenuItem
+                              key={scenario.scenario_id}
+                              value={scenario.scenario_id}
+                            >
                               {scenario.scenario_id}
                             </MenuItem>
                           ))}
@@ -340,12 +359,24 @@ export default function DataPage() {
 
                       {/* Download buttons - show when a scenario is selected and files exist */}
                       {selectedCsvDataset && selectedCsvScenario && (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 2,
+                            mb: 2,
+                          }}
+                        >
                           {selectedCsvScenario.files.output_csv && (
                             <DownloadButton
                               fileId={`${selectedCsvDataset}_output`}
-                              filename={selectedCsvScenario.files.output_csv.filename}
-                              downloadUrl={getDownloadUrl(selectedCsvDataset, 'output')}
+                              filename={
+                                selectedCsvScenario.files.output_csv.filename
+                              }
+                              downloadUrl={getDownloadUrl(
+                                selectedCsvDataset,
+                                "output",
+                              )}
                               variant="outlined"
                               sx={{ mb: 1 }}
                             >
@@ -355,8 +386,13 @@ export default function DataPage() {
                           {selectedCsvScenario.files.sv_csv && (
                             <DownloadButton
                               fileId={`${selectedCsvDataset}_sv`}
-                              filename={selectedCsvScenario.files.sv_csv.filename}
-                              downloadUrl={getDownloadUrl(selectedCsvDataset, 'sv')}
+                              filename={
+                                selectedCsvScenario.files.sv_csv.filename
+                              }
+                              downloadUrl={getDownloadUrl(
+                                selectedCsvDataset,
+                                "sv",
+                              )}
                               variant="outlined"
                             >
                               Download SV Input CSV
@@ -393,7 +429,8 @@ export default function DataPage() {
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
-                    including technical specifications, user guides, and methodology.
+                    including technical specifications, user guides, and
+                    methodology.
                   </Typography>
                   <Typography
                     variant="body2"
@@ -431,8 +468,8 @@ export default function DataPage() {
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
-                    Access peer-reviewed publications and research papers related
-                    to the COEQWAL project and CalSim3 modeling efforts.
+                    Access peer-reviewed publications and research papers
+                    related to the COEQWAL project and CalSim3 modeling efforts.
                   </Typography>
                   <Typography
                     variant="body2"
@@ -449,10 +486,7 @@ export default function DataPage() {
 
               {/* API Access Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText
-                  title="API access"
-                  headlineVariant="h5"
-                >
+                <LeadingMarkerText title="API access" headlineVariant="h5">
                   <Typography
                     variant="body1"
                     sx={{
@@ -470,8 +504,8 @@ export default function DataPage() {
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
-                    REST API endpoints for accessing scenario data, model outputs,
-                    and other COEQWAL resources programmatically.
+                    REST API endpoints for accessing scenario data, model
+                    outputs, and other COEQWAL resources programmatically.
                   </Typography>
                   <Typography
                     variant="body2"
@@ -509,8 +543,8 @@ export default function DataPage() {
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
-                    Contact our team for technical support, questions about the data,
-                    or collaboration opportunities.
+                    Contact our team for technical support, questions about the
+                    data, or collaboration opportunities.
                   </Typography>
                   <Typography
                     variant="body2"
