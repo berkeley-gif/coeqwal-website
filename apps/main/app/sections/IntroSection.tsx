@@ -137,15 +137,7 @@ const IntroSection = () => {
       <Spacer height={{ xs: 48, md: 48 }} />
 
       {/* Frontmatter panel(s) */}
-      <Box
-        sx={{
-          background: `url('/images/home_collage/newcollage_wetland.png')`,
-          backgroundSize: "100vw auto",
-          backgroundPosition: "top right",
-          backgroundRepeat: "no-repeat",
-          minHeight: "180vh", // Accomodates background image
-        }}
-      >
+      <Box>
         <BasePanel
           id="frontmatter"
           fullHeight={false}
