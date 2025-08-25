@@ -1,5 +1,5 @@
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
@@ -15,7 +15,6 @@ const IntroSection = () => {
         background: (theme) => `
             linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
           `,
-        minHeight: "200vh",
       }}
     >
       {/* Full screen home panel */}
@@ -41,7 +40,8 @@ const IntroSection = () => {
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: { xs: 0, md: "26%" },
+
             zIndex: theme.zIndex.introBackgroundImages,
             pointerEvents: "none",
           }}
@@ -56,9 +56,10 @@ const IntroSection = () => {
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: { xs: 0, md: "26%" },
             zIndex: theme.zIndex.introForegroundImages,
             pointerEvents: "none",
+
           }}
         >
           <FloatingImageMarkers
@@ -74,6 +75,7 @@ const IntroSection = () => {
           sx={{
             position: "relative",
             zIndex: theme.zIndex.introText,
+            pr: { xs: 1, md: 0 }
           }}
         >
           <Typography
@@ -134,16 +136,16 @@ const IntroSection = () => {
       </BasePanel>
 
       {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 48, md: 48 }} />
+      <Spacer height={{ xs: 32, md: 48 }} />
 
       {/* Frontmatter panel(s) */}
       <Box
         sx={{
           background: `url('/images/home_collage/newcollage_wetland.png')`,
-          backgroundSize: "100vw auto",
-          backgroundPosition: "top right",
+          backgroundSize: { xs: "cover", md: "contain", lg: "100vw auto" },
+          backgroundPosition: { xs: "center top", md: "top right", lg: "top right" },
           backgroundRepeat: "no-repeat",
-          minHeight: "180vh", // Accomodates background image
+          minHeight: { xs: "120vh", md: "min(120vh, 900px)", lg: "min(140vh, 1050px)" },
         }}
       >
         <BasePanel
@@ -156,15 +158,15 @@ const IntroSection = () => {
           sx={{
             color: (theme) => theme.palette.primary.dark,
             position: "relative",
-            minHeight: "180vh",
+            minHeight: { xs: "140vh", md: "150vh", lg: "170vh" },
           }}
         >
           <Box
             sx={{
               position: "relative",
               width: "100%",
-              height: "100%",
-              minHeight: "180vh",
+              height: { xs: "140vh", md: "170vh" },
+              minHeight: { xs: "140vh", md: "150vh", lg: "170vh" },
             }}
           >
             <Box
@@ -172,11 +174,11 @@ const IntroSection = () => {
               src="/images/home_collage/birds_top.png"
               sx={{
                 position: "absolute",
-                left: "-56%",
-                top: "20%",
+                left: { xs: "-30%", md: "-56%" },
+                top: { xs: "26%", md: "20%" },
                 transform: "translateY(-50%)",
-                width: "280px",
-                height: "280px",
+                width: { xs: 200, md: 280 },
+                height: { xs: 200, md: 280 },
                 zIndex: (theme) => theme.zIndex.introBackgroundImages,
               }}
             />
@@ -184,13 +186,13 @@ const IntroSection = () => {
             <Box
               sx={{
                 textAlign: "left",
+                position: { xs: "static", lg: "absolute" },
+                top: { xs: "40%", md: "34%" },
+                left: { lg: "50%" },
+                transform: { xs: "translate(8%, -15%)", lg: "translate(-50%, -50%)" },
+                width: { sm: "80%", lg: "100%" },
+                px: { xs: 2, md: 2 },
                 maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-                position: "absolute",
-                top: "34%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: "100%",
-                px: 2,
               }}
             >
               <Typography variant="body1">
@@ -246,7 +248,7 @@ const IntroSection = () => {
         </BasePanel>
       </Box>
 
-      <Spacer height={{ xs: 48, md: 160 }} />
+      <Spacer height={{ xs: 24, md: 48, lg: 64 }} />
 
       {/* California map background with right-aligned text */}
       <BasePanel
@@ -261,7 +263,7 @@ const IntroSection = () => {
           backgroundSize: "contain",
           backgroundPosition: "10% center",
           backgroundRepeat: "no-repeat",
-          height: "140vh",
+          height: { xs: "120vh", md: "130vh", lg: "140vh" },
           display: "flex",
           alignItems: "center",
         }}
@@ -272,7 +274,7 @@ const IntroSection = () => {
             textAlign: "left",
             color: (theme) => theme.palette.blue.darkest,
             ml: "auto", // Keep it right-aligned but not as extreme
-            mr: 4, // Add some margin from the right edge
+            mr: { xs: 2, md: 4 },
           }}
         >
           <Typography variant="body1" sx={{ mb: 3 }}>
