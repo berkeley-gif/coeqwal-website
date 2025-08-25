@@ -1125,7 +1125,7 @@ function PanelWithDetail({
                     flexDirection: "column",
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
-                    pt: 0,
+                    pt: (theme) => `${theme.layout.headerHeight}px`,
                     pointerEvents: "auto",
                   }}
                 >

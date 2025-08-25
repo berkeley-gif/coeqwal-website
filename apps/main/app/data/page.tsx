@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -10,32 +10,99 @@ import {
   FormControl,
   InputLabel,
   useTheme,
+  Grid,
+  IconButton,
+  CircularProgress,
+
 } from "@repo/ui/mui"
 import type { SelectChangeEvent } from "@mui/material/Select"
 import { Header } from "../components/Header"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
-import { BasePanel } from "@repo/ui"
+import { LeadingMarkerText, ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
+import type { Scenario } from "../types/scenarios"
+import { getDownloadUrl } from "../utils/scenarioApi"
+
+// For now, use static data until CORS is configured on the AWS API
+const STATIC_SCENARIOS: Scenario[] = [
+  {
+    scenario_id: "s0020",
+    files: {
+      zip: {
+        key: "scenario/s0020/run/s0020_DCRadjBL_2020LU_wTUCP.zip",
+        filename: "s0020_DCRadjBL_2020LU_wTUCP.zip"
+      },
+      output_csv: {
+        key: "scenario/s0020/csv/s0020_calsim_output.csv",
+        filename: "s0020_calsim_output.csv"
+      },
+      sv_csv: {
+        key: "scenario/s0020/csv/s0020_sv_input.csv",
+        filename: "s0020_sv_input.csv"
+      }
+    }
+  },
+  {
+    scenario_id: "s0021",
+    files: {
+      zip: {
+        key: "scenario/s0021/run/s0021_DCRadjBL_2020LU_woTUCP.zip",
+        filename: "s0021_DCRadjBL_2020LU_woTUCP.zip"
+      },
+      output_csv: {
+        key: "scenario/s0021/csv/s0021_calsim_output.csv",
+        filename: "s0021_calsim_output.csv"
+      },
+      sv_csv: {
+        key: "scenario/s0021/csv/s0021_sv_input.csv",
+        filename: "s0021_sv_input.csv"
+      }
+    }
+  }
+]
 
 export default function DataPage() {
   const theme = useTheme()
-  const [selectedDataset, setSelectedDataset] = useState("")
+  const [selectedZipDataset, setSelectedZipDataset] = useState("")
+  const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
+  const [scenarios, setScenarios] = useState<Scenario[]>(STATIC_SCENARIOS)
+  const [loading, setLoading] = useState(false) // No loading needed for static data
 
-  const handleDatasetChange = (event: SelectChangeEvent<string>) => {
-    setSelectedDataset(event.target.value)
+  // TODO: Replace with dynamic fetching once CORS is configured on AWS API
+  // For now using static data to avoid CORS issues
+  useEffect(() => {
+    // Simulate loading for better UX
+    setLoading(true)
+    const timer = setTimeout(() => {
+      setScenarios(STATIC_SCENARIOS)
+      setLoading(false)
+    }, 500)
+    
+    return () => clearTimeout(timer)
+  }, [])
+
+  const handleZipDatasetChange = (event: SelectChangeEvent<string>) => {
+    setSelectedZipDataset(event.target.value)
   }
 
-  // Map file IDs to display names
-  const fileNames: Record<string, string> = {
-    "1": "s0002_9.3.1_danube_adj.zip",
-    "2": "s0003_9.3.1_danube_cc50.zip",
-    "3": "s0004_9.3.1_danube_cc75.zip",
-    "4": "s0005_9.3.1_danube_cc95.zip",
+  const handleCsvDatasetChange = (event: SelectChangeEvent<string>) => {
+    setSelectedCsvDataset(event.target.value)
   }
+
+  // Filter scenarios that have zip files
+  const zipScenarios = scenarios.filter(scenario => scenario.files.zip)
+  
+  // Filter scenarios that have CSV files (either output_csv or sv_csv)
+  const csvScenarios = scenarios.filter(scenario => 
+    scenario.files.output_csv || scenario.files.sv_csv
+  )
+
+  // Get selected scenario data
+  const selectedZipScenario = scenarios.find(s => s.scenario_id === selectedZipDataset)
+  const selectedCsvScenario = scenarios.find(s => s.scenario_id === selectedCsvDataset)
 
   return (
     <>
-      {/* Same header as main page */}
       <Header />
 
       <ConnectedMultiDrawer
@@ -44,26 +111,18 @@ export default function DataPage() {
         showRailButtons={false}
       />
 
-      {/* Background similar to main page */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: (theme) => theme.zIndex.basement,
-        }}
-      />
-
-      {/* Main content area */}
+      {/* Main content wrapper */}
       <Box
         sx={{
           position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          margin: 0,
+          padding: 0,
+          overflowX: "hidden",
+          width: "100%",
           zIndex: (theme) => theme.zIndex.panels,
           pointerEvents: "auto",
-          width: "100%",
-          overflowX: "hidden",
         }}
       >
         <Box
@@ -76,215 +135,407 @@ export default function DataPage() {
             padding: 0,
             overflowX: "hidden",
             width: "100%",
-            "& > *": {
-              margin: 0,
-            },
+            minHeight: "100vh",
+            backgroundColor: (theme) => theme.palette.utility.white,
+            color: (theme) => theme.palette.blue.darkest,
           }}
         >
-          {/* Data page content */}
-          <BasePanel
-            fullHeight={false}
-            includeHeaderSpacing={true}
-            background="light"
-            sx={{
-              minHeight: "100vh",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Container maxWidth="lg">
-              <Typography
-                variant="h1"
-                sx={{
-                  mb: 4,
-                  textAlign: "center",
-                  color: (theme) => theme.palette.primary.dark,
+          <Container maxWidth="lg" sx={{ py: 8, pt: (theme) => `calc(${theme.layout.headerHeight}px + 32px)` }}>
+            {/* Header with back arrow */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 2,
+                mb: 4,
+              }}
+            >
+              <IconButton
+                onClick={() => window.history.back()}
+                sx={(theme) => {
+                  const typography = theme.typography.h2
+                  let fontSize = 16
+                  if (typeof typography.fontSize === "string") {
+                    if (typography.fontSize.includes("rem")) {
+                      fontSize = parseFloat(typography.fontSize) * 16
+                    } else {
+                      fontSize = parseFloat(typography.fontSize)
+                    }
+                  } else if (typeof typography.fontSize === "number") {
+                    fontSize = typography.fontSize
+                  }
+
+                  const lineHeight =
+                    typeof typography.lineHeight === "number"
+                      ? typography.lineHeight
+                      : 1.2
+
+                  const firstLineHeight = fontSize * lineHeight
+                  const topOffset = (firstLineHeight - 48) / 2
+
+                  return {
+                    color: theme.palette.blue.darkest,
+                    width: 48,
+                    height: 48,
+                    position: "relative",
+                    top: Math.max(0, topOffset),
+                  }
                 }}
               >
-                Data & Downloads
-              </Typography>
-
-              <Typography
-                variant="h3"
-                sx={{
-                  mb: 6,
-                  textAlign: "center",
-                  color: (theme) => theme.palette.primary.dark,
-                }}
-              >
-                Access COEQWAL datasets and scenario results
-              </Typography>
-
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
-                  gap: 4,
-                  mt: 6,
-                }}
-              >
-                {/* Scenario data section */}
-                <Box
-                  sx={{
-                    p: 4,
-
-                    borderRadius: 2,
-                    boxShadow: 1,
+                <ArrowHead
+                  style={{
+                    width: 28,
+                    height: 28,
+                    transform: "rotate(180deg)",
                   }}
+                />
+              </IconButton>
+              <Typography
+                variant="h2"
+                sx={{
+                  alignSelf: "flex-start",
+                  color: (theme) => theme.palette.blue.darkest,
+                }}
+              >
+                Data & downloads
+              </Typography>
+            </Box>
+
+            {/* Content in Grid layout */}
+            <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
+              {/* Full run data Section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <LeadingMarkerText
+                  title="Full scenario run files"
+                  headlineVariant="h5"
                 >
-                  <Typography variant="h4" sx={{ mb: 2 }}>
-                    Scenario data
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      opacity: 0.8,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Download raw CalSim3 scenario run files
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    Download raw CalSim3 scenario run files in zipped format.
-                    CalSim3 model run files include input and output files in
-                    wresl and dss formats.
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Access complete CalSim3 model run files in zipped format.
+                    These files include input and output data in WRESL and DSS formats,
+                    providing full scenario configuration details.
                   </Typography>
 
-                  {/* Dropdown for dataset selection */}
-                  <FormControl fullWidth sx={{ mb: 3 }}>
-                    <InputLabel id="dataset-select-label">
-                      Select Dataset
-                    </InputLabel>
-                    <Select
-                      labelId="dataset-select-label"
-                      id="dataset-select"
-                      value={selectedDataset}
-                      label="Select Dataset"
-                      onChange={handleDatasetChange}
-                    >
-                      <MenuItem value="">
-                        <em>Choose scenario</em>
-                      </MenuItem>
-                      <MenuItem value="1">s0002_9.3.1_danube_adj.zip</MenuItem>
-                      <MenuItem value="2">s0003_9.3.1_danube_cc50.zip</MenuItem>
-                      <MenuItem value="3">s0004_9.3.1_danube_cc75.zip</MenuItem>
-                      <MenuItem value="4">s0005_9.3.1_danube_cc95.zip</MenuItem>
-                    </Select>
-                  </FormControl>
+                  {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <>
+                      {/* Dropdown for dataset selection */}
+                      <FormControl 
+                        fullWidth 
+                        sx={{ 
+                          mb: 3,
+                          "& .MuiOutlinedInput-root": {
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          }
+                        }}
+                      >
+                        <InputLabel id="zip-dataset-select-label">
+                          Select dataset
+                        </InputLabel>
+                        <Select
+                          labelId="zip-dataset-select-label"
+                          id="zip-dataset-select"
+                          value={selectedZipDataset}
+                          label="Select dataset"
+                          onChange={handleZipDatasetChange}
+                          disabled={zipScenarios.length === 0}
+                        >
+                          <MenuItem value="">
+                            <em>Choose scenario</em>
+                          </MenuItem>
+                          {zipScenarios.map((scenario) => (
+                            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id}>
+                              {scenario.files.zip?.filename || scenario.scenario_id}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
 
-                  {/* Download button - only show when a file is selected */}
-                  {selectedDataset && (
-                    <DownloadButton
-                      fileId={selectedDataset}
-                      filename={fileNames[selectedDataset] || selectedDataset}
-                    />
+                      {/* Download button - only show when a file is selected */}
+                      {selectedZipDataset && selectedZipScenario?.files.zip && (
+                        <Box sx={{ mb: 2 }}>
+                          <DownloadButton
+                            fileId={selectedZipDataset}
+                            filename={selectedZipScenario.files.zip.filename}
+                            downloadUrl={getDownloadUrl(selectedZipDataset, 'zip')}
+                          />
+                        </Box>
+                      )}
+                    </>
                   )}
+                </LeadingMarkerText>
+              </Grid>
 
+              {/* Scenario Data Section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <LeadingMarkerText
+                  title="Scenario data in csv format"
+                  headlineVariant="h5"
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      opacity: 0.8,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Download CalSim3 scenario input and output data in csv format
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Access COEQWAL CalSim3 SV input and variable output data in csv format.
+                  </Typography>
+
+                  {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <>
+                      {/* Dropdown for dataset selection */}
+                      <FormControl 
+                        fullWidth 
+                        sx={{ 
+                          mb: 3,
+                          "& .MuiOutlinedInput-root": {
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          }
+                        }}
+                      >
+                        <InputLabel id="csv-dataset-select-label">
+                          Select dataset
+                        </InputLabel>
+                        <Select
+                          labelId="csv-dataset-select-label"
+                          id="csv-dataset-select"
+                          value={selectedCsvDataset}
+                          label="Select dataset"
+                          onChange={handleCsvDatasetChange}
+                          disabled={csvScenarios.length === 0}
+                        >
+                          <MenuItem value="">
+                            <em>Choose scenario</em>
+                          </MenuItem>
+                          {csvScenarios.map((scenario) => (
+                            <MenuItem key={scenario.scenario_id} value={scenario.scenario_id}>
+                              {scenario.scenario_id}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      {/* Download buttons - show when a scenario is selected and files exist */}
+                      {selectedCsvDataset && selectedCsvScenario && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                          {selectedCsvScenario.files.output_csv && (
+                            <DownloadButton
+                              fileId={`${selectedCsvDataset}_output`}
+                              filename={selectedCsvScenario.files.output_csv.filename}
+                              downloadUrl={getDownloadUrl(selectedCsvDataset, 'output')}
+                              variant="outlined"
+                              sx={{ mb: 1 }}
+                            >
+                              Download Output CSV
+                            </DownloadButton>
+                          )}
+                          {selectedCsvScenario.files.sv_csv && (
+                            <DownloadButton
+                              fileId={`${selectedCsvDataset}_sv`}
+                              filename={selectedCsvScenario.files.sv_csv.filename}
+                              downloadUrl={getDownloadUrl(selectedCsvDataset, 'sv')}
+                              variant="outlined"
+                            >
+                              Download SV Input CSV
+                            </DownloadButton>
+                          )}
+                        </Box>
+                      )}
+                    </>
+                  )}
+                </LeadingMarkerText>
+              </Grid>
+
+              {/* Model Documentation Section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <LeadingMarkerText
+                  title="Model documentation"
+                  headlineVariant="h5"
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      opacity: 0.8,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Technical documentation and user guides
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Comprehensive documentation for the COEQWAL CalSim3 model,
+                    including technical specifications, user guides, and methodology.
+                  </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ color: "text.secondary", mt: 3 }}
+                    sx={{
+                      fontStyle: "italic",
+                      color: (theme) => theme.palette.blue.darkest,
+                      opacity: 0.7,
+                    }}
                   >
-                    • CalSim3 model run files in zipped format
-                    <br />
-                    • Includes input and output files
-                    <br />
-                    • WRESL and DSS file formats
-                    <br />• Complete scenario configuration
+                    Documentation will be available soon.
                   </Typography>
-                </Box>
+                </LeadingMarkerText>
+              </Grid>
 
-                {/* Model Documentation Section */}
-                <Box
-                  sx={{
-                    p: 4,
-
-                    borderRadius: 2,
-                    boxShadow: 1,
-                  }}
+              {/* Research Publications Section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <LeadingMarkerText
+                  title="Research publications"
+                  headlineVariant="h5"
                 >
-                  <Typography variant="h4" sx={{ mb: 2 }}>
-                    Model Documentation
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      opacity: 0.8,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Scientific papers and research findings
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    Technical documentation, methodology, and data dictionaries
-                    for COEQWAL models.
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Access peer-reviewed publications and research papers related
+                    to the COEQWAL project and CalSim3 modeling efforts.
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    • CalSim model specifications
-                    <br />
-                    • Scenario assumptions
-                    <br />
-                    • Data processing methods
-                    <br />• API documentation
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontStyle: "italic",
+                      color: (theme) => theme.palette.blue.darkest,
+                      opacity: 0.7,
+                    }}
+                  >
+                    Publications will be available soon.
                   </Typography>
-                </Box>
+                </LeadingMarkerText>
+              </Grid>
 
-                {/* Research Publications Section */}
-                <Box
-                  sx={{
-                    p: 4,
-
-                    borderRadius: 2,
-                    boxShadow: 1,
-                  }}
+              {/* API Access Section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <LeadingMarkerText
+                  title="API access"
+                  headlineVariant="h5"
                 >
-                  <Typography variant="h4" sx={{ mb: 2 }}>
-                    Research Publications
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      opacity: 0.8,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Programmatic access to COEQWAL data
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    Peer-reviewed papers, reports, and publications using
-                    COEQWAL data and models.
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    REST API endpoints for accessing scenario data, model outputs,
+                    and other COEQWAL resources programmatically.
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    • Journal articles
-                    <br />
-                    • Technical reports
-                    <br />
-                    • Conference proceedings
-                    <br />• Policy briefs
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontStyle: "italic",
+                      color: (theme) => theme.palette.blue.darkest,
+                      opacity: 0.7,
+                    }}
+                  >
+                    API documentation will be available soon.
                   </Typography>
-                </Box>
+                </LeadingMarkerText>
+              </Grid>
 
-                {/* API Access Section */}
-                <Box
-                  sx={{
-                    p: 4,
-
-                    borderRadius: 2,
-                    boxShadow: 1,
-                  }}
+              {/* Support & Contact Section */}
+              <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
+                <LeadingMarkerText
+                  title="Support & contact"
+                  headlineVariant="h5"
                 >
-                  <Typography variant="h4" sx={{ mb: 2 }}>
-                    API Access
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 2,
+                      opacity: 0.8,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Get help and technical support
                   </Typography>
-                  <Typography variant="body1" sx={{ mb: 3 }}>
-                    Programmatic access to COEQWAL data through our REST API and
-                    data services.
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
+                    }}
+                  >
+                    Contact our team for technical support, questions about the data,
+                    or collaboration opportunities.
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    • RESTful API endpoints
-                    <br />
-                    • Real-time data feeds
-                    <br />
-                    • Query parameters
-                    <br />• Authentication guides
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontStyle: "italic",
+                      color: (theme) => theme.palette.blue.darkest,
+                      opacity: 0.7,
+                    }}
+                  >
+                    Contact information will be available soon.
                   </Typography>
-                </Box>
-              </Box>
-
-              {/* Contact Information */}
-              <Box
-                sx={{
-                  mt: 8,
-                  p: 4,
-
-                  borderRadius: 2,
-                  textAlign: "center",
-                }}
-              >
-                <Typography variant="h5" sx={{ mb: 2 }}>
-                  Need Help?
-                </Typography>
-                <Typography variant="body1">
-                  For questions about data access, technical support, or
-                  collaboration opportunities, please contact the COEQWAL team.
-                </Typography>
-              </Box>
-            </Container>
-          </BasePanel>
+                </LeadingMarkerText>
+              </Grid>
+            </Grid>
+          </Container>
         </Box>
       </Box>
     </>
