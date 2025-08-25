@@ -193,12 +193,8 @@ const themeValues = {
       cream: "#fdf0a0", // Light yellow
     },
 
-    // Nature colors - greens and teals
+    // Nature colors - greens
     nature: {
-      teal: "#76b9aa", // Medium teal - natural elements
-      sage: "#9fd5cb", // Light teal - subtle backgrounds
-      mint: "#b1e1c3", // Pale green - very light elements
-      whisper: "#d1ebc7", // Very light green - backgrounds
       forest: "#7b9d3f", // Forest green - for saved scenarios tab
     },
 
