@@ -1053,11 +1053,37 @@ const theme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: ({ theme }) => ({
+          backgroundColor: theme.palette.common.white,
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: theme.border.standard,
           },
           "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: theme.border.standard,
+          },
+          "&.Mui-focused": {
+            backgroundColor: theme.palette.common.white, // Maintain white background when focused
+          },
+        }),
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        outlined: ({ theme }) => ({
+          backgroundColor: theme.palette.common.white,
+          "&.Mui-focused": {
+            backgroundColor: theme.palette.common.white,
+          },
+        }),
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: theme.palette.common.white,
+            "&.Mui-focused": {
+              backgroundColor: theme.palette.common.white,
+            },
           },
         }),
       },
@@ -1916,9 +1942,14 @@ declare module "@mui/material/Typography" {
 | - Size: Uses theme.layout.controls.standard (20px × 20px)
 | - Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
 | - Border: 1px solid using theme.palette.text.primary
-| - Background: Transparent with hover states
+| - Background: Transparent with hover states (for checkboxes/radios)
 | - Spacing: theme.spacing(0.5) margin
 | - Protection: flexShrink: 0 prevents label compression
+|
+| BACKGROUND COLOR STANDARDS:
+| - Text fields, dropdowns, selects: white (theme.palette.common.white)
+| - Checkboxes, radios: Transparent with hover states
+| - Enforced via MuiOutlinedInput, MuiSelect, MuiTextField overrides
 |
 | COMPACT SPACING SYSTEM:
 | - xs: 2px (compactSpacing.xs) - micro spacing
@@ -1976,6 +2007,9 @@ declare module "@mui/material/Typography" {
 | - MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
 | - MuiRadio: Uses formControlBase + circular styling + 20px dimensions
 | - MuiFormControlLabel: alignItems "flex-start" for multi-line labels
+| - MuiOutlinedInput: ALWAYS white background, never green/transparent
+| - MuiSelect: ALWAYS white background for dropdowns
+| - MuiTextField: ALWAYS white background for text inputs
 |
 | SIZING GUIDELINES:
 | - Standard (20px): Default for most form controls

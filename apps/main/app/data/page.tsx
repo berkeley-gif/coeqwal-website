@@ -240,12 +240,7 @@ export default function DataPage() {
                       {/* Dropdown for dataset selection */}
                       <FormControl 
                         fullWidth 
-                        sx={{ 
-                          mb: 3,
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          }
-                        }}
+                        sx={{ mb: 3 }}
                       >
                         <InputLabel id="zip-dataset-select-label">
                           Select dataset
@@ -319,12 +314,7 @@ export default function DataPage() {
                       {/* Dropdown for dataset selection */}
                       <FormControl 
                         fullWidth 
-                        sx={{ 
-                          mb: 3,
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          }
-                        }}
+                        sx={{ mb: 3 }}
                       >
                         <InputLabel id="csv-dataset-select-label">
                           Select dataset
