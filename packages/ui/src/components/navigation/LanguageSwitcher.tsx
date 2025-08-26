@@ -51,7 +51,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           height: (theme) => theme.spacing(5),
           minHeight: (theme) => theme.spacing(5),
           border: "none !important",
-          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
+          boxShadow: (theme) =>
+            `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
           fontSize: (theme) => theme.typography.button.fontSize,
           fontWeight: (theme) => theme.typography.button.fontWeight,
           fontFamily: (theme) => theme.typography.fontFamily,
@@ -64,7 +65,6 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             border: "none !important",
             boxShadow: (theme) =>
               `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
-
           },
           "&.Mui-selected": {
             backgroundColor: (theme) => theme.palette.overlay.water,
@@ -89,7 +89,8 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           height: (theme) => theme.spacing(5),
           minHeight: (theme) => theme.spacing(5),
           border: "none !important",
-          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
+          boxShadow: (theme) =>
+            `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
           fontSize: (theme) => theme.typography.button.fontSize,
           fontWeight: (theme) => theme.typography.button.fontWeight,
           fontFamily: (theme) => theme.typography.fontFamily,
@@ -102,7 +103,6 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
             border: "none !important",
             boxShadow: (theme) =>
               `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
-
           },
           "&.Mui-selected": {
             backgroundColor: (theme) => theme.palette.overlay.water,
@@ -117,7 +117,6 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
                 `inset 0 0 0 1px ${theme.palette.overlay.waterLight} !important`,
             },
           },
-
         }}
       >
         Español
@@ -125,4 +124,3 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
     </ToggleButtonGroup>
   )
 }
-

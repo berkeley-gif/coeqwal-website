@@ -204,7 +204,6 @@ export default function ContentPanels() {
         },
       }}
     >
-
       <Spacer height={{ xs: 48, md: 96 }} />
 
       <Box

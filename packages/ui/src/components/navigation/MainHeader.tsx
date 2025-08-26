@@ -1,12 +1,6 @@
 "use client"
 
-import {
-  AppBar,
-  Toolbar,
-  Stack,
-  Button,
-  Box,
-} from "@mui/material"
+import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
@@ -110,7 +104,7 @@ export function MainHeader({ onDataClick, onToolsClick }: HeaderProps) {
       onClick: () => onToolsClick?.("scenario-explorer"),
     },
     {
-      key: "needs-search", 
+      key: "needs-search",
       label: componentText.toolsDropdown.needsSearch,
       onClick: () => onToolsClick?.("needs-search"),
     },
