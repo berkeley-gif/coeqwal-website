@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
-import { BasePanel, LeadingMarkerText, ArrowHead, Spacer } from "@repo/ui"
+import { BasePanel, LeadingMarkerText, ArrowHead, RoundedDownArrow, Spacer } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
 
 type PanelType = "learn" | "explore" | "empower" | null
@@ -143,16 +143,14 @@ export default function ContentPanels() {
           color="inherit"
           aria-label="open-empower"
           sx={(theme) => ({
-            width: 48,
-            height: 48,
+            width: 96,
+            height: 96,
             borderRadius: theme.borderRadius.rounded,
             border: "none",
           })}
           onClick={scrollToNextSection}
         >
-          <ArrowHead
-            style={{ width: 36, height: 36, transform: "rotate(90deg)" }}
-          />
+          <RoundedDownArrow size={80} />
         </IconButton>
       </Box>
     </Box>
@@ -1012,14 +1010,14 @@ function PanelWithDetail({
                     <IconButton
                       onClick={onToggleDetail}
                       sx={(theme) => ({
-                        width: { xs: 40, md: 48 },
-                        height: { xs: 40, md: 48 },
+                        width: { xs: 80, md: 96 },
+                        height: { xs: 80, md: 96 },
                         color: theme.palette.blue.darkest,
                         border: "none",
                         borderRadius: theme.borderRadius.rounded,
                       })}
                     >
-                      <ArrowHead style={{ width: 36, height: 36 }} />
+                      <RoundedDownArrow size={{ xs: 64, md: 80 }} style={{ transform: "rotate(-90deg)" }} />
                     </IconButton>
                   </Box>
                 )}
@@ -1037,17 +1035,11 @@ function PanelWithDetail({
                     color: theme.palette.blue.darkest,
                     border: "none",
                     borderRadius: theme.borderRadius.rounded,
-                    width: 60,
-                    height: 60,
+                    width: 120,
+                    height: 120,
                   })}
                 >
-                  <ArrowHead
-                    style={{
-                      width: 36,
-                      height: 36,
-                      transform: "rotate(90deg)",
-                    }}
-                  />
+                  <RoundedDownArrow size={96} />
                 </IconButton>
               )}
             </Box>

@@ -153,7 +153,7 @@ const themeValues = {
 
   // Layout dimensions, for layout and layout calculations
   layout: {
-    headerHeight: 70,
+    headerHeight: 68,
     drawer: {
       width: 360,
       closedWidth: 60,

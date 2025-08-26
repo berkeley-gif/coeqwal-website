@@ -1,5 +1,5 @@
-import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { BasePanel, Spacer, RoundedDownArrow } from "@repo/ui"
+import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
@@ -117,19 +117,24 @@ const IntroSection = () => {
               mt: 4,
             }}
           >
-            <ScrollIndicator
-              scrollToId="frontmatter"
-              color={theme.palette.blue.darkest}
-              animationComplete={true}
-              delay={1.0}
+                      <ScrollIndicator
+            scrollToId="frontmatter"
+            color={theme.palette.blue.darkest}
+            animationComplete={true}
+            delay={1.0}
+          >
+            <IconButton
+              sx={(theme) => ({
+                width: 60,
+                height: 60,
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+                color: theme.palette.blue.darkest,
+              })}
             >
-              <ArrowHead
-                size={28}
-                style={{
-                  transform: "rotate(90deg)",
-                }}
-              />
-            </ScrollIndicator>
+              <RoundedDownArrow size={40} />
+            </IconButton>
+          </ScrollIndicator>
           </Box>
         </Box>
       </BasePanel>
@@ -200,12 +205,17 @@ const IntroSection = () => {
               justifyContent: "center",
             }}
           >
-            <ArrowHead
-              size={28}
-              style={{
-                transform: "rotate(90deg)",
-              }}
-            />
+            <IconButton
+              sx={(theme) => ({
+                width: 60,
+                height: 60,
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+                color: theme.palette.overlay.water,
+              })}
+            >
+              <RoundedDownArrow size={40} />
+            </IconButton>
           </ScrollIndicator>
         </Box>
       </BasePanel>
@@ -277,12 +287,17 @@ const IntroSection = () => {
               justifyContent: "center",
             }}
           >
-            <ArrowHead
-              size={28}
-              style={{
-                transform: "rotate(90deg)",
-              }}
-            />
+            <IconButton
+              sx={(theme) => ({
+                width: 60,
+                height: 60,
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+                color: theme.palette.overlay.water,
+              })}
+            >
+              <RoundedDownArrow size={40} />
+            </IconButton>
           </ScrollIndicator>
         </Box>
       </BasePanel>
