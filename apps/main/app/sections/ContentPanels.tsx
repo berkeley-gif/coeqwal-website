@@ -40,22 +40,6 @@ export default function ContentPanels({
     }
   }
 
-  // Smooth scroll to a detail panel by id, then open it
-  // const scrollToPanel = (panelId: string, panelType: PanelType) => {
-  //   const el = document.getElementById(panelId)
-  //   if (el) {
-  //     const rect = el.getBoundingClientRect()
-  //     const currentTop =
-  //       window.pageYOffset || document.documentElement.scrollTop
-  //     const target = rect.top + currentTop - 20
-  //     window.scrollTo({ top: target, behavior: "smooth" })
-  //   }
-  //   // Slight delay to allow scroll start, then toggle
-  //   requestAnimationFrame(() => {
-  //     setActivePanel(panelType === activePanel ? null : panelType)
-  //   })
-  // }
-
   // Scroll to the next section after the content panels
   const scrollToNextSection = () => {
     const root = document.getElementById("content-panels")
@@ -229,15 +213,9 @@ export default function ContentPanels({
         },
       }}
     >
-      {/* Learn panel (new UI embedded below in legacy container) */}
-
-      {/* Explore panel (new UI embedded below in legacy container) */}
 
       <Spacer height={{ xs: 48, md: 96 }} />
 
-      {/* Empower panel (new UI embedded below in legacy container) */}
-
-      {/* Existing complex panels block (now using new UIs in title) */}
       <Box
         sx={{
           position: "relative",
