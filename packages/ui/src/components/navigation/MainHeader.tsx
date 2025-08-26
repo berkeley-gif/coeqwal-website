@@ -6,16 +6,18 @@ import {
   Stack,
   Button,
   Box,
-  Menu,
-  MenuItem,
 } from "@mui/material"
 import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
-import { useState } from "react"
+import { NavDropdown } from "./NavDropdown"
+import type { NavDropdownOption } from "./NavDropdown"
+import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
+import { useRef, useState } from "react"
+
+const MotionAppBar = motion.create(AppBar)
 export interface HeaderProps {
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
@@ -68,15 +70,23 @@ const translations: TranslationsMap = {
   },
 }
 
-// NEW SIMPLIFIED HEADER
-export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
+export function MainHeader({ onDataClick, onToolsClick }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const { locale, isLoading } = useTranslation()
 
-  // Tools dropdown state
-  const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null)
-  const isToolsOpen = Boolean(toolsAnchorEl)
+  // Scroll-based hide/show functionality
+  const [isHidden, setIsHidden] = useState(false)
+  const { scrollY } = useScroll()
+  const lastYRef = useRef(0)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
 
   // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
@@ -93,25 +103,37 @@ export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
     color: "white",
   }
 
-  const handleToolsClick = (event: React.MouseEvent<HTMLElement>) => {
-    setToolsAnchorEl(event.currentTarget)
-  }
-
-  const handleToolsClose = () => {
-    setToolsAnchorEl(null)
-  }
-
-  const handleToolSelection = (tool: "scenario-explorer" | "needs-search") => {
-    onToolsClick?.(tool)
-    handleToolsClose()
-  }
+  const toolsOptions: NavDropdownOption[] = [
+    {
+      key: "scenario-explorer",
+      label: componentText.toolsDropdown.scenarioExplorer,
+      onClick: () => onToolsClick?.("scenario-explorer"),
+    },
+    {
+      key: "needs-search", 
+      label: componentText.toolsDropdown.needsSearch,
+      onClick: () => onToolsClick?.("needs-search"),
+    },
+  ]
 
   return (
-    <AppBar
+    <MotionAppBar
+      animate={isHidden ? "hidden" : "visible"}
+      whileHover="visible"
+      onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
+      variants={{
+        hidden: {
+          y: "calc(-100% - 16px)", // Account for 16px top margin
+        },
+        visible: {
+          y: "0%",
+        },
+      }}
+      transition={{ duration: 0.3 }}
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: "rgba(42, 82, 135, 0.2)", // Blue circle color
+        backgroundColor: theme.palette.overlay.water,
         borderRadius: theme.borderRadius.card,
         margin: "16px",
         width: "calc(100% - 32px)",
@@ -138,51 +160,12 @@ export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
             paddingRight: "8px",
           }}
         >
-          <Button
+          <NavDropdown
+            label={componentText.buttons.tools}
+            options={toolsOptions}
             variant={buttonVariant}
-            onClick={handleToolsClick}
-            endIcon={<ArrowDropDownIcon />}
-            sx={{
-              ...buttonStyle,
-            }}
-          >
-            {componentText.buttons.tools}
-          </Button>
-          <Menu
-            anchorEl={toolsAnchorEl}
-            open={isToolsOpen}
-            onClose={handleToolsClose}
-            sx={{
-              "& .MuiPaper-root": {
-                backgroundColor: "rgba(42, 82, 135, 0.95)",
-                borderRadius: theme.borderRadius.card,
-                mt: 1,
-              },
-            }}
-          >
-            <MenuItem
-              onClick={() => handleToolSelection("scenario-explorer")}
-              sx={{
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                },
-              }}
-            >
-              {componentText.toolsDropdown.scenarioExplorer}
-            </MenuItem>
-            <MenuItem
-              onClick={() => handleToolSelection("needs-search")}
-              sx={{
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                },
-              }}
-            >
-              {componentText.toolsDropdown.needsSearch}
-            </MenuItem>
-          </Menu>
+            sx={buttonStyle}
+          />
           <Button
             variant={buttonVariant}
             onClick={onDataClick}
@@ -203,6 +186,6 @@ export function HeaderHome({ onDataClick, onToolsClick }: HeaderProps) {
           <LanguageSwitcher />
         </Stack>
       </Toolbar>
-    </AppBar>
+    </MotionAppBar>
   )
 }
