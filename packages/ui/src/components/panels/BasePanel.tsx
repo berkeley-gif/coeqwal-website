@@ -95,12 +95,12 @@ const PanelRoot = styled(Box, {
       return includeHeaderSpacing ? `${theme.layout.headerHeight}px 0 0 0` : 0
     }
 
-    // Centered content section: equal top/bottom padding for vertical centering
+    // Centered content: minimal padding, flexbox centering
     if (paddingVariant === "content-centered") {
       const topPad = includeHeaderSpacing
-        ? `${theme.layout.headerHeight + 120}px`
-        : "120px"
-      return `${topPad} ${side} 120px ${side}` // Equal top/bottom padding for centering
+        ? `${theme.layout.headerHeight}px`
+        : "0px"
+      return `${topPad} ${side} 0px ${side}`
     }
     const topPad = getTopPadding(basePad)
     return `${topPad} ${side} ${side} ${side}`
