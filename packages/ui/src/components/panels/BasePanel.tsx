@@ -12,14 +12,14 @@ export interface BasePanelProps extends BoxProps {
   panelWidth?: string | number
   background?: "light" | "dark" | "accent" | "transparent"
   paddingVariant?:
-  | "normal"
-  | "narrow"
-  | "wide"
-  | "very-wide"
-  | "content-first"
-  | "content-middle"
-  | "content-last"
-  | "none"
+    | "normal"
+    | "narrow"
+    | "wide"
+    | "very-wide"
+    | "content-first"
+    | "content-middle"
+    | "content-last"
+    | "none"
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
   /**
@@ -77,7 +77,6 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "content-last") return "120px"
     return theme.spacing(5) // normal padding
   }
-
 
   // Get padding for mobile screens
   const getMobilePadding = () => {
@@ -182,13 +181,13 @@ const PanelRoot = styled(Box, {
     // header spacing in the 50vh figure.
     ...(id === "home"
       ? {
-        [theme.breakpoints.between("sm", "lg")]: {
-          paddingTop: "50vh",
-          paddingRight: "120px",
-          paddingBottom: "120px",
-          paddingLeft: "120px",
-        },
-      }
+          [theme.breakpoints.between("sm", "lg")]: {
+            paddingTop: "50vh",
+            paddingRight: "120px",
+            paddingBottom: "120px",
+            paddingLeft: "120px",
+          },
+        }
       : {}),
   }
 })
