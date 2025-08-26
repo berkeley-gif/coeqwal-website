@@ -138,79 +138,77 @@ const IntroSection = () => {
       <Spacer height={{ xs: 32, md: 48 }} />
 
       {/* Frontmatter panel(s) */}
-        <BasePanel
-          id="frontmatter"
-          fullHeight={true}
-          fullWidth
-          background="transparent"
-          paddingVariant="content-centered"
-          includeHeaderSpacing={true}
+      <BasePanel
+        id="frontmatter"
+        fullHeight={true}
+        fullWidth
+        background="transparent"
+        paddingVariant="content-centered"
+        includeHeaderSpacing={true}
+        sx={{
+          color: (theme) => theme.palette.primary.dark,
+          position: "relative",
+          background: `url('/images/intro_collage/riverbank_right_lg.png')`,
+          backgroundSize: "40% auto",
+          backgroundPosition: "bottom right",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <Box
           sx={{
-            color: (theme) => theme.palette.primary.dark,
-            position: "relative",
-            background: `url('/images/intro_collage/riverbank_right_lg.png')`,
-            backgroundSize: "40% auto",
-            backgroundPosition: "bottom right",
-            backgroundRepeat: "no-repeat",
+            width: "100%",
+            maxWidth: (theme) => theme.layout.textContainer.maxWidth,
+            textAlign: "left",
           }}
         >
-            <Box
-              sx={{
-                width: "100%",
-                maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-                textAlign: "left",
-              }}
-            >
+          <Typography variant="body1">
+            California&apos;s Central Valley water depends on two main things:
+          </Typography>
+          <Box component="ol" sx={{ mt: 1, mb: 2, pl: 3 }}>
+            <Box component="li" sx={{ mb: 1 }}>
               <Typography variant="body1">
-                California&apos;s Central Valley water depends on two main
-                things:
+                How much rain and snow we get.
               </Typography>
-              <Box component="ol" sx={{ mt: 1, mb: 2, pl: 3 }}>
-                <Box component="li" sx={{ mb: 1 }}>
-                  <Typography variant="body1">
-                    How much rain and snow we get.
-                  </Typography>
-                </Box>
-                <Box component="li" sx={{ mb: 1 }}>
-                  <Typography variant="body1">
-                    How we choose to manage it.
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                We already face difficult choices. Climate change brings deeper
-                droughts, bigger floods, and growing uncertainty.
-              </Typography>
-
-              <Typography variant="body1">
-                The COEQWAL (Collaboratory for Equity in Water Allocation)
-                project has modeled 30 alternative water management scenarios
-                for the Central Valley water systems that supply most of the
-                state. For each of these scenarios, we also modeled 5 future
-                climate possibilities.
-              </Typography>
-
-              <ScrollIndicator
-                scrollToId="regions"
-                color={theme.palette.overlay.water}
-                animationComplete={true}
-                delay={1.0}
-                style={{
-                  marginTop: "2rem",
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              >
-                <ArrowHead
-                  size={28}
-                  style={{
-                    transform: "rotate(90deg)",
-                  }}
-                />
-              </ScrollIndicator>
             </Box>
-        </BasePanel>
+            <Box component="li" sx={{ mb: 1 }}>
+              <Typography variant="body1">
+                How we choose to manage it.
+              </Typography>
+            </Box>
+          </Box>
+
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            We already face difficult choices. Climate change brings deeper
+            droughts, bigger floods, and growing uncertainty.
+          </Typography>
+
+          <Typography variant="body1">
+            The COEQWAL (Collaboratory for Equity in Water Allocation) project
+            has modeled 30 alternative water management scenarios for the
+            Central Valley water systems that supply most of the state. For each
+            of these scenarios, we also modeled 5 future climate possibilities.
+          </Typography>
+
+          <ScrollIndicator
+            scrollToId="regions"
+            color={theme.palette.overlay.water}
+            animationComplete={true}
+            delay={1.0}
+            style={{
+              marginTop: "2rem",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <ArrowHead
+              size={28}
+              style={{
+                transform: "rotate(90deg)",
+              }}
+            />
+          </ScrollIndicator>
+        </Box>
+      </BasePanel>
 
       <Spacer height={{ xs: 24, md: 48, lg: 64 }} />
 

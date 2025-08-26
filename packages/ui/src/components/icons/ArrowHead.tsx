@@ -24,10 +24,7 @@ export function ArrowHead({
       focusable="false"
       {...svgProps}
     >
-      <path
-        d="M12 8 L12 40 L40 24 Z"
-        fill={color}
-      />
+      <path d="M12 8 L12 40 L40 24 Z" fill={color} />
     </svg>
   )
 }

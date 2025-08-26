@@ -2,7 +2,10 @@
 export { MainHeader } from "./navigation/MainHeader"
 export type { HeaderProps } from "./navigation/MainHeader"
 export { NavDropdown } from "./navigation/NavDropdown"
-export type { NavDropdownProps, NavDropdownOption } from "./navigation/NavDropdown"
+export type {
+  NavDropdownProps,
+  NavDropdownOption,
+} from "./navigation/NavDropdown"
 export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { MultiDrawer } from "./navigation/MultiDrawer"
@@ -10,7 +13,6 @@ export { AppMultiDrawer } from "./navigation/AppMultiDrawer"
 export type { TabKey } from "./navigation/MultiDrawer"
 export type { AppMultiDrawerProps } from "./navigation/AppMultiDrawer"
 export type { SavedScenario } from "./navigation/drawer-content/SavedScenariosContent"
-export { default as CustomArrowForwardIcon } from "./navigation/CustomArrowForwardIcon"
 
 // Common components
 export { Card, ScenarioCard, ScenarioCardList } from "./common/Card"

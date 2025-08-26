@@ -118,7 +118,8 @@ const PanelRoot = styled(Box, {
     flexDirection: "column",
     position: "relative",
     alignItems: paddingVariant === "content-centered" ? "center" : "stretch",
-    justifyContent: paddingVariant === "content-centered" ? "center" : "flex-start",
+    justifyContent:
+      paddingVariant === "content-centered" ? "center" : "flex-start",
     textAlign: "left",
 
     // Background variants
