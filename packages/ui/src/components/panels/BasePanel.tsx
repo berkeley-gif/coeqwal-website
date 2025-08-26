@@ -12,14 +12,14 @@ export interface BasePanelProps extends BoxProps {
   panelWidth?: string | number
   background?: "light" | "dark" | "accent" | "transparent"
   paddingVariant?:
-    | "normal"
-    | "narrow"
-    | "wide"
-    | "very-wide"
-    | "content-first"
-    | "content-middle"
-    | "content-last"
-    | "none"
+  | "normal"
+  | "narrow"
+  | "wide"
+  | "very-wide"
+  | "content-first"
+  | "content-middle"
+  | "content-last"
+  | "none"
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
   /**
@@ -49,9 +49,13 @@ const PanelRoot = styled(Box, {
   paddingVariant,
   includeHeaderSpacing,
   backgroundImage,
+  id,
 }) => {
-  // Base padding based on variant
-  const getBasePadding = () => {
+  const toPx = (v: string | number) => (typeof v === "number" ? `${v}px` : v)
+  const toNum = (v: string | number) => parseInt(v.toString(), 10)
+
+  // Base padding Desktop
+  const getBasePaddingDesktop = () => {
     if (paddingVariant === "none") return 0
     if (paddingVariant === "narrow") return theme.spacing(4)
     if (paddingVariant === "wide") return "120px"
@@ -61,6 +65,19 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "content-last") return "192px"
     return theme.spacing(6) // normal padding
   }
+
+  // Base padding Tablet
+  const getBasePaddingTablet = () => {
+    if (paddingVariant === "none") return 0
+    if (paddingVariant === "narrow") return theme.spacing(4)
+    if (paddingVariant === "wide") return "80px"
+    if (paddingVariant === "very-wide") return "120px"
+    if (paddingVariant === "content-first") return "120px"
+    if (paddingVariant === "content-middle") return "120px"
+    if (paddingVariant === "content-last") return "120px"
+    return theme.spacing(5) // normal padding
+  }
+
 
   // Get padding for mobile screens
   const getMobilePadding = () => {
@@ -74,12 +91,13 @@ const PanelRoot = styled(Box, {
       return includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0
     }
     return includeHeaderSpacing
-      ? `${theme.layout.headerHeight + parseInt(basePad.toString(), 10)}px`
+      ? `${theme.layout.headerHeight + toNum(basePad)}px`
       : basePad
   }
 
   // Format the padding string
   const getPaddingString = (basePad: string | number) => {
+    const side = toPx(basePad)
     if (paddingVariant === "none") {
       return includeHeaderSpacing ? `${theme.layout.headerHeight}px 0 0 0` : 0
     }
@@ -88,7 +106,7 @@ const PanelRoot = styled(Box, {
       const topPad = includeHeaderSpacing
         ? `${theme.layout.headerHeight + 192}px`
         : "192px"
-      return `${topPad} 192px 120px 192px` // Full top padding, increased bottom (120px)
+      return `${topPad} ${side} 120px ${side}` // Full top padding, increased bottom (120px)
     }
 
     // Middle content section: reduced top/bottom padding
@@ -96,7 +114,7 @@ const PanelRoot = styled(Box, {
       const topPad = includeHeaderSpacing
         ? `${theme.layout.headerHeight + 80}px`
         : "80px"
-      return `${topPad} 192px 120px 192px` // Top 80px, bottom 120px for 200px between sections
+      return `${topPad} ${side} 120px ${side}` // Top 80px, bottom 120px for 200px between sections
     }
 
     // Last content section: reduced top, full bottom padding
@@ -104,15 +122,15 @@ const PanelRoot = styled(Box, {
       const topPad = includeHeaderSpacing
         ? `${theme.layout.headerHeight + 80}px`
         : "80px"
-      return `${topPad} 192px 192px 192px` // Reduced top, full bottom padding
+      return `${topPad} ${side} 192px ${side}` // Reduced top, full bottom padding
     }
     const topPad = getTopPadding(basePad)
-    return `${topPad} ${basePad} ${basePad} ${basePad}`
+    return `${topPad} ${side} ${side} ${side}`
   }
-
-  // Get base padding values
-  const basePadding = getBasePadding()
-  const mobilePadding = getMobilePadding()
+  // Base paddings by breakpoint tier
+  const desktopSide = getBasePaddingDesktop()
+  const tabletSide = getBasePaddingTablet()
+  const mobileSide = getMobilePadding()
 
   return {
     margin: 0,
@@ -140,18 +158,38 @@ const PanelRoot = styled(Box, {
         ? theme.palette.common.white
         : theme.palette.text.primary,
 
-    // Padding with conditional header spacing
-    padding: getPaddingString(basePadding),
+    // Desktop / default padding
+    padding: getPaddingString(desktopSide),
 
     // Responsive adjustments for smaller screens
-    [theme.breakpoints.down("md")]: {
-      padding: getPaddingString(mobilePadding),
+    [theme.breakpoints.between("md", "lg")]: {
+      padding: getPaddingString(tabletSide),
+    },
+
+    [theme.breakpoints.down("sm")]: {
+      padding: getPaddingString(mobileSide),
     },
 
     // Optional full-bleed background image
     backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
     backgroundSize: backgroundImage ? "cover" : undefined,
     backgroundPosition: backgroundImage ? "center" : undefined,
+
+    // ---- Special-case: tablet hero padding for #home ----
+    // We want the final computed padding (including header considerations)
+    // to be ~50vh on top. We just force 50vh top + 120px sides/bottom
+    // across the whole tablet band (sm..lg). This effectively "includes"
+    // header spacing in the 50vh figure.
+    ...(id === "home"
+      ? {
+        [theme.breakpoints.between("sm", "lg")]: {
+          paddingTop: "50vh",
+          paddingRight: "120px",
+          paddingBottom: "120px",
+          paddingLeft: "120px",
+        },
+      }
+      : {}),
   }
 })
 

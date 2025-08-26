@@ -587,6 +587,10 @@ const theme = createTheme({
       maxWidth: themeValues.layout.textContainer.maxWidth,
     },
   },
+  // Custom breakpoints
+  breakpoints: {
+    values: { xs: 0, sm: 600, md: 820, lg: 1200, xl: 1536 }
+  },
   // Card typography scale
   cards: {
     typography: {
