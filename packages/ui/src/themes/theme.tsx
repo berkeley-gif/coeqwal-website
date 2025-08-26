@@ -690,10 +690,6 @@ const theme = createTheme({
       cream: themeValues.palette.accent.cream,
     },
     nature: {
-      teal: themeValues.palette.nature.teal,
-      sage: themeValues.palette.nature.sage,
-      mint: themeValues.palette.nature.mint,
-      whisper: themeValues.palette.nature.whisper,
       forest: themeValues.palette.nature.forest,
     },
     utility: {
@@ -741,7 +737,7 @@ const theme = createTheme({
     },
     background: {
       default: themeValues.palette.utility.white,
-      paper: themeValues.palette.nature.whisper,
+      paper: themeValues.palette.utility.white,
     },
     text: {
       primary: themeValues.palette.blue.darkest,
@@ -752,13 +748,13 @@ const theme = createTheme({
       hover: themeValues.palette.blue.medium,
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
-      disabledBackground: themeValues.palette.nature.whisper,
+      disabledBackground: themeValues.palette.utility.white,
     },
     // Colors for interactive elements
     interaction: {
       hoverBackground: themeValues.palette.grey[100], // Light grey hover background for interactive elements
     },
-    divider: themeValues.palette.nature.sage,
+    divider: themeValues.palette.grey[400],
   },
   // Type family, sizes, and weights
   typography: {
