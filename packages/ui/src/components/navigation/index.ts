@@ -1,6 +1,6 @@
 // Export all navigation components
-export { MainHeader } from "./HeaderHome"
-export type { HeaderProps } from "./HeaderHome"
+export { MainHeader } from "./MainHeader"
+export type { HeaderProps } from "./MainHeader"
 export { NavDropdown } from "./NavDropdown"
 export type { NavDropdownProps, NavDropdownOption } from "./NavDropdown"
 export type { SecondaryNavItem } from "./Header"
