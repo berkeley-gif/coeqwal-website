@@ -151,7 +151,7 @@ const themeValues = {
       '"neue-haas-grotesk-display", "neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
 
-  // Layout dimensions, for layout calculations
+  // Layout dimensions, for layout and layout calculations
   layout: {
     headerHeight: 70,
     drawer: {
@@ -182,7 +182,7 @@ const themeValues = {
     blue: {
       darkest: "#3a4574", // Deep navy - primary text (TODO: should it be #2A5287 ?)
       dark: "#186b88", // Dark teal - secondary text
-      medium: "#2d89b6", // Medium blue - accent text (a beautiful blue FWIW)
+      medium: "#2d89b6", // Medium blue - accent (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
       light: "#77a2d9", // Light blue - subtle elements
     },
