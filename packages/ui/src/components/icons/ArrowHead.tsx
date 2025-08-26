@@ -26,13 +26,8 @@ export function ArrowHead({
     >
       <path
         d="M12 8 L12 40 L40 24 Z"
-        stroke={color}
-        strokeWidth={16}
-        strokeLinejoin="round"
-        fill="none"
+        fill={color}
       />
-      {/* Inner fill to keep arrow solid while preserving rounded outline */}
-      <polygon points="14,12 14,36 36,24" fill={color} />
     </svg>
   )
 }
