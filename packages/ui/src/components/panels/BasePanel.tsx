@@ -16,9 +16,7 @@ export interface BasePanelProps extends BoxProps {
     | "narrow"
     | "wide"
     | "very-wide"
-    | "content-first"
-    | "content-middle"
-    | "content-last"
+    | "content-centered"
     | "none"
   includeHeaderSpacing?: boolean
   children?: React.ReactNode
@@ -60,9 +58,7 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "narrow") return theme.spacing(4)
     if (paddingVariant === "wide") return "120px"
     if (paddingVariant === "very-wide") return "192px"
-    if (paddingVariant === "content-first") return "192px"
-    if (paddingVariant === "content-middle") return "192px"
-    if (paddingVariant === "content-last") return "192px"
+    if (paddingVariant === "content-centered") return "192px"
     return theme.spacing(6) // normal padding
   }
 
@@ -72,9 +68,7 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "narrow") return theme.spacing(4)
     if (paddingVariant === "wide") return "80px"
     if (paddingVariant === "very-wide") return "120px"
-    if (paddingVariant === "content-first") return "120px"
-    if (paddingVariant === "content-middle") return "120px"
-    if (paddingVariant === "content-last") return "120px"
+    if (paddingVariant === "content-centered") return "120px"
     return theme.spacing(5) // normal padding
   }
 
@@ -100,28 +94,13 @@ const PanelRoot = styled(Box, {
     if (paddingVariant === "none") {
       return includeHeaderSpacing ? `${theme.layout.headerHeight}px 0 0 0` : 0
     }
-    // First content section: full top padding, reduced bottom padding
-    if (paddingVariant === "content-first") {
-      const topPad = includeHeaderSpacing
-        ? `${theme.layout.headerHeight + 192}px`
-        : "192px"
-      return `${topPad} ${side} 120px ${side}` // Full top padding, increased bottom (120px)
-    }
 
-    // Middle content section: reduced top/bottom padding
-    if (paddingVariant === "content-middle") {
+    // Centered content section: equal top/bottom padding for vertical centering
+    if (paddingVariant === "content-centered") {
       const topPad = includeHeaderSpacing
-        ? `${theme.layout.headerHeight + 80}px`
-        : "80px"
-      return `${topPad} ${side} 120px ${side}` // Top 80px, bottom 120px for 200px between sections
-    }
-
-    // Last content section: reduced top, full bottom padding
-    if (paddingVariant === "content-last") {
-      const topPad = includeHeaderSpacing
-        ? `${theme.layout.headerHeight + 80}px`
-        : "80px"
-      return `${topPad} ${side} 192px ${side}` // Reduced top, full bottom padding
+        ? `${theme.layout.headerHeight + 120}px`
+        : "120px"
+      return `${topPad} ${side} 120px ${side}` // Equal top/bottom padding for centering
     }
     const topPad = getTopPadding(basePad)
     return `${topPad} ${side} ${side} ${side}`
@@ -138,7 +117,8 @@ const PanelRoot = styled(Box, {
     display: "flex",
     flexDirection: "column",
     position: "relative",
-    alignItems: "stretch",
+    alignItems: paddingVariant === "content-centered" ? "center" : "stretch",
+    justifyContent: paddingVariant === "content-centered" ? "center" : "flex-start",
     textAlign: "left",
 
     // Background variants

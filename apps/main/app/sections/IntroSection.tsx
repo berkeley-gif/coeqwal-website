@@ -1,5 +1,5 @@
 import { BasePanel, Spacer, ArrowHead } from "@repo/ui"
-import { Box, Typography, useTheme, useMediaQuery } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { ScrollIndicator } from "@repo/motion/components"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
@@ -138,44 +138,22 @@ const IntroSection = () => {
       <Spacer height={{ xs: 32, md: 48 }} />
 
       {/* Frontmatter panel(s) */}
-      <Box
-        sx={{
-          background: `url('/images/home_collage/newcollage_wetland.png')`,
-          backgroundSize: { xs: "cover", md: "contain", lg: "100vw auto" },
-          backgroundPosition: {
-            xs: "center top",
-            md: "top right",
-            lg: "top right",
-          },
-          backgroundRepeat: "no-repeat",
-          minHeight: {
-            xs: "120vh",
-            md: "min(120vh, 900px)",
-            lg: "min(140vh, 1050px)",
-          },
-        }}
-      >
         <BasePanel
           id="frontmatter"
-          fullHeight={false}
+          fullHeight={true}
           fullWidth
           background="transparent"
-          paddingVariant="none"
+          paddingVariant="content-centered"
           includeHeaderSpacing={true}
           sx={{
             color: (theme) => theme.palette.primary.dark,
             position: "relative",
-            minHeight: { xs: "140vh", md: "150vh", lg: "170vh" },
+            background: `url('/images/intro_collage/riverbank_right_lg.png')`,
+            backgroundSize: "40% auto",
+            backgroundPosition: "bottom right",
+            backgroundRepeat: "no-repeat",
           }}
         >
-          <Box
-            sx={{
-              position: "relative",
-              width: "100%",
-              height: { xs: "140vh", md: "170vh" },
-              minHeight: { xs: "140vh", md: "150vh", lg: "170vh" },
-            }}
-          >
             <Box
               component="img"
               src="/images/home_collage/birds_top.png"
@@ -192,17 +170,9 @@ const IntroSection = () => {
 
             <Box
               sx={{
-                textAlign: "left",
-                position: { xs: "static", lg: "absolute" },
-                top: { xs: "40%", md: "34%" },
-                left: { lg: "50%" },
-                transform: {
-                  xs: "translate(8%, -15%)",
-                  lg: "translate(-50%, -50%)",
-                },
-                width: { sm: "80%", lg: "100%" },
-                px: { xs: 2, md: 2 },
+                width: "100%",
                 maxWidth: (theme) => theme.layout.textContainer.maxWidth,
+                textAlign: "left",
               }}
             >
               <Typography variant="body1">
@@ -254,9 +224,7 @@ const IntroSection = () => {
                 />
               </ScrollIndicator>
             </Box>
-          </Box>
         </BasePanel>
-      </Box>
 
       <Spacer height={{ xs: 24, md: 48, lg: 64 }} />
 
@@ -266,7 +234,6 @@ const IntroSection = () => {
         fullHeight={false}
         fullWidth
         background="transparent"
-        paddingVariant="content-first"
         includeHeaderSpacing={true}
         sx={{
           background: `url('/images/california.png')`,
