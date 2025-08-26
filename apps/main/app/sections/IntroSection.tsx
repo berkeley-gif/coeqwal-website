@@ -117,24 +117,24 @@ const IntroSection = () => {
               mt: 4,
             }}
           >
-                      <ScrollIndicator
-            scrollToId="frontmatter"
-            color={theme.palette.blue.darkest}
-            animationComplete={true}
-            delay={1.0}
-          >
-            <IconButton
-              sx={(theme) => ({
-                width: 60,
-                height: 60,
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-                color: theme.palette.blue.darkest,
-              })}
+            <ScrollIndicator
+              scrollToId="frontmatter"
+              color={theme.palette.blue.darkest}
+              animationComplete={true}
+              delay={1.0}
             >
-              <RoundedDownArrow size={40} />
-            </IconButton>
-          </ScrollIndicator>
+              <IconButton
+                sx={(theme) => ({
+                  width: 60,
+                  height: 60,
+                  borderRadius: theme.borderRadius.rounded,
+                  border: "none",
+                  color: theme.palette.blue.darkest,
+                })}
+              >
+                <RoundedDownArrow size={40} />
+              </IconButton>
+            </ScrollIndicator>
           </Box>
         </Box>
       </BasePanel>

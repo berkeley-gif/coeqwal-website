@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
-import { BasePanel, LeadingMarkerText, ArrowHead, RoundedDownArrow, Spacer } from "@repo/ui"
+import {
+  BasePanel,
+  LeadingMarkerText,
+  ArrowHead,
+  RoundedDownArrow,
+  Spacer,
+} from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
 
 type PanelType = "learn" | "explore" | "empower" | null
@@ -1017,7 +1023,10 @@ function PanelWithDetail({
                         borderRadius: theme.borderRadius.rounded,
                       })}
                     >
-                      <RoundedDownArrow size={{ xs: 64, md: 80 }} style={{ transform: "rotate(-90deg)" }} />
+                                             <RoundedDownArrow
+                         size={80}
+                         style={{ transform: "rotate(-90deg)" }}
+                       />
                     </IconButton>
                   </Box>
                 )}
