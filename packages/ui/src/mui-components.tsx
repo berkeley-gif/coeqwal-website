@@ -83,6 +83,7 @@ import AddIcon from "@mui/icons-material/Add"
 import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
@@ -114,6 +115,7 @@ export {
   CheckIcon,
   CloseIcon,
   ArrowRightIcon,
+  ArrowForwardIcon,
   FiberManualRecordIcon,
   PlayArrowIcon,
   InfoIcon,
