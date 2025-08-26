@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
+import { Box, Typography, Grid, IconButton, useTheme, useMediaQuery } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
 import { BasePanel, LeadingMarkerText, ArrowHead, Spacer } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
@@ -12,7 +12,7 @@ type PanelType = "learn" | "explore" | "empower" | null
 
 export default function ContentPanels({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onOpenLearnDrawer,
+  onOpenLearnDrawer
 }: ContentPanelsProps = {}) {
   const theme = useTheme()
 
@@ -61,15 +61,16 @@ export default function ContentPanels({
   const LearnSimple = () => (
     <Box
       sx={{
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "2fr 1fr" },
         alignItems: "center",
-        gap: 2,
+        gap: { xs: 2, md: 3 },
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
       }}
     >
       {/* Text column */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ order: { xs: 2, md: 1 }, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
           <Typography variant="body1">
             Many Californians would be surprised to learn how controlled our
@@ -83,13 +84,13 @@ export default function ContentPanels({
       </Box>
       {/* Image column */}
       <Box
-        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}
+        sx={{ order: { xs: 1, md: 2 }, minWidth: 0, display: "flex", justifyContent: "center" }}
       >
         <Box
           component="img"
           src="/images/content/learn.png"
           alt="Learn"
-          sx={{ width: "100%", maxWidth: 520, height: "auto" }}
+          sx={{ width: "100%", maxWidth: { xs: 420, md: 520 }, height: "auto" }}
         />
       </Box>
     </Box>
@@ -98,26 +99,28 @@ export default function ContentPanels({
   const ExploreSimple = () => (
     <Box
       sx={{
-        display: "flex",
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "1fr 2fr" },
         alignItems: "center",
-        gap: 2,
+        gap: { xs: 2, md: 3 },
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
+        paddingTop: { xs: 3, md: 10 },
       }}
     >
       {/* Image column */}
       <Box
-        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}
+        sx={{ order: { xs: 2, md: 1 }, minWidth: 0, display: "flex", justifyContent: "center" }}
       >
         <Box
           component="img"
           src="/images/content/explore.png"
           alt="Explore"
-          sx={{ width: "100%", maxWidth: 500, height: "auto" }}
+          sx={{ width: "100%", maxWidth: { xs: 420, md: 500 }, height: "auto" }}
         />
       </Box>
       {/* Text column */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ order: { xs: 2, md: 1 }, minWidth: 0 }}>
         <LeadingMarkerText title="Explore">
           <Typography variant="body1">
             COEQWAL&apos;s scenarios by theme
@@ -130,13 +133,13 @@ export default function ContentPanels({
   const EmpowerSimple = () => (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: "grid",
+        gridTemplateColumns: "1fr",
+        placeItems: "center",
         gap: 2,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
-        paddingTop: { xs: 3, md: 14 },
+        paddingTop: { xs: 3, md: 10 },
       }}
     >
       <LeadingMarkerText title="Empower">
@@ -186,7 +189,7 @@ export default function ContentPanels({
       paddingVariant="wide"
       sx={{
         position: "relative",
-        overflowX: "hidden", // Prevent horizontal scrolling
+        overflowX: "clip", // Prevent horizontal scrolling
         overflowY: "visible", // Allow natural vertical flow
         width: "100%", // Full width of parent
         maxWidth: "100%", // Ensure it doesn't exceed parent width
@@ -197,7 +200,7 @@ export default function ContentPanels({
         transform: "translateZ(0)", // Force new stacking context
         isolation: "isolate", // Create stacking context
         bgcolor: (theme) => theme.palette.brand.water,
-        paddingTop: { xs: 3, md: 6 }, // Override the wide padding variant's large top padding (120px -> 24px/48px)
+        paddingTop: { xs: 4, md: 6 }, // Override the wide padding variant's large top padding (120px -> 24px/48px)
 
         // Custom styling to ensure proper overlapping
         "& .active-panel-container": {
@@ -214,7 +217,7 @@ export default function ContentPanels({
       }}
     >
 
-      <Spacer height={{ xs: 48, md: 96 }} />
+      <Spacer height={{ xs: 66, md: 72 }} />
 
       <Box
         sx={{
@@ -242,71 +245,8 @@ export default function ContentPanels({
           title={<LearnSimple />}
           detailContent={
             <>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 2,
-                  mb: 2,
-                }}
-              >
-                <IconButton
-                  onClick={() => togglePanelDetail("learn")}
-                  sx={(theme) => {
-                    // Calculate positioning to align with first line of h2
-                    const typography = theme.typography.h2
-
-                    // Parse fontSize from rem to pixels (assuming 1rem = 16px)
-                    let fontSize = 16
-                    if (typeof typography.fontSize === "string") {
-                      if (typography.fontSize.includes("rem")) {
-                        fontSize = parseFloat(typography.fontSize) * 16
-                      } else {
-                        fontSize = parseFloat(typography.fontSize)
-                      }
-                    } else if (typeof typography.fontSize === "number") {
-                      fontSize = typography.fontSize
-                    }
-
-                    const lineHeight =
-                      typeof typography.lineHeight === "number"
-                        ? typography.lineHeight
-                        : 1.2
-
-                    // Calculate the height of the first line in pixels
-                    const firstLineHeight = fontSize * lineHeight
-
-                    // Position arrow button to center on the first line (48px button, 28px arrow)
-                    const topOffset = (firstLineHeight - 48) / 2
-
-                    return {
-                      color: theme.palette.blue.darkest,
-                      width: 48,
-                      height: 48,
-                      position: "relative",
-                      top: Math.max(0, topOffset),
-                    }
-                  }}
-                >
-                  <ArrowHead
-                    style={{
-                      width: 28,
-                      height: 28,
-                      transform: "rotate(180deg)",
-                    }}
-                  />
-                </IconButton>
-                <Typography
-                  variant="h2"
-                  sx={{
-                    alignSelf: "flex-start",
-                    color: (theme) => theme.palette.blue.darkest,
-                  }}
-                >
-                  Learn
-                </Typography>
-              </Box>
-              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
+              <ResponsiveDetailHeader label="Learn" onBack={() => togglePanelDetail("learn")} />
+              <Grid container spacing={{ xs: 3, md: 4 }} sx={{ mt: 1, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Central Valley Water"
@@ -510,73 +450,8 @@ export default function ContentPanels({
           title={<ExploreSimple />}
           detailContent={
             <>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 2,
-                  mb: 2,
-                }}
-              >
-                <IconButton
-                  onClick={() => togglePanelDetail("explore")}
-                  sx={(theme) => {
-                    // Calculate positioning to align with first line of h2
-                    const typography = theme.typography.h2
-
-                    // Parse fontSize from rem to pixels (assuming 1rem = 16px)
-                    let fontSize = 16
-                    if (typeof typography.fontSize === "string") {
-                      if (typography.fontSize.includes("rem")) {
-                        fontSize = parseFloat(typography.fontSize) * 16
-                      } else {
-                        fontSize = parseFloat(typography.fontSize)
-                      }
-                    } else if (typeof typography.fontSize === "number") {
-                      fontSize = typography.fontSize
-                    }
-
-                    const lineHeight =
-                      typeof typography.lineHeight === "number"
-                        ? typography.lineHeight
-                        : 1.2
-
-                    // Calculate the height of the first line in pixels
-                    const firstLineHeight = fontSize * lineHeight
-
-                    // Position arrow button to center on the first line (48px button, 28px arrow)
-                    const topOffset = (firstLineHeight - 48) / 2
-
-                    return {
-                      color: theme.palette.blue.darkest,
-                      width: 48,
-                      height: 48,
-                      position: "relative",
-                      top: Math.max(0, topOffset),
-                    }
-                  }}
-                >
-                  <ArrowHead
-                    style={{
-                      width: 28,
-                      height: 28,
-                      transform: "rotate(180deg)",
-                    }}
-                  />
-                </IconButton>
-                <Typography
-                  variant="h2"
-                  sx={{
-                    alignSelf: "flex-start",
-                    pointerEvents: "auto",
-                    width: "100%",
-                    color: (theme) => theme.palette.blue.darkest,
-                  }}
-                >
-                  Explore scenario themes
-                </Typography>
-              </Box>
-              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
+              <ResponsiveDetailHeader label="Explore scenario themes" onBack={() => togglePanelDetail("explore")} />
+              <Grid container spacing={{ xs: 3, md: 4 }} sx={{ mt: 1, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Current operations"
@@ -885,11 +760,40 @@ export default function ContentPanels({
         />
 
         {/* Empower panel */}
-        <Box sx={{ py: 4 }}>
+        <Box sx={{ py: { xs: 3, md: 5 } }}>
           <EmpowerSimple />
         </Box>
       </Box>
     </BasePanel>
+  )
+}
+
+// Reusable back header with responsive vertical alignment for the arrow
+function ResponsiveDetailHeader({ label, onBack }: { label: string; onBack: () => void }) {
+  return (
+    <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 2 }}>
+      <IconButton
+        onClick={onBack}
+        sx={(t) => {
+          const typography = t.typography.h2
+          let fontSize = 16
+          if (typeof typography.fontSize === "string") {
+            fontSize = parseFloat(typography.fontSize) * 16
+          } else if (typeof typography.fontSize === "number") {
+            fontSize = typography.fontSize
+          }
+          const lineHeight = typeof typography.lineHeight === "number" ? typography.lineHeight : 1.2
+          const firstLineHeight = fontSize * lineHeight
+          const topOffset = (firstLineHeight - 48) / 2
+          return { color: t.palette.blue.darkest, width: 48, height: 48, position: "relative", top: { xs: 0, md: Math.max(0, topOffset) } }
+        }}
+      >
+        <ArrowHead style={{ width: 28, height: 28, transform: "rotate(180deg)" }} />
+      </IconButton>
+      <Typography variant="h2" sx={{ alignSelf: "flex-start", color: (t) => t.palette.blue.darkest }}>
+        {label}
+      </Typography>
+    </Box>
   )
 }
 
@@ -919,9 +823,11 @@ function PanelWithDetail({
   addBorder = false,
   hideBottomArrow = false,
 }: PanelWithDetailProps) {
+  const theme = useTheme()
   const containerRef = useRef<HTMLDivElement>(null)
   const mainPanelRef = useRef<HTMLDivElement>(null)
   const detailPanelRef = useRef<HTMLDivElement>(null)
+  const isTablet = useMediaQuery(theme.breakpoints.up("md"))
 
   // Smooth height animation using Framer Motion's layout animations
   const [containerHeight, setContainerHeight] = useState<"auto" | number>(
@@ -951,6 +857,7 @@ function PanelWithDetail({
   return (
     <motion.div
       ref={containerRef}
+      id="detail-panel"
       className={isActive ? "active-panel-container" : ""}
       animate={{ height: containerHeight }}
       transition={{
@@ -964,6 +871,7 @@ function PanelWithDetail({
         overflow: "visible",
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
+
       }}
     >
       {/* Conditionally render either main panel or detail panel with sliding animation */}
@@ -1002,7 +910,7 @@ function PanelWithDetail({
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 2,
-                  width: "100%",
+                  width: { sm: "90%", md: "100%" },
                   pointerEvents: "auto",
                 }}
               >
