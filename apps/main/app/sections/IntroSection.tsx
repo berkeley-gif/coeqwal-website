@@ -237,7 +237,7 @@ const IntroSection = () => {
 
               <ScrollIndicator
                 scrollToId="regions"
-                color={theme.palette.blue.darkest}
+                color={theme.palette.overlay.water}
                 animationComplete={true}
                 delay={1.0}
                 style={{
@@ -317,7 +317,7 @@ const IntroSection = () => {
 
           <ScrollIndicator
             scrollToId="content-panels"
-            color={theme.palette.blue.darkest}
+            color={theme.palette.overlay.water}
             animationComplete={true}
             delay={1.0}
             style={{
