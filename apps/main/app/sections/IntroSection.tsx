@@ -155,20 +155,6 @@ const IntroSection = () => {
           }}
         >
             <Box
-              component="img"
-              src="/images/home_collage/birds_top.png"
-              sx={{
-                position: "absolute",
-                left: { xs: "-30%", md: "-56%" },
-                top: { xs: "26%", md: "20%" },
-                transform: "translateY(-50%)",
-                width: { xs: 200, md: 280 },
-                height: { xs: 200, md: 280 },
-                zIndex: (theme) => theme.zIndex.introBackgroundImages,
-              }}
-            />
-
-            <Box
               sx={{
                 width: "100%",
                 maxWidth: (theme) => theme.layout.textContainer.maxWidth,
