@@ -59,7 +59,6 @@ const IntroSection = () => {
             bottom: { xs: 0, md: "26%" },
             zIndex: theme.zIndex.introForegroundImages,
             pointerEvents: "none",
-
           }}
         >
           <FloatingImageMarkers
@@ -75,7 +74,7 @@ const IntroSection = () => {
           sx={{
             position: "relative",
             zIndex: theme.zIndex.introText,
-            pr: { xs: 1, md: 0 }
+            pr: { xs: 1, md: 0 },
           }}
         >
           <Typography
@@ -143,9 +142,17 @@ const IntroSection = () => {
         sx={{
           background: `url('/images/home_collage/newcollage_wetland.png')`,
           backgroundSize: { xs: "cover", md: "contain", lg: "100vw auto" },
-          backgroundPosition: { xs: "center top", md: "top right", lg: "top right" },
+          backgroundPosition: {
+            xs: "center top",
+            md: "top right",
+            lg: "top right",
+          },
           backgroundRepeat: "no-repeat",
-          minHeight: { xs: "120vh", md: "min(120vh, 900px)", lg: "min(140vh, 1050px)" },
+          minHeight: {
+            xs: "120vh",
+            md: "min(120vh, 900px)",
+            lg: "min(140vh, 1050px)",
+          },
         }}
       >
         <BasePanel
@@ -189,7 +196,10 @@ const IntroSection = () => {
                 position: { xs: "static", lg: "absolute" },
                 top: { xs: "40%", md: "34%" },
                 left: { lg: "50%" },
-                transform: { xs: "translate(8%, -15%)", lg: "translate(-50%, -50%)" },
+                transform: {
+                  xs: "translate(8%, -15%)",
+                  lg: "translate(-50%, -50%)",
+                },
                 width: { sm: "80%", lg: "100%" },
                 px: { xs: 2, md: 2 },
                 maxWidth: (theme) => theme.layout.textContainer.maxWidth,

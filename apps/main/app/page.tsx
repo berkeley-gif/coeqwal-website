@@ -19,7 +19,7 @@ export default function Home() {
       <ConnectedMultiDrawer
         drawerWidth={theme.layout.drawer.width}
         overlay={true}
-/*         overlay={!isTablet}
+        /*         overlay={!isTablet}
         showRailButtons={true} */
       />
 
