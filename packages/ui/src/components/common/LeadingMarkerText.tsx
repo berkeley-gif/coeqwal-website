@@ -63,7 +63,7 @@ export function LeadingMarkerText({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: theme.palette.ambient.rippleBlue,
+            backgroundColor: theme.palette.overlay.water,
             gridColumn: 1,
             gridRow: 1,
             position: "relative",

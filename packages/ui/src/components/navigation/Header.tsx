@@ -33,8 +33,6 @@ export interface SecondaryNavItem {
 }
 
 interface HeaderProps {
-  drawerOpen?: boolean
-  drawerPosition?: "left" | "right"
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
@@ -67,8 +65,6 @@ const sectionParentMap: Record<string, string | undefined> = {
 }
 
 export function Header({
-  drawerOpen = false,
-  drawerPosition = "right",
   activeSection,
   onSectionClick,
   showSecondaryNav = false,
@@ -81,8 +77,8 @@ export function Header({
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
     lineHeight: 1.1, // Line height for text wrapping
-    height: "36px", // Fixed height to match language switcher
-    minHeight: "36px", // Ditto
+    height: theme.spacing(4.5), // 36px to match language switcher
+    minHeight: theme.spacing(4.5), // 36px
   }
   const { locale, isLoading } = useTranslation()
 
@@ -128,7 +124,7 @@ export function Header({
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: theme.background.transparent,
+        backgroundColor: theme.palette.overlay.water,
         borderBottom: theme.border.standard,
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
@@ -137,7 +133,7 @@ export function Header({
       elevation={0}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", pl: 2 }}>
           <Logo />
         </Box>
 
@@ -172,7 +168,7 @@ export function Header({
                     fontSize: theme.typography.nav.fontSize,
                     position: "relative",
                     textTransform: "uppercase",
-                    letterSpacing: "0.5px",
+                    letterSpacing: "0.03rem",
                     fontWeight: isActive ? 600 : 500,
                     transition: "color 0.3s ease",
                     lineHeight: 1.1, // Slightly more spacing between lines when wrapped
@@ -218,24 +214,9 @@ export function Header({
           direction="row"
           spacing={2}
           alignItems="center"
-          sx={(theme) => ({
-            // If drawer is on the right side
-            ...(drawerPosition === "right" && {
-              paddingRight: drawerOpen
-                ? `calc(${theme.layout.drawer.width}px + 16px)` // Wide padding when drawer is open
-                : `calc(${theme.layout.drawer.closedWidth}px + 16px)`, // Narrower padding when drawer is closed
-            }),
-            // If drawer is on the left side
-            ...(drawerPosition === "left" && {
-              paddingRight: "16px",
-            }),
-            transition: theme.transitions.create("padding", {
-              easing: theme.transitions.easing.sharp,
-              duration: drawerOpen
-                ? theme.transitions.duration.enteringScreen
-                : theme.transitions.duration.leavingScreen,
-            }),
-          })}
+          sx={{
+            pr: 2,
+          }}
         >
           <Button
             variant={buttonVariant}

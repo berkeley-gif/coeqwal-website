@@ -225,8 +225,8 @@ export function MultiDrawer({
 
   // Mapping of tab keys to background colors
   const tabBg: Record<TabKey, string> = {
-    glossary: "#60aacb",
-    savedScenarios: theme.palette.nature.forest, // Green theme for scenarios
+    glossary: theme.palette.blue.medium,
+    savedScenarios: theme.palette.nature.forest,
   }
 
   // Track the bg color to apply to drawer paper, preserve while closing
@@ -285,8 +285,8 @@ export function MultiDrawer({
             label={tabTitles.glossary}
             onClick={() => toggleTab("glossary")}
             active={activeTab === "glossary"}
-            bgColor="#3F7DA2" // Slightly darker than the active color
-            hoverColor="#5195BD" // Slightly lighter than active color
+            bgColor={theme.palette.blue.dark} // Slightly darker blue for rail button
+            hoverColor={theme.palette.blue.bright} // Slightly lighter blue for hover
           />
           <RailButton
             label={tabTitles.savedScenarios}
@@ -343,7 +343,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    background: "#2e3a6c",
+                    background: theme.palette.blue.medium, // Use the beautiful medium blue
                     color: theme.palette.common.white,
                     padding: 2,
                     display: "flex",
@@ -410,7 +410,7 @@ export function MultiDrawer({
               <>
                 <Box
                   sx={{
-                    background: "#4a5d2a", // Darker green for header
+                    background: theme.palette.nature.forest,
                     color: theme.palette.common.white,
                     padding: 2,
                     display: "flex",

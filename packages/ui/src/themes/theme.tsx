@@ -153,7 +153,7 @@ const themeValues = {
 
   // Layout dimensions, for layout calculations
   layout: {
-    headerHeight: 80,
+    headerHeight: 70,
     drawer: {
       width: 360,
       closedWidth: 60,
@@ -182,7 +182,7 @@ const themeValues = {
     blue: {
       darkest: "#3a4574", // Deep navy - primary text (TODO: should it be #2A5287 ?)
       dark: "#186b88", // Dark teal - secondary text
-      medium: "#2d89b6", // Medium blue - accent text
+      medium: "#2d89b6", // Medium blue - accent text (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
       light: "#77a2d9", // Light blue - subtle elements
     },
@@ -222,6 +222,12 @@ const themeValues = {
     ambient: {
       rippleWhite: "rgba(255, 255, 255, 0.16)", // Water bubbles - white at 16% opacity
       rippleBlue: "rgba(42, 82, 135, 0.16)", // Water bubbles - blue (#2A5287) at 16% opacity
+    },
+
+    // Header and UI overlay colors
+    overlay: {
+      water: "rgba(42, 82, 135, 0.2)", // Semi-transparent blue for header and UI elements
+      waterLight: "rgba(42, 82, 135, 0.1)", // Lighter variant for overlapping dividers and borders
     },
 
     categories: {
@@ -713,6 +719,11 @@ const theme = createTheme({
       rippleBlue: themeValues.palette.ambient.rippleBlue,
     },
 
+    overlay: {
+      water: themeValues.palette.overlay.water,
+      waterLight: themeValues.palette.overlay.waterLight,
+    },
+
     categories: {
       groundwaterManagement:
         themeValues.palette.categories.groundwaterManagement,
@@ -745,14 +756,14 @@ const theme = createTheme({
       disabled: themeValues.palette.blue.light,
     },
     action: {
-      hover: themeValues.palette.blue.medium,
+      hover: themeValues.palette.grey[100], // Light grey hover background for interactive elements
       selected: themeValues.palette.blue.light,
       disabled: themeValues.palette.blue.light,
       disabledBackground: themeValues.palette.utility.white,
     },
     // Colors for interactive elements
     interaction: {
-      hoverBackground: themeValues.palette.grey[100], // Light grey hover background for interactive elements
+      hoverBackground: themeValues.palette.grey[100], // Same light grey hover background for interactive elements
     },
     divider: themeValues.palette.grey[400],
   },
@@ -931,7 +942,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: ({ theme }) => ({
-          backgroundColor: theme.background.transparent,
+          backgroundColor: theme.palette.overlay.water,
           borderBottom: theme.border.standard,
           color: theme.palette.text.primary,
           borderRadius: theme.borderRadius.none,
@@ -983,10 +994,11 @@ const theme = createTheme({
             fontSize: "1rem",
             fontWeight: 400,
             color: theme.palette.common.white,
-            backgroundColor: theme.palette.blue.darkest,
+            backgroundColor: theme.palette.overlay.water,
             "&:hover": {
-              backgroundColor: theme.palette.blue.dark,
-              opacity: 0.9,
+              backgroundColor: theme.palette.common.white,
+              color: theme.palette.blue.darkest,
+              opacity: 1,
             },
           }),
         },
@@ -1549,6 +1561,11 @@ declare module "@mui/material/styles" {
       rippleBlue: string
     }
 
+    overlay: {
+      water: string
+      waterLight: string
+    }
+
     categories: {
       groundwaterManagement: string
       riverFlows: string
@@ -1607,6 +1624,11 @@ declare module "@mui/material/styles" {
     ambient?: {
       rippleWhite?: string
       rippleBlue?: string
+    }
+
+    overlay?: {
+      water?: string
+      waterLight?: string
     }
 
     categories?: {
