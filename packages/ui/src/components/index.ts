@@ -1,8 +1,8 @@
 // Navigation components
-export { HeaderHome as Header } from "./navigation/HeaderHome"
-export { AppHeader } from "./navigation/AppHeader"
+export { MainHeader } from "./navigation/HeaderHome"
 export type { HeaderProps } from "./navigation/HeaderHome"
-export type { AppHeaderProps } from "./navigation/AppHeader"
+export { NavDropdown } from "./navigation/NavDropdown"
+export type { NavDropdownProps, NavDropdownOption } from "./navigation/NavDropdown"
 export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { MultiDrawer } from "./navigation/MultiDrawer"

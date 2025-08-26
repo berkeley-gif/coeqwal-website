@@ -27,18 +27,19 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       exclusive
       onChange={handleChange}
       sx={{
-        height: "40px",
+        height: (theme) => theme.spacing(5), // 40px using theme spacing
         fontSize: (theme) => theme.typography.button.fontSize,
         fontWeight: (theme) => theme.typography.button.fontWeight,
         fontFamily: (theme) => theme.typography.fontFamily,
         border: "none",
         "& .MuiToggleButtonGroup-grouped": {
-          border: "none",
+          border: "none !important",
           "&:not(:first-of-type)": {
-            borderLeft: (theme) => `1px solid ${theme.palette.blue.darkest}`,
+            borderLeft: "none !important",
+            marginLeft: "0 !important",
           },
           "&.Mui-disabled": {
-            border: "none",
+            border: "none !important",
           },
         },
         ...sx,
@@ -47,10 +48,10 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       <ToggleButton
         value="en"
         sx={{
-          height: "40px",
-          minHeight: "40px",
-          border: "none",
-          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+          height: (theme) => theme.spacing(5), // 40px using theme spacing
+          minHeight: (theme) => theme.spacing(5), // 40px using theme spacing
+          border: "none !important",
+          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
           fontSize: (theme) => theme.typography.button.fontSize,
           fontWeight: (theme) => theme.typography.button.fontWeight,
           fontFamily: (theme) => theme.typography.fontFamily,
@@ -60,40 +61,23 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           "&:hover": {
             backgroundColor: (theme) => theme.palette.common.white,
             color: (theme) => theme.palette.blue.darkest,
-            border: "none",
+            border: "none !important",
             boxShadow: (theme) =>
-              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
-            "&::before": {
-              opacity: 1,
-            },
+              `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
+
           },
           "&.Mui-selected": {
-            backgroundColor: (theme) => theme.palette.blue.darkest,
+            backgroundColor: (theme) => theme.palette.overlay.water,
             color: (theme) => theme.palette.common.white,
-            border: "none",
+            border: "none !important",
             boxShadow: (theme) =>
-              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+              `inset 0 0 0 1px ${theme.palette.overlay.waterLight} !important`,
             "&:hover": {
-              backgroundColor: (theme) => theme.palette.blue.dark,
-              border: "none",
+              backgroundColor: (theme) => theme.palette.overlay.water,
+              border: "none !important",
               boxShadow: (theme) =>
-                `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+                `inset 0 0 0 1px ${theme.palette.overlay.waterLight} !important`,
             },
-          },
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: "-100%",
-            width: "100%",
-            height: "100%",
-            background: (theme) =>
-              `linear-gradient(90deg, transparent, ${theme.palette.blue.darkest}1a, transparent)`,
-            transition: "left 0.5s ease",
-            opacity: 0,
-          },
-          "&:hover::before": {
-            left: "100%",
           },
         }}
       >
@@ -102,10 +86,10 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
       <ToggleButton
         value="es"
         sx={{
-          height: "40px",
-          minHeight: "40px",
-          border: "none",
-          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+          height: (theme) => theme.spacing(5), // 40px using theme spacing
+          minHeight: (theme) => theme.spacing(5), // 40px using theme spacing
+          border: "none !important",
+          boxShadow: (theme) => `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
           fontSize: (theme) => theme.typography.button.fontSize,
           fontWeight: (theme) => theme.typography.button.fontWeight,
           fontFamily: (theme) => theme.typography.fontFamily,
@@ -115,41 +99,25 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
           "&:hover": {
             backgroundColor: (theme) => theme.palette.common.white,
             color: (theme) => theme.palette.blue.darkest,
-            border: "none",
+            border: "none !important",
             boxShadow: (theme) =>
-              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
-            "&::before": {
-              opacity: 1,
-            },
+              `inset 0 0 0 1px ${theme.palette.overlay.water} !important`,
+
           },
           "&.Mui-selected": {
-            backgroundColor: (theme) => theme.palette.blue.darkest,
+            backgroundColor: (theme) => theme.palette.overlay.water,
             color: (theme) => theme.palette.common.white,
-            border: "none",
+            border: "none !important",
             boxShadow: (theme) =>
-              `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+              `inset 0 0 0 1px ${theme.palette.overlay.waterLight} !important`,
             "&:hover": {
-              backgroundColor: (theme) => theme.palette.blue.dark,
-              border: "none",
+              backgroundColor: (theme) => theme.palette.overlay.water,
+              border: "none !important",
               boxShadow: (theme) =>
-                `inset 0 0 0 1px ${theme.palette.blue.darkest}`,
+                `inset 0 0 0 1px ${theme.palette.overlay.waterLight} !important`,
             },
           },
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            left: "-100%",
-            width: "100%",
-            height: "100%",
-            background: (theme) =>
-              `linear-gradient(90deg, transparent, ${theme.palette.blue.darkest}1a, transparent)`,
-            transition: "left 0.5s ease",
-            opacity: 0,
-          },
-          "&:hover::before": {
-            left: "100%",
-          },
+
         }}
       >
         Español
@@ -157,3 +125,4 @@ export function LanguageSwitcher({ sx }: LanguageSwitcherProps) {
     </ToggleButtonGroup>
   )
 }
+
