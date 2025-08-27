@@ -123,17 +123,17 @@ const IntroSection = () => {
               animationComplete={true}
               delay={1.0}
             >
-              <IconButton
-                sx={(theme) => ({
-                  width: 60,
-                  height: 60,
-                  borderRadius: theme.borderRadius.rounded,
-                  border: "none",
-                  color: theme.palette.blue.darkest,
-                })}
-              >
-                <RoundedDownArrow size={40} />
-              </IconButton>
+                          <IconButton
+              sx={(theme) => ({
+                width: 90,
+                height: 90,
+                borderRadius: theme.borderRadius.rounded,
+                border: "none",
+                color: theme.palette.blue.darkest,
+              })}
+            >
+              <RoundedDownArrow />
+            </IconButton>
             </ScrollIndicator>
           </Box>
         </Box>
@@ -207,14 +207,14 @@ const IntroSection = () => {
           >
             <IconButton
               sx={(theme) => ({
-                width: 60,
-                height: 60,
+                width: 90,
+                height: 90,
                 borderRadius: theme.borderRadius.rounded,
                 border: "none",
                 color: theme.palette.overlay.water,
               })}
             >
-              <RoundedDownArrow size={40} />
+              <RoundedDownArrow />
             </IconButton>
           </ScrollIndicator>
         </Box>
@@ -289,14 +289,14 @@ const IntroSection = () => {
           >
             <IconButton
               sx={(theme) => ({
-                width: 60,
-                height: 60,
+                width: 90,
+                height: 90,
                 borderRadius: theme.borderRadius.rounded,
                 border: "none",
                 color: theme.palette.overlay.water,
               })}
             >
-              <RoundedDownArrow size={40} />
+              <RoundedDownArrow />
             </IconButton>
           </ScrollIndicator>
         </Box>
