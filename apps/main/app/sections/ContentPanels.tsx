@@ -5,7 +5,7 @@ import {
   BasePanel,
   LeadingMarkerText,
   ArrowHead,
-  RoundedDownArrow,
+  CircularArrowButton,
   Spacer,
 } from "@repo/ui"
 import { motion, AnimatePresence } from "@repo/motion"
@@ -144,20 +144,17 @@ export default function ContentPanels() {
           operational decisions
         </Typography>
       </LeadingMarkerText>
-      <Box sx={{ display: "flex", justifyContent: "center", mt: (theme) => theme.layout.spacing.sm }}>
-        <IconButton
-          color="inherit"
-          aria-label="open-empower"
-          sx={(theme) => ({
-            width: 90,
-            height: 90,
-            borderRadius: theme.borderRadius.rounded,
-            border: "none",
-          })}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: (theme) => theme.layout.spacing.sm,
+        }}
+      >
+        <CircularArrowButton
           onClick={scrollToNextSection}
-        >
-          <RoundedDownArrow />
-        </IconButton>
+          ariaLabel="open-empower"
+        />
       </Box>
     </Box>
   )
@@ -300,7 +297,14 @@ export default function ContentPanels() {
                   Learn
                 </Typography>
               </Box>
-              <Grid container spacing={4} sx={{ mt: (theme) => theme.layout.spacing.sm, pointerEvents: "auto" }}>
+              <Grid
+                container
+                spacing={4}
+                sx={{
+                  mt: (theme) => theme.layout.spacing.sm,
+                  pointerEvents: "auto",
+                }}
+              >
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Central Valley Water"
@@ -570,7 +574,14 @@ export default function ContentPanels() {
                   Explore scenario themes
                 </Typography>
               </Box>
-              <Grid container spacing={4} sx={{ mt: (theme) => theme.layout.spacing.sm, pointerEvents: "auto" }}>
+              <Grid
+                container
+                spacing={4}
+                sx={{
+                  mt: (theme) => theme.layout.spacing.sm,
+                  pointerEvents: "auto",
+                }}
+              >
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Current operations"
@@ -1013,40 +1024,25 @@ function PanelWithDetail({
                       justifyContent: "center",
                     }}
                   >
-                    <IconButton
+                    <CircularArrowButton
                       onClick={onToggleDetail}
-                      sx={(theme) => ({
-                        width: 90,
-                        height: 90,
-                        color: theme.palette.blue.darkest,
-                        border: "none",
-                        borderRadius: theme.borderRadius.rounded,
-                      })}
-                    >
-                      <RoundedDownArrow style={{ transform: "rotate(-90deg)" }} />
-                    </IconButton>
+                      rotation="-90deg"
+                    />
                   </Box>
                 )}
               </Box>
 
               {/* Bottom scroll arrow (outer). Do not render for Empower */}
               {!hideBottomArrow && panelType !== "empower" && (
-                <IconButton
+                <CircularArrowButton
                   onClick={onToggleDetail}
-                  sx={(theme) => ({
+                  sx={{
                     position: "absolute",
                     bottom: 20,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    color: theme.palette.blue.darkest,
-                    border: "none",
-                    borderRadius: theme.borderRadius.rounded,
-                    width: 90,
-                    height: 90,
-                  })}
-                >
-                  <RoundedDownArrow />
-                </IconButton>
+                  }}
+                />
               )}
             </Box>
           </motion.div>

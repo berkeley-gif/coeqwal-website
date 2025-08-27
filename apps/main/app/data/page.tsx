@@ -154,9 +154,9 @@ export default function DataPage() {
             <Box
               sx={{
                 display: "flex",
-                              alignItems: "flex-start",
-              gap: (theme) => theme.layout.spacing.md,
-              mb: 4,
+                alignItems: "flex-start",
+                gap: (theme) => theme.layout.spacing.md,
+                mb: 4,
               }}
             >
               <IconButton
@@ -211,7 +211,14 @@ export default function DataPage() {
             </Box>
 
             {/* Content in Grid layout */}
-            <Grid container spacing={4} sx={{ mt: (theme) => theme.layout.spacing.sm, pointerEvents: "auto" }}>
+            <Grid
+              container
+              spacing={4}
+              sx={{
+                mt: (theme) => theme.layout.spacing.sm,
+                pointerEvents: "auto",
+              }}
+            >
               {/* Full run data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <LeadingMarkerText
@@ -221,8 +228,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                        mb: (theme) => theme.layout.spacing.sm,
-                    opacity: 0.8,
+                      mb: (theme) => theme.layout.spacing.sm,
+                      opacity: 0.8,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -231,8 +238,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                                          mb: 3,
-                    color: (theme) => theme.palette.blue.darkest,
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Access complete CalSim3 model run files in zipped format.
@@ -278,7 +285,7 @@ export default function DataPage() {
 
                       {/* Download button - only show when a file is selected */}
                       {selectedZipDataset && selectedZipScenario?.files.zip && (
-                         <Box sx={{ mb: (theme) => theme.layout.spacing.sm }}>
+                        <Box sx={{ mb: (theme) => theme.layout.spacing.sm }}>
                           <DownloadButton
                             fileId={selectedZipDataset}
                             filename={selectedZipScenario.files.zip.filename}
@@ -303,8 +310,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                        mb: (theme) => theme.layout.spacing.sm,
-                    opacity: 0.8,
+                      mb: (theme) => theme.layout.spacing.sm,
+                      opacity: 0.8,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -314,8 +321,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                                          mb: 3,
-                    color: (theme) => theme.palette.blue.darkest,
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Access COEQWAL CalSim3 SV input and variable output data in
@@ -378,7 +385,10 @@ export default function DataPage() {
                                 "output",
                               )}
                               variant="outlined"
-                              sx={{ mb: (theme) => theme.spacing(theme.cards.spacing.compact.sm) }}
+                              sx={{
+                                mb: (theme) =>
+                                  theme.spacing(theme.cards.spacing.compact.sm),
+                              }}
                             >
                               Download Output CSV
                             </DownloadButton>
@@ -414,8 +424,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                        mb: (theme) => theme.layout.spacing.sm,
-                    opacity: 0.8,
+                      mb: (theme) => theme.layout.spacing.sm,
+                      opacity: 0.8,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -424,8 +434,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                                          mb: 3,
-                    color: (theme) => theme.palette.blue.darkest,
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
@@ -454,8 +464,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                        mb: (theme) => theme.layout.spacing.sm,
-                    opacity: 0.8,
+                      mb: (theme) => theme.layout.spacing.sm,
+                      opacity: 0.8,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -464,8 +474,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                                          mb: 3,
-                    color: (theme) => theme.palette.blue.darkest,
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Access peer-reviewed publications and research papers
@@ -490,8 +500,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                        mb: (theme) => theme.layout.spacing.sm,
-                    opacity: 0.8,
+                      mb: (theme) => theme.layout.spacing.sm,
+                      opacity: 0.8,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -500,8 +510,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                                          mb: 3,
-                    color: (theme) => theme.palette.blue.darkest,
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     REST API endpoints for accessing scenario data, model
@@ -529,8 +539,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                        mb: (theme) => theme.layout.spacing.sm,
-                    opacity: 0.8,
+                      mb: (theme) => theme.layout.spacing.sm,
+                      opacity: 0.8,
                       color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
@@ -539,8 +549,8 @@ export default function DataPage() {
                   <Typography
                     variant="body1"
                     sx={{
-                                          mb: 3,
-                    color: (theme) => theme.palette.blue.darkest,
+                      mb: 3,
+                      color: (theme) => theme.palette.blue.darkest,
                     }}
                   >
                     Contact our team for technical support, questions about the
