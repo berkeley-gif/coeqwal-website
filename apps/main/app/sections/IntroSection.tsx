@@ -81,7 +81,7 @@ const IntroSection = () => {
             variant="h1"
             component="h1"
             sx={{
-              mb: 2,
+              mb: (theme) => theme.layout.spacing.md,
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-start",
@@ -100,7 +100,7 @@ const IntroSection = () => {
             variant="body1"
             sx={{
               maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-              mb: 4,
+              mb: (theme) => theme.layout.spacing.xl,
             }}
           >
             Explore a range of Central Valley water scenarios and discover
@@ -114,7 +114,7 @@ const IntroSection = () => {
               width: (theme) => theme.layout.textContainer.maxWidth,
               display: "flex",
               justifyContent: "center",
-              mt: 4,
+              mt: (theme) => theme.layout.spacing.xl,
             }}
           >
             <ScrollIndicator
@@ -169,20 +169,24 @@ const IntroSection = () => {
           <Typography variant="body1">
             California&apos;s Central Valley water depends on two main things:
           </Typography>
-          <Box component="ol" sx={{ mt: 1, mb: 2, pl: 3 }}>
-            <Box component="li" sx={{ mb: 1 }}>
+          <Box component="ol" sx={{ 
+            mt: (theme) => theme.layout.spacing.xs,
+            mb: (theme) => theme.layout.spacing.sm,
+            pl: 3 
+          }}>
+            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">
                 How much rain and snow we get.
               </Typography>
             </Box>
-            <Box component="li" sx={{ mb: 1 }}>
+            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">
                 How we choose to manage it.
               </Typography>
             </Box>
           </Box>
 
-          <Typography variant="body1" sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: (theme) => theme.layout.spacing.sm }}>
             We already face difficult choices. Climate change brings deeper
             droughts, bigger floods, and growing uncertainty.
           </Typography>
@@ -248,23 +252,23 @@ const IntroSection = () => {
             mr: { xs: 2, md: 4 },
           }}
         >
-          <Typography variant="body1" sx={{ mb: 3 }}>
+          <Typography variant="body1" sx={{ mb: (theme) => theme.layout.spacing.md }}>
             The scenarios we run cover these areas of California:
           </Typography>
 
-          <Box component="ul" sx={{ mb: 3, pl: 3 }}>
-            <Box component="li" sx={{ mb: 1 }}>
+          <Box component="ul" sx={{ mb: (theme) => theme.layout.spacing.md, pl: 3 }}>
+            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">Sacramento Valley</Typography>
             </Box>
-            <Box component="li" sx={{ mb: 1 }}>
+            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">San Joaquin Valley</Typography>
             </Box>
-            <Box component="li" sx={{ mb: 1 }}>
+            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">
                 Sacramento-San Joaquin Delta
               </Typography>
             </Box>
-            <Box component="li" sx={{ mb: 1 }}>
+            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">Tulare Basin.</Typography>
             </Box>
           </Box>

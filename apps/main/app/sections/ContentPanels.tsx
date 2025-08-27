@@ -62,7 +62,7 @@ export default function ContentPanels() {
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 2,
+        gap: (theme) => theme.layout.spacing.md,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
       }}
@@ -99,7 +99,7 @@ export default function ContentPanels() {
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 2,
+        gap: (theme) => theme.layout.spacing.md,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
       }}
@@ -132,7 +132,7 @@ export default function ContentPanels() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: 2,
+        gap: (theme) => theme.layout.spacing.md,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
         paddingTop: { xs: 3, md: 14 },
@@ -144,7 +144,7 @@ export default function ContentPanels() {
           operational decisions
         </Typography>
       </LeadingMarkerText>
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: (theme) => theme.layout.spacing.sm }}>
         <IconButton
           color="inherit"
           aria-label="open-empower"
@@ -240,8 +240,8 @@ export default function ContentPanels() {
                 sx={{
                   display: "flex",
                   alignItems: "flex-start",
-                  gap: 2,
-                  mb: 2,
+                  gap: (theme) => theme.layout.spacing.sm,
+                  mb: (theme) => theme.layout.spacing.sm,
                 }}
               >
                 <IconButton
@@ -300,7 +300,7 @@ export default function ContentPanels() {
                   Learn
                 </Typography>
               </Box>
-              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
+              <Grid container spacing={4} sx={{ mt: (theme) => theme.layout.spacing.sm, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Central Valley Water"
@@ -309,7 +309,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -319,7 +319,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 3,
+                        mb: 3, // MUI spacing for larger gaps
                         color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
@@ -357,7 +357,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -418,7 +418,7 @@ export default function ContentPanels() {
                         color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
-                        mb: 1,
+                        mb: (theme) => theme.layout.spacing.xs,
                         fontWeight: 500,
                         "&:hover": {
                           textDecoration: "underline",
@@ -455,7 +455,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm, // 16px
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -494,7 +494,7 @@ export default function ContentPanels() {
           }
         />
 
-        {/* Panel Component - Explore (detail only) */}
+        {/* Panel Component - Explore detail */}
         <PanelWithDetail
           panelType="explore"
           isActive={activePanel === "explore"}
@@ -508,8 +508,8 @@ export default function ContentPanels() {
                 sx={{
                   display: "flex",
                   alignItems: "flex-start",
-                  gap: 2,
-                  mb: 2,
+                  gap: (theme) => theme.layout.spacing.sm,
+                  mb: (theme) => theme.layout.spacing.sm,
                 }}
               >
                 <IconButton
@@ -570,7 +570,7 @@ export default function ContentPanels() {
                   Explore scenario themes
                 </Typography>
               </Box>
-              <Grid container spacing={4} sx={{ mt: 2, pointerEvents: "auto" }}>
+              <Grid container spacing={4} sx={{ mt: (theme) => theme.layout.spacing.sm, pointerEvents: "auto" }}>
                 <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                   <LeadingMarkerText
                     title="Current operations"
@@ -611,7 +611,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -654,7 +654,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -698,7 +698,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -743,7 +743,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -789,7 +789,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -835,7 +835,7 @@ export default function ContentPanels() {
                     <Typography
                       variant="body1"
                       sx={{
-                        mb: 2,
+                        mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
                         color: (theme) => theme.palette.blue.darkest,
                       }}
@@ -995,7 +995,7 @@ function PanelWithDetail({
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: 2,
+                  gap: (theme) => theme.layout.spacing.md,
                   width: "100%",
                   pointerEvents: "auto",
                 }}

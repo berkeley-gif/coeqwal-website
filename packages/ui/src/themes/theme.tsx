@@ -81,7 +81,6 @@ import type { CSSProperties } from "react"
 //
 // Perfect Fourth (1.333) type scale
 // Headlines: Neue Haas Display (h1, h2, h3, h5, h6) | Body text: Neue Haas Text (h4, body1, body2, UI)
-// Base: 1.25rem (20px) primary body text
 //
 // Scale progression using Perfect Fourth ratio (1.333):
 // • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water" (Neue Haas Display Medium)
@@ -112,10 +111,6 @@ import type { CSSProperties } from "react"
 // ===============================================================================
 
 const typeScale = {
-  // Base sizes for the scale
-  baseBody: "1.25rem", // 20px - primary body text
-  smallBody: "0.95rem", // 15.2px - dashboard interface text
-
   // Headline sizes using Perfect Fourth ratio (1.333) - refined scale
   h1: "5.8rem", // 92.8px - Hero size
   h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
@@ -133,14 +128,8 @@ const typeScale = {
   },
 }
 
-// Compact spacing constants for use in mixins
-const compactSpacing = {
-  xs: "2px", // 0.25 * 8px
-  sm: "4px", // 0.5 * 8px
-  md: "8px", // 1 * 8px
-  lg: "12px", // 1.5 * 8px
-  xl: "16px", // 2 * 8px
-} as const
+// Compact spacing is handled in theme.cards.spacing.compact
+// Use theme.spacing(theme.cards.spacing.compact.X) for consistent spacing
 
 const themeValues = {
   // Typography
@@ -328,12 +317,12 @@ const themeValues = {
       title: {
         fontSize: typeScale.compact.title, // 0.9rem
         fontWeight: 500,
-        marginBottom: compactSpacing.sm, // 4px compact spacing
+        marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
       },
       subtitle: {
         fontSize: typeScale.compact.subtitle, // 0.8rem
         opacity: 0.9,
-        marginBottom: compactSpacing.sm, // 4px compact spacing
+        marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
       },
       action: {
         fontSize: typeScale.compact.subtitle, // 0.8rem
@@ -351,10 +340,10 @@ const scenarioCardListMixin = {
     margin: 0,
     paddingLeft: `${themeValues.layout.controls.standard}px`, // 20px standardized
     "& li": {
-      fontSize: typeScale.smallBody, // 0.95rem - dashboard interface text
+      fontSize: "0.95rem", // 15.2px - dashboard interface text (matches body2)
       fontWeight: 400,
       lineHeight: 1.4, // Tighter to conserve vertical space
-      marginBottom: compactSpacing.sm, // 4px compact spacing
+      marginBottom: "4px", // Use theme.spacing(theme.cards.spacing.compact.sm) in components
 
       color: "inherit",
       "&:last-child": {
@@ -374,7 +363,7 @@ const tooltipActionButtonMixin = {
   borderRadius: themeValues.borderRadius.pill,
   boxShadow: "none",
   border: "none",
-  padding: `${compactSpacing.sm} ${compactSpacing.lg}`, // 4px 12px compact spacing
+  padding: "4px 12px", // Use theme.spacing(theme.cards.spacing.compact.sm, theme.cards.spacing.compact.lg) in components
   minWidth: "auto",
   lineHeight: 1.5,
   fontSize: typeScale.compact.subtitle, // 0.8rem - compact dialog subtitles
@@ -582,7 +571,7 @@ const createDrawerMixins = (
 // Create theme
 const theme = createTheme({
   ...baseTheme,
-  // Custom layout values
+  // Custom layout values and responsive spacing system
   layout: {
     headerHeight: themeValues.layout.headerHeight,
     drawer: {
@@ -591,6 +580,15 @@ const theme = createTheme({
     },
     textContainer: {
       maxWidth: themeValues.layout.textContainer.maxWidth,
+    },
+    // Responsive layout spacing for major components and sections
+    spacing: {
+      xs: { xs: 1, sm: 1.5, md: 2 },     // 8px / 12px / 16px
+      sm: { xs: 1.5, sm: 2, md: 2.5 },   // 12px / 16px / 20px
+      md: { xs: 2, sm: 2.5, md: 3 },     // 16px / 20px / 24px
+      lg: { xs: 2.5, sm: 3, md: 4 },     // 20px / 24px / 32px
+      xl: { xs: 3, sm: 4, md: 5 },       // 24px / 32px / 40px
+      xxl: { xs: 4, sm: 5, md: 6 },      // 32px / 40px / 48px
     },
   },
   // Custom breakpoints
@@ -654,13 +652,13 @@ const theme = createTheme({
       tellMoreIcon: {
         marginLeft: "auto", // Aligns right within card header row
       },
-      // Compact spacing system for UI elements (dialogs, tooltips, form controls)
+      // Compact spacing for cards, dialogs, tooltips, form controls
       compact: {
-        xs: 0.25, // 2px - micro spacing
-        sm: 0.5, // 4px - tight spacing
-        md: 1, // 8px - compact spacing
-        lg: 1.5, // 12px - medium compact
-        xl: 2, // 16px - standard compact
+        xs: 0.25, // 2px
+        sm: 0.5, // 4px
+        md: 1, // 8px
+        lg: 1.5, // 12px
+        xl: 2, // 16px
       },
     },
   },
@@ -820,14 +818,14 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // 1.25rem/20px - primary body text
+      fontSize: "1.25rem", // 20px - primary body text (matches body1)
       fontWeight: 400,
       lineHeight: 1.5, // 1.5x ratio (30px at 20px font size)
       color: themeValues.palette.blue.darkest,
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody, // 0.95rem/15.2px - dashboard interface text
+      fontSize: "0.95rem", // 15.2px - dashboard interface text (matches body2)
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: 1.6, // Consistent line height ratio
@@ -835,7 +833,7 @@ const theme = createTheme({
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.baseBody, // 1.5rem - matches body1
+      fontSize: "1.25rem", // 20px - matches body1
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
@@ -843,7 +841,7 @@ const theme = createTheme({
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: typeScale.smallBody, // 1rem - matches body2
+      fontSize: "0.95rem", // 15.2px - matches body2
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.6,
@@ -1703,6 +1701,14 @@ declare module "@mui/material/styles" {
         compact: number
         micro: number
       }
+      spacing: {
+        xs: { xs: number; sm: number; md: number }
+        sm: { xs: number; sm: number; md: number }
+        md: { xs: number; sm: number; md: number }
+        lg: { xs: number; sm: number; md: number }
+        xl: { xs: number; sm: number; md: number }
+        xxl: { xs: number; sm: number; md: number }
+      }
     }
     border: ReturnType<typeof createBorderStyles>
     background: {
@@ -1836,6 +1842,14 @@ declare module "@mui/material/styles" {
         standard?: number
         compact?: number
         micro?: number
+      }
+      spacing?: {
+        xs?: { xs: number; sm: number; md: number }
+        sm?: { xs: number; sm: number; md: number }
+        md?: { xs: number; sm: number; md: number }
+        lg?: { xs: number; sm: number; md: number }
+        xl?: { xs: number; sm: number; md: number }
+        xxl?: { xs: number; sm: number; md: number }
       }
     }
     cards?: {
@@ -1978,11 +1992,12 @@ declare module "@mui/material/Typography" {
 | - Enforced via MuiOutlinedInput, MuiSelect, MuiTextField overrides
 |
 | COMPACT SPACING SYSTEM:
-| - xs: 2px (compactSpacing.xs) - micro spacing
-| - sm: 4px (compactSpacing.sm) - tight spacing
-| - md: 8px (compactSpacing.md) - compact spacing
-| - lg: 12px (compactSpacing.lg) - medium compact
-| - xl: 16px (compactSpacing.xl) - standard compact
+| - xs: 2px (theme.cards.spacing.compact.xs) - micro spacing
+| - sm: 4px (theme.cards.spacing.compact.sm) - tight spacing
+| - md: 8px (theme.cards.spacing.compact.md) - compact spacing
+| - lg: 12px (theme.cards.spacing.compact.lg) - medium compact
+| - xl: 16px (theme.cards.spacing.compact.xl) - standard compact
+| - Usage: theme.spacing(theme.cards.spacing.compact.sm) for consistent spacing
 |
 | TYPOGRAPHY FOR CONTROLS:
 | - Labels: typeScale.compact.caption (0.75rem/12px)
@@ -2026,7 +2041,7 @@ declare module "@mui/material/Typography" {
 | Form Label with Compact Typography:
 |   sx={{
 |     fontSize: theme.typography.compact.caption,
-|     marginBottom: compactSpacing.sm
+|     marginBottom: theme.spacing(theme.cards.spacing.compact.sm)
 |   }}
 |
 | MUI COMPONENT OVERRIDES:
