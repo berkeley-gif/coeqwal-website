@@ -1,4 +1,4 @@
-import { BasePanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
+import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
@@ -122,78 +122,82 @@ const IntroSection = () => {
       </TwoColumnPanel>
 
       {/* Frontmatter panel(s) */}
-      <BasePanel
+      <OneColumnPanel
         id="frontmatter"
         fullHeight={true}
         fullWidth
-        background="transparent"
-        paddingVariant="content-centered" // new BasePanel option to center text vertically and horizontally within panel without relying on padding
+        backgroundColor="transparent"
+        textColor={theme.palette.primary.dark}
         includeHeaderSpacing={true}
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
         sx={{
-          color: (theme) => theme.palette.primary.dark,
           position: "relative",
           background: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "40% auto",
           backgroundPosition: "bottom right",
           backgroundRepeat: "no-repeat",
         }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-            textAlign: "left",
-          }}
-        >
-          <Typography variant="body1">
-            California&apos;s Central Valley water depends on two main things:
-          </Typography>
+        content={
           <Box
-            component="ol"
             sx={{
-              mt: (theme) => theme.layout.spacing.xs,
-              mb: (theme) => theme.layout.spacing.sm,
-              pl: 3,
+              width: "100%",
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
+              textAlign: "left",
             }}
           >
-            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
-              <Typography variant="body1">
-                How much rain and snow we get.
-              </Typography>
+            <Typography variant="body1">
+              California&apos;s Central Valley water depends on two main things:
+            </Typography>
+            <Box
+              component="ol"
+              sx={{
+                mt: (theme) => theme.layout.spacing.xs,
+                mb: (theme) => theme.layout.spacing.sm,
+                pl: 3,
+              }}
+            >
+              <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
+                <Typography variant="body1">
+                  How much rain and snow we get.
+                </Typography>
+              </Box>
+              <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
+                <Typography variant="body1">
+                  How we choose to manage it.
+                </Typography>
+              </Box>
             </Box>
-            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
-              <Typography variant="body1">
-                How we choose to manage it.
-              </Typography>
-            </Box>
+
+            <Typography
+              variant="body1"
+              sx={{ mb: (theme) => theme.layout.spacing.sm }}
+            >
+              We already face difficult choices. Climate change brings deeper
+              droughts, bigger floods, and growing uncertainty.
+            </Typography>
+
+            <Typography variant="body1">
+              The COEQWAL (Collaboratory for Equity in Water Allocation) project
+              has modeled 30 alternative water management scenarios for the
+              Central Valley water systems that supply most of the state. For each
+              of these scenarios, we also modeled 5 future climate possibilities.
+            </Typography>
+
+            <ScrollToButton
+              scrollToId="regions"
+              color={theme.palette.overlay.water}
+              style={{
+                marginTop: "2rem",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            />
           </Box>
-
-          <Typography
-            variant="body1"
-            sx={{ mb: (theme) => theme.layout.spacing.sm }}
-          >
-            We already face difficult choices. Climate change brings deeper
-            droughts, bigger floods, and growing uncertainty.
-          </Typography>
-
-          <Typography variant="body1">
-            The COEQWAL (Collaboratory for Equity in Water Allocation) project
-            has modeled 30 alternative water management scenarios for the
-            Central Valley water systems that supply most of the state. For each
-            of these scenarios, we also modeled 5 future climate possibilities.
-          </Typography>
-
-          <ScrollToButton
-            scrollToId="regions"
-            color={theme.palette.overlay.water}
-            style={{
-              marginTop: "2rem",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          />
-        </Box>
-      </BasePanel>
+        }
+      />
 
       <Spacer height={{ xs: 24, md: 48, lg: 64 }} />
 
