@@ -1,4 +1,4 @@
-import { BasePanel, Spacer, ScrollToButton } from "@repo/ui"
+import { BasePanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
@@ -17,20 +17,74 @@ const IntroSection = () => {
       }}
     >
       {/* Full screen home panel */}
-      <BasePanel
+      <TwoColumnPanel
         id="home"
         fullHeight={true}
         fullWidth={true}
-        background="transparent"
-        paddingVariant="very-wide"
+        backgroundColor="transparent"
         includeHeaderSpacing={true}
+        contentColumn="left"
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
         sx={{
           position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "flex-start",
         }}
+        leftContent={
+          <Box
+            sx={{
+              width: (theme) => theme.layout.textContainer.maxWidth,
+              textAlign: "left",
+              zIndex: theme.zIndex.introText,
+            }}
+          >
+            {/* Hero text content */}
+            <Typography
+              variant="h1"
+              component="h1"
+              sx={{
+                mb: (theme) => theme.layout.spacing.md,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                "& > span": {
+                  lineHeight: 1.05, // Match theme h1 lineHeight
+                },
+              }}
+            >
+              <span>Rethink</span>
+              <span>California</span>
+              <span>Water</span>
+            </Typography>
+
+            {/* Body text */}
+            <Typography
+              variant="body1"
+              sx={{
+                mb: (theme) => theme.layout.spacing.xl,
+              }}
+            >
+              Explore a range of Central Valley water scenarios and discover
+              possibilities for water management across the state, under current
+              conditions and future climates.
+            </Typography>
+
+            {/* Arrow positioned at text block midpoint */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mt: (theme) => theme.layout.spacing.xl,
+              }}
+            >
+              <ScrollToButton
+                scrollToId="frontmatter"
+                color={theme.palette.blue.darkest}
+              />
+            </Box>
+          </Box>
+        }
       >
         {/* Ambient background circles, positioned to cover full viewport */}
         <Box
@@ -40,7 +94,6 @@ const IntroSection = () => {
             left: 0,
             right: 0,
             bottom: { xs: 0, md: "26%" },
-
             zIndex: theme.zIndex.introBackgroundImages,
             pointerEvents: "none",
           }}
@@ -66,63 +119,7 @@ const IntroSection = () => {
             zIndex={1}
           />
         </Box>
-
-        {/* Hero text content */}
-        <Box
-          id="home-content"
-          sx={{
-            position: "relative",
-            zIndex: theme.zIndex.introText,
-            pr: { xs: 1, md: 0 },
-          }}
-        >
-          <Typography
-            variant="h1"
-            component="h1"
-            sx={{
-              mb: (theme) => theme.layout.spacing.md,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-start",
-              "& > span": {
-                lineHeight: 1.05, // Match theme h1 lineHeight
-              },
-            }}
-          >
-            <span>Rethink</span>
-            <span>California</span>
-            <span>Water</span>
-          </Typography>
-
-          {/* Body text */}
-          <Typography
-            variant="body1"
-            sx={{
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-              mb: (theme) => theme.layout.spacing.xl,
-            }}
-          >
-            Explore a range of Central Valley water scenarios and discover
-            possibilities for water management across the state, under current
-            conditions and future climates.
-          </Typography>
-
-          {/* Arrow positioned at text block midpoint */}
-          <Box
-            sx={{
-              width: (theme) => theme.layout.textContainer.maxWidth,
-              display: "flex",
-              justifyContent: "center",
-              mt: (theme) => theme.layout.spacing.xl,
-            }}
-          >
-            <ScrollToButton
-              scrollToId="frontmatter"
-              color={theme.palette.blue.darkest}
-            />
-          </Box>
-        </Box>
-      </BasePanel>
+      </TwoColumnPanel>
 
       {/* Frontmatter panel(s) */}
       <BasePanel
