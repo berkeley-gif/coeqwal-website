@@ -383,7 +383,7 @@ const tooltipActionButtonMixin = {
   transition: "all 0.2s ease",
 } as const
 
-// Triangle checkbox mixin (for expandable form controls)
+// Triangle checkbox mixin (for dropdown menus in the scenario search panel)
 const triangleCheckboxMixin = {
   display: "inline-block",
   width: `${themeValues.layout.controls.standard}px !important`,
@@ -1250,7 +1250,6 @@ const theme = createTheme({
     },
     MuiTypography: {
       variants: [
-        // Removed the problematic global body2 margin - it should be applied contextually, not globally
         {
           props: { variant: "h2" },
           style: ({ theme }) => ({
@@ -1472,7 +1471,7 @@ theme.background = {
   paragraph: "rgba(0, 0, 0, 0.4)",
   overlay: {
     light: "rgba(0, 0, 0, 0.2)",
-    medium: "rgba(0, 0, 0, 0.4)", // Same as paragraph background
+    medium: "rgba(0, 0, 0, 0.4)",
     dark: "rgba(0, 0, 0, 0.8)",
   },
 }
@@ -1484,7 +1483,7 @@ theme.drawerNavigation = {
   colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
 }
 
-// Add map prompt dialog configuration to theme with theme variables
+// Map prompt dialog configuration
 theme.mapPromptDialog = {
   ...themeValues.mapPromptDialog,
   backgroundColor: theme.background.overlay.dark,
