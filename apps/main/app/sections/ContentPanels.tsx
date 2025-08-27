@@ -149,14 +149,14 @@ export default function ContentPanels() {
           color="inherit"
           aria-label="open-empower"
           sx={(theme) => ({
-            width: 96,
-            height: 96,
+            width: 90,
+            height: 90,
             borderRadius: theme.borderRadius.rounded,
             border: "none",
           })}
           onClick={scrollToNextSection}
         >
-          <RoundedDownArrow size={80} />
+          <RoundedDownArrow />
         </IconButton>
       </Box>
     </Box>
@@ -1016,17 +1016,14 @@ function PanelWithDetail({
                     <IconButton
                       onClick={onToggleDetail}
                       sx={(theme) => ({
-                        width: { xs: 80, md: 96 },
-                        height: { xs: 80, md: 96 },
+                        width: 90,
+                        height: 90,
                         color: theme.palette.blue.darkest,
                         border: "none",
                         borderRadius: theme.borderRadius.rounded,
                       })}
                     >
-                                             <RoundedDownArrow
-                         size={80}
-                         style={{ transform: "rotate(-90deg)" }}
-                       />
+                      <RoundedDownArrow style={{ transform: "rotate(-90deg)" }} />
                     </IconButton>
                   </Box>
                 )}
@@ -1044,11 +1041,11 @@ function PanelWithDetail({
                     color: theme.palette.blue.darkest,
                     border: "none",
                     borderRadius: theme.borderRadius.rounded,
-                    width: 120,
-                    height: 120,
+                    width: 90,
+                    height: 90,
                   })}
                 >
-                  <RoundedDownArrow size={96} />
+                  <RoundedDownArrow />
                 </IconButton>
               )}
             </Box>
