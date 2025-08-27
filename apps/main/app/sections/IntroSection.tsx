@@ -139,16 +139,13 @@ const IntroSection = () => {
         </Box>
       </BasePanel>
 
-      {/* Spacer between full-screen panels */}
-      <Spacer height={{ xs: 32, md: 48 }} />
-
       {/* Frontmatter panel(s) */}
       <BasePanel
         id="frontmatter"
         fullHeight={true}
         fullWidth
         background="transparent"
-        paddingVariant="content-centered"
+        paddingVariant="content-centered" // new BasePanel option to center text vertically and horizontally within panel without relying on padding
         includeHeaderSpacing={true}
         sx={{
           color: (theme) => theme.palette.primary.dark,
