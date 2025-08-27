@@ -583,12 +583,12 @@ const theme = createTheme({
     },
     // Responsive layout spacing for major components and sections
     spacing: {
-      xs: { xs: 1, sm: 1.5, md: 2 },     // 8px / 12px / 16px
-      sm: { xs: 1.5, sm: 2, md: 2.5 },   // 12px / 16px / 20px
-      md: { xs: 2, sm: 2.5, md: 3 },     // 16px / 20px / 24px
-      lg: { xs: 2.5, sm: 3, md: 4 },     // 20px / 24px / 32px
-      xl: { xs: 3, sm: 4, md: 5 },       // 24px / 32px / 40px
-      xxl: { xs: 4, sm: 5, md: 6 },      // 32px / 40px / 48px
+      xs: { xs: 1, sm: 1.5, md: 2 }, // 8px / 12px / 16px
+      sm: { xs: 1.5, sm: 2, md: 2.5 }, // 12px / 16px / 20px
+      md: { xs: 2, sm: 2.5, md: 3 }, // 16px / 20px / 24px
+      lg: { xs: 2.5, sm: 3, md: 4 }, // 20px / 24px / 32px
+      xl: { xs: 3, sm: 4, md: 5 }, // 24px / 32px / 40px
+      xxl: { xs: 4, sm: 5, md: 6 }, // 32px / 40px / 48px
     },
   },
   // Custom breakpoints

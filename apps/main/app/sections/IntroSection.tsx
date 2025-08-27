@@ -1,6 +1,5 @@
-import { BasePanel, Spacer, RoundedDownArrow } from "@repo/ui"
-import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
-import { ScrollIndicator } from "@repo/motion/components"
+import { BasePanel, Spacer, ScrollToButton } from "@repo/ui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
 import { ambientCircles } from "../config/ambientCircles"
@@ -117,24 +116,10 @@ const IntroSection = () => {
               mt: (theme) => theme.layout.spacing.xl,
             }}
           >
-            <ScrollIndicator
+            <ScrollToButton
               scrollToId="frontmatter"
               color={theme.palette.blue.darkest}
-              animationComplete={true}
-              delay={1.0}
-            >
-                          <IconButton
-              sx={(theme) => ({
-                width: 90,
-                height: 90,
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-                color: theme.palette.blue.darkest,
-              })}
-            >
-              <RoundedDownArrow />
-            </IconButton>
-            </ScrollIndicator>
+            />
           </Box>
         </Box>
       </BasePanel>
@@ -166,11 +151,14 @@ const IntroSection = () => {
           <Typography variant="body1">
             California&apos;s Central Valley water depends on two main things:
           </Typography>
-          <Box component="ol" sx={{ 
-            mt: (theme) => theme.layout.spacing.xs,
-            mb: (theme) => theme.layout.spacing.sm,
-            pl: 3 
-          }}>
+          <Box
+            component="ol"
+            sx={{
+              mt: (theme) => theme.layout.spacing.xs,
+              mb: (theme) => theme.layout.spacing.sm,
+              pl: 3,
+            }}
+          >
             <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">
                 How much rain and snow we get.
@@ -183,7 +171,10 @@ const IntroSection = () => {
             </Box>
           </Box>
 
-          <Typography variant="body1" sx={{ mb: (theme) => theme.layout.spacing.sm }}>
+          <Typography
+            variant="body1"
+            sx={{ mb: (theme) => theme.layout.spacing.sm }}
+          >
             We already face difficult choices. Climate change brings deeper
             droughts, bigger floods, and growing uncertainty.
           </Typography>
@@ -195,29 +186,15 @@ const IntroSection = () => {
             of these scenarios, we also modeled 5 future climate possibilities.
           </Typography>
 
-          <ScrollIndicator
+          <ScrollToButton
             scrollToId="regions"
             color={theme.palette.overlay.water}
-            animationComplete={true}
-            delay={1.0}
             style={{
               marginTop: "2rem",
               display: "flex",
               justifyContent: "center",
             }}
-          >
-            <IconButton
-              sx={(theme) => ({
-                width: 90,
-                height: 90,
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-                color: theme.palette.overlay.water,
-              })}
-            >
-              <RoundedDownArrow />
-            </IconButton>
-          </ScrollIndicator>
+          />
         </Box>
       </BasePanel>
 
@@ -249,11 +226,17 @@ const IntroSection = () => {
             mr: { xs: 2, md: 4 },
           }}
         >
-          <Typography variant="body1" sx={{ mb: (theme) => theme.layout.spacing.md }}>
+          <Typography
+            variant="body1"
+            sx={{ mb: (theme) => theme.layout.spacing.md }}
+          >
             The scenarios we run cover these areas of California:
           </Typography>
 
-          <Box component="ul" sx={{ mb: (theme) => theme.layout.spacing.md, pl: 3 }}>
+          <Box
+            component="ul"
+            sx={{ mb: (theme) => theme.layout.spacing.md, pl: 3 }}
+          >
             <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
               <Typography variant="body1">Sacramento Valley</Typography>
             </Box>
@@ -277,29 +260,15 @@ const IntroSection = () => {
             to advocate for your community.
           </Typography>
 
-          <ScrollIndicator
+          <ScrollToButton
             scrollToId="content-panels"
             color={theme.palette.overlay.water}
-            animationComplete={true}
-            delay={1.0}
             style={{
               marginTop: "2rem",
               display: "flex",
               justifyContent: "center",
             }}
-          >
-            <IconButton
-              sx={(theme) => ({
-                width: 90,
-                height: 90,
-                borderRadius: theme.borderRadius.rounded,
-                border: "none",
-                color: theme.palette.overlay.water,
-              })}
-            >
-              <RoundedDownArrow />
-            </IconButton>
-          </ScrollIndicator>
+          />
         </Box>
       </BasePanel>
     </Box>
