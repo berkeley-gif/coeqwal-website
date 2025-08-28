@@ -36,10 +36,8 @@ function Snowmelt() {
     >
       <motion.div style={{ opacity: firstParagraphOpacity }}>
         <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "First, we need to understand how climate change is affecting California’s water."
-            }
+          <Typography variant="h4">
+            {"Losing Nature's Water Storage"}
           </Typography>
         </Box>
         <Box className="paragraph" component="article">

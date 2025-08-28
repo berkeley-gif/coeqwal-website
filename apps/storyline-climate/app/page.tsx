@@ -17,14 +17,13 @@ import Delta from "./components/03Delta"
 import Whiplash from "./components/04Whiplash"
 import SectionTransition from "./components/07AdaptTransition"
 import SectionSupply from "./components/05Groundwater"
-import SectionResolution from "./components/08Hydroclimate"
-import Conclusion from "./components/09Conclusion"
+import SectionResolution from "./components/08Resolution"
 import Conveyance from "./components/06Conveyance"
 import { motion, useScroll, useMotionValueEvent } from "@repo/motion"
 
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [useNewPlot, setUseNewPlot] = useState(false)
+  const [useNewPlot, setUseNewPlot] = useState(true)
 
   return (
     <>
@@ -60,7 +59,6 @@ export default function StoryContainer() {
             <Whiplash />
             <SectionTransition />
             <SectionResolution />
-            <Conclusion />
           </>
         ) : (
           <>
@@ -72,7 +70,6 @@ export default function StoryContainer() {
             <Conveyance />
             <SectionTransition />
             <SectionResolution />
-            <Conclusion />
           </>
         )}
       </Box>
@@ -114,6 +111,7 @@ function SelectionPanel({
         display: "flex",
         flexDirection: "column",
         gap: 1,
+        zIndex: 3,
       }}
     >
       <Box>
@@ -148,7 +146,7 @@ function SelectionPanel({
           <RadioGroup
             row
             name="row-radio-buttons-group"
-            defaultValue={"original"}
+            defaultValue={"new"}
             onChange={(event) => {
               updateOnPlot(event.target.value)
             }}

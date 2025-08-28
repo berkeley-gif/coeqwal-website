@@ -98,6 +98,15 @@ html{
     text-align: center;
 }
 
+.text-center-left-holder{
+    position: absolute;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+}
+
+
+
 .selection-panel {
     position: fixed;
     right: 30px;
@@ -110,6 +119,16 @@ html{
 
 .MuiFormControlLabel-label {
   color: #f2f0ef !important;
+}
+
+.img-container{
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 /* specific to this story */
