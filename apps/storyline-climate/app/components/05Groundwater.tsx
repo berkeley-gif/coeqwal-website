@@ -47,9 +47,9 @@ function Groundwater() {
             {"During droughts of the past,"}
           </Typography>
           <Typography variant="body1">
-            {
-              "communities and farmers in California have relied on groundwater to meet their needs. "
-            }
+            {"communities and farmers in California have relied on "}
+            <span style={{ fontWeight: "bold" }}>{"groundwater"}</span>
+            {" to meet their needs."}
           </Typography>
         </Box>
         <Box className="paragraph" component="article">
@@ -138,13 +138,15 @@ function Conservation() {
           </Typography>
           <Typography variant="body1">
             {
-              "For example, drought tolerant landscaping, water efficient appliances, and water recycling "
+              "For example, drought-tolerant landscaping, water-efficient appliances, and water recycling "
             }
           </Typography>
           <Typography variant="body1">
-            {
-              "can help lower human water demands and make the most of available supplies."
-            }
+            {"can help "}
+            <span className="highlight-text">
+              {"lower human water demands"}
+            </span>
+            {" and make the most of available supplies."}
           </Typography>
         </Box>
         <Box className="paragraph" component="article">
