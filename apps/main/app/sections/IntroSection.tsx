@@ -1,5 +1,6 @@
 import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useTranslation } from "@repo/i18n"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
 import { ambientCircles } from "../config/ambientCircles"
@@ -7,6 +8,7 @@ import { floatingMarkers } from "../config/floatingMarkers"
 
 const IntroSection = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   return (
     <Box
@@ -53,9 +55,7 @@ const IntroSection = () => {
                 },
               }}
             >
-              <span>Rethink</span>
-              <span>California</span>
-              <span>Water</span>
+              {t("heroPanel.title")}
             </Typography>
 
             {/* Body text */}
@@ -65,9 +65,7 @@ const IntroSection = () => {
                 mb: (theme) => theme.layout.spacing.xl,
               }}
             >
-              Explore a range of Central Valley water scenarios and discover
-              possibilities for water management across the state, under current
-              conditions and future climates.
+              {t("heroPanel.content")}
             </Typography>
 
             {/* Arrow positioned at text block midpoint */}
