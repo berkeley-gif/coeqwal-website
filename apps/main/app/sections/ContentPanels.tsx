@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
+import { ResponsiveStyleValue } from "@mui/system"
 import {
   BasePanel,
   LeadingMarkerText,
@@ -59,9 +60,11 @@ export default function ContentPanels() {
 
   const LearnSimple = () => (
     <Box
+      id="learn-simple"
       sx={{
         display: "flex",
-        alignItems: "center",
+        alignItems: { sm: "flex-start", lg: "center" },
+        flexDirection: { sm: "column-reverse", lg: "row" },
         gap: (theme) => theme.layout.spacing.md,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
@@ -96,9 +99,11 @@ export default function ContentPanels() {
 
   const ExploreSimple = () => (
     <Box
+      id="explore-simple"
       sx={{
         display: "flex",
-        alignItems: "center",
+        alignItems: { sm: "flex-start", lg: "center" },
+        flexDirection: { sm: "column", lg: "row" },
         gap: (theme) => theme.layout.spacing.md,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
@@ -498,6 +503,7 @@ export default function ContentPanels() {
           }
         />
 
+        <Spacer height={{ xs: 100, lg: 0 }} />
         {/* Panel Component - Explore detail */}
         <PanelWithDetail
           panelType="explore"
@@ -888,7 +894,7 @@ export default function ContentPanels() {
             </>
           }
         />
-
+        <Spacer height={{ xs: 100, lg: 0 }} />
         {/* Empower panel */}
         <Box sx={{ py: 4 }}>
           <EmpowerSimple />
