@@ -4,39 +4,33 @@ import React from "react"
 import { Box, Typography, BoxProps } from "@mui/material"
 import { styled } from "@mui/material/styles"
 
-interface TwoColumnPanelProps extends BoxProps {
-  /** Content for left column */
-  leftContent?: React.ReactNode
-  /** Content for right column */
-  rightContent?: React.ReactNode
-  /** Optional title for left column */
-  leftTitle?: string
-  /** Optional title for right column */
-  rightTitle?: string
+interface OneColumnPanelProps extends Omit<BoxProps, 'content'> {
+  /** Main content for the panel */
+  content?: React.ReactNode
+  /** Optional title for the panel */
+  title?: string
   /** When true, panel spans full viewport width (100vw) */
   fullWidth?: boolean
   /** When true, panel spans full viewport height (100vh) */
   fullHeight?: boolean
   /** Background color - any CSS color value */
   backgroundColor?: string
+  /** Text color - theme color path or hex color */
+  textColor?: string
   /** Whether to include space for header at top */
   includeHeaderSpacing?: boolean
-  /** Which column should contain the main content */
-  contentColumn?: "left" | "right"
-  /** Flex alignment for the content column */
+  /** Flex alignment for the content */
   contentAlignment?: {
     justifyContent?: "flex-start" | "center" | "flex-end"
     alignItems?: "flex-start" | "center" | "flex-end" | "stretch"
   }
-  /** Text color - theme color path or hex color */
-  textColor?: string
   /** Background elements (absolutely positioned) */
   children?: React.ReactNode
   /** Optional background image */
   backgroundImage?: string
 }
 
-const TwoColumnRoot = styled(Box, {
+const OneColumnRoot = styled(Box, {
   shouldForwardProp: (prop) =>
     prop !== "fullHeight" &&
     prop !== "fullWidth" &&
@@ -44,7 +38,7 @@ const TwoColumnRoot = styled(Box, {
     prop !== "textColor" &&
     prop !== "includeHeaderSpacing" &&
     prop !== "backgroundImage",
-})<TwoColumnPanelProps>(({
+})<OneColumnPanelProps>(({
   theme,
   fullHeight,
   fullWidth,
@@ -61,7 +55,7 @@ const TwoColumnRoot = styled(Box, {
     position: "relative",
     boxSizing: "border-box",
     display: "flex",
-    flexDirection: "row",
+    flexDirection: "column",
     
     // Header spacing via padding-top
     paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
@@ -79,17 +73,14 @@ const TwoColumnRoot = styled(Box, {
   }
 })
 
-export function TwoColumnPanel({
-  leftContent,
-  rightContent,
-  leftTitle,
-  rightTitle,
+export function OneColumnPanel({
+  content,
+  title,
   fullWidth = false,
   fullHeight = true,
   backgroundColor = "transparent",
   textColor,
   includeHeaderSpacing = true,
-  contentColumn = "left",
   contentAlignment = {
     justifyContent: "center",
     alignItems: "center",
@@ -97,11 +88,9 @@ export function TwoColumnPanel({
   backgroundImage,
   children,
   ...rest
-}: TwoColumnPanelProps) {
-  const isLeftContent = contentColumn === "left"
-  
+}: OneColumnPanelProps) {
   return (
-    <TwoColumnRoot
+    <OneColumnRoot
       fullHeight={fullHeight}
       fullWidth={fullWidth}
       backgroundColor={backgroundColor}
@@ -110,44 +99,24 @@ export function TwoColumnPanel({
       backgroundImage={backgroundImage}
       {...rest}
     >
-      {/* Left Column - 50% width */}
+      {/* Main Content Column - full width */}
       <Box
         sx={{
-          width: "50%",
+          width: "100%",
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: isLeftContent ? contentAlignment.justifyContent : "flex-start",
-          alignItems: isLeftContent ? contentAlignment.alignItems : "flex-start",
+          justifyContent: contentAlignment.justifyContent,
+          alignItems: contentAlignment.alignItems,
           position: "relative",
         }}
       >
-        {leftTitle && (
+        {title && (
           <Typography variant="h2" gutterBottom>
-            {leftTitle}
+            {title}
           </Typography>
         )}
-        {leftContent}
-      </Box>
-
-      {/* Right Column - 50% width */}
-      <Box
-        sx={{
-          width: "50%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: !isLeftContent ? contentAlignment.justifyContent : "flex-start",
-          alignItems: !isLeftContent ? contentAlignment.alignItems : "flex-start",
-          position: "relative",
-        }}
-      >
-        {rightTitle && (
-          <Typography variant="h2" gutterBottom>
-            {rightTitle}
-          </Typography>
-        )}
-        {rightContent}
+        {content}
       </Box>
 
       {/* Background Elements - absolutely positioned */}
@@ -166,6 +135,6 @@ export function TwoColumnPanel({
           {children}
         </Box>
       )}
-    </TwoColumnRoot>
+    </OneColumnRoot>
   )
 }
