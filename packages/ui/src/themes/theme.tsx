@@ -593,7 +593,7 @@ const theme = createTheme({
   },
   // Custom breakpoints
   breakpoints: {
-    values: { xs: 0, sm: 600, md: 820, lg: 1200, xl: 1536 },
+    values: { xs: 0, sm: 600, md: 900, lg: 1200, xl: 1536 },
   },
   // Card typography scale
   cards: {
