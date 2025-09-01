@@ -53,6 +53,7 @@ export type { InfoIconButtonProps } from "./common/InfoIconButton"
 
 // Panel components
 export { BasePanel } from "./panels/BasePanel"
+export { OneColumnPanel } from "./panels/OneColumnPanel"
 export { TwoColumnPanel } from "./panels/TwoColumnPanel"
 export { VideoPanel } from "./panels/VideoPanel"
 export type { BasePanelProps } from "./panels/BasePanel"
