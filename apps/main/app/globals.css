@@ -1,2 +1,10 @@
 /* Import Mapbox GL CSS */
 @import 'mapbox-gl/dist/mapbox-gl.css';
+
+/* Temporarily hide map */
+.map-container,
+.leaflet-container,
+[class*="map"],
+[id*="map"] {
+  display: none !important;
+}
