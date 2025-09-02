@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
+import { ResponsiveStyleValue } from "@mui/system"
 import {
   BasePanel,
   LeadingMarkerText,
@@ -57,15 +58,43 @@ export default function ContentPanels() {
     window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" })
   }
 
-  const LearnSimple = () => (
-    <Box
+  interface ContentPanelProps {
+    id: string
+    smallScreenFlexDir?: 'column' | 'column-reverse' | 'row' | 'row-reverse'
+    smallScreenAlign?: 'flex-start' | 'center' | 'flex-end'
+    largeScreenFlexDir?: 'column' | 'column-reverse' | 'row' | 'row-reverse'
+    largeScreenAlign?: 'flex-start' | 'center' | 'flex-end'
+    children: React.ReactNode
+  }
+
+  function ContentPanel({
+    id,
+    smallScreenFlexDir = 'column',
+    largeScreenFlexDir = 'row',
+    smallScreenAlign = 'flex-start',
+    largeScreenAlign = 'center',
+    children
+  }: ContentPanelProps) {
+    return (<Box
+      id={id}
       sx={{
         display: "flex",
-        alignItems: "center",
+        alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
+        flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
         gap: (theme) => theme.layout.spacing.md,
         color: (theme) => theme.palette.blue.darkest,
         width: "100%",
+        paddingTop: { xs: 3, md: 14 },
       }}
+    >
+      {children}
+    </Box>)
+  }
+
+  const LearnSimple = () => (
+    <ContentPanel
+      id="learn"
+      smallScreenFlexDir="column-reverse"
     >
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -91,18 +120,12 @@ export default function ContentPanels() {
           sx={{ width: "100%", maxWidth: 520, height: "auto" }}
         />
       </Box>
-    </Box>
+    </ContentPanel>
   )
 
   const ExploreSimple = () => (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: (theme) => theme.layout.spacing.md,
-        color: (theme) => theme.palette.blue.darkest,
-        width: "100%",
-      }}
+    <ContentPanel
+      id="explore"
     >
       {/* Image column */}
       <Box
@@ -123,41 +146,10 @@ export default function ContentPanels() {
           </Typography>
         </LeadingMarkerText>
       </Box>
-    </Box>
+    </ContentPanel>
   )
 
-  const EmpowerSimple = () => (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: (theme) => theme.layout.spacing.md,
-        color: (theme) => theme.palette.blue.darkest,
-        width: "100%",
-        paddingTop: { xs: 3, md: 14 },
-      }}
-    >
-      <LeadingMarkerText title="Empower">
-        <Typography variant="body1">
-          your community with data that helps you understand the impacts of
-          operational decisions
-        </Typography>
-      </LeadingMarkerText>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          mt: (theme) => theme.layout.spacing.sm,
-        }}
-      >
-        <CircularArrowButton
-          onClick={scrollToNextSection}
-          ariaLabel="open-empower"
-        />
-      </Box>
-    </Box>
-  )
+
   // Get background color for each panel
   const getPanelBgColor = (panelType: PanelType, theme: Theme) => {
     switch (panelType) {
@@ -498,7 +490,8 @@ export default function ContentPanels() {
           }
         />
 
-        {/* Panel Component - Explore detail */}
+        <Spacer height={{ xs: 100, lg: 0 }} />
+        {/* Explore panel */}
         <PanelWithDetail
           panelType="explore"
           isActive={activePanel === "explore"}
@@ -888,10 +881,29 @@ export default function ContentPanels() {
             </>
           }
         />
-
+        <Spacer height={{ xs: 100, lg: 0 }} />
         {/* Empower panel */}
         <Box sx={{ py: 4 }}>
-          <EmpowerSimple />
+          <ContentPanel id="empower" smallScreenAlign="center" largeScreenFlexDir="column">
+            <LeadingMarkerText title="Empower">
+              <Typography variant="body1">
+                your community with data that helps you understand the impacts of
+                operational decisions
+              </Typography>
+            </LeadingMarkerText>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mt: (theme) => theme.layout.spacing.sm,
+              }}
+            >
+              <CircularArrowButton
+                onClick={scrollToNextSection}
+                ariaLabel="open-empower"
+              />
+            </Box>
+          </ContentPanel>
         </Box>
       </Box>
     </BasePanel>

@@ -25,16 +25,18 @@ const IntroSection = () => {
         includeHeaderSpacing={true}
         contentColumn="left"
         contentAlignment={{
-          justifyContent: "center",
-          alignItems: "center",
+          justifyContent: { xs: "flex-end", md: "flex-end", lg: "center" },
+          alignItems: "flex-start",
         }}
         sx={{
           position: "relative",
+
         }}
         leftContent={
           <Box
             sx={{
-              width: (theme) => theme.layout.textContainer.maxWidth,
+              width: '100%',
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth, // This is setting 
               textAlign: "left",
               zIndex: theme.zIndex.introText,
             }}
@@ -111,6 +113,9 @@ const IntroSection = () => {
             bottom: { xs: 0, md: "26%" },
             zIndex: theme.zIndex.introForegroundImages,
             pointerEvents: "none",
+            transform: { xs: "scale(0.8)", md: "scale(1.20)", lg: "scale(1)" },
+            transformOrigin: "top right",
+            willChange: "transform",
           }}
         >
           <FloatingImageMarkers

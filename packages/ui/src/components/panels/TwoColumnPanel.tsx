@@ -3,6 +3,7 @@
 import React from "react"
 import { Box, Typography, BoxProps } from "@mui/material"
 import { styled } from "@mui/material/styles"
+import { ResponsiveStyleValue } from "@mui/system"
 
 interface TwoColumnPanelProps extends BoxProps {
   /** Content for left column */
@@ -25,8 +26,8 @@ interface TwoColumnPanelProps extends BoxProps {
   contentColumn?: "left" | "right"
   /** Flex alignment for the content column */
   contentAlignment?: {
-    justifyContent?: "flex-start" | "center" | "flex-end"
-    alignItems?: "flex-start" | "center" | "flex-end" | "stretch"
+    justifyContent?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end">
+    alignItems?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end" | "stretch">
   }
   /** Text color - theme color path or hex color */
   textColor?: string
@@ -62,9 +63,12 @@ const TwoColumnRoot = styled(Box, {
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "row",
-    
+
     // Header spacing via padding-top
     paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
+
+    paddingLeft: '78px',
+    paddingRight: '78px',
 
     // Background color
     backgroundColor: backgroundColor || "transparent",
@@ -99,7 +103,7 @@ export function TwoColumnPanel({
   ...rest
 }: TwoColumnPanelProps) {
   const isLeftContent = contentColumn === "left"
-  
+
   return (
     <TwoColumnRoot
       fullHeight={fullHeight}
