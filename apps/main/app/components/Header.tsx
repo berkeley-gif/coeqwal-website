@@ -25,7 +25,5 @@ export function Header() {
     }
   }
 
-  return (
-    <UIHeader onDataClick={handleDataClick} />
-  )
+  return <UIHeader onDataClick={handleDataClick} />
 }

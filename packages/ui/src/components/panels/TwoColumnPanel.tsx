@@ -27,7 +27,9 @@ interface TwoColumnPanelProps extends BoxProps {
   /** Flex alignment for the content column */
   contentAlignment?: {
     justifyContent?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end">
-    alignItems?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end" | "stretch">
+    alignItems?: ResponsiveStyleValue<
+      "flex-start" | "center" | "flex-end" | "stretch"
+    >
   }
   /** Text color - theme color path or hex color */
   textColor?: string
@@ -67,8 +69,8 @@ const TwoColumnRoot = styled(Box, {
     // Header spacing via padding-top
     paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
 
-    paddingLeft: '78px',
-    paddingRight: '78px',
+    paddingLeft: "78px",
+    paddingRight: "78px",
 
     // Background color
     backgroundColor: backgroundColor || "transparent",
@@ -121,8 +123,12 @@ export function TwoColumnPanel({
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: isLeftContent ? contentAlignment.justifyContent : "flex-start",
-          alignItems: isLeftContent ? contentAlignment.alignItems : "flex-start",
+          justifyContent: isLeftContent
+            ? contentAlignment.justifyContent
+            : "flex-start",
+          alignItems: isLeftContent
+            ? contentAlignment.alignItems
+            : "flex-start",
           position: "relative",
         }}
       >
@@ -141,8 +147,12 @@ export function TwoColumnPanel({
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: !isLeftContent ? contentAlignment.justifyContent : "flex-start",
-          alignItems: !isLeftContent ? contentAlignment.alignItems : "flex-start",
+          justifyContent: !isLeftContent
+            ? contentAlignment.justifyContent
+            : "flex-start",
+          alignItems: !isLeftContent
+            ? contentAlignment.alignItems
+            : "flex-start",
           position: "relative",
         }}
       >

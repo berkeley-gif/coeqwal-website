@@ -1,4 +1,10 @@
-import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
+import {
+  BasePanel,
+  OneColumnPanel,
+  TwoColumnPanel,
+  Spacer,
+  ScrollToButton,
+} from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
@@ -32,13 +38,12 @@ const IntroSection = () => {
         }}
         sx={{
           position: "relative",
-
         }}
         leftContent={
           <Box
             sx={{
-              width: '100%',
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth, // This is setting 
+              width: "100%",
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth, // This is setting
               textAlign: "left",
               zIndex: theme.zIndex.introText,
             }}
@@ -162,12 +167,18 @@ const IntroSection = () => {
                 pl: 3,
               }}
             >
-              <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
+              <Box
+                component="li"
+                sx={{ mb: (theme) => theme.layout.spacing.xs }}
+              >
                 <Typography variant="body1">
                   How much rain and snow we get.
                 </Typography>
               </Box>
-              <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
+              <Box
+                component="li"
+                sx={{ mb: (theme) => theme.layout.spacing.xs }}
+              >
                 <Typography variant="body1">
                   How we choose to manage it.
                 </Typography>
@@ -185,8 +196,9 @@ const IntroSection = () => {
             <Typography variant="body1">
               The COEQWAL (Collaboratory for Equity in Water Allocation) project
               has modeled 30 alternative water management scenarios for the
-              Central Valley water systems that supply most of the state. For each
-              of these scenarios, we also modeled 5 future climate possibilities.
+              Central Valley water systems that supply most of the state. For
+              each of these scenarios, we also modeled 5 future climate
+              possibilities.
             </Typography>
 
             <ScrollToButton

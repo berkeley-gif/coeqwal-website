@@ -36,7 +36,7 @@ export default function Home() {
       >
         {/* Panel sections */}
         <IntroSection />
-{/* Temporarily hidden while developing */}
+        {/* Temporarily hidden while developing */}
         {/* <MapPanel 
           mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "pk.eyJ1IjoiZGlnaWppbGwiLCJhIjoiY2tydmI3dXQyMDR4ajJ2cWUyd3htc3h5MCJ9.8dWK7Z9U3DfG7Ec_DP4Lww"}
           initialLongitude={-121.4944} // California Central Valley
