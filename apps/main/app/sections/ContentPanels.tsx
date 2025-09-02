@@ -92,9 +92,13 @@ export default function ContentPanels() {
   }
 
   const LearnSimple = () => (
-    <ContentPanel
-      id="learn"
-      smallScreenFlexDir="column-reverse"
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: { sm: "flex-start", lg: "center" },
+        flexDirection: { sm: "column-reverse", lg: "row" },
+        gap: (theme) => theme.layout.spacing.md,
+      }}
     >
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -120,12 +124,17 @@ export default function ContentPanels() {
           sx={{ width: "100%", maxWidth: 520, height: "auto" }}
         />
       </Box>
-    </ContentPanel>
+    </Box>
   )
 
   const ExploreSimple = () => (
-    <ContentPanel
-      id="explore"
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: { sm: "flex-start", lg: "center" },
+        flexDirection: { sm: "column", lg: "row" },
+        gap: (theme) => theme.layout.spacing.md,
+      }}
     >
       {/* Image column */}
       <Box
@@ -146,7 +155,7 @@ export default function ContentPanels() {
           </Typography>
         </LeadingMarkerText>
       </Box>
-    </ContentPanel>
+    </Box>
   )
 
 
