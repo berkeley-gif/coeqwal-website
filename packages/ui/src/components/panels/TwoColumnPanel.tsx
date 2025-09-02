@@ -3,7 +3,7 @@
 import React from "react"
 import { Box, Typography, BoxProps } from "@mui/material"
 import { styled } from "@mui/material/styles"
-import { ResponsiveStyleValue } from "@mui/system"
+// import { ResponsiveStyleValue } from "@mui/system"
 
 interface TwoColumnPanelProps extends BoxProps {
   /** Content for left column */
@@ -26,10 +26,8 @@ interface TwoColumnPanelProps extends BoxProps {
   contentColumn?: "left" | "right"
   /** Flex alignment for the content column */
   contentAlignment?: {
-    justifyContent?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end">
-    alignItems?: ResponsiveStyleValue<
-      "flex-start" | "center" | "flex-end" | "stretch"
-    >
+    justifyContent?: "flex-start" | "center" | "flex-end" | { xs?: "flex-start" | "center" | "flex-end"; md?: "flex-start" | "center" | "flex-end"; lg?: "flex-start" | "center" | "flex-end" }
+    alignItems?: "flex-start" | "center" | "flex-end" | "stretch" | { xs?: "flex-start" | "center" | "flex-end" | "stretch"; md?: "flex-start" | "center" | "flex-end" | "stretch"; lg?: "flex-start" | "center" | "flex-end" | "stretch" }
   }
   /** Text color - theme color path or hex color */
   textColor?: string

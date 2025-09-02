@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
 import type { Theme } from "@mui/material/styles"
-import { ResponsiveStyleValue } from "@mui/system"
+// import { ResponsiveStyleValue } from "@mui/system"
 import {
   BasePanel,
   LeadingMarkerText,
@@ -58,39 +58,41 @@ export default function ContentPanels() {
     window.scrollBy({ top: window.innerHeight, left: 0, behavior: "smooth" })
   }
 
-  interface ContentPanelProps {
-    id: string
-    smallScreenFlexDir?: "column" | "column-reverse" | "row" | "row-reverse"
-    smallScreenAlign?: "flex-start" | "center" | "flex-end"
-    largeScreenFlexDir?: "column" | "column-reverse" | "row" | "row-reverse"
-    largeScreenAlign?: "flex-start" | "center" | "flex-end"
-    children: React.ReactNode
-  }
+  // save for later for now
+  // interface ContentPanelProps {
+  //   id: string
+  //   smallScreenFlexDir?: "column" | "column-reverse" | "row" | "row-reverse"
+  //   smallScreenAlign?: "flex-start" | "center" | "flex-end"
+  //   largeScreenFlexDir?: "column" | "column-reverse" | "row" | "row-reverse"
+  //   largeScreenAlign?: "flex-start" | "center" | "flex-end"
+  //   children: React.ReactNode
+  // }
 
-  function ContentPanel({
-    id,
-    smallScreenFlexDir = "column",
-    largeScreenFlexDir = "row",
-    smallScreenAlign = "flex-start",
-    largeScreenAlign = "center",
-    children,
-  }: ContentPanelProps) {
-    return (
-      <Box
-        id={id}
-        sx={{
-          display: "flex",
-          alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
-          flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
-          gap: (theme) => theme.layout.spacing.md,
-          width: "100%",
-          paddingTop: { xs: 3, md: 14 },
-        }}
-      >
-        {children}
-      </Box>
-    )
-  }
+  // save for later for now
+  // function ContentPanel({
+  //   id,
+  //   smallScreenFlexDir = "column",
+  //   largeScreenFlexDir = "row",
+  //   smallScreenAlign = "flex-start",
+  //   largeScreenAlign = "center",
+  //   children,
+  // }: ContentPanelProps) {
+  //   return (
+  //     <Box
+  //       id={id}
+  //       sx={{
+  //         display: "flex",
+  //         alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
+  //         flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
+  //         gap: (theme) => theme.layout.spacing.md,
+  //         width: "100%",
+  //         paddingTop: { xs: 3, md: 14 },
+  //       }}
+  //     >
+  //       {children}
+  //     </Box>
+  //   )
+  // }
 
   const LearnSimple = () => (
     <Box
