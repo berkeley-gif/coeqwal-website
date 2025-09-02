@@ -82,7 +82,6 @@ export default function ContentPanels() {
         alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
         flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
         gap: (theme) => theme.layout.spacing.md,
-        color: (theme) => theme.palette.blue.darkest,
         width: "100%",
         paddingTop: { xs: 3, md: 14 },
       }}
@@ -92,9 +91,14 @@ export default function ContentPanels() {
   }
 
   const LearnSimple = () => (
-    <ContentPanel
-      id="learn"
-      smallScreenFlexDir="column-reverse"
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: { xs: "flex-start", lg: "center" },
+        flexDirection: { xs: "column-reverse", lg: "row" },
+        gap: (theme) => theme.layout.spacing.md,
+        width: "100%",
+      }}
     >
       {/* Text column */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -120,12 +124,18 @@ export default function ContentPanels() {
           sx={{ width: "100%", maxWidth: 520, height: "auto" }}
         />
       </Box>
-    </ContentPanel>
+    </Box>
   )
 
   const ExploreSimple = () => (
-    <ContentPanel
-      id="explore"
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: { xs: "flex-start", lg: "center" },
+        flexDirection: { xs: "column", lg: "row" },
+        gap: (theme) => theme.layout.spacing.md,
+        width: "100%",
+      }}
     >
       {/* Image column */}
       <Box
@@ -146,7 +156,7 @@ export default function ContentPanels() {
           </Typography>
         </LeadingMarkerText>
       </Box>
-    </ContentPanel>
+    </Box>
   )
 
 
@@ -490,7 +500,6 @@ export default function ContentPanels() {
           }
         />
 
-        <Spacer height={{ xs: 100, lg: 0 }} />
         {/* Explore panel */}
         <PanelWithDetail
           panelType="explore"
@@ -881,10 +890,20 @@ export default function ContentPanels() {
             </>
           }
         />
-        <Spacer height={{ xs: 100, lg: 0 }} />
         {/* Empower panel */}
         <Box sx={{ py: 4 }}>
-          <ContentPanel id="empower" smallScreenAlign="center" largeScreenFlexDir="column">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: (theme) => theme.layout.spacing.md,
+              color: (theme) => theme.palette.blue.darkest,
+              width: "100%",
+              paddingTop: { xs: 3, lg: 14 },
+              textAlign: "center",
+            }}
+          >
             <LeadingMarkerText title="Empower">
               <Typography variant="body1">
                 your community with data that helps you understand the impacts of
@@ -903,7 +922,7 @@ export default function ContentPanels() {
                 ariaLabel="open-empower"
               />
             </Box>
-          </ContentPanel>
+          </Box>
         </Box>
       </Box>
     </BasePanel>
