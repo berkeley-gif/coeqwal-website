@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@repo/ui/mui"
+import { VerticalImageSlider } from "./helpers/ImageSlider"
 
 function Opener() {
   return (
@@ -12,12 +13,9 @@ function Opener() {
       tabIndex={-1}
       role="region"
     >
-      <Box
-        className="image-holder"
-        sx={{
-          height: "100vh",
-          backgroundImage: "url('/drafts/opener-static-background.png')",
-        }}
+      <VerticalImageSlider
+        topSrc="/images/oroville2021-drought.png"
+        bottomSrc="/images/oroville2023-floods.png"
       />
       <Box
         className="paragraph text-center-holder"
@@ -26,10 +24,10 @@ function Opener() {
         sx={{ top: "40%" }}
       >
         <Typography id="opener-heading" variant="h2" gutterBottom>
-          {"How climate change affects California's water"}
+          {"How Climate Change Affects California's Water"}
         </Typography>
         <Typography variant="h3" gutterBottom>
-          {"Adapting to a hotter, more variable climate future"}
+          {"Adapting to a Hotter, More Variable Climate Future"}
         </Typography>
       </Box>
       <Box
