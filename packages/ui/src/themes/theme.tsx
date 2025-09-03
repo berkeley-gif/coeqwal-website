@@ -750,7 +750,7 @@ const theme = createTheme({
     },
     text: {
       primary: themeValues.palette.blue.darkest,
-      secondary: themeValues.palette.blue.medium,
+      secondary: themeValues.palette.utility.white,
       disabled: themeValues.palette.blue.light,
     },
     action: {
