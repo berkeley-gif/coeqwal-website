@@ -6,6 +6,7 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
+import { NavDropdown, NavDropdownOption } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
 import { useRef, useState } from "react"
@@ -15,8 +16,13 @@ const MotionAppBar = motion.create(AppBar)
 type HeaderTranslations = {
   title: string
   buttons: {
+    tools: string
     getData: string
     about: string
+  }
+  tools: {
+    scenarioExplorer: string
+    needsSearch: string
   }
 }
 
@@ -38,21 +44,32 @@ interface HeaderProps {
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
   onDataClick?: () => void
+  onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
 }
 
 const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
     buttons: {
-      about: "About COEQWAL",
+      tools: "Tools",
       getData: "Download data",
+      about: "About COEQWAL",
+    },
+    tools: {
+      scenarioExplorer: "Scenario data explorer",
+      needsSearch: "Needs-based search",
     },
   },
   es: {
     title: "COEQWAL",
     buttons: {
-      about: "Sobre COEQWAL",
+      tools: "Herramientas",
       getData: "Descargar datos",
+      about: "Sobre COEQWAL",
+    },
+    tools: {
+      scenarioExplorer: "Explorador de datos de escenarios",
+      needsSearch: "Búsqueda basada en necesidades",
     },
   },
 }
@@ -70,6 +87,7 @@ export function Header({
   showSecondaryNav = false,
   secondaryNavItems = [], // Default to empty array, bc optional
   onDataClick,
+  onToolsClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -218,6 +236,26 @@ export function Header({
             pr: 2,
           }}
         >
+          {/* Tools dropdown */}
+          {onToolsClick && (
+            <NavDropdown
+              label={componentText.buttons.tools}
+              options={[
+                {
+                  key: "scenario-explorer",
+                  label: componentText.tools.scenarioExplorer,
+                  onClick: () => onToolsClick("scenario-explorer"),
+                },
+                {
+                  key: "needs-search", 
+                  label: componentText.tools.needsSearch,
+                  onClick: () => onToolsClick("needs-search"),
+                },
+              ]}
+              variant={buttonVariant}
+              sx={buttonStyle}
+            />
+          )}
           <Button
             variant={buttonVariant}
             sx={{
@@ -229,8 +267,6 @@ export function Header({
               "&:hover": {
                 backgroundColor: "white",
                 color: (theme) => theme.palette.blue.darkest,
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
                 "&::before": {
                   opacity: 1,
                 },
@@ -266,8 +302,6 @@ export function Header({
               "&:hover": {
                 backgroundColor: "white",
                 color: (theme) => theme.palette.blue.darkest,
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(52, 69, 116, 0.4)",
                 "&::before": {
                   opacity: 1,
                 },
@@ -291,9 +325,45 @@ export function Header({
           >
             {componentText.buttons.getData}
           </Button>
+          <Button
+            variant={buttonVariant}
+            sx={{
+              ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
+            }}
+          >
+            {componentText.buttons.about}
+          </Button>
           <LanguageSwitcher />
         </Stack>
       </Toolbar>
     </MotionAppBar>
   )
 }
+
+export { Header }
