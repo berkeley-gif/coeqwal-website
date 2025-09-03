@@ -1,6 +1,7 @@
 import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
+import { motion } from "@repo/motion"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
 import { BlueThemeBackground } from "../components/BlueThemeBackground"
@@ -39,10 +40,10 @@ const IntroSection = () => {
         includeHeaderSpacing={true}
         contentColumn="left"
         contentAlignment={{
-          justifyContent: "flex-end", // Text block stays at bottom for all screen sizes
+          justifyContent: "flex-end", // Text block stays at bottom for all screen sizes for this instance
           alignItems: "flex-start",
         }}
-        debug={true} // Enable debug borders
+        debug={false} // Enable debug borders
         leftContent={
           <Box
             sx={{
@@ -50,43 +51,56 @@ const IntroSection = () => {
               paddingBottom: { xs: 4, md: 6, lg: 8 }, // Responsive bottom spacing
             }}
           >
-            {/* Home text content */}
-            <Typography
-              variant="h1"
-              component="h1"
-              sx={{
-                fontSize: "4.8rem", // may change type scale to accomodate new content ~ new layout
-                color: (theme) => theme.palette.text.secondary, // white
-                mb: (theme) => theme.layout.spacing.md,
+            {/* Home text content with fade-in animation */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                delay: 2, // Text fade in after wave pattern
+                duration: 1.5,
+                ease: "easeOut"
               }}
             >
-                {t("homePanel.title")}
+              <Typography
+                variant="h1"
+                component="h1"
+                sx={{
+                  fontSize: "4.2rem", // may change type scale to accomodate new content ~ new layout
+                  lineHeight: 1.12,
+                  color: (theme) => theme.palette.text.secondary, // white
+                  mb: (theme) => theme.layout.spacing.sm,
+                  maxWidth: "800px", // For title wrap styling in this case
+                }}
+              >
+                  {t("homePanel.title")}
+                </Typography>
+
+              {/* Body text */}
+              <Typography
+                variant="body1"
+                sx={(theme) => ({
+                  // mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
+                  color: theme.palette.text.secondary, // white
+                  paddingLeft: "0.5rem", // visually match h1 and body1
+                })}
+              >
+                {t("homePanel.content")}
               </Typography>
 
-            {/* Body text */}
-            <Typography
-              variant="body1"
-              sx={(theme) => ({
-                mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
-                color: theme.palette.text.secondary, // white
-                paddingLeft: "0.5rem", // visually match h1 and body1
-              })}
-            >
-              {t("homePanel.content")}
-            </Typography>
-
-            {/* Arrow positioned at text block midpoint */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <ScrollToButton
-                scrollToId="frontmatter"
-                color={(theme) => theme.palette.text.secondary}
-              />
-            </Box>
+              {/* Arrow positioned at text block midpoint */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  mt: (theme) => theme.layout.spacing.sm,  // sm: { xs: 1.5, sm: 2, md: 2.5 }, // 12px / 16px / 20px
+                }}
+              >
+                <ScrollToButton
+                  scrollToId="frontmatter"
+                  color={(theme) => theme.palette.text.secondary}
+                />
+              </Box>
+            </motion.div>
           </Box>
         }
       >
