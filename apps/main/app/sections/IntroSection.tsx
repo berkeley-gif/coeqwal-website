@@ -1,9 +1,11 @@
-import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
+import { OneColumnPanel, TwoColumnPanel, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { motion } from "@repo/motion"
 import { BlueThemeBackground } from "../components/BlueThemeBackground"
 import { ImageWavePattern } from "../components/ImageWavePattern"
+import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
+import MapOverlayPanels from "../components/MapOverlayPanels"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -139,7 +141,7 @@ const IntroSection = () => {
             </Typography>
 
             <ScrollToButton
-              scrollToId="regions"
+              scrollToId="california-map"
               color={theme.palette.overlay.water}
               style={{
                 marginTop: "2rem",
@@ -151,79 +153,11 @@ const IntroSection = () => {
         }
       />
 
-      <Spacer height={(theme) => theme.layout.spacer.small} />
+      {/* Sticky California map background */}
+      <CaliforniaMapPanel id="california-map" />
 
-      {/* California map background with right-aligned text */}
-      <BasePanel
-        id="regions"
-        fullHeight={false}
-        fullWidth
-        background="transparent"
-        includeHeaderSpacing={true}
-        sx={{
-          background: `url('/images/california.png')`,
-          backgroundSize: "contain",
-          backgroundPosition: "10% center",
-          backgroundRepeat: "no-repeat",
-          height: { xs: "120vh", md: "130vh", lg: "140vh" },
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-            textAlign: "left",
-            color: (theme) => theme.palette.blue.darkest,
-            ml: "auto", // Keep it right-aligned but not as extreme
-            mr: { xs: 2, md: 4 },
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ mb: (theme) => theme.layout.spacing.md }}
-          >
-            The scenarios we run cover these areas of California:
-          </Typography>
-
-          <Box
-            component="ul"
-            sx={{ mb: (theme) => theme.layout.spacing.md, pl: 3 }}
-          >
-            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
-              <Typography variant="body1">Sacramento Valley</Typography>
-            </Box>
-            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
-              <Typography variant="body1">San Joaquin Valley</Typography>
-            </Box>
-            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
-              <Typography variant="body1">
-                Sacramento-San Joaquin Delta
-              </Typography>
-            </Box>
-            <Box component="li" sx={{ mb: (theme) => theme.layout.spacing.xs }}>
-              <Typography variant="body1">Tulare Basin.</Typography>
-            </Box>
-          </Box>
-
-          <Typography variant="body1">
-            The goal of the COEQWAL project is to make opaque water management
-            transparent and accessible. On this site you can explore alternative
-            water management scenarios, understand the trade-offs, and use data
-            to advocate for your community.
-          </Typography>
-
-          <ScrollToButton
-            scrollToId="content-panels"
-            color={theme.palette.overlay.water}
-            style={{
-              marginTop: "2rem",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          />
-        </Box>
-      </BasePanel>
+      {/* Scrolling overlay panels over the sticky map */}
+      <MapOverlayPanels />
     </Box>
   )
 }
