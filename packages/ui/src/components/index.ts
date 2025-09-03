@@ -1,6 +1,8 @@
 // Navigation components
 export { MainHeader } from "./navigation/MainHeader"
 export type { HeaderProps } from "./navigation/MainHeader"
+export { AppHeader } from "./navigation/AppHeader"
+export { Header } from "./navigation/Header"
 export { NavDropdown } from "./navigation/NavDropdown"
 export type {
   NavDropdownProps,

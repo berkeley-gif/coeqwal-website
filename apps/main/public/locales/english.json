@@ -1,7 +1,10 @@
 {
   "homePanel": {
     "title": "What is the future of California's water?",
-    "content": "Water is vital to California’s communities, farms, and the environment. Delivering water to all who need it is not easy, especially as our climate changes. Explore how water in California is managed across the state and discover pathways to a more sustainable and equitable water future."
+    "content": "Water is vital to California's communities, farms, and the environment. Delivering water to all who need it is not easy, especially as our climate changes. Explore how water in California is managed across the state and discover pathways to a more sustainable and equitable water future."
+  },
+  "frontmatterPanel": {
+    "content": "Are you curious about California water and how water management decisions affect you, now and into the future? COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly funded project that sheds light on how water is allocated in California and how climate change shapes the choices we face."
   },
   "interstitial": {
     "content": [

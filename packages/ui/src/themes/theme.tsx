@@ -139,7 +139,7 @@ const themeValues = {
 
   // Layout dimensions, for layout and layout calculations
   layout: {
-    headerHeight: 68,
+    headerHeight: 70,
     drawer: {
       width: 360,
       closedWidth: 60,
@@ -928,9 +928,9 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: ({ theme }) => ({
-          backgroundColor: theme.palette.overlay.water,
-          borderBottom: theme.border.standard,
-          color: theme.palette.text.primary,
+          backgroundColor: "transparent",
+          borderBottom: "none",
+          color: theme.palette.text.secondary,
           borderRadius: theme.borderRadius.none,
           boxShadow: "none",
         }),

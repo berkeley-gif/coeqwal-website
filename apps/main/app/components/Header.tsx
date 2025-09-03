@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { MainHeader } from "@repo/ui"
+import { AppHeader } from "@repo/ui"
 
 /**
  * Main application header with Next.js routing logic
@@ -26,6 +26,6 @@ export function Header() {
   }
 
   return (
-    <MainHeader onDataClick={handleDataClick} onToolsClick={handleToolsClick} />
+    <AppHeader onDataClick={handleDataClick} onToolsClick={handleToolsClick} />
   )
 }
