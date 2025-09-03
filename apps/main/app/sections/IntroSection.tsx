@@ -1,5 +1,6 @@
 import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { useTranslation } from "@repo/i18n"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
 import { BlueThemeBackground } from "../components/BlueThemeBackground"
@@ -8,6 +9,7 @@ import { floatingMarkers } from "../config/floatingMarkers"
 
 const IntroSection = () => {
   const theme = useTheme()
+  const { t } = useTranslation()
 
   return (
     <Box
@@ -18,9 +20,8 @@ const IntroSection = () => {
         position: "relative",
       }}
     >
-      {/* Home panel */}
-      <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
       {/* Full screen home panel */}
+      <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
       <TwoColumnPanel
         id="home"
         fullHeight={true}
@@ -43,7 +44,7 @@ const IntroSection = () => {
               zIndex: theme.zIndex.introText,
             }}
           >
-            {/* Hero text content */}
+            {/* Home text content */}
             <Typography
               variant="h1"
               component="h1"
@@ -53,15 +54,10 @@ const IntroSection = () => {
                 flexDirection: "column",
                 alignItems: "flex-start",
                 color: (theme) => theme.palette.text.secondary, // white
-                "& > span": {
-                  lineHeight: 1.05, // Match theme h1 lineHeight
-                },
               }}
             >
-              <span>Rethink</span>
-              <span>California</span>
-              <span>Water</span>
-            </Typography>
+                {t("homePanel.title")}
+              </Typography>
 
             {/* Body text */}
             <Typography
@@ -71,9 +67,7 @@ const IntroSection = () => {
                 color: (theme) => theme.palette.text.secondary, // white
               }}
             >
-              Explore a range of Central Valley water scenarios and discover
-              possibilities for water management across the state, under current
-              conditions and future climates.
+              {t("homePanel.content")}
             </Typography>
 
             {/* Arrow positioned at text block midpoint */}
