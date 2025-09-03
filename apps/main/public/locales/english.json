@@ -13,6 +13,9 @@
   "scenariosPanel": {
     "content": "Working with diverse community partners, the COEQWAL research team has developed 30 operational strategies – different ways we could manage California's water system. We evaluate these strategies under the climate we've experienced in the recent past, and under five additional hydroclimates – novel patterns of future water availability caused by climate change. These scenarios – unique combinations of operational strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between objectives. By understanding how different decisions affect water allocations for different users, we can imagine new ways of improving water management in California."
   },
+  "interstitialPanel": {
+    "content": "On this site, you can learn about California's water and explore how water allocations change under different scenarios. By providing access to the same tools used by decision-makers and discovering new pathways for managing water, COEQWAL empowers all Californians to shape our water future."
+  },
   "interstitial": {
     "content": [
       "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Agriculture, communities, and ecosystems are all connected by California water.",

@@ -158,6 +158,43 @@ const IntroSection = () => {
 
       {/* Scrolling overlay panels over the sticky map */}
       <MapOverlayPanels />
+
+      {/* Interstitial panel - can be broken out into a component */}
+      <OneColumnPanel
+        id="interstitial"
+        fullHeight={false}
+        fullWidth
+        backgroundColor={theme.palette.common.white}
+        textColor={theme.palette.blue.darkest}
+        includeHeaderSpacing={true}
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        content={
+          <Box
+            sx={{
+              width: "100%",
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
+              textAlign: "left",
+            }}
+          >
+            <Typography variant="body1">
+              {t("interstitialPanel.content")}
+            </Typography>
+
+            <ScrollToButton
+              scrollToId="content-panels"
+              color={theme.palette.overlay.water}
+              style={{
+                marginTop: "2rem",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            />
+          </Box>
+        }
+      />
     </Box>
   )
 }
