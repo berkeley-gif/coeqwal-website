@@ -6,6 +6,13 @@
   "frontmatterPanel": {
     "content": "Are you curious about California water and how water management decisions affect you, now and into the future? COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly funded project that sheds light on how water is allocated in California and how climate change shapes the choices we face."
   },
+  "toolsPanel": {
+    "title": "Tools are needed",
+    "content": "But how do we track the water we have and where it is being delivered? This is where models come in. CalSim is a water planning model developed by government agencies that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released, and where it gets delivered across the state."
+  },
+  "scenariosPanel": {
+    "content": "Working with diverse community partners, the COEQWAL research team has developed 30 operational strategies – different ways we could manage California's water system. We evaluate these strategies under the climate we've experienced in the recent past, and under five additional hydroclimates – novel patterns of future water availability caused by climate change. These scenarios – unique combinations of operational strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between objectives. By understanding how different decisions affect water allocations for different users, we can imagine new ways of improving water management in California."
+  },
   "interstitial": {
     "content": [
       "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Agriculture, communities, and ecosystems are all connected by California water.",
