@@ -4,6 +4,7 @@ import { useTranslation } from "@repo/i18n"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
 import { BlueThemeBackground } from "../components/BlueThemeBackground"
+import { ImageWavePattern } from "../components/ImageWavePattern"
 import { ambientCircles } from "../config/ambientCircles"
 import { floatingMarkers } from "../config/floatingMarkers"
 
@@ -22,6 +23,14 @@ const IntroSection = () => {
     >
       {/* Full screen home panel */}
       <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
+      
+      {/* Wave pattern of circular images */}
+      <ImageWavePattern 
+        imageCount={16}
+        height="33.33vh"
+        zIndex={theme.zIndex.introForegroundImages}
+      />
+
       <TwoColumnPanel
         id="home"
         fullHeight={true}
