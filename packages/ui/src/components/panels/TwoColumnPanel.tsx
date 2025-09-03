@@ -35,6 +35,10 @@ interface TwoColumnPanelProps extends BoxProps {
   children?: React.ReactNode
   /** Optional background image */
   backgroundImage?: string
+  /** Responsive column order - can reverse columns/rows on smaller screens */
+  reverseOnMobile?: boolean
+  /** Show debug borders to visualize column layout */
+  debug?: boolean
 }
 
 const TwoColumnRoot = styled(Box, {
@@ -62,7 +66,7 @@ const TwoColumnRoot = styled(Box, {
     position: "relative",
     boxSizing: "border-box",
     display: "flex",
-    flexDirection: "row",
+    flexDirection: { xs: "column", lg: "row" }, // Column on mobile/tablet, row on desktop
 
     // Header spacing via padding-top
     paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
@@ -99,6 +103,8 @@ export function TwoColumnPanel({
     alignItems: "center",
   },
   backgroundImage,
+  reverseOnMobile = false,
+  debug = false,
   children,
   ...rest
 }: TwoColumnPanelProps) {
@@ -114,16 +120,23 @@ export function TwoColumnPanel({
       backgroundImage={backgroundImage}
       {...rest}
     >
-      {/* Left Column - 50% width */}
+      {/* Left Column */}
       <Box
         sx={{
-          width: "50%",
-          height: "100%",
+          flex: { xs: "1 1 100%", lg: "1 1 50%" }, // Full width on mobile/tablet, 50% on desktop
+          order: reverseOnMobile ? { xs: 2, lg: 1 } : 1, // Responsive order
           display: "flex",
           flexDirection: "column",
           justifyContent: isLeftContent ? contentAlignment.justifyContent : "flex-start",
           alignItems: isLeftContent ? contentAlignment.alignItems : "flex-start",
           position: "relative",
+          minHeight: { xs: "auto", lg: "100%" }, // Auto height on mobile/tablet, full height on desktop
+          // Debug borders (conditional)
+          ...(debug && {
+            border: "2px solid red",
+            borderStyle: "dashed",
+            zIndex: 9999,
+          }),
         }}
       >
         {leftTitle && (
@@ -134,16 +147,23 @@ export function TwoColumnPanel({
         {leftContent}
       </Box>
 
-      {/* Right Column - 50% width */}
+      {/* Right Column */}
       <Box
         sx={{
-          width: "50%",
-          height: "100%",
-          display: "flex",
+          flex: { xs: "1 1 100%", lg: "1 1 50%" }, // Full width on mobile/tablet, 50% on desktop  
+          order: reverseOnMobile ? { xs: 1, lg: 2 } : 2, // Responsive order control
+          display: rightContent ? "flex" : { xs: "none", lg: "flex" }, // Hide empty column on mobile/tablet
           flexDirection: "column",
           justifyContent: !isLeftContent ? contentAlignment.justifyContent : "flex-start",
           alignItems: !isLeftContent ? contentAlignment.alignItems : "flex-start",
           position: "relative",
+          minHeight: { xs: "auto", lg: "100%" }, // Auto height on mobile/tablet, full height on desktop
+          // Debug borders (conditional)
+          ...(debug && {
+            border: "2px solid blue",
+            borderStyle: "dashed",
+            zIndex: 9999,
+          }),
         }}
       >
         {rightTitle && (

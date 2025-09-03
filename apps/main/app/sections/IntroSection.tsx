@@ -42,11 +42,12 @@ const IntroSection = () => {
           justifyContent: "flex-end", // Text block aligned at bottom on all screens now
           alignItems: "flex-start",
         }}
+        debug={true} // Enable debug borders
         leftContent={
           <Box
             sx={{
-              zIndex: theme.zIndex.introText,
-              paddingBottom: { xs: 4, md: 6, lg: 8 }, // if this becomes the usual, we can set it in the theme using theme.spacing
+              zIndex: (theme) => theme.zIndex.introText,
+              paddingBottom: { xs: 4, md: 6, lg: 8 }, // Responsive bottom spacing
             }}
           >
             {/* Home text content */}
