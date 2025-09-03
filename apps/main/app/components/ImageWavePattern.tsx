@@ -22,6 +22,7 @@ interface ImageWavePatternProps {
  * - Staggered fade-in animation
  * - Bobbing and rocking motion
  * - Responsive image scaling
+ * - Ambient circles that fade in with text
  */
 export function ImageWavePattern({
   imageCount = 16,
@@ -31,6 +32,32 @@ export function ImageWavePattern({
   imageExtension = "png"
 }: ImageWavePatternProps) {
   const theme = useTheme()
+
+  const generateAmbientCircles = () => {
+    const circles = []
+    const circleCount = Math.floor(imageCount * 1.2) // More bubbles ~ fuller atmosphere
+    
+    for (let i = 0; i < circleCount; i++) {
+      const xPosition = (i / (circleCount - 1)) * 100
+      const waveHeight = Math.sin((i / (circleCount - 1)) * Math.PI * 2.5 + Math.PI) * 15 + 65
+      const size = 40 + Math.sin((i / (circleCount - 1)) * Math.PI * 3) * 30 // 10-70px range
+      const color = "white" // Only white bubbles for contrast against blue background
+      const opacity = 0.3 + (i % 4) * 0.15 // 0.3, 0.45, 0.6, 0.75
+      
+      circles.push({
+        xPosition,
+        yPosition: waveHeight,
+        size,
+        color,
+        opacity,
+        index: i
+      })
+    }
+    
+    return circles
+  }
+
+  const ambientCircles = generateAmbientCircles()
 
   return (
     <Box
@@ -49,6 +76,7 @@ export function ImageWavePattern({
         willChange: "transform", // Performance optimization
       }}
     >
+      {/* Main image wave pattern */}
       {Array.from({ length: imageCount }, (_, i) => {
         // Create wave pattern across the width
         const xPosition = (i / (imageCount - 1)) * 100 // Distribute evenly across width
@@ -94,6 +122,46 @@ export function ImageWavePattern({
                   transform: "scale(1.1)",
                   opacity: 1,
                 }
+              }}
+            />
+          </motion.div>
+        )
+      })}
+
+      {/* Ambient circles wave pattern (fade in with text) */}
+      {ambientCircles.map((circle, i) => {
+        const circleColor = circle.color === "white" 
+          ? theme.palette.ambient.rippleWhite 
+          : theme.palette.ambient.rippleBlue
+        
+        return (
+          <motion.div
+            key={`ambient-${i}`}
+            initial={{ opacity: 0 }}
+            animate={{ 
+              opacity: circle.opacity,
+              y: [0, -12, 0, -8, 0], // Bubbly floating motion
+              scale: [1, 1.05, 1, 1.02, 1], // Gentle breathing/pulsing...keep?
+            }}
+            transition={{
+              opacity: { delay: 2 + i * 0.05, duration: 1.2, ease: "easeOut" }, // Fade in with text
+              y: { delay: 2 + i * 0.05 + 1.2, duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
+              scale: { delay: 2 + i * 0.05 + 1.2, duration: 6, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" } // Gentle pulsing
+            }}
+            style={{
+              position: "absolute",
+              left: `${circle.xPosition}%`,
+              top: `${circle.yPosition}%`,
+              transform: "translate(-50%, -50%)",
+              zIndex: 0, // Behind the main images. TODO: square with theme Zindexing
+            }}
+          >
+            <Box
+              sx={{
+                width: `${circle.size}px`,
+                height: `${circle.size}px`,
+                borderRadius: "50%",
+                backgroundColor: circleColor,
               }}
             />
           </motion.div>
