@@ -247,7 +247,7 @@ export function Header({
                   onClick: () => onToolsClick("scenario-explorer"),
                 },
                 {
-                  key: "needs-search", 
+                  key: "needs-search",
                   label: componentText.tools.needsSearch,
                   onClick: () => onToolsClick("needs-search"),
                 },

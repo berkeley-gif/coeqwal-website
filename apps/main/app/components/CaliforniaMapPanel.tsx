@@ -8,9 +8,9 @@ interface CaliforniaMapPanelProps {
   mapboxToken?: string
 }
 
-export default function CaliforniaMapPanel({ 
+export default function CaliforniaMapPanel({
   id = "california-map",
-  mapboxToken 
+  mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
 

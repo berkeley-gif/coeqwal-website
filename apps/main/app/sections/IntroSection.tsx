@@ -25,9 +25,9 @@ const IntroSection = () => {
       >
         {/* Blue gradient home panel background */}
         <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
-        
+
         {/* Wave pattern of circle images */}
-        <ImageWavePattern 
+        <ImageWavePattern
           imageCount={{ xs: 6, sm: 11, lg: 16 }}
           height="33.33vh"
           zIndex={theme.zIndex.introForegroundImages}
@@ -56,10 +56,10 @@ const IntroSection = () => {
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
+                transition={{
                   delay: 2, // Text fade in after wave pattern
                   duration: 1.5,
-                  ease: "easeOut"
+                  ease: "easeOut",
                 }}
               >
                 <Typography
@@ -73,8 +73,8 @@ const IntroSection = () => {
                     maxWidth: "800px", // For custom title wrap styling in this case
                   }}
                 >
-                    {t("homePanel.title")}
-                  </Typography>
+                  {t("homePanel.title")}
+                </Typography>
 
                 {/* Body text */}
                 <Typography
@@ -93,7 +93,7 @@ const IntroSection = () => {
                   sx={{
                     display: "flex",
                     justifyContent: "center",
-                    mt: (theme) => theme.layout.spacing.sm,  // sm: { xs: 1.5, sm: 2, md: 2.5 }, // 12px / 16px / 20px
+                    mt: (theme) => theme.layout.spacing.sm, // sm: { xs: 1.5, sm: 2, md: 2.5 }, // 12px / 16px / 20px
                   }}
                 >
                   <ScrollToButton

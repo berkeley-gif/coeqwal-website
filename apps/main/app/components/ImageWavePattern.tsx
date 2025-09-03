@@ -26,40 +26,46 @@ interface ImageWavePatternProps {
  */
 export function ImageWavePattern({
   imageCount = { xs: 6, sm: 11, lg: 16 }, // Yay ResponsiveStyleValue
-  height = "33.33vh", 
+  height = "33.33vh",
   zIndex,
   imagePath = "/images/circular-crops",
-  imageExtension = "png"
+  imageExtension = "png",
 }: ImageWavePatternProps) {
   const theme = useTheme()
-  
+
   // Create separate image arrays for each breakpoint to ensure proper wave distribution
-  const imageCountConfig = typeof imageCount === 'number' 
-    ? { xs: imageCount, sm: imageCount, lg: imageCount }
-    : { xs: (imageCount as any).xs || 16, sm: (imageCount as any).sm || 16, lg: (imageCount as any).lg || 16 }
+  const imageCountConfig =
+    typeof imageCount === "number"
+      ? { xs: imageCount, sm: imageCount, lg: imageCount }
+      : {
+          xs: (imageCount as any).xs || 16,
+          sm: (imageCount as any).sm || 16,
+          lg: (imageCount as any).lg || 16,
+        }
 
   // Generate ambient circles for each breakpoint, just like images
   const generateAmbientCirclesForBreakpoint = (count: number) => {
     const circles = []
     const circleCount = Math.floor(count * 1.2) // More bubbles ~ fuller atmosphere
-    
+
     for (let i = 0; i < circleCount; i++) {
       const xPosition = (i / (circleCount - 1)) * 100
-      const waveHeight = Math.sin((i / (circleCount - 1)) * Math.PI * 3 + Math.PI/4) * 15 + 55 // Same base wave as images but with π/4 phase shift and slightly higher center
+      const waveHeight =
+        Math.sin((i / (circleCount - 1)) * Math.PI * 3 + Math.PI / 4) * 15 + 55 // Same base wave as images but with π/4 phase shift and slightly higher center
       const size = 70 + Math.sin((i / (circleCount - 1)) * Math.PI * 3) * 15 // 55-85px range
       const color = "white" // Only white bubbles for contrast against blue background
       const opacity = 0.3 + (i % 4) * 0.15 // 0.3, 0.45, 0.6, 0.75
-      
+
       circles.push({
         xPosition,
         yPosition: waveHeight,
         size,
         color,
         opacity,
-        index: i
+        index: i,
       })
     }
-    
+
     return circles
   }
 
@@ -85,38 +91,51 @@ export function ImageWavePattern({
         <Box
           key={breakpoint}
           sx={{
-            display: { 
-              xs: breakpoint === 'xs' ? 'block' : 'none',
-              sm: breakpoint === 'sm' ? 'block' : 'none', 
-              lg: breakpoint === 'lg' ? 'block' : 'none'
+            display: {
+              xs: breakpoint === "xs" ? "block" : "none",
+              sm: breakpoint === "sm" ? "block" : "none",
+              lg: breakpoint === "lg" ? "block" : "none",
             },
-            position: 'absolute',
+            position: "absolute",
             top: 0,
             left: 0,
             right: 0,
-            height: '100%',
+            height: "100%",
           }}
         >
           {Array.from({ length: count }, (_, i) => {
             // Create wave pattern across the width - properly distributed
             const xPosition = (i / (count - 1)) * 100 // Distribute evenly across width
-            const waveHeight = Math.sin((i / (count - 1)) * Math.PI * 3) * 15 + 50 // Sine wave with 3 cycles
+            const waveHeight =
+              Math.sin((i / (count - 1)) * Math.PI * 3) * 15 + 50 // Sine wave with 3 cycles
             const imageNumber = (i % 16) + 1 // Cycle through images 1-16
             const size = 75 + Math.sin((i / (count - 1)) * Math.PI * 2) * 15 // Varying sizes 60-90px
-            
+
             return (
               <motion.div
                 key={`${breakpoint}-${i}`}
                 initial={{ opacity: 0, y: -50 }}
-                animate={{ 
+                animate={{
                   opacity: 1,
                   y: [0, -10, 0, -5], // Bobbing motion
-                  rotate: [0, 5, -5, 0] // Rocking motion
+                  rotate: [0, 5, -5, 0], // Rocking motion
                 }}
                 transition={{
                   opacity: { delay: i * 0.1, duration: 0.8, ease: "easeOut" },
-                  y: { delay: i * 0.1 + 0.8, duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-                  rotate: { delay: i * 0.1 + 0.8, duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }
+                  y: {
+                    delay: i * 0.1 + 0.8,
+                    duration: 4,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                  },
+                  rotate: {
+                    delay: i * 0.1 + 0.8,
+                    duration: 4,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    ease: "easeInOut",
+                  },
                 }}
                 style={{
                   position: "absolute",
@@ -141,7 +160,7 @@ export function ImageWavePattern({
                     "&:hover": {
                       transform: "scale(1.1)",
                       opacity: 1,
-                    }
+                    },
                   }}
                 />
               </motion.div>
@@ -153,41 +172,58 @@ export function ImageWavePattern({
       {/* Responsive ambient circles wave pattern - each breakpoint gets proper distribution */}
       {Object.entries(imageCountConfig).map(([breakpoint, count]) => {
         const ambientCircles = generateAmbientCirclesForBreakpoint(count)
-        
+
         return (
           <Box
             key={`ambient-${breakpoint}`}
             sx={{
-              display: { 
-                xs: breakpoint === 'xs' ? 'block' : 'none',
-                sm: breakpoint === 'sm' ? 'block' : 'none', 
-                lg: breakpoint === 'lg' ? 'block' : 'none'
+              display: {
+                xs: breakpoint === "xs" ? "block" : "none",
+                sm: breakpoint === "sm" ? "block" : "none",
+                lg: breakpoint === "lg" ? "block" : "none",
               },
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
-              height: '100%',
+              height: "100%",
             }}
           >
             {ambientCircles.map((circle, i) => {
-              const circleColor = circle.color === "white" 
-                ? theme.palette.ambient.rippleWhite 
-                : theme.palette.ambient.rippleBlue
-              
+              const circleColor =
+                circle.color === "white"
+                  ? theme.palette.ambient.rippleWhite
+                  : theme.palette.ambient.rippleBlue
+
               return (
                 <motion.div
                   key={`ambient-${breakpoint}-${i}`}
                   initial={{ opacity: 0 }}
-                  animate={{ 
+                  animate={{
                     opacity: circle.opacity,
                     y: [0, -12, 0, -8, 0], // Bubbly floating motion
                     scale: [1, 1.05, 1, 1.02, 1], // Gentle breathing/pulsing
                   }}
                   transition={{
-                    opacity: { delay: 2 + i * 0.05, duration: 1.2, ease: "easeOut" }, // Fade in with text
-                    y: { delay: 2 + i * 0.05 + 1.2, duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-                    scale: { delay: 2 + i * 0.05 + 1.2, duration: 6, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }
+                    opacity: {
+                      delay: 2 + i * 0.05,
+                      duration: 1.2,
+                      ease: "easeOut",
+                    }, // Fade in with text
+                    y: {
+                      delay: 2 + i * 0.05 + 1.2,
+                      duration: 5,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    },
+                    scale: {
+                      delay: 2 + i * 0.05 + 1.2,
+                      duration: 6,
+                      repeat: Infinity,
+                      repeatType: "reverse",
+                      ease: "easeInOut",
+                    },
                   }}
                   style={{
                     position: "absolute",

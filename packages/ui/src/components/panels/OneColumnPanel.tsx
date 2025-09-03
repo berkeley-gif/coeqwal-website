@@ -4,7 +4,7 @@ import React from "react"
 import { Box, Typography, BoxProps } from "@mui/material"
 import { styled } from "@mui/material/styles"
 
-interface OneColumnPanelProps extends Omit<BoxProps, 'content'> {
+interface OneColumnPanelProps extends Omit<BoxProps, "content"> {
   /** Main content for the panel */
   content?: React.ReactNode
   /** Optional title for the panel */
@@ -56,7 +56,7 @@ const OneColumnRoot = styled(Box, {
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
-    
+
     // Header spacing via padding-top
     paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
 
