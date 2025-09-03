@@ -1,7 +1,12 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, BoxProps, ResponsiveStyleValue } from "../../mui-components"
+import {
+  Box,
+  Typography,
+  BoxProps,
+  ResponsiveStyleValue,
+} from "../../mui-components"
 
 interface TwoColumnPanelProps {
   /** Content for left column */
@@ -25,7 +30,9 @@ interface TwoColumnPanelProps {
   /** Flex alignment for the content column */
   contentAlignment?: {
     justifyContent?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end">
-    alignItems?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end" | "stretch">
+    alignItems?: ResponsiveStyleValue<
+      "flex-start" | "center" | "flex-end" | "stretch"
+    >
   }
   /** Text color - theme color path or hex color */
   textColor?: string
@@ -38,7 +45,7 @@ interface TwoColumnPanelProps {
   /** Show debug borders to visualize column layout */
   debug?: boolean
   /** Additional sx props */
-  sx?: BoxProps['sx']
+  sx?: BoxProps["sx"]
   /** ID for the panel */
   id?: string
 }
@@ -82,10 +89,12 @@ export function TwoColumnPanel({
           flexDirection: { xs: "column", lg: "row" }, // Column on mobile/tablet, row on desktop
 
           // Header spacing via padding-top
-          paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
+          paddingTop: includeHeaderSpacing
+            ? `${theme.layout.headerHeight}px`
+            : 0,
 
-          paddingLeft: '78px',
-          paddingRight: '78px',
+          paddingLeft: "78px",
+          paddingRight: "78px",
 
           // Background color
           backgroundColor: backgroundColor || "transparent",
@@ -94,12 +103,14 @@ export function TwoColumnPanel({
           color: textColor || theme.palette.text.primary,
 
           // Optional background image
-          backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+          backgroundImage: backgroundImage
+            ? `url(${backgroundImage})`
+            : undefined,
           backgroundSize: backgroundImage ? "cover" : undefined,
           backgroundPosition: backgroundImage ? "center" : undefined,
         }),
         // Additional sx props
-        ...(Array.isArray(sx) ? sx : [sx])
+        ...(Array.isArray(sx) ? sx : [sx]),
       ]}
     >
       {/* Left Column */}
@@ -109,8 +120,12 @@ export function TwoColumnPanel({
           order: reverseOnMobile ? { xs: 2, lg: 1 } : 1, // Responsive order
           display: "flex",
           flexDirection: "column",
-          justifyContent: isLeftContent ? contentAlignment.justifyContent : "flex-start",
-          alignItems: isLeftContent ? contentAlignment.alignItems : "flex-start",
+          justifyContent: isLeftContent
+            ? contentAlignment.justifyContent
+            : "flex-start",
+          alignItems: isLeftContent
+            ? contentAlignment.alignItems
+            : "flex-start",
           position: "relative",
           minHeight: { xs: "auto", lg: "100%" }, // Auto height on mobile/tablet, full height on desktop
           // Debug borders (conditional)
@@ -132,12 +147,16 @@ export function TwoColumnPanel({
       {/* Right Column */}
       <Box
         sx={{
-          flex: { xs: "1 1 100%", lg: "1 1 50%" }, // Full width on mobile/tablet, 50% on desktop  
+          flex: { xs: "1 1 100%", lg: "1 1 50%" }, // Full width on mobile/tablet, 50% on desktop
           order: reverseOnMobile ? { xs: 1, lg: 2 } : 2, // Responsive order control
           display: rightContent ? "flex" : { xs: "none", lg: "flex" }, // Hide empty column on mobile/tablet
           flexDirection: "column",
-          justifyContent: !isLeftContent ? contentAlignment.justifyContent : "flex-start",
-          alignItems: !isLeftContent ? contentAlignment.alignItems : "flex-start",
+          justifyContent: !isLeftContent
+            ? contentAlignment.justifyContent
+            : "flex-start",
+          alignItems: !isLeftContent
+            ? contentAlignment.alignItems
+            : "flex-start",
           position: "relative",
           minHeight: { xs: "auto", lg: "100%" }, // Auto height on mobile/tablet, full height on desktop
           // Debug borders (conditional)

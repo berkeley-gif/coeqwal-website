@@ -13,7 +13,9 @@ type ResponsiveHeightValue =
       xl?: number | string
     }
 
-type ResponsiveHeight = ResponsiveHeightValue | ((theme: Theme) => ResponsiveHeightValue)
+type ResponsiveHeight =
+  | ResponsiveHeightValue
+  | ((theme: Theme) => ResponsiveHeightValue)
 
 export interface SpacerProps {
   height?: ResponsiveHeight
@@ -23,12 +25,18 @@ export function Spacer({ height = 64 }: SpacerProps) {
   return (
     <Box
       sx={(theme) => {
-        const resolvedHeight = typeof height === "function" ? height(theme) : height
-        
+        const resolvedHeight =
+          typeof height === "function" ? height(theme) : height
+
         const style =
           typeof resolvedHeight === "object" && resolvedHeight !== null
             ? { height: resolvedHeight }
-            : { height: typeof resolvedHeight === "number" ? `${resolvedHeight}px` : resolvedHeight }
+            : {
+                height:
+                  typeof resolvedHeight === "number"
+                    ? `${resolvedHeight}px`
+                    : resolvedHeight,
+              }
 
         return { width: "100%", ...style }
       }}

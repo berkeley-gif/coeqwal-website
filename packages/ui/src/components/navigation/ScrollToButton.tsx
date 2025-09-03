@@ -19,7 +19,10 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
   style,
 }) => {
   const theme = useTheme()
-  const buttonColor = typeof color === 'function' ? color(theme) : (color || theme.palette.blue.darkest)
+  const buttonColor =
+    typeof color === "function"
+      ? color(theme)
+      : color || theme.palette.blue.darkest
 
   return (
     <ScrollIndicator

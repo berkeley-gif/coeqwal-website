@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Box, Typography, Grid, IconButton, useTheme, Theme } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  Grid,
+  IconButton,
+  useTheme,
+  Theme,
+} from "@repo/ui/mui"
 import {
   BasePanel,
   LeadingMarkerText,
@@ -58,35 +65,37 @@ export default function ContentPanels() {
 
   interface ContentPanelProps {
     id: string
-    smallScreenFlexDir?: 'column' | 'column-reverse' | 'row' | 'row-reverse'
-    smallScreenAlign?: 'flex-start' | 'center' | 'flex-end'
-    largeScreenFlexDir?: 'column' | 'column-reverse' | 'row' | 'row-reverse'
-    largeScreenAlign?: 'flex-start' | 'center' | 'flex-end'
+    smallScreenFlexDir?: "column" | "column-reverse" | "row" | "row-reverse"
+    smallScreenAlign?: "flex-start" | "center" | "flex-end"
+    largeScreenFlexDir?: "column" | "column-reverse" | "row" | "row-reverse"
+    largeScreenAlign?: "flex-start" | "center" | "flex-end"
     children: React.ReactNode
   }
 
   function ContentPanel({
     id,
-    smallScreenFlexDir = 'column',
-    largeScreenFlexDir = 'row',
-    smallScreenAlign = 'flex-start',
-    largeScreenAlign = 'center',
-    children
+    smallScreenFlexDir = "column",
+    largeScreenFlexDir = "row",
+    smallScreenAlign = "flex-start",
+    largeScreenAlign = "center",
+    children,
   }: ContentPanelProps) {
-    return (<Box
-      id={id}
-      sx={{
-        display: "flex",
-        alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
-        flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
-        gap: (theme) => theme.layout.spacing.md,
-        color: (theme) => theme.palette.blue.darkest,
-        width: "100%",
-        paddingTop: { xs: 3, md: 14 },
-      }}
-    >
-      {children}
-    </Box>)
+    return (
+      <Box
+        id={id}
+        sx={{
+          display: "flex",
+          alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
+          flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
+          gap: (theme) => theme.layout.spacing.md,
+          color: (theme) => theme.palette.blue.darkest,
+          width: "100%",
+          paddingTop: { xs: 3, md: 14 },
+        }}
+      >
+        {children}
+      </Box>
+    )
   }
 
   const LearnSimple = () => (
@@ -155,7 +164,6 @@ export default function ContentPanels() {
       </Box>
     </Box>
   )
-
 
   // Get background color for each panel
   const getPanelBgColor = (panelType: PanelType, theme: Theme) => {
@@ -891,11 +899,15 @@ export default function ContentPanels() {
         <Spacer height={(theme) => theme.layout.spacer.large} />
         {/* Empower panel */}
         <Box sx={{ py: 4 }}>
-          <ContentPanel id="empower" smallScreenAlign="center" largeScreenFlexDir="column">
+          <ContentPanel
+            id="empower"
+            smallScreenAlign="center"
+            largeScreenFlexDir="column"
+          >
             <LeadingMarkerText title="Empower">
               <Typography variant="body1">
-                your community with data that helps you understand the impacts of
-                operational decisions
+                your community with data that helps you understand the impacts
+                of operational decisions
               </Typography>
             </LeadingMarkerText>
             <Box

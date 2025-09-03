@@ -41,12 +41,12 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
         }}
-                rightContent={
+        rightContent={
           <Box sx={overlayPanelStyle}>
             <Typography
               variant="h2"
               component="h2"
-              sx={{ 
+              sx={{
                 mb: (theme) => theme.layout.spacing.md,
                 color: (theme) => theme.palette.common.white,
               }}
@@ -54,7 +54,7 @@ export default function MapOverlayPanels() {
               {t("toolsPanel.title")}
             </Typography>
 
-            <Typography 
+            <Typography
               variant="body1"
               sx={{
                 color: (theme) => theme.palette.common.white,
@@ -82,9 +82,9 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
         }}
-                rightContent={
+        rightContent={
           <Box sx={overlayPanelStyle}>
-            <Typography 
+            <Typography
               variant="body1"
               sx={{
                 color: (theme) => theme.palette.common.white,
