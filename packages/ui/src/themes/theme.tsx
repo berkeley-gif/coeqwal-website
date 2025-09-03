@@ -128,9 +128,6 @@ const typeScale = {
   },
 }
 
-// Compact spacing is handled in theme.cards.spacing.compact
-// Use theme.spacing(theme.cards.spacing.compact.X) for consistent spacing
-
 const themeValues = {
   // Typography
   fontFamily: {
@@ -161,7 +158,7 @@ const themeValues = {
 
   // Color Palette - California Water theme
   palette: {
-    // Core brand colors
+    // Core colors
     brand: {
       sky: "#92C1D5", // Top of gradient - sky blue
       water: "#64A4D6", // Bottom of gradient - water blue
@@ -249,7 +246,7 @@ const themeValues = {
     pill: "999px",
     rounded: "16px",
     card: "16px",
-    standard: "32px",
+    standard: "16px",
     none: "0px",
   },
 
@@ -268,23 +265,23 @@ const themeValues = {
 
   // Z-index values
   zIndex: {
-    // Background layers (negative values)
+    // Background layers
     basement: -1, // Map when used as background
-    sectionBackground: -1, // Section background elements
+    sectionBackground: 0, // Section background elements
 
     // Content layers (0-99)
-    content: 0, // Default content layer
-    panels: 0, // Main content panels
+    content: 20, // Default content layer
+    panels: 10, // Main content panels
 
     // Intro section micro-layers (1-9)
-    introBackgroundImages: 1, // Background decorative images
-    introText: 2, // Text content
-    introForegroundImages: 3, // Foreground decorative elements
-    introBubbles: 4, // Interactive bubble elements
+    introBackgroundImages: 15, // Background decorative images
+    introText: 20, // Text content
+    introForegroundImages: 30, // Foreground decorative elements
+    introBubbles: 40, // Interactive bubble elements
 
     // Interactive layers (100-999)
-    mapControls: 1000, // Map overlay controls and panels
-    floatingElements: 1100, // Floating UI elements
+    mapControls: 100, // Map overlay controls and panels
+    floatingElements: 110, // Floating UI elements
 
     // Navigation layers (1200-1499)
     drawerBackdrop: 1199, // Drawer backdrop/overlay
@@ -902,16 +899,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: `
         @import url("https://use.typekit.net/rxm7kha.css");
-        
-        /* Ingeborg Trial Font Family */
-        @font-face {
-          font-family: 'Ingeborg Trial';
-          src: url('/fonts/IngeborgTrial-Bold.otf') format('opentype');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-        
+                
         *, *::before, *::after {
           box-sizing: border-box;
         }
@@ -1477,6 +1465,8 @@ theme.background = {
 theme.borderRadius = themeValues.borderRadius
 
 // Define color palette for drawer navigation items
+
+// Probably obsolete TODO: check and delete
 theme.drawerNavigation = {
   colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
 }

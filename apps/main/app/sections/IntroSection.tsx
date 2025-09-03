@@ -30,18 +30,14 @@ const IntroSection = () => {
         includeHeaderSpacing={true}
         contentColumn="left"
         contentAlignment={{
-          justifyContent: { xs: "flex-end", md: "flex-end", lg: "center" },
+          justifyContent: "flex-end", // Text block aligned at bottom on all screens now
           alignItems: "flex-start",
-        }}
-        sx={{
-          position: "relative",
         }}
         leftContent={
           <Box
             sx={{
-              width: '100%',
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth, // This is a site-wide setting 
               zIndex: theme.zIndex.introText,
+              paddingBottom: { xs: 4, md: 6, lg: 8 }, // if this becomes the usual, we can set it in the theme using theme.spacing
             }}
           >
             {/* Home text content */}
@@ -49,11 +45,9 @@ const IntroSection = () => {
               variant="h1"
               component="h1"
               sx={{
-                mb: (theme) => theme.layout.spacing.md,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
+                fontSize: "4.8rem", // may change type scale to accomodate new content ~ new layout
                 color: (theme) => theme.palette.text.secondary, // white
+                mb: (theme) => theme.layout.spacing.md,
               }}
             >
                 {t("homePanel.title")}
@@ -62,10 +56,11 @@ const IntroSection = () => {
             {/* Body text */}
             <Typography
               variant="body1"
-              sx={{
-                mb: (theme) => theme.layout.spacing.xl,
-                color: (theme) => theme.palette.text.secondary, // white
-              }}
+              sx={(theme) => ({
+                mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
+                color: theme.palette.text.secondary, // white
+                paddingLeft: "0.5rem", // visually match h1 and body1
+              })}
             >
               {t("homePanel.content")}
             </Typography>
@@ -75,7 +70,6 @@ const IntroSection = () => {
               sx={{
                 display: "flex",
                 justifyContent: "center",
-                mt: (theme) => theme.layout.spacing.xl,
               }}
             >
               <ScrollToButton
