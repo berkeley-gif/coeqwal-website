@@ -151,7 +151,7 @@ const IntroSection = () => {
         }
       />
 
-      <Spacer height={{ xs: 24, md: 48, lg: 64 }} />
+      <Spacer height={(theme) => theme.layout.spacer.small} />
 
       {/* California map background with right-aligned text */}
       <BasePanel

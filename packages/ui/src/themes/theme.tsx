@@ -154,6 +154,12 @@ const themeValues = {
       compact: 16, // Compact form control size (16px × 16px)
       micro: 12, // Micro form control size (12px × 12px)
     },
+    // Spacer component spacing system - responsive values for section spacing
+    spacer: {
+      small: { xs: 24, md: 48, lg: 64 }, // 24px / 48px / 64px
+      medium: { xs: 48, md: 96 }, // 48px / 96px
+      large: { xs: 100, lg: 0 }, // 100px / 0
+    },
   },
 
   // Color Palette - California Water theme
@@ -570,14 +576,7 @@ const theme = createTheme({
   ...baseTheme,
   // Custom layout values and responsive spacing system
   layout: {
-    headerHeight: themeValues.layout.headerHeight,
-    drawer: {
-      width: themeValues.layout.drawer.width,
-      closedWidth: themeValues.layout.drawer.closedWidth,
-    },
-    textContainer: {
-      maxWidth: themeValues.layout.textContainer.maxWidth,
-    },
+    ...themeValues.layout,
     // Responsive layout spacing for major components and sections
     spacing: {
       xs: { xs: 1, sm: 1.5, md: 2 }, // 8px / 12px / 16px
@@ -1698,6 +1697,11 @@ declare module "@mui/material/styles" {
         lg: { xs: number; sm: number; md: number }
         xl: { xs: number; sm: number; md: number }
         xxl: { xs: number; sm: number; md: number }
+      }
+      spacer: {
+        small: { xs: number; md: number; lg: number }
+        medium: { xs: number; md: number }
+        large: { xs: number; lg: number }
       }
     }
     border: ReturnType<typeof createBorderStyles>
