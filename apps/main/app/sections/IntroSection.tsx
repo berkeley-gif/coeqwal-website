@@ -18,7 +18,7 @@ const IntroSection = () => {
         position: "relative",
       }}
     >
-      {/* Blue gradient overlay for home panel only */}
+      {/* Home panel */}
       <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
       {/* Full screen home panel */}
       <TwoColumnPanel
@@ -86,7 +86,7 @@ const IntroSection = () => {
             >
               <ScrollToButton
                 scrollToId="frontmatter"
-                color={(theme) => theme.palette.text.secondary} // white, etc.
+                color={(theme) => theme.palette.text.secondary}
               />
             </Box>
           </Box>
