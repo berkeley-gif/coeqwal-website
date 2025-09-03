@@ -58,6 +58,8 @@ export {
 
 export type { BoxProps } from "@mui/material"
 export type { TypographyProps } from "@mui/material/Typography"
+export type { ButtonProps } from "@mui/material/Button"
+export type { SelectChangeEvent } from "@mui/material/Select"
 
 // Import and re-export specific commonly used icons
 import WaterIcon from "@mui/icons-material/Water"
@@ -89,6 +91,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import InfoIcon from "@mui/icons-material/Info"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
+import MyLocationIcon from "@mui/icons-material/MyLocation"
 
 // Export individually imported icons
 export {
@@ -121,6 +124,7 @@ export {
   PlayArrowIcon,
   InfoIcon,
   UnfoldMoreIcon,
+  MyLocationIcon,
 }
 
 // Export the full icons library for access to other icons as needed
@@ -129,3 +133,6 @@ export * as icons from "@mui/icons-material"
 // Styles and themes
 export { useTheme, alpha, styled } from "@mui/material/styles"
 export type { Theme } from "@mui/material/styles"
+
+// System utilities and types
+export type { ResponsiveStyleValue, SxProps } from "@mui/system"

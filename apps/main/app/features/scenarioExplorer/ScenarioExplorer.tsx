@@ -35,7 +35,7 @@ import {
   Layer,
   Popup,
 } from "@repo/map"
-import MyLocationIcon from "@mui/icons-material/MyLocation"
+import { MyLocationIcon } from "@repo/ui/mui"
 import { MapPromptDialog } from "@repo/ui"
 
 import { useGlyphSettingsStore } from "@repo/state"

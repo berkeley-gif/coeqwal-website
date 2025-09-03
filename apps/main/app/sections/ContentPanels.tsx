@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { Box, Typography, Grid, IconButton, useTheme } from "@repo/ui/mui"
-import type { Theme } from "@mui/material/styles"
-import { ResponsiveStyleValue } from "@mui/system"
+import { Box, Typography, Grid, IconButton, useTheme, Theme } from "@repo/ui/mui"
 import {
   BasePanel,
   LeadingMarkerText,

@@ -3,7 +3,7 @@ import EditableNeedsRenderer from "./EditableNeedsRenderer"
 import { Box, Typography, Button, CheckIcon } from "@repo/ui/mui"
 import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
 import { BLANK_WATER_NEED } from "./constants"
-import { useTheme } from "@mui/material/styles"
+import { useTheme } from "@repo/ui/mui"
 
 type WaterNeedEditorProps = {
   currentWaterNeed: WaterNeedSetting

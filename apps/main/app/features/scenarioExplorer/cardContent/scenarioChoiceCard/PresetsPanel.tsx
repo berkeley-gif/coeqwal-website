@@ -8,10 +8,10 @@ import {
   FormControlLabel,
   IconButton,
   useTheme,
+  InfoIcon,
 } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { useMap } from "@repo/map"
-import InfoIcon from "@mui/icons-material/Info"
 import { useDrawerStore } from "@repo/state"
 
 // Custom triangle component that matches checkbox styling

@@ -13,8 +13,8 @@ import {
   Grid,
   IconButton,
   CircularProgress,
+  SelectChangeEvent,
 } from "@repo/ui/mui"
-import type { SelectChangeEvent } from "@mui/material/Select"
 import { Header } from "../components/Header"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { LeadingMarkerText, ArrowHead } from "@repo/ui"
