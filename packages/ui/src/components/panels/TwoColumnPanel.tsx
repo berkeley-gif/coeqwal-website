@@ -1,11 +1,9 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, BoxProps } from "@mui/material"
-import { styled } from "@mui/material/styles"
-import { ResponsiveStyleValue } from "@mui/system"
+import { Box, Typography, BoxProps, ResponsiveStyleValue } from "../../mui-components"
 
-interface TwoColumnPanelProps extends BoxProps {
+interface TwoColumnPanelProps {
   /** Content for left column */
   leftContent?: React.ReactNode
   /** Content for right column */
@@ -39,53 +37,11 @@ interface TwoColumnPanelProps extends BoxProps {
   reverseOnMobile?: boolean
   /** Show debug borders to visualize column layout */
   debug?: boolean
+  /** Additional sx props */
+  sx?: BoxProps['sx']
+  /** ID for the panel */
+  id?: string
 }
-
-const TwoColumnRoot = styled(Box, {
-  shouldForwardProp: (prop) =>
-    prop !== "fullHeight" &&
-    prop !== "fullWidth" &&
-    prop !== "backgroundColor" &&
-    prop !== "textColor" &&
-    prop !== "includeHeaderSpacing" &&
-    prop !== "backgroundImage",
-})<TwoColumnPanelProps>(({
-  theme,
-  fullHeight,
-  fullWidth,
-  backgroundColor,
-  textColor,
-  includeHeaderSpacing,
-  backgroundImage,
-}) => {
-  return {
-    margin: 0,
-    width: fullWidth ? "100vw" : "100%",
-    height: fullHeight ? "100vh" : "auto",
-    minHeight: fullHeight ? "100vh" : "auto",
-    position: "relative",
-    boxSizing: "border-box",
-    display: "flex",
-    flexDirection: { xs: "column", lg: "row" }, // Column on mobile/tablet, row on desktop
-
-    // Header spacing via padding-top
-    paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
-
-    paddingLeft: '78px',
-    paddingRight: '78px',
-
-    // Background color
-    backgroundColor: backgroundColor || "transparent",
-
-    // Text color
-    color: textColor || theme.palette.text.primary,
-
-    // Optional background image
-    backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
-    backgroundSize: backgroundImage ? "cover" : undefined,
-    backgroundPosition: backgroundImage ? "center" : undefined,
-  }
-})
 
 export function TwoColumnPanel({
   leftContent,
@@ -106,19 +62,45 @@ export function TwoColumnPanel({
   reverseOnMobile = false,
   debug = false,
   children,
-  ...rest
+  sx,
+  id,
 }: TwoColumnPanelProps) {
   const isLeftContent = contentColumn === "left"
 
   return (
-    <TwoColumnRoot
-      fullHeight={fullHeight}
-      fullWidth={fullWidth}
-      backgroundColor={backgroundColor}
-      textColor={textColor}
-      includeHeaderSpacing={includeHeaderSpacing}
-      backgroundImage={backgroundImage}
-      {...rest}
+    <Box
+      id={id}
+      sx={[
+        (theme) => ({
+          margin: 0,
+          width: fullWidth ? "100vw" : "100%",
+          height: fullHeight ? "100vh" : "auto",
+          minHeight: fullHeight ? "100vh" : "auto",
+          position: "relative",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: { xs: "column", lg: "row" }, // Column on mobile/tablet, row on desktop
+
+          // Header spacing via padding-top
+          paddingTop: includeHeaderSpacing ? `${theme.layout.headerHeight}px` : 0,
+
+          paddingLeft: '78px',
+          paddingRight: '78px',
+
+          // Background color
+          backgroundColor: backgroundColor || "transparent",
+
+          // Text color
+          color: textColor || theme.palette.text.primary,
+
+          // Optional background image
+          backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+          backgroundSize: backgroundImage ? "cover" : undefined,
+          backgroundPosition: backgroundImage ? "center" : undefined,
+        }),
+        // Additional sx props
+        ...(Array.isArray(sx) ? sx : [sx])
+      ]}
     >
       {/* Left Column */}
       <Box
@@ -190,6 +172,6 @@ export function TwoColumnPanel({
           {children}
         </Box>
       )}
-    </TwoColumnRoot>
+    </Box>
   )
 }

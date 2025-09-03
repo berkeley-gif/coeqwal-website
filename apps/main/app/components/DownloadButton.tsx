@@ -1,9 +1,7 @@
 "use client"
 
 import React from "react"
-import { Button } from "@repo/ui/mui"
-import type { ButtonProps } from "@mui/material/Button"
-import { icons } from "@repo/ui/mui"
+import { Button, ButtonProps, icons } from "@repo/ui/mui"
 
 const { Download } = icons
 

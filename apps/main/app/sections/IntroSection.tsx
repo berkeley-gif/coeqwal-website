@@ -39,7 +39,7 @@ const IntroSection = () => {
         includeHeaderSpacing={true}
         contentColumn="left"
         contentAlignment={{
-          justifyContent: "flex-end", // Text block aligned at bottom on all screens now
+          justifyContent: "flex-end", // Text block stays at bottom for all screen sizes
           alignItems: "flex-start",
         }}
         debug={true} // Enable debug borders
