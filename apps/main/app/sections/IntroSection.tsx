@@ -2,12 +2,8 @@ import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } fro
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { motion } from "@repo/motion"
-import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
-import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
 import { BlueThemeBackground } from "../components/BlueThemeBackground"
 import { ImageWavePattern } from "../components/ImageWavePattern"
-import { ambientCircles } from "../config/ambientCircles"
-import { floatingMarkers } from "../config/floatingMarkers"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -43,7 +39,7 @@ const IntroSection = () => {
           justifyContent: "flex-end", // Text block stays at bottom for all screen sizes for this instance
           alignItems: "flex-start",
         }}
-        debug={false} // Enable debug borders
+        debug={false} // Debug borders
         leftContent={
           <Box
             sx={{
@@ -103,44 +99,9 @@ const IntroSection = () => {
             </motion.div>
           </Box>
         }
-      >
-        {/* Ambient background circles, positioned to cover full viewport */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: { xs: 0, md: "26%" },
-            zIndex: theme.zIndex.introBackgroundImages,
-            pointerEvents: "none",
-          }}
-        >
-          <FloatingAmbientCircles circles={ambientCircles} zIndex={1} />
-        </Box>
+      />
 
-        {/* Floating image markers, positioned to cover full viewport */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: { xs: 0, md: "26%" },
-            zIndex: theme.zIndex.introForegroundImages,
-            pointerEvents: "none",
-            transform: { xs: "scale(0.8)", md: "scale(1.20)", lg: "scale(1)" },
-            transformOrigin: "top right",
-            willChange: "transform",
-          }}
-        >
-          <FloatingImageMarkers
-            markers={floatingMarkers}
-            showHalos={true}
-            zIndex={1}
-          />
-        </Box>
-      </TwoColumnPanel>
+      {/* Note: Original clustered image circles saved in ClusteredImageCircles.tsx for reuse if wanted */}
 
       {/* Frontmatter panel(s) */}
       <OneColumnPanel
