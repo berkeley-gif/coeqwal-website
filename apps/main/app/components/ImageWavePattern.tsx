@@ -1,9 +1,9 @@
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box, useTheme, ResponsiveStyleValue } from "@repo/ui/mui"
 import { motion } from "@repo/motion"
 
 interface ImageWavePatternProps {
-  /** Number of images in the wave pattern */
-  imageCount?: number
+  /** Number of images in the wave pattern - can be responsive */
+  imageCount?: ResponsiveStyleValue<number>
   /** Height of the wave container as viewport percentage */
   height?: string
   /** Z-index for layering */
@@ -25,22 +25,28 @@ interface ImageWavePatternProps {
  * - Ambient circles that fade in with text
  */
 export function ImageWavePattern({
-  imageCount = 16,
-  height = "33.33vh",
+  imageCount = { xs: 6, sm: 11, lg: 16 }, // Yay ResponsiveStyleValue
+  height = "33.33vh", 
   zIndex,
   imagePath = "/images/circular-crops",
   imageExtension = "png"
 }: ImageWavePatternProps) {
   const theme = useTheme()
+  
+  // Create separate image arrays for each breakpoint to ensure proper wave distribution
+  const imageCountConfig = typeof imageCount === 'number' 
+    ? { xs: imageCount, sm: imageCount, lg: imageCount }
+    : { xs: (imageCount as any).xs || 16, sm: (imageCount as any).sm || 16, lg: (imageCount as any).lg || 16 }
 
-  const generateAmbientCircles = () => {
+  // Generate ambient circles for each breakpoint, just like images
+  const generateAmbientCirclesForBreakpoint = (count: number) => {
     const circles = []
-    const circleCount = Math.floor(imageCount * 1.2) // More bubbles ~ fuller atmosphere
+    const circleCount = Math.floor(count * 1.2) // More bubbles ~ fuller atmosphere
     
     for (let i = 0; i < circleCount; i++) {
       const xPosition = (i / (circleCount - 1)) * 100
-      const waveHeight = Math.sin((i / (circleCount - 1)) * Math.PI * 2.5 + Math.PI) * 15 + 65
-      const size = 40 + Math.sin((i / (circleCount - 1)) * Math.PI * 3) * 30 // 10-70px range
+      const waveHeight = Math.sin((i / (circleCount - 1)) * Math.PI * 3 + Math.PI/4) * 15 + 55 // Same base wave as images but with π/4 phase shift and slightly higher center
+      const size = 70 + Math.sin((i / (circleCount - 1)) * Math.PI * 3) * 15 // 55-85px range
       const color = "white" // Only white bubbles for contrast against blue background
       const opacity = 0.3 + (i % 4) * 0.15 // 0.3, 0.45, 0.6, 0.75
       
@@ -56,8 +62,6 @@ export function ImageWavePattern({
     
     return circles
   }
-
-  const ambientCircles = generateAmbientCircles()
 
   return (
     <Box
@@ -76,95 +80,135 @@ export function ImageWavePattern({
         willChange: "transform", // Performance optimization
       }}
     >
-      {/* Main image wave pattern */}
-      {Array.from({ length: imageCount }, (_, i) => {
-        // Create wave pattern across the width
-        const xPosition = (i / (imageCount - 1)) * 100 // Distribute evenly across width
-        const waveHeight = Math.sin((i / (imageCount - 1)) * Math.PI * 3) * 15 + 50 // Sine wave with 3 cycles
-        const imageNumber = (i % imageCount) + 1 // Cycle through images
-        const size = 60 + Math.sin((i / (imageCount - 1)) * Math.PI * 2) * 20 // Varying sizes 40-80px
-        
-        return (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ 
-              opacity: 1, // Can change opacity (including with a function)
-              y: [0, -10, 0, -5], // Bobbing motion
-              rotate: [0, 5, -5, 0] // Rocking motion
-            }}
-            transition={{
-              opacity: { delay: i * 0.1, duration: 0.8, ease: "easeOut" }, // Fade in once
-              y: { delay: i * 0.1 + 0.8, duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }, // Continuous bobbing
-              rotate: { delay: i * 0.1 + 0.8, duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" } // Continuous rocking
-            }}
-            style={{
-              position: "absolute",
-              left: `${xPosition}%`,
-              top: `${waveHeight}%`,
-              transform: "translate(-50%, -50%)",
-              zIndex: 1,
-            }}
-          >
-            <Box
-              component="img"
-              src={`${imagePath}/${imageNumber}.${imageExtension}`}
-              alt={`Circular crop ${imageNumber}`}
-              sx={{
-                width: `${size}px`,
-                height: `${size}px`,
-                borderRadius: "50%",
-                opacity: 1, // Also can change opacity here
-                filter: "brightness(1.1) contrast(1.1)",
-                boxShadow: "0 4px 20px rgba(42, 82, 135, 0.3)",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  transform: "scale(1.1)",
+      {/* Responsive image wave patterns - each breakpoint gets proper distribution - needs tweaking but okay for now */}
+      {Object.entries(imageCountConfig).map(([breakpoint, count]) => (
+        <Box
+          key={breakpoint}
+          sx={{
+            display: { 
+              xs: breakpoint === 'xs' ? 'block' : 'none',
+              sm: breakpoint === 'sm' ? 'block' : 'none', 
+              lg: breakpoint === 'lg' ? 'block' : 'none'
+            },
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '100%',
+          }}
+        >
+          {Array.from({ length: count }, (_, i) => {
+            // Create wave pattern across the width - properly distributed
+            const xPosition = (i / (count - 1)) * 100 // Distribute evenly across width
+            const waveHeight = Math.sin((i / (count - 1)) * Math.PI * 3) * 15 + 50 // Sine wave with 3 cycles
+            const imageNumber = (i % 16) + 1 // Cycle through images 1-16
+            const size = 75 + Math.sin((i / (count - 1)) * Math.PI * 2) * 15 // Varying sizes 60-90px
+            
+            return (
+              <motion.div
+                key={`${breakpoint}-${i}`}
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ 
                   opacity: 1,
-                }
-              }}
-            />
-          </motion.div>
-        )
-      })}
+                  y: [0, -10, 0, -5], // Bobbing motion
+                  rotate: [0, 5, -5, 0] // Rocking motion
+                }}
+                transition={{
+                  opacity: { delay: i * 0.1, duration: 0.8, ease: "easeOut" },
+                  y: { delay: i * 0.1 + 0.8, duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
+                  rotate: { delay: i * 0.1 + 0.8, duration: 4, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }
+                }}
+                style={{
+                  position: "absolute",
+                  left: `${xPosition}%`,
+                  top: `${waveHeight}%`,
+                  transform: "translate(-50%, -50%)",
+                  zIndex: 1,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={`${imagePath}/${imageNumber}.${imageExtension}`}
+                  alt={`Circular crop ${imageNumber}`}
+                  sx={{
+                    width: `${size}px`,
+                    height: `${size}px`,
+                    borderRadius: "50%",
+                    opacity: 1,
+                    filter: "brightness(1.1) contrast(1.1)",
+                    boxShadow: "0 4px 20px rgba(42, 82, 135, 0.3)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "scale(1.1)",
+                      opacity: 1,
+                    }
+                  }}
+                />
+              </motion.div>
+            )
+          })}
+        </Box>
+      ))}
 
-      {/* Ambient circles wave pattern (fade in with text) */}
-      {ambientCircles.map((circle, i) => {
-        const circleColor = circle.color === "white" 
-          ? theme.palette.ambient.rippleWhite 
-          : theme.palette.ambient.rippleBlue
+      {/* Responsive ambient circles wave pattern - each breakpoint gets proper distribution */}
+      {Object.entries(imageCountConfig).map(([breakpoint, count]) => {
+        const ambientCircles = generateAmbientCirclesForBreakpoint(count)
         
         return (
-          <motion.div
-            key={`ambient-${i}`}
-            initial={{ opacity: 0 }}
-            animate={{ 
-              opacity: circle.opacity,
-              y: [0, -12, 0, -8, 0], // Bubbly floating motion
-              scale: [1, 1.05, 1, 1.02, 1], // Gentle breathing/pulsing...keep?
-            }}
-            transition={{
-              opacity: { delay: 2 + i * 0.05, duration: 1.2, ease: "easeOut" }, // Fade in with text
-              y: { delay: 2 + i * 0.05 + 1.2, duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
-              scale: { delay: 2 + i * 0.05 + 1.2, duration: 6, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" } // Gentle pulsing
-            }}
-            style={{
-              position: "absolute",
-              left: `${circle.xPosition}%`,
-              top: `${circle.yPosition}%`,
-              transform: "translate(-50%, -50%)",
-              zIndex: 0, // Behind the main images. TODO: square with theme Zindexing
+          <Box
+            key={`ambient-${breakpoint}`}
+            sx={{
+              display: { 
+                xs: breakpoint === 'xs' ? 'block' : 'none',
+                sm: breakpoint === 'sm' ? 'block' : 'none', 
+                lg: breakpoint === 'lg' ? 'block' : 'none'
+              },
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '100%',
             }}
           >
-            <Box
-              sx={{
-                width: `${circle.size}px`,
-                height: `${circle.size}px`,
-                borderRadius: "50%",
-                backgroundColor: circleColor,
-              }}
-            />
-          </motion.div>
+            {ambientCircles.map((circle, i) => {
+              const circleColor = circle.color === "white" 
+                ? theme.palette.ambient.rippleWhite 
+                : theme.palette.ambient.rippleBlue
+              
+              return (
+                <motion.div
+                  key={`ambient-${breakpoint}-${i}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: circle.opacity,
+                    y: [0, -12, 0, -8, 0], // Bubbly floating motion
+                    scale: [1, 1.05, 1, 1.02, 1], // Gentle breathing/pulsing
+                  }}
+                  transition={{
+                    opacity: { delay: 2 + i * 0.05, duration: 1.2, ease: "easeOut" }, // Fade in with text
+                    y: { delay: 2 + i * 0.05 + 1.2, duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" },
+                    scale: { delay: 2 + i * 0.05 + 1.2, duration: 6, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }
+                  }}
+                  style={{
+                    position: "absolute",
+                    left: `${circle.xPosition}%`,
+                    top: `${circle.yPosition}%`,
+                    transform: "translate(-50%, -50%)",
+                    zIndex: 0, // Behind the main images
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: `${circle.size}px`,
+                      height: `${circle.size}px`,
+                      borderRadius: "50%",
+                      backgroundColor: circleColor,
+                    }}
+                  />
+                </motion.div>
+              )
+            })}
+          </Box>
         )
       })}
     </Box>

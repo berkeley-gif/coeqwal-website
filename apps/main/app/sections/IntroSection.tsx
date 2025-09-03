@@ -27,7 +27,7 @@ const IntroSection = () => {
       
       {/* Wave pattern of circular images */}
       <ImageWavePattern 
-        imageCount={16}
+        imageCount={{ xs: 6, sm: 11, lg: 16 }}
         height="33.33vh"
         zIndex={theme.zIndex.introForegroundImages}
       />
@@ -66,9 +66,9 @@ const IntroSection = () => {
                 component="h1"
                 sx={{
                   fontSize: "4.2rem", // may change type scale to accomodate new content ~ new layout
-                  lineHeight: 1.12,
+                  lineHeight: 1.1,
                   color: (theme) => theme.palette.text.secondary, // white
-                  mb: (theme) => theme.layout.spacing.sm,
+                  mb: (theme) => theme.layout.spacing.xs,
                   maxWidth: "800px", // For title wrap styling in this case
                 }}
               >
