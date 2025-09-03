@@ -204,7 +204,7 @@ export default function ContentPanels() {
         },
       }}
     >
-      <Spacer height={{ xs: 48, md: 96 }} />
+      <Spacer height={(theme) => theme.layout.spacer.medium} />
 
       <Box
         sx={{
@@ -497,7 +497,7 @@ export default function ContentPanels() {
           }
         />
 
-        <Spacer height={{ xs: 100, lg: 0 }} />
+        <Spacer height={(theme) => theme.layout.spacer.large} />
         {/* Explore panel */}
         <PanelWithDetail
           panelType="explore"
@@ -888,7 +888,7 @@ export default function ContentPanels() {
             </>
           }
         />
-        <Spacer height={{ xs: 100, lg: 0 }} />
+        <Spacer height={(theme) => theme.layout.spacer.large} />
         {/* Empower panel */}
         <Box sx={{ py: 4 }}>
           <ContentPanel id="empower" smallScreenAlign="center" largeScreenFlexDir="column">
