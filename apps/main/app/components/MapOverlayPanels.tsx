@@ -44,8 +44,8 @@ export default function MapOverlayPanels() {
         rightContent={
           <Box sx={overlayPanelStyle}>
             <Typography
-              variant="h2"
-              component="h2"
+              variant="h3"
+              component="h3"
               sx={{
                 mb: (theme) => theme.layout.spacing.md,
                 color: (theme) => theme.palette.common.white,

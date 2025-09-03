@@ -6,7 +6,7 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
-import { NavDropdown, NavDropdownOption } from "./NavDropdown"
+import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
 import { useRef, useState } from "react"
@@ -366,4 +366,4 @@ export function Header({
   )
 }
 
-export { Header }
+
