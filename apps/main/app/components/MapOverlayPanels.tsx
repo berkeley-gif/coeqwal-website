@@ -1,18 +1,28 @@
 "use client"
 
-import { TwoColumnPanel, ScrollToButton } from "@repo/ui"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { TwoColumnPanel } from "@repo/ui"
+import { Box, Typography, useTheme, Theme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 
 export default function MapOverlayPanels() {
-  const theme = useTheme()
+  const theme = useTheme() // eslint-disable-line @typescript-eslint/no-unused-vars
   const { t } = useTranslation()
+
+  // Shared style for overlay panel content boxes, for now
+  const overlayPanelStyle = {
+    maxWidth: (theme: Theme) => theme.layout.textContainer.maxWidth,
+    backgroundColor: "rgba(42, 82, 135, 0.7)", // Same as home panel gradient start
+    backdropFilter: "blur(10px)",
+    borderRadius: (theme: Theme) => theme.borderRadius.card,
+    padding: (theme: Theme) => theme.layout.spacing.lg,
+    pointerEvents: "auto", // Re-enable pointer events for the content box
+  }
 
   return (
     <Box
       sx={{
         position: "relative",
-        zIndex: 2, // Above the sticky map
+        zIndex: (theme) => theme.zIndex.content, // Above the sticky map
       }}
     >
       {/* Tools Panel - Right-side overlay */}
@@ -31,25 +41,14 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
         }}
-        rightContent={
-          <Box
-            sx={{
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(10px)",
-              borderRadius: theme.borderRadius.card,
-              padding: { xs: 3, md: 4 },
-              boxShadow: theme.shadows[3],
-              pointerEvents: "auto", // Re-enable pointer events for the content box
-              border: `1px solid rgba(255, 255, 255, 0.2)`,
-            }}
-          >
+                rightContent={
+          <Box sx={overlayPanelStyle}>
             <Typography
               variant="h2"
               component="h2"
               sx={{ 
                 mb: (theme) => theme.layout.spacing.md,
-                color: (theme) => theme.palette.blue.darkest,
+                color: (theme) => theme.palette.common.white,
               }}
             >
               {t("toolsPanel.title")}
@@ -58,7 +57,7 @@ export default function MapOverlayPanels() {
             <Typography 
               variant="body1"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
+                color: (theme) => theme.palette.common.white,
               }}
             >
               {t("toolsPanel.content")}
@@ -73,7 +72,7 @@ export default function MapOverlayPanels() {
         fullHeight={true}
         fullWidth={true}
         backgroundColor="transparent"
-        includeHeaderSpacing={true}
+        includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
           justifyContent: "flex-start",
@@ -83,32 +82,16 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
         }}
-        rightContent={
-          <Box
-            sx={{
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
-              backgroundColor: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(10px)",
-              borderRadius: theme.borderRadius.card,
-              padding: { xs: 3, md: 4 },
-              boxShadow: theme.shadows[3],
-              pointerEvents: "auto", // Re-enable pointer events for the content box
-              border: `1px solid rgba(255, 255, 255, 0.2)`,
-            }}
-          >
-            <Typography variant="body1">
+                rightContent={
+          <Box sx={overlayPanelStyle}>
+            <Typography 
+              variant="body1"
+              sx={{
+                color: (theme) => theme.palette.common.white,
+              }}
+            >
               {t("scenariosPanel.content")}
             </Typography>
-
-            <ScrollToButton
-              scrollToId="content-panels"
-              color={theme.palette.overlay.water}
-              style={{
-                marginTop: "2rem",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            />
           </Box>
         }
       />
