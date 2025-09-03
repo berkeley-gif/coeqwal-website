@@ -2,6 +2,7 @@ import { BasePanel, OneColumnPanel, TwoColumnPanel, Spacer, ScrollToButton } fro
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
 import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
+import { BlueThemeBackground } from "../components/BlueThemeBackground"
 import { ambientCircles } from "../config/ambientCircles"
 import { floatingMarkers } from "../config/floatingMarkers"
 
@@ -14,8 +15,11 @@ const IntroSection = () => {
         background: (theme) => `
             linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
           `,
+        position: "relative",
       }}
     >
+      {/* Blue gradient overlay for home panel only */}
+      <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
       {/* Full screen home panel */}
       <TwoColumnPanel
         id="home"
@@ -30,14 +34,12 @@ const IntroSection = () => {
         }}
         sx={{
           position: "relative",
-
         }}
         leftContent={
           <Box
             sx={{
               width: '100%',
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth, // This is setting 
-              textAlign: "left",
+              maxWidth: (theme) => theme.layout.textContainer.maxWidth, // This is a site-wide setting 
               zIndex: theme.zIndex.introText,
             }}
           >
@@ -50,6 +52,7 @@ const IntroSection = () => {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
+                color: (theme) => theme.palette.text.secondary, // white
                 "& > span": {
                   lineHeight: 1.05, // Match theme h1 lineHeight
                 },
@@ -65,6 +68,7 @@ const IntroSection = () => {
               variant="body1"
               sx={{
                 mb: (theme) => theme.layout.spacing.xl,
+                color: (theme) => theme.palette.text.secondary, // white
               }}
             >
               Explore a range of Central Valley water scenarios and discover
@@ -82,7 +86,7 @@ const IntroSection = () => {
             >
               <ScrollToButton
                 scrollToId="frontmatter"
-                color={theme.palette.blue.darkest}
+                color={(theme) => theme.palette.text.secondary} // white, etc.
               />
             </Box>
           </Box>
