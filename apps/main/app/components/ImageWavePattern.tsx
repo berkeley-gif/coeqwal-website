@@ -38,10 +38,10 @@ export function ImageWavePattern({
     typeof imageCount === "number"
       ? { xs: imageCount, sm: imageCount, lg: imageCount }
       : {
-          xs: (imageCount as { xs?: number; sm?: number; lg?: number }).xs || 16,
-          sm: (imageCount as { xs?: number; sm?: number; lg?: number }).sm || 16,
-          lg: (imageCount as { xs?: number; sm?: number; lg?: number }).lg || 16,
-        }
+        xs: (imageCount as { xs?: number; sm?: number; lg?: number }).xs || 16,
+        sm: (imageCount as { xs?: number; sm?: number; lg?: number }).sm || 16,
+        lg: (imageCount as { xs?: number; sm?: number; lg?: number }).lg || 16,
+      }
 
   // Generate ambient circles for each breakpoint, just like images
   const generateAmbientCirclesForBreakpoint = (count: number) => {
@@ -81,7 +81,7 @@ export function ImageWavePattern({
         pointerEvents: "none",
         overflow: "hidden",
         // Responsive scaling
-        transform: { xs: "scale(0.8)", md: "scale(1.20)", lg: "scale(1)" },
+        transform: { xs: "scale(1.7)", md: "scale(2.20)", lg: "scale(1.2)", xl: "scale(2.5)" },
         transformOrigin: "top center",
         willChange: "transform", // Performance optimization
       }}

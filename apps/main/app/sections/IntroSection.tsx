@@ -23,8 +23,6 @@ const IntroSection = () => {
           height: "100vh",
         }}
       >
-        {/* Blue gradient home panel background */}
-        <BlueThemeBackground zIndex={theme.zIndex.introBackgroundImages} />
 
         {/* Wave pattern of circle images */}
         <ImageWavePattern
@@ -33,23 +31,25 @@ const IntroSection = () => {
           zIndex={theme.zIndex.introForegroundImages}
         />
 
-        <TwoColumnPanel
+        <OneColumnPanel
           id="home"
           fullHeight={true}
           fullWidth={true}
           backgroundColor="transparent"
           includeHeaderSpacing={true}
-          contentColumn="left"
           contentAlignment={{
-            justifyContent: "flex-end", // Text block stays at bottom for all screen sizes for this instance
-            alignItems: "flex-start",
+            justifyContent: { xs: "center", md: 'flex-end', lg: "flex-end" }, // Text block stays at bottom for all screen sizes for this instance
+            alignItems: "center",
           }}
-          debug={false} // Debug borders
-          leftContent={
+
+          content={
             <Box
               sx={{
                 zIndex: (theme) => theme.zIndex.introText,
-                paddingBottom: { xs: 4, md: 6, lg: 8 }, // Responsive bottom spacing
+                paddingBottom: { xs: 4, md: 6, lg: 8 },
+                paddingLeft: { xs: 9, md: 18, lg: 35, xl: 70 }, // Responsive padding
+                paddingRight: { xs: 9, md: 18, lg: 35, xl: 70 }, // Responsive padding
+                textAlign: 'center',
               }}
             >
               {/* Home text content with fade-in animation */}
@@ -70,7 +70,7 @@ const IntroSection = () => {
                     lineHeight: 1.1,
                     color: (theme) => theme.palette.text.secondary, // white
                     mb: (theme) => theme.layout.spacing.xs,
-                    maxWidth: "800px", // For custom title wrap styling in this case
+                    mt: { xs: '40vh', lg: '0' },
                   }}
                 >
                   {t("homePanel.title")}
@@ -82,7 +82,7 @@ const IntroSection = () => {
                   sx={(theme) => ({
                     // mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
                     color: theme.palette.text.secondary, // white
-                    paddingLeft: "0.5rem", // visually match h1 and body1
+
                   })}
                 >
                   {t("homePanel.content")}

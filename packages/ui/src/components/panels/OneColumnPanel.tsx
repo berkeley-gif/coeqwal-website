@@ -3,6 +3,7 @@
 import React from "react"
 import { Box, Typography, BoxProps } from "@mui/material"
 import { styled } from "@mui/material/styles"
+import { ResponsiveStyleValue } from "@repo/ui/mui"
 
 interface OneColumnPanelProps extends Omit<BoxProps, "content"> {
   /** Main content for the panel */
@@ -21,7 +22,7 @@ interface OneColumnPanelProps extends Omit<BoxProps, "content"> {
   includeHeaderSpacing?: boolean
   /** Flex alignment for the content */
   contentAlignment?: {
-    justifyContent?: "flex-start" | "center" | "flex-end"
+    justifyContent?: ResponsiveStyleValue<"flex-start" | "center" | "flex-end">
     alignItems?: "flex-start" | "center" | "flex-end" | "stretch"
   }
   /** Background elements (absolutely positioned) */
