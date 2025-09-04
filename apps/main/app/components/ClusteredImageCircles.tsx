@@ -54,7 +54,6 @@ export function ClusteredImageCircles({
             bottom: { xs: 0, md: "26%" },
             zIndex: zIndex || theme.zIndex.introForegroundImages,
             pointerEvents: "none",
-            transform: { xs: "scale(0.8)", md: "scale(1.20)", lg: "scale(1)" },
             transformOrigin: "top right",
             willChange: "transform",
           }}

@@ -776,6 +776,7 @@ const theme = createTheme({
       fontWeight: 500,
       lineHeight: 1.0, // Tighter for large hero text
       color: themeValues.palette.blue.darkest,
+      textTransform: 'uppercase'
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
