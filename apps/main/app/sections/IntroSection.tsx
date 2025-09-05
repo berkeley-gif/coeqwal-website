@@ -1,8 +1,7 @@
-import { OneColumnPanel, TwoColumnPanel, ScrollToButton } from "@repo/ui"
+import { OneColumnPanel, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { motion } from "@repo/motion"
-import { BlueThemeBackground } from "../components/BlueThemeBackground"
 import { ImageWavePattern } from "../components/ImageWavePattern"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
@@ -80,10 +79,10 @@ const IntroSection = () => {
                 {/* Body text */}
                 <Typography
                   variant="body1"
-                  sx={(theme) => ({
+                  sx={{
                     // mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
                     color: (theme) => theme.palette.blue.darkest, // blue dark
-                  })}
+                  }}
                 >
                   {t("homePanel.content")}
                 </Typography>
