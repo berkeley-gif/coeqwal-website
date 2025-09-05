@@ -47,7 +47,7 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
           paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Remove TwoColumnPanel's default padding that blocks clicks
+          paddingRight: 0, // Ditto
         }}
         rightContent={
           <Box sx={{
@@ -170,7 +170,7 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
           paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Remove TwoColumnPanel's default padding that blocks clicks
+          paddingRight: 0, // Same as above
         }}
         rightContent={
           <Box sx={{
@@ -205,12 +205,12 @@ export default function MapOverlayPanels() {
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
           paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Remove TwoColumnPanel's default padding that blocks clicks
+          paddingRight: 0, // Here also -- I'll work on this
         }}
         rightContent={
           <Box sx={{
             ...overlayPanelStyle,
-            marginRight: { xs: 2, md: 8 }, // Push panel further right to avoid markers
+            marginRight: { xs: 2, md: 8 }, // Push panel right, for now
           }}>
             <Typography
               variant="body1"

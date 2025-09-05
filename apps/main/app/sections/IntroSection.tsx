@@ -13,7 +13,7 @@ const IntroSection = () => {
   const { t } = useTranslation()
 
   return (
-    <Box>
+    <Box sx={{ pointerEvents: "none" }}>
       {/* Home panel (could be its own component) */}
       <Box
         sx={{
@@ -39,6 +39,7 @@ const IntroSection = () => {
           backgroundColor="transparent"
           includeHeaderSpacing={true}
           textColor={theme.palette.blue.darkest}
+          sx={{ pointerEvents: "auto" }} // Enables interactions for home panel
           contentAlignment={{
             justifyContent: { xs: "center", md: 'flex-end', lg: "flex-end" }, // Text block stays at bottom for all screen sizes for this instance
             alignItems: "center",
@@ -124,6 +125,7 @@ const IntroSection = () => {
           alignItems: "center",
         }}
         sx={{
+          pointerEvents: "auto", // Enables interactions for frontmatter panel
           position: "relative",
           backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "40% auto",
@@ -178,6 +180,7 @@ const IntroSection = () => {
         backgroundColor={theme.palette.brand.sky}
         textColor={theme.palette.text.secondary}
         includeHeaderSpacing={true}
+        sx={{ pointerEvents: "auto" }} // Enables interactions for interstitial panel
         contentAlignment={{
           justifyContent: "center",
           alignItems: "center",

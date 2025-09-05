@@ -31,6 +31,7 @@ export default function Home() {
           zIndex: (theme) => theme.zIndex.panels,
           overflowX: "clip",
           overflowY: "visible",
+          pointerEvents: "none", // Allow map interactions to pass through
         }}
       >
         {/* Panel sections */}

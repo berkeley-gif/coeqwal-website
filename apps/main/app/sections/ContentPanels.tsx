@@ -184,6 +184,7 @@ export default function ContentPanels() {
       background="transparent"
       paddingVariant="wide"
       sx={{
+        pointerEvents: "auto", // Re-enable interactions for content panels
         position: "relative",
         overflowX: "hidden", // Prevent horizontal scrolling
         overflowY: "visible", // Allow natural vertical flow
