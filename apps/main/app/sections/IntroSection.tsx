@@ -6,7 +6,7 @@ import { BlueThemeBackground } from "../components/BlueThemeBackground"
 import { ImageWavePattern } from "../components/ImageWavePattern"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
-import { Direction } from "@dnd-kit/core/dist/types"
+import { CalSimProvider } from "../components/CalSimContext"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -161,11 +161,14 @@ const IntroSection = () => {
         }
       />
 
-      {/* Sticky California map background */}
-      <CaliforniaMapPanel id="california-map" />
-
-      {/* Scrolling overlay panels over the sticky map */}
-      <MapOverlayPanels />
+      {/* CalSim context provider for shared state between map and overlays */}
+      <CalSimProvider>
+        {/* Sticky California map background */}
+        <CaliforniaMapPanel id="california-map" />
+        
+        {/* Scrolling overlay panels over the sticky map */}
+        <MapOverlayPanels />
+      </CalSimProvider>
 
       {/* Interstitial panel - can be broken out into a component */}
       <OneColumnPanel

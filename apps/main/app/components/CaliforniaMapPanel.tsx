@@ -2,6 +2,7 @@
 
 import { Map } from "@repo/map"
 import { Box } from "@repo/ui/mui"
+import CalSimMarkers from "./CalSimMarkers"
 
 interface CaliforniaMapPanelProps {
   id?: string
@@ -29,7 +30,7 @@ export default function CaliforniaMapPanel({
         mapboxToken={token}
         mapStyle="mapbox://styles/digijill/clz4h7lfm00mn01rih4x75g46"
         initialViewState={{
-          longitude: -121.4944,
+          longitude: -119.5, // Move map center east to shift markers left on screen
           latitude: 37.0902,
           zoom: 7,
           bearing: 0,
@@ -41,7 +42,10 @@ export default function CaliforniaMapPanel({
         touchRotate={false}
         dragPan={true}
         interactive={true}
-      />
+      >
+        {/* CalSim markers rendered as direct children of Map for proper interaction */}
+        <CalSimMarkers />
+      </Map>
     </Box>
   )
 }
