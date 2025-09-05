@@ -1,8 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
-  useTheme,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -14,41 +13,107 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
+  useTheme,
 } from "@repo/ui/mui"
+import { Map, useMap, NavigationControl, GeolocateControl } from "@repo/map"
 
 import AddedWaterNeeds from "./AddedNeedsList"
 import WaterNeedEditor from "./WaterNeedEditor"
-import BucketScene from "./NeedsBuckets"
-import ActionPanel from "./ActionPanel"
-import TutorialSlider from "./TutorialSlider"
 import { WaterNeedSetting } from "./types"
 
 import {
   WATER_NEED_TYPES,
   BLANK_WATER_NEED,
   DEFAULT_OTHER_WATER_NEEDS,
-  SYNERGY_COLOR,
-  UNSATISFIABLE_COLOR,
 } from "./constants"
-
-// const waterNeedSettings: WaterNeedSetting[] = []
-
-// const needsBucketWaterNeedSettings: NeedsBucketWaterNeedSetting[] = []
 
 const NeedsEditorPanel: React.FC = () => {
   const theme = useTheme()
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  const {
+    addSource,
+    addLayer,
+    removeLayer,
+    removeSource,
+    hasSource,
+    hasLayer,
+    flyTo,
+  } = useMap()
   const [expanded, setExpanded] = useState("")
   const [needsList, setNeedsList] = useState<WaterNeedSetting[]>(
     DEFAULT_OTHER_WATER_NEEDS,
   )
 
-  const [showTutorial, setShowTutorial] = useState(true)
-  const [showBucketScene, setShowBucketScene] = useState(false)
-  const [showActionPanel, setShowActionPanel] = useState(false)
-  const [isShowingPopup, setIsShowingPopup] = useState(false)
-
   const [currentWaterNeedSetting, setCurrentWaterNeedSetting] =
     useState<WaterNeedSetting>(BLANK_WATER_NEED)
+
+  // Load DU GeoJSON data and add to map
+  useEffect(() => {
+    const loadAndAddDuLayer = async () => {
+      try {
+        // Check if source already exists
+        if (hasSource("du-geojson")) {
+          return
+        }
+
+        // Load GeoJSON data
+        const response = await fetch("/geospatial_data/du.geojson")
+        const geoJsonData = await response.json()
+
+        // Add source to map
+        addSource("du-geojson", {
+          type: "geojson",
+          data: geoJsonData,
+        })
+
+        // Add fill layer
+        if (!hasLayer("du-polygons")) {
+          addLayer(
+            "du-polygons",
+            "du-geojson",
+            "fill",
+            {
+              "fill-color": "rgba(100, 164, 214, 0.3)", // Semi-transparent blue
+              "fill-outline-color": "rgba(100, 164, 214, 1)", // Solid blue outline
+            },
+            {
+              visibility: "visible",
+            },
+          )
+        }
+
+        // Add outline layer
+        if (!hasLayer("du-polygons-outline")) {
+          addLayer(
+            "du-polygons-outline",
+            "du-geojson",
+            "line",
+            {
+              "line-color": "rgba(100, 164, 214, 1)", // Solid blue outline
+              "line-width": 1,
+            },
+            {
+              visibility: "visible",
+            },
+          )
+        }
+      } catch (error) {
+        console.error("Error loading DU GeoJSON data:", error)
+      }
+    }
+
+    // loadAndAddDuLayer()
+
+    // Cleanup function to remove layers when component unmounts
+    return () => {
+      if (hasLayer("du-polygons-outline")) {
+        removeLayer("du-polygons-outline")
+      }
+      if (hasLayer("du-polygons")) {
+        removeLayer("du-polygons")
+      }
+    }
+  }, [addSource, addLayer, removeLayer, hasSource, hasLayer])
 
   const addNewNeed = (type: string) => {
     const defaultSetting = WATER_NEED_TYPES.find(
@@ -90,20 +155,6 @@ const NeedsEditorPanel: React.FC = () => {
     })
 
     setCurrentWaterNeedSetting(needToEdit)
-    setShowBucketScene(false) // Close the bucket scene if open
-  }
-
-  const handleGoBack = () => {
-    if (showBucketScene) {
-      setShowBucketScene(false)
-      setShowActionPanel(false)
-      return
-    }
-    if (showActionPanel) {
-      setShowActionPanel(false)
-      setShowBucketScene(true)
-      return
-    }
   }
 
   return (
@@ -119,32 +170,7 @@ const NeedsEditorPanel: React.FC = () => {
         position: "relative", // Added for overlay positioning
       }}
     >
-      <Button
-        sx={{ position: "absolute", left: 0, bottom: 0, m: 4 }}
-        onClick={handleGoBack}
-      >
-        Go Back
-      </Button>
-      {showTutorial && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100vh",
-            backgroundColor: "rgba(0, 0, 0, 0)", // Semi-transparent dark overlay
-            backdropFilter: "blur(2px)", // Bokeh effect
-            zIndex: 10, // Ensure it overlays other content
-          }}
-        >
-          <TutorialSlider onFinish={() => setShowTutorial(false)} />
-        </Box>
-      )}
-      {!showBucketScene && !showActionPanel && (
+      {
         <Box
           sx={{
             width: "90%",
@@ -155,20 +181,16 @@ const NeedsEditorPanel: React.FC = () => {
             justifyContent: "center",
           }}
         >
-          <Typography variant="h3" sx={{ mb: 2 }}>
-            <span style={{ fontStyle: "italic" }}>Water Needs</span>-based
-            search
-          </Typography>
           <Box
             sx={{
               width: "100%",
-              height: "100%",
               display: "flex",
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
             }}
           >
+            {/* Water Need Types Accordion */}
             <Box
               sx={{
                 maxWidth: "25%",
@@ -208,6 +230,7 @@ const NeedsEditorPanel: React.FC = () => {
                 </Accordion>
               ))}
             </Box>
+            {/* Water Need Editor Panel */}
             <Box
               sx={{
                 flex: 1,
@@ -220,9 +243,47 @@ const NeedsEditorPanel: React.FC = () => {
                 currentWaterNeed={currentWaterNeedSetting}
                 setCurrentWaterNeed={setCurrentWaterNeedSetting}
                 setNeedsList={setNeedsList}
+                mapFunctions={{
+                  addSource,
+                  addLayer,
+                  removeLayer,
+                  removeSource,
+                  hasSource,
+                  hasLayer,
+                  flyTo,
+                }}
               />
             </Box>
           </Box>
+          {/* Map Panel */}
+          <Box
+            sx={{
+              width: "70%",
+              height: "30vh",
+              mr: 2,
+              position: "relative",
+              borderRadius: 2,
+              overflow: "hidden",
+            }}
+          >
+            <Map
+              mapboxToken={mapboxToken}
+              mapStyle="mapbox://styles/mapbox/streets-v12"
+              initialViewState={{
+                longitude: -120.759,
+                latitude: 38.032,
+                zoom: 6.3,
+              }}
+              style={{ width: "100%", height: "100%" }}
+              scrollZoom={true}
+              touchZoom={true}
+              touchRotate={false}
+            >
+              <NavigationControl position="top-right" />
+              <GeolocateControl position="top-right" />
+            </Map>
+          </Box>
+          {/* Added Needs List and Continue Button */}
           <Box
             sx={{
               p: 2,
@@ -245,11 +306,7 @@ const NeedsEditorPanel: React.FC = () => {
                 variant="outlined"
                 startIcon={<ArrowRightIcon />}
                 size="medium"
-                onClick={() => {
-                  setShowBucketScene(true)
-
-                  setIsShowingPopup(true)
-                }}
+                onClick={() => {}}
                 sx={{
                   color: "black",
                   borderColor: "black",
@@ -262,86 +319,7 @@ const NeedsEditorPanel: React.FC = () => {
             )}
           </Box>
         </Box>
-      )}
-      {showBucketScene && (
-        <Box
-          sx={{
-            width: "90%",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <BucketScene
-            needsList={needsList}
-            height={600}
-            editWaterNeed={handleEditWaterNeed}
-            setNeedsList={setNeedsList}
-            finishWaterNeed={(selectedNeedsList) => {
-              setNeedsList(selectedNeedsList)
-              // setNeedsBucketWaterNeedSetting(selectedNeedsList)
-              setShowBucketScene(false)
-              setTimeout(() => setShowActionPanel(true), 0)
-            }}
-          />
-        </Box>
-      )}
-      {showActionPanel && (
-        <Box
-          sx={{
-            width: "90%",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <ActionPanel finalNeedsList={needsList.filter((d) => d.isSelected)} />
-        </Box>
-      )}
-      <Dialog
-        open={isShowingPopup}
-        slotProps={{
-          paper: {
-            sx: { backgroundColor: "white" },
-          },
-        }}
-      >
-        <DialogContent>
-          <Typography variant="h5">
-            We&apos;ve combined the <em>Water Needs</em> with the predefined
-            needs that COEQWAL is aware of, so that you can explore your needs
-            in context of others&apos; water needs.
-            <br />
-            <br />
-            Your selection is first populated in the center{" "}
-            <em>Currently Selected</em> bucket, and we will determine after
-            every change whether the other water needs are{" "}
-            <span
-              style={{
-                background: SYNERGY_COLOR,
-                borderRadius: "5px",
-                padding: "2px 4px",
-              }}
-            >
-              synergistic
-            </span>{" "}
-            or{" "}
-            <span
-              style={{
-                background: UNSATISFIABLE_COLOR,
-                borderRadius: "5px",
-                padding: "2px 4px",
-              }}
-            >
-              unsatisfiable
-            </span>
-            .
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsShowingPopup(false)} color="primary">
-            OK!
-          </Button>
-        </DialogActions>
-      </Dialog>
+      }
     </Box>
   )
 }

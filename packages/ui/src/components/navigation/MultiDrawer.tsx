@@ -1,17 +1,23 @@
 "use client"
 
 import { useState } from "react"
-import { Box, Drawer, useTheme, Fade, Typography } from "@mui/material"
+import {
+  Box,
+  Drawer,
+  useTheme,
+  Typography,
+  Fade,
+  IconButton,
+} from "@mui/material"
+import CloseIcon from "@mui/icons-material/Close"
+import EditNoteIcon from "@mui/icons-material/EditNote"
 
 // Content components
-import {
-  LearnContent,
-  CurrentOpsContent,
-  ThemesContent,
-} from "./drawer-content"
+import { CurrentOpsContent, SavedScenariosContent } from "./drawer-content"
+import type { SavedScenario } from "./drawer-content/SavedScenariosContent"
 
 // Types
-export type TabKey = "learn" | "currentOps" | "themes"
+export type TabKey = "glossary" | "savedScenarios"
 
 // Props for the rail buttons
 interface RailButtonProps {
@@ -20,12 +26,11 @@ interface RailButtonProps {
   active?: boolean
   bgColor: string
   hoverColor: string
-  topButton?: boolean
-  bottomButton?: boolean
+  icon?: React.ReactNode
 }
 
 /**
- * Button component for the mini rail - vertical tab style with vertical text
+ * Button component for the mini rail, vertical tab style with vertical text
  */
 function RailButton({
   label,
@@ -33,8 +38,7 @@ function RailButton({
   active,
   bgColor,
   hoverColor,
-  topButton,
-  bottomButton,
+  icon,
 }: RailButtonProps) {
   const theme = useTheme()
 
@@ -45,9 +49,9 @@ function RailButton({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: active ? theme.palette.primary.main : bgColor,
-        color: "#FFFFFF", // White text to match secondary nav
-        borderRadius: 0, // Remove capsule shape
+        bgcolor: active ? "#60aacb" : bgColor,
+        color: "#FFFFFF",
+        borderRadius: "8px 0 0 8px", // Rounded corners on the left side only (tabs are on right, so round toward center)
         boxShadow: "none",
         padding: "12px 2px", // Reduced horizontal padding
         my: 0,
@@ -55,35 +59,85 @@ function RailButton({
         height: "220px", // Increased height for more text space
         cursor: "pointer",
         position: "relative",
-        borderTopLeftRadius: topButton ? "8px" : 0,
-        borderBottomLeftRadius: bottomButton ? "8px" : 0,
         borderRight: active
           ? `4px solid ${theme.palette.primary.dark}`
           : "none",
-        border: "none", // Remove border
+        border: "none",
         transition: "all 0.2s ease",
         "&:hover": {
-          bgcolor: active ? theme.palette.primary.main : hoverColor,
+          bgcolor: active ? "#60aacb" : hoverColor,
         },
       }}
       aria-label={`Open ${label} panel`}
     >
-      <Typography
-        variant="nav"
+      <Box
         sx={{
-          fontWeight: 500, // Match secondary nav
-          fontSize: theme.typography.nav.fontSize,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 0.5,
           transform: "rotate(-90deg)",
-          whiteSpace: "nowrap",
-          letterSpacing: "0.05em",
-          textTransform: "uppercase",
-          color: "inherit", // Ensure text color is inherited
-          width: "180px", // Ensure enough width for rotated text
-          textAlign: "center", // Center the text
+          transformOrigin: "center",
+          width: "180px",
         }}
       >
-        {label}
-      </Typography>
+        <Typography
+          variant="nav"
+          sx={{
+            fontWeight: 500,
+            fontSize: theme.typography.nav.fontSize,
+            whiteSpace: "nowrap",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            color: "inherit",
+            textAlign: "center",
+          }}
+        >
+          {label}
+        </Typography>
+        {icon && (
+          <Box
+            component="button"
+            onClick={(e) => {
+              e.stopPropagation() // Prevent triggering the rail button
+              console.log("Save to story clicked")
+            }}
+            sx={{
+              width: "30px",
+              height: "30px",
+              borderRadius: "50%",
+              backgroundColor: "white",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ml: 0.5,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              "&:hover": {
+                transform: "scale(1.1)",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+              },
+              "&:active": {
+                transform: "scale(0.95)",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                fontSize: "1.5rem",
+                color: active ? "#449cd9" : "#666",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {icon}
+            </Box>
+          </Box>
+        )}
+      </Box>
     </Box>
   )
 }
@@ -117,22 +171,43 @@ export interface MultiDrawerProps {
    * Optional drawer content that can be passed to drawer components
    */
   drawerContent?: Record<string, unknown>
+
+  /**
+   * When true, displays a vertical rail button on the left side for toggling the drawer
+   * @default false
+   */
+  showRailButtons?: boolean
+
+  /**
+   * Optional offset from top to account for fixed header
+   * @default 0
+   */
+  headerOffset?: number
+}
+
+// Map of tab keys to display titles
+const tabTitles: Record<TabKey, string> = {
+  glossary: "Glossary",
+  savedScenarios: "My Scenarios",
 }
 
 /**
- * MultiDrawer component with three tabs
+ * MultiDrawer component with multiple tabs
  *
  * Features:
- * - Always visible mini rail with labeled buttons
- * - Single drawer with different content based on active tab
+ * - Drawer with multiple content types (Glossary, Saved Scenarios)
+ * - Vertical rail buttons with rotated text
  * - Smooth transitions between tabs
+ * - Can be controlled from outside via state management
  */
 export function MultiDrawer({
-  drawerWidth = 360,
+  drawerWidth = undefined,
   onDrawerStateChange,
   activeTab: controlledActiveTab,
   overlay = false,
   drawerContent = {},
+  showRailButtons = false,
+  headerOffset = 0,
 }: MultiDrawerProps) {
   const theme = useTheme()
 
@@ -150,13 +225,12 @@ export function MultiDrawer({
 
   // Mapping of tab keys to background colors
   const tabBg: Record<TabKey, string> = {
-    learn: "rgb(128, 175, 196)",
-    currentOps: "rgb(106, 155, 170)",
-    themes: "rgb(87, 137, 154)",
+    glossary: theme.palette.blue.medium,
+    savedScenarios: theme.palette.nature.forest,
   }
 
   // Track the bg color to apply to drawer paper, preserve while closing
-  const [drawerBg, setDrawerBg] = useState<string>(tabBg.learn)
+  const [drawerBg, setDrawerBg] = useState<string>(tabBg.glossary)
 
   // Update drawer state and call optional callback
   const updateDrawerState = (tab: TabKey | null) => {
@@ -185,134 +259,212 @@ export function MultiDrawer({
 
   return (
     <>
-      {/* Mini rail with vertical tab buttons */}
-      <Box
-        sx={{
-          position: "fixed",
-          top: "50%", // Position at middle of window height
-          right: 0, // Keep in fixed position
-          transform: "translateY(-50%)", // Center vertically
-          opacity: drawerOpen ? 0 : 1, // Hide when drawer is open
-          visibility: drawerOpen ? "hidden" : "visible", // Hide when drawer is open
-          zIndex: overlay ? 1299 : 1200, // Ensure tabs are above other content but below drawer
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 0, // No gap between buttons
-          overflow: "hidden", // Ensure child border-radius is respected
-          p: 0, // No padding
-          backgroundColor: "transparent", // Transparent background
-          border: "none", // No border
-          boxShadow: "none", // No shadow
-          transition: theme.transitions.create(["opacity", "visibility"], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        }}
-      >
-        <RailButton
-          label="LEARN ABOUT WATER"
-          onClick={() => toggleTab("learn")}
-          active={activeTab === "learn"}
-          bgColor="rgb(128, 175, 196)" /* #80AFC4 */
-          hoverColor="rgb(113, 160, 181)" /* #71A0B5 */
-          topButton
-        />
-        <RailButton
-          label="CURRENT OPERATIONS"
-          onClick={() => toggleTab("currentOps")}
-          active={activeTab === "currentOps"}
-          bgColor="rgb(106, 155, 170)" /* #6A9BAA */
-          hoverColor="rgb(94, 141, 156)" /* #5E8D9C */
-        />
-        <RailButton
-          label="SCENARIO THEMES"
-          onClick={() => toggleTab("themes")}
-          active={activeTab === "themes"}
-          bgColor="rgb(87, 137, 154)" /* #57899A */
-          hoverColor="rgb(76, 123, 138)" /* #4C7B8A */
-          bottomButton
-        />
-      </Box>
+      {/* Rail buttons - only shown when showRailButtons is true */}
+      {showRailButtons && (
+        <Box
+          sx={{
+            position: "fixed",
+            top: `calc(50% + ${headerOffset}px)`,
+            right: drawerOpen
+              ? (drawerWidth ??
+                theme.layout.drawer.width ??
+                theme.layout.drawer.glossaryWidth)
+              : 0,
+            transform: "translateY(-50%)",
+            zIndex: theme.zIndex.drawerBackdrop,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            transition: theme.transitions.create("right", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          }}
+        >
+          <RailButton
+            label={tabTitles.glossary}
+            onClick={() => toggleTab("glossary")}
+            active={activeTab === "glossary"}
+            bgColor={theme.palette.blue.dark} // Slightly darker blue for rail button
+            hoverColor={theme.palette.blue.bright} // Slightly lighter blue for hover
+          />
+          <RailButton
+            label={tabTitles.savedScenarios}
+            onClick={() => toggleTab("savedScenarios")}
+            active={activeTab === "savedScenarios"}
+            bgColor="#5a7a2f" // Slightly darker than the active green
+            hoverColor="#6b8f3a" // Slightly lighter than active green
+            icon={<EditNoteIcon />}
+          />
+        </Box>
+      )}
 
-      {/* Main drawer with dynamic content */}
+      {/* Main drawer with glossary content */}
       <Drawer
         anchor="right"
         variant="persistent"
         open={drawerOpen}
         onClose={close}
         sx={{
-          // Use higher z-index in overlay mode
-          zIndex: overlay ? 1300 : theme.zIndex.drawer,
+          // Use overlay z-index in overlay mode, otherwise use drawer z-index
+          zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
           position: "relative",
           ".MuiDrawer-paper": {
-            width: drawerWidth,
+            width:
+              drawerWidth ??
+              theme.layout.drawer.width ??
+              theme.layout.drawer.glossaryWidth,
             transition: theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
             overflow: "hidden", // Prevent scrollbar flicker during transitions
-            zIndex: overlay ? 1300 : theme.zIndex.drawer,
+            zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",
-            backgroundColor: drawerBg,
+            // Account for header height when in overlay mode
+            top: overlay ? `${headerOffset}px` : 0,
+            height: overlay ? `calc(100vh - ${headerOffset}px)` : "100vh",
+            backgroundColor: drawerBg, // Use the tracked background color
+            borderTopLeftRadius: theme.borderRadius.rounded,
           },
         }}
       >
-        {/* Fade transitions for each content section */}
-        <Fade in={activeTab === "learn"}>
+        {/* Glossary Content */}
+        <Fade in={activeTab === "glossary"}>
           <Box
             sx={{
-              display: activeTab === "learn" ? "block" : "none",
+              display: activeTab === "glossary" ? "block" : "none",
               height: "100%",
               overflow: "auto",
             }}
           >
-            {activeTab === "learn" && (
-              <LearnContent
-                onClose={close}
-                selectedSection={
-                  drawerContent.selectedSection as string | undefined
-                }
-              />
+            {activeTab === "glossary" && (
+              <>
+                <Box
+                  sx={{
+                    background: theme.palette.blue.medium, // Use the beautiful medium blue
+                    color: theme.palette.common.white,
+                    padding: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    minHeight: "56px",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      color: theme.palette.common.white,
+                      margin: 0,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {tabTitles.glossary}
+                  </Typography>
+                  <IconButton
+                    onClick={close}
+                    size="small"
+                    aria-label="close drawer"
+                    sx={{
+                      color: theme.palette.common.white,
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    backgroundColor: theme.palette.common.white,
+                    height: "calc(100% - 56px)", // Adjust based on header height
+                    overflow: "auto",
+                  }}
+                >
+                  <CurrentOpsContent
+                    onClose={close}
+                    selectedSection={
+                      drawerContent.selectedSection as string | undefined
+                    }
+                    selectedTerm={
+                      drawerContent.selectedTerm as string | undefined
+                    }
+                  />
+                </Box>
+              </>
             )}
           </Box>
         </Fade>
 
-        <Fade in={activeTab === "currentOps"}>
+        {/* Saved Scenarios Content */}
+        <Fade in={activeTab === "savedScenarios"}>
           <Box
             sx={{
-              display: activeTab === "currentOps" ? "block" : "none",
+              display: activeTab === "savedScenarios" ? "block" : "none",
               height: "100%",
               overflow: "auto",
             }}
           >
-            {activeTab === "currentOps" && (
-              <CurrentOpsContent
-                onClose={close}
-                selectedSection={
-                  drawerContent.selectedSection as string | undefined
-                }
-              />
-            )}
-          </Box>
-        </Fade>
-
-        <Fade in={activeTab === "themes"}>
-          <Box
-            sx={{
-              display: activeTab === "themes" ? "block" : "none",
-              height: "100%",
-              overflow: "auto",
-            }}
-          >
-            {activeTab === "themes" && (
-              <ThemesContent
-                onClose={close}
-                selectedOperation={
-                  drawerContent.selectedOperation as string | undefined
-                }
-              />
+            {activeTab === "savedScenarios" && (
+              <>
+                <Box
+                  sx={{
+                    background: theme.palette.nature.forest,
+                    color: theme.palette.common.white,
+                    padding: 2,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                    {tabTitles.savedScenarios}
+                  </Typography>
+                  <IconButton
+                    onClick={close}
+                    size="small"
+                    aria-label="close drawer"
+                    sx={{
+                      color: theme.palette.common.white,
+                    }}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+                <Box
+                  sx={{
+                    color: theme.palette.text.primary,
+                    backgroundColor: theme.palette.common.white,
+                    height: "calc(100% - 56px)", // Adjust based on header height
+                    overflow: "auto",
+                  }}
+                >
+                  <SavedScenariosContent
+                    onClose={close}
+                    savedScenarios={
+                      drawerContent.savedScenarios as
+                        | SavedScenario[]
+                        | undefined
+                    }
+                    onLoadScenario={
+                      drawerContent.onLoadScenario as
+                        | ((scenario: SavedScenario) => void)
+                        | undefined
+                    }
+                    onDeleteScenario={
+                      drawerContent.onDeleteScenario as
+                        | ((id: string) => void)
+                        | undefined
+                    }
+                    onEditScenario={
+                      drawerContent.onEditScenario as
+                        | ((scenario: SavedScenario) => void)
+                        | undefined
+                    }
+                  />
+                </Box>
+              </>
             )}
           </Box>
         </Fade>

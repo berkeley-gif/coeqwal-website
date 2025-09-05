@@ -13,7 +13,7 @@ interface AnimatedMarkerProps {
 
 export default function AnimatedMarker({
   id,
-  color = "#FF5722",
+  color = "#ffd87e", // Using theme.palette.accent.gold
   size = 20,
   onClick,
   children,

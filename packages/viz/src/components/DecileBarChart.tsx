@@ -22,6 +22,10 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
   yAxisLabel = "Value",
   colorScheme = "blues",
   showValues = true,
+  showLegend = true,
+  compact = false,
+  showTickLabels = true,
+  axisColor = "#999",
   responsive = true,
   barWidthPixels = 30,
 }) => {
@@ -182,26 +186,28 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
           .text(`D${current.decile}: ${formatValue(current.value)}`)
       }
 
-      // Add decile markers on the left side
-      svg
-        .append("line")
-        .attr("x1", barX - 10)
-        .attr("x2", barX)
-        .attr("y1", y(current.value))
-        .attr("y2", y(current.value))
-        .attr("stroke", "#999")
-        .attr("stroke-width", 1)
+      // Add decile markers on the left side (only if tick labels are shown)
+      if (showTickLabels) {
+        svg
+          .append("line")
+          .attr("x1", barX - 10)
+          .attr("x2", barX)
+          .attr("y1", y(current.value))
+          .attr("y2", y(current.value))
+          .attr("stroke", axisColor)
+          .attr("stroke-width", 1)
 
-      svg
-        .append("text")
-        .attr("x", barX - 12)
-        .attr("y", y(current.value))
-        .attr("dy", "0.35em")
-        .attr("text-anchor", "end")
-        .attr("font-size", "10px")
-        .attr("fill", "#555")
-        .attr("font-weight", "bold")
-        .text(`D${current.decile}`)
+        svg
+          .append("text")
+          .attr("x", barX - 12)
+          .attr("y", y(current.value))
+          .attr("dy", "0.35em")
+          .attr("text-anchor", "end")
+          .attr("font-size", "10px")
+          .attr("fill", axisColor)
+          .attr("font-weight", "bold")
+          .text(`D${current.decile}`)
+      }
     }
 
     // Add a baseline
@@ -211,20 +217,27 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
       .attr("x2", innerWidth)
       .attr("y1", innerHeight)
       .attr("y2", innerHeight)
-      .attr("stroke", "#999")
+      .attr("stroke", axisColor)
       .attr("stroke-width", 1)
 
     // Add Y axis
-    svg
-      .append("g")
-      .call(
-        d3
-          .axisLeft(y)
-          .ticks(5)
-          .tickFormat((d) => formatValue(d as number)),
-      )
+    const yAxisGroup = svg.append("g").call(
+      d3
+        .axisLeft(y)
+        .ticks(5)
+        .tickFormat(
+          showTickLabels ? (d) => formatValue(d as number) : () => "",
+        ),
+    )
+
+    yAxisGroup
       .selectAll("text")
       .attr("font-size", "10px")
+      .attr("fill", axisColor)
+
+    yAxisGroup.selectAll("line").attr("stroke", axisColor)
+
+    yAxisGroup.select(".domain").attr("stroke", axisColor)
 
     // Add Y axis label
     svg
@@ -248,56 +261,58 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
       .attr("font-weight", "bold")
       .text(title)
 
-    // Add legend
-    const legendX = 0
-    const legendY = innerHeight + 25
+    // Add legend (conditional)
+    if (!compact && showLegend) {
+      const legendX = 0
+      const legendY = innerHeight + 25
 
-    // Add legend title
-    svg
-      .append("text")
-      .attr("x", legendX)
-      .attr("y", legendY - 10)
-      .attr("text-anchor", "start")
-      .attr("font-size", "11px")
-      .attr("font-weight", "bold")
-      .text("Legend:")
-
-    // Add legend items with clear groupings
-    const legendItems = [
-      { decile: 1, label: "D1 (10th percentile)" },
-      { decile: 3, label: "D3 (30th percentile)" },
-      { decile: 5, label: "D5 (50th percentile)" },
-      { decile: 7, label: "D7 (70th percentile)" },
-      { decile: 9, label: "D9 (90th percentile)" },
-    ]
-
-    // Create two columns for legend items
-    const itemsPerColumn = 3
-    const columnWidth = innerWidth / 2
-
-    legendItems.forEach((item, i) => {
-      const column = Math.floor(i / itemsPerColumn)
-      const row = i % itemsPerColumn
-
-      svg
-        .append("rect")
-        .attr("x", legendX + column * columnWidth)
-        .attr("y", legendY + row * 15)
-        .attr("width", 12)
-        .attr("height", 12)
-        .attr("fill", colorScale(sortedData.length - item.decile + 1)) // Reverse the color scale in legend too
-        .attr("stroke", "white")
-        .attr("stroke-width", 0.5)
-
+      // Add legend title
       svg
         .append("text")
-        .attr("x", legendX + column * columnWidth + 18)
-        .attr("y", legendY + row * 15 + 6)
-        .attr("dy", "0.35em")
+        .attr("x", legendX)
+        .attr("y", legendY - 10)
         .attr("text-anchor", "start")
-        .attr("font-size", "10px")
-        .text(item.label)
-    })
+        .attr("font-size", "11px")
+        .attr("font-weight", "bold")
+        .text("Legend:")
+
+      // Add legend items with clear groupings
+      const legendItems = [
+        { decile: 1, label: "D1 (10th percentile)" },
+        { decile: 3, label: "D3 (30th percentile)" },
+        { decile: 5, label: "D5 (50th percentile)" },
+        { decile: 7, label: "D7 (70th percentile)" },
+        { decile: 9, label: "D9 (90th percentile)" },
+      ]
+
+      // Create two columns for legend items
+      const itemsPerColumn = 3
+      const columnWidth = innerWidth / 2
+
+      legendItems.forEach((item, i) => {
+        const column = Math.floor(i / itemsPerColumn)
+        const row = i % itemsPerColumn
+
+        svg
+          .append("rect")
+          .attr("x", legendX + column * columnWidth)
+          .attr("y", legendY + row * 15)
+          .attr("width", 12)
+          .attr("height", 12)
+          .attr("fill", colorScale(sortedData.length - item.decile + 1)) // Reverse the color scale in legend too
+          .attr("stroke", "white")
+          .attr("stroke-width", 0.5)
+
+        svg
+          .append("text")
+          .attr("x", legendX + column * columnWidth + 18)
+          .attr("y", legendY + row * 15 + 6)
+          .attr("dy", "0.35em")
+          .attr("text-anchor", "start")
+          .attr("font-size", "10px")
+          .text(item.label)
+      })
+    }
   }, [
     data,
     decileData,
@@ -309,6 +324,10 @@ export const DecileBarChart: React.FC<DecileChartProps> = ({
     yAxisLabel,
     colorScheme,
     showValues,
+    showLegend,
+    compact,
+    showTickLabels,
+    axisColor,
     responsive,
     barWidthPixels,
   ])

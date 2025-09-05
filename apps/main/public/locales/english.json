@@ -1,28 +1,30 @@
 {
-  "heroPanel": {
-    "title": "Californians are\u00A0connected by\u00A0their water",
-    "content": [
-      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to communities, farms, and ecosystems across the state.",
-      "The COEQWAL project helps you understand how California moves water, what alternatives look like, and how we might adapt the system for a changing climate."
-    ],
-    "headlines": [
-      "Is California ready for the next drought?",
-      "Does saving salmon mean changing how we use water?",
-      "How is climate change reshaping California's water?",
-      "Do some Californians still lack water justice?",
-      "Where does your water come from? Who else depends on it?"
-    ],
-    "scrollText": "Water connects us. Explore California's water system and discover possibilities for the future of water in our state.",
-    "combinedPanelScrollText": "Californians share water through one of the largest and most complex conveyance systems in the world."
+  "homePanel": {
+    "title": "What is the future of California's water?",
+    "content": "Water is vital to California's communities, farms, and the environment. Delivering water to all who need it is not easy, especially as our climate changes. Explore how water in California is managed across the state and discover pathways to a more sustainable and equitable water future."
+  },
+  "frontmatterPanel": {
+    "content": "Are you curious about California water and how water management decisions affect you, now and into the future? COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly funded project that sheds light on how water is allocated in California and how climate change shapes the choices we face."
+  },
+  "toolsPanel": {
+    "title": "Tools are needed",
+    "content": "But how do we track the water we have and where it is being delivered? This is where models come in. CalSim is a water planning model developed by government agencies that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released, and where it gets delivered across the state."
+  },
+  "scenariosPanel": {
+    "content": "Working with diverse community partners, the COEQWAL research team has developed 30 operational strategies – different ways we could manage California's water system. We evaluate these strategies under the climate we've experienced in the recent past, and under five additional hydroclimates – novel patterns of future water availability caused by climate change. These scenarios – unique combinations of operational strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between objectives. By understanding how different decisions affect water allocations for different users, we can imagine new ways of improving water management in California."
+  },
+  "interstitialPanel": {
+    "content": "On this site, you can learn about California's water and explore how water allocations change under different scenarios. By providing access to the same tools used by decision-makers and discovering new pathways for managing water, COEQWAL empowers all Californians to shape our water future."
   },
   "interstitial": {
     "content": [
-      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to communities, farms, and ecosystems across the state.",
-      "The COEQWAL project helps you understand how California moves water, what alternatives look like, and the effects of a changing climate. Using the same computer models as the state Department of Water Resources and the U.S. Bureau of Reclamation, COEQWAL models a broad range of water management scenarios to explore possibilities for the future of water in California."
+      "From mountains to coast and north to south, Californians share water through one of the largest and most complex conveyance systems in the world. Agriculture, communities, and ecosystems are all connected by California water.",
+      "The COEQWAL project helps you understand how California moves water, what alternative water management scenarios look like, and the effects of a changing climate. Using the same computer models as the state Department of Water Resources and the U.S. Bureau of Reclamation, COEQWAL models a broad range of water management scenarios to explore alternative possibilities for the future of water in California."
     ],
     "boldText": "From mountains to coast and north to south,",
-    "part1": "Californians share water through one of the largest and most complex conveyance systems in the world. Most of California's water falls far from where it's needed. It flows—through rivers, tunnels, and canals—to communities, farms, and ecosystems across the state.",
-    "part2": "The COEQWAL project helps you understand how California moves water, what alternatives look like, and the effects of a changing climate. Using the same computer models as the state Department of Water Resources and the U.S. Bureau of Reclamation, COEQWAL models a broad range of water management scenarios to explore alternative possibilities for the future of water in California."
+    "part1": "Many Californians would be surprised to learn how controlled our state's surface water is. Californians share water through one of the largest and most complex conveyance and allocation systems in the world, particularly in the Central Valley. Communities, agriculture, and ecosystems are all connected by California water.",
+    "part2": "Our climate determines how much water falls on our state. Water rights, policies, and laws guide who gets water, the amount of water they get, and when they get it. State and federal agencies make operational decisions about storage, conveyance, and deliveries based on these rules and regulations. They use an open-source computational model called CalSim to understand how their operational decisions affect where the water goes.",
+    "part3": "The COEQWAL project uses CalSim to model a broad range of alternative water management scenarios, each designed to ask,"
   },
   "secondaryNavigation": {
     "tab1": "Learn",
@@ -76,19 +78,19 @@
   },
   "questionBuilder": {
     "defaultTerms": {
-      "waterAvailability": "outcomes",
-      "outcomes": "outcomes",
-      "decisions": "water operations",
-      "decisions_sub": "water operations"
+      "waterAvailability": "water outcomes",
+      "outcomes": "water outcomes",
+      "decisions": "decisions",
+      "decisions_sub": "decisions"
     },
-    "scenarioSingular": "scenario",
+    "scenarioSingular": "scenarios",
     "scenarioPlural": "scenarios",
     "singularVerb": "does",
     "pluralVerb": "do",
     "questionFormat": "How {{verb}} {{operation}} affect {{outcome}}?",
     "questionFormatWithClimate": "How {{verb}} {{operation}} affect {{outcome}} with {{climate}}?",
-    "swappedFormat": "For these {{outcome}}, which {{operation}} could we try?",
-    "swappedFormatNoChange": "For {{outcome}}, which {{operation}} could we consider?",
+    "swappedFormat": "To {{outcome}}, which {{operation}} could we consider?",
+    "swappedFormatNoChange": "To {{outcome}}, which {{operation}} could we consider?",
     "connectors": {
       "and": "and",
       "in": "in",
@@ -117,15 +119,18 @@
       "title": "{{waterAvailability}}",
       "swappedTitle": "To change {{waterAvailability}}",
       "includeClimate": "Include future climate conditions",
-      "chooseLocation": "Choose location on map",
+      "chooseLocation": "My community",
       "mapPlaceholder": "Map Placeholder"
     },
     "climateSelector": {
       "title": "climate",
       "options": {
-        "hist_adj": "current conditions",
-        "cc50": "a moderately hotter and dryer future",
-        "cc95": "a severely hotter and dryer future"
+        "hist_adj": "current climate",
+        "cc50": "moderate warming",
+        "cc95": "severe warming",
+        "extreme_warming": "extreme warming",
+        "extreme_drying": "extreme drying",
+        "wetter_future": "wetter future"
       }
     },
     "sectionAccordion": {

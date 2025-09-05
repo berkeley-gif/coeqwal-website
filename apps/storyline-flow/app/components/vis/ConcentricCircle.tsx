@@ -3,7 +3,7 @@
 import React, { useMemo } from "react"
 import { motion } from "@repo/motion"
 import "./concentric-circle.css"
-import { IconProps } from "../helpers/Icons"
+import { DeprecatedIconProps as IconProps } from "../helpers/Icons"
 
 type Entry = {
   year: string
@@ -64,6 +64,7 @@ function ConcentricCircle({
   }, [size, shift])
 
   const growth = data.present.value / data.past.value
+  //const growth = Math.sqrt(data.present.value / data.past.value)
 
   return (
     <svg width="100%" height="100%">

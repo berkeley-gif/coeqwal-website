@@ -227,6 +227,10 @@ export interface MapOperationsAPI {
   setPaintProperty: (id: string, property: string, value: StyleValue) => void
   setLayoutProperty: (id: string, property: string, value: StyleValue) => void
   setFilter: (id: string, filter: string) => void // TODO: not really string type for filter
+  project: (
+    longitude: number,
+    latitude: number,
+  ) => { x: number; y: number } | null
 
   // Optional overlay portal system
   overlays?: RefObject<Record<string, OverlayEntry>>

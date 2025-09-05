@@ -46,7 +46,7 @@ export const VideoBackground: FC<VideoBackgroundProps> = ({
         overflow: "hidden",
       }}
     >
-      {/* Direct HTML5 video element with inline styles for maximum browser compatibility */}
+      {/* Direct HTML5 video element with inline styles */}
       <video
         ref={videoRef}
         autoPlay
@@ -78,7 +78,7 @@ export const VideoBackground: FC<VideoBackgroundProps> = ({
           left: 0,
           width: "100%",
           height: "100%",
-          backgroundColor: "black",
+          backgroundColor: (theme) => theme.palette.blue.darkest,
           opacity: opacity,
         }}
       />

@@ -1,0 +1,138 @@
+:root{
+    --primary-color: #1a4472;
+    --primary-color-transparent: #1a447280;
+    --dark-color-transparent: #21212195;
+    --dark-color: #021224;
+    --light-color: #1a3a5c;
+    --text-color: #f2f0ef;
+    --highlight-color: #F1B143;
+}
+
+header {
+    pointer-events: auto;
+}
+
+/* TODO: might need to set this in the story container */
+body{
+    background: var(--primary-color) !important;
+}
+
+/* This shuts framer motion up: https://github.com/motiondivision/motion/issues/1853#issuecomment-2122841818*/
+/* But this creates a second scroll bar*/
+html{
+    position: relative;
+}
+
+#meta-container{
+    pointer-events: none;
+}
+
+.container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 5rem;
+    padding-right: 5rem;
+    width: max-content;
+    pointer-events: auto;
+    margin-bottom: 20vh;
+}
+
+.container-center{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    pointer-events: auto;
+}
+
+.filled-container{
+    background-color: var(--primary-color);
+}
+
+.sticky-container{
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    width: 100%;
+}
+
+
+@media (min-width: 1536px) {
+    .paragraph {
+        margin-bottom: 3rem;
+        z-index: 2; /* testing */
+    }
+}
+
+@media (min-width: 1200px) {
+    .paragraph {
+        margin-bottom: 1.5rem;
+        z-index: 2; /* testing */
+    }
+}
+
+/* for testing */
+
+.image-holder{
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
+.text-center-holder{
+    position: absolute;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.text-center-left-holder{
+    position: absolute;
+    left: 50%;
+    width: 100%;
+    transform: translate(-50%, -50%);
+}
+
+
+
+.selection-panel {
+    position: fixed;
+    right: 30px;
+    padding: 10px;
+    z-index: 2;
+    font-size: 0.9rem;
+    background-color: var(--dark-color-transparent)
+
+}
+
+.MuiFormControlLabel-label {
+  color: #f2f0ef !important;
+}
+
+.img-container{
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* specific to this story */
+
+.highlight-text{
+    color: var(--highlight-color);
+}

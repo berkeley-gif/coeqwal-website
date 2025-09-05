@@ -18,6 +18,8 @@ export {
   AccordionSummary,
   AccordionDetails,
   MobileStepper,
+  Tabs,
+  Tab,
 
   // Typography and content
   Typography,
@@ -35,6 +37,9 @@ export {
   TextField,
   IconButton,
   MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
   Slider,
   List,
   ListItem,
@@ -51,6 +56,7 @@ export {
   AlertTitle,
   Tooltip,
   CircularProgress,
+  Fade,
 
   // Utility components
   useMediaQuery,
@@ -58,6 +64,8 @@ export {
 
 export type { BoxProps } from "@mui/material"
 export type { TypographyProps } from "@mui/material/Typography"
+export type { ButtonProps } from "@mui/material/Button"
+export type { SelectChangeEvent } from "@mui/material/Select"
 
 // Import and re-export specific commonly used icons
 import WaterIcon from "@mui/icons-material/Water"
@@ -84,9 +92,14 @@ import CheckIcon from "@mui/icons-material/Check"
 import CloseIcon from "@mui/icons-material/Close"
 import ArrowRightIcon from "@mui/icons-material/ArrowRight"
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft"
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord"
 import EditIcon from "@mui/icons-material/Edit"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import PlayArrowIcon from "@mui/icons-material/PlayArrow"
+import InfoIcon from "@mui/icons-material/Info"
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
+import MyLocationIcon from "@mui/icons-material/MyLocation"
 
 // Export individually imported icons
 export {
@@ -115,8 +128,13 @@ export {
   CloseIcon,
   ArrowRightIcon,
   ArrowLeftIcon,
-  FiberManualRecordIcon,
   EditIcon,
+  ArrowForwardIcon,
+  FiberManualRecordIcon,
+  PlayArrowIcon,
+  InfoIcon,
+  UnfoldMoreIcon,
+  MyLocationIcon,
 }
 
 // Export the full icons library for access to other icons as needed
@@ -125,3 +143,6 @@ export * as icons from "@mui/icons-material"
 // Styles and themes
 export { useTheme, alpha, styled } from "@mui/material/styles"
 export type { Theme } from "@mui/material/styles"
+
+// System utilities and types
+export type { ResponsiveStyleValue, SxProps } from "@mui/system"

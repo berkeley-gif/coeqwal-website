@@ -2,20 +2,17 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react"
 import * as d3 from "d3"
-import { motion } from "@repo/motion"
-//import rawData from "data/annual_precipitation.json" assert { type: "json" }
+import { motion, MotionValue, useTransform } from "@repo/motion"
 import { debounce } from "lodash"
-import {
-  axisVariants,
-  barVariants,
-  labelVariants,
-  tickVariants,
-} from "@repo/motion/variants"
-import { VisibleIcon } from "../helpers/Icons"
 import "./precipitation-bar.css"
 import { useFetchData } from "../../hooks/useFetchData"
 import { useBreakpoint } from "@repo/ui/hooks"
-import { visibleIconTransform } from "../helpers/breakpoints"
+import {
+  visibleIconTransform,
+  visibleIconTransformConfig,
+} from "../helpers/breakpoints"
+import { FreshWaterColor, OffWhiteColor } from "../helpers/colorPalette"
+import { usePlayAnimationOnce } from "@repo/motion/hooks"
 
 interface PrecipitationDatum {
   year: number
@@ -27,24 +24,21 @@ const responsiveHeight = {
   xs: 200,
   sm: 250,
   md: 300,
-  lg: 420,
+  lg: 450,
   xl: 500,
 }
 
-const margin = { top: 20, right: 80, bottom: 30, left: 180 }
+const margin = { top: 20, right: 80, bottom: 35, left: 180 }
 const LABEL_HEIGHT = 50
 
-//TODO: possible make the height a fixed number
 function PrecipitationBar({
   yearLabels,
-  startAnimation,
+  scrollYProgress,
   getSelectedYear,
-  onAnimationComplete,
 }: {
   yearLabels: number[]
-  startAnimation: boolean
+  scrollYProgress: MotionValue<number>
   getSelectedYear: (year: string) => void
-  onAnimationComplete: () => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const breakpoint = useBreakpoint()
@@ -157,46 +151,44 @@ function PrecipitationBar({
           inch
         </div>
       )}
-      <svg width={dimensions.width} height={selectedHeight}>
+      <svg width={dimensions.width} height={selectedHeight} id="bar-svg">
         <YAxis
           yTicks={yTicks}
           yExtents={yExtents as [number, number]}
           average={average}
           yScale={yScale}
           dimensions={dimensions}
-          animate={startAnimation}
+          scrollYProgress={scrollYProgress}
         />
-        <Bars
+        <BarChart
           data={data}
           xScale={xScale}
           yScale={yScale}
-          animate={startAnimation}
+          scrollYProgress={scrollYProgress}
           setTooltip={setTooltip}
           containerRef={containerRef}
           yearLabels={yearLabels}
           getSelectedYear={getSelectedYear}
-          onAnimationComplete={onAnimationComplete}
         />
         <XAxis
           yOffset={yScale(0)}
           dimensions={dimensions}
-          animate={startAnimation}
+          scrollYProgress={scrollYProgress}
         />
       </svg>
     </div>
   )
 }
 
-function Bars({
+function BarChart({
   data,
   xScale,
   yScale,
   setTooltip,
   containerRef,
   yearLabels,
-  animate,
+  scrollYProgress,
   getSelectedYear,
-  onAnimationComplete,
 }: {
   data: PrecipitationDatum[]
   xScale: d3.ScaleBand<number>
@@ -211,20 +203,21 @@ function Bars({
   >
   containerRef: React.RefObject<HTMLDivElement | null>
   yearLabels: number[]
-  animate: boolean
+  scrollYProgress: MotionValue<number>
   getSelectedYear: (year: string) => void
-  onAnimationComplete: () => void
 }) {
   const [finished, setFinished] = useState(false)
   const barWidth = xScale.bandwidth() * 0.6
   const breakpoint = useBreakpoint()
-  const transform = visibleIconTransform[breakpoint]
+  const transform = visibleIconTransform[
+    breakpoint
+  ] as visibleIconTransformConfig
+  const [yearHovered, setYearHovered] = useState<number | null>(null)
+  const [yearClicked, setYearClicked] = useState<number | null>(null)
 
   useEffect(() => {
-    if (finished) {
-      onAnimationComplete()
-    }
-  }, [finished, onAnimationComplete])
+    console.log("Year clicked:", yearClicked)
+  }, [yearClicked])
 
   return (
     <>
@@ -233,44 +226,26 @@ function Bars({
         const barHeight = Math.abs(yScale(d.anomaly) - yScale(0))
         const yPos = d.anomaly < 0 ? yScale(0) : yScale(d.anomaly)
         const cursorStyle = yearLabels.includes(d.year) ? "pointer" : "default"
+
         return (
           <g key={idx} className="bars">
-            <motion.rect
-              x={xPos}
-              width={barWidth}
-              fill={d.anomaly < 0 ? "transparent" : "steelblue"}
-              stroke={d.anomaly < 0 ? "steelblue" : "none"}
-              strokeWidth={d.anomaly < 0 ? 2 : 0}
-              variants={barVariants}
-              initial="initial"
-              animate={animate ? "visible" : "initial"}
-              custom={{ yPos, barHeight, order: idx, baseline: yScale(0) }}
+            <Bar
+              xPos={xPos}
+              yPosStart={yScale(0)}
+              yPosEnd={yPos}
+              barHeight={barHeight}
+              barWidth={barWidth}
+              d={d}
+              scrollYProgress={scrollYProgress}
+              idx={idx}
+              hasPhoto={yearLabels.includes(d.year)}
+              onAnimationComplete={() => {
+                if (idx === data.length - 1) setFinished(true)
+              }}
+              transform={transform}
+              yearHovered={yearHovered}
+              yearClicked={yearClicked}
             />
-            <g
-              transform={`translate(${xPos + barWidth / 2}, ${d.anomaly < 0 ? yPos + barHeight : yPos})`}
-            >
-              <motion.text
-                className="axis-label"
-                dy={d.anomaly < 0 ? "0.9em" : "-0.7em"}
-                fontSize="1rem"
-                variants={labelVariants}
-                initial="hidden"
-                animate={animate ? "visible" : "hidden"}
-                custom={3.5 + idx * 0.1}
-              >
-                {d.year}
-              </motion.text>
-              {yearLabels.includes(d.year) && (
-                <VisibleIcon
-                  delay={4.5 + idx * 0.1}
-                  animation={animate ? "visible" : "hidden"}
-                  transform={`translate(${transform?.x ?? 0}, ${d.anomaly < 0 ? (transform?.belowY ?? 0) : (transform?.aboveY ?? 0)})`}
-                  onAnimationComplete={() => {
-                    if (idx === data.length - 1) setFinished(true)
-                  }}
-                />
-              )}
-            </g>
             <rect
               x={xPos - 2} // consider stroke-width
               y={d.anomaly < 0 ? yPos : yPos - LABEL_HEIGHT} // Covers the entire height of the chart
@@ -294,14 +269,21 @@ function Bars({
                   })
                 }
               }}
+              onMouseOver={() => {
+                setYearHovered(d.year)
+              }}
               onClick={() => {
                 if (yearLabels.includes(d.year)) {
                   getSelectedYear(d.year.toString())
+                  setYearClicked(d.year)
+                } else {
+                  setYearClicked(null)
                 }
               }}
-              onMouseLeave={() =>
+              onMouseLeave={() => {
                 setTooltip((prev) => ({ ...prev, visible: false }))
-              }
+                setYearHovered(null)
+              }}
             />
           </g>
         )
@@ -310,34 +292,190 @@ function Bars({
   )
 }
 
+function Bar({
+  d,
+  xPos,
+  yPosStart,
+  yPosEnd,
+  barWidth,
+  scrollYProgress,
+  barHeight,
+  idx,
+  hasPhoto = false,
+  onAnimationComplete,
+  transform,
+  yearHovered,
+  yearClicked,
+}: {
+  d: PrecipitationDatum
+  xPos: number
+  yPosStart: number
+  yPosEnd: number
+  barWidth: number
+  scrollYProgress: MotionValue<number>
+  barHeight: number
+  idx: number
+  hasPhoto?: boolean
+  onAnimationComplete?: () => void
+  transform: visibleIconTransformConfig
+  yearHovered: number | null
+  yearClicked: number | null
+}) {
+  const [animationPlayed, setAnimationPlayed] = useState(false)
+
+  const range = useMemo(
+    (): [number, number] => [0.5 + idx * 0.01, 0.7 + idx * 0.01],
+    [idx],
+  )
+  const opacity = useTransform(
+    scrollYProgress,
+    range,
+    animationPlayed ? [1, 1] : [0, 1],
+  )
+  const height = useTransform(
+    scrollYProgress,
+    range,
+    animationPlayed ? [barHeight, barHeight] : [0, barHeight],
+  )
+  const y = useTransform(
+    scrollYProgress,
+    range,
+    animationPlayed ? [yPosEnd, yPosEnd] : [yPosStart, yPosEnd],
+  )
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (latest) => {
+      if (latest >= range[1]) {
+        setAnimationPlayed(true) // Mark animation as completed
+      }
+    })
+
+    return () => unsubscribe()
+  }, [scrollYProgress, range])
+
+  return (
+    <>
+      <motion.rect
+        x={xPos}
+        width={barWidth}
+        fill={d.anomaly < 0 ? "transparent" : FreshWaterColor}
+        stroke={d.anomaly < 0 ? FreshWaterColor : "none"}
+        strokeWidth={d.anomaly < 0 ? 2 : 0}
+        style={{
+          opacity,
+          y,
+          height,
+        }}
+      />
+      <g
+        transform={`translate(${xPos + barWidth / 2}, ${d.anomaly < 0 ? yPosEnd + barHeight : yPosEnd})`}
+      >
+        <motion.text
+          className="axis-label"
+          dy={d.anomaly < 0 ? "0.9em" : "-0.7em"}
+          fontSize="1rem"
+          style={{ opacity }}
+        >
+          {d.year}
+        </motion.text>
+        {hasPhoto && (
+          <VisibleIcon
+            isHovered={yearHovered === d.year}
+            yearClicked={yearClicked}
+            isClicked={yearClicked === d.year}
+            opacity={opacity}
+            transform={`translate(${transform.x}, ${d.anomaly < 0 ? transform.belowY : transform.aboveY})`}
+            onAnimationComplete={onAnimationComplete}
+          />
+        )}
+      </g>
+    </>
+  )
+}
+
+function VisibleIcon({
+  opacity,
+  isHovered,
+  yearClicked,
+  isClicked,
+  transform,
+  onAnimationComplete,
+}: {
+  opacity: MotionValue<number>
+  transform: string
+  isHovered: boolean
+  isClicked: boolean
+  yearClicked: number | null
+  onAnimationComplete?: () => void
+}) {
+  const animatedScale = isHovered ? 1.1 : isClicked ? 1 : [0.8, 1, 0.8]
+
+  return (
+    <motion.g
+      initial={{ scale: 0 }}
+      animate={{
+        scale: animatedScale, // Oscillate between 1 and 1.2
+      }}
+      transition={{
+        duration: isHovered || isClicked ? 0.2 : 1.5, // Duration of one cycle
+        repeat: isHovered || isClicked ? 0 : Infinity, // Infinite animation
+        repeatType: "reverse", // Reverse direction after each cycle
+      }}
+    >
+      {yearClicked === null || isClicked ? (
+        <motion.path
+          style={{
+            opacity: opacity,
+            fill: OffWhiteColor,
+            transform: transform,
+          }}
+          onAnimationComplete={onAnimationComplete}
+          d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"
+        ></motion.path>
+      ) : (
+        <motion.path
+          style={{
+            opacity: opacity,
+            fill: OffWhiteColor,
+            transform: transform,
+          }}
+          onAnimationComplete={onAnimationComplete}
+          d="M12 17.5C8.2 17.5 4.8 15.4 3.2 12H1C2.7 16.4 7 19.5 12 19.5S21.3 16.4 23 12H20.8C19.2 15.4 15.8 17.5 12 17.5Z"
+        ></motion.path>
+      )}
+    </motion.g>
+  )
+}
+
 function XAxis({
   yOffset,
   dimensions,
-  animate,
+  scrollYProgress,
 }: {
   yOffset: number
   dimensions: { width: number; height: number }
-  animate: boolean
+  scrollYProgress: MotionValue<number>
 }) {
+  const textOpacity = usePlayAnimationOnce(scrollYProgress, [0.4, 0.7], [0, 1])
+  const axisPathLength = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.4, 0.7],
+    [0, 1],
+  )
+
   return (
     <g className="x-axis" transform={`translate(${margin.left}, ${yOffset})`}>
       <motion.path
         className="axis"
         d={`M0,0 L${dimensions.width - margin.right - margin.left},0`}
-        variants={axisVariants}
-        initial="hidden"
-        animate={animate ? "visible" : "hidden"}
-        custom={1.5}
+        pathLength={axisPathLength}
       />
       <motion.text
         x={dimensions.width - margin.right - margin.left}
         y={0}
         dx="3em"
         className="x-axis-ticks"
-        variants={labelVariants}
-        initial="hidden"
-        animate={animate ? "visible" : "hidden"}
-        custom={2.5}
+        style={{ opacity: textOpacity }}
       >
         Years
       </motion.text>
@@ -347,21 +485,27 @@ function XAxis({
 
 function YAxis({
   yTicks,
-  yExtents,
   yScale,
   average,
   dimensions,
-  animate,
+  scrollYProgress,
 }: {
   yTicks: { value: number; label: string }[]
   yExtents: [number, number]
   yScale: d3.ScaleLinear<number, number>
   dimensions: { width: number; height: number }
   average: number
-  animate: boolean
+  scrollYProgress: MotionValue<number>
 }) {
   const aboveMidpoint = (margin.top + yScale(0)) / 2
   const belowMidpoint = (dimensions.height - margin.bottom + yScale(0)) / 2
+
+  const axisPathLength = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.4, 0.7],
+    [0, 1],
+  )
+  const labelOpacity = usePlayAnimationOnce(scrollYProgress, [0.6, 0.7], [0, 1])
 
   return (
     <>
@@ -369,50 +513,23 @@ function YAxis({
         <motion.path
           className="axis"
           d={`M0,${dimensions.height - margin.bottom} L0,${margin.top}`}
-          variants={axisVariants}
-          initial="hidden"
-          animate={animate ? "visible" : "hidden"}
-          custom={0}
+          pathLength={axisPathLength}
         />
         {yTicks.map((tick, idx) => (
-          <motion.g
+          <Tick
             key={idx}
-            variants={tickVariants}
-            initial="hidden"
-            animate={animate ? "visible" : "hidden"}
-            custom={
-              0.6 +
-              ((tick.value - yExtents[0]) / (yExtents[1] - yExtents[0])) * 0.5
-            }
-          >
-            <line
-              x1={-6}
-              x2={0}
-              y1={yScale(tick.value)}
-              y2={yScale(tick.value)}
-              className="axis"
-            />
-            <text
-              x={0}
-              y={yScale(tick.value)}
-              dx="-0.75em"
-              className="y-axis-ticks"
-            >
-              {tick.label}
-            </text>
-          </motion.g>
+            tick={tick}
+            yPos={yScale(tick.value)}
+            idx={idx}
+            scrollYProgress={scrollYProgress}
+          />
         ))}
       </g>
       <g
         className="y-axis-label"
         transform={`translate(${margin.left / 2}, 0)`}
       >
-        <motion.g
-          variants={labelVariants}
-          initial="hidden"
-          animate={animate ? "visible" : "hidden"}
-          custom={1}
-        >
+        <motion.g style={{ opacity: labelOpacity }}>
           <text
             x={0}
             y={yScale(0)}
@@ -438,10 +555,7 @@ function YAxis({
           y={aboveMidpoint}
           className="axis-label"
           fontSize="1rem"
-          variants={labelVariants}
-          initial="hidden"
-          animate={animate ? "visible" : "hidden"}
-          custom={1.35}
+          style={{ opacity: labelOpacity }}
         >
           Above average
         </motion.text>
@@ -450,15 +564,36 @@ function YAxis({
           y={belowMidpoint}
           className="axis-label"
           fontSize="1rem"
-          variants={labelVariants}
-          initial="hidden"
-          animate={animate ? "visible" : "hidden"}
-          custom={0.5}
+          style={{ opacity: labelOpacity }}
         >
           Below average
         </motion.text>
       </g>
     </>
+  )
+}
+
+function Tick({
+  tick,
+  yPos,
+  idx,
+  scrollYProgress,
+}: {
+  tick: { value: number; label: string }
+  yPos: number
+  idx: number
+  scrollYProgress: MotionValue<number>
+}) {
+  const range: [number, number] = [0.5 + idx * 0.01, 0.7 + idx * 0.01]
+  const tickOpacity = usePlayAnimationOnce(scrollYProgress, range, [0, 1])
+
+  return (
+    <motion.g key={idx} style={{ opacity: tickOpacity }}>
+      <line x1={-6} x2={0} y1={yPos} y2={yPos} className="axis" />
+      <text x={0} y={yPos} dx="-0.75em" className="y-axis-ticks">
+        {tick.label}
+      </text>
+    </motion.g>
   )
 }
 

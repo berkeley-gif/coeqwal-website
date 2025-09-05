@@ -1,12 +1,10 @@
 "use client"
 
 import { useMap } from "@repo/map"
-import { Box, VisibilityIcon } from "@repo/ui/mui"
-import { canalLayerStyle, riverLayerStyle } from "./helpers/mapLayerStyle"
+import { Box, Stack, Typography } from "@repo/ui/mui"
 import useActiveSection from "../hooks/useActiveSection"
 import useStoryStore from "../store"
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Sentence } from "@repo/motion/components"
+import { useState } from "react"
 import { MarkerType } from "./helpers/mapMarkers"
 import { useFetchData } from "../hooks/useFetchData"
 import {
@@ -15,12 +13,15 @@ import {
   IrrigationTextLabels,
 } from "./helpers/mapAnnotations"
 import {
-  drinkingMapViewState,
-  goldRushMapViewState,
-  reclamationMapViewState,
-} from "./helpers/mapViews"
-import { useBreakpoint } from "@repo/ui/hooks"
-import ScrollIndicator from "./helpers/ScrollIndicator"
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "@repo/motion"
+import { InfrastructureColor } from "./helpers/colorPalette"
+import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
+
+const MotionTypography = motion.create(Typography)
 
 function SectionHuman() {
   const [mineMarkers, setMineMarkers] = useState<Record<string, MarkerType[]>>(
@@ -34,10 +35,15 @@ function SectionHuman() {
     },
   )
 
+  //<Irrigation markers={mineMarkers.irrigation || []} />
   return (
     <>
-      <Header markers={mineMarkers.mining || []} />
-      <Irrigation markers={mineMarkers.irrigation || []} />
+      <Header
+        markers={[
+          ...(mineMarkers.mining ?? []),
+          ...(mineMarkers.irrigation ?? []),
+        ]}
+      />
       <Drinking />
     </>
   )
@@ -46,56 +52,48 @@ function SectionHuman() {
 function Header({ markers }: { markers: MarkerType[] }) {
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.economy
-  const { sectionRef, isSectionActive } = useActiveSection("goldrush", {
+  const { sectionRef } = useActiveSection("goldrush", {
     amount: 0.5,
   })
   const setMarkers = useStoryStore((state) => state.setMarkers)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const hasSeen = useRef(false)
-  const { flyTo } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = goldRushMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
+  const [hasSetMarkers, setHasSetMarkers] = useState(false)
 
-  const load = useCallback(() => {
-    setTimeout(() => {
-      flyTo({
-        longitude: mapViewState?.longitude ?? 0,
-        latitude: mapViewState?.latitude ?? 0,
-        zoom: mapViewState?.zoom ?? 1,
-        transitionOptions: {
-          duration: 2000,
-        },
-      })
-    }, 1000)
-    setTimeout(() => {
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.2 && latest < 0.9 && !hasSetMarkers) {
       setMarkers(markers, "rough-circle")
-      setTextMarkers(GoldRushTextLabels, "text")
-    }, 2000)
-  }, [flyTo, markers, setMarkers, setTextMarkers, mapViewState])
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setTextMarkers([], "text")
-  }, [setMarkers, setTextMarkers])
-
-  useEffect(() => {
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log('unload stuff')
-        unload()
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
+      setTextMarkers([...GoldRushTextLabels, ...IrrigationTextLabels], "text")
+      setHasSetMarkers(true)
+      return
+    } else if (latest < 0.2 || latest > 0.9) {
+      setMarkers([], "rough-circle")
+      setTextMarkers([], "text")
+      setHasSetMarkers(false)
     }
-  }, [isSectionActive, load, unload])
+  })
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.5],
+    [0, 1],
+  )
+
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
 
   return (
     <Box
@@ -104,95 +102,29 @@ function Header({ markers }: { markers: MarkerType[] }) {
       height="100vh"
       sx={{ justifyContent: "center" }}
     >
-      <Box className="paragraph">
-        <Sentence variant="h3" gutterBottom custom={0}>
-          {content?.title}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence
-          custom={1}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p2}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
-    </Box>
-  )
-}
-
-function Irrigation({ markers }: { markers: MarkerType[] }) {
-  const storyline = useStoryStore((state) => state.storyline)
-  const content = storyline?.economy.irrigation
-  const { sectionRef, isSectionActive } = useActiveSection("irrigation", {
-    amount: 0.5,
-  })
-  const setMarkers = useStoryStore((state) => state.setMarkers)
-  const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const hasSeen = useRef(false)
-  const { flyTo, setPaintProperty } = useMap()
-  const breakpoint = useBreakpoint()
-  const mapViewState = reclamationMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setMarkers(markers, "rough-circle")
-    setTextMarkers(IrrigationTextLabels, "text")
-    setPaintProperty("canal-layer", "line-opacity", 0)
-  }, [
-    flyTo,
-    markers,
-    setMarkers,
-    setTextMarkers,
-    mapViewState,
-    setPaintProperty,
-  ])
-
-  const unload = useCallback(() => {
-    setMarkers([], "rough-circle")
-    setTextMarkers([], "text")
-  }, [setMarkers, setTextMarkers])
-
-  useEffect(() => {
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log('unload stuff')
-        unload()
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
-    }
-  }, [isSectionActive, load, unload])
-
-  return (
-    <Box className="container" height="100vh" sx={{ justifyContent: "center" }}>
-      <Box ref={sectionRef} className="paragraph">
-        <Sentence custom={0}>{content?.p1}</Sentence>
-        <Sentence
-          custom={1}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p2}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+      <motion.div
+        className="paragraph"
+        style={{ opacity: firstParagraphOpacity }}
+      >
+        <Typography variant="h3" gutterBottom>
+          {" "}
+          {content?.title}{" "}
+        </Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: secondParagraphOpacity }}
+      >
+        <Typography variant="body1">{content?.p1}</Typography>
+        <Typography variant="body1"> {content?.p2}</Typography>
+      </motion.div>
+      <motion.div
+        className="paragraph"
+        style={{ opacity: thirdParagraphOpacity, marginTop: "5%" }}
+      >
+        <Typography>{content?.irrigation.p1}</Typography>
+        <Typography>{content?.irrigation.p2}</Typography>
+      </motion.div>
     </Box>
   )
 }
@@ -203,79 +135,53 @@ function Drinking() {
   const { sectionRef, isSectionActive } = useActiveSection("drinking", {
     amount: 0.5,
   })
-  const { addSource, addLayer, setPaintProperty, flyTo } = useMap()
-  const hasSeen = useRef(false)
+  const { setPaintProperty } = useMap()
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
-  const breakpoint = useBreakpoint()
-  const mapViewState = drinkingMapViewState[breakpoint]
-  const [animationComplete, setAnimationComplete] = useState(false)
 
-  const init = useCallback(() => {
-    addSource("canal", {
-      type: "geojson",
-      data: "/rivers/drinking.geojson",
-    })
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
-    addLayer(
-      "canal-layer",
-      "canal",
-      canalLayerStyle.type,
-      canalLayerStyle.paint,
-      canalLayerStyle.layout,
-    )
-
-    addSource("river-combined", {
-      type: "vector",
-      url: "mapbox://yskuo.a2firbty",
-    })
-
-    addLayer(
-      "river-combined-layer",
-      "river-combined",
-      riverLayerStyle.type,
-      riverLayerStyle.paint,
-      riverLayerStyle.layout,
-      riverLayerStyle.layer,
-    )
-  }, [addSource, addLayer])
-
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setPaintProperty("river-combined-layer", "line-opacity", 1)
-    setPaintProperty("canal-layer", "line-opacity", 1)
-    setTextMarkers(DrinkingTextLabels, "text")
-  }, [flyTo, setPaintProperty, setTextMarkers, mapViewState])
-
-  const unload = useCallback(() => {
-    setPaintProperty("river-combined-layer", "line-opacity", 0)
-    setTextMarkers([], "text")
-  }, [setPaintProperty, setTextMarkers])
-
-  useEffect(() => {
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-        init()
-      }
-      hasSeen.current = true
-      load()
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.4 && latest < 1) {
+      setPaintProperty("river-combined-layer", "line-opacity", 1)
+      setPaintProperty("canal-layer", "line-opacity", 1)
+      return
     } else {
-      if (hasSeen.current) {
-        unload()
-        //console.log('unload stuff')
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
+      setPaintProperty("river-combined-layer", "line-opacity", 0)
+      if (latest < 0.4) {
+        setPaintProperty("canal-layer", "line-opacity", 0)
       }
     }
-  }, [isSectionActive, load, unload, init])
+  })
+
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    () => {
+      setTextMarkers(DrinkingTextLabels, "text")
+    },
+    () => {
+      setTextMarkers([], "text")
+    },
+  )
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.4],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.35, 0.55],
+    [0, 1],
+  )
+  const thirdParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
 
   return (
     <Box
@@ -285,18 +191,22 @@ function Drinking() {
       sx={{ justifyContent: "center" }}
     >
       <Box className="paragraph">
-        <Sentence custom={0}>
-          {content?.p1} <VisibilityIcon sx={{ verticalAlign: "middle" }} />
-        </Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
-        <Sentence
-          custom={2}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        >
-          {content?.p3}
-        </Sentence>
+        <Stack spacing={2} direction="column">
+          <MotionTypography style={{ opacity: firstParagraphOpacity }}>
+            {content?.p1}
+          </MotionTypography>
+          <MotionTypography style={{ opacity: secondParagraphOpacity }}>
+            {content?.p2}
+          </MotionTypography>
+          <MotionTypography style={{ opacity: thirdParagraphOpacity }}>
+            It required water rights and major investments as{" "}
+            <span style={{ color: InfrastructureColor }}>
+              water infrastructure
+            </span>{" "}
+            began to crisscross the state
+          </MotionTypography>
+        </Stack>
       </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }

@@ -14,6 +14,8 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",
@@ -22,7 +24,8 @@
     "@repo/viz": "workspace:*",
     "d3": "^7.8.5",
     "matter-js": "^0.20.0",
-    "next": "^15.2.1"
+    "next": "^15.2.1",
+    "@turf/centroid": "^3.0.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

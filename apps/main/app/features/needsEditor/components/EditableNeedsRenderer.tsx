@@ -13,7 +13,7 @@ import {
   CheckIcon,
   VisibilityIcon,
 } from "@repo/ui/mui"
-import { ColoredText } from "../../scenarioResults/components/ui"
+import centroid from "@turf/centroid"
 import { ExceedancePlot } from "@repo/viz"
 
 import {
@@ -25,12 +25,35 @@ import {
 
 import { WATER_NEED_TYPES } from "./constants"
 
+type MapFunctions = {
+  addSource: (id: string, data: any) => void
+  addLayer: (
+    id: string,
+    sourceId: string,
+    type: string,
+    paint: any,
+    layout?: any,
+  ) => void
+  removeLayer: (id: string) => void
+  removeSource: (id: string) => void
+  hasSource: (id: string) => boolean
+  hasLayer: (id: string) => boolean
+  flyTo: (
+    longitude: number,
+    latitude: number,
+    zoom: number,
+    pitch?: number,
+    bearing?: number,
+  ) => void
+}
+
 type EditableNeedsRendererProps = {
   // userSetting: UserSetting
   // setUserSetting: React.Dispatch<React.SetStateAction<UserSetting>>
 
   currentWaterNeed: WaterNeedSetting
   setCurrentWaterNeed: React.Dispatch<React.SetStateAction<WaterNeedSetting>>
+  mapFunctions?: MapFunctions
 }
 
 const getCurrentFieldValue = (
@@ -87,6 +110,7 @@ const EditableNeedsRenderer = ({
   // setUserSetting,
   currentWaterNeed,
   setCurrentWaterNeed,
+  mapFunctions,
 }: EditableNeedsRendererProps) => {
   const theme = useTheme()
   const [textFieldTempValue, setTextFieldTempValue] = useState<string | number>(
@@ -97,6 +121,7 @@ const EditableNeedsRenderer = ({
   )
   const [isShowingSelector, setIsShowingSelector] = useState(false)
   const [isShowingExeedancePlot, setIsShowingExceedancePlot] = useState(false)
+  const [hoveredOption, setHoveredOption] = useState<string | null>(null)
 
   const [userSetting, setUserSetting] = useState<UserSetting>(
     currentWaterNeed.setting,
@@ -114,6 +139,18 @@ const EditableNeedsRenderer = ({
       )
     }
   }, [currentWaterNeed, isShowingExeedancePlot])
+
+  // Cleanup hover layers when component unmounts
+  useEffect(() => {
+    return () => {
+      if (mapFunctions && hoveredOption) {
+        const layerId = `hover-poi`
+        if (mapFunctions.hasLayer(layerId)) {
+          mapFunctions.removeLayer(layerId)
+        }
+      }
+    }
+  }, [mapFunctions, hoveredOption])
 
   const currentWaterNeedType = WATER_NEED_TYPES.find(
     (item) => item.label === currentWaterNeed.name,
@@ -212,6 +249,108 @@ const EditableNeedsRenderer = ({
     })
   }
 
+  const handleOptionHover = async (option: string) => {
+    if (!mapFunctions) return
+
+    const { addSource, addLayer, removeSource, hasSource, hasLayer, flyTo } = mapFunctions
+
+    // Remove previous hover layer if exists
+    if (hoveredOption && hoveredOption !== option) {
+      if (hasLayer("hover-poi")) {
+        mapFunctions.removeLayer("hover-poi")
+      }
+    }
+
+    setHoveredOption(option)
+
+    // Add new layer for hovered option
+    // if (!hasLayer("hover-poi")) {
+    try {
+      const sourceId = `hover-poi`
+
+      // Remove existing source if it exists to update data
+      if (hasSource(sourceId)) {
+        // Remove layer first, then source
+        if (hasLayer("hover-poi")) {
+          mapFunctions.removeLayer("hover-poi")
+        }
+        removeSource(sourceId)
+      }
+
+      const response = await fetch("/geospatial_data/du.geojson")
+      let geoJsonData = await response.json()
+
+      const optionSubset = geoJsonData.features.filter(
+        (feature: any) => feature.properties?.DU_ID === option,
+      )
+      if (optionSubset.length === 0) {
+        // If no features match the option, try without filtering to see all data
+        console.warn(
+          `No features found for option: ${option}, showing all features for debugging`,
+        )
+        // Keep original geoJsonData to show something
+      } else {
+        geoJsonData = { type: "FeatureCollection", features: optionSubset }
+      }
+
+      console.log("Adding source with data:", geoJsonData)
+      addSource(sourceId, {
+        type: "geojson",
+        data: geoJsonData,
+      })
+
+      const polygon_centroid = centroid(geoJsonData)
+      console.log("Centroid of hovered option:", polygon_centroid)
+
+      // Fly to the centroid of the hovered option
+      if (
+        polygon_centroid?.geometry?.coordinates &&
+        polygon_centroid.geometry.coordinates.length >= 2
+      ) {
+        const [longitude, latitude] = polygon_centroid.geometry.coordinates
+        if (typeof longitude === "number" && typeof latitude === "number") {
+          flyTo(longitude, latitude, 8) // Zoom level 8, you can adjust this
+        }
+      }
+
+      const layerStyle = getOptionLayerStyle()
+      console.log("Adding layer with style:", layerStyle)
+      addLayer("hover-poi", sourceId, "fill", layerStyle.paint, {
+        visibility: "visible",
+      })
+    } catch (error) {
+      console.error("Error adding hover layer:", error)
+    }
+    // }
+  }
+
+  const handleOptionLeave = () => {
+    if (!mapFunctions || !hoveredOption) return
+
+    const { flyTo } = mapFunctions
+    const layerId = `hover-poi`
+    if (mapFunctions.hasLayer(layerId)) {
+      mapFunctions.removeLayer(layerId)
+      flyTo(-120.759, 38.032, 6.3) // Fly back to California view
+    }
+    setHoveredOption(null)
+  }
+
+  const getOptionLayerStyle = () => {
+    // Return different styles based on the option
+    const styles = {
+      default: {
+        paint: {
+          "fill-color": "rgba(255, 0, 0, 0.3)",
+          "fill-outline-color": "rgba(255, 0, 0, 1)",
+        },
+      },
+      // Add more styles for different options
+    }
+
+    return styles["default"] // You can extend this logic
+  }
+
   const splitStringBySpaces = (str: string) => {
     // Split by spaces, but keep the spaces
     const parts = str.split(/(\s+)/)
@@ -266,33 +405,41 @@ const EditableNeedsRenderer = ({
     return (
       <Box key={i} component="span">
         {/* Split by spaces, but keep the spaces */}
-        {splitStringBySpaces(value.toString() as string).map((part, index) => (
-          <Box
-            component="span"
-            key={index}
-            sx={{
-              textDecoration: "underline",
-              whiteSpace: "normal",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => {
-              setEditingField(hydratedTarget)
-              setTextFieldTempValue(
-                getCurrentFieldValue(hydratedTarget, userSetting),
-              )
-              setIsShowingSelector(true)
-            }}
-          >
-            {isFieldSelected ? (
-              <ColoredText color={theme.palette.pop.main}>
+        <Box
+          component="span"
+          sx={{
+            backgroundColor: isFieldSelected
+              ? theme.palette.grey[200]
+              : "transparent",
+            padding: isFieldSelected ? "2px 6px" : "0",
+            borderRadius: isFieldSelected ? "4px" : "0",
+            display: "inline",
+          }}
+        >
+          {splitStringBySpaces(value.toString() as string).map(
+            (part, index) => (
+              <Box
+                component="span"
+                key={index}
+                sx={{
+                  textDecoration: "underline",
+                  whiteSpace: "normal",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+                onClick={() => {
+                  setEditingField(hydratedTarget)
+                  setTextFieldTempValue(
+                    getCurrentFieldValue(hydratedTarget, userSetting),
+                  )
+                  setIsShowingSelector(true)
+                }}
+              >
                 <React.Fragment key={index}>{part}</React.Fragment>
-              </ColoredText>
-            ) : (
-              <React.Fragment key={index}>{part}</React.Fragment>
-            )}
-          </Box>
-        ))}
+              </Box>
+            ),
+          )}
+        </Box>
       </Box>
     )
   }
@@ -427,7 +574,7 @@ const EditableNeedsRenderer = ({
           <Box
             sx={{
               width: "5px",
-              backgroundColor: "#ccc",
+
               mx: 2,
             }}
             id="divider"
@@ -462,14 +609,26 @@ const EditableNeedsRenderer = ({
                 What&apos;s this?
               </Button>
               <Typography variant="h5">
-                <>Select</> <>a</>
-                <ColoredText color={theme.palette.pop.main}>
-                  {" "}
+                <>Select</> <>a</>{" "}
+                <span
+                  style={{
+                    backgroundColor: theme.palette.grey[200],
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                  }}
+                >
                   {editingField.name}
-                </ColoredText>
+                </span>
               </Typography>
             </Box>
-            <Stack direction="column" spacing={2} flexWrap="wrap">
+            <Stack
+              direction="column"
+              spacing={2}
+              sx={{
+                maxHeight: "200px",
+                overflow: "auto",
+              }}
+            >
               {OPTIONS[editingField.name]?.map((option, i) => {
                 const curEditingField =
                   editingField.type === "title"
@@ -487,8 +646,10 @@ const EditableNeedsRenderer = ({
                       p: 1,
                       cursor: "pointer",
                       backgroundColor: isSelected
-                        ? "primary.main"
-                        : "primary.light",
+                        ? theme.palette.grey[200]
+                        : hoveredOption === option
+                          ? theme.palette.grey[100]
+                          : "white",
 
                       color: isSelected
                         ? "text.primary"
@@ -499,6 +660,8 @@ const EditableNeedsRenderer = ({
                       setIsShowingSelector(false)
                       setEditingField(null)
                     }}
+                    onMouseEnter={() => handleOptionHover(option)}
+                    onMouseLeave={handleOptionLeave}
                   >
                     <Typography variant="h6">{option}</Typography>
                   </Paper>
@@ -509,8 +672,8 @@ const EditableNeedsRenderer = ({
               variant="outlined"
               color="primary"
               sx={{
-                borderColor: "black",
-                color: "black",
+                borderColor: theme.palette.primary.dark,
+                color: theme.palette.primary.dark,
                 width: "fit-content",
                 height: "fit-content",
               }}
@@ -535,11 +698,16 @@ const EditableNeedsRenderer = ({
               }}
             >
               <Typography variant="h5" sx={{ mb: 2 }}>
-                Edit
-                <ColoredText color={theme.palette.pop.main}>
-                  {" "}
+                Edit{" "}
+                <span
+                  style={{
+                    backgroundColor: theme.palette.grey[200],
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                  }}
+                >
                   {editingField.name}
-                </ColoredText>
+                </span>
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <TextField
@@ -577,7 +745,7 @@ const EditableNeedsRenderer = ({
                         variant="outlined"
                         color="success"
                         sx={{
-                          borderColor: "success.main",
+                          borderColor: theme.palette.primary.dark,
                         }}
                         disabled={
                           !isInputValid(
@@ -604,8 +772,8 @@ const EditableNeedsRenderer = ({
                     variant="outlined"
                     color="primary"
                     sx={{
-                      borderColor: "black",
-                      color: "black",
+                      borderColor: theme.palette.primary.dark,
+                      color: theme.palette.primary.dark,
                       width: "fit-content",
                       height: "fit-content",
                     }}
@@ -655,7 +823,10 @@ const EditableNeedsRenderer = ({
           startIcon={<AddIcon />}
           onClick={handleAddRule}
           size="small"
-          sx={{ color: "black", borderColor: "black" }}
+          sx={{
+            color: theme.palette.primary.dark,
+            borderColor: theme.palette.primary.dark,
+          }}
         >
           Add another rule
         </Button>

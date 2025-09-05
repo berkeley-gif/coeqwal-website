@@ -6,13 +6,23 @@ import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
 import { LanguageSwitcher } from "../index"
 import { Logo } from "../common/Logo"
+import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
+import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
+import { useRef, useState } from "react"
+
+const MotionAppBar = motion.create(AppBar)
 
 type HeaderTranslations = {
   title: string
   buttons: {
+    tools: string
     getData: string
     about: string
+  }
+  tools: {
+    scenarioExplorer: string
+    needsSearch: string
   }
 }
 
@@ -21,7 +31,7 @@ type TranslationsMap = {
   es: HeaderTranslations
 }
 
-// Incoming: secondary nav option
+// Secondary nav option (optional)
 export interface SecondaryNavItem {
   key: string
   label: string
@@ -29,37 +39,40 @@ export interface SecondaryNavItem {
 }
 
 interface HeaderProps {
-  drawerOpen?: boolean
-  drawerPosition?: "left" | "right"
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
+  onDataClick?: () => void
+  onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
 }
 
 const translations: TranslationsMap = {
   en: {
     title: "COEQWAL",
     buttons: {
-      getData: "Raw Data",
+      tools: "Tools",
+      getData: "Download data",
       about: "About COEQWAL",
+    },
+    tools: {
+      scenarioExplorer: "Scenario data explorer",
+      needsSearch: "Needs-based search",
     },
   },
   es: {
     title: "COEQWAL",
     buttons: {
-      getData: "Datos sin procesar",
+      tools: "Herramientas",
+      getData: "Descargar datos",
       about: "Sobre COEQWAL",
+    },
+    tools: {
+      scenarioExplorer: "Explorador de datos de escenarios",
+      needsSearch: "Búsqueda basada en necesidades",
     },
   },
 }
-
-// Define which sections should have BLACK text (all others will have white)
-// TODO: generalize this
-const blackSections = [
-  "hero", // Home section
-  "combined-panel", // Scenario search section
-]
 
 // This maps sections to their parent section in the UI
 // Used for arrow display when scrolling through combined sections
@@ -69,12 +82,12 @@ const sectionParentMap: Record<string, string | undefined> = {
 }
 
 export function Header({
-  drawerOpen = false,
-  drawerPosition = "right",
   activeSection,
   onSectionClick,
   showSecondaryNav = false,
   secondaryNavItems = [], // Default to empty array, bc optional
+  onDataClick,
+  onToolsClick,
 }: HeaderProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
@@ -82,10 +95,23 @@ export function Header({
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
     lineHeight: 1.1, // Line height for text wrapping
-    height: "36px", // Fixed height to match language switcher
-    minHeight: "36px", // Ditto
+    height: theme.spacing(4.5), // 36px to match language switcher
+    minHeight: theme.spacing(4.5), // 36px
   }
   const { locale, isLoading } = useTranslation()
+
+  // Scroll-based hide/show functionality
+  const [isHidden, setIsHidden] = useState(false)
+  const { scrollY } = useScroll()
+  const lastYRef = useRef(0)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
 
   // Use 'en' as default until client-side hydration is complete
   const safeLocale = !locale || isLoading ? "en" : locale
@@ -96,18 +122,27 @@ export function Header({
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
-  // Determine the text color for all navigation items based on active section
-  // Default to white, switch to black for specific sections
-  const textColor = blackSections.includes(activeSection || "")
-    ? "black"
-    : "white"
+  // Set text color to always be white
+  const textColor = "white"
 
   return (
-    <AppBar
+    <MotionAppBar
+      animate={isHidden ? "hidden" : "visible"}
+      whileHover="visible"
+      onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
+      variants={{
+        hidden: {
+          y: "-100%",
+        },
+        visible: {
+          y: "0%",
+        },
+      }}
+      transition={{ duration: 0.3 }}
       position="fixed"
       sx={{
         zIndex: theme.zIndex.appBar,
-        backgroundColor: theme.background.transparent,
+        backgroundColor: theme.palette.overlay.water,
         borderBottom: theme.border.standard,
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
@@ -116,7 +151,7 @@ export function Header({
       elevation={0}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", pl: 2 }}>
           <Logo />
         </Box>
 
@@ -145,13 +180,13 @@ export function Header({
                   disableRipple
                   onClick={() => onSectionClick?.(item.sectionId)}
                   sx={{
-                    color: textColor, // Apply the same color to all items
+                    color: textColor,
                     minWidth: "auto",
                     px: isTablet ? 1 : 2,
                     fontSize: theme.typography.nav.fontSize,
                     position: "relative",
                     textTransform: "uppercase",
-                    letterSpacing: "0.5px",
+                    letterSpacing: "0.03rem",
                     fontWeight: isActive ? 600 : 500,
                     transition: "color 0.3s ease",
                     lineHeight: 1.1, // Slightly more spacing between lines when wrapped
@@ -197,29 +232,95 @@ export function Header({
           direction="row"
           spacing={2}
           alignItems="center"
-          sx={(theme) => ({
-            // If drawer is on the right side
-            ...(drawerPosition === "right" && {
-              paddingRight: drawerOpen
-                ? `calc(${theme.layout.drawer.width}px + 16px)` // Wide padding when drawer is open
-                : `calc(${theme.layout.drawer.closedWidth}px + 16px)`, // Narrower padding when drawer is closed
-            }),
-            // If drawer is on the left side
-            ...(drawerPosition === "left" && {
-              paddingRight: "16px",
-            }),
-            transition: theme.transitions.create("padding", {
-              easing: theme.transitions.easing.sharp,
-              duration: drawerOpen
-                ? theme.transitions.duration.enteringScreen
-                : theme.transitions.duration.leavingScreen,
-            }),
-          })}
+          sx={{
+            pr: 2,
+          }}
         >
+          {/* Tools dropdown */}
+          {onToolsClick && (
+            <NavDropdown
+              label={componentText.buttons.tools}
+              options={[
+                {
+                  key: "scenario-explorer",
+                  label: componentText.tools.scenarioExplorer,
+                  onClick: () => onToolsClick("scenario-explorer"),
+                },
+                {
+                  key: "needs-search",
+                  label: componentText.tools.needsSearch,
+                  onClick: () => onToolsClick("needs-search"),
+                },
+              ]}
+              variant={buttonVariant}
+              sx={buttonStyle}
+            />
+          )}
           <Button
             variant={buttonVariant}
             sx={{
               ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
+            }}
+          >
+            {componentText.buttons.about}
+          </Button>
+          <Button
+            variant={buttonVariant}
+            onClick={onDataClick}
+            sx={{
+              ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
             }}
           >
             {componentText.buttons.getData}
@@ -228,6 +329,32 @@ export function Header({
             variant={buttonVariant}
             sx={{
               ...buttonStyle,
+              color: textColor,
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "&:hover": {
+                backgroundColor: "white",
+                color: (theme) => theme.palette.blue.darkest,
+                "&::before": {
+                  opacity: 1,
+                },
+              },
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: "-100%",
+                width: "100%",
+                height: "100%",
+                background:
+                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                transition: "left 0.5s ease",
+                opacity: 0,
+              },
+              "&:hover::before": {
+                left: "100%",
+              },
             }}
           >
             {componentText.buttons.about}
@@ -235,6 +362,8 @@ export function Header({
           <LanguageSwitcher />
         </Stack>
       </Toolbar>
-    </AppBar>
+    </MotionAppBar>
   )
 }
+
+

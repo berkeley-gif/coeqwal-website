@@ -1,8 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, IconButton, Typography } from "@mui/material"
-import CloseIcon from "@mui/icons-material/Close"
+import { Box } from "@mui/material"
 
 export interface ContentWrapperProps {
   /** Title displayed at the top of the content section */
@@ -11,48 +10,20 @@ export interface ContentWrapperProps {
   children: React.ReactNode
   /** Function called when the close button is clicked */
   onClose: () => void
-  /** Optional background color for the wrapper */
-  bgColor?: string
+  /** Custom styles for the wrapper */
+  wrapperStyles?: React.CSSProperties
 }
 
 /**
  * Wrapper component for drawer content sections
- * Provides consistent styling and a close button
+ * Provides consistent styling without a close button (now in drawer header)
  */
 export function ContentWrapper({
-  title,
   children,
-  onClose,
-  bgColor,
+  wrapperStyles,
 }: ContentWrapperProps) {
   return (
-    <Box
-      className="drawer-content-wrapper"
-      sx={{
-        p: 2,
-        width: "100%",
-        height: "100%",
-        overflow: "auto",
-        bgcolor: bgColor,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-          pb: 1,
-          borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          {title}
-        </Typography>
-        <IconButton onClick={onClose} size="small" aria-label="close">
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </Box>
+    <Box className="drawer-content-wrapper" sx={wrapperStyles}>
       {children}
     </Box>
   )

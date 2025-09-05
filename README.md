@@ -17,20 +17,21 @@ Dependencies and configurations set at the root level are overriden by local dep
   - [Mapbox](https://mapbox.com/)
 - [D3](https://d3js.org/)
 - [MaterialUI](https://mui.com/material-ui/)
+- [motion](https://motion.dev/)
 - [SASS](https://sass-lang.com/)
 
 ## Installation
 
 ### Prerequisites
 
-Node.js: Ensure you have Node.js version 22.x installed. Use nvm or Volta for version management.
+Node.js: Ensure you have Node.js version 20.x installed. Use nvm or Volta for version management.
 
 ```sh
-nvm install 22.13.0
-nvm use 22.13.0
+nvm install 20.19.1
+nvm use 20.19.1
 ```
 
-pnpm: Install pnpm using Corepack (included in Node.js 22.x).
+pnpm: Install pnpm using Corepack (included in Node.js 20.x).
 
 ```sh
 corepack enable
@@ -100,6 +101,7 @@ To add a new app, cd into the `apps` directory and run
 pnpm dlx create-next-app@latest <app name>
 ```
 
+To maintain consistent structure for all apps, for configurations, choose **No** for TailwindCSS, `src/` directory, and import alias; otherwise, choose **Yes**.
 This generator should create your directory and install necessary files, configurations, and dependencies. Then go to the root level and run:
 
 ```sh

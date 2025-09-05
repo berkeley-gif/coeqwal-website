@@ -1,6 +1,7 @@
 import React, { useRef } from "react"
 import { motion } from "@repo/motion"
 import { opacityVariants } from "@repo/motion/variants"
+import { Typography } from "@repo/ui/mui"
 
 export interface UnderlineLegendProps {
   /** Colors for each segment of the underline */
@@ -53,12 +54,12 @@ const Legend: React.FC<UnderlineLegendProps> = ({
         variants={opacityVariants}
         initial="hidden"
         whileInView={"visible"}
-        transition={{ once: true }}
-        custom={0.5}
+        viewport={{ once: true }}
+        custom={0}
         style={{
           position: "absolute",
           padding: "1.5px",
-          bottom: 5,
+          bottom: 0,
           left: 0,
           width: "100%",
           height,
@@ -92,10 +93,11 @@ const Legend: React.FC<UnderlineLegendProps> = ({
         variants={opacityVariants}
         initial="hidden"
         whileInView={"visible"}
-        custom={0.7}
+        viewport={{ once: true }}
+        custom={0}
         style={{
           position: "absolute",
-          bottom: 0,
+          bottom: -4,
           left: 0,
           width: "100%",
           display: "flex",
@@ -115,7 +117,7 @@ const Legend: React.FC<UnderlineLegendProps> = ({
                 textAlign: "center",
               }}
             >
-              {label}
+              <Typography variant="caption">{label}</Typography>
             </div>
           )
         })}

@@ -11,7 +11,7 @@ interface LogoProps {
  * COEQWAL Logo Component
  *
  * Renders the COEQWAL logo as an SVG.
- * This component directly includes the SVG code from the original file
+ * Directly includes the SVG code from the original file
  * to ensure consistent rendering across different environments.
  */
 export function Logo({ width = 160, height = 40 }: LogoProps) {

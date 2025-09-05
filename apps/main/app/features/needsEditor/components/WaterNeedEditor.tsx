@@ -3,17 +3,30 @@ import EditableNeedsRenderer from "./EditableNeedsRenderer"
 import { Box, Typography, Button, CheckIcon } from "@repo/ui/mui"
 import { WaterNeedSetting } from "./types" // Adjust the import path as necessary
 import { BLANK_WATER_NEED } from "./constants"
+import { useTheme } from "@repo/ui/mui"
+
+type MapFunctions = {
+  addSource: (id: string, data: any) => void
+  addLayer: (id: string, sourceId: string, type: string, paint: any, layout?: any) => void
+  removeLayer: (id: string) => void
+  removeSource: (id: string) => void
+  hasSource: (id: string) => boolean
+  hasLayer: (id: string) => boolean
+  flyTo: (longitude: number, latitude: number, zoom: number, pitch?: number, bearing?: number) => void
+}
 
 type WaterNeedEditorProps = {
   currentWaterNeed: WaterNeedSetting
   setCurrentWaterNeed: React.Dispatch<React.SetStateAction<WaterNeedSetting>>
   setNeedsList: React.Dispatch<React.SetStateAction<WaterNeedSetting[]>>
+  mapFunctions?: MapFunctions
 }
 
 const WaterNeedEditor = ({
   currentWaterNeed,
   setCurrentWaterNeed,
   setNeedsList,
+  mapFunctions,
 }: WaterNeedEditorProps) => {
   const addNeedToList = () => {
     // Add to list and clear current need
@@ -22,6 +35,8 @@ const WaterNeedEditor = ({
     })
     setCurrentWaterNeed(BLANK_WATER_NEED)
   }
+
+  const theme = useTheme()
 
   return (
     <Box
@@ -64,6 +79,7 @@ const WaterNeedEditor = ({
           <EditableNeedsRenderer
             currentWaterNeed={currentWaterNeed}
             setCurrentWaterNeed={setCurrentWaterNeed}
+            mapFunctions={mapFunctions}
           />
 
           <Button
@@ -72,8 +88,8 @@ const WaterNeedEditor = ({
             size="medium"
             onClick={addNeedToList}
             sx={{
-              color: "black",
-              borderColor: "black",
+              color: theme.palette.primary.dark,
+              borderColor: theme.palette.primary.dark,
               width: "fit-content",
             }}
           >

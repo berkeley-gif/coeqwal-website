@@ -5,6 +5,7 @@ import { Storyline } from "./story"
 interface StoryState {
   storyline: Storyline | null
   activeSection: string
+  isMapReady: boolean
   loadedSections: Set<string>
   markerLayer: {
     points: MarkerType[]
@@ -15,45 +16,60 @@ interface StoryState {
     style: string
   }
   breakpoint: string
+  selectedMonthSnowpack: string
+  tooltipContent: MarkerType | null
   setActiveSection: (section: string) => void
+  setMapReady: (isReady: boolean) => void
   fetchStoryline: () => Promise<void>
   markSectionAsLoaded: (section: string) => void
   setMarkers: (markers: MarkerType[], style: string) => void
   setTextMarkers: (markers: MarkerType[], style: string) => void
   setBreakpoint: (breakpoint: string) => void
+  setSelectedMonthSnowpack: (month: string) => void
+  setTooltipContent: (content: MarkerType | null) => void
 }
 
-const useStoryStore = create<StoryState>((set) => ({
-  storyline: null,
-  activeSection: "opener",
-  loadedSections: new Set(["opener", "precipitation"]), // Initialize with the first section loaded
-  markerLayer: { points: [], style: "rough-circle" },
-  textMarkerLayer: { points: [], style: "text" },
-  breakpoint: "xl",
-  setActiveSection: (section: string) => set({ activeSection: section }),
-  markSectionAsLoaded: (section: string) =>
-    set((state) => {
-      const updatedLoadedSections = new Set(state.loadedSections)
-      updatedLoadedSections.add(section)
-      return { loadedSections: updatedLoadedSections }
-    }),
-  fetchStoryline: async () => {
-    try {
-      const response = await fetch("/locales/english.json")
-      if (!response.ok) {
-        throw new Error("Failed to fetch story data")
+const useStoryStore = create<StoryState>((set) => {
+  return {
+    storyline: null,
+    activeSection: "opener",
+    isMapReady: false,
+    loadedSections: new Set(["opener", "precipitation"]), // Initialize with the first section loaded
+    markerLayer: { points: [], style: "rough-circle" },
+    textMarkerLayer: { points: [], style: "text" },
+    breakpoint: "xl",
+    selectedMonthSnowpack: "10",
+    tooltipContent: null,
+    setActiveSection: (section: string) => set({ activeSection: section }),
+    setMapReady: (isReady: boolean) => set({ isMapReady: isReady }),
+    markSectionAsLoaded: (section: string) =>
+      set((state) => {
+        const updatedLoadedSections = new Set(state.loadedSections)
+        updatedLoadedSections.add(section)
+        return { loadedSections: updatedLoadedSections }
+      }),
+    fetchStoryline: async () => {
+      try {
+        const response = await fetch("/locales/english.json")
+        if (!response.ok) {
+          throw new Error("Failed to fetch story data")
+        }
+        const data = await response.json()
+        set({ storyline: data })
+      } catch (err) {
+        console.error("Error loading story data:", err)
       }
-      const data = await response.json()
-      set({ storyline: data })
-    } catch (err) {
-      console.error("Error loading story data:", err)
-    }
-  },
-  setMarkers: (markers: MarkerType[], style: string) =>
-    set({ markerLayer: { points: markers, style: style } }),
-  setTextMarkers: (markers: MarkerType[], style: string) =>
-    set({ textMarkerLayer: { points: markers, style: style } }),
-  setBreakpoint: (breakpoint: string) => set({ breakpoint: breakpoint }),
-}))
+    },
+    setMarkers: (markers: MarkerType[], style: string) =>
+      set({ markerLayer: { points: markers, style: style } }),
+    setTextMarkers: (markers: MarkerType[], style: string) =>
+      set({ textMarkerLayer: { points: markers, style: style } }),
+    setBreakpoint: (breakpoint: string) => set({ breakpoint: breakpoint }),
+    setSelectedMonthSnowpack: (month: string) =>
+      set({ selectedMonthSnowpack: month }),
+    setTooltipContent: (content: MarkerType | null) =>
+      set({ tooltipContent: content }),
+  }
+})
 
 export default useStoryStore

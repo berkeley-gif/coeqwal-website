@@ -13,6 +13,8 @@ import type {
   MapOperationsAPI,
   MapLayerType,
   StyleValue,
+  ViewState,
+  ViewStateTransitionOptions,
   MarkerProperties,
 } from "../types"
 
@@ -168,8 +170,54 @@ export function MapProvider({ children }: { children: ReactNode }) {
       }
     },
 
-    fitBounds: () => {
-      throw new Error("fitBounds not implemented yet")
+    fitBounds: (
+      boundsOrViewState:
+        | [[number, number], [number, number]]
+        | Pick<ViewState, "bounds" | "pitch" | "bearing" | "transitionOptions">,
+      pitch?: number,
+      bearing?: number,
+      padding?:
+        | number
+        | { top: number; bottom: number; left: number; right: number },
+      transitionOptions?: ViewStateTransitionOptions,
+    ) => {
+      const map = mapRef.current?.getMap()
+      if (!map) return
+
+      try {
+        // Handle both overloads: bounds array or viewState object
+        if (Array.isArray(boundsOrViewState)) {
+          // First overload: bounds array with optional parameters
+          map.fitBounds(boundsOrViewState, {
+            pitch: pitch ?? 0,
+            bearing: bearing ?? 0,
+            padding: padding ?? 50,
+            duration:
+              transitionOptions?.duration ?? DEFAULT_TRANSITION.duration,
+            easing: transitionOptions?.easing ?? DEFAULT_TRANSITION.easing,
+            essential:
+              transitionOptions?.essential ?? DEFAULT_TRANSITION.essential,
+          })
+        } else {
+          // Second overload: viewState object
+          const viewState = boundsOrViewState
+          map.fitBounds(viewState.bounds!, {
+            pitch: viewState.pitch ?? 0,
+            bearing: viewState.bearing ?? 0,
+            padding: padding ?? 50,
+            duration:
+              viewState.transitionOptions?.duration ??
+              DEFAULT_TRANSITION.duration,
+            easing:
+              viewState.transitionOptions?.easing ?? DEFAULT_TRANSITION.easing,
+            essential:
+              viewState.transitionOptions?.essential ??
+              DEFAULT_TRANSITION.essential,
+          })
+        }
+      } catch (err) {
+        console.error("Failed to fit bounds:", err)
+      }
     },
 
     addSource: (id, source) => {
@@ -293,6 +341,20 @@ export function MapProvider({ children }: { children: ReactNode }) {
         map.setFilter(id, filter)
       } catch (err) {
         console.error(`Failed to set filter for layer '${id}':`, err)
+      }
+    },
+
+    project: (lng: number, lat: number) => {
+      const map = mapRef.current?.getMap()
+      if (!map) {
+        console.warn("project called but mapRef is null")
+        return null
+      }
+      try {
+        return map.project([lng, lat])
+      } catch (err) {
+        console.error(`Failed to project coordinates (${lng}, ${lat}):`, err)
+        return null
       }
     },
 

@@ -1,27 +1,31 @@
 "use client"
 
-import { Box, Slider, Typography } from "@repo/ui/mui"
-import { useState, useCallback, useRef, useEffect } from "react"
+import { Box, Slider, Stack, Typography, VisibilityIcon } from "@repo/ui/mui"
+import { useState } from "react"
 import { useMap } from "@repo/map/client"
 import { useFetchData } from "../hooks/useFetchData"
 import PrecipitationBar from "./vis/PrecipitationBar"
-import {
-  precipitationPaintStyle,
-  snowpackPaintStyle,
-} from "./helpers/mapLayerStyle"
 import useActiveSection from "../hooks/useActiveSection"
 import { MarkerType } from "./helpers/mapMarkers"
 import useStoryStore from "../store"
 
 import AnimatedCurve from "./vis/AnimatedCurve"
-import { Sentence } from "@repo/motion/components"
 import { MONTHIDS, MONTHS, selectedMonths } from "./helpers/constants"
-import { stateMapViewState } from "./helpers/mapViews"
-import { useBreakpoint } from "@repo/ui/hooks"
-import { motion } from "@repo/motion"
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "@repo/motion"
 import { springUpTextVariants } from "@repo/motion/variants"
 import Legend from "./helpers/Legend"
-import ScrollIndicator from "./helpers/ScrollIndicator"
+import {
+  FreshWaterColorScale,
+  SnowWaterColorScale,
+} from "./helpers/colorPalette"
+import { usePlayAnimationOnce } from "@repo/motion/hooks"
+import { SierraNevadaMountains } from "./helpers/mapAnnotations"
+import { useSectionLifecycle } from "../hooks/useSectionLifeCycle"
 
 const MotionSlider = motion.create(Slider)
 const MotionTypography = motion.create(Typography)
@@ -46,65 +50,40 @@ function SectionWaterSource() {
 }
 
 function Precipitation() {
-  const { addLayer, addSource, setPaintProperty } = useMap()
+  const { setPaintProperty } = useMap()
   const storyline = useStoryStore((state) => state.storyline)
   const content = storyline?.precipitation
-  const { sectionRef, isSectionActive } = useActiveSection("precipitation", {
+  const { sectionRef } = useActiveSection("precipitation", {
     amount: 0.2,
   })
-  const hasSeen = useRef(false)
-  const colors = [
-    "rgba(77, 166, 255, 0.1)",
-    "rgba(77, 166, 255, 0.3)",
-    "rgba(77, 166, 255, 0.5)",
-    "rgba(77, 166, 255, 0.7)",
-  ]
+
+  const colors = FreshWaterColorScale
   const labels = ["10", "20", "30", "40", "50 in."]
-  const [animationComplete, setAnimationComplete] = useState(false)
 
-  const init = useCallback(() => {
-    addSource("precipitation-vector", {
-      type: "vector",
-      url: "mapbox://yskuo.9zuvqy7z",
-    })
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
-    addLayer(
-      "precipitation-vector-layer",
-      "precipitation-vector",
-      "fill",
-      precipitationPaintStyle,
-      {},
-      { "source-layer": "region" },
-    )
-  }, [addSource, addLayer])
-
-  //TODO: there is two times re-render here, in case we have performance issues
-  const load = useCallback(() => {
-    setPaintProperty("precipitation-vector-layer", "fill-opacity", 1)
-  }, [setPaintProperty])
-
-  const unload = useCallback(() => {
-    setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
-  }, [setPaintProperty])
-
-  useEffect(() => {
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        console.log("initialize stuff")
-        init()
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        console.log("unload stuff")
-        unload()
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.1 && latest < 0.9) {
+      setPaintProperty("precipitation-vector-layer", "fill-opacity", 1)
+      return
     }
-  }, [isSectionActive, init, load, unload])
+    setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
+  })
+
+  const titleOpacity = useTransform(scrollYProgress, [0.2, 0.5], [0, 1])
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.7],
+    [0, 1],
+  )
 
   return (
     <Box
@@ -116,34 +95,43 @@ function Precipitation() {
       tabIndex={-1} // Ensure focusable for screen readers
       role="region"
     >
-      <Box className="paragraph" component="article">
-        <Sentence
-          variant="h3"
-          gutterBottom
-          options={{ amount: 0.1 }}
-          custom={0}
-        >
+      <motion.div className="paragraph" style={{ opacity: titleOpacity }}>
+        <Typography variant="h3" gutterBottom>
           {content?.title1}{" "}
           <Legend colors={colors} labels={labels}>
             {content?.title2}
           </Legend>{" "}
           {content?.title3}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence custom={2}>{content?.p2}</Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={3}>{content?.p3}</Sentence>
-        <Sentence
-          custom={4}
-          onAnimationComplete={() => setAnimationComplete(true)}
+        </Typography>
+      </motion.div>
+      <Stack spacing={12} direction="column" component="section" role="region">
+        <motion.div
+          className="paragraph"
+          style={{ opacity: firstParagraphOpacity }}
         >
-          {content?.p4}
-        </Sentence>
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+          <Typography variant="body1">{content?.p1}</Typography>
+          <Typography variant="body1">{content?.p2}</Typography>
+        </motion.div>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: secondParagraphOpacity }}
+        >
+          <Typography variant="body1">{content?.p3}</Typography>
+          <Typography variant="body1">{content?.p4}</Typography>
+          <Typography variant="caption" sx={{ opacity: 0.7 }}>
+            GIS data source : 30-year (1991-2020) normals from{" "}
+            <a
+              href="https://prism.oregonstate.edu/normals/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              PRISM
+            </a>
+            .
+          </Typography>
+        </motion.div>
+      </Stack>
     </Box>
   )
 }
@@ -154,91 +142,126 @@ function Variability({ markers }: { markers: Record<string, MarkerType[]> }) {
   const { sectionRef, isSectionActive } = useActiveSection("variability", {
     amount: 0.5,
   })
-  const hasSeen = useRef(false)
-
-  const [startBarAnimation, setStartBarAnimation] = useState(false)
-  const { setPaintProperty } = useMap()
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
   const setMarkers = useStoryStore((state) => state.setMarkers)
-  const [animationComplete, setAnimationComplete] = useState(false)
+  const [currentPoints, setCurrentPoints] = useState<MarkerType[]>([])
+  const setTooltipContent = useStoryStore((state) => state.setTooltipContent)
 
   const getSelectedYear = (year: string) => {
     const points = markers[year] || []
     setMarkers(points, "rough-circle")
+    setCurrentPoints(points)
+    setTooltipContent(points[0] || null) // Set the first point as tooltip content
   }
 
-  useEffect(() => {
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-      }
-      hasSeen.current = true
-      setPaintProperty("precipitation-vector-layer", "fill-opacity", 0)
-    } else {
-      if (hasSeen.current) {
-        //console.log('unload stuff')
-        setMarkers([], "rough-circle")
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
-    }
-  }, [isSectionActive, setMarkers, setPaintProperty])
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    () => {
+      setMarkers(currentPoints, "rough-circle")
+    },
+    () => {
+      setMarkers([], "rough-circle")
+    },
+  )
+
+  const firstParagraphOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1])
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.3, 0.6],
+    [0, 1],
+  )
+  const exampleParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.6, 0.8],
+    [0, 1],
+  )
+
+  const titleOpacity = usePlayAnimationOnce(scrollYProgress, [0.4, 0.7], [0, 1])
+  const captionOpacity = usePlayAnimationOnce(
+    scrollYProgress,
+    [0.4, 0.7],
+    [0, 0.7],
+  ) //TODO: make this 0.7 a constant for caption
 
   return (
     <Box
       ref={sectionRef}
       className="container"
-      height="100vh"
+      height="110vh"
+      sx={{ justifyContent: "space-around" }}
       tabIndex={-1}
       role="region"
     >
-      <Box className="paragraph">
-        <Sentence custom={0}>{content?.p1}</Sentence>
-        <Sentence custom={1}>{content?.p2}</Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={2}>{content?.p3}</Sentence>
-        <Sentence custom={3}>{content?.p4}</Sentence>
-      </Box>
-      <Box
-        className="paragraph"
-        style={{ height: "fit-content", width: "100%" }}
-      >
-        <Sentence
-          variant="h6"
-          custom={4}
-          onAnimationComplete={() => setStartBarAnimation(true)}
+      <Stack spacing={3} direction="column" component="section" role="region">
+        <motion.div
+          className="paragraph"
+          style={{ opacity: firstParagraphOpacity }}
         >
-          California Rainfall Deviation from Average
-        </Sentence>
-        <Sentence custom={4.5} variant="caption">
-          source:{" "}
-          <a
-            href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "inherit", textDecoration: "underline" }}
+          <Typography>{content?.p1}</Typography>
+          <Typography gutterBottom>{content?.p2}</Typography>
+        </motion.div>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: secondParagraphOpacity }}
+        >
+          <Typography>{content?.p3}</Typography>
+          <Typography>{content?.p4}</Typography>
+        </motion.div>
+      </Stack>
+      <Stack
+        spacing={1}
+        direction="column"
+        component="section"
+        role="region"
+        sx={{ width: "100%" }}
+      >
+        <Box
+          className="paragraph"
+          style={{ height: "fit-content", width: "100%" }}
+        >
+          <MotionTypography variant="h4" style={{ opacity: titleOpacity }}>
+            California Rainfall Deviation from Average
+          </MotionTypography>
+          <MotionTypography
+            variant="caption"
+            style={{ opacity: captionOpacity }}
           >
-            NOAA
-          </a>
-        </Sentence>
-        <PrecipitationBar
-          yearLabels={Object.keys(markers).map((key) => parseInt(key))}
-          startAnimation={startBarAnimation}
-          getSelectedYear={getSelectedYear}
-          onAnimationComplete={() => setAnimationComplete(true)}
-        />
-      </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
+            Data source:{" "}
+            <a
+              href="https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/statewide/time-series"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "underline" }}
+            >
+              NOAA
+            </a>
+          </MotionTypography>
+          <PrecipitationBar
+            yearLabels={Object.keys(markers).map((key) => parseInt(key))}
+            scrollYProgress={scrollYProgress}
+            getSelectedYear={getSelectedYear}
+          />
+        </Box>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: exampleParagraphOpacity }}
+        >
+          <Typography variant="body1">
+            Click on{" "}
+            <VisibilityIcon
+              sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
+            />{" "}
+            and circles to explore how California is affected by droughts and
+            floods.
+          </Typography>
+        </motion.div>
+      </Stack>
     </Box>
   )
-}
-
-const mountainMarker = {
-  id: "sierra-nevada-mountains",
-  name: "Sierra Nevada Mountains",
-  latitude: 38.2489,
-  longitude: -119.6877,
 }
 
 function Snowpack() {
@@ -247,140 +270,132 @@ function Snowpack() {
   const { sectionRef, isSectionActive } = useActiveSection("snowpack", {
     amount: 0.5,
   })
-  const [startAnimation, setStartAnimation] = useState(false)
   const [monthIdx, setMonthIdx] = useState(0)
-  const hasSeen = useRef(false)
-  const { flyTo, setPaintProperty, addSource, setFilter, addLayer } = useMap()
+  const { setPaintProperty, setFilter } = useMap()
   const setMarkers = useStoryStore((state) => state.setMarkers)
-  const breakpoint = useBreakpoint()
-  const mapViewState = stateMapViewState[breakpoint]
-  const colors = [
-    "rgba(242, 240, 239, 0.4)",
-    "rgba(242, 240, 239, 0.6)",
-    "rgba(242, 240, 239, 0.8)",
-  ]
+  const colors = SnowWaterColorScale
   const labels = ["1", "6.5", "13", "20 ft."]
-  const [animationComplete, setAnimationComplete] = useState(false)
+  const setSelectedMonthSnowpack = useStoryStore(
+    (state) => state.setSelectedMonthSnowpack,
+  )
 
-  const init = useCallback(() => {
-    addSource("snowpack", {
-      type: "vector",
-      url: "mapbox://yskuo.6vdu01qt",
-    })
-    addLayer(
-      "snowpack-layer",
-      "snowpack",
-      "fill",
-      snowpackPaintStyle,
-      {},
-      { "source-layer": "snowpack-adjusted-final-4n64x8" },
-    )
-  }, [addLayer, addSource])
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end center"],
+  })
 
-  const load = useCallback(() => {
-    flyTo({
-      longitude: mapViewState?.longitude ?? 0,
-      latitude: mapViewState?.latitude ?? 0,
-      zoom: mapViewState?.zoom ?? 1,
-      transitionOptions: {
-        duration: 2000,
-      },
-    })
-    setPaintProperty("river-sac-layer", "line-opacity", 0)
-    setPaintProperty("river-sanjoaquin-layer", "line-opacity", 0)
-    setFilter("snowpack-layer", [
-      "all",
-      ["==", ["get", "month-adjusted"], "10"],
-    ] as unknown as string)
-    if (!animationComplete) return
-    setPaintProperty("snowpack-layer", "fill-opacity", 1)
-    setMarkers([mountainMarker], "text")
-  }, [
-    flyTo,
-    mapViewState,
-    setPaintProperty,
-    setFilter,
-    animationComplete,
-    setMarkers,
-  ])
-
-  const unload = useCallback(() => {
-    setMarkers([], "text")
-    setPaintProperty("snowpack-layer", "fill-opacity", 0)
-  }, [setMarkers, setPaintProperty])
-
-  useEffect(() => {
-    if (isSectionActive) {
-      if (!hasSeen.current) {
-        //console.log('initialize stuff')
-        init()
-      }
-      hasSeen.current = true
-      load()
-    } else {
-      if (hasSeen.current) {
-        //console.log('unload stuff')
-        unload()
-      } else {
-        //console.log('not seen yet, dont do anything')
-        return
-      }
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    if (latest > 0.5 && latest < 0.9) {
+      setPaintProperty("snowpack-layer", "fill-opacity", 1)
+      return
     }
-  }, [init, isSectionActive, load, unload])
+    setPaintProperty("snowpack-layer", "fill-opacity", 0)
+  })
+
+  //NOTE: It seems I have to implement text markers using load and unload
+  useSectionLifecycle(
+    isSectionActive,
+    () => {},
+    () => {
+      setMarkers([SierraNevadaMountains], "text")
+    },
+    () => {
+      setMarkers([], "text")
+    },
+  )
+
+  const firstParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.05, 0.35],
+    [0, 1],
+  )
+  const secondParagraphOpacity = useTransform(
+    scrollYProgress,
+    [0.15, 0.45],
+    [0, 1],
+  )
+  const titleOpacity = useTransform(scrollYProgress, [0.25, 0.55], [0, 1])
 
   return (
     <Box
       ref={sectionRef}
       className="container"
-      height="100vh"
+      height="120vh"
+      sx={{ justifyContent: "space-around" }}
       tabIndex={-1}
       role="region"
     >
-      <Box className="paragraph">
-        <Sentence variant="h3" gutterBottom custom={0}>
-          {content?.title1}
-          <Legend colors={colors} labels={labels}>
-            {content?.title2}
-          </Legend>{" "}
-          {content?.title3}
-        </Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence custom={1}>{content?.p1}</Sentence>
-        <Sentence custom={2}>{content?.p2}</Sentence>
-      </Box>
-      <Box className="paragraph">
-        <Sentence
-          custom={3}
-          onAnimationComplete={() => setStartAnimation(true)}
+      <Stack
+        spacing={6}
+        direction="column"
+        component="section"
+        role="region"
+        sx={{ width: "100%" }}
+      >
+        <Box className="paragraph">
+          <Typography variant="h3" gutterBottom>
+            {content?.title1}
+            <Legend colors={colors} labels={labels}>
+              {content?.title2}
+            </Legend>{" "}
+            {content?.title3}
+          </Typography>
+        </Box>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: firstParagraphOpacity }}
         >
-          {content?.p3}
-        </Sentence>
-      </Box>
+          <Typography variant="body1">{content?.p1}</Typography>
+          <Typography variant="body1">{content?.p2}</Typography>
+        </motion.div>
+        <motion.div
+          className="paragraph"
+          style={{ opacity: secondParagraphOpacity }}
+        >
+          <Typography variant="body1"> {content?.p3}</Typography>
+          <Typography variant="body1">
+            Slide to see the snowpack change over time!
+          </Typography>
+        </motion.div>
+      </Stack>
       <Box
         className="paragraph"
         style={{ height: "fit-content", width: "100%" }}
       >
-        <Sentence custom={3} variant="h6">
+        <MotionTypography variant="h4" style={{ opacity: titleOpacity }}>
           {"From Snow to Snowmelt \u2014 an Illustration"}
-        </Sentence>
+        </MotionTypography>
+        <MotionTypography variant="caption">
+          GIS data source: Snowpack spatial accumulation from{" "}
+          <a
+            href="https://www.nohrsc.noaa.gov/snowfall/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            NOAA
+          </a>
+          .
+        </MotionTypography>
         <AnimatedCurve
-          startAnimation={startAnimation}
           selectedMonth={monthIdx}
+          scrollYProgress={scrollYProgress}
         />
         {/* <PathMorphing />*/}
         <div id="month-slider">
           <MotionSlider
             variants={springUpTextVariants}
             initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={7}
+            whileInView="visible"
+            viewport={{ amount: 0.1, once: true }}
+            custom={0}
             min={0}
             max={11}
             value={monthIdx}
             track={false}
             onChange={(e, newValue) => {
               setMonthIdx(newValue as number)
+              setSelectedMonthSnowpack(MONTHIDS[newValue as number] as string)
               setFilter("snowpack-layer", [
                 "all",
                 [
@@ -414,18 +429,14 @@ function Snowpack() {
             gutterBottom
             variants={springUpTextVariants}
             initial="hidden"
-            animate={startAnimation ? "visible" : "hidden"}
-            custom={8}
-            onAnimationComplete={() => {
-              setAnimationComplete(true)
-              setPaintProperty("snowpack-layer", "fill-opacity", 1)
-            }}
+            whileInView="visible"
+            viewport={{ amount: 0.1, once: true }}
+            custom={0}
           >
             Months in a Water Year
           </MotionTypography>
         </div>
       </Box>
-      <ScrollIndicator animationComplete={animationComplete} />
     </Box>
   )
 }

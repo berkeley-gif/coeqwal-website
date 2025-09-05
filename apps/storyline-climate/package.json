@@ -1,0 +1,30 @@
+{
+  "name": "storyline-climate",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --max-warnings 0"
+  },
+  "dependencies": {
+    "@repo/i18n": "workspace:*",
+    "@repo/map": "workspace:*",
+    "@repo/motion": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@turf/turf": "^7.2.0",
+    "d3": "^7.9.0",
+    "lodash": "^4.17.21",
+    "next": "^15.2.1",
+    "roughjs": "^4.6.6",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/d3": "^7.4.3",
+    "@types/lodash": "^4.17.16"
+  }
+}
