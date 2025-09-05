@@ -30,7 +30,7 @@ export default function CaliforniaMapPanel({
         mapboxToken={token}
         mapStyle="mapbox://styles/digijill/clz4h7lfm00mn01rih4x75g46"
         initialViewState={{
-          longitude: -119.5, // Move map center east to shift markers left on screen
+          longitude: -119.5,
           latitude: 37.0902,
           zoom: 7,
           bearing: 0,
