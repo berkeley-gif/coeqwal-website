@@ -90,7 +90,7 @@ export default function CalSimMarkers() {
 
       // Transform and filter nodes with valid geometry
       const validNodes = nodes
-        .map((node: any) => {
+        .map((node: Record<string, unknown>) => {
           let geometry = node.geometry
           if (typeof geometry === "string") {
             try {
@@ -110,19 +110,22 @@ export default function CalSimMarkers() {
             geometry,
           }
         })
-        .filter((node: any): node is CalSimNode => {
+        .filter((node: unknown): node is CalSimNode => {
           if (
             !node ||
+            typeof node !== "object" ||
+            !("geometry" in node) ||
             !node.geometry ||
-            !node.geometry.coordinates ||
+            typeof node.geometry !== "object" ||
+            !("coordinates" in node.geometry) ||
             !Array.isArray(node.geometry.coordinates)
           ) {
-            console.warn("Invalid node geometry after parsing:", node?.name)
+            console.warn("Invalid node geometry after parsing:", (node as Record<string, unknown>)?.name)
             return false
           }
           const [lng, lat] = node.geometry.coordinates
           if (typeof lng !== "number" || typeof lat !== "number") {
-            console.warn("Invalid coordinates:", node.name, lng, lat)
+            console.warn("Invalid coordinates:", (node as Record<string, unknown>).name, lng, lat)
             return false
           }
           return true
