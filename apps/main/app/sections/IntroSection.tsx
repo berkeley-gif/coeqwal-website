@@ -24,7 +24,6 @@ const IntroSection = () => {
           height: "100vh",
         }}
       >
-
         {/* Wave pattern of circle images */}
         <ImageWavePattern
           imageCount={{ xs: 6, sm: 11, lg: 16 }}
@@ -41,10 +40,9 @@ const IntroSection = () => {
           textColor={theme.palette.blue.darkest}
           sx={{ pointerEvents: "auto" }} // Enables interactions for home panel
           contentAlignment={{
-            justifyContent: { xs: "center", md: 'flex-end', lg: "flex-end" }, // Text block stays at bottom for all screen sizes for this instance
+            justifyContent: { xs: "center", md: "flex-end", lg: "flex-end" }, // Text block stays at bottom for all screen sizes for this instance
             alignItems: "center",
           }}
-
           content={
             <Box
               sx={{
@@ -52,7 +50,7 @@ const IntroSection = () => {
                 paddingBottom: { xs: 4, md: 6, lg: 8 },
                 paddingLeft: { xs: 9, md: 18, lg: 35, xl: 70 }, // Responsive padding
                 paddingRight: { xs: 9, md: 18, lg: 35, xl: 70 }, // Responsive padding
-                textAlign: 'center',
+                textAlign: "center",
               }}
             >
               {/* Home text content with fade-in animation */}
@@ -73,7 +71,7 @@ const IntroSection = () => {
                     lineHeight: 1.1,
                     color: (theme) => theme.palette.blue.darkest, // blue dark
                     mb: (theme) => theme.layout.spacing.xs,
-                    mt: { xs: '40vh', lg: '0' },
+                    mt: { xs: "40vh", lg: "0" },
                   }}
                 >
                   {t("homePanel.title")}
@@ -85,7 +83,6 @@ const IntroSection = () => {
                   sx={(theme) => ({
                     // mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
                     color: (theme) => theme.palette.blue.darkest, // blue dark
-
                   })}
                 >
                   {t("homePanel.content")}
@@ -167,7 +164,7 @@ const IntroSection = () => {
       <CalSimProvider>
         {/* Sticky California map background */}
         <CaliforniaMapPanel id="california-map" />
-        
+
         {/* Scrolling overlay panels over the sticky map */}
         <MapOverlayPanels />
       </CalSimProvider>
@@ -191,7 +188,6 @@ const IntroSection = () => {
               width: "100%",
               maxWidth: (theme) => theme.layout.textContainer.maxWidth,
               textAlign: "left",
-
             }}
           >
             <Typography variant="body1">

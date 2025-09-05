@@ -1,6 +1,12 @@
 "use client"
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react"
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react"
 
 interface CalSimContextType {
   isCalSimVisible: boolean
@@ -13,7 +19,7 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
 
   const toggleCalSim = useCallback(() => {
-    setIsCalSimVisible(prev => !prev)
+    setIsCalSimVisible((prev) => !prev)
   }, [])
 
   return (
@@ -26,7 +32,7 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
 export function useCalSimToggle() {
   const context = useContext(CalSimContext)
   if (!context) {
-    throw new Error('useCalSimToggle must be used within a CalSimProvider')
+    throw new Error("useCalSimToggle must be used within a CalSimProvider")
   }
   return context
 }

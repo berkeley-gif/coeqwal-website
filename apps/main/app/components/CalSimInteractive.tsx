@@ -17,10 +17,12 @@ export function useCalSimToggle() {
 
   return {
     isCalSimVisible,
-    toggleCalSim
+    toggleCalSim,
   }
 }
 
-export default function CalSimInteractive({ onToggle }: CalSimInteractiveProps) {
+export default function CalSimInteractive({
+  onToggle,
+}: CalSimInteractiveProps) {
   return null // This component is no longer needed bc CalSimMarkers handles everything
 }
