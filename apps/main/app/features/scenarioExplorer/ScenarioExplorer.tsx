@@ -2898,6 +2898,7 @@ export default function ScenarioExplorer({
     <Box
       id="map-panel"
       sx={{
+        pointerEvents: "auto", // Re-enable interactions for scenario explorer
         position: "relative",
         width: "100vw",
         height: "100vh",
