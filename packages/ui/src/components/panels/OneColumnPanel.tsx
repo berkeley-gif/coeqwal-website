@@ -65,7 +65,7 @@ const OneColumnRoot = styled(Box, {
     backgroundColor: backgroundColor || "transparent",
 
     // Text color
-    color: textColor || theme.palette.text.primary,
+    color: textColor || theme.palette.blue.darkest,
 
     // Optional background image
     backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,

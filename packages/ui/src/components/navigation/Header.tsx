@@ -143,7 +143,7 @@ export function Header({
       sx={{
         zIndex: theme.zIndex.appBar,
         backgroundColor: theme.palette.overlay.water,
-        borderBottom: theme.border.standard,
+
         color: theme.palette.text.primary,
         borderRadius: theme.borderRadius.none,
         boxShadow: "none",

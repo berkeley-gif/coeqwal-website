@@ -179,6 +179,10 @@ const themeValues = {
       light: "#77a2d9", // Light blue - subtle elements
     },
 
+    text: {
+      default: '#fffff', // Change the default here 
+    },
+
     // Accent colors - warm tones
     accent: {
       gold: "#ffd87e", // Golden yellow - highlights
@@ -187,6 +191,7 @@ const themeValues = {
 
     // Nature colors - greens
     nature: {
+      earth: "#c2a14f", // Earth brown
       forest: "#7b9d3f", // Forest green - for saved scenarios tab
     },
 
@@ -432,7 +437,7 @@ const cardTypographyMixins = {
   } as const,
   // Main card title (e.g., "Current Operations")
   cardTitle: {
-    color: "blue.darkest",
+    color: "text.secondary",
     fontFamily: themeValues.fontFamily.neueHaasText,
     fontWeight: 500,
     fontSize: "1.5rem", // Could use typeScale.h6 but this is specifically for cards
@@ -442,11 +447,11 @@ const cardTypographyMixins = {
   // Section headers within cards (e.g., "Scenario snapshot")
   sectionHeader: {
     // Uses Typography variant="h6" with theme color
-    color: "blue.darkest",
+    color: "text.secondary",
   } as const,
   // Body text containers
   bodyContainer: {
-    color: "blue.darkest",
+    color: "text.secondary",
     fontFamily: "typography.fontFamily",
     mb: 2.5,
   } as const,
@@ -690,6 +695,7 @@ const theme = createTheme({
       cream: themeValues.palette.accent.cream,
     },
     nature: {
+      earth: themeValues.palette.nature.earth,
       forest: themeValues.palette.nature.forest,
     },
     utility: {
@@ -1532,6 +1538,7 @@ declare module "@mui/material/styles" {
       cream: string
     }
     nature: {
+      earth: string
       teal: string
       sage: string
       mint: string
@@ -1597,6 +1604,7 @@ declare module "@mui/material/styles" {
       cream?: string
     }
     nature?: {
+      earth: string
       teal?: string
       sage?: string
       mint?: string
