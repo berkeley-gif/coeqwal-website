@@ -6,6 +6,7 @@ import { BlueThemeBackground } from "../components/BlueThemeBackground"
 import { ImageWavePattern } from "../components/ImageWavePattern"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
+import { Direction } from "@dnd-kit/core/dist/types"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -37,6 +38,7 @@ const IntroSection = () => {
           fullWidth={true}
           backgroundColor="transparent"
           includeHeaderSpacing={true}
+          textColor={theme.palette.blue.darkest}
           contentAlignment={{
             justifyContent: { xs: "center", md: 'flex-end', lg: "flex-end" }, // Text block stays at bottom for all screen sizes for this instance
             alignItems: "center",
@@ -68,7 +70,7 @@ const IntroSection = () => {
                   sx={{
                     fontSize: "4.2rem", // I changed the h1 size to fit the longer headline. We could change the type scale to accomodate new content / new layout
                     lineHeight: 1.1,
-                    color: (theme) => theme.palette.text.secondary, // white
+                    color: (theme) => theme.palette.blue.darkest, // blue dark
                     mb: (theme) => theme.layout.spacing.xs,
                     mt: { xs: '40vh', lg: '0' },
                   }}
@@ -81,7 +83,7 @@ const IntroSection = () => {
                   variant="body1"
                   sx={(theme) => ({
                     // mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
-                    color: theme.palette.text.secondary, // white
+                    color: (theme) => theme.palette.blue.darkest, // blue dark
 
                   })}
                 >
@@ -98,7 +100,7 @@ const IntroSection = () => {
                 >
                   <ScrollToButton
                     scrollToId="frontmatter"
-                    color={(theme) => theme.palette.text.secondary}
+                    color={(theme) => theme.palette.blue.darkest}
                   />
                 </Box>
               </motion.div>
@@ -114,8 +116,8 @@ const IntroSection = () => {
         id="frontmatter"
         fullHeight={true}
         fullWidth
-        backgroundColor="transparent"
-        textColor={theme.palette.primary.dark}
+        backgroundColor={theme.palette.nature.earth}
+        textColor={theme.palette.blue.darkest}
         includeHeaderSpacing={true}
         contentAlignment={{
           justifyContent: "center",
@@ -123,7 +125,7 @@ const IntroSection = () => {
         }}
         sx={{
           position: "relative",
-          background: `url('/images/intro_collage/riverbank_right_lg.png')`,
+          backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "40% auto",
           backgroundPosition: "bottom right",
           backgroundRepeat: "no-repeat",
@@ -134,15 +136,21 @@ const IntroSection = () => {
               width: "100%",
               maxWidth: (theme) => theme.layout.textContainer.maxWidth,
               textAlign: "left",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
             }}
           >
+            <Typography variant="body1" fontWeight="bold">
+              {t("frontmatterPanel.boldText")}
+            </Typography>
             <Typography variant="body1">
               {t("frontmatterPanel.content")}
             </Typography>
 
             <ScrollToButton
               scrollToId="california-map"
-              color={theme.palette.overlay.water}
+              color={theme.palette.blue.darkest}
               style={{
                 marginTop: "2rem",
                 display: "flex",
@@ -164,8 +172,8 @@ const IntroSection = () => {
         id="interstitial"
         fullHeight={false}
         fullWidth
-        backgroundColor={theme.palette.common.white}
-        textColor={theme.palette.blue.darkest}
+        backgroundColor={theme.palette.brand.sky}
+        textColor={theme.palette.text.secondary}
         includeHeaderSpacing={true}
         contentAlignment={{
           justifyContent: "center",
@@ -177,6 +185,7 @@ const IntroSection = () => {
               width: "100%",
               maxWidth: (theme) => theme.layout.textContainer.maxWidth,
               textAlign: "left",
+
             }}
           >
             <Typography variant="body1">
@@ -185,7 +194,7 @@ const IntroSection = () => {
 
             <ScrollToButton
               scrollToId="content-panels"
-              color={theme.palette.overlay.water}
+              color={theme.palette.blue.darkest}
               style={{
                 marginTop: "2rem",
                 display: "flex",
