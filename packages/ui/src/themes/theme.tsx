@@ -180,7 +180,7 @@ const themeValues = {
     },
 
     text: {
-      default: '#fffff', // Change the default here 
+      default: "#fffff", // Change the default here
     },
 
     // Accent colors - warm tones
@@ -782,7 +782,7 @@ const theme = createTheme({
       fontWeight: 500,
       lineHeight: 1.0, // Tighter for large hero text
       color: themeValues.palette.blue.darkest,
-      textTransform: 'uppercase'
+      textTransform: "uppercase",
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,

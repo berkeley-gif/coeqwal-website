@@ -50,10 +50,12 @@ export default function MapOverlayPanels() {
           paddingRight: 0, // Ditto
         }}
         rightContent={
-          <Box sx={{
-            ...overlayPanelStyle,
-            marginRight: { xs: 2, md: 8 },
-          }}>
+          <Box
+            sx={{
+              ...overlayPanelStyle,
+              marginRight: { xs: 2, md: 8 },
+            }}
+          >
             <Typography
               variant="h3"
               component="h3"
@@ -69,7 +71,7 @@ export default function MapOverlayPanels() {
               {t("toolsPanel.boldText")}
             </Typography>
 
-                        <Typography 
+            <Typography
               variant="body1"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
@@ -84,14 +86,14 @@ export default function MapOverlayPanels() {
               variant="standard"
               onClick={toggleCalSim}
               sx={{
-                backgroundColor: isCalSimVisible 
-                  ? (theme) => theme.palette.accent.gold 
+                backgroundColor: isCalSimVisible
+                  ? (theme) => theme.palette.accent.gold
                   : (theme) => theme.palette.common.white,
-                color: isCalSimVisible 
+                color: isCalSimVisible
                   ? (theme) => theme.palette.utility.black
                   : (theme) => theme.palette.blue.darkest,
                 "&:hover": {
-                  backgroundColor: isCalSimVisible 
+                  backgroundColor: isCalSimVisible
                     ? (theme) => theme.palette.accent.cream
                     : (theme) => theme.palette.grey[100],
                 },
@@ -104,48 +106,76 @@ export default function MapOverlayPanels() {
             {/* CalSim Legend */}
             {isCalSimVisible && (
               <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" sx={{ mb: 1, fontSize: "0.8rem", fontWeight: 500 }}>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 1, fontSize: "0.8rem", fontWeight: 500 }}
+                >
                   CalSim Node Types:
                 </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <Box
+                  sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
+                >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ 
-                      width: 12, height: 12, borderRadius: "50%", 
-                      backgroundColor: "#2563eb", border: "1px solid white" 
-                    }} />
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#2563eb",
+                        border: "1px solid white",
+                      }}
+                    />
                     <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
                       Reservoirs & Storage
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ 
-                      width: 12, height: 12, borderRadius: "50%", 
-                      backgroundColor: "#dc2626", border: "1px solid white" 
-                    }} />
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#dc2626",
+                        border: "1px solid white",
+                      }}
+                    />
                     <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
                       Pump Stations
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ 
-                      width: 12, height: 12, borderRadius: "50%", 
-                      backgroundColor: "#059669", border: "1px solid white" 
-                    }} />
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#059669",
+                        border: "1px solid white",
+                      }}
+                    />
                     <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
                       Water Treatment
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box sx={{ 
-                      width: 12, height: 12, borderRadius: "50%", 
-                      backgroundColor: "#6b7280", border: "1px solid white" 
-                    }} />
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: "#6b7280",
+                        border: "1px solid white",
+                      }}
+                    />
                     <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
                       Other Nodes
                     </Typography>
                   </Box>
                 </Box>
-                <Typography variant="body2" sx={{ mt: 1, fontSize: "0.7rem", fontStyle: "italic" }}>
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 1, fontSize: "0.7rem", fontStyle: "italic" }}
+                >
                   Hover for details • Click to see network
                 </Typography>
               </Box>
@@ -173,10 +203,12 @@ export default function MapOverlayPanels() {
           paddingRight: 0, // Same as above
         }}
         rightContent={
-          <Box sx={{
-            ...overlayPanelStyle,
-            marginRight: { xs: 2, md: 8 }, // Push panel further right to avoid markers
-          }}>
+          <Box
+            sx={{
+              ...overlayPanelStyle,
+              marginRight: { xs: 2, md: 8 }, // Push panel further right to avoid markers
+            }}
+          >
             <Typography
               variant="body1"
               sx={{
@@ -208,10 +240,12 @@ export default function MapOverlayPanels() {
           paddingRight: 0, // Here also -- I'll work on this
         }}
         rightContent={
-          <Box sx={{
-            ...overlayPanelStyle,
-            marginRight: { xs: 2, md: 8 }, // Push panel right, for now
-          }}>
+          <Box
+            sx={{
+              ...overlayPanelStyle,
+              marginRight: { xs: 2, md: 8 }, // Push panel right, for now
+            }}
+          >
             <Typography
               variant="body1"
               sx={{

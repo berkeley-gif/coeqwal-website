@@ -365,5 +365,3 @@ export function Header({
     </MotionAppBar>
   )
 }
-
-
