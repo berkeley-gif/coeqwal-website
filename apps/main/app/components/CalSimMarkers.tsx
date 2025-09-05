@@ -20,6 +20,8 @@ interface CalSimNode {
   }
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_COEQWAL_API_URL || 'https://api.coeqwal.org'
+
 export default function CalSimMarkers() {
   const { isCalSimVisible } = useCalSimToggle()
   const { mapRef } = useMap()
@@ -63,9 +65,8 @@ export default function CalSimMarkers() {
     ].join(',')
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_COEQWAL_API_URL || 'https://api.coeqwal.org'
       const response = await fetch(
-        `${apiUrl}/api/nodes/spatial?bbox=${bbox}&zoom=${zoom}&limit=500`
+        `${API_BASE_URL}/api/nodes/spatial?bbox=${bbox}&zoom=${zoom}&limit=500`
       )
       
       if (!response.ok) {
@@ -112,6 +113,7 @@ export default function CalSimMarkers() {
       
     } catch (error) {
       console.error("Failed to load CalSim nodes from API:", error)
+      console.error("API URL being used:", `${API_BASE_URL}/api/nodes/spatial?bbox=${bbox}&zoom=${zoom}&limit=500`)
       
       // Fallback to mock data
       const mockNodes: CalSimNode[] = [
@@ -147,9 +149,8 @@ export default function CalSimMarkers() {
   // Handle node click for network traversal
   const handleNodeClick = useCallback(async (node: CalSimNode) => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_COEQWAL_API_URL || 'https://api.coeqwal.org'
       const response = await fetch(
-        `${apiUrl}/api/nodes/${node.id}/network?direction=both&include_arcs=true`
+        `${API_BASE_URL}/api/nodes/${node.id}/network?direction=both&include_arcs=true`
       )
       
       if (!response.ok) {
