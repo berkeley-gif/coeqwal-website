@@ -19,7 +19,10 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
 
   const toggleCalSim = useCallback(() => {
-    setIsCalSimVisible((prev) => !prev)
+    setIsCalSimVisible((prev) => {
+      console.log(`CalSim toggle: ${prev} -> ${!prev}`)
+      return !prev
+    })
   }, [])
 
   return (
