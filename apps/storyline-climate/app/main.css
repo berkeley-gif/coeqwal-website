@@ -52,14 +52,21 @@ html{
     margin-bottom: 20vh;
 }
 
-.container-center{
+.container-center, .container-center-horizontal{
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
     text-align: center;
     pointer-events: auto;
+}
+
+.container-center{
+    flex-direction: column;
+}
+
+.container-center-horizontal{
+    flex-direction: row;
 }
 
 .filled-container{
