@@ -1,14 +1,20 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { Map, useMap, MapRef } from "@repo/map"
+import { Map, useMap, MapRef, Source, Layer } from "@repo/map"
 import { Box } from "@repo/ui/mui"
+import { deltaMapViewState } from "./helpers/mapViewStates"
+import { useBreakpoint } from "@repo/ui/hooks"
+import { AnimatePresence } from "@repo/motion"
+import { TextMarker, TextMarkersLayer } from "./helpers/mapLayers"
+import { SacramentoRiver, SanJoaquinRiver } from "./helpers/mapAnnotations"
+import { InfrastructureColor } from "./helpers/colorPalette"
+import useStoryStore from "../store"
 
 interface MapContainerProps {
   onLoad?: () => void
   uncontrolledRef?: React.RefObject<MapRef | null>
 }
-
 export default function MapContainer({
   uncontrolledRef,
   onLoad,
@@ -17,6 +23,8 @@ export default function MapContainer({
   const { mapRef } = useMap()
   const initialized = useRef(false)
   const resourceLoaded = useRef(false)
+  const breakpoint = useBreakpoint()
+  const textMarkerLayer = useStoryStore((state) => state.textMarkerLayer)
 
   useEffect(() => {
     if (!resourceLoaded.current) {
@@ -73,13 +81,97 @@ export default function MapContainer({
       <Map
         mapboxToken={mapboxToken}
         mapStyle="mapbox://styles/coeqwal/cmc0zhlcr008p01sof4ob61vg"
-        //initialViewState={mapViewState}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100%", height: "40vh" }}
         interactive={false}
         navigationControl={false}
-        dragPan={false}
+        dragPan={true}
         onLoad={onLoad}
-      ></Map>
+        initialViewState={deltaMapViewState[breakpoint]!}
+      >
+        <RiverLayer />
+        <TunnelLayer />
+        <AnimatePresence>
+          <TextMarkersLayer
+            markers={[SacramentoRiver, SanJoaquinRiver]}
+            styledMarker={TextMarker}
+            key={1}
+          />
+          {textMarkerLayer.style === "text" && (
+            <TextMarkersLayer
+              key={2}
+              markers={textMarkerLayer.points}
+              styledMarker={TextMarker}
+            />
+          )}
+        </AnimatePresence>
+      </Map>
     </Box>
+  )
+}
+
+function TunnelLayer() {
+  return (
+    <>
+      <Source id="delta-tunnel" type="vector" url="mapbox://coeqwal.1vtnekq4">
+        <Layer
+          id="delta-tunnel-layer"
+          type="line"
+          source="delta-tunnel"
+          source-layer="delta-biwt27"
+          paint={{
+            "line-color": InfrastructureColor,
+            "line-width": 5,
+            "line-opacity": 0,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+          }}
+        />
+      </Source>
+    </>
+  )
+}
+
+function RiverLayer() {
+  return (
+    <>
+      <Source
+        id="river-sac"
+        type="geojson"
+        data={"/data/SacramentoRiver.geojson"}
+      />
+      <Source
+        id="river-sanjoaquin"
+        type="geojson"
+        data={"/data/SanJoaquinRiver.geojson"}
+      />
+      <Layer
+        id="river-sanjoaquin-layer"
+        type="line"
+        source="river-sanjoaquin"
+        layout={{
+          "line-cap": "round",
+          "line-join": "round",
+        }}
+        paint={{
+          "line-color": "#50B1E7",
+          "line-width": 5,
+        }}
+      />
+      <Layer
+        id="river-sac-layer"
+        type="line"
+        source="river-sac"
+        layout={{
+          "line-cap": "round",
+          "line-join": "round",
+        }}
+        paint={{
+          "line-color": "#50B1E7",
+          "line-width": 5,
+        }}
+      />
+    </>
   )
 }

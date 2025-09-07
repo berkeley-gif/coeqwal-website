@@ -44,10 +44,12 @@ function Groundwater() {
       <motion.div style={{ opacity: firstParagraphOpacity }}>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
-            {"During droughts of the past,"}
+            {
+              "In past droughts, when water available in rivers and reservoirs is reduced,"
+            }
           </Typography>
           <Typography variant="body1">
-            {"communities and farmers in California have relied on "}
+            {"communities and farmers in California have turned to"}
             <span style={{ fontWeight: "bold" }}>{"groundwater"}</span>
             {" to meet their needs."}
           </Typography>
@@ -59,9 +61,11 @@ function Groundwater() {
           <Typography variant="body1">
             {"Unfortunately, "}
             <span className="highlight-text">
-              {"overpumping of groundwater has depleted aquifers"}
+              {
+                "overpumping of groundwater has depleted underground water storage"
+              }
             </span>
-            {" and caused the land to subside, or sink."}
+            {" and caused the land to sink."}
           </Typography>
         </Box>
       </motion.div>
@@ -83,18 +87,23 @@ function Groundwater() {
             <span style={{ fontWeight: "bold" }}>
               {"Sustainable Groundwater Management Act (SGMA) "}
             </span>
-            {"is intended to prevent unsustainable pumping and "}
+            {"is intended to protect groundwater for the future."}
           </Typography>
           <Typography variant="body1">
             {
-              "help to ensure the groundwater supplies will be available during more extreme droughts of the future. "
+              "It aims to reduce overpumping so supplies will still be there during extreme droughts."
             }
           </Typography>
         </Box>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
             {
-              "However, this law will likely require a reduction in farmland and will not go into full effect for many years."
+              "But putting the law fully into effect will take years. It will also mean many farms must cut back on water use through more efficient irrigation, fewer crops, or retiring some farmland."
+            }
+          </Typography>
+          <Typography variant="body1">
+            {
+              "These changes could affect the livelihoods of workers and local economies. Therefore, careful planning will be needed to support affected communities."
             }
           </Typography>
         </Box>
@@ -134,29 +143,21 @@ function Conservation() {
       <motion.div style={{ opacity: firstParagraphOpacity }}>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
-            {"Water conservation is another important adaptation strategy."}
-          </Typography>
-          <Typography variant="body1">
             {
-              "For example, drought-tolerant landscaping, water-efficient appliances, and water recycling "
+              "Water conservation in cities and community water systems can also help us adapt to a future with less water."
             }
           </Typography>
           <Typography variant="body1">
-            {"can help "}
+            {
+              "Upgrades like drought-tolerant landscaping, water-efficient appliances, and water recycling "
+            }
+          </Typography>
+          <Typography variant="body1">
+            {"all help "}
             <span className="highlight-text">
               {"lower human water demands"}
             </span>
             {" and make the most of available supplies."}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "In fact, urban water conservation has been so successful that California’s cities are using as much water now as they did in 2000, "
-            }
-          </Typography>
-          <Typography variant="body1">
-            {"despite an increase of about 5.5 million people!"}
           </Typography>
         </Box>
       </motion.div>
@@ -175,13 +176,11 @@ function Conservation() {
         <Box className="paragraph" component="article">
           <Typography variant="body1">
             {
-              "However, further urban conservation will be more difficult to achieve, and agricultural land transitions change livelihoods for workers and local economies,"
+              "In fact, California has already made water conservation gains \u2014 cities today use about the same amount of water they did in 2000, "
             }
           </Typography>
           <Typography variant="body1">
-            {
-              " even with support for planning and funding those transitions in ways that benefit many groups."
-            }
+            {"even though 5.5 million more people now live here."}
           </Typography>
         </Box>
       </motion.div>

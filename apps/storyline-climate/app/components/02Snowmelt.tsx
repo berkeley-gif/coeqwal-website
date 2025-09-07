@@ -43,12 +43,17 @@ function Snowmelt() {
         <Box className="paragraph" component="article">
           <Typography variant="body1">
             {
-              "Mountain snowpack in winter has historically served as a reliable water supply to California. "
+              "For decades, California has relied on mountain snowpacks as a natural water storage."
             }
           </Typography>
           <Typography variant="body1">
             {
-              "The snowmelt contributes to river flows throughout the long, dry summer that supply water for agriculture and cities and also sustain ecosystems."
+              "Snow builds up in winter, then melts slowly, feeding rivers through the long, dry summer."
+            }
+          </Typography>
+          <Typography variant="body1">
+            {
+              "The snowmelt has consistently maintained river flows to provide water for farms, cities, and ecosystems."
             }
           </Typography>
         </Box>
@@ -87,19 +92,19 @@ function Snowmelt() {
       <motion.div style={{ opacity: secondParagraphOpacity }}>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
-            {"However, as the temperature increases, "}
+            {"But warmer winters mean "}
             <span className="highlight-text">
-              {"more water arrives as rain"}
+              {"more precipitation falls as rain"}
             </span>
-            {" in California instead of snow, and "}
+            {" instead of snow. And "}
             <span className="highlight-text">
-              {"the reduced snowpack melts earlier"}
+              {"the snowpack we do receive melts earlier"}
             </span>
-            {"."}
+            {" in the year."}
           </Typography>
           <Typography variant="body1">
             {
-              "The water we do have will also evaporate from soils or get used by plants more quickly, stressing ecosystems."
+              "Higher temperatures also cause water to evaporate faster from soils and plants."
             }
           </Typography>
           <Typography variant="body1">
@@ -107,9 +112,11 @@ function Snowmelt() {
             <span style={{ fontWeight: "bold" }}>
               {"less water is available"}
             </span>
-            {" when we \u2014 humans and ecosystems \u2014 "}
+            {
+              " in rivers and reservoirs during the dry summer when we \u2014 humans and ecosystems \u2014 "
+            }
             <span style={{ fontWeight: "bold" }}>{"need it most"}</span>
-            {" in the dry summer season."}
+            {"."}
           </Typography>
         </Box>
       </motion.div>

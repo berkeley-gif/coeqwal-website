@@ -29,9 +29,14 @@ function Balance() {
           transition={{ duration: 1 }}
         >
           <Box className="paragraph" component="article">
-            <Typography variant="h4">
+            <Typography variant="body1">
               {
-                "Each of these strategies comes with distinct benefits and costs that must be carefully balanced."
+                "Because climate change depends on what happens around the world, it is hard to predict exactly how California will be affected."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Each strategy we have discussed \u2014 from conserving water to building new infrastructure \u2014 has benefits and drawbacks that must be carefully weighed."
               }
             </Typography>
           </Box>
@@ -56,7 +61,7 @@ function Balance() {
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
-                "Because the pace of climate change depends on how society acts at a global scale, it is difficult to predict exactly how impacts will unfold in California."
+                "The key is finding the right combination of approaches that work for California's diverse communities, farms, and ecosystems."
               }
             </Typography>
           </Box>
