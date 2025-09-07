@@ -1,0 +1,650 @@
+[
+  {
+    "model": "Historical",
+    "month": "Oct",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 1
+  },
+  {
+    "model": "Historical",
+    "month": "Nov",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 2
+  },
+  {
+    "model": "Historical",
+    "month": "Dec",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 3
+  },
+  {
+    "model": "Historical",
+    "month": "Jan",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 4
+  },
+  {
+    "model": "Historical",
+    "month": "Feb",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 5
+  },
+  {
+    "model": "Historical",
+    "month": "Mar",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 6
+  },
+  {
+    "model": "Historical",
+    "month": "Apr",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 7
+  },
+  {
+    "model": "Historical",
+    "month": "May",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 8
+  },
+  {
+    "model": "Historical",
+    "month": "Jun",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 9
+  },
+  {
+    "model": "Historical",
+    "month": "Jul",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 10
+  },
+  {
+    "model": "Historical",
+    "month": "Aug",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 11
+  },
+  {
+    "model": "Historical",
+    "month": "Sep",
+    "mean": 0.0,
+    "median": 0.0,
+    "Qone": 0.0,
+    "Qthree": 0.0,
+    "monthNum": 12
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Oct",
+    "mean": 4.41,
+    "median": 2.93,
+    "Qone": -0.2,
+    "Qthree": 7.32,
+    "monthNum": 1
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Nov",
+    "mean": 9.9,
+    "median": 8.25,
+    "Qone": 2.46,
+    "Qthree": 17.99,
+    "monthNum": 2
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Dec",
+    "mean": 15.67,
+    "median": 15.44,
+    "Qone": 8.52,
+    "Qthree": 22.94,
+    "monthNum": 3
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Jan",
+    "mean": 13.98,
+    "median": 14.05,
+    "Qone": 8.35,
+    "Qthree": 19.77,
+    "monthNum": 4
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Feb",
+    "mean": 10.18,
+    "median": 9.59,
+    "Qone": 3.88,
+    "Qthree": 16.47,
+    "monthNum": 5
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Mar",
+    "mean": 6.56,
+    "median": 6.62,
+    "Qone": 1.11,
+    "Qthree": 10.38,
+    "monthNum": 6
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Apr",
+    "mean": -3.48,
+    "median": -2.9,
+    "Qone": -12.07,
+    "Qthree": 4.82,
+    "monthNum": 7
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "May",
+    "mean": -23.41,
+    "median": -23.83,
+    "Qone": -31.21,
+    "Qthree": -16.38,
+    "monthNum": 8
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Jun",
+    "mean": -34.73,
+    "median": -36.17,
+    "Qone": -42.39,
+    "Qthree": -28.8,
+    "monthNum": 9
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Jul",
+    "mean": -24.93,
+    "median": -25.78,
+    "Qone": -40.22,
+    "Qthree": -8.96,
+    "monthNum": 10
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Aug",
+    "mean": -6.25,
+    "median": -2.01,
+    "Qone": -7.95,
+    "Qthree": -0.35,
+    "monthNum": 11
+  },
+  {
+    "model": "Warmer & Drier I",
+    "month": "Sep",
+    "mean": 1.16,
+    "median": 0.82,
+    "Qone": -0.6,
+    "Qthree": 2.3,
+    "monthNum": 12
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Oct",
+    "mean": 2.13,
+    "median": 0.1,
+    "Qone": -2.75,
+    "Qthree": 5.42,
+    "monthNum": 1
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Nov",
+    "mean": 6.53,
+    "median": 3.9,
+    "Qone": -1.74,
+    "Qthree": 14.18,
+    "monthNum": 2
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Dec",
+    "mean": 11.22,
+    "median": 12.06,
+    "Qone": 1.54,
+    "Qthree": 20.66,
+    "monthNum": 3
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Jan",
+    "mean": 8.14,
+    "median": 7.26,
+    "Qone": 1.5,
+    "Qthree": 16.18,
+    "monthNum": 4
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Feb",
+    "mean": 3.74,
+    "median": 3.9,
+    "Qone": -4.81,
+    "Qthree": 11.0,
+    "monthNum": 5
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Mar",
+    "mean": 0.32,
+    "median": 0.08,
+    "Qone": -6.45,
+    "Qthree": 5.94,
+    "monthNum": 6
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Apr",
+    "mean": -10.11,
+    "median": -8.95,
+    "Qone": -20.36,
+    "Qthree": 0.52,
+    "monthNum": 7
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "May",
+    "mean": -31.23,
+    "median": -32.74,
+    "Qone": -40.38,
+    "Qthree": -22.42,
+    "monthNum": 8
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Jun",
+    "mean": -42.11,
+    "median": -43.79,
+    "Qone": -50.43,
+    "Qthree": -35.9,
+    "monthNum": 9
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Jul",
+    "mean": -29.47,
+    "median": -29.44,
+    "Qone": -46.0,
+    "Qthree": -11.34,
+    "monthNum": 10
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Aug",
+    "mean": -8.16,
+    "median": -3.76,
+    "Qone": -9.49,
+    "Qthree": -1.8,
+    "monthNum": 11
+  },
+  {
+    "model": "Warmer & Drier II",
+    "month": "Sep",
+    "mean": -0.18,
+    "median": -0.46,
+    "Qone": -2.08,
+    "Qthree": 1.34,
+    "monthNum": 12
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Oct",
+    "mean": -14.75,
+    "median": -16.84,
+    "Qone": -24.52,
+    "Qthree": -10.82,
+    "monthNum": 1
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Nov",
+    "mean": -0.29,
+    "median": -0.36,
+    "Qone": -9.83,
+    "Qthree": 10.96,
+    "monthNum": 2
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Dec",
+    "mean": -9.92,
+    "median": -10.2,
+    "Qone": -15.02,
+    "Qthree": -4.42,
+    "monthNum": 3
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Jan",
+    "mean": -2.27,
+    "median": 0.58,
+    "Qone": -11.8,
+    "Qthree": 9.36,
+    "monthNum": 4
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Feb",
+    "mean": 7.57,
+    "median": 7.0,
+    "Qone": -2.57,
+    "Qthree": 15.9,
+    "monthNum": 5
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Mar",
+    "mean": 2.32,
+    "median": 2.54,
+    "Qone": -2.84,
+    "Qthree": 8.98,
+    "monthNum": 6
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Apr",
+    "mean": -39.39,
+    "median": -39.66,
+    "Qone": -42.45,
+    "Qthree": -36.91,
+    "monthNum": 7
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "May",
+    "mean": -54.51,
+    "median": -55.4,
+    "Qone": -57.66,
+    "Qthree": -51.87,
+    "monthNum": 8
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Jun",
+    "mean": -58.47,
+    "median": -59.56,
+    "Qone": -64.63,
+    "Qthree": -54.22,
+    "monthNum": 9
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Jul",
+    "mean": -47.92,
+    "median": -45.16,
+    "Qone": -55.74,
+    "Qthree": -39.65,
+    "monthNum": 10
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Aug",
+    "mean": -36.15,
+    "median": -36.36,
+    "Qone": -41.26,
+    "Qthree": -30.92,
+    "monthNum": 11
+  },
+  {
+    "model": "Warmer & Drier III",
+    "month": "Sep",
+    "mean": -30.81,
+    "median": -30.7,
+    "Qone": -34.99,
+    "Qthree": -25.19,
+    "monthNum": 12
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Oct",
+    "mean": -10.62,
+    "median": -15.28,
+    "Qone": -22.08,
+    "Qthree": 0.29,
+    "monthNum": 1
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Nov",
+    "mean": -10.01,
+    "median": -14.5,
+    "Qone": -22.32,
+    "Qthree": -3.75,
+    "monthNum": 2
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Dec",
+    "mean": -8.48,
+    "median": -12.86,
+    "Qone": -19.77,
+    "Qthree": -0.79,
+    "monthNum": 3
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Jan",
+    "mean": -14.78,
+    "median": -11.86,
+    "Qone": -27.35,
+    "Qthree": -3.61,
+    "monthNum": 4
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Feb",
+    "mean": 11.55,
+    "median": 15.01,
+    "Qone": 1.85,
+    "Qthree": 23.96,
+    "monthNum": 5
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Mar",
+    "mean": -20.6,
+    "median": -19.69,
+    "Qone": -24.86,
+    "Qthree": -15.14,
+    "monthNum": 6
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Apr",
+    "mean": -29.18,
+    "median": -28.13,
+    "Qone": -32.72,
+    "Qthree": -23.81,
+    "monthNum": 7
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "May",
+    "mean": -38.88,
+    "median": -38.01,
+    "Qone": -42.78,
+    "Qthree": -33.71,
+    "monthNum": 8
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Jun",
+    "mean": -50.49,
+    "median": -50.9,
+    "Qone": -53.83,
+    "Qthree": -47.51,
+    "monthNum": 9
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Jul",
+    "mean": -50.45,
+    "median": -50.33,
+    "Qone": -54.76,
+    "Qthree": -46.78,
+    "monthNum": 10
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Aug",
+    "mean": -40.81,
+    "median": -40.3,
+    "Qone": -45.28,
+    "Qthree": -34.68,
+    "monthNum": 11
+  },
+  {
+    "model": "Warmer & Drier IV",
+    "month": "Sep",
+    "mean": -32.13,
+    "median": -30.66,
+    "Qone": -39.88,
+    "Qthree": -26.07,
+    "monthNum": 12
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Oct",
+    "mean": -26.84,
+    "median": -26.76,
+    "Qone": -33.92,
+    "Qthree": -21.34,
+    "monthNum": 1
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Nov",
+    "mean": -23.45,
+    "median": -24.88,
+    "Qone": -29.54,
+    "Qthree": -18.86,
+    "monthNum": 2
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Dec",
+    "mean": -27.27,
+    "median": -27.52,
+    "Qone": -33.77,
+    "Qthree": -22.32,
+    "monthNum": 3
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Jan",
+    "mean": 3.81,
+    "median": 6.2,
+    "Qone": -12.83,
+    "Qthree": 19.62,
+    "monthNum": 4
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Feb",
+    "mean": 34.67,
+    "median": 34.3,
+    "Qone": 26.62,
+    "Qthree": 41.43,
+    "monthNum": 5
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Mar",
+    "mean": 10.91,
+    "median": 12.53,
+    "Qone": 1.75,
+    "Qthree": 19.04,
+    "monthNum": 6
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Apr",
+    "mean": -8.91,
+    "median": -5.63,
+    "Qone": -17.38,
+    "Qthree": 0.26,
+    "monthNum": 7
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "May",
+    "mean": -13.54,
+    "median": -10.43,
+    "Qone": -19.55,
+    "Qthree": -4.28,
+    "monthNum": 8
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Jun",
+    "mean": -26.9,
+    "median": -26.95,
+    "Qone": -30.05,
+    "Qthree": -23.53,
+    "monthNum": 9
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Jul",
+    "mean": -27.45,
+    "median": -27.48,
+    "Qone": -33.58,
+    "Qthree": -23.8,
+    "monthNum": 10
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Aug",
+    "mean": -25.04,
+    "median": -25.95,
+    "Qone": -29.75,
+    "Qthree": -20.6,
+    "monthNum": 11
+  },
+  {
+    "model": "Warmer & Wetter",
+    "month": "Sep",
+    "mean": -26.07,
+    "median": -25.78,
+    "Qone": -31.74,
+    "Qthree": -21.6,
+    "monthNum": 12
+  }
+]

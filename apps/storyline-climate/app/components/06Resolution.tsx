@@ -3,7 +3,8 @@
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
+import HydroClimateContainer from "./vis/HydroClimate"
 
 function SectionResolution() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -14,23 +15,34 @@ function SectionResolution() {
   const x = useTransform(
     scrollYProgress,
     [0, 1],
-    ["0vw", `-${(2 - 1) * 100}vw`],
+    ["0vw", `-${(3 - 1) * 100}vw`],
   )
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (v) => {
+      console.log(v)
+    })
+
+    return () => unsubscribe()
+  }, [scrollYProgress])
 
   return (
     <div>
-      <div ref={containerRef} style={{ height: "200vh", position: "relative" }}>
+      <Hydroclimate />
+      <div ref={containerRef} style={{ height: "400vh", position: "relative" }}>
         <div
           style={{
             position: "sticky",
             top: 0,
             overflow: "hidden",
             height: "100vh",
+            width: "100%",
           }}
         >
-          <motion.div style={{ x, width: "200vw", display: "flex" }}>
-            <Hydroclimate />
+          <motion.div style={{ x, width: "300vw", display: "flex" }}>
+            <Box className="container-center">Test </Box>
             <Scenarios />
+            <Box className="container-center"> Transition</Box>
             {/* Probably need a dummy slide for the transition*/}
           </motion.div>
         </div>
@@ -61,66 +73,66 @@ function Hydroclimate() {
   return (
     <Box
       id="hydroclimate"
-      ref={sectionRef}
       className="container-center"
-      height="100vh"
       sx={{ justifyContent: "center" }}
       tabIndex={-1}
       role="region"
     >
-      <motion.div style={{ opacity: firstParagraphOpacity }}>
-        <Box className="paragraph" component="article">
-          <Typography variant="h4">
-            {
-              "COEQWAL: Planning for different hydroclimates and management decisions"
-            }
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1" style={{ fontWeight: "bold" }}>
-            {"This is where COEQWAL comes in."}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "Using a water planning model called CalSim, COEQWAL helps us study how climate change might affect California's water."
-            }
-          </Typography>
-        </Box>
-      </motion.div>
       <Box
-        style={{
-          height: "50%",
-          width: "80%",
-          backgroundImage: "url('/drafts/hydroclimates.png')",
-          backgroundSize: "contain",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
+        ref={sectionRef}
+        height="150vh"
+        width="100%"
+        sx={{ position: "relative" }}
       ></Box>
-      <Box className="paragraph" component="article">
-        <Typography variant="caption">{"bleh bleh bleh"}</Typography>
-        <Typography variant="caption">
-          {
-            "that correspond to more moderate (or slower) and more extreme (or rapid) climate change "
-          }
 
-          <u>{"(Hydroclimate futures FAQ)"}</u>
-        </Typography>
-      </Box>
-      <motion.div style={{ opacity: secondParagraphOpacity }}>
+      <Box className="container-center sticky-container">
+        <motion.div style={{ opacity: firstParagraphOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="h4">
+              {
+                "COEQWAL: Planning for different hydroclimates and management decisions"
+              }
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1" style={{ fontWeight: "bold" }}>
+              {"This is where COEQWAL comes in."}
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "Using a water planning model called CalSim, COEQWAL helps us study how climate change might affect California's water."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
+        <Box className="container-center-horizontal" height="50vh" width="80%">
+          <HydroClimateContainer />
+        </Box>
         <Box className="paragraph" component="article">
-          <Typography variant="body1">
+          <Typography variant="caption">
             {
-              "COEQWAL studies five plausible future hydroclimates that correspond to different levels of concern for our water system."
+              "Hydroclimate changes in precipitation, temperature, and seasonal streamflow (bands show the interquartile range) relative to historical conditions (1922–2021). See more: "
             }
-          </Typography>
-          <Typography variant="body1">
-            {"Some involve moderate increases in temperature"}
+            <u>{"Hydroclimate futures FAQ"}</u>
           </Typography>
         </Box>
-      </motion.div>
+        <motion.div style={{ opacity: secondParagraphOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "COEQWAL studies five plausible future hydroclimates that correspond to different levels of concern for our water system."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Some involve moderate increases in temperature, precipitation, and streamflow, while others involve much greater changes."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
+      </Box>
     </Box>
   )
 }

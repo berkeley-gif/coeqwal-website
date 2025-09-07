@@ -9,7 +9,7 @@ import {
 } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import MapContainer from "./MapContainer"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { FreshWaterColor } from "./helpers/colorPalette"
 import useStoryStore from "../store"
 import { useMap } from "@repo/map"
@@ -33,13 +33,6 @@ function Delta() {
     target: sectionRef,
     offset: ["start end", "end start"],
   })
-
-  useEffect(() => {
-    const unsubscribe = scrollYProgress.on("change", (v) => {
-      console.log(v)
-    })
-    return () => unsubscribe()
-  }, [scrollYProgress])
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
     if (latest > 0.55) {
