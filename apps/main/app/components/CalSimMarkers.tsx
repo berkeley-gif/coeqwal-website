@@ -587,25 +587,23 @@ export default function CalSimMarkers() {
         <Source
           id="calsim-network-arcs"
           type="geojson"
-          data={
-            {
-              type: "FeatureCollection",
-              features: networkArcs.map((arc) => ({
-                type: "Feature" as const,
-                properties: {
-                  id: arc.id,
-                  name: arc.name,
-                  short_code: arc.short_code,
-                  arc_type: arc.element_type,
-                  from_node: arc.from_node,
-                  to_node: arc.to_node,
-                  depth: arc.depth || 1,
-                  strategy: arc.strategy || "direct",
-                },
-                geometry: arc.geometry,
-              })),
-            } as { type: "FeatureCollection"; features: unknown[] }
-          }
+          data={{
+            type: "FeatureCollection",
+            features: networkArcs.map((arc) => ({
+              type: "Feature" as const,
+              properties: {
+                id: arc.id,
+                name: arc.name,
+                short_code: arc.short_code,
+                arc_type: arc.element_type,
+                from_node: arc.from_node,
+                to_node: arc.to_node,
+                depth: arc.depth || 1,
+                strategy: arc.strategy || "direct",
+              },
+              geometry: arc.geometry,
+            })),
+          } as GeoJSON.FeatureCollection}
         >
           {/* White outline */}
           <Layer
