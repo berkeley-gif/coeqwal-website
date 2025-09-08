@@ -95,9 +95,9 @@ export default function MapOverlayPanels() {
             }}
             transition={{ 
               type: "spring",
-              stiffness: 60,  // Reduced stiffness for slower movement
-              damping: 25,    // Increased damping for smoother settling
-              duration: 1.2   // Longer duration for slower entrance
+              stiffness: 40,  // Lower stiffness for gentler movement
+              damping: 30,    // Higher damping for smoother, less bouncy settling
+              duration: 1.8   // Longer duration for elegant entrance ✨
             }}
             style={{ 
               width: "100%",
