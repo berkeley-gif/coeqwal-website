@@ -64,7 +64,7 @@ export default function CaliforniaMapPanel({
           style={{ 
             position: 'absolute',
             left: '60px',
-            bottom: '10px', // Align with NavigationControl
+            bottom: '30px', // Align with bottom of zoom controls
             zIndex: 1
           }}
         />
