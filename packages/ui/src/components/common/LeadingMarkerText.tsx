@@ -80,6 +80,9 @@ export function LeadingMarkerText({
         sx={{
           gridColumn: bodySpansFull ? "1 / span 2" : 2,
           color: (theme) => theme.palette.text.primary,
+          display: "flex",
+          flexDirection: "column",
+          gap: 2
         }}
       >
         {children}

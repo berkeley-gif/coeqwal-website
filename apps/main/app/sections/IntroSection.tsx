@@ -47,8 +47,9 @@ const IntroSection = () => {
               sx={{
                 zIndex: (theme) => theme.zIndex.introText,
                 paddingBottom: { xs: 4, md: 6, lg: 8 },
-                paddingLeft: { xs: 9, md: 18, lg: 35, xl: 70 }, // Responsive padding
-                paddingRight: { xs: 9, md: 18, lg: 35, xl: 70 }, // Responsive padding
+                paddingLeft: { xs: 9, md: 18, lg: 35, xl: 45 }, // Responsive padding
+                paddingRight: { xs: 9, md: 18, lg: 35, xl: 45 }, // Responsive padding
+                maxWidth: "1500px",
                 textAlign: "center",
               }}
             >

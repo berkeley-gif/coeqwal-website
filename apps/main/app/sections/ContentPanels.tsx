@@ -90,7 +90,6 @@ export default function ContentPanels() {
           gap: (theme) => theme.layout.spacing.md,
           color: (theme) => theme.palette.blue.darkest,
           width: "100%",
-          paddingTop: { xs: 3, md: 14 },
         }}
       >
         {children}
@@ -102,27 +101,62 @@ export default function ContentPanels() {
     <Box
       sx={{
         display: "flex",
-        alignItems: { sm: "flex-start", lg: "center" },
+        alignItems: { sm: "flex-start", md: "center" },
         flexDirection: { sm: "column-reverse", lg: "row" },
         gap: (theme) => theme.layout.spacing.md,
       }}
     >
       {/* Text column */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 2, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
-          <Typography variant="body1">
-            Many Californians would be surprised to learn how controlled our
-            state&apos;s water is. Californians share water through one of the
-            largest and most complex conveyance and allocation systems in the
-            world, particularly in the Central Valley. Learn how California
-            water flows and water management decisions balance water needs
-            across the state.
+          <Typography variant="body1" fontWeight="bold">
+            Do you know that California has one of the most complex water allocation systems in the world?
           </Typography>
+          <Typography variant="body1">
+            Learn how hydroclimate affects water availability, how water flows through California&apos;s Central Valley, the ways in which we manage water to satisfy diverse needs, and why inequities in water access persist.
+          </Typography>
+          <Box
+            component="a"
+            href="https://flow.coeqwal.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              color: (theme) => theme.palette.blue.darkest,
+              textDecoration: "none",
+              display: "block",
+              fontWeight: 500,
+              "&:hover": {
+                textDecoration: "underline",
+              },
+
+            }}
+          >
+            Learn more: How water moves through California →
+          </Box>
+          <Box
+            component="a"
+            href="https://climate.coeqwal.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              color: (theme) => theme.palette.blue.darkest,
+              textDecoration: "none",
+              display: "block",
+              mb: (theme) => theme.layout.spacing.xs,
+              fontWeight: 500,
+              "&:hover": {
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Learn more: Climate change and California water →
+          </Box>
         </LeadingMarkerText>
-      </Box>
+      </Box >
       {/* Image column */}
-      <Box
-        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}
+      < Box
+        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }
+        }
       >
         <Box
           component="img"
@@ -130,15 +164,15 @@ export default function ContentPanels() {
           alt="Learn"
           sx={{ width: "100%", maxWidth: 520, height: "auto" }}
         />
-      </Box>
-    </Box>
+      </Box >
+    </Box >
   )
 
   const ExploreSimple = () => (
     <Box
       sx={{
         display: "flex",
-        alignItems: { sm: "flex-start", lg: "center" },
+        alignItems: { sm: "flex-start", md: "center" },
         flexDirection: { sm: "column", lg: "row" },
         gap: (theme) => theme.layout.spacing.md,
       }}
@@ -155,10 +189,13 @@ export default function ContentPanels() {
         />
       </Box>
       {/* Text column */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 2, minWidth: 0 }}>
         <LeadingMarkerText title="Explore">
+          <Typography variant="body1" fontWeight="bold">
+            What if we managed water differently?
+          </Typography>
           <Typography variant="body1">
-            COEQWAL&apos;s scenarios by theme
+            Discover new possibilities for allocating water by reviewing the operational strategies included on COEQWAL&apos;s data platform.
           </Typography>
         </LeadingMarkerText>
       </Box>
@@ -239,6 +276,7 @@ export default function ContentPanels() {
           addBorder={false}
           hideBottomArrow={true}
           title={<LearnSimple />}
+          hideDetailArrow={true}
           detailContent={
             <>
               <Box
@@ -515,6 +553,7 @@ export default function ContentPanels() {
           bgColor={getPanelBgColor("explore", theme)}
           hideBottomArrow={true}
           title={<ExploreSimple />}
+          hideDetailArrow={true}
           detailContent={
             <>
               <Box
@@ -899,23 +938,25 @@ export default function ContentPanels() {
         />
         <Spacer height={(theme) => theme.layout.spacer.large} />
         {/* Empower panel */}
-        <Box sx={{ py: 4 }}>
+        <Box>
           <ContentPanel
             id="empower"
             smallScreenAlign="center"
             largeScreenFlexDir="column"
           >
             <LeadingMarkerText title="Empower">
+              <Typography variant="body1" fontWeight="bold">
+                What scenarios align with your interests?
+              </Typography>
               <Typography variant="body1">
-                your community with data that helps you understand the impacts
-                of operational decisions
+                Use the tools below to search, evaluate, and export information about scenarios that are meaningful to you.
               </Typography>
             </LeadingMarkerText>
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "center",
-                mt: (theme) => theme.layout.spacing.sm,
+                //mt: (theme) => theme.layout.spacing.sm,
               }}
             >
               <CircularArrowButton
@@ -987,6 +1028,7 @@ function PanelWithDetail({
 
   return (
     <motion.div
+      id="panelDiv"
       ref={containerRef}
       className={isActive ? "active-panel-container" : ""}
       animate={{ height: containerHeight }}
@@ -1001,6 +1043,7 @@ function PanelWithDetail({
         overflow: "visible",
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
+        margin: hideDetailArrow ? `0 0 8rem` : 0
       }}
     >
       {/* Conditionally render either main panel or detail panel with sliding animation */}
