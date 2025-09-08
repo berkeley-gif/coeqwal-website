@@ -272,6 +272,7 @@ const themeValues = {
   // Shadows
   shadow: {
     none: "none",
+    subtle: "0 1px 3px rgba(0,0,0,0.2)", // Subtle shadow
   },
 
   // Z-index values
