@@ -95,7 +95,7 @@ export default function MapGeoSearch({
       case "bottom-left":
         return {
           ...baseStyles,
-          bottom: "40px", // Align with map controls
+          bottom: "10px", // Align with NavigationControl
           left: "110px",
         }
       case "top-left":
