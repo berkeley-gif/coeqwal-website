@@ -3,7 +3,8 @@
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
+import HydroClimateContainer from "./vis/HydroClimate"
 
 function SectionResolution() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -14,23 +15,34 @@ function SectionResolution() {
   const x = useTransform(
     scrollYProgress,
     [0, 1],
-    ["0vw", `-${(2 - 1) * 100}vw`],
+    ["0vw", `-${(3 - 1) * 100}vw`],
   )
+
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on("change", (v) => {
+      console.log(v)
+    })
+
+    return () => unsubscribe()
+  }, [scrollYProgress])
 
   return (
     <div>
-      <div ref={containerRef} style={{ height: "200vh", position: "relative" }}>
+      <Hydroclimate />
+      <div ref={containerRef} style={{ height: "400vh", position: "relative" }}>
         <div
           style={{
             position: "sticky",
             top: 0,
             overflow: "hidden",
             height: "100vh",
+            width: "100%",
           }}
         >
-          <motion.div style={{ x, width: "200vw", display: "flex" }}>
-            <Hydroclimate />
+          <motion.div style={{ x, width: "300vw", display: "flex" }}>
+            <Box className="container-center">Test </Box>
             <Scenarios />
+            <Box className="container-center"> Transition</Box>
             {/* Probably need a dummy slide for the transition*/}
           </motion.div>
         </div>
@@ -61,65 +73,66 @@ function Hydroclimate() {
   return (
     <Box
       id="hydroclimate"
-      ref={sectionRef}
       className="container-center"
-      height="100vh"
       sx={{ justifyContent: "center" }}
       tabIndex={-1}
       role="region"
     >
-      <motion.div style={{ opacity: firstParagraphOpacity }}>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1" style={{ fontWeight: "bold" }}>
-            {"This is where COEQWAL comes in."}
-          </Typography>
-        </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {
-              "Using a water planning model known as CalSim, COEQWAL shines a light on possible water futures "
-            }
-          </Typography>
-          <Typography variant="body1">
-            {"by simulating the effects of climate on the water system."}
-          </Typography>
-        </Box>
-      </motion.div>
       <Box
-        style={{
-          height: "50%",
-          width: "80%",
-          backgroundImage: "url('/drafts/hydroclimates.png')",
-          backgroundSize: "contain",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
+        ref={sectionRef}
+        height="150vh"
+        width="100%"
+        sx={{ position: "relative" }}
       ></Box>
-      <Box className="paragraph" component="article">
-        <Typography variant="caption">
-          {
-            "These hydroclimate futures represent plausible conditions predicted by different models around the year 2050 "
-          }
-        </Typography>
-        <Typography variant="caption">
-          {
-            "that correspond to more moderate (or slower) and more extreme (or rapid) climate change "
-          }
-          <u>{"(Hydroclimate futures FAQ)"}</u>
-        </Typography>
-      </Box>
-      <motion.div style={{ opacity: secondParagraphOpacity }}>
+
+      <Box className="container-center sticky-container">
+        <motion.div style={{ opacity: firstParagraphOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="h4">
+              {
+                "COEQWAL: Planning for different hydroclimates and management decisions"
+              }
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1" style={{ fontWeight: "bold" }}>
+              {"This is where COEQWAL comes in."}
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "Using a water planning model called CalSim, COEQWAL helps us study how climate change might affect California's water."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
+        <Box className="container-center-horizontal" height="50vh" width="80%">
+          <HydroClimateContainer />
+        </Box>
         <Box className="paragraph" component="article">
-          <Typography variant="body1">
-            {"COEQWAL evaluates the effect of distinct hydroclimate futures, "}
-          </Typography>
-          <Typography variant="body1">
+          <Typography variant="caption">
             {
-              "which represent a range of possible changes in temperature, precipitation, and streamflow that are predicted by global climate models."
+              "Hydroclimate changes in precipitation, temperature, and seasonal streamflow (bands show the interquartile range) relative to historical conditions (1922–2021). See more: "
             }
+            <u>{"Hydroclimate futures FAQ"}</u>
           </Typography>
         </Box>
-      </motion.div>
+        <motion.div style={{ opacity: secondParagraphOpacity }}>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "COEQWAL studies five plausible future hydroclimates that correspond to different levels of concern for our water system."
+              }
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Some involve moderate increases in temperature, precipitation, and streamflow, while others involve much greater changes."
+              }
+            </Typography>
+          </Box>
+        </motion.div>
+      </Box>
     </Box>
   )
 }
@@ -153,14 +166,17 @@ function Scenarios() {
         }}
       >
         <Typography variant="body1">
-          {"COEQWAL also explores the effects of "}
+          {"COEQWAL also looks at "}
           <span style={{ fontWeight: "bold" }}>
-            <u>{"different water management decisions"}</u>
+            <u>{"different strategies for managing water"}</u>
           </span>{" "}
           <LibraryBooksIcon
             sx={{ fontSize: "1.5rem", verticalAlign: "middle" }}
           />{" "}
           {" and how these might limit the impacts of climate change."}
+        </Typography>
+        <Typography variant="body1">
+          {"These different approaches are grouped into distinct themes."}
         </Typography>
       </Box>
       <Box
@@ -191,7 +207,7 @@ function Scenarios() {
       >
         <Typography variant="body1">
           {
-            "For example, COEQWAL looks at scenarios where groundwater pumping is limited under SGMA, sometimes along with cutting back farmland. These show how sustainable groundwater management can help during droughts, though it comes with trade-offs for crop production"
+            "For example, COEQWAL explores how reducing groundwater pumping through SGMA can help during droughts, while also considering the economic impacts to agricultural water users."
           }
         </Typography>
       </Box>
@@ -223,7 +239,7 @@ function Scenarios() {
       >
         <Typography variant="body1">
           {
-            "COEQWAL is also evaluating scenarios that include the Delta Conveyance Project."
+            "COEQWAL also explores scenarios provided by government agencies that represent how the Delta Conveyance Project would affect water experts and salinity conditions in the Delta. These scenarios can help us understand how the tunnel could impact farms, cities, and ecosystems throughout the state."
           }
         </Typography>
       </Box>
@@ -286,20 +302,18 @@ function Conclusion() {
         <Stack spacing={12} direction="column">
           <motion.div style={{ opacity: firstParagraphOpacity }}>
             <Box className="paragraph" component="article">
-              <Typography variant="body1">
-                {"For a foreseeable future, "}
-              </Typography>
+              <Typography variant="body1">{"In the years ahead,"}</Typography>
               <Typography variant="body1">
                 {
-                  "California will continue to experience warming temperatures, more extreme droughts, and rising sea levels"
+                  "California will keep getting hotter, with more severe droughts, less snowpack in the mountains, and higher sea levels."
                 }
               </Typography>
               <Typography variant="body1">
-                {"that will affect "}
+                {"This will change "}
                 <span style={{ fontWeight: "bold" }}>
-                  {"when and how much water is available"}
+                  {"when and how much water we have"}
                 </span>
-                {"."}
+                {" to allocate to different uses."}
               </Typography>
             </Box>
             <Box className="paragraph" component="article">
@@ -319,7 +333,7 @@ function Conclusion() {
             <Box className="paragraph" component="article">
               <Typography variant="body1">
                 {
-                  "Are you curios about how these scenarios will affect your specific water needs? "
+                  "Are you curious about how these scenarios will affect your specific water needs? "
                 }
               </Typography>
               <Typography variant="body1">
@@ -328,7 +342,7 @@ function Conclusion() {
                   <u>{"exploring specific scenarios"}</u>
                 </span>
                 {
-                  " and think about how you can help California adapt to this changing climate."
+                  " and think about how you can help California adapt to our changing climate."
                 }
               </Typography>
             </Box>

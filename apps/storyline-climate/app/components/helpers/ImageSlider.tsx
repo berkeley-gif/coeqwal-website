@@ -294,12 +294,13 @@ export function VerticalImageSlider({
           transform: "translate(-50%, -50%)",
           width: 44,
           height: 44,
-          borderRadius: "9999px",
+          borderRadius: "50%",
           backgroundColor: "#f2f0ef",
           display: "grid",
           placeItems: "center",
           cursor: "pointer",
           outline: "none",
+          pointerEvents: "auto",
         }}
         onPointerDown={(e) => {
           ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
