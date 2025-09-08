@@ -22,23 +22,23 @@ export default function MapOverlayPanels() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.target.id === 'tools-overlay' && entry.isIntersecting) {
+          if (entry.target.id === 'california-map' && entry.isIntersecting) {
             setIsFirstPanelVisible(true)
-            console.log("🎬 First map panel entered viewport - triggering slide-up animation")
+            console.log("🎬 California map entered viewport - triggering panel slide-up animation")
           }
         })
       },
       { 
-        threshold: 0.1, // Trigger when 10% of panel is visible
-        rootMargin: '50px 0px -50px 0px' // Start animation slightly before panel is fully visible
+        threshold: 0.5, // Trigger when 50% of panel is visible
+        rootMargin: '0px 0px -200px 0px' // Delay trigger until well into viewport
       }
     )
     
-    // Observe the first panel
-    const firstPanel = document.getElementById('tools-overlay')
-    if (firstPanel) {
-      observer.observe(firstPanel)
-      console.log("👀 Observing first map panel for entrance animation")
+    // Observe the California map panel instead - trigger when map becomes sticky
+    const mapPanel = document.getElementById('california-map')
+    if (mapPanel) {
+      observer.observe(mapPanel)
+      console.log("👀 Observing California map panel for entrance animation")
     }
     
     return () => {
@@ -88,9 +88,9 @@ export default function MapOverlayPanels() {
         }}
         rightContent={
           <motion.div
-            initial={{ marginTop: 0, opacity: 0 }} // Start at normal position, hidden
+            initial={{ marginTop: "100vh", opacity: 0 }} // Start one viewport below, hidden
             animate={{ 
-              marginTop: isFirstPanelVisible ? "-100vh" : 0, // Slide up to overlay map
+              marginTop: isFirstPanelVisible ? 0 : "100vh", // Slide up to natural position over sticky map
               opacity: isFirstPanelVisible ? 1 : 0 
             }}
             transition={{ 

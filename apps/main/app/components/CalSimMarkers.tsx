@@ -135,6 +135,10 @@ export function convertGeoJSONToNetwork(
 
   geoJsonResponse.features.forEach((feature) => {
     if (feature.properties.type === "node") {
+      // Skip features without geometry (logical connections)
+      if (!feature.geometry || !feature.geometry.coordinates) {
+        return
+      }
       const coords = feature.geometry.coordinates as [number, number]
       nodes.push({
         id: feature.properties.id,
@@ -153,6 +157,10 @@ export function convertGeoJSONToNetwork(
         has_geometry: feature.properties.has_geometry,
       })
     } else if (feature.properties.type === "arc") {
+      // Skip arcs without geometry (logical connections)
+      if (!feature.geometry || !feature.geometry.coordinates) {
+        return
+      }
       arcs.push({
         id: feature.properties.id,
         short_code: feature.properties.short_code,
@@ -593,7 +601,7 @@ export default function CalSimMarkers() {
     }
   }, [isCalSimVisible, loadCalSimNodes])
 
-  // NEW: Systematic network traversal using 3-pass approach
+  // SYSTEMATIC network traversal using 3-pass approach
   const handleNodeClick = useCallback(
     async (node: NetworkNode) => {
       if (selectedNode?.id === node.id) {
@@ -613,7 +621,7 @@ export default function CalSimMarkers() {
       )
 
       try {
-        // NEW: Use the systematic 3-pass API (no depth limits)
+        // Use the systematic 3-pass API (no depth limits)
         const systematicUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}/systematic?direction=both`
         console.log(`📡 Fetching SYSTEMATIC 3-pass API: ${systematicUrl}`)
 
