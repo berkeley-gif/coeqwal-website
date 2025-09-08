@@ -198,18 +198,28 @@ export default function CalSimMarkers() {
   const [isLoadingNetwork, setIsLoadingNetwork] = useState(false)
   const [currentZoom, setCurrentZoom] = useState<number>(0)
 
-  // Helper functions for node styling
-  const getNodeSize = (category: string) => {
+
+  // Helper functions for node styling with connectivity emphasis
+  const getNodeSize = (category: string, isConnected = false, isSelected = false) => {
+    let baseSize = 8
     switch (category) {
       case "reservoir":
-        return 16
+        baseSize = 16
+        break
       case "pump_station":
-        return 12
+        baseSize = 12
+        break
       case "water_treatment":
-        return 10
+        baseSize = 10
+        break
       default:
-        return 8
+        baseSize = 8
     }
+    
+    // Emphasize connected and selected nodes for water journey visibility
+    if (isSelected) return baseSize * 1.5 // Much larger for selected
+    if (isConnected) return baseSize * 1.3 // Larger for connected (part of water flow)
+    return baseSize * 0.8 // Smaller for disconnected to emphasize the flow
   }
 
   const getNodeColor = (
@@ -217,23 +227,23 @@ export default function CalSimMarkers() {
     isConnected = false,
     isSelected = false,
   ) => {
-    if (isSelected) return "#ff6b35"
-    if (isConnected) return "#ffeb3b"
+    if (isSelected) return "#ff6b35" // Bright orange for selected
+    if (isConnected) return "#00e676" // Bright green for connected (water flow path)
 
-    // Color by element type
+    // Bright colors for element types (not muted)
     const baseColor = (() => {
       const category = getMapCategory(node.element_type)
       switch (category) {
         case "reservoir":
-          return "#2563eb"
+          return "#2563eb" // Bright blue for reservoirs
         case "pump_station":
-          return "#dc2626"
+          return "#dc2626" // Bright red for pump stations
         case "water_treatment":
-          return "#059669"
+          return "#059669" // Bright green for treatment
         case "channel":
-          return "#8b5cf6"
+          return "#8b5cf6" // Bright purple for channels
         default:
-          return "#6b7280"
+          return "#6b7280" // Gray for others
       }
     })()
 
@@ -546,14 +556,23 @@ export default function CalSimMarkers() {
         setNetworkArcs(networkData.arcs)
         setConnectedNodeIds(allConnectedNodes)
 
-        console.log(`🌊 Enhanced Network for ${node.name}:`)
-        console.log(`  🔼 Upstream nodes: ${upstreamNodes.size}`)
-        console.log(`  🔽 Downstream nodes: ${downstreamNodes.size}`)
-        console.log(`  🔗 Total connected nodes: ${allConnectedNodes.size}`)
-        console.log(`  ➡️ Connected arcs: ${networkData.arcs.length}`)
+        console.log(`🌊 WATER JOURNEY from ${node.name}:`)
+        console.log(`  💧 Water sources (upstream): ${upstreamNodes.size}`)
+        console.log(`  🚰 Water delivery points (downstream): ${downstreamNodes.size}`)
+        console.log(`  🔗 Total water network: ${allConnectedNodes.size} facilities`)
+        console.log(`  🛤️ Water pathways: ${networkData.arcs.length} connections`)
         console.log(
-          `  🎯 Strategies used: ${enhancedData.metadata.strategies_used?.join(", ") || "N/A"}`,
+          `  📋 Connection strategies: ${enhancedData.metadata.strategies_used?.join(", ") || "N/A"}`,
         )
+        
+        // Add water flow story context
+        if (node.element_type === 'STR') {
+          console.log(`💧 This reservoir can deliver water to ${downstreamNodes.size} facilities`)
+        } else if (node.element_type === 'PS') {
+          console.log(`⚡ This pump station moves water between ${allConnectedNodes.size} facilities`)
+        } else if (['WTP', 'WWTP'].includes(node.element_type)) {
+          console.log(`🧹 This treatment facility processes water from ${upstreamNodes.size} sources`)
+        }
       } catch (error) {
         console.error(
           "Failed to load enhanced network for node:",
@@ -611,8 +630,8 @@ export default function CalSimMarkers() {
             type="line"
             paint={{
               "line-color": "#ffffff",
-              "line-width": 20,
-              "line-opacity": 1,
+              "line-width": 25, // Thicker white outline for better visibility
+              "line-opacity": 0.9,
             }}
             layout={{
               "line-cap": "round",
@@ -627,20 +646,20 @@ export default function CalSimMarkers() {
               "line-color": [
                 "case",
                 ["==", ["get", "strategy"], "enhanced"],
-                "#00ff00", // Green for enhanced connections
+                "#00bcd4", // Bright cyan - enhanced water pathways
                 ["==", ["get", "strategy"], "proximity"],
-                "#ffff00", // Yellow for proximity connections
+                "#ff9800", // Orange - regional water distribution
                 ["==", ["get", "strategy"], "river_sequence"],
-                "#00ffff", // Cyan for river sequence
-                "#ff0000", // Red for direct connections
+                "#2196f3", // Blue - natural river flows
+                "#e91e63", // Pink - direct water connections
               ],
               "line-width": [
                 "case",
                 ["<=", ["get", "depth"], 2],
-                18, // Thicker for closer connections
+                20, // Much thicker for closer connections - water highways
                 ["<=", ["get", "depth"], 4],
-                15,
-                12, // Thinner for distant connections
+                16, // Thick for medium connections
+                12, // Still visible for distant connections
               ],
               "line-opacity": [
                 "case",
@@ -681,8 +700,16 @@ export default function CalSimMarkers() {
                 handleNodeClick(node)
               }}
               sx={{
-                width: getNodeSize(getMapCategory(node.element_type)),
-                height: getNodeSize(getMapCategory(node.element_type)),
+                width: getNodeSize(
+                  getMapCategory(node.element_type),
+                  connectedNodeIds.has(node.id),
+                  selectedNode?.id === node.id
+                ),
+                height: getNodeSize(
+                  getMapCategory(node.element_type),
+                  connectedNodeIds.has(node.id),
+                  selectedNode?.id === node.id
+                ),
                 borderRadius: "50%",
                 backgroundColor: getNodeColor(
                   node,
@@ -721,17 +748,17 @@ export default function CalSimMarkers() {
         return marker
       })}
 
-      {/* Custom enhanced popup for detailed information */}
+      {/* Enhanced tooltip with native Mapbox viewport handling */}
       {hoveredNode && (
         <Popup
           longitude={hoveredNode.coordinates[0]}
           latitude={hoveredNode.coordinates[1]}
           closeButton={false}
           closeOnClick={false}
-          anchor="bottom"
-          offset={[0, -10]}
+          maxWidth="280px"
+          className="calsim-tooltip"
         >
-          <Box sx={{ padding: 1, minWidth: 200 }}>
+          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 280 }}>
             <Typography variant="h6" sx={{ mb: 0.5, fontSize: "0.9rem" }}>
               {hoveredNode.display_name}
             </Typography>
@@ -760,7 +787,7 @@ export default function CalSimMarkers() {
                   variant="body2"
                   sx={{ fontSize: "0.8rem", color: "warning.main" }}
                 >
-                  <strong>Part of active network</strong>
+                  <strong>Part of active water network</strong>
                 </Typography>
               )}
             {hoveredNode.strategy && (
@@ -790,10 +817,10 @@ export default function CalSimMarkers() {
               {isLoadingNetwork && selectedNode?.id === hoveredNode.id
                 ? "Loading enhanced network connections..."
                 : selectedNode?.id === hoveredNode.id
-                  ? `Showing ${connectedNodeIds.size} connected nodes, ${networkArcs.length} arcs (enhanced network)`
+                  ? `Showing ${connectedNodeIds.size} connected nodes, ${networkArcs.length} arcs (water network)`
                   : connectedNodeIds.has(hoveredNode.id)
-                    ? "Connected to selected network"
-                    : "Click for enhanced network analysis"}
+                    ? "Connected to water network"
+                    : "Click to trace water journey"}
             </Typography>
           </Box>
         </Popup>
