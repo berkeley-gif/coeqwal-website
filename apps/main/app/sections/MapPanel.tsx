@@ -18,9 +18,9 @@ interface MapPanelProps {
 
 export default function MapPanel({
   mapboxToken,
-  initialLongitude = -121.4944, // California Central Valley
-  initialLatitude = 37.0902,
-  initialZoom = 6,
+  initialLongitude = -120.954, // California Central Valley
+  initialLatitude = 38.073,
+  initialZoom = 6.3,
   mapStyle = "mapbox://styles/digijill/cmeum8zy2001b01s65c4d1l30",
 }: MapPanelProps) {
   return (

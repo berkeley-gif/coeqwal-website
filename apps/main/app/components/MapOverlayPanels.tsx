@@ -41,7 +41,7 @@ export default function MapOverlayPanels() {
         contentColumn="right"
         contentAlignment={{
           justifyContent: "flex-start",
-          alignItems: "flex-start",
+          alignItems: "flex-end",
         }}
         sx={{
           minHeight: "100vh",
@@ -53,7 +53,7 @@ export default function MapOverlayPanels() {
           <Box
             sx={{
               ...overlayPanelStyle,
-              marginRight: { xs: 2, md: 8 },
+              mr: { xs: 8, md: 16 },
             }}
           >
             <Typography
@@ -121,7 +121,7 @@ export default function MapOverlayPanels() {
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#2563eb",
+                        backgroundColor: "#2563eb", // Bright blue - matches active reservoirs
                         border: "1px solid white",
                       }}
                     />
@@ -135,7 +135,7 @@ export default function MapOverlayPanels() {
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#dc2626",
+                        backgroundColor: "#dc2626", // Bright red - matches active pump stations
                         border: "1px solid white",
                       }}
                     />
@@ -149,7 +149,7 @@ export default function MapOverlayPanels() {
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#059669",
+                        backgroundColor: "#059669", // Bright green - matches active treatment
                         border: "1px solid white",
                       }}
                     />
@@ -163,12 +163,59 @@ export default function MapOverlayPanels() {
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#6b7280",
+                        backgroundColor: "#8b5cf6", // Bright purple for channels
                         border: "1px solid white",
                       }}
                     />
                     <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-                      Other Nodes
+                      Channels & Other
+                    </Typography>
+                  </Box>
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 1, mb: 1, fontSize: "0.7rem", fontWeight: 500 }}
+                >
+                  Water Flow Paths:
+                </Typography>
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 20,
+                        height: 3,
+                        backgroundColor: "#00bcd4",
+                        borderRadius: 1,
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
+                      Enhanced Pathways
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 20,
+                        height: 3,
+                        backgroundColor: "#2196f3",
+                        borderRadius: 1,
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
+                      Natural River Flows
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{
+                        width: 20,
+                        height: 3,
+                        backgroundColor: "#ff9800",
+                        borderRadius: 1,
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
+                      Regional Distribution
                     </Typography>
                   </Box>
                 </Box>
@@ -176,7 +223,7 @@ export default function MapOverlayPanels() {
                   variant="body2"
                   sx={{ mt: 1, fontSize: "0.7rem", fontStyle: "italic" }}
                 >
-                  Hover for details • Click to see network
+                  Click any facility to trace water journey
                 </Typography>
               </Box>
             )}
@@ -194,7 +241,7 @@ export default function MapOverlayPanels() {
         contentColumn="right"
         contentAlignment={{
           justifyContent: "flex-start",
-          alignItems: "flex-start",
+          alignItems: "flex-end", // Align panels to the right edge
         }}
         sx={{
           minHeight: "100vh",
@@ -206,7 +253,7 @@ export default function MapOverlayPanels() {
           <Box
             sx={{
               ...overlayPanelStyle,
-              marginRight: { xs: 2, md: 8 }, // Push panel further right to avoid markers
+              mr: { xs: 8, md: 16 },
             }}
           >
             <Typography
@@ -231,19 +278,19 @@ export default function MapOverlayPanels() {
         contentColumn="right"
         contentAlignment={{
           justifyContent: "flex-start",
-          alignItems: "flex-start",
+          alignItems: "flex-end",
         }}
         sx={{
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
           paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Here also -- I'll work on this
+          paddingRight: 0, // Here also -- Todo: work on this
         }}
         rightContent={
           <Box
             sx={{
               ...overlayPanelStyle,
-              marginRight: { xs: 2, md: 8 }, // Push panel right, for now
+              mr: { xs: 8, md: 16 }, // Moved further right to show more map // Push panel right, for now
             }}
           >
             <Typography
