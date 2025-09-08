@@ -4,6 +4,7 @@ import { TwoColumnPanel } from "@repo/ui"
 import { Box, Typography, useTheme, Theme, Button } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useCalSimToggle } from "./CalSimContext"
+import Image from "next/image"
 
 export default function MapOverlayPanels() {
   const theme = useTheme() // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -262,10 +263,32 @@ export default function MapOverlayPanels() {
               variant="body1"
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
+                mb: (theme) => theme.spacing(2),
               }}
             >
               {t("scenariosPanel.part1")}
             </Typography>
+            <Box
+              sx={{
+                width: "100%",
+                borderRadius: (theme) => theme.borderRadius.card,
+                overflow: "hidden",
+                boxShadow: (theme) => theme.shadows[2],
+              }}
+            >
+              <Image
+                src="/images/dorota-trzaska-1tAtO-9HYNM-unsplash.jpg"
+                alt="California water landscape"
+                width={400}
+                height={250}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            </Box>
           </Box>
         }
       />

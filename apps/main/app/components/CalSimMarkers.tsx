@@ -1,9 +1,10 @@
 "use client"
 
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useState, useEffect, useRef } from "react"
 import { useMap, Marker, Popup, Source, Layer } from "@repo/map"
 import { Box, Typography } from "@repo/ui/mui"
 import { useCalSimToggle } from "./CalSimContext"
+import { LocationOnIcon } from "@repo/ui/mui"
 
 // ==============================================
 // TYPESCRIPT INTERFACES
@@ -37,7 +38,8 @@ export interface NetworkGeoJSONFeature {
 
     // Traversal-specific properties
     depth?: number
-    strategy?: "direct" | "proximity" | "river_sequence" | "simple_direct_connectivity"
+    strategy?: "geopackage_direct" | "xml_with_geometry" | "xml_without_geometry" | "systematic_three_pass"
+    has_geometry?: boolean
   }
 }
 
@@ -53,6 +55,10 @@ export interface NetworkGeoJSONResponse {
     direction?: string
     max_depth?: number
     approach?: string
+    pass1_geopackage?: number
+    pass2_xml_with_geometry?: number
+    pass3_xml_without_geometry?: number
+    no_depth_limit?: boolean
   }
 }
 
@@ -73,6 +79,7 @@ export interface NetworkNode {
   // Traversal properties
   depth?: number
   strategy?: string
+  has_geometry?: boolean
 }
 
 export interface NetworkArc {
@@ -97,6 +104,7 @@ export interface NetworkArc {
   // Traversal properties
   depth?: number
   strategy?: string
+  has_geometry?: boolean
 }
 
 const API_BASE_URL =
@@ -142,6 +150,7 @@ export function convertGeoJSONToNetwork(
           feature.properties.display_name || feature.properties.short_code,
         depth: feature.properties.depth,
         strategy: feature.properties.strategy,
+        has_geometry: feature.properties.has_geometry,
       })
     } else if (feature.properties.type === "arc") {
       arcs.push({
@@ -160,6 +169,7 @@ export function convertGeoJSONToNetwork(
           feature.properties.display_name || feature.properties.short_code,
         depth: feature.properties.depth,
         strategy: feature.properties.strategy,
+        has_geometry: feature.properties.has_geometry,
       })
     }
   })
@@ -197,6 +207,77 @@ export default function CalSimMarkers() {
   )
   const [isLoadingNetwork, setIsLoadingNetwork] = useState(false)
   const [currentZoom, setCurrentZoom] = useState<number>(0)
+  const [networkMetadata, setNetworkMetadata] = useState<any>(null)
+  const [showReservoirMarkers, setShowReservoirMarkers] = useState(false)
+  
+  // Intersection observer to detect when second panel is in view
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      console.log("❌ Window undefined - server side")
+      return
+    }
+    
+    console.log("🔍 Setting up intersection observer...")
+    
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        console.log(`📊 Intersection observer triggered with ${entries.length} entries`)
+        entries.forEach((entry) => {
+          const panelId = entry.target.id
+          const isIntersecting = entry.isIntersecting
+          const intersectionRatio = entry.intersectionRatio
+          
+          console.log(`📍 Panel ${panelId}: intersecting=${isIntersecting}, ratio=${intersectionRatio.toFixed(2)}`)
+          
+          if ((panelId === 'scenarios-overlay' || panelId === 'scenarios-overlay2') && isIntersecting) {
+            setShowReservoirMarkers(true)
+            console.log(`🎯 Panel ${panelId} in view - showing reservoir markers!`)
+            
+            // Load nodes if not already loaded (for reservoir markers)
+            if (allNodes.length === 0) {
+              console.log("📡 Loading nodes for reservoir markers...")
+              loadCalSimNodes()
+            }
+          }
+        })
+      },
+      { 
+        threshold: [0, 0.1, 0.3, 0.5], // Multiple thresholds for debugging
+        rootMargin: '0px 0px -50px 0px' // Trigger a bit before fully in view
+      }
+    )
+    
+    // Observe both scenario panels
+    const panel1 = document.getElementById('scenarios-overlay')
+    const panel2 = document.getElementById('scenarios-overlay2')
+    
+    if (panel1 && observerRef.current) {
+      observerRef.current.observe(panel1)
+      console.log("📍 Observing scenarios-overlay")
+    }
+    
+    if (panel2 && observerRef.current) {
+      observerRef.current.observe(panel2)
+      console.log("📍 Observing scenarios-overlay2 (with image)")
+    }
+    
+    if (!panel1 && !panel2) {
+      console.warn("⚠️ Could not find scenario panels to observe")
+      // For testing, show markers after 3 seconds
+      setTimeout(() => {
+        setShowReservoirMarkers(true)
+        console.log("🎯 Test mode - showing reservoir markers after 3s")
+      }, 3000)
+    }
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+    }
+  }, [])
 
   // Helper functions for node styling with connectivity emphasis
   const getNodeSize = (category: string, isConnected = false, isSelected = false) => {
@@ -227,7 +308,19 @@ export default function CalSimMarkers() {
     isSelected = false,
   ) => {
     if (isSelected) return "#ff6b35" // Bright orange for selected
-    if (isConnected) return "#00e676" // Bright green for connected (water flow path)
+    if (isConnected) {
+      // Color by strategy/pass
+      switch (node.strategy) {
+        case "geopackage_direct":
+          return "#00e676" // Bright green for geopackage (most reliable)
+        case "xml_with_geometry":
+          return "#00bcd4" // Cyan for XML with geometry
+        case "xml_without_geometry":
+          return "#9c27b0" // Purple for logical XML connections
+        default:
+          return "#00e676" // Default green
+      }
+    }
 
     // Bright colors for element types (not muted)
     const baseColor = (() => {
@@ -493,16 +586,18 @@ export default function CalSimMarkers() {
       setNetworkArcs([])
       setConnectedNodeIds(new Set())
       setIsLoadingNetwork(false)
+      setNetworkMetadata(null)
     }
   }, [isCalSimVisible, loadCalSimNodes])
 
-  // UPDATED: Simple network traversal with MAXIMAL connections
+  // NEW: Systematic network traversal using 3-pass approach
   const handleNodeClick = useCallback(
     async (node: NetworkNode) => {
       if (selectedNode?.id === node.id) {
         setSelectedNode(null)
         setNetworkArcs([])
         setConnectedNodeIds(new Set())
+        setNetworkMetadata(null)
         console.log("Toggled off network for node:", node.name)
         return
       }
@@ -511,26 +606,26 @@ export default function CalSimMarkers() {
       setIsLoadingNetwork(true)
 
       console.log(
-        `🔍 Loading MAXIMAL network connections for ${node.short_code} (${node.name})`,
+        `🔍 Loading SYSTEMATIC 3-pass network for ${node.short_code} (${node.name})`,
       )
 
       try {
-        // UPDATED: Use the new simple API with MAXIMAL depth for maximum connections
-        const simpleUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}/simple?direction=both&max_depth=15`
-        console.log(`📡 Fetching SIMPLE API with MAXIMAL connections: ${simpleUrl}`)
+        // NEW: Use the systematic 3-pass API (no depth limits)
+        const systematicUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}/systematic?direction=both`
+        console.log(`📡 Fetching SYSTEMATIC 3-pass API: ${systematicUrl}`)
 
-        const simpleResponse = await fetch(simpleUrl)
+        const systematicResponse = await fetch(systematicUrl)
 
-        if (!simpleResponse.ok) {
-          console.warn(`Simple API failed: ${simpleResponse.status}, trying fallback...`)
+        if (!systematicResponse.ok) {
+          console.warn(`Systematic API failed: ${systematicResponse.status}, trying fallback...`)
           
-          // FALLBACK: Try the basic traversal API if simple fails
-          const fallbackUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}?direction=both&max_depth=15`
-          console.log(`📡 Fallback to basic API: ${fallbackUrl}`)
+          // FALLBACK: Try the simple API if systematic fails
+          const fallbackUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}/simple?direction=both&max_depth=15`
+          console.log(`📡 Fallback to simple API: ${fallbackUrl}`)
           
           const fallbackResponse = await fetch(fallbackUrl)
           if (!fallbackResponse.ok) {
-            throw new Error(`Both APIs failed: Simple ${simpleResponse.status}, Fallback ${fallbackResponse.status}`)
+            throw new Error(`Both APIs failed: Systematic ${systematicResponse.status}, Simple ${fallbackResponse.status}`)
           }
           
           const fallbackData = await fallbackResponse.json()
@@ -541,7 +636,7 @@ export default function CalSimMarkers() {
           const networkData = convertGeoJSONToNetwork(fallbackData)
           console.log(`✅ Fallback network loaded: ${networkData.nodes.length} nodes, ${networkData.arcs.length} arcs`)
           
-          // Process fallback data same as simple data
+          // Process fallback data same as systematic data
           const { upstreamMap, downstreamMap } = buildNetworkMaps(networkData.arcs)
           const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
           const downstreamNodes = findDownstreamNodes(node.id, downstreamMap)
@@ -549,6 +644,7 @@ export default function CalSimMarkers() {
 
           setNetworkArcs(networkData.arcs)
           setConnectedNodeIds(allConnectedNodes)
+          setNetworkMetadata(fallbackData.metadata)
           
           console.log(`🌊 FALLBACK WATER JOURNEY from ${node.name}:`)
           console.log(`  💧 Water sources (upstream): ${upstreamNodes.size}`)
@@ -559,18 +655,26 @@ export default function CalSimMarkers() {
           return
         }
 
-        const simpleData = await simpleResponse.json()
+        const systematicData = await systematicResponse.json()
 
-        if (!isGeoJSONResponse(simpleData)) {
+        if (!isGeoJSONResponse(systematicData)) {
           throw new Error("Invalid GeoJSON response format")
         }
 
-        const networkData = convertGeoJSONToNetwork(simpleData)
+        const networkData = convertGeoJSONToNetwork(systematicData)
 
         console.log(
-          `✅ SIMPLE API network loaded: ${networkData.nodes.length} nodes, ${networkData.arcs.length} arcs`,
+          `✅ SYSTEMATIC 3-pass network loaded: ${networkData.nodes.length} nodes, ${networkData.arcs.length} arcs`,
         )
-        console.log(`📊 Approach: ${simpleData.metadata.approach || 'simple_direct_connectivity'}`)
+        console.log(`📊 Approach: ${systematicData.metadata.approach || 'systematic_three_pass'}`)
+        
+        // Log the 3-pass breakdown
+        if (systematicData.metadata) {
+          console.log(`📊 Pass 1 (Geopackage): ${systematicData.metadata.pass1_geopackage || 0} connections`)
+          console.log(`📊 Pass 2 (XML + Geometry): ${systematicData.metadata.pass2_xml_with_geometry || 0} connections`)
+          console.log(`📊 Pass 3 (XML Logical): ${systematicData.metadata.pass3_xml_without_geometry || 0} connections`)
+          console.log(`📊 No depth limit: ${systematicData.metadata.no_depth_limit ? 'Yes' : 'No'}`)
+        }
 
         // Build network maps for traversal using all nodes (not just visible ones)
         const { upstreamMap, downstreamMap } = buildNetworkMaps(networkData.arcs)
@@ -585,14 +689,14 @@ export default function CalSimMarkers() {
 
         setNetworkArcs(networkData.arcs)
         setConnectedNodeIds(allConnectedNodes)
+        setNetworkMetadata(systematicData.metadata)
 
-        console.log(`🌊 MAXIMAL WATER JOURNEY from ${node.name}:`)
+        console.log(`🌊 SYSTEMATIC WATER JOURNEY from ${node.name}:`)
         console.log(`  💧 Water sources (upstream): ${upstreamNodes.size}`)
         console.log(`  🚰 Water delivery points (downstream): ${downstreamNodes.size}`)
         console.log(`  🔗 Total water network: ${allConnectedNodes.size} facilities`)
         console.log(`  🛤️ Water pathways: ${networkData.arcs.length} connections`)
-        console.log(`  🎯 Max depth used: ${simpleData.metadata.max_depth || 15} hops`)
-        console.log(`  📋 API approach: ${simpleData.metadata.approach || 'simple_direct_connectivity'}`)
+        console.log(`  🎯 Approach: 3-pass systematic (no depth limits)`)
         
         // Add water flow story context
         if (node.element_type === 'STR') {
@@ -605,23 +709,25 @@ export default function CalSimMarkers() {
         
         // Performance analysis
         if (allConnectedNodes.size < 5) {
-          console.warn(`⚠️ Low connectivity (${allConnectedNodes.size} nodes). Consider:`)
-          console.warn(`   - Checking if ${node.short_code} has from_node/to_node data`)
-          console.warn(`   - Increasing max_depth beyond ${simpleData.metadata.max_depth || 15}`)
-          console.warn(`   - Verifying network_topology connectivity data`)
-        } else if (allConnectedNodes.size > 100) {
-          console.log(`🎉 Excellent connectivity! Found ${allConnectedNodes.size} connected facilities`)
+          console.warn(`⚠️ Low connectivity (${allConnectedNodes.size} nodes). This suggests:`)
+          console.warn(`   - Pass 1 (geopackage): ${systematicData.metadata?.pass1_geopackage || 0} connections`)
+          console.warn(`   - Pass 2 (XML + geo): ${systematicData.metadata?.pass2_xml_with_geometry || 0} connections`)  
+          console.warn(`   - Pass 3 (XML logical): ${systematicData.metadata?.pass3_xml_without_geometry || 0} connections`)
+          console.warn(`   - Element ${node.short_code} may have limited connectivity in all data sources`)
+        } else if (allConnectedNodes.size > 50) {
+          console.log(`🎉 Excellent systematic connectivity! Found ${allConnectedNodes.size} connected facilities`)
         }
         
       } catch (error) {
         console.error(
-          "Failed to load network for node:",
+          "Failed to load systematic network for node:",
           node.name,
           error,
         )
         setSelectedNode(null)
         setNetworkArcs([])
         setConnectedNodeIds(new Set())
+        setNetworkMetadata(null)
       } finally {
         setIsLoadingNetwork(false)
       }
@@ -629,9 +735,52 @@ export default function CalSimMarkers() {
     [selectedNode, buildNetworkMaps, findUpstreamNodes, findDownstreamNodes],
   )
 
-  // Don't render anything if CalSim is not visible
-  if (!isCalSimVisible || !visibleNodes.length) {
+  // Don't render markers if CalSim is not visible, but allow reservoir markers when panel is in view
+  if (!isCalSimVisible && !showReservoirMarkers) {
     return null
+  }
+  
+  // If CalSim is off but reservoir markers should show, render only reservoir markers
+  if (!isCalSimVisible && showReservoirMarkers) {
+    console.log("🎯 CalSim off, but showing reservoir markers due to scroll")
+    const reservoirs = allNodes.filter(node => node.element_type === 'STR')
+    console.log(`🏞️ Rendering ${reservoirs.length} reservoir markers (CalSim off mode)`)
+    
+    return (
+      <>
+        {reservoirs.map((reservoir) => (
+          <Marker
+            key={`reservoir-scroll-${reservoir.id}`}
+            longitude={reservoir.coordinates[0]}
+            latitude={reservoir.coordinates[1]}
+          >
+            <Box
+              sx={{
+                position: 'relative',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                console.log("Scroll reservoir marker clicked:", reservoir.name)
+                handleNodeClick(reservoir)
+              }}
+            >
+              <LocationOnIcon
+                sx={{
+                  fontSize: '2rem',
+                  color: '#CD5C5C', // Red from theme
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                  '&:hover': {
+                    transform: 'scale(1.1)',
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              />
+            </Box>
+          </Marker>
+        ))}
+      </>
+    )
   }
 
   const renderStart = performance.now()
@@ -641,7 +790,7 @@ export default function CalSimMarkers() {
 
   const jsx = (
     <>
-      {/* Simple network arcs visualization with clean styling */}
+      {/* Systematic network arcs visualization with strategy-based styling */}
       {networkArcs.length > 0 && (
         <Source
           id="calsim-network-arcs"
@@ -658,7 +807,8 @@ export default function CalSimMarkers() {
                 from_node: arc.from_node,
                 to_node: arc.to_node,
                 depth: arc.depth || 1,
-                strategy: arc.strategy || "direct",
+                strategy: arc.strategy || "systematic",
+                has_geometry: arc.has_geometry || true,
               },
               geometry: arc.geometry,
             })),
@@ -670,7 +820,7 @@ export default function CalSimMarkers() {
             type="line"
             paint={{
               "line-color": "#ffffff",
-              "line-width": 8,
+              "line-width": 10,
               "line-opacity": 0.9,
             }}
             layout={{
@@ -678,40 +828,40 @@ export default function CalSimMarkers() {
               "line-join": "round",
             }}
           />
-          {/* Main arc layer with depth-based styling */}
+          {/* Main arc layer with strategy-based styling */}
           <Layer
             id="calsim-network-arcs-layer"
             type="line"
             paint={{
               "line-color": [
                 "case",
-                ["<=", ["get", "depth"], 2],
-                "#00bcd4", // Bright cyan for close connections
-                ["<=", ["get", "depth"], 5],
-                "#2196f3", // Blue for medium connections
-                ["<=", ["get", "depth"], 10],
-                "#9c27b0", // Purple for distant connections
-                "#ff5722", // Orange for very distant connections
+                ["==", ["get", "strategy"], "geopackage_direct"],
+                "#00e676", // Bright green for geopackage (most reliable)
+                ["==", ["get", "strategy"], "xml_with_geometry"], 
+                "#00bcd4", // Cyan for XML with geometry
+                ["==", ["get", "strategy"], "xml_without_geometry"],
+                "#9c27b0", // Purple for logical XML connections
+                "#2196f3", // Blue for other connections
               ],
               "line-width": [
                 "case",
-                ["<=", ["get", "depth"], 2],
-                6, // Thicker for closer connections
-                ["<=", ["get", "depth"], 5],
-                4, // Medium for medium connections
-                ["<=", ["get", "depth"], 10],
-                3, // Thinner for distant connections
-                2, // Thinnest for very distant connections
+                ["==", ["get", "strategy"], "geopackage_direct"],
+                8, // Thickest for geopackage (most reliable)
+                ["==", ["get", "strategy"], "xml_with_geometry"],
+                6, // Medium for XML with geometry
+                ["==", ["get", "strategy"], "xml_without_geometry"],
+                4, // Thinner for logical connections
+                5, // Default thickness
               ],
               "line-opacity": [
                 "case",
-                ["<=", ["get", "depth"], 2],
-                1.0, // Full opacity for close connections
-                ["<=", ["get", "depth"], 5],
-                0.8,
-                ["<=", ["get", "depth"], 10],
-                0.6,
-                0.4, // More transparent for very distant connections
+                ["==", ["get", "strategy"], "geopackage_direct"],
+                1.0, // Full opacity for most reliable
+                ["==", ["get", "strategy"], "xml_with_geometry"],
+                0.9,
+                ["==", ["get", "strategy"], "xml_without_geometry"],
+                0.7, // More transparent for logical
+                0.8, // Default opacity
               ],
             }}
             layout={{
@@ -721,6 +871,53 @@ export default function CalSimMarkers() {
           />
         </Source>
       )}
+
+      {/* Special reservoir markers when second panel is in view */}
+      {showReservoirMarkers && (() => {
+        console.log(`🔍 showReservoirMarkers=${showReservoirMarkers}, allNodes.length=${allNodes.length}`)
+        
+        const reservoirs = allNodes.filter(node => node.element_type === 'STR')
+        console.log(`🏞️ Found ${reservoirs.length} reservoirs out of ${allNodes.length} total nodes`)
+        
+        if (reservoirs.length === 0) {
+          console.warn("⚠️ No reservoirs (STR) found in allNodes")
+          console.log("📊 Sample node element_types:", allNodes.slice(0, 5).map(n => n.element_type))
+        } else {
+          console.log("✅ Sample reservoirs:", reservoirs.slice(0, 3).map(r => `${r.short_code} (${r.name})`))
+        }
+        
+        return reservoirs.map((reservoir) => (
+          <Marker
+            key={`reservoir-${reservoir.id}`}
+            longitude={reservoir.coordinates[0]}
+            latitude={reservoir.coordinates[1]}
+          >
+            <Box
+              sx={{
+                position: 'relative',
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                console.log("Reservoir marker clicked:", reservoir.name)
+                handleNodeClick(reservoir)
+              }}
+            >
+              <LocationOnIcon
+                sx={{
+                  fontSize: '2rem',
+                  color: '#CD5C5C', // Red from theme.palette.categories.tier4
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                  '&:hover': {
+                    transform: 'scale(1.1)',
+                    filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              />
+            </Box>
+          </Marker>
+        ))
+      })()}
 
       {/* CalSim node markers */}
       {visibleNodes.map((node) => {
@@ -784,17 +981,17 @@ export default function CalSimMarkers() {
         )
       })}
 
-      {/* Enhanced tooltip */}
+      {/* Enhanced tooltip with systematic metadata */}
       {hoveredNode && (
         <Popup
           longitude={hoveredNode.coordinates[0]}
           latitude={hoveredNode.coordinates[1]}
           closeButton={false}
           closeOnClick={false}
-          maxWidth="320px"
+          maxWidth="350px"
           className="calsim-tooltip"
         >
-          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 320 }}>
+          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 350 }}>
             <Typography variant="h6" sx={{ mb: 0.5, fontSize: "0.9rem" }}>
               {hoveredNode.display_name}
             </Typography>
@@ -823,7 +1020,7 @@ export default function CalSimMarkers() {
                   variant="body2"
                   sx={{ fontSize: "0.8rem", color: "warning.main" }}
                 >
-                  <strong>Part of active water network</strong>
+                  <strong>Part of systematic water network</strong>
                 </Typography>
               )}
             {hoveredNode.strategy && (
@@ -831,7 +1028,12 @@ export default function CalSimMarkers() {
                 variant="body2"
                 sx={{ fontSize: "0.75rem", color: "success.main" }}
               >
-                <strong>Connection:</strong> {hoveredNode.strategy}
+                <strong>Connection:</strong> {
+                  hoveredNode.strategy === 'geopackage_direct' ? 'Geopackage (Pass 1)' :
+                  hoveredNode.strategy === 'xml_with_geometry' ? 'XML + Geometry (Pass 2)' :
+                  hoveredNode.strategy === 'xml_without_geometry' ? 'XML Logical (Pass 3)' :
+                  hoveredNode.strategy
+                }
               </Typography>
             )}
             <Typography
@@ -851,13 +1053,24 @@ export default function CalSimMarkers() {
               }}
             >
               {isLoadingNetwork && selectedNode?.id === hoveredNode.id
-                ? "Loading maximal network connections (15 hops)..."
+                ? "Loading systematic 3-pass network (no depth limit)..."
                 : selectedNode?.id === hoveredNode.id
-                  ? `Showing ${connectedNodeIds.size} connected nodes, ${networkArcs.length} arcs (maximal network)`
+                  ? `Showing ${connectedNodeIds.size} connected nodes, ${networkArcs.length} arcs (systematic 3-pass network)`
                   : connectedNodeIds.has(hoveredNode.id)
-                    ? "Connected to water network"
-                    : "Click to trace maximal water journey (15 hops)"}
+                    ? "Connected to systematic water network"
+                    : "Click to trace systematic water journey (3-pass approach)"}
             </Typography>
+            {/* Show network metadata for selected node */}
+            {selectedNode?.id === hoveredNode.id && networkMetadata && (
+              <Typography
+                variant="body2"
+                sx={{ fontSize: "0.7rem", mt: 0.5, color: "info.main" }}
+              >
+                <strong>Network Stats:</strong> Pass1: {networkMetadata.pass1_geopackage || 0}, 
+                Pass2: {networkMetadata.pass2_xml_with_geometry || 0}, 
+                Pass3: {networkMetadata.pass3_xml_without_geometry || 0}
+              </Typography>
+            )}
           </Box>
         </Popup>
       )}
