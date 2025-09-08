@@ -217,6 +217,7 @@ export default function CalSimMarkers() {
   const [currentZoom, setCurrentZoom] = useState<number>(0)
   const [networkMetadata, setNetworkMetadata] = useState<any>(null)
   const [showReservoirMarkers, setShowReservoirMarkers] = useState(false)
+  const [majorReservoirIds, setMajorReservoirIds] = useState<Set<string>>(new Set())
   
   // Intersection observer to detect when second panel is in view
   const observerRef = useRef<IntersectionObserver | null>(null)
@@ -333,12 +334,12 @@ export default function CalSimMarkers() {
       }
     }
 
-    // Bright colors for element types (not muted)
+    // Bright colors for element types (not muted) - reservoirs now blue
     const baseColor = (() => {
       const category = getMapCategory(node.element_type)
       switch (category) {
         case "reservoir":
-          return "#2563eb" // Bright blue for reservoirs
+          return "#2563eb" // Keep bright blue for reservoirs (consistent with legend)
         case "pump_station":
           return "#dc2626" // Bright red for pump stations
         case "water_treatment":
@@ -350,8 +351,53 @@ export default function CalSimMarkers() {
       }
     })()
 
-    return baseColor
+  return baseColor
+}
+
+// Fetch the top 9 major reservoirs by capacity
+const fetchMajorReservoirs = useCallback(async () => {
+  try {
+    console.log("🏞️ Fetching top 9 major reservoirs by capacity...")
+    const response = await fetch(
+      `${API_BASE_URL}/api/network/elements/search?element_type=STR&sort_by=capacity_taf&sort_order=desc&limit=9`
+    )
+    
+    if (!response.ok) {
+      throw new Error(`Major reservoirs API failed: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    console.log("✅ Major reservoirs response:", data)
+    console.log("📊 Response structure:", Object.keys(data))
+    
+    // Extract short_codes from the GeoJSON FeatureCollection response
+    const reservoirIds = new Set<string>()
+    
+    if (data.type === 'FeatureCollection' && Array.isArray(data.features)) {
+      console.log(`📊 Processing ${data.features.length} GeoJSON features`)
+      data.features.forEach((feature: any) => {
+        console.log("🔍 Processing feature:", feature)
+        if (feature.properties) {
+          const shortCode = feature.properties.short_code || feature.properties.shortCode || feature.properties.code || feature.properties.id
+          if (shortCode) {
+            reservoirIds.add(shortCode)
+            console.log(`🏞️ Major reservoir: ${shortCode} - ${feature.properties.display_name || feature.properties.name || 'Unknown'}`)
+          }
+        }
+      })
+    } else {
+      console.warn("⚠️ Expected GeoJSON FeatureCollection, got:", data)
+    }
+    
+    setMajorReservoirIds(reservoirIds)
+    console.log(`✅ Loaded ${reservoirIds.size} major reservoir IDs`)
+    return reservoirIds
+    
+  } catch (error) {
+    console.error("❌ Failed to fetch major reservoirs:", error)
+    return new Set<string>()
   }
+}, [])
 
   // Network traversal functions for new API
   const buildNetworkMaps = useCallback(
@@ -383,7 +429,7 @@ export default function CalSimMarkers() {
 
       return { upstreamMap, downstreamMap }
     },
-    [allNodes],
+    [allNodes, majorReservoirIds],
   )
 
   // Find all upstream nodes from a given node
@@ -429,19 +475,32 @@ export default function CalSimMarkers() {
   // Filter nodes based on zoom level for performance
   const filterNodesByZoom = useCallback(
     (nodes: NetworkNode[], zoom: number): NetworkNode[] => {
+      let filteredNodes = nodes.filter((node) => {
+        if (node.element_type === 'STR') {
+          // Filter to major reservoirs using API-provided IDs
+          const isMajorReservoir = majorReservoirIds.has(node.short_code)
+          if (isMajorReservoir) {
+            console.log(`✅ Major reservoir MATCH: ${node.short_code} - "${node.display_name}"`)
+          }
+          return isMajorReservoir
+        }
+        // Keep all non-reservoir nodes
+        return true
+      })
+
       if (zoom >= 8) {
-        // High zoom: show all nodes
-        return nodes
+        // High zoom: show all filtered nodes
+        return filteredNodes
       } else if (zoom >= 6) {
         // Medium zoom: show important nodes only
-        return nodes.filter(
+        return filteredNodes.filter(
           (node) =>
             ["STR", "PS", "WTP", "WWTP"].includes(node.element_type) ||
             node.connectivity_status === "connected",
         )
       } else {
-        // Low zoom: show only major infrastructure
-        return nodes.filter((node) => ["STR", "PS"].includes(node.element_type))
+        // Low zoom: show only major infrastructure (including filtered reservoirs)
+        return filteredNodes.filter((node) => ["STR", "PS"].includes(node.element_type))
       }
     },
     [],
@@ -530,6 +589,11 @@ export default function CalSimMarkers() {
       // Store all nodes and filter for current zoom
       const stateStart = performance.now()
       setAllNodes(validNodes)
+      
+      // Log reservoir information
+      const reservoirs = validNodes.filter(node => node.element_type === 'STR')
+      console.log(`🏞️ Found ${reservoirs.length} total reservoirs in data`)
+      
       const filteredNodes = filterNodesByZoom(validNodes, zoom)
       setVisibleNodes(filteredNodes)
 
@@ -587,7 +651,10 @@ export default function CalSimMarkers() {
   // Load CalSim nodes when toggle is enabled
   useEffect(() => {
     if (isCalSimVisible) {
-      loadCalSimNodes()
+      // First fetch major reservoirs, then load nodes
+      fetchMajorReservoirs().then(() => {
+        loadCalSimNodes()
+      })
     } else {
       // Clean up all CalSim-related state
       setAllNodes([])
@@ -598,8 +665,9 @@ export default function CalSimMarkers() {
       setConnectedNodeIds(new Set())
       setIsLoadingNetwork(false)
       setNetworkMetadata(null)
+      setMajorReservoirIds(new Set())
     }
-  }, [isCalSimVisible, loadCalSimNodes])
+  }, [isCalSimVisible, loadCalSimNodes, fetchMajorReservoirs])
 
   // SYSTEMATIC network traversal using 3-pass approach
   const handleNodeClick = useCallback(
@@ -751,11 +819,16 @@ export default function CalSimMarkers() {
     return null
   }
   
-  // If CalSim is off but reservoir markers should show, render only reservoir markers
+  // If CalSim is off but reservoir markers should show, render only major reservoir markers
   if (!isCalSimVisible && showReservoirMarkers) {
     console.log("🎯 CalSim off, but showing reservoir markers due to scroll")
-    const reservoirs = allNodes.filter(node => node.element_type === 'STR')
-    console.log(`🏞️ Rendering ${reservoirs.length} reservoir markers (CalSim off mode)`)
+    
+    const reservoirs = allNodes.filter(node => {
+      if (node.element_type !== 'STR') return false
+      return majorReservoirIds.has(node.short_code)
+    })
+    
+    console.log(`🏞️ Rendering ${reservoirs.length} major reservoir markers (CalSim off mode)`)
     
     return (
       <>
@@ -887,14 +960,18 @@ export default function CalSimMarkers() {
       {showReservoirMarkers && (() => {
         console.log(`🔍 showReservoirMarkers=${showReservoirMarkers}, allNodes.length=${allNodes.length}`)
         
-        const reservoirs = allNodes.filter(node => node.element_type === 'STR')
-        console.log(`🏞️ Found ${reservoirs.length} reservoirs out of ${allNodes.length} total nodes`)
+        const reservoirs = allNodes.filter(node => {
+          if (node.element_type !== 'STR') return false
+          return majorReservoirIds.has(node.short_code)
+        })
+        
+        console.log(`🏞️ Found ${reservoirs.length} major reservoirs out of ${allNodes.length} total nodes`)
         
         if (reservoirs.length === 0) {
-          console.warn("⚠️ No reservoirs (STR) found in allNodes")
+          console.warn("⚠️ No major reservoirs found in allNodes")
           console.log("📊 Sample node element_types:", allNodes.slice(0, 5).map(n => n.element_type))
         } else {
-          console.log("✅ Sample reservoirs:", reservoirs.slice(0, 3).map(r => `${r.short_code} (${r.name})`))
+          console.log("✅ Major reservoirs:", reservoirs.map(r => `${r.short_code} (${r.name})`))
         }
         
         return reservoirs.map((reservoir) => (
@@ -932,6 +1009,8 @@ export default function CalSimMarkers() {
 
       {/* CalSim node markers */}
       {visibleNodes.map((node) => {
+        const isReservoir = node.element_type === 'STR'
+        
         return (
           <Marker
             key={node.id}
@@ -943,51 +1022,97 @@ export default function CalSimMarkers() {
               handleNodeClick(node)
             }}
           >
-            <Box
-              onMouseEnter={() => setHoveredNode(node)}
-              onMouseLeave={() => setHoveredNode(null)}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleNodeClick(node)
-              }}
-              sx={{
-                width: getNodeSize(
-                  getMapCategory(node.element_type),
-                  connectedNodeIds.has(node.id),
-                  selectedNode?.id === node.id
-                ),
-                height: getNodeSize(
-                  getMapCategory(node.element_type),
-                  connectedNodeIds.has(node.id),
-                  selectedNode?.id === node.id
-                ),
-                borderRadius: "50%",
-                backgroundColor: getNodeColor(
-                  node,
-                  connectedNodeIds.has(node.id),
-                  selectedNode?.id === node.id,
-                ),
-                border:
-                  selectedNode?.id === node.id
-                    ? "3px solid #ff6b35"
-                    : connectedNodeIds.has(node.id)
-                      ? "3px solid #ffeb3b"
-                      : isLoadingNetwork && selectedNode?.id === node.id
-                        ? "3px solid #ffb366"
-                        : "2px solid white",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                pointerEvents: "auto",
-                zIndex: 9999,
-                position: "relative",
-                opacity:
-                  isLoadingNetwork && selectedNode?.id === node.id ? 0.7 : 1,
-                "&:hover": {
-                  transform: "scale(1.2)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                },
-              }}
-            />
+            {isReservoir ? (
+              // Reservoirs use LocationOnIcon
+              <Box
+                onMouseEnter={() => setHoveredNode(node)}
+                onMouseLeave={() => setHoveredNode(null)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNodeClick(node)
+                }}
+                sx={{
+                  cursor: "pointer",
+                  position: "relative",
+                  opacity: isLoadingNetwork && selectedNode?.id === node.id ? 0.7 : 1,
+                }}
+              >
+                <LocationOnIcon
+                  sx={{
+                    fontSize: getNodeSize(
+                      getMapCategory(node.element_type),
+                      connectedNodeIds.has(node.id),
+                      selectedNode?.id === node.id
+                    ) * 1.5, // Slightly larger than circle markers
+                    color: getNodeColor(
+                      node,
+                      connectedNodeIds.has(node.id),
+                      selectedNode?.id === node.id,
+                    ),
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    '&:hover': {
+                      transform: 'scale(1.2)',
+                      filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+                    },
+                    transition: 'all 0.2s ease',
+                    // Add border effect for selected/connected states
+                    ...(selectedNode?.id === node.id && {
+                      filter: 'drop-shadow(0 0 0 3px #ff6b35) drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    }),
+                    ...(connectedNodeIds.has(node.id) && selectedNode?.id !== node.id && {
+                      filter: 'drop-shadow(0 0 0 2px #ffeb3b) drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    }),
+                  }}
+                />
+              </Box>
+            ) : (
+              // Other nodes use circle markers
+              <Box
+                onMouseEnter={() => setHoveredNode(node)}
+                onMouseLeave={() => setHoveredNode(null)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNodeClick(node)
+                }}
+                sx={{
+                  width: getNodeSize(
+                    getMapCategory(node.element_type),
+                    connectedNodeIds.has(node.id),
+                    selectedNode?.id === node.id
+                  ),
+                  height: getNodeSize(
+                    getMapCategory(node.element_type),
+                    connectedNodeIds.has(node.id),
+                    selectedNode?.id === node.id
+                  ),
+                  borderRadius: "50%",
+                  backgroundColor: getNodeColor(
+                    node,
+                    connectedNodeIds.has(node.id),
+                    selectedNode?.id === node.id,
+                  ),
+                  border:
+                    selectedNode?.id === node.id
+                      ? "3px solid #ff6b35"
+                      : connectedNodeIds.has(node.id)
+                        ? "3px solid #ffeb3b"
+                        : isLoadingNetwork && selectedNode?.id === node.id
+                          ? "3px solid #ffb366"
+                          : "2px solid white",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  pointerEvents: "auto",
+                  zIndex: 9999,
+                  position: "relative",
+                  opacity:
+                    isLoadingNetwork && selectedNode?.id === node.id ? 0.7 : 1,
+                  "&:hover": {
+                    transform: "scale(1.2)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                  },
+                }}
+              />
+            )}
           </Marker>
         )
       })}

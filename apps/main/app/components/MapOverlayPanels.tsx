@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { TwoColumnPanel } from "@repo/ui"
-import { Box, Typography, useTheme, Theme, Button } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Theme, Button, LocationOnIcon } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useCalSimToggle } from "./CalSimContext"
 import { motion } from "@repo/motion"
@@ -175,14 +175,10 @@ export default function MapOverlayPanels() {
                   columnGap: (theme) => theme.spacing(2)
                 }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
-                    <Box
+                    <LocationOnIcon
                       sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.primary.main,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
-                        boxShadow: (theme) => theme.shadows[1],
+                        fontSize: '1rem',
+                        color: '#2563eb', // Blue color matching CalSim reservoirs
                         flexShrink: 0,
                       }}
                     />
