@@ -1,8 +1,9 @@
 "use client"
 
-import { Map } from "@repo/map"
+import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import CalSimMarkers from "./CalSimMarkers"
+import MapGeoSearch from "./MapGeoSearch"
 
 interface CaliforniaMapPanelProps {
   id?: string
@@ -38,14 +39,29 @@ export default function CaliforniaMapPanel({
         }}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
-        touchZoom={true}
+        touchZoom={false}
         touchRotate={false}
         dragPan={true}
+        doubleClickZoom={true}
         interactive={true}
       >
+        {/* Map Controls in lower left */}
+        <NavigationControl position="bottom-left" />
+        <GeolocateControl position="bottom-left" />
+        
         {/* CalSim markers rendered as direct children of Map for proper interaction */}
         <CalSimMarkers />
       </Map>
+      
+      {/* Geolocation search box positioned to avoid control overlap */}
+      <MapGeoSearch 
+        position="bottom-left"
+        mapboxToken={token}
+        placeholder="Search California location..."
+        onLocationSearch={(query) => {
+          console.log("Location search completed:", query)
+        }}
+      />
     </Box>
   )
 }

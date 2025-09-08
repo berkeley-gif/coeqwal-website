@@ -105,123 +105,125 @@ export default function MapOverlayPanels() {
 
             {/* CalSim Legend */}
             {isCalSimVisible && (
-              <Box sx={{ mt: 1 }}>
+              <Box sx={{ mt: (theme) => theme.spacing(1) }}>
                 <Typography
-                  variant="body2"
-                  sx={{ mb: 1, fontSize: "0.8rem", fontWeight: 500 }}
+                  variant="h6"
+                  sx={{ mb: (theme) => theme.spacing(1.5) }}
                 >
-                  CalSim Node Types:
+                  Legend
                 </Typography>
-                <Box
-                  sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box sx={{ 
+                  display: "grid", 
+                  gridTemplateColumns: "1fr 1fr", 
+                  gap: (theme) => theme.spacing(1),
+                  columnGap: (theme) => theme.spacing(2)
+                }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#2563eb", // Bright blue - matches active reservoirs
-                        border: "1px solid white",
+                        backgroundColor: (theme) => theme.palette.blue.main,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-                      Reservoirs & Storage
-                    </Typography>
+                    <Typography variant="body2">Reservoir</Typography>
                   </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#dc2626", // Bright red - matches active pump stations
-                        border: "1px solid white",
+                        backgroundColor: (theme) => theme.palette.accent.gold,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-                      Pump Stations
-                    </Typography>
+                    <Typography variant="body2">Basins</Typography>
                   </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#059669", // Bright green - matches active treatment
-                        border: "1px solid white",
+                        backgroundColor: (theme) => theme.palette.primary.main,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-                      Water Treatment
-                    </Typography>
+                    <Typography variant="body2">Channel</Typography>
                   </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: "#8b5cf6", // Bright purple for channels
-                        border: "1px solid white",
+                        backgroundColor: (theme) => theme.palette.brand.water,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2" sx={{ fontSize: "0.75rem" }}>
-                      Channels & Other
-                    </Typography>
+                    <Typography variant="body2">Delta</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: (theme) => theme.palette.nature.forest,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography variant="body2">Delivery</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: (theme) => theme.palette.blue.dark,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography variant="body2">Sacramento River</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
+                    <Box
+                      sx={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: "50%",
+                        backgroundColor: (theme) => theme.palette.blue.darkest,
+                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        boxShadow: (theme) => theme.shadows[1],
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Typography variant="body2">San Joaquin River</Typography>
                   </Box>
                 </Box>
                 <Typography
                   variant="body2"
-                  sx={{ mt: 1, mb: 1, fontSize: "0.7rem", fontWeight: 500 }}
-                >
-                  Water Flow Paths:
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 20,
-                        height: 3,
-                        backgroundColor: "#00bcd4",
-                        borderRadius: 1,
-                      }}
-                    />
-                    <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
-                      Enhanced Pathways
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 20,
-                        height: 3,
-                        backgroundColor: "#2196f3",
-                        borderRadius: 1,
-                      }}
-                    />
-                    <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
-                      Natural River Flows
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 20,
-                        height: 3,
-                        backgroundColor: "#ff9800",
-                        borderRadius: 1,
-                      }}
-                    />
-                    <Typography variant="body2" sx={{ fontSize: "0.7rem" }}>
-                      Regional Distribution
-                    </Typography>
-                  </Box>
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{ mt: 1, fontSize: "0.7rem", fontStyle: "italic" }}
+                  sx={{ 
+                    mt: (theme) => theme.spacing(1.5), 
+                    fontStyle: "italic", 
+                    color: "text.secondary" 
+                  }}
                 >
                   Click any facility to trace water journey
                 </Typography>
