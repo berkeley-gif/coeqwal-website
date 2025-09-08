@@ -1,7 +1,16 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import {
+  Box,
+  FormControl,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  Typography,
+} from "@repo/ui/mui"
 import { VerticalImageSlider } from "./helpers/ImageSlider"
+import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
+import { useRef, useState } from "react"
 
 function Opener() {
   return (
@@ -13,6 +22,8 @@ function Opener() {
       tabIndex={-1}
       role="region"
     >
+      <SourceAnnouncer />
+      <SelectionPanel />
       <VerticalImageSlider
         topSrc="/images/oroville2021-drought.png"
         bottomSrc="/images/oroville2023-floods.png"
@@ -27,7 +38,7 @@ function Opener() {
           {"How Climate Change Affects California's Water"}
         </Typography>
         <Typography variant="h3" gutterBottom>
-          {"Adapting to a Hotter, More Variable Climate Future"}
+          {"Adapting to a Hotter, More Uncertain Climate Future"}
         </Typography>
       </Box>
       <Box
@@ -36,46 +47,44 @@ function Opener() {
         sx={{ top: "60%" }}
       >
         <Typography variant="body1">
-          {"California’s water management systems are under strain"}
-        </Typography>
-        <Typography variant="body1">
           {
-            "from the needs to provide safe and affordable drinking water, grow food,"
+            "California’s water system is under pressure to meet multiple demands."
           }
         </Typography>
         <Typography variant="body1">
-          {"and protect ecosystem and cultural water uses."}
+          {
+            "People need clean drinking water. Farms need water to grow food. Fish and wildlife need water to survive."
+          }
         </Typography>
       </Box>
       <Box
         className="paragraph text-center-holder"
         component="article"
-        sx={{ top: "70%" }}
+        sx={{ top: "67%" }}
       >
-        <Typography variant="body1" style={{ fontWeight: "bold" }}>
+        <Typography variant="body1">
           {"Climate change is making matters worse."}
         </Typography>
       </Box>
       <Box
         className="paragraph text-center-holder"
         component="article"
-        sx={{ top: "80%" }}
+        sx={{ top: "74%" }}
       >
         <Typography variant="body1">
-          {"Climate change is bringing warmer temperatures, "}
+          {"Warmer temperatures, less predictable rain and snow, "}
         </Typography>
         <Typography variant="body1">
-          {"more volatile precipitation patterns, and rising sea levels"}
-        </Typography>
-        <Typography variant="body1">
-          {"that stress our water infrastructure and our living environment."}
+          {
+            "and higher sea levels are stressing both our water infrastructure and living environment."
+          }
         </Typography>
       </Box>
       <Box
         className="paragraph text-center-holder"
         component="article"
         aria-labelledby="opener-throughline"
-        sx={{ top: "90%" }}
+        sx={{ top: "85%" }}
       >
         <Typography
           id="throughline-heading"
@@ -88,6 +97,112 @@ function Opener() {
         </Typography>
       </Box>
     </Box>
+  )
+}
+
+function SourceAnnouncer() {
+  const { scrollY } = useScroll()
+  const lastYRef = useRef(0)
+  const [isHidden, setIsHidden] = useState(false)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
+
+  return (
+    <motion.div
+      animate={isHidden ? "hidden" : "visible"}
+      variants={{
+        hidden: {
+          top: "10px",
+        },
+        visible: {
+          top: "74.5px",
+        },
+      }}
+      transition={{ duration: 0.3 }}
+      className="panel"
+      style={{
+        position: "absolute",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        zIndex: 3,
+      }}
+    >
+      <Box>
+        <p>Enterprise Bridge at Oroville Dam</p>
+        <p>Top: 2021. Bottom: 2023</p>
+        <p>Photo by Justin Sullivan</p>
+      </Box>
+    </motion.div>
+  )
+}
+
+function SelectionPanel() {
+  const { scrollY } = useScroll()
+  const lastYRef = useRef(0)
+  const [isHidden, setIsHidden] = useState(false)
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const difference = latest - lastYRef.current
+    if (Math.abs(difference) > 10) {
+      setIsHidden(difference > 0)
+    }
+    lastYRef.current = latest
+  })
+
+  return (
+    <motion.div
+      animate={isHidden ? "hidden" : "visible"}
+      variants={{
+        hidden: {
+          top: "10px",
+        },
+        visible: {
+          top: "74.5px",
+        },
+      }}
+      transition={{ duration: 0.3 }}
+      className="selection-panel"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+        zIndex: 3,
+      }}
+    >
+      <Box>
+        <FormControl>
+          Opener (not implemented yet)
+          <RadioGroup
+            row
+            name="row-radio-buttons-group"
+            defaultValue={"oroville"}
+          >
+            <FormControlLabel
+              value="oroville"
+              control={<Radio size="small" />}
+              label="Oroville"
+            />
+            <FormControlLabel
+              value="temperature"
+              control={<Radio size="small" />}
+              label="Temperature"
+            />
+            <FormControlLabel
+              value="sealevel"
+              control={<Radio size="small" />}
+              label="Sea Level"
+            />
+          </RadioGroup>
+        </FormControl>
+      </Box>
+    </motion.div>
   )
 }
 

@@ -1,0 +1,60 @@
+.axis{
+    stroke: #F2F0EF;
+    stroke-width: 2px;
+}
+
+.y-axis-ticks text,
+.y-axis text,
+.x-axis-ticks text,
+.x-axis text{
+    fill: #F2F0EF;
+}
+
+#hydroclimate-line-title{
+    font-size: 16px;
+    fill: #F1B143;
+}
+
+.climate-points{
+    fill: #F1B143;
+    font-size: 18px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.axis-label{
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.x-axis-ticks {
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-size: 14px;
+}
+
+.y-axis-ticks {
+    text-anchor: end;
+    dominant-baseline: middle;
+    font-size: 12px;
+}
+
+#y-axis-label,
+#x-axis-label{
+    text-anchor: middle;
+    font-size: 14px;
+}
+
+@media (max-width: 600px) {
+    .x-axis-ticks {
+        font-size: 1rem;
+    }
+
+    .y-axis-ticks {
+        font-size: 10px;
+    }
+
+    #y-axis-label{
+        font-size: 12px;
+    }
+}

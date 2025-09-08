@@ -27,6 +27,19 @@ html{
     pointer-events: none;
 }
 
+
+#loader{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
 .container{
     position: relative;
     display: flex;
@@ -39,14 +52,21 @@ html{
     margin-bottom: 20vh;
 }
 
-.container-center{
+.container-center, .container-center-horizontal{
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     width: 100%;
     text-align: center;
     pointer-events: auto;
+}
+
+.container-center{
+    flex-direction: column;
+}
+
+.container-center-horizontal{
+    flex-direction: row;
 }
 
 .filled-container{
@@ -117,6 +137,15 @@ html{
 
 }
 
+.panel{
+    padding: 10px;
+    left: 30px;
+    z-index:2;
+    font-size: 0.9rem;
+    background-color: var(--dark-color-transparent);
+    text-align: left;
+}
+
 .MuiFormControlLabel-label {
   color: #f2f0ef !important;
 }
@@ -135,4 +164,24 @@ html{
 
 .highlight-text{
     color: var(--highlight-color);
+}
+
+.top-paragraph-container, .bottom-paragraph-container{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.top-paragraph-container{
+    top: 0;
+    justify-content: flex-end;
+}
+
+.bottom-paragraph-container{
+    bottom: 0;
+    justify-content: flex-start;
 }
