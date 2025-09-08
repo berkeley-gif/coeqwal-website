@@ -604,7 +604,7 @@ export default function CalSimMarkers() {
                 },
                 geometry: arc.geometry,
               })),
-            } as any
+            } as { type: "FeatureCollection"; features: unknown[] }
           }
         >
           {/* White outline */}
