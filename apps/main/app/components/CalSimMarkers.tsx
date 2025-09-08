@@ -66,7 +66,7 @@ export interface NetworkNode {
   id: number
   short_code: string
   name: string
-  coordinates: [number, number]
+    coordinates: [number, number]
 
   // Core properties
   element_type: string
@@ -350,7 +350,7 @@ export default function CalSimMarkers() {
           return "#6b7280" // Gray for others
       }
     })()
-
+    
   return baseColor
 }
 
@@ -413,21 +413,21 @@ const fetchMajorReservoirs = useCallback(async () => {
         const toNodeId = allNodes.find((n) => n.short_code === arc.to_node)?.id
 
         if (fromNodeId && toNodeId) {
-          // Build upstream map
+      // Build upstream map
           if (!upstreamMap.has(toNodeId)) {
             upstreamMap.set(toNodeId, [])
-          }
+      }
           upstreamMap.get(toNodeId)!.push(fromNodeId)
-
-          // Build downstream map
+      
+      // Build downstream map
           if (!downstreamMap.has(fromNodeId)) {
             downstreamMap.set(fromNodeId, [])
-          }
+      }
           downstreamMap.get(fromNodeId)!.push(toNodeId)
         }
-      })
-
-      return { upstreamMap, downstreamMap }
+    })
+    
+    return { upstreamMap, downstreamMap }
     },
     [allNodes, majorReservoirIds],
   )
@@ -439,15 +439,15 @@ const fetchMajorReservoirs = useCallback(async () => {
       upstreamMap: Map<number, number[]>,
       visited = new Set<number>(),
     ): Set<number> => {
-      if (visited.has(nodeId)) return visited
-      visited.add(nodeId)
-
-      const upstreamNodes = upstreamMap.get(nodeId) || []
+    if (visited.has(nodeId)) return visited
+    visited.add(nodeId)
+    
+    const upstreamNodes = upstreamMap.get(nodeId) || []
       upstreamNodes.forEach((upstreamNode) => {
-        findUpstreamNodes(upstreamNode, upstreamMap, visited)
-      })
-
-      return visited
+      findUpstreamNodes(upstreamNode, upstreamMap, visited)
+    })
+    
+    return visited
     },
     [],
   )
@@ -459,15 +459,15 @@ const fetchMajorReservoirs = useCallback(async () => {
       downstreamMap: Map<number, number[]>,
       visited = new Set<number>(),
     ): Set<number> => {
-      if (visited.has(nodeId)) return visited
-      visited.add(nodeId)
-
-      const downstreamNodes = downstreamMap.get(nodeId) || []
+    if (visited.has(nodeId)) return visited
+    visited.add(nodeId)
+    
+    const downstreamNodes = downstreamMap.get(nodeId) || []
       downstreamNodes.forEach((downstreamNode) => {
-        findDownstreamNodes(downstreamNode, downstreamMap, visited)
-      })
-
-      return visited
+      findDownstreamNodes(downstreamNode, downstreamMap, visited)
+    })
+    
+    return visited
     },
     [],
   )
@@ -475,6 +475,8 @@ const fetchMajorReservoirs = useCallback(async () => {
   // Filter nodes based on zoom level for performance
   const filterNodesByZoom = useCallback(
     (nodes: NetworkNode[], zoom: number): NetworkNode[] => {
+      console.log(`🔍 Filtering with ${majorReservoirIds.size} major reservoir IDs:`, Array.from(majorReservoirIds))
+      
       let filteredNodes = nodes.filter((node) => {
         if (node.element_type === 'STR') {
           // Filter to major reservoirs using API-provided IDs
@@ -487,6 +489,9 @@ const fetchMajorReservoirs = useCallback(async () => {
         // Keep all non-reservoir nodes
         return true
       })
+      
+      const reservoirCount = filteredNodes.filter(n => n.element_type === 'STR').length
+      console.log(`📊 After filtering: ${reservoirCount} reservoirs out of ${filteredNodes.length} total nodes`)
 
       if (zoom >= 8) {
         // High zoom: show all filtered nodes
@@ -653,7 +658,7 @@ const fetchMajorReservoirs = useCallback(async () => {
     if (isCalSimVisible) {
       // First fetch major reservoirs, then load nodes
       fetchMajorReservoirs().then(() => {
-        loadCalSimNodes()
+      loadCalSimNodes()
       })
     } else {
       // Clean up all CalSim-related state
@@ -672,18 +677,18 @@ const fetchMajorReservoirs = useCallback(async () => {
   // SYSTEMATIC network traversal using 3-pass approach
   const handleNodeClick = useCallback(
     async (node: NetworkNode) => {
-      if (selectedNode?.id === node.id) {
-        setSelectedNode(null)
-        setNetworkArcs([])
-        setConnectedNodeIds(new Set())
+    if (selectedNode?.id === node.id) {
+      setSelectedNode(null)
+      setNetworkArcs([])
+      setConnectedNodeIds(new Set())
         setNetworkMetadata(null)
-        console.log("Toggled off network for node:", node.name)
-        return
-      }
+      console.log("Toggled off network for node:", node.name)
+      return
+    }
 
-      setSelectedNode(node)
-      setIsLoadingNetwork(true)
-
+    setSelectedNode(node)
+    setIsLoadingNetwork(true)
+    
       console.log(
         `🔍 Loading SYSTEMATIC 3-pass network for ${node.short_code} (${node.name})`,
       )
@@ -717,12 +722,12 @@ const fetchMajorReservoirs = useCallback(async () => {
           
           // Process fallback data same as systematic data
           const { upstreamMap, downstreamMap } = buildNetworkMaps(networkData.arcs)
-          const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
-          const downstreamNodes = findDownstreamNodes(node.id, downstreamMap)
-          const allConnectedNodes = new Set([...upstreamNodes, ...downstreamNodes])
-
+      const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
+      const downstreamNodes = findDownstreamNodes(node.id, downstreamMap)
+      const allConnectedNodes = new Set([...upstreamNodes, ...downstreamNodes])
+      
           setNetworkArcs(networkData.arcs)
-          setConnectedNodeIds(allConnectedNodes)
+      setConnectedNodeIds(allConnectedNodes)
           setNetworkMetadata(fallbackData.metadata)
           
           console.log(`🌊 FALLBACK WATER JOURNEY from ${node.name}:`)
@@ -803,13 +808,13 @@ const fetchMajorReservoirs = useCallback(async () => {
           node.name,
           error,
         )
-        setSelectedNode(null)
-        setNetworkArcs([])
-        setConnectedNodeIds(new Set())
+      setSelectedNode(null)
+      setNetworkArcs([])
+      setConnectedNodeIds(new Set())
         setNetworkMetadata(null)
-      } finally {
-        setIsLoadingNetwork(false)
-      }
+    } finally {
+      setIsLoadingNetwork(false)
+    }
     },
     [selectedNode, buildNetworkMaps, findUpstreamNodes, findDownstreamNodes],
   )
@@ -818,7 +823,7 @@ const fetchMajorReservoirs = useCallback(async () => {
   if (!isCalSimVisible && !showReservoirMarkers) {
     return null
   }
-  
+
   // If CalSim is off but reservoir markers should show, render only major reservoir markers
   if (!isCalSimVisible && showReservoirMarkers) {
     console.log("🎯 CalSim off, but showing reservoir markers due to scroll")
@@ -829,9 +834,9 @@ const fetchMajorReservoirs = useCallback(async () => {
     })
     
     console.log(`🏞️ Rendering ${reservoirs.length} major reservoir markers (CalSim off mode)`)
-    
-    return (
-      <>
+
+  return (
+    <>
         {reservoirs.map((reservoir) => (
           <Marker
             key={`reservoir-scroll-${reservoir.id}`}
@@ -1012,16 +1017,16 @@ const fetchMajorReservoirs = useCallback(async () => {
         const isReservoir = node.element_type === 'STR'
         
         return (
-          <Marker
-            key={node.id}
+        <Marker
+          key={node.id}
             longitude={node.coordinates[0]}
             latitude={node.coordinates[1]}
-            onClick={(e) => {
-              e.originalEvent.stopPropagation()
-              console.log("Marker clicked:", node.name)
-              handleNodeClick(node)
-            }}
-          >
+          onClick={(e) => {
+            e.originalEvent.stopPropagation()
+            console.log("Marker clicked:", node.name)
+            handleNodeClick(node)
+          }}
+        >
             {isReservoir ? (
               // Reservoirs use LocationOnIcon
               <Box
@@ -1069,12 +1074,12 @@ const fetchMajorReservoirs = useCallback(async () => {
               // Other nodes use circle markers
               <Box
                 onMouseEnter={() => setHoveredNode(node)}
-                onMouseLeave={() => setHoveredNode(null)}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleNodeClick(node)
-                }}
-                sx={{
+            onMouseLeave={() => setHoveredNode(null)}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleNodeClick(node)
+            }}
+            sx={{
                   width: getNodeSize(
                     getMapCategory(node.element_type),
                     connectedNodeIds.has(node.id),
@@ -1085,8 +1090,8 @@ const fetchMajorReservoirs = useCallback(async () => {
                     connectedNodeIds.has(node.id),
                     selectedNode?.id === node.id
                   ),
-                  borderRadius: "50%",
-                  backgroundColor: getNodeColor(
+              borderRadius: "50%",
+              backgroundColor: getNodeColor(
                     node,
                     connectedNodeIds.has(node.id),
                     selectedNode?.id === node.id,
@@ -1094,24 +1099,24 @@ const fetchMajorReservoirs = useCallback(async () => {
                   border:
                     selectedNode?.id === node.id
                       ? "3px solid #ff6b35"
-                      : connectedNodeIds.has(node.id)
+                : connectedNodeIds.has(node.id)
                         ? "3px solid #ffeb3b"
-                        : isLoadingNetwork && selectedNode?.id === node.id
+                : isLoadingNetwork && selectedNode?.id === node.id
                           ? "3px solid #ffb366"
-                          : "2px solid white",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  pointerEvents: "auto",
-                  zIndex: 9999,
-                  position: "relative",
+                : "2px solid white",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              pointerEvents: "auto",
+              zIndex: 9999,
+              position: "relative",
                   opacity:
                     isLoadingNetwork && selectedNode?.id === node.id ? 0.7 : 1,
-                  "&:hover": {
-                    transform: "scale(1.2)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                  },
-                }}
-              />
+              "&:hover": {
+                transform: "scale(1.2)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+              },
+            }}
+          />
             )}
           </Marker>
         )
@@ -1119,28 +1124,28 @@ const fetchMajorReservoirs = useCallback(async () => {
 
       {/* Enhanced tooltip with systematic metadata */}
       {hoveredNode && (
-        <Popup
+            <Popup
           longitude={hoveredNode.coordinates[0]}
           latitude={hoveredNode.coordinates[1]}
-          closeButton={false}
-          closeOnClick={false}
+              closeButton={false}
+              closeOnClick={false}
           maxWidth="350px"
           className="calsim-tooltip"
-        >
-          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 350 }}>
-            <Typography variant="h6" sx={{ mb: 0.5, fontSize: "0.9rem" }}>
-              {hoveredNode.display_name}
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ mb: 0.25, fontSize: "0.75rem", color: "text.secondary" }}
             >
+          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 350 }}>
+                <Typography variant="h6" sx={{ mb: 0.5, fontSize: "0.9rem" }}>
+              {hoveredNode.display_name}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 0.25, fontSize: "0.75rem", color: "text.secondary" }}
+                >
               {hoveredNode.short_code} • ID: {hoveredNode.id}
-            </Typography>
+                </Typography>
             <Typography variant="body2" sx={{ mb: 0.25, fontSize: "0.8rem" }}>
               <strong>Type:</strong> {hoveredNode.element_type}
               {hoveredNode.subtype ? `-${hoveredNode.subtype}` : ""}
-            </Typography>
+                </Typography>
             <Typography variant="body2" sx={{ mb: 0.25, fontSize: "0.8rem" }}>
               <strong>Status:</strong> {hoveredNode.connectivity_status}
             </Typography>
@@ -1148,20 +1153,20 @@ const fetchMajorReservoirs = useCallback(async () => {
               <Typography variant="body2" sx={{ mb: 0.25, fontSize: "0.8rem" }}>
                 <strong>River:</strong> {hoveredNode.river_name}
                 {hoveredNode.river_mile && ` (Mile ${hoveredNode.river_mile})`}
-              </Typography>
-            )}
+                  </Typography>
+                )}
             {connectedNodeIds.has(hoveredNode.id) &&
               selectedNode?.id !== hoveredNode.id && (
-                <Typography
-                  variant="body2"
+                  <Typography
+                    variant="body2"
                   sx={{ fontSize: "0.8rem", color: "warning.main" }}
-                >
+                  >
                   <strong>Part of systematic water network</strong>
-                </Typography>
-              )}
+                  </Typography>
+                )}
             {hoveredNode.strategy && (
-              <Typography
-                variant="body2"
+                  <Typography
+                    variant="body2"
                 sx={{ fontSize: "0.75rem", color: "success.main" }}
               >
                 <strong>Connection:</strong> {
@@ -1170,24 +1175,24 @@ const fetchMajorReservoirs = useCallback(async () => {
                   hoveredNode.strategy === 'xml_without_geometry' ? 'XML Logical (Pass 3)' :
                   hoveredNode.strategy
                 }
-              </Typography>
-            )}
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: "0.75rem",
-                fontStyle: "italic",
-                mt: 0.5,
+                  </Typography>
+                )}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75rem",
+                    fontStyle: "italic",
+                    mt: 0.5,
                 color:
                   selectedNode?.id === hoveredNode.id
-                    ? "primary.main"
+                      ? "primary.main" 
                     : connectedNodeIds.has(hoveredNode.id)
                       ? "warning.main"
                       : isLoadingNetwork && selectedNode?.id === hoveredNode.id
-                        ? "warning.main"
-                        : "text.secondary",
-              }}
-            >
+                      ? "warning.main"
+                      : "text.secondary",
+                  }}
+                >
               {isLoadingNetwork && selectedNode?.id === hoveredNode.id
                 ? "Loading systematic 3-pass network (no depth limit)..."
                 : selectedNode?.id === hoveredNode.id
@@ -1195,7 +1200,7 @@ const fetchMajorReservoirs = useCallback(async () => {
                   : connectedNodeIds.has(hoveredNode.id)
                     ? "Connected to systematic water network"
                     : "Click to trace systematic water journey (3-pass approach)"}
-            </Typography>
+                </Typography>
             {/* Show network metadata for selected node */}
             {selectedNode?.id === hoveredNode.id && networkMetadata && (
               <Typography
@@ -1207,9 +1212,9 @@ const fetchMajorReservoirs = useCallback(async () => {
                 Pass3: {networkMetadata.pass3_xml_without_geometry || 0}
               </Typography>
             )}
-          </Box>
-        </Popup>
-      )}
+              </Box>
+            </Popup>
+          )}
     </>
   )
 
