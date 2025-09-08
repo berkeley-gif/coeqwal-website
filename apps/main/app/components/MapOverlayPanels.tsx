@@ -1,15 +1,50 @@
 "use client"
 
+import { useState, useEffect, useRef } from "react"
 import { TwoColumnPanel } from "@repo/ui"
 import { Box, Typography, useTheme, Theme, Button } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useCalSimToggle } from "./CalSimContext"
+import { motion } from "@repo/motion"
 import Image from "next/image"
 
 export default function MapOverlayPanels() {
   const theme = useTheme() // eslint-disable-line @typescript-eslint/no-unused-vars
   const { t } = useTranslation()
   const { isCalSimVisible, toggleCalSim } = useCalSimToggle()
+  
+  // Animation state for first panel entrance
+  const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+  const firstPanelRef = useRef<HTMLDivElement>(null)
+  
+  // Intersection observer for first panel entrance animation
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target.id === 'tools-overlay' && entry.isIntersecting) {
+            setIsFirstPanelVisible(true)
+            console.log("🎬 First map panel entered viewport - triggering slide-up animation")
+          }
+        })
+      },
+      { 
+        threshold: 0.1, // Trigger when 10% of panel is visible
+        rootMargin: '50px 0px -50px 0px' // Start animation slightly before panel is fully visible
+      }
+    )
+    
+    // Observe the first panel
+    const firstPanel = document.getElementById('tools-overlay')
+    if (firstPanel) {
+      observer.observe(firstPanel)
+      console.log("👀 Observing first map panel for entrance animation")
+    }
+    
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
 
   // Shared style for overlay panel content boxes, for now
   const overlayPanelStyle = {
@@ -30,6 +65,7 @@ export default function MapOverlayPanels() {
         position: "relative",
         zIndex: (theme) => theme.zIndex.content, // Above the sticky map
         pointerEvents: "none", // Allow markers to be clickable through overlays
+        marginTop: "-100vh", // Pull up to overlay the sticky map immediately
       }}
     >
       {/* Tools Panel - Right-side overlay */}
@@ -41,8 +77,8 @@ export default function MapOverlayPanels() {
         includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
-          justifyContent: "flex-start",
-          alignItems: "flex-end",
+          justifyContent: "center", // Center vertically in viewport
+          alignItems: "flex-end", // Keep right alignment
         }}
         sx={{
           minHeight: "100vh",
@@ -51,22 +87,41 @@ export default function MapOverlayPanels() {
           paddingRight: 0, // Ditto
         }}
         rightContent={
-          <Box
-            sx={{
-              ...overlayPanelStyle,
-              mr: { xs: 8, md: 16 },
+          <motion.div
+            initial={{ marginTop: 0, opacity: 0 }} // Start at normal position, hidden
+            animate={{ 
+              marginTop: isFirstPanelVisible ? "-100vh" : 0, // Slide up to overlay map
+              opacity: isFirstPanelVisible ? 1 : 0 
+            }}
+            transition={{ 
+              type: "spring",
+              stiffness: 60,  // Reduced stiffness for slower movement
+              damping: 25,    // Increased damping for smoother settling
+              duration: 1.2   // Longer duration for slower entrance
+            }}
+            style={{ 
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end" // Ensure right alignment is maintained
             }}
           >
-            <Typography
-              variant="h3"
-              component="h3"
+            <Box
+              ref={firstPanelRef}
               sx={{
-                mb: (theme) => theme.layout.spacing.md,
-                color: (theme) => theme.palette.blue.darkest,
+                ...overlayPanelStyle,
+                mr: { xs: 8, md: 16 },
               }}
             >
-              {t("toolsPanel.title")}
-            </Typography>
+              <Typography
+                variant="h3"
+                component="h3"
+                sx={{
+                  mb: (theme) => theme.layout.spacing.md,
+                  color: (theme) => theme.palette.blue.darkest,
+                }}
+              >
+                {t("toolsPanel.title")}
+              </Typography>
 
             <Typography variant="body1" fontWeight="bold">
               {t("toolsPanel.boldText")}
@@ -125,7 +180,7 @@ export default function MapOverlayPanels() {
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.blue.main,
+                        backgroundColor: (theme) => theme.palette.primary.main,
                         border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
                         boxShadow: (theme) => theme.shadows[1],
                         flexShrink: 0,
@@ -230,7 +285,8 @@ export default function MapOverlayPanels() {
                 </Typography>
               </Box>
             )}
-          </Box>
+            </Box>
+          </motion.div>
         }
       />
 
@@ -243,7 +299,7 @@ export default function MapOverlayPanels() {
         includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
-          justifyContent: "flex-start",
+          justifyContent: "center", // Center vertically in viewport
           alignItems: "flex-end", // Align panels to the right edge
         }}
         sx={{
@@ -302,8 +358,8 @@ export default function MapOverlayPanels() {
         includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
-          justifyContent: "flex-start",
-          alignItems: "flex-end",
+          justifyContent: "center", // Center vertically in viewport
+          alignItems: "flex-end", // Align panels to the right edge
         }}
         sx={{
           minHeight: "100vh",

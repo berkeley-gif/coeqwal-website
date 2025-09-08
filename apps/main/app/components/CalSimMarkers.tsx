@@ -231,21 +231,24 @@ export default function CalSimMarkers() {
           
           console.log(`📍 Panel ${panelId}: intersecting=${isIntersecting}, ratio=${intersectionRatio.toFixed(2)}`)
           
-          if ((panelId === 'scenarios-overlay' || panelId === 'scenarios-overlay2') && isIntersecting) {
+          if (panelId === 'scenarios-overlay2' && isIntersecting) {
             setShowReservoirMarkers(true)
-            console.log(`🎯 Panel ${panelId} in view - showing reservoir markers!`)
+            console.log(`🎯 Panel ${panelId} (with image) in view - showing reservoir markers!`)
             
             // Load nodes if not already loaded (for reservoir markers)
             if (allNodes.length === 0) {
               console.log("📡 Loading nodes for reservoir markers...")
               loadCalSimNodes()
             }
+          } else if (panelId === 'scenarios-overlay2' && !isIntersecting) {
+            setShowReservoirMarkers(false)
+            console.log("🎯 Panel scenarios-overlay2 out of view - hiding reservoir markers")
           }
         })
       },
       { 
-        threshold: [0, 0.1, 0.3, 0.5], // Multiple thresholds for debugging
-        rootMargin: '0px 0px -50px 0px' // Trigger a bit before fully in view
+        threshold: [0, 0.05, 0.1], // Lower thresholds for earlier triggering
+        rootMargin: '200px 0px 200px 0px' // Trigger even earlier - 200px before panel
       }
     )
     
