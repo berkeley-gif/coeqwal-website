@@ -37,7 +37,7 @@ export interface NetworkGeoJSONFeature {
 
     // Traversal-specific properties
     depth?: number
-    strategy?: "direct" | "proximity" | "river_sequence"
+    strategy?: "direct" | "proximity" | "river_sequence" | "simple_direct_connectivity"
   }
 }
 
@@ -52,7 +52,7 @@ export interface NetworkGeoJSONResponse {
     start_element?: string
     direction?: string
     max_depth?: number
-    strategies_used?: string[]
+    approach?: string
   }
 }
 
@@ -197,7 +197,6 @@ export default function CalSimMarkers() {
   )
   const [isLoadingNetwork, setIsLoadingNetwork] = useState(false)
   const [currentZoom, setCurrentZoom] = useState<number>(0)
-
 
   // Helper functions for node styling with connectivity emphasis
   const getNodeSize = (category: string, isConnected = false, isSelected = false) => {
@@ -369,7 +368,7 @@ export default function CalSimMarkers() {
     try {
       const fetchStart = performance.now()
       // Use ultra-fast nodes API
-      const fastUrl = `${API_BASE_URL}/api/network/nodes/fast?bbox=${bbox}&limit=1000`
+      const fastUrl = `${API_BASE_URL}/api/network/nodes/fast?bbox=${bbox}&limit=2000`
       console.log("⚡ Fetching ULTRA-FAST nodes API...")
       console.log("🎯 URL:", fastUrl)
 
@@ -497,7 +496,7 @@ export default function CalSimMarkers() {
     }
   }, [isCalSimVisible, loadCalSimNodes])
 
-  // Enhanced network traversal using only the new API
+  // UPDATED: Simple network traversal with MAXIMAL connections
   const handleNodeClick = useCallback(
     async (node: NetworkNode) => {
       if (selectedNode?.id === node.id) {
@@ -512,38 +511,69 @@ export default function CalSimMarkers() {
       setIsLoadingNetwork(true)
 
       console.log(
-        `🔍 Loading enhanced network for ${node.short_code} (${node.name})`,
+        `🔍 Loading MAXIMAL network connections for ${node.short_code} (${node.name})`,
       )
 
       try {
-        // Use the enhanced network traversal API directly
-        const enhancedUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}/enhanced?direction=both&max_depth=8`
-        console.log(`📡 Fetching: ${enhancedUrl}`)
+        // UPDATED: Use the new simple API with MAXIMAL depth for maximum connections
+        const simpleUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}/simple?direction=both&max_depth=15`
+        console.log(`📡 Fetching SIMPLE API with MAXIMAL connections: ${simpleUrl}`)
 
-        const enhancedResponse = await fetch(enhancedUrl)
+        const simpleResponse = await fetch(simpleUrl)
 
-        if (!enhancedResponse.ok) {
-          throw new Error(
-            `Enhanced network API failed: ${enhancedResponse.status}`,
-          )
+        if (!simpleResponse.ok) {
+          console.warn(`Simple API failed: ${simpleResponse.status}, trying fallback...`)
+          
+          // FALLBACK: Try the basic traversal API if simple fails
+          const fallbackUrl = `${API_BASE_URL}/api/network/traverse/${node.short_code}?direction=both&max_depth=15`
+          console.log(`📡 Fallback to basic API: ${fallbackUrl}`)
+          
+          const fallbackResponse = await fetch(fallbackUrl)
+          if (!fallbackResponse.ok) {
+            throw new Error(`Both APIs failed: Simple ${simpleResponse.status}, Fallback ${fallbackResponse.status}`)
+          }
+          
+          const fallbackData = await fallbackResponse.json()
+          if (!isGeoJSONResponse(fallbackData)) {
+            throw new Error("Invalid GeoJSON response format from fallback")
+          }
+          
+          const networkData = convertGeoJSONToNetwork(fallbackData)
+          console.log(`✅ Fallback network loaded: ${networkData.nodes.length} nodes, ${networkData.arcs.length} arcs`)
+          
+          // Process fallback data same as simple data
+          const { upstreamMap, downstreamMap } = buildNetworkMaps(networkData.arcs)
+          const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
+          const downstreamNodes = findDownstreamNodes(node.id, downstreamMap)
+          const allConnectedNodes = new Set([...upstreamNodes, ...downstreamNodes])
+
+          setNetworkArcs(networkData.arcs)
+          setConnectedNodeIds(allConnectedNodes)
+          
+          console.log(`🌊 FALLBACK WATER JOURNEY from ${node.name}:`)
+          console.log(`  💧 Water sources (upstream): ${upstreamNodes.size}`)
+          console.log(`  🚰 Water delivery (downstream): ${downstreamNodes.size}`)
+          console.log(`  🔗 Total network: ${allConnectedNodes.size} facilities`)
+          console.log(`  🛤️ Connections: ${networkData.arcs.length} pathways`)
+          
+          return
         }
 
-        const enhancedData = await enhancedResponse.json()
+        const simpleData = await simpleResponse.json()
 
-        if (!isGeoJSONResponse(enhancedData)) {
+        if (!isGeoJSONResponse(simpleData)) {
           throw new Error("Invalid GeoJSON response format")
         }
 
-        const networkData = convertGeoJSONToNetwork(enhancedData)
+        const networkData = convertGeoJSONToNetwork(simpleData)
 
         console.log(
-          `✅ Enhanced network loaded: ${networkData.nodes.length} nodes, ${networkData.arcs.length} arcs`,
+          `✅ SIMPLE API network loaded: ${networkData.nodes.length} nodes, ${networkData.arcs.length} arcs`,
         )
+        console.log(`📊 Approach: ${simpleData.metadata.approach || 'simple_direct_connectivity'}`)
 
         // Build network maps for traversal using all nodes (not just visible ones)
-        const { upstreamMap, downstreamMap } = buildNetworkMaps(
-          networkData.arcs,
-        )
+        const { upstreamMap, downstreamMap } = buildNetworkMaps(networkData.arcs)
 
         // Find all connected nodes
         const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
@@ -556,14 +586,13 @@ export default function CalSimMarkers() {
         setNetworkArcs(networkData.arcs)
         setConnectedNodeIds(allConnectedNodes)
 
-        console.log(`🌊 WATER JOURNEY from ${node.name}:`)
+        console.log(`🌊 MAXIMAL WATER JOURNEY from ${node.name}:`)
         console.log(`  💧 Water sources (upstream): ${upstreamNodes.size}`)
         console.log(`  🚰 Water delivery points (downstream): ${downstreamNodes.size}`)
         console.log(`  🔗 Total water network: ${allConnectedNodes.size} facilities`)
         console.log(`  🛤️ Water pathways: ${networkData.arcs.length} connections`)
-        console.log(
-          `  📋 Connection strategies: ${enhancedData.metadata.strategies_used?.join(", ") || "N/A"}`,
-        )
+        console.log(`  🎯 Max depth used: ${simpleData.metadata.max_depth || 15} hops`)
+        console.log(`  📋 API approach: ${simpleData.metadata.approach || 'simple_direct_connectivity'}`)
         
         // Add water flow story context
         if (node.element_type === 'STR') {
@@ -573,9 +602,20 @@ export default function CalSimMarkers() {
         } else if (['WTP', 'WWTP'].includes(node.element_type)) {
           console.log(`🧹 This treatment facility processes water from ${upstreamNodes.size} sources`)
         }
+        
+        // Performance analysis
+        if (allConnectedNodes.size < 5) {
+          console.warn(`⚠️ Low connectivity (${allConnectedNodes.size} nodes). Consider:`)
+          console.warn(`   - Checking if ${node.short_code} has from_node/to_node data`)
+          console.warn(`   - Increasing max_depth beyond ${simpleData.metadata.max_depth || 15}`)
+          console.warn(`   - Verifying network_topology connectivity data`)
+        } else if (allConnectedNodes.size > 100) {
+          console.log(`🎉 Excellent connectivity! Found ${allConnectedNodes.size} connected facilities`)
+        }
+        
       } catch (error) {
         console.error(
-          "Failed to load enhanced network for node:",
+          "Failed to load network for node:",
           node.name,
           error,
         )
@@ -601,7 +641,7 @@ export default function CalSimMarkers() {
 
   const jsx = (
     <>
-      {/* Enhanced network arcs visualization with depth-based styling */}
+      {/* Simple network arcs visualization with clean styling */}
       {networkArcs.length > 0 && (
         <Source
           id="calsim-network-arcs"
@@ -624,13 +664,13 @@ export default function CalSimMarkers() {
             })),
           } as GeoJSON.FeatureCollection}
         >
-          {/* White outline */}
+          {/* White outline for visibility */}
           <Layer
             id="calsim-network-arcs-outline"
             type="line"
             paint={{
               "line-color": "#ffffff",
-              "line-width": 25, // Thicker white outline for better visibility
+              "line-width": 8,
               "line-opacity": 0.9,
             }}
             layout={{
@@ -638,36 +678,40 @@ export default function CalSimMarkers() {
               "line-join": "round",
             }}
           />
-          {/* Colored main layer with depth-based and strategy-based styling */}
+          {/* Main arc layer with depth-based styling */}
           <Layer
             id="calsim-network-arcs-layer"
             type="line"
             paint={{
               "line-color": [
                 "case",
-                ["==", ["get", "strategy"], "enhanced"],
-                "#00bcd4", // Bright cyan - enhanced water pathways
-                ["==", ["get", "strategy"], "proximity"],
-                "#ff9800", // Orange - regional water distribution
-                ["==", ["get", "strategy"], "river_sequence"],
-                "#2196f3", // Blue - natural river flows
-                "#e91e63", // Pink - direct water connections
+                ["<=", ["get", "depth"], 2],
+                "#00bcd4", // Bright cyan for close connections
+                ["<=", ["get", "depth"], 5],
+                "#2196f3", // Blue for medium connections
+                ["<=", ["get", "depth"], 10],
+                "#9c27b0", // Purple for distant connections
+                "#ff5722", // Orange for very distant connections
               ],
               "line-width": [
                 "case",
                 ["<=", ["get", "depth"], 2],
-                20, // Much thicker for closer connections - water highways
-                ["<=", ["get", "depth"], 4],
-                16, // Thick for medium connections
-                12, // Still visible for distant connections
+                6, // Thicker for closer connections
+                ["<=", ["get", "depth"], 5],
+                4, // Medium for medium connections
+                ["<=", ["get", "depth"], 10],
+                3, // Thinner for distant connections
+                2, // Thinnest for very distant connections
               ],
               "line-opacity": [
                 "case",
                 ["<=", ["get", "depth"], 2],
                 1.0, // Full opacity for close connections
-                ["<=", ["get", "depth"], 4],
+                ["<=", ["get", "depth"], 5],
                 0.8,
-                0.6, // More transparent for distant connections
+                ["<=", ["get", "depth"], 10],
+                0.6,
+                0.4, // More transparent for very distant connections
               ],
             }}
             layout={{
@@ -678,10 +722,9 @@ export default function CalSimMarkers() {
         </Source>
       )}
 
-      {/* CalSim node markers using map package interface */}
+      {/* CalSim node markers */}
       {visibleNodes.map((node) => {
-        const renderStart = performance.now()
-        const marker = (
+        return (
           <Marker
             key={node.id}
             longitude={node.coordinates[0]}
@@ -739,26 +782,19 @@ export default function CalSimMarkers() {
             />
           </Marker>
         )
-        const renderEnd = performance.now()
-        if (renderEnd - renderStart > 5) {
-          console.log(
-            `⚠️ Slow marker render for ${node.short_code}: ${(renderEnd - renderStart).toFixed(0)}ms`,
-          )
-        }
-        return marker
       })}
 
-      {/* Enhanced tooltip with native Mapbox viewport handling */}
+      {/* Enhanced tooltip */}
       {hoveredNode && (
         <Popup
           longitude={hoveredNode.coordinates[0]}
           latitude={hoveredNode.coordinates[1]}
           closeButton={false}
           closeOnClick={false}
-          maxWidth="280px"
+          maxWidth="320px"
           className="calsim-tooltip"
         >
-          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 280 }}>
+          <Box sx={{ padding: 1, minWidth: 200, maxWidth: 320 }}>
             <Typography variant="h6" sx={{ mb: 0.5, fontSize: "0.9rem" }}>
               {hoveredNode.display_name}
             </Typography>
@@ -795,7 +831,7 @@ export default function CalSimMarkers() {
                 variant="body2"
                 sx={{ fontSize: "0.75rem", color: "success.main" }}
               >
-                <strong>Connection Strategy:</strong> {hoveredNode.strategy}
+                <strong>Connection:</strong> {hoveredNode.strategy}
               </Typography>
             )}
             <Typography
@@ -815,12 +851,12 @@ export default function CalSimMarkers() {
               }}
             >
               {isLoadingNetwork && selectedNode?.id === hoveredNode.id
-                ? "Loading enhanced network connections..."
+                ? "Loading maximal network connections (15 hops)..."
                 : selectedNode?.id === hoveredNode.id
-                  ? `Showing ${connectedNodeIds.size} connected nodes, ${networkArcs.length} arcs (water network)`
+                  ? `Showing ${connectedNodeIds.size} connected nodes, ${networkArcs.length} arcs (maximal network)`
                   : connectedNodeIds.has(hoveredNode.id)
                     ? "Connected to water network"
-                    : "Click to trace water journey"}
+                    : "Click to trace maximal water journey (15 hops)"}
             </Typography>
           </Box>
         </Popup>

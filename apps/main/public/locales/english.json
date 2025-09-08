@@ -1,20 +1,20 @@
 {
   "homePanel": {
     "title": "What is the future of California's water?",
-    "content": "Water is vital to California's communities, farms, and the environment. Delivering water to all who need it is not easy, especially as our climate changes. Explore how water in California is managed across the state and discover pathways to a more sustainable and equitable water future."
+    "content": "Water is vital to California's communities, farms, and the environment. Delivering water meet all needs is not easy, especially as our climate changes. Here you can explore how water in California is managed across the Central Valley and discover pathways to a more sustainable and equitable water future."
   },
   "frontmatterPanel": {
-    "boldText": "Are you curious about California water and how water management decisions affect you, now and into the future?",
-    "content": "COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly funded project that sheds light on how water is allocated in California and how climate change shapes the choices we face."
+    "boldText": "Are you curious about California water and how water management decisions affect outcomes, now and into the future?",
+    "content": "COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly-funded project that sheds light on how water is allocated in California and how climate change affects the choices we face."
   },
   "toolsPanel": {
     "title": "Tools are needed",
-    "boldText": "But how do we track the water we have and where it is being delivered?",
+    "boldText": "How do we track the water we have and where it is being delivered?",
     "content": "This is where models come in. CalSim is a water planning model developed by government agencies that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released, and where it gets delivered across the state."
   },
   "scenariosPanel": {
-    "part1": "Working with diverse community partners, the COEQWAL research team has developed 30 operational strategies – different ways we could manage California's water system. We evaluate these strategies under the climate we've experienced in the recent past, and under five additional hydroclimates – novel patterns of future water availability caused by climate change.",
-    "part2": "These scenarios – unique combinations of operational strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between objectives. By understanding how different decisions affect water allocations for different users, we can imagine new ways of improving water management in California."
+    "part1": "Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these strategies under the climate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change.",
+    "part2": "These scenarios – unique combinations of operational strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between different goals. By understanding how different decisions affect water allocations for different users, we can imagine new ways of managing our water."
   },
   "interstitialPanel": {
     "content": "On this site, you can learn about California's water and explore how water allocations change under different scenarios. By providing access to the same tools used by decision-makers and discovering new pathways for managing water, COEQWAL empowers all Californians to shape our water future."
