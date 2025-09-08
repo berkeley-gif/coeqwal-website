@@ -1,0 +1,35 @@
+/* Style Mapbox controls */
+
+/* Make GeolocateControl parent container round */
+.mapboxgl-ctrl-group:has(.mapboxgl-ctrl-geolocate) {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Make GeolocateControl button round */
+.mapboxgl-ctrl-geolocate {
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  border: 1px solid #e0e0e0 !important;
+  background-color: white !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  margin: 0 !important;
+}
+
+.mapboxgl-ctrl-geolocate:hover {
+  background-color: #f5f5f5 !important;
+  border-color: #2d89b6 !important;
+}
+
+.mapboxgl-ctrl-geolocate:focus {
+  outline: none !important;
+  border-color: #2d89b6 !important;
+}
+
+.mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon {
+  color: #2d89b6 !important;
+}

@@ -4,6 +4,7 @@ import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import CalSimMarkers from "./CalSimMarkers"
 import MapGeoSearch from "./MapGeoSearch"
+import "./MapboxControlStyles.css"
 
 interface CaliforniaMapPanelProps {
   id?: string
@@ -25,6 +26,7 @@ export default function CaliforniaMapPanel({
         width: "100vw",
         height: "100vh",
         zIndex: (theme) => theme.zIndex.basement, // Map when used as background element
+        pointerEvents: "auto", // Ensure map can receive pointer events
       }}
     >
       <Map
@@ -39,15 +41,33 @@ export default function CaliforniaMapPanel({
         }}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
-        touchZoom={false}
+        touchZoom={true}
         touchRotate={false}
         dragPan={true}
+        dragRotate={false}
         doubleClickZoom={true}
+        keyboard={true}
         interactive={true}
       >
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
-        <GeolocateControl position="bottom-left" />
+        <GeolocateControl 
+          position="bottom-left" 
+          positionOptions={{
+            enableHighAccuracy: true,
+            timeout: 6000,
+            maximumAge: 0
+          }}
+          trackUserLocation={false}
+          showUserHeading={false}
+          showAccuracyCircle={true}
+          style={{ 
+            position: 'absolute',
+            left: '60px',
+            bottom: '30px', // Align with bottom of zoom controls
+            zIndex: 1
+          }}
+        />
         
         {/* CalSim markers rendered as direct children of Map for proper interaction */}
         <CalSimMarkers />
