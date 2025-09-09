@@ -3,10 +3,10 @@ export const OUTCOMES = [
   "Agricultural revenue",
   "Environmental flows",
   "Delta estuary status",
+  "Delta exports",
   "Reservoir storage",
   "Groundwater storage",
   "Salmon abundance",
-  "Distributional equity",
 ] as const
 
 export type Outcome = (typeof OUTCOMES)[number]
