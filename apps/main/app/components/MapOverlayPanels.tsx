@@ -604,6 +604,49 @@ export default function MapOverlayPanels() {
           </Box>
         }
       />
+
+      {/* Invisible marker for intersection detection */}
+      <TwoColumnPanel
+        id="scenario-explorer-overlay"
+        fullHeight={true}
+        fullWidth={true}
+        backgroundColor="transparent"
+        includeHeaderSpacing={false}
+        contentColumn="right"
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        sx={{
+          minHeight: "100vh",
+          pointerEvents: "none", // Allow map interaction through the overlay
+          paddingLeft: 0,
+          paddingRight: 0,
+        }}
+        rightContent={
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100vh",
+              width: "100%",
+            }}
+          >
+            <Typography
+              variant="h2"
+              sx={{
+                color: theme.palette.blue.darkest,
+                textAlign: "center",
+                opacity: 0.1, // Very subtle so it doesn't interfere with the map
+                pointerEvents: "none",
+              }}
+            >
+              Scenario Explorer
+            </Typography>
+          </Box>
+        }
+      />
     </Box>
   )
 }
