@@ -953,7 +953,7 @@ const MapControls = ({
                       lineHeight: 1.3,
                     }}
                   >
-                    Current operations scenario
+                    Current operations
                   </Box>
                 </Box>
               )}
@@ -973,7 +973,7 @@ const MapControls = ({
                       mb: 0.5,
                     }}
                   >
-                    SCENARIO
+                    OPERATIONS
                   </Box>
                   <Box
                     sx={{
@@ -994,11 +994,11 @@ const MapControls = ({
                         mb: 0, // Remove margin to fix alignment
                       }}
                     >
-                      Current operations scenario
+                      Current operations
                     </Box>
                     <InfoIconButton
                       mode="glossary"
-                      glossaryEntry="Current operations scenario"
+                      glossaryEntry="Current operations"
                       onGlossaryOpen={handleGlossaryOpen}
                     />
                   </Box>
@@ -3557,7 +3557,7 @@ export default function ScenarioExplorer({
         }
       />
 
-      {/* Comparison mode dialog - REMOVED per user request */}
+      {/* Comparison mode dialog */}
 
       {/* Delivery area selection dialog */}
       <MapPromptDialog

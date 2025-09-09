@@ -50,6 +50,8 @@ export default function ProgressiveScenarioPanels() {
         setIsExpanded(shouldExpand)
         setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
         
+        console.log("🗺️ Setting panels expanded state:", shouldExpand)
+        
         console.log(
           "🎬 Coordinated panel state:",
           { 
