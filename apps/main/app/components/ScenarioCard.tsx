@@ -3,6 +3,7 @@
 import { Box, Typography, useTheme, Select, MenuItem } from "@repo/ui/mui"
 import { InfoIconButton } from "@repo/ui"
 import { useDrawerStore, useGlyphSettingsStore } from "@repo/state"
+import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 
 interface ScenarioCardProps {
@@ -19,6 +20,21 @@ export default function ScenarioCard({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const glyphVariant = useGlyphSettingsStore((s) => s.variant)
+
+  // Generate dummy data for current operations scenario (copied from ScenarioExplorer)
+  const generateDummyData = (outcomeIndex: number) => {
+    const baseMedian = outcomeIndex * 0.1 - 0.2
+    const medianShift = 0 // Historical climate
+    const variabilityMultiplier = 1
+
+    const median = baseMedian + medianShift
+    const baseSpread = 0.4 * variabilityMultiplier
+    const q1 = median - baseSpread * 0.5
+    const q3 = median + baseSpread * 0.3
+    const min = median - baseSpread * 0.8
+
+    return [q3, median, q1, min] as [number, number, number, number]
+  }
 
   const handleGlossaryOpen = (entry: string) => {
     setDrawerContent({
@@ -295,7 +311,7 @@ export default function ScenarioCard({
                     alignItems: "start",
                   }}
                 >
-                  {OUTCOMES.map((outcome) => (
+                  {OUTCOMES.map((outcome, outcomeIndex) => (
                     <Box
                       key={outcome}
                       sx={{
@@ -303,34 +319,24 @@ export default function ScenarioCard({
                         flexDirection: "column",
                         alignItems: "center",
                         gap: 1,
-                        p: 2,
-                        backgroundColor: theme.palette.grey[50],
-                        borderRadius: theme.borderRadius.rounded,
-                        border: `1px solid ${theme.palette.grey[200]}`,
                         cursor: "pointer",
-                        "&:hover": {
-                          backgroundColor: theme.palette.blue.bright + "10",
-                          borderColor: theme.palette.blue.medium,
-                        },
                       }}
-                      onClick={() => handleGlossaryOpen(outcome)}
+                      onClick={() => {
+                        console.log("Selected outcome:", outcome)
+                        handleGlossaryOpen(outcome)
+                      }}
                     >
-                      {/* Placeholder for ScenarioGlyph - simplified for IntroSection */}
-                      <Box
-                        sx={{
-                          width: 60,
-                          height: 40,
-                          backgroundColor: theme.palette.blue.medium,
-                          borderRadius: theme.borderRadius.rounded,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Typography variant="caption" sx={{ color: "white", fontWeight: "bold" }}>
-                          {glyphVariant}
-                        </Typography>
-                      </Box>
+                      <ScenarioGlyph
+                        tierColors={[
+                          theme.palette.tiers.tier1,
+                          theme.palette.tiers.tier2,
+                          theme.palette.tiers.tier3,
+                          theme.palette.tiers.tier4,
+                        ]}
+                        values={generateDummyData(outcomeIndex)}
+                        variant={glyphVariant}
+                        size={60}
+                      />
                       <Typography
                         variant="caption"
                         sx={{
@@ -338,6 +344,7 @@ export default function ScenarioCard({
                           fontWeight: 500,
                           textAlign: "center",
                           fontSize: "0.75rem",
+                          mt: 0.5,
                         }}
                       >
                         {outcome}
