@@ -132,17 +132,64 @@ export default function ScenarioCard({
                     color: "inherit",
                   }}
                 >
-                  shows outcomes under historical climate variability
+                  serves as a foundation to compare alternatives.
                 </Typography>
-                <Typography
-                  component="li"
-                  variant="body2"
+              </Box>
+            </Box>
+
+            {/* HR separator */}
+            <Box
+              sx={{
+                borderBottom: "1px solid",
+                borderColor: theme.palette.grey[300],
+                my: 2.5,
+                mb: 0,
+              }}
+            />
+
+            {/* Scenario snapshot section */}
+            <Box sx={{ flexShrink: 0, pb: 2 }}>
+              <Box>
+                <Box
                   sx={{
-                    mb: 0,
-                    color: "inherit",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    mb: 2,
                   }}
                 >
-                  establishes a baseline for comparing alternatives
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        color: theme.palette.blue.darkest,
+                      }}
+                    >
+                      Scenario outcomes
+                    </Typography>
+                    <InfoIconButton
+                      mode="glossary"
+                      glossaryEntry="CalSim"
+                      onGlossaryOpen={handleGlossaryOpen}
+                    />
+                  </Box>
+                </Box>
+                
+                {/* Simplified outcomes display - no complex charts for IntroSection */}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontStyle: "italic",
+                  }}
+                >
+                  Interactive scenario outcomes available in full Scenario Explorer
                 </Typography>
               </Box>
             </Box>

@@ -26,19 +26,17 @@ export default function ProgressiveScenarioPanels() {
           .filter((entry) => entry.isIntersecting)
           .map((entry) => entry.target.id)
 
-        // Operations panel logic: Show from scenarios-overlay onwards
+        // Operations panel logic: Show only during IntroSection map overlays
         const operationsPanels = [
           "scenarios-overlay",
           "scenarios-overlay2", 
-          "content-panels",
           "scenario-explorer-overlay"
         ]
         const showOperations = visiblePanels.some(id => operationsPanels.includes(id))
 
-        // Hydroclimate panel logic: Show from scenarios-overlay2 onwards  
+        // Hydroclimate panel logic: Show from scenarios-overlay2 onwards (IntroSection only)
         const hydroclimateStartPanels = [
           "scenarios-overlay2", 
-          "content-panels",
           "scenario-explorer-overlay"
         ]
         const showHydroclimate = visiblePanels.some(id => hydroclimateStartPanels.includes(id))
@@ -67,15 +65,13 @@ export default function ProgressiveScenarioPanels() {
       },
     )
 
-    // Observe all relevant panels
+    // Observe only IntroSection panels (no content-panels)
     const scenariosPanel = document.getElementById("scenarios-overlay")
     const scenariosPanel2 = document.getElementById("scenarios-overlay2")
-    const contentPanels = document.getElementById("content-panels")
     const scenarioExplorerOverlay = document.getElementById("scenario-explorer-overlay")
 
     if (scenariosPanel) observer.observe(scenariosPanel)
     if (scenariosPanel2) observer.observe(scenariosPanel2)
-    if (contentPanels) observer.observe(contentPanels)
     if (scenarioExplorerOverlay) observer.observe(scenarioExplorerOverlay)
 
     return () => observer.disconnect()
@@ -90,7 +86,7 @@ export default function ProgressiveScenarioPanels() {
         transform: "translateY(-50%)",
         zIndex: (theme) => theme.zIndex.appBar,
         pointerEvents: "none", // Allow map interaction through
-        width: "320px",
+        width: "400px", // Match ScenarioExplorer left panel width (2/7 of typical viewport)
         display: "flex",
         flexDirection: "column",
         gap: 3,
