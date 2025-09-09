@@ -14,10 +14,9 @@ import { useTranslation } from "@repo/i18n"
 import { useCalSimToggle } from "./CalSimContext"
 import { useDrawerStore } from "@repo/state"
 import { motion } from "@repo/motion"
-import Image from "next/image"
 
 export default function MapOverlayPanels() {
-  const theme = useTheme() // eslint-disable-line @typescript-eslint/no-unused-vars
+  const theme = useTheme()
   const { t } = useTranslation()
   const { isCalSimVisible, toggleCalSim, showBasins, toggleBasins } =
     useCalSimToggle()
@@ -587,9 +586,15 @@ export default function MapOverlayPanels() {
                 text={t("scenariosPanel.part2")}
                 terms={[
                   { name: "scenarios", glossaryTerm: "Scenarios" },
-                  { name: "operational strategies", glossaryTerm: "Operational strategies" },
+                  {
+                    name: "operational strategies",
+                    glossaryTerm: "Operational strategies",
+                  },
                   { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
-                  { name: "water allocations", glossaryTerm: "Water allocations" },
+                  {
+                    name: "water allocations",
+                    glossaryTerm: "Water allocations",
+                  },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.blue.darkest}

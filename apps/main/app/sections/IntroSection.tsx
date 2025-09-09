@@ -115,7 +115,7 @@ const IntroSection = () => {
         id="frontmatter"
         fullHeight={true}
         fullWidth
-        backgroundColor={theme.palette.nature.earth}
+        backgroundColor={theme.palette.brand.sky}
         textColor={theme.palette.blue.darkest}
         includeHeaderSpacing={true}
         contentAlignment={{
