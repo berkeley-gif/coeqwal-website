@@ -337,9 +337,9 @@ const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <SettingsIcon />,
-    term: "Current operations scenario",
+    term: "Current operations",
     definition:
-      "The baseline modeling scenario used in COEQWAL analysis that represents today's water management practices in California's Central Valley. This scenario models the coordinated operations of the State Water Project (SWP) and Central Valley Project (CVP) under current institutional, regulatory, and infrastructure conditions. It includes existing reservoir operations, environmental flow requirements, and water allocation priorities as they currently exist. The current operations scenario provides the reference point for evaluating how alternative management strategies might change water outcomes for different users and regions. Learn more in the Current operations scenario theme.",
+      "The baseline modeling scenario used in COEQWAL analysis that represents today's water management practices in California's Central Valley. This scenario models the coordinated operations of the State Water Project (SWP) and Central Valley Project (CVP) under current institutional, regulatory, and infrastructure conditions. It includes existing reservoir operations, environmental flow requirements, and water allocation priorities as they currently exist. The current operations scenario provides the reference point for evaluating how alternative management strategies might change water outcomes for different users and regions. Learn more in the Current operations theme.",
     seeAlso: "CalSim, Water management decisions",
   },
   // Outcome-specific glossary entries
@@ -733,7 +733,7 @@ export function CurrentOpsContent({
     const hasCentralValley =
       definition.includes("Central Valley") && currentTerm !== "Central Valley"
     const hasLearnMore = definition.includes(
-      "Learn more in the Current operations scenario theme",
+      "Learn more in the Current operations theme",
     )
 
     console.log("hasLearnMore:", hasLearnMore)
@@ -825,7 +825,7 @@ export function CurrentOpsContent({
     if (hasLearnMore) {
       console.log("Has Learn More link detected for:", currentTerm)
       const learnMoreText =
-        "Learn more in the Current operations scenario theme"
+        "Learn more in the Current operations theme"
       const learnMoreIndex = definition.indexOf(learnMoreText)
       const beforeLearnMore = definition.substring(0, learnMoreIndex)
       const afterLearnMore = definition.substring(
@@ -846,8 +846,8 @@ export function CurrentOpsContent({
               },
             }}
             onClick={() => {
-              // TODO: Navigate to Current operations scenario theme page
-              console.log("Navigate to Current operations scenario theme")
+              // TODO: Navigate to Current operations theme page
+              console.log("Navigate to Current operations theme")
             }}
           >
             {learnMoreText}

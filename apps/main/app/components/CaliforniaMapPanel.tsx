@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect } from "react"
-import { Map, NavigationControl, GeolocateControl, useMap } from "@repo/map"
+import { Map, NavigationControl, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 // import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
-import MapGeoSearch from "./MapGeoSearch"
 import BasinsLayer from "./BasinsLayer"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
@@ -21,30 +20,29 @@ function MapCenterController() {
   const { flyTo } = useMap()
 
   useEffect(() => {
-    if (!flyTo) return
+    console.log("🗺️ MapCenterController effect triggered:", { isPanelsExpanded, flyTo: !!flyTo })
+    
+    if (!flyTo) {
+      console.log("🗺️ flyTo not available yet")
+      return
+    }
 
     if (isPanelsExpanded) {
-      // Center map at longitude -120 when panels expand
-      flyTo({
-        longitude: -120,
-        latitude: 38.073,
-        zoom: 6.3, // Keep same zoom
-        transitionOptions: {
-          duration: 1000, // 1 second smooth transition
-        },
+      console.log("🗺️ Flying to -120 longitude for expanded panels")
+      // Center map at longitude -120 when panels expand (using coordinate pattern)
+      flyTo(-120, 38.073, 6.3, 0, 0, {
+        duration: 1000, // 1 second smooth transition
+        essential: true,
       })
-      console.log("🗺️ Map centered to -120 longitude for expanded panels")
+      console.log("🗺️ Map flyTo command sent: -120 longitude")
     } else {
+      console.log("🗺️ Flying back to -119 longitude (original center)")
       // Return to original center when panels collapse
-      flyTo({
-        longitude: -119,
-        latitude: 38.073,
-        zoom: 6.3, // Keep same zoom
-        transitionOptions: {
-          duration: 1000,
-        },
+      flyTo(-119, 38.073, 6.3, 0, 0, {
+        duration: 1000,
+        essential: true,
       })
-      console.log("🗺️ Map returned to original center")
+      console.log("🗺️ Map flyTo command sent: -119 longitude")
     }
   }, [isPanelsExpanded, flyTo])
 
@@ -95,23 +93,6 @@ export default function CaliforniaMapPanel({
         
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
-        <GeolocateControl
-          position="bottom-left"
-          positionOptions={{
-            enableHighAccuracy: true,
-            timeout: 6000,
-            maximumAge: 0,
-          }}
-          trackUserLocation={false}
-          showUserHeading={false}
-          showAccuracyCircle={true}
-          style={{
-            position: "absolute",
-            left: "60px",
-            bottom: "30px", // Align with bottom of zoom controls
-            zIndex: 1,
-          }}
-        />
 
         {/* Basins GeoJSON Layer */}
         <BasinsLayer visible={showBasins} />
@@ -123,15 +104,6 @@ export default function CaliforniaMapPanel({
         {/* <CalSimMarkers /> */}
       </Map>
 
-      {/* Geolocation search box positioned to avoid control overlap */}
-      <MapGeoSearch
-        position="bottom-left"
-        mapboxToken={token}
-        placeholder="Search California location..."
-        onLocationSearch={(query) => {
-          console.log("Location search completed:", query)
-        }}
-      />
     </Box>
   )
 }

@@ -5,6 +5,7 @@ import { InfoIconButton } from "@repo/ui"
 import { useDrawerStore, useGlyphSettingsStore } from "@repo/state"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
+import { useCalSimToggle } from "./CalSimContext"
 
 interface ScenarioCardProps {
   isMinimized?: boolean
@@ -15,13 +16,14 @@ interface ScenarioCardProps {
 export default function ScenarioCard({ 
   isMinimized = false, 
   onToggleMinimized,
-  minimizedTitle = "Current operations scenario"
+  minimizedTitle = "Current operations"
 }: ScenarioCardProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
+  const { selectedOutcome, setSelectedOutcome } = useCalSimToggle()
   const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
-  // Generate dummy data for current operations scenario (copied from ScenarioExplorer)
+  // Generate dummy data for current operations (copied from ScenarioExplorer)
   const generateDummyData = (outcomeIndex: number) => {
     const baseMedian = outcomeIndex * 0.1 - 0.2
     const medianShift = 0 // Historical climate
@@ -41,6 +43,21 @@ export default function ScenarioCard({
       selectedTerm: entry,
     })
     openDrawer("glossary")
+  }
+
+  const handleOutcomeSelect = (outcome: string) => {
+    if (selectedOutcome === outcome) {
+      // If clicking the same outcome, deselect it
+      setSelectedOutcome(null)
+      console.log("🎯 Outcome deselected:", outcome)
+    } else {
+      // Select new outcome
+      setSelectedOutcome(outcome)
+      console.log("🎯 Outcome selected:", outcome)
+    }
+    
+    // Also open glossary drawer with the specific outcome term
+    handleGlossaryOpen(outcome)
   }
 
   return (
@@ -96,7 +113,7 @@ export default function ScenarioCard({
                 mb: 0.5,
               }}
             >
-              SCENARIO
+              OPERATIONS
             </Box>
             <Box
               sx={{
@@ -117,12 +134,13 @@ export default function ScenarioCard({
                   mb: 0,
                 }}
               >
-                Current operations scenario
+                Current operations
               </Box>
               <InfoIconButton
                 mode="glossary"
-                glossaryEntry="Current operations scenario"
+                glossaryEntry="Current operations"
                 onGlossaryOpen={handleGlossaryOpen}
+                sx={{ color: theme.palette.blue.bright }}
               />
             </Box>
             <Box
@@ -197,6 +215,7 @@ export default function ScenarioCard({
                       mode="glossary"
                       glossaryEntry="CalSim"
                       onGlossaryOpen={handleGlossaryOpen}
+                      sx={{ color: theme.palette.blue.bright }}
                     />
                   </Box>
                   {/* Glyph variant selector */}
@@ -320,10 +339,22 @@ export default function ScenarioCard({
                         alignItems: "center",
                         gap: 1,
                         cursor: "pointer",
+                        p: 1,
+                        borderRadius: theme.borderRadius.rounded,
+                        border: selectedOutcome === outcome 
+                          ? `2px solid ${theme.palette.blue.bright}` 
+                          : "2px solid transparent",
+                        backgroundColor: selectedOutcome === outcome 
+                          ? theme.palette.blue.bright + "10" 
+                          : "transparent",
+                        transition: "all 0.2s ease",
+                        "&:hover": {
+                          backgroundColor: theme.palette.blue.bright + "05",
+                          border: `2px solid ${theme.palette.blue.medium}`,
+                        },
                       }}
                       onClick={() => {
-                        console.log("Selected outcome:", outcome)
-                        handleGlossaryOpen(outcome)
+                        handleOutcomeSelect(outcome)
                       }}
                     >
                       <ScenarioGlyph

@@ -110,6 +110,7 @@ export default function ClimateCard({
                 mode="glossary"
                 glossaryEntry="Changing climate"
                 onGlossaryOpen={handleGlossaryOpen}
+                sx={{ color: theme.palette.blue.bright }}
               />
             </Box>
 
