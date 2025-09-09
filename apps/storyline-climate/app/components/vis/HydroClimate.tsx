@@ -3,6 +3,7 @@ import { useFetchData } from "../../hooks/useFetchData"
 import FlowLine, { FlowEntry } from "./HydroClimateLine"
 import * as d3 from "d3"
 import { Typography } from "@repo/ui/mui"
+import { useBreakpoint } from "@repo/ui/hooks"
 
 export type ContainerSize = {
   width: number
@@ -74,7 +75,7 @@ const yExtents = [-15, 15]
 const yTicks = [-15, 0, 15]
 const xExtents = [0, 2]
 const xTicks = [1, 2]
-const margin = { top: 40, right: 75, bottom: 40, left: 150 }
+const margin = { top: 20, right: 75, bottom: 40, left: 120 }
 
 function ClimateScatter({ onSelect }: { onSelect: (model: string) => void }) {
   const svgRef = useRef<SVGSVGElement | null>(null)
@@ -105,6 +106,16 @@ function ClimateScatter({ onSelect }: { onSelect: (model: string) => void }) {
 
   return (
     <svg ref={svgRef} width="100%" height="100%">
+      <text
+        id="hydroclimate-scatter-title"
+        x={size.width / 2}
+        y={margin.top}
+        dx={"0.75em"}
+        dy={"2em"}
+        style={{ textAnchor: "middle" }}
+      >
+        Below uses dummy data; right side uses real data
+      </text>
       <XAxis size={size} yOffset={yScale(0)} xScale={xScale} />
       <Rules size={size} xScale={xScale} yScale={yScale} />
       <ClimatePoint
@@ -129,6 +140,8 @@ function ClimatePoint({
   yScale: d3.ScaleLinear<number, number>
   onSelect: (model: string) => void
 }) {
+  const breakpoint = useBreakpoint()
+
   return (
     <>
       {data.map((entry, idx) => (
@@ -138,7 +151,11 @@ function ClimatePoint({
           style={{ cursor: "pointer" }}
         >
           <circle
-            r="6"
+            r={
+              breakpoint === "xs" || breakpoint === "sm" || breakpoint == "lg"
+                ? 4
+                : 6
+            }
             fill="#F1B143"
             cx={xScale(entry.temperature)}
             cy={yScale(entry.precipitation)}
@@ -199,7 +216,7 @@ function Rules({
           ></path>
         ))}
       </g>
-      <g className="y-axis-rules" transform={`translate(0, 0})`}>
+      <g className="y-axis-rules" transform={`translate(0, 0)`}>
         {yValues.map((val, idx) => (
           <path
             key={idx}
@@ -222,7 +239,7 @@ function YAxis({ yScale }: { yScale: d3.ScaleLinear<number, number> }) {
           <YTick key={idx} value={tick} yPos={yScale(tick)} idx={idx} />
         ))}
       </g>
-      <g className="y-axis" transform={`translate(${margin.left * 0.6},0)`}>
+      <g className="y-axis" transform={`translate(${margin.left * 0.5},0)`}>
         <text id="y-axis-label" x={0} y={yScale(0)}>
           <tspan x={0} dy="-0.6em" dx="-1em">
             Changes in
