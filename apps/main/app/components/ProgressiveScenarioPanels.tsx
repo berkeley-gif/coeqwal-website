@@ -105,9 +105,9 @@ export default function ProgressiveScenarioPanels() {
             style={{ pointerEvents: "auto" }}
           >
             <ScenarioCard
-              isExpanded={isExpanded}
-              isMinimized={isScenarioCardMinimized}
-              onToggleMinimized={() => setIsScenarioCardMinimized(!isScenarioCardMinimized)}
+              isMinimized={!isExpanded} // Minimized when not in final section, user can control when expanded
+              onToggleMinimized={isExpanded ? () => setIsScenarioCardMinimized(!isScenarioCardMinimized) : undefined}
+              minimizedTitle="Operations" // Show "Operations" when not expanded
             />
           </motion.div>
         )}
@@ -128,11 +128,11 @@ export default function ProgressiveScenarioPanels() {
             style={{ pointerEvents: "auto" }}
           >
             <ClimateCard
-              isExpanded={isExpanded}
-              isMinimized={isClimateCardMinimized}
-              onToggleMinimized={() => setIsClimateCardMinimized(!isClimateCardMinimized)}
+              isMinimized={!isExpanded} // Minimized when not in final section, user can control when expanded
+              onToggleMinimized={isExpanded ? () => setIsClimateCardMinimized(!isClimateCardMinimized) : undefined}
               selectedClimate={selectedClimate}
               onClimateChange={setSelectedClimate}
+              minimizedTitle="Hydroclimate" // Show "Hydroclimate" when not expanded
             />
           </motion.div>
         )}
