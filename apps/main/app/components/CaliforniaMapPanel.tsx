@@ -2,7 +2,8 @@
 
 import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { Box } from "@repo/ui/mui"
-import CalSimMarkers from "./CalSimMarkers"
+// import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
+import CalSimLayers from "./CalSimLayers"
 import MapGeoSearch from "./MapGeoSearch"
 import BasinsLayer from "./BasinsLayer"
 import { useCalSimToggle } from "./CalSimContext"
@@ -75,8 +76,11 @@ export default function CaliforniaMapPanel({
         {/* Basins GeoJSON Layer */}
         <BasinsLayer visible={showBasins} />
         
-        {/* CalSim markers rendered as direct children of Map for proper interaction */}
-        <CalSimMarkers />
+        {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
+        <CalSimLayers />
+        
+        {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
+        {/* <CalSimMarkers /> */}
       </Map>
       
       {/* Geolocation search box positioned to avoid control overlap */}
