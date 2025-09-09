@@ -58,7 +58,7 @@ export default function ScenarioCard({
           borderRadius: theme.borderRadius.card,
           border: "1px solid",
           borderColor: theme.palette.divider,
-          padding: 3,
+          padding: 2, // Reduced from 3 to 2
           display: "flex",
           flexDirection: "column",
           height: "auto",
@@ -67,7 +67,7 @@ export default function ScenarioCard({
       >
         {/* Minimized state - show title only */}
         {isMinimized && (
-          <Box sx={{ mb: 2, flexShrink: 0 }}>
+          <Box sx={{ mb: 1, flexShrink: 0 }}>
             <Box
               sx={{
                 color: theme.palette.blue.darkest,
@@ -84,7 +84,7 @@ export default function ScenarioCard({
 
         {/* Expanded state - full content */}
         {!isMinimized && (
-          <Box sx={{ mb: 2, flexShrink: 0 }}>
+          <Box sx={{ mb: 1, flexShrink: 0 }}>
             <Box
               sx={{
                 color: theme.palette.blue.medium,
@@ -127,7 +127,7 @@ export default function ScenarioCard({
             </Box>
             <Box
               sx={{
-                mb: 2,
+                mb: 1,
                 color: theme.palette.blue.darkest,
                 fontFamily: theme.typography.fontFamily,
               }}
@@ -162,13 +162,13 @@ export default function ScenarioCard({
               sx={{
                 borderBottom: "1px solid",
                 borderColor: theme.palette.grey[300],
-                my: 2.5,
+                my: 1.5,
                 mb: 0,
               }}
             />
 
             {/* Scenario snapshot section */}
-            <Box sx={{ flexShrink: 0, pb: 2 }}>
+            <Box sx={{ flexShrink: 0, pb: 1 }}>
               <Box>
                 <Box
                   sx={{
@@ -288,7 +288,7 @@ export default function ScenarioCard({
                     mb: 0,
                   }}
                 >
-                  <Typography variant="body2" sx={{ mb: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
                     <Box
                       component="span"
                       sx={{
@@ -307,7 +307,7 @@ export default function ScenarioCard({
                   sx={{
                     display: "grid",
                     gridTemplateColumns: "1fr 1fr", // 2 columns for outcomes
-                    gap: 2,
+                    gap: 1.5,
                     alignItems: "start",
                   }}
                 >

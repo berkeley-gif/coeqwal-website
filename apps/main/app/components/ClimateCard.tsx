@@ -44,7 +44,7 @@ export default function ClimateCard({
           borderRadius: theme.borderRadius.card,
           border: "1px solid",
           borderColor: theme.palette.divider,
-          padding: 3,
+          padding: 2, // Reduced from 3 to 2
           display: "flex",
           flexDirection: "column",
           height: "auto",
@@ -53,7 +53,7 @@ export default function ClimateCard({
       >
         {/* Minimized state - show title only */}
         {isMinimized && (
-          <Box sx={{ mb: 2, flexShrink: 0 }}>
+          <Box sx={{ mb: 1, flexShrink: 0 }}>
             <Box
               sx={{
                 color: theme.palette.blue.darkest,
@@ -90,7 +90,7 @@ export default function ClimateCard({
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
-                mb: 1,
+                mb: 0.5,
               }}
             >
               <Box
@@ -114,8 +114,8 @@ export default function ClimateCard({
             </Box>
 
             {/* Climate instruction text */}
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
+            <Box sx={{ mb: 1.5 }}>
+              <Typography variant="body2" sx={{ mb: 0.5 }}>
                 <Box
                   component="span"
                   sx={{
