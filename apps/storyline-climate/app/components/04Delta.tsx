@@ -69,12 +69,7 @@ function Delta() {
   )
 
   return (
-    <Box
-      id="delta"
-      className="container-left"
-      tabIndex={-1}
-      role="region"
-    >
+    <Box id="delta" className="container-left" tabIndex={-1} role="region">
       <Box
         ref={sectionRef}
         height="450vh" // control this to determine the height
@@ -83,10 +78,17 @@ function Delta() {
       ></Box>
 
       <Box className="sticky-container">
-        <motion.div style={{ width: "100%", height: "30vh", display: 'flex', justifyContent: 'center'}}>
+        <motion.div
+          style={{
+            width: "100%",
+            height: "30vh",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <motion.div
-            className="top-paragraph-container text-container-left" 
-            style={{ height: "30vh", width: '100%', opacity: topIssueOpacity }}
+            className="top-paragraph-container text-container-left"
+            style={{ height: "30vh", width: "100%", opacity: topIssueOpacity }}
           >
             <IssueTopParagraph />
           </motion.div>
@@ -113,7 +115,10 @@ function Delta() {
             }}
           />
         </Box>
-        <motion.div className='text-container-left' style={{ width: "100%", height: "30vh" }}>
+        <motion.div
+          className="text-container-left"
+          style={{ width: "100%", height: "30vh" }}
+        >
           <motion.div
             className="bottom-paragraph-container text-container-left"
             style={{
@@ -163,7 +168,6 @@ function IssueTopParagraph() {
           </span>
           {" \u2014 meet the San Francisco Bay."}
         </Typography>
-
       </Box>
     </>
   )
@@ -175,9 +179,7 @@ function IssueBottomParagraph() {
       <motion.div>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
-            {
-              "This area is home to many communities and farms."
-            }
+            {"This area is home to many communities and farms."}
           </Typography>
           <Typography variant="body1">
             {
@@ -196,7 +198,7 @@ function IssueBottomParagraph() {
               "Increasing salinity threatens local Delta communities and farms. "
             }
           </Typography>
-          <Typography variant='body1'>
+          <Typography variant="body1">
             {
               "It also puts water exports to San Joaquin Valley farms and cities in Southern California at risk. "
             }
@@ -219,12 +221,18 @@ function AdaptationTopParagraph() {
       </Box>
       <Box className="paragraph" component="article">
         <Typography variant="body1">
-          {
-            "For example, "
-          }
-          <span style={{fontWeight: 'bold'}}><a href="https://delta-just-transitions-ucdavis.hub.arcgis.com/" style={{ color: "#f2f0ef", textDecoration: "underline" }}
-          >Just Transitions in the Delta: Drought, Salinity, and Sea Level Rise</a></span>
-          , is a research effort studying a wide range of adaptation strategies to address salinity intrusion.
+          {"For example, "}
+          <span style={{ fontWeight: "bold" }}>
+            <a
+              href="https://delta-just-transitions-ucdavis.hub.arcgis.com/"
+              style={{ color: "#f2f0ef", textDecoration: "underline" }}
+            >
+              Just Transitions in the Delta: Drought, Salinity, and Sea Level
+              Rise
+            </a>
+          </span>
+          , is a research effort studying a wide range of adaptation strategies
+          to address salinity intrusion.
         </Typography>
         <Typography variant="body1">
           {
@@ -256,18 +264,16 @@ function AdaptationBottomParagraph() {
       </Box>
       <Box className="paragraph" component="article">
         <Typography variant="body1">
-          {
-            "The proposed "
-          }
-          <span style={{fontWeight: 'bold'}}>Delta Conveyance Project</span> {" "}
+          {"The proposed "}
+          <span style={{ fontWeight: "bold" }}>
+            Delta Conveyance Project
+          </span>{" "}
           {
             "would create a large tunnel to move water from the Sacramento River to the Delta pumps. "
           }
         </Typography>
         <Typography variant="body1">
-          {
-            "This tunnel would protect water exports from rising sea levels. "
-          }
+          {"This tunnel would protect water exports from rising sea levels. "}
         </Typography>
         <Typography variant="body1">
           {

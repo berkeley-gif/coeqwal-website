@@ -28,12 +28,27 @@ function Snowmelt() {
       ref={sectionRef}
       className="container-row"
       height="100vh"
-      width='100%'
+      width="100%"
       tabIndex={-1}
       role="region"
     >
-      <Box width='50%' height='100%' sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-        <motion.div className='text-container-left' style={{ opacity: firstParagraphOpacity, marginBottom: '20px', paddingRight: '10px' }}>
+      <Box
+        width="50%"
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <motion.div
+          className="text-container-left"
+          style={{
+            opacity: firstParagraphOpacity,
+            marginBottom: "20px",
+            paddingRight: "10px",
+          }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="h4">
               {"Losing Nature's Water Storage"}
@@ -57,7 +72,10 @@ function Snowmelt() {
             </Typography>
           </Box>
         </motion.div>
-        <motion.div className='text-container-left' style={{ opacity: secondParagraphOpacity, paddingRight: '10px'  }}>
+        <motion.div
+          className="text-container-left"
+          style={{ opacity: secondParagraphOpacity, paddingRight: "10px" }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {"But warmer winters mean "}
@@ -77,7 +95,10 @@ function Snowmelt() {
             </Typography>
           </Box>
         </motion.div>
-        <motion.div className='text-container-left' style={{ opacity: secondParagraphOpacity, paddingRight: '10px'  }}>
+        <motion.div
+          className="text-container-left"
+          style={{ opacity: secondParagraphOpacity, paddingRight: "10px" }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {"The impact is that "}
@@ -93,13 +114,28 @@ function Snowmelt() {
           </Box>
         </motion.div>
       </Box>
-      <Box width='50%' height='100%' sx={{backgroundColor: '#458992ff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 20px'}}>
-        <Box width='100%' height='40%' sx={{backgroundColor: '#1f313aff'}}>
-          
-        </Box>
-        <Box width='100%' height='40%' sx={{backgroundColor: '#437b97ff'}}>
-          
-        </Box>
+      <Box
+        width="50%"
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "0 20px",
+        }}
+      >
+        <Box
+          width="100%"
+          height="100%"
+          sx={{
+            position: "relative",
+            justifyContent: "center",
+            backgroundImage: "url('/drafts/supply-swe.png')",
+            backgroundSize: "100% auto",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></Box>
       </Box>
     </Box>
   )

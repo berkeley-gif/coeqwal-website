@@ -10,7 +10,8 @@
     fill: #F2F0EF;
 }
 
-#hydroclimate-line-title{
+#hydroclimate-line-title,
+#hydroclimate-scatter-title{
     fill: #F1B143;
 }
 
@@ -55,7 +56,8 @@
         font-size: 14px;
     }
 
-    #hydroclimate-line-title{
+    #hydroclimate-line-title,
+    #hydroclimate-scatter-title{
         font-size: 16px;
     }
 }
@@ -74,7 +76,8 @@
         font-size: 14px;
     }
 
-    #hydroclimate-line-title{
+    #hydroclimate-line-title,
+    #hydroclimate-scatter-title{
         font-size: 16px;
     }
 }

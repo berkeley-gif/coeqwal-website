@@ -106,6 +106,16 @@ function ClimateScatter({ onSelect }: { onSelect: (model: string) => void }) {
 
   return (
     <svg ref={svgRef} width="100%" height="100%">
+      <text
+        id="hydroclimate-scatter-title"
+        x={size.width / 2}
+        y={margin.top}
+        dx={"0.75em"}
+        dy={"2em"}
+        style={{ textAnchor: "middle" }}
+      >
+        Below uses dummy data; right side uses real data
+      </text>
       <XAxis size={size} yOffset={yScale(0)} xScale={xScale} />
       <Rules size={size} xScale={xScale} yScale={yScale} />
       <ClimatePoint
@@ -129,9 +139,9 @@ function ClimatePoint({
   xScale: d3.ScaleLinear<number, number>
   yScale: d3.ScaleLinear<number, number>
   onSelect: (model: string) => void
-  }) {
+}) {
   const breakpoint = useBreakpoint()
-  
+
   return (
     <>
       {data.map((entry, idx) => (
@@ -141,7 +151,11 @@ function ClimatePoint({
           style={{ cursor: "pointer" }}
         >
           <circle
-            r={(breakpoint === 'xs' || breakpoint === 'sm' || breakpoint == "lg") ? 4 : 6}
+            r={
+              breakpoint === "xs" || breakpoint === "sm" || breakpoint == "lg"
+                ? 4
+                : 6
+            }
             fill="#F1B143"
             cx={xScale(entry.temperature)}
             cy={yScale(entry.precipitation)}
