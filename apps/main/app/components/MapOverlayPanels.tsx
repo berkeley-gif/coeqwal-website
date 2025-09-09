@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { TwoColumnPanel } from "@repo/ui"
+import { useState, useEffect, useRef, useCallback } from "react"
+import { TwoColumnPanel, GlossaryLinkedText } from "@repo/ui"
 import { Box, Typography, useTheme, Theme, Button, LocationOnIcon } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useCalSimToggle } from "./CalSimContext"
+import { useDrawerStore } from "@repo/state"
 import { motion } from "@repo/motion"
 import Image from "next/image"
 
@@ -12,10 +13,22 @@ export default function MapOverlayPanels() {
   const theme = useTheme() // eslint-disable-line @typescript-eslint/no-unused-vars
   const { t } = useTranslation()
   const { isCalSimVisible, toggleCalSim, showBasins, toggleBasins } = useCalSimToggle()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
   
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
   const firstPanelRef = useRef<HTMLDivElement>(null)
+
+  // Handler to open glossary to specific entry
+  const handleGlossaryOpen = useCallback(
+    (glossaryEntry: string) => {
+      setDrawerContent({
+        selectedTerm: glossaryEntry,
+      })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
   
   // Intersection observer for first panel entrance animation
   useEffect(() => {
@@ -132,15 +145,26 @@ export default function MapOverlayPanels() {
               {t("toolsPanel.boldText")}
             </Typography>
 
-            <Typography
-              variant="body1"
+            <Box
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 mb: 2,
+                fontSize: "1rem",
+                lineHeight: 1.5,
               }}
             >
-              {t("toolsPanel.content")}
-            </Typography>
+              <GlossaryLinkedText
+                text={t("toolsPanel.content")}
+                terms={[
+                  { name: "CalSim", glossaryTerm: "CalSim" },
+                  { name: "California's major water projects", glossaryTerm: "California's major water projects" },
+                  { name: "Central Valley", glossaryTerm: "Central Valley" },
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.blue.darkest}
+                underlineColor={theme.palette.blue.medium}
+              />
+            </Box>
 
             {/* CalSim toggle button */}
             <Button
@@ -286,142 +310,112 @@ export default function MapOverlayPanels() {
                       borderRadius: "6px",
                       backgroundColor: (theme) => theme.palette.brand.sky, // Same as overlay panel
                       "&:hover": {
-                        backgroundColor: (theme) => theme.palette.grey[100],
+                        backgroundColor: "rgba(255, 255, 255, 0.3)", // Semi-transparent white
                       },
                       transition: "background-color 0.2s ease",
                     }}
                     onClick={toggleBasins}
                   >
-                    <Box
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        flexShrink: 0,
-                        position: 'relative',
-                        opacity: showBasins ? 1 : 0.6,
-                        transition: "all 0.2s ease",
-                        // Create white stroke with no fill effect
-                        '& img': {
-                          filter: `
-                            brightness(0) 
-                            saturate(100%) 
-                            invert(100%) 
-                            drop-shadow(1px 0px 0px white) 
-                            drop-shadow(-1px 0px 0px white) 
-                            drop-shadow(0px 1px 0px white) 
-                            drop-shadow(0px -1px 0px white)
-                            drop-shadow(1px 1px 0px white)
-                            drop-shadow(-1px -1px 0px white)
-                            drop-shadow(1px -1px 0px white)
-                            drop-shadow(-1px 1px 0px white)
-                          `,
-                        }
-                      }}
-                    >
-                      <Image
-                        src="/images/legend/basins.svg"
-                        alt="Basins legend icon"
-                        width={32}
-                        height={32}
-                        style={{
-                          display: 'block',
-                        }}
-                      />
-                    </Box>
-                    <Typography 
+                    <Typography
                       variant="body2"
                       sx={{
-                        fontWeight: showBasins ? 600 : 400,
-                        color: showBasins 
-                          ? (theme) => theme.palette.accent.gold
-                          : "inherit",
+                        fontSize: "16px", // Same as map basin labels
+                        fontWeight: "bold",
+                        color: "#ffffff",
+                        textAlign: "center",
+                        lineHeight: 1.1,
+                        textShadow: "0 0 3px #3a4574, 0 0 6px #3a4574", // Smooth glow effect instead of harsh outline
+                        fontFamily: "Neue Haas Grotesk, Arial, sans-serif",
+                        opacity: showBasins ? 1 : 0.6,
                         transition: "all 0.2s ease",
+                        flexShrink: 0,
+                        cursor: "pointer",
                       }}
                     >
-                      Basins {showBasins ? "(on)" : "(off)"}
+                      {showBasins ? "Basins" : "Show Basins"}
                     </Typography>
                   </Box>
+                  {/* Sacramento River nodes - deeper blue */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.primary.main,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        backgroundColor: "#186b88", // theme.palette.blue.dark
+                        border: "1px solid #ffffff", // Finer white stroke
                         boxShadow: (theme) => theme.shadows[1],
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2">Channel</Typography>
+                    <Typography variant="body2">Sacramento River nodes</Typography>
                   </Box>
+                  
+                  {/* San Joaquin River nodes - purple */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.brand.water,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        backgroundColor: "#7b1fa2", // Purple
+                        border: "1px solid #ffffff", // Finer white stroke
                         boxShadow: (theme) => theme.shadows[1],
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2">Delta</Typography>
+                    <Typography variant="body2">San Joaquin River nodes</Typography>
                   </Box>
+                  
+                  {/* California Aqueduct nodes - gold */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.nature.forest,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        backgroundColor: "#ffd87e", // theme.palette.accent.gold
+                        border: "1px solid #ffffff", // Finer white stroke
                         boxShadow: (theme) => theme.shadows[1],
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2">Delivery</Typography>
+                    <Typography variant="body2">California Aqueduct nodes</Typography>
                   </Box>
+                  
+                  {/* Delta Mendota Canal nodes - earth brown */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.blue.dark,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        backgroundColor: "#c2a14f", // theme.palette.nature.earth
+                        border: "1px solid #ffffff", // Finer white stroke
                         boxShadow: (theme) => theme.shadows[1],
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2">Sacramento River</Typography>
+                    <Typography variant="body2">Delta Mendota Canal nodes</Typography>
                   </Box>
+                  
+                  {/* All other nodes - sky blue (map panel color) */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
                       sx={{
                         width: 12,
                         height: 12,
                         borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.blue.darkest,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
+                        backgroundColor: "#92C1D5", // theme.palette.brand.sky - map panel color
+                        border: "1px solid #ffffff", // Finer white stroke
                         boxShadow: (theme) => theme.shadows[1],
                         flexShrink: 0,
                       }}
                     />
-                    <Typography variant="body2">San Joaquin River</Typography>
+                    <Typography variant="body2">Other system nodes</Typography>
                   </Box>
                 </Box>
-                <Typography
-                  variant="body2"
-                  sx={{ 
-                    mt: (theme) => theme.spacing(1.5), 
-                    fontStyle: "italic", 
-                    color: "text.secondary" 
-                  }}
-                >
-                  Click any facility to trace water journey
-                </Typography>
+
               </Box>
             )}
           </Box>
@@ -454,15 +448,27 @@ export default function MapOverlayPanels() {
               mr: { xs: 8, md: 16 },
             }}
           >
-            <Typography
-              variant="body1"
+            <Box
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
                 mb: (theme) => theme.spacing(2),
+                fontSize: "1rem",
+                lineHeight: 1.5,
               }}
             >
-              {t("scenariosPanel.part1")}
-            </Typography>
+              <GlossaryLinkedText
+                text={t("scenariosPanel.part1")}
+                terms={[
+                  { name: "COEQWAL", glossaryTerm: "COEQWAL" },
+                  { name: "CalSim", glossaryTerm: "CalSim" },
+                  { name: "operational strategies", glossaryTerm: "Operational strategies" },
+                  { name: "hydroclimates", glossaryTerm: "Hydroclimates" },
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.blue.darkest}
+                underlineColor={theme.palette.blue.medium}
+              />
+            </Box>
             <Box
               sx={{
                 width: "100%",
@@ -513,14 +519,24 @@ export default function MapOverlayPanels() {
               mr: { xs: 8, md: 16 }, // Moved further right to show more map // Push panel right, for now
             }}
           >
-            <Typography
-              variant="body1"
+            <Box
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
+                fontSize: "1rem",
+                lineHeight: 1.5,
               }}
             >
-              {t("scenariosPanel.part2")}
-            </Typography>
+              <GlossaryLinkedText
+                text={t("scenariosPanel.part2")}
+                terms={[
+                  { name: "operational strategies", glossaryTerm: "Operational strategies" },
+                  { name: "hydroclimates", glossaryTerm: "Hydroclimates" },
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.blue.darkest}
+                underlineColor={theme.palette.blue.medium}
+              />
+            </Box>
           </Box>
         }
       />

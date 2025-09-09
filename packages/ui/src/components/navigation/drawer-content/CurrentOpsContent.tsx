@@ -18,6 +18,7 @@ import Diversity3Icon from "@mui/icons-material/Diversity3"
 import React from "react"
 import LocalShippingIcon from "@mui/icons-material/LocalShipping"
 import ThermostatIcon from "@mui/icons-material/Thermostat"
+import CloudIcon from "@mui/icons-material/Cloud"
 
 export interface CurrentOpsContentProps {
   /** Function called when the close button is clicked */
@@ -50,6 +51,25 @@ const glossaryTerms: GlossaryTerm[] = [
     term: "COEQWAL",
     definition:
       "A collaborative project focused on exploring alternative water management decisions and supporting more equitable and inclusive stewardship of California's water system.",
+  },
+  {
+    icon: <EngineeringIcon />,
+    term: "Operational strategies",
+    definition:
+      "Different approaches to managing California's water system, including changes to reservoir operations, water allocation priorities, infrastructure usage, and environmental flow requirements. The COEQWAL project has developed 30 operational strategies that represent alternative ways California could manage its water resources to better meet diverse needs and adapt to changing conditions.",
+  },
+  {
+    icon: <CloudIcon />,
+    term: "Hydroclimates", 
+    definition:
+      "Patterns of water availability that reflect different climate conditions, including precipitation, temperature, and snowpack patterns. COEQWAL evaluates water management strategies under multiple hydroclimates - the climate experienced in the recent past plus five additional patterns representing possible future climates affected by climate change.",
+  },
+  {
+    icon: <AccountBalanceIcon />,
+    term: "California's major water projects",
+    definition:
+      "Large-scale water infrastructure systems including the State Water Project (SWP) operated by the California Department of Water Resources and the Central Valley Project (CVP) operated by the U.S. Bureau of Reclamation. These projects include major reservoirs like Shasta and Oroville, the California Aqueduct, Delta pumping facilities, and hundreds of miles of canals that move water throughout the Central Valley and to Southern California.",
+    seeAlso: "Central Valley, CalSim",
   },
   {
     icon: <WaterIcon />,
