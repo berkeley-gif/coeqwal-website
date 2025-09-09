@@ -255,9 +255,9 @@ const themeValues = {
   // Border radius values
   borderRadius: {
     pill: "999px",
-    rounded: "16px",
-    card: "16px",
-    standard: "16px",
+    rounded: "8px",
+    card: "8px",
+    standard: "8px",
     none: "0px",
   },
 
@@ -313,7 +313,7 @@ const themeValues = {
   mapPromptDialog: {
     backgroundColor: "rgba(0, 0, 0, 0.8)", // theme.background.overlay.dark
     textColor: "#FFFFFF", // theme.palette.utility.white
-    borderRadius: "16px", // theme.borderRadius.card
+    borderRadius: "8px", // theme.borderRadius.card
     padding: "16px", // theme.borderRadius.card
     minWidth: "280px",
     boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",

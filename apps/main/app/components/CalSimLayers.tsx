@@ -8,6 +8,63 @@ import type { NetworkGeoJSONResponse } from "./CalSimMarkers"
 
 const API_BASE_URL = "https://api.coeqwal.org"
 
+// More specific API response type (for future use when API is fully migrated)
+// interface EnhancedTrailResponse {
+//   type: "FeatureCollection"
+//   trail_info: {
+//     name: string
+//     description: string
+//     trail_type: "enhanced" | "foundation" | "comprehensive" | "complete"
+//     feature_count: number
+//     progression_level: {
+//       level: number
+//       description: string
+//       data_quality: string
+//       coverage: string
+//       expected_features: string
+//     }
+//     additional_infrastructure: number
+//   }
+//   features: TrailFeature[]
+// }
+
+// TrailFeature interface (for future use when API is fully migrated)
+// interface TrailFeature {
+//   type: "Feature"
+//   geometry: {
+//     type: "Point" | "LineString" | "MultiLineString"
+//     coordinates: [number, number] | [number, number][] | [number, number][][]
+//   }
+//   properties: {
+//     id: number
+//     short_code: string
+//     schematic_type: "node" | "arc"
+//     type: "STR" | "PS" | "WTP" | "WWTP" | "CH" | "DD" | "DA" | "D" | "OM"
+//     sub_type?: string
+//     from_node?: string
+//     to_node?: string
+//     river_name?: string
+//     arc_name?: string
+//     hydrologic_region?: string
+//     geometry_type: "point" | "line"
+//     source: "trail_backbone" | "enhanced_infrastructure"
+//     name?: string
+//     capacity_taf?: number
+//   }
+// }
+
+// System Pattern Constants
+const SYSTEM_PATTERNS = {
+  SACRAMENTO: "SAC",
+  SAN_JOAQUIN: "SJR",
+  CALIFORNIA_AQUEDUCT: "CAA",
+  DELTA_MENDOTA_CANAL: "DMC",
+  OLD_MIDDLE_RIVER: "OMR",
+  MOKELUMNE: "MOK",
+  AMERICAN_RIVER: "AMR",
+  FEATHER_RIVER: "FTR",
+} as const
+
 export default function CalSimLayers() {
   const { isCalSimVisible } = useCalSimToggle()
   const theme = useTheme()
@@ -71,7 +128,7 @@ export default function CalSimLayers() {
         return `${baseSize}rem`
       },
     }
-  }, [])
+  }, [majorReservoirData])
 
   // Load CalSim data when visible
   const loadCalSimData = useCallback(async () => {
@@ -125,6 +182,30 @@ export default function CalSimLayers() {
     }
   }, [isCalSimVisible, loadCalSimData])
 
+  // Memoize Feature Filtering for performance
+  const { majorReservoirFeatures, regularFeatures } = useMemo(() => {
+    if (!geoJsonData) return { majorReservoirFeatures: [], regularFeatures: [] }
+
+    const major = geoJsonData.features.filter((f) => {
+      const props = f.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      return (
+        (props.schematic_type === "node" || props.element_type === "node") && // eslint-disable-line react/prop-types
+        props.type === "STR" && // eslint-disable-line react/prop-types
+        majorReservoirCodes.has(props.short_code) // eslint-disable-line react/prop-types
+      )
+    })
+
+    const regular = geoJsonData.features.filter((f) => {
+      const props = f.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      return (
+        (props.schematic_type === "node" || props.element_type === "node") && // eslint-disable-line react/prop-types
+        (props.type !== "STR" || !majorReservoirCodes.has(props.short_code)) // eslint-disable-line react/prop-types
+      )
+    })
+
+    return { majorReservoirFeatures: major, regularFeatures: regular }
+  }, [geoJsonData, majorReservoirCodes])
+
   // Don't render if CalSim is not visible or no data
   if (!isCalSimVisible || !geoJsonData) {
     return null
@@ -133,24 +214,6 @@ export default function CalSimLayers() {
   console.log(
     "🎨 HYBRID RENDERING: Mapbox layers for regular nodes + DOM markers for reservoirs...",
   )
-
-  // Extract features for different rendering approaches
-  const majorReservoirFeatures = geoJsonData.features.filter((f) => {
-    const props = f.properties as any
-    return (
-      props.schematic_type === "node" &&
-      props.type === "STR" &&
-      majorReservoirCodes.has(props.short_code)
-    )
-  })
-
-  const regularFeatures = geoJsonData.features.filter((f) => {
-    const props = f.properties as any
-    return (
-      props.schematic_type === "node" &&
-      (props.type !== "STR" || !majorReservoirCodes.has(props.short_code))
-    )
-  })
 
   console.log(
     `   🏞️ Major Reservoirs (DOM LocationOnIcon): ${majorReservoirFeatures.length}`,
@@ -167,7 +230,7 @@ export default function CalSimLayers() {
         type="geojson"
         data={{
           type: "FeatureCollection",
-          features: regularFeatures as any,
+          features: regularFeatures as any, // eslint-disable-line @typescript-eslint/no-explicit-any
         }}
       >
         {/* Regular infrastructure nodes */}
@@ -178,7 +241,11 @@ export default function CalSimLayers() {
             "circle-radius": [
               "case",
               // Sacramento River nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SAC"],
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.SACRAMENTO,
+              ],
               [
                 "case",
                 ["==", ["get", "type"], "CH"],
@@ -192,7 +259,11 @@ export default function CalSimLayers() {
                 4, // SAC Default - bigger
               ],
               // San Joaquin River nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SJR"],
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.SAN_JOAQUIN,
+              ],
               [
                 "case",
                 ["==", ["get", "type"], "CH"],
@@ -206,7 +277,11 @@ export default function CalSimLayers() {
                 4, // SJR Default - bigger
               ],
               // California Aqueduct nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "CAA"],
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.CALIFORNIA_AQUEDUCT,
+              ],
               [
                 "case",
                 ["==", ["get", "type"], "CH"],
@@ -220,7 +295,11 @@ export default function CalSimLayers() {
                 4, // CAA Default - bigger
               ],
               // Delta Mendota Canal nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "DMC"],
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.DELTA_MENDOTA_CANAL,
+              ],
               [
                 "case",
                 ["==", ["get", "type"], "CH"],
@@ -248,17 +327,33 @@ export default function CalSimLayers() {
             ],
             "circle-color": [
               "case",
-              // Sacramento River nodes (SAC prefix) - deeper blue
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SAC"],
+              // Sacramento River nodes - deeper blue
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.SACRAMENTO,
+              ],
               "#186b88", // theme.palette.blue.dark
-              // San Joaquin River nodes (SJR prefix) - purple
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SJR"],
+              // San Joaquin River nodes - purple
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.SAN_JOAQUIN,
+              ],
               "#7b1fa2", // Purple
-              // California Aqueduct nodes (CAA prefix) - gold
-              ["==", ["slice", ["get", "short_code"], 0, 3], "CAA"],
+              // California Aqueduct nodes - gold
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.CALIFORNIA_AQUEDUCT,
+              ],
               "#ffd87e", // theme.palette.accent.gold
-              // Delta Mendota Canal nodes (DMC prefix) - earth brown
-              ["==", ["slice", ["get", "short_code"], 0, 3], "DMC"],
+              // Delta Mendota Canal nodes - earth brown
+              [
+                "==",
+                ["slice", ["get", "short_code"], 0, 3],
+                SYSTEM_PATTERNS.DELTA_MENDOTA_CANAL,
+              ],
               "#c2a14f", // theme.palette.nature.earth
               // Default: map panel overlay color (sky blue)
               "#92C1D5", // theme.palette.brand.sky - same as map panel overlay
@@ -273,8 +368,8 @@ export default function CalSimLayers() {
       {/* DOM MARKERS: Beautiful LocationOnIcon markers for 8 major reservoirs */}
       {majorReservoirFeatures.map((feature) => {
         const coordinates = feature.geometry.coordinates as [number, number]
-        const props = feature.properties as any
-        const { id, short_code } = props
+        const props = feature.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
+        const { id, short_code } = props // eslint-disable-line react/prop-types
 
         // Get TAF data from our curated major reservoir data
         const reservoirInfo = majorReservoirData.get(short_code)

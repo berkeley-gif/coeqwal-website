@@ -134,8 +134,7 @@ const glossaryTerms: GlossaryTerm[] = [
   {
     icon: <LocationOnIcon />,
     term: "Scenario themes",
-    definition:
-      "Groups of related operational strategies.",
+    definition: "Groups of related operational strategies.",
   },
   {
     icon: <CompareIcon />,
