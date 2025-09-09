@@ -254,83 +254,282 @@ const glossaryTerms: GlossaryTerm[] = [
     tiers: [
       {
         tier: "Tier 1",
-        color: "tier1", // Green theme reference
-        description: "Full demand achieved for at least 95% of years",
+        color: "tier1",
+        description: "Community water systems receive enough water to meet their full demands in at least 95% of years",
       },
       {
         tier: "Tier 2",
-        color: "tier2", // Light blue theme reference
-        description: "Functional minimums achieved for 100% of years",
+        color: "tier2",
+        description: "Community water systems receive enough water to maintain human health and safety in addition to meeting minimal industrial and commercial demands in all years",
       },
       {
         tier: "Tier 3",
-        color: "tier3", // Orange theme reference
-        description:
-          "Human health and safety minimums achieved for 100% of years",
+        color: "tier3",
+        description: "Community water systems receive enough water to deliver the minimum water needed for human health and safety in all years",
       },
       {
         tier: "Tier 4",
-        color: "tier4", // Red theme reference
-        description:
-          "Human health and safety minimums not achieved for all years",
+        color: "tier4",
+        description: "Human health and safety minimums are not achieved in all years",
       },
     ],
   },
   {
     icon: <LocationOnIcon />,
-    term: "Agricultural deliveries",
+    term: "Agricultural revenue",
     definition:
-      "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agricultural water use represents the largest share of California's developed water supply.",
+      "The change to average agricultural revenue compared to today's outcomes.",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "Agricultural revenue increases compared to historical values",
+      },
+      {
+        tier: "Tier 2", 
+        color: "tier2",
+        description: "Agricultural revenue declines less than 5% compared to historical values",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3", 
+        description: "Agricultural revenue declines between 5% and 20% compared to historical values",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "Agricultural revenue decreases more than 20% compared to historical values",
+      },
+    ],
   },
   {
     icon: <LocationOnIcon />,
     term: "Environmental health",
     definition:
-      "River flows, Delta outflows, Delta estuary health, and deliveries to wetland refuges.",
+      "See Environmental flows for detailed information about river flow patterns and ecosystem support.",
+    seeAlso: "Environmental flows",
   },
   {
     icon: <LocationOnIcon />,
-    term: "Delta health",
-    definition: " ",
-  },
-  {
-    icon: <LocationOnIcon />,
-    term: "Reservoir storage",
-    definition: " ",
-  },
-  {
-    icon: <LocationOnIcon />,
-    term: "Groundwater storage",
-    definition: " ",
-  },
-  {
-    icon: <LocationOnIcon />,
-    term: "Salmon abundance",
-    definition: " ",
+    term: "Delta estuary status",
+    definition:
+      "Measures the degree to which outflows from the Delta vary from year to year, within acceptable ranges. In general, greater variation provides more suitable habitat for native species in the Delta.",
     tiers: [
       {
         tier: "Tier 1",
         color: "tier1",
-        description:
-          "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 8 times its starting size, using a rolling 10-year average",
+        description: "Healthy variations in flow in at least 90% of years",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description:
-          "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population grows 2 to 8 times its starting size, using a rolling 10-year average",
+        description: "Healthy variations in flow in at least 70% of years",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description:
-          "At least an 80% chance (>800 out of 1,000 model runs) that the salmon population exceeds its starting size, using a rolling 10-year average",
+        description: "Healthy variations in flow in at least 50% of years",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description:
-          "The change in population size does not satisfy Tier 1, 2, or 3",
+        description: "Healthy variations in flow in fewer than 50% of years",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Environmental flows",
+    definition:
+      "Tiers reflect the extent to which river flows vary seasonally and year-to-year within ranges to support healthy riverine ecosystems.",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "Flows vary enough between years and seasons to support a healthy, functioning ecosystem in 90% of years",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "Flows in the wet season and spring are below target ranges, but flows in the dry season are sufficient in 90% of years",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "Seasonal flow targets are not achieved in wet season, spring, or dry season, but existing regulatory minimum flows are met in 90% of years",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "Minimum flow requirements are met in fewer than 90% of years",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Freshwater for Delta exports",
+    definition:
+      "Tier reflects how often salinity at the Delta pumping stations meets or exceeds water quality requirements for drinking water or irrigation.",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "Average salinity at both Banks & Jones pumping plants meets water quality standards for drinking and irrigation year round in 95% of years",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "Average salinity at Banks and Jones pumping plants remains suitable for drinking and irrigation (but with potential need for extra treatment) for at least 10 months per year in 95% of years",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "Average salinity at Banks and Jones pumping plants is unsuitable for drinking and irrigation for 2 months in any year, in more than 5% of years at either site",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "Average salinity at Banks and Jones pumping plants is unsuitable for irrigation or drinking water for more than two months in any year",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Freshwater for in-Delta uses",
+    definition:
+      "Tiers reflect how often water in the western Delta is fresh enough for in-Delta uses.",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Groundwater storage",
+    definition:
+      "Tier reflects how groundwater storage conditions (total water in the theoretically accessible aquifer system) compares to a reference condition. Groundwater responds slowly (at least compared to surface water systems) and can exhibit long-term upward or downward storage trends. Different scenarios may also exhibit shifts in the magnitude of storage but with a similar trend. The tiers attempt to assign tier designations at the Water Budget Area (WBA) level based on these trend and magnitude characteristics.",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "The groundwater trend in a WBA is stable or increasing from 1960-2021 and average total storage is greater than in the reference scenario",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "The groundwater trend in a WBA is stable or increasing but total storage is less than in the reference",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "The groundwater trend is declining (not stable or increasing as in Tiers 1 or 2) but at a moderate rate (fitted linear trend is less negative than -0.015 ft/yr)",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "Groundwater trends in a WBA are declining more severely, at a rate greater than 0.015 ft/year (slope <= -0.015 ft/yr)",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Reservoir storage",
+    definition:
+      "Tier reflects how full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October).",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "Reservoir storage is frequently high. There is a 90% chance that end-of-April reservoir storage is greater than the median April value observed over the last 30 years (or length of the observational record, whichever is longer)",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "Reservoir storage is lower than in Tier 1 but similar to recent history. On average, for two years out of three the reservoir storage is greater than the 33rd percentile from the observational record over the last 30 years",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "Reservoir storage tends to be lower than in Tier 2 and is slightly lower than recent history. For 3 years out of 10, the reservoir storage is greater than the 33rd percentile from the observational record over the last 30 years",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "Reservoir storage is lower than in Tier 3 and is much lower than recent history. In Tier 4 reservoir storage exceeds the historical 33rd percentile less than 3 years in 10",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Population size of Winter Run Chinook salmon on the Sacramento River",
+    definition:
+      "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "There is at least an 80% chance that the population grows to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "There is at least an 80% chance that the population grows to 2 to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "There is at least an 80% chance that the population of Winter Run Chinook salmon on the Sacramento River grows from its current size",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
+      },
+    ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Salmon abundance",
+    definition:
+      "Tiers reflect whether the population shows strong growth (Tier 1), moderate growth (Tier 2), little or no change (Tier 3), or experiences population decline (Tier 4).",
+    tiers: [
+      {
+        tier: "Tier 1",
+        color: "tier1",
+        description: "There is at least an 80% chance that the population grows to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+      },
+      {
+        tier: "Tier 2",
+        color: "tier2",
+        description: "There is at least an 80% chance that the population grows to 2 to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+      },
+      {
+        tier: "Tier 3",
+        color: "tier3",
+        description: "There is at least an 80% chance that the population of Winter Run Chinook salmon on the Sacramento River grows from its current size",
+      },
+      {
+        tier: "Tier 4",
+        color: "tier4",
+        description: "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
       },
     ],
   },

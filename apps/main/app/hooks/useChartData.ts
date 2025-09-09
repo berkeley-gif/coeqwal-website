@@ -48,11 +48,11 @@ export const useChartData = ({
   const axes = useMemo(
     () => [
       "Community deliveries",
-      "Agricultural deliveries",
-      "Environmental deliveries",
+      "Agricultural revenue",
+      "Environmental flows",
       "Reservoir storage",
       "Groundwater storage",
-      "Delta salinity",
+      "Delta estuary status",
       "Salmon abundance",
       "Distributional equity",
     ],
@@ -69,11 +69,11 @@ export const useChartData = ({
       name: "Current Operations",
       values: {
         "Community deliveries": 0.0,
-        "Agricultural deliveries": 0.0,
-        "Environmental deliveries": 0.0,
+        "Agricultural revenue": 0.0,
+        "Environmental flows": 0.0,
         "Reservoir storage": 0.0,
         "Groundwater storage": 0.0,
-        "Delta salinity": 0.0,
+        "Delta estuary status": 0.0,
         "Salmon abundance": 0.0,
         "Distributional equity": 0.0,
       },
@@ -124,15 +124,15 @@ export const useChartData = ({
         values: {
           "Community deliveries":
             Math.sin(baseVariation * Math.PI * 2 + randomSeed) * 0.8,
-          "Agricultural deliveries":
+          "Agricultural revenue":
             Math.cos(baseVariation * Math.PI * 1.5 + randomSeed) * 0.9,
-          "Environmental deliveries":
+          "Environmental flows":
             Math.sin(baseVariation * Math.PI * 3 + randomSeed + 1) * 0.7,
           "Reservoir storage":
             Math.cos(baseVariation * Math.PI * 2.5 + randomSeed + 2) * 0.6,
           "Groundwater storage":
             Math.sin(baseVariation * Math.PI * 1.8 + randomSeed + 3) * 0.9,
-          "Delta salinity":
+          "Delta estuary status":
             Math.cos(baseVariation * Math.PI * 2.2 + randomSeed + 4) * 0.5,
           "Salmon abundance":
             Math.sin(baseVariation * Math.PI * 2.8 + randomSeed + 5) * 0.8,
