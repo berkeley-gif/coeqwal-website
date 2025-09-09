@@ -824,8 +824,7 @@ export function CurrentOpsContent({
     // Handle Learn more link
     if (hasLearnMore) {
       console.log("Has Learn More link detected for:", currentTerm)
-      const learnMoreText =
-        "Learn more in the Current operations theme"
+      const learnMoreText = "Learn more in the Current operations theme"
       const learnMoreIndex = definition.indexOf(learnMoreText)
       const beforeLearnMore = definition.substring(0, learnMoreIndex)
       const afterLearnMore = definition.substring(

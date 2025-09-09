@@ -258,40 +258,6 @@ export function Header({
           )}
           <Button
             variant={buttonVariant}
-            sx={{
-              ...buttonStyle,
-              color: textColor,
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                backgroundColor: "white",
-                color: (theme) => theme.palette.blue.darkest,
-                "&::before": {
-                  opacity: 1,
-                },
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                background:
-                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
-                transition: "left 0.5s ease",
-                opacity: 0,
-              },
-              "&:hover::before": {
-                left: "100%",
-              },
-            }}
-          >
-            {componentText.buttons.about}
-          </Button>
-          <Button
-            variant={buttonVariant}
             onClick={onDataClick}
             sx={{
               ...buttonStyle,

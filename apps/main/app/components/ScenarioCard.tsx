@@ -13,10 +13,10 @@ interface ScenarioCardProps {
   minimizedTitle?: string
 }
 
-export default function ScenarioCard({ 
-  isMinimized = false, 
+export default function ScenarioCard({
+  isMinimized = false,
   onToggleMinimized,
-  minimizedTitle = "Current operations"
+  minimizedTitle = "Current operations",
 }: ScenarioCardProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -55,7 +55,7 @@ export default function ScenarioCard({
       setSelectedOutcome(outcome)
       console.log("🎯 Outcome selected:", outcome)
     }
-    
+
     // Also open glossary drawer with the specific outcome term
     handleGlossaryOpen(outcome)
   }
@@ -288,7 +288,8 @@ export default function ScenarioCard({
                               color: theme.palette.blue.darkest,
                               fontWeight: 500,
                               "&:hover": {
-                                backgroundColor: theme.palette.blue.bright + "30",
+                                backgroundColor:
+                                  theme.palette.blue.bright + "30",
                               },
                             },
                           },
@@ -316,8 +317,8 @@ export default function ScenarioCard({
                     >
                       Click
                     </Box>{" "}
-                    on each outcome to see how it is defined and how the
-                    results are distributed across the state on the map.
+                    on each outcome to see how it is defined and how the results
+                    are distributed across the state on the map.
                   </Typography>
                 </Box>
 
@@ -325,7 +326,7 @@ export default function ScenarioCard({
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr", // 2 columns for outcomes
+                    gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns for outcomes (2 rows)
                     gap: 1.5,
                     alignItems: "start",
                   }}
@@ -341,12 +342,14 @@ export default function ScenarioCard({
                         cursor: "pointer",
                         p: 1,
                         borderRadius: theme.borderRadius.rounded,
-                        border: selectedOutcome === outcome 
-                          ? `2px solid ${theme.palette.blue.bright}` 
-                          : "2px solid transparent",
-                        backgroundColor: selectedOutcome === outcome 
-                          ? theme.palette.blue.bright + "10" 
-                          : "transparent",
+                        border:
+                          selectedOutcome === outcome
+                            ? `2px solid ${theme.palette.blue.bright}`
+                            : "2px solid transparent",
+                        backgroundColor:
+                          selectedOutcome === outcome
+                            ? theme.palette.blue.bright + "10"
+                            : "transparent",
                         transition: "all 0.2s ease",
                         "&:hover": {
                           backgroundColor: theme.palette.blue.bright + "05",

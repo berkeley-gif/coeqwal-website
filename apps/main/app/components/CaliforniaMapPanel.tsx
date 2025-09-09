@@ -20,8 +20,11 @@ function MapCenterController() {
   const { flyTo } = useMap()
 
   useEffect(() => {
-    console.log("🗺️ MapCenterController effect triggered:", { isPanelsExpanded, flyTo: !!flyTo })
-    
+    console.log("🗺️ MapCenterController effect triggered:", {
+      isPanelsExpanded,
+      flyTo: !!flyTo,
+    })
+
     if (!flyTo) {
       console.log("🗺️ flyTo not available yet")
       return
@@ -90,7 +93,7 @@ export default function CaliforniaMapPanel({
       >
         {/* Map center controller for panel expansion */}
         <MapCenterController />
-        
+
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
 
@@ -103,7 +106,6 @@ export default function CaliforniaMapPanel({
         {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
         {/* <CalSimMarkers /> */}
       </Map>
-
     </Box>
   )
 }
