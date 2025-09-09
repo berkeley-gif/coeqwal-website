@@ -1,8 +1,8 @@
 "use client"
 
 import { motion} from "@repo/motion"
-import { Box, Typography, Stack } from "@repo/ui/mui"
-import { useEffect, useRef, useMemo, useState } from "react"
+import { Box, Typography } from "@repo/ui/mui"
+import { useEffect, useRef, useState } from "react"
 import * as d3 from "d3"
 
 function SectionTransition() {
@@ -18,17 +18,19 @@ function Balance() {
   return (
     <Box
       id="balance"
-      className="container-center"
+      className="container-row"
       height="100vh"
-      sx={{ justifyContent: "center" }}
+      width='100%'
       tabIndex={-1}
       role="region"
     >
-      <Stack spacing={12} direction="column" style={{ margin: "1rem 3rem" }}>
+      <Box width='100%' height='100%' sx={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center'}}>
         <motion.div
+          className='text-container-left'
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 1 }}
+          style={{marginTop: '10rem'}}
         >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
@@ -42,24 +44,6 @@ function Balance() {
               }
             </Typography>
           </Box>
-        </motion.div>
-        <Box
-          className="paragraph"
-          sx={{
-            width: "100%",
-            height: "40vh",
-            justifyContent: "center",
-            display: "flex",
-            backgroundColor: "#757575",
-          }}
-        >
-          Placeholder
-        </Box>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
@@ -68,58 +52,10 @@ function Balance() {
             </Typography>
           </Box>
         </motion.div>
-      </Stack>
+      </Box>
     </Box>
   )
 }
-
-// function Bullet() {
-//   return (
-//     <Box
-//       id="bullet"
-//       className="container-center"
-//       height="100vh"
-//       sx={{
-//         justifyContent: "center",
-//         backgroundImage: "url('/drafts/trajectory.png')",
-//         backgroundSize: "contain",
-//         backgroundPosition: "center",
-//         backgroundRepeat: "no-repeat",
-//         position: "relative",
-//       }}
-//       tabIndex={-1}
-//       role="region"
-//     >
-//       <motion.div
-//         initial={{ scaleX: 1 }}
-//         whileInView={{ scaleX: 0 }}
-//         transition={{ duration: 2, ease: "easeInOut", delay: 0.5 }}
-//         style={{
-//           width: "100%",
-//           height: "100%",
-//           position: "absolute",
-//           transformOrigin: "right",
-//           backgroundColor: "#1a4472",
-//         }}
-//       ></motion.div>
-//       <motion.div
-//         initial={{ opacity: 0 }}
-//         whileInView={{ opacity: 1 }}
-//         transition={{ duration: 1, delay: 0.5 }}
-//       >
-//         <Box className="paragraph" component="article">
-//           <Typography variant="h2">
-//             {"What is clear is that there is no silver bullet"}
-//           </Typography>
-//           <Typography variant="h2">
-//             {"to solve California's water problems."}
-//           </Typography>
-//         </Box>
-//       </motion.div>
-//     </Box>
-//   )
-// }
-
 
 // function to compute curve paths
 function computeCurvePaths(width: number, height: number): string[] {
@@ -141,10 +77,11 @@ function computeCurvePaths(width: number, height: number): string[] {
 
   // Four lanes, slightly spread, crossings near the center
   const pairs: ReadonlyArray<[number, number]> = [
-    [-0.36, 0.0],
-    [-0.18, Math.PI * 0.5],
-    [ 0.18, Math.PI * 1.0],
-    [ 0.36, Math.PI * 1.5],
+    [-0.12, 0.0],
+    [-0.06, Math.PI * 0.5],
+    [0.09, Math.PI * 1.0],
+    [ 0.03, Math.PI * 1.0],
+    [ 0.12, Math.PI * 1.5],
   ]
 
   const lineGen = d3.line<[number, number]>()
@@ -188,6 +125,7 @@ function Bullet() {
       id="bullet"
       className="container-center"
       height="100vh"
+      width='100%'
       sx={{
         justifyContent: "center",
         position: "relative",
@@ -209,9 +147,10 @@ function Bullet() {
             key={i}
             d={d}
             fill="none"
-            stroke="#e2b267"
+            stroke="#F1B143"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
+            strokeOpacity={0.5}
             initial={{ pathLength: 0, opacity: 0 }}
             whileInView={{ pathLength: 1, opacity: 0.5 }}
             viewport={{ once: false, amount: 0.2 }} // retrigger

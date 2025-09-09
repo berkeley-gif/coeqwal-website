@@ -40,9 +40,9 @@ function SectionResolution() {
           }}
         >
           <motion.div style={{ x, width: "300vw", display: "flex" }}>
-            <Box className="container-center">Test </Box>
+            <Box height="50vh" width="50vw"> </Box>
             <Scenarios />
-            <Box className="container-center"> Transition</Box>
+            <Box className="container-center"></Box>
             {/* Probably need a dummy slide for the transition*/}
           </motion.div>
         </div>
@@ -73,8 +73,7 @@ function Hydroclimate() {
   return (
     <Box
       id="hydroclimate"
-      className="container-center"
-      sx={{ justifyContent: "center" }}
+      className="container-left"
       tabIndex={-1}
       role="region"
     >
@@ -85,57 +84,59 @@ function Hydroclimate() {
         sx={{ position: "relative" }}
       ></Box>
 
-      <Box className="container-center sticky-container">
-        <motion.div style={{ opacity: firstParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="h4">
+      <Box className="sticky-container">
+        <Box width='100%' height='100%' sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+          <motion.div className='text-container-left' style={{ opacity: firstParagraphOpacity, padding: '0 5rem' }}>
+            <Box className="paragraph" component="article">
+              <Typography variant="h4">
+                {
+                  "COEQWAL: Planning for different hydroclimates and management decisions"
+                }
+              </Typography>
+            </Box>
+            <Box className="paragraph" component="article">
+              <Typography variant="body1" style={{ fontWeight: "bold" }}>
+                {"This is where COEQWAL comes in."}
+              </Typography>
+            </Box>
+            <Box className="paragraph" component="article">
+              <Typography variant="body1">
+                {
+                  "Using a water planning model called CalSim, COEQWAL helps us study how climate change might affect California's water."
+                }
+              </Typography>
+            </Box>
+          </motion.div>
+          <motion.div className='text-container-left' style={{ opacity: secondParagraphOpacity, padding: '0 5rem' }}>
+            <Box className="paragraph" component="article">
+              <Typography variant="body1">
+                {
+                  "COEQWAL studies five plausible future hydroclimates that correspond to different levels of concern for our water system. Some involve moderate increases in temperature, precipitation, and streamflow, while others involve much greater changes."
+                }
+              </Typography>
+
+            </Box>
+          </motion.div>
+          <Box className="container-center-horizontal" height="50vh" width="80%">
+            <HydroClimateContainer />
+          </Box>
+          <Box className="paragraph" component="article" style={{ padding: '0 5rem'}}>
+            <Typography variant="caption">
               {
-                "COEQWAL: Planning for different hydroclimates and management decisions"
+                "Hydroclimate changes in precipitation, temperature, and seasonal streamflow (bands show the interquartile range) relative to historical conditions (1922–2021)."
               }
             </Typography>
           </Box>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1" style={{ fontWeight: "bold" }}>
-              {"This is where COEQWAL comes in."}
-            </Typography>
-          </Box>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "Using a water planning model called CalSim, COEQWAL helps us study how climate change might affect California's water."
-              }
-            </Typography>
-          </Box>
-        </motion.div>
-        <Box className="container-center-horizontal" height="50vh" width="80%">
-          <HydroClimateContainer />
         </Box>
-        <Box className="paragraph" component="article">
-          <Typography variant="caption">
-            {
-              "Hydroclimate changes in precipitation, temperature, and seasonal streamflow (bands show the interquartile range) relative to historical conditions (1922–2021). See more: "
-            }
-            <u>{"Hydroclimate futures FAQ"}</u>
-          </Typography>
-        </Box>
-        <motion.div style={{ opacity: secondParagraphOpacity }}>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {
-                "COEQWAL studies five plausible future hydroclimates that correspond to different levels of concern for our water system."
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Some involve moderate increases in temperature, precipitation, and streamflow, while others involve much greater changes."
-              }
-            </Typography>
-          </Box>
-        </motion.div>
       </Box>
     </Box>
   )
 }
+
+/* 
+
+
+*/
 
 function Scenarios() {
   return (

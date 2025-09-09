@@ -71,8 +71,7 @@ function Delta() {
   return (
     <Box
       id="delta"
-      className="container-center"
-      sx={{ justifyContent: "center" }}
+      className="container-left"
       tabIndex={-1}
       role="region"
     >
@@ -83,16 +82,16 @@ function Delta() {
         sx={{ position: "relative" }}
       ></Box>
 
-      <Box className="container-center sticky-container">
-        <motion.div style={{ width: "100%", height: "30vh" }}>
+      <Box className="sticky-container">
+        <motion.div style={{ width: "100%", height: "30vh", display: 'flex', justifyContent: 'center'}}>
           <motion.div
-            className="top-paragraph-container"
-            style={{ height: "30vh", opacity: topIssueOpacity }}
+            className="top-paragraph-container text-container-left" 
+            style={{ height: "30vh", width: '100%', opacity: topIssueOpacity }}
           >
             <IssueTopParagraph />
           </motion.div>
           <motion.div
-            className="top-paragraph-container"
+            className="top-paragraph-container text-container-left"
             style={{ height: "30vh", opacity: topAdaptationOpacity }}
           >
             <AdaptationTopParagraph />
@@ -113,14 +112,10 @@ function Delta() {
               setMapReady(true)
             }}
           />
-          {/* <Box style={{
-            width: '100px', height: '100px', backgroundColor: 'teal',
-            position: 'absolute', top: 0, left: '30%'
-          }}></Box>*/}
         </Box>
-        <motion.div style={{ width: "100%", height: "30vh" }}>
+        <motion.div className='text-container-left' style={{ width: "100%", height: "30vh" }}>
           <motion.div
-            className="bottom-paragraph-container"
+            className="bottom-paragraph-container text-container-left"
             style={{
               height: "30vh",
               opacity: bottomIssueOpacity,
@@ -130,7 +125,7 @@ function Delta() {
             <IssueBottomParagraph />
           </motion.div>
           <motion.div
-            className="bottom-paragraph-container"
+            className="bottom-paragraph-container text-container-left"
             style={{
               height: "30vh",
               opacity: bottomAdaptationOpacity,
@@ -168,11 +163,7 @@ function IssueTopParagraph() {
           </span>
           {" \u2014 meet the San Francisco Bay."}
         </Typography>
-        <Typography variant="body1">
-          {
-            "This area is home to many communities and farms. It is also where huge pumps move freshwater south to supply cities and farms across the state."
-          }
-        </Typography>
+
       </Box>
     </>
   )
@@ -185,19 +176,29 @@ function IssueBottomParagraph() {
         <Box className="paragraph" component="article">
           <Typography variant="body1">
             {
-              "As the sea level rises, salty ocean water extends further into the Delta."
+              "This area is home to many communities and farms."
+            }
+          </Typography>
+          <Typography variant="body1">
+            {
+              "It is also where huge pumps move freshwater south of the Delta to supply cities and farms across the state."
             }
           </Typography>
         </Box>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
             {
-              "The saltier water threatens local Delta communities and farms. It also puts water exports to San Joaquin Valley farms and cities in Southern California at risk."
+              "As sea levels rise, salty ocean water can extend further into the Delta through higher tides. "
             }
           </Typography>
           <Typography variant="body1">
             {
-              "To address the threat of sea level rise, several strategies are being considered."
+              "Increasing salinity threatens local Delta communities and farms. "
+            }
+          </Typography>
+          <Typography variant='body1'>
+            {
+              "It also puts water exports to San Joaquin Valley farms and cities in Southern California at risk. "
             }
           </Typography>
         </Box>
@@ -212,19 +213,25 @@ function AdaptationTopParagraph() {
       <Box className="paragraph" component="article">
         <Typography variant="body1">
           {
-            "For example, the state has proposed to construct a large tunnel, known as the Delta Conveyance Project, to move water from the Sacramento River to the Delta pumps."
+            "People are looking for ways to manage salinity and other water system problems brought by climate change."
           }
         </Typography>
       </Box>
       <Box className="paragraph" component="article">
         <Typography variant="body1">
           {
-            "in order to limit the risks of rising sea levels to water exports. "
+            "For example, "
           }
+          <span style={{fontWeight: 'bold'}}><a href="https://delta-just-transitions-ucdavis.hub.arcgis.com/" style={{ color: "#f2f0ef", textDecoration: "underline" }}
+          >Just Transitions in the Delta: Drought, Salinity, and Sea Level Rise</a></span>
+          , is a research effort studying a wide range of adaptation strategies to address salinity intrusion.
         </Typography>
         <Typography variant="body1">
           {
-            "Opponents of this project argue that it would harm Delta communities and ecosystems."
+            "These include physical changes to the Delta itself \u2014 such as restoration and nature-based solutions, which can redirect where and how tides flow into the Delta."
+          }
+          {
+            " These changes can make better conditions for fish and create new recreational opportunities for outdoor recreation."
           }
         </Typography>
       </Box>
@@ -238,12 +245,33 @@ function AdaptationBottomParagraph() {
       <Box className="paragraph" component="article">
         <Typography variant="body1">
           {
-            "Other adaptation strategies are also being explored that involve ‘nature-based solutions.’ "
+            "The Just Transition project is also exploring possibilities for operable gates, freshwater corridors, and other water conveyance infrastructure."
           }
         </Typography>
         <Typography variant="body1">
           {
-            "Setting back levees along rivers to restore floodplain habitats, for example, gives rivers more room to safely flood and promotes groundwater recharge."
+            "These options could be combined with policy changes, sending more freshwater into the Delta and running reservoirs differently."
+          }
+        </Typography>
+      </Box>
+      <Box className="paragraph" component="article">
+        <Typography variant="body1">
+          {
+            "The proposed "
+          }
+          <span style={{fontWeight: 'bold'}}>Delta Conveyance Project</span> {" "}
+          {
+            "would create a large tunnel to move water from the Sacramento River to the Delta pumps. "
+          }
+        </Typography>
+        <Typography variant="body1">
+          {
+            "This tunnel would protect water exports from rising sea levels. "
+          }
+        </Typography>
+        <Typography variant="body1">
+          {
+            "However, opponents of this project argue that it would harm Delta communities and ecosystems.  "
           }
         </Typography>
       </Box>

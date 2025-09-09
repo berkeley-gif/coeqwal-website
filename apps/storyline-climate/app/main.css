@@ -40,16 +40,15 @@ html{
     z-index: 1000;
 }
 
-.container{
+.container-row{
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     padding-left: 5rem;
     padding-right: 5rem;
     width: max-content;
     pointer-events: auto;
-    margin-bottom: 20vh;
 }
 
 .container-center, .container-center-horizontal{
@@ -61,7 +60,23 @@ html{
     pointer-events: auto;
 }
 
-.container-center{
+.container-left{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    text-align: left;
+    pointer-events: auto;
+    align-items: center;
+}
+
+.text-container-left{
+    text-align: left;
+    width: 100%;
+    word-break: break-word;   
+    overflow-wrap: break-word;
+}
+
+.container-center, .container-left{
     flex-direction: column;
 }
 
@@ -87,6 +102,8 @@ html{
     .paragraph {
         margin-bottom: 3rem;
         z-index: 2; /* testing */
+        
+        box-sizing: border-box
     }
 }
 
@@ -94,6 +111,9 @@ html{
     .paragraph {
         margin-bottom: 1.5rem;
         z-index: 2; /* testing */
+        max-width: 100%;
+        box-sizing: border-box
+
     }
 }
 
@@ -128,7 +148,7 @@ html{
 
 
 .selection-panel {
-    position: fixed;
+    position: absolute;
     right: 30px;
     padding: 10px;
     z-index: 2;
@@ -167,13 +187,13 @@ html{
 }
 
 .top-paragraph-container, .bottom-paragraph-container{
-    width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    position: absolute;
+    position: absolute; /* needs to be there*/
     left: 0;
     right: 0;
+    padding-left: 5rem;
+    padding-right: 5rem;
 }
 
 .top-paragraph-container{
