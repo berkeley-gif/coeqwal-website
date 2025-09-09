@@ -540,7 +540,7 @@ export default function MapOverlayPanels() {
                     name: "operational strategies",
                     glossaryTerm: "Operational strategies",
                   },
-                  { name: "hydroclimates", glossaryTerm: "Hydroclimates" },
+                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.blue.darkest}
@@ -588,7 +588,7 @@ export default function MapOverlayPanels() {
                 terms={[
                   { name: "scenarios", glossaryTerm: "Scenarios" },
                   { name: "operational strategies", glossaryTerm: "Operational strategies" },
-                  { name: "hydroclimates", glossaryTerm: "Hydroclimates" },
+                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
                   { name: "water allocations", glossaryTerm: "Water allocations" },
                 ]}
                 onActivate={handleGlossaryOpen}
