@@ -85,7 +85,7 @@ import type { CSSProperties } from "react"
 // Scale progression using Perfect Fourth ratio (1.333):
 // • h1: 5.8rem (92.8px) - Hero headlines "Rethink California Water" (Neue Haas Display Medium)
 // • h2: 4.35rem (69.6px) - Section headlines "What is the future..." (Neue Haas Display Medium)
-// • h3: 3.26rem (52.2px) - Subsection headlines (Neue Haas Display Medium)
+// • h3: 2.8rem (44.8px) - Subsection headlines (Neue Haas Display Medium)
 // • h4: 2.45rem (39.2px) - Card titles and smaller headlines (Neue Haas Text Regular)
 // • h5: 1.84rem (29.4px) - Labels and minor headlines (Neue Haas Display Medium)
 // • h6: 1.38rem (22.1px) - Small headlines and captions (Neue Haas Display SemiBold)
@@ -114,7 +114,7 @@ const typeScale = {
   // Headline sizes using Perfect Fourth ratio (1.333) - refined scale
   h1: "5.8rem", // 92.8px - Hero size
   h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
-  h3: "3.26rem", // 52.2px - Subsection headers (h2 ÷ 1.333)
+  h3: "2.8rem", // 44.8px - Subsection headers (updated for map overlay panels)
   h4: "2.45rem", // 39.2px - Card titles (h3 ÷ 1.333)
   h5: "1.84rem", // 29.4px - Minor headlines (h4 ÷ 1.333)
   h6: "1.38rem", // 22.1px - Section headers (h5 ÷ 1.333)
