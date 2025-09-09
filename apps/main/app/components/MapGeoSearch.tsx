@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { TextField, Box, IconButton, Theme } from "@repo/ui/mui"
-import { SearchIcon, MyLocationIcon } from "@repo/ui/mui"
+import { SearchIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 
 interface MapGeoSearchProps {

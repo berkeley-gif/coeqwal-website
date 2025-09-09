@@ -59,7 +59,7 @@ export interface NetworkNode {
   id: number
   short_code: string
   name: string
-  coordinates: [number, number]
+    coordinates: [number, number]
   element_type: string
   subtype?: string
   river_name?: string
@@ -277,7 +277,7 @@ export default function CalSimMarkers() {
     // Major reservoirs use the scaling system, all others use uniform small size
     if (isMajorReservoir) {
       // This won't actually be used since major reservoirs use location icons
-      return 16
+        return 16
     }
 
     // All non-major-reservoir nodes get the same small size
@@ -324,9 +324,9 @@ export default function CalSimMarkers() {
           }
           downstreamMap.get(fromNodeId)!.push(toNodeId)
         }
-      })
-
-      return { upstreamMap, downstreamMap }
+    })
+    
+    return { upstreamMap, downstreamMap }
     },
     [allNodes],
   )
@@ -337,15 +337,15 @@ export default function CalSimMarkers() {
       upstreamMap: Map<number, number[]>,
       visited = new Set<number>(),
     ): Set<number> => {
-      if (visited.has(nodeId)) return visited
-      visited.add(nodeId)
-
-      const upstreamNodes = upstreamMap.get(nodeId) || []
+    if (visited.has(nodeId)) return visited
+    visited.add(nodeId)
+    
+    const upstreamNodes = upstreamMap.get(nodeId) || []
       upstreamNodes.forEach((upstreamNode) => {
-        findUpstreamNodes(upstreamNode, upstreamMap, visited)
-      })
-
-      return visited
+      findUpstreamNodes(upstreamNode, upstreamMap, visited)
+    })
+    
+    return visited
     },
     [],
   )
@@ -356,15 +356,15 @@ export default function CalSimMarkers() {
       downstreamMap: Map<number, number[]>,
       visited = new Set<number>(),
     ): Set<number> => {
-      if (visited.has(nodeId)) return visited
-      visited.add(nodeId)
-
-      const downstreamNodes = downstreamMap.get(nodeId) || []
+    if (visited.has(nodeId)) return visited
+    visited.add(nodeId)
+    
+    const downstreamNodes = downstreamMap.get(nodeId) || []
       downstreamNodes.forEach((downstreamNode) => {
-        findDownstreamNodes(downstreamNode, downstreamMap, visited)
-      })
-
-      return visited
+      findDownstreamNodes(downstreamNode, downstreamMap, visited)
+    })
+    
+    return visited
     },
     [],
   )
@@ -579,17 +579,17 @@ export default function CalSimMarkers() {
   // NEW: Clean geopackage network traversal
   const handleNodeClick = useCallback(
     async (node: NetworkNode) => {
-      if (selectedNode?.id === node.id) {
-        setSelectedNode(null)
-        setNetworkArcs([])
-        setConnectedNodeIds(new Set())
+    if (selectedNode?.id === node.id) {
+      setSelectedNode(null)
+      setNetworkArcs([])
+      setConnectedNodeIds(new Set())
         setNetworkMetadata(null)
-        return
-      }
+      return
+    }
 
-      setSelectedNode(node)
-      setIsLoadingNetwork(true)
-
+    setSelectedNode(node)
+    setIsLoadingNetwork(true)
+    
       console.log(
         `🔍 Loading CLEAN GEOPACKAGE network for ${node.short_code} (${node.name})`,
       )
@@ -625,15 +625,15 @@ export default function CalSimMarkers() {
           const { upstreamMap, downstreamMap } = buildNetworkMaps(
             networkData.arcs,
           )
-          const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
-          const downstreamNodes = findDownstreamNodes(node.id, downstreamMap)
+      const upstreamNodes = findUpstreamNodes(node.id, upstreamMap)
+      const downstreamNodes = findDownstreamNodes(node.id, downstreamMap)
           const allConnectedNodes = new Set([
             ...upstreamNodes,
             ...downstreamNodes,
           ])
 
           setNetworkArcs(networkData.arcs)
-          setConnectedNodeIds(allConnectedNodes)
+      setConnectedNodeIds(allConnectedNodes)
           setNetworkMetadata(fallbackData.metadata)
 
           console.log(
@@ -687,16 +687,16 @@ export default function CalSimMarkers() {
           console.log(
             `🎉 Excellent geopackage connectivity! Found ${allConnectedNodes.size} connected facilities`,
           )
-        }
-      } catch (error) {
-        console.error("Failed to load geopackage network:", error)
-        setSelectedNode(null)
-        setNetworkArcs([])
-        setConnectedNodeIds(new Set())
-        setNetworkMetadata(null)
-      } finally {
-        setIsLoadingNetwork(false)
       }
+    } catch (error) {
+        console.error("Failed to load geopackage network:", error)
+      setSelectedNode(null)
+      setNetworkArcs([])
+      setConnectedNodeIds(new Set())
+        setNetworkMetadata(null)
+    } finally {
+      setIsLoadingNetwork(false)
+    }
     },
     [selectedNode, buildNetworkMaps, findUpstreamNodes, findDownstreamNodes],
   )
@@ -751,16 +751,16 @@ export default function CalSimMarkers() {
           type="geojson"
           data={
             {
-              type: "FeatureCollection",
-              features: networkArcs.map((arc) => ({
+            type: "FeatureCollection",
+            features: networkArcs.map((arc) => ({
                 type: "Feature" as const,
-                properties: {
-                  id: arc.id,
+              properties: {
+                id: arc.id,
                   strategy: arc.strategy || "geopackage_clean",
                   depth: arc.depth || 1,
-                },
-                geometry: arc.geometry,
-              })),
+              },
+              geometry: arc.geometry,
+            })),
             } as GeoJSON.FeatureCollection
           }
         >
@@ -790,16 +790,16 @@ export default function CalSimMarkers() {
         const isSelected = selectedNode?.id === node.id
 
         return (
-          <Marker
+        <Marker
             key={`${instanceId}-regular-${node.id}-${node.short_code}`} // Unique key with instance ID
             longitude={node.coordinates[0]}
             latitude={node.coordinates[1]}
-          >
-            <Box
+        >
+          <Box
               onMouseEnter={() => setHoveredNode(node)}
-              onMouseLeave={() => setHoveredNode(null)}
+            onMouseLeave={() => setHoveredNode(null)}
               onClick={() => handleNodeClick(node)}
-              sx={{
+            sx={{
                 width: getNodeSize(
                   false,
                   connectedNodeIds.has(node.id),
@@ -810,16 +810,16 @@ export default function CalSimMarkers() {
                   connectedNodeIds.has(node.id),
                   isSelected,
                 ),
-                borderRadius: "50%",
-                backgroundColor: getNodeColor(
+              borderRadius: "50%",
+              backgroundColor: getNodeColor(
                   node,
                   connectedNodeIds.has(node.id),
                   isSelected,
                   theme,
                 ),
                 border: isSelected ? "3px solid #ff6b35" : "2px solid white",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
                 "&:hover": { transform: "scale(1.2)" },
               }}
             />
@@ -989,9 +989,9 @@ export default function CalSimMarkers() {
           <Box sx={{ padding: 1, minWidth: 200, maxWidth: 350 }}>
             <Typography variant="h6" sx={{ mb: 0.5, fontSize: "0.9rem" }}>
               {hoveredNode.display_name}
-            </Typography>
-            <Typography
-              variant="body2"
+                </Typography>
+                  <Typography
+                    variant="body2"
               sx={{ mb: 0.25, fontSize: "0.75rem", color: "text.secondary" }}
             >
               {hoveredNode.short_code} • ID: {hoveredNode.id}
@@ -1005,35 +1005,35 @@ export default function CalSimMarkers() {
                 <strong>Capacity:</strong>{" "}
                 {hoveredNode.capacity_taf.toLocaleString()} TAF
                 {hoveredNode.rank && ` (Rank #${hoveredNode.rank})`}
-              </Typography>
-            )}
+                  </Typography>
+                )}
             {hoveredNode.river_name && (
               <Typography variant="body2" sx={{ mb: 0.25, fontSize: "0.8rem" }}>
                 <strong>River:</strong> {hoveredNode.river_name}
                 {hoveredNode.river_mile && ` (Mile ${hoveredNode.river_mile})`}
-              </Typography>
-            )}
+                  </Typography>
+                )}
             {connectedNodeIds.has(hoveredNode.id) &&
               selectedNode?.id !== hoveredNode.id && (
-                <Typography
-                  variant="body2"
+                  <Typography
+                    variant="body2"
                   sx={{ fontSize: "0.8rem", color: "warning.main" }}
                 >
                   <strong>Part of clean geopackage network</strong>
-                </Typography>
-              )}
-            <Typography
-              variant="body2"
-              sx={{
-                fontSize: "0.75rem",
-                fontStyle: "italic",
-                mt: 0.5,
+                  </Typography>
+                )}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontSize: "0.75rem",
+                    fontStyle: "italic",
+                    mt: 0.5,
                 color:
                   selectedNode?.id === hoveredNode.id
-                    ? "primary.main"
-                    : "text.secondary",
-              }}
-            >
+                      ? "primary.main" 
+                      : "text.secondary",
+                  }}
+                >
               {isLoadingNetwork && selectedNode?.id === hoveredNode.id
                 ? "Loading clean geopackage network (99.7% connectivity)..."
                 : selectedNode?.id === hoveredNode.id
@@ -1049,11 +1049,11 @@ export default function CalSimMarkers() {
                 {networkMetadata.foundation || "clean_geopackage"} •
                 <strong>Connectivity:</strong>{" "}
                 {networkMetadata.connectivity_rate || "99.7%"}
-              </Typography>
+                </Typography>
             )}
-          </Box>
-        </Popup>
-      )}
+              </Box>
+            </Popup>
+          )}
     </>
   )
 }
