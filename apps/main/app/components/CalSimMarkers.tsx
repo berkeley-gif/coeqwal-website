@@ -112,9 +112,12 @@ export function convertGeoJSONToNetwork(
 ): { nodes: NetworkNode[]; arcs: NetworkArc[] } {
   const nodes: NetworkNode[] = []
   const arcs: NetworkArc[] = []
+  
+  console.log("🔄 Converting GeoJSON to network...")
 
   geoJsonResponse.features.forEach((feature) => {
-    if (feature.properties.type === "node") {
+    // Handle both old format (type === "node") and new format (schematic_type === "node")
+    if (feature.properties.type === "node" || feature.properties.schematic_type === "node") {
       if (!feature.geometry || !feature.geometry.coordinates) {
         return
       }
@@ -124,8 +127,8 @@ export function convertGeoJSONToNetwork(
         short_code: feature.properties.short_code,
         name: feature.properties.display_name || feature.properties.short_code,
         coordinates: coords,
-        element_type: feature.properties.element_type,
-        subtype: feature.properties.subtype,
+        element_type: feature.properties.element_type || feature.properties.type, // Use type if element_type not available
+        subtype: feature.properties.subtype || feature.properties.sub_type, // Handle both naming conventions
         river_name: feature.properties.river_name,
         river_mile: feature.properties.river_mile,
         connectivity_status: feature.properties.connectivity_status,
@@ -136,7 +139,7 @@ export function convertGeoJSONToNetwork(
         capacity_taf: feature.properties.capacity_taf,
         rank: feature.properties.rank,
       })
-    } else if (feature.properties.type === "arc") {
+    } else if (feature.properties.type === "arc" || feature.properties.schematic_type === "arc") {
       if (!feature.geometry || !feature.geometry.coordinates) {
         return
       }
@@ -160,6 +163,7 @@ export function convertGeoJSONToNetwork(
     }
   })
 
+  console.log(`✅ Conversion complete: ${nodes.length} nodes, ${arcs.length} arcs`)
   return { nodes, arcs }
 }
 
@@ -349,24 +353,52 @@ export default function CalSimMarkers() {
 
     try {
       const fetchStart = performance.now()
-      // Use the trails overview API to get network nodes
-      const trailsUrl = `${API_BASE_URL}/api/network/trails/overview`
-      console.log("⚡ Fetching TRAILS OVERVIEW API...")
+      
+      // 🧪 API TRAIL TYPE TESTING - Switch between these options:
+      
+      // TEST 1: Foundation level
+      // const trailsUrl = `${API_BASE_URL}/api/network/trails/overview?trail_type=foundation`
+      
+      // TEST 2: Enhanced level (211 features - ✅ WORKING)
+      // const trailsUrl = `${API_BASE_URL}/api/network/trails/overview?trail_type=enhanced`
+      
+      // TEST 3: Complete level (should show 1000+ features)
+      // const trailsUrl = `${API_BASE_URL}/api/network/trails/overview?trail_type=complete`
+      
+      // TEST 4: Comprehensiv level (currently testing - 92 high-quality backbone features)
+      const trailsUrl = `${API_BASE_URL}/api/network/trails/overview?trail_type=comprehensive`
+      
+      console.log("🧪 TESTING TRAIL TYPE: comprehensive")
       console.log("🎯 URL:", trailsUrl)
 
       const geoJsonResponse = await fetch(trailsUrl)
       const fetchEnd = performance.now()
-      console.log(`⏱️ Trails overview API fetch took: ${(fetchEnd - fetchStart).toFixed(0)}ms`)
+      console.log(`⏱️ API fetch took: ${(fetchEnd - fetchStart).toFixed(0)}ms`)
 
       if (!geoJsonResponse.ok) {
-        throw new Error(`All nodes API failed: ${geoJsonResponse.status}`)
+        console.error(`❌ API Error: ${geoJsonResponse.status} - ${geoJsonResponse.statusText}`)
+        console.error(`🎯 Failed URL: ${trailsUrl}`)
+        throw new Error(`API failed: ${geoJsonResponse.status} ${geoJsonResponse.statusText}`)
       }
 
       const geoJsonData = await geoJsonResponse.json()
-      console.log("📊 Trails overview response:", geoJsonData.metadata)
+      console.log("📊 TEST RESULTS - COMPREHENSIV:")
+      console.log("   📈 Feature Count:", geoJsonData.trail_info?.feature_count || geoJsonData.metadata?.total_features || "unknown")
+      console.log("   🎯 Expected: 92 high-quality backbone features")
+      console.log("   🎯 Data Quality:", geoJsonData.trail_info?.progression_level?.data_quality || "unknown")
+      console.log("   🗂️  Trail Info:", geoJsonData.trail_info)
+      console.log("   📋 Metadata:", geoJsonData.metadata)
 
       if (!isGeoJSONResponse(geoJsonData)) {
         throw new Error("Invalid GeoJSON response format")
+      }
+
+      // 🐛 DEBUG: Check the structure of features
+      console.log("🔍 FEATURE DEBUG:")
+      console.log("   📊 Total features:", geoJsonData.features.length)
+      if (geoJsonData.features.length > 0) {
+        console.log("   🔍 First feature:", geoJsonData.features[0])
+        console.log("   🔍 First feature properties:", geoJsonData.features[0].properties)
       }
 
       const { nodes } = convertGeoJSONToNetwork(geoJsonData)
@@ -449,9 +481,12 @@ export default function CalSimMarkers() {
 
   // Load nodes when CalSim toggle is enabled
   useEffect(() => {
+    console.log("🔄 CalSim toggle effect triggered:", isCalSimVisible)
     if (isCalSimVisible) {
+      console.log("✅ CalSim is visible - calling loadCalSimNodes()")
       loadCalSimNodes()
     } else {
+      console.log("❌ CalSim not visible - clearing nodes")
       setAllNodes([])
       setVisibleNodes([])
       setHoveredNode(null)
@@ -570,6 +605,13 @@ export default function CalSimMarkers() {
   const nodesToRender = isCalSimVisible 
     ? visibleNodes // Show all infrastructure when CalSim is on
     : allNodes.filter(node => node.element_type === 'STR' && majorReservoirCodes.has(node.short_code)) // Only major reservoirs when CalSim is off
+
+  // 🐛 DEBUG: Log rendering state
+  console.log("🎨 RENDER DEBUG:")
+  console.log("   📊 CalSim visible:", isCalSimVisible)
+  console.log("   📊 All nodes:", allNodes.length)
+  console.log("   📊 Visible nodes:", visibleNodes.length)
+  console.log("   📊 Nodes to render:", nodesToRender.length)
 
   // Regular CalSim markers
   console.log(`🎨 Rendering CalSim markers: ${nodesToRender.length} nodes (CalSim: ${isCalSimVisible}, ReservoirMarkers: ${showReservoirMarkers})`)
