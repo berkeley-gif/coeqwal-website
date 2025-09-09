@@ -1,13 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
 
 export default function ProgressiveScenarioPanels() {
-  const theme = useTheme()
   const [showOperationsPanel, setShowOperationsPanel] = useState(false)
   const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -105,41 +104,11 @@ export default function ProgressiveScenarioPanels() {
             }}
             style={{ pointerEvents: "auto" }}
           >
-            {isExpanded ? (
-              // Expanded state: Full ScenarioCard
-              <ScenarioCard
-                isMinimized={isScenarioCardMinimized}
-                onToggleMinimized={() => setIsScenarioCardMinimized(!isScenarioCardMinimized)}
-              />
-            ) : (
-              // Simple state: Just "Operations" text
-              <Box
-                sx={{
-                  p: 3,
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: theme.borderRadius.card,
-                  border: "1px solid",
-                  borderColor: theme.palette.divider,
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                  height: "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: theme.palette.blue.darkest,
-                    fontWeight: 500,
-                    textAlign: "center",
-                  }}
-                >
-                  Operations
-                </Typography>
-              </Box>
-            )}
+            <ScenarioCard
+              isExpanded={isExpanded}
+              isMinimized={isScenarioCardMinimized}
+              onToggleMinimized={() => setIsScenarioCardMinimized(!isScenarioCardMinimized)}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -158,43 +127,13 @@ export default function ProgressiveScenarioPanels() {
             }}
             style={{ pointerEvents: "auto" }}
           >
-            {isExpanded ? (
-              // Expanded state: Full ClimateCard
-              <ClimateCard
-                isMinimized={isClimateCardMinimized}
-                onToggleMinimized={() => setIsClimateCardMinimized(!isClimateCardMinimized)}
-                selectedClimate={selectedClimate}
-                onClimateChange={setSelectedClimate}
-              />
-            ) : (
-              // Simple state: Just "Hydroclimate" text
-              <Box
-                sx={{
-                  p: 3,
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  backdropFilter: "blur(10px)",
-                  borderRadius: theme.borderRadius.card,
-                  border: "1px solid",
-                  borderColor: theme.palette.divider,
-                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                  height: "auto",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    color: theme.palette.blue.darkest,
-                    fontWeight: 500,
-                    textAlign: "center",
-                  }}
-                >
-                  Hydroclimate
-                </Typography>
-              </Box>
-            )}
+            <ClimateCard
+              isExpanded={isExpanded}
+              isMinimized={isClimateCardMinimized}
+              onToggleMinimized={() => setIsClimateCardMinimized(!isClimateCardMinimized)}
+              selectedClimate={selectedClimate}
+              onClimateChange={setSelectedClimate}
+            />
           </motion.div>
         )}
       </AnimatePresence>
