@@ -50,19 +50,31 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <Diversity3Icon />,
     term: "COEQWAL",
     definition:
-      "A collaborative project focused on exploring alternative water management decisions and supporting more equitable and inclusive stewardship of California's water system.",
+      "A collaborative project focused on exploring alternative water management strategies and supporting more equitable and inclusive stewardship of California's water under a changing climate. See 'About COEQWAL' for more information.",
   },
   {
     icon: <EngineeringIcon />,
     term: "Operational strategies",
     definition:
-      "Different approaches to managing California's water system, including changes to reservoir operations, water allocation priorities, infrastructure usage, and environmental flow requirements. The COEQWAL project has developed 30 operational strategies that represent alternative ways California could manage its water resources to better meet diverse needs and adapt to changing conditions.",
+      "Decisions made by water system operators about how to manage water infrastructure and allocate water. These include decisions about when to release water from reservoirs, how much water to pump through canals, how to satisfy regulatory and legal requirements, and how to balance competing demands for water across the system.",
   },
   {
     icon: <CloudIcon />,
-    term: "Hydroclimates",
+    term: "Hydroclimate",
     definition:
-      "Patterns of water availability that reflect different climate conditions, including precipitation, temperature, and snowpack patterns. COEQWAL evaluates water management strategies under multiple hydroclimates - the climate experienced in the recent past plus five additional patterns representing possible future climates affected by climate change.",
+      "Current and projected shifts in California's climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California's water. These hydroclimate futures can be combined with operational strategies to see how water allocation outcomes change under different conditions, hydroclimates.",
+  },
+  {
+    icon: <AccountBalanceIcon />,
+    term: "California Department of Water Resources (DWR)",
+    definition:
+      "A state agency that manages California's water resources. DWR operates the State Water Project and plays a central role in planning, modeling, and allocating water in California.",
+  },
+  {
+    icon: <AccountBalanceIcon />,
+    term: "California water system",
+    definition:
+      "A vast, interconnected network of rivers, reservoirs, aqueducts, dams, canals, and pumps that moves water across the state from mountains and rivers to communities, farms, and ecosystems. It is one of the most physically complex engineered water systems in the world, with an equally complex network of agencies and laws that govern its operation.",
   },
   {
     icon: <AccountBalanceIcon />,
@@ -72,11 +84,65 @@ const glossaryTerms: GlossaryTerm[] = [
     seeAlso: "Central Valley, CalSim",
   },
   {
+    icon: <LocalShippingIcon />,
+    term: "Conveyance",
+    definition:
+      "The movement of water through managed infrastructure such as canals, aqueducts, pipes, and pumps. Conveyance is central to California's water system, which transports water hundreds of miles between regions.",
+  },
+  {
+    icon: <LocalShippingIcon />,
+    term: "Deliveries",
+    definition:
+      "The distribution of water from storage and conveyance systems to end users, including farms, communities, and environmental uses. Water deliveries are managed according to water rights, contracts, and regulatory requirements. See also allocation.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Distributional equity",
+    definition:
+      "How fairly the benefits and burdens of water allocations are shared.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Environmental river flows",
+    definition:
+      "Water maintained in rivers to sustain fish populations and other benefits and services that healthy river ecosystems support.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Environmental water",
+    definition:
+      "Water allocated to benefit the environment, including river flows, Delta outflows for estuary health, and deliveries to wetland refuges.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Groundwater",
+    definition:
+      "Water that is stored underground in aquifers—layers of rock, sand, and soil that hold water. Groundwater is accessed through wells and provides a significant portion of California's water supply, especially during droughts. It is recharged naturally by rainfall and snowmelt, and artificially through managed aquifer recharge programs. Unlike surface water, groundwater moves slowly through underground formations and can take decades to millennia to replenish.",
+  },
+  {
+    icon: <EngineeringIcon />,
+    term: "Delta Conveyance Project",
+    definition:
+      "A proposed water infrastructure project by the state Department of Water Resources designed to improve the reliability of water deliveries from the Sacramento-San Joaquin Delta. The project includes tunnel alternatives that would convey water from the Sacramento River, under the Delta, to pumping plants in the southern Delta. The Bethany Alternative refers to a specific tunnel route ending at Bethany Reservoir instead of Clifton Court Forebay.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Scenario data",
+    definition:
+      "The detailed outputs produced by modeling unique combinations of hydroclimate futures and operational scenarios in CalSim3. The CalSim3 model outputs include things like river flows, reservoir levels, salinity, and water deliveries. These data help us understand and respond to the anticipated effects of specific water management decisions in combination with current or future climate and hydrologic conditions.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Scenario themes",
+    definition:
+      "Groups of related operational strategies.",
+  },
+  {
     icon: <CompareIcon />,
     term: "Scenarios",
     definition:
-      "Unique combinations of operational strategies and climate conditions that show how water might be allocated under different circumstances. COEQWAL uses CalSim to model scenarios that explore alternative ways of managing California's water system, helping to understand trade-offs between different goals and outcomes.",
-    seeAlso: "Operational strategies, Hydroclimates, CalSim",
+      "Combined sets of operational strategies and hydroclimates designed to explore different water management possibilities. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? How will allocations change if the state gets drier? Scenarios help us to understand tradeoffs and impacts.",
+    seeAlso: "Operational strategies, Hydroclimate, CalSim",
   },
   {
     icon: <LocalShippingIcon />,
@@ -84,6 +150,18 @@ const glossaryTerms: GlossaryTerm[] = [
     definition:
       "The distribution of available water among different users including communities, agriculture, and environmental needs. Water allocations are determined by water rights, regulations, and operational decisions, and can vary significantly based on water availability, climate conditions, and management strategies.",
     seeAlso: "Water management decisions, COEQWAL",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Storage",
+    definition:
+      "The holding of water in reservoirs, tanks, and other facilities for later use. Water storage allows California to capture water during wet periods and release it during dry periods, helping to balance supply and demand across seasons and years.",
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Surface water",
+    definition:
+      "Surface water is water that flows over or is stored on the Earth's surface in natural or engineered systems. It includes water flowing in rivers and artificial channels and water stored in lakes and reservoirs. Surface water plays a key role in ecosystems, agriculture, community supply, and flood control.",
   },
   {
     icon: <WaterIcon />,
@@ -175,13 +253,13 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <LocationOnIcon />,
     term: "Central Valley",
     definition:
-      "The large, flat valley running roughly 450 miles north to south throughout the center of California. The Central Valley forms the heart of California's agricultural region. It includes the Sacramento Valley in the north and the San Joaquin Valley in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water through the Central Valley, but also to neighboring water districts like East Bay MUD and the Los Angeles Metropolitan Water District.",
+      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California. It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water through the Central Valley, but also to cities along the coast, including in the San Francisco Bay Area and Southern California.",
   },
   {
     icon: <EngineeringIcon />,
     term: "CalSim",
     definition:
-      "Computational model used to simulate how water moves through California's Central Valley water system. CalSim is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management decisions could impact the Central Valley. Scenarios are the result of a computational model that estimates how much water is available for each purpose in each region. This scenario has the following summary outcomes. Because specific allocations vary locally across the state as well as during wet and dry years, we use four measurements per outcome to show how much or how often the water allocated reaches certain goals.",
+      "A computational water planning model used to simulate how water moves through California's Central Valley water system. CalSim is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of operational strategies and hydroclimates could affect water allocations and different outcomes for people and the environment.",
   },
   {
     icon: <ThermostatIcon />,
@@ -190,10 +268,16 @@ const glossaryTerms: GlossaryTerm[] = [
       "The ongoing shifts in California's climate patterns, including rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Different climate scenarios represent potential future conditions based on varying precipitation and temperature patterns. These scenarios help evaluate how water management strategies perform under different climate conditions.",
   },
   {
+    icon: <LocalShippingIcon />,
+    term: "Allocation",
+    definition:
+      "The amount of water allocated to a particular water users, based on available water supplies, regulations, and priorities established by law and policy. In the CalSim model, available water is distributed across the Central Valley to satisfy agricultural, community, and environmental water demands. CalSim estimates the amount of water delivered to every water use specified in the model for each month in a 100-year period, which may represent historical conditions or future hydroclimates.",
+  },
+  {
     icon: <Psychology />,
     term: "Actionable insights",
     definition:
-      "Information and data that can be used to support decision-making, advocacy, or planning. COEQWAL helps turn complex scenario data into actionable insights for communities, agencies, and advocates.",
+      "Information and data that can be used to support decision-making, advocacy, or planning. COEQWAL helps turn complex hydroclimate and operational strategies data into actionable insights for communities, agencies, and advocates.",
   },
   {
     icon: <WaterIcon />,
@@ -248,7 +332,7 @@ const glossaryTerms: GlossaryTerm[] = [
     icon: <SettingsIcon />,
     term: "Current operations",
     definition:
-      "The baseline water management scenario that represents how California's Central Valley water system operates today. This includes current operations of the State Water Project (SWP) managed by the California Department of Water Resources and the Central Valley Project (CVP) operated by the U.S. Bureau of Reclamation. Current operations involve coordinated management of reservoirs, pumping stations, and water deliveries to balance competing demands from urban areas, agriculture, and environmental needs. The system moves water from northern California rivers and reservoirs through the Sacramento-San Joaquin Delta to southern California and the Central Valley. This baseline scenario serves as the foundation for comparing alternative water management approaches and understanding potential trade-offs in water allocation decisions.",
+      "This operational strategy shows how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated. It relies on a CalSim model simulation developed by the Department of Water Resources in 2020 that represents current operations of the State Water Project and Central Valley Project. This operational strategy includes Temporary Urgency Change Petitions (TUCPs), which allow flexibility during droughts to release water in ways that protect fish and wildlife. This operational strategy also represents 2020 agricultural land use in the Central Valley. 'Current operations for California water' serves as a baseline to understand how water is allocated to different users in the state, and how allocations vary from year to year. This also allows us to understand how potential changes to operations and climate may affect water allocations in the future.",
     seeAlso:
       "California Department of Water Resources (DWR), U.S. Bureau of Reclamation, Water management decisions",
   },
@@ -291,6 +375,12 @@ const glossaryTerms: GlossaryTerm[] = [
           "Human health and safety minimums are not achieved in all years",
       },
     ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Agricultural deliveries",
+    definition:
+      "The amount of water delivered to farms and agricultural operations for crop irrigation, livestock, and food processing. Agriculture uses the largest share of California's developed water supply.",
   },
   {
     icon: <LocationOnIcon />,
