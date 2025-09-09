@@ -16,7 +16,7 @@ export default function ProgressiveScenarioPanels() {
   // State for expanded card functionality
   const [isScenarioCardMinimized, setIsScenarioCardMinimized] = useState(false)
   const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
-  const [selectedClimate, setSelectedClimate] = useState(1)
+  const [selectedClimate, setSelectedClimate] = useState(1) // Default to "Historical"
 
   // Coordinated intersection observer for both panels
   useEffect(() => {
@@ -155,7 +155,6 @@ export default function ProgressiveScenarioPanels() {
               onToggleMinimized={isExpanded ? () => setIsClimateCardMinimized(!isClimateCardMinimized) : undefined}
               selectedClimate={selectedClimate}
               onClimateChange={setSelectedClimate}
-              minimizedTitle="Hydroclimate" // Show "Hydroclimate" when not expanded
             />
           </motion.div>
         )}

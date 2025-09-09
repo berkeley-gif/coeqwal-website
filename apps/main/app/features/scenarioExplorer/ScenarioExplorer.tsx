@@ -1808,7 +1808,14 @@ const MapControls = ({
                         lineHeight: 1.3,
                       }}
                     >
-                      Climate
+                      {[
+                        "Warmer Wetter",
+                        "Historical",
+                        "Warmer Drier I",
+                        "Warmer Drier II",
+                        "Warmer Drier III",
+                        "Warmer Drier IV",
+                      ][selectedClimate]}
                     </Box>
                   </Box>
                 )}
@@ -1828,7 +1835,7 @@ const MapControls = ({
                         mb: 0.5,
                       }}
                     >
-                      CLIMATE
+                      HYDROCLIMATE
                     </Box>
                     <Box
                       sx={{
@@ -1849,7 +1856,14 @@ const MapControls = ({
                           mb: 0,
                         }}
                       >
-                        Climate
+                        {[
+                          "Warmer Wetter",
+                          "Historical",
+                          "Warmer Drier I",
+                          "Warmer Drier II",
+                          "Warmer Drier III",
+                          "Warmer Drier IV",
+                        ][selectedClimate]}
                       </Box>
                       <InfoIconButton
                         mode="glossary"
@@ -3690,7 +3704,7 @@ export default function ScenarioExplorer({
                   mb: 0.5,
                 }}
               >
-                CLIMATE
+                HYDROCLIMATE
               </Box>
               <Box
                 sx={{
@@ -4058,7 +4072,7 @@ export default function ScenarioExplorer({
                       mb: 0.5,
                     }}
                   >
-                    CLIMATE
+                    HYDROCLIMATE
                   </Box>
                   <Typography
                     variant="h6"
