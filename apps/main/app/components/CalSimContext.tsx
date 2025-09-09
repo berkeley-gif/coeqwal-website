@@ -11,12 +11,15 @@ import {
 interface CalSimContextType {
   isCalSimVisible: boolean
   toggleCalSim: () => void
+  showBasins: boolean
+  toggleBasins: () => void
 }
 
 const CalSimContext = createContext<CalSimContextType | undefined>(undefined)
 
 export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
+  const [showBasins, setShowBasins] = useState(false)
 
   const toggleCalSim = useCallback(() => {
     setIsCalSimVisible((prev) => {
@@ -25,8 +28,15 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const toggleBasins = useCallback(() => {
+    setShowBasins((prev) => {
+      console.log(`Basins toggle: ${prev} -> ${!prev}`)
+      return !prev
+    })
+  }, [])
+
   return (
-    <CalSimContext.Provider value={{ isCalSimVisible, toggleCalSim }}>
+    <CalSimContext.Provider value={{ isCalSimVisible, toggleCalSim, showBasins, toggleBasins }}>
       {children}
     </CalSimContext.Provider>
   )

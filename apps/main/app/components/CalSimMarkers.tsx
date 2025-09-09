@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect, useRef, useMemo } from "react"
 import { useMap, Marker, Popup, Source, Layer } from "@repo/map"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Theme } from "@repo/ui/mui"
 import { useCalSimToggle } from "./CalSimContext"
 import { LocationOnIcon } from "@repo/ui/mui"
 
@@ -163,26 +163,11 @@ export function convertGeoJSONToNetwork(
   return { nodes, arcs }
 }
 
-function getMapCategory(elementType: string): string {
-  switch (elementType.toUpperCase()) {
-    case "STR":
-      return "reservoir"
-    case "PS":
-      return "pump_station"
-    case "WTP":
-      return "water_treatment"
-    case "WWTP":
-      return "water_treatment"
-    case "CH":
-      return "channel"
-    default:
-      return "other"
-  }
-}
 
 export default function CalSimMarkers() {
   const { isCalSimVisible } = useCalSimToggle()
   const { mapRef } = useMap()
+  const theme = useTheme()
   
   // Generate unique instance ID to prevent duplicate keys across multiple component instances
   const instanceId = useRef(Math.random().toString(36).substr(2, 9)).current
@@ -200,12 +185,11 @@ export default function CalSimMarkers() {
     ['SHSTA', { name: 'Shasta', capacity_taf: 4552.0, rank: 1 }],
     ['OROVL', { name: 'Oroville', capacity_taf: 3537.0, rank: 2 }],
     ['TRNTY', { name: 'Trinity', capacity_taf: 2448.0, rank: 3 }],
-    ['MELON', { name: 'New Melones', capacity_taf: 2400.0, rank: 4 }],
+    ['MELON', { name: 'Melones', capacity_taf: 2400.0, rank: 4 }],
     ['SLUIS', { name: 'San Luis', capacity_taf: 2041.0, rank: 5 }],
-    ['PEDRO', { name: 'New Don Pedro', capacity_taf: 2030.0, rank: 6 }],
-    ['BRYSA', { name: 'Berryessa', capacity_taf: 1602.0, rank: 7 }],
-    ['ALMNR', { name: 'Almanor', capacity_taf: 1143.0, rank: 8 }],
-    ['MCLRE', { name: 'McClure', capacity_taf: 1025.0, rank: 9 }],
+    ['BRYSA', { name: 'Berryessa', capacity_taf: 1602.0, rank: 6 }],
+    ['ALMNR', { name: 'Almanor', capacity_taf: 1143.0, rank: 7 }],
+    ['MCLRE', { name: 'McClure', capacity_taf: 1025.0, rank: 8 }],
   ]), [])
   
   // Calculate scaling factors for reservoir markers based on TAF values
@@ -214,7 +198,7 @@ export default function CalSimMarkers() {
     const maxCapacity = Math.max(...capacities)
     const minCapacity = Math.min(...capacities)
     
-    // Define size range for markers (in rem)
+    // Define size range for markers (in rem) - adjusted for 8 reservoirs
     const minMarkerSize = 4.5  // Minimum size for smallest reservoir
     const maxMarkerSize = 7    // Maximum size for largest reservoir
     
@@ -252,44 +236,27 @@ export default function CalSimMarkers() {
   // No separate reservoir fetching - using infrastructure trails API only
 
   // Helper functions for styling
-  const getNodeSize = (category: string, isConnected = false, isSelected = false) => {
-    let baseSize = 8
-    switch (category) {
-      case "reservoir":
-        baseSize = 16
-        break
-      case "pump_station":
-        baseSize = 12
-        break
-      case "water_treatment":
-        baseSize = 10
-        break
-      default:
-        baseSize = 8
+  const getNodeSize = (isMajorReservoir: boolean, isConnected = false, isSelected = false) => {
+    // Major reservoirs use the scaling system, all others use uniform small size
+    if (isMajorReservoir) {
+      // This won't actually be used since major reservoirs use location icons
+        return 16
     }
+    
+    // All non-major-reservoir nodes get the same small size
+    const baseSize = 8
     
     if (isSelected) return baseSize * 1.5
     if (isConnected) return baseSize * 1.3
-    return baseSize * 0.8
+    return baseSize
   }
 
-  const getNodeColor = (node: NetworkNode, isConnected = false, isSelected = false) => {
+  const getNodeColor = (node: NetworkNode, isConnected = false, isSelected = false, theme: Theme) => {
     if (isSelected) return "#ff6b35"
     if (isConnected) return "#00e676"
 
-    const category = getMapCategory(node.element_type)
-    switch (category) {
-      case "reservoir":
-        return "#2563eb"
-      case "pump_station":
-        return "#dc2626"
-      case "water_treatment":
-        return "#059669"
-      case "channel":
-        return "#8b5cf6"
-      default:
-        return "#6b7280"
-    }
+    // Use sky blue fill for all nodes (same as location markers)
+    return theme.palette.brand.sky
   }
 
   // Network traversal functions
@@ -353,20 +320,12 @@ export default function CalSimMarkers() {
   // Filter nodes to show major reservoirs prominently
   const filterNodesByZoom = useCallback(
     (nodes: NetworkNode[], zoom: number): NetworkNode[] => {
-      // Always prioritize major reservoirs
-      // Infrastructure trails API now includes the 9 major reservoirs
-      // No additional filtering needed - it's already curated
-
-      // Apply zoom filtering
-      if (zoom >= 8) {
+      // Show all nodes at all zoom levels now that we have the full dataset
+      // Only apply minimal filtering for performance at very low zoom levels
+      if (zoom >= 5) {
         return nodes
-      } else if (zoom >= 6) {
-        return nodes.filter(
-          (node) =>
-            ["STR", "PS", "WTP", "WWTP"].includes(node.element_type) ||
-            node.connectivity_status === "connected",
-        )
       } else {
+        // At very low zoom, only show major infrastructure
         return nodes.filter((node) => ["STR", "PS"].includes(node.element_type))
       }
     },
@@ -390,21 +349,21 @@ export default function CalSimMarkers() {
 
     try {
       const fetchStart = performance.now()
-      // Use the infrastructure trails API to get curated infrastructure nodes
-      const trailsUrl = `${API_BASE_URL}/api/network/trails/overview?trail_type=infrastructure`
-      console.log("⚡ Fetching INFRASTRUCTURE TRAILS API...")
+      // Use the trails overview API to get network nodes
+      const trailsUrl = `${API_BASE_URL}/api/network/trails/overview`
+      console.log("⚡ Fetching TRAILS OVERVIEW API...")
       console.log("🎯 URL:", trailsUrl)
 
       const geoJsonResponse = await fetch(trailsUrl)
       const fetchEnd = performance.now()
-      console.log(`⏱️ Infrastructure trails API fetch took: ${(fetchEnd - fetchStart).toFixed(0)}ms`)
+      console.log(`⏱️ Trails overview API fetch took: ${(fetchEnd - fetchStart).toFixed(0)}ms`)
 
       if (!geoJsonResponse.ok) {
         throw new Error(`All nodes API failed: ${geoJsonResponse.status}`)
       }
 
       const geoJsonData = await geoJsonResponse.json()
-      console.log("📊 Infrastructure trails response:", geoJsonData.metadata)
+      console.log("📊 Trails overview response:", geoJsonData.metadata)
 
       if (!isGeoJSONResponse(geoJsonData)) {
         throw new Error("Invalid GeoJSON response format")
@@ -615,6 +574,19 @@ export default function CalSimMarkers() {
   // Regular CalSim markers
   console.log(`🎨 Rendering CalSim markers: ${nodesToRender.length} nodes (CalSim: ${isCalSimVisible}, ReservoirMarkers: ${showReservoirMarkers})`)
 
+  // Split nodes into two groups for layering
+  const regularNodes = nodesToRender.filter(node => {
+    const isReservoir = node.element_type === 'STR'
+    const isMajorReservoir = isReservoir && majorReservoirCodes.has(node.short_code)
+    return !isMajorReservoir
+  })
+  
+  const majorReservoirNodes = nodesToRender.filter(node => {
+    const isReservoir = node.element_type === 'STR'
+    const isMajorReservoir = isReservoir && majorReservoirCodes.has(node.short_code)
+    return isMajorReservoir
+  })
+
   return (
     <>
 
@@ -657,21 +629,47 @@ export default function CalSimMarkers() {
         </Source>
       )}
 
-      {/* CalSim node markers with reservoir emphasis */}
-      {nodesToRender.map((node) => {
-        const isReservoir = node.element_type === 'STR'
-        // Only show special styling for top 9 reservoirs by capacity
-        const isMajorReservoir = isReservoir && majorReservoirCodes.has(node.short_code)
+      {/* Regular nodes (rendered first, behind major reservoirs) */}
+      {regularNodes.map((node) => {
+        const isSelected = selectedNode?.id === node.id
+        
+        return (
+          <Marker
+            key={`${instanceId}-regular-${node.id}-${node.short_code}`} // Unique key with instance ID
+            longitude={node.coordinates[0]}
+            latitude={node.coordinates[1]}
+          >
+            <Box
+              onMouseEnter={() => setHoveredNode(node)}
+              onMouseLeave={() => setHoveredNode(null)}
+              onClick={() => handleNodeClick(node)}
+              sx={{
+                width: getNodeSize(false, connectedNodeIds.has(node.id), isSelected),
+                height: getNodeSize(false, connectedNodeIds.has(node.id), isSelected),
+                borderRadius: "50%",
+                backgroundColor: getNodeColor(node, connectedNodeIds.has(node.id), isSelected, theme),
+                border: isSelected ? "3px solid #ff6b35" : "2px solid white",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                "&:hover": { transform: "scale(1.2)" },
+              }}
+            />
+          </Marker>
+        )
+      })}
+
+      {/* Major reservoir nodes (rendered on top) */}
+      {majorReservoirNodes.map((node) => {
         const isSelected = selectedNode?.id === node.id
         
         return (
         <Marker
-            key={`${instanceId}-calsim-${node.id}-${node.short_code}`} // Unique key with instance ID
+            key={`${instanceId}-reservoir-${node.id}-${node.short_code}`} // Unique key with instance ID
             longitude={node.coordinates[0]}
             latitude={node.coordinates[1]}
-          >
-            {isMajorReservoir ? (
-              <Box
+            anchor="bottom" // Position marker so the bottom point aligns with the coordinates
+        >
+          <Box
                 onMouseEnter={() => setHoveredNode(node)}
             onMouseLeave={() => setHoveredNode(null)}
                 onClick={() => handleNodeClick(node)}
@@ -679,8 +677,8 @@ export default function CalSimMarkers() {
               cursor: "pointer",
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'flex-start', // Align to start to accommodate label
-                  gap: 1, // Space between marker and label
+                  justifyContent: 'center', // Center the marker
+                  position: 'relative', // Enable absolute positioning for child elements
                 }}
               >
                 {/* Location icon with TAF circle - wrapped in relative container */}
@@ -704,7 +702,7 @@ export default function CalSimMarkers() {
                         <LocationOnIcon
                           sx={{
                             fontSize: `${markerSize}rem`,
-                            color: (theme) => isSelected ? '#ff6b35' : theme.palette.brand.sky,
+                            color: (theme) => isSelected ? '#ff6b35' : theme.palette.brand.sky, // Use overlay panel background color
                             filter: `drop-shadow(0 2px 4px rgba(0,0,0,0.15))${isSelected 
                               ? ' drop-shadow(0 0 0 3px #ff6b35)'
                               : ''}`,
@@ -716,84 +714,85 @@ export default function CalSimMarkers() {
                         <Box
                           sx={{
                             position: 'absolute',
-                            top: '18%', // Position in the main body of the location icon
+                            top: '15%', // Position in the main body of the location icon (adjusted for anchor="bottom")
                             left: '50%',
-                            transform: 'translateX(-50%)',
+                            transform: 'translate(-50%, 0)', // Center the circle horizontally only
                             width: `${circleSize}rem`,
                             height: `${circleSize}rem`,
                             borderRadius: '50%',
-                            backgroundColor: 'white',
-                            border: '1px solid rgba(0,0,0,0.2)',
+                            backgroundColor: (theme) => theme.palette.blue.medium, // Blue fill for circles
+                            border: '1px solid rgba(0,0,0,0.1)',
                             display: 'flex',
+                            flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: fontSize,
-                            lineHeight: 1,
+                            lineHeight: 1.2, // Set line height to 1.2
                             fontWeight: 'bold',
-                            color: '#333',
+                            color: 'white', // White text
                             pointerEvents: 'none', // Don't interfere with click events
                             boxShadow: '0 1px 2px rgba(0,0,0,0.1)', // Subtle inner shadow for depth
+                            textAlign: 'center',
                           }}
                         >
-                          {reservoirInfo?.capacity_taf 
-                            ? `${(reservoirInfo.capacity_taf / 1000).toFixed(1)}K`
-                            : '?'}
+                          {reservoirInfo?.capacity_taf ? (
+                            <>
+                              <Box component="span" sx={{ fontSize: fontSize }}>
+                                {(reservoirInfo.capacity_taf / 1000).toFixed(1)}K
+                              </Box>
+                              <Box 
+                                component="span" 
+                                sx={{ 
+                                  fontSize: `calc(${fontSize} * 0.7)`, // Smaller font for units
+                                  lineHeight: 1.2,
+                                  marginTop: '-0.1rem'
+                                }}
+                              >
+                                TAF
+                              </Box>
+                            </>
+                          ) : (
+                            '?'
+                          )}
                         </Box>
                       </>
                     )
                   })()}
                 </Box>
                 
-                {/* Reservoir name label */}
+                {/* Reservoir name label positioned on the stalk */}
                 <Box
                   sx={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    position: 'absolute',
+                    bottom: '25%', // Position on the stalk of the location marker
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
                     backdropFilter: 'blur(4px)',
-                    borderRadius: '4px',
-                    padding: '2px 6px',
+                    borderRadius: '12px',
+                    padding: '3px 8px',
                     boxShadow: (theme) => theme.shadows[1],
                     pointerEvents: 'none',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   <Typography
                     variant="body2"
                     sx={{
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
                       fontWeight: 600,
                       color: '#333',
-                      lineHeight: 1,
-                      whiteSpace: 'nowrap',
+                      lineHeight: 1.1,
+                      textAlign: 'center',
                     }}
                   >
-                    {node.display_name}
+                    {(() => {
+                      const reservoirInfo = majorReservoirData.get(node.short_code)
+                      return reservoirInfo ? reservoirInfo.name : node.display_name
+                    })()}
                   </Typography>
                 </Box>
               </Box>
-            ) : (
-              <Box
-                onMouseEnter={() => setHoveredNode(node)}
-                onMouseLeave={() => setHoveredNode(null)}
-                onClick={() => handleNodeClick(node)}
-                sx={{
-                  width: getNodeSize(
-                    getMapCategory(node.element_type),
-                    connectedNodeIds.has(node.id),
-                    isSelected
-                  ),
-                  height: getNodeSize(
-                    getMapCategory(node.element_type),
-                    connectedNodeIds.has(node.id),
-                    isSelected
-                  ),
-                  borderRadius: "50%",
-                  backgroundColor: getNodeColor(node, connectedNodeIds.has(node.id), isSelected),
-                  border: isSelected ? "3px solid #ff6b35" : "2px solid white",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  "&:hover": { transform: "scale(1.2)" },
-                }}
-              />
-            )}
           </Marker>
         )
       })}

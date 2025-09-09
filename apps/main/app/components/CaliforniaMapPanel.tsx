@@ -4,6 +4,8 @@ import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import CalSimMarkers from "./CalSimMarkers"
 import MapGeoSearch from "./MapGeoSearch"
+import BasinsLayer from "./BasinsLayer"
+import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
 
 interface CaliforniaMapPanelProps {
@@ -16,6 +18,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  const { showBasins } = useCalSimToggle()
 
   return (
     <Box
@@ -68,6 +71,9 @@ export default function CaliforniaMapPanel({
             zIndex: 1
           }}
         />
+        
+        {/* Basins GeoJSON Layer */}
+        <BasinsLayer visible={showBasins} />
         
         {/* CalSim markers rendered as direct children of Map for proper interaction */}
         <CalSimMarkers />

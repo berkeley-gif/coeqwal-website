@@ -11,7 +11,7 @@ import Image from "next/image"
 export default function MapOverlayPanels() {
   const theme = useTheme() // eslint-disable-line @typescript-eslint/no-unused-vars
   const { t } = useTranslation()
-  const { isCalSimVisible, toggleCalSim } = useCalSimToggle()
+  const { isCalSimVisible, toggleCalSim, showBasins, toggleBasins } = useCalSimToggle()
   
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
@@ -115,18 +115,18 @@ export default function MapOverlayPanels() {
               sx={{
                 ...overlayPanelStyle,
                 mr: { xs: 8, md: 16 },
+            }}
+          >
+            <Typography
+              variant="h3"
+              component="h3"
+              sx={{
+                mb: (theme) => theme.layout.spacing.md,
+                color: (theme) => theme.palette.blue.darkest,
               }}
             >
-              <Typography
-                variant="h3"
-                component="h3"
-                sx={{
-                  mb: (theme) => theme.layout.spacing.md,
-                  color: (theme) => theme.palette.blue.darkest,
-                }}
-              >
-                {t("toolsPanel.title")}
-              </Typography>
+              {t("toolsPanel.title")}
+            </Typography>
 
             <Typography variant="body1" fontWeight="bold">
               {t("toolsPanel.boldText")}
@@ -158,11 +158,12 @@ export default function MapOverlayPanels() {
                     ? (theme) => theme.palette.accent.cream
                     : (theme) => theme.palette.grey[100],
                 },
-                mb: 2,
+                mb: 1,
               }}
             >
               {isCalSimVisible ? "Hide CalSim Network" : "Show CalSim Network"}
             </Button>
+
 
             {/* CalSim Legend */}
             {isCalSimVisible && (
@@ -179,29 +180,166 @@ export default function MapOverlayPanels() {
                   gap: (theme) => theme.spacing(1),
                   columnGap: (theme) => theme.spacing(2)
                 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
-                    <LocationOnIcon
-                      sx={{
-                        fontSize: '1rem',
-                        color: '#2563eb', // Blue color matching CalSim reservoirs
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Typography variant="body2">Reservoir</Typography>
-                  </Box>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(2) }}>
+                    {/* Full replica of reservoir marker for legend */}
                     <Box
                       sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: "50%",
-                        backgroundColor: (theme) => theme.palette.accent.gold,
-                        border: (theme) => `${theme.border.thick} ${theme.palette.common.white}`,
-                        boxShadow: (theme) => theme.shadows[1],
-                        flexShrink: 0,
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
-                    />
-                    <Typography variant="body2">Basins</Typography>
+                    >
+                      <LocationOnIcon
+                        sx={{
+                          fontSize: '4.5rem', // Make it bigger to match the largest actual markers
+                          color: (theme) => theme.palette.brand.sky,
+                          flexShrink: 0,
+                          // Enhanced shadow for better contrast against panel background
+                          filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                          '&:hover': { transform: 'scale(1.05)' },
+                          transition: 'all 0.2s ease',
+                          // Add white outline to differentiate from panel background
+                          WebkitTextStroke: '2px white',
+                          textShadow: '2px 2px 4px rgba(0,0,0,0.3), -2px -2px 4px rgba(0,0,0,0.3), 2px -2px 4px rgba(0,0,0,0.3), -2px 2px 4px rgba(0,0,0,0.3)',
+                        }}
+                      />
+                      {/* TAF circle matching the actual markers */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: '15%',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '2rem', // Scale up the circle proportionally
+                          height: '2rem',
+                          borderRadius: '50%',
+                          backgroundColor: (theme) => theme.palette.blue.medium,
+                          border: '1px solid rgba(0,0,0,0.1)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '0.65rem', // Scale up text size
+                          lineHeight: 1.2,
+                          fontWeight: 'bold',
+                          color: 'white',
+                          pointerEvents: 'none',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                          textAlign: 'center',
+                        }}
+                      >
+                        <Box component="span" sx={{ fontSize: '0.65rem' }}>
+                          4.6K
+                        </Box>
+                        <Box 
+                          component="span" 
+                          sx={{ 
+                            fontSize: 'calc(0.65rem * 0.7)', // Smaller font for units
+                            lineHeight: 1.2,
+                            marginTop: '-0.1rem'
+                          }}
+                        >
+                          TAF
+                        </Box>
+                      </Box>
+                      
+                      {/* Reservoir name label positioned on the stalk */}
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          bottom: '25%', // Position on the stalk of the location marker
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          backdropFilter: 'blur(4px)',
+                          borderRadius: '12px',
+                          padding: '3px 8px',
+                          boxShadow: (theme) => theme.shadows[1],
+                          pointerEvents: 'none',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            color: '#333',
+                            lineHeight: 1.1,
+                            textAlign: 'center',
+                          }}
+                        >
+                          Reservoir
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Typography variant="body2">Major reservoirs with capacity in thousand acre feet (TAF)</Typography>
+                  </Box>
+                  <Box 
+                    sx={{ 
+                      display: "flex", 
+                      alignItems: "center", 
+                      gap: (theme) => theme.spacing(1),
+                      cursor: "pointer",
+                      padding: "4px 8px",
+                      borderRadius: "6px",
+                      backgroundColor: (theme) => theme.palette.brand.sky, // Same as overlay panel
+                      "&:hover": {
+                        backgroundColor: (theme) => theme.palette.grey[100],
+                      },
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onClick={toggleBasins}
+                  >
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        flexShrink: 0,
+                        position: 'relative',
+                        opacity: showBasins ? 1 : 0.6,
+                        transition: "all 0.2s ease",
+                        // Create white stroke with no fill effect
+                        '& img': {
+                          filter: `
+                            brightness(0) 
+                            saturate(100%) 
+                            invert(100%) 
+                            drop-shadow(1px 0px 0px white) 
+                            drop-shadow(-1px 0px 0px white) 
+                            drop-shadow(0px 1px 0px white) 
+                            drop-shadow(0px -1px 0px white)
+                            drop-shadow(1px 1px 0px white)
+                            drop-shadow(-1px -1px 0px white)
+                            drop-shadow(1px -1px 0px white)
+                            drop-shadow(-1px 1px 0px white)
+                          `,
+                        }
+                      }}
+                    >
+                      <Image
+                        src="/images/legend/basins.svg"
+                        alt="Basins legend icon"
+                        width={32}
+                        height={32}
+                        style={{
+                          display: 'block',
+                        }}
+                      />
+                    </Box>
+                    <Typography 
+                      variant="body2"
+                      sx={{
+                        fontWeight: showBasins ? 600 : 400,
+                        color: showBasins 
+                          ? (theme) => theme.palette.accent.gold
+                          : "inherit",
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      Basins {showBasins ? "(on)" : "(off)"}
+                    </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: (theme) => theme.spacing(1) }}>
                     <Box
@@ -286,7 +424,7 @@ export default function MapOverlayPanels() {
                 </Typography>
               </Box>
             )}
-            </Box>
+          </Box>
           </motion.div>
         }
       />
