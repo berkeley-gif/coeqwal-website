@@ -367,7 +367,7 @@ const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <LocationOnIcon />,
-    term: "Freshwater for Delta exports",
+    term: "Delta exports",
     definition:
       "Tier reflects how often salinity at the Delta pumping stations meets or exceeds water quality requirements for drinking water or irrigation.",
     tiers: [
@@ -392,6 +392,13 @@ const glossaryTerms: GlossaryTerm[] = [
         description: "Average salinity at Banks and Jones pumping plants is unsuitable for irrigation or drinking water for more than two months in any year",
       },
     ],
+  },
+  {
+    icon: <LocationOnIcon />,
+    term: "Freshwater for Delta exports",
+    definition:
+      "See Delta exports for detailed information about Delta pumping station water quality.",
+    seeAlso: "Delta exports",
   },
   {
     icon: <LocationOnIcon />,
@@ -532,11 +539,6 @@ const glossaryTerms: GlossaryTerm[] = [
         description: "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
       },
     ],
-  },
-  {
-    icon: <LocationOnIcon />,
-    term: "Distributional equity",
-    definition: "How fairly water benefits and burdens are shared.",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
 

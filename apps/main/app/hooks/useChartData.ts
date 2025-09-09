@@ -50,11 +50,11 @@ export const useChartData = ({
       "Community deliveries",
       "Agricultural revenue",
       "Environmental flows",
+      "Delta estuary status",
+      "Delta exports",
       "Reservoir storage",
       "Groundwater storage",
-      "Delta estuary status",
       "Salmon abundance",
-      "Distributional equity",
     ],
     [],
   )
@@ -71,11 +71,11 @@ export const useChartData = ({
         "Community deliveries": 0.0,
         "Agricultural revenue": 0.0,
         "Environmental flows": 0.0,
+        "Delta estuary status": 0.0,
+        "Delta exports": 0.0,
         "Reservoir storage": 0.0,
         "Groundwater storage": 0.0,
-        "Delta estuary status": 0.0,
         "Salmon abundance": 0.0,
-        "Distributional equity": 0.0,
       },
       highlighted: highlightBaseline,
     })
@@ -128,16 +128,16 @@ export const useChartData = ({
             Math.cos(baseVariation * Math.PI * 1.5 + randomSeed) * 0.9,
           "Environmental flows":
             Math.sin(baseVariation * Math.PI * 3 + randomSeed + 1) * 0.7,
+          "Delta estuary status":
+            Math.cos(baseVariation * Math.PI * 2.2 + randomSeed + 4) * 0.5,
+          "Delta exports":
+            Math.sin(baseVariation * Math.PI * 2.4 + randomSeed + 5) * 0.7,
           "Reservoir storage":
             Math.cos(baseVariation * Math.PI * 2.5 + randomSeed + 2) * 0.6,
           "Groundwater storage":
             Math.sin(baseVariation * Math.PI * 1.8 + randomSeed + 3) * 0.9,
-          "Delta estuary status":
-            Math.cos(baseVariation * Math.PI * 2.2 + randomSeed + 4) * 0.5,
           "Salmon abundance":
-            Math.sin(baseVariation * Math.PI * 2.8 + randomSeed + 5) * 0.8,
-          "Distributional equity":
-            Math.cos(baseVariation * Math.PI * 1.6 + randomSeed + 6) * 0.6,
+            Math.sin(baseVariation * Math.PI * 2.8 + randomSeed + 6) * 0.8,
         },
       })
     })
