@@ -5,6 +5,7 @@ import { motion } from "@repo/motion"
 import { ImageWavePattern } from "../components/ImageWavePattern"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
+import ProgressiveScenarioPanels from "../components/ProgressiveScenarioPanels"
 import { CalSimProvider } from "../components/CalSimContext"
 
 const IntroSection = () => {
@@ -167,6 +168,9 @@ const IntroSection = () => {
 
         {/* Scrolling overlay panels over the sticky map */}
         <MapOverlayPanels />
+
+        {/* Progressive scenario and climate panels that appear on scroll */}
+        <ProgressiveScenarioPanels />
       </CalSimProvider>
 
       {/* Interstitial panel - can be broken out into a component */}
