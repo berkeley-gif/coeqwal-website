@@ -72,6 +72,20 @@ const glossaryTerms: GlossaryTerm[] = [
     seeAlso: "Central Valley, CalSim",
   },
   {
+    icon: <CompareIcon />,
+    term: "Scenarios",
+    definition:
+      "Unique combinations of operational strategies and climate conditions that show how water might be allocated under different circumstances. COEQWAL uses CalSim to model scenarios that explore alternative ways of managing California's water system, helping to understand trade-offs between different goals and outcomes.",
+    seeAlso: "Operational strategies, Hydroclimates, CalSim",
+  },
+  {
+    icon: <LocalShippingIcon />,
+    term: "Water allocations",
+    definition:
+      "The distribution of available water among different users including communities, agriculture, and environmental needs. Water allocations are determined by water rights, regulations, and operational decisions, and can vary significantly based on water availability, climate conditions, and management strategies.",
+    seeAlso: "Water management decisions, COEQWAL",
+  },
+  {
     icon: <WaterIcon />,
     term: "California water system",
     definition:

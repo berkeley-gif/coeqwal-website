@@ -144,7 +144,6 @@ export default function MapOverlayPanels() {
                 variant="h3"
                 component="h3"
                 sx={{
-                  mb: (theme) => theme.layout.spacing.md,
                   color: (theme) => theme.palette.blue.darkest,
                 }}
               >
@@ -515,10 +514,19 @@ export default function MapOverlayPanels() {
               mr: { xs: 8, md: 16 },
             }}
           >
+            <Typography
+              variant="h3"
+              component="h3"
+              sx={{
+                color: (theme) => theme.palette.blue.darkest,
+              }}
+            >
+              Rethink California water
+            </Typography>
+
             <Box
               sx={{
                 color: (theme) => theme.palette.blue.darkest,
-                mb: (theme) => theme.spacing(2),
                 fontSize: "1rem",
                 lineHeight: 1.5,
               }}
@@ -537,27 +545,6 @@ export default function MapOverlayPanels() {
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.blue.darkest}
                 underlineColor={theme.palette.blue.medium}
-              />
-            </Box>
-            <Box
-              sx={{
-                width: "100%",
-                borderRadius: (theme) => theme.borderRadius.card,
-                overflow: "hidden",
-                boxShadow: (theme) => theme.shadows[2],
-              }}
-            >
-              <Image
-                src="/images/dorota-trzaska-1tAtO-9HYNM-unsplash.jpg"
-                alt="California water landscape"
-                width={400}
-                height={250}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "cover",
-                  display: "block",
-                }}
               />
             </Box>
           </Box>
@@ -599,11 +586,10 @@ export default function MapOverlayPanels() {
               <GlossaryLinkedText
                 text={t("scenariosPanel.part2")}
                 terms={[
-                  {
-                    name: "operational strategies",
-                    glossaryTerm: "Operational strategies",
-                  },
+                  { name: "scenarios", glossaryTerm: "Scenarios" },
+                  { name: "operational strategies", glossaryTerm: "Operational strategies" },
                   { name: "hydroclimates", glossaryTerm: "Hydroclimates" },
+                  { name: "water allocations", glossaryTerm: "Water allocations" },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.blue.darkest}
