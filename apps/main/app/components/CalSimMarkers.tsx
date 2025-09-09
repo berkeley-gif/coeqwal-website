@@ -356,6 +356,9 @@ export default function CalSimMarkers() {
     const zoom = map.getZoom()
     setCurrentZoom(zoom)
 
+    const zoom = map.getZoom()
+    setCurrentZoom(zoom)
+
     try {
       const fetchStart = performance.now()
       // Use ultra-fast nodes API
