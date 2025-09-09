@@ -8,7 +8,7 @@ import ClimateCard from "./ClimateCard"
 import { useCalSimToggle } from "./CalSimContext"
 
 export default function ProgressiveScenarioPanels() {
-  const { setIsPanelsExpanded } = useCalSimToggle()
+  const { setIsPanelsExpanded, setIsPanelsVisible } = useCalSimToggle()
   const [showOperationsPanel, setShowOperationsPanel] = useState(false)
   const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -27,10 +27,9 @@ export default function ProgressiveScenarioPanels() {
           .filter((entry) => entry.isIntersecting)
           .map((entry) => entry.target.id)
 
-        // Operations panel logic: Show only during IntroSection map overlays
+        // Operations panel logic: Show starting from "Rethink California water" panel
         const operationsPanels = [
-          "scenarios-overlay",
-          "scenarios-overlay2",
+          "scenarios-overlay2", // Start from the "Rethink California water" panel
           "scenario-explorer-overlay",
         ]
         const showOperations = visiblePanels.some((id) =>
@@ -53,8 +52,12 @@ export default function ProgressiveScenarioPanels() {
         setShowHydroclimatePanel(showHydroclimate)
         setIsExpanded(shouldExpand)
         setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
-
-        console.log("🗺️ Setting panels expanded state:", shouldExpand)
+        setIsPanelsVisible(showOperations || showHydroclimate) // Communicate visibility state to map
+        
+        console.log("🗺️ Setting panels state:", { 
+          expanded: shouldExpand, 
+          visible: showOperations || showHydroclimate 
+        })
 
         console.log(
           "🎬 Coordinated panel state:",
@@ -73,19 +76,17 @@ export default function ProgressiveScenarioPanels() {
       },
     )
 
-    // Observe only IntroSection panels (no content-panels)
-    const scenariosPanel = document.getElementById("scenarios-overlay")
+    // Observe only relevant IntroSection panels (starting from scenarios-overlay2)
     const scenariosPanel2 = document.getElementById("scenarios-overlay2")
     const scenarioExplorerOverlay = document.getElementById(
       "scenario-explorer-overlay",
     )
 
-    if (scenariosPanel) observer.observe(scenariosPanel)
     if (scenariosPanel2) observer.observe(scenariosPanel2)
     if (scenarioExplorerOverlay) observer.observe(scenarioExplorerOverlay)
 
     return () => observer.disconnect()
-  }, [setIsPanelsExpanded])
+  }, [setIsPanelsExpanded, setIsPanelsVisible])
 
   return (
     <Box
@@ -120,7 +121,7 @@ export default function ProgressiveScenarioPanels() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: 0.8,
+              duration: 2.0, // Much slower fade-in to not distract from reading
               ease: "easeOut",
             }}
             style={{
@@ -150,9 +151,9 @@ export default function ProgressiveScenarioPanels() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: 0.8,
+              duration: 2.0, // Much slower fade-in to not distract from reading
               ease: "easeOut",
-              delay: 0.2, // Slight delay after scenario card
+              delay: 0.5, // Longer delay after operations panel for subtle entrance
             }}
             style={{
               pointerEvents: "auto",

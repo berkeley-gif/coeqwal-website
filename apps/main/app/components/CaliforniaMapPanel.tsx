@@ -6,6 +6,7 @@ import { Box } from "@repo/ui/mui"
 // import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
 import BasinsLayer from "./BasinsLayer"
+import HotspotMarkers from "./HotspotMarkers"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
 
@@ -14,40 +15,61 @@ interface CaliforniaMapPanelProps {
   mapboxToken?: string
 }
 
-// Component to handle map centering based on panel expansion
+// Component to handle map centering based on panel visibility
 function MapCenterController() {
-  const { isPanelsExpanded } = useCalSimToggle()
-  const { flyTo } = useMap()
+  const { isPanelsVisible } = useCalSimToggle()
+  const { flyTo, mapRef } = useMap()
 
   useEffect(() => {
-    console.log("🗺️ MapCenterController effect triggered:", {
-      isPanelsExpanded,
-      flyTo: !!flyTo,
-    })
+    console.log("🗺️🔍 DEBUGGING MapCenterController:")
+    console.log("   - isPanelsVisible:", isPanelsVisible)
+    console.log("   - flyTo function exists:", !!flyTo)
+    console.log("   - mapRef exists:", !!mapRef.current)
+
+    // Log current map center for debugging
+    if (mapRef.current) {
+      const currentCenter = mapRef.current.getCenter()
+      console.log("   - Current map center:", currentCenter)
+    }
 
     if (!flyTo) {
-      console.log("🗺️ flyTo not available yet")
+      console.log("🗺️❌ flyTo function not available")
       return
     }
 
-    if (isPanelsExpanded) {
-      console.log("🗺️ Flying to -120 longitude for expanded panels")
-      // Center map at longitude -120 when panels expand (using coordinate pattern)
-      flyTo(-120, 38.073, 6.3, 0, 0, {
-        duration: 1000, // 1 second smooth transition
-        essential: true,
-      })
-      console.log("🗺️ Map flyTo command sent: -120 longitude")
-    } else {
-      console.log("🗺️ Flying back to -119 longitude (original center)")
-      // Return to original center when panels collapse
-      flyTo(-119, 38.073, 6.3, 0, 0, {
-        duration: 1000,
-        essential: true,
-      })
-      console.log("🗺️ Map flyTo command sent: -119 longitude")
-    }
-  }, [isPanelsExpanded, flyTo])
+    // Add a small delay to ensure map is fully loaded
+    setTimeout(() => {
+      try {
+        if (isPanelsVisible) {
+          console.log("🗺️✈️ ATTEMPTING flyTo -125 longitude using context API (VERY dramatic shift)")
+          // Use the map package's context API flyTo method - much more dramatic shift
+          flyTo(-125, 38.073, 7.0, 0, 0, {
+            duration: 1000, // Faster so it's more noticeable
+            essential: true,
+          })
+          console.log("🗺️✅ Context API flyTo command executed")
+          
+          // Also log what the center should be after
+          setTimeout(() => {
+            if (mapRef.current) {
+              const newCenter = mapRef.current.getCenter()
+              console.log("🗺️📍 New map center after flyTo:", newCenter)
+            }
+          }, 2100) // After animation completes
+        } else {
+          console.log("🗺️🏠 ATTEMPTING flyTo back to -119 longitude using context API")
+          flyTo(-119, 38.073, 6.3, 0, 0, {
+            duration: 2000,
+            essential: true,
+          })
+          console.log("🗺️✅ Context API return flyTo command executed")
+        }
+      } catch (error) {
+        console.error("🗺️💥 Error executing flyTo:", error)
+      }
+    }, 200) // Slightly longer delay
+
+  }, [isPanelsVisible, flyTo, mapRef])
 
   return null // This component only handles side effects
 }
@@ -57,7 +79,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { showBasins } = useCalSimToggle()
+  const { showBasins, isPanelsVisible } = useCalSimToggle()
 
   return (
     <Box
@@ -102,6 +124,9 @@ export default function CaliforniaMapPanel({
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         <CalSimLayers />
+
+        {/* Hotspot markers - appear when progressive panels are visible */}
+        <HotspotMarkers visible={isPanelsVisible} />
 
         {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
         {/* <CalSimMarkers /> */}

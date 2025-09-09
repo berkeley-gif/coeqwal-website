@@ -638,7 +638,7 @@ export default function MapOverlayPanels() {
               sx={{
                 color: theme.palette.blue.darkest,
                 textAlign: "center",
-                opacity: 0.1, // Very subtle so it doesn't interfere with the map
+                opacity: 0, // Completely transparent
                 pointerEvents: "none",
               }}
             >
