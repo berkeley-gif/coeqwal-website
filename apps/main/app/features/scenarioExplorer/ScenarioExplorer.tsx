@@ -3727,7 +3727,7 @@ export default function ScenarioExplorer({
                   Scenario Exploration
                 </Typography>
 
-                {/* Center: Control dropdowns */}
+                {/* Center: Natural language interface with control dropdowns */}
                 <Box
                   sx={{
                     display: "flex",
@@ -3736,6 +3736,20 @@ export default function ScenarioExplorer({
                     alignItems: "flex-end", // Align with baseline of title
                   }}
                 >
+                  {/* Natural language prompt */}
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      color: theme.palette.blue.darkest,
+                      fontWeight: 700,
+                      alignSelf: "flex-end",
+                      mb: 1.5, // Align with dropdown labels
+                      fontSize: "1.5rem",
+                    }}
+                  >
+                    Show me
+                  </Typography>
+
                   {/* Outcome dropdown */}
                   <Box sx={{ minWidth: "200px" }}>
                     <Typography
