@@ -5,6 +5,7 @@ import { InfoIconButton, DiscreteSlider } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 
 interface ClimateCardProps {
+  isExpanded?: boolean
   isMinimized?: boolean
   onToggleMinimized?: () => void
   selectedClimate?: number
@@ -12,6 +13,7 @@ interface ClimateCardProps {
 }
 
 export default function ClimateCard({ 
+  isExpanded = false,
   isMinimized = false, 
   onToggleMinimized,
   selectedClimate = 1,
@@ -27,6 +29,39 @@ export default function ClimateCard({
     openDrawer("glossary")
   }
 
+  // Simple state when not expanded
+  if (!isExpanded) {
+    return (
+      <Box
+        sx={{
+          p: 3,
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          backdropFilter: "blur(10px)",
+          borderRadius: theme.borderRadius.card,
+          border: "1px solid",
+          borderColor: theme.palette.divider,
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+          height: "auto",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 500,
+            textAlign: "center",
+          }}
+        >
+          Hydroclimate
+        </Typography>
+      </Box>
+    )
+  }
+
+  // Expanded state - full ScenarioExplorer content
   return (
     <Box
       sx={{
