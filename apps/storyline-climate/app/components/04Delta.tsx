@@ -27,6 +27,7 @@ function Delta() {
   const { sectionRef } = useActiveSection("delta", { amount: 0.5 })
   const setMapReady = useStoryStore((state) => state.setMapReady)
   const setTextMarkers = useStoryStore((state) => state.setTextMarkers)
+  const setCancelTextLayer = useStoryStore((state) => state.setCancelTextLayer)
   const [hasSetMarkers, setHasSetMarkers] = useState(false)
   const { setPaintProperty } = useMap()
   const { scrollYProgress } = useScroll({
@@ -39,9 +40,17 @@ function Delta() {
       if (hasSetMarkers) return
       setPaintProperty("delta-tunnel-layer", "line-opacity", 1)
       setTextMarkers([Tunnel], "text")
+      setPaintProperty("sac-arrow-layer", "line-opacity", 0)
+      setPaintProperty("joaquin-arrow-layer", "line-opacity", 0)
+      setPaintProperty("salinity-export-arrow-layer", "line-opacity", 0)
+      setCancelTextLayer("pumping")
       if (!hasSetMarkers) setHasSetMarkers(true)
     } else {
+      setCancelTextLayer("")
       setPaintProperty("delta-tunnel-layer", "line-opacity", 0)
+      setPaintProperty("sac-arrow-layer", "line-opacity", 1)
+      setPaintProperty("joaquin-arrow-layer", "line-opacity", 1)
+      setPaintProperty("salinity-export-arrow-layer", "line-opacity", 1)
       setTextMarkers([], "text")
       setHasSetMarkers(false)
     }

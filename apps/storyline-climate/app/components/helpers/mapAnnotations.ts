@@ -25,3 +25,17 @@ export const Tunnel: TextAnnotation = {
   latitude: 38.138,
   longitude: -121.2527,
 }
+
+export const JonesPumping: TextAnnotation = {
+  id: "jones-pumping",
+  name: "Jones Pumping",
+  latitude: 37.775,
+  longitude: -121.485,
+}
+
+export const BanksPumping: TextAnnotation = {
+  id: "bank-pumping",
+  name: "Banks Pumping",
+  latitude: 37.805,
+  longitude: -121.7505,
+}

@@ -193,12 +193,12 @@ function Conservation() {
             </Typography>
             <Typography variant="body1">
               {
-                "Upgrades like drought-tolerant landscaping, water-efficient appliances, and water recycling all help lower human water demands and "
+                "Upgrades like drought-tolerant landscaping, water-efficient appliances, and water recycling all help "
               }
               <span className="highlight-text">
-                {"make the most of available supplies"}
+                {"lower human water demands"}
               </span>
-              {"."}
+              {" and make the most of available supplies."}
             </Typography>
           </Box>
         </motion.div>
