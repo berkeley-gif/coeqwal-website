@@ -5,8 +5,10 @@ import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
+import { useCalSimToggle } from "./CalSimContext"
 
 export default function ProgressiveScenarioPanels() {
+  const { setIsPanelsExpanded } = useCalSimToggle()
   const [showOperationsPanel, setShowOperationsPanel] = useState(false)
   const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -46,6 +48,7 @@ export default function ProgressiveScenarioPanels() {
         setShowOperationsPanel(showOperations)
         setShowHydroclimatePanel(showHydroclimate)
         setIsExpanded(shouldExpand)
+        setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
         
         console.log(
           "🎬 Coordinated panel state:",
@@ -74,21 +77,31 @@ export default function ProgressiveScenarioPanels() {
     if (scenarioExplorerOverlay) observer.observe(scenarioExplorerOverlay)
 
     return () => observer.disconnect()
-  }, [])
+  }, [setIsPanelsExpanded])
 
   return (
     <Box
       sx={{
         position: "fixed",
+        top: 24, // Top aligned instead of center
         left: 24,
-        top: "50%",
-        transform: "translateY(-50%)",
         zIndex: (theme) => theme.zIndex.appBar,
         pointerEvents: "none", // Allow map interaction through
         width: "420px", // Slightly wider for better chart visibility
+        maxHeight: "calc(100vh - 48px)", // Ensure panels fit in viewport
         display: "flex",
         flexDirection: "column",
         gap: 1, // Reduced gap between panels
+        
+        // Responsive layout for when both panels don't fit
+        "@media (max-height: 800px)": {
+          flexDirection: "row",
+          flexWrap: "wrap",
+          width: "calc(100vw - 48px)",
+          maxWidth: "900px",
+          alignItems: "flex-start",
+          gap: 2,
+        },
       }}
     >
       {/* Operations Panel */}
@@ -102,7 +115,11 @@ export default function ProgressiveScenarioPanels() {
               duration: 0.8,
               ease: "easeOut",
             }}
-            style={{ pointerEvents: "auto" }}
+            style={{ 
+              pointerEvents: "auto",
+              flexShrink: 0, // Don't shrink in responsive layout
+              width: "420px", // Fixed width for responsive layout
+            }}
           >
             <ScenarioCard
               isMinimized={!isExpanded} // Minimized when not in final section, user can control when expanded
@@ -125,7 +142,11 @@ export default function ProgressiveScenarioPanels() {
               ease: "easeOut",
               delay: 0.2, // Slight delay after scenario card
             }}
-            style={{ pointerEvents: "auto" }}
+            style={{ 
+              pointerEvents: "auto",
+              flexShrink: 0, // Don't shrink in responsive layout
+              width: "420px", // Fixed width for responsive layout
+            }}
           >
             <ClimateCard
               isMinimized={!isExpanded} // Minimized when not in final section, user can control when expanded

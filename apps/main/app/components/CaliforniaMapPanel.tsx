@@ -1,6 +1,7 @@
 "use client"
 
-import { Map, NavigationControl, GeolocateControl } from "@repo/map"
+import { useEffect } from "react"
+import { Map, NavigationControl, GeolocateControl, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 // import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
@@ -12,6 +13,42 @@ import "./MapboxControlStyles.css"
 interface CaliforniaMapPanelProps {
   id?: string
   mapboxToken?: string
+}
+
+// Component to handle map centering based on panel expansion
+function MapCenterController() {
+  const { isPanelsExpanded } = useCalSimToggle()
+  const { flyTo } = useMap()
+
+  useEffect(() => {
+    if (!flyTo) return
+
+    if (isPanelsExpanded) {
+      // Center map at longitude -120 when panels expand
+      flyTo({
+        longitude: -120,
+        latitude: 38.073,
+        zoom: 6.3, // Keep same zoom
+        transitionOptions: {
+          duration: 1000, // 1 second smooth transition
+        },
+      })
+      console.log("🗺️ Map centered to -120 longitude for expanded panels")
+    } else {
+      // Return to original center when panels collapse
+      flyTo({
+        longitude: -119,
+        latitude: 38.073,
+        zoom: 6.3, // Keep same zoom
+        transitionOptions: {
+          duration: 1000,
+        },
+      })
+      console.log("🗺️ Map returned to original center")
+    }
+  }, [isPanelsExpanded, flyTo])
+
+  return null // This component only handles side effects
 }
 
 export default function CaliforniaMapPanel({
@@ -53,6 +90,9 @@ export default function CaliforniaMapPanel({
         keyboard={true}
         interactive={true}
       >
+        {/* Map center controller for panel expansion */}
+        <MapCenterController />
+        
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
         <GeolocateControl

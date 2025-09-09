@@ -292,7 +292,7 @@ export default function ScenarioCard({
                     <Box
                       component="span"
                       sx={{
-                        color: theme.palette.text.secondary,
+                        color: theme.palette.blue.bright,
                       }}
                     >
                       Click
