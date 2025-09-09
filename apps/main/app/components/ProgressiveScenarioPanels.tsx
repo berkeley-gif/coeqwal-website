@@ -8,8 +8,8 @@ import ClimateCard from "./ClimateCard"
 
 export default function ProgressiveScenarioPanels() {
   const theme = useTheme()
-  const [showScenarioCard, setShowScenarioCard] = useState(false)
-  const [showClimateCard, setShowClimateCard] = useState(false)
+  const [showOperationsPanel, setShowOperationsPanel] = useState(false)
+  const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
   
   // State for expanded card functionality
@@ -17,29 +17,48 @@ export default function ProgressiveScenarioPanels() {
   const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
   const [selectedClimate, setSelectedClimate] = useState(1)
 
-  // Intersection observer for scenario-related panels (Operations)
+  // Coordinated intersection observer for both panels
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        const scenariosPanels = [
-          "scenarios-overlay",
-          "scenarios-overlay2",
-          "content-panels",
-        ]
-        const anyScenarioPanelVisible = entries.some(
-          (entry) =>
-            scenariosPanels.includes(entry.target.id) && entry.isIntersecting,
-        )
+        // Determine which panels are currently visible
+        const visiblePanels = entries
+          .filter((entry) => entry.isIntersecting)
+          .map((entry) => entry.target.id)
 
-        setShowScenarioCard(anyScenarioPanelVisible)
+        // Operations panel logic: Show from scenarios-overlay onwards
+        const operationsPanels = [
+          "scenarios-overlay",
+          "scenarios-overlay2", 
+          "content-panels",
+          "scenario-explorer-overlay"
+        ]
+        const showOperations = visiblePanels.some(id => operationsPanels.includes(id))
+
+        // Hydroclimate panel logic: Show from scenarios-overlay2 onwards  
+        const hydroclimateStartPanels = [
+          "scenarios-overlay2", 
+          "content-panels",
+          "scenario-explorer-overlay"
+        ]
+        const showHydroclimate = visiblePanels.some(id => hydroclimateStartPanels.includes(id))
+
+        // Expansion logic: Only when scenario-explorer-overlay is visible
+        const shouldExpand = visiblePanels.includes("scenario-explorer-overlay")
+
+        setShowOperationsPanel(showOperations)
+        setShowHydroclimatePanel(showHydroclimate)
+        setIsExpanded(shouldExpand)
+        
         console.log(
-          "🎬 Operations panel visibility:",
-          anyScenarioPanelVisible,
-          "- triggered by:",
-          entries
-            .filter((e) => e.isIntersecting)
-            .map((e) => e.target.id)
-            .join(", "),
+          "🎬 Coordinated panel state:",
+          { 
+            operations: showOperations,
+            hydroclimate: showHydroclimate, 
+            expanded: shouldExpand 
+          },
+          "- visible panels:",
+          visiblePanels.join(", "),
         )
       },
       {
@@ -48,80 +67,16 @@ export default function ProgressiveScenarioPanels() {
       },
     )
 
-    // Observe scenarios panels and content panels
+    // Observe all relevant panels
     const scenariosPanel = document.getElementById("scenarios-overlay")
     const scenariosPanel2 = document.getElementById("scenarios-overlay2")
     const contentPanels = document.getElementById("content-panels")
+    const scenarioExplorerOverlay = document.getElementById("scenario-explorer-overlay")
 
     if (scenariosPanel) observer.observe(scenariosPanel)
     if (scenariosPanel2) observer.observe(scenariosPanel2)
     if (contentPanels) observer.observe(contentPanels)
-
-    return () => observer.disconnect()
-  }, [])
-
-  // Intersection observer for climate panel (shows on second scenarios panel OR content panels)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const relevantPanels = ["scenarios-overlay2", "content-panels"]
-        const anyRelevantPanelVisible = entries.some(
-          (entry) =>
-            relevantPanels.includes(entry.target.id) && entry.isIntersecting,
-        )
-
-        setShowClimateCard(anyRelevantPanelVisible)
-        console.log(
-          "🎬 Hydroclimate panel visibility:",
-          anyRelevantPanelVisible,
-          "- triggered by:",
-          entries
-            .filter((e) => e.isIntersecting)
-            .map((e) => e.target.id)
-            .join(", "),
-        )
-      },
-      {
-        threshold: 0.1, // Lower threshold to trigger earlier
-        rootMargin: "0px 0px -50px 0px", // Less aggressive margin
-      },
-    )
-
-    // Observe both the second scenarios panel and content panels
-    const secondScenariosPanel = document.getElementById("scenarios-overlay2")
-    const contentPanels = document.getElementById("content-panels")
-
-    if (secondScenariosPanel) observer.observe(secondScenariosPanel)
-    if (contentPanels) observer.observe(contentPanels)
-
-    return () => observer.disconnect()
-  }, [])
-
-  // Intersection observer for expansion state (scenario-explorer-overlay)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target.id === "scenario-explorer-overlay") {
-            setIsExpanded(entry.isIntersecting)
-            console.log(
-              "🎬 Panel expansion state:",
-              entry.isIntersecting,
-              "- triggered by scenario-explorer-overlay"
-            )
-          }
-        })
-      },
-      {
-        threshold: 0.3, // Trigger when 30% of the panel is visible
-        rootMargin: "0px 0px -100px 0px",
-      },
-    )
-
-    const scenarioExplorerOverlay = document.getElementById("scenario-explorer-overlay")
-    if (scenarioExplorerOverlay) {
-      observer.observe(scenarioExplorerOverlay)
-    }
+    if (scenarioExplorerOverlay) observer.observe(scenarioExplorerOverlay)
 
     return () => observer.disconnect()
   }, [])
@@ -141,9 +96,9 @@ export default function ProgressiveScenarioPanels() {
         gap: 3,
       }}
     >
-      {/* Scenario Card */}
+      {/* Operations Panel */}
       <AnimatePresence>
-        {showScenarioCard && (
+        {showOperationsPanel && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -193,9 +148,9 @@ export default function ProgressiveScenarioPanels() {
         )}
       </AnimatePresence>
 
-      {/* Climate Card */}
+      {/* Hydroclimate Panel */}
       <AnimatePresence>
-        {showClimateCard && (
+        {showHydroclimatePanel && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
