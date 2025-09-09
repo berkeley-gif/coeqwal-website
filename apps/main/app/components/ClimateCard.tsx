@@ -17,7 +17,7 @@ export default function ClimateCard({
   onToggleMinimized,
   selectedClimate = 1,
   onClimateChange = () => {},
-  minimizedTitle = "Climate"
+  minimizedTitle = "Hydroclimate"
 }: ClimateCardProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -83,7 +83,7 @@ export default function ClimateCard({
                 mb: 0.5,
               }}
             >
-              CLIMATE
+              HYDROCLIMATE
             </Box>
             <Box
               sx={{
@@ -104,7 +104,7 @@ export default function ClimateCard({
                   mb: 0,
                 }}
               >
-                Climate
+                Hydroclimate
               </Box>
               <InfoIconButton
                 mode="glossary"
@@ -119,12 +119,12 @@ export default function ClimateCard({
                 <Box
                   component="span"
                   sx={{
-                    color: theme.palette.text.secondary,
+                    color: theme.palette.blue.bright,
                   }}
                 >
                   Slide
                 </Box>{" "}
-                to explore how climate affects outcomes.
+                to explore how hydroclimate affects outcomes.
               </Typography>
             </Box>
 

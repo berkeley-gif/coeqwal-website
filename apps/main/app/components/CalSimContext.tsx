@@ -13,6 +13,8 @@ interface CalSimContextType {
   toggleCalSim: () => void
   showBasins: boolean
   toggleBasins: () => void
+  isPanelsExpanded: boolean
+  setIsPanelsExpanded: (expanded: boolean) => void
 }
 
 const CalSimContext = createContext<CalSimContextType | undefined>(undefined)
@@ -20,6 +22,7 @@ const CalSimContext = createContext<CalSimContextType | undefined>(undefined)
 export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
   const [showBasins, setShowBasins] = useState(false)
+  const [isPanelsExpanded, setIsPanelsExpanded] = useState(false)
 
   const toggleCalSim = useCallback(() => {
     setIsCalSimVisible((prev) => {
@@ -37,7 +40,14 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
 
   return (
     <CalSimContext.Provider
-      value={{ isCalSimVisible, toggleCalSim, showBasins, toggleBasins }}
+      value={{ 
+        isCalSimVisible, 
+        toggleCalSim, 
+        showBasins, 
+        toggleBasins,
+        isPanelsExpanded,
+        setIsPanelsExpanded 
+      }}
     >
       {children}
     </CalSimContext.Provider>
