@@ -3,11 +3,19 @@
 import { useState, useEffect } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
+import ScenarioCard from "./ScenarioCard"
+import ClimateCard from "./ClimateCard"
 
 export default function ProgressiveScenarioPanels() {
   const theme = useTheme()
   const [showScenarioCard, setShowScenarioCard] = useState(false)
   const [showClimateCard, setShowClimateCard] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  
+  // State for expanded card functionality
+  const [isScenarioCardMinimized, setIsScenarioCardMinimized] = useState(false)
+  const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
+  const [selectedClimate, setSelectedClimate] = useState(1)
 
   // Intersection observer for scenario-related panels (Operations)
   useEffect(() => {
@@ -89,6 +97,35 @@ export default function ProgressiveScenarioPanels() {
     return () => observer.disconnect()
   }, [])
 
+  // Intersection observer for expansion state (scenario-explorer-overlay)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target.id === "scenario-explorer-overlay") {
+            setIsExpanded(entry.isIntersecting)
+            console.log(
+              "🎬 Panel expansion state:",
+              entry.isIntersecting,
+              "- triggered by scenario-explorer-overlay"
+            )
+          }
+        })
+      },
+      {
+        threshold: 0.3, // Trigger when 30% of the panel is visible
+        rootMargin: "0px 0px -100px 0px",
+      },
+    )
+
+    const scenarioExplorerOverlay = document.getElementById("scenario-explorer-overlay")
+    if (scenarioExplorerOverlay) {
+      observer.observe(scenarioExplorerOverlay)
+    }
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <Box
       sx={{
@@ -117,32 +154,41 @@ export default function ProgressiveScenarioPanels() {
             }}
             style={{ pointerEvents: "auto" }}
           >
-            <Box
-              sx={{
-                p: 3,
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                backdropFilter: "blur(10px)",
-                borderRadius: theme.borderRadius.card,
-                border: "1px solid",
-                borderColor: theme.palette.divider,
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                height: "auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typography
-                variant="h6"
+            {isExpanded ? (
+              // Expanded state: Full ScenarioCard
+              <ScenarioCard
+                isMinimized={isScenarioCardMinimized}
+                onToggleMinimized={() => setIsScenarioCardMinimized(!isScenarioCardMinimized)}
+              />
+            ) : (
+              // Simple state: Just "Operations" text
+              <Box
                 sx={{
-                  color: theme.palette.blue.darkest,
-                  fontWeight: 500,
-                  textAlign: "center",
+                  p: 3,
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: theme.borderRadius.card,
+                  border: "1px solid",
+                  borderColor: theme.palette.divider,
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+                  height: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                Operations
-              </Typography>
-            </Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: theme.palette.blue.darkest,
+                    fontWeight: 500,
+                    textAlign: "center",
+                  }}
+                >
+                  Operations
+                </Typography>
+              </Box>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -161,32 +207,43 @@ export default function ProgressiveScenarioPanels() {
             }}
             style={{ pointerEvents: "auto" }}
           >
-            <Box
-              sx={{
-                p: 3,
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                backdropFilter: "blur(10px)",
-                borderRadius: theme.borderRadius.card,
-                border: "1px solid",
-                borderColor: theme.palette.divider,
-                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-                height: "auto",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Typography
-                variant="h6"
+            {isExpanded ? (
+              // Expanded state: Full ClimateCard
+              <ClimateCard
+                isMinimized={isClimateCardMinimized}
+                onToggleMinimized={() => setIsClimateCardMinimized(!isClimateCardMinimized)}
+                selectedClimate={selectedClimate}
+                onClimateChange={setSelectedClimate}
+              />
+            ) : (
+              // Simple state: Just "Hydroclimate" text
+              <Box
                 sx={{
-                  color: theme.palette.blue.darkest,
-                  fontWeight: 500,
-                  textAlign: "center",
+                  p: 3,
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: theme.borderRadius.card,
+                  border: "1px solid",
+                  borderColor: theme.palette.divider,
+                  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+                  height: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                Hydroclimate
-              </Typography>
-            </Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: theme.palette.blue.darkest,
+                    fontWeight: 500,
+                    textAlign: "center",
+                  }}
+                >
+                  Hydroclimate
+                </Typography>
+              </Box>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
