@@ -53,18 +53,12 @@ const SortableScenarioExplorationCard = ({
   id,
   title,
   description,
-  outcomes,
   isBaseline = false,
-  selectedClimate = 1,
-  visualizationType = "bars",
 }: {
   id: string
   title: string
   description: string
-  outcomes: string[]
   isBaseline?: boolean
-  selectedClimate?: number
-  visualizationType?: "bars" | "rose" | "quartile" | "map"
 }) => {
   const theme = useTheme()
   const {
@@ -3950,10 +3944,7 @@ export default function ScenarioExplorer({
                           id={scenario.id}
                           title={scenario.title}
                           description={scenario.description}
-                          outcomes={scenario.outcomes}
                           isBaseline={scenario.isBaseline}
-                          selectedClimate={selectedClimate}
-                          visualizationType={explorationVisualizationType}
                         />
                       )
                     })}
