@@ -162,96 +162,26 @@ const SortableScenarioExplorationCard = ({
           </Typography>
         </Box>
 
-        {/* Outcomes grid */}
+        {/* Single indicator image replacing all charts */}
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 3, // Larger gap for better spacing in bigger cards
             flexGrow: 1,
-            alignItems: "center", // Center the glyphs vertically
-            padding: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 2,
           }}
         >
-          {outcomes.map((outcome, index) => (
-            <Box
-              key={outcome}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 1,
-                p: 1,
-                borderRadius: theme.borderRadius.rounded,
-                backgroundColor: theme.palette.grey[50],
-              }}
-            >
-              <ScenarioGlyph
-                tierColors={[
-                  theme.palette.tiers.tier1,
-                  theme.palette.tiers.tier2,
-                  theme.palette.tiers.tier3,
-                  theme.palette.tiers.tier4,
-                ]}
-                values={(() => {
-                  // Generate hydroclimate values
-                  const outcomeIndex = outcomes.indexOf(outcome)
-                  const baseMedian = outcomeIndex * 0.1 - 0.2
-
-                  let medianShift = 0
-                  let variabilityMultiplier = 1
-
-                  if (selectedClimate === 0) {
-                    medianShift = 0.3
-                    variabilityMultiplier = 0.7
-                  } else if (selectedClimate === 1) {
-                    medianShift = 0
-                    variabilityMultiplier = 1
-                  } else {
-                    const drierLevel = selectedClimate - 2
-                    medianShift = -0.2 - drierLevel * 0.2
-                    variabilityMultiplier = 1.2 + drierLevel * 0.4
-                  }
-
-                  // For non-baseline scenarios, add some dummy data improvement
-                  if (!isBaseline) {
-                    medianShift += 0.1 + index * 0.05 // Each alternative performs slightly better
-                    variabilityMultiplier *= 0.9 // Less variability
-                  }
-
-                  const median = baseMedian + medianShift
-                  const baseSpread = 0.4 * variabilityMultiplier
-                  const q1 = median - baseSpread * 0.5
-                  const q3 = median + baseSpread * 0.3
-                  const min = median - baseSpread * 0.8
-
-                  return [q3, median, q1, min] as [
-                    number,
-                    number,
-                    number,
-                    number,
-                  ]
-                })()}
-                size={56} // Fill the 2x2 space
-                variant={
-                  visualizationType === "map" ? "bars" : visualizationType
-                } // Default to bars for map mode
-              />
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: (theme) =>
-                    theme.typography.compact.caption.fontSize,
-                  textAlign: "center",
-                  lineHeight: 1.3,
-                  maxWidth: "90px", // Wider text area
-                  fontWeight: 400,
-                }}
-              >
-                {outcome}
-              </Typography>
-            </Box>
-          ))}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/indicators.png"
+            alt="Scenario indicators"
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+            }}
+          />
         </Box>
       </Card>
     </Box>
@@ -4078,7 +4008,14 @@ export default function ScenarioExplorer({
                       fontSize: "1.2rem",
                     }}
                   >
-                    Climate
+                    {[
+                      "Warmer Wetter",
+                      "Historical",
+                      "Warmer Drier I",
+                      "Warmer Drier II",
+                      "Warmer Drier III",
+                      "Warmer Drier IV",
+                    ][selectedClimate]}
                   </Typography>
                   <Typography
                     variant="body2"
