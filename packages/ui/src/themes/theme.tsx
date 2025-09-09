@@ -614,7 +614,7 @@ const theme = createTheme({
         fontSize: "1.5rem", // 24px
         lineHeight: 1.4,
         fontWeight: 500,
-      },  
+      },
       subtitle: {
         fontSize: "1.25rem", // 20px
         lineHeight: 1.5,

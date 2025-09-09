@@ -55,36 +55,36 @@ export default function CaliforniaMapPanel({
       >
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
-        <GeolocateControl 
-          position="bottom-left" 
+        <GeolocateControl
+          position="bottom-left"
           positionOptions={{
             enableHighAccuracy: true,
             timeout: 6000,
-            maximumAge: 0
+            maximumAge: 0,
           }}
           trackUserLocation={false}
           showUserHeading={false}
           showAccuracyCircle={true}
-          style={{ 
-            position: 'absolute',
-            left: '60px',
-            bottom: '30px', // Align with bottom of zoom controls
-            zIndex: 1
+          style={{
+            position: "absolute",
+            left: "60px",
+            bottom: "30px", // Align with bottom of zoom controls
+            zIndex: 1,
           }}
         />
-        
+
         {/* Basins GeoJSON Layer */}
         <BasinsLayer visible={showBasins} />
-        
+
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         <CalSimLayers />
-        
+
         {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
         {/* <CalSimMarkers /> */}
       </Map>
-      
+
       {/* Geolocation search box positioned to avoid control overlap */}
-      <MapGeoSearch 
+      <MapGeoSearch
         position="bottom-left"
         mapboxToken={token}
         placeholder="Search California location..."

@@ -39,15 +39,21 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         type="symbol"
         layout={{
           "text-field": ["get", "name"],
-          "text-font": ["Neue Haas Grotesk Bold", "Neue Haas Grotesk", "Arial Unicode MS Bold"],
+          "text-font": [
+            "Neue Haas Grotesk Bold",
+            "Neue Haas Grotesk",
+            "Arial Unicode MS Bold",
+          ],
           "text-size": 16,
           "text-anchor": "center",
           "symbol-placement": "point",
           "text-offset": [
             "case",
-            ["==", ["get", "name"], "Sacramento River Basin"], [0, -10], // Move Sacramentohigher
-            ["==", ["get", "name"], "San Joaquin River Basin"], [0, 5], // Move San Joaquin lower
-            [0, 0] // Default position for Tulare Basin
+            ["==", ["get", "name"], "Sacramento River Basin"],
+            [0, -10], // Move Sacramentohigher
+            ["==", ["get", "name"], "San Joaquin River Basin"],
+            [0, 5], // Move San Joaquin lower
+            [0, 0], // Default position for Tulare Basin
           ],
         }}
         paint={{
@@ -60,4 +66,3 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
     </Source>
   )
 }
-

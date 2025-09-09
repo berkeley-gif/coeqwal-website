@@ -82,7 +82,7 @@ export function LeadingMarkerText({
           color: (theme) => theme.palette.text.primary,
           display: "flex",
           flexDirection: "column",
-          gap: 2
+          gap: 2,
         }}
       >
         {children}

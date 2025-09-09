@@ -28,51 +28,53 @@ export default function MapGeoSearch({
 
   const handleSearch = async () => {
     if (!searchValue.trim()) return
-    
+
     setIsSearching(true)
-    
+
     try {
       // Use Mapbox Geocoding API
       const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN
       console.log("🔍 Searching for:", searchValue)
       console.log("🔑 Using token:", token ? "✅ Available" : "❌ Missing")
-      
+
       const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchValue)}.json?access_token=${token}&country=US&bbox=-124.5,32.5,-114.0,42.0&limit=1`
       console.log("📡 Geocode URL:", geocodeUrl)
-      
+
       const response = await fetch(geocodeUrl)
-      
+
       if (!response.ok) {
-        throw new Error('Geocoding failed')
+        throw new Error("Geocoding failed")
       }
-      
+
       const data = await response.json()
-      
+
       if (data.features && data.features.length > 0) {
         const [lng, lat] = data.features[0].center
         const placeName = data.features[0].place_name
-        
+
         // Move map to the location
         if (mapRef?.current) {
           mapRef.current.getMap()?.flyTo({
             center: [lng, lat],
             zoom: 10,
-            duration: 1500
+            duration: 1500,
           })
         }
-        
-        console.log(`📍 Found location: ${placeName} at [${lng.toFixed(4)}, ${lat.toFixed(4)}]`)
-        
+
+        console.log(
+          `📍 Found location: ${placeName} at [${lng.toFixed(4)}, ${lat.toFixed(4)}]`,
+        )
+
         if (onLocationSearch) {
           onLocationSearch(searchValue.trim())
         }
-        
+
         setSearchValue("") // Clear search after success
       } else {
         console.warn(`❌ Location not found: ${searchValue}`)
       }
     } catch (error) {
-      console.error('Geocoding error:', error)
+      console.error("Geocoding error:", error)
     } finally {
       setIsSearching(false)
     }
@@ -168,15 +170,15 @@ export default function MapGeoSearch({
                 size="small"
                 onClick={handleSearch}
                 disabled={isSearching}
-                sx={{ 
+                sx={{
                   color: (theme) => theme.palette.blue.medium,
-                  p: 0.5 
+                  p: 0.5,
                 }}
               >
                 <SearchIcon fontSize="small" />
               </IconButton>
             ),
-          }
+          },
         }}
       />
     </Box>

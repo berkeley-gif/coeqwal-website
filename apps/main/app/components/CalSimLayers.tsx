@@ -11,51 +11,65 @@ const API_BASE_URL = "https://api.coeqwal.org"
 export default function CalSimLayers() {
   const { isCalSimVisible } = useCalSimToggle()
   const theme = useTheme()
-  const [geoJsonData, setGeoJsonData] = useState<NetworkGeoJSONResponse | null>(null)
+  const [geoJsonData, setGeoJsonData] = useState<NetworkGeoJSONResponse | null>(
+    null,
+  )
 
   // Major reservoir data (same as original CalSimMarkers)
-  const majorReservoirData = useMemo(() => new Map([
-    ['SHSTA', { name: 'Shasta', capacity_taf: 4552.0, rank: 1 }],
-    ['OROVL', { name: 'Oroville', capacity_taf: 3538.0, rank: 2 }],
-    ['TRNTY', { name: 'Trinity', capacity_taf: 2448.0, rank: 3 }],
-    ['SLUIS', { name: 'San Luis', capacity_taf: 2041.0, rank: 4 }],
-    ['BRYSA', { name: 'Berryessa', capacity_taf: 1602.0, rank: 5 }],
-    ['ALMNR', { name: 'Almanor', capacity_taf: 1174.0, rank: 6 }],
-    ['MCLRE', { name: 'McClure', capacity_taf: 1025.0, rank: 7 }],
-    ['FOLSM', { name: 'Folsom', capacity_taf: 977.0, rank: 8 }],
-  ]), [])
+  const majorReservoirData = useMemo(
+    () =>
+      new Map([
+        ["SHSTA", { name: "Shasta", capacity_taf: 4552.0, rank: 1 }],
+        ["OROVL", { name: "Oroville", capacity_taf: 3538.0, rank: 2 }],
+        ["TRNTY", { name: "Trinity", capacity_taf: 2448.0, rank: 3 }],
+        ["SLUIS", { name: "San Luis", capacity_taf: 2041.0, rank: 4 }],
+        ["BRYSA", { name: "Berryessa", capacity_taf: 1602.0, rank: 5 }],
+        ["ALMNR", { name: "Almanor", capacity_taf: 1174.0, rank: 6 }],
+        ["MCLRE", { name: "McClure", capacity_taf: 1025.0, rank: 7 }],
+        ["FOLSM", { name: "Folsom", capacity_taf: 977.0, rank: 8 }],
+      ]),
+    [],
+  )
 
-  const majorReservoirCodes = useMemo(() => new Set(majorReservoirData.keys()), [majorReservoirData])
+  const majorReservoirCodes = useMemo(
+    () => new Set(majorReservoirData.keys()),
+    [majorReservoirData],
+  )
 
   // Reservoir scaling calculations (same as original CalSimMarkers)
   const reservoirScaling = useMemo(() => {
-    const capacities = Array.from(majorReservoirData.values()).map(r => r.capacity_taf)
+    const capacities = Array.from(majorReservoirData.values()).map(
+      (r) => r.capacity_taf,
+    )
     const maxCapacity = Math.max(...capacities)
     const minCapacity = Math.min(...capacities)
-    
-    const minMarkerSize = 4.5  // LocationOnIcon size
-    const maxMarkerSize = 7.0  
-    const minCircleSize = 2.0  // Slightly bigger from 1.8
-    const maxCircleSize = 3.2  // Slightly bigger from 2.8
-    
+
+    const minMarkerSize = 4.5 // LocationOnIcon size
+    const maxMarkerSize = 7.0
+    const minCircleSize = 2.0 // Slightly bigger from 1.8
+    const maxCircleSize = 3.2 // Slightly bigger from 2.8
+
     return {
       getMarkerSize: (capacity_taf: number, isSelected = false) => {
-        const normalizedSize = minMarkerSize + 
-          ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) * 
-          (maxMarkerSize - minMarkerSize)
+        const normalizedSize =
+          minMarkerSize +
+          ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) *
+            (maxMarkerSize - minMarkerSize)
         return isSelected ? normalizedSize * 1.15 : normalizedSize
       },
       getCircleSize: (capacity_taf: number, isSelected = false) => {
-        const normalizedSize = minCircleSize + 
-          ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) * 
-          (maxCircleSize - minCircleSize)
+        const normalizedSize =
+          minCircleSize +
+          ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) *
+            (maxCircleSize - minCircleSize)
         return isSelected ? normalizedSize * 1.15 : normalizedSize
       },
       getFontSize: (capacity_taf: number) => {
-        const baseSize = 0.6 +   // Slightly bigger to match larger circles
-          ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) * 0.25  // Slightly more range
+        const baseSize =
+          0.6 + // Slightly bigger to match larger circles
+          ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) * 0.25 // Slightly more range
         return `${baseSize}rem`
-      }
+      },
     }
   }, [])
 
@@ -65,24 +79,33 @@ export default function CalSimLayers() {
 
     try {
       console.log("🚀 Loading CalSim enhanced data...")
-      
+
       const trailsUrl = `${API_BASE_URL}/api/network/trails/overview?trail_type=enhanced`
       console.log("🎯 URL:", trailsUrl)
 
       const response = await fetch(trailsUrl)
       console.log("📡 API Response status:", response.status)
-      
+
       if (!response.ok) {
         throw new Error(`API failed: ${response.status}`)
       }
 
       const data = await response.json()
       console.log("📊 ENHANCED API Results:")
-      console.log("   📈 Feature Count:", data.trail_info?.feature_count || "unknown")
+      console.log(
+        "   📈 Feature Count:",
+        data.trail_info?.feature_count || "unknown",
+      )
       console.log("   🎯 Expected: 875 features")
       console.log("   🔍 Features array length:", data.features?.length || 0)
-      console.log("   🎯 Data Quality:", data.trail_info?.progression_level?.data_quality || "unknown")
-      console.log("   🔧 Additional Infrastructure:", data.trail_info?.additional_infrastructure || "unknown")
+      console.log(
+        "   🎯 Data Quality:",
+        data.trail_info?.progression_level?.data_quality || "unknown",
+      )
+      console.log(
+        "   🔧 Additional Infrastructure:",
+        data.trail_info?.additional_infrastructure || "unknown",
+      )
 
       setGeoJsonData(data)
       console.log("✅ CalSim enhanced data loaded")
@@ -107,23 +130,34 @@ export default function CalSimLayers() {
     return null
   }
 
-  console.log("🎨 HYBRID RENDERING: Mapbox layers for regular nodes + DOM markers for reservoirs...")
+  console.log(
+    "🎨 HYBRID RENDERING: Mapbox layers for regular nodes + DOM markers for reservoirs...",
+  )
 
   // Extract features for different rendering approaches
-  const majorReservoirFeatures = geoJsonData.features.filter(f => {
+  const majorReservoirFeatures = geoJsonData.features.filter((f) => {
     const props = f.properties as any
-    return props.schematic_type === "node" && props.type === "STR" && majorReservoirCodes.has(props.short_code)
-  })
-  
-  const regularFeatures = geoJsonData.features.filter(f => {
-    const props = f.properties as any
-    return props.schematic_type === "node" && (
-      props.type !== "STR" || !majorReservoirCodes.has(props.short_code)
+    return (
+      props.schematic_type === "node" &&
+      props.type === "STR" &&
+      majorReservoirCodes.has(props.short_code)
     )
   })
 
-  console.log(`   🏞️ Major Reservoirs (DOM LocationOnIcon): ${majorReservoirFeatures.length}`)
-  console.log(`   🔧 Regular nodes + other reservoirs (Mapbox): ${regularFeatures.length}`)
+  const regularFeatures = geoJsonData.features.filter((f) => {
+    const props = f.properties as any
+    return (
+      props.schematic_type === "node" &&
+      (props.type !== "STR" || !majorReservoirCodes.has(props.short_code))
+    )
+  })
+
+  console.log(
+    `   🏞️ Major Reservoirs (DOM LocationOnIcon): ${majorReservoirFeatures.length}`,
+  )
+  console.log(
+    `   🔧 Regular nodes + other reservoirs (Mapbox): ${regularFeatures.length}`,
+  )
 
   return (
     <>
@@ -133,7 +167,7 @@ export default function CalSimLayers() {
         type="geojson"
         data={{
           type: "FeatureCollection",
-          features: regularFeatures as any
+          features: regularFeatures as any,
         }}
       >
         {/* Regular infrastructure nodes */}
@@ -144,61 +178,90 @@ export default function CalSimLayers() {
             "circle-radius": [
               "case",
               // Sacramento River nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SAC"], [
+              ["==", ["slice", ["get", "short_code"], 0, 3], "SAC"],
+              [
                 "case",
-                ["==", ["get", "type"], "CH"], 4,    // SAC Channels - bigger
-                ["==", ["get", "type"], "PS"], 5,    // SAC Pump stations - bigger
-                ["==", ["get", "type"], "WWTP"], 5,  // SAC Wastewater treatment - bigger
-                ["==", ["get", "type"], "WTP"], 5,   // SAC Water treatment - bigger
-                4 // SAC Default - bigger
+                ["==", ["get", "type"], "CH"],
+                4, // SAC Channels - bigger
+                ["==", ["get", "type"], "PS"],
+                5, // SAC Pump stations - bigger
+                ["==", ["get", "type"], "WWTP"],
+                5, // SAC Wastewater treatment - bigger
+                ["==", ["get", "type"], "WTP"],
+                5, // SAC Water treatment - bigger
+                4, // SAC Default - bigger
               ],
               // San Joaquin River nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SJR"], [
+              ["==", ["slice", ["get", "short_code"], 0, 3], "SJR"],
+              [
                 "case",
-                ["==", ["get", "type"], "CH"], 4,    // SJR Channels - bigger
-                ["==", ["get", "type"], "PS"], 5,    // SJR Pump stations - bigger
-                ["==", ["get", "type"], "WWTP"], 5,  // SJR Wastewater treatment - bigger
-                ["==", ["get", "type"], "WTP"], 5,   // SJR Water treatment - bigger
-                4 // SJR Default - bigger
+                ["==", ["get", "type"], "CH"],
+                4, // SJR Channels - bigger
+                ["==", ["get", "type"], "PS"],
+                5, // SJR Pump stations - bigger
+                ["==", ["get", "type"], "WWTP"],
+                5, // SJR Wastewater treatment - bigger
+                ["==", ["get", "type"], "WTP"],
+                5, // SJR Water treatment - bigger
+                4, // SJR Default - bigger
               ],
               // California Aqueduct nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "CAA"], [
+              ["==", ["slice", ["get", "short_code"], 0, 3], "CAA"],
+              [
                 "case",
-                ["==", ["get", "type"], "CH"], 4,    // CAA Channels - bigger
-                ["==", ["get", "type"], "PS"], 5,    // CAA Pump stations - bigger
-                ["==", ["get", "type"], "WWTP"], 5,  // CAA Wastewater treatment - bigger
-                ["==", ["get", "type"], "WTP"], 5,   // CAA Water treatment - bigger
-                4 // CAA Default - bigger
+                ["==", ["get", "type"], "CH"],
+                4, // CAA Channels - bigger
+                ["==", ["get", "type"], "PS"],
+                5, // CAA Pump stations - bigger
+                ["==", ["get", "type"], "WWTP"],
+                5, // CAA Wastewater treatment - bigger
+                ["==", ["get", "type"], "WTP"],
+                5, // CAA Water treatment - bigger
+                4, // CAA Default - bigger
               ],
               // Delta Mendota Canal nodes - bigger
-              ["==", ["slice", ["get", "short_code"], 0, 3], "DMC"], [
+              ["==", ["slice", ["get", "short_code"], 0, 3], "DMC"],
+              [
                 "case",
-                ["==", ["get", "type"], "CH"], 4,    // DMC Channels - bigger
-                ["==", ["get", "type"], "PS"], 5,    // DMC Pump stations - bigger
-                ["==", ["get", "type"], "WWTP"], 5,  // DMC Wastewater treatment - bigger
-                ["==", ["get", "type"], "WTP"], 5,   // DMC Water treatment - bigger
-                4 // DMC Default - bigger
+                ["==", ["get", "type"], "CH"],
+                4, // DMC Channels - bigger
+                ["==", ["get", "type"], "PS"],
+                5, // DMC Pump stations - bigger
+                ["==", ["get", "type"], "WWTP"],
+                5, // DMC Wastewater treatment - bigger
+                ["==", ["get", "type"], "WTP"],
+                5, // DMC Water treatment - bigger
+                4, // DMC Default - bigger
               ],
               // All other nodes - regular size
-              ["==", ["get", "type"], "CH"], 3,    // Other Channels
-              ["==", ["get", "type"], "PS"], 4,    // Other Pump stations
-              ["==", ["get", "type"], "WWTP"], 4,  // Other Wastewater treatment
-              ["==", ["get", "type"], "WTP"], 4,   // Other Water treatment
-              ["==", ["get", "type"], "OM"], 3,    // Other/Delta
-              3 // Default
+              ["==", ["get", "type"], "CH"],
+              3, // Other Channels
+              ["==", ["get", "type"], "PS"],
+              4, // Other Pump stations
+              ["==", ["get", "type"], "WWTP"],
+              4, // Other Wastewater treatment
+              ["==", ["get", "type"], "WTP"],
+              4, // Other Water treatment
+              ["==", ["get", "type"], "OM"],
+              3, // Other/Delta
+              3, // Default
             ],
             "circle-color": [
               "case",
               // Sacramento River nodes (SAC prefix) - deeper blue
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SAC"], "#186b88", // theme.palette.blue.dark
-              // San Joaquin River nodes (SJR prefix) - purple  
-              ["==", ["slice", ["get", "short_code"], 0, 3], "SJR"], "#7b1fa2", // Purple
+              ["==", ["slice", ["get", "short_code"], 0, 3], "SAC"],
+              "#186b88", // theme.palette.blue.dark
+              // San Joaquin River nodes (SJR prefix) - purple
+              ["==", ["slice", ["get", "short_code"], 0, 3], "SJR"],
+              "#7b1fa2", // Purple
               // California Aqueduct nodes (CAA prefix) - gold
-              ["==", ["slice", ["get", "short_code"], 0, 3], "CAA"], "#ffd87e", // theme.palette.accent.gold
+              ["==", ["slice", ["get", "short_code"], 0, 3], "CAA"],
+              "#ffd87e", // theme.palette.accent.gold
               // Delta Mendota Canal nodes (DMC prefix) - earth brown
-              ["==", ["slice", ["get", "short_code"], 0, 3], "DMC"], "#c2a14f", // theme.palette.nature.earth
+              ["==", ["slice", ["get", "short_code"], 0, 3], "DMC"],
+              "#c2a14f", // theme.palette.nature.earth
               // Default: map panel overlay color (sky blue)
-              "#92C1D5" // theme.palette.brand.sky - same as map panel overlay
+              "#92C1D5", // theme.palette.brand.sky - same as map panel overlay
             ],
             "circle-stroke-width": 1, // Finer stroke
             "circle-stroke-color": "#ffffff", // White stroke for all
@@ -212,7 +275,7 @@ export default function CalSimLayers() {
         const coordinates = feature.geometry.coordinates as [number, number]
         const props = feature.properties as any
         const { id, short_code } = props
-        
+
         // Get TAF data from our curated major reservoir data
         const reservoirInfo = majorReservoirData.get(short_code)
         const capacity_taf = reservoirInfo?.capacity_taf || 1000
@@ -233,53 +296,53 @@ export default function CalSimLayers() {
             <Box
               sx={{
                 cursor: "pointer",
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
               }}
             >
               <Box
                 sx={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <LocationOnIcon
                   sx={{
                     fontSize: `${markerSize}rem`,
                     color: theme.palette.brand.sky, // Sky blue
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))',
-                    '&:hover': { transform: 'scale(1.05)' },
-                    transition: 'all 0.2s ease',
+                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.15))",
+                    "&:hover": { transform: "scale(1.05)" },
+                    transition: "all 0.2s ease",
                   }}
                 />
-                
+
                 {/* TAF circle inside the location icon */}
                 <Box
                   sx={{
-                    position: 'absolute',
-                    top: '15%',
-                    left: '50%',
-                    transform: 'translate(-50%, 0)',
+                    position: "absolute",
+                    top: "15%",
+                    left: "50%",
+                    transform: "translate(-50%, 0)",
                     width: `${circleSize}rem`,
                     height: `${circleSize}rem`,
-                    borderRadius: '50%',
+                    borderRadius: "50%",
                     backgroundColor: theme.palette.blue.medium,
-                    border: '1px solid rgba(0,0,0,0.1)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    border: "1px solid rgba(0,0,0,0.1)",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
                     fontSize: fontSize,
                     lineHeight: 1.2,
-                    fontWeight: 'bold',
-                    color: 'white',
-                    pointerEvents: 'none',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                    textAlign: 'center',
+                    fontWeight: "bold",
+                    color: "white",
+                    pointerEvents: "none",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                    textAlign: "center",
                   }}
                 >
                   {capacity_taf ? (
@@ -292,14 +355,14 @@ export default function CalSimLayers() {
                         sx={{
                           fontSize: `calc(${fontSize} * 0.7)`,
                           lineHeight: 1.2,
-                          marginTop: '-0.1rem'
+                          marginTop: "-0.1rem",
                         }}
                       >
                         TAF
                       </Box>
                     </>
                   ) : (
-                    '?'
+                    "?"
                   )}
                 </Box>
               </Box>
@@ -307,27 +370,27 @@ export default function CalSimLayers() {
               {/* Reservoir name label positioned on the stalk */}
               <Box
                 sx={{
-                  position: 'absolute',
-                  bottom: '25%',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                  backdropFilter: 'blur(4px)',
-                  borderRadius: '12px',
-                  padding: '3px 8px',
+                  position: "absolute",
+                  bottom: "25%",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  backdropFilter: "blur(4px)",
+                  borderRadius: "12px",
+                  padding: "3px 8px",
                   boxShadow: theme.shadows[1],
-                  pointerEvents: 'none',
-                  whiteSpace: 'nowrap',
+                  pointerEvents: "none",
+                  whiteSpace: "nowrap",
                 }}
               >
                 <Typography
                   variant="body2"
                   sx={{
-                    fontSize: '0.7rem',
+                    fontSize: "0.7rem",
                     fontWeight: 600,
-                    color: '#333',
+                    color: "#333",
                     lineHeight: 1.1,
-                    textAlign: 'center',
+                    textAlign: "center",
                   }}
                 >
                   {name}

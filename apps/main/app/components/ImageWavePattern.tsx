@@ -38,13 +38,13 @@ export function ImageWavePattern({
     typeof imageCount === "number"
       ? { xs: imageCount, sm: imageCount, lg: imageCount }
       : {
-        xs:
-          (imageCount as { xs?: number; sm?: number; lg?: number }).xs || 16,
-        sm:
-          (imageCount as { xs?: number; sm?: number; lg?: number }).sm || 16,
-        lg:
-          (imageCount as { xs?: number; sm?: number; lg?: number }).lg || 16,
-      }
+          xs:
+            (imageCount as { xs?: number; sm?: number; lg?: number }).xs || 16,
+          sm:
+            (imageCount as { xs?: number; sm?: number; lg?: number }).sm || 16,
+          lg:
+            (imageCount as { xs?: number; sm?: number; lg?: number }).lg || 16,
+        }
 
   // Generate ambient circles for each breakpoint, just like images
   const generateAmbientCirclesForBreakpoint = (count: number) => {

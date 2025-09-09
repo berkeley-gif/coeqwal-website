@@ -60,7 +60,7 @@ const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <CloudIcon />,
-    term: "Hydroclimates", 
+    term: "Hydroclimates",
     definition:
       "Patterns of water availability that reflect different climate conditions, including precipitation, temperature, and snowpack patterns. COEQWAL evaluates water management strategies under multiple hydroclimates - the climate experienced in the recent past plus five additional patterns representing possible future climates affected by climate change.",
   },
@@ -255,22 +255,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "Community water systems receive enough water to meet their full demands in at least 95% of years",
+        description:
+          "Community water systems receive enough water to meet their full demands in at least 95% of years",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "Community water systems receive enough water to maintain human health and safety in addition to meeting minimal industrial and commercial demands in all years",
+        description:
+          "Community water systems receive enough water to maintain human health and safety in addition to meeting minimal industrial and commercial demands in all years",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "Community water systems receive enough water to deliver the minimum water needed for human health and safety in all years",
+        description:
+          "Community water systems receive enough water to deliver the minimum water needed for human health and safety in all years",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Human health and safety minimums are not achieved in all years",
+        description:
+          "Human health and safety minimums are not achieved in all years",
       },
     ],
   },
@@ -283,22 +287,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "Agricultural revenue increases compared to historical values",
+        description:
+          "Agricultural revenue increases compared to historical values",
       },
       {
-        tier: "Tier 2", 
+        tier: "Tier 2",
         color: "tier2",
-        description: "Agricultural revenue declines less than 5% compared to historical values",
+        description:
+          "Agricultural revenue declines less than 5% compared to historical values",
       },
       {
         tier: "Tier 3",
-        color: "tier3", 
-        description: "Agricultural revenue declines between 5% and 20% compared to historical values",
+        color: "tier3",
+        description:
+          "Agricultural revenue declines between 5% and 20% compared to historical values",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Agricultural revenue decreases more than 20% compared to historical values",
+        description:
+          "Agricultural revenue decreases more than 20% compared to historical values",
       },
     ],
   },
@@ -346,22 +354,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "Flows vary enough between years and seasons to support a healthy, functioning ecosystem in 90% of years",
+        description:
+          "Flows vary enough between years and seasons to support a healthy, functioning ecosystem in 90% of years",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "Flows in the wet season and spring are below target ranges, but flows in the dry season are sufficient in 90% of years",
+        description:
+          "Flows in the wet season and spring are below target ranges, but flows in the dry season are sufficient in 90% of years",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "Seasonal flow targets are not achieved in wet season, spring, or dry season, but existing regulatory minimum flows are met in 90% of years",
+        description:
+          "Seasonal flow targets are not achieved in wet season, spring, or dry season, but existing regulatory minimum flows are met in 90% of years",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Minimum flow requirements are met in fewer than 90% of years",
+        description:
+          "Minimum flow requirements are met in fewer than 90% of years",
       },
     ],
   },
@@ -374,22 +386,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "Average salinity at both Banks & Jones pumping plants meets water quality standards for drinking and irrigation year round in 95% of years",
+        description:
+          "Average salinity at both Banks & Jones pumping plants meets water quality standards for drinking and irrigation year round in 95% of years",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "Average salinity at Banks and Jones pumping plants remains suitable for drinking and irrigation (but with potential need for extra treatment) for at least 10 months per year in 95% of years",
+        description:
+          "Average salinity at Banks and Jones pumping plants remains suitable for drinking and irrigation (but with potential need for extra treatment) for at least 10 months per year in 95% of years",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "Average salinity at Banks and Jones pumping plants is unsuitable for drinking and irrigation for 2 months in any year, in more than 5% of years at either site",
+        description:
+          "Average salinity at Banks and Jones pumping plants is unsuitable for drinking and irrigation for 2 months in any year, in more than 5% of years at either site",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Average salinity at Banks and Jones pumping plants is unsuitable for irrigation or drinking water for more than two months in any year",
+        description:
+          "Average salinity at Banks and Jones pumping plants is unsuitable for irrigation or drinking water for more than two months in any year",
       },
     ],
   },
@@ -409,22 +425,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months",
+        description:
+          "Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months",
+        description:
+          "Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months",
+        description:
+          "Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months",
+        description:
+          "Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months",
       },
     ],
   },
@@ -437,22 +457,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "The groundwater trend in a WBA is stable or increasing from 1960-2021 and average total storage is greater than in the reference scenario",
+        description:
+          "The groundwater trend in a WBA is stable or increasing from 1960-2021 and average total storage is greater than in the reference scenario",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "The groundwater trend in a WBA is stable or increasing but total storage is less than in the reference",
+        description:
+          "The groundwater trend in a WBA is stable or increasing but total storage is less than in the reference",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "The groundwater trend is declining (not stable or increasing as in Tiers 1 or 2) but at a moderate rate (fitted linear trend is less negative than -0.015 ft/yr)",
+        description:
+          "The groundwater trend is declining (not stable or increasing as in Tiers 1 or 2) but at a moderate rate (fitted linear trend is less negative than -0.015 ft/yr)",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Groundwater trends in a WBA are declining more severely, at a rate greater than 0.015 ft/year (slope <= -0.015 ft/yr)",
+        description:
+          "Groundwater trends in a WBA are declining more severely, at a rate greater than 0.015 ft/year (slope <= -0.015 ft/yr)",
       },
     ],
   },
@@ -465,22 +489,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "Reservoir storage is frequently high. There is a 90% chance that end-of-April reservoir storage is greater than the median April value observed over the last 30 years (or length of the observational record, whichever is longer)",
+        description:
+          "Reservoir storage is frequently high. There is a 90% chance that end-of-April reservoir storage is greater than the median April value observed over the last 30 years (or length of the observational record, whichever is longer)",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "Reservoir storage is lower than in Tier 1 but similar to recent history. On average, for two years out of three the reservoir storage is greater than the 33rd percentile from the observational record over the last 30 years",
+        description:
+          "Reservoir storage is lower than in Tier 1 but similar to recent history. On average, for two years out of three the reservoir storage is greater than the 33rd percentile from the observational record over the last 30 years",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "Reservoir storage tends to be lower than in Tier 2 and is slightly lower than recent history. For 3 years out of 10, the reservoir storage is greater than the 33rd percentile from the observational record over the last 30 years",
+        description:
+          "Reservoir storage tends to be lower than in Tier 2 and is slightly lower than recent history. For 3 years out of 10, the reservoir storage is greater than the 33rd percentile from the observational record over the last 30 years",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "Reservoir storage is lower than in Tier 3 and is much lower than recent history. In Tier 4 reservoir storage exceeds the historical 33rd percentile less than 3 years in 10",
+        description:
+          "Reservoir storage is lower than in Tier 3 and is much lower than recent history. In Tier 4 reservoir storage exceeds the historical 33rd percentile less than 3 years in 10",
       },
     ],
   },
@@ -493,22 +521,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "There is at least an 80% chance that the population grows to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+        description:
+          "There is at least an 80% chance that the population grows to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "There is at least an 80% chance that the population grows to 2 to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+        description:
+          "There is at least an 80% chance that the population grows to 2 to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "There is at least an 80% chance that the population of Winter Run Chinook salmon on the Sacramento River grows from its current size",
+        description:
+          "There is at least an 80% chance that the population of Winter Run Chinook salmon on the Sacramento River grows from its current size",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
+        description:
+          "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
       },
     ],
   },
@@ -521,22 +553,26 @@ const glossaryTerms: GlossaryTerm[] = [
       {
         tier: "Tier 1",
         color: "tier1",
-        description: "There is at least an 80% chance that the population grows to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+        description:
+          "There is at least an 80% chance that the population grows to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
       },
       {
         tier: "Tier 2",
         color: "tier2",
-        description: "There is at least an 80% chance that the population grows to 2 to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
+        description:
+          "There is at least an 80% chance that the population grows to 2 to 8 times its current size for Winter Run Chinook salmon on the Sacramento River",
       },
       {
         tier: "Tier 3",
         color: "tier3",
-        description: "There is at least an 80% chance that the population of Winter Run Chinook salmon on the Sacramento River grows from its current size",
+        description:
+          "There is at least an 80% chance that the population of Winter Run Chinook salmon on the Sacramento River grows from its current size",
       },
       {
         tier: "Tier 4",
         color: "tier4",
-        description: "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
+        description:
+          "The population of Winter Run Chinook salmon on the Sacramento River remains stable at current levels or declines",
       },
     ],
   },
