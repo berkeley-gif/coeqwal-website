@@ -8,17 +8,15 @@ interface HotspotMarkersProps {
   visible?: boolean
 }
 
-export default function HotspotMarkers({ visible = true }: HotspotMarkersProps) {
+export default function HotspotMarkers({
+  visible = true,
+}: HotspotMarkersProps) {
   if (!visible) return null
 
   return (
     <>
       {/* Marker 1: Los Angeles area */}
-      <Marker
-        longitude={-118.2437}
-        latitude={34.0522}
-        anchor="bottom"
-      >
+      <Marker longitude={-118.2437} latitude={34.0522} anchor="bottom">
         <MapMarkerTooltip
           text="Los Angeles - Urban water demand performing well"
           statusColor="#4CAF50"
@@ -61,11 +59,7 @@ export default function HotspotMarkers({ visible = true }: HotspotMarkersProps) 
       </Marker>
 
       {/* Marker 2: Sacramento area */}
-      <Marker
-        longitude={-121.3}
-        latitude={38.6}
-        anchor="bottom"
-      >
+      <Marker longitude={-121.3} latitude={38.6} anchor="bottom">
         <MapMarkerTooltip
           text="Sacramento - Municipal water supply under stress"
           statusColor="#ff4444"
@@ -108,11 +102,7 @@ export default function HotspotMarkers({ visible = true }: HotspotMarkersProps) 
       </Marker>
 
       {/* Marker 3: Westlands W.D. - Central Valley */}
-      <Marker
-        longitude={-120.58}
-        latitude={36.58}
-        anchor="bottom"
-      >
+      <Marker longitude={-120.58} latitude={36.58} anchor="bottom">
         <MapMarkerTooltip
           text="Central Valley - Agricultural irrigation stable"
           statusColor="#4CAF50"
@@ -155,11 +145,7 @@ export default function HotspotMarkers({ visible = true }: HotspotMarkersProps) 
       </Marker>
 
       {/* Marker 4: Chico area */}
-      <Marker
-        longitude={-121.95}
-        latitude={39.7285}
-        anchor="bottom"
-      >
+      <Marker longitude={-121.95} latitude={39.7285} anchor="bottom">
         <MapMarkerTooltip
           text="Chico - Crop irrigation facing drought challenges"
           statusColor="#ff4444"

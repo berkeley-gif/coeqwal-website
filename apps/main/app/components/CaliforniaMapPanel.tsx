@@ -41,14 +41,16 @@ function MapCenterController() {
     setTimeout(() => {
       try {
         if (isPanelsVisible) {
-          console.log("🗺️✈️ ATTEMPTING flyTo -125 longitude using context API (VERY dramatic shift)")
+          console.log(
+            "🗺️✈️ ATTEMPTING flyTo -125 longitude using context API (VERY dramatic shift)",
+          )
           // Use the map package's context API flyTo method - much more dramatic shift
           flyTo(-125, 38.073, 7.0, 0, 0, {
             duration: 1000, // Faster so it's more noticeable
             essential: true,
           })
           console.log("🗺️✅ Context API flyTo command executed")
-          
+
           // Also log what the center should be after
           setTimeout(() => {
             if (mapRef.current) {
@@ -57,7 +59,9 @@ function MapCenterController() {
             }
           }, 2100) // After animation completes
         } else {
-          console.log("🗺️🏠 ATTEMPTING flyTo back to -119 longitude using context API")
+          console.log(
+            "🗺️🏠 ATTEMPTING flyTo back to -119 longitude using context API",
+          )
           flyTo(-119, 38.073, 6.3, 0, 0, {
             duration: 2000,
             essential: true,
@@ -68,7 +72,6 @@ function MapCenterController() {
         console.error("🗺️💥 Error executing flyTo:", error)
       }
     }, 200) // Slightly longer delay
-
   }, [isPanelsVisible, flyTo, mapRef])
 
   return null // This component only handles side effects
