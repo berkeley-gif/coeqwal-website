@@ -42,7 +42,7 @@ export function TextMarker({ text }: { text: string }) {
         display: "inline-block",
         backgroundColor: `${text.includes("Delta") ? InfrastructureColor : OceanWaterColor}`, // Background color
         padding: "4px 8px", // Padding to create space around the text
-        color: "white", // Text color
+        color: "#f2f0ef", // Text color
         fontSize: "1rem", // Font size
         lineHeight: "1", // Ensures the text height matches its line height
         textAlign: "center", // Centers the text horizontally

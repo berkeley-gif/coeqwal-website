@@ -7,7 +7,7 @@ import { deltaMapViewState } from "./helpers/mapViewStates"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { AnimatePresence } from "@repo/motion"
 import { TextMarker, TextMarkersLayer } from "./helpers/mapLayers"
-import { SacramentoRiver, SanJoaquinRiver } from "./helpers/mapAnnotations"
+import { BanksPumping, JonesPumping, SacramentoRiver, SanJoaquinRiver } from "./helpers/mapAnnotations"
 import { InfrastructureColor } from "./helpers/colorPalette"
 import useStoryStore from "../store"
 
@@ -25,6 +25,7 @@ export default function MapContainer({
   const resourceLoaded = useRef(false)
   const breakpoint = useBreakpoint()
   const textMarkerLayer = useStoryStore((state) => state.textMarkerLayer)
+  const cancelTextLayer = useStoryStore((state) => state.cancelTextLayer)
 
   useEffect(() => {
     if (!resourceLoaded.current) {
@@ -105,6 +106,12 @@ export default function MapContainer({
               styledMarker={TextMarker}
             />
           )}
+          {cancelTextLayer != "pumping" && (<TextMarkersLayer
+            markers={[BanksPumping, JonesPumping]}
+            styledMarker={TextMarker}
+            key={3}
+          />)
+          }
         </AnimatePresence>
       </Map>
     </Box>
@@ -162,7 +169,7 @@ function SalinityHistoricalLayer() {
           type="line"
           source="salinity-export-arrow"
           paint={{
-            "line-color": InfrastructureColor,
+            "line-color": "#76bfe6",
             "line-width": 5,
           }}
           layout={{
