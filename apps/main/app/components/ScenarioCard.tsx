@@ -1,22 +1,24 @@
 "use client"
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, Select, MenuItem } from "@repo/ui/mui"
 import { InfoIconButton } from "@repo/ui"
-import { useDrawerStore } from "@repo/state"
+import { useDrawerStore, useGlyphSettingsStore } from "@repo/state"
+import { OUTCOMES } from "../lib/outcomes"
 
 interface ScenarioCardProps {
-  isExpanded?: boolean
   isMinimized?: boolean
   onToggleMinimized?: () => void
+  minimizedTitle?: string
 }
 
 export default function ScenarioCard({ 
-  isExpanded = false,
   isMinimized = false, 
-  onToggleMinimized 
+  onToggleMinimized,
+  minimizedTitle = "Current operations scenario"
 }: ScenarioCardProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
+  const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
   const handleGlossaryOpen = (entry: string) => {
     setDrawerContent({
@@ -25,39 +27,6 @@ export default function ScenarioCard({
     openDrawer("glossary")
   }
 
-  // Simple state when not expanded
-  if (!isExpanded) {
-    return (
-      <Box
-        sx={{
-          p: 3,
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(10px)",
-          borderRadius: theme.borderRadius.card,
-          border: "1px solid",
-          borderColor: theme.palette.divider,
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-          height: "auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 500,
-            textAlign: "center",
-          }}
-        >
-          Operations
-        </Typography>
-      </Box>
-    )
-  }
-
-  // Expanded state - full ScenarioExplorer content
   return (
     <Box
       sx={{
@@ -92,7 +61,7 @@ export default function ScenarioCard({
                 lineHeight: 1.3,
               }}
             >
-              Current operations scenario
+              {minimizedTitle}
             </Box>
           </Box>
         )}
@@ -190,7 +159,7 @@ export default function ScenarioCard({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    mb: 2,
+                    mb: 0,
                   }}
                 >
                   <Box
@@ -214,18 +183,168 @@ export default function ScenarioCard({
                       onGlossaryOpen={handleGlossaryOpen}
                     />
                   </Box>
+                  {/* Glyph variant selector */}
+                  <Select
+                    size="small"
+                    value={glyphVariant}
+                    onChange={(e) =>
+                      useGlyphSettingsStore
+                        .getState()
+                        .setVariant(
+                          e.target.value as "bars" | "rose" | "quartile",
+                        )
+                    }
+                    sx={{
+                      fontSize: theme.typography.compact.caption.fontSize,
+                      minWidth: "100px",
+                      height: "32px",
+                      backgroundColor: theme.palette.common.white,
+                      borderRadius: theme.borderRadius.rounded,
+                      "& .MuiSelect-select": {
+                        padding: "6px 12px",
+                        display: "flex",
+                        alignItems: "center",
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderWidth: "1px",
+                        borderColor: theme.palette.grey[300],
+                        borderRadius: theme.borderRadius.rounded,
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: theme.palette.blue.medium,
+                        borderWidth: "1px",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: theme.palette.blue.bright,
+                        borderWidth: "2px",
+                        boxShadow: `0 0 0 1px ${theme.palette.blue.bright}20`,
+                      },
+                      "& .MuiSelect-icon": {
+                        color: theme.palette.grey[500],
+                        fontSize: "1.2rem",
+                        right: "8px",
+                      },
+                      "&:hover .MuiSelect-icon": {
+                        color: theme.palette.blue.medium,
+                      },
+                      "&.Mui-focused .MuiSelect-icon": {
+                        color: theme.palette.blue.bright,
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: theme.borderRadius.rounded,
+                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                          border: `1px solid ${theme.palette.grey[200]}`,
+                          backgroundColor: theme.palette.common.white,
+                          mt: 0.5,
+                          "& .MuiMenuItem-root": {
+                            fontSize: theme.typography.compact.caption.fontSize,
+                            padding: "8px 16px",
+                            minHeight: "auto",
+                            backgroundColor: theme.palette.common.white,
+                            "&:hover": {
+                              backgroundColor: theme.palette.blue.bright + "10",
+                              color: theme.palette.blue.darkest,
+                            },
+                            "&.Mui-selected": {
+                              backgroundColor: theme.palette.blue.bright + "20",
+                              color: theme.palette.blue.darkest,
+                              fontWeight: 500,
+                              "&:hover": {
+                                backgroundColor: theme.palette.blue.bright + "30",
+                              },
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  >
+                    <MenuItem value="bars">Bars</MenuItem>
+                    <MenuItem value="rose">Rose</MenuItem>
+                    <MenuItem value="quartile">Quartile</MenuItem>
+                  </Select>
                 </Box>
-                
-                {/* Simplified outcomes display - no complex charts for IntroSection */}
-                <Typography
-                  variant="body2"
+
+                <Box
                   sx={{
-                    color: theme.palette.text.secondary,
-                    fontStyle: "italic",
+                    mb: 0,
                   }}
                 >
-                  Interactive scenario outcomes available in full Scenario Explorer
-                </Typography>
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                      }}
+                    >
+                      Click
+                    </Box>{" "}
+                    on each outcome to see how it is defined and how the
+                    results are distributed across the state on the map.
+                  </Typography>
+                </Box>
+
+                {/* Outcomes charts grid */}
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr", // 2 columns for outcomes
+                    gap: 2,
+                    alignItems: "start",
+                  }}
+                >
+                  {OUTCOMES.map((outcome) => (
+                    <Box
+                      key={outcome}
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 1,
+                        p: 2,
+                        backgroundColor: theme.palette.grey[50],
+                        borderRadius: theme.borderRadius.rounded,
+                        border: `1px solid ${theme.palette.grey[200]}`,
+                        cursor: "pointer",
+                        "&:hover": {
+                          backgroundColor: theme.palette.blue.bright + "10",
+                          borderColor: theme.palette.blue.medium,
+                        },
+                      }}
+                      onClick={() => handleGlossaryOpen(outcome)}
+                    >
+                      {/* Placeholder for ScenarioGlyph - simplified for IntroSection */}
+                      <Box
+                        sx={{
+                          width: 60,
+                          height: 40,
+                          backgroundColor: theme.palette.blue.medium,
+                          borderRadius: theme.borderRadius.rounded,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: "white", fontWeight: "bold" }}>
+                          {glyphVariant}
+                        </Typography>
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: theme.palette.blue.darkest,
+                          fontWeight: 500,
+                          textAlign: "center",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        {outcome}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
               </Box>
             </Box>
           </Box>
