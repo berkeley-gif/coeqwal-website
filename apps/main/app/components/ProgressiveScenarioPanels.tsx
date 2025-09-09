@@ -85,10 +85,10 @@ export default function ProgressiveScenarioPanels() {
         transform: "translateY(-50%)",
         zIndex: (theme) => theme.zIndex.appBar,
         pointerEvents: "none", // Allow map interaction through
-        width: "400px", // Match ScenarioExplorer left panel width (2/7 of typical viewport)
+        width: "420px", // Slightly wider for better chart visibility
         display: "flex",
         flexDirection: "column",
-        gap: 3,
+        gap: 1, // Reduced gap between panels
       }}
     >
       {/* Operations Panel */}
