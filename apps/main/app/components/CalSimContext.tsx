@@ -36,7 +36,9 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <CalSimContext.Provider value={{ isCalSimVisible, toggleCalSim, showBasins, toggleBasins }}>
+    <CalSimContext.Provider
+      value={{ isCalSimVisible, toggleCalSim, showBasins, toggleBasins }}
+    >
       {children}
     </CalSimContext.Provider>
   )

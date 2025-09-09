@@ -110,10 +110,14 @@ export default function ContentPanels() {
       <Box sx={{ flex: 2, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
           <Typography variant="body1" fontWeight="bold">
-            Do you know that California has one of the most complex water allocation systems in the world?
+            Do you know that California has one of the most complex water
+            allocation systems in the world?
           </Typography>
           <Typography variant="body1">
-            Learn how hydroclimate affects water availability, how water flows through California&apos;s Central Valley, the ways in which we manage water to satisfy diverse needs, and why inequities in water access persist.
+            Learn how hydroclimate affects water availability, how water flows
+            through California&apos;s Central Valley, the ways in which we
+            manage water to satisfy diverse needs, and why inequities in water
+            access persist.
           </Typography>
           <Box
             component="a"
@@ -128,7 +132,6 @@ export default function ContentPanels() {
               "&:hover": {
                 textDecoration: "underline",
               },
-
             }}
           >
             Learn more: How water moves through California →
@@ -152,11 +155,10 @@ export default function ContentPanels() {
             Learn more: Climate change and California water →
           </Box>
         </LeadingMarkerText>
-      </Box >
+      </Box>
       {/* Image column */}
-      < Box
-        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }
-        }
+      <Box
+        sx={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "center" }}
       >
         <Box
           component="img"
@@ -164,8 +166,8 @@ export default function ContentPanels() {
           alt="Learn"
           sx={{ width: "100%", maxWidth: 520, height: "auto" }}
         />
-      </Box >
-    </Box >
+      </Box>
+    </Box>
   )
 
   const ExploreSimple = () => (
@@ -195,7 +197,8 @@ export default function ContentPanels() {
             What if we managed water differently?
           </Typography>
           <Typography variant="body1">
-            Discover new possibilities for allocating water by reviewing the operational strategies included on COEQWAL&apos;s data platform.
+            Discover new possibilities for allocating water by reviewing the
+            operational strategies included on COEQWAL&apos;s data platform.
           </Typography>
         </LeadingMarkerText>
       </Box>
@@ -949,7 +952,8 @@ export default function ContentPanels() {
                 What scenarios align with your interests?
               </Typography>
               <Typography variant="body1">
-                Use the tools below to search, evaluate, and export information about scenarios that are meaningful to you.
+                Use the tools below to search, evaluate, and export information
+                about scenarios that are meaningful to you.
               </Typography>
             </LeadingMarkerText>
             <Box
@@ -1043,7 +1047,7 @@ function PanelWithDetail({
         overflow: "visible",
         backgroundColor: "transparent",
         zIndex: isActive ? 103 : 101,
-        margin: hideDetailArrow ? `0 0 8rem` : 0
+        margin: hideDetailArrow ? `0 0 8rem` : 0,
       }}
     >
       {/* Conditionally render either main panel or detail panel with sliding animation */}
