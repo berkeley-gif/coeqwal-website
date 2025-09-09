@@ -79,7 +79,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { showBasins, isPanelsVisible } = useCalSimToggle()
+  const { showBasins, isPanelsExpanded } = useCalSimToggle()
 
   return (
     <Box
@@ -123,10 +123,11 @@ export default function CaliforniaMapPanel({
         <BasinsLayer visible={showBasins} />
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
-        <CalSimLayers />
+        {/* Hide CalSim layers when hotspot markers are shown */}
+        {!isPanelsExpanded && <CalSimLayers />}
 
-        {/* Hotspot markers - appear when progressive panels are visible */}
-        <HotspotMarkers visible={isPanelsVisible} />
+        {/* Hotspot markers - appear when progressive panels are expanded */}
+        <HotspotMarkers visible={isPanelsExpanded} />
 
         {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
         {/* <CalSimMarkers /> */}
