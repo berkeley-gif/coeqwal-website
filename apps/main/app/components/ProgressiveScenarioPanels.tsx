@@ -53,10 +53,10 @@ export default function ProgressiveScenarioPanels() {
         setIsExpanded(shouldExpand)
         setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
         setIsPanelsVisible(showOperations || showHydroclimate) // Communicate visibility state to map
-        
-        console.log("🗺️ Setting panels state:", { 
-          expanded: shouldExpand, 
-          visible: showOperations || showHydroclimate 
+
+        console.log("🗺️ Setting panels state:", {
+          expanded: shouldExpand,
+          visible: showOperations || showHydroclimate,
         })
 
         console.log(

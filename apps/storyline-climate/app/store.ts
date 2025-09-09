@@ -9,7 +9,7 @@ interface StoryState {
     points: MarkerType[]
     style: string
   }
-  cancelTextLayer: string,
+  cancelTextLayer: string
   setActiveSection: (section: string) => void
   setMapReady: (isReady: boolean) => void
   setBreakpoint: (bp: string) => void
@@ -27,7 +27,7 @@ const useStoryStore = create<StoryState>((set) => ({
   setMapReady: (isReady: boolean) => set({ isMapReady: isReady }),
   setBreakpoint: (bp: string) => set({ breakpoint: bp }),
   setTextMarkers: (markers: MarkerType[], style: string) =>
-  set({ textMarkerLayer: { points: markers, style: style } }),
+    set({ textMarkerLayer: { points: markers, style: style } }),
   setCancelTextLayer: (text: string) => set({ cancelTextLayer: text }),
 }))
 

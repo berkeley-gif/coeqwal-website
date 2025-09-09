@@ -7,7 +7,12 @@ import { deltaMapViewState } from "./helpers/mapViewStates"
 import { useBreakpoint } from "@repo/ui/hooks"
 import { AnimatePresence } from "@repo/motion"
 import { TextMarker, TextMarkersLayer } from "./helpers/mapLayers"
-import { BanksPumping, JonesPumping, SacramentoRiver, SanJoaquinRiver } from "./helpers/mapAnnotations"
+import {
+  BanksPumping,
+  JonesPumping,
+  SacramentoRiver,
+  SanJoaquinRiver,
+} from "./helpers/mapAnnotations"
 import { InfrastructureColor } from "./helpers/colorPalette"
 import useStoryStore from "../store"
 
@@ -106,12 +111,13 @@ export default function MapContainer({
               styledMarker={TextMarker}
             />
           )}
-          {cancelTextLayer != "pumping" && (<TextMarkersLayer
-            markers={[BanksPumping, JonesPumping]}
-            styledMarker={TextMarker}
-            key={3}
-          />)
-          }
+          {cancelTextLayer != "pumping" && (
+            <TextMarkersLayer
+              markers={[BanksPumping, JonesPumping]}
+              styledMarker={TextMarker}
+              key={3}
+            />
+          )}
         </AnimatePresence>
       </Map>
     </Box>

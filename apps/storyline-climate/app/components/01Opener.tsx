@@ -30,77 +30,66 @@ function Opener() {
     >
       <SourceAnnouncer selected={selectedOpener} />
       <SelectionPanel onChange={onSelectionChange} />
-      {
-        selectedOpener === "oroville" && (
+      {selectedOpener === "oroville" && (
         <VerticalImageSlider
           topSrc="/images/oroville2021-drought.png"
           bottomSrc="/images/oroville2023-floods.png"
         />
-        )
-      }
-      {
-        selectedOpener === "sealevel" && (
-          <Box width='100%' height='100%'
-            sx={{
-              position: "absolute",
-              justifyContent: "center",
-              backgroundImage: "url('/drafts/opener_sea_level.png')",
-              backgroundSize: "auto 100vh",
-              backgroundPosition: "right",
-              backgroundRepeat: "no-repeat",
-              zIndex: 1,
-            }}
-          >
-          </Box>
-        )
-      }
-      {
-        selectedOpener === "temperature" && (
-          <Box width='100%' height='100%'
-            sx={{
-              position: "absolute",
-              justifyContent: "center",
-              backgroundImage: "url('/drafts/opener_temperature.png')",
-              backgroundSize: "auto 100vh",
-              backgroundPosition: "right",
-              backgroundRepeat: "no-repeat",
-              zIndex: 1,
-            }}
-          >
-          </Box>
-        )
-      }
-      {
-        selectedOpener === "sealevel" && (
-          <SeaLevelText />
-        )
-      }
-      {
-        selectedOpener === "temperature" && (
-          <SeaLevelText />
-        )
-      }
-      {
-        selectedOpener === "oroville" && (
-          <OrovilleText />
-        )
-      }
+      )}
+      {selectedOpener === "sealevel" && (
+        <Box
+          width="100%"
+          height="100%"
+          sx={{
+            position: "absolute",
+            justifyContent: "center",
+            backgroundImage: "url('/drafts/opener_sea_level.png')",
+            backgroundSize: "auto 100vh",
+            backgroundPosition: "right",
+            backgroundRepeat: "no-repeat",
+            zIndex: 1,
+          }}
+        ></Box>
+      )}
+      {selectedOpener === "temperature" && (
+        <Box
+          width="100%"
+          height="100%"
+          sx={{
+            position: "absolute",
+            justifyContent: "center",
+            backgroundImage: "url('/drafts/opener_temperature.png')",
+            backgroundSize: "auto 100vh",
+            backgroundPosition: "right",
+            backgroundRepeat: "no-repeat",
+            zIndex: 1,
+          }}
+        ></Box>
+      )}
+      {selectedOpener === "sealevel" && <SeaLevelText />}
+      {selectedOpener === "temperature" && <SeaLevelText />}
+      {selectedOpener === "oroville" && <OrovilleText />}
     </Box>
   )
 }
 
 function SeaLevelText() {
   return (
-    <Box width='100%' height='100%' sx={{
-      display: 'flex', flexDirection: 'column', justifyContent: 'center',
-      alignItems: 'flex-start', position: 'relative', zIndex: 2,
-      padding: '0 5rem', textAlign: 'left',
-    }}>
-      <Box
-        className="paragraph"
-        component="header"
-        role="banner"
-      >
+    <Box
+      width="100%"
+      height="100%"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        position: "relative",
+        zIndex: 2,
+        padding: "0 5rem",
+        textAlign: "left",
+      }}
+    >
+      <Box className="paragraph" component="header" role="banner">
         <Typography id="opener-heading" variant="h2" gutterBottom>
           {"How Climate Change Affects California's Water"}
         </Typography>
@@ -108,10 +97,7 @@ function SeaLevelText() {
           {"Adapting to a Hotter, More Uncertain Climate Future"}
         </Typography>
       </Box>
-      <Box
-        className="paragraph"
-        component="article"
-      >
+      <Box className="paragraph" component="article">
         <Typography variant="body1">
           {
             "California’s water system is under pressure to meet multiple demands."
@@ -123,18 +109,12 @@ function SeaLevelText() {
           }
         </Typography>
       </Box>
-      <Box
-        className="paragraph"
-        component="article"
-      >
+      <Box className="paragraph" component="article">
         <Typography variant="body1">
           {"Climate change is making matters worse."}
         </Typography>
       </Box>
-      <Box
-        className="paragraph"
-        component="article"
-      >
+      <Box className="paragraph" component="article">
         <Typography variant="body1">
           {"Warmer temperatures, less predictable rain and snow, "}
         </Typography>
@@ -160,7 +140,6 @@ function SeaLevelText() {
         </Typography>
       </Box>
     </Box>
-
   )
 }
 
@@ -272,41 +251,31 @@ function SourceAnnouncer(selected: { selected: string }) {
         zIndex: 3,
       }}
     >
-      {
-        selected.selected === "oroville" && (
+      {selected.selected === "oroville" && (
         <Box>
-            <p>Enterprise Bridge at Oroville Dam</p>
-            <p>Top: 2021. Bottom: 2023</p>
-            <p>Photo by Justin Sullivan</p>
-          </Box>
-        )
-      }
-      {
-        selected.selected === "temperature" && (
+          <p>Enterprise Bridge at Oroville Dam</p>
+          <p>Top: 2021. Bottom: 2023</p>
+          <p>Photo by Justin Sullivan</p>
+        </Box>
+      )}
+      {selected.selected === "temperature" && (
         <Box>
-            <p>Projected temperature change relative to historical average</p>
-            <p>Cal-Adapt mid-century projection of average maximum temperature</p>
-            <p>Medium emission scenario(RCP4.5)</p>
-          </Box>
-        )
-      }
-      {
-        selected.selected === "sealevel" && (
+          <p>Projected temperature change relative to historical average</p>
+          <p>Cal-Adapt mid-century projection of average maximum temperature</p>
+          <p>Medium emission scenario(RCP4.5)</p>
+        </Box>
+      )}
+      {selected.selected === "sealevel" && (
         <Box>
-            <p>Projected sea level change (image-placeholder)</p>
-            <p>Cal-Adapt CoSMoS 2020-2040 median flood scenario</p>
-          </Box>
-        )
-      }
+          <p>Projected sea level change (image-placeholder)</p>
+          <p>Cal-Adapt CoSMoS 2020-2040 median flood scenario</p>
+        </Box>
+      )}
     </motion.div>
   )
 }
 
-function SelectionPanel({
-  onChange,
-}: {
-  onChange: (value: string) => void,
-}) {
+function SelectionPanel({ onChange }: { onChange: (value: string) => void }) {
   const { scrollY } = useScroll()
   const lastYRef = useRef(0)
   const [isHidden, setIsHidden] = useState(false)
