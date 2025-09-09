@@ -90,6 +90,8 @@ export default function MapContainer({
       >
         <RiverLayer />
         <TunnelLayer />
+        <SalinityHistoricalLayer />
+        <RiverFlowLayer />
         <AnimatePresence>
           <TextMarkersLayer
             markers={[SacramentoRiver, SanJoaquinRiver]}
@@ -106,6 +108,115 @@ export default function MapContainer({
         </AnimatePresence>
       </Map>
     </Box>
+  )
+}
+
+function SalinityHistoricalLayer() {
+  return (
+    <>
+      <Source
+        id="salinity-historical-arrow"
+        type="geojson"
+        data="/data/crappy_historical_x2_arrow.geojson"
+      >
+        <Layer
+          id="salinity-historical-arrow-layer"
+          type="line"
+          source="salinity-historical-arrow"
+          paint={{
+            "line-color": "#F2f0EF",
+            "line-width": 5,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+          }}
+        />
+      </Source>
+      <Source
+        id="salinity-dummy-arrow"
+        type="geojson"
+        data="/data/crappy_dummy_x2_arrow.geojson"
+      >
+        <Layer
+          id="salinity-dummy-arrow-layer"
+          type="line"
+          source="salinity-dummy-arrow"
+          paint={{
+            "line-color": "#F1B143",
+            "line-width": 5,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+          }}
+        />
+      </Source>
+      <Source
+        id="salinity-export-arrow"
+        type="geojson"
+        data="/data/crappy_export.geojson"
+      >
+        <Layer
+          id="salinity-export-arrow-layer"
+          type="line"
+          source="salinity-export-arrow"
+          paint={{
+            "line-color": InfrastructureColor,
+            "line-width": 5,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+          }}
+        />
+      </Source>
+    </>
+  )
+}
+
+function RiverFlowLayer() {
+  return (
+    <>
+      <Source
+        id="sac-arrow"
+        type="geojson"
+        data="/data/crappy_sac_flow.geojson"
+      >
+        <Layer
+          id="sac-arrow-layer"
+          type="line"
+          source="sac-arrow"
+          paint={{
+            "line-color": "#76bfe6",
+            "line-width": 6,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+          }}
+        />
+      </Source>
+      <Source
+        id="san-joaquin-arrow"
+        type="geojson"
+        data="/data/crappy_joaquin_flow.geojson"
+      >
+        <Layer
+          id="joaquin-arrow-layer"
+          type="line"
+          source="san-joaquin-arrow"
+          paint={{
+            "line-color": "#76bfe6",
+            "line-width": 6,
+          }}
+          layout={{
+            "line-cap": "round",
+            "line-join": "round",
+          }}
+        />
+      </Source>
+    </>
   )
 }
 
