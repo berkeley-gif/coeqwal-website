@@ -1808,14 +1808,16 @@ const MapControls = ({
                         lineHeight: 1.3,
                       }}
                     >
-                      {[
-                        "Warmer Wetter",
-                        "Historical",
-                        "Warmer Drier I",
-                        "Warmer Drier II",
-                        "Warmer Drier III",
-                        "Warmer Drier IV",
-                      ][selectedClimate]}
+                      {
+                        [
+                          "Warmer Wetter",
+                          "Historical",
+                          "Warmer Drier I",
+                          "Warmer Drier II",
+                          "Warmer Drier III",
+                          "Warmer Drier IV",
+                        ][selectedClimate]
+                      }
                     </Box>
                   </Box>
                 )}
@@ -1856,14 +1858,16 @@ const MapControls = ({
                           mb: 0,
                         }}
                       >
-                        {[
-                          "Warmer Wetter",
-                          "Historical",
-                          "Warmer Drier I",
-                          "Warmer Drier II",
-                          "Warmer Drier III",
-                          "Warmer Drier IV",
-                        ][selectedClimate]}
+                        {
+                          [
+                            "Warmer Wetter",
+                            "Historical",
+                            "Warmer Drier I",
+                            "Warmer Drier II",
+                            "Warmer Drier III",
+                            "Warmer Drier IV",
+                          ][selectedClimate]
+                        }
                       </Box>
                       <InfoIconButton
                         mode="glossary"

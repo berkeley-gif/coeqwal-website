@@ -12,7 +12,7 @@ export default function ProgressiveScenarioPanels() {
   const [showOperationsPanel, setShowOperationsPanel] = useState(false)
   const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  
+
   // State for expanded card functionality
   const [isScenarioCardMinimized, setIsScenarioCardMinimized] = useState(false)
   const [isClimateCardMinimized, setIsClimateCardMinimized] = useState(false)
@@ -30,17 +30,21 @@ export default function ProgressiveScenarioPanels() {
         // Operations panel logic: Show only during IntroSection map overlays
         const operationsPanels = [
           "scenarios-overlay",
-          "scenarios-overlay2", 
-          "scenario-explorer-overlay"
+          "scenarios-overlay2",
+          "scenario-explorer-overlay",
         ]
-        const showOperations = visiblePanels.some(id => operationsPanels.includes(id))
+        const showOperations = visiblePanels.some((id) =>
+          operationsPanels.includes(id),
+        )
 
         // Hydroclimate panel logic: Show from scenarios-overlay2 onwards (IntroSection only)
         const hydroclimateStartPanels = [
-          "scenarios-overlay2", 
-          "scenario-explorer-overlay"
+          "scenarios-overlay2",
+          "scenario-explorer-overlay",
         ]
-        const showHydroclimate = visiblePanels.some(id => hydroclimateStartPanels.includes(id))
+        const showHydroclimate = visiblePanels.some((id) =>
+          hydroclimateStartPanels.includes(id),
+        )
 
         // Expansion logic: Only when scenario-explorer-overlay is visible
         const shouldExpand = visiblePanels.includes("scenario-explorer-overlay")
@@ -49,15 +53,15 @@ export default function ProgressiveScenarioPanels() {
         setShowHydroclimatePanel(showHydroclimate)
         setIsExpanded(shouldExpand)
         setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
-        
+
         console.log("🗺️ Setting panels expanded state:", shouldExpand)
-        
+
         console.log(
           "🎬 Coordinated panel state:",
-          { 
+          {
             operations: showOperations,
-            hydroclimate: showHydroclimate, 
-            expanded: shouldExpand 
+            hydroclimate: showHydroclimate,
+            expanded: shouldExpand,
           },
           "- visible panels:",
           visiblePanels.join(", "),
@@ -72,7 +76,9 @@ export default function ProgressiveScenarioPanels() {
     // Observe only IntroSection panels (no content-panels)
     const scenariosPanel = document.getElementById("scenarios-overlay")
     const scenariosPanel2 = document.getElementById("scenarios-overlay2")
-    const scenarioExplorerOverlay = document.getElementById("scenario-explorer-overlay")
+    const scenarioExplorerOverlay = document.getElementById(
+      "scenario-explorer-overlay",
+    )
 
     if (scenariosPanel) observer.observe(scenariosPanel)
     if (scenariosPanel2) observer.observe(scenariosPanel2)
@@ -89,12 +95,12 @@ export default function ProgressiveScenarioPanels() {
         left: 24,
         zIndex: (theme) => theme.zIndex.appBar,
         pointerEvents: "none", // Allow map interaction through
-        width: "420px", // Slightly wider for better chart visibility
+        width: "474px", // Match ScenarioExplorer left panel width exactly
         maxHeight: "calc(100vh - 48px)", // Ensure panels fit in viewport
         display: "flex",
         flexDirection: "column",
         gap: 1, // Reduced gap between panels
-        
+
         // Responsive layout for when both panels don't fit
         "@media (max-height: 800px)": {
           flexDirection: "row",
@@ -117,15 +123,19 @@ export default function ProgressiveScenarioPanels() {
               duration: 0.8,
               ease: "easeOut",
             }}
-            style={{ 
+            style={{
               pointerEvents: "auto",
               flexShrink: 0, // Don't shrink in responsive layout
-              width: "420px", // Fixed width for responsive layout
+              width: "474px", // Fixed width for responsive layout
             }}
           >
             <ScenarioCard
               isMinimized={!isExpanded} // Minimized when not in final section, user can control when expanded
-              onToggleMinimized={isExpanded ? () => setIsScenarioCardMinimized(!isScenarioCardMinimized) : undefined}
+              onToggleMinimized={
+                isExpanded
+                  ? () => setIsScenarioCardMinimized(!isScenarioCardMinimized)
+                  : undefined
+              }
               minimizedTitle="Operations" // Show "Operations" when not expanded
             />
           </motion.div>
@@ -144,15 +154,19 @@ export default function ProgressiveScenarioPanels() {
               ease: "easeOut",
               delay: 0.2, // Slight delay after scenario card
             }}
-            style={{ 
+            style={{
               pointerEvents: "auto",
               flexShrink: 0, // Don't shrink in responsive layout
-              width: "420px", // Fixed width for responsive layout
+              width: "474px", // Fixed width for responsive layout
             }}
           >
             <ClimateCard
               isMinimized={!isExpanded} // Minimized when not in final section, user can control when expanded
-              onToggleMinimized={isExpanded ? () => setIsClimateCardMinimized(!isClimateCardMinimized) : undefined}
+              onToggleMinimized={
+                isExpanded
+                  ? () => setIsClimateCardMinimized(!isClimateCardMinimized)
+                  : undefined
+              }
               selectedClimate={selectedClimate}
               onClimateChange={setSelectedClimate}
             />

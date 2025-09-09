@@ -11,11 +11,11 @@ interface ClimateCardProps {
   onClimateChange?: (value: number) => void
 }
 
-export default function ClimateCard({ 
-  isMinimized = false, 
+export default function ClimateCard({
+  isMinimized = false,
   onToggleMinimized,
   selectedClimate = 1,
-  onClimateChange = () => {}
+  onClimateChange = () => {},
 }: ClimateCardProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
@@ -62,14 +62,16 @@ export default function ClimateCard({
                 lineHeight: 1.3,
               }}
             >
-              {[
-                "Warmer Wetter",
-                "Historical",
-                "Warmer Drier I",
-                "Warmer Drier II",
-                "Warmer Drier III",
-                "Warmer Drier IV",
-              ][selectedClimate]}
+              {
+                [
+                  "Warmer Wetter",
+                  "Historical",
+                  "Warmer Drier I",
+                  "Warmer Drier II",
+                  "Warmer Drier III",
+                  "Warmer Drier IV",
+                ][selectedClimate]
+              }
             </Box>
           </Box>
         )}
@@ -109,14 +111,16 @@ export default function ClimateCard({
                   mb: 0,
                 }}
               >
-                {[
-                  "Warmer Wetter",
-                  "Historical",
-                  "Warmer Drier I",
-                  "Warmer Drier II",
-                  "Warmer Drier III",
-                  "Warmer Drier IV",
-                ][selectedClimate]}
+                {
+                  [
+                    "Warmer Wetter",
+                    "Historical",
+                    "Warmer Drier I",
+                    "Warmer Drier II",
+                    "Warmer Drier III",
+                    "Warmer Drier IV",
+                  ][selectedClimate]
+                }
               </Box>
               <InfoIconButton
                 mode="glossary"
