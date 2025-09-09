@@ -37,12 +37,27 @@ function Groundwater() {
       ref={sectionRef}
       className="container-row"
       height="100vh"
-      width='100%'
+      width="100%"
       tabIndex={-1}
       role="region"
     >
-      <Box width='50%' height='100%' sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-        <motion.div className='text-container-left' style={{ opacity: firstParagraphOpacity, marginBottom: '20px', paddingRight: '10px'  }}>
+      <Box
+        width="50%"
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <motion.div
+          className="text-container-left"
+          style={{
+            opacity: firstParagraphOpacity,
+            marginBottom: "20px",
+            paddingRight: "10px",
+          }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
@@ -70,21 +85,24 @@ function Groundwater() {
             </Typography>
           </Box>
         </motion.div>
-        <motion.div className='text-container-left' style={{ opacity: secondParagraphOpacity, paddingRight: '10px'  }}>
+        <motion.div
+          className="text-container-left"
+          style={{ opacity: secondParagraphOpacity, paddingRight: "10px" }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {"The 2014 "}
               <span style={{ fontWeight: "bold" }}>
                 {"Sustainable Groundwater Management Act (SGMA) "}
               </span>
-              {"is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."}
+              {
+                "is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."
+              }
             </Typography>
           </Box>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
-              {
-                "But putting the law fully into effect will take years. "
-              }
+              {"But putting the law fully into effect will take years. "}
             </Typography>
             <Typography variant="body1" gutterBottom>
               {
@@ -98,15 +116,29 @@ function Groundwater() {
             </Typography>
           </Box>
         </motion.div>
-
       </Box>
-      <Box width='50%' height='100%' sx={{backgroundColor: '#458992ff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 20px'}}>
-        <Box width='100%' height='40%' sx={{backgroundColor: '#1f313aff'}}>
-          
-        </Box>
-        <Box width='100%' height='40%' sx={{backgroundColor: '#437b97ff'}}>
-          
-        </Box>
+      <Box
+        width="50%"
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "0 20px",
+        }}
+      >
+        <Box
+          width="100%"
+          height="100%"
+          sx={{
+            position: "relative",
+            justifyContent: "center",
+            backgroundImage: "url('/drafts/supply-groundwater.png')",
+            backgroundSize: "100% auto",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></Box>
       </Box>
     </Box>
   )
@@ -136,12 +168,23 @@ function Conservation() {
       ref={sectionRef}
       className="container-row"
       height="100vh"
-      width='100%'
+      width="100%"
       tabIndex={-1}
       role="region"
     >
-      <Box width='50%' height='100%' sx={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-        <motion.div className='text-container-left' style={{ opacity: firstParagraphOpacity }}>
+      <Box
+        width="50%"
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <motion.div
+          className="text-container-left"
+          style={{ opacity: firstParagraphOpacity }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
@@ -159,7 +202,10 @@ function Conservation() {
             </Typography>
           </Box>
         </motion.div>
-        <motion.div className='text-container-left' style={{ opacity: secondParagraphOpacity }}>
+        <motion.div
+          className="text-container-left"
+          style={{ opacity: secondParagraphOpacity }}
+        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
@@ -172,17 +218,31 @@ function Conservation() {
           </Box>
         </motion.div>
       </Box>
-      <Box width='50%' height='100%' sx={{backgroundColor: '#458992ff', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '0 20px'}}>
-        <Box width='100%' height='40%' sx={{backgroundColor: '#1f313aff'}}>
-          
-        </Box>
-        <Box width='100%' height='40%' sx={{backgroundColor: '#437b97ff'}}>
-          
-        </Box>
+      <Box
+        width="50%"
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "0 20px",
+        }}
+      >
+        <Box
+          width="100%"
+          height="100%"
+          sx={{
+            position: "relative",
+            justifyContent: "center",
+            backgroundImage: "url('/drafts/supply-conservation.png')",
+            backgroundSize: "100% auto",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        ></Box>
       </Box>
     </Box>
   )
 }
-
 
 export default SectionSupply
