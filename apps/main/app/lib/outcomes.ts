@@ -1,8 +1,8 @@
 export const OUTCOMES = [
   "Community deliveries",
-  "Agricultural deliveries",
-  "Environmental health",
-  "Delta health",
+  "Agricultural revenue",
+  "Environmental flows",
+  "Delta estuary status",
   "Reservoir storage",
   "Groundwater storage",
   "Salmon abundance",
