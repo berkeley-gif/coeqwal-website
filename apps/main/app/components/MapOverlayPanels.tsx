@@ -44,9 +44,7 @@ export default function MapOverlayPanels() {
         entries.forEach((entry) => {
           if (entry.target.id === "california-map" && entry.isIntersecting) {
             setIsFirstPanelVisible(true)
-            console.log(
-              "Map entered viewport",
-            )
+            console.log("Map entered viewport")
           }
         })
       },
@@ -139,10 +137,7 @@ export default function MapOverlayPanels() {
                 mr: { xs: 8, md: 16 },
               }}
             >
-              <Typography
-                variant="h3"
-                component="h3"
-              >
+              <Typography variant="h3" component="h3">
                 {t("toolsPanel.title")}
               </Typography>
 
@@ -507,10 +502,7 @@ export default function MapOverlayPanels() {
               mr: { xs: 8, md: 16 },
             }}
           >
-            <Typography
-              variant="h3"
-              component="h3"
-            >
+            <Typography variant="h3" component="h3">
               Rethink California water
             </Typography>
 

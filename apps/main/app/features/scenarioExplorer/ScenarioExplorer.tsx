@@ -4013,14 +4013,16 @@ export default function ScenarioExplorer({
                       fontSize: "1.2rem",
                     }}
                   >
-                    {[
-                      "Warmer Wetter",
-                      "Historical",
-                      "Warmer Drier I",
-                      "Warmer Drier II",
-                      "Warmer Drier III",
-                      "Warmer Drier IV",
-                    ][selectedClimate]}
+                    {
+                      [
+                        "Warmer Wetter",
+                        "Historical",
+                        "Warmer Drier I",
+                        "Warmer Drier II",
+                        "Warmer Drier III",
+                        "Warmer Drier IV",
+                      ][selectedClimate]
+                    }
                   </Typography>
                   <Typography
                     variant="body2"
