@@ -1,3 +1,6 @@
+// Meli, since we are not longer doing the complicated slide feature, it might be easier to scrap the contents of this file and rewrite cleanly with your abstraction.
+// The code was built around that functionality (requested feature at the time, but it's a mess)
+
 import React, { useState, useEffect, useRef } from "react"
 import {
   Box,
@@ -24,10 +27,10 @@ export default function ContentPanels() {
   // Track which panel is showing details (if any)
   const [activePanel, setActivePanel] = useState<PanelType>(null)
 
-  // Force redraw when the window is resized to recalculate panel dimensions
+  // Force redraw when the window is resized to recalculate panel dimensions <= don't need this calculation once detail panels are removed
   const [, setWindowWidth] = useState(0)
 
-  useEffect(() => {
+  useEffect(() => { // don't need this resize once detail panels are removed + following blocks as well
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
     }
@@ -88,7 +91,6 @@ export default function ContentPanels() {
           alignItems: { sm: smallScreenAlign, lg: largeScreenAlign },
           flexDirection: { sm: smallScreenFlexDir, lg: largeScreenFlexDir },
           gap: (theme) => theme.layout.spacing.md,
-          color: (theme) => theme.palette.blue.darkest,
           width: "100%",
         }}
       >
@@ -109,7 +111,7 @@ export default function ContentPanels() {
       {/* Text column */}
       <Box sx={{ flex: 2, minWidth: 0 }}>
         <LeadingMarkerText title="Learn">
-          <Typography variant="body1" fontWeight="bold">
+          <Typography variant="body1" fontWeight={700}>
             Do you know that California has one of the most complex water
             allocation systems in the world?
           </Typography>
@@ -193,7 +195,7 @@ export default function ContentPanels() {
       {/* Text column */}
       <Box sx={{ flex: 2, minWidth: 0 }}>
         <LeadingMarkerText title="Explore">
-          <Typography variant="body1" fontWeight="bold">
+          <Typography variant="body1" fontWeight={700}>
             What if we managed water differently?
           </Typography>
           <Typography variant="body1">
@@ -224,7 +226,7 @@ export default function ContentPanels() {
       background="transparent"
       paddingVariant="wide"
       sx={{
-        pointerEvents: "auto", // Re-enable interactions for content panels
+        pointerEvents: "auto", // Re-enable interactions for content panels, test to see if necessary
         position: "relative",
         overflowX: "hidden", // Prevent horizontal scrolling
         overflowY: "visible", // Allow natural vertical flow
@@ -340,7 +342,6 @@ export default function ContentPanels() {
                   variant="h2"
                   sx={{
                     alignSelf: "flex-start",
-                    color: (theme) => theme.palette.blue.darkest,
                   }}
                 >
                   Learn
@@ -364,7 +365,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       A natural system fed by rain and snowpack
@@ -373,7 +373,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3, // MUI spacing for larger gaps
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Water in California begins as precipitation. It travels
@@ -412,7 +411,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Who decides where water goes and when?
@@ -421,7 +419,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       California&apos;s water is managed by a patchwork of
@@ -431,7 +428,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -452,7 +448,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       California faces increasing water challenges from
@@ -510,7 +505,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm, // 16px
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       What if we made different choices?
@@ -519,7 +513,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       The COEQWAL project uses the CalSim3 computational model,
@@ -531,7 +524,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -619,7 +611,6 @@ export default function ContentPanels() {
                     alignSelf: "flex-start",
                     pointerEvents: "auto",
                     width: "100%",
-                    color: (theme) => theme.palette.blue.darkest,
                   }}
                 >
                   Explore scenario themes
@@ -642,7 +633,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Baseline scenarios show how California manages water
@@ -653,14 +643,13 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
                         cursor: "default",
                       }}
                     >
-                      Explore current operations scenarios →
+                      Explore current operations →
                     </Box>
                   </LeadingMarkerText>
                 </Grid>
@@ -675,7 +664,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Balancing ecosystem needs with human uses
@@ -684,7 +672,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Natural river systems have high flows in winter and low
@@ -696,7 +683,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -718,7 +704,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Sustainable strategies for groundwater basins
@@ -727,7 +712,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       In California, too much groundwater pumping has caused
@@ -740,7 +724,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -762,7 +745,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Ensuring safe, affordable water access for all
@@ -771,7 +753,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       All Californians need water for drinking, cooking,
@@ -785,7 +766,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -807,7 +787,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Supporting the Delta ecosystem and San Francisco Bay
@@ -816,7 +795,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       The Sacramento and San Joaquin Rivers carry water from
@@ -831,7 +809,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -853,7 +830,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Protecting in-Delta water users and livelihoods
@@ -862,7 +838,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Communities and farms in the Delta need freshwater water
@@ -877,7 +852,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -899,7 +873,6 @@ export default function ContentPanels() {
                       sx={{
                         mb: (theme) => theme.layout.spacing.sm,
                         opacity: 0.8,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       Ensuring consistent water deliveries to users south of the
@@ -909,7 +882,6 @@ export default function ContentPanels() {
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: (theme) => theme.palette.blue.darkest,
                       }}
                     >
                       California&apos;s water system is designed and managed to
@@ -924,7 +896,6 @@ export default function ContentPanels() {
                     </Typography>
                     <Box
                       sx={{
-                        color: (theme) => theme.palette.blue.darkest,
                         textDecoration: "none",
                         display: "block",
                         fontWeight: 500,
@@ -948,7 +919,7 @@ export default function ContentPanels() {
             largeScreenFlexDir="column"
           >
             <LeadingMarkerText title="Empower">
-              <Typography variant="body1" fontWeight="bold">
+              <Typography variant="body1" fontWeight={700}>
                 What scenarios align with your interests?
               </Typography>
               <Typography variant="body1">
@@ -1071,7 +1042,6 @@ function PanelWithDetail({
               sx={{
                 backgroundColor: "transparent",
                 p: 0,
-                color: (theme) => theme.palette.blue.darkest,
                 position: "relative",
                 borderRadius: 0,
                 userSelect: "text",
@@ -1151,7 +1121,6 @@ function PanelWithDetail({
               sx={{
                 backgroundColor: (theme) => theme.palette.brand.water,
                 p: 0,
-                color: (theme) => theme.palette.blue.darkest,
                 position: "relative",
                 borderRadius: 0,
                 userSelect: "text",

@@ -111,6 +111,7 @@ import type { CSSProperties } from "react"
 // ===============================================================================
 
 const typeScale = {
+  // Redo: We changed the h1 scale to fit the longer headline. We could change the type scale to accomodate new content / new layout
   // Headline sizes using Perfect Fourth ratio (1.333) - refined scale
   h1: "5.8rem", // 92.8px - Hero size
   h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
@@ -172,7 +173,7 @@ const themeValues = {
 
     // Text and UI blues (organized by intensity)
     blue: {
-      darkest: "#3a4574", // Deep navy - primary text (TODO: should it be #2A5287 ?)
+      darkest: "#3a4574", // Deep navy - primary text (TODO: is this too purple? should it be #2A5287 ?)
       dark: "#186b88", // Dark teal - secondary text
       medium: "#2d89b6", // Medium blue - accent (a beautiful blue FWIW)
       bright: "#449cd9", // Bright blue - links/interactive
@@ -180,7 +181,7 @@ const themeValues = {
     },
 
     text: {
-      default: "#fffff", // Change the default here
+      default: "#fffff", // This is a mui default; TODO: change it to our text.primary
     },
 
     // Accent colors - warm tones
@@ -225,22 +226,6 @@ const themeValues = {
     overlay: {
       water: "rgba(42, 82, 135, 0.2)", // Semi-transparent blue for header and UI elements
       waterLight: "rgba(42, 82, 135, 0.1)", // Lighter variant for overlapping dividers and borders
-    },
-
-    categories: {
-      // Not used yet, categories have changed
-      groundwaterManagement: "#76b9aa", // nature.teal
-      riverFlows: "#2d89b6", // blue.medium
-      urbanWaterPriorities: "#449cd9", // blue.bright
-      deltaBalance: "#ffd87e", // accent.gold
-      infrastructure: "#3a4574", // blue.darkest
-      noFlowRequirements: "#186b88", // blue.dark
-      carryoverRequirements: "#77a2d9", // blue.light
-      deltaOutflows: "#87CEEB", // brand.sky
-      urbanDemand: "#9fd5cb", // nature.sage
-      exportReductions: "#64a3d7", // brand.water
-      conveyanceProjects: "#b1e1c3", // nature.mint
-      climateFuture: "#ffd87e", // accent.gold
     },
 
     // Outcome tier colors, used
@@ -723,23 +708,6 @@ const theme = createTheme({
     overlay: {
       water: themeValues.palette.overlay.water,
       waterLight: themeValues.palette.overlay.waterLight,
-    },
-
-    categories: {
-      groundwaterManagement:
-        themeValues.palette.categories.groundwaterManagement,
-      riverFlows: themeValues.palette.categories.riverFlows,
-      urbanWaterPriorities: themeValues.palette.categories.urbanWaterPriorities,
-      deltaBalance: themeValues.palette.categories.deltaBalance,
-      infrastructure: themeValues.palette.categories.infrastructure,
-      noFlowRequirements: themeValues.palette.categories.noFlowRequirements,
-      carryoverRequirements:
-        themeValues.palette.categories.carryoverRequirements,
-      deltaOutflows: themeValues.palette.categories.deltaOutflows,
-      urbanDemand: themeValues.palette.categories.urbanDemand,
-      exportReductions: themeValues.palette.categories.exportReductions,
-      conveyanceProjects: themeValues.palette.categories.conveyanceProjects,
-      climateFuture: themeValues.palette.categories.climateFuture,
     },
     tiers: {
       tier1: themeValues.palette.tiers.tier1,

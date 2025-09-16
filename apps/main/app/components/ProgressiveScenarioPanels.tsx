@@ -1,5 +1,5 @@
 "use client"
-
+// Todo: coordinate intersection observer logic with storyline i.o. logic. HY should be an i.o. pro by now.
 import { useState, useEffect } from "react"
 import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
@@ -29,7 +29,7 @@ export default function ProgressiveScenarioPanels() {
 
         // Operations panel logic: Show starting from "Rethink California water" panel
         const operationsPanels = [
-          "scenarios-overlay2", // Start from the "Rethink California water" panel
+          "scenarios-overlay2", // Start from "Rethink California water" panel
           "scenario-explorer-overlay",
         ]
         const showOperations = visiblePanels.some((id) =>
@@ -54,13 +54,13 @@ export default function ProgressiveScenarioPanels() {
         setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
         setIsPanelsVisible(showOperations || showHydroclimate) // Communicate visibility state to map
 
-        console.log("🗺️ Setting panels state:", {
+        console.log("Setting panels state:", {
           expanded: shouldExpand,
           visible: showOperations || showHydroclimate,
         })
 
         console.log(
-          "🎬 Coordinated panel state:",
+          "Coordinated panel state:",
           {
             operations: showOperations,
             hydroclimate: showHydroclimate,
@@ -92,15 +92,15 @@ export default function ProgressiveScenarioPanels() {
     <Box
       sx={{
         position: "fixed",
-        top: 24, // Top aligned instead of center
+        top: 24,
         left: 24,
         zIndex: (theme) => theme.zIndex.appBar,
         pointerEvents: "none", // Allow map interaction through
-        width: "474px", // Match ScenarioExplorer left panel width exactly
+        width: "474px", // Match ScenarioExplorer left panel width
         maxHeight: "calc(100vh - 48px)", // Ensure panels fit in viewport
         display: "flex",
         flexDirection: "column",
-        gap: 1, // Reduced gap between panels
+        gap: 1,
 
         // Responsive layout for when both panels don't fit
         "@media (max-height: 800px)": {
@@ -119,7 +119,13 @@ export default function ProgressiveScenarioPanels() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{
+              opacity: 0,
+              transition: {
+                duration: 0.15, // Quick fade-out, not yet mastered
+                ease: "easeIn",
+              },
+            }}
             transition={{
               duration: 2.0, // Much slower fade-in to not distract from reading
               ease: "easeOut",
@@ -143,13 +149,19 @@ export default function ProgressiveScenarioPanels() {
         )}
       </AnimatePresence>
 
-      {/* Hydroclimate Panel */}
+      {/* Hydroclimate panel */}
       <AnimatePresence>
         {showHydroclimatePanel && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{
+              opacity: 0,
+              transition: {
+                duration: 0.15, // Quick fade-out, not yet mastered, also actions for both panels should be combined
+                ease: "easeIn",
+              },
+            }}
             transition={{
               duration: 2.0, // Much slower fade-in to not distract from reading
               ease: "easeOut",
