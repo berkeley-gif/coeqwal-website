@@ -45,7 +45,7 @@ export default function MapOverlayPanels() {
           if (entry.target.id === "california-map" && entry.isIntersecting) {
             setIsFirstPanelVisible(true)
             console.log(
-              "🎬 California map entered viewport - triggering panel slide-up animation",
+              "Map entered viewport",
             )
           }
         })
@@ -56,11 +56,11 @@ export default function MapOverlayPanels() {
       },
     )
 
-    // Observe the California map panel instead - trigger when map becomes sticky
+    // Observe the California map panel -> trigger when map becomes sticky
     const mapPanel = document.getElementById("california-map")
     if (mapPanel) {
       observer.observe(mapPanel)
-      console.log("👀 Observing California map panel for entrance animation")
+      console.log("Observing California map panel for entrance animation")
     }
 
     return () => {
@@ -71,7 +71,7 @@ export default function MapOverlayPanels() {
   // Shared style for overlay panel content boxes, for now
   const overlayPanelStyle = {
     maxWidth: (theme: Theme) => theme.layout.textContainer.maxWidth,
-    backgroundColor: (theme: Theme) => theme.palette.brand.sky, // Same as home panel gradient start
+    backgroundColor: (theme: Theme) => theme.palette.brand.sky,
     backdropFilter: "blur(10px)",
     borderRadius: (theme: Theme) => theme.borderRadius.card,
     padding: (theme: Theme) => theme.layout.spacing.lg,
@@ -90,7 +90,7 @@ export default function MapOverlayPanels() {
         marginTop: "-100vh", // Pull up to overlay the sticky map immediately
       }}
     >
-      {/* Tools Panel - Right-side overlay */}
+      {/* Tools panel right-side overlay */}
       <TwoColumnPanel
         id="tools-overlay"
         fullHeight={true}
@@ -99,8 +99,8 @@ export default function MapOverlayPanels() {
         includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
-          justifyContent: "center", // Center vertically in viewport
-          alignItems: "flex-end", // Keep right alignment
+          justifyContent: "center",
+          alignItems: "flex-end",
         }}
         sx={{
           minHeight: "100vh",
@@ -117,9 +117,9 @@ export default function MapOverlayPanels() {
             }}
             transition={{
               type: "spring",
-              stiffness: 40, // Lower stiffness for gentler movement
-              damping: 30, // Higher damping for smoother, less bouncy settling
-              duration: 1.8, // Longer duration for elegant entrance ✨
+              stiffness: 40, // Lower stiffness
+              damping: 30, // Higher damping
+              duration: 1.8, // Longer duration
               // Separate faster timing for opacity
               opacity: {
                 duration: 0.6, // Much faster opacity fade-in
@@ -129,7 +129,7 @@ export default function MapOverlayPanels() {
             style={{
               width: "100%",
               display: "flex",
-              justifyContent: "flex-end", // Ensure right alignment is maintained
+              justifyContent: "flex-end", // Ensure right alignment
             }}
           >
             <Box
@@ -142,20 +142,16 @@ export default function MapOverlayPanels() {
               <Typography
                 variant="h3"
                 component="h3"
-                sx={{
-                  color: (theme) => theme.palette.blue.darkest,
-                }}
               >
                 {t("toolsPanel.title")}
               </Typography>
 
-              <Typography variant="body1" fontWeight="bold">
+              <Typography variant="body1" fontWeight={700}>
                 {t("toolsPanel.boldText")}
               </Typography>
 
               <Box
                 sx={{
-                  color: (theme) => theme.palette.blue.darkest,
                   mb: 2,
                   fontSize: "1rem",
                   lineHeight: 1.5,
@@ -173,7 +169,7 @@ export default function MapOverlayPanels() {
                   ]}
                   onActivate={handleGlossaryOpen}
                   color={theme.palette.blue.darkest}
-                  underlineColor={theme.palette.blue.medium}
+                  underlineColor={theme.palette.blue.darkest}
                 />
               </Box>
 
@@ -225,7 +221,7 @@ export default function MapOverlayPanels() {
                         gap: (theme) => theme.spacing(2),
                       }}
                     >
-                      {/* Full replica of reservoir marker for legend */}
+                      {/* Reservoir marker for legend */}
                       <Box
                         sx={{
                           position: "relative",
@@ -236,16 +232,14 @@ export default function MapOverlayPanels() {
                       >
                         <LocationOnIcon
                           sx={{
-                            fontSize: "4.5rem", // Make it bigger to match the largest actual markers
+                            fontSize: "4.5rem", // Bigger
                             color: (theme) => theme.palette.brand.sky,
                             flexShrink: 0,
-                            // Enhanced shadow for better contrast against panel background
                             filter:
                               "drop-shadow(0 4px 8px rgba(0,0,0,0.3)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))",
                             "&:hover": { transform: "scale(1.05)" },
                             transition: "all 0.2s ease",
-                            // Add white outline to differentiate from panel background
-                            WebkitTextStroke: "2px white",
+                            WebkitTextStroke: "2px white", // White outline
                             textShadow:
                               "2px 2px 4px rgba(0,0,0,0.3), -2px -2px 4px rgba(0,0,0,0.3), 2px -2px 4px rgba(0,0,0,0.3), -2px 2px 4px rgba(0,0,0,0.3)",
                           }}
@@ -267,9 +261,9 @@ export default function MapOverlayPanels() {
                             flexDirection: "column",
                             alignItems: "center",
                             justifyContent: "center",
-                            fontSize: "0.65rem", // Scale up text size
+                            fontSize: "0.65rem", // Bigger
                             lineHeight: 1.2,
-                            fontWeight: "bold",
+                            fontWeight: 700,
                             color: "white",
                             pointerEvents: "none",
                             boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
@@ -336,7 +330,7 @@ export default function MapOverlayPanels() {
                         borderRadius: "6px",
                         backgroundColor: (theme) => theme.palette.brand.sky, // Same as overlay panel
                         "&:hover": {
-                          backgroundColor: "rgba(255, 255, 255, 0.3)", // Semi-transparent white
+                          backgroundColor: "rgba(255, 255, 255, 0.3)",
                         },
                         transition: "background-color 0.2s ease",
                       }}
@@ -346,7 +340,7 @@ export default function MapOverlayPanels() {
                         variant="body2"
                         sx={{
                           fontSize: "16px", // Same as map basin labels
-                          fontWeight: "bold",
+                          fontWeight: 700,
                           color: "#ffffff",
                           textAlign: "center",
                           lineHeight: 1.1,
@@ -361,7 +355,7 @@ export default function MapOverlayPanels() {
                         {showBasins ? "Basins" : "Show Basins"}
                       </Typography>
                     </Box>
-                    {/* Sacramento River nodes - deeper blue */}
+                    {/* Sacramento River nodes */}
                     <Box
                       sx={{
                         display: "flex",
@@ -385,7 +379,7 @@ export default function MapOverlayPanels() {
                       </Typography>
                     </Box>
 
-                    {/* San Joaquin River nodes - purple */}
+                    {/* San Joaquin River nodes */}
                     <Box
                       sx={{
                         display: "flex",
@@ -409,7 +403,7 @@ export default function MapOverlayPanels() {
                       </Typography>
                     </Box>
 
-                    {/* California Aqueduct nodes - gold */}
+                    {/* California Aqueduct nodes */}
                     <Box
                       sx={{
                         display: "flex",
@@ -433,7 +427,7 @@ export default function MapOverlayPanels() {
                       </Typography>
                     </Box>
 
-                    {/* Delta Mendota Canal nodes - earth brown */}
+                    {/* Delta Mendota Canal nodes */}
                     <Box
                       sx={{
                         display: "flex",
@@ -457,7 +451,7 @@ export default function MapOverlayPanels() {
                       </Typography>
                     </Box>
 
-                    {/* All other nodes - sky blue (map panel color) */}
+                    {/* All other nodes) */}
                     <Box
                       sx={{
                         display: "flex",
@@ -471,7 +465,7 @@ export default function MapOverlayPanels() {
                           height: 12,
                           borderRadius: "50%",
                           backgroundColor: "#92C1D5", // theme.palette.brand.sky - map panel color
-                          border: "1px solid #ffffff", // Finer white stroke
+                          border: "1px solid #ffffff",
                           boxShadow: (theme) => theme.shadows[1],
                           flexShrink: 0,
                         }}
@@ -488,7 +482,7 @@ export default function MapOverlayPanels() {
         }
       />
 
-      {/* Scenarios Panel - Right-side overlay */}
+      {/* Scenarios panel right-side overlay */}
       <TwoColumnPanel
         id="scenarios-overlay"
         fullHeight={true}
@@ -497,8 +491,8 @@ export default function MapOverlayPanels() {
         includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
-          justifyContent: "center", // Center vertically in viewport
-          alignItems: "flex-end", // Align panels to the right edge
+          justifyContent: "center",
+          alignItems: "flex-end",
         }}
         sx={{
           minHeight: "100vh",
@@ -516,16 +510,12 @@ export default function MapOverlayPanels() {
             <Typography
               variant="h3"
               component="h3"
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-              }}
             >
               Rethink California water
             </Typography>
 
             <Box
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
                 fontSize: "1rem",
                 lineHeight: 1.5,
               }}
@@ -543,14 +533,14 @@ export default function MapOverlayPanels() {
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.blue.darkest}
-                underlineColor={theme.palette.blue.medium}
+                underlineColor={theme.palette.blue.darkest}
               />
             </Box>
           </Box>
         }
       />
 
-      {/* Scenarios Panel - Right-side overlay */}
+      {/* Scenarios panel right-side overlay */}
       <TwoColumnPanel
         id="scenarios-overlay2"
         fullHeight={true}
@@ -559,20 +549,20 @@ export default function MapOverlayPanels() {
         includeHeaderSpacing={false}
         contentColumn="right"
         contentAlignment={{
-          justifyContent: "center", // Center vertically in viewport
-          alignItems: "flex-end", // Align panels to the right edge
+          justifyContent: "center",
+          alignItems: "flex-end",
         }}
         sx={{
           minHeight: "100vh",
           pointerEvents: "none", // Allow map interaction through the overlay
           paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Here also -- Todo: work on this
+          paddingRight: 0, // Here also, might want to put some time into this
         }}
         rightContent={
           <Box
             sx={{
               ...overlayPanelStyle,
-              mr: { xs: 8, md: 16 }, // Moved further right to show more map // Push panel right, for now
+              mr: { xs: 8, md: 16 }, // Moved further right to show more map, for now
             }}
           >
             <Box
@@ -597,15 +587,14 @@ export default function MapOverlayPanels() {
                   },
                 ]}
                 onActivate={handleGlossaryOpen}
-                color={theme.palette.blue.darkest}
-                underlineColor={theme.palette.blue.medium}
+                underlineColor={theme.palette.blue.darkest}
               />
             </Box>
           </Box>
         }
       />
 
-      {/* Invisible marker for intersection detection */}
+      {/* Invisible marker for intersection detection; todo: come back to this */}
       <TwoColumnPanel
         id="scenario-explorer-overlay"
         fullHeight={true}

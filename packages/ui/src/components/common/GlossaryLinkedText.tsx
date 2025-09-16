@@ -76,8 +76,8 @@ export function GlossaryLinkedText({
         component="span"
         sx={{
           backgroundColor: "transparent",
-          borderBottom: `${underlinePx}px solid ${underlineColor || "#3a4574"}`, // Default blue color
-          color: linkColor || color || "#3a4574", // Default blue color
+          borderBottom: `${underlinePx}px solid ${underlineColor || "#3a4574"}`, // Default text blue, todo: relate to theme color
+          color: linkColor || color || "#3a4574", // Default text blue
           py: 0.1,
           mx: 0.2,
           lineHeight: 0,
@@ -86,7 +86,7 @@ export function GlossaryLinkedText({
           display: "inline-block",
           position: "relative",
           "&:hover": {
-            borderBottom: `${underlineHoverPx}px solid ${underlineColor || "#3a4574"}`, // Default blue color
+            borderBottom: `${underlineHoverPx}px solid ${underlineColor || "#3a4574"}`, // Default text blue
           },
         }}
         onClick={() => onActivate(glossaryTerm)}

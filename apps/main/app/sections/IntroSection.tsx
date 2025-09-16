@@ -37,10 +37,9 @@ const IntroSection = () => {
           fullWidth={true}
           backgroundColor="transparent"
           includeHeaderSpacing={true}
-          textColor={theme.palette.blue.darkest}
-          sx={{ pointerEvents: "auto" }} // Enables interactions for home panel
+          sx={{ pointerEvents: "auto" }} // Enables interactions for home panel, test to see if necessary
           contentAlignment={{
-            justifyContent: { xs: "center", md: "flex-end", lg: "flex-end" }, // Text block stays at bottom for all screen sizes for this instance
+            justifyContent: { xs: "center", md: "flex-end", lg: "flex-end" }, // Text block
             alignItems: "center",
           }}
           content={
@@ -70,7 +69,6 @@ const IntroSection = () => {
                   sx={{
                     fontSize: "4.2rem", // I changed the h1 size to fit the longer headline. We could change the type scale to accomodate new content / new layout
                     lineHeight: 1.1,
-                    color: (theme) => theme.palette.blue.darkest, // blue dark
                     mb: (theme) => theme.layout.spacing.xs,
                     mt: { xs: "40vh", lg: "0" },
                   }}
@@ -81,10 +79,6 @@ const IntroSection = () => {
                 {/* Body text */}
                 <Typography
                   variant="body1"
-                  sx={{
-                    // mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
-                    color: (theme) => theme.palette.blue.darkest, // blue dark
-                  }}
                 >
                   {t("homePanel.content")}
                 </Typography>
@@ -116,15 +110,13 @@ const IntroSection = () => {
         fullHeight={true}
         fullWidth
         backgroundColor={theme.palette.brand.sky}
-        textColor={theme.palette.blue.darkest}
         includeHeaderSpacing={true}
         contentAlignment={{
           justifyContent: "center",
           alignItems: "center",
         }}
         sx={{
-          pointerEvents: "auto", // Enables interactions for frontmatter panel
-          position: "relative",
+          pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary?
           backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "40% auto",
           backgroundPosition: "bottom right",
@@ -141,7 +133,7 @@ const IntroSection = () => {
               gap: "20px",
             }}
           >
-            <Typography variant="body1" fontWeight="bold">
+            <Typography variant="body1" fontWeight={700}>
               {t("frontmatterPanel.boldText")}
             </Typography>
             <Typography variant="body1">
@@ -150,7 +142,6 @@ const IntroSection = () => {
 
             <ScrollToButton
               scrollToId="california-map"
-              color={theme.palette.blue.darkest}
               style={{
                 marginTop: "2rem",
                 display: "flex",
