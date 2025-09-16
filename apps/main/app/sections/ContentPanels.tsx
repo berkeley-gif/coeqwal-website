@@ -30,7 +30,8 @@ export default function ContentPanels() {
   // Force redraw when the window is resized to recalculate panel dimensions <= don't need this calculation once detail panels are removed
   const [, setWindowWidth] = useState(0)
 
-  useEffect(() => { // don't need this resize once detail panels are removed + following blocks as well
+  useEffect(() => {
+    // don't need this resize once detail panels are removed + following blocks as well
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
     }

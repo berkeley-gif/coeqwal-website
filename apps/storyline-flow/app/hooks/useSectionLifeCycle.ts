@@ -13,7 +13,7 @@ export function useSectionLifecycle(
   init: () => void,
   load: () => void,
   unload: () => void,
-  opts: Options = {}
+  opts: Options = {},
 ) {
   const { needsReload, watchReady = true } = opts
 

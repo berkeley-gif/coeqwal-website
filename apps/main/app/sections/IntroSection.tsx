@@ -77,9 +77,7 @@ const IntroSection = () => {
                 </Typography>
 
                 {/* Body text */}
-                <Typography
-                  variant="body1"
-                >
+                <Typography variant="body1">
                   {t("homePanel.content")}
                 </Typography>
 
