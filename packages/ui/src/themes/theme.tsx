@@ -1,8 +1,4 @@
 import { createTheme, Theme } from "@mui/material/styles"
-import type { CSSProperties } from "react"
-
-// TODO:
-// - Standardized styles for transitions
 
 /* ========================================================
  TABLE OF CONTENTS
@@ -12,9 +8,9 @@ import type { CSSProperties } from "react"
 |    - Font families neueHaasText, neueHaasDisplay
 |    - Layout dimensions (headerHeight, drawer widths incl. glossaryWidth, textContainer)
 |    - California Water color palette (brand, blue, accent, nature, utility, grey, ambient)
-|    - Category & tier colors for data visualization
+|    - Tier colors for data visualization
 |    - Border radius values
-|    - Border styles
+|    - Border styles  
 |    - Shadows
 |    - Z-Index layering system (5 layers: background, content, interactive, navigation, system)
 |    - Map prompt dialog configuration
@@ -22,7 +18,7 @@ import type { CSSProperties } from "react"
 | 2. Reusable mixins (defined before theme creation)
 |    - Scenario card list styling
 |    - Tooltip action button styling
-|    - Checkbox with dropdown mixin for expandable controls
+|    - Triangle checkbox mixin for expandable controls
 |    - Form control base mixin (standardized 20px × 20px controls)
 |    - Card typography mixins (eyebrow, cardTitle, sectionHeader, bodyContainer, etc.)
 |    - Drawer content styling mixins (contentWrapper, itemBox, chips, etc.)
@@ -31,7 +27,7 @@ import type { CSSProperties } from "react"
 |    - Base theme creation
 |    - Helper functions (createBorderStyles, createDrawerMixins)
 |    - Main theme object with:
-|      - Custom layout properties
+|      - Custom layout properties and responsive spacing system
 |      - Cards typography scale and spacing system
 |      - California Water palette integration
 |      - Typography variants using typeScale
@@ -50,13 +46,12 @@ import type { CSSProperties } from "react"
 |    - Border utilities with palette colors
 |    - Background overlays (transparent, paragraph, overlay variants)
 |    - Border radius application
-|    - Drawer navigation color palette
 |    - Map prompt dialog configuration
 |    - Exported mixin constants
 |
 | 5. TypeScript customizations
 |    - Extended palette interface (brand, blue, accent, nature, utility, grey, ambient)
-|    - Category & tier color interfaces
+|    - Tier color interfaces
 |    - Custom theme interface extensions (layout, cards, border, background, mapPromptDialog)
 |    - Z-Index interface extensions (layered system with semantic names)
 |    - Cards typography and spacing interfaces
@@ -67,13 +62,13 @@ import type { CSSProperties } from "react"
 |    - Form control conventions and specifications
 |    - Z-index layering system guide
 |    - Usage examples and best practices
- ========================================================
+| ========================================================
 
 
- 1. Global theme values
- ======================================================== 
- Change these values to update the theme across the site
- */
+| 1. Global theme values
+======================================================== 
+Change these values to update the theme across the site
+*/
 
 // ===============================================================================
 // TYPOGRAPHY SCALE
@@ -516,8 +511,8 @@ const drawerContentMixins = {
 } as const
 
 /* ========================================================
- 2. Theme configuration
- ======================================================== */
+| 2. Theme configuration
+======================================================== */
 
 const baseTheme = createTheme()
 
@@ -709,6 +704,7 @@ const theme = createTheme({
       water: themeValues.palette.overlay.water,
       waterLight: themeValues.palette.overlay.waterLight,
     },
+
     tiers: {
       tier1: themeValues.palette.tiers.tier1,
       tier2: themeValues.palette.tiers.tier2,
@@ -1418,8 +1414,8 @@ const theme = createTheme({
 })
 
 /* ========================================================
- 3. Custom theme properties
- ======================================================== */
+| 3. Custom theme properties
+======================================================== */
 
 // Apply border styles with colors from palette
 theme.border = createBorderStyles(
@@ -1438,13 +1434,6 @@ theme.background = {
 }
 
 theme.borderRadius = themeValues.borderRadius
-
-// Define color palette for drawer navigation items
-
-// Probably obsolete TODO: check and delete
-theme.drawerNavigation = {
-  colors: ["#BFDADC", "#9ACBCF", "#76B2BE", "#548FAF", "#3B6C97", "#1A3F6A"],
-}
 
 // Map prompt dialog configuration
 theme.mapPromptDialog = {
@@ -1481,8 +1470,8 @@ export const formControlBase = formControlBaseMixin
 export default theme
 
 /* ========================================================
- 4. TypeScript customizations
- ======================================================== */
+| 4. TypeScript customizations
+======================================================== */
 
 // Custom palette colors and theme properties
 declare module "@mui/material/styles" {
@@ -1508,10 +1497,6 @@ declare module "@mui/material/styles" {
     }
     nature: {
       earth: string
-      teal: string
-      sage: string
-      mint: string
-      whisper: string
       forest: string
     }
     utility: {
@@ -1529,31 +1514,12 @@ declare module "@mui/material/styles" {
       waterLight: string
     }
 
-    categories: {
-      groundwaterManagement: string
-      riverFlows: string
-      urbanWaterPriorities: string
-      deltaBalance: string
-      infrastructure: string
-      noFlowRequirements: string
-      carryoverRequirements: string
-      deltaOutflows: string
-      urbanDemand: string
-      exportReductions: string
-      conveyanceProjects: string
-      climateFuture: string
-    }
-
     tiers: {
       tier1: string
       tier2: string
       tier3: string
       tier4: string
     }
-  }
-
-  interface TypeText {
-    teal: string
   }
 
   interface PaletteOptions {
@@ -1574,10 +1540,6 @@ declare module "@mui/material/styles" {
     }
     nature?: {
       earth: string
-      teal?: string
-      sage?: string
-      mint?: string
-      whisper?: string
       forest?: string
     }
     utility?: {
@@ -1593,21 +1555,6 @@ declare module "@mui/material/styles" {
     overlay?: {
       water?: string
       waterLight?: string
-    }
-
-    categories?: {
-      groundwaterManagement?: string
-      riverFlows?: string
-      urbanWaterPriorities?: string
-      deltaBalance?: string
-      infrastructure?: string
-      noFlowRequirements?: string
-      carryoverRequirements?: string
-      deltaOutflows?: string
-      urbanDemand?: string
-      exportReductions?: string
-      conveyanceProjects?: string
-      climateFuture?: string
     }
 
     tiers?: {
@@ -1698,9 +1645,6 @@ declare module "@mui/material/styles" {
       card: string
       standard: string
       none: string
-    }
-    drawerNavigation: {
-      colors: string[]
     }
     mapPromptDialog: {
       backgroundColor: string
@@ -1892,8 +1836,6 @@ declare module "@mui/material/styles" {
   }
 
   interface Mixins {
-    hoverParagraph: CSSProperties
-    hoverParagraphDarkened: CSSProperties
     drawerContent: typeof drawerContentMixins
     cardTypography: typeof cardTypographyMixins
     scenarioCardList: typeof scenarioCardListMixin
@@ -1940,139 +1882,139 @@ declare module "@mui/material/Typography" {
 
 /* ========================================================
 | FORM CONTROL CONVENTIONS - USAGE GUIDE
-| ========================================================
-| 
-| All form controls in the application follow standardized conventions
-| for consistent appearance and behavior across the site.
-|
-| CONTROL DIMENSIONS:
-| - Standard: 20px × 20px (theme.layout.controls.standard)
-| - Compact: 16px × 16px (theme.layout.controls.compact)
-| - Micro: 12px × 12px (theme.layout.controls.micro)
-|
-| STANDARD SPECIFICATIONS:
-| - Size: Uses theme.layout.controls.standard (20px × 20px)
-| - Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
-| - Border: 1px solid using theme.palette.text.primary
-| - Background: Transparent with hover states (for checkboxes/radios)
-| - Spacing: theme.spacing(0.5) margin
-| - Protection: flexShrink: 0 prevents label compression
-|
-| BACKGROUND COLOR STANDARDS:
-| - Text fields, dropdowns, selects: white (theme.palette.common.white)
-| - Checkboxes, radios: Transparent with hover states
-| - Enforced via MuiOutlinedInput, MuiSelect, MuiTextField overrides
-|
-| COMPACT SPACING SYSTEM:
-| - xs: 2px (theme.cards.spacing.compact.xs) - micro spacing
-| - sm: 4px (theme.cards.spacing.compact.sm) - tight spacing
-| - md: 8px (theme.cards.spacing.compact.md) - compact spacing
-| - lg: 12px (theme.cards.spacing.compact.lg) - medium compact
-| - xl: 16px (theme.cards.spacing.compact.xl) - standard compact
-| - Usage: theme.spacing(theme.cards.spacing.compact.sm) for consistent spacing
-|
-| TYPOGRAPHY FOR CONTROLS:
-| - Labels: typeScale.compact.caption (0.75rem/12px)
-| - Helper text: typeScale.compact.micro (0.7rem/11.2px)
-| - Form titles: typeScale.compact.title (0.9rem/14.4px)
-|
-| REUSABLE MIXINS:
-| 
-| 1. theme.mixins.formControlBase
-|    - Base styling for all standard form controls
-|    - Uses theme.layout.controls.standard (20px × 20px)
-|    - Includes sizing, positioning, and interaction states
-|
-| 2. theme.mixins.triangleCheckbox  
-|    - Specialized for expandable/collapsible controls
-|    - Uses standardized control dimensions and compact typography
-|    - Includes text centering for triangle symbols (typeScale.compact.micro)
-|
-| USAGE EXAMPLES:
-|
-| Standard Checkbox:
-|   sx={{ 
-|     ...theme.mixins.formControlBase,
-|     borderRadius: "2px",
-|     border: `1px solid ${theme.palette.text.primary}`
-|   }}
-|
-| Compact Control (custom):
-|   sx={{
-|     width: `${theme.layout.controls.compact}px`,
-|     height: `${theme.layout.controls.compact}px`,
-|     fontSize: theme.typography.compact.micro
-|   }}
-|
-| Triangle Dropdown:
-|   sx={{
-|     ...theme.mixins.triangleCheckbox,
-|     border: `1px solid ${theme.palette.text.primary}`
-|   }}
-|
-| Form Label with Compact Typography:
-|   sx={{
-|     fontSize: theme.typography.compact.caption,
-|     marginBottom: theme.spacing(theme.cards.spacing.compact.sm)
-|   }}
-|
-| MUI COMPONENT OVERRIDES:
-| - MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
-| - MuiRadio: Uses formControlBase + circular styling + 20px dimensions
-| - MuiFormControlLabel: alignItems "flex-start" for multi-line labels
-| - MuiOutlinedInput: White background
-| - MuiSelect: White background for dropdowns
-| - MuiTextField: White background for text inputs
-| - MuiMenu: White background for dropdown panels
-| - MuiPaper: White background for menu/select panels
-|
-| SIZING GUIDELINES:
-| - Standard (20px): Default for most form controls
-| - Compact (16px): Dense interfaces, secondary controls
-| - Micro (12px): Indicators, status controls, tight spaces
-|
-| ========================================================
-|
-| Z-INDEX LAYERING SYSTEM - USAGE GUIDE
-| ========================================================
-| 
-| The z-index system is organized into logical layers to prevent
-| conflicts and ensure predictable stacking behavior:
-|
-| BACKGROUND LAYERS (negative values):
-| - basement (-1): Map when used as background element
-| - sectionBackground (-1): Section background decorations
-|
-| CONTENT LAYERS (0-99):
-| - content (0): Default content layer for main sections
-| - panels (0): Main content panels and cards
-| 
-| INTRO SECTION MICRO-LAYERS (1-9):
-| - introBackgroundImages (1): Decorative background images
-| - introText (2): Text content over backgrounds
-| - introForegroundImages (3): Decorative foreground elements
-| - introBubbles (4): Interactive floating elements
-|
-| INTERACTIVE LAYERS (1000-1199):
-| - mapControls (1000): Map overlay controls and panels
-| - floatingElements (1100): Floating UI elements, scroll controls
-|
-| NAVIGATION LAYERS (1200-1499):
-| - drawerBackdrop (1199): Drawer backdrop/overlay
-| - drawer (1200): Side drawer/navigation
-| - overlay (1250): General overlay elements
-| - modal (1300): Modal dialogs
-| - appBar (1400): Top navigation bar
-|
-| SYSTEM LAYERS (1500+):
-| - tooltip (1500): Tooltips, help text, and map prompt dialogs
-| - notification (1600): Toast notifications  
-| - loading (1700): Loading overlays
-| - debug (9999): Debug overlays (development only)
-|
-| USAGE:
-| Always use theme.zIndex.layerName instead of hardcoded numbers:
-|   zIndex: (theme) => theme.zIndex.mapControls
-||   zIndex: (theme) => theme.zIndex.tooltip
-|
-| ======================================================== */
+======================================================== 
+
+All form controls in the application follow standardized conventions
+for consistent appearance and behavior across the site.
+
+CONTROL DIMENSIONS:
+- Standard: 20px × 20px (theme.layout.controls.standard)
+- Compact: 16px × 16px (theme.layout.controls.compact)
+- Micro: 12px × 12px (theme.layout.controls.micro)
+
+STANDARD SPECIFICATIONS:
+- Size: Uses theme.layout.controls.standard (20px × 20px)
+- Positioning: alignSelf "flex-start" + transform "translateY(-3px)"
+- Border: 1px solid using theme.palette.text.primary
+- Background: Transparent with hover states (for checkboxes/radios)
+- Spacing: theme.spacing(0.5) margin
+- Protection: flexShrink: 0 prevents label compression
+
+BACKGROUND COLOR STANDARDS:
+- Text fields, dropdowns, selects: white (theme.palette.common.white)
+- Checkboxes, radios: Transparent with hover states
+- Enforced via MuiOutlinedInput, MuiSelect, MuiTextField overrides
+
+COMPACT SPACING SYSTEM:
+- xs: 2px (theme.cards.spacing.compact.xs) - micro spacing
+- sm: 4px (theme.cards.spacing.compact.sm) - tight spacing
+- md: 8px (theme.cards.spacing.compact.md) - compact spacing
+- lg: 12px (theme.cards.spacing.compact.lg) - medium compact
+- xl: 16px (theme.cards.spacing.compact.xl) - standard compact
+- Usage: theme.spacing(theme.cards.spacing.compact.sm) for consistent spacing
+
+TYPOGRAPHY FOR CONTROLS:
+- Labels: typeScale.compact.caption (0.75rem/12px)
+- Helper text: typeScale.compact.micro (0.7rem/11.2px)
+- Form titles: typeScale.compact.title (0.9rem/14.4px)
+
+REUSABLE MIXINS:
+
+1. theme.mixins.formControlBase
+   - Base styling for all standard form controls
+   - Uses theme.layout.controls.standard (20px × 20px)
+   - Includes sizing, positioning, and interaction states
+
+2. theme.mixins.triangleCheckbox  
+   - Specialized for expandable/collapsible controls
+   - Uses standardized control dimensions and compact typography
+   - Includes text centering for triangle symbols (typeScale.compact.micro)
+
+USAGE EXAMPLES:
+
+Standard Checkbox:
+  sx={{ 
+    ...theme.mixins.formControlBase,
+    borderRadius: "2px",
+    border: `1px solid ${theme.palette.text.primary}`
+  }}
+
+Compact Control (custom):
+  sx={{
+    width: `${theme.layout.controls.compact}px`,
+    height: `${theme.layout.controls.compact}px`,
+    fontSize: theme.typography.compact.micro
+  }}
+
+Triangle Dropdown:
+  sx={{
+    ...theme.mixins.triangleCheckbox,
+    border: `1px solid ${theme.palette.text.primary}`
+  }}
+
+Form Label with Compact Typography:
+  sx={{
+    fontSize: theme.typography.compact.caption,
+    marginBottom: theme.spacing(theme.cards.spacing.compact.sm)
+  }}
+
+MUI COMPONENT OVERRIDES:
+- MuiCheckbox: Uses formControlBase + square styling + 20px dimensions
+- MuiRadio: Uses formControlBase + circular styling + 20px dimensions
+- MuiFormControlLabel: alignItems "flex-start" for multi-line labels
+- MuiOutlinedInput: White background
+- MuiSelect: White background for dropdowns
+- MuiTextField: White background for text inputs
+- MuiMenu: White background for dropdown panels
+- MuiPaper: White background for menu/select panels
+
+SIZING GUIDELINES:
+- Standard (20px): Default for most form controls
+- Compact (16px): Dense interfaces, secondary controls
+- Micro (12px): Indicators, status controls, tight spaces
+
+========================================================
+
+Z-INDEX LAYERING SYSTEM - USAGE GUIDE
+========================================================
+
+The z-index system is organized into logical layers to prevent
+conflicts and ensure predictable stacking behavior:
+
+BACKGROUND LAYERS (negative values):
+- basement (-1): Map when used as background element
+- sectionBackground (0): Section background decorations
+
+CONTENT LAYERS (0-99):
+- content (20): Default content layer for main sections
+- panels (10): Main content panels and cards
+
+INTRO SECTION MICRO-LAYERS (1-40):
+- introBackgroundImages (15): Decorative background images
+- introText (20): Text content over backgrounds
+- introForegroundImages (30): Decorative foreground elements
+- introBubbles (40): Interactive floating elements
+
+INTERACTIVE LAYERS (100-999):
+- mapControls (100): Map overlay controls and panels
+- floatingElements (110): Floating UI elements, scroll controls
+
+NAVIGATION LAYERS (1200-1499):
+- drawerBackdrop (1199): Drawer backdrop/overlay
+- drawer (1200): Side drawer/navigation
+- overlay (1250): General overlay elements
+- modal (1300): Modal dialogs
+- appBar (1400): Top navigation bar
+
+SYSTEM LAYERS (1500+):
+- tooltip (1500): Tooltips, help text, and map prompt dialogs
+- notification (1600): Toast notifications  
+- loading (1700): Loading overlays
+- debug (9999): Debug overlays (development only)
+
+USAGE:
+Always use theme.zIndex.layerName instead of hardcoded numbers:
+  zIndex: (theme) => theme.zIndex.mapControls
+  zIndex: (theme) => theme.zIndex.tooltip
+
+======================================================== */
