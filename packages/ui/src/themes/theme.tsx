@@ -674,7 +674,8 @@ const theme = createTheme({
     },
     accent: {
       gold: themeValues.palette.accent.gold,
-      cream: themeValues.palette.accent.cream,
+      orange: themeValues.palette.accent.orange,
+      alert: themeValues.palette.accent.alert,
     },
     nature: {
       earth: themeValues.palette.nature.earth,
@@ -1494,7 +1495,8 @@ declare module "@mui/material/styles" {
     }
     accent: {
       gold: string
-      cream: string
+      orange: string
+      alert: string
     }
     nature: {
       earth: string
@@ -1537,7 +1539,8 @@ declare module "@mui/material/styles" {
     }
     accent?: {
       gold?: string
-      cream?: string
+      orange?: string
+      alert?: string
     }
     nature?: {
       earth: string

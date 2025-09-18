@@ -82,7 +82,7 @@ Standardized form control sizes:
 
 - **Brand**: Sky blue and water blue gradients
 - **Blue**: 5-step scale from darkest navy to light blue
-- **Accent**: Gold and cream highlights
+- **Accent**: Gold and warm highlights
 - **Nature**: Teal, sage, mint, and forest greens
 - **Utility**: Black and white
 - **Ambient**: Translucent ripple effects

@@ -181,7 +181,7 @@ export default function MapOverlayPanels() {
                     : (theme) => theme.palette.blue.darkest,
                   "&:hover": {
                     backgroundColor: isCalSimVisible
-                      ? (theme) => theme.palette.accent.cream
+                      ? (theme) => theme.palette.accent.orange
                       : (theme) => theme.palette.grey[100],
                   },
                   mb: 1,
