@@ -56,17 +56,9 @@ export default function DataPage() {
           a.scenario_id.localeCompare(b.scenario_id),
         )
         setScenarios(sorted)
-
-        // Clear selections if they no longer exist
-        if (!sorted.find((s) => s.scenario_id === selectedZipDataset)) {
-          setSelectedZipDataset("")
-        }
-        if (!sorted.find((s) => s.scenario_id === selectedCsvDataset)) {
-          setSelectedCsvDataset("")
-        }
-      } catch (e: any) {
-        if (alive && e.name !== "AbortError") {
-          setError(e?.message ?? "Failed to load scenarios")
+      } catch (error) {
+        if (alive && error instanceof Error && error.name !== "AbortError") {
+          setError(error.message ?? "Failed to load scenarios")
         }
       } finally {
         if (alive) setLoading(false)
