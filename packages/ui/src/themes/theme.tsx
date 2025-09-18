@@ -182,12 +182,13 @@ const themeValues = {
     // Accent colors - warm tones
     accent: {
       gold: "#ffd87e", // Golden yellow - highlights
-      cream: "#fdf0a0", // Light yellow
+      orange: "#FFA200",
+      alert: "#E54545",
     },
 
-    // Nature colors - greens
+    // Greens
     nature: {
-      earth: "#c2a14f", // Earth brown
+      earth: "#9ABD3D",
       forest: "#7b9d3f", // Forest green - for saved scenarios tab
     },
 
