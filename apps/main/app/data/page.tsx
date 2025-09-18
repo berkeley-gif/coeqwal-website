@@ -14,6 +14,7 @@ import {
   IconButton,
   CircularProgress,
   SelectChangeEvent,
+  Alert,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
@@ -22,63 +23,62 @@ import DownloadButton from "../components/DownloadButton"
 import type { Scenario } from "../types/scenarios"
 import { getDownloadUrl } from "../utils/scenarioApi"
 
-// For now, use static data until CORS is configured on the AWS API
-const STATIC_SCENARIOS: Scenario[] = [
-  {
-    scenario_id: "s0020",
-    files: {
-      zip: {
-        key: "scenario/s0020/run/s0020_DCRadjBL_2020LU_wTUCP.zip",
-        filename: "s0020_DCRadjBL_2020LU_wTUCP.zip",
-      },
-      output_csv: {
-        key: "scenario/s0020/csv/s0020_calsim_output.csv",
-        filename: "s0020_calsim_output.csv",
-      },
-      sv_csv: {
-        key: "scenario/s0020/csv/s0020_sv_input.csv",
-        filename: "s0020_sv_input.csv",
-      },
-    },
-  },
-  {
-    scenario_id: "s0021",
-    files: {
-      zip: {
-        key: "scenario/s0021/run/s0021_DCRadjBL_2020LU_woTUCP.zip",
-        filename: "s0021_DCRadjBL_2020LU_woTUCP.zip",
-      },
-      output_csv: {
-        key: "scenario/s0021/csv/s0021_calsim_output.csv",
-        filename: "s0021_calsim_output.csv",
-      },
-      sv_csv: {
-        key: "scenario/s0021/csv/s0021_sv_input.csv",
-        filename: "s0021_sv_input.csv",
-      },
-    },
-  },
-]
-
 export default function DataPage() {
   const theme = useTheme()
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
-  const [scenarios, setScenarios] = useState<Scenario[]>(STATIC_SCENARIOS)
-  const [loading, setLoading] = useState(false) // No loading needed for static data
+  const [scenarios, setScenarios] = useState<Scenario[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // TODO: Replace with dynamic fetching once CORS is configured on AWS API
-  // For now using static data to avoid CORS issues
+  const API_BASE = process.env.NEXT_PUBLIC_COEQWAL_PRESIGN_DOWNLOAD_API_BASE
+
   useEffect(() => {
-    // Simulate loading for better UX
-    setLoading(true)
-    const timer = setTimeout(() => {
-      setScenarios(STATIC_SCENARIOS)
-      setLoading(false)
-    }, 500)
+    let alive = true
+    const controller = new AbortController()
 
-    return () => clearTimeout(timer)
-  }, [])
+    async function load() {
+      try {
+        setLoading(true)
+        setError(null)
+
+        const res = await fetch(`${API_BASE}/scenario`, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          signal: controller.signal,
+        })
+        if (!res.ok) throw new Error(`List scenarios failed: ${res.status}`)
+
+        const data = (await res.json()) as { scenarios: Scenario[] }
+        if (!alive) return
+
+        const sorted = [...(data.scenarios ?? [])].sort((a, b) =>
+          a.scenario_id.localeCompare(b.scenario_id),
+        )
+        setScenarios(sorted)
+
+        // Clear selections if they no longer exist
+        if (!sorted.find((s) => s.scenario_id === selectedZipDataset)) {
+          setSelectedZipDataset("")
+        }
+        if (!sorted.find((s) => s.scenario_id === selectedCsvDataset)) {
+          setSelectedCsvDataset("")
+        }
+      } catch (e: any) {
+        if (alive && e.name !== "AbortError") {
+          setError(e?.message ?? "Failed to load scenarios")
+        }
+      } finally {
+        if (alive) setLoading(false)
+      }
+    }
+
+    load()
+    return () => {
+      alive = false
+      controller.abort()
+    }
+  }, [API_BASE]) // re-fetch if base changes
 
   const handleZipDatasetChange = (event: SelectChangeEvent<string>) => {
     setSelectedZipDataset(event.target.value)
@@ -210,6 +210,12 @@ export default function DataPage() {
               </Typography>
             </Box>
 
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
             {/* Content in Grid layout */}
             <Grid
               container
@@ -283,7 +289,7 @@ export default function DataPage() {
                         </Select>
                       </FormControl>
 
-                      {/* Download button - only show when a file is selected */}
+                      {/* Download buttons (only show when a file is selected) */}
                       {selectedZipDataset && selectedZipScenario?.files.zip && (
                         <Box sx={{ mb: (theme) => theme.layout.spacing.sm }}>
                           <DownloadButton
