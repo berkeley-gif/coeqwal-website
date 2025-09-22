@@ -19,6 +19,12 @@ type VerticalCompareProps = {
   altBottom?: string
   height?: number | string
   initial?: number // 0..100 (% from top)
+
+  /** --- autoplay options --- */
+  autoPlay?: boolean          // run the sweep on mount
+  autoPlayDelayMs?: number    // delay before starting
+  autoPlayDurationMs?: number // total sweep time
+  autoPlayOnce?: boolean      // run only the first time component mounts
 }
 
 export function HorizontalImageSlider({
@@ -173,11 +179,42 @@ export function VerticalImageSlider({
   altBottom = "",
   height = "100vh",
   initial = 50,
+
+  autoPlay = true,
+  autoPlayDelayMs = 400,
+  autoPlayDurationMs = 2000,
+  autoPlayOnce = true,
 }: VerticalCompareProps) {
   const [pos, setPos] = useState(Math.min(100, Math.max(0, initial)))
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
+
+  const [showKnob, setShowKnob] = useState(!autoPlay) //toggle circle state
+
+  // --- autoplay bookkeeping ---
+  const rafId = useRef<number | null>(null)
+  const abortAutoplay = useRef(false)
+  const hasAutoPlayed = useRef(false)
+  const autoplayTimer = useRef<number | null>(null)
+
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+  const stopAutoplay = () => {
+    abortAutoplay.current = true
+    if (rafId.current != null) {
+      cancelAnimationFrame(rafId.current)
+      rafId.current = null
+    }
+    if (autoplayTimer.current != null) {
+      window.clearTimeout(autoplayTimer.current)
+      autoplayTimer.current = null
+    }
+  }
+
   const updateFromPointer = useCallback((clientY: number) => {
     const el = wrapRef.current
     if (!el) return
@@ -202,6 +239,49 @@ export function VerticalImageSlider({
       window.removeEventListener("pointerup", onUp)
     }
   }, [updateFromPointer])
+
+  // --- Autoplay from 0 -> 100 on mount ---
+  useEffect(() => {
+    if (!autoPlay) return
+    if (autoPlayOnce && hasAutoPlayed.current) return
+    if (prefersReducedMotion) return
+
+    abortAutoplay.current = false
+    // from the very top and no show knob
+    setPos(0)
+    setShowKnob(false)
+
+    // simple easeInOutCubic
+    const ease = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+
+    autoplayTimer.current = window.setTimeout(() => {
+      const start = performance.now()
+
+      const step = (now: number) => {
+        if (abortAutoplay.current) return
+        const elapsed = now - start
+        const t = Math.min(1, elapsed / autoPlayDurationMs)
+        const eased = ease(t)
+        setPos(0 + (100 - 0) * eased)
+
+        if (t < 1) {
+          rafId.current = requestAnimationFrame(step)
+        } else {
+          rafId.current = null
+          hasAutoPlayed.current = true
+          setShowKnob(true) // show knob after animation finishes
+        }
+      }
+
+      rafId.current = requestAnimationFrame(step)
+    }, autoPlayDelayMs) as unknown as number
+
+    return () => {
+      stopAutoplay()
+    }
+  }, [autoPlay, autoPlayDelayMs, autoPlayDurationMs, autoPlayOnce, prefersReducedMotion])
+
 
   return (
     <Box
@@ -280,37 +360,40 @@ export function VerticalImageSlider({
       />
 
       {/* Knob (draggable) */}
-      <Box
-        role="slider"
-        aria-label="Comparison position"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(pos)}
-        tabIndex={0}
-        sx={{
-          position: "absolute",
-          left: "50%",
-          top: `${pos}%`,
-          transform: "translate(-50%, -50%)",
-          width: 44,
-          height: 44,
-          borderRadius: "50%",
-          backgroundColor: "#f2f0ef",
-          display: "grid",
-          placeItems: "center",
-          cursor: "pointer",
-          outline: "none",
-          pointerEvents: "auto",
-        }}
-        onPointerDown={(e) => {
-          ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
-          dragging.current = true
-          updateFromPointer(e.clientY)
-          setIsDragging(true)
-        }}
-      >
-        <UnfoldMoreIcon style={{ fill: "#104472" }} />
-      </Box>
+      {showKnob && (
+        <Box
+          role="slider"
+          aria-label="Comparison position"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(pos)}
+          tabIndex={0}
+          sx={{
+            position: "absolute",
+            left: "50%",
+            top: `${pos}%`,
+            transform: "translate(-50%, -50%)",
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            backgroundColor: "#f2f0ef",
+            display: "grid",
+            placeItems: "center",
+            cursor: "pointer",
+            outline: "none",
+            pointerEvents: "auto",
+          }}
+          onPointerDown={(e) => {
+            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+            stopAutoplay()
+            dragging.current = true
+            updateFromPointer(e.clientY)
+            setIsDragging(true)
+          }}
+        >
+          <UnfoldMoreIcon style={{ fill: "#104472" }} />
+        </Box>
+      )}
     </Box>
   )
 }
