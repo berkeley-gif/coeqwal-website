@@ -21,10 +21,10 @@ type VerticalCompareProps = {
   initial?: number // 0..100 (% from top)
 
   /** --- autoplay options --- */
-  autoPlay?: boolean          // run the sweep on mount
-  autoPlayDelayMs?: number    // delay before starting
+  autoPlay?: boolean // run the sweep on mount
+  autoPlayDelayMs?: number // delay before starting
   autoPlayDurationMs?: number // total sweep time
-  autoPlayOnce?: boolean      // run only the first time component mounts
+  autoPlayOnce?: boolean // run only the first time component mounts
 }
 
 export function HorizontalImageSlider({
@@ -181,8 +181,8 @@ export function VerticalImageSlider({
   initial = 50,
 
   autoPlay = true,
-  autoPlayDelayMs = 400,
-  autoPlayDurationMs = 2000,
+  autoPlayDelayMs = 500,
+  autoPlayDurationMs = 3000,
   autoPlayOnce = true,
 }: VerticalCompareProps) {
   const [pos, setPos] = useState(Math.min(100, Math.max(0, initial)))
@@ -280,8 +280,13 @@ export function VerticalImageSlider({
     return () => {
       stopAutoplay()
     }
-  }, [autoPlay, autoPlayDelayMs, autoPlayDurationMs, autoPlayOnce, prefersReducedMotion])
-
+  }, [
+    autoPlay,
+    autoPlayDelayMs,
+    autoPlayDurationMs,
+    autoPlayOnce,
+    prefersReducedMotion,
+  ])
 
   return (
     <Box
@@ -341,7 +346,7 @@ export function VerticalImageSlider({
           width: "100%",
           height: "100%",
           position: "relative",
-          backgroundColor: "#21212150",
+          backgroundColor: "#21212170",
         }}
       />
 
@@ -384,7 +389,7 @@ export function VerticalImageSlider({
             pointerEvents: "auto",
           }}
           onPointerDown={(e) => {
-            (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
+            ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
             stopAutoplay()
             dragging.current = true
             updateFromPointer(e.clientY)
