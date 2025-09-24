@@ -205,3 +205,8 @@ html{
     bottom: 0;
     justify-content: flex-start;
 }
+
+.text-shadow{
+    text-shadow: #212121 0 0 15px,
+    #212121 0 0 30px;
+}
