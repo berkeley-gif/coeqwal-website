@@ -42,6 +42,10 @@ export default function DataPage() {
         setLoading(true)
         setError(null)
 
+        if (!API_BASE) {
+          throw new Error("API base URL not configured")
+        }
+
         const res = await fetch(`${API_BASE}/scenario`, {
           method: "GET",
           headers: { Accept: "application/json" },
@@ -70,7 +74,7 @@ export default function DataPage() {
       alive = false
       controller.abort()
     }
-  }, [API_BASE]) // re-fetch if base changes
+  }, [API_BASE])
 
   const handleZipDatasetChange = (event: SelectChangeEvent<string>) => {
     setSelectedZipDataset(event.target.value)
