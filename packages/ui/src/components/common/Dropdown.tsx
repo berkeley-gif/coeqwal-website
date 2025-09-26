@@ -23,14 +23,6 @@ export interface DropdownProps
   menuItemProps?: Partial<MenuItemProps>
 }
 
-/**
- * Custom dropdown component
- *
- * Features:
- * - Standard and compact variants
- * - Theme-integrated styling
- * - Accessible and keyboard navigable
- */
 export function Dropdown({
   options,
   label,

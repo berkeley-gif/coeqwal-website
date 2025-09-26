@@ -39,6 +39,7 @@ export {
   Select,
   FormControl,
   InputLabel,
+  InputBase,
   Slider,
   List,
   ListItem,
@@ -92,6 +93,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow"
 import InfoIcon from "@mui/icons-material/Info"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
+import EditNoteIcon from "@mui/icons-material/EditNote"
 
 // Export individually imported icons
 export {
@@ -125,6 +127,7 @@ export {
   InfoIcon,
   UnfoldMoreIcon,
   MyLocationIcon,
+  EditNoteIcon,
 }
 
 // Export the full icons library for access to other icons as needed

@@ -795,10 +795,10 @@ const theme = createTheme({
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "0.95rem", // 15.2px - dashboard interface text (matches body2)
+      fontSize: "1rem", // 16px - dashboard interface text
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: 1.6, // Consistent line height ratio
+      lineHeight: 1.6,
       color: themeValues.palette.blue.darkest,
     },
     subtitle1: {

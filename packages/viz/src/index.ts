@@ -18,6 +18,10 @@ export type {
 } from "./components/VerticalParallelLinePlot"
 export { default as OutcomeGlyph } from "./components/OutcomeGlyph"
 export type { OutcomeGlyphProps } from "./components/OutcomeGlyph"
+export { default as VerticalBarChart } from "./components/VerticalBarChart"
+export type { VerticalBarChartProps } from "./components/VerticalBarChart"
+export { default as VerticalOutcomeGlyph } from "./components/VerticalOutcomeGlyph"
+export type { VerticalOutcomeGlyphProps } from "./components/VerticalOutcomeGlyph"
 export { default as ScenarioGlyph } from "./components/ScenarioGlyph"
 export type { ScenarioGlyphProps } from "./components/ScenarioGlyph"
 

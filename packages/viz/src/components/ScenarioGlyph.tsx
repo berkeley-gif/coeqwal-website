@@ -2,9 +2,10 @@
 
 import React from "react"
 import OutcomeGlyph from "./OutcomeGlyph"
+import VerticalOutcomeGlyph from "./VerticalOutcomeGlyph"
 import RoseChart from "./RoseChart"
 import { DecileBarChart } from "./DecileBarChart"
-export type GlyphVariant = "bars" | "rose" | "quartile"
+export type GlyphVariant = "bars" | "verticalBars" | "rose" | "quartile"
 
 export interface ScenarioGlyphProps {
   variant: GlyphVariant
@@ -24,6 +25,14 @@ const ScenarioGlyph: React.FC<ScenarioGlyphProps> = ({
     case "bars":
       return (
         <OutcomeGlyph values={values} size={size} tierColors={tierColors} />
+      )
+    case "verticalBars":
+      return (
+        <VerticalOutcomeGlyph
+          values={values}
+          size={size}
+          tierColors={tierColors}
+        />
       )
     case "rose": {
       return <RoseChart size={size} />

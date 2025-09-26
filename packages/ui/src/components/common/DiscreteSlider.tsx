@@ -15,51 +15,86 @@ export interface DiscreteSliderProps {
   disabled?: boolean
   /** Position labels on top or bottom of slider */
   labelPosition?: "top" | "bottom"
+  /** Colors for styling */
+  colors?: {
+    track?: string
+    activeStop?: string
+    inactiveStop?: string
+    activeLabel?: string
+    inactiveLabel?: string
+    pointer?: string
+  }
+  /** Spacing values in pixels */
+  spacing?: {
+    container?: number
+    track?: number
+    labels?: number
+  }
   /** Optional custom styling */
   sx?: object
+  /** Callback when hovering over a stop */
+  onStopHover?: (index: number) => void
+  /** Callback when leaving the slider */
+  onSliderLeave?: () => void
 }
 
 const SliderContainer = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "labelPosition",
-})<{ labelPosition: "top" | "bottom" }>(({ theme, labelPosition }) => ({
+  shouldForwardProp: (prop) => prop !== "labelPosition" && prop !== "spacing",
+})<{
+  labelPosition: "top" | "bottom"
+  spacing: { container?: number; track?: number; labels?: number }
+}>(({ labelPosition, spacing }) => ({
   position: "relative",
   width: "100%",
-  padding: theme.spacing(1, 0),
-  paddingTop: labelPosition === "top" ? theme.spacing(3) : theme.spacing(1),
+  padding: `${spacing.container || 8}px 0`,
+  paddingTop:
+    labelPosition === "top"
+      ? `${spacing.labels || 24}px`
+      : `${spacing.container || 8}px`,
   paddingBottom:
-    labelPosition === "bottom" ? theme.spacing(4) : theme.spacing(1),
-  // Add horizontal padding to account for label widths at the edges
-  paddingLeft: "40px", // Half of maxWidth (80px) to prevent left label overflow
-  paddingRight: "40px", // Ditto, for right side
+    labelPosition === "bottom"
+      ? `${spacing.labels || 32}px`
+      : `${spacing.container || 8}px`,
+  paddingLeft: "40px",
+  paddingRight: "40px",
 }))
 
-const SliderTrack = styled(Box)(({ theme }) => ({
-  position: "relative",
-  height: "4px",
-  backgroundColor: theme.palette.grey[300],
-  borderRadius: "2px",
-  margin: theme.spacing(3, 0, 2, 0),
-  cursor: "pointer",
-}))
+const SliderTrack = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "trackColor" && prop !== "spacing",
+})<{ trackColor: string; spacing: { track?: number } }>(
+  ({ trackColor, spacing }) => ({
+    position: "relative",
+    height: "4px",
+    backgroundColor: trackColor,
+    borderRadius: "2px",
+    margin: `${spacing.track || 24}px 0 ${spacing.track || 16}px 0`,
+    cursor: "pointer",
+  }),
+)
 
 const SliderStop = styled(Box, {
-  shouldForwardProp: (prop) => prop !== "active",
-})<{ active: boolean }>(({ theme, active }) => ({
-  position: "absolute",
-  top: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "20px",
-  height: "20px",
-  borderRadius: "50%",
-  backgroundColor: active ? theme.palette.blue.bright : theme.palette.grey[400],
-  border: "2px solid white",
-  transition: "all 0.2s ease",
-  zIndex: 1,
-  boxShadow: active ? theme.shadows[1] : "none",
-}))
+  shouldForwardProp: (prop) =>
+    prop !== "active" && prop !== "activeColor" && prop !== "inactiveColor",
+})<{ active: boolean; activeColor: string; inactiveColor: string }>(
+  ({ active, activeColor, inactiveColor }) => ({
+    position: "absolute",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "20px",
+    height: "20px",
+    borderRadius: "50%",
+    backgroundColor: active ? activeColor : inactiveColor,
+    border: "2px solid white",
+    transition: "all 0.2s ease",
+    zIndex: 1,
+    boxShadow: "none",
+  }),
+)
 
-const SliderPointer = styled(Box)<{ disabled?: boolean }>(
-  ({ theme, disabled }) => ({
+const SliderPointer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "disabled" && prop !== "pointerColor",
+})<{ disabled?: boolean; pointerColor: string }>(
+  ({ disabled, pointerColor }) => ({
     position: "absolute",
     top: "100%",
     left: "50%",
@@ -69,75 +104,84 @@ const SliderPointer = styled(Box)<{ disabled?: boolean }>(
     cursor: disabled ? "not-allowed" : "grab",
     transition: "all 0.2s ease",
     zIndex: 3,
-    marginTop: "8px", // Space between track and pointer
-    color: theme.palette.blue.bright, // Color for the SVG
-    // Drop-shadow equivalent of MUI elevation 1 TODO: figure out how to use MUI elevation correctly
-    filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.12))",
+    marginTop: "12px",
+    color: pointerColor,
+    filter: "none",
     "&:hover": disabled
       ? {}
       : {
           transform: "translateX(-50%) scale(1.1)",
-          // Drop-shadow equivalent of MUI elevation 2
-          filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.16))",
+          filter: "none",
         },
     "&:active": disabled
       ? {}
       : {
           cursor: "grabbing",
           transform: "translateX(-50%) scale(1.05)",
-          // Elevation 1
-          filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.12))",
+          filter: "none",
         },
-    // SVG triangle
     "& svg": {
-      width: "100%",
-      height: "100%",
+      width: "70%",
+      height: "70%",
       display: "block",
+      margin: "auto",
     },
   }),
 )
 
 const SliderLabel = styled(Typography, {
-  shouldForwardProp: (prop) => prop !== "active" && prop !== "labelPosition",
-})<{ active: boolean; labelPosition: "top" | "bottom" }>(
-  ({ theme, active, labelPosition }) => ({
-    position: "absolute",
-    top: labelPosition === "top" ? "auto" : "100%",
-    bottom: labelPosition === "top" ? "100%" : "auto",
-    left: "50%",
-    transform: "translateX(-50%)",
-    fontSize: "0.75rem",
-    fontWeight: active ? 500 : 400,
-    color: active ? theme.palette.blue.bright : theme.palette.text.secondary,
-    marginTop: labelPosition === "bottom" ? theme.spacing(2.5) : 0,
-    marginBottom: labelPosition === "top" ? theme.spacing(2) : 0,
-    textAlign: "center",
-    minWidth: "50px",
-    maxWidth: "80px", // Constrain width to encourage wrapping
-    transition: "all 0.2s ease",
-    lineHeight: 1.2, // Tighter line height for wrapped text
-  }),
-)
+  shouldForwardProp: (prop) =>
+    prop !== "active" &&
+    prop !== "labelPosition" &&
+    prop !== "activeColor" &&
+    prop !== "inactiveColor" &&
+    prop !== "spacing",
+})<{
+  active: boolean
+  labelPosition: "top" | "bottom"
+  activeColor: string
+  inactiveColor: string
+  spacing: { labels?: number }
+}>(({ active, labelPosition, activeColor, inactiveColor, spacing }) => ({
+  position: "absolute",
+  top: labelPosition === "top" ? "auto" : "100%",
+  bottom: labelPosition === "top" ? "100%" : "auto",
+  left: "50%",
+  transform: "translateX(-50%)",
+  fontSize: "0.75rem",
+  fontWeight: active ? 500 : 400,
+  color: active ? activeColor : inactiveColor,
+  marginTop: labelPosition === "bottom" ? `${spacing.labels || 20}px` : 0,
+  marginBottom: labelPosition === "top" ? `${spacing.labels || 16}px` : 0,
+  textAlign: "center",
+  minWidth: "50px",
+  maxWidth: "80px",
+  transition: "all 0.2s ease",
+  lineHeight: 1.3,
+}))
 
-/**
- * Custom draggable discrete slider component with labeled stops.
- *
- * Features:
- * - Horizontal draggable slider with evenly spaced stops
- * - Blue rounded rectangle pointer that snaps to stops
- * - Hover effects and smooth transitions
- * - Active state styling for current stop
- * - Custom labels for each stop
- * - Disabled state support
- * - Foreshadows brushing interactions in parallel plots
- */
 export function DiscreteSlider({
   stops,
   value,
   onChange,
   disabled = false,
   labelPosition = "bottom",
+  colors = {
+    track: "#cbd5e0",
+    activeStop: "#449cd9",
+    inactiveStop: "#a0aec0",
+    activeLabel: "#449cd9",
+    inactiveLabel: "#4a5568",
+    pointer: "#449cd9",
+  },
+  spacing = {
+    container: 8,
+    track: 24,
+    labels: 20,
+  },
   sx = {},
+  onStopHover,
+  onSliderLeave,
 }: DiscreteSliderProps) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -213,8 +257,18 @@ export function DiscreteSlider({
   }, [isDragging, handleMouseMove, handleMouseUp])
 
   return (
-    <SliderContainer labelPosition={labelPosition} sx={sx}>
-      <SliderTrack ref={trackRef} onClick={handleTrackClick}>
+    <SliderContainer
+      labelPosition={labelPosition}
+      spacing={spacing}
+      sx={sx}
+      onMouseLeave={onSliderLeave}
+    >
+      <SliderTrack
+        ref={trackRef}
+        onClick={handleTrackClick}
+        trackColor={colors.track || "#cbd5e0"}
+        spacing={spacing}
+      >
         {/* Render stop indicators and pointer */}
         {stops.map((stop, index) => {
           const position = getStopPosition(index)
@@ -229,20 +283,32 @@ export function DiscreteSlider({
                 top: "50%",
                 transform: "translateY(-50%)",
               }}
+              onMouseEnter={() => onStopHover?.(index)}
             >
-              <SliderStop active={isActive} />
-              <SliderLabel active={isActive} labelPosition={labelPosition}>
+              <SliderStop
+                active={isActive}
+                activeColor={colors.activeStop || "#449cd9"}
+                inactiveColor={colors.inactiveStop || "#a0aec0"}
+              />
+              <SliderLabel
+                active={isActive}
+                labelPosition={labelPosition}
+                activeColor={colors.activeLabel || "#449cd9"}
+                inactiveColor={colors.inactiveLabel || "#4a5568"}
+                spacing={spacing}
+              >
                 {stop}
               </SliderLabel>
               {/* Show pointer only for active stop */}
               {isActive && (
                 <SliderPointer
                   disabled={disabled}
+                  pointerColor={colors.pointer || "#449cd9"}
                   onMouseDown={handleMouseDown}
                 >
                   <svg viewBox="0 0 16 12" xmlns="http://www.w3.org/2000/svg">
                     <path
-                      d="M3 12 Q2 12 2 11 Q2 10.5 2.5 10 L7 3 Q8 2 8 2 Q8 2 9 3 L13.5 10 Q14 10.5 14 11 Q14 12 13 12 Z"
+                      d="M3 10 Q2 10 2 9 Q2 8.5 2.5 8 L7 2 Q8 1 8 1 Q8 1 9 2 L13.5 8 Q14 8.5 14 9 Q14 10 13 10 Z"
                       fill="currentColor"
                       stroke="none"
                     />
