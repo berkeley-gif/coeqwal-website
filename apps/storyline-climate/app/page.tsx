@@ -6,7 +6,7 @@ import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import Snowmelt from "./components/02Snowmelt"
+import SectionStarter from "./components/02Snowmelt"
 import SectionDelta from "./components/04Delta"
 import SectionTransition from "./components/05AdaptTransition"
 import SectionSupply from "./components/03Groundwater"
@@ -39,7 +39,7 @@ export default function StoryContainer() {
         }}
       >
         <Opener />
-        <Snowmelt />
+        <SectionStarter />
         <SectionSupply />
         <SectionDelta />
         <SectionTransition />
