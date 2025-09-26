@@ -4,6 +4,85 @@ import { Box, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 
+function SectionStarter() {
+  return (
+    <>
+      <Temperature />
+      <Snowmelt />
+    </>
+  )
+}
+
+function Temperature() {
+  const { sectionRef } = useActiveSection("temperature", { amount: 0.5 })
+  return (
+    <Box
+      id="temperature"
+      className="container-left"
+      ref={sectionRef}
+      height="100vh"
+      width="100%"
+      tabIndex={-1}
+      role="region"
+      sx={{ paddingLeft: "5rem", paddingRight: "5rem" }}
+    >
+      <Box width="100%" height="60%" sx={{ display: "flex" }}>
+        Chart placeholder
+      </Box>
+      <Box
+        width="100%"
+        height="40%"
+        className="text-container-left"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <Box className="paragraph">
+          <Typography variant="body1">
+            {
+              "California’s water system is under pressure to meet multiple demands."
+            }
+          </Typography>
+          <Typography variant="body1">
+            {
+              "People need clean drinking water. Farms need water to grow food. Fish and wildlife need water to survive."
+            }
+          </Typography>
+        </Box>
+        <Box className="paragraph">
+          <Typography variant="body1">
+            {"Climate change is making matters worse."}
+          </Typography>
+        </Box>
+        <Box className="paragraph">
+          <Typography variant="body1">
+            {
+              "Warmer temperatures, less predictable rain and snow, and higher sea levels are stressing both our water infrastructure and living environment."
+            }
+          </Typography>
+        </Box>
+        <Box
+          className="paragraph"
+          component="article"
+          aria-labelledby="opener-throughline"
+        >
+          <Typography
+            id="throughline-heading"
+            variant="body1"
+            sx={{ fontWeight: "bold" }}
+          >
+            {
+              "How can we limit the impacts of climate change on California's water future?"
+            }
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  )
+}
+
 function Snowmelt() {
   const { sectionRef } = useActiveSection("snowmelt", { amount: 0.5 })
   const { scrollYProgress } = useScroll({
@@ -141,4 +220,4 @@ function Snowmelt() {
   )
 }
 
-export default Snowmelt
+export default SectionStarter
