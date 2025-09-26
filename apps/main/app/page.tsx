@@ -5,7 +5,7 @@ import { Header } from "./components/Header"
 import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
 import IntroSection from "./sections/IntroSection"
 import ContentPanels from "./sections/ContentPanels"
-import ScenarioExplorer from "./features/scenarioExplorer/ScenarioExplorer"
+import ScenarioExplorer2 from "./features/scenarioExplorer/ScenarioExplorer2"
 
 export default function Home() {
   const theme = useTheme()
@@ -37,7 +37,7 @@ export default function Home() {
         {/* Panel sections */}
         <IntroSection />
         <ContentPanels />
-        <ScenarioExplorer />
+        <ScenarioExplorer2 />
       </Box>
     </>
   )
