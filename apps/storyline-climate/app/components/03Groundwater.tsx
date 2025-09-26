@@ -59,6 +59,11 @@ function Groundwater() {
           }}
         >
           <Box className="paragraph" component="article">
+            <Typography variant="h4">
+              {"Groundwater: A Hidden but Limited Reserve"}
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
                 "In past droughts, when water available in rivers and reservoirs is reduced,"
@@ -185,6 +190,11 @@ function Conservation() {
           className="text-container-left"
           style={{ opacity: firstParagraphOpacity }}
         >
+          <Box className="paragraph" component="article">
+            <Typography variant="h4">
+              {"Making the Most of Limited Water"}
+            </Typography>
+          </Box>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {

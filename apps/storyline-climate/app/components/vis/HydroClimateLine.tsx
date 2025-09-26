@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { ContainerSize } from "./HydroClimate"
 import * as d3 from "d3"
 import "./hydroclimate.css"
+import { FreshWaterColor } from "../helpers/colorPalette"
 
 export type FlowEntry = {
   model: string
@@ -95,12 +96,12 @@ function FlowLineWithBand({
       <path
         d={lineGenerator(data) ?? ""}
         fill="none"
-        stroke="#F1B143"
+        stroke={FreshWaterColor}
         strokeWidth={2}
       ></path>
       <path
         d={areaGenerator(data) ?? ""}
-        fill="#F1B143"
+        fill={FreshWaterColor}
         fillOpacity={0.15}
         stroke="none"
       />

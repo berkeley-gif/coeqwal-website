@@ -168,19 +168,45 @@ function ScenariosMockup() {
   return (
     <Box
       id="scenarios"
-      className="container-center"
+      //className="container-center"
+      width="100vw"
       height="100vh"
       sx={{
         position: "relative",
         justifyContent: "center",
-        backgroundImage: "url('/drafts/scenario-lines-v2.png')",
-        backgroundSize: "auto 100vh",
-        backgroundPosition: "right",
-        backgroundRepeat: "no-repeat",
+        //backgroundImage: "url('/drafts/scenario-lines-v2.png')",
+        //backgroundSize: "auto 100vh",
+        //backgroundPosition: "right",
+        //backgroundRepeat: "no-repeat",
       }}
       tabIndex={-1}
       role="region"
-    ></Box>
+    >
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 1728 291"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <motion.path
+          initial={{ pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          transition={{ duration: 4, ease: "easeInOut" }}
+          d="M-1 208.147C-1 208.147 554 256.147 685 208.147C816 160.147 798 -34.8529 980 8.14711C1162 51.1471 1732 8.14697 1732 8.14697"
+          stroke="#F1B143"
+          strokeWidth="4"
+        />
+        <motion.path
+          initial={{ pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          transition={{ duration: 4, ease: "easeInOut" }}
+          d="M-1 208.147C-1 208.147 360 207.147 662 236.147C964 265.147 919 301.147 992 284.147C1065 267.147 1732 284.147 1732 284.147"
+          stroke="#F1B143"
+          strokeWidth="4"
+        />
+      </svg>
+    </Box>
   )
 }
 
