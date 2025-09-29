@@ -1,6 +1,8 @@
-import { OneColumnPanel, ScrollToButton } from "@repo/ui"
+import { OneColumnPanel, ScrollToButton, GlossaryLinkedText } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
+import { useDrawerStore } from "@repo/state"
+import { useCallback } from "react"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../components/ProgressiveScenarioPanels"
@@ -9,6 +11,16 @@ import { CalSimProvider } from "../components/CalSimContext"
 const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
+
+  // Handler to open glossary to specific entry
+  const handleGlossaryOpen = useCallback(
+    (term: string) => {
+      setDrawerContent({ selectedTerm: term })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
 
   return (
     <Box sx={{ pointerEvents: "none" }}>
@@ -70,7 +82,7 @@ const IntroSection = () => {
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, 10vh)", // Position below centered title
-                  maxWidth: "600px", // Optimal width for paragraph reading
+                  maxWidth: theme.layout.textContainer.maxWidth, // Optimal width for paragraph reading
                   textAlign: "left", // Left-align text for better readability
                 }}
               >
@@ -128,7 +140,7 @@ const IntroSection = () => {
         sx={{
           pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary? bc map?
           backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
-          backgroundSize: "40% auto",
+          backgroundSize: "38% auto",
           backgroundPosition: "bottom right",
           backgroundRepeat: "no-repeat",
         }}
@@ -143,11 +155,41 @@ const IntroSection = () => {
               gap: "20px",
             }}
           >
-            <Typography variant="body1" fontWeight={700}>
+            {/* <Typography variant="body1" fontWeight={700}>
               {t("frontmatterPanel.boldText")}
-            </Typography>
+            </Typography> */}
             <Typography variant="body1">
               {t("frontmatterPanel.content")}
+            </Typography>
+            
+            <Typography variant="body1">
+              <GlossaryLinkedText
+                text="Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these water management strategies under the hydroclimate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change."
+                terms={[
+                  { name: "COEQWAL", glossaryTerm: "COEQWAL" },
+                  { name: "CalSim", glossaryTerm: "CalSim" },
+                  { name: "water management strategies", glossaryTerm: "Operational strategies" },
+                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.text.primary}
+                underlineColor={theme.palette.text.primary}
+              />
+            </Typography>
+            
+            <Typography variant="body1">
+              <GlossaryLinkedText
+                text="These scenarios – unique combinations of water management strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between goals. By understanding how different decisions affect water allocations for different communities, we can imagine new ways of improving water management in California."
+                terms={[
+                  { name: "scenarios", glossaryTerm: "Scenario" },
+                  { name: "water management strategies", glossaryTerm: "Operational strategies" },
+                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
+                  { name: "water allocations", glossaryTerm: "Water allocation" },
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.text.primary}
+                underlineColor={theme.palette.text.primary}
+              />
             </Typography>
 
             <ScrollToButton
@@ -174,8 +216,8 @@ const IntroSection = () => {
         <ProgressiveScenarioPanels />
       </CalSimProvider>
 
-      {/* Interstitial panel - can be broken out into a component */}
-      <OneColumnPanel
+{/* Interstitial panel - can be broken out into a component */}
+      {/* <OneColumnPanel
         id="interstitial"
         fullHeight={false}
         fullWidth
@@ -210,7 +252,7 @@ const IntroSection = () => {
             />
           </Box>
         }
-      />
+      /> */}
     </Box>
   )
 }

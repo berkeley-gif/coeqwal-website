@@ -22,8 +22,8 @@ export function ConnectedMultiDrawer({
 }: ConnectedMultiDrawerProps) {
   const theme = useTheme()
 
-  // Check if user has scrolled past the home panel
-  const hasPassedHomePanel = useHomePanelIntersection()
+  // Check if user has reached the frontmatter panel
+  const hasReachedFrontmatter = useHomePanelIntersection()
 
   // Get state from the store
   const activeTab = useDrawerStore((state) => state.activeTab)
@@ -44,7 +44,7 @@ export function ConnectedMultiDrawer({
     <AppMultiDrawer
       drawerWidth={drawerWidth}
       overlay={overlay}
-      showRailButtons={showRailButtons && hasPassedHomePanel}
+      showRailButtons={showRailButtons && hasReachedFrontmatter}
       activeTab={activeTab}
       drawerContent={content}
       onDrawerStateChange={handleDrawerStateChange}

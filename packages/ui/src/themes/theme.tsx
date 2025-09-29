@@ -142,7 +142,7 @@ const themeValues = {
       glossaryWidth: 360,
     },
     textContainer: {
-      maxWidth: { xs: "600px", md: "520px" },
+      maxWidth: "600px",
     },
     // Compact control dimensions for UI elements
     controls: {
@@ -1607,7 +1607,7 @@ declare module "@mui/material/styles" {
         glossaryWidth: number
       }
       textContainer: {
-        maxWidth: { xs: string; md: string }
+        maxWidth: string
       }
       controls: {
         standard: number
@@ -1752,7 +1752,7 @@ declare module "@mui/material/styles" {
         closedWidth?: number
       }
       textContainer?: {
-        maxWidth?: { xs: string; md: string }
+        maxWidth?: string
       }
       controls?: {
         standard?: number
