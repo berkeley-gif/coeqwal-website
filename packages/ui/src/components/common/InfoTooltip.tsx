@@ -17,12 +17,6 @@ export interface InfoTooltipProps extends Omit<BaseTooltipProps, "title"> {
 /**
  * Info tooltip component for displaying detailed information with optional actions.
  * Commonly used with info icons to provide contextual help and interactive elements.
- *
- * Features:
- * - Main description text with proper spacing
- * - Optional action buttons or additional content
- * - Extended interaction timing for button clicks
- * - Optimized positioning for info icons
  */
 export function InfoTooltip({
   description,

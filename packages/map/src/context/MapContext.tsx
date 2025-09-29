@@ -254,15 +254,22 @@ export function MapProvider({ children }: { children: ReactNode }) {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
       try {
+        const { beforeId, ...otherProps } = others || {}
         const layer = {
           id,
           source,
           type,
           ...(paint ? { paint } : {}),
           ...(layout ? { layout } : {}),
-          ...(others ? others : {}),
+          ...otherProps,
         } as LayerSpecification
-        map.addLayer(layer)
+        
+        // Use beforeId if provided, otherwise add to top
+        if (beforeId && typeof beforeId === 'string') {
+          map.addLayer(layer, beforeId)
+        } else {
+          map.addLayer(layer)
+        }
       } catch (err) {
         console.error(`Failed to add layer '${id}':`, err)
       }

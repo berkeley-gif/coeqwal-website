@@ -618,6 +618,7 @@ const theme = createTheme({
       },
     },
     spacing: {
+      standard: 3, // 24px - standardized spacing unit
       padding: 3, // 24px inner padding
       gap: 3, // 24px between cards
       capsule: {
@@ -748,7 +749,6 @@ const theme = createTheme({
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 1.0, // Tighter for large hero text
-      color: themeValues.palette.blue.darkest,
       textTransform: "uppercase",
     },
     h2: {
@@ -756,42 +756,36 @@ const theme = createTheme({
       fontSize: typeScale.h2,
       fontWeight: 500,
       lineHeight: 1.1, // Slightly tighter for section headers
-      color: themeValues.palette.blue.darkest,
     },
     h3: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h3,
       fontWeight: 500,
       lineHeight: 1.15, // Balanced for subsection headers
-      color: themeValues.palette.blue.darkest,
     },
     h4: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: typeScale.h4,
       fontWeight: 400,
       lineHeight: 1.25, // Slightly more open for card titles
-      color: themeValues.palette.blue.darkest,
     },
     h5: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h5,
       fontWeight: 500,
       lineHeight: 1.35, // Good balance for minor headlines
-      color: themeValues.palette.blue.darkest,
     },
     h6: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
       fontSize: typeScale.h6,
       fontWeight: 600,
       lineHeight: 1.4,
-      color: themeValues.palette.blue.darkest,
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.25rem", // 20px - primary body text (matches body1)
       fontWeight: 400,
       lineHeight: 1.5, // 1.5x ratio (30px at 20px font size)
-      color: themeValues.palette.blue.darkest,
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
@@ -799,7 +793,6 @@ const theme = createTheme({
       fontWeight: 400,
       letterSpacing: "unset",
       lineHeight: 1.6,
-      color: themeValues.palette.blue.darkest,
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
@@ -807,7 +800,6 @@ const theme = createTheme({
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.5,
-      color: themeValues.palette.blue.darkest,
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
@@ -815,7 +807,6 @@ const theme = createTheme({
       fontWeight: 500, // Medium weight to distinguish from body
       letterSpacing: "normal",
       lineHeight: 1.6,
-      color: themeValues.palette.blue.darkest,
     },
     button: {
       fontSize: "1rem", // 16px for top-level UI elements
@@ -1720,6 +1711,7 @@ declare module "@mui/material/styles" {
         }
       }
       spacing: {
+        standard: number
         padding: number
         gap: number
         capsule: {
@@ -1811,6 +1803,7 @@ declare module "@mui/material/styles" {
         }
       }
       spacing?: {
+        standard?: number
         padding?: number
         gap?: number
         capsule?: {

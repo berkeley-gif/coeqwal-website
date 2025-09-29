@@ -21,57 +21,27 @@ function MapCenterController() {
   const { flyTo, mapRef } = useMap()
 
   useEffect(() => {
-    console.log("🗺️🔍 DEBUGGING MapCenterController:")
-    console.log("   - isPanelsVisible:", isPanelsVisible)
-    console.log("   - flyTo function exists:", !!flyTo)
-    console.log("   - mapRef exists:", !!mapRef.current)
-
-    // Log current map center for debugging
-    if (mapRef.current) {
-      const currentCenter = mapRef.current.getCenter()
-      console.log("   - Current map center:", currentCenter)
-    }
-
-    if (!flyTo) {
-      console.log("🗺️❌ flyTo function not available")
-      return
-    }
+    if (!flyTo) return
 
     // Add a small delay to ensure map is fully loaded
     setTimeout(() => {
       try {
         if (isPanelsVisible) {
-          console.log(
-            "🗺️✈️ ATTEMPTING flyTo -125 longitude using context API (VERY dramatic shift)",
-          )
-          // Use the map package's context API flyTo method - much more dramatic shift
+          // Use the map package's context API flyTo method
           flyTo(-125, 38.073, 7.0, 0, 0, {
-            duration: 1000, // Faster so it's more noticeable
+            duration: 1000,
             essential: true,
           })
-          console.log("🗺️✅ Context API flyTo command executed")
-
-          // Also log what the center should be after
-          setTimeout(() => {
-            if (mapRef.current) {
-              const newCenter = mapRef.current.getCenter()
-              console.log("🗺️📍 New map center after flyTo:", newCenter)
-            }
-          }, 2100) // After animation completes
         } else {
-          console.log(
-            "🗺️🏠 ATTEMPTING flyTo back to -119 longitude using context API",
-          )
           flyTo(-119, 38.073, 6.3, 0, 0, {
             duration: 2000,
             essential: true,
           })
-          console.log("🗺️✅ Context API return flyTo command executed")
         }
       } catch (error) {
-        console.error("🗺️💥 Error executing flyTo:", error)
+        console.error("Error executing flyTo:", error)
       }
-    }, 200) // Slightly longer delay
+    }, 200)
   }, [isPanelsVisible, flyTo, mapRef])
 
   return null // This component only handles side effects
