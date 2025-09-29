@@ -3,21 +3,21 @@
 import { useEffect, useState } from "react"
 
 /**
- * Hook to detect when the user has scrolled past the home panel
- * Uses intersection observer to watch for when the home panel exits the viewport
+ * Hook to detect when the user has reached the frontmatter panel
+ * Uses intersection observer to watch for when the frontmatter panel enters the viewport
  * 
- * @returns boolean - true when user has scrolled past the home panel
+ * @returns boolean - true when user has reached the frontmatter panel
  */
 export function useHomePanelIntersection() {
-  const [hasPassedHomePanel, setHasPassedHomePanel] = useState(false)
+  const [hasReachedFrontmatter, setHasReachedFrontmatter] = useState(false)
 
   useEffect(() => {
-    // Find the home panel element
-    const homePanel = document.getElementById("home")
+    // Find the frontmatter panel element
+    const frontmatterPanel = document.getElementById("frontmatter")
     
-    if (!homePanel) {
-      // If no home panel found, assume we've passed it (fallback)
-      setHasPassedHomePanel(true)
+    if (!frontmatterPanel) {
+      // If no frontmatter panel found, assume we've reached it (fallback)
+      setHasReachedFrontmatter(true)
       return
     }
 
@@ -26,24 +26,25 @@ export function useHomePanelIntersection() {
       (entries) => {
         const [entry] = entries
         
-        // When the home panel is no longer intersecting (fully out of view)
-        // and the user has scrolled down, show the glossary tab
-        if (!entry.isIntersecting && entry.boundingClientRect.top < 0) {
-          setHasPassedHomePanel(true)
-        } else if (entry.isIntersecting) {
-          // If the home panel comes back into view, hide the glossary tab
-          setHasPassedHomePanel(false)
+        if (!entry) return
+        
+        // When the frontmatter panel is intersecting, show the glossary tab
+        if (entry.isIntersecting) {
+          setHasReachedFrontmatter(true)
+        } else if (entry.boundingClientRect.top > 0) {
+          // If we've scrolled back up above the frontmatter panel, hide the glossary tab
+          setHasReachedFrontmatter(false)
         }
       },
       {
-        // Trigger when the home panel is completely out of view
-        rootMargin: "0px",
+        // Trigger when the frontmatter panel starts entering the viewport
+        rootMargin: "0px 0px -50% 0px", // Trigger when top half is visible
         threshold: 0,
       }
     )
 
     // Start observing
-    observer.observe(homePanel)
+    observer.observe(frontmatterPanel)
 
     // Cleanup
     return () => {
@@ -51,5 +52,5 @@ export function useHomePanelIntersection() {
     }
   }, [])
 
-  return hasPassedHomePanel
+  return hasReachedFrontmatter
 }

@@ -136,27 +136,17 @@ export default function MapOverlayPanels() {
                 mr: { xs: 8, md: 16 },
               }}
             >
-              <Typography variant="h3" component="h3">
-                {t("toolsPanel.title")}
-              </Typography>
-
               <Typography variant="body1" fontWeight={700}>
                 {t("toolsPanel.boldText")}
               </Typography>
 
-              <Box
-                sx={{
-                  mb: 2,
-                  fontSize: "1rem",
-                  lineHeight: 1.5,
-                }}
-              >
+              <Typography variant="body1" sx={{ mb: 2 }}>
                 <GlossaryLinkedText
                   text={t("toolsPanel.content")}
                   terms={[
                     { name: "CalSim", glossaryTerm: "CalSim" },
                     {
-                      name: "California's major water projects",
+                      name: "major water projects",
                       glossaryTerm: "California's major water projects",
                     },
                     { name: "Central Valley", glossaryTerm: "Central Valley" },
@@ -165,7 +155,7 @@ export default function MapOverlayPanels() {
                   color={theme.palette.blue.darkest}
                   underlineColor={theme.palette.blue.darkest}
                 />
-              </Box>
+              </Typography>
 
               {/* CalSim toggle button */}
               <Button
@@ -473,158 +463,6 @@ export default function MapOverlayPanels() {
               )}
             </Box>
           </motion.div>
-        }
-      />
-
-      {/* Scenarios panel right-side overlay */}
-      <TwoColumnPanel
-        id="scenarios-overlay"
-        fullHeight={true}
-        fullWidth={true}
-        backgroundColor="transparent"
-        includeHeaderSpacing={false}
-        contentColumn="right"
-        contentAlignment={{
-          justifyContent: "center",
-          alignItems: "flex-end",
-        }}
-        sx={{
-          minHeight: "100vh",
-          pointerEvents: "none", // Allow map interaction through the overlay
-          paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Same as above
-        }}
-        rightContent={
-          <Box
-            sx={{
-              ...overlayPanelStyle,
-              mr: { xs: 8, md: 16 },
-            }}
-          >
-            <Typography variant="h3" component="h3">
-              Rethink California water
-            </Typography>
-
-            <Box
-              sx={{
-                fontSize: "1rem",
-                lineHeight: 1.5,
-              }}
-            >
-              <GlossaryLinkedText
-                text={t("scenariosPanel.part1")}
-                terms={[
-                  { name: "COEQWAL", glossaryTerm: "COEQWAL" },
-                  { name: "CalSim", glossaryTerm: "CalSim" },
-                  {
-                    name: "operational strategies",
-                    glossaryTerm: "Operational strategies",
-                  },
-                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
-                ]}
-                onActivate={handleGlossaryOpen}
-                color={theme.palette.blue.darkest}
-                underlineColor={theme.palette.blue.darkest}
-              />
-            </Box>
-          </Box>
-        }
-      />
-
-      {/* Scenarios panel right-side overlay */}
-      <TwoColumnPanel
-        id="scenarios-overlay2"
-        fullHeight={true}
-        fullWidth={true}
-        backgroundColor="transparent"
-        includeHeaderSpacing={false}
-        contentColumn="right"
-        contentAlignment={{
-          justifyContent: "center",
-          alignItems: "flex-end",
-        }}
-        sx={{
-          minHeight: "100vh",
-          pointerEvents: "none", // Allow map interaction through the overlay
-          paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
-          paddingRight: 0, // Here also, might want to put some time into this
-        }}
-        rightContent={
-          <Box
-            sx={{
-              ...overlayPanelStyle,
-              mr: { xs: 8, md: 16 }, // Moved further right to show more map, for now
-            }}
-          >
-            <Box
-              sx={{
-                color: (theme) => theme.palette.blue.darkest,
-                fontSize: "1rem",
-                lineHeight: 1.5,
-              }}
-            >
-              <GlossaryLinkedText
-                text={t("scenariosPanel.part2")}
-                terms={[
-                  { name: "scenarios", glossaryTerm: "Scenarios" },
-                  {
-                    name: "operational strategies",
-                    glossaryTerm: "Operational strategies",
-                  },
-                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
-                  {
-                    name: "water allocations",
-                    glossaryTerm: "Water allocations",
-                  },
-                ]}
-                onActivate={handleGlossaryOpen}
-                underlineColor={theme.palette.blue.darkest}
-              />
-            </Box>
-          </Box>
-        }
-      />
-
-      {/* Invisible marker for intersection detection; todo: come back to this */}
-      <TwoColumnPanel
-        id="scenario-explorer-overlay"
-        fullHeight={true}
-        fullWidth={true}
-        backgroundColor="transparent"
-        includeHeaderSpacing={false}
-        contentColumn="right"
-        contentAlignment={{
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-        sx={{
-          minHeight: "100vh",
-          pointerEvents: "none", // Allow map interaction through the overlay
-          paddingLeft: 0,
-          paddingRight: 0,
-        }}
-        rightContent={
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100vh",
-              width: "100%",
-            }}
-          >
-            <Typography
-              variant="h2"
-              sx={{
-                color: theme.palette.blue.darkest,
-                textAlign: "center",
-                opacity: 0, // Completely transparent
-                pointerEvents: "none",
-              }}
-            >
-              Scenario Explorer
-            </Typography>
-          </Box>
         }
       />
     </Box>

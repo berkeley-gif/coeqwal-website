@@ -10,8 +10,8 @@
   },
   "toolsPanel": {
     "title": "Tools are needed",
-    "boldText": "How do we track the water we have and where it is being delivered?",
-    "content": "This is where models come in. CalSim is a water planning model developed by government agencies that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released, and where it gets delivered across the state."
+    "boldText": "What parts of California are covered by the model?",
+    "content": "CalSim is a water planning model developed by government agencies that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released, and where it gets delivered across the state."
   },
   "scenariosPanel": {
     "part1": "Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these operational strategies under the climate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change.",

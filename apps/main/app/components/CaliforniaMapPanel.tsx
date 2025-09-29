@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
-import { Map, NavigationControl, useMap } from "@repo/map"
+import { Map, NavigationControl } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 // import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
@@ -15,37 +14,6 @@ interface CaliforniaMapPanelProps {
   mapboxToken?: string
 }
 
-// Component to handle map centering based on panel visibility
-function MapCenterController() {
-  const { isPanelsVisible } = useCalSimToggle()
-  const { flyTo, mapRef } = useMap()
-
-  useEffect(() => {
-    if (!flyTo) return
-
-    // Add a small delay to ensure map is fully loaded
-    setTimeout(() => {
-      try {
-        if (isPanelsVisible) {
-          // Use the map package's context API flyTo method
-          flyTo(-125, 38.073, 7.0, 0, 0, {
-            duration: 1000,
-            essential: true,
-          })
-        } else {
-          flyTo(-119, 38.073, 6.3, 0, 0, {
-            duration: 2000,
-            essential: true,
-          })
-        }
-      } catch (error) {
-        console.error("Error executing flyTo:", error)
-      }
-    }, 200)
-  }, [isPanelsVisible, flyTo, mapRef])
-
-  return null // This component only handles side effects
-}
 
 export default function CaliforniaMapPanel({
   id = "california-map",
@@ -86,8 +54,6 @@ export default function CaliforniaMapPanel({
         keyboard={true}
         interactive={true}
       >
-        {/* Map center controller for panel expansion */}
-        <MapCenterController />
 
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
