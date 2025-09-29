@@ -65,7 +65,7 @@ const getStyles = (theme: Theme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    mb: theme.spacing(2),
+    mb: theme.spacing(3),
   },
   hydroclimateTag: {
     backgroundColor: theme.palette.grey[200],
@@ -81,7 +81,7 @@ const getStyles = (theme: Theme) => ({
   },
   iconContainer: {
     display: "flex",
-    gap: theme.spacing(2),
+    gap: theme.spacing(3),
     alignItems: "center",
   },
   strategyIcon: {
@@ -98,7 +98,7 @@ const getStyles = (theme: Theme) => ({
     display: "grid",
     gridTemplateColumns: "repeat(4, 1fr)",
     gap: theme.spacing(3),
-    mb: theme.spacing(4),
+    mb: theme.spacing(3),
   },
   outcomeItem: {
     display: "flex",
@@ -111,11 +111,11 @@ const getStyles = (theme: Theme) => ({
   actionFooter: {
     backgroundColor: theme.palette.grey[100],
     borderRadius: theme.spacing(1),
-    p: theme.spacing(2),
-    mt: theme.spacing(2),
+    p: theme.spacing(3),
+    mt: theme.spacing(3),
     display: "flex",
     justifyContent: "flex-end",
-    gap: theme.spacing(2),
+    gap: theme.spacing(3),
   },
   actionIcon: {
     backgroundColor: theme.palette.grey[300],
@@ -128,7 +128,7 @@ const getStyles = (theme: Theme) => ({
   },
 })
 
-export default function ScenarioExplorer2() {
+export default function ScenarioExplorer3() {
   const theme = useTheme()
   const styles = getStyles(theme)
 
@@ -249,22 +249,22 @@ export default function ScenarioExplorer2() {
       includeHeaderSpacing={true}
       sx={{ pointerEvents: "auto" }}
     >
-      <DashboardGrid spacing={16}>
+      <DashboardGrid spacing={24}>
         {/* Left section: controls and configuration cards */}
         <DashboardCardContainer
           width={{
             xs: "100%",
             sm: "100%",
             md: "100%",
-            lg: "40%",
-            xl: "40%",
+            lg: "33.33%",
+            xl: "33.33%",
           }}
         >
-          <Stack spacing={2}>
+          <Stack spacing={3}>
             {/* Card 1: Choose operations */}
             <Card>
               <SectionHeader>
-                1. Choose water management strategies
+                Choose water management strategies
               </SectionHeader>
 
               {/* Dropdown and Add button */}
@@ -300,7 +300,7 @@ export default function ScenarioExplorer2() {
 
             {/* Card 2: Adjust Hydroclimate */}
             <Card>
-              <SectionHeader>2. Adjust hydroclimate</SectionHeader>
+              <SectionHeader>Adjust hydroclimate</SectionHeader>
 
               {/* Hydroclimate instruction text */}
               <Box sx={styles.hydroclimateInstructions}>
@@ -350,11 +350,11 @@ export default function ScenarioExplorer2() {
             xs: "100%",
             sm: "100%",
             md: "100%",
-            lg: "58%",
-            xl: "58%",
+            lg: "66.67%",
+            xl: "66.67%",
           }}
         >
-          <Stack spacing={theme.spacing(2)}>
+          <Stack spacing={theme.spacing(3)}>
             {/* Strategy Definition Panel - Shows when no visible strategies, OR when hovering over non-visible strategies */}
             {(visibleStrategies.size === 0 ||
               (visibleStrategies.size > 0 &&
@@ -610,7 +610,7 @@ export default function ScenarioExplorer2() {
                   {/* Description */}
                   <Typography
                     variant="body2"
-                    sx={{ mb: theme.spacing(4), lineHeight: 1.5 }}
+                    sx={{ mb: theme.spacing(3), lineHeight: 1.5 }}
                   >
                     {strategy.description}
                   </Typography>

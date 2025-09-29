@@ -4,14 +4,14 @@ export const strategies = [
     value: "current-ops",
     label: "Current operational strategy",
     description:
-      "The baseline water management approach currently used in California, including allowing for TUCPs (Temporary Urgent Change Petitions to allow changes during droughts to meet human health and safety needs and protect endangered species). This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation across the state.",
+      "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, and allows for TUCPs.",
   },
   {
     value: "current-ops-wo-tucp",
     label: "Current operational strategy without TUCP's",
     description:
-      "Current operations without TUCPs (Temporary Urgent Change Petitions to allow changes during droughts to meet human health and safety needs and protect endangered species).",
-  },
+        "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
+},
 ]
 
 // Strategy definitions for the definition panel with icons

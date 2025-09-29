@@ -2,23 +2,22 @@
 
 import { Typography, useTheme, TypographyProps } from "../.."
 
-export interface SectionHeaderProps extends Omit<TypographyProps, "variant"> {
+export interface SectionHeaderProps extends TypographyProps {
   children: React.ReactNode
-  variant?: "subtitle1" | "subtitle2" | "h6"
 }
 
 export function SectionHeader({
   children,
-  variant = "subtitle1",
+  variant = "h5",
   sx,
   ...props
 }: SectionHeaderProps) {
   const theme = useTheme()
 
   const sectionHeaderStyles = {
-    textIndent: theme.spacing(-2),
-    paddingLeft: theme.spacing(2),
+    display: "inline-block",
     mb: theme.spacing(3),
+    fontWeight: 500,
     ...sx,
   }
 

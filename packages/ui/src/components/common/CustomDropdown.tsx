@@ -5,7 +5,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputBase,
   SelectChangeEvent,
   useTheme,
 } from "../.."
@@ -43,11 +42,13 @@ export function CustomDropdown({
       fontSize: theme.typography.body2.fontSize,
       "& .MuiSelect-select": {
         fontSize: theme.typography.body2.fontSize,
+        borderRadius: 0,
+        backgroundColor: "transparent",
+        border: "none",
+        padding: `0px ${theme.spacing(4)} 0px 0`,
+        borderBottom: "none",
+        cursor: "pointer",
       },
-    },
-    input: {
-      fontSize: theme.typography.body2.fontSize,
-      cursor: "pointer",
       "& .MuiInputBase-input": {
         borderRadius: 0,
         backgroundColor: "transparent",
@@ -57,8 +58,15 @@ export function CustomDropdown({
         cursor: "pointer",
         fontSize: theme.typography.body2.fontSize,
       },
-      "& .MuiSelect-select": {
-        cursor: "pointer",
+      // Remove default outline
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "none",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        border: "none",
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        border: "none",
       },
     },
     underline: {
@@ -108,7 +116,6 @@ export function CustomDropdown({
             return option?.label || selected
           }}
           sx={dropdownStyles.select}
-          input={<InputBase sx={dropdownStyles.input} />}
           MenuProps={{
             autoFocus: false,
             disableAutoFocusItem: true,

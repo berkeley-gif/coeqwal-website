@@ -58,7 +58,6 @@ export default function MapOverlayPanels() {
     const mapPanel = document.getElementById("california-map")
     if (mapPanel) {
       observer.observe(mapPanel)
-      console.log("Observing California map panel for entrance animation")
     }
 
     return () => {

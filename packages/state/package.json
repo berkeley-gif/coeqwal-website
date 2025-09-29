@@ -19,6 +19,10 @@
     "./drawer": {
       "import": "./src/drawer/index.ts",
       "types": "./src/drawer/index.ts"
+    },
+    "./workflow": {
+      "import": "./src/workflow/index.ts",
+      "types": "./src/workflow/index.ts"
     }
   },
   "scripts": {
