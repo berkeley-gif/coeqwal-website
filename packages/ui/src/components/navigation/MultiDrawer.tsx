@@ -388,7 +388,6 @@ export function MultiDrawer({
             )}
           </Box>
         </Fade>
-
       </Drawer>
     </>
   )

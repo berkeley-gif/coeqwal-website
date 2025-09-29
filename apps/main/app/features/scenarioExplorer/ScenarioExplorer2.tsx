@@ -263,9 +263,7 @@ export default function ScenarioExplorer3() {
           <Stack spacing={3}>
             {/* Card 1: Choose operations */}
             <Card>
-              <SectionHeader>
-                Choose water management strategies
-              </SectionHeader>
+              <SectionHeader>Choose water management strategies</SectionHeader>
 
               {/* Dropdown and Add button */}
               <ControlsContainer>
