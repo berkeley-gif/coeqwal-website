@@ -4,6 +4,7 @@ import { AppMultiDrawer } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 import { useTheme } from "@repo/ui/mui"
 import type { TabKey } from "@repo/ui"
+import { useHomePanelIntersection } from "../hooks/useHomePanelIntersection"
 
 interface ConnectedMultiDrawerProps {
   drawerWidth?: number
@@ -20,6 +21,9 @@ export function ConnectedMultiDrawer({
   showRailButtons = true,
 }: ConnectedMultiDrawerProps) {
   const theme = useTheme()
+
+  // Check if user has scrolled past the home panel
+  const hasPassedHomePanel = useHomePanelIntersection()
 
   // Get state from the store
   const activeTab = useDrawerStore((state) => state.activeTab)
@@ -40,7 +44,7 @@ export function ConnectedMultiDrawer({
     <AppMultiDrawer
       drawerWidth={drawerWidth}
       overlay={overlay}
-      showRailButtons={showRailButtons}
+      showRailButtons={showRailButtons && hasPassedHomePanel}
       activeTab={activeTab}
       drawerContent={content}
       onDrawerStateChange={handleDrawerStateChange}

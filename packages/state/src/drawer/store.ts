@@ -3,8 +3,6 @@ import { immer } from "zustand/middleware/immer"
 import type {
   DrawerState,
   TabKey,
-  SavedScenario,
-  SavedScenariosCallbacks,
 } from "./types"
 
 export interface DrawerStoreState extends DrawerState {
@@ -16,10 +14,6 @@ export interface DrawerStoreState extends DrawerState {
   setDrawerContent: (content: Record<string, unknown>) => void
   // Convenience methods for specific panels
   openGlossaryPanel: () => void
-  openSavedScenariosPanel: (
-    scenarios?: SavedScenario[],
-    callbacks?: SavedScenariosCallbacks,
-  ) => void
 }
 
 export const useDrawerStore = create<DrawerStoreState>()(
@@ -73,17 +67,6 @@ export const useDrawerStore = create<DrawerStoreState>()(
         state.isOpen = true
         state.activeTab = "glossary"
         state.content = { selectedSection: undefined }
-      }),
-
-    // Convenience method for saved scenarios panel
-    openSavedScenariosPanel: (scenarios = [], callbacks = {}) =>
-      set((state) => {
-        state.isOpen = true
-        state.activeTab = "savedScenarios"
-        state.content = {
-          savedScenarios: scenarios,
-          ...callbacks,
-        }
       }),
   })),
 )

@@ -1,5 +1,5 @@
 // Define TabKey type here instead of importing from @repo/ui (creates circular dependency)
-export type TabKey = "glossary" | "savedScenarios"
+export type TabKey = "glossary"
 
 // Additional configuration options for the drawer
 export type DrawerSize = "default" | "large" | "full"

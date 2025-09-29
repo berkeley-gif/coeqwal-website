@@ -45,9 +45,10 @@ export function NavDropdown({
     lineHeight: 1.1,
     height: theme.spacing(4.5), // 36px to match other header buttons
     minHeight: theme.spacing(4.5),
-    fontFamily: theme.typography.fontFamily,
-    fontWeight: theme.typography.button.fontWeight,
-    color: "white",
+    letterSpacing: "0.75px",
+    fontSize: "0.95rem",
+    fontWeight: 500,
+    color: theme.palette.text.primary,
   }
 
   return (
@@ -90,8 +91,8 @@ export function NavDropdown({
               py: (theme) => theme.spacing(1.5), // 12px padding
               px: (theme) => theme.spacing(2), // 16px padding
               "&:hover": {
-                backgroundColor: (theme) => theme.palette.action.hover, // Use consistent light grey hover
-                color: (theme) => theme.palette.blue.darkest, // Keep text readable on light background
+                backgroundColor: (theme) => theme.palette.action.hover,
+                color: (theme) => theme.palette.blue.darkest,
               },
             }}
           >

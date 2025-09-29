@@ -1,10 +1,6 @@
 import { OneColumnPanel, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
-import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
-import { ambientCircles } from "../config/ambientCircles"
-import { floatingMarkers } from "../config/floatingMarkers"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../components/ProgressiveScenarioPanels"
@@ -81,17 +77,29 @@ const IntroSection = () => {
                 <Typography
                   variant="body1"
                   sx={(theme) => ({
-                    mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
+                    mb: theme.layout.spacing.md, // Spacing before second paragraph
                   })}
                 >
                 {t("homePanel.content")}
                 </Typography>
 
-                {/* Arrow positioned at text block midpoint */}
+                <Typography
+                  variant="body1"
+                  sx={(theme) => ({
+                    mb: theme.layout.spacing.xs, // Reduced spacing before arrow from normal
+                  })}
+                >
+                {t("homePanel.callToAction")}
+                </Typography>
+
+                {/* Arrow */}
                 <Box
                   sx={{
                     display: "flex",
                     justifyContent: "center",
+                    position: "relative", // Ensure proper stacking context
+                    zIndex: theme.zIndex.introBubbles + 1, // Above any potential overlapping elements
+                    pointerEvents: "auto", // Ensure arrow can receive interactions
                   }}
                 >
                   <ScrollToButton
@@ -103,42 +111,6 @@ const IntroSection = () => {
             </Box>
           }
         >
-          {/* Ambient background circles, positioned to cover full viewport */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: { xs: 0, md: "26%" },
-              zIndex: theme.zIndex.introBackgroundImages,
-              pointerEvents: "none",
-            }}
-          >
-            <FloatingAmbientCircles circles={ambientCircles} zIndex={1} />
-          </Box>
-
-          {/* Floating image markers, positioned to cover full viewport */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: { xs: 0, md: "26%" },
-              zIndex: theme.zIndex.introForegroundImages,
-              pointerEvents: "none",
-              transform: { xs: "scale(0.8)", md: "scale(1.20)", lg: "scale(1)" },
-              transformOrigin: "top right",
-              willChange: "transform",
-            }}
-          >
-            <FloatingImageMarkers
-              markers={floatingMarkers}
-              showHalos={true}
-              zIndex={1}
-            />
-          </Box>
         </OneColumnPanel>
       </Box>
 
