@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react"
 import { TwoColumnPanel, GlossaryLinkedText } from "@repo/ui"
+import ScenarioCard from "./ScenarioCard"
+import ClimateCard from "./ClimateCard"
 import {
   Box,
   Typography,
@@ -463,6 +465,46 @@ export default function MapOverlayPanels() {
               )}
             </Box>
           </motion.div>
+        }
+      />
+
+      {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
+      <TwoColumnPanel
+        id="baseline-scenario-overlay"
+        fullHeight={true}
+        fullWidth={true}
+        backgroundColor="transparent"
+        includeHeaderSpacing={false}
+        contentColumn="right"
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "flex-end",
+        }}
+        sx={{
+          minHeight: "100vh",
+          pointerEvents: "none", // Allow map interaction through the overlay
+          paddingLeft: 0,
+          paddingRight: 0,
+        }}
+        rightContent={
+          <Box
+            sx={{
+              ...overlayPanelStyle,
+              mr: { xs: 8, md: 16 }, // Same margin as tools overlay
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            <ScenarioCard
+              isMinimized={false}
+              minimizedTitle="Current operations"
+            />
+            <ClimateCard
+              isMinimized={false}
+              selectedClimate={1} // Historical
+            />
+          </Box>
         }
       />
     </Box>

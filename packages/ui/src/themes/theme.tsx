@@ -1150,7 +1150,6 @@ const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
           padding: "1px 15px", // to account for border width
-          textTransform: "uppercase",
           letterSpacing: "0.75px",
           fontSize: "0.95rem",
           fontWeight: 500,

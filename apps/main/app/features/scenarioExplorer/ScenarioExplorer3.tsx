@@ -140,6 +140,16 @@ const OutcomeTooltip = ({ outcome, children }: { outcome: string; children: Reac
         enterDelay: 300,
         leaveDelay: 0,
         enterNextDelay: 100,
+        PopperProps: {
+          modifiers: [
+            {
+              name: "offset",
+              options: {
+                offset: [0, -40], // Hack: Move tooltip higher
+              },
+            },
+          ],
+        },
         slotProps: {
           tooltip: {
             sx: {
@@ -1060,9 +1070,16 @@ export default function ScenarioExplorer3() {
                       mt: theme.spacing(theme.cards.spacing.standard * 2),
                       ml: theme.spacing(theme.cards.spacing.standard + 4) // Align with the top subtitle
                     }}>
-                      <SectionHeader sx={{ letterSpacing: 0.5, mb: theme.spacing(theme.cards.spacing.standard) }}>
+                      <Typography 
+                        variant="subtitle1" 
+                        sx={{ 
+                          letterSpacing: 0.5, 
+                          mb: theme.spacing(theme.cards.spacing.standard),
+                          fontWeight: 400,
+                        }}
+                      >
                         See how outcomes change with a different hydroclimate
-                      </SectionHeader>
+                      </Typography>
                       
                       <FormControl component="fieldset">
                         <RadioGroup

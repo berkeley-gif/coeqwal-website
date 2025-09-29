@@ -1,8 +1,8 @@
 export const OUTCOMES = [
   "Community deliveries",
-  "Agricultural productivity", 
+  "Agricultural revenue", 
   "Environmental flows",
-  "Delta estuary health",
+  "Delta estuary status",
   "Freshwater for Delta exports",
   "Reservoir storage",
   "Groundwater storage",
@@ -14,7 +14,7 @@ export type Outcome = (typeof OUTCOMES)[number]
 // Outcome definitions for tooltips
 export const outcomeDefinitions: Record<string, string> = {
   "Community deliveries": "Water delivered to community water systems for residential, commercial, and industrial use",
-  "Agricultural revenue": "Impact on agricultural production",
+  "Agricultural revenue": "Impact on agricultural production and revenue",
   "Environmental flows": "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
   "Delta estuary status": "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
   "Freshwater for Delta exports": "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
