@@ -169,7 +169,7 @@ const IntroSection = () => {
                   { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                   { name: "CalSim", glossaryTerm: "CalSim" },
                   { name: "water management strategies", glossaryTerm: "Operational strategies" },
-                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
+                  { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.text.primary}
@@ -181,9 +181,6 @@ const IntroSection = () => {
               <GlossaryLinkedText
                 text="These scenarios – unique combinations of water management strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between goals. By understanding how different decisions affect water allocations for different communities, we can imagine new ways of improving water management in California."
                 terms={[
-                  { name: "scenarios", glossaryTerm: "Scenario" },
-                  { name: "water management strategies", glossaryTerm: "Operational strategies" },
-                  { name: "hydroclimates", glossaryTerm: "Hydroclimate" },
                   { name: "water allocations", glossaryTerm: "Water allocation" },
                 ]}
                 onActivate={handleGlossaryOpen}
