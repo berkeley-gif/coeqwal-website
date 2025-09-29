@@ -97,6 +97,10 @@ export function Header({
     lineHeight: 1.1, // Line height for text wrapping
     height: theme.spacing(4.5), // 36px to match language switcher
     minHeight: theme.spacing(4.5), // 36px
+    letterSpacing: "0.75px",
+    fontSize: "0.95rem",
+    fontWeight: 500,
+    color: theme.palette.text.primary,
   }
   const { locale, isLoading } = useTranslation()
 
@@ -122,8 +126,7 @@ export function Header({
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
-  // Set text color to always be white
-  const textColor = "white"
+  const textColor = theme.palette.text.primary
 
   return (
     <MotionAppBar
@@ -185,7 +188,6 @@ export function Header({
                     px: isTablet ? 1 : 2,
                     fontSize: theme.typography.nav.fontSize,
                     position: "relative",
-                    textTransform: "uppercase",
                     letterSpacing: "0.03rem",
                     fontWeight: isActive ? 600 : 500,
                     transition: "color 0.3s ease",

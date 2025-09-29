@@ -13,10 +13,6 @@ interface ImageMarker {
   zIndex?: number
 }
 
-/**
- * Floating image markers - circular crop images with halos
- * Positioned to create a dynamic cluster effect across the hero section
- */
 export const floatingMarkers: ImageMarker[] = [
   // Main cluster of images
   {

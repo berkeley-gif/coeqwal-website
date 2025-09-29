@@ -10,14 +10,13 @@ import {
   IconButton,
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
-import EditNoteIcon from "@mui/icons-material/EditNote"
+import { motion, AnimatePresence } from "@repo/motion"
 
 // Content components
-import { CurrentOpsContent, SavedScenariosContent } from "./drawer-content"
-import type { SavedScenario } from "./drawer-content/SavedScenariosContent"
+import { CurrentOpsContent } from "./drawer-content"
 
 // Types
-export type TabKey = "glossary" | "savedScenarios"
+export type TabKey = "glossary"
 
 // Props for the rail buttons
 interface RailButtonProps {
@@ -188,17 +187,10 @@ export interface MultiDrawerProps {
 // Map of tab keys to display titles
 const tabTitles: Record<TabKey, string> = {
   glossary: "Glossary",
-  savedScenarios: "My Scenarios",
 }
 
 /**
- * MultiDrawer component with multiple tabs
- *
- * Features:
- * - Drawer with multiple content types (Glossary, Saved Scenarios)
- * - Vertical rail buttons with rotated text
- * - Smooth transitions between tabs
- * - Can be controlled from outside via state management
+ * MultiDrawer component with glossary content
  */
 export function MultiDrawer({
   drawerWidth = undefined,
@@ -226,7 +218,6 @@ export function MultiDrawer({
   // Mapping of tab keys to background colors
   const tabBg: Record<TabKey, string> = {
     glossary: theme.palette.blue.medium,
-    savedScenarios: theme.palette.nature.forest,
   }
 
   // Track the bg color to apply to drawer paper, preserve while closing
@@ -260,44 +251,45 @@ export function MultiDrawer({
   return (
     <>
       {/* Rail buttons - only shown when showRailButtons is true */}
-      {showRailButtons && (
-        <Box
-          sx={{
-            position: "fixed",
-            top: `calc(50% + ${headerOffset}px)`,
-            right: drawerOpen
-              ? (drawerWidth ??
-                theme.layout.drawer.width ??
-                theme.layout.drawer.glossaryWidth)
-              : 0,
-            transform: "translateY(-50%)",
-            zIndex: theme.zIndex.drawerBackdrop,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-            transition: theme.transitions.create("right", {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-          }}
-        >
-          <RailButton
-            label={tabTitles.glossary}
-            onClick={() => toggleTab("glossary")}
-            active={activeTab === "glossary"}
-            bgColor={theme.palette.blue.dark} // Slightly darker blue for rail button
-            hoverColor={theme.palette.blue.bright} // Slightly lighter blue for hover
-          />
-          <RailButton
-            label={tabTitles.savedScenarios}
-            onClick={() => toggleTab("savedScenarios")}
-            active={activeTab === "savedScenarios"}
-            bgColor="#5a7a2f" // Slightly darker than the active green
-            hoverColor="#6b8f3a" // Slightly lighter than active green
-            icon={<EditNoteIcon />}
-          />
-        </Box>
-      )}
+      <AnimatePresence>
+        {showRailButtons && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{
+              duration: 0.4,
+              ease: "easeOut",
+            }}
+            style={{
+              position: "fixed",
+              top: `calc(50% + ${headerOffset}px)`,
+              right: drawerOpen
+                ? (drawerWidth ??
+                  theme.layout.drawer.width ??
+                  theme.layout.drawer.glossaryWidth)
+                : 0,
+              transform: "translateY(-50%)",
+              zIndex: theme.zIndex.drawerBackdrop,
+              display: "flex",
+              flexDirection: "column",
+              gap: theme.spacing(1),
+              transition: theme.transitions.create("right", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+            }}
+          >
+            <RailButton
+              label={tabTitles.glossary}
+              onClick={() => toggleTab("glossary")}
+              active={activeTab === "glossary"}
+              bgColor={theme.palette.blue.dark} // Slightly darker blue for rail button
+              hoverColor={theme.palette.blue.bright} // Slightly lighter blue for hover
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main drawer with glossary content */}
       <Drawer
@@ -397,77 +389,6 @@ export function MultiDrawer({
           </Box>
         </Fade>
 
-        {/* Saved Scenarios Content */}
-        <Fade in={activeTab === "savedScenarios"}>
-          <Box
-            sx={{
-              display: activeTab === "savedScenarios" ? "block" : "none",
-              height: "100%",
-              overflow: "auto",
-            }}
-          >
-            {activeTab === "savedScenarios" && (
-              <>
-                <Box
-                  sx={{
-                    background: theme.palette.nature.forest,
-                    color: theme.palette.common.white,
-                    padding: 2,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Typography variant="h5" sx={{ fontWeight: 500 }}>
-                    {tabTitles.savedScenarios}
-                  </Typography>
-                  <IconButton
-                    onClick={close}
-                    size="small"
-                    aria-label="close drawer"
-                    sx={{
-                      color: theme.palette.common.white,
-                    }}
-                  >
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-                <Box
-                  sx={{
-                    color: theme.palette.text.primary,
-                    backgroundColor: theme.palette.common.white,
-                    height: "calc(100% - 56px)", // Adjust based on header height
-                    overflow: "auto",
-                  }}
-                >
-                  <SavedScenariosContent
-                    onClose={close}
-                    savedScenarios={
-                      drawerContent.savedScenarios as
-                        | SavedScenario[]
-                        | undefined
-                    }
-                    onLoadScenario={
-                      drawerContent.onLoadScenario as
-                        | ((scenario: SavedScenario) => void)
-                        | undefined
-                    }
-                    onDeleteScenario={
-                      drawerContent.onDeleteScenario as
-                        | ((id: string) => void)
-                        | undefined
-                    }
-                    onEditScenario={
-                      drawerContent.onEditScenario as
-                        | ((scenario: SavedScenario) => void)
-                        | undefined
-                    }
-                  />
-                </Box>
-              </>
-            )}
-          </Box>
-        </Fade>
       </Drawer>
     </>
   )

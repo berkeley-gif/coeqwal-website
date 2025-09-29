@@ -1150,18 +1150,22 @@ const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
           padding: "1px 15px", // to account for border width
-          textTransform: "none",
+          textTransform: "uppercase",
+          letterSpacing: "0.75px",
+          fontSize: "0.95rem",
+          fontWeight: 500,
           backgroundColor: "transparent",
-          color: theme.palette.common.white,
+          color: theme.palette.text.primary,
           boxShadow: "none",
           "&:hover": {
             backgroundColor: "transparent",
           },
           "&.Mui-selected": {
             backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
+            color: theme.palette.common.white,
             "&:hover": {
-              backgroundColor: theme.palette.common.white,
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.common.white,
             },
           },
         }),
