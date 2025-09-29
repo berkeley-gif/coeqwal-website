@@ -14,7 +14,6 @@ interface CaliforniaMapPanelProps {
   mapboxToken?: string
 }
 
-
 export default function CaliforniaMapPanel({
   id = "california-map",
   mapboxToken,
@@ -54,7 +53,6 @@ export default function CaliforniaMapPanel({
         keyboard={true}
         interactive={true}
       >
-
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
 

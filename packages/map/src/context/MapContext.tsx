@@ -263,9 +263,9 @@ export function MapProvider({ children }: { children: ReactNode }) {
           ...(layout ? { layout } : {}),
           ...otherProps,
         } as LayerSpecification
-        
+
         // Use beforeId if provided, otherwise add to top
-        if (beforeId && typeof beforeId === 'string') {
+        if (beforeId && typeof beforeId === "string") {
           map.addLayer(layer, beforeId)
         } else {
           map.addLayer(layer)

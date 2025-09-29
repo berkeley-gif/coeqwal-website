@@ -41,7 +41,7 @@ const IntroSection = () => {
           backgroundColor="transparent"
           includeHeaderSpacing={true}
           contentAlignment={{
-            justifyContent: "flex-start", 
+            justifyContent: "flex-start",
             alignItems: "center",
           }}
           content={
@@ -69,11 +69,12 @@ const IntroSection = () => {
                   top: "40%",
                   left: "50%",
                   transform: "translate(-50%, -50%)", // Center the title in viewport
-                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Tring San Francisco on Mac, system fonts elsewhere
+                  fontFamily:
+                    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Tring San Francisco on Mac, system fonts elsewhere
                 }}
               >
-                  {t("homePanel.title")}
-                </Typography>
+                {t("homePanel.title")}
+              </Typography>
 
               {/* Body text */}
               <Box
@@ -92,7 +93,7 @@ const IntroSection = () => {
                     mb: theme.layout.spacing.md, // Spacing before second paragraph
                   })}
                 >
-                {t("homePanel.content")}
+                  {t("homePanel.content")}
                 </Typography>
 
                 <Typography
@@ -101,7 +102,7 @@ const IntroSection = () => {
                     mb: theme.layout.spacing.xs, // Reduced spacing before arrow from normal
                   })}
                 >
-                {t("homePanel.callToAction")}
+                  {t("homePanel.callToAction")}
                 </Typography>
 
                 {/* Arrow */}
@@ -122,8 +123,7 @@ const IntroSection = () => {
               </Box>
             </Box>
           }
-        >
-        </OneColumnPanel>
+        ></OneColumnPanel>
       </Box>
 
       {/* Frontmatter panel(s) */}
@@ -161,14 +161,17 @@ const IntroSection = () => {
             <Typography variant="body1">
               {t("frontmatterPanel.content")}
             </Typography>
-            
+
             <Typography variant="body1">
               <GlossaryLinkedText
                 text="Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these water management strategies under the hydroclimate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change."
                 terms={[
                   { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                   { name: "CalSim", glossaryTerm: "CalSim" },
-                  { name: "water management strategies", glossaryTerm: "Operational strategies" },
+                  {
+                    name: "water management strategies",
+                    glossaryTerm: "Operational strategies",
+                  },
                   { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
                 ]}
                 onActivate={handleGlossaryOpen}
@@ -176,12 +179,15 @@ const IntroSection = () => {
                 underlineColor={theme.palette.text.primary}
               />
             </Typography>
-            
+
             <Typography variant="body1">
               <GlossaryLinkedText
                 text="These scenarios – unique combinations of water management strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between goals. By understanding how different decisions affect water allocations for different communities, we can imagine new ways of improving water management in California."
                 terms={[
-                  { name: "water allocations", glossaryTerm: "Water allocation" },
+                  {
+                    name: "water allocations",
+                    glossaryTerm: "Water allocation",
+                  },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.text.primary}
@@ -213,7 +219,7 @@ const IntroSection = () => {
         <ProgressiveScenarioPanels />
       </CalSimProvider>
 
-{/* Interstitial panel - can be broken out into a component */}
+      {/* Interstitial panel - can be broken out into a component */}
       {/* <OneColumnPanel
         id="interstitial"
         fullHeight={false}

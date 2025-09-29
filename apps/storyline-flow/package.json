@@ -10,6 +10,7 @@
     "lint": "next lint --max-warnings 0"
   },
   "dependencies": {
+    "@mui/system": "^7.3.2",
     "@repo/i18n": "workspace:*",
     "@repo/map": "workspace:*",
     "@repo/motion": "workspace:*",

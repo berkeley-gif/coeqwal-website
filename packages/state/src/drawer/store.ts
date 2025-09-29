@@ -1,9 +1,6 @@
 import { create } from "zustand"
 import { immer } from "zustand/middleware/immer"
-import type {
-  DrawerState,
-  TabKey,
-} from "./types"
+import type { DrawerState, TabKey } from "./types"
 
 export interface DrawerStoreState extends DrawerState {
   // Actions

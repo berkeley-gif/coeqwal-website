@@ -10,8 +10,8 @@ export const strategies = [
     value: "current-ops-wo-tucp",
     label: "Current operational strategy without TUCP's",
     description:
-        "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
-},
+      "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
+  },
 ]
 
 // Strategy definitions for the definition panel with icons
