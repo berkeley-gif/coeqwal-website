@@ -1,8 +1,10 @@
 import { OneColumnPanel, ScrollToButton } from "@repo/ui"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
-import { motion } from "@repo/motion"
-import { ImageWavePattern } from "../components/ImageWavePattern"
+import { FloatingAmbientCircles } from "../components/FloatingAmbientCircles"
+import { FloatingImageMarkers } from "../components/FloatingImageMarkers"
+import { ambientCircles } from "../config/ambientCircles"
+import { floatingMarkers } from "../config/floatingMarkers"
 import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../components/ProgressiveScenarioPanels"
@@ -24,61 +26,65 @@ const IntroSection = () => {
           height: "100vh",
         }}
       >
-        {/* Wave pattern of circle images */}
-        <ImageWavePattern
-          imageCount={{ xs: 6, sm: 11, lg: 16 }}
-          height="33.33vh"
-          zIndex={theme.zIndex.introForegroundImages}
-        />
-
         <OneColumnPanel
           id="home"
           fullHeight={true}
           fullWidth={true}
           backgroundColor="transparent"
           includeHeaderSpacing={true}
-          sx={{ pointerEvents: "auto" }} // Enables interactions for home panel, test to see if necessary
           contentAlignment={{
-            justifyContent: { xs: "center", md: "flex-end", lg: "flex-end" }, // Text block
+            justifyContent: "flex-start", 
             alignItems: "center",
           }}
           content={
             <Box
               sx={{
-                zIndex: (theme) => theme.zIndex.introText,
-                paddingBottom: { xs: 4, md: 6, lg: 8 },
-                paddingLeft: { xs: 9, md: 18, lg: 35, xl: 45 }, // Responsive padding
-                paddingRight: { xs: 9, md: 18, lg: 35, xl: 45 }, // Responsive padding
-                maxWidth: "1500px",
-                textAlign: "center",
+                position: "relative", // Needed for z-index
+                zIndex: theme.zIndex.introBubbles,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+                height: "100%",
               }}
             >
-              {/* Home text content with fade-in animation */}
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 2, // Text fade in after wave pattern
-                  duration: 1.5,
-                  ease: "easeOut",
+              {/* Home text content */}
+              <Typography
+                variant="h1"
+                component="h1"
+                sx={{
+                  fontSize: "6.5rem",
+                  textAlign: "center",
+                  fontWeight: 500,
+                  width: "1200px", // Fixed width for title to break properly
+                  position: "absolute",
+                  top: "40%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)", // Center the title in viewport
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Tring San Francisco on Mac, system fonts elsewhere
                 }}
               >
-                <Typography
-                  variant="h1"
-                  component="h1"
-                  sx={{
-                    fontSize: "4.2rem", // I changed the h1 size to fit the longer headline. We could change the type scale to accomodate new content / new layout
-                    lineHeight: 1.1,
-                    mb: (theme) => theme.layout.spacing.xs,
-                    mt: { xs: "40vh", lg: "0" },
-                  }}
-                >
                   {t("homePanel.title")}
                 </Typography>
 
-                {/* Body text */}
-                <Typography variant="body1">
-                  {t("homePanel.content")}
+              {/* Body text */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, 10vh)", // Position below centered title
+                  maxWidth: "600px", // Optimal width for paragraph reading
+                  textAlign: "left", // Left-align text for better readability
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  sx={(theme) => ({
+                    mb: theme.layout.spacing.xl, // Theme responsive spacing: 24px/32px/40px
+                  })}
+                >
+                {t("homePanel.content")}
                 </Typography>
 
                 {/* Arrow positioned at text block midpoint */}
@@ -86,21 +92,55 @@ const IntroSection = () => {
                   sx={{
                     display: "flex",
                     justifyContent: "center",
-                    mt: (theme) => theme.layout.spacing.sm, // sm: { xs: 1.5, sm: 2, md: 2.5 }, // 12px / 16px / 20px
                   }}
                 >
                   <ScrollToButton
                     scrollToId="frontmatter"
-                    color={(theme) => theme.palette.blue.darkest}
+                    color={(theme) => theme.palette.text.primary}
                   />
                 </Box>
-              </motion.div>
+              </Box>
             </Box>
           }
-        />
-      </Box>
+        >
+          {/* Ambient background circles, positioned to cover full viewport */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: { xs: 0, md: "26%" },
+              zIndex: theme.zIndex.introBackgroundImages,
+              pointerEvents: "none",
+            }}
+          >
+            <FloatingAmbientCircles circles={ambientCircles} zIndex={1} />
+          </Box>
 
-      {/* Note: Original clustered image circles saved in ClusteredImageCircles.tsx for reuse if wanted */}
+          {/* Floating image markers, positioned to cover full viewport */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: { xs: 0, md: "26%" },
+              zIndex: theme.zIndex.introForegroundImages,
+              pointerEvents: "none",
+              transform: { xs: "scale(0.8)", md: "scale(1.20)", lg: "scale(1)" },
+              transformOrigin: "top right",
+              willChange: "transform",
+            }}
+          >
+            <FloatingImageMarkers
+              markers={floatingMarkers}
+              showHalos={true}
+              zIndex={1}
+            />
+          </Box>
+        </OneColumnPanel>
+      </Box>
 
       {/* Frontmatter panel(s) */}
       <OneColumnPanel
@@ -114,7 +154,7 @@ const IntroSection = () => {
           alignItems: "center",
         }}
         sx={{
-          pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary?
+          pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary? bc map?
           backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "40% auto",
           backgroundPosition: "bottom right",

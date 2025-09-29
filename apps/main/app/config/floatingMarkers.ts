@@ -64,4 +64,34 @@ export const floatingMarkers: ImageMarker[] = [
     left: "60%",
     zIndex: 1, // Higher z-index to appear on top
   },
+
+  // Additional left side bubbles to extend pattern
+  {
+    id: "image-left-1",
+    imageSrc: "/images/circular-crops/1.png",
+    imageSize: 12,
+    top: "18%",
+    left: "10%",
+  },
+  {
+    id: "image-left-2",
+    imageSrc: "/images/circular-crops/2.png",
+    imageSize: 10,
+    top: "45%",
+    left: "15%",
+  },
+  {
+    id: "image-left-3",
+    imageSrc: "/images/circular-crops/5.png",
+    imageSize: 14,
+    top: "65%",
+    left: "8%",
+  },
+  {
+    id: "image-left-4",
+    imageSrc: "/images/circular-crops/6.png",
+    imageSize: 11,
+    top: "35%",
+    left: "25%",
+  },
 ]

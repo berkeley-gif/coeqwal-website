@@ -749,7 +749,7 @@ const theme = createTheme({
       fontSize: typeScale.h1,
       fontWeight: 500,
       lineHeight: 1.0, // Tighter for large hero text
-      textTransform: "uppercase",
+      // textTransform: "uppercase",
     },
     h2: {
       fontFamily: themeValues.fontFamily.neueHaasDisplay,
