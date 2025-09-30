@@ -3,6 +3,7 @@
 import { Box, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
+import GroundwaterContainer from "./vis/Groundwater"
 
 function SectionSupply() {
   return (
@@ -134,16 +135,20 @@ function Groundwater() {
       >
         <Box
           width="100%"
-          height="100%"
+          height="70%"
           sx={{
             position: "relative",
             justifyContent: "center",
-            backgroundImage: "url('/drafts/supply-groundwater.png')",
+            // backgroundImage: "url('/drafts/supply-groundwater.png')",
             backgroundSize: "100% auto",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
           }}
-        ></Box>
+        >
+          <Box width="100%" height="60%" >
+            <GroundwaterContainer/>
+          </Box>
+        </Box>
       </Box>
     </Box>
   )

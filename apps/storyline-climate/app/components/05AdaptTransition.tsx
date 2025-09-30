@@ -4,6 +4,8 @@ import { motion } from "@repo/motion"
 import { Box, Typography } from "@repo/ui/mui"
 import { useEffect, useRef, useState } from "react"
 import * as d3 from "d3"
+import "../rain.css"
+import { FreshWaterColor } from "./helpers/colorPalette"
 
 function SectionTransition() {
   return (
@@ -15,6 +17,8 @@ function SectionTransition() {
 }
 
 function Balance() {
+  const drops = Array.from({ length: 100 })
+
   return (
     <Box
       id="balance"
@@ -29,8 +33,40 @@ function Balance() {
         backgroundSize: "100vw auto",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
+        overflow: "hidden", 
+        zIndex: 1,
+        "--rain-color": FreshWaterColor,
       }}
     >
+      <Box className="rain"
+          sx={{
+            width: "100%",
+            height: "90%",
+          zIndex: -1,
+        }}>
+        {drops.map((_, i) => {
+          const delay = Math.random() * 5
+          const dur = 2 + Math.random() * 2
+          return (
+            <Box
+              key={i}
+              className="drop"
+              sx={{ left: `${Math.random() * 100}%` }}
+              style={{animationDuration: `${dur}s`, animationDelay: `${delay}s`,}}
+            >
+              <Box
+                className="stem"
+                style={{animationDuration: `${dur}s`,animationDelay: `${delay}s`,}}
+              />
+              <Box
+                className="splat"
+                style={{animationDuration: `${dur}s`,animationDelay: `${delay}s`,}}
+              />
+            </Box>
+          )
+        })}
+      </Box>
+
       <Box
         width="100%"
         height="100%"
@@ -39,6 +75,7 @@ function Balance() {
           flexDirection: "column",
           justifyContent: "flex-start",
           alignItems: "center",
+          zIndex: 1,
         }}
       >
         <motion.div
