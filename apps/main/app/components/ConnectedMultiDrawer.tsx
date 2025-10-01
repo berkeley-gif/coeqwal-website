@@ -5,7 +5,6 @@ import { useDrawerStore } from "@repo/state"
 import { useTheme } from "@repo/ui/mui"
 import type { TabKey } from "@repo/ui"
 import { useHomePanelIntersection } from "../hooks/useHomePanelIntersection"
-import { glossaryTerms } from "../lib/glossary"
 
 interface ConnectedMultiDrawerProps {
   drawerWidth?: number
@@ -47,10 +46,7 @@ export function ConnectedMultiDrawer({
       overlay={overlay}
       showRailButtons={showRailButtons && hasReachedFrontmatter}
       activeTab={activeTab}
-      drawerContent={{
-        ...content,
-        glossaryTerms, // Pass the glossary data
-      }}
+      drawerContent={content}
       onDrawerStateChange={handleDrawerStateChange}
       headerOffset={theme.layout.headerHeight}
     />

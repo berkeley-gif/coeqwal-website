@@ -13,7 +13,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import { motion, AnimatePresence } from "@repo/motion"
 
 // Content components
-import { CurrentOpsContent } from "./drawer-content/CurrentOpsContent"
+import { GlossaryContent } from "./drawer-content/GlossaryContent"
 
 // Types
 export type TabKey = "glossary"
@@ -374,15 +374,15 @@ export function MultiDrawer({
                     overflow: "auto",
                   }}
                 >
-                  <CurrentOpsContent
-                    onClose={close}
-                    selectedSection={
-                      drawerContent.selectedSection as string | undefined
-                    }
-                    selectedTerm={
-                      drawerContent.selectedTerm as string | undefined
-                    }
-                  />
+                   <GlossaryContent
+                     onClose={close}
+                     selectedSection={
+                       drawerContent.selectedSection as string | undefined
+                     }
+                     selectedTerm={
+                       drawerContent.selectedTerm as string | undefined
+                     }
+                   />
                 </Box>
               </>
             )}

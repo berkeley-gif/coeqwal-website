@@ -186,7 +186,7 @@ const IntroSection = () => {
                 terms={[
                   {
                     name: "water allocations",
-                    glossaryTerm: "Water allocation",
+                    glossaryTerm: "Water allocations",
                   },
                 ]}
                 onActivate={handleGlossaryOpen}
