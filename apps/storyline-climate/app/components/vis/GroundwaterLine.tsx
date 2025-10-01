@@ -47,20 +47,23 @@ export default function GroundwaterLine({ data, yExtents }: Props) {
   const xScale = useMemo(() => {
     const minDate = d3.min(data, (d) => d.date!) ?? new Date()
     const maxDate = d3.max(data, (d) => d.date!) ?? new Date()
-    return d3.scaleTime()
+    return d3
+      .scaleTime()
       .domain([minDate, maxDate])
       .range([margin.left, Math.max(margin.left, size.width - margin.right)])
   }, [data, size.width])
 
   const yScale = useMemo(() => {
-  return d3.scaleLinear()
-    .domain(yExtents)
-    .range([margin.top, Math.max(margin.top, size.height - margin.bottom)]) // reversed
-    .nice()
-}, [yExtents, size.height])
+    return d3
+      .scaleLinear()
+      .domain(yExtents)
+      .range([margin.top, Math.max(margin.top, size.height - margin.bottom)]) // reversed
+      .nice()
+  }, [yExtents, size.height])
 
   const linePath = useMemo(() => {
-    const line = d3.line<GroundwaterRow>()
+    const line = d3
+      .line<GroundwaterRow>()
       .x((d) => xScale(d.date!))
       .y((d) => yScale(d.gse_gwe))
       .curve(d3.curveLinear)
@@ -68,7 +71,8 @@ export default function GroundwaterLine({ data, yExtents }: Props) {
   }, [data, xScale, yScale])
 
   const areaPath = useMemo(() => {
-    const area = d3.area<GroundwaterRow>()
+    const area = d3
+      .area<GroundwaterRow>()
       .x((d) => xScale(d.date!))
       .y0(yScale(yExtents[1])) // fill down to bottom of chart
       .y1((d) => yScale(d.gse_gwe))
@@ -87,11 +91,14 @@ export default function GroundwaterLine({ data, yExtents }: Props) {
       {/* clip to plotting area so bands/area/line don't spill out */}
       <defs>
         <clipPath id="plot-clip">
-          <rect x={margin.left} y={margin.top} width={plotWidth} height={plotHeight} />
+          <rect
+            x={margin.left}
+            y={margin.top}
+            width={plotWidth}
+            height={plotHeight}
+          />
         </clipPath>
       </defs>
-
-      
 
       {/* Axes */}
       <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} />
@@ -142,9 +149,9 @@ function XAxis({
   const yLabels = Math.max(margin.top, size.height - margin.bottom)
 
   // --- icon setup ---
-  const iconSize = 48        
-  const iconPadLeft = 8      
-  const iconPadAbove = 0     
+  const iconSize = 48
+  const iconPadLeft = 8
+  const iconPadAbove = 0
   const iconX = margin.left - iconSize - iconPadLeft
   const iconY = yLine - iconSize - iconPadAbove
 
@@ -160,7 +167,7 @@ function XAxis({
       {/* well icon: above & attached to the x-axis, left of y tick labels */}
       <image
         href="/icons/well_icon.svg"
-        x={iconX+50}
+        x={iconX + 50}
         y={iconY}
         width={iconSize}
         height={iconSize}

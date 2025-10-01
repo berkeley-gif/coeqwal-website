@@ -13,7 +13,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import { motion, AnimatePresence } from "@repo/motion"
 
 // Content components
-import { CurrentOpsContent } from "../index"
+import { CurrentOpsContent } from "./drawer-content/CurrentOpsContent"
 
 // Types
 export type TabKey = "glossary"
@@ -25,6 +25,7 @@ interface RailButtonProps {
   active?: boolean
   bgColor: string
   hoverColor: string
+  icon?: React.ReactNode
 }
 
 /**
@@ -36,6 +37,7 @@ function RailButton({
   active,
   bgColor,
   hoverColor,
+  icon,
 }: RailButtonProps) {
   const theme = useTheme()
 
@@ -48,17 +50,19 @@ function RailButton({
         alignItems: "center",
         bgcolor: active ? "#60aacb" : bgColor,
         color: "#FFFFFF",
-        borderRadius: "8px 0 0 8px",
-        p: "12px 2px",
-        width: 60,
-        height: 220,
+        borderRadius: "8px 0 0 8px", // Rounded corners on the left side only (tabs are on right, so round toward center)
+        boxShadow: "none",
+        padding: "12px 2px", // Reduced horizontal padding
+        my: 0,
+        width: "60px", // Wider to accommodate longer text
+        height: "220px", // Increased height for more text space
         cursor: "pointer",
         position: "relative",
         borderRight: active
           ? `4px solid ${theme.palette.primary.dark}`
           : "none",
-        transition: "background-color 0.2s ease",
         border: "none",
+        transition: "all 0.2s ease",
         "&:hover": {
           bgcolor: active ? "#60aacb" : hoverColor,
         },
@@ -90,6 +94,48 @@ function RailButton({
         >
           {label}
         </Typography>
+        {icon && (
+          <Box
+            component="button"
+            onClick={(e) => {
+              e.stopPropagation() // Prevent triggering the rail button
+              console.log("Save to story clicked")
+            }}
+            sx={{
+              width: "30px",
+              height: "30px",
+              borderRadius: "50%",
+              backgroundColor: "white",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ml: 0.5,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              "&:hover": {
+                transform: "scale(1.1)",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+              },
+              "&:active": {
+                transform: "scale(0.95)",
+              },
+            }}
+          >
+            <Box
+              sx={{
+                fontSize: "1.5rem",
+                color: active ? "#449cd9" : "#666",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {icon}
+            </Box>
+          </Box>
+        )}
       </Box>
     </Box>
   )
@@ -227,8 +273,11 @@ export function MultiDrawer({
               zIndex: theme.zIndex.drawerBackdrop,
               display: "flex",
               flexDirection: "column",
-              gap: 8,
-              transition: "right 0.3s ease",
+              gap: theme.spacing(1),
+              transition: theme.transitions.create("right", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
             }}
           >
             <RailButton
@@ -257,7 +306,11 @@ export function MultiDrawer({
               drawerWidth ??
               theme.layout.drawer.width ??
               theme.layout.drawer.glossaryWidth,
-            overflow: "hidden",
+            transition: theme.transitions.create("width", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            overflow: "hidden", // Prevent scrollbar flicker during transitions
             zIndex: overlay ? theme.zIndex.overlay : theme.zIndex.drawer,
             // Don't push content in overlay mode
             position: overlay ? "fixed" : "relative",

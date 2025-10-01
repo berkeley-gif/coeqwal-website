@@ -45,19 +45,19 @@ export interface BaseHeaderProps {
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
-  
+
   // Action handlers
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
-  
+
   // Styling props (theme-agnostic)
   backgroundColor?: string
   textColor?: string
   zIndex?: number
   borderRadius?: string | number
   boxShadow?: string
-  
+
   // Layout props
   hideOnScroll?: boolean
   showLanguageSwitcher?: boolean
@@ -116,7 +116,7 @@ export function BaseHeader({
   // Responsive breakpoints (using standard MUI breakpoints)
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
-  
+
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
     lineHeight: 1.1,
@@ -127,7 +127,7 @@ export function BaseHeader({
     fontWeight: 500,
     color: textColor,
   }
-  
+
   const { locale, isLoading } = useTranslation()
 
   // Scroll-based hide/show functionality
@@ -137,7 +137,7 @@ export function BaseHeader({
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     if (!hideOnScroll) return
-    
+
     const difference = latest - lastYRef.current
     if (Math.abs(difference) > 10) {
       setIsHidden(difference > 0)
@@ -283,7 +283,7 @@ export function BaseHeader({
               sx={buttonStyle}
             />
           )}
-          
+
           {/* Data button */}
           {onDataClick && (
             <Button
@@ -321,7 +321,7 @@ export function BaseHeader({
               {componentText.buttons.getData}
             </Button>
           )}
-          
+
           {/* About button */}
           <Button
             variant={buttonVariant}
@@ -357,7 +357,7 @@ export function BaseHeader({
           >
             {componentText.buttons.about}
           </Button>
-          
+
           {/* Language switcher */}
           {showLanguageSwitcher && <LanguageSwitcher />}
         </Stack>

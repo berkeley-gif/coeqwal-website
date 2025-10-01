@@ -736,8 +736,8 @@ export default function ScenarioExplorer3() {
             },
           ]
         : []),
-    // TODO: type this
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any 
+      // TODO: type this
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any,
     [selectedOutcomes, showMapView, theme],
   )

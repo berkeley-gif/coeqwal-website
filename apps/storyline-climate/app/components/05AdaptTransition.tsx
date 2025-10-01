@@ -33,17 +33,19 @@ function Balance() {
         backgroundSize: "100vw auto",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        overflow: "hidden", 
+        overflow: "hidden",
         zIndex: 1,
         "--rain-color": FreshWaterColor,
       }}
     >
-      <Box className="rain"
-          sx={{
-            width: "100%",
-            height: "90%",
+      <Box
+        className="rain"
+        sx={{
+          width: "100%",
+          height: "90%",
           zIndex: -1,
-        }}>
+        }}
+      >
         {drops.map((_, i) => {
           const delay = Math.random() * 5
           const dur = 2 + Math.random() * 2
@@ -52,15 +54,24 @@ function Balance() {
               key={i}
               className="drop"
               sx={{ left: `${Math.random() * 100}%` }}
-              style={{animationDuration: `${dur}s`, animationDelay: `${delay}s`,}}
+              style={{
+                animationDuration: `${dur}s`,
+                animationDelay: `${delay}s`,
+              }}
             >
               <Box
                 className="stem"
-                style={{animationDuration: `${dur}s`,animationDelay: `${delay}s`,}}
+                style={{
+                  animationDuration: `${dur}s`,
+                  animationDelay: `${delay}s`,
+                }}
               />
               <Box
                 className="splat"
-                style={{animationDuration: `${dur}s`,animationDelay: `${delay}s`,}}
+                style={{
+                  animationDuration: `${dur}s`,
+                  animationDelay: `${delay}s`,
+                }}
               />
             </Box>
           )
