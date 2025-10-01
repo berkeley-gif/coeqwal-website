@@ -29,7 +29,7 @@ function Temperature() {
       sx={{ paddingLeft: "5rem", paddingRight: "5rem" }}
     >
       <Box width="100%" height="60%" sx={{ display: "flex" }}>
-        <TemperatureLineChart/>
+        <TemperatureLineChart />
       </Box>
       <Box
         width="100%"
@@ -195,7 +195,7 @@ function Snowmelt() {
           </Box>
         </motion.div>
       </Box>
-      
+
       <Box
         width="50%"
         height="100%"
@@ -204,7 +204,6 @@ function Snowmelt() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "0 20px",
-          
         }}
       >
         <Box
@@ -214,8 +213,8 @@ function Snowmelt() {
             position: "relative",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",   // centers vertical
-            alignItems: "flex-start",   // aligned left
+            justifyContent: "center", // centers vertical
+            alignItems: "flex-start", // aligned left
             backgroundSize: "100% auto",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -226,15 +225,15 @@ function Snowmelt() {
             src="/icons/snowflake_icon.svg"
             alt="Snowflake icon"
             sx={{
-            display: "block",
-            mb: 2,  // spacing between icon and chart
-            ml: 2, // move right
-            width: 48,
-            height: 48,
-            filter: "invert(1) brightness(100%)",
-          }}
+              display: "block",
+              mb: 2, // spacing between icon and chart
+              ml: 2, // move right
+              width: 48,
+              height: 48,
+              filter: "invert(1) brightness(100%)",
+            }}
           />
-          <Box width="100%" height="50%" >
+          <Box width="100%" height="50%">
             <SnowpackContainer />
           </Box>
         </Box>

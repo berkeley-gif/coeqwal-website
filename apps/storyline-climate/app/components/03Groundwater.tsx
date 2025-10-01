@@ -145,8 +145,8 @@ function Groundwater() {
             backgroundRepeat: "no-repeat",
           }}
         >
-          <Box width="100%" height="60%" >
-            <GroundwaterContainer/>
+          <Box width="100%" height="60%">
+            <GroundwaterContainer />
           </Box>
         </Box>
       </Box>

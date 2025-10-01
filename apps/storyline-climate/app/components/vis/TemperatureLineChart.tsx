@@ -40,7 +40,14 @@ function XAxis({
           return (
             <g key={i}>
               {/* tick mark */}
-              <line x1={x} x2={x} y1={y} y2={y + 6} stroke={axisColor} strokeWidth={1} />
+              <line
+                x1={x}
+                x2={x}
+                y1={y}
+                y2={y + 6}
+                stroke={axisColor}
+                strokeWidth={1}
+              />
               {/* tick label */}
               <text
                 x={x}
@@ -51,7 +58,6 @@ function XAxis({
                 {d3.format("d")(t)}
               </text>
             </g>
-            
           )
         })}
       </g>
@@ -59,7 +65,7 @@ function XAxis({
       <text
         x={(margin.left + size.width - margin.right) / 2}
         y={y}
-        dy="2em"   
+        dy="2em"
         style={{ textAnchor: "middle", fill: "white" }}
       >
         Year
@@ -72,7 +78,7 @@ function YAxis({
   yScale,
   margin,
   ticks,
-  labelOffset = -60,   // extra spacing for label
+  labelOffset = -60, // extra spacing for label
 }: {
   yScale: d3.ScaleLinear<number, number>
   margin: Margin
@@ -85,14 +91,7 @@ function YAxis({
   return (
     <g className="y-axis" transform={`translate(${margin.left},0)`}>
       {/* main y-axis line */}
-      <line
-        x1={0}
-        x2={0}
-        y1={r0}
-        y2={r1}
-        stroke={axisColor}
-        strokeWidth={1}
-      />
+      <line x1={0} x2={0} y1={r0} y2={r1} stroke={axisColor} strokeWidth={1} />
 
       {/* ticks */}
       {ticks.map((t, i) => (
@@ -139,7 +138,8 @@ export default function TemperatureLineChart() {
     if (!wrapRef.current) return
     const ro = new ResizeObserver((entries) => {
       for (const e of entries) {
-        if (e.contentRect?.width) setWrapWidth(Math.max(320, e.contentRect.width))
+        if (e.contentRect?.width)
+          setWrapWidth(Math.max(320, e.contentRect.width))
       }
     })
     ro.observe(wrapRef.current)
@@ -148,7 +148,9 @@ export default function TemperatureLineChart() {
 
   useEffect(() => {
     ;(async () => {
-      const txt = await (await fetch("/data/CA_historical_state_temperature.csv")).text()
+      const txt = await (
+        await fetch("/data/CA_historical_state_temperature.csv")
+      ).text()
       const cleaned = txt
         .split(/\r?\n/)
         .filter((line) => line.trim() && !line.startsWith("#"))
@@ -159,7 +161,9 @@ export default function TemperatureLineChart() {
         .map((r) => {
           const year = Math.floor(Number(r.Date) / 100) // e.g., 189512 -> 1895
           const value = Number(r.Value)
-          return Number.isFinite(year) && Number.isFinite(value) ? { year, value } : null
+          return Number.isFinite(year) && Number.isFinite(value)
+            ? { year, value }
+            : null
         })
         .filter((d): d is Point => !!d)
         .sort((a, b) => a.year - b.year)
@@ -193,18 +197,18 @@ export default function TemperatureLineChart() {
 
   // ticks (as arrays) for your axis components
   const xTicks = useMemo(() => {
-  if (!xScale) return []
-  const [d0, d1] = xScale.domain() as [number, number]
-  const count = Math.min(10, Math.max(3, Math.floor(innerW / 60)))
-  return d3.ticks(d0, d1, count)
-}, [xScale, innerW])
+    if (!xScale) return []
+    const [d0, d1] = xScale.domain() as [number, number]
+    const count = Math.min(10, Math.max(3, Math.floor(innerW / 60)))
+    return d3.ticks(d0, d1, count)
+  }, [xScale, innerW])
 
   const yTicks = useMemo(() => {
-  if (!yScale) return []
-  const [y0, y1] = yScale.domain() as [number, number]  // force tuple
-  const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
-  return d3.ticks(y0, y1, count)
-}, [yScale, innerH])
+    if (!yScale) return []
+    const [y0, y1] = yScale.domain() as [number, number] // force tuple
+    const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
+    return d3.ticks(y0, y1, count)
+  }, [yScale, innerH])
 
   // line path
   const linePath = useMemo(() => {
@@ -224,7 +228,7 @@ export default function TemperatureLineChart() {
         {/* axes */}
         {xScale && yScale && (
           <>
-            <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks}/>
+            <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} />
             <YAxis yScale={yScale} margin={margin} ticks={yTicks} />
           </>
         )}
@@ -236,32 +240,32 @@ export default function TemperatureLineChart() {
 
         {/* dashed reference line at 57.8°F */}
         {yScale && (
-  <>
-    <line
-      x1={margin.left}
-      x2={size.width - margin.right}
-      y1={yScale(57.8)}
-      y2={yScale(57.8)}
-      stroke="white"
-      strokeWidth={2}
-      strokeDasharray="6,6"
-      opacity={0.6}
-    />
-    <text
-      x={margin.left + 190}
-      y={yScale(57.8)}
-      dy={-8} // 8px above the dashed line
-      textAnchor="end"
-      style={{
-        fill: "white",
-        fontSize: 14,
-        strokeWidth: 2,
-      }}
-    >
-      Average temperature: 57.8 °F
-    </text>
-  </>
-)}
+          <>
+            <line
+              x1={margin.left}
+              x2={size.width - margin.right}
+              y1={yScale(57.8)}
+              y2={yScale(57.8)}
+              stroke="white"
+              strokeWidth={2}
+              strokeDasharray="6,6"
+              opacity={0.6}
+            />
+            <text
+              x={margin.left + 190}
+              y={yScale(57.8)}
+              dy={-8} // 8px above the dashed line
+              textAnchor="end"
+              style={{
+                fill: "white",
+                fontSize: 14,
+                strokeWidth: 2,
+              }}
+            >
+              Average temperature: 57.8 °F
+            </text>
+          </>
+        )}
       </svg>
     </div>
   )

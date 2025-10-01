@@ -1,602 +1,602 @@
 [
-    {
-        "year":1950,
-        "CanESM2 (Average)":0.2408622354
-    },
-    {
-        "year":1951,
-        "CanESM2 (Average)":20.146440506
-    },
-    {
-        "year":1952,
-        "CanESM2 (Average)":9.200750351
-    },
-    {
-        "year":1953,
-        "CanESM2 (Average)":10.7796325684
-    },
-    {
-        "year":1954,
-        "CanESM2 (Average)":19.4811668396
-    },
-    {
-        "year":1955,
-        "CanESM2 (Average)":10.7095088959
-    },
-    {
-        "year":1956,
-        "CanESM2 (Average)":10.4096403122
-    },
-    {
-        "year":1957,
-        "CanESM2 (Average)":8.9055728912
-    },
-    {
-        "year":1958,
-        "CanESM2 (Average)":22.4095840454
-    },
-    {
-        "year":1959,
-        "CanESM2 (Average)":4.9422974586
-    },
-    {
-        "year":1960,
-        "CanESM2 (Average)":16.5054206848
-    },
-    {
-        "year":1961,
-        "CanESM2 (Average)":7.8230605125
-    },
-    {
-        "year":1962,
-        "CanESM2 (Average)":8.0263185501
-    },
-    {
-        "year":1963,
-        "CanESM2 (Average)":3.9681091309
-    },
-    {
-        "year":1964,
-        "CanESM2 (Average)":5.4333372116
-    },
-    {
-        "year":1965,
-        "CanESM2 (Average)":13.3794088364
-    },
-    {
-        "year":1966,
-        "CanESM2 (Average)":5.3823962212
-    },
-    {
-        "year":1967,
-        "CanESM2 (Average)":3.9940407276
-    },
-    {
-        "year":1968,
-        "CanESM2 (Average)":5.787191391
-    },
-    {
-        "year":1969,
-        "CanESM2 (Average)":11.0033950806
-    },
-    {
-        "year":1970,
-        "CanESM2 (Average)":10.6629524231
-    },
-    {
-        "year":1971,
-        "CanESM2 (Average)":5.1482377052
-    },
-    {
-        "year":1972,
-        "CanESM2 (Average)":5.5865650177
-    },
-    {
-        "year":1973,
-        "CanESM2 (Average)":6.4225749969
-    },
-    {
-        "year":1974,
-        "CanESM2 (Average)":17.4276695251
-    },
-    {
-        "year":1975,
-        "CanESM2 (Average)":10.1512384415
-    },
-    {
-        "year":1976,
-        "CanESM2 (Average)":6.4640207291
-    },
-    {
-        "year":1977,
-        "CanESM2 (Average)":8.2765274048
-    },
-    {
-        "year":1978,
-        "CanESM2 (Average)":3.142626524
-    },
-    {
-        "year":1979,
-        "CanESM2 (Average)":2.3777821064
-    },
-    {
-        "year":1980,
-        "CanESM2 (Average)":0.5677590966
-    },
-    {
-        "year":1981,
-        "CanESM2 (Average)":16.0499229431
-    },
-    {
-        "year":1982,
-        "CanESM2 (Average)":15.2214603424
-    },
-    {
-        "year":1983,
-        "CanESM2 (Average)":9.8479413986
-    },
-    {
-        "year":1984,
-        "CanESM2 (Average)":2.8178658485
-    },
-    {
-        "year":1985,
-        "CanESM2 (Average)":11.849199295
-    },
-    {
-        "year":1986,
-        "CanESM2 (Average)":8.0662441254
-    },
-    {
-        "year":1987,
-        "CanESM2 (Average)":6.9201726913
-    },
-    {
-        "year":1988,
-        "CanESM2 (Average)":3.3700256348
-    },
-    {
-        "year":1989,
-        "CanESM2 (Average)":9.7115793228
-    },
-    {
-        "year":1990,
-        "CanESM2 (Average)":8.444849968
-    },
-    {
-        "year":1991,
-        "CanESM2 (Average)":4.5317974091
-    },
-    {
-        "year":1992,
-        "CanESM2 (Average)":5.888258934
-    },
-    {
-        "year":1993,
-        "CanESM2 (Average)":1.2471162081
-    },
-    {
-        "year":1994,
-        "CanESM2 (Average)":27.0324668884
-    },
-    {
-        "year":1995,
-        "CanESM2 (Average)":8.190580368
-    },
-    {
-        "year":1996,
-        "CanESM2 (Average)":4.3601222038
-    },
-    {
-        "year":1997,
-        "CanESM2 (Average)":5.2235760689
-    },
-    {
-        "year":1998,
-        "CanESM2 (Average)":3.9688725471
-    },
-    {
-        "year":1999,
-        "CanESM2 (Average)":5.3051695824
-    },
-    {
-        "year":2000,
-        "CanESM2 (Average)":10.6109752655
-    },
-    {
-        "year":2001,
-        "CanESM2 (Average)":4.837893486
-    },
-    {
-        "year":2002,
-        "CanESM2 (Average)":0.5730718374
-    },
-    {
-        "year":2003,
-        "CanESM2 (Average)":2.7017753124
-    },
-    {
-        "year":2004,
-        "CanESM2 (Average)":7.4593095779
-    },
-    {
-        "year":2005,
-        "CanESM2 (Average)":7.3321657181
-    },
-    {
-        "year":2006,
-        "CanESM2 (Average)":4.6167941093
-    },
-    {
-        "year":2007,
-        "CanESM2 (Average)":1.1663030386
-    },
-    {
-        "year":2008,
-        "CanESM2 (Average)":7.1225852966
-    },
-    {
-        "year":2009,
-        "CanESM2 (Average)":7.8347587585
-    },
-    {
-        "year":2010,
-        "CanESM2 (Average)":6.6483502388
-    },
-    {
-        "year":2011,
-        "CanESM2 (Average)":0.4803698659
-    },
-    {
-        "year":2012,
-        "CanESM2 (Average)":6.3855009079
-    },
-    {
-        "year":2013,
-        "CanESM2 (Average)":7.5625119209
-    },
-    {
-        "year":2014,
-        "CanESM2 (Average)":11.9764451981
-    },
-    {
-        "year":2015,
-        "CanESM2 (Average)":8.3566064835
-    },
-    {
-        "year":2016,
-        "CanESM2 (Average)":10.0501070023
-    },
-    {
-        "year":2017,
-        "CanESM2 (Average)":9.1458034515
-    },
-    {
-        "year":2018,
-        "CanESM2 (Average)":4.4244809151
-    },
-    {
-        "year":2019,
-        "CanESM2 (Average)":2.2954108715
-    },
-    {
-        "year":2020,
-        "CanESM2 (Average)":0.919136405
-    },
-    {
-        "year":2021,
-        "CanESM2 (Average)":3.0808084011
-    },
-    {
-        "year":2022,
-        "CanESM2 (Average)":6.1244411469
-    },
-    {
-        "year":2023,
-        "CanESM2 (Average)":3.9164254665
-    },
-    {
-        "year":2024,
-        "CanESM2 (Average)":0.726144731
-    },
-    {
-        "year":2025,
-        "CanESM2 (Average)":5.8784618378
-    },
-    {
-        "year":2026,
-        "CanESM2 (Average)":3.521239996
-    },
-    {
-        "year":2027,
-        "CanESM2 (Average)":7.7758674622
-    },
-    {
-        "year":2028,
-        "CanESM2 (Average)":4.852678299
-    },
-    {
-        "year":2029,
-        "CanESM2 (Average)":0.5307510495
-    },
-    {
-        "year":2030,
-        "CanESM2 (Average)":2.2302713394
-    },
-    {
-        "year":2031,
-        "CanESM2 (Average)":2.0185263157
-    },
-    {
-        "year":2032,
-        "CanESM2 (Average)":10.7296733856
-    },
-    {
-        "year":2033,
-        "CanESM2 (Average)":4.359181881
-    },
-    {
-        "year":2034,
-        "CanESM2 (Average)":0.3160727322
-    },
-    {
-        "year":2035,
-        "CanESM2 (Average)":1.7215054035
-    },
-    {
-        "year":2036,
-        "CanESM2 (Average)":1.1077973843
-    },
-    {
-        "year":2037,
-        "CanESM2 (Average)":1.079529047
-    },
-    {
-        "year":2038,
-        "CanESM2 (Average)":7.0409402847
-    },
-    {
-        "year":2039,
-        "CanESM2 (Average)":5.2537074089
-    },
-    {
-        "year":2040,
-        "CanESM2 (Average)":2.3232638836
-    },
-    {
-        "year":2041,
-        "CanESM2 (Average)":1.0998177528
-    },
-    {
-        "year":2042,
-        "CanESM2 (Average)":2.2055633068
-    },
-    {
-        "year":2043,
-        "CanESM2 (Average)":0.0795823932
-    },
-    {
-        "year":2044,
-        "CanESM2 (Average)":1.7245287895
-    },
-    {
-        "year":2045,
-        "CanESM2 (Average)":2.9690630436
-    },
-    {
-        "year":2046,
-        "CanESM2 (Average)":1.0206100941
-    },
-    {
-        "year":2047,
-        "CanESM2 (Average)":0.2487282008
-    },
-    {
-        "year":2048,
-        "CanESM2 (Average)":4.161886692
-    },
-    {
-        "year":2049,
-        "CanESM2 (Average)":3.005838871
-    },
-    {
-        "year":2050,
-        "CanESM2 (Average)":1.6942310333
-    },
-    {
-        "year":2051,
-        "CanESM2 (Average)":0.4020127058
-    },
-    {
-        "year":2052,
-        "CanESM2 (Average)":1.941670537
-    },
-    {
-        "year":2053,
-        "CanESM2 (Average)":5.0652461052
-    },
-    {
-        "year":2054,
-        "CanESM2 (Average)":0.8382412195
-    },
-    {
-        "year":2055,
-        "CanESM2 (Average)":5.9189758301
-    },
-    {
-        "year":2056,
-        "CanESM2 (Average)":0.7704538703
-    },
-    {
-        "year":2057,
-        "CanESM2 (Average)":0.1496930718
-    },
-    {
-        "year":2058,
-        "CanESM2 (Average)":6.1685643196
-    },
-    {
-        "year":2059,
-        "CanESM2 (Average)":1.1697402
-    },
-    {
-        "year":2060,
-        "CanESM2 (Average)":1.4148299694
-    },
-    {
-        "year":2061,
-        "CanESM2 (Average)":0.3312428594
-    },
-    {
-        "year":2062,
-        "CanESM2 (Average)":2.8470132351
-    },
-    {
-        "year":2063,
-        "CanESM2 (Average)":3.8575398922
-    },
-    {
-        "year":2064,
-        "CanESM2 (Average)":4.2619948387
-    },
-    {
-        "year":2065,
-        "CanESM2 (Average)":0.4300524294
-    },
-    {
-        "year":2066,
-        "CanESM2 (Average)":0.0714684427
-    },
-    {
-        "year":2067,
-        "CanESM2 (Average)":0.0703735575
-    },
-    {
-        "year":2068,
-        "CanESM2 (Average)":7.8219356537
-    },
-    {
-        "year":2069,
-        "CanESM2 (Average)":0.6709100604
-    },
-    {
-        "year":2070,
-        "CanESM2 (Average)":0.0793964639
-    },
-    {
-        "year":2071,
-        "CanESM2 (Average)":1.6252689362
-    },
-    {
-        "year":2072,
-        "CanESM2 (Average)":1.3178122044
-    },
-    {
-        "year":2073,
-        "CanESM2 (Average)":0.937088728
-    },
-    {
-        "year":2074,
-        "CanESM2 (Average)":4.712141037
-    },
-    {
-        "year":2075,
-        "CanESM2 (Average)":0.4407745004
-    },
-    {
-        "year":2076,
-        "CanESM2 (Average)":0.0721863732
-    },
-    {
-        "year":2077,
-        "CanESM2 (Average)":0.4855717719
-    },
-    {
-        "year":2078,
-        "CanESM2 (Average)":0.1374062449
-    },
-    {
-        "year":2079,
-        "CanESM2 (Average)":3.0633673668
-    },
-    {
-        "year":2080,
-        "CanESM2 (Average)":0.21920757
-    },
-    {
-        "year":2081,
-        "CanESM2 (Average)":0.0000961402
-    },
-    {
-        "year":2082,
-        "CanESM2 (Average)":1.1150597334
-    },
-    {
-        "year":2083,
-        "CanESM2 (Average)":0.5122736096
-    },
-    {
-        "year":2084,
-        "CanESM2 (Average)":0.7950132489
-    },
-    {
-        "year":2085,
-        "CanESM2 (Average)":1.0040533543
-    },
-    {
-        "year":2086,
-        "CanESM2 (Average)":1.3694107533
-    },
-    {
-        "year":2087,
-        "CanESM2 (Average)":0.1642120332
-    },
-    {
-        "year":2088,
-        "CanESM2 (Average)":0.0120388828
-    },
-    {
-        "year":2089,
-        "CanESM2 (Average)":0.7063350081
-    },
-    {
-        "year":2090,
-        "CanESM2 (Average)":0.7149677873
-    },
-    {
-        "year":2091,
-        "CanESM2 (Average)":0.1346549988
-    },
-    {
-        "year":2092,
-        "CanESM2 (Average)":0.0136606339
-    },
-    {
-        "year":2093,
-        "CanESM2 (Average)":0.3643937111
-    },
-    {
-        "year":2094,
-        "CanESM2 (Average)":0.0424370468
-    },
-    {
-        "year":2095,
-        "CanESM2 (Average)":0.344270885
-    },
-    {
-        "year":2096,
-        "CanESM2 (Average)":0.0192668047
-    },
-    {
-        "year":2097,
-        "CanESM2 (Average)":1.6039401293
-    },
-    {
-        "year":2098,
-        "CanESM2 (Average)":0.080921866
-    },
-    {
-        "year":2099,
-        "CanESM2 (Average)":0.2376274318
-    }
+  {
+    "year": 1950,
+    "CanESM2 (Average)": 0.2408622354
+  },
+  {
+    "year": 1951,
+    "CanESM2 (Average)": 20.146440506
+  },
+  {
+    "year": 1952,
+    "CanESM2 (Average)": 9.200750351
+  },
+  {
+    "year": 1953,
+    "CanESM2 (Average)": 10.7796325684
+  },
+  {
+    "year": 1954,
+    "CanESM2 (Average)": 19.4811668396
+  },
+  {
+    "year": 1955,
+    "CanESM2 (Average)": 10.7095088959
+  },
+  {
+    "year": 1956,
+    "CanESM2 (Average)": 10.4096403122
+  },
+  {
+    "year": 1957,
+    "CanESM2 (Average)": 8.9055728912
+  },
+  {
+    "year": 1958,
+    "CanESM2 (Average)": 22.4095840454
+  },
+  {
+    "year": 1959,
+    "CanESM2 (Average)": 4.9422974586
+  },
+  {
+    "year": 1960,
+    "CanESM2 (Average)": 16.5054206848
+  },
+  {
+    "year": 1961,
+    "CanESM2 (Average)": 7.8230605125
+  },
+  {
+    "year": 1962,
+    "CanESM2 (Average)": 8.0263185501
+  },
+  {
+    "year": 1963,
+    "CanESM2 (Average)": 3.9681091309
+  },
+  {
+    "year": 1964,
+    "CanESM2 (Average)": 5.4333372116
+  },
+  {
+    "year": 1965,
+    "CanESM2 (Average)": 13.3794088364
+  },
+  {
+    "year": 1966,
+    "CanESM2 (Average)": 5.3823962212
+  },
+  {
+    "year": 1967,
+    "CanESM2 (Average)": 3.9940407276
+  },
+  {
+    "year": 1968,
+    "CanESM2 (Average)": 5.787191391
+  },
+  {
+    "year": 1969,
+    "CanESM2 (Average)": 11.0033950806
+  },
+  {
+    "year": 1970,
+    "CanESM2 (Average)": 10.6629524231
+  },
+  {
+    "year": 1971,
+    "CanESM2 (Average)": 5.1482377052
+  },
+  {
+    "year": 1972,
+    "CanESM2 (Average)": 5.5865650177
+  },
+  {
+    "year": 1973,
+    "CanESM2 (Average)": 6.4225749969
+  },
+  {
+    "year": 1974,
+    "CanESM2 (Average)": 17.4276695251
+  },
+  {
+    "year": 1975,
+    "CanESM2 (Average)": 10.1512384415
+  },
+  {
+    "year": 1976,
+    "CanESM2 (Average)": 6.4640207291
+  },
+  {
+    "year": 1977,
+    "CanESM2 (Average)": 8.2765274048
+  },
+  {
+    "year": 1978,
+    "CanESM2 (Average)": 3.142626524
+  },
+  {
+    "year": 1979,
+    "CanESM2 (Average)": 2.3777821064
+  },
+  {
+    "year": 1980,
+    "CanESM2 (Average)": 0.5677590966
+  },
+  {
+    "year": 1981,
+    "CanESM2 (Average)": 16.0499229431
+  },
+  {
+    "year": 1982,
+    "CanESM2 (Average)": 15.2214603424
+  },
+  {
+    "year": 1983,
+    "CanESM2 (Average)": 9.8479413986
+  },
+  {
+    "year": 1984,
+    "CanESM2 (Average)": 2.8178658485
+  },
+  {
+    "year": 1985,
+    "CanESM2 (Average)": 11.849199295
+  },
+  {
+    "year": 1986,
+    "CanESM2 (Average)": 8.0662441254
+  },
+  {
+    "year": 1987,
+    "CanESM2 (Average)": 6.9201726913
+  },
+  {
+    "year": 1988,
+    "CanESM2 (Average)": 3.3700256348
+  },
+  {
+    "year": 1989,
+    "CanESM2 (Average)": 9.7115793228
+  },
+  {
+    "year": 1990,
+    "CanESM2 (Average)": 8.444849968
+  },
+  {
+    "year": 1991,
+    "CanESM2 (Average)": 4.5317974091
+  },
+  {
+    "year": 1992,
+    "CanESM2 (Average)": 5.888258934
+  },
+  {
+    "year": 1993,
+    "CanESM2 (Average)": 1.2471162081
+  },
+  {
+    "year": 1994,
+    "CanESM2 (Average)": 27.0324668884
+  },
+  {
+    "year": 1995,
+    "CanESM2 (Average)": 8.190580368
+  },
+  {
+    "year": 1996,
+    "CanESM2 (Average)": 4.3601222038
+  },
+  {
+    "year": 1997,
+    "CanESM2 (Average)": 5.2235760689
+  },
+  {
+    "year": 1998,
+    "CanESM2 (Average)": 3.9688725471
+  },
+  {
+    "year": 1999,
+    "CanESM2 (Average)": 5.3051695824
+  },
+  {
+    "year": 2000,
+    "CanESM2 (Average)": 10.6109752655
+  },
+  {
+    "year": 2001,
+    "CanESM2 (Average)": 4.837893486
+  },
+  {
+    "year": 2002,
+    "CanESM2 (Average)": 0.5730718374
+  },
+  {
+    "year": 2003,
+    "CanESM2 (Average)": 2.7017753124
+  },
+  {
+    "year": 2004,
+    "CanESM2 (Average)": 7.4593095779
+  },
+  {
+    "year": 2005,
+    "CanESM2 (Average)": 7.3321657181
+  },
+  {
+    "year": 2006,
+    "CanESM2 (Average)": 4.6167941093
+  },
+  {
+    "year": 2007,
+    "CanESM2 (Average)": 1.1663030386
+  },
+  {
+    "year": 2008,
+    "CanESM2 (Average)": 7.1225852966
+  },
+  {
+    "year": 2009,
+    "CanESM2 (Average)": 7.8347587585
+  },
+  {
+    "year": 2010,
+    "CanESM2 (Average)": 6.6483502388
+  },
+  {
+    "year": 2011,
+    "CanESM2 (Average)": 0.4803698659
+  },
+  {
+    "year": 2012,
+    "CanESM2 (Average)": 6.3855009079
+  },
+  {
+    "year": 2013,
+    "CanESM2 (Average)": 7.5625119209
+  },
+  {
+    "year": 2014,
+    "CanESM2 (Average)": 11.9764451981
+  },
+  {
+    "year": 2015,
+    "CanESM2 (Average)": 8.3566064835
+  },
+  {
+    "year": 2016,
+    "CanESM2 (Average)": 10.0501070023
+  },
+  {
+    "year": 2017,
+    "CanESM2 (Average)": 9.1458034515
+  },
+  {
+    "year": 2018,
+    "CanESM2 (Average)": 4.4244809151
+  },
+  {
+    "year": 2019,
+    "CanESM2 (Average)": 2.2954108715
+  },
+  {
+    "year": 2020,
+    "CanESM2 (Average)": 0.919136405
+  },
+  {
+    "year": 2021,
+    "CanESM2 (Average)": 3.0808084011
+  },
+  {
+    "year": 2022,
+    "CanESM2 (Average)": 6.1244411469
+  },
+  {
+    "year": 2023,
+    "CanESM2 (Average)": 3.9164254665
+  },
+  {
+    "year": 2024,
+    "CanESM2 (Average)": 0.726144731
+  },
+  {
+    "year": 2025,
+    "CanESM2 (Average)": 5.8784618378
+  },
+  {
+    "year": 2026,
+    "CanESM2 (Average)": 3.521239996
+  },
+  {
+    "year": 2027,
+    "CanESM2 (Average)": 7.7758674622
+  },
+  {
+    "year": 2028,
+    "CanESM2 (Average)": 4.852678299
+  },
+  {
+    "year": 2029,
+    "CanESM2 (Average)": 0.5307510495
+  },
+  {
+    "year": 2030,
+    "CanESM2 (Average)": 2.2302713394
+  },
+  {
+    "year": 2031,
+    "CanESM2 (Average)": 2.0185263157
+  },
+  {
+    "year": 2032,
+    "CanESM2 (Average)": 10.7296733856
+  },
+  {
+    "year": 2033,
+    "CanESM2 (Average)": 4.359181881
+  },
+  {
+    "year": 2034,
+    "CanESM2 (Average)": 0.3160727322
+  },
+  {
+    "year": 2035,
+    "CanESM2 (Average)": 1.7215054035
+  },
+  {
+    "year": 2036,
+    "CanESM2 (Average)": 1.1077973843
+  },
+  {
+    "year": 2037,
+    "CanESM2 (Average)": 1.079529047
+  },
+  {
+    "year": 2038,
+    "CanESM2 (Average)": 7.0409402847
+  },
+  {
+    "year": 2039,
+    "CanESM2 (Average)": 5.2537074089
+  },
+  {
+    "year": 2040,
+    "CanESM2 (Average)": 2.3232638836
+  },
+  {
+    "year": 2041,
+    "CanESM2 (Average)": 1.0998177528
+  },
+  {
+    "year": 2042,
+    "CanESM2 (Average)": 2.2055633068
+  },
+  {
+    "year": 2043,
+    "CanESM2 (Average)": 0.0795823932
+  },
+  {
+    "year": 2044,
+    "CanESM2 (Average)": 1.7245287895
+  },
+  {
+    "year": 2045,
+    "CanESM2 (Average)": 2.9690630436
+  },
+  {
+    "year": 2046,
+    "CanESM2 (Average)": 1.0206100941
+  },
+  {
+    "year": 2047,
+    "CanESM2 (Average)": 0.2487282008
+  },
+  {
+    "year": 2048,
+    "CanESM2 (Average)": 4.161886692
+  },
+  {
+    "year": 2049,
+    "CanESM2 (Average)": 3.005838871
+  },
+  {
+    "year": 2050,
+    "CanESM2 (Average)": 1.6942310333
+  },
+  {
+    "year": 2051,
+    "CanESM2 (Average)": 0.4020127058
+  },
+  {
+    "year": 2052,
+    "CanESM2 (Average)": 1.941670537
+  },
+  {
+    "year": 2053,
+    "CanESM2 (Average)": 5.0652461052
+  },
+  {
+    "year": 2054,
+    "CanESM2 (Average)": 0.8382412195
+  },
+  {
+    "year": 2055,
+    "CanESM2 (Average)": 5.9189758301
+  },
+  {
+    "year": 2056,
+    "CanESM2 (Average)": 0.7704538703
+  },
+  {
+    "year": 2057,
+    "CanESM2 (Average)": 0.1496930718
+  },
+  {
+    "year": 2058,
+    "CanESM2 (Average)": 6.1685643196
+  },
+  {
+    "year": 2059,
+    "CanESM2 (Average)": 1.1697402
+  },
+  {
+    "year": 2060,
+    "CanESM2 (Average)": 1.4148299694
+  },
+  {
+    "year": 2061,
+    "CanESM2 (Average)": 0.3312428594
+  },
+  {
+    "year": 2062,
+    "CanESM2 (Average)": 2.8470132351
+  },
+  {
+    "year": 2063,
+    "CanESM2 (Average)": 3.8575398922
+  },
+  {
+    "year": 2064,
+    "CanESM2 (Average)": 4.2619948387
+  },
+  {
+    "year": 2065,
+    "CanESM2 (Average)": 0.4300524294
+  },
+  {
+    "year": 2066,
+    "CanESM2 (Average)": 0.0714684427
+  },
+  {
+    "year": 2067,
+    "CanESM2 (Average)": 0.0703735575
+  },
+  {
+    "year": 2068,
+    "CanESM2 (Average)": 7.8219356537
+  },
+  {
+    "year": 2069,
+    "CanESM2 (Average)": 0.6709100604
+  },
+  {
+    "year": 2070,
+    "CanESM2 (Average)": 0.0793964639
+  },
+  {
+    "year": 2071,
+    "CanESM2 (Average)": 1.6252689362
+  },
+  {
+    "year": 2072,
+    "CanESM2 (Average)": 1.3178122044
+  },
+  {
+    "year": 2073,
+    "CanESM2 (Average)": 0.937088728
+  },
+  {
+    "year": 2074,
+    "CanESM2 (Average)": 4.712141037
+  },
+  {
+    "year": 2075,
+    "CanESM2 (Average)": 0.4407745004
+  },
+  {
+    "year": 2076,
+    "CanESM2 (Average)": 0.0721863732
+  },
+  {
+    "year": 2077,
+    "CanESM2 (Average)": 0.4855717719
+  },
+  {
+    "year": 2078,
+    "CanESM2 (Average)": 0.1374062449
+  },
+  {
+    "year": 2079,
+    "CanESM2 (Average)": 3.0633673668
+  },
+  {
+    "year": 2080,
+    "CanESM2 (Average)": 0.21920757
+  },
+  {
+    "year": 2081,
+    "CanESM2 (Average)": 0.0000961402
+  },
+  {
+    "year": 2082,
+    "CanESM2 (Average)": 1.1150597334
+  },
+  {
+    "year": 2083,
+    "CanESM2 (Average)": 0.5122736096
+  },
+  {
+    "year": 2084,
+    "CanESM2 (Average)": 0.7950132489
+  },
+  {
+    "year": 2085,
+    "CanESM2 (Average)": 1.0040533543
+  },
+  {
+    "year": 2086,
+    "CanESM2 (Average)": 1.3694107533
+  },
+  {
+    "year": 2087,
+    "CanESM2 (Average)": 0.1642120332
+  },
+  {
+    "year": 2088,
+    "CanESM2 (Average)": 0.0120388828
+  },
+  {
+    "year": 2089,
+    "CanESM2 (Average)": 0.7063350081
+  },
+  {
+    "year": 2090,
+    "CanESM2 (Average)": 0.7149677873
+  },
+  {
+    "year": 2091,
+    "CanESM2 (Average)": 0.1346549988
+  },
+  {
+    "year": 2092,
+    "CanESM2 (Average)": 0.0136606339
+  },
+  {
+    "year": 2093,
+    "CanESM2 (Average)": 0.3643937111
+  },
+  {
+    "year": 2094,
+    "CanESM2 (Average)": 0.0424370468
+  },
+  {
+    "year": 2095,
+    "CanESM2 (Average)": 0.344270885
+  },
+  {
+    "year": 2096,
+    "CanESM2 (Average)": 0.0192668047
+  },
+  {
+    "year": 2097,
+    "CanESM2 (Average)": 1.6039401293
+  },
+  {
+    "year": 2098,
+    "CanESM2 (Average)": 0.080921866
+  },
+  {
+    "year": 2099,
+    "CanESM2 (Average)": 0.2376274318
+  }
 ]

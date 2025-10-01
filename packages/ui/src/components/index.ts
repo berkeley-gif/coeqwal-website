@@ -20,7 +20,7 @@ export type { SavedScenario } from "./navigation/drawer-content/SavedScenariosCo
 export { default as ContentWrapper } from "./navigation/drawer-content/ContentWrapper"
 export type { ContentWrapperProps } from "./navigation/drawer-content/ContentWrapper"
 export { default as CurrentOpsContent } from "./navigation/drawer-content/CurrentOpsContent"
-export type { CurrentOpsContentProps } from "./navigation/drawer-content/CurrentOpsContent"
+export type { CurrentOpsContentProps, GlossaryTerm, TierInfo } from "./navigation/drawer-content/CurrentOpsContent"
 export { default as SavedScenariosContent } from "./navigation/drawer-content/SavedScenariosContent"
 export type { SavedScenariosContentProps } from "./navigation/drawer-content/SavedScenariosContent"
 

@@ -9,12 +9,12 @@ export interface AppHeaderProps {
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
-  
+
   // Action handlers
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
   onAboutClick?: () => void
-  
+
   // Layout props
   hideOnScroll?: boolean
   showLanguageSwitcher?: boolean

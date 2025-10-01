@@ -13,10 +13,8 @@ export default function SnowpackContainer() {
   // Change this path to where you host the JSON in your app
   useFetchData("./data/Snowpack.json", (raw: SnowRow[]) => {
     setRows(raw)
-    const values = raw.flatMap((r) => [
-      r["CanESM2 (Average)"] ?? undefined,
-    ])
-    const min = 0 
+    const values = raw.flatMap((r) => [r["CanESM2 (Average)"] ?? undefined])
+    const min = 0
     const max = d3.max(values.filter((v): v is number => v != null)) ?? 0
     const pad = max * 0.05 || 1
     setYExtents([min, max + pad])
