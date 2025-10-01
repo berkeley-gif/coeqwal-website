@@ -1,15 +1,13 @@
 // Navigation components
-export { MainHeader } from "./navigation/MainHeader"
-export type { HeaderProps } from "./navigation/MainHeader"
+export { BaseHeader } from "./navigation/BaseHeader"
+export type { BaseHeaderProps, SecondaryNavItem } from "./navigation/BaseHeader"
 export { AppHeader } from "./navigation/AppHeader"
 export type { AppHeaderProps } from "./navigation/AppHeader"
-export { Header } from "./navigation/Header"
 export { NavDropdown } from "./navigation/NavDropdown"
 export type {
   NavDropdownProps,
   NavDropdownOption,
 } from "./navigation/NavDropdown"
-export type { SecondaryNavItem } from "./navigation/Header"
 export { LanguageSwitcher } from "./navigation/LanguageSwitcher"
 export { MultiDrawer } from "./navigation/MultiDrawer"
 export { AppMultiDrawer } from "./navigation/AppMultiDrawer"
@@ -17,6 +15,14 @@ export { ScrollToButton } from "./navigation/ScrollToButton"
 export type { TabKey } from "./navigation/MultiDrawer"
 export type { AppMultiDrawerProps } from "./navigation/AppMultiDrawer"
 export type { SavedScenario } from "./navigation/drawer-content/SavedScenariosContent"
+
+// Drawer content components
+export { default as ContentWrapper } from "./navigation/drawer-content/ContentWrapper"
+export type { ContentWrapperProps } from "./navigation/drawer-content/ContentWrapper"
+export { default as CurrentOpsContent } from "./navigation/drawer-content/CurrentOpsContent"
+export type { CurrentOpsContentProps } from "./navigation/drawer-content/CurrentOpsContent"
+export { default as SavedScenariosContent } from "./navigation/drawer-content/SavedScenariosContent"
+export type { SavedScenariosContentProps } from "./navigation/drawer-content/SavedScenariosContent"
 
 // Common components
 export { Card, ScenarioCard, ScenarioCardList } from "./common/Card"

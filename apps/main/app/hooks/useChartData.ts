@@ -80,7 +80,7 @@ export const useChartData = ({
       highlighted: highlightBaseline,
     })
 
-    // Generate additional scenarios with varied data
+    // Dummy scenarios
     const scenarioNames = [
       "SGMA San Joaquin Valley",
       "SGMA Sacramento Valley",

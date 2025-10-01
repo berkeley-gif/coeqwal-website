@@ -25,7 +25,17 @@ export function Header() {
     }
   }
 
+  // Handle about page clicks
+  const handleAboutClick = () => {
+    // TODO: Navigate to about page once it exists
+    console.log("Navigate to about page")
+  }
+
   return (
-    <AppHeader onDataClick={handleDataClick} onToolsClick={handleToolsClick} />
+    <AppHeader 
+      onDataClick={handleDataClick} 
+      onToolsClick={handleToolsClick}
+      onAboutClick={handleAboutClick}
+    />
   )
 }

@@ -20,12 +20,6 @@ export interface ActionCardButtonProps extends Omit<ButtonProps, "children"> {
 
 /**
  * Action card button component for primary actions in card interfaces.
- *
- * Features:
- * - Default grey/blue styling with hover effects
- * - Main title with optional subtitle
- * - Full width layout with centered content
- * - Disabled state support
  */
 export function ActionCardButton({
   title,

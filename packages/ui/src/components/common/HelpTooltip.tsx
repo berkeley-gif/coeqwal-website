@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { BaseTooltip } from "./BaseTooltip"
 import type { BaseTooltipProps } from "./BaseTooltip"
 

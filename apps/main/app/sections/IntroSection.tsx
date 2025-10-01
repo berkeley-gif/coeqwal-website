@@ -61,7 +61,7 @@ const IntroSection = () => {
                 variant="h1"
                 component="h1"
                 sx={{
-                  fontSize: "6.5rem",
+                  fontSize: "6.5rem", // Custom for demo with new title
                   textAlign: "center",
                   fontWeight: 500,
                   width: "1200px", // Fixed width for title to break properly
@@ -70,7 +70,7 @@ const IntroSection = () => {
                   left: "50%",
                   transform: "translate(-50%, -50%)", // Center the title in viewport
                   fontFamily:
-                    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Tring San Francisco on Mac, system fonts elsewhere
+                    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
                 }}
               >
                 {t("homePanel.title")}
