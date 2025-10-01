@@ -15,12 +15,10 @@ export default function Home() {
       {/* Header */}
       <Header />
 
-      {/* Side drawer */}
+      {/* Side drawer (glossary) */}
       <ConnectedMultiDrawer
         drawerWidth={theme.layout.drawer.width}
         overlay={true}
-        /*         overlay={!isTablet}
-        showRailButtons={true} */
       />
 
       {/* Main content */}
@@ -28,7 +26,7 @@ export default function Home() {
         component="main"
         sx={{
           position: "relative",
-          zIndex: (theme) => theme.zIndex.panels,
+          zIndex: (theme) => theme.zIndex.panels, // (not in use but left here to demonstrate z-indexing system)
           overflowX: "clip",
           overflowY: "visible",
           pointerEvents: "none", // Allow map interactions to pass through

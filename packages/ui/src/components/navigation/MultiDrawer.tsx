@@ -13,7 +13,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import { motion, AnimatePresence } from "@repo/motion"
 
 // Content components
-import { CurrentOpsContent } from "./drawer-content"
+import { CurrentOpsContent } from "../index"
 
 // Types
 export type TabKey = "glossary"

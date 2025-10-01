@@ -1,4 +1,4 @@
-// Currently not in use, but anticipated use
+// Currently not in use, but anticipated use in future for map markers
 
 // Marker type definition
 export interface MarkerData {

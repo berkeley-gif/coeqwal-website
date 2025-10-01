@@ -1,10 +1,9 @@
 "use client"
 
 import { AppBar, Toolbar, Stack, Button, Box } from "@mui/material"
-import { useTheme } from "@mui/material/styles"
 import { useMediaQuery } from "@mui/material"
 import { useTranslation } from "@repo/i18n"
-import { LanguageSwitcher } from "../index"
+import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
@@ -13,6 +12,7 @@ import { useRef, useState } from "react"
 
 const MotionAppBar = motion.create(AppBar)
 
+// Translation types
 type HeaderTranslations = {
   title: string
   buttons: {
@@ -38,13 +38,29 @@ export interface SecondaryNavItem {
   sectionId: string
 }
 
-interface HeaderProps {
+// Main props interface
+export interface BaseHeaderProps {
+  // Navigation props
   activeSection?: string
   onSectionClick?: (sectionId: string) => void
   showSecondaryNav?: boolean
   secondaryNavItems?: SecondaryNavItem[]
+  
+  // Action handlers
   onDataClick?: () => void
   onToolsClick?: (tool: "scenario-explorer" | "needs-search") => void
+  onAboutClick?: () => void
+  
+  // Styling props (theme-agnostic)
+  backgroundColor?: string
+  textColor?: string
+  zIndex?: number
+  borderRadius?: string | number
+  boxShadow?: string
+  
+  // Layout props
+  hideOnScroll?: boolean
+  showLanguageSwitcher?: boolean
 }
 
 const translations: TranslationsMap = {
@@ -81,27 +97,37 @@ const sectionParentMap: Record<string, string | undefined> = {
   calsim: "managing-water",
 }
 
-export function Header({
+export function BaseHeader({
   activeSection,
   onSectionClick,
   showSecondaryNav = false,
-  secondaryNavItems = [], // Default to empty array, bc optional
+  secondaryNavItems = [],
   onDataClick,
   onToolsClick,
-}: HeaderProps) {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"))
+  onAboutClick,
+  backgroundColor = "rgba(255, 255, 255, 0.95)",
+  textColor = "#000000",
+  zIndex = 1100,
+  borderRadius = 0,
+  boxShadow = "none",
+  hideOnScroll = true,
+  showLanguageSwitcher = true,
+}: BaseHeaderProps) {
+  // Responsive breakpoints (using standard MUI breakpoints)
+  const isMobile = useMediaQuery("(max-width:600px)")
+  const isTablet = useMediaQuery("(max-width:900px)")
+  
   const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
-    lineHeight: 1.1, // Line height for text wrapping
-    height: theme.spacing(4.5), // 36px to match language switcher
-    minHeight: theme.spacing(4.5), // 36px
+    lineHeight: 1.1,
+    height: 36,
+    minHeight: 36,
     letterSpacing: "0.75px",
     fontSize: "0.95rem",
     fontWeight: 500,
-    color: theme.palette.text.primary,
+    color: textColor,
   }
+  
   const { locale, isLoading } = useTranslation()
 
   // Scroll-based hide/show functionality
@@ -110,6 +136,8 @@ export function Header({
   const lastYRef = useRef(0)
 
   useMotionValueEvent(scrollY, "change", (latest) => {
+    if (!hideOnScroll) return
+    
     const difference = latest - lastYRef.current
     if (Math.abs(difference) > 10) {
       setIsHidden(difference > 0)
@@ -126,11 +154,9 @@ export function Header({
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
-  const textColor = theme.palette.text.primary
-
   return (
     <MotionAppBar
-      animate={isHidden ? "hidden" : "visible"}
+      animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
       whileHover="visible"
       onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
       variants={{
@@ -144,12 +170,11 @@ export function Header({
       transition={{ duration: 0.3 }}
       position="fixed"
       sx={{
-        zIndex: theme.zIndex.appBar,
-        backgroundColor: theme.palette.overlay.water,
-
-        color: theme.palette.text.primary,
-        borderRadius: theme.borderRadius.none,
-        boxShadow: "none",
+        zIndex,
+        backgroundColor,
+        color: textColor,
+        borderRadius,
+        boxShadow,
       }}
       elevation={0}
     >
@@ -186,12 +211,12 @@ export function Header({
                     color: textColor,
                     minWidth: "auto",
                     px: isTablet ? 1 : 2,
-                    fontSize: theme.typography.nav.fontSize,
+                    fontSize: "0.875rem",
                     position: "relative",
                     letterSpacing: "0.03rem",
                     fontWeight: isActive ? 600 : 500,
                     transition: "color 0.3s ease",
-                    lineHeight: 1.1, // Slightly more spacing between lines when wrapped
+                    lineHeight: 1.1,
                     "&:hover": {
                       backgroundColor: "transparent",
                     },
@@ -258,9 +283,49 @@ export function Header({
               sx={buttonStyle}
             />
           )}
+          
+          {/* Data button */}
+          {onDataClick && (
+            <Button
+              variant={buttonVariant}
+              onClick={onDataClick}
+              sx={{
+                ...buttonStyle,
+                color: textColor,
+                position: "relative",
+                overflow: "hidden",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  "&::before": {
+                    opacity: 1,
+                  },
+                },
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  top: 0,
+                  left: "-100%",
+                  width: "100%",
+                  height: "100%",
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)",
+                  transition: "left 0.5s ease",
+                  opacity: 0,
+                },
+                "&:hover::before": {
+                  left: "100%",
+                },
+              }}
+            >
+              {componentText.buttons.getData}
+            </Button>
+          )}
+          
+          {/* About button */}
           <Button
             variant={buttonVariant}
-            onClick={onDataClick}
+            onClick={onAboutClick}
             sx={{
               ...buttonStyle,
               color: textColor,
@@ -268,8 +333,7 @@ export function Header({
               overflow: "hidden",
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
               "&:hover": {
-                backgroundColor: "white",
-                color: (theme) => theme.palette.blue.darkest,
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
                 "&::before": {
                   opacity: 1,
                 },
@@ -282,41 +346,7 @@ export function Header({
                 width: "100%",
                 height: "100%",
                 background:
-                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
-                transition: "left 0.5s ease",
-                opacity: 0,
-              },
-              "&:hover::before": {
-                left: "100%",
-              },
-            }}
-          >
-            {componentText.buttons.getData}
-          </Button>
-          <Button
-            variant={buttonVariant}
-            sx={{
-              ...buttonStyle,
-              color: textColor,
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                backgroundColor: "white",
-                color: (theme) => theme.palette.blue.darkest,
-                "&::before": {
-                  opacity: 1,
-                },
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                background:
-                  "linear-gradient(90deg, transparent, rgba(52, 69, 116, 0.1), transparent)",
+                  "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)",
                 transition: "left 0.5s ease",
                 opacity: 0,
               },
@@ -327,7 +357,9 @@ export function Header({
           >
             {componentText.buttons.about}
           </Button>
-          <LanguageSwitcher />
+          
+          {/* Language switcher */}
+          {showLanguageSwitcher && <LanguageSwitcher />}
         </Stack>
       </Toolbar>
     </MotionAppBar>

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 
 /**
- * Hook to detect when the user has reached the frontmatter panel
- * Uses intersection observer to watch for when the frontmatter panel enters the viewport
+ * Hook to detect when the user has passed the home panel
+ * Used to trigger showing the glossary
  *
- * @returns boolean - true when user has reached the frontmatter panel
+ * @returns boolean - true when user has reached the first panel after home panel ("frontmatter")
  */
 export function useHomePanelIntersection() {
   const [hasReachedFrontmatter, setHasReachedFrontmatter] = useState(false)

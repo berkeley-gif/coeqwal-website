@@ -1,5 +1,5 @@
-// Meli, since we are not longer doing the complicated slide feature, it might be easier to scrap the contents of this file and rewrite cleanly with your abstraction.
-// The code was built around that functionality (requested feature at the time, but it's a mess)
+// Meli, since we are no longer doing the complicated slide feature, it might be easier to scrap the contents of this file and rewrite cleanly with your abstraction.
+// The code was built around that functionality (requested feature at the time, but now it's a mess)
 
 import React, { useState, useEffect, useRef } from "react"
 import {
