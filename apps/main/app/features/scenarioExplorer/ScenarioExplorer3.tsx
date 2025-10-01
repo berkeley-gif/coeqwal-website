@@ -560,10 +560,10 @@ export default function ScenarioExplorer3() {
   const {
     currentStep,
     setStep,
-    explore: { 
-      showMapView, 
-      showOnlyChosen, 
-      showDefinitions, 
+    explore: {
+      showMapView,
+      showOnlyChosen,
+      showDefinitions,
       chosenStrategies,
       selectedOutcomes,
       searchQuery,
@@ -795,7 +795,7 @@ export default function ScenarioExplorer3() {
         }
       }
     },
-[showMapView, flyTo, selectedOutcomes, setSelectedOutcome],
+    [showMapView, flyTo, selectedOutcomes, setSelectedOutcome],
   )
 
   // Handle location search using Mapbox Geocoding API
@@ -829,7 +829,7 @@ export default function ScenarioExplorer3() {
         setSearchQuery("") // This will automatically set isSearching to false
       }
     },
-[flyTo, setSearchQuery],
+    [flyTo, setSearchQuery],
   )
 
   // Handle search form submission
