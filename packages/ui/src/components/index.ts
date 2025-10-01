@@ -19,8 +19,9 @@ export type { SavedScenario } from "./navigation/drawer-content/SavedScenariosCo
 // Drawer content components
 export { default as ContentWrapper } from "./navigation/drawer-content/ContentWrapper"
 export type { ContentWrapperProps } from "./navigation/drawer-content/ContentWrapper"
-export { default as CurrentOpsContent } from "./navigation/drawer-content/CurrentOpsContent"
-export type { CurrentOpsContentProps, GlossaryTerm, TierInfo } from "./navigation/drawer-content/CurrentOpsContent"
+export { default as GlossaryContent } from "./navigation/drawer-content/GlossaryContent"
+export type { GlossaryContentProps } from "./navigation/drawer-content/GlossaryContent"
+export type { GlossaryTerm, TierInfo } from "../lib/glossary"
 export { default as SavedScenariosContent } from "./navigation/drawer-content/SavedScenariosContent"
 export type { SavedScenariosContentProps } from "./navigation/drawer-content/SavedScenariosContent"
 
