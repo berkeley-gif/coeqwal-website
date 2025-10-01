@@ -374,15 +374,15 @@ export function MultiDrawer({
                     overflow: "auto",
                   }}
                 >
-                   <GlossaryContent
-                     onClose={close}
-                     selectedSection={
-                       drawerContent.selectedSection as string | undefined
-                     }
-                     selectedTerm={
-                       drawerContent.selectedTerm as string | undefined
-                     }
-                   />
+                  <GlossaryContent
+                    onClose={close}
+                    selectedSection={
+                      drawerContent.selectedSection as string | undefined
+                    }
+                    selectedTerm={
+                      drawerContent.selectedTerm as string | undefined
+                    }
+                  />
                 </Box>
               </>
             )}
