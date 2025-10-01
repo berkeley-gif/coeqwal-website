@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback } from "react"
+import React, { useCallback } from "react"
 import {
   Box,
   Typography,
@@ -556,25 +556,26 @@ export default function ScenarioExplorer3() {
   // Map functionality
   const { flyTo } = useMap()
 
-  // Workflow and explore state
+  // All state from workflow store
   const {
     currentStep,
     setStep,
-    explore: { showMapView, showOnlyChosen, showDefinitions, chosenStrategies },
+    explore: { 
+      showMapView, 
+      showOnlyChosen, 
+      showDefinitions, 
+      chosenStrategies,
+      selectedOutcomes,
+      searchQuery,
+      isSearching,
+    },
     setMapView,
     setShowOnlyChosen,
     setShowDefinitions,
     toggleStrategyChoice,
+    setSelectedOutcome,
+    setSearchQuery,
   } = useWorkflowStore()
-
-  // Outcome visualization state - track by strategy
-  const [selectedOutcomes, setSelectedOutcomes] = useState<
-    Record<string, string | null>
-  >({})
-
-  // Search state
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
 
   // Find any selected outcome from any strategy
   const anySelectedOutcome = Object.values(selectedOutcomes).find(
@@ -745,18 +746,20 @@ export default function ScenarioExplorer3() {
   // Handle outcome selection - only one outcome can be selected at a time
   const handleOutcomeSelect = useCallback(
     (strategyValue: string, outcome: string) => {
-      setSelectedOutcomes((prev) => {
-        // Check if this outcome is already selected for this strategy
-        const isCurrentlySelected = prev[strategyValue] === outcome
+      // Check if this outcome is already selected for this strategy
+      const isCurrentlySelected = selectedOutcomes[strategyValue] === outcome
 
-        if (isCurrentlySelected) {
-          // Deselect if clicking the same outcome
-          return { [strategyValue]: null }
-        } else {
-          // Select this outcome and clear all others
-          return { [strategyValue]: outcome }
-        }
-      })
+      if (isCurrentlySelected) {
+        // Deselect if clicking the same outcome
+        setSelectedOutcome(strategyValue, null)
+      } else {
+        // Clear all other selections first
+        Object.keys(selectedOutcomes).forEach((key) => {
+          setSelectedOutcome(key, null)
+        })
+        // Select this outcome
+        setSelectedOutcome(strategyValue, outcome)
+      }
 
       // Fly to appropriate extent if outcome is selected and we're in map view
       if (showMapView) {
@@ -792,7 +795,7 @@ export default function ScenarioExplorer3() {
         }
       }
     },
-    [showMapView, flyTo],
+[showMapView, flyTo, selectedOutcomes, setSelectedOutcome],
   )
 
   // Handle location search using Mapbox Geocoding API
@@ -800,7 +803,7 @@ export default function ScenarioExplorer3() {
     async (query: string) => {
       if (!query.trim()) return
 
-      setIsSearching(true)
+      setSearchQuery(query) // This will automatically set isSearching to true
       try {
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&country=US&bbox=-124.7844079,32.7153292,-114.1315252,42.2097232`,
@@ -823,10 +826,10 @@ export default function ScenarioExplorer3() {
       } catch (error) {
         console.error("Geocoding error:", error)
       } finally {
-        setIsSearching(false)
+        setSearchQuery("") // This will automatically set isSearching to false
       }
     },
-    [flyTo],
+[flyTo, setSearchQuery],
   )
 
   // Handle search form submission

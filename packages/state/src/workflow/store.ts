@@ -3,9 +3,10 @@ import { immer } from "zustand/middleware/immer"
 import type { WorkflowStep, ExploreState } from "./types"
 
 export interface WorkflowStoreState {
-  currentStep: WorkflowStep
-  explore: ExploreState
-  // actions
+  currentStep: WorkflowStep // steps are 1. choose, 2. compare, 3. empower
+  explore: ExploreState // user settings
+  
+  // Workflow actions
   setStep: (step: WorkflowStep) => void
   setMapView: (show: boolean) => void
   setShowOnlyChosen: (show: boolean) => void
@@ -13,13 +14,23 @@ export interface WorkflowStoreState {
   toggleStrategyChoice: (strategyValue: string) => void
   resetExplore: () => void
   reset: () => void
+  
+  // Scenario explorer actions
+  setSelectedOutcome: (strategy: string, outcome: string | null) => void
+  setSearchQuery: (query: string) => void
 }
 
 const initialExploreState: ExploreState = {
+  // Existing workflow state
   showMapView: false,
   showOnlyChosen: false,
   showDefinitions: true,
   chosenStrategies: [],
+  
+  // Scenario explorer state
+  selectedOutcomes: {},
+  searchQuery: "",
+  isSearching: false,
 }
 
 export const useWorkflowStore = create<WorkflowStoreState>()(
@@ -45,6 +56,18 @@ export const useWorkflowStore = create<WorkflowStoreState>()(
         } else {
           state.explore.chosenStrategies.push(strategyValue)
         }
+      }),
+
+    // Scenario explorer actions
+    setSelectedOutcome: (strategy, outcome) =>
+      set((state) => {
+        state.explore.selectedOutcomes[strategy] = outcome
+      }),
+
+    setSearchQuery: (query) =>
+      set((state) => {
+        state.explore.searchQuery = query
+        state.explore.isSearching = query.length > 0
       }),
 
     // Reset actions
