@@ -5,7 +5,7 @@ export interface ExploreState {
   showOnlyChosen: boolean
   showDefinitions: boolean
   chosenStrategies: string[]
-  
+
   // Scenario explorer state
   selectedOutcomes: Record<string, string | null>
   searchQuery: string

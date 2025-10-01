@@ -5,7 +5,7 @@ import type { WorkflowStep, ExploreState } from "./types"
 export interface WorkflowStoreState {
   currentStep: WorkflowStep // steps are 1. choose, 2. compare, 3. empower
   explore: ExploreState // user settings
-  
+
   // Workflow actions
   setStep: (step: WorkflowStep) => void
   setMapView: (show: boolean) => void
@@ -14,7 +14,7 @@ export interface WorkflowStoreState {
   toggleStrategyChoice: (strategyValue: string) => void
   resetExplore: () => void
   reset: () => void
-  
+
   // Scenario explorer actions
   setSelectedOutcome: (strategy: string, outcome: string | null) => void
   setSearchQuery: (query: string) => void
@@ -26,7 +26,7 @@ const initialExploreState: ExploreState = {
   showOnlyChosen: false,
   showDefinitions: true,
   chosenStrategies: [],
-  
+
   // Scenario explorer state
   selectedOutcomes: {},
   searchQuery: "",
