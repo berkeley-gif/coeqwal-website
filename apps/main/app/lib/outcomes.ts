@@ -13,37 +13,49 @@ export const OUTCOMES = [
 export type Outcome = (typeof OUTCOMES)[number]
 
 // Import API functions
-import { fetchTierDefinitions, getTierMapping, mapShortCodeToDisplayName } from '../api/tierApi'
+import {
+  fetchTierDefinitions,
+  getTierMapping,
+  mapShortCodeToDisplayName,
+} from "../api/tierApi"
 
 // Outcome definitions (fetched from API)
 export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
   try {
     const [apiDefinitions, tierMapping] = await Promise.all([
       fetchTierDefinitions(),
-      getTierMapping()
+      getTierMapping(),
     ])
-    
+
     // Convert API short codes to display names
     const definitions: Record<string, string> = {}
     Object.entries(apiDefinitions).forEach(([shortCode, description]) => {
       const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
       definitions[displayName] = description
     })
-    
+
     return definitions
   } catch (error) {
-    console.error('Failed to fetch tier definitions:', error)
+    console.error("Failed to fetch tier definitions:", error)
     // Fallback to hard-coded definitions
     return {
-      "Community deliveries": "Water delivered to community water systems for residential, commercial, and industrial use",
+      "Community deliveries":
+        "Water delivered to community water systems for residential, commercial, and industrial use",
       "Agricultural revenue": "Impact on agricultural production and revenue",
-      "Environmental flows": "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
-      "Delta ecology": "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
-      "Freshwater for Delta exports": "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
-      "Freshwater for in-Delta uses": "Water used within the Delta region for local agricultural, municipal, and environmental needs",
-      "Reservoir storage": "Amount of water stored in California's major reservoir systems each spring",
-      "Groundwater storage": "Amount of water stored in underground aquifer systems.",
-      "Salmon abundance": "Population levels of Winter-run Chinook salmon in the Sacramento River.",
+      "Environmental flows":
+        "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
+      "Delta ecology":
+        "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
+      "Freshwater for Delta exports":
+        "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
+      "Freshwater for in-Delta uses":
+        "Water used within the Delta region for local agricultural, municipal, and environmental needs",
+      "Reservoir storage":
+        "Amount of water stored in California's major reservoir systems each spring",
+      "Groundwater storage":
+        "Amount of water stored in underground aquifer systems.",
+      "Salmon abundance":
+        "Population levels of Winter-run Chinook salmon in the Sacramento River.",
     }
   }
 }

@@ -1,9 +1,5 @@
 import React from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { useOutcomeDefinitions } from "../../../hooks/useTierData"
 import { outcomeTierValues } from "../../../lib/outcomes"
@@ -93,25 +89,45 @@ const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
           Outcome levels:
         </Typography>
         <Box sx={tooltipStyles.legendRow}>
-          <Box sx={{ ...tooltipStyles.tierBox, backgroundColor: theme.palette.tiers.tier1 }} />
+          <Box
+            sx={{
+              ...tooltipStyles.tierBox,
+              backgroundColor: theme.palette.tiers.tier1,
+            }}
+          />
           <Typography variant="caption" sx={tooltipStyles.tierTextExpanded}>
             {outcomeTierValues[outcome]?.tier1 || "Excellent"}
           </Typography>
         </Box>
         <Box sx={tooltipStyles.legendRow}>
-          <Box sx={{ ...tooltipStyles.tierBox, backgroundColor: theme.palette.tiers.tier2 }} />
+          <Box
+            sx={{
+              ...tooltipStyles.tierBox,
+              backgroundColor: theme.palette.tiers.tier2,
+            }}
+          />
           <Typography variant="caption" sx={tooltipStyles.tierText}>
             {outcomeTierValues[outcome]?.tier2 || "Good"}
           </Typography>
         </Box>
         <Box sx={tooltipStyles.legendRow}>
-          <Box sx={{ ...tooltipStyles.tierBox, backgroundColor: theme.palette.tiers.tier3 }} />
+          <Box
+            sx={{
+              ...tooltipStyles.tierBox,
+              backgroundColor: theme.palette.tiers.tier3,
+            }}
+          />
           <Typography variant="caption" sx={tooltipStyles.tierText}>
             {outcomeTierValues[outcome]?.tier3 || "Fair"}
           </Typography>
         </Box>
         <Box sx={tooltipStyles.legendRow}>
-          <Box sx={{ ...tooltipStyles.tierBox, backgroundColor: theme.palette.tiers.tier4 }} />
+          <Box
+            sx={{
+              ...tooltipStyles.tierBox,
+              backgroundColor: theme.palette.tiers.tier4,
+            }}
+          />
           <Typography variant="caption" sx={tooltipStyles.tierText}>
             {outcomeTierValues[outcome]?.tier4 || "Poor"}
           </Typography>

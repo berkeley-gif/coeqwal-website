@@ -1,11 +1,5 @@
 import React from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  InfoIcon,
-  Theme,
-} from "@repo/ui/mui"
+import { Box, Typography, useTheme, InfoIcon, Theme } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
@@ -22,8 +16,15 @@ interface StrategyGridProps {
   setShowDefinitions: (show: boolean) => void
   selectedOutcomes: Record<string, string | null>
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
-  getChartDataForStrategy: (strategyValue: string) => Record<string, Array<{ label: string; color: string; value: number }>>
-  outcomeNames: Array<{ shortCode: string; name: string; displayName: string; isActive: boolean }>
+  getChartDataForStrategy: (
+    strategyValue: string,
+  ) => Record<string, Array<{ label: string; color: string; value: number }>>
+  outcomeNames: Array<{
+    shortCode: string
+    name: string
+    displayName: string
+    isActive: boolean
+  }>
 }
 
 // Reusable styles, eventually use theme?
@@ -34,7 +35,9 @@ const gridStyles = {
       xs: "0.5fr minmax(200px, 3fr) minmax(80px, 1fr)",
       lg: "0.5fr minmax(300px, 4fr) 1fr minmax(540px, 9fr)",
     },
-    gap: showMapView ? theme.spacing(1) : theme.spacing(theme.cards.spacing.standard),
+    gap: showMapView
+      ? theme.spacing(1)
+      : theme.spacing(theme.cards.spacing.standard),
     alignItems: "start",
     ...(showMapView && {
       maxHeight: "40vh",
@@ -64,8 +67,12 @@ const gridStyles = {
     gridTemplateColumns: { xs: "subgrid", lg: "subgrid" },
     backgroundColor: "#faf8f5",
     borderRadius: theme.borderRadius.rounded,
-    padding: showMapView ? theme.spacing(1) : theme.spacing(theme.cards.spacing.standard),
-    gap: showMapView ? theme.spacing(1) : theme.spacing(theme.cards.spacing.standard),
+    padding: showMapView
+      ? theme.spacing(1)
+      : theme.spacing(theme.cards.spacing.standard),
+    gap: showMapView
+      ? theme.spacing(1)
+      : theme.spacing(theme.cards.spacing.standard),
     alignItems: "start",
   }),
   starIcon: {
@@ -107,7 +114,12 @@ const gridStyles = {
     minWidth: { xs: "auto", lg: "540px" },
     mt: { xs: 2, lg: 0 },
   }),
-  outcomeBox: (showMapView: boolean, isActive: boolean, isSelected: boolean, theme: Theme) => ({
+  outcomeBox: (
+    showMapView: boolean,
+    isActive: boolean,
+    isSelected: boolean,
+    theme: Theme,
+  ) => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -118,9 +130,12 @@ const gridStyles = {
     transition: "all 0.2s ease",
     backgroundColor: "transparent",
     opacity: isActive ? 1 : 0.7,
-    border: isSelected ? `2px solid ${theme.palette.blue.bright}` : "2px solid transparent",
+    border: isSelected
+      ? `2px solid ${theme.palette.blue.bright}`
+      : "2px solid transparent",
     "&:hover": {
-      backgroundColor: showMapView && isActive ? theme.palette.grey[100] : "transparent",
+      backgroundColor:
+        showMapView && isActive ? theme.palette.grey[100] : "transparent",
     },
   }),
   outcomeLabel: (showMapView: boolean, isActive: boolean, theme: Theme) => ({
@@ -324,12 +339,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               </InfoTooltip>
 
               {/* Land use icon - different for historical strategy */}
-              <InfoTooltip 
+              <InfoTooltip
                 description={
-                  strategy.value === "current-ops-historical-ag" 
-                    ? "Historical land use (2004-2013)" 
+                  strategy.value === "current-ops-historical-ag"
+                    ? "Historical land use (2004-2013)"
                     : "Current land use considerations"
-                } 
+                }
                 placement="top"
               >
                 <Box
@@ -392,8 +407,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             >
               {outcomeNames.map(({ name, displayName, isActive }) => {
                 // Get chart data for this specific strategy
-                const strategyChartData = getChartDataForStrategy(strategy.value)
-                
+                const strategyChartData = getChartDataForStrategy(
+                  strategy.value,
+                )
+
                 return (
                   <OutcomeTooltip key={displayName} outcome={displayName}>
                     <Box
@@ -414,9 +431,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             ? `2px solid ${theme.palette.blue.bright}`
                             : "2px solid transparent",
                         "&:hover": {
-                          backgroundColor: showMapView && isActive
-                            ? theme.palette.grey[100]
-                            : "transparent",
+                          backgroundColor:
+                            showMapView && isActive
+                              ? theme.palette.grey[100]
+                              : "transparent",
                         },
                       }}
                       onClick={
@@ -428,15 +446,28 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       <ScenarioGlyph
                         variant="bars"
                         values={
-                          isActive 
-                            ? (strategyChartData[displayName]?.map(tier => tier.value).slice(0, 4) as [number, number, number, number]) || [0, 0, 0, 0]
+                          isActive
+                            ? (strategyChartData[displayName]
+                                ?.map((tier) => tier.value)
+                                .slice(0, 4) as [
+                                number,
+                                number,
+                                number,
+                                number,
+                              ]) || [0, 0, 0, 0]
                             : [0, 0, 0, 0] // Empty chart for inactive outcomes
                         }
                         size={showMapView ? 35 : 50}
                         tierColors={
-                          isActive 
-                            ? (strategyChartData[displayName]?.map(tier => tier.color).slice(0, 4) as [string, string, string, string]) ||
-                              [
+                          isActive
+                            ? (strategyChartData[displayName]
+                                ?.map((tier) => tier.color)
+                                .slice(0, 4) as [
+                                string,
+                                string,
+                                string,
+                                string,
+                              ]) || [
                                 theme.palette.tiers.tier1,
                                 theme.palette.tiers.tier2,
                                 theme.palette.tiers.tier3,
@@ -453,7 +484,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       <Typography
                         variant="caption"
                         sx={{
-                          color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
+                          color: isActive
+                            ? theme.palette.blue.darkest
+                            : theme.palette.grey[500],
                           fontWeight: 500,
                           textAlign: "center",
                           fontSize: showMapView ? "0.6rem" : "0.7rem",

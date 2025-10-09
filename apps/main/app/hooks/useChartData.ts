@@ -45,7 +45,6 @@ const CHART_AXES = [
   "Salmon abundance",
 ] as const
 
-
 const CHART_COLORS = {
   default: "#1f77b4",
   highlighted: "#ff7f0e",
@@ -53,10 +52,17 @@ const CHART_COLORS = {
 } as const
 
 const CATEGORICAL_COLORS = [
-  "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd",
-  "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf",
+  "#1f77b4",
+  "#ff7f0e",
+  "#2ca02c",
+  "#d62728",
+  "#9467bd",
+  "#8c564b",
+  "#e377c2",
+  "#7f7f7f",
+  "#bcbd22",
+  "#17becf",
 ] as const
-
 
 export function useChartData({
   highlightBaseline,
@@ -70,15 +76,18 @@ export function useChartData({
     // Legacy hover handler
   }, [])
 
-  const handleLineClick = useCallback((data: VerticalParallelLineData) => {
-    onLineClick?.(data)
-  }, [onLineClick])
+  const handleLineClick = useCallback(
+    (data: VerticalParallelLineData) => {
+      onLineClick?.(data)
+    },
+    [onLineClick],
+  )
 
   // Legacy baseline data
   const baselineData: VerticalParallelLineData = {
     id: "baseline",
     name: "Current Operations",
-    values: Object.fromEntries(CHART_AXES.map(axis => [axis, 0.0])),
+    values: Object.fromEntries(CHART_AXES.map((axis) => [axis, 0.0])),
     highlighted: highlightBaseline,
   }
 
