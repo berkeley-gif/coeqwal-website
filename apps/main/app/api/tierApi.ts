@@ -54,40 +54,33 @@ export interface ScenarioTiersResponse {
   }
 }
 
-// API functions
-export async function fetchTierDefinitions(): Promise<TierDefinitions> {
-  const response = await fetch(`${API_BASE}/tiers/definitions`)
+// Helpers
+async function apiFetch<T>(endpoint: string, errorMessage: string): Promise<T> {
+  const response = await fetch(`${API_BASE}${endpoint}`)
   if (!response.ok) {
-    throw new Error(`Failed to fetch tier definitions: ${response.statusText}`)
+    throw new Error(`${errorMessage}: ${response.statusText}`)
   }
   return response.json()
+}
+
+// API functions
+export async function fetchTierDefinitions(): Promise<TierDefinitions> {
+  return apiFetch('/tiers/definitions', 'Failed to fetch tier definitions')
 }
 
 export async function fetchTierList(): Promise<TierListItem[]> {
-  const response = await fetch(`${API_BASE}/tiers/list`)
-  if (!response.ok) {
-    throw new Error(`Failed to fetch tier list: ${response.statusText}`)
-  }
-  return response.json()
+  return apiFetch('/tiers/list', 'Failed to fetch tier list')
 }
 
 export async function fetchScenarioTiers(scenarioId: string): Promise<ScenarioTiersResponse> {
-  const response = await fetch(`${API_BASE}/tiers/scenarios/${scenarioId}/tiers`)
-  if (!response.ok) {
-    throw new Error(`Failed to fetch scenario tiers: ${response.statusText}`)
-  }
-  return response.json()
+  return apiFetch(`/tiers/scenarios/${scenarioId}/tiers`, 'Failed to fetch scenario tiers')
 }
 
 export async function fetchSingleTier(
   scenarioId: string, 
   tierCode: string
 ): Promise<SingleValueTier> {
-  const response = await fetch(`${API_BASE}/tiers/scenarios/${scenarioId}/tiers/${tierCode}`)
-  if (!response.ok) {
-    throw new Error(`Failed to fetch single tier: ${response.statusText}`)
-  }
-  return response.json()
+  return apiFetch(`/tiers/scenarios/${scenarioId}/tiers/${tierCode}`, 'Failed to fetch single tier')
 }
 
 // Mapping from API
@@ -127,48 +120,42 @@ export function mapShortCodeToDisplayName(shortCode: string, mapping: Record<str
   return mapping[shortCode] || shortCode
 }
 
-// Utility function to convert multi_value API data to chart format
-// Note: Colors come from theme, with hard-coded defaults
+// Constants
+const DEFAULT_TIER_COLORS = {
+  tier1: "#7b9d3f", // green
+  tier2: "#60aacb", // blue
+  tier3: "#FFB347", // orange
+  tier4: "#CD5C5C", // red
+} as const
+
+type TierColors = { tier1: string; tier2: string; tier3: string; tier4: string }
+type ChartDataPoint = { label: string; color: string; value: number }
+
+// Helpers
+const getTierColors = (themeColors?: TierColors) => themeColors || DEFAULT_TIER_COLORS
+
+const formatTierLabel = (tier: string) => tier.charAt(0).toUpperCase() + tier.slice(1)
+
+// Utility functions
 export function convertMultiValueToChartData(
   tierData: MultiValueTier,
-  themeColors?: { tier1: string; tier2: string; tier3: string; tier4: string }
-): Array<{
-  label: string
-  color: string
-  value: number
-}> {
-  // Use theme colors if provided, otherwise fallback to defaults
-  const tierColors = themeColors || {
-    tier1: "#7b9d3f", // green (from theme)
-    tier2: "#60aacb", // blue (from theme)
-    tier3: "#FFB347", // orange (from theme)
-    tier4: "#CD5C5C", // red (from theme)
-  }
+  themeColors?: TierColors
+): ChartDataPoint[] {
+  const tierColors = getTierColors(themeColors)
 
   return tierData.data.map(item => ({
-    label: item.tier.charAt(0).toUpperCase() + item.tier.slice(1), // "tier1" -> "Tier1"
+    label: formatTierLabel(item.tier),
     color: tierColors[item.tier],
-    value: item.normalized // Use normalized value (0-1)
+    value: item.normalized
   }))
 }
 
-// Utility to convert single_value tier to chart format
 export function convertSingleValueToChartData(
   tierLevel: number,
-  themeColors?: { tier1: string; tier2: string; tier3: string; tier4: string }
-): Array<{
-  label: string
-  color: string
-  value: number
-}> {
-  const tierColors = themeColors || {
-    tier1: "#7b9d3f",
-    tier2: "#60aacb", 
-    tier3: "#FFB347",
-    tier4: "#CD5C5C",
-  }
+  themeColors?: TierColors
+): ChartDataPoint[] {
+  const tierColors = getTierColors(themeColors)
 
-  // Create array where only the active tier has value 1 (full width), others have 0
   return [
     { label: "Tier 1", color: tierColors.tier1, value: tierLevel === 1 ? 1 : 0 },
     { label: "Tier 2", color: tierColors.tier2, value: tierLevel === 2 ? 1 : 0 },
