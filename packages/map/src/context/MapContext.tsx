@@ -223,6 +223,22 @@ export function MapProvider({ children }: { children: ReactNode }) {
     addSource: (id, source) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getSource(id)) return
+      
+      // If style isn't loaded, wait for it to load then retry
+      if (!map.isStyleLoaded()) {
+        const retryAddSource = () => {
+          try {
+            if (map.getSource(id)) return // Already added
+            map.addSource(id, source)
+          } catch (err) {
+            console.error(`Failed to add source '${id}' on retry:`, err)
+          }
+        }
+        
+        map.once('styledata', retryAddSource)
+        return
+      }
+      
       try {
         map.addSource(id, source)
       } catch (err) {
@@ -253,6 +269,37 @@ export function MapProvider({ children }: { children: ReactNode }) {
     ) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
+      
+      // If style isn't loaded, wait for it to load then retry
+      if (!map.isStyleLoaded()) {
+        const retryAddLayer = () => {
+          try {
+            if (map.getLayer(id) || !map.getSource(source)) return // Already added or source missing
+            
+            const { beforeId, ...otherProps } = others || {}
+            const layer = {
+              id,
+              source,
+              type,
+              ...(paint ? { paint } : {}),
+              ...(layout ? { layout } : {}),
+              ...otherProps,
+            } as LayerSpecification
+            
+            if (beforeId) {
+              map.addLayer(layer, beforeId)
+            } else {
+              map.addLayer(layer)
+            }
+          } catch (err) {
+            console.error(`Failed to add layer '${id}' on retry:`, err)
+          }
+        }
+        
+        map.once('styledata', retryAddLayer)
+        return
+      }
+      
       try {
         const { beforeId, ...otherProps } = others || {}
         const layer = {
