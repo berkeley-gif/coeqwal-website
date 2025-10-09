@@ -52,7 +52,7 @@ const VerticalBarChart = ({
       : 0.2 + generateRandomValue(i) * 0.8
   })
   const maxValue = Math.max(...rawValues)
-  const normalizedValues = rawValues.map((value) => (value / maxValue) * 0.9) // Scale to 90% of height
+  const normalizedValues = rawValues.map((value) => (value / maxValue)) // Scale to 100% of height
 
   const barWidth = (size * 0.8) / chartTiers.length // 80% of width divided by number of bars
   const barSpacing = (size * 0.2) / (chartTiers.length + 1) // Remaining 20% for spacing

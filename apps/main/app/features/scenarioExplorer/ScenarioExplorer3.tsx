@@ -32,11 +32,8 @@ import {
   GeolocateControl,
 } from "@repo/map"
 import { strategies, hydroclimateOptions } from "../../lib/scenarios"
-import {
-  OUTCOMES,
-  outcomeDefinitions,
-  outcomeTierValues,
-} from "../../lib/outcomes"
+import { OUTCOMES, outcomeTierValues } from "../../lib/outcomes"
+import { useOutcomeDefinitions, useScenarioTiers } from "../../hooks/useTierData"
 import { useWorkflowStore } from "@repo/state"
 import { motion } from "@repo/motion"
 
@@ -49,6 +46,7 @@ const OutcomeTooltip = ({
   children: React.ReactElement
 }) => {
   const theme = useTheme()
+  const { definitions: outcomeDefinitions } = useOutcomeDefinitions()
 
   const tooltipContent = (
     <Box
@@ -225,8 +223,8 @@ const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
   )
 }
 
-// Reusable Strategy Grid Component
-const StrategyGrid = ({
+// Strategy Grid component
+  const StrategyGrid = ({
   showMapView,
   showOnlyChosen,
   showDefinitions,
@@ -235,6 +233,8 @@ const StrategyGrid = ({
   setMapView,
   selectedOutcomes,
   onOutcomeSelect,
+  getChartDataForStrategy,
+  outcomeNames,
 }: {
   showMapView: boolean
   showOnlyChosen: boolean
@@ -246,6 +246,8 @@ const StrategyGrid = ({
   setShowDefinitions: (show: boolean) => void
   selectedOutcomes: Record<string, string | null>
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
+  getChartDataForStrategy: (strategyValue: string) => Record<string, Array<{ label: string; color: string; value: number }>>
+  outcomeNames: Array<{ shortCode: string; name: string; displayName: string; isActive: boolean }>
 }) => {
   const theme = useTheme()
 
@@ -253,7 +255,10 @@ const StrategyGrid = ({
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "0.5fr repeat(11, 1fr)",
+        gridTemplateColumns: {
+          xs: "0.5fr minmax(200px, 3fr) minmax(80px, 1fr)", // Mobile: Choose | Strategy | Operations (stacked outcomes below)
+          lg: "0.5fr minmax(300px, 4fr) 1fr minmax(540px, 9fr)", // Desktop: Choose | Strategy | Key Operations | 9 Outcomes
+        },
         gap: showMapView
           ? theme.spacing(1)
           : theme.spacing(theme.cards.spacing.standard),
@@ -276,16 +281,15 @@ const StrategyGrid = ({
           >
             <Typography variant="subtitle2">Choose</Typography>
           </Box>
-          <Box sx={{ gridColumn: "span 4" }}>
+          <Box>
             <Typography variant="subtitle2">Strategy</Typography>
           </Box>
-          <Box sx={{ gridColumn: "span 1" }}>
+          <Box>
             <Typography variant="subtitle2">Key operations</Typography>
           </Box>
           <Box
             sx={{
-              gridColumn: "span 6",
-              display: "flex",
+              display: { xs: "none", lg: "flex" },
               alignItems: "baseline",
               gap: theme.spacing(theme.cards.spacing.standard),
             }}
@@ -319,7 +323,10 @@ const StrategyGrid = ({
             sx={{
               gridColumn: "1 / -1", // Span all columns
               display: "grid",
-              gridTemplateColumns: "subgrid",
+              gridTemplateColumns: {
+                xs: "subgrid", // Mobile: use parent grid
+                lg: "subgrid", // Desktop: use parent grid
+              },
               backgroundColor: "#faf8f5",
               borderRadius: theme.borderRadius.rounded,
               padding: showMapView
@@ -356,8 +363,8 @@ const StrategyGrid = ({
               </svg>
             </Box>
 
-            {/* Columns 2-5: Strategy name and description */}
-            <Box sx={{ gridColumn: "span 4" }}>
+            {/* Column 2: Strategy name and description */}
+            <Box>
               <Typography
                 variant="subtitle1"
                 sx={{
@@ -408,141 +415,177 @@ const StrategyGrid = ({
               )}
             </Box>
 
-            {/* Column 6: Strategy icons */}
+            {/* Column 3: Operations/assumptions icons */}
             <Box
               sx={{
-                gridColumn: "span 1",
-                display: "flex",
-                gap: 1,
+                display: "flex", // Always visible
+                gap: { xs: 0.5, md: 1 },
                 alignItems: "center",
+                flexDirection: { xs: "column", md: "row" }, // Stack vertically on mobile, row on desktop
+                justifyContent: "flex-start",
               }}
             >
-              {strategy.value === "current-ops" && (
-                <InfoTooltip description="Current operations" placement="top">
+              {/* Current operations icons */}
+              <InfoTooltip description="Current operations" placement="top">
+                <Box
+                  sx={{
+                    width: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                    height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                    cursor: "pointer",
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/icons/current_ops.svg"
+                    alt="Current operations"
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </Box>
+              </InfoTooltip>
+
+              {/* Land use icon - both types */}
+              <InfoTooltip 
+                description={
+                  strategy.value === "current-ops-historical-ag" 
+                    ? "Historical land use (2004-2013)" 
+                    : "Current land use considerations"
+                } 
+                placement="top"
+              >
+                <Box
+                  sx={{
+                    width: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                    height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                    cursor: "pointer",
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      strategy.value === "current-ops-historical-ag"
+                        ? "/images/icons/land_use_prev.svg"
+                        : "/images/icons/land_use.svg"
+                    }
+                    alt={
+                      strategy.value === "current-ops-historical-ag"
+                        ? "Historical land use"
+                        : "Current land use"
+                    }
+                    style={{ width: "100%", height: "100%" }}
+                  />
+                </Box>
+              </InfoTooltip>
+              {/* No TUCP icon */}
+              {strategy.value === "current-ops-wo-tucp" && (
+                <InfoTooltip description="Without TUCPs" placement="top">
                   <Box
                     sx={{
-                      width: showMapView ? "28px" : "40px",
-                      height: showMapView ? "28px" : "40px",
+                      width: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                      height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
                       cursor: "pointer",
                     }}
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/images/icons/current_ops.svg"
-                      alt="Current operations"
+                      src="/images/icons/no_tucp.svg"
+                      alt="Without TUCPs"
                       style={{ width: "100%", height: "100%" }}
                     />
                   </Box>
                 </InfoTooltip>
               )}
-              {strategy.value === "current-ops-wo-tucp" && (
-                <>
-                  <InfoTooltip description="Current operations" placement="top">
-                    <Box
-                      sx={{
-                        width: showMapView ? "28px" : "40px",
-                        height: showMapView ? "28px" : "40px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/images/icons/current_ops.svg"
-                        alt="Current operations"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                  <InfoTooltip description="Without TUCPs" placement="top">
-                    <Box
-                      sx={{
-                        width: showMapView ? "28px" : "40px",
-                        height: showMapView ? "28px" : "40px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/images/icons/no_tucp.svg"
-                        alt="Without TUCPs"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                </>
-              )}
             </Box>
 
-            {/* Columns 7-12: Outcome charts */}
+            {/* Column 4: Outcome charts (responsive layout) */}
             <Box
               sx={{
-                gridColumn: "span 6",
+                gridColumn: { xs: "1 / -1", lg: "auto" }, // Full width on mobile, auto on desktop
                 display: "grid",
-                gridTemplateColumns: "repeat(8, 1fr)",
+                gridTemplateColumns: {
+                  xs: "repeat(3, 1fr)", // Mobile: 3x3 grid
+                  lg: "repeat(9, minmax(60px, 1fr))", // Desktop: 9 in a row
+                },
                 gap: theme.spacing(theme.cards.spacing.standard),
+                minWidth: { xs: "auto", lg: "540px" },
+                mt: { xs: 2, lg: 0 }, // Add top margin on mobile
               }}
             >
-              {OUTCOMES.map((outcome) => (
-                <OutcomeTooltip key={outcome} outcome={outcome}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: showMapView ? 0.5 : 1,
-                      cursor: showMapView ? "pointer" : "default",
-                      padding: 0.5,
-                      borderRadius: theme.borderRadius.rounded,
-                      transition: "all 0.2s ease",
-                      backgroundColor: "transparent",
-                      border:
-                        selectedOutcomes[strategy.value] === outcome &&
-                        showMapView
-                          ? `2px solid ${theme.palette.blue.bright}`
-                          : "2px solid transparent",
-                      "&:hover": {
-                        backgroundColor: showMapView
-                          ? theme.palette.grey[100]
-                          : "transparent",
-                      },
-                    }}
-                    onClick={
-                      showMapView
-                        ? () => onOutcomeSelect(strategy.value, outcome)
-                        : undefined
-                    }
-                  >
-                    <ScenarioGlyph
-                      variant="bars"
-                      values={[
-                        Math.random() * 0.4 - 0.2, // min
-                        Math.random() * 0.3 - 0.1, // q1
-                        Math.random() * 0.2, // median
-                        Math.random() * 0.3 + 0.1, // q3
-                      ]}
-                      size={showMapView ? 35 : 50}
-                      tierColors={[
-                        theme.palette.tiers.tier1,
-                        theme.palette.tiers.tier2,
-                        theme.palette.tiers.tier3,
-                        theme.palette.tiers.tier4,
-                      ]}
-                    />
-                    <Typography
-                      variant="caption"
+              {outcomeNames.map(({ name, displayName, isActive }) => {
+                // Get chart data for this specific strategy
+                const strategyChartData = getChartDataForStrategy(strategy.value)
+                
+                return (
+                  <OutcomeTooltip key={displayName} outcome={displayName}>
+                    <Box
                       sx={{
-                        color: theme.palette.blue.darkest,
-                        fontWeight: 500,
-                        textAlign: "center",
-                        fontSize: showMapView ? "0.6rem" : "0.7rem",
-                        lineHeight: showMapView ? 1.1 : 1.2,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: showMapView ? 0.5 : 1,
+                        cursor: showMapView && isActive ? "pointer" : "default",
+                        padding: 0.5,
+                        borderRadius: theme.borderRadius.rounded,
+                        transition: "all 0.2s ease",
+                        backgroundColor: "transparent",
+                        opacity: isActive ? 1 : 0.7, // Dim for inactive outcomes
+                        border:
+                          selectedOutcomes[strategy.value] === displayName &&
+                          showMapView
+                            ? `2px solid ${theme.palette.blue.bright}`
+                            : "2px solid transparent",
+                        "&:hover": {
+                          backgroundColor: showMapView && isActive
+                            ? theme.palette.grey[100]
+                            : "transparent",
+                        },
                       }}
+                      onClick={
+                        showMapView && isActive
+                          ? () => onOutcomeSelect(strategy.value, displayName)
+                          : undefined
+                      }
                     >
-                      {outcome}
-                    </Typography>
-                  </Box>
-                </OutcomeTooltip>
-              ))}
+                      <ScenarioGlyph
+                        variant="bars"
+                        values={
+                          isActive 
+                            ? (strategyChartData[displayName]?.map(tier => tier.value).slice(0, 4) as [number, number, number, number]) || [0, 0, 0, 0]
+                            : [0, 0, 0, 0] // Empty chart for inactive outcomes
+                        }
+                        size={showMapView ? 35 : 50}
+                        tierColors={
+                          isActive 
+                            ? (strategyChartData[displayName]?.map(tier => tier.color).slice(0, 4) as [string, string, string, string]) ||
+                              [
+                                theme.palette.tiers.tier1,
+                                theme.palette.tiers.tier2,
+                                theme.palette.tiers.tier3,
+                                theme.palette.tiers.tier4,
+                              ]
+                            : [
+                                theme.palette.grey[300],
+                                theme.palette.grey[300],
+                                theme.palette.grey[300],
+                                theme.palette.grey[300],
+                              ] // Grey colors for inactive outcomes
+                        }
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
+                          fontWeight: 500,
+                          textAlign: "center",
+                          fontSize: showMapView ? "0.6rem" : "0.7rem",
+                          lineHeight: showMapView ? 1.1 : 1.2,
+                        }}
+                      >
+                        {name}
+                      </Typography>
+                    </Box>
+                  </OutcomeTooltip>
+                )
+              })}
             </Box>
           </Box>
         ))}
@@ -555,6 +598,25 @@ export default function ScenarioExplorer3() {
 
   // Map functionality
   const { flyTo } = useMap()
+
+  // Fetch tier data for all three scenarios (still hardcoding, TODO: make dynamic)
+  const { chartData: s0020ChartData, outcomeNames } = useScenarioTiers("s0020")
+  const { chartData: s0021ChartData } = useScenarioTiers("s0021")
+  const { chartData: s0011ChartData } = useScenarioTiers("s0011")
+
+  // Map strategy values to their corresponding scenario data
+  const getChartDataForStrategy = (strategyValue: string) => {
+    switch (strategyValue) {
+      case "current-ops":
+        return s0020ChartData
+      case "current-ops-wo-tucp":
+        return s0021ChartData
+      case "current-ops-historical-ag":
+        return s0011ChartData
+      default:
+        return s0020ChartData // fallback
+    }
+  }
 
   // All state from workflow store
   const {
@@ -1081,7 +1143,10 @@ export default function ScenarioExplorer3() {
                             <Box
                               sx={{
                                 display: "grid",
-                                gridTemplateColumns: "0.5fr repeat(11, 1fr)",
+                                gridTemplateColumns: {
+                                  xs: "0.5fr minmax(200px, 3fr) minmax(80px, 1fr)",
+                                  lg: "0.5fr minmax(300px, 4fr) 1fr minmax(540px, 9fr)",
+                                }, // Match main grid
                                 gap: theme.spacing(
                                   theme.cards.spacing.standard,
                                 ),
@@ -1092,7 +1157,7 @@ export default function ScenarioExplorer3() {
                               {/* Left side controls */}
                               <Box
                                 sx={{
-                                  gridColumn: "1 / 7",
+                                  gridColumn: "1 / 4", // Span first 3 columns
                                   display: "flex",
                                   alignItems: "baseline",
                                   gap: theme.spacing(
@@ -1163,7 +1228,7 @@ export default function ScenarioExplorer3() {
                               </Box>
 
                               {/* Right side, aligned with charts column */}
-                              <Box sx={{ gridColumn: "7 / -1" }}>
+                              <Box sx={{ gridColumn: "4 / -1" }}>
                                 <Typography
                                   variant="body2"
                                   sx={{
@@ -1187,6 +1252,8 @@ export default function ScenarioExplorer3() {
                               setShowDefinitions={setShowDefinitions}
                               selectedOutcomes={selectedOutcomes}
                               onOutcomeSelect={handleOutcomeSelect}
+                              getChartDataForStrategy={getChartDataForStrategy}
+                              outcomeNames={outcomeNames || []}
                             />
                           </Box>
 
@@ -1290,6 +1357,8 @@ export default function ScenarioExplorer3() {
                           setShowDefinitions={setShowDefinitions}
                           selectedOutcomes={selectedOutcomes}
                           onOutcomeSelect={handleOutcomeSelect}
+                          getChartDataForStrategy={getChartDataForStrategy}
+                          outcomeNames={outcomeNames || []}
                         />
                       )}
 
