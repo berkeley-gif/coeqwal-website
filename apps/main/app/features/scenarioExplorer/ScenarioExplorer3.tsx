@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback } from "react"
+import React, { useCallback, useMemo } from "react"
 import {
   Box,
   Typography,
@@ -32,19 +32,19 @@ import {
   GeolocateControl,
 } from "@repo/map"
 import { strategies, hydroclimateOptions } from "../../lib/scenarios"
-import { OUTCOMES, outcomeTierValues } from "../../lib/outcomes"
+import { outcomeTierValues } from "../../lib/outcomes"
 import { useOutcomeDefinitions, useScenarioTiers } from "../../hooks/useTierData"
 import { useWorkflowStore } from "@repo/state"
 import { motion } from "@repo/motion"
 
-// Outcome tooltip
-const OutcomeTooltip = ({
+// Outcome tooltip (memoized)
+const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
   outcome,
   children,
 }: {
   outcome: string
   children: React.ReactElement
-}) => {
+}) {
   const theme = useTheme()
   const { definitions: outcomeDefinitions } = useOutcomeDefinitions()
 
@@ -194,7 +194,7 @@ const OutcomeTooltip = ({
       {children}
     </InfoTooltip>
   )
-}
+})
 
 // Triangle component for section headers (CSS hover)
 const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
@@ -223,8 +223,8 @@ const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
   )
 }
 
-// Strategy Grid component
-  const StrategyGrid = ({
+// Strategy Grid component (memoized)
+const StrategyGrid = React.memo(function StrategyGridComponent({
   showMapView,
   showOnlyChosen,
   showDefinitions,
@@ -248,7 +248,7 @@ const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
   getChartDataForStrategy: (strategyValue: string) => Record<string, Array<{ label: string; color: string; value: number }>>
   outcomeNames: Array<{ shortCode: string; name: string; displayName: string; isActive: boolean }>
-}) => {
+}) {
   const theme = useTheme()
 
   return (
@@ -591,7 +591,7 @@ const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
         ))}
     </Box>
   )
-}
+})
 
 export default function ScenarioExplorer3() {
   const theme = useTheme()
@@ -604,19 +604,21 @@ export default function ScenarioExplorer3() {
   const { chartData: s0021ChartData } = useScenarioTiers("s0021")
   const { chartData: s0011ChartData } = useScenarioTiers("s0011")
 
-  // Map strategy values to their corresponding scenario data
-  const getChartDataForStrategy = (strategyValue: string) => {
-    switch (strategyValue) {
-      case "current-ops":
-        return s0020ChartData
-      case "current-ops-wo-tucp":
-        return s0021ChartData
-      case "current-ops-historical-ag":
-        return s0011ChartData
-      default:
-        return s0020ChartData // fallback
-    }
-  }
+  // Map strategy values to their corresponding scenario data (memoized)
+  const getChartDataForStrategy = useMemo(() => 
+    (strategyValue: string) => {
+      switch (strategyValue) {
+        case "current-ops":
+          return s0020ChartData
+        case "current-ops-wo-tucp":
+          return s0021ChartData
+        case "current-ops-historical-ag":
+          return s0011ChartData
+        default:
+          return s0020ChartData // fallback
+      }
+    }, [s0020ChartData, s0021ChartData, s0011ChartData]
+  )
 
   // All state from workflow store
   const {
@@ -656,154 +658,154 @@ export default function ScenarioExplorer3() {
     [showMapView],
   )
 
+  // Memoize map layers to prevent recreation on every render
+  const mapLayers = useMemo(() => [
+    // Community deliveries layers
+    ...(anySelectedOutcome === "Community deliveries"
+      ? [
+          {
+            id: "community-deliveries-layer",
+            source: "delivery-units",
+            type: "fill",
+            paint: {
+              "fill-color": [
+                "case",
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  0,
+                ],
+                "#7b9d3f", // Tier 1 - Green
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  1,
+                ],
+                "#60aacb", // Tier 2 - Blue
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  2,
+                ],
+                "#FFB347", // Tier 3 - Orange
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  3,
+                ],
+                "#CD5C5C", // Tier 4 - Red
+                "#60aacb", // Fallback blue for any edge cases
+              ],
+              "fill-opacity": 0.7,
+              "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
+            },
+            others: {
+              filter: ["==", ["get", "Class"], "Urban"],
+              beforeId: "settlement-subdivision-label", // Insert before place name labels
+            },
+          },
+          {
+            id: "community-deliveries-hover",
+            source: "delivery-units",
+            type: "line",
+            paint: {
+              "line-color": theme.palette.utility.white, // White stroke on hover
+              "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                5,
+                1, // At zoom 5: 1px width
+                8,
+                2, // At zoom 8: 2px width
+                12,
+                4, // At zoom 12: 4px width
+              ],
+              "line-opacity": 0, // Hidden by default, only visible on hover
+            },
+            others: {
+              filter: ["==", ["get", "Class"], "Urban"],
+              beforeId: "settlement-subdivision-label", // Insert before place name labels
+            },
+          },
+        ]
+      : []),
+    // Agricultural deliveries layers
+    ...(anySelectedOutcome === "Agricultural deliveries"
+      ? [
+          {
+            id: "agricultural-deliveries-layer",
+            source: "delivery-units",
+            type: "fill",
+            paint: {
+              "fill-color": [
+                "case",
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  0,
+                ],
+                "#7b9d3f", // Tier 1 - Green
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  1,
+                ],
+                "#60aacb", // Tier 2 - Blue
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  2,
+                ],
+                "#FFB347", // Tier 3 - Orange
+                [
+                  "==",
+                  ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                  3,
+                ],
+                "#CD5C5C", // Tier 4 - Red
+                "#60aacb", // Fallback blue for any edge cases
+              ],
+              "fill-opacity": 0.7,
+              "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
+            },
+            others: {
+              filter: ["==", ["get", "Class"], "Agriculture"],
+              beforeId: "settlement-subdivision-label", // Insert before place name labels
+            },
+          },
+          {
+            id: "agricultural-deliveries-hover",
+            source: "delivery-units",
+            type: "line",
+            paint: {
+              "line-color": theme.palette.utility.white, // White stroke on hover
+              "line-width": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                5,
+                1, // At zoom 5: 1px width
+                8,
+                2, // At zoom 8: 2px width
+                12,
+                4, // At zoom 12: 4px width
+              ],
+              "line-opacity": 0, // Hidden by default, only visible on hover
+            },
+            others: {
+              filter: ["==", ["get", "Class"], "Agriculture"],
+              beforeId: "settlement-subdivision-label", // Insert before place name labels
+            },
+          },
+        ]
+      : []),
+    // TODO: type this
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ] as any, [anySelectedOutcome, theme])
+
   // Declarative layer management based on selected outcomes
-  useMapLayers(
-    [
-      // Community deliveries layers
-      ...(anySelectedOutcome === "Community deliveries"
-        ? [
-            {
-              id: "community-deliveries-layer",
-              source: "delivery-units",
-              type: "fill",
-              paint: {
-                "fill-color": [
-                  "case",
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    0,
-                  ],
-                  "#7b9d3f", // Tier 1 - Green
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    1,
-                  ],
-                  "#60aacb", // Tier 2 - Blue
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    2,
-                  ],
-                  "#FFB347", // Tier 3 - Orange
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    3,
-                  ],
-                  "#CD5C5C", // Tier 4 - Red
-                  "#60aacb", // Fallback blue for any edge cases
-                ],
-                "fill-opacity": 0.7,
-                "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Urban"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-            {
-              id: "community-deliveries-hover",
-              source: "delivery-units",
-              type: "line",
-              paint: {
-                "line-color": theme.palette.utility.white, // White stroke on hover
-                "line-width": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  5,
-                  1, // At zoom 5: 1px width
-                  8,
-                  2, // At zoom 8: 2px width
-                  12,
-                  4, // At zoom 12: 4px width
-                ],
-                "line-opacity": 0, // Hidden by default, only visible on hover
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Urban"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-          ]
-        : []),
-      // Agricultural deliveries layers
-      ...(anySelectedOutcome === "Agricultural deliveries"
-        ? [
-            {
-              id: "agricultural-deliveries-layer",
-              source: "delivery-units",
-              type: "fill",
-              paint: {
-                "fill-color": [
-                  "case",
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    0,
-                  ],
-                  "#7b9d3f", // Tier 1 - Green
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    1,
-                  ],
-                  "#60aacb", // Tier 2 - Blue
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    2,
-                  ],
-                  "#FFB347", // Tier 3 - Orange
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    3,
-                  ],
-                  "#CD5C5C", // Tier 4 - Red
-                  "#60aacb", // Fallback blue for any edge cases
-                ],
-                "fill-opacity": 0.7,
-                "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Agriculture"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-            {
-              id: "agricultural-deliveries-hover",
-              source: "delivery-units",
-              type: "line",
-              paint: {
-                "line-color": theme.palette.utility.white, // White stroke on hover
-                "line-width": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  5,
-                  1, // At zoom 5: 1px width
-                  8,
-                  2, // At zoom 8: 2px width
-                  12,
-                  4, // At zoom 12: 4px width
-                ],
-                "line-opacity": 0, // Hidden by default, only visible on hover
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Agriculture"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-          ]
-        : []),
-      // TODO: type this
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ] as any,
-    [selectedOutcomes, showMapView, theme],
-  )
+  useMapLayers(mapLayers, [])
 
   // Handle outcome selection - only one outcome can be selected at a time
   const handleOutcomeSelect = useCallback(
