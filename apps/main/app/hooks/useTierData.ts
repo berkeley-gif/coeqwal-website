@@ -1,9 +1,6 @@
-/**
- * Custom hook for fetching and formatting tier data (with theme colors)
- */
 
 import { useMemo } from 'react'
-import { useTheme } from '@repo/ui/mui'
+import { useTheme, Theme } from '@repo/ui/mui'
 import useSWR from 'swr'
 import { 
   fetchScenarioTiers, 
@@ -13,9 +10,74 @@ import {
   convertMultiValueToChartData,
   convertSingleValueToChartData,
   mapShortCodeToDisplayName,
-} from '../lib/tierApi'
+  type ScenarioTiersResponse,
+} from '../api/tierApi'
 
-// Hook for fetching outcome definitions with display names
+// Types
+interface TierColors {
+  tier1: string
+  tier2: string
+  tier3: string
+  tier4: string
+}
+
+interface ChartDataPoint {
+  label: string
+  color: string
+  value: number
+}
+
+interface OutcomeInfo {
+  shortCode: string
+  name: string
+  displayName: string
+  isActive: boolean
+}
+
+// Constants
+const OUTCOME_DISPLAY_ORDER = [
+  "Community deliveries",
+  "Agricultural revenue", 
+  "Environmental flows",
+  "Delta ecology",
+  "Freshwater for Delta exports",
+  "Freshwater for in-Delta uses",
+  "Reservoir storage",
+  "Groundwater storage",
+  "Salmon abundance",
+] as const
+
+// Helpers
+const getThemeColors = (theme: Theme): TierColors => ({
+  tier1: theme.palette.tiers.tier1,
+  tier2: theme.palette.tiers.tier2,
+  tier3: theme.palette.tiers.tier3,
+  tier4: theme.palette.tiers.tier4,
+})
+
+const processScenarioData = (
+  scenarioData: ScenarioTiersResponse,
+  tierMapping: Record<string, string>,
+  themeColors: TierColors
+): Record<string, Array<ChartDataPoint>> => {
+  const converted: Record<string, Array<ChartDataPoint>> = {}
+
+  Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
+    const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
+    
+    if (tierInfo.type === "multi_value" && tierInfo.data) {
+      converted[displayName] = convertMultiValueToChartData(
+        { name: tierInfo.name, type: "multi_value", data: tierInfo.data, total: tierInfo.total || 0 },
+        themeColors
+      )
+    } else if (tierInfo.type === "single_value" && tierInfo.level) {
+      converted[displayName] = convertSingleValueToChartData(tierInfo.level, themeColors)
+    }
+  })
+
+  return converted
+}
+
 export function useOutcomeDefinitions() {
   const { data: definitions, error: definitionsError, isLoading: definitionsLoading } = useSWR(
     '/api/tiers/definitions',
@@ -46,7 +108,6 @@ export function useOutcomeDefinitions() {
   }
 }
 
-// Hook for fetching scenario tier data with theme colors
 export function useScenarioTiers(scenarioId: string | null) {
   const theme = useTheme()
   
@@ -68,55 +129,14 @@ export function useScenarioTiers(scenarioId: string | null) {
   // Convert API data to chart format with theme colors
   const chartData = useMemo(() => {
     if (!scenarioData || !tierMapping) return {}
-
-    const themeColors = {
-      tier1: theme.palette.tiers.tier1,
-      tier2: theme.palette.tiers.tier2,
-      tier3: theme.palette.tiers.tier3,
-      tier4: theme.palette.tiers.tier4,
-    }
-
-    const converted: Record<string, Array<{
-      label: string
-      color: string
-      value: number
-    }>> = {}
-
-    Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
-      const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-      
-      if (tierInfo.type === "multi_value" && tierInfo.data) {
-        converted[displayName] = convertMultiValueToChartData(
-          { name: tierInfo.name, type: "multi_value", data: tierInfo.data, total: tierInfo.total || 0 },
-          themeColors
-        )
-      } else if (tierInfo.type === "single_value" && tierInfo.level) {
-        converted[displayName] = convertSingleValueToChartData(
-          tierInfo.level,
-          themeColors
-        )
-      }
-    })
-
-    return converted
-  }, [scenarioData, tierMapping, theme.palette.tiers])
+    return processScenarioData(scenarioData, tierMapping, getThemeColors(theme))
+  }, [scenarioData, tierMapping, theme])
 
   // Show outcomes in the specific order, some are inactive
   const outcomeNames = useMemo(() => {
     if (!allTiers || !tierMapping) return []
     
-    // Define the order using API names (TODO: make dynamic)
-    const desiredOrder = [
-      "Community deliveries",
-      "Agricultural revenue", 
-      "Environmental flows",
-      "Delta ecology",
-      "Freshwater for Delta exports",
-      "Freshwater for in-Delta uses",
-      "Reservoir storage",
-      "Groundwater storage",
-      "Salmon abundance",
-    ]
+    const desiredOrder = OUTCOME_DISPLAY_ORDER
     
     // Quick lookup
     const tiersByDisplayName = new Map()
@@ -157,11 +177,9 @@ export function useScenarioTiers(scenarioId: string | null) {
   }
 }
 
-// Hook for fetching multiple scenarios
 export function useMultipleScenarioTiers() {
   const theme = useTheme()
   
-  // Fetch scenarios in parallel (React hooks must be at top level, not in callbacks like map())
   const s0020Result = useSWR(`/api/tiers/scenarios/s0020/tiers`, () => fetchScenarioTiers("s0020"))
   const s0021Result = useSWR(`/api/tiers/scenarios/s0021/tiers`, () => fetchScenarioTiers("s0021"))
   const s0011Result = useSWR(`/api/tiers/scenarios/s0011/tiers`, () => fetchScenarioTiers("s0011"))
@@ -181,88 +199,22 @@ export function useMultipleScenarioTiers() {
   const allChartData = useMemo(() => {
     if (!tierMapping) return {}
 
-    const themeColors = {
-      tier1: theme.palette.tiers.tier1,
-      tier2: theme.palette.tiers.tier2,
-      tier3: theme.palette.tiers.tier3,
-      tier4: theme.palette.tiers.tier4,
-    }
+    const themeColors = getThemeColors(theme)
+    const result: Record<string, Record<string, Array<ChartDataPoint>>> = {}
 
-    const result: Record<string, Record<string, Array<{
-      label: string
-      color: string
-      value: number
-    }>>> = {}
-
-    // s0020
-    if (s0020Result.data) {
-      const converted: Record<string, Array<{ label: string; color: string; value: number }>> = {}
-      Object.entries(s0020Result.data.tiers).forEach(([shortCode, tierInfo]: [string, any]) => {
-        const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-        if (tierInfo.type === "multi_value" && tierInfo.data) {
-          converted[displayName] = convertMultiValueToChartData(
-            { name: tierInfo.name, type: "multi_value", data: tierInfo.data, total: tierInfo.total || 0 },
-            themeColors
-          )
-        } else if (tierInfo.type === "single_value" && tierInfo.level) {
-          converted[displayName] = convertSingleValueToChartData(tierInfo.level, themeColors)
-        }
-      })
-      result["s0020"] = converted
-    }
-
-    // s0021
-    if (s0021Result.data) {
-      const converted: Record<string, Array<{ label: string; color: string; value: number }>> = {}
-      Object.entries(s0021Result.data.tiers).forEach(([shortCode, tierInfo]: [string, any]) => {
-        const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-        if (tierInfo.type === "multi_value" && tierInfo.data) {
-          converted[displayName] = convertMultiValueToChartData(
-            { name: tierInfo.name, type: "multi_value", data: tierInfo.data, total: tierInfo.total || 0 },
-            themeColors
-          )
-        } else if (tierInfo.type === "single_value" && tierInfo.level) {
-          converted[displayName] = convertSingleValueToChartData(tierInfo.level, themeColors)
-        }
-      })
-      result["s0021"] = converted
-    }
-
-    // s0011
-    if (s0011Result.data) {
-      const converted: Record<string, Array<{ label: string; color: string; value: number }>> = {}
-      Object.entries(s0011Result.data.tiers).forEach(([shortCode, tierInfo]: [string, any]) => {
-        const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
-        if (tierInfo.type === "multi_value" && tierInfo.data) {
-          converted[displayName] = convertMultiValueToChartData(
-            { name: tierInfo.name, type: "multi_value", data: tierInfo.data, total: tierInfo.total || 0 },
-            themeColors
-          )
-        } else if (tierInfo.type === "single_value" && tierInfo.level) {
-          converted[displayName] = convertSingleValueToChartData(tierInfo.level, themeColors)
-        }
-      })
-      result["s0011"] = converted
-    }
+    // Process each scenario using helper function
+    if (s0020Result.data) result["s0020"] = processScenarioData(s0020Result.data, tierMapping, themeColors)
+    if (s0021Result.data) result["s0021"] = processScenarioData(s0021Result.data, tierMapping, themeColors)
+    if (s0011Result.data) result["s0011"] = processScenarioData(s0011Result.data, tierMapping, themeColors)
 
     return result
-  }, [s0020Result.data, s0021Result.data, s0011Result.data, tierMapping, theme.palette.tiers])
+  }, [s0020Result.data, s0021Result.data, s0011Result.data, tierMapping, theme])
 
   // Get outcome names from first scenario (structure should be same)
   const outcomeNames = useMemo(() => {
     if (!allTiers || !tierMapping) return []
     
-    const desiredOrder = [
-      "Community deliveries",
-      "Agricultural revenue", 
-      "Environmental flows",
-      "Delta ecology",
-      "Freshwater for Delta exports",
-      "Freshwater for in-Delta uses",
-      "Reservoir storage",
-      "Groundwater storage",
-      "Salmon abundance",
-    ]
+    const desiredOrder = OUTCOME_DISPLAY_ORDER
     
     const tiersByDisplayName = new Map()
     allTiers.forEach((tier) => {
@@ -271,7 +223,7 @@ export function useMultipleScenarioTiers() {
     })
     
     const firstScenarioData = s0020Result.data
-    return desiredOrder.map((displayName) => {
+    return desiredOrder.map((displayName): OutcomeInfo => {
       const tier = tiersByDisplayName.get(displayName)
       if (!tier) {
         return {
@@ -292,7 +244,16 @@ export function useMultipleScenarioTiers() {
   }, [allTiers, tierMapping, s0020Result.data])
 
   const isLoading = s0020Result.isLoading || s0021Result.isLoading || s0011Result.isLoading || tiersLoading || mappingLoading
-  const error = s0020Result.error || s0021Result.error || s0011Result.error || tiersError || mappingError
+  
+  // Provide specific error messages
+  const error = useMemo(() => {
+    if (s0020Result.error) return `Failed to load s0020 data: ${s0020Result.error.message}`
+    if (s0021Result.error) return `Failed to load s0021 data: ${s0021Result.error.message}`
+    if (s0011Result.error) return `Failed to load s0011 data: ${s0011Result.error.message}`
+    if (tiersError) return `Failed to load tier list: ${tiersError.message}`
+    if (mappingError) return `Failed to load tier mapping: ${mappingError.message}`
+    return null
+  }, [s0020Result.error, s0021Result.error, s0011Result.error, tiersError, mappingError])
 
   return {
     allChartData,

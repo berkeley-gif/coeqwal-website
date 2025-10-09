@@ -13,7 +13,7 @@ export const OUTCOMES = [
 export type Outcome = (typeof OUTCOMES)[number]
 
 // Import API functions
-import { fetchTierDefinitions, getTierMapping, mapShortCodeToDisplayName } from './tierApi'
+import { fetchTierDefinitions, getTierMapping, mapShortCodeToDisplayName } from '../api/tierApi'
 
 // Outcome definitions (fetched from API)
 export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
