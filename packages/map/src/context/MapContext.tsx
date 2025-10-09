@@ -65,6 +65,19 @@ export function MapProvider({ children }: { children: ReactNode }) {
     CSSProperties | undefined
   >(undefined)
 
+  // Helper function to ensure operations happen after style loads
+  const withStyleLoaded = (operation: () => void) => {
+    const map = mapRef.current?.getMap()
+    if (!map) return
+    
+    if (!map.isStyleLoaded()) {
+      map.once('styledata', operation)
+      return
+    }
+    
+    operation()
+  }
+
   const contextValue: MapOperationsAPI = {
     mapRef,
     markers,
@@ -223,11 +236,15 @@ export function MapProvider({ children }: { children: ReactNode }) {
     addSource: (id, source) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getSource(id)) return
-      try {
-        map.addSource(id, source)
-      } catch (err) {
-        console.error(`Failed to add source '${id}':`, err)
-      }
+      
+      withStyleLoaded(() => {
+        try {
+          if (map.getSource(id)) return // Already added
+          map.addSource(id, source)
+        } catch (err) {
+          console.error(`Failed to add source '${id}':`, err)
+        }
+      })
     },
 
     removeSource: (id) => {
@@ -253,26 +270,31 @@ export function MapProvider({ children }: { children: ReactNode }) {
     ) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
-      try {
-        const { beforeId, ...otherProps } = others || {}
-        const layer = {
-          id,
-          source,
-          type,
-          ...(paint ? { paint } : {}),
-          ...(layout ? { layout } : {}),
-          ...otherProps,
-        } as LayerSpecification
+      
+      withStyleLoaded(() => {
+        try {
+          if (map.getLayer(id) || !map.getSource(source)) return // Already added or source missing
+          
+          const { beforeId, ...otherProps } = others || {}
+          const layer = {
+            id,
+            source,
+            type,
+            ...(paint ? { paint } : {}),
+            ...(layout ? { layout } : {}),
+            ...otherProps,
+          } as LayerSpecification
 
-        // Use beforeId if provided, otherwise add to top
-        if (beforeId && typeof beforeId === "string") {
-          map.addLayer(layer, beforeId)
-        } else {
-          map.addLayer(layer)
+          // Use beforeId if provided, otherwise add to top
+          if (beforeId && typeof beforeId === "string") {
+            map.addLayer(layer, beforeId)
+          } else {
+            map.addLayer(layer)
+          }
+        } catch (err) {
+          console.error(`Failed to add layer '${id}':`, err)
         }
-      } catch (err) {
-        console.error(`Failed to add layer '${id}':`, err)
-      }
+      })
     },
 
     removeLayer: (id) => {
