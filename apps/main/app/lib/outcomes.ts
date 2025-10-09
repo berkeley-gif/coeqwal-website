@@ -102,6 +102,16 @@ export const outcomeTierValues: Record<
     tier4:
       "Average salinity greater than 2500 uS/cm for 2 or more months in any year.",
   },
+  "Freshwater for in-Delta uses": {
+    tier1:
+      "Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months.",
+    tier2:
+      "Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months.",
+    tier3:
+      "Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months.",
+    tier4:
+      "Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months.",
+  },
   "Reservoir storage": {
     tier1: "Storage ≥ top threshold for at least 90% of years.",
     tier2: "Storage ≥ middle threshold for at least 67% of years.",
