@@ -22,7 +22,8 @@
     "@repo/state": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/viz": "workspace:*",
-    "next": "^15.2.1"
+    "next": "^15.2.1",
+    "swr": "^2.3.6"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
