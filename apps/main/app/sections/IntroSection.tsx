@@ -7,6 +7,7 @@ import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../components/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../components/ProgressiveScenarioPanels"
 import { CalSimProvider } from "../components/CalSimContext"
+import SmoothTabs from "../components/tabs/SmoothTabs"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -208,16 +209,16 @@ const IntroSection = () => {
       />
 
       {/* CalSim context provider for shared state between map and overlays */}
-      <CalSimProvider>
+      {/* <CalSimProvider> */}
         {/* Sticky California map background */}
-        <CaliforniaMapPanel id="california-map" />
+{/*         <CaliforniaMapPanel id="california-map" /> */}
 
         {/* Scrolling overlay panels over the sticky map */}
-        <MapOverlayPanels />
+{/*         <MapOverlayPanels /> */}
 
         {/* Progressive scenario and climate panels that appear on scroll */}
-        <ProgressiveScenarioPanels />
-      </CalSimProvider>
+   {/*      <ProgressiveScenarioPanels /> */}
+    {/*   </CalSimProvider> */}
 
       {/* Interstitial panel - can be broken out into a component */}
       {/* <OneColumnPanel
@@ -256,6 +257,7 @@ const IntroSection = () => {
           </Box>
         }
       /> */}
+      
     </Box>
   )
 }
