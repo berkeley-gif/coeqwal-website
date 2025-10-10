@@ -3,15 +3,12 @@
 import { AnimatePresence, motion } from '@repo/motion'
 import dynamic from 'next/dynamic'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useAutoAdvanceTabs } from '../../hooks/useAutoAdvance'
 import { useTabs } from '../../context/Tabs'
-import { TabKey } from '../../types/tabs'
+import { TABS, TabKey } from '../../types/tabs'
 import TabPanel from '../../components/tabs/TabPanel'
 import AutoHeight from '../../components/common/AutoHeight'
-
-// import maps dynamically
-//const MapPanel = dynamic(() => import("@/components/maps/MapPanel"), { ssr: false });
 
 const panelVariants = {
     enter: { opacity: 0, x: 30 },
@@ -28,6 +25,10 @@ export default function TabPanels() {
         console.log('activeTab: ', activeTab)
     }, [activeTab])
 
+    const panelColor: string = useMemo(() => {
+        return TABS.find(t => t.key === activeTab)?.panelColor ?? 'fffff'
+    }, [activeTab])
+
     const render = (tab: TabKey) => {
         switch (tab) {
             case 'learn':
@@ -37,13 +38,6 @@ export default function TabPanels() {
                         <p style={{ height: '2000px' }}>Intro content… (replace with real copy)</p>
                     </TabPanel>
                 )
-            case 'inquire':
-                return (
-                    <TabPanel tabKey='inquire' selfScroll>
-                        <h2>Inquire</h2>
-                        <p style={{ height: '1000px' }}>Inquire content… (replace with real copy)</p>
-                    </TabPanel>
-                )
             case 'explore':
                 return (
                     <TabPanel tabKey='explore' selfScroll>
@@ -51,7 +45,7 @@ export default function TabPanels() {
                         <p style={{ height: '500px' }}>Explore content… (replace with real copy)</p>
                     </TabPanel>
                 )
-            case 'inquire':
+            case 'empower':
                 return (
                     <TabPanel tabKey='empower' selfScroll>
                         <h2>Empower</h2>
@@ -62,19 +56,29 @@ export default function TabPanels() {
     }
 
     return (
-        <AutoHeight style={{ position: 'relative' }}>
-            <AnimatePresence mode='popLayout' initial={false}>
-                <motion.div
-                    key={activeTab}
-                    variants={panelVariants}
-                    initial='center'
-                    animate='center'
-                    exit='exit'
-                    transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-                >
-                    {render(activeTab)}
-                </motion.div>
-            </AnimatePresence>
-        </AutoHeight>
+        <AutoHeight>
+            <motion.div
+                animate={{ backgroundColor: panelColor }}
+                transition={{ type: 'spring', stiffness: 180, damping: 26 }}
+                style={{
+                    position: 'relative',
+                    borderRadius: 0
+                }}
+            >
+                <AnimatePresence mode='wait' initial={false}>
+                    <motion.div
+                        key={activeTab}
+                        variants={panelVariants}
+                        initial='center'
+                        animate='center'
+                        exit='exit'
+                        transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+                        style={{ position: 'relative' }}
+                    >
+                        {render(activeTab)}
+                    </motion.div>
+                </AnimatePresence>
+            </motion.div>
+        </AutoHeight >
     )
 }

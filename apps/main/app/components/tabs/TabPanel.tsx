@@ -19,7 +19,9 @@ export default function TabPanel({ tabKey, children, className, selfScroll = fal
             aria-labelledby={`tab-${tabKey}`}
             className={className}
             ref={containerRef}
-            style={selfScroll ? { overflow: 'auto', maxHeight: 'calc(100dvh - 120px)' } : undefined}
+            style={
+                selfScroll ? { overflow: 'auto', maxHeight: 'calc(100dvh - 120px)' } : undefined
+            }
             tabIndex={-1}
         >
             <div aria-hidden data-sentinel='top' />
