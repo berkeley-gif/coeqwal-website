@@ -1,12 +1,11 @@
 "use client"
 
-import React, { useCallback } from "react"
+import React, { useCallback, useMemo } from "react"
 import {
   Box,
   Typography,
   Stack,
   useTheme,
-  InfoIcon,
   Radio,
   RadioGroup,
   FormControlLabel,
@@ -20,9 +19,7 @@ import {
   Card,
   SectionHeader,
   RoundedRightArrow,
-  InfoTooltip,
 } from "@repo/ui"
-import { ScenarioGlyph } from "@repo/viz"
 import {
   Map,
   useMap,
@@ -31,172 +28,11 @@ import {
   NavigationControl,
   GeolocateControl,
 } from "@repo/map"
-import { strategies, hydroclimateOptions } from "../../lib/scenarios"
-import {
-  OUTCOMES,
-  outcomeDefinitions,
-  outcomeTierValues,
-} from "../../lib/outcomes"
+import { hydroclimateOptions } from "../../lib/scenarios"
+import { useMultipleScenarioTiers } from "../../hooks/useTierData"
 import { useWorkflowStore } from "@repo/state"
 import { motion } from "@repo/motion"
-
-// Outcome tooltip
-const OutcomeTooltip = ({
-  outcome,
-  children,
-}: {
-  outcome: string
-  children: React.ReactElement
-}) => {
-  const theme = useTheme()
-
-  const tooltipContent = (
-    <Box
-      sx={{
-        width: "450px",
-        padding: 1,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "normal",
-        wordBreak: "break-word",
-        hyphens: "auto",
-      }}
-    >
-      <Typography
-        variant="body2"
-        sx={{
-          mb: 1,
-          fontWeight: 500,
-          width: "100%",
-          wordBreak: "break-word",
-          whiteSpace: "normal",
-        }}
-      >
-        {outcome}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          mb: 2,
-          lineHeight: 1.4,
-          width: "100%",
-          wordBreak: "break-word",
-          whiteSpace: "normal",
-        }}
-      >
-        {outcomeDefinitions[outcome] || "Definition not available"}
-      </Typography>
-      {/* Legend */}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <Typography variant="caption" sx={{ fontWeight: 500, mb: 0.5 }}>
-          Outcome levels:
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-          <Box
-            sx={{
-              width: 12,
-              minHeight: 12,
-              backgroundColor: theme.palette.tiers.tier1,
-              borderRadius: "2px",
-              flexShrink: 0,
-              alignSelf: "stretch",
-            }}
-          />
-          <Typography
-            variant="caption"
-            sx={{
-              lineHeight: 1.3,
-              wordBreak: "break-word",
-              whiteSpace: "normal",
-              flex: 1,
-              width: "100%",
-            }}
-          >
-            {outcomeTierValues[outcome]?.tier1 || "Excellent"}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-          <Box
-            sx={{
-              width: 12,
-              minHeight: 12,
-              backgroundColor: theme.palette.tiers.tier2,
-              borderRadius: "2px",
-              flexShrink: 0,
-              alignSelf: "stretch",
-            }}
-          />
-          <Typography variant="caption" sx={{ lineHeight: 1.3 }}>
-            {outcomeTierValues[outcome]?.tier2 || "Good"}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-          <Box
-            sx={{
-              width: 12,
-              minHeight: 12,
-              backgroundColor: theme.palette.tiers.tier3,
-              borderRadius: "2px",
-              flexShrink: 0,
-              alignSelf: "stretch",
-            }}
-          />
-          <Typography variant="caption" sx={{ lineHeight: 1.3 }}>
-            {outcomeTierValues[outcome]?.tier3 || "Fair"}
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-          <Box
-            sx={{
-              width: 12,
-              minHeight: 12,
-              backgroundColor: theme.palette.tiers.tier4,
-              borderRadius: "2px",
-              flexShrink: 0,
-              alignSelf: "stretch",
-            }}
-          />
-          <Typography variant="caption" sx={{ lineHeight: 1.3 }}>
-            {outcomeTierValues[outcome]?.tier4 || "Poor"}
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
-  )
-
-  return (
-    <InfoTooltip
-      description={tooltipContent}
-      placement="top"
-      tooltipProps={{
-        enterDelay: 300,
-        leaveDelay: 0,
-        enterNextDelay: 100,
-        PopperProps: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, -40], // Hack: Move tooltip higher
-              },
-            },
-          ],
-        },
-        slotProps: {
-          tooltip: {
-            sx: {
-              maxWidth: "none !important",
-              width: "auto",
-              minWidth: "450px",
-            },
-          },
-        },
-      }}
-    >
-      {children}
-    </InfoTooltip>
-  )
-}
+import StrategyGrid from "./components/StrategyGrid"
 
 // Triangle component for section headers (CSS hover)
 const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
@@ -225,336 +61,31 @@ const SectionTriangle = ({ isActive }: { isActive: boolean }) => {
   )
 }
 
-// Reusable Strategy Grid Component
-const StrategyGrid = ({
-  showMapView,
-  showOnlyChosen,
-  showDefinitions,
-  chosenStrategies,
-  toggleStrategyChoice,
-  setMapView,
-  selectedOutcomes,
-  onOutcomeSelect,
-}: {
-  showMapView: boolean
-  showOnlyChosen: boolean
-  showDefinitions: boolean
-  chosenStrategies: string[]
-  toggleStrategyChoice: (value: string) => void
-  setMapView: (show: boolean) => void
-  setShowOnlyChosen: (show: boolean) => void
-  setShowDefinitions: (show: boolean) => void
-  selectedOutcomes: Record<string, string | null>
-  onOutcomeSelect: (strategyValue: string, outcome: string) => void
-}) => {
-  const theme = useTheme()
-
-  return (
-    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: "0.5fr repeat(11, 1fr)",
-        gap: showMapView
-          ? theme.spacing(1)
-          : theme.spacing(theme.cards.spacing.standard),
-        alignItems: "start",
-        ...(showMapView && {
-          maxHeight: "40vh",
-          overflow: "auto",
-        }),
-      }}
-    >
-      {/* Column Headers - only show in table view */}
-      {!showMapView && (
-        <>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="subtitle2">Choose</Typography>
-          </Box>
-          <Box sx={{ gridColumn: "span 4" }}>
-            <Typography variant="subtitle2">Strategy</Typography>
-          </Box>
-          <Box sx={{ gridColumn: "span 1" }}>
-            <Typography variant="subtitle2">Key operations</Typography>
-          </Box>
-          <Box
-            sx={{
-              gridColumn: "span 6",
-              display: "flex",
-              alignItems: "baseline",
-              gap: theme.spacing(theme.cards.spacing.standard),
-            }}
-          >
-            <Typography variant="subtitle2">Key outcomes</Typography>
-            <Typography
-              variant="body2"
-              onClick={() => setMapView(!showMapView)}
-              sx={{
-                cursor: "pointer",
-                color: theme.palette.blue.bright,
-                textDecoration: "none",
-                fontSize: "0.8rem",
-                "&:hover": { color: theme.palette.blue.darkest },
-              }}
-            >
-              {showMapView ? "Back to list view" : "Show outcomes on map"}
-            </Typography>
-          </Box>
-        </>
-      )}
-
-      {/* Strategy rows */}
-      {strategies
-        .filter((strategy) =>
-          showOnlyChosen ? chosenStrategies.includes(strategy.value) : true,
-        )
-        .map((strategy) => (
-          <Box
-            key={strategy.value}
-            sx={{
-              gridColumn: "1 / -1", // Span all columns
-              display: "grid",
-              gridTemplateColumns: "subgrid",
-              backgroundColor: "#faf8f5",
-              borderRadius: theme.borderRadius.rounded,
-              padding: showMapView
-                ? theme.spacing(1)
-                : theme.spacing(theme.cards.spacing.standard),
-              gap: showMapView
-                ? theme.spacing(1)
-                : theme.spacing(theme.cards.spacing.standard),
-              alignItems: "start",
-            }}
-          >
-            {/* Column 1: Star icon */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                pt: 1,
-                cursor: "pointer",
-              }}
-              onClick={() => toggleStrategyChoice(strategy.value)}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                  stroke={theme.palette.blue.bright}
-                  strokeWidth="2"
-                  fill={
-                    chosenStrategies.includes(strategy.value)
-                      ? theme.palette.blue.bright
-                      : "none"
-                  }
-                />
-              </svg>
-            </Box>
-
-            {/* Columns 2-5: Strategy name and description */}
-            <Box sx={{ gridColumn: "span 4" }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 500,
-                  mb: showDefinitions ? (showMapView ? 0.5 : 1) : 0,
-                  fontSize: showMapView ? "0.9rem" : undefined,
-                }}
-              >
-                {strategy.label}
-              </Typography>
-              {showDefinitions && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    lineHeight: showMapView ? 1.3 : 1.5,
-                    fontSize: showMapView ? "0.8rem" : undefined,
-                  }}
-                >
-                  {strategy.description
-                    .split(/(\bTUCPs?\b)/g)
-                    .map((part, index) => {
-                      if (part.match(/\bTUCPs?\b/)) {
-                        return (
-                          <span key={index}>
-                            {part}
-                            <InfoTooltip
-                              description="Temporary Urgent Change Petitions permit changes during droughts to meet human health and safety needs and protect endangered species"
-                              placement="top"
-                            >
-                              <InfoIcon
-                                sx={{
-                                  fontSize: "0.8rem",
-                                  ml: 0.5,
-                                  cursor: "pointer",
-                                  color: theme.palette.blue.bright,
-                                  "&:hover": {
-                                    color: theme.palette.blue.darkest,
-                                  },
-                                }}
-                              />
-                            </InfoTooltip>
-                          </span>
-                        )
-                      }
-                      return part
-                    })}
-                </Typography>
-              )}
-            </Box>
-
-            {/* Column 6: Strategy icons */}
-            <Box
-              sx={{
-                gridColumn: "span 1",
-                display: "flex",
-                gap: 1,
-                alignItems: "center",
-              }}
-            >
-              {strategy.value === "current-ops" && (
-                <InfoTooltip description="Current operations" placement="top">
-                  <Box
-                    sx={{
-                      width: showMapView ? "28px" : "40px",
-                      height: showMapView ? "28px" : "40px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src="/images/icons/current_ops.svg"
-                      alt="Current operations"
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </Box>
-                </InfoTooltip>
-              )}
-              {strategy.value === "current-ops-wo-tucp" && (
-                <>
-                  <InfoTooltip description="Current operations" placement="top">
-                    <Box
-                      sx={{
-                        width: showMapView ? "28px" : "40px",
-                        height: showMapView ? "28px" : "40px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/images/icons/current_ops.svg"
-                        alt="Current operations"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                  <InfoTooltip description="Without TUCPs" placement="top">
-                    <Box
-                      sx={{
-                        width: showMapView ? "28px" : "40px",
-                        height: showMapView ? "28px" : "40px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src="/images/icons/no_tucp.svg"
-                        alt="Without TUCPs"
-                        style={{ width: "100%", height: "100%" }}
-                      />
-                    </Box>
-                  </InfoTooltip>
-                </>
-              )}
-            </Box>
-
-            {/* Columns 7-12: Outcome charts */}
-            <Box
-              sx={{
-                gridColumn: "span 6",
-                display: "grid",
-                gridTemplateColumns: "repeat(8, 1fr)",
-                gap: theme.spacing(theme.cards.spacing.standard),
-              }}
-            >
-              {OUTCOMES.map((outcome) => (
-                <OutcomeTooltip key={outcome} outcome={outcome}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: showMapView ? 0.5 : 1,
-                      cursor: showMapView ? "pointer" : "default",
-                      padding: 0.5,
-                      borderRadius: theme.borderRadius.rounded,
-                      transition: "all 0.2s ease",
-                      backgroundColor: "transparent",
-                      border:
-                        selectedOutcomes[strategy.value] === outcome &&
-                        showMapView
-                          ? `2px solid ${theme.palette.blue.bright}`
-                          : "2px solid transparent",
-                      "&:hover": {
-                        backgroundColor: showMapView
-                          ? theme.palette.grey[100]
-                          : "transparent",
-                      },
-                    }}
-                    onClick={
-                      showMapView
-                        ? () => onOutcomeSelect(strategy.value, outcome)
-                        : undefined
-                    }
-                  >
-                    <ScenarioGlyph
-                      variant="bars"
-                      values={[
-                        Math.random() * 0.4 - 0.2, // min
-                        Math.random() * 0.3 - 0.1, // q1
-                        Math.random() * 0.2, // median
-                        Math.random() * 0.3 + 0.1, // q3
-                      ]}
-                      size={showMapView ? 35 : 50}
-                      tierColors={[
-                        theme.palette.tiers.tier1,
-                        theme.palette.tiers.tier2,
-                        theme.palette.tiers.tier3,
-                        theme.palette.tiers.tier4,
-                      ]}
-                    />
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.blue.darkest,
-                        fontWeight: 500,
-                        textAlign: "center",
-                        fontSize: showMapView ? "0.6rem" : "0.7rem",
-                        lineHeight: showMapView ? 1.1 : 1.2,
-                      }}
-                    >
-                      {outcome}
-                    </Typography>
-                  </Box>
-                </OutcomeTooltip>
-              ))}
-            </Box>
-          </Box>
-        ))}
-    </Box>
-  )
-}
-
 export default function ScenarioExplorer3() {
   const theme = useTheme()
 
   // Map functionality
   const { flyTo } = useMap()
+
+  // Fetch tier data
+  const { allChartData, outcomeNames } = useMultipleScenarioTiers()
+
+  // Map strategy values to their corresponding scenario data (memoized)
+  const getChartDataForStrategy = useMemo(
+    () => (strategyValue: string) => {
+      switch (strategyValue) {
+        case "current-ops":
+          return allChartData["s0020"] || {}
+        case "current-ops-wo-tucp":
+          return allChartData["s0021"] || {}
+        case "current-ops-historical-ag":
+          return allChartData["s0011"] || {}
+        default:
+          return allChartData["s0020"] || {} // fallback
+      }
+    },
+    [allChartData],
+  )
 
   // All state from workflow store
   const {
@@ -594,154 +125,158 @@ export default function ScenarioExplorer3() {
     [showMapView],
   )
 
-  // Declarative layer management based on selected outcomes
-  useMapLayers(
-    [
-      // Community deliveries layers
-      ...(anySelectedOutcome === "Community deliveries"
-        ? [
-            {
-              id: "community-deliveries-layer",
-              source: "delivery-units",
-              type: "fill",
-              paint: {
-                "fill-color": [
-                  "case",
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    0,
+  // Memoize map layers to prevent recreation on every render
+  const mapLayers = useMemo(
+    () =>
+      [
+        // Community deliveries layers
+        ...(anySelectedOutcome === "Community deliveries"
+          ? [
+              {
+                id: "community-deliveries-layer",
+                source: "delivery-units",
+                type: "fill",
+                paint: {
+                  "fill-color": [
+                    "case",
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      0,
+                    ],
+                    "#7b9d3f", // Tier 1 - Green
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      1,
+                    ],
+                    "#60aacb", // Tier 2 - Blue
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      2,
+                    ],
+                    "#FFB347", // Tier 3 - Orange
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      3,
+                    ],
+                    "#CD5C5C", // Tier 4 - Red
+                    "#60aacb", // Fallback blue for any edge cases
                   ],
-                  "#7b9d3f", // Tier 1 - Green
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    1,
+                  "fill-opacity": 0.7,
+                  "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
+                },
+                others: {
+                  filter: ["==", ["get", "Class"], "Urban"],
+                  beforeId: "settlement-subdivision-label", // Insert before place name labels
+                },
+              },
+              {
+                id: "community-deliveries-hover",
+                source: "delivery-units",
+                type: "line",
+                paint: {
+                  "line-color": theme.palette.utility.white, // White stroke on hover
+                  "line-width": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    5,
+                    1, // At zoom 5: 1px width
+                    8,
+                    2, // At zoom 8: 2px width
+                    12,
+                    4, // At zoom 12: 4px width
                   ],
-                  "#60aacb", // Tier 2 - Blue
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    2,
+                  "line-opacity": 0, // Hidden by default, only visible on hover
+                },
+                others: {
+                  filter: ["==", ["get", "Class"], "Urban"],
+                  beforeId: "settlement-subdivision-label", // Insert before place name labels
+                },
+              },
+            ]
+          : []),
+        // Agricultural deliveries layers
+        ...(anySelectedOutcome === "Agricultural deliveries"
+          ? [
+              {
+                id: "agricultural-deliveries-layer",
+                source: "delivery-units",
+                type: "fill",
+                paint: {
+                  "fill-color": [
+                    "case",
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      0,
+                    ],
+                    "#7b9d3f", // Tier 1 - Green
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      1,
+                    ],
+                    "#60aacb", // Tier 2 - Blue
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      2,
+                    ],
+                    "#FFB347", // Tier 3 - Orange
+                    [
+                      "==",
+                      ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
+                      3,
+                    ],
+                    "#CD5C5C", // Tier 4 - Red
+                    "#60aacb", // Fallback blue for any edge cases
                   ],
-                  "#FFB347", // Tier 3 - Orange
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    3,
+                  "fill-opacity": 0.7,
+                  "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
+                },
+                others: {
+                  filter: ["==", ["get", "Class"], "Agriculture"],
+                  beforeId: "settlement-subdivision-label", // Insert before place name labels
+                },
+              },
+              {
+                id: "agricultural-deliveries-hover",
+                source: "delivery-units",
+                type: "line",
+                paint: {
+                  "line-color": theme.palette.utility.white, // White stroke on hover
+                  "line-width": [
+                    "interpolate",
+                    ["linear"],
+                    ["zoom"],
+                    5,
+                    1, // At zoom 5: 1px width
+                    8,
+                    2, // At zoom 8: 2px width
+                    12,
+                    4, // At zoom 12: 4px width
                   ],
-                  "#CD5C5C", // Tier 4 - Red
-                  "#60aacb", // Fallback blue for any edge cases
-                ],
-                "fill-opacity": 0.7,
-                "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
+                  "line-opacity": 0, // Hidden by default, only visible on hover
+                },
+                others: {
+                  filter: ["==", ["get", "Class"], "Agriculture"],
+                  beforeId: "settlement-subdivision-label", // Insert before place name labels
+                },
               },
-              others: {
-                filter: ["==", ["get", "Class"], "Urban"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-            {
-              id: "community-deliveries-hover",
-              source: "delivery-units",
-              type: "line",
-              paint: {
-                "line-color": theme.palette.utility.white, // White stroke on hover
-                "line-width": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  5,
-                  1, // At zoom 5: 1px width
-                  8,
-                  2, // At zoom 8: 2px width
-                  12,
-                  4, // At zoom 12: 4px width
-                ],
-                "line-opacity": 0, // Hidden by default, only visible on hover
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Urban"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-          ]
-        : []),
-      // Agricultural deliveries layers
-      ...(anySelectedOutcome === "Agricultural deliveries"
-        ? [
-            {
-              id: "agricultural-deliveries-layer",
-              source: "delivery-units",
-              type: "fill",
-              paint: {
-                "fill-color": [
-                  "case",
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    0,
-                  ],
-                  "#7b9d3f", // Tier 1 - Green
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    1,
-                  ],
-                  "#60aacb", // Tier 2 - Blue
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    2,
-                  ],
-                  "#FFB347", // Tier 3 - Orange
-                  [
-                    "==",
-                    ["%", ["length", ["to-string", ["get", "DU_ID"]]], 4],
-                    3,
-                  ],
-                  "#CD5C5C", // Tier 4 - Red
-                  "#60aacb", // Fallback blue for any edge cases
-                ],
-                "fill-opacity": 0.7,
-                "fill-outline-color": theme.palette.blue.darkest, // Darker blue for outline
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Agriculture"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-            {
-              id: "agricultural-deliveries-hover",
-              source: "delivery-units",
-              type: "line",
-              paint: {
-                "line-color": theme.palette.utility.white, // White stroke on hover
-                "line-width": [
-                  "interpolate",
-                  ["linear"],
-                  ["zoom"],
-                  5,
-                  1, // At zoom 5: 1px width
-                  8,
-                  2, // At zoom 8: 2px width
-                  12,
-                  4, // At zoom 12: 4px width
-                ],
-                "line-opacity": 0, // Hidden by default, only visible on hover
-              },
-              others: {
-                filter: ["==", ["get", "Class"], "Agriculture"],
-                beforeId: "settlement-subdivision-label", // Insert before place name labels
-              },
-            },
-          ]
-        : []),
-      // TODO: type this
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ] as any,
-    [selectedOutcomes, showMapView, theme],
+            ]
+          : []),
+        // TODO: type this
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any,
+    [anySelectedOutcome, theme],
   )
+
+  // Declarative layer management based on selected outcomes
+  useMapLayers(mapLayers, [])
 
   // Handle outcome selection - only one outcome can be selected at a time
   const handleOutcomeSelect = useCallback(
@@ -1081,7 +616,10 @@ export default function ScenarioExplorer3() {
                             <Box
                               sx={{
                                 display: "grid",
-                                gridTemplateColumns: "0.5fr repeat(11, 1fr)",
+                                gridTemplateColumns: {
+                                  xs: "0.5fr minmax(200px, 3fr) minmax(80px, 1fr)",
+                                  lg: "0.5fr minmax(300px, 4fr) 1fr minmax(540px, 9fr)",
+                                }, // Match main grid
                                 gap: theme.spacing(
                                   theme.cards.spacing.standard,
                                 ),
@@ -1092,7 +630,7 @@ export default function ScenarioExplorer3() {
                               {/* Left side controls */}
                               <Box
                                 sx={{
-                                  gridColumn: "1 / 7",
+                                  gridColumn: "1 / 4", // Span first 3 columns
                                   display: "flex",
                                   alignItems: "baseline",
                                   gap: theme.spacing(
@@ -1163,7 +701,7 @@ export default function ScenarioExplorer3() {
                               </Box>
 
                               {/* Right side, aligned with charts column */}
-                              <Box sx={{ gridColumn: "7 / -1" }}>
+                              <Box sx={{ gridColumn: "4 / -1" }}>
                                 <Typography
                                   variant="body2"
                                   sx={{
@@ -1187,6 +725,8 @@ export default function ScenarioExplorer3() {
                               setShowDefinitions={setShowDefinitions}
                               selectedOutcomes={selectedOutcomes}
                               onOutcomeSelect={handleOutcomeSelect}
+                              getChartDataForStrategy={getChartDataForStrategy}
+                              outcomeNames={outcomeNames || []}
                             />
                           </Box>
 
@@ -1290,6 +830,8 @@ export default function ScenarioExplorer3() {
                           setShowDefinitions={setShowDefinitions}
                           selectedOutcomes={selectedOutcomes}
                           onOutcomeSelect={handleOutcomeSelect}
+                          getChartDataForStrategy={getChartDataForStrategy}
+                          outcomeNames={outcomeNames || []}
                         />
                       )}
 

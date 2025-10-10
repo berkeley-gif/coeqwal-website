@@ -2,33 +2,67 @@ export const OUTCOMES = [
   "Community deliveries",
   "Agricultural revenue",
   "Environmental flows",
-  "Delta estuary status",
+  "Delta ecology",
   "Freshwater for Delta exports",
+  "Freshwater for in-Delta uses",
   "Reservoir storage",
   "Groundwater storage",
-  "Winter-run Chinook salmon abundance",
+  "Salmon abundance",
 ] as const
 
 export type Outcome = (typeof OUTCOMES)[number]
 
-// Outcome definitions for tooltips
-export const outcomeDefinitions: Record<string, string> = {
-  "Community deliveries":
-    "Water delivered to community water systems for residential, commercial, and industrial use",
-  "Agricultural revenue": "Impact on agricultural production and revenue",
-  "Environmental flows":
-    "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
-  "Delta estuary status":
-    "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
-  "Freshwater for Delta exports":
-    "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
-  "Reservoir storage":
-    "Amount of water stored in California's major reservoir systems each spring",
-  "Groundwater storage":
-    "Amount of water stored in underground aquifer systems.",
-  "Winter-run Chinook salmon abundance":
-    "Population levels of Winter-run Chinook salmon in the Sacramento River.",
+// Import API functions
+import {
+  fetchTierDefinitions,
+  getTierMapping,
+  mapShortCodeToDisplayName,
+} from "../api/tierApi"
+
+// Outcome definitions (fetched from API)
+export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
+  try {
+    const [apiDefinitions, tierMapping] = await Promise.all([
+      fetchTierDefinitions(),
+      getTierMapping(),
+    ])
+
+    // Convert API short codes to display names
+    const definitions: Record<string, string> = {}
+    Object.entries(apiDefinitions).forEach(([shortCode, description]) => {
+      const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
+      definitions[displayName] = description
+    })
+
+    return definitions
+  } catch (error) {
+    console.error("Failed to fetch tier definitions:", error)
+    // Fallback to hard-coded definitions
+    return {
+      "Community deliveries":
+        "Water delivered to community water systems for residential, commercial, and industrial use",
+      "Agricultural revenue": "Impact on agricultural production and revenue",
+      "Environmental flows":
+        "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
+      "Delta ecology":
+        "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
+      "Freshwater for Delta exports":
+        "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
+      "Freshwater for in-Delta uses":
+        "Water used within the Delta region for local agricultural, municipal, and environmental needs",
+      "Reservoir storage":
+        "Amount of water stored in California's major reservoir systems each spring",
+      "Groundwater storage":
+        "Amount of water stored in underground aquifer systems.",
+      "Salmon abundance":
+        "Population levels of Winter-run Chinook salmon in the Sacramento River.",
+    }
+  }
 }
+
+// For backwards compatibility, export the function result
+// TODO: use React Query or SWR to call getOutcomeDefinitions()
+export const outcomeDefinitions = getOutcomeDefinitions()
 
 // Tier value definitions for each outcome
 export const outcomeTierValues: Record<
@@ -60,7 +94,7 @@ export const outcomeTierValues: Record<
       "Existing flow requirements: Minimum flow constraints for current operations met in 50% of years.",
     tier4: "No function: None of the above thresholds met.",
   },
-  "Delta estuary status": {
+  "Delta ecology": {
     tier1:
       "Scenario scores in the top 25% based on yearly evaluation of ecosystem indicators: low SAV, high turbidity, fresh conditions, expanded microhabitats in most years.",
     tier2:
@@ -80,6 +114,16 @@ export const outcomeTierValues: Record<
     tier4:
       "Average salinity greater than 2500 uS/cm for 2 or more months in any year.",
   },
+  "Freshwater for in-Delta uses": {
+    tier1:
+      "Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months.",
+    tier2:
+      "Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months.",
+    tier3:
+      "Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months.",
+    tier4:
+      "Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months.",
+  },
   "Reservoir storage": {
     tier1: "Storage ≥ top threshold for at least 90% of years.",
     tier2: "Storage ≥ middle threshold for at least 67% of years.",
@@ -94,7 +138,7 @@ export const outcomeTierValues: Record<
     tier3: "Groundwater trend declining at moderate rate.",
     tier4: "Groundwater trend declining severely.",
   },
-  "Winter-run Chinook salmon abundance": {
+  "Salmon abundance": {
     tier1:
       "Strong growth: At least 80% chance population grows to 8x current size.",
     tier2:
