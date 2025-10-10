@@ -10,7 +10,7 @@ export default function SmoothTabs() {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    const { activeTab, setActiveTab, autoAdvanceEnabled, setAutoAdvanceEnabled } = useTabs()
+    const { activeTab, setActiveTab } = useTabs()
 
     // Read ?tab= from URL and convert it to a tabKey
     const tabFromUrl = useMemo<TabKey | null>(() => {
@@ -71,11 +71,10 @@ export default function SmoothTabs() {
                 style={{
                     display: 'flex',
                     width: '100%',
-                    borderBottom: '2px solid #000000',
                     pointerEvents: 'auto'
                 }}
             >
-                {TABS.map(({ key, label }) => {
+                {TABS.map(({ key, label, panelColor }) => {
                     const selected = key === activeTab
                     return (
                         <button
@@ -92,12 +91,10 @@ export default function SmoothTabs() {
                                 position: 'relative',
                                 padding: '12px 16px',
                                 border: 'none',
-                                background: 'transparent',
+                                background: panelColor,
                                 cursor: 'pointer',
                                 fontWeight: 600,
                                 textTransform: 'uppercase',
-                                letterSpacing: '0.02em',
-                                borderBottom: selected ? '2px solid transparent' : '2px solid #e5e7eb',
                             }}
                         >
                             {selected && (
@@ -110,7 +107,7 @@ export default function SmoothTabs() {
                                         right: 0,
                                         bottom: -2,
                                         height: 2,
-                                        background: 'var(--accent, #2563eb)',
+                                        background: `var(--accent, ${panelColor})`,
                                         borderRadius: 2,
                                     }}
                                 />
