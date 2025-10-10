@@ -16,7 +16,7 @@ export default function TabPanel({ tabKey, children, className, selfScroll = fal
         <div
             id={`panel-${tabKey}`}
             role='tabpanel'
-            aria-labeledby={`tab-${tabKey}`}
+            aria-labelledby={`tab-${tabKey}`}
             className={className}
             ref={containerRef}
             style={selfScroll ? { overflow: 'auto', maxHeight: 'calc(100dvh - 120px)' } : undefined}

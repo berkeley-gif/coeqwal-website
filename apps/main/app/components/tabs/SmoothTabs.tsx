@@ -1,30 +1,48 @@
 'use client'
 
 import { motion } from '@repo/motion'
-import { useEffect } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useMemo } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { TABS, TAB_ORDER, TabKey } from '../../types/tabs'
 import { useTabs } from '../../context/Tabs'
-
-const tabToPath = (tab: TabKey) => `/${tab}`
 
 export default function SmoothTabs() {
     const router = useRouter()
     const pathname = usePathname()
+    const searchParams = useSearchParams()
     const { activeTab, setActiveTab, autoAdvanceEnabled, setAutoAdvanceEnabled } = useTabs()
 
-    // Read /<tab> from URL and align the state on load
+    // Read ?tab= from URL and convert it to a tabKey
+    const tabFromUrl = useMemo<TabKey | null>(() => {
+        const qp = searchParams?.get('tab')
+        return qp && TAB_ORDER.includes(qp as TabKey) ? (qp as TabKey) : null
+    }, [searchParams])
+
+    // Set the active tab from URL or set the URL from tab
     useEffect(() => {
-        const seg = pathname?.split('/').filter(Boolean).at(-1)
-
-        if (seg && TAB_ORDER.includes(seg as TabKey)) setActiveTab(seg as TabKey)
-    }, [pathname, setActiveTab])
-
-    const onSelect = (tab: TabKey | undefined) => {
-        if (tab) {
-            setActiveTab(tab)
-            router.replace(tabToPath(tab))
+        // If URL has a ?tab=... -> set the active tab
+        if (tabFromUrl && tabFromUrl !== activeTab) {
+            setActiveTab(tabFromUrl)
         }
+    }, [tabFromUrl, activeTab, setActiveTab])
+
+
+    // Write ?tab= ONLY if it changes (prevents feedback loops)
+    const replaceTabParam = (tab: TabKey) => {
+        if (searchParams?.get('tab') === tab) return
+
+        const sp = new URLSearchParams(searchParams?.toString())
+        sp.set('tab', tab)
+        router.replace(`${pathname}?${sp.toString()}`, { scroll: false })
+    }
+
+
+    const onSelect = (tab: TabKey) => {
+        if (tab !== activeTab) {
+            setActiveTab(tab)
+        }
+
+        replaceTabParam(tab)
     }
 
     // Keyboard support A11y: ArrowLeft/Right, Home/End
@@ -40,7 +58,9 @@ export default function SmoothTabs() {
     return (
         <div id="tabs"
             style={{
-                width: '100%'
+                position: 'sticky',
+                top: 0,
+                zIndex: 1000,
             }}
         >
             <div
@@ -49,65 +69,57 @@ export default function SmoothTabs() {
                 onKeyDown={handleKeyDown}
                 className="tab-container"
                 style={{
-                    margin: 'auto',
                     display: 'flex',
                     width: '100%',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '10px'
+                    borderBottom: '2px solid #000000',
+                    pointerEvents: 'auto'
                 }}
             >
-                <div className="tabs"
-                    style={{
-                        position: 'relative',
-                        display: 'flex',
-                        gap: '10px',
-                    }}
-                >
-                    {TABS.map(({ key, label }) => {
-                        const selected = key === activeTab
-
-                        return (
-                            <button
-                                key={key}
-                                role='tab'
-                                aria-selected={selected}
-                                aria-constrols={`panel-${key}`}
-                                id={`tab-${key}`}
-                                onClick={() => onSelect(key)}
-                                className="tab__button"
-                                style={{
-                                    position: 'relative',
-                                    zIndex: 10,
-                                    cursor: 'pointer',
-
-                                }}
-                            >
-                                {selected && (
-                                    <motion.span
-                                        layoutId='tab-pill'
-                                        className='tab__pill'
-                                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                                        style={{ position: 'absolute', background: 'var(--accent, white)' }}
-                                    />
-                                )}
-                                {label}
-                            </button>
-                        )
-                    })}
-                </div>
-
-                {/* UX Toggle for auto-advance behavior */}
-                <label
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center'
-                    }}>
-                    <input type="checkbox" checked={autoAdvanceEnabled} onChange={(e) => setAutoAdvanceEnabled(e.target.checked)} />
-                    Auto-advance
-                </label>
+                {TABS.map(({ key, label }) => {
+                    const selected = key === activeTab
+                    return (
+                        <button
+                            key={key}
+                            role="tab"
+                            aria-selected={selected}
+                            aria-controls={`panel-${key}`}
+                            id={`tab-${key}`}
+                            onClick={() => onSelect(key)}
+                            type="button"
+                            tabIndex={selected ? 0 : -1}
+                            style={{
+                                flex: 1,
+                                position: 'relative',
+                                padding: '12px 16px',
+                                border: 'none',
+                                background: 'transparent',
+                                cursor: 'pointer',
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.02em',
+                                borderBottom: selected ? '2px solid transparent' : '2px solid #e5e7eb',
+                            }}
+                        >
+                            {selected && (
+                                <motion.span
+                                    layoutId="seg-pill"
+                                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                                    style={{
+                                        position: 'absolute',
+                                        left: 0,
+                                        right: 0,
+                                        bottom: -2,
+                                        height: 2,
+                                        background: 'var(--accent, #2563eb)',
+                                        borderRadius: 2,
+                                    }}
+                                />
+                            )}
+                            {label}
+                        </button>
+                    )
+                })}
             </div>
-        </div >
+        </div>
     )
-
 }
