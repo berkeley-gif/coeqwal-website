@@ -200,6 +200,7 @@ export function useScenarioTiers(scenarioId: string | null) {
 export function useMultipleScenarioTiers() {
   const theme = useTheme()
 
+  // Fetch all scenarios in parallel with consistent keys
   const s0020Result = useSWR(`/api/tiers/scenarios/s0020/tiers`, () =>
     fetchScenarioTiers("s0020"),
   )
@@ -222,11 +223,13 @@ export function useMultipleScenarioTiers() {
     isLoading: mappingLoading,
   } = useSWR("/api/tiers/mapping", getTierMapping)
 
+  // Memoize theme colors to prevent recalculation
+  const themeColors = useMemo(() => getThemeColors(theme), [theme])
+
   // Convert all scenario data to chart format
   const allChartData = useMemo(() => {
     if (!tierMapping) return {}
 
-    const themeColors = getThemeColors(theme)
     const result: Record<string, Record<string, Array<ChartDataPoint>>> = {}
 
     // Process each scenario using helper function
@@ -250,7 +253,13 @@ export function useMultipleScenarioTiers() {
       )
 
     return result
-  }, [s0020Result.data, s0021Result.data, s0011Result.data, tierMapping, theme])
+  }, [
+    s0020Result.data,
+    s0021Result.data,
+    s0011Result.data,
+    tierMapping,
+    themeColors,
+  ])
 
   // Get outcome names from first scenario (structure should be same)
   const outcomeNames = useMemo(() => {

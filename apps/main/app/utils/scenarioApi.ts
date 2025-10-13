@@ -1,7 +1,6 @@
-import type { ScenariosResponse } from "../types/scenarios"
+import type { ScenariosResponse } from "../types/scenarioDownloads"
 
-const SCENARIOS_API_URL =
-  "https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/scenarios"
+const SCENARIOS_API_URL = "https://api.coeqwal.org/scenarios"
 
 /**
  * Fetch scenarios from AWS API
@@ -36,5 +35,5 @@ export function getDownloadUrl(
   scenarioId: string,
   fileType: "zip" | "output" | "sv",
 ): string {
-  return `https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/download?scenario=${scenarioId}&type=${fileType}`
+  return `https://api.coeqwal.org/download?scenario=${scenarioId}&type=${fileType}`
 }
