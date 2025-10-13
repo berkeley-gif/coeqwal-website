@@ -4,8 +4,6 @@ import { Box, Typography, useTheme, Divider, Stack } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
 import {
   glossaryTerms,
-  type GlossaryTerm,
-  type TierInfo,
 } from "../../../lib/glossary"
 import React from "react"
 

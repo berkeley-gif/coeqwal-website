@@ -9,9 +9,7 @@ import {
   WaterIcon,
   SettingsIcon,
   EngineeringIcon,
-  BarChartIcon,
   LocationOnIcon,
-  OpacityIcon,
 } from "../mui-components"
 // Import additional icons directly from @mui/icons-material
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance"
