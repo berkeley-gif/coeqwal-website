@@ -3,19 +3,10 @@ import { Box, Typography, useTheme, InfoIcon, Theme } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
+import { useExploreUserWorkflowStore } from "@repo/state"
 import OutcomeTooltip from "./OutcomeTooltip"
 
 interface StrategyGridProps {
-  showMapView: boolean
-  showOnlyChosen: boolean
-  showDefinitions: boolean
-  chosenStrategies: string[]
-  toggleStrategyChoice: (value: string) => void
-  setMapView: (show: boolean) => void
-  setShowOnlyChosen: (show: boolean) => void
-  setShowDefinitions: (show: boolean) => void
-  selectedOutcomes: Record<string, string | null>
-  onOutcomeSelect: (strategyValue: string, outcome: string) => void
   getChartDataForStrategy: (
     strategyValue: string,
   ) => Record<string, Array<{ label: string; color: string; value: number }>>
@@ -25,6 +16,7 @@ interface StrategyGridProps {
     displayName: string
     isActive: boolean
   }>
+  onOutcomeSelect: (strategyValue: string, outcome: string) => void
 }
 
 // Reusable styles, eventually use theme?
@@ -149,18 +141,24 @@ const gridStyles = {
 
 // Strategy Grid component (memoized)
 const StrategyGrid = React.memo(function StrategyGridComponent({
-  showMapView,
-  showOnlyChosen,
-  showDefinitions,
-  chosenStrategies,
-  toggleStrategyChoice,
-  setMapView,
-  selectedOutcomes,
-  onOutcomeSelect,
   getChartDataForStrategy,
   outcomeNames,
+  onOutcomeSelect,
 }: StrategyGridProps) {
   const theme = useTheme()
+
+  // Get all necessary state from the store
+  const {
+    explore: {
+      showMapView,
+      showOnlyChosen,
+      showDefinitions,
+      chosenStrategies,
+      selectedOutcomes,
+    },
+    setMapView,
+    toggleStrategyChoice,
+  } = useExploreUserWorkflowStore()
 
   return (
     <Box sx={gridStyles.container(showMapView, theme)}>

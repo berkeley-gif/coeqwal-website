@@ -20,7 +20,7 @@ import { Header } from "../components/Header"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { LeadingMarkerText, ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
-import type { Scenario } from "../types/scenarios"
+import type { Scenario } from "../types/scenarioDownloads"
 import { getDownloadUrl } from "../utils/scenarioApi"
 
 export default function DataPage() {
