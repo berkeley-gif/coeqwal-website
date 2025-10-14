@@ -1,14 +1,15 @@
 'use client'
 
+import { useMemo, useEffect } from "react"
 import { AnimatePresence, motion } from '@repo/motion'
-import dynamic from 'next/dynamic'
-
-import { useEffect, useMemo } from 'react'
-import { useAutoAdvanceTabs } from '../../hooks/useAutoAdvance'
 import { useTabs } from '../../context/Tabs'
 import { TABS, TabKey } from '../../types/tabs'
 import TabPanel from '../../components/tabs/TabPanel'
 import AutoHeight from '../../components/common/AutoHeight'
+import { useScrollTabsIntoViewOnChange } from '../../hooks/useScrollTabsIntoViewOnChange'
+
+import LearnPanel from '../tabPanels/Learn'
+import ExplorePanel from '../tabPanels/Explore'
 
 const panelVariants = {
     enter: { opacity: 0, x: 30 },
@@ -16,10 +17,19 @@ const panelVariants = {
     exit: { opacity: 0, x: -30 }
 }
 
-export default function TabPanels() {
-    const { activeTab } = useTabs()
+type Props = {
+    tabsRef: React.RefObject<HTMLDivElement>
+}
 
-    useAutoAdvanceTabs({ idleMs: 260, fastPathShortPanels: true })
+export default function TabPanels() {
+    const { state, panelRef } = useTabs()
+    const { activeTab } = state
+
+
+    useScrollTabsIntoViewOnChange({
+        behavior: 'smooth',
+        offsetPx: 0
+    })
 
     useEffect(() => {
         console.log('activeTab: ', activeTab)
@@ -33,23 +43,22 @@ export default function TabPanels() {
         switch (tab) {
             case 'learn':
                 return (
-                    <TabPanel tabKey='learn' selfScroll>
-                        <h2>Learn</h2>
-                        <p style={{ height: '2000px' }}>Intro content… (replace with real copy)</p>
+                    <TabPanel tabKey='learn'>
+                        <LearnPanel />
                     </TabPanel>
                 )
             case 'explore':
                 return (
-                    <TabPanel tabKey='explore' selfScroll>
-                        <h2>Explore</h2>
-                        <p style={{ height: '500px' }}>Explore content… (replace with real copy)</p>
+                    <TabPanel tabKey='explore'>
+                        <ExplorePanel />
+
                     </TabPanel>
                 )
             case 'empower':
                 return (
-                    <TabPanel tabKey='empower' selfScroll>
+                    <TabPanel tabKey='empower'>
                         <h2>Empower</h2>
-                        <p style={{ height: '300px' }}>Empower content… (replace with real copy)</p>
+                        <p style={{ height: '500px' }}>Coming soon...</p>
                     </TabPanel>
                 )
         }
@@ -68,6 +77,7 @@ export default function TabPanels() {
                 <AnimatePresence mode='wait' initial={false}>
                     <motion.div
                         key={activeTab}
+                        ref={panelRef}
                         variants={panelVariants}
                         initial='center'
                         animate='center'
