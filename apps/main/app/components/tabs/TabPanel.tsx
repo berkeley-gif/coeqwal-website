@@ -1,32 +1,25 @@
 'use client'
 
-import { useRef } from 'react'
+import { forwardRef, type ReactNode } from 'react'
 
 type Props = {
     tabKey: string
     children: React.ReactNode
-    className?: string
-    selfScroll?: boolean
 }
-
-export default function TabPanel({ tabKey, children, className, selfScroll = false }: Props) {
-    const containerRef = useRef<HTMLDivElement | null>(null)
-
-    return (
+const TabPanel = forwardRef<HTMLDivElement, Props>(
+    ({ tabKey, children }, ref) => (
         <div
+            ref={ref}
+            role="tabpanel"
             id={`panel-${tabKey}`}
-            role='tabpanel'
             aria-labelledby={`tab-${tabKey}`}
-            className={className}
-            ref={containerRef}
-            style={
-                selfScroll ? { overflow: 'auto', maxHeight: 'calc(100dvh - 120px)' } : undefined
-            }
-            tabIndex={-1}
+            style={{ padding: '2rem' }}
         >
-            <div aria-hidden data-sentinel='top' />
             {children}
-            <div aria-hidden data-sentinel='bottom' />
-        </div >
+        </div>
     )
-}
+)
+
+TabPanel.displayName = 'TabPanel'
+
+export default TabPanel
