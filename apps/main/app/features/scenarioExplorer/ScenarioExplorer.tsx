@@ -11,7 +11,14 @@ import {
   FormControl,
   TextField,
 } from "@repo/ui/mui"
-import { DashboardPanel, DashboardGrid, DashboardCardContainer } from "@repo/ui"
+import { 
+  DashboardPanel, 
+  DashboardGrid, 
+  DashboardCardContainer, 
+  SectionHeader,
+  DocumentListIcon,
+  MapIcon as MapViewIcon,
+} from "@repo/ui"
 import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { motion } from "@repo/motion"
 import { hydroclimateOptions } from "../../lib/scenarios"
@@ -108,6 +115,21 @@ export default function ScenarioExplorer() {
             xl: "100%",
           }}
         >
+          {/* Section header */}
+          <SectionHeader variant="h5">
+            Choose water management strategies to explore
+          </SectionHeader>
+          
+          <Typography 
+            variant="body2" 
+            sx={{
+              ml: 0.5,
+              mb: theme.spacing(4),
+            }}
+          >
+            Use these descriptions to choose water management strategies to explore in more depth.
+          </Typography>
+
           {/* Strategy Explorer */}
           {!showMapView && (
             <motion.div

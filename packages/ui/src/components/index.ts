@@ -106,3 +106,6 @@ export type {
 // Scenario components
 export { default as ScenarioTile } from "./scenario/ScenarioTile"
 export type { GlyphVariant } from "./scenario/ScenarioTile"
+
+// Custom icons
+export * from "./icons/DocumentIcons"
