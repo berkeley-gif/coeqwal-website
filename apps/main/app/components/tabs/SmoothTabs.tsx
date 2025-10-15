@@ -13,8 +13,8 @@ export default function SmoothTabs() {
     const { activeTab } = state
     const { navigateToTab } = useTabNavigation()
 
-    const onSelect = (tab: TabKey) => {
-        if (tab !== activeTab) {
+    const onSelect = (tab: TabKey | undefined) => {
+        if (tab && tab !== activeTab) {
             hasEnteredTabsRef.current = true
             navigateToTab(tab)
         }
