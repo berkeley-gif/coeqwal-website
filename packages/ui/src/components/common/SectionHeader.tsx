@@ -4,7 +4,7 @@ import { Typography, useTheme, TypographyProps } from "../.."
 
 type SectionHeaderVariant = "h5" | "h4" | "h3" | "subtitle1" | "subtitle2"
 
-export interface SectionHeaderProps extends Omit<TypographyProps, 'variant'> {
+export interface SectionHeaderProps extends Omit<TypographyProps, "variant"> {
   children: React.ReactNode
   variant?: SectionHeaderVariant
 }

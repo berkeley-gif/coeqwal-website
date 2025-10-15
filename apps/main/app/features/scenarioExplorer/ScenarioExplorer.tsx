@@ -11,10 +11,10 @@ import {
   FormControl,
   TextField,
 } from "@repo/ui/mui"
-import { 
-  DashboardPanel, 
-  DashboardGrid, 
-  DashboardCardContainer, 
+import {
+  DashboardPanel,
+  DashboardGrid,
+  DashboardCardContainer,
   SectionHeader,
   DocumentListIcon,
   MapIcon as MapViewIcon,
@@ -119,15 +119,16 @@ export default function ScenarioExplorer() {
           <SectionHeader variant="h5">
             Choose water management strategies to explore
           </SectionHeader>
-          
-          <Typography 
-            variant="body2" 
+
+          <Typography
+            variant="body2"
             sx={{
               ml: 0.5,
               mb: theme.spacing(4),
             }}
           >
-            Use these descriptions to choose water management strategies to explore in more depth.
+            Use these descriptions to choose water management strategies to
+            explore in more depth.
           </Typography>
 
           {/* Strategy Explorer */}
