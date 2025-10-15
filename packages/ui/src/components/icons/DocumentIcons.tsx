@@ -1,0 +1,170 @@
+"use client"
+
+import { Box, useTheme } from "../.."
+
+interface DocumentIconProps {
+  active?: boolean
+  size?: number
+  sx?: any
+}
+
+/**
+ * Document icon with 3 bulleted lines -- represents "show all" or "list view"
+ */
+export function DocumentListIcon({ active = false, size = 36, sx }: DocumentIconProps) {
+  const theme = useTheme()
+  
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        color: active ? theme.palette.blue.bright : theme.palette.grey[400],
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "color 0.2s ease",
+        ...sx,
+      }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+           style={{ width: "100%", height: "100%", marginRight: "-12px" }}>
+        <rect x="5" y="4" width="14" height="16" rx="2"/>
+        <circle cx="8" cy="9" r="0.5" fill="currentColor"/>
+        <path d="M10.5 9h5"/>
+        <circle cx="8" cy="12" r="0.5" fill="currentColor"/>
+        <path d="M10.5 12h5"/>
+        <circle cx="8" cy="15" r="0.5" fill="currentColor"/>
+        <path d="M10.5 15h5"/>
+      </svg>
+    </Box>
+  )
+}
+
+/**
+ * Document icon with 2 checked lines -- represents "show only chosen" or filtered subset
+ */
+export function DocumentCheckedIcon({ active = false, size = 36, sx }: DocumentIconProps) {
+  const theme = useTheme()
+  
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        color: active ? theme.palette.blue.bright : theme.palette.grey[400],
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "color 0.2s ease",
+        ...sx,
+      }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+           style={{ width: "100%", height: "100%" }}>
+        <rect x="5" y="4" width="14" height="16" rx="2"/>
+        <path d="M7 9l1 1 1.5-1.5" strokeWidth="1.5"/>
+        <path d="M11 9h4.5"/>
+        <path d="M7 12l1 1 1.5-1.5" strokeWidth="1.5"/>
+        <path d="M11 12h4.5"/>
+      </svg>
+    </Box>
+  )
+}
+
+/**
+ * Document icon with 3 lines (bold top line) -- represents "show definitions"
+ */
+export function DocumentExpandedIcon({ active = false, size = 36, sx }: DocumentIconProps) {
+  const theme = useTheme()
+  
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        color: active ? theme.palette.blue.bright : theme.palette.grey[400],
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "color 0.2s ease",
+        ...sx,
+      }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+           style={{ width: "100%", height: "100%", marginRight: "-12px" }}>
+        <rect x="5" y="4" width="14" height="16" rx="2"/>
+        <path d="M8 8h8" strokeWidth="2"/>
+        <path d="M8 11.5h8M8 14.5h5"/>
+      </svg>
+    </Box>
+  )
+}
+
+/**
+ * Document icon with 1 line (bold top line) -- represents "hide definitions"  
+ */
+export function DocumentCollapsedIcon({ active = false, size = 36, sx }: DocumentIconProps) {
+  const theme = useTheme()
+  
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        color: active ? theme.palette.blue.bright : theme.palette.grey[400],
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "color 0.2s ease",
+        ...sx,
+      }}
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"
+           xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+           style={{ width: "100%", height: "100%" }}>
+        <rect x="5" y="4" width="14" height="16" rx="2"/>
+        <path d="M8 8h8" strokeWidth="2"/>
+      </svg>
+    </Box>
+  )
+}
+
+/**
+ * Map icon with location pin and geographic features
+ */
+export function MapIcon({ active = false, size = 44, sx }: DocumentIconProps) {
+  const theme = useTheme()
+  
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        color: active ? theme.palette.blue.bright : theme.palette.grey[400],
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        transition: "color 0.2s ease",
+        ...sx,
+      }}
+    >
+      <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"
+           strokeWidth="1.1" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+           style={{ width: "100%", height: "100%" }}>
+        <path d="M12 2c-3 0-5.5 2.4-5.5 5.5 0 3.8 5.5 9 5.5 9s5.5-5.2 5.5-9c0-3.1-2.5-5.5-5.5-5.5zm0 7.5c-1 0-1.8-.8-1.8-1.8s.8-1.8 1.8-1.8 1.8.8 1.8 1.8-.8 1.8-1.8 1.8z" stroke="none"/>
+        <rect x="3.5" y="12" width="17" height="8" rx="1.5" fill="none"/>
+        <path d="M18 12.5h-1.5c-.02.35-.1.7-.2.95.05 0 .1.01.15.01.3.01.6-.02.9.01.6.07 1.1.45 1.35.95l-.24-1.7c-.02-.16-.16-.27-.33-.27h-.1z" opacity="0.7" stroke="none"/>
+        <path d="M7 15.5c.33-.18.75-.2 1.1-.11.37.07.72.22 1.08.34.36.12.75.22 1.12.17.35-.04.68-.2.92-.45.31-.32.46-.84.2-1.2-.07-.1-.17-.17-.28-.22l-.28.45c-.21.32-.57.52-.95.52s-.75-.2-.95-.52l-.44-.7c-.6-.05-1.2-.21-1.65-.6-.22-.19-.4-.44-.65-.6-.53-.34-1.2-.22-1.82-.08l-.8 6c-.03.2.14.38.34.38h4.42c.05-.54-.19-1.02-.61-1.37-.22-.18-.49-.3-.75-.46-.23-.16-.45-.38-.52-.66-.08-.37.15-.76.49-.95z" opacity="0.9" stroke="none"/>
+        <path d="M16.5 17.5c-.24-.19-.32-.68-.74-.62-.67.09-.11 1-.81 1.29-.22.09-.4.22-.4.49 0 .51.58.73.97.52.21-.11.28-.3.51-.42.37-.2.93.1 1.28-.15.28-.2.32-.65.05-.86-.24-.2-.61-.06-.86-.26z" opacity="0.8" stroke="none"/>
+      </svg>
+    </Box>
+  )
+}

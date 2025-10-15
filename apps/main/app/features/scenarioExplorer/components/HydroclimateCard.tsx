@@ -1,13 +1,12 @@
 import React from "react"
 import {
-  Typography,
   useTheme,
   Radio,
   RadioGroup,
   FormControlLabel,
   FormControl,
 } from "@repo/ui/mui"
-import { Card } from "@repo/ui"
+import { Card, SectionHeader } from "@repo/ui"
 import { hydroclimateOptions } from "../../../lib/scenarios"
 
 /**
@@ -25,16 +24,12 @@ export default function HydroclimateCard() {
         padding: theme.spacing(theme.cards.spacing.standard),
       }}
     >
-      <Typography
+      <SectionHeader 
         variant="subtitle1"
-        sx={{
-          letterSpacing: 0.5,
-          mb: theme.spacing(theme.cards.spacing.standard),
-          fontWeight: 400,
-        }}
+        sx={{ display: "block" }}
       >
         See how outcomes change with a different hydroclimate
-      </Typography>
+      </SectionHeader>
 
       <FormControl component="fieldset">
         <RadioGroup
