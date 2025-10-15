@@ -19,6 +19,7 @@ import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { useExploreUserWorkflowStore } from "@repo/state"
 import OutcomeTooltip from "./OutcomeTooltip"
+import TogglePair from "./TogglePair"
 
 interface StrategyGridProps {
   getChartDataForStrategy: (
@@ -61,7 +62,7 @@ const gridStyles = {
     height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
     cursor: "pointer",
   }),
-  outcomeChartsContainer: (theme: any) => ({
+  outcomeChartsContainer: (theme: Theme) => ({
     gridColumn: { xs: "1 / -1", lg: "auto" },
     display: "grid",
     gridTemplateColumns: {
@@ -160,34 +161,26 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           >
             <Typography variant="subtitle2">Strategy</Typography>
 
-            {/* Toggle icons for show checked / show all */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0,
-                cursor: "pointer",
-              }}
-              onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-            >
-              <DocumentListIcon active={!showOnlyChosen} size={40} />
-              <DocumentCheckedIcon active={showOnlyChosen} size={40} />
-            </Box>
+            <TogglePair
+              leftIcon={<DocumentListIcon active={!showOnlyChosen} size={40} />}
+              rightIcon={
+                <DocumentCheckedIcon active={showOnlyChosen} size={40} />
+              }
+              onLeftClick={() => setShowOnlyChosen(false)}
+              onRightClick={() => setShowOnlyChosen(true)}
+            />
 
-            {/* Toggle icons for show/hide definitions */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0,
-                cursor: "pointer",
-                ml: -1,
-              }}
-              onClick={() => setShowDefinitions(!showDefinitions)}
-            >
-              <DocumentExpandedIcon active={showDefinitions} size={40} />
-              <DocumentCollapsedIcon active={!showDefinitions} size={40} />
-            </Box>
+            <TogglePair
+              leftIcon={
+                <DocumentExpandedIcon active={showDefinitions} size={40} />
+              }
+              rightIcon={
+                <DocumentCollapsedIcon active={!showDefinitions} size={40} />
+              }
+              onLeftClick={() => setShowDefinitions(true)}
+              onRightClick={() => setShowDefinitions(false)}
+              sx={{ ml: -1 }}
+            />
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", height: "56px" }}>
             <Typography variant="subtitle2">Key operations</Typography>
@@ -203,24 +196,21 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           >
             <Typography variant="subtitle2">Key outcomes</Typography>
 
-            {/* List vs Map view toggle */}
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-                cursor: "pointer",
                 padding: "2px 4px",
                 borderRadius: 1,
                 marginTop: "-20px",
-                "&:hover": {
-                  backgroundColor: theme.palette.grey[100],
-                },
+                "&:hover": { backgroundColor: theme.palette.grey[100] },
               }}
-              onClick={() => setMapView(!showMapView)}
             >
-              <DocumentListIcon active={!showMapView} size={52} />
-              <MapViewIcon active={showMapView} size={52} />
+              <TogglePair
+                leftIcon={<DocumentListIcon active={!showMapView} size={52} />}
+                rightIcon={<MapViewIcon active={showMapView} size={52} />}
+                onLeftClick={() => setMapView(false)}
+                onRightClick={() => setMapView(true)}
+                gap={0.5}
+              />
             </Box>
           </Box>
         </>
