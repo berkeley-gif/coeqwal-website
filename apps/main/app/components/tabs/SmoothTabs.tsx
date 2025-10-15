@@ -1,19 +1,22 @@
 'use client'
 
 import { motion } from '@repo/motion'
-import { TABS, TAB_ORDER, TabKey } from '../../types/tabs'
-import { useTabs, setActiveTab, setAutoAdvance } from '../../context/Tabs'
 import { Typography } from "@repo/ui/mui"
 
-export default function SmoothTabs() {
-    const { state, dispatch, tabsRef, scrollIntentRef } = useTabs()
-    const { activeTab, autoAdvanceEnabled } = state
+import { TABS, TAB_ORDER, TabKey } from '../../types/tabs'
+import { useTabs } from '../../context/Tabs'
+import { useTabNavigation } from '../../hooks/useTabNavigation'
 
+
+export default function SmoothTabs() {
+    const { state, tabsRef, hasEnteredTabsRef } = useTabs()
+    const { activeTab } = state
+    const { navigateToTab } = useTabNavigation()
 
     const onSelect = (tab: TabKey) => {
         if (tab !== activeTab) {
-            scrollIntentRef.current = 'user'
-            dispatch(setActiveTab(tab))
+            hasEnteredTabsRef.current = true
+            navigateToTab(tab)
         }
     }
 

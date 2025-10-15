@@ -1,12 +1,22 @@
 'use client'
 
-import { useMemo, useEffect } from "react"
+/**
+ * TabPanels
+ * - Renders the active tab's panel with a nice crossfade/slide.
+ * - Keeps URL <-> state in sync on load or on manual URL edits (deep-link safe).
+ */
+
+import { useMemo, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { AnimatePresence, motion } from '@repo/motion'
+
 import { useTabs } from '../../context/Tabs'
 import { TABS, TabKey } from '../../types/tabs'
 import TabPanel from '../../components/tabs/TabPanel'
-import AutoHeight from '../../components/common/AutoHeight'
-import { useScrollTabsIntoViewOnChange } from '../../hooks/useScrollTabsIntoViewOnChange'
+import AutoHeight from '../../../../../packages/ui/src/components/common/AutoHeight'
+import { useTabNavigation } from "../../hooks/useTabNavigation"
+import { useScrollTabsIntoViewOnChange } from "../../hooks/useScrollTabsIntoViewOnChange"
+import { useMarkTabsEnteredOnScroll } from '../../hooks/useMarkTabsEnteredOnScroll'
 
 import LearnPanel from '../tabPanels/Learn'
 import ExplorePanel from '../tabPanels/Explore'
@@ -17,24 +27,30 @@ const panelVariants = {
     exit: { opacity: 0, x: -30 }
 }
 
-type Props = {
-    tabsRef: React.RefObject<HTMLDivElement>
-}
-
 export default function TabPanels() {
+    const searchParams = useSearchParams()
     const { state, panelRef } = useTabs()
     const { activeTab } = state
+    const { navigateToTab } = useTabNavigation()
 
+    // Change url when entering tab
+    useMarkTabsEnteredOnScroll()
 
-    useScrollTabsIntoViewOnChange({
-        behavior: 'smooth',
-        offsetPx: 0
-    })
+    // Scroll to tab top on every tab change
+    useScrollTabsIntoViewOnChange({ behavior: 'smooth', offsetPx: 0 })
 
+    const didInitRef = useRef(false)
     useEffect(() => {
-        console.log('activeTab: ', activeTab)
-    }, [activeTab])
+        if (didInitRef.current) return
+        didInitRef.current = true
 
+        const urlTab = searchParams.get('tab') as TabKey | null
+        if (urlTab && urlTab !== activeTab) {
+            navigateToTab(urlTab)
+        }
+    }, []) // ← run exactly once
+
+    // Background color tied to active tab
     const panelColor: string = useMemo(() => {
         return TABS.find(t => t.key === activeTab)?.panelColor ?? 'fffff'
     }, [activeTab])
@@ -43,20 +59,28 @@ export default function TabPanels() {
         switch (tab) {
             case 'learn':
                 return (
-                    <TabPanel tabKey='learn'>
+                    <TabPanel
+                        tabKey='learn'
+                        ref={panelRef}
+                    >
                         <LearnPanel />
                     </TabPanel>
                 )
             case 'explore':
                 return (
-                    <TabPanel tabKey='explore'>
+                    <TabPanel
+                        tabKey='explore'
+                        ref={panelRef}
+                    >
                         <ExplorePanel />
-
                     </TabPanel>
                 )
             case 'empower':
                 return (
-                    <TabPanel tabKey='empower'>
+                    <TabPanel
+                        tabKey='empower'
+                        ref={panelRef}
+                    >
                         <h2>Empower</h2>
                         <p style={{ height: '500px' }}>Coming soon...</p>
                     </TabPanel>
@@ -77,7 +101,6 @@ export default function TabPanels() {
                 <AnimatePresence mode='wait' initial={false}>
                     <motion.div
                         key={activeTab}
-                        ref={panelRef}
                         variants={panelVariants}
                         initial='center'
                         animate='center'

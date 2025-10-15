@@ -1,56 +1,74 @@
 'use client'
 
+/**
+ * - Scrolls so the NEW panel's top sits just under the sticky tabs.
+ * - Skips first render (no jump on load).
+ * - Skips when (panel + tabs) fits in the viewport.
+ * - Uses a single rAF to let layout settle.
+ * - Clamps target to [0, maxScroll] to avoid overshoot at document end.
+ *
+ * Junior-friendly mental model:
+ *   1) Wait one frame so DOM has updated.
+ *   2) Measure panelTop and tabsHeight.
+ *   3) Scroll to panelTop - tabsHeight - offsetPx (but never < 0 or > maxScroll).
+ */
+
+
 import { useEffect, useRef } from "react"
-import { useTabs } from '../context/Tabs'
+import { useTabs, clamp } from '../context/Tabs'
 
 type Options = {
     behavior?: ScrollBehavior
+    // extra pixels to stop above the panel
     offsetPx?: number
 }
 
 export function useScrollTabsIntoViewOnChange({
     behavior = 'smooth',
-    offsetPx = 0
+    offsetPx = 0,
 }: Options) {
-    const { state, tabsRef, panelRef, scrollIntentRef } = useTabs()
+    const { state, tabsRef, panelRef, hasEnteredTabsRef } = useTabs()
     const { activeTab } = state
 
     // Track first run so we don't scroll to the tabs on initial page load
     const hasMountedRef = useRef(false)
 
     useEffect(() => {
-        // First effect after mount? Don't scroll
+        // don't do anything until user has entered the tabs area
+        if (!hasEnteredTabsRef.current) return
+
+        // First render? Don't scroll
         if (!hasMountedRef.current) {
             hasMountedRef.current = true
-            scrollIntentRef.current = 'none'
             return
         }
 
-        // Only scroll to the tabs when the last change was user-initiated
-        if (scrollIntentRef.current !== 'user') return
-
-        // Clear intent immediately so re-renders don't retrigger
-        scrollIntentRef.current = 'none'
+        const tabsEl = tabsRef.current
+        const panelEl = panelRef.current
+        if (!tabsEl || !panelEl) return
 
         const raf = requestAnimationFrame(() => {
-            const tabsEl = tabsRef.current
-            const panelEl = panelRef.current
-            if (!tabsEl || !panelEl) return
-
-            const panelDocY = panelEl.getBoundingClientRect().top + window.scrollY
+            const vh = window.innerHeight
             const tabsHeight = tabsEl.offsetHeight
-            const totalOffset = tabsHeight + offsetPx
+            const panelHeight = panelEl.scrollHeight
 
-            // Where the document should scroll to:
-            const targetY = Math.max(0, panelDocY - totalOffset)  // put tabs' top at top of viewport
+            // if panel + tabs fits on screen, no need to scroll
+            if (panelHeight + tabsHeight <= vh) return
 
-            // Micro-scroll guard: avoid jitter if already aligned
-            const epsilon = 2
+            // compute where to place the page so the panel top sits under the sticky tabs
+            const panelTopDoc = panelEl.getBoundingClientRect().top + window.scrollY
+            const rawTarget = panelTopDoc - (tabsHeight + offsetPx)
+
+            // clamp to valid scroll range and micro-jitter guard
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+            const targetY = clamp(rawTarget, 0, Math.max(0, maxScroll))
+
+            const epsilon = 1
             if (Math.abs(window.scrollY - targetY) > epsilon) {
                 window.scrollTo({ top: targetY, behavior })
             }
         })
 
         return () => cancelAnimationFrame(raf)
-    }, [activeTab, behavior, offsetPx, tabsRef, panelRef, scrollIntentRef])
+    }, [activeTab, behavior, offsetPx, tabsRef, panelRef, hasEnteredTabsRef])
 }
