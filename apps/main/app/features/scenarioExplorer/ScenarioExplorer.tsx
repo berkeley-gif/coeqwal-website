@@ -11,7 +11,17 @@ import {
   FormControl,
   TextField,
 } from "@repo/ui/mui"
-import { DashboardPanel, DashboardGrid, DashboardCardContainer } from "@repo/ui"
+import {
+  DashboardPanel,
+  DashboardGrid,
+  DashboardCardContainer,
+  SectionHeader,
+  DocumentListIcon,
+  DocumentCheckedIcon,
+  DocumentExpandedIcon,
+  DocumentCollapsedIcon,
+  MapIcon as MapViewIcon,
+} from "@repo/ui"
 import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { motion } from "@repo/motion"
 import { hydroclimateOptions } from "../../lib/scenarios"
@@ -24,6 +34,7 @@ import { useMapIntegration } from "./hooks/useMapIntegration"
 // Components
 import StrategyGrid from "./components/StrategyGrid"
 import HydroclimateCard from "./components/HydroclimateCard"
+import TogglePair from "./components/TogglePair"
 
 /**
  * ScenarioExplorer
@@ -108,6 +119,22 @@ export default function ScenarioExplorer() {
             xl: "100%",
           }}
         >
+          {/* Section header */}
+          <SectionHeader variant="h5">
+            Choose water management strategies to explore
+          </SectionHeader>
+
+          <Typography
+            variant="body2"
+            sx={{
+              ml: 0.5,
+              mb: theme.spacing(4),
+            }}
+          >
+            Use these descriptions to choose water management strategies to
+            explore in more depth.
+          </Typography>
+
           {/* Strategy Explorer */}
           {!showMapView && (
             <motion.div
@@ -231,79 +258,82 @@ export default function ScenarioExplorer() {
                   zIndex: 1000,
                 }}
               >
-                {/* Controls line */}
+                {/* Header row */}
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: {
-                      xs: "0.5fr minmax(200px, 3fr) minmax(80px, 1fr)",
-                      lg: "0.5fr minmax(300px, 4fr) 1fr minmax(540px, 9fr)",
-                    },
-                    gap: theme.spacing(theme.cards.spacing.standard),
-                    alignItems: "baseline",
-                    mb: 2,
+                    gridTemplateColumns:
+                      "auto minmax(0, 1fr) auto minmax(0, 1.5fr)",
+                    gap: theme.spacing(1),
+                    alignItems: "center",
+                    height: "48px",
+                    mb: 1,
                   }}
                 >
-                  {/* Left side controls */}
-                  <Box
-                    sx={{
-                      gridColumn: "1 / 4",
-                      display: "flex",
-                      alignItems: "baseline",
-                      gap: theme.spacing(theme.cards.spacing.standard),
-                    }}
-                  >
+                  {/* Empty first column (replaces Choose in table view) */}
+                  <Box />
+
+                  {/* Strategy column with toggles */}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <Typography variant="subtitle2">Strategy</Typography>
-                    <Typography
-                      variant="body2"
-                      onClick={() => setMapView(!showMapView)}
-                      sx={{
-                        cursor: "pointer",
-                        color: theme.palette.blue.bright,
-                        textDecoration: "none",
-                        fontSize: "0.8rem",
-                        "&:hover": { color: theme.palette.blue.darkest },
-                      }}
-                    >
-                      Back to list view
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      onClick={() => setShowOnlyChosen(!showOnlyChosen)}
-                      sx={{
-                        cursor: "pointer",
-                        color: theme.palette.blue.bright,
-                        textDecoration: "none",
-                        fontSize: "0.8rem",
-                        "&:hover": { color: theme.palette.blue.darkest },
-                      }}
-                    >
-                      {showOnlyChosen
-                        ? "Show all strategies"
-                        : "Show only chosen strategies"}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      onClick={() => setShowDefinitions(!showDefinitions)}
-                      sx={{
-                        cursor: "pointer",
-                        color: theme.palette.blue.bright,
-                        textDecoration: "none",
-                        fontSize: "0.8rem",
-                        "&:hover": { color: theme.palette.blue.darkest },
-                      }}
-                    >
-                      {showDefinitions
-                        ? "Hide definitions"
-                        : "Show definitions"}
-                    </Typography>
+
+                    <TogglePair
+                      leftIcon={
+                        <DocumentListIcon active={!showOnlyChosen} size={35} />
+                      }
+                      rightIcon={
+                        <DocumentCheckedIcon
+                          active={showOnlyChosen}
+                          size={35}
+                        />
+                      }
+                      onLeftClick={() => setShowOnlyChosen(false)}
+                      onRightClick={() => setShowOnlyChosen(true)}
+                    />
+
+                    <TogglePair
+                      leftIcon={
+                        <DocumentExpandedIcon
+                          active={showDefinitions}
+                          size={35}
+                        />
+                      }
+                      rightIcon={
+                        <DocumentCollapsedIcon
+                          active={!showDefinitions}
+                          size={35}
+                        />
+                      }
+                      onLeftClick={() => setShowDefinitions(true)}
+                      onRightClick={() => setShowDefinitions(false)}
+                    />
                   </Box>
 
-                  {/* Right side instruction */}
-                  <Box sx={{ gridColumn: "4 / -1" }}>
-                    <Typography variant="body2" sx={{ fontStyle: "italic" }}>
-                      Click on an outcome to view on the map
-                    </Typography>
+                  {/* Key operations column */}
+                  <Box>
+                    <Typography variant="subtitle2">Key operations</Typography>
+                  </Box>
+
+                  {/* Key outcomes column with view toggle */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      pl: 3,
+                    }}
+                  >
+                    <Typography variant="subtitle2">Key outcomes</Typography>
+
+                    <TogglePair
+                      leftIcon={
+                        <DocumentListIcon active={!showMapView} size={46} />
+                      }
+                      rightIcon={<MapViewIcon active={showMapView} size={46} />}
+                      onLeftClick={() => setMapView(false)}
+                      onRightClick={() => setMapView(true)}
+                      gap={0.4}
+                    />
                   </Box>
                 </Box>
 
