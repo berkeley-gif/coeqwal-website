@@ -24,10 +24,7 @@ export default function HydroclimateCard() {
         padding: theme.spacing(theme.cards.spacing.standard),
       }}
     >
-      <SectionHeader 
-        variant="subtitle1"
-        sx={{ display: "block" }}
-      >
+      <SectionHeader variant="subtitle1" sx={{ display: "block" }}>
         See how outcomes change with a different hydroclimate
       </SectionHeader>
 

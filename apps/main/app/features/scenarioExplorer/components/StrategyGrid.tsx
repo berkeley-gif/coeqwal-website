@@ -1,6 +1,13 @@
 import React from "react"
-import { Box, Typography, useTheme, InfoIcon, Theme, Checkbox } from "@repo/ui/mui"
-import { 
+import {
+  Box,
+  Typography,
+  useTheme,
+  InfoIcon,
+  Theme,
+  Checkbox,
+} from "@repo/ui/mui"
+import {
   InfoTooltip,
   DocumentListIcon,
   DocumentCheckedIcon,
@@ -34,9 +41,7 @@ const gridStyles = {
       xs: "auto minmax(0, 1fr) auto",
       lg: "auto minmax(0, 1fr) auto minmax(0, 1.5fr)",
     },
-    gap: showMapView
-      ? theme.spacing(1)
-      : theme.spacing(2),
+    gap: showMapView ? theme.spacing(1) : theme.spacing(2),
     alignItems: "start",
     width: "100%",
     ...(showMapView && {
@@ -136,17 +141,25 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               height: "56px",
             }}
           >
-            <Typography 
+            <Typography
               variant="subtitle2"
               sx={{
                 pl: theme.spacing(2),
               }}
             >
-              Choose</Typography>
+              Choose
+            </Typography>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, height: "56px" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              height: "56px",
+            }}
+          >
             <Typography variant="subtitle2">Strategy</Typography>
-            
+
             {/* Toggle icons for show checked / show all */}
             <Box
               sx={{
@@ -189,7 +202,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             }}
           >
             <Typography variant="subtitle2">Key outcomes</Typography>
-            
+
             {/* List vs Map view toggle */}
             <Box
               sx={{
@@ -278,7 +291,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   whiteSpace: "pre-line",
                 }}
               >
-                {strategy.value === "current-ops-historical-ag" 
+                {strategy.value === "current-ops-historical-ag"
                   ? "Current operations with\nhistorical agricultural land use" // hack to get desired line break
                   : strategy.label}
               </Typography>
