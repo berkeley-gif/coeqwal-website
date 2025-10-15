@@ -102,7 +102,7 @@ Change these values to update the theme across the site
 //
 
 // ===============================================================================
-// SPECS FOR THEME VALUES (need to be defined before theme creation)
+// SPECS FOR THEME VALUES
 // ===============================================================================
 
 const typeScale = {
@@ -158,7 +158,7 @@ const themeValues = {
     },
   },
 
-  // Color Palette - California Water theme
+  // Color palette
   palette: {
     // Core colors
     brand: {
@@ -797,14 +797,14 @@ const theme = createTheme({
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
       fontSize: "1.25rem", // 20px - matches body1
-      fontWeight: 500, // Medium weight to distinguish from body
+      fontWeight: 500,
       letterSpacing: "normal",
-      lineHeight: 1.5,
+      lineHeight: 1.4,
     },
     subtitle2: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "0.95rem", // 15.2px - matches body2
-      fontWeight: 500, // Medium weight to distinguish from body
+      fontSize: "1rem",
+      fontWeight: 500,
       letterSpacing: "normal",
       lineHeight: 1.6,
     },
@@ -1217,7 +1217,7 @@ const theme = createTheme({
           // Custom square checkbox using standardized form control base
           ...formControlBaseMixin,
           borderRadius: "2px",
-          border: `1px solid ${theme.palette.text.primary}`,
+          border: `2px solid ${theme.palette.text.primary}`,
           margin: theme.spacing(0.5),
           cursor: "pointer",
           "&:hover": {

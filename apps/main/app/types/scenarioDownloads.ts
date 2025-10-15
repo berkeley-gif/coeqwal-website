@@ -1,3 +1,5 @@
+// Types for scenario file downloads and API responses
+
 export interface ScenarioFile {
   key: string
   filename: string
