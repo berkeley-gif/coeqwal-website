@@ -69,12 +69,12 @@ export function MapProvider({ children }: { children: ReactNode }) {
   const withStyleLoaded = (operation: () => void) => {
     const map = mapRef.current?.getMap()
     if (!map) return
-    
+
     if (!map.isStyleLoaded()) {
-      map.once('styledata', operation)
+      map.once("styledata", operation)
       return
     }
-    
+
     operation()
   }
 
@@ -236,7 +236,7 @@ export function MapProvider({ children }: { children: ReactNode }) {
     addSource: (id, source) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getSource(id)) return
-      
+
       withStyleLoaded(() => {
         try {
           if (map.getSource(id)) return // Already added
@@ -270,11 +270,11 @@ export function MapProvider({ children }: { children: ReactNode }) {
     ) => {
       const map = mapRef.current?.getMap()
       if (!map || map.getLayer(id) || !map.getSource(source)) return
-      
+
       withStyleLoaded(() => {
         try {
           if (map.getLayer(id) || !map.getSource(source)) return // Already added or source missing
-          
+
           const { beforeId, ...otherProps } = others || {}
           const layer = {
             id,

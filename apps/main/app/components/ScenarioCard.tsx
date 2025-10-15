@@ -1,8 +1,8 @@
 "use client"
 
-import { Box, Typography, useTheme, Select, MenuItem } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton } from "@repo/ui"
-import { useDrawerStore, useGlyphSettingsStore } from "@repo/state"
+import { useDrawerStore } from "@repo/state"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
@@ -21,7 +21,6 @@ export default function ScenarioCard({
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
   const { selectedOutcome, setSelectedOutcome } = useCalSimToggle()
-  const glyphVariant = useGlyphSettingsStore((s) => s.variant)
 
   // Generate dummy data for current operations (copied from ScenarioExplorer)
   const generateDummyData = (outcomeIndex: number) => {
@@ -218,89 +217,6 @@ export default function ScenarioCard({
                       sx={{ color: theme.palette.blue.bright }}
                     />
                   </Box>
-                  {/* Glyph variant selector */}
-                  <Select
-                    size="small"
-                    value={glyphVariant}
-                    onChange={(e) =>
-                      useGlyphSettingsStore
-                        .getState()
-                        .setVariant(
-                          e.target.value as "bars" | "rose" | "quartile",
-                        )
-                    }
-                    sx={{
-                      fontSize: theme.typography.compact.caption.fontSize,
-                      minWidth: "100px",
-                      height: "32px",
-                      backgroundColor: theme.palette.common.white,
-                      borderRadius: theme.borderRadius.rounded,
-                      "& .MuiSelect-select": {
-                        padding: "6px 12px",
-                        display: "flex",
-                        alignItems: "center",
-                      },
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderWidth: "1px",
-                        borderColor: theme.palette.grey[300],
-                        borderRadius: theme.borderRadius.rounded,
-                      },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: theme.palette.blue.medium,
-                        borderWidth: "1px",
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: theme.palette.blue.bright,
-                        borderWidth: "2px",
-                        boxShadow: `0 0 0 1px ${theme.palette.blue.bright}20`,
-                      },
-                      "& .MuiSelect-icon": {
-                        color: theme.palette.grey[500],
-                        fontSize: "1.2rem",
-                        right: "8px",
-                      },
-                      "&:hover .MuiSelect-icon": {
-                        color: theme.palette.blue.medium,
-                      },
-                      "&.Mui-focused .MuiSelect-icon": {
-                        color: theme.palette.blue.bright,
-                      },
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          borderRadius: theme.borderRadius.rounded,
-                          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-                          border: `1px solid ${theme.palette.grey[200]}`,
-                          backgroundColor: theme.palette.common.white,
-                          mt: 0.5,
-                          "& .MuiMenuItem-root": {
-                            fontSize: theme.typography.compact.caption.fontSize,
-                            padding: "8px 16px",
-                            minHeight: "auto",
-                            backgroundColor: theme.palette.common.white,
-                            "&:hover": {
-                              backgroundColor: theme.palette.blue.bright + "10",
-                              color: theme.palette.blue.darkest,
-                            },
-                            "&.Mui-selected": {
-                              backgroundColor: theme.palette.blue.bright + "20",
-                              color: theme.palette.blue.darkest,
-                              fontWeight: 500,
-                              "&:hover": {
-                                backgroundColor:
-                                  theme.palette.blue.bright + "30",
-                              },
-                            },
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <MenuItem value="bars">Bars</MenuItem>
-                    <MenuItem value="rose">Rose</MenuItem>
-                    <MenuItem value="quartile">Quartile</MenuItem>
-                  </Select>
                 </Box>
 
                 <Box
@@ -368,7 +284,7 @@ export default function ScenarioCard({
                           theme.palette.tiers.tier4,
                         ]}
                         values={generateDummyData(outcomeIndex)}
-                        variant={glyphVariant}
+                        variant="bars"
                         size={60}
                       />
                       <Typography

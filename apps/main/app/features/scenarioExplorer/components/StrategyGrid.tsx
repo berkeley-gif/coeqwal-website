@@ -1,21 +1,27 @@
 import React from "react"
-import { Box, Typography, useTheme, InfoIcon, Theme } from "@repo/ui/mui"
-import { InfoTooltip } from "@repo/ui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  InfoIcon,
+  Theme,
+  Checkbox,
+} from "@repo/ui/mui"
+import {
+  InfoTooltip,
+  DocumentListIcon,
+  DocumentCheckedIcon,
+  DocumentExpandedIcon,
+  DocumentCollapsedIcon,
+  MapIcon as MapViewIcon,
+} from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
+import { useExploreUserWorkflowStore } from "@repo/state"
 import OutcomeTooltip from "./OutcomeTooltip"
+import TogglePair from "./TogglePair"
 
 interface StrategyGridProps {
-  showMapView: boolean
-  showOnlyChosen: boolean
-  showDefinitions: boolean
-  chosenStrategies: string[]
-  toggleStrategyChoice: (value: string) => void
-  setMapView: (show: boolean) => void
-  setShowOnlyChosen: (show: boolean) => void
-  setShowDefinitions: (show: boolean) => void
-  selectedOutcomes: Record<string, string | null>
-  onOutcomeSelect: (strategyValue: string, outcome: string) => void
   getChartDataForStrategy: (
     strategyValue: string,
   ) => Record<string, Array<{ label: string; color: string; value: number }>>
@@ -25,6 +31,7 @@ interface StrategyGridProps {
     displayName: string
     isActive: boolean
   }>
+  onOutcomeSelect: (strategyValue: string, outcome: string) => void
 }
 
 // Reusable styles, eventually use theme?
@@ -32,64 +39,16 @@ const gridStyles = {
   container: (showMapView: boolean, theme: Theme) => ({
     display: "grid",
     gridTemplateColumns: {
-      xs: "0.5fr minmax(200px, 3fr) minmax(80px, 1fr)",
-      lg: "0.5fr minmax(300px, 4fr) 1fr minmax(540px, 9fr)",
+      xs: "auto minmax(0, 1fr) auto",
+      lg: "auto minmax(0, 1fr) auto minmax(0, 1.5fr)",
     },
-    gap: showMapView
-      ? theme.spacing(1)
-      : theme.spacing(theme.cards.spacing.standard),
+    gap: showMapView ? theme.spacing(1) : theme.spacing(2),
     alignItems: "start",
+    width: "100%",
     ...(showMapView && {
       maxHeight: "40vh",
       overflow: "auto",
     }),
-  }),
-  headerBox: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerBoxFlex: (theme: Theme) => ({
-    display: { xs: "none", lg: "flex" },
-    alignItems: "baseline",
-    gap: theme.spacing(theme.cards.spacing.standard),
-  }),
-  mapViewToggle: (theme: Theme) => ({
-    cursor: "pointer",
-    color: theme.palette.blue.bright,
-    textDecoration: "none",
-    fontSize: "0.8rem",
-    "&:hover": { color: theme.palette.blue.darkest },
-  }),
-  strategyRow: (showMapView: boolean, theme: Theme) => ({
-    gridColumn: "1 / -1",
-    display: "grid",
-    gridTemplateColumns: { xs: "subgrid", lg: "subgrid" },
-    backgroundColor: "#faf8f5",
-    borderRadius: theme.borderRadius.rounded,
-    padding: showMapView
-      ? theme.spacing(1)
-      : theme.spacing(theme.cards.spacing.standard),
-    gap: showMapView
-      ? theme.spacing(1)
-      : theme.spacing(theme.cards.spacing.standard),
-    alignItems: "start",
-  }),
-  starIcon: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "flex-start",
-    pt: 1,
-    cursor: "pointer",
-  },
-  strategyTitle: (showMapView: boolean, showDefinitions: boolean) => ({
-    fontWeight: 500,
-    mb: showDefinitions ? (showMapView ? 0.5 : 1) : 0,
-    fontSize: showMapView ? "0.9rem" : undefined,
-  }),
-  strategyDescription: (showMapView: boolean) => ({
-    lineHeight: showMapView ? 1.3 : 1.5,
-    fontSize: showMapView ? "0.8rem" : undefined,
   }),
   operationsIcons: {
     display: "flex",
@@ -103,16 +62,16 @@ const gridStyles = {
     height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
     cursor: "pointer",
   }),
-  outcomeChartsContainer: (theme: any) => ({
+  outcomeChartsContainer: (theme: Theme) => ({
     gridColumn: { xs: "1 / -1", lg: "auto" },
     display: "grid",
     gridTemplateColumns: {
       xs: "repeat(3, 1fr)",
-      lg: "repeat(9, minmax(60px, 1fr))",
+      lg: "repeat(auto-fit, minmax(60px, 1fr))",
     },
-    gap: theme.spacing(theme.cards.spacing.standard),
-    minWidth: { xs: "auto", lg: "540px" },
+    gap: theme.spacing(1),
     mt: { xs: 2, lg: 0 },
+    maxWidth: "100%",
   }),
   outcomeBox: (
     showMapView: boolean,
@@ -147,24 +106,32 @@ const gridStyles = {
   }),
 } as const
 
-// Strategy Grid component (memoized)
+// Strategy Grid component
 const StrategyGrid = React.memo(function StrategyGridComponent({
-  showMapView,
-  showOnlyChosen,
-  showDefinitions,
-  chosenStrategies,
-  toggleStrategyChoice,
-  setMapView,
-  selectedOutcomes,
-  onOutcomeSelect,
   getChartDataForStrategy,
   outcomeNames,
+  onOutcomeSelect,
 }: StrategyGridProps) {
   const theme = useTheme()
 
+  // Get all necessary state from the store
+  const {
+    explore: {
+      showMapView,
+      showOnlyChosen,
+      showDefinitions,
+      chosenStrategies,
+      selectedOutcomes,
+    },
+    setMapView,
+    setShowOnlyChosen,
+    setShowDefinitions,
+    toggleStrategyChoice,
+  } = useExploreUserWorkflowStore()
+
   return (
     <Box sx={gridStyles.container(showMapView, theme)}>
-      {/* Column Headers - only show in table view */}
+      {/* Column header */}
       {!showMapView && (
         <>
           <Box
@@ -172,37 +139,79 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              height: "56px",
             }}
           >
-            <Typography variant="subtitle2">Choose</Typography>
+            <Typography
+              variant="subtitle2"
+              sx={{
+                pl: theme.spacing(2),
+              }}
+            >
+              Choose
+            </Typography>
           </Box>
-          <Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              height: "56px",
+            }}
+          >
             <Typography variant="subtitle2">Strategy</Typography>
+
+            <TogglePair
+              leftIcon={<DocumentListIcon active={!showOnlyChosen} size={40} />}
+              rightIcon={
+                <DocumentCheckedIcon active={showOnlyChosen} size={40} />
+              }
+              onLeftClick={() => setShowOnlyChosen(false)}
+              onRightClick={() => setShowOnlyChosen(true)}
+            />
+
+            <TogglePair
+              leftIcon={
+                <DocumentExpandedIcon active={showDefinitions} size={40} />
+              }
+              rightIcon={
+                <DocumentCollapsedIcon active={!showDefinitions} size={40} />
+              }
+              onLeftClick={() => setShowDefinitions(true)}
+              onRightClick={() => setShowDefinitions(false)}
+              sx={{ ml: -1 }}
+            />
           </Box>
-          <Box>
+          <Box sx={{ display: "flex", alignItems: "center", height: "56px" }}>
             <Typography variant="subtitle2">Key operations</Typography>
           </Box>
           <Box
             sx={{
               display: { xs: "none", lg: "flex" },
-              alignItems: "baseline",
+              alignItems: "center",
+              justifyContent: "space-between",
               gap: theme.spacing(theme.cards.spacing.standard),
+              height: "56px",
             }}
           >
             <Typography variant="subtitle2">Key outcomes</Typography>
-            <Typography
-              variant="body2"
-              onClick={() => setMapView(!showMapView)}
+
+            <Box
               sx={{
-                cursor: "pointer",
-                color: theme.palette.blue.bright,
-                textDecoration: "none",
-                fontSize: "0.8rem",
-                "&:hover": { color: theme.palette.blue.darkest },
+                padding: "2px 4px",
+                borderRadius: 1,
+                marginTop: "-20px",
+                "&:hover": { backgroundColor: theme.palette.grey[100] },
               }}
             >
-              {showMapView ? "Back to list view" : "Show outcomes on map"}
-            </Typography>
+              <TogglePair
+                leftIcon={<DocumentListIcon active={!showMapView} size={52} />}
+                rightIcon={<MapViewIcon active={showMapView} size={52} />}
+                onLeftClick={() => setMapView(false)}
+                onRightClick={() => setMapView(true)}
+                gap={0.5}
+              />
+            </Box>
           </Box>
         </>
       )}
@@ -212,7 +221,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         .filter((strategy) =>
           showOnlyChosen ? chosenStrategies.includes(strategy.value) : true,
         )
-        .map((strategy) => (
+        .map((strategy, index) => (
           <Box
             key={strategy.value}
             sx={{
@@ -231,31 +240,34 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 ? theme.spacing(1)
                 : theme.spacing(theme.cards.spacing.standard),
               alignItems: "start",
+              ...(index === 0 && { marginTop: "-12px" }), // Pull first row closer to headers
             }}
           >
-            {/* Column 1: Star icon */}
+            {/* Column 1: Checkbox */}
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "flex-start",
                 pt: 1,
+                pointerEvents: "auto",
                 cursor: "pointer",
               }}
-              onClick={() => toggleStrategyChoice(strategy.value)}
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleStrategyChoice(strategy.value)
+              }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                  stroke={theme.palette.blue.bright}
-                  strokeWidth="2"
-                  fill={
-                    chosenStrategies.includes(strategy.value)
-                      ? theme.palette.blue.bright
-                      : "none"
-                  }
-                />
-              </svg>
+              <Checkbox
+                checked={chosenStrategies.includes(strategy.value)}
+                onChange={() => {}}
+                sx={{
+                  padding: 0,
+                  margin: 0,
+                  cursor: "pointer",
+                  pointerEvents: "none",
+                }}
+              />
             </Box>
 
             {/* Column 2: Strategy name and description */}
@@ -264,11 +276,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 variant="subtitle1"
                 sx={{
                   fontWeight: 500,
-                  mb: showDefinitions ? (showMapView ? 0.5 : 1) : 0,
+                  mb: showDefinitions ? 0.5 : 0,
                   fontSize: showMapView ? "0.9rem" : undefined,
+                  whiteSpace: "pre-line",
                 }}
               >
-                {strategy.label}
+                {strategy.value === "current-ops-historical-ag"
+                  ? "Current operations with\nhistorical agricultural land use" // hack to get desired line break
+                  : strategy.label}
               </Typography>
               {showDefinitions && (
                 <Typography
@@ -398,11 +413,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "repeat(3, 1fr)", // Mobile: 3x3 grid
-                  lg: "repeat(9, minmax(60px, 1fr))", // Desktop: 9 in a row
+                  lg: "repeat(auto-fit, minmax(60px, 1fr))", // Desktop: auto-fit to available space
                 },
-                gap: theme.spacing(theme.cards.spacing.standard),
-                minWidth: { xs: "auto", lg: "540px" },
+                gap: theme.spacing(1),
                 mt: { xs: 2, lg: 0 }, // Add top margin on mobile
+                maxWidth: "100%",
               }}
             >
               {outcomeNames.map(({ name, displayName, isActive }) => {

@@ -1,9 +1,9 @@
 'use client'
 
-import ScenarioExplorer3 from "../../features/scenarioExplorer/ScenarioExplorer3"
+import ScenarioExplorer from "../../features/scenarioExplorer/ScenarioExplorer"
 
 export default function ExplorePanel() {
     return (
-        <ScenarioExplorer3 />
+        <ScenarioExplorer />
     )
 }
