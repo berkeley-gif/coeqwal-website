@@ -483,7 +483,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               ]) || [0, 0, 0, 0]
                             : [0, 0, 0, 0] // Empty chart for inactive outcomes
                         }
-                        size={showMapView ? 35 : 50}
+                        size={showMapView ? 45 : 50}
                         tierColors={
                           isActiveForStrategy
                             ? (strategyChartData[displayName]

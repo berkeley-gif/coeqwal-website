@@ -1,16 +1,7 @@
 "use client"
 
-import React from "react"
-import {
-  Box,
-  Typography,
-  useTheme,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-  TextField,
-} from "@repo/ui/mui"
+import React, { useState } from "react"
+import { Box, Typography, useTheme, TextField } from "@repo/ui/mui"
 import {
   DashboardPanel,
   DashboardGrid,
@@ -24,7 +15,6 @@ import {
 } from "@repo/ui"
 import { Map, NavigationControl, GeolocateControl } from "@repo/map"
 import { motion } from "@repo/motion"
-import { hydroclimateOptions } from "../../lib/scenarios"
 
 // Custom hooks
 import { useScenarioData } from "./hooks/useScenarioData"
@@ -45,6 +35,12 @@ import TogglePair from "./components/TogglePair"
  */
 export default function ScenarioExplorer() {
   const theme = useTheme()
+
+  // Local state for resizable map overlay
+  const [overlayHeight, setOverlayHeight] = useState(400)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStartY, setDragStartY] = useState(0)
+  const [dragStartHeight, setDragStartHeight] = useState(0)
 
   // Data management
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
@@ -68,6 +64,50 @@ export default function ScenarioExplorer() {
 
   // Map integration
   useMapIntegration(showMapView, anySelectedOutcome || null)
+
+  // Handle drag to resize overlay
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    setDragStartY(e.clientY)
+    setDragStartHeight(overlayHeight)
+    setIsDragging(true)
+  }
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return
+      e.preventDefault()
+
+      // Calculate new height based on drag distance
+      const dragDistance = e.clientY - dragStartY
+      const newHeight = dragStartHeight + dragDistance
+
+      // Constrain between min and max
+      setOverlayHeight(
+        Math.max(150, Math.min(newHeight, window.innerHeight * 0.8)),
+      )
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    if (isDragging) {
+      // Set cursor on body to override everything during drag
+      document.body.style.cursor = "ns-resize !important"
+      document.body.style.userSelect = "none"
+
+      document.addEventListener("mousemove", handleMouseMove)
+      document.addEventListener("mouseup", handleMouseUp)
+
+      return () => {
+        document.body.style.cursor = ""
+        document.body.style.userSelect = ""
+        document.removeEventListener("mousemove", handleMouseMove)
+        document.removeEventListener("mouseup", handleMouseUp)
+      }
+    }
+  }, [isDragging, dragStartY, dragStartHeight])
 
   // Handle loading and error states
   if (isLoading) {
@@ -250,101 +290,173 @@ export default function ScenarioExplorer() {
                   top: theme.spacing(theme.cards.spacing.standard),
                   left: theme.spacing(theme.cards.spacing.standard),
                   right: theme.spacing(theme.cards.spacing.standard),
+                  height: `${overlayHeight}px`,
                   backgroundColor: "rgba(255, 255, 255, 0.95)",
                   borderRadius: theme.borderRadius.rounded,
-                  padding: theme.spacing(theme.cards.spacing.standard),
                   backdropFilter: "blur(8px)",
                   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
                   zIndex: 1000,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
                 }}
               >
-                {/* Header row */}
+                {/* Header and content wrapper with original padding */}
                 <Box
                   sx={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "auto minmax(0, 1fr) auto minmax(0, 1.5fr)",
-                    gap: theme.spacing(1),
-                    alignItems: "center",
-                    height: "48px",
-                    mb: 1,
+                    padding: theme.spacing(theme.cards.spacing.standard),
+                    flex: 1,
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
-                  {/* Empty first column (replaces Choose in table view) */}
-                  <Box />
-
-                  {/* Strategy column with toggles */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <Typography variant="subtitle2">
-                      Choose strategies
-                    </Typography>
-
-                    <TogglePair
-                      leftIcon={
-                        <DocumentListIcon active={!showOnlyChosen} size={35} />
-                      }
-                      rightIcon={
-                        <DocumentCheckedIcon
-                          active={showOnlyChosen}
-                          size={35}
-                        />
-                      }
-                      onLeftClick={() => setShowOnlyChosen(false)}
-                      onRightClick={() => setShowOnlyChosen(true)}
-                    />
-
-                    <TogglePair
-                      leftIcon={
-                        <DocumentExpandedIcon
-                          active={showDefinitions}
-                          size={35}
-                        />
-                      }
-                      rightIcon={
-                        <DocumentCollapsedIcon
-                          active={!showDefinitions}
-                          size={35}
-                        />
-                      }
-                      onLeftClick={() => setShowDefinitions(true)}
-                      onRightClick={() => setShowDefinitions(false)}
-                    />
-                  </Box>
-
-                  {/* Key operations column */}
-                  <Box>
-                    <Typography variant="subtitle2">Key operations</Typography>
-                  </Box>
-
-                  {/* Key outcomes column with view toggle */}
+                  {/* Header row */}
                   <Box
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
+                      display: "grid",
+                      gridTemplateColumns:
+                        "32px minmax(0, 0.8fr) auto minmax(0, 2fr)",
+                      gap: theme.spacing(1),
+                      columnGap: theme.spacing(2),
                       alignItems: "center",
-                      pl: 3,
+                      height: "48px",
+                      mb: 1,
+                      flexShrink: 0,
                     }}
                   >
-                    <Typography variant="subtitle2">Key outcomes</Typography>
+                    {/* Empty first column (replaces Choose in table view) */}
+                    <Box />
 
-                    <TogglePair
-                      leftIcon={
-                        <DocumentListIcon active={!showMapView} size={46} />
-                      }
-                      rightIcon={<MapViewIcon active={showMapView} size={46} />}
-                      onLeftClick={() => setMapView(false)}
-                      onRightClick={() => setMapView(true)}
-                      gap={0.4}
+                    {/* Strategy column with toggles */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        ml: -0.5,
+                      }}
+                    >
+                      <Typography variant="subtitle2">
+                        Choose strategies
+                      </Typography>
+
+                      <Box sx={{ ml: 10 }}>
+                        <TogglePair
+                          leftIcon={
+                            <DocumentListIcon
+                              active={!showOnlyChosen}
+                              size={35}
+                            />
+                          }
+                          rightIcon={
+                            <DocumentCheckedIcon
+                              active={showOnlyChosen}
+                              size={35}
+                            />
+                          }
+                          onLeftClick={() => setShowOnlyChosen(false)}
+                          onRightClick={() => setShowOnlyChosen(true)}
+                          gap={-0.5}
+                        />
+                      </Box>
+
+                      <TogglePair
+                        leftIcon={
+                          <DocumentExpandedIcon
+                            active={showDefinitions}
+                            size={35}
+                          />
+                        }
+                        rightIcon={
+                          <DocumentCollapsedIcon
+                            active={!showDefinitions}
+                            size={35}
+                          />
+                        }
+                        onLeftClick={() => setShowDefinitions(true)}
+                        onRightClick={() => setShowDefinitions(false)}
+                        gap={-0.5}
+                        sx={{ ml: -1.5 }}
+                      />
+                    </Box>
+
+                    {/* Key operations column */}
+                    <Box>
+                      <Typography variant="subtitle2">
+                        Key operations
+                      </Typography>
+                    </Box>
+
+                    {/* Key outcomes column with view toggle */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        pl: 3,
+                      }}
+                    >
+                      <Typography variant="subtitle2">Key outcomes</Typography>
+
+                      <TogglePair
+                        leftIcon={
+                          <DocumentListIcon active={!showMapView} size={46} />
+                        }
+                        rightIcon={
+                          <MapViewIcon active={showMapView} size={46} />
+                        }
+                        onLeftClick={() => setMapView(false)}
+                        onRightClick={() => setMapView(true)}
+                        gap={0.4}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Strategy table - scrollable */}
+                  <Box
+                    sx={{
+                      flex: 1,
+                      overflowY: "auto",
+                      overflowX: "hidden",
+                      minHeight: 0,
+                    }}
+                  >
+                    <StrategyGrid
+                      getChartDataForStrategy={getChartDataForStrategy}
+                      outcomeNames={outcomeNames || []}
+                      onOutcomeSelect={handleOutcomeSelect}
                     />
                   </Box>
                 </Box>
 
-                {/* Strategy table for map overlay */}
-                <StrategyGrid
-                  getChartDataForStrategy={getChartDataForStrategy}
-                  outcomeNames={outcomeNames || []}
-                  onOutcomeSelect={handleOutcomeSelect}
-                />
+                {/* Drag handle at bottom */}
+                <Box
+                  onMouseDown={handleMouseDown}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    py: 1.5,
+                    cursor: "ns-resize",
+                    borderTop: `1px solid ${theme.palette.grey[300]}`,
+                    flexShrink: 0,
+                    "&:hover": {
+                      backgroundColor: theme.palette.grey[100],
+                    },
+                    userSelect: "none",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: "40px",
+                      height: "4px",
+                      borderRadius: "2px",
+                      backgroundColor: theme.palette.grey[400],
+                      transition: "background-color 0.2s ease",
+                    }}
+                  />
+                </Box>
               </Box>
 
               {/* Hydroclimate overlay at bottom left of map */}
@@ -362,61 +474,11 @@ export default function ScenarioExplorer() {
                   minWidth: "300px",
                 }}
               >
-                <Typography variant="subtitle2" sx={{ mb: 2 }}>
-                  Hydroclimate
-                </Typography>
-                <FormControl component="fieldset">
-                  <RadioGroup
-                    value="historical"
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: theme.spacing(1),
-                    }}
-                  >
-                    {hydroclimateOptions.map((option) => (
-                      <FormControlLabel
-                        key={option.value}
-                        value={option.value}
-                        disabled={option.value !== "historical"}
-                        control={
-                          <Radio
-                            disabled={option.value !== "historical"}
-                            sx={{
-                              "&.Mui-checked": {
-                                backgroundColor: theme.palette.blue.bright,
-                                borderColor: theme.palette.blue.bright,
-                              },
-                              "&:hover": {
-                                backgroundColor: theme.palette.blue.bright,
-                              },
-                              "&.Mui-disabled": {
-                                backgroundColor: "transparent",
-                                borderColor: theme.palette.grey[400],
-                                cursor: "not-allowed",
-                              },
-                            }}
-                          />
-                        }
-                        label={option.label}
-                        sx={{
-                          "& .MuiFormControlLabel-label": {
-                            fontSize: "0.8rem",
-                            fontWeight:
-                              option.value === "historical" ? 500 : 400,
-                            color:
-                              option.value === "historical"
-                                ? theme.palette.text.primary
-                                : `${theme.palette.grey[500]} !important`,
-                          },
-                          "&.Mui-disabled .MuiFormControlLabel-label": {
-                            color: `${theme.palette.grey[500]} !important`,
-                          },
-                        }}
-                      />
-                    ))}
-                  </RadioGroup>
-                </FormControl>
+                <HydroclimateCard
+                  layout="vertical"
+                  variant="compact"
+                  showCard={false}
+                />
               </Box>
             </Box>
           </DashboardCardContainer>
