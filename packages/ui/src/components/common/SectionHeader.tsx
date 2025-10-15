@@ -32,7 +32,7 @@ export function SectionHeader({
       case "h5":
         return {
           fontWeight: 600,
-          mb: theme.spacing(0.5),
+          mb: theme.spacing(0),
         }
       case "subtitle1":
         return {
@@ -54,7 +54,6 @@ export function SectionHeader({
 
   const sectionHeaderStyles = {
     display: "inline-block",
-    letterSpacing: 0.5,
     ...getVariantStyles(variant),
     ...sx,
   }

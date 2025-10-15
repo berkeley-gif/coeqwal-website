@@ -127,8 +127,8 @@ export default function ScenarioExplorer() {
           <Typography
             variant="body2"
             sx={{
-              ml: 0.5,
-              mb: theme.spacing(4),
+              ml: 0.25,
+              mb: theme.spacing(2),
             }}
           >
             Use these descriptions to choose water management strategies to
@@ -275,7 +275,9 @@ export default function ScenarioExplorer() {
 
                   {/* Strategy column with toggles */}
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                    <Typography variant="subtitle2">Strategy</Typography>
+                    <Typography variant="subtitle2">
+                      Choose strategies
+                    </Typography>
 
                     <TogglePair
                       leftIcon={

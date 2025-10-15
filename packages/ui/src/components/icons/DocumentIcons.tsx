@@ -36,7 +36,7 @@ export function DocumentListIcon({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.1"
+        strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +82,7 @@ export function DocumentCheckedIcon({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.15"
         strokeLinecap="round"
         strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
@@ -90,9 +90,9 @@ export function DocumentCheckedIcon({
         style={{ width: "100%", height: "100%" }}
       >
         <rect x="5" y="4" width="14" height="16" rx="2" />
-        <path d="M7 9l1 1 1.5-1.5" strokeWidth="1.5" />
+        <path d="M7 9l1 1 1.5-1.5" strokeWidth="1.3" />
         <path d="M11 9h4.5" />
-        <path d="M7 12l1 1 1.5-1.5" strokeWidth="1.5" />
+        <path d="M7 12l1 1 1.5-1.5" strokeWidth="1.3" />
         <path d="M11 12h4.5" />
       </svg>
     </Box>
@@ -126,7 +126,7 @@ export function DocumentExpandedIcon({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.15"
         strokeLinecap="round"
         strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
@@ -134,7 +134,7 @@ export function DocumentExpandedIcon({
         style={{ width: "100%", height: "100%", marginRight: "-12px" }}
       >
         <rect x="5" y="4" width="14" height="16" rx="2" />
-        <path d="M8 8h8" strokeWidth="2" />
+        <path d="M8 8h8" strokeWidth="1.6" />
         <path d="M8 11.5h8M8 14.5h5" />
       </svg>
     </Box>
@@ -168,7 +168,7 @@ export function DocumentCollapsedIcon({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.15"
         strokeLinecap="round"
         strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +176,7 @@ export function DocumentCollapsedIcon({
         style={{ width: "100%", height: "100%" }}
       >
         <rect x="5" y="4" width="14" height="16" rx="2" />
-        <path d="M8 8h8" strokeWidth="2" />
+        <path d="M8 8h8" strokeWidth="1.6" />
       </svg>
     </Box>
   )
@@ -205,7 +205,7 @@ export function MapIcon({ active = false, size = 44, sx }: DocumentIconProps) {
         viewBox="0 0 24 24"
         fill="currentColor"
         stroke="currentColor"
-        strokeWidth="1.1"
+        strokeWidth="1"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
         style={{ width: "100%", height: "100%" }}
