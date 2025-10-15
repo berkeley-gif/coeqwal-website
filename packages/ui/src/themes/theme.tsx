@@ -792,7 +792,7 @@ const theme = createTheme({
       fontSize: "1rem", // 16px - dashboard interface text
       fontWeight: 400,
       letterSpacing: "unset",
-      lineHeight: 1.6,
+      lineHeight: 1.5,
     },
     subtitle1: {
       fontFamily: themeValues.fontFamily.neueHaasText,

@@ -23,11 +23,11 @@ export default function TogglePair({
   sx,
 }: TogglePairProps) {
   return (
-    <Box sx={{ display: "flex", gap, ...sx }}>
+    <Box sx={{ display: "flex", ...sx }}>
       <Box sx={{ cursor: "pointer" }} onClick={onLeftClick}>
         {leftIcon}
       </Box>
-      <Box sx={{ cursor: "pointer" }} onClick={onRightClick}>
+      <Box sx={{ cursor: "pointer", marginLeft: gap }} onClick={onRightClick}>
         {rightIcon}
       </Box>
     </Box>

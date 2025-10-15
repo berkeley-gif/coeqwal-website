@@ -29,25 +29,26 @@ interface StrategyGridProps {
     shortCode: string
     name: string
     displayName: string
-    isActive: boolean
   }>
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
 }
 
-// Reusable styles, eventually use theme?
 const gridStyles = {
   container: (showMapView: boolean, theme: Theme) => ({
     display: "grid",
     gridTemplateColumns: {
-      xs: "auto minmax(0, 1fr) auto",
-      lg: "auto minmax(0, 1fr) auto minmax(0, 1.5fr)",
+      xs: "32px minmax(0, 1fr) auto",
+      lg: "32px minmax(0, 0.8fr) auto minmax(0, 2fr)",
     },
-    gap: showMapView ? theme.spacing(1) : theme.spacing(2),
+    gap: theme.spacing(1),
+    columnGap: theme.spacing(2),
     alignItems: "start",
     width: "100%",
     ...(showMapView && {
       maxHeight: "40vh",
-      overflow: "auto",
+      overflowY: "auto",
+      overflowX: "hidden",
+      pt: 1,
     }),
   }),
   operationsIcons: {
@@ -99,10 +100,11 @@ const gridStyles = {
   }),
   outcomeLabel: (showMapView: boolean, isActive: boolean, theme: Theme) => ({
     color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
-    fontWeight: 500,
+    fontWeight: 400,
     textAlign: "center",
-    fontSize: showMapView ? "0.6rem" : "0.7rem",
+    fontSize: showMapView ? "0.6rem" : "0.75rem",
     lineHeight: showMapView ? 1.1 : 1.2,
+    whiteSpace: "pre-line",
   }),
 } as const
 
@@ -136,39 +138,30 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         <>
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "56px",
-            }}
-          >
-            <Typography
-              variant="subtitle2"
-              sx={{
-                pl: theme.spacing(2),
-              }}
-            >
-              Choose
-            </Typography>
-          </Box>
-          <Box
-            sx={{
+              gridColumn: "1 / 3",
               display: "flex",
               alignItems: "center",
               gap: 2,
               height: "56px",
             }}
           >
-            <Typography variant="subtitle2">Strategy</Typography>
+            <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
+              Choose strategies
+            </Typography>
 
-            <TogglePair
-              leftIcon={<DocumentListIcon active={!showOnlyChosen} size={40} />}
-              rightIcon={
-                <DocumentCheckedIcon active={showOnlyChosen} size={40} />
-              }
-              onLeftClick={() => setShowOnlyChosen(false)}
-              onRightClick={() => setShowOnlyChosen(true)}
-            />
+            <Box sx={{ ml: 10 }}>
+              <TogglePair
+                leftIcon={
+                  <DocumentListIcon active={!showOnlyChosen} size={40} />
+                }
+                rightIcon={
+                  <DocumentCheckedIcon active={showOnlyChosen} size={40} />
+                }
+                onLeftClick={() => setShowOnlyChosen(false)}
+                onRightClick={() => setShowOnlyChosen(true)}
+                gap={-0.5}
+              />
+            </Box>
 
             <TogglePair
               leftIcon={
@@ -179,7 +172,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               }
               onLeftClick={() => setShowDefinitions(true)}
               onRightClick={() => setShowDefinitions(false)}
-              sx={{ ml: -1 }}
+              gap={-0.5}
+              sx={{ ml: -1.5 }}
             />
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", height: "56px" }}>
@@ -209,7 +203,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 rightIcon={<MapViewIcon active={showMapView} size={52} />}
                 onLeftClick={() => setMapView(false)}
                 onRightClick={() => setMapView(true)}
-                gap={0.5}
+                gap={-0.25}
               />
             </Box>
           </Box>
@@ -233,14 +227,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               },
               backgroundColor: "#faf8f5",
               borderRadius: theme.borderRadius.rounded,
-              padding: showMapView
-                ? theme.spacing(1)
-                : theme.spacing(theme.cards.spacing.standard),
-              gap: showMapView
-                ? theme.spacing(1)
-                : theme.spacing(theme.cards.spacing.standard),
+              padding: showMapView ? theme.spacing(1) : theme.spacing(1.5),
+              gap: theme.spacing(1),
               alignItems: "start",
-              ...(index === 0 && { marginTop: "-12px" }), // Pull first row closer to headers
+              transition: "background-color 0.2s ease",
+              "&:hover": {
+                backgroundColor: theme.palette.common.white,
+              },
+              ...(index === 0 && !showMapView && { marginTop: "-8px" }), // Pull first row closer to headers in table view
             }}
           >
             {/* Column 1: Checkbox */}
@@ -249,7 +243,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "flex-start",
-                pt: 1,
                 pointerEvents: "auto",
                 cursor: "pointer",
               }}
@@ -266,18 +259,28 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   margin: 0,
                   cursor: "pointer",
                   pointerEvents: "none",
+                  position: "relative",
+                  top: "1px",
+                  transform: "scale(0.9)",
+                  "& svg": {
+                    strokeWidth: "1px",
+                  },
+                  "& path": {
+                    strokeWidth: "1px",
+                  },
                 }}
               />
             </Box>
 
             {/* Column 2: Strategy name and description */}
-            <Box>
+            <Box sx={{ pr: 1 }}>
               <Typography
                 variant="subtitle1"
                 sx={{
                   fontWeight: 500,
                   mb: showDefinitions ? 0.5 : 0,
-                  fontSize: showMapView ? "0.9rem" : undefined,
+                  fontSize: showMapView ? "0.9rem" : "1rem",
+                  lineHeight: 1.3,
                   whiteSpace: "pre-line",
                 }}
               >
@@ -289,8 +292,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 <Typography
                   variant="body2"
                   sx={{
-                    lineHeight: showMapView ? 1.3 : 1.5,
-                    fontSize: showMapView ? "0.8rem" : undefined,
+                    lineHeight: showMapView ? 1.3 : 1.4,
+                    fontSize: showMapView ? "0.8rem" : "0.875rem",
                   }}
                 >
                   {strategy.description
@@ -330,7 +333,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               sx={{
                 display: "flex", // Always visible
                 gap: { xs: 0.5, md: 1 },
-                alignItems: "center",
+                alignItems: "flex-start",
                 flexDirection: { xs: "column", md: "row" }, // Stack vertically on mobile, row on desktop
                 justifyContent: "flex-start",
               }}
@@ -420,11 +423,16 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 maxWidth: "100%",
               }}
             >
-              {outcomeNames.map(({ name, displayName, isActive }) => {
-                // Get chart data for this specific strategy
+              {outcomeNames.map(({ name, displayName }) => {
+                // Get chart data for this strategy
                 const strategyChartData = getChartDataForStrategy(
                   strategy.value,
                 )
+
+                // Check if this outcome exists for this strategy
+                const isActiveForStrategy =
+                  strategyChartData[displayName] !== undefined &&
+                  strategyChartData[displayName].length > 0
 
                 return (
                   <OutcomeTooltip key={displayName} outcome={displayName}>
@@ -434,12 +442,15 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         flexDirection: "column",
                         alignItems: "center",
                         gap: showMapView ? 0.5 : 1,
-                        cursor: showMapView && isActive ? "pointer" : "default",
-                        padding: 0.5,
+                        cursor:
+                          showMapView && isActiveForStrategy
+                            ? "pointer"
+                            : "default",
+                        padding: 0,
                         borderRadius: theme.borderRadius.rounded,
                         transition: "all 0.2s ease",
                         backgroundColor: "transparent",
-                        opacity: isActive ? 1 : 0.7, // Dim for inactive outcomes
+                        opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
                         border:
                           selectedOutcomes[strategy.value] === displayName &&
                           showMapView
@@ -447,13 +458,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             : "2px solid transparent",
                         "&:hover": {
                           backgroundColor:
-                            showMapView && isActive
+                            showMapView && isActiveForStrategy
                               ? theme.palette.grey[100]
                               : "transparent",
                         },
                       }}
                       onClick={
-                        showMapView && isActive
+                        showMapView && isActiveForStrategy
                           ? () => onOutcomeSelect(strategy.value, displayName)
                           : undefined
                       }
@@ -461,7 +472,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       <ScenarioGlyph
                         variant="bars"
                         values={
-                          isActive
+                          isActiveForStrategy
                             ? (strategyChartData[displayName]
                                 ?.map((tier) => tier.value)
                                 .slice(0, 4) as [
@@ -474,7 +485,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         }
                         size={showMapView ? 35 : 50}
                         tierColors={
-                          isActive
+                          isActiveForStrategy
                             ? (strategyChartData[displayName]
                                 ?.map((tier) => tier.color)
                                 .slice(0, 4) as [
@@ -498,17 +509,15 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       />
                       <Typography
                         variant="caption"
-                        sx={{
-                          color: isActive
-                            ? theme.palette.blue.darkest
-                            : theme.palette.grey[500],
-                          fontWeight: 500,
-                          textAlign: "center",
-                          fontSize: showMapView ? "0.6rem" : "0.7rem",
-                          lineHeight: showMapView ? 1.1 : 1.2,
-                        }}
+                        sx={gridStyles.outcomeLabel(
+                          showMapView,
+                          isActiveForStrategy,
+                          theme,
+                        )}
                       >
-                        {name}
+                        {displayName === "Freshwater for in-Delta uses"
+                          ? "Freshwater for\nin-Delta uses"
+                          : name}
                       </Typography>
                     </Box>
                   </OutcomeTooltip>

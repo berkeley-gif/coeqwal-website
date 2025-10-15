@@ -1,12 +1,14 @@
 import React from "react"
 import {
+  Box,
+  Typography,
   useTheme,
   Radio,
   RadioGroup,
   FormControlLabel,
   FormControl,
 } from "@repo/ui/mui"
-import { Card, SectionHeader } from "@repo/ui"
+import { Card } from "@repo/ui"
 import { hydroclimateOptions } from "../../../lib/scenarios"
 
 /**
@@ -24,62 +26,81 @@ export default function HydroclimateCard() {
         padding: theme.spacing(theme.cards.spacing.standard),
       }}
     >
-      <SectionHeader variant="subtitle1" sx={{ display: "block" }}>
-        See how outcomes change with a different hydroclimate
-      </SectionHeader>
-
-      <FormControl component="fieldset">
-        <RadioGroup
-          value="historical"
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            gap: theme.spacing(theme.cards.spacing.standard + 1),
-            flexWrap: "wrap",
-          }}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography
+          variant="subtitle2"
+          sx={{ mb: 0, fontWeight: 500, fontSize: "1rem" }}
         >
-          {hydroclimateOptions.map((option) => (
-            <FormControlLabel
-              key={option.value}
-              value={option.value}
-              disabled={option.value !== "historical"}
-              control={
-                <Radio
-                  disabled={option.value !== "historical"}
-                  sx={{
-                    "&.Mui-checked": {
-                      backgroundColor: theme.palette.blue.bright,
-                      borderColor: theme.palette.blue.bright,
-                    },
-                    "&:hover": {
-                      backgroundColor: theme.palette.blue.bright,
-                    },
-                    "&.Mui-disabled": {
-                      backgroundColor: "transparent",
-                      borderColor: theme.palette.grey[400],
-                      cursor: "not-allowed",
-                    },
-                  }}
-                />
-              }
-              label={option.label}
-              sx={{
-                "& .MuiFormControlLabel-label": {
-                  fontSize: "0.95rem",
-                  fontWeight: option.value === "historical" ? 500 : 400,
-                  color:
-                    option.value === "historical"
-                      ? theme.palette.text.primary
-                      : `${theme.palette.grey[500]} !important`,
-                },
-                "&.Mui-disabled .MuiFormControlLabel-label": {
-                  color: `${theme.palette.grey[500]} !important`,
-                },
-              }}
-            />
-          ))}
-        </RadioGroup>
-      </FormControl>
+          See hydroclimate effects
+        </Typography>
+
+        <FormControl component="fieldset" sx={{ mt: "-2px" }}>
+          <RadioGroup
+            value="historical"
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: theme.spacing(theme.cards.spacing.standard + 1),
+              flexWrap: "wrap",
+            }}
+          >
+            {hydroclimateOptions.map((option) => (
+              <FormControlLabel
+                key={option.value}
+                value={option.value}
+                disabled={option.value !== "historical"}
+                control={
+                  <Radio
+                    disabled={option.value !== "historical"}
+                    sx={{
+                      padding: "9px",
+                      transform: "none !important",
+                      border: `1px solid ${theme.palette.grey[500]} !important`,
+                      "&.Mui-checked": {
+                        backgroundColor: `${theme.palette.blue.bright} !important`,
+                        borderColor: `${theme.palette.blue.bright} !important`,
+                      },
+                      "&.Mui-checked::after": {
+                        top: "50% !important",
+                        left: "50% !important",
+                        transform: "translate(-50%, -50%) !important",
+                      },
+                      "&.Mui-disabled": {
+                        borderColor: `${theme.palette.grey[500]} !important`,
+                        backgroundColor: "transparent !important",
+                      },
+                      "& .MuiSvgIcon-root": {
+                        display: "none",
+                      },
+                    }}
+                  />
+                }
+                label={option.label}
+                sx={{
+                  m: 0,
+                  alignItems: "center",
+                  "& .MuiFormControlLabel-label": {
+                    fontSize: "0.875rem",
+                    fontWeight: option.value === "historical" ? 500 : 400,
+                    color: `${
+                      option.value === "historical"
+                        ? theme.palette.text.primary
+                        : theme.palette.grey[500]
+                    } !important`,
+                  },
+                }}
+              />
+            ))}
+          </RadioGroup>
+        </FormControl>
+      </Box>
     </Card>
   )
 }
