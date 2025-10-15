@@ -2,9 +2,7 @@
 
 import { Box, Typography, useTheme, Divider, Stack } from "@mui/material"
 import { ContentWrapper } from "./ContentWrapper"
-import {
-  glossaryTerms,
-} from "../../../lib/glossary"
+import { glossaryTerms } from "../../../lib/glossary"
 import React from "react"
 
 export interface GlossaryContentProps {

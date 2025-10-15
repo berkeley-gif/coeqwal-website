@@ -2,19 +2,19 @@
 export const strategies = [
   {
     value: "current-ops",
-    label: "Current operational strategy",
+    label: "Current operations",
     description:
       "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, and allows for TUCPs.",
   },
   {
     value: "current-ops-wo-tucp",
-    label: "Current operational strategy without TUCPs",
+    label: "Current operations without TUCPs",
     description:
       "This strategy reflects existing operational rules, infrastructure constraints, and regulatory requirements for water allocation, but does not allow TUCPs.",
   },
   {
     value: "current-ops-historical-ag",
-    label: "Current operational strategy with historical agricultural land use",
+    label: "Current operations with historical agricultural land use",
     description:
       "This strategy reflects current operations, includes TUCPs, but represents 2004-2013 agricultural. This operational strategy is useful for understanding how recent changes in land use affect agricultural water demands and statewide water allocations.",
   },
