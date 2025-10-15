@@ -1,4 +1,3 @@
-// FILE: context/Tabs.tsx
 'use client'
 
 import React, {
@@ -8,14 +7,24 @@ import React, {
     useReducer,
     useRef,
     type ReactNode,
+    type RefObject,
 } from 'react'
 
-export type TabKey = 'learn' | 'explore' | 'empower'
+import type { TabKey } from '../types/tabs'
 
 type State = {
     activeTab: TabKey
     autoAdvanceEnabled: boolean
     locked: boolean
+}
+
+export function nextTab(order: TabKey[], current: TabKey): TabKey | undefined {
+    const i = order.indexOf(current)
+    return (order[(i + 1) % order.length])
+}
+
+export function clamp(n: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, n))
 }
 
 export type Action =
@@ -46,8 +55,9 @@ const initialState: State = {
 type TabsContextShape = {
     state: State
     dispatch: React.Dispatch<Action>
-    tabsRef: React.MutableRefObject<HTMLDivElement | null>
-    panelRef: React.MutableRefObject<HTMLElement | null>
+    tabsRef: RefObject<HTMLDivElement>
+    panelRef: RefObject<HTMLDivElement>
+    hasEnteredTabsRef: React.MutableRefObject<boolean>
     // Who triggered the last tab change? Don't scroll automatically on load
     scrollIntentRef: React.MutableRefObject<'none' | 'user' | 'sync'>
 }
@@ -58,12 +68,15 @@ export function TabsProvider({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(tabsReducer, initialState)
 
     const tabsRef = useRef<HTMLDivElement>(null)
-    const panelRef = useRef<HTMLElement>(null)
+    const panelRef = useRef<HTMLDivElement>(null)
 
     const scrollIntentRef = useRef<'none' | 'user' | 'sync'>('none')
 
+    // 🚦 prevents any auto scroll-align before user actually reaches tabs or clicks a tab
+    const hasEnteredTabsRef = useRef<boolean>(false)
+
     const value = useMemo(
-        () => ({ state, dispatch, tabsRef, panelRef, scrollIntentRef }),
+        () => ({ state, dispatch, tabsRef, panelRef, scrollIntentRef, hasEnteredTabsRef }),
         [state]
     )
 
