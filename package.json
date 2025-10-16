@@ -8,6 +8,7 @@
     "dev:storyline-flow": "pnpm --filter storyline-flow dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md,scss,json}\"",
+    "serve": "pnpm dlx serve apps/main/out/",
     "clean": "rm -rf node_modules .turbo && pnpm install && pnpm build",
     "check-types": "turbo run check-types"
   },

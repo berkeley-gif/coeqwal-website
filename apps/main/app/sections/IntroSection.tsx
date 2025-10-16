@@ -240,7 +240,6 @@ const IntroSection = () => {
           </Box>
         }
       /> */}
-      
     </Box>
   )
 }
