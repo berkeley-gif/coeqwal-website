@@ -59,6 +59,7 @@ export interface BaseHeaderProps {
   boxShadow?: string
 
   // Layout props
+  variant?: "fixed" | "overlay" | "static" | "sticky"
   hideOnScroll?: boolean
   showLanguageSwitcher?: boolean
 }
@@ -68,7 +69,7 @@ const translations: TranslationsMap = {
     title: "COEQWAL",
     buttons: {
       tools: "Tools",
-      getData: "Download data",
+      getData: "Get data",
       about: "About COEQWAL",
     },
     tools: {
@@ -110,6 +111,7 @@ export function BaseHeader({
   zIndex = 1100,
   borderRadius = 0,
   boxShadow = "none",
+  variant = "fixed",
   hideOnScroll = true,
   showLanguageSwitcher = true,
 }: BaseHeaderProps) {
@@ -117,15 +119,17 @@ export function BaseHeader({
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
 
-  const buttonVariant = isMobile ? "text" : "standard"
   const buttonStyle = {
-    lineHeight: 1.1,
-    height: 36,
-    minHeight: 36,
-    letterSpacing: "0.75px",
-    fontSize: "0.95rem",
+    fontSize: "1.125rem",
     fontWeight: 500,
     color: textColor,
+    textTransform: "none" as const,
+    padding: "8px 16px",
+    transition: "opacity 0.2s ease",
+    "&:hover": {
+      backgroundColor: "transparent",
+      opacity: 0.7,
+    },
   }
 
   const { locale, isLoading } = useTranslation()
@@ -150,6 +154,15 @@ export function BaseHeader({
   const componentText =
     translations[safeLocale as keyof TranslationsMap] || translations.en
 
+  // Map variant to CSS position
+  const positionMap = {
+    fixed: "fixed" as const,
+    overlay: "absolute" as const,
+    static: "static" as const,
+    sticky: "sticky" as const,
+  }
+  const position = positionMap[variant]
+
   // Only show secondary navigation if explicitly enabled and not on mobile
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
@@ -168,13 +181,15 @@ export function BaseHeader({
         },
       }}
       transition={{ duration: 0.3 }}
-      position="fixed"
+      position={position}
       sx={{
         zIndex,
         backgroundColor,
         color: textColor,
         borderRadius,
         boxShadow,
+        ...(position === "sticky" && { top: 0 }),
+        ...(position === "absolute" && { top: 0, left: 0, right: 0 }),
       }}
       elevation={0}
     >
@@ -279,82 +294,20 @@ export function BaseHeader({
                   onClick: () => onToolsClick("needs-search"),
                 },
               ]}
-              variant={buttonVariant}
+              variant="text"
               sx={buttonStyle}
             />
           )}
 
           {/* Data button */}
           {onDataClick && (
-            <Button
-              variant={buttonVariant}
-              onClick={onDataClick}
-              sx={{
-                ...buttonStyle,
-                color: textColor,
-                position: "relative",
-                overflow: "hidden",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  "&::before": {
-                    opacity: 1,
-                  },
-                },
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: "-100%",
-                  width: "100%",
-                  height: "100%",
-                  background:
-                    "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)",
-                  transition: "left 0.5s ease",
-                  opacity: 0,
-                },
-                "&:hover::before": {
-                  left: "100%",
-                },
-              }}
-            >
+            <Button variant="text" onClick={onDataClick} sx={buttonStyle}>
               {componentText.buttons.getData}
             </Button>
           )}
 
           {/* About button */}
-          <Button
-            variant={buttonVariant}
-            onClick={onAboutClick}
-            sx={{
-              ...buttonStyle,
-              color: textColor,
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.1)",
-                "&::before": {
-                  opacity: 1,
-                },
-              },
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: "-100%",
-                width: "100%",
-                height: "100%",
-                background:
-                  "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)",
-                transition: "left 0.5s ease",
-                opacity: 0,
-              },
-              "&:hover::before": {
-                left: "100%",
-              },
-            }}
-          >
+          <Button variant="text" onClick={onAboutClick} sx={buttonStyle}>
             {componentText.buttons.about}
           </Button>
 

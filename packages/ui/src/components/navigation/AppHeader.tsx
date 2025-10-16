@@ -16,6 +16,7 @@ export interface AppHeaderProps {
   onAboutClick?: () => void
 
   // Layout props
+  variant?: "fixed" | "overlay" | "static" | "sticky"
   hideOnScroll?: boolean
   showLanguageSwitcher?: boolean
 }
@@ -32,35 +33,11 @@ export function AppHeader({
   onDataClick,
   onToolsClick,
   onAboutClick,
+  variant = "fixed",
   hideOnScroll = true,
   showLanguageSwitcher = true,
 }: AppHeaderProps) {
   const theme = useTheme()
-
-  // Default handlers that just log - applications should provide their own
-  const handleDataClick = () => {
-    if (onDataClick) {
-      onDataClick()
-    } else {
-      console.log("Data click - no handler provided")
-    }
-  }
-
-  const handleToolsClick = (tool: "scenario-explorer" | "needs-search") => {
-    if (onToolsClick) {
-      onToolsClick(tool)
-    } else {
-      console.log(`Tools click: ${tool} - no handler provided`)
-    }
-  }
-
-  const handleAboutClick = () => {
-    if (onAboutClick) {
-      onAboutClick()
-    } else {
-      console.log("About click - no handler provided")
-    }
-  }
 
   return (
     <BaseHeader
@@ -68,14 +45,15 @@ export function AppHeader({
       onSectionClick={onSectionClick}
       showSecondaryNav={showSecondaryNav}
       secondaryNavItems={secondaryNavItems}
-      onDataClick={handleDataClick}
-      onToolsClick={handleToolsClick}
-      onAboutClick={handleAboutClick}
+      onDataClick={onDataClick}
+      onToolsClick={onToolsClick}
+      onAboutClick={onAboutClick}
       backgroundColor={theme.palette.overlay.water}
       textColor={theme.palette.text.primary}
       zIndex={theme.zIndex.appBar}
       borderRadius={theme.borderRadius.none}
       boxShadow="none"
+      variant={variant}
       hideOnScroll={hideOnScroll}
       showLanguageSwitcher={showLanguageSwitcher}
     />
