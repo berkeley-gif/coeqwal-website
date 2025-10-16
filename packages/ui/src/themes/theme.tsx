@@ -411,7 +411,6 @@ const cardTypographyMixins = {
   eyebrow: {
     color: "blue.medium",
     textTransform: "uppercase",
-    letterSpacing: "0.75px",
     fontSize: typeScale.compact.caption, // 0.75rem - compact captions/labels
     fontWeight: 500,
     display: "block",
@@ -1150,7 +1149,6 @@ const theme = createTheme({
         root: ({ theme }) => ({
           borderRadius: theme.borderRadius.pill,
           padding: "1px 15px", // to account for border width
-          letterSpacing: "0.75px",
           fontSize: "0.95rem",
           fontWeight: 500,
           backgroundColor: "transparent",
