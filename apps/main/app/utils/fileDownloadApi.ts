@@ -37,9 +37,7 @@ export async function fetchScenariosForDownload(): Promise<ScenariosResponse> {
     })
 
     if (!response.ok) {
-      console.warn(
-        `API returned ${response.status}, using fallback scenarios`,
-      )
+      console.warn(`API returned ${response.status}, using fallback scenarios`)
       return FALLBACK_SCENARIOS
     }
 
@@ -60,4 +58,3 @@ export function getFileDownloadUrl(
 ): string {
   return `${FILE_DOWNLOAD_API_BASE}/download?scenario=${scenarioId}&type=${fileType}`
 }
-
