@@ -434,19 +434,18 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   strategyChartData[displayName] !== undefined &&
                   strategyChartData[displayName].length > 0
 
-                return (
-                  <OutcomeTooltip key={displayName} outcome={displayName}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: showMapView ? 0.5 : 1,
-                        cursor:
-                          showMapView && isActiveForStrategy
-                            ? "pointer"
-                            : "default",
-                        padding: 0,
+                const chartBox = (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: showMapView ? 0.5 : 1,
+                      cursor:
+                        showMapView && isActiveForStrategy
+                          ? "pointer"
+                          : "default",
+                      padding: 0,
                         borderRadius: theme.borderRadius.rounded,
                         transition: "all 0.2s ease",
                         backgroundColor: "transparent",
@@ -520,6 +519,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           : name}
                       </Typography>
                     </Box>
+                  )
+
+                return showMapView ? (
+                  <div key={displayName}>{chartBox}</div>
+                ) : (
+                  <OutcomeTooltip key={displayName} outcome={displayName}>
+                    {chartBox}
                   </OutcomeTooltip>
                 )
               })}
