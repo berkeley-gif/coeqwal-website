@@ -50,7 +50,7 @@ export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
       "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
     "Environmental flows":
       "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
-    "Delta estuary ecology":
+    "Delta ecology":
       "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
     "Freshwater for Delta exports":
       "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the Banks and Jones pumping plants.",
@@ -96,7 +96,7 @@ export const outcomeTierValues: Record<
     tier4:
       "Critical: Minimum flow requirements are met in fewer than 90% of years.",
   },
-  "Delta estuary ecology": {
+  "Delta ecology": {
     tier1:
       "Optimal: Scores in top 25% of healthy flows compared to historical record",
     tier2:

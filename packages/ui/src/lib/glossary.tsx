@@ -45,7 +45,7 @@ export const glossaryTerms: GlossaryTerm[] = [
   },
   {
     icon: <EngineeringIcon />,
-    term: "Operational strategies",
+    term: "Water management strategies",
     definition:
       "Decisions made by water system operators about how to manage water infrastructure and allocate water. These include decisions about when to release water from reservoirs, how much water to pump through canals, how to satisfy regulatory and legal requirements, and how to balance competing demands for water across the system.",
   },
@@ -53,7 +53,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <CloudIcon />,
     term: "Hydroclimate",
     definition:
-      "Current and projected shifts in California's climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California's water. These hydroclimate futures can be combined with operational strategies to see how water allocation outcomes change under different conditions, hydroclimates.",
+      "Current and projected shifts in California's climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California's water. These hydroclimate futures can be combined with water management strategies to see how water allocation outcomes change under different conditions.",
   },
   {
     icon: <AccountBalanceIcon />,
@@ -175,19 +175,19 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <SettingsIcon />,
     term: "Allocation",
     definition:
-      "The process of distributing available water among different users and uses, such as agriculture, communities, and environmental needs. Water allocation decisions determine who gets water, when, and how much, based on water rights, regulations, and priorities established by law and policy.",
+      "The amount of water allocated to a particular water users, based on available water supplies, regulations, and priorities established by law and policy. In the CalSim model, available water is distributed across the Central Valley and inter-connected regions to satisfy agricultural, community, and environmental water demands. CalSim estimates the amount of water delivered to every water use specified in the model for each month in a 100-year period, which may represent historical conditions or future hydroclimates.",
   },
   {
     icon: <LocationOnIcon />,
     term: "Central Valley",
     definition:
-      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California. It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water through the Central Valley, but also to cities along the coast, including in the San Francisco Bay Area and Southern California.",
+      "The Central Valley is the large, relatively flat valley running roughly 450 miles north to south throughout the center of California.  It includes the Sacramento Valley in the north and the San Joaquin Valley and Tulare Basin region in the south, and is home to some of the most productive farmland in the world. Much of California's complex water infrastructure is designed to move water to farms through the Central Valley, but also to cities within the Valley and along the coast, including in the San Francisco Bay Area and Southern California.",
   },
   {
     icon: <EngineeringIcon />,
     term: "CalSim",
     definition:
-      "A computational water planning model used to simulate how water moves through California's Central Valley water system. CalSim is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of operational strategies and hydroclimates could affect water allocations and different outcomes for people and the environment.",
+      "A computational water planning model used to simulate how water moves through California's Central Valley water system. CalSim3 is used by the state's Department of Water Resources and the federal U.S. Bureau of Reclamation to model the storage, conveyance, and delivery of water in the Central Valley. COEQWAL is using this same open-source model to explore how a broad range of water management strategies and hydroclimates could affect water allocations and different outcomes for people and the environment.",
   },
   {
     icon: <ThermostatIcon />,
@@ -205,7 +205,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <WaterIcon />,
     term: "Sustainable Groundwater Management Act (SGMA)",
     definition:
-      "A California law enacted in 2014 that requires local agencies to manage groundwater sustainably. SGMA establishes a framework for local groundwater management, requiring agencies to balance water use and recharge to avoid long-term depletion. The law aims to achieve groundwater sustainability by 2040 for high and medium priority basins.",
+      "A California law enacted in 2014 that requires local agencies to manage groundwater sustainably. SGMA establishes a framework for local groundwater management, requiring agencies to balance water use and recharge to avoid long-term depletion of aquifers. The law aims to achieve groundwater sustainability by 2040 in most parts of the Central Valleys.",
     seeAlso: "Groundwater",
   },
   {
