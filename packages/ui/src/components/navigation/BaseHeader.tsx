@@ -130,6 +130,12 @@ export function BaseHeader({
       backgroundColor: "transparent",
       opacity: 0.7,
     },
+    "&:active": {
+      backgroundColor: "transparent", // Hack for capsule shape it wants to make
+    },
+    "&.MuiButton-root": {
+      minWidth: "auto",
+    },
   }
 
   const { locale, isLoading } = useTranslation()
@@ -301,13 +307,23 @@ export function BaseHeader({
 
           {/* Data button */}
           {onDataClick && (
-            <Button variant="text" onClick={onDataClick} sx={buttonStyle}>
+            <Button
+              variant="text"
+              disableRipple
+              onClick={onDataClick}
+              sx={buttonStyle}
+            >
               {componentText.buttons.getData}
             </Button>
           )}
 
           {/* About button */}
-          <Button variant="text" onClick={onAboutClick} sx={buttonStyle}>
+          <Button
+            variant="text"
+            disableRipple
+            onClick={onAboutClick}
+            sx={buttonStyle}
+          >
             {componentText.buttons.about}
           </Button>
 

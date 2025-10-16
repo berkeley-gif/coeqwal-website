@@ -15,6 +15,7 @@ export interface NavDropdownProps {
   label: string
   options: NavDropdownOption[]
   variant?: "text" | "standard"
+  disableRipple?: boolean
   sx?: React.ComponentProps<typeof Button>["sx"]
 }
 
@@ -22,6 +23,7 @@ export function NavDropdown({
   label,
   options,
   variant = "standard",
+  disableRipple = false,
   sx,
 }: NavDropdownProps) {
   const theme = useTheme()
@@ -54,6 +56,7 @@ export function NavDropdown({
     <>
       <Button
         variant={variant}
+        disableRipple={disableRipple}
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}
         sx={{
