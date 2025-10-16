@@ -10,7 +10,6 @@ export interface OutcomeInfo {
   shortCode: string
   name: string
   displayName: string
-  isActive: boolean
 }
 
 export interface TierData {

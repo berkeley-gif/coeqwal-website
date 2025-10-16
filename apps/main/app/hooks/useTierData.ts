@@ -30,7 +30,6 @@ interface OutcomeInfo {
   shortCode: string
   name: string
   displayName: string
-  isActive: boolean
 }
 
 // Constants
@@ -163,19 +162,16 @@ export function useScenarioTiers(scenarioId: string | null) {
       tiersByDisplayName.set(displayName, tier)
     })
 
-    // Return outcomes in order, including missing ones as inactive
+    // Return outcomes in order, including missing ones (as inactive)
     return desiredOrder.map((displayName) => {
       const tier = tiersByDisplayName.get(displayName)
       if (!tier) {
-        console.warn(
-          `Tier not found in API for display name: ${displayName} - showing as inactive`,
-        )
-        // Return inactive placeholder for missing API tiers
+        console.warn(`Tier not found in API for display name: ${displayName}`)
+        // Return placeholder for missing API tiers
         return {
           shortCode: "MISSING",
           name: displayName, // Use display name as fallback
           displayName,
-          isActive: false, // Always inactive if not in API
         }
       }
 
@@ -183,10 +179,9 @@ export function useScenarioTiers(scenarioId: string | null) {
         shortCode: tier.short_code,
         name: tier.name,
         displayName,
-        isActive: scenarioData?.tiers[tier.short_code] !== undefined,
       }
     }) // Don't filter ...show all outcomes
-  }, [allTiers, tierMapping, scenarioData])
+  }, [allTiers, tierMapping])
 
   return {
     chartData,
@@ -276,7 +271,6 @@ export function useMultipleScenarioTiers() {
       tiersByDisplayName.set(displayName, tier)
     })
 
-    const firstScenarioData = s0020Result.data
     return desiredOrder.map((displayName): OutcomeInfo => {
       const tier = tiersByDisplayName.get(displayName)
       if (!tier) {
@@ -284,7 +278,6 @@ export function useMultipleScenarioTiers() {
           shortCode: "MISSING",
           name: displayName,
           displayName,
-          isActive: false,
         }
       }
 
@@ -292,10 +285,9 @@ export function useMultipleScenarioTiers() {
         shortCode: tier.short_code,
         name: tier.name,
         displayName,
-        isActive: firstScenarioData?.tiers[tier.short_code] !== undefined,
       }
     })
-  }, [allTiers, tierMapping, s0020Result.data])
+  }, [allTiers, tierMapping])
 
   const isLoading =
     s0020Result.isLoading ||
