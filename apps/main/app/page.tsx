@@ -41,8 +41,8 @@ export default function Home() {
         >
           {/* Panel sections */}
           <IntroSection />
-          <SmoothTabs ref={tabsRef} />
-          <TabPanels tabsRef={tabsRef} />
+          <SmoothTabs />
+          <TabPanels />
           {/*    <ContentPanels /> */}
         </Box>
       </TabsProvider>

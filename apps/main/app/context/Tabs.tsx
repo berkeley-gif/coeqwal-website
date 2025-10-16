@@ -53,13 +53,12 @@ const initialState: State = {
 }
 
 type TabsContextShape = {
-    state: State
-    dispatch: React.Dispatch<Action>
-    tabsRef: RefObject<HTMLDivElement>
-    panelRef: RefObject<HTMLDivElement>
-    hasEnteredTabsRef: React.MutableRefObject<boolean>
-    // Who triggered the last tab change? Don't scroll automatically on load
-    scrollIntentRef: React.MutableRefObject<'none' | 'user' | 'sync'>
+  state: State
+  dispatch: React.Dispatch<Action>
+  tabsRef: React.MutableRefObject<HTMLDivElement | null>
+  panelRef: React.MutableRefObject<HTMLDivElement | null>
+  hasEnteredTabsRef: React.MutableRefObject<boolean>
+  scrollIntentRef: React.MutableRefObject<'none' | 'user' | 'sync'>
 }
 
 const TabsContext = createContext<TabsContextShape | null>(null)
