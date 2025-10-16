@@ -3,10 +3,6 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state"
 import { useCallback } from "react"
-import CaliforniaMapPanel from "../components/CaliforniaMapPanel"
-import MapOverlayPanels from "../components/MapOverlayPanels"
-import ProgressiveScenarioPanels from "../components/ProgressiveScenarioPanels"
-import { CalSimProvider } from "../components/CalSimContext"
 
 const IntroSection = () => {
   const theme = useTheme()
@@ -207,18 +203,6 @@ const IntroSection = () => {
         }
       />
 
-      {/* CalSim context provider for shared state between map and overlays */}
-      <CalSimProvider>
-        {/* Sticky California map background */}
-        <CaliforniaMapPanel id="california-map" />
-
-        {/* Scrolling overlay panels over the sticky map */}
-        <MapOverlayPanels />
-
-        {/* Progressive scenario and climate panels that appear on scroll */}
-        <ProgressiveScenarioPanels />
-      </CalSimProvider>
-
       {/* Interstitial panel - can be broken out into a component */}
       {/* <OneColumnPanel
         id="interstitial"
@@ -256,6 +240,7 @@ const IntroSection = () => {
           </Box>
         }
       /> */}
+      
     </Box>
   )
 }

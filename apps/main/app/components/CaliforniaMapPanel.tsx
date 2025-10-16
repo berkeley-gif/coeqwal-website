@@ -29,7 +29,7 @@ export default function CaliforniaMapPanel({
         top: 0,
         width: "100vw",
         height: "100vh",
-        zIndex: (theme) => theme.zIndex.basement, // Map when used as background element
+        zIndex: 0, // Map when used as background element
         pointerEvents: "auto", // Ensure map can receive pointer events
       }}
     >
