@@ -21,6 +21,12 @@ import { useExploreUserWorkflowStore } from "@repo/state"
 import OutcomeTooltip from "./OutcomeTooltip"
 import TogglePair from "./TogglePair"
 
+// Map outcome keys to display labels
+const getOutcomeDisplayLabel = (name: string): string => {
+  if (name === "Delta ecology") return "Delta estuary ecology"
+  return name
+}
+
 interface StrategyGridProps {
   getChartDataForStrategy: (
     strategyValue: string,
@@ -516,7 +522,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       >
                         {displayName === "Freshwater for in-Delta uses"
                           ? "Freshwater for\nin-Delta uses"
-                          : name}
+                          : getOutcomeDisplayLabel(name)}
                       </Typography>
                     </Box>
                   )
