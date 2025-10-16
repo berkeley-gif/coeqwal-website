@@ -6,12 +6,11 @@ import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
 import IntroSection from "./sections/IntroSection"
 
 import { TabsProvider } from "./context/Tabs"
-import SmoothTabs from './components/tabs/SmoothTabs'
+import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
 import { useRef } from "react"
 
 import ScenarioExplorer from "./features/scenarioExplorer/ScenarioExplorer"
-
 
 export default function Home() {
   const theme = useTheme()
