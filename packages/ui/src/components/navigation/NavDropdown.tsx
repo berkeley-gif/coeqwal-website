@@ -45,7 +45,6 @@ export function NavDropdown({
     lineHeight: 1.1,
     height: theme.spacing(4.5), // 36px to match other header buttons
     minHeight: theme.spacing(4.5),
-    letterSpacing: "0.75px",
     fontSize: "0.95rem",
     fontWeight: 500,
     color: theme.palette.text.primary,
