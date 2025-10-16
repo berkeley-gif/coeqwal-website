@@ -81,7 +81,8 @@ const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
         {outcome}
       </Typography>
       <Typography variant="body2" sx={tooltipStyles.description}>
-        {outcomeDefinitions[outcome] || "Definition not available"}
+        {(outcomeDefinitions as Record<string, string>)[outcome] ||
+          "Definition not available"}
       </Typography>
       {/* Legend */}
       <Box sx={tooltipStyles.legendContainer}>
@@ -96,7 +97,8 @@ const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
             }}
           />
           <Typography variant="caption" sx={tooltipStyles.tierTextExpanded}>
-            {outcomeTierValues[outcome]?.tier1 || "Excellent"}
+            {(outcomeTierValues as Record<string, any>)[outcome]?.tier1 ||
+              "Excellent"}
           </Typography>
         </Box>
         <Box sx={tooltipStyles.legendRow}>
@@ -107,7 +109,8 @@ const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
             }}
           />
           <Typography variant="caption" sx={tooltipStyles.tierText}>
-            {outcomeTierValues[outcome]?.tier2 || "Good"}
+            {(outcomeTierValues as Record<string, any>)[outcome]?.tier2 ||
+              "Good"}
           </Typography>
         </Box>
         <Box sx={tooltipStyles.legendRow}>
@@ -118,7 +121,8 @@ const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
             }}
           />
           <Typography variant="caption" sx={tooltipStyles.tierText}>
-            {outcomeTierValues[outcome]?.tier3 || "Fair"}
+            {(outcomeTierValues as Record<string, any>)[outcome]?.tier3 ||
+              "Fair"}
           </Typography>
         </Box>
         <Box sx={tooltipStyles.legendRow}>
@@ -129,7 +133,8 @@ const OutcomeTooltip = React.memo(function OutcomeTooltipComponent({
             }}
           />
           <Typography variant="caption" sx={tooltipStyles.tierText}>
-            {outcomeTierValues[outcome]?.tier4 || "Poor"}
+            {(outcomeTierValues as Record<string, any>)[outcome]?.tier4 ||
+              "Poor"}
           </Typography>
         </Box>
       </Box>
