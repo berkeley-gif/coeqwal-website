@@ -21,7 +21,10 @@ import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { LeadingMarkerText, ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import type { Scenario } from "../types/scenarioDownloads"
-import { getDownloadUrl } from "../utils/scenarioApi"
+import {
+  getFileDownloadUrl,
+  fetchScenariosForDownload,
+} from "../utils/fileDownloadApi"
 
 export default function DataPage() {
   const theme = useTheme()
@@ -31,29 +34,15 @@ export default function DataPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const API_BASE = process.env.NEXT_PUBLIC_COEQWAL_PRESIGN_DOWNLOAD_API_BASE
-
   useEffect(() => {
     let alive = true
-    const controller = new AbortController()
 
     async function load() {
       try {
         setLoading(true)
         setError(null)
 
-        if (!API_BASE) {
-          throw new Error("API base URL not configured")
-        }
-
-        const res = await fetch(`${API_BASE}/scenario`, {
-          method: "GET",
-          headers: { Accept: "application/json" },
-          signal: controller.signal,
-        })
-        if (!res.ok) throw new Error(`List scenarios failed: ${res.status}`)
-
-        const data = (await res.json()) as { scenarios: Scenario[] }
+        const data = await fetchScenariosForDownload()
         if (!alive) return
 
         const sorted = [...(data.scenarios ?? [])].sort((a, b) =>
@@ -61,7 +50,7 @@ export default function DataPage() {
         )
         setScenarios(sorted)
       } catch (error) {
-        if (alive && error instanceof Error && error.name !== "AbortError") {
+        if (alive && error instanceof Error) {
           setError(error.message ?? "Failed to load scenarios")
         }
       } finally {
@@ -72,9 +61,8 @@ export default function DataPage() {
     load()
     return () => {
       alive = false
-      controller.abort()
     }
-  }, [API_BASE])
+  }, [])
 
   const handleZipDatasetChange = (event: SelectChangeEvent<string>) => {
     setSelectedZipDataset(event.target.value)
@@ -291,7 +279,7 @@ export default function DataPage() {
                           <DownloadButton
                             fileId={selectedZipDataset}
                             filename={selectedZipScenario.files.zip.filename}
-                            downloadUrl={getDownloadUrl(
+                            downloadUrl={getFileDownloadUrl(
                               selectedZipDataset,
                               "zip",
                             )}
@@ -382,7 +370,7 @@ export default function DataPage() {
                               filename={
                                 selectedCsvScenario.files.output_csv.filename
                               }
-                              downloadUrl={getDownloadUrl(
+                              downloadUrl={getFileDownloadUrl(
                                 selectedCsvDataset,
                                 "output",
                               )}
@@ -401,7 +389,7 @@ export default function DataPage() {
                               filename={
                                 selectedCsvScenario.files.sv_csv.filename
                               }
-                              downloadUrl={getDownloadUrl(
+                              downloadUrl={getFileDownloadUrl(
                                 selectedCsvDataset,
                                 "sv",
                               )}
