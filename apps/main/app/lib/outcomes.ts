@@ -19,8 +19,10 @@ import {
   mapShortCodeToDisplayName,
 } from "../api/tierApi"
 
-// Outcome definitions (fetched from API)
+// Outcome definitions (hardcoded for now / database fetch commented out)
 export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
+  // TODO: Re-enable database fetch when ready
+  /*
   try {
     const [apiDefinitions, tierMapping] = await Promise.all([
       fetchTierDefinitions(),
@@ -37,27 +39,29 @@ export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
     return definitions
   } catch (error) {
     console.error("Failed to fetch tier definitions:", error)
-    // Fallback to hard-coded definitions
-    return {
-      "Community deliveries":
-        "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for 140 community water systems.",
-      "Agricultural revenue":
-        "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
-      "Environmental flows":
-        "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
-      "Delta ecology":
-        "Ecological responses to flow, measured by direct indicators (SAV growth, salinity, turbidity, microhabitat availability)",
-      "Freshwater for Delta exports":
-        "Frequency with which water at Delta pumps (Banks and Jones) meets salinity thresholds for drinking water",
-      "Freshwater for in-Delta uses":
-        "Water used within the Delta region for local agricultural, municipal, and environmental needs",
-      "Reservoir storage":
-        "Amount of water stored in California's major reservoir systems each spring",
-      "Groundwater storage":
-        "Amount of water stored in underground aquifer systems.",
-      "Salmon abundance":
-        "Population levels of Winter-run Chinook salmon in the Sacramento River.",
-    }
+  }
+  */
+
+  // Using hardcoded definitions
+  return {
+    "Community deliveries":
+      "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for 140 community water systems.",
+    "Agricultural revenue":
+      "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
+    "Environmental flows":
+      "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    "Delta estuary ecology":
+      "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
+    "Freshwater for Delta exports":
+      "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the Banks and Jones pumping plants.",
+    "Freshwater for in-Delta uses":
+      "How often water in the Delta is fresh enough for in-Delta uses, assessed at two compliance locations in the western Delta.",
+    "Reservoir storage":
+      "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in XX large reservoirs.",
+    "Groundwater storage":
+      "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
+    "Salmon abundance":
+      "Change in population trend for endangered Sacramento River winter-run Chinook salmon.",
   }
 }
 
@@ -84,64 +88,69 @@ export const outcomeTierValues: Record<
   },
   "Environmental flows": {
     tier1:
-      "Functional ecosystem: Functional flows to sustain native freshwater species in 90% of years. Higher mean daily flows in spring/winter than summer.",
+      "Optimal: Flows exhibit sufficient magnitude and variation in 90% of years",
     tier2:
-      "Modified functional flows: Partial functional flows in wet season/spring. Full functional flows in summer for 75% of years. Higher mean daily flows in spring/winter than summer.",
+      "Suboptimal: Flows in the wet season and spring are below target ranges, but flows in the dry season are sufficient in 90% of years.",
     tier3:
-      "Existing flow requirements: Minimum flow constraints for current operations met in 50% of years.",
-    tier4: "No function: None of the above thresholds met.",
-  },
-  "Delta ecology": {
-    tier1:
-      "Scenario scores in the top 25% based on yearly evaluation of ecosystem indicators: low SAV, high turbidity, fresh conditions, expanded microhabitats in most years.",
-    tier2:
-      "Scenario scores in the top 50% based on yearly evaluation of ecosystem indicators: unchanged SAV, high turbidity, fresh conditions, some microhabitats available in most years.",
-    tier3:
-      "Scenario scores in the top 75% based on yearly evaluation of ecosystem indicators: unchanged SAV, standard turbidity, moderate salinity, few microhabitats available in most years.",
+      "At-risk: Seasonal flow targets are not achieved in wet season, spring, or dry season, but existing regulatory minimum flows are met in 90% of years.",
     tier4:
-      "None of the above thresholds met: unchanged SAV, low turbidity, moderate to high salinity, few microhabitats available in most years.",
+      "Critical: Minimum flow requirements are met in fewer than 90% of years.",
+  },
+  "Delta estuary ecology": {
+    tier1:
+      "Optimal: Scores in top 25% of healthy flows compared to historical record",
+    tier2:
+      "Suboptimal: Scores in top 50% of healthy flows compared to historical record",
+    tier3:
+      "At-risk: Scores in top 75% of healthy flows compared to historical record",
+    tier4: "Critical: Doesn't meet any of the above thresholds",
   },
   "Freshwater for Delta exports": {
     tier1:
-      "Average salinity below 900 uS/cm for all 12 months per year for 95% of years.",
+      "Optimal: Average salinity at pumping plants meets water quality standards for drinking and irrigation year round in 95% of years",
     tier2:
-      "Average salinity between 900-1600 uS/cm for at least 10 months per year for 95% of years.",
+      "Suboptimal: Average salinity at pumping plants remains suitable for drinking and irrigation (but with potential need for extra treatment) for at least 10 months per year in 95% of years",
     tier3:
-      "Average salinity above 1600 uS/cm for 2 or more months in any year, or more than 5% of years at either pumping station.",
+      "At-risk: Average salinity at pumping plants is unsuitable for drinking and irrigation for 2 months in any year, in more than 5% of years at either site",
     tier4:
-      "Average salinity greater than 2500 uS/cm for 2 or more months in any year.",
+      "Critical: Average salinity at pumping plants is unsuitable for irrigation or drinking water for more than two months in any year",
   },
   "Freshwater for in-Delta uses": {
     tier1:
-      "Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months.",
+      "Optimal: Water is fresh enough for human use with no restrictions in at least 75% of all months, and unusable no more than in 5% of all months.",
     tier2:
-      "Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months.",
+      "Suboptimal: Water is fresh enough for human use with no restrictions in at least 65% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 75% of months, and unusable in no more than 12% of all months.",
     tier3:
-      "Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months.",
+      "At-risk: Water is fresh enough for human use with no restrictions in at least 55% of all months, fresh enough for human use with some treatment or cropping adjustments in at least 65% of months, and unusable in no more than 20% of all months.",
     tier4:
-      "Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months.",
+      "Critical: Water is fresh enough for human use with no restrictions in less than 55% of all months and/or is unusable in more than 20% of all months.",
   },
   "Reservoir storage": {
-    tier1: "Storage ≥ top threshold for at least 90% of years.",
-    tier2: "Storage ≥ middle threshold for at least 67% of years.",
-    tier3: "Storage ≥ middle threshold for at least 30% of years.",
-    tier4: "Storage below middle threshold for more than 70% of years.",
+    tier1:
+      "Optimal: Reservoir storage is frequently high. There is a 90% chance that end-of-April reservoir storage is greater than the long-term median value",
+    tier2:
+      "Suboptimal: Reservoir storage is lower, but similar to recent history. In two out of three years (66%), end-of-April storage exceeds the 33rd percentile of long-term values",
+    tier3:
+      "At-risk: Reservoir storage is slightly lower than recent history. In three out of ten years (30%), end-of-April storage exceeds the 33rd percentile of long-term values",
+    tier4:
+      "Critical: Reservoir storage is much lower than recent history. In fewer than three out of ten years (30%), end-of-April storage exceeds the 33rd percentile of long-term values",
   },
   "Groundwater storage": {
     tier1:
-      "Groundwater trend is stable or increasing from 1960-2021 levels AND average total storage > current operations.",
+      "Optimal: Groundwater trend is stable or increasing and average total storage is greater than historical.",
     tier2:
-      "Groundwater trend stable/increasing BUT average total storage < current operations.",
-    tier3: "Groundwater trend declining at moderate rate.",
-    tier4: "Groundwater trend declining severely.",
+      "At-risk: Groundwater trend is stable or increasing and average total storage is less than historical.",
+    tier3: "Compromised: Groundwater trend is declining at a moderate rate.",
+    tier4: "Critical: Groundwater trend is declining at a rapid rate.",
   },
   "Salmon abundance": {
     tier1:
-      "Strong growth: At least 80% chance population grows to 8x current size.",
+      "Optimal: There is at least an 80% chance that the population grows to 8 times its current size",
     tier2:
-      "Moderate growth: At least 80% chance population grows 2-8x current size.",
+      "Suboptimal: There is at least an 80% chance that the population grows to 2 to 8 times its current size",
     tier3:
-      "Little or no change: At least 80% chance population grows from current size.",
-    tier4: "Population decline.",
+      "At-risk: There is at least an 80% chance that the population grows from its current size, but does not exceed 2 times its current size",
+    tier4:
+      "Critical: The population does not grow from its current size, remains stable at current levels, or the population declines.",
   },
 }
