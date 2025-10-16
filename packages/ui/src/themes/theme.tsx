@@ -782,9 +782,9 @@ const theme = createTheme({
     },
     body1: {
       fontFamily: themeValues.fontFamily.neueHaasText,
-      fontSize: "1.25rem", // 20px - primary body text (matches body1)
+      fontSize: "1.125rem", // 18px - primary body text
       fontWeight: 400,
-      lineHeight: 1.5, // 1.5x ratio (30px at 20px font size)
+      lineHeight: 1.5, // 1.5x ratio (27px at 18px font size)
     },
     body2: {
       fontFamily: themeValues.fontFamily.neueHaasText,

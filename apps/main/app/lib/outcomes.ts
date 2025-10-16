@@ -113,7 +113,7 @@ export const outcomeTierValues: Record<
     tier3:
       "At-risk: Average salinity at pumping plants is unsuitable for drinking and irrigation for 2 months in any year, in more than 5% of years at either site",
     tier4:
-      "Critical: Average salinity at pumping plants is unsuitable for irrigation or drinking water for more than two months in any year",
+      "Critical: Average salinity at pumping plants is unsuitable for irrigation or drinking water for **more than two months in any year**",
   },
   "Freshwater for in-Delta uses": {
     tier1:
@@ -129,19 +129,19 @@ export const outcomeTierValues: Record<
     tier1:
       "Optimal: Reservoir storage is frequently high. There is a 90% chance that end-of-April reservoir storage is greater than the long-term median value",
     tier2:
-      "Suboptimal: Reservoir storage is lower, but similar to recent history. In two out of three years (66%), end-of-April storage exceeds the 33rd percentile of long-term values",
+      "Suboptimal: Reservoir storage is lower, but similar to recent history. In two out of three years (66%), end-of-April storage exceeds the **33rd percentile** of long-term values",
     tier3:
-      "At-risk: Reservoir storage is slightly lower than recent history. In three out of ten years (30%), end-of-April storage exceeds the 33rd percentile of long-term values",
+      "At-risk: Reservoir storage is slightly lower than recent history. In three out of ten years (30%), end-of-April storage exceeds the **33rd percentile** of long-term values",
     tier4:
-      "Critical: Reservoir storage is much lower than recent history. In fewer than three out of ten years (30%), end-of-April storage exceeds the 33rd percentile of long-term values",
+      "Critical: Reservoir storage is much lower than recent history. In fewer than three out of ten years (30%), end-of-April storage exceeds the **33rd percentile** of long-term values",
   },
   "Groundwater storage": {
     tier1:
-      "Optimal: Groundwater trend is stable or increasing and average total storage is greater than historical.",
+      "Optimal: Groundwater trend is **stable or increasing** and average total storage is **greater than historical**.",
     tier2:
-      "At-risk: Groundwater trend is stable or increasing and average total storage is less than historical.",
-    tier3: "Compromised: Groundwater trend is declining at a moderate rate.",
-    tier4: "Critical: Groundwater trend is declining at a rapid rate.",
+      "At-risk: Groundwater trend is **stable or increasing** and average total storage is **less than historical**.",
+    tier3: "Compromised: Groundwater trend is **declining at a moderate rate**.",
+    tier4: "Critical: Groundwater trend is **declining at a rapid rate**.",
   },
   "Salmon abundance": {
     tier1:
@@ -151,6 +151,6 @@ export const outcomeTierValues: Record<
     tier3:
       "At-risk: There is at least an 80% chance that the population grows from its current size, but does not exceed 2 times its current size",
     tier4:
-      "Critical: The population does not grow from its current size, remains stable at current levels, or the population declines.",
+      "Critical: The population **does not grow** from its current size, **remains stable** at current levels, or the population **declines**.",
   },
 }
