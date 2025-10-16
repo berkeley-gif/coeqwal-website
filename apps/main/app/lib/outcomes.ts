@@ -40,8 +40,9 @@ export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
     // Fallback to hard-coded definitions
     return {
       "Community deliveries":
-        "Water delivered to community water systems for residential, commercial, and industrial use",
-      "Agricultural revenue": "Impact on agricultural production and revenue",
+        "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for 140 community water systems.",
+      "Agricultural revenue":
+        "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
       "Environmental flows":
         "Water allocated to support ecosystem health, wildlife habitats, and environmental protection",
       "Delta ecology":
@@ -70,20 +71,16 @@ export const outcomeTierValues: Record<
   { tier1: string; tier2: string; tier3: string; tier4: string }
 > = {
   "Community deliveries": {
-    tier1: "Full demands met in at least 95% of years.",
-    tier2: "Functional minimum demands met in all years.",
-    tier3: "Human health & safety minimums met in all years.",
-    tier4: "Human health & safety minimums not achieved for all years.",
+    tier1: "Optimal: TBD",
+    tier2: "Suboptimal: TBD",
+    tier3: "At-risk: TBD",
+    tier4: "Critical: TBD",
   },
   "Agricultural revenue": {
-    tier1:
-      "Increased production: Agricultural production increases with respect to today's outcomes.",
-    tier2:
-      "Minimal impact: Agricultural production declines less than 5% with respect to today's outcomes.",
-    tier3:
-      "Moderate impact: Agricultural production declines 5%-20% with respect to today's outcomes.",
-    tier4:
-      "Severe impact: Agricultural production declines more than 20% with respect to today's outcomes.",
+    tier1: "Optimal: Agricultural revenue remains stable or increase",
+    tier2: "Suboptimal: Agricultural revenue declines less than 5%",
+    tier3: "At-risk: Agricultural revenue declines between 5% and 20%",
+    tier4: "Critical: Agricultural revenue decreases more than 20%",
   },
   "Environmental flows": {
     tier1:
