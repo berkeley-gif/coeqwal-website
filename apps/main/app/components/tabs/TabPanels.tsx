@@ -9,6 +9,7 @@
 import { useMemo, useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { AnimatePresence, motion } from '@repo/motion'
+import type { RefObject } from "react"
 
 import { useTabs } from '../../context/Tabs'
 import { TABS, TabKey } from '../../types/tabs'
@@ -91,6 +92,7 @@ export default function TabPanels() {
     return (
         <AutoHeight>
             <motion.div
+                ref={panelRef}
                 animate={{ backgroundColor: panelColor }}
                 transition={{ type: 'spring', stiffness: 180, damping: 26 }}
                 style={{

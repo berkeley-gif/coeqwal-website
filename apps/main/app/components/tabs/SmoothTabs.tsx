@@ -7,7 +7,6 @@ import { TABS, TAB_ORDER, TabKey } from '../../types/tabs'
 import { useTabs } from '../../context/Tabs'
 import { useTabNavigation } from '../../hooks/useTabNavigation'
 
-
 export default function SmoothTabs() {
     const { state, tabsRef, hasEnteredTabsRef } = useTabs()
     const { activeTab } = state
@@ -87,7 +86,19 @@ export default function SmoothTabs() {
                                     }}
                                 />
                             )}
-                            <Typography variant="h6">{label}</Typography>
+                            {selected && (
+                                <Typography variant="h6" style={{
+                                    fontWeight: 500
+                                }}>
+                                    {label}</Typography>
+                            )}
+                            {!selected && (
+                                <Typography variant="h6" style={{
+                                    fontWeight: 300
+                                }}>
+                                    {label}</Typography>
+                            )}
+
 
                         </button>
                     )
