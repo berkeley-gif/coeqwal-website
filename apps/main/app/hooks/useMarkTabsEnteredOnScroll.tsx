@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 /**
  * Flip the "entered" gate the first time the user reaches the tabs area.
@@ -6,8 +6,8 @@
  * the scroll-align hook can act later on tab changes.
  */
 
-import { useEffect } from 'react'
-import { useTabs } from '../context/Tabs'
+import { useEffect } from "react"
+import { useTabs } from "../context/Tabs"
 
 export function useMarkTabsEnteredOnScroll() {
   const { tabsRef, panelRef, hasEnteredTabsRef } = useTabs()
@@ -24,7 +24,8 @@ export function useMarkTabsEnteredOnScroll() {
       // Tabs are sticky if their top is at/above the top of the viewport.
       const isSticky = tabsEl.getBoundingClientRect().top <= 0
       // Or the current panel has reached under the tabs
-      const underTabs = panelEl.getBoundingClientRect().top <= tabsEl.offsetHeight
+      const underTabs =
+        panelEl.getBoundingClientRect().top <= tabsEl.offsetHeight
       if (isSticky || underTabs) {
         hasEnteredTabsRef.current = true
       }
@@ -44,11 +45,11 @@ export function useMarkTabsEnteredOnScroll() {
       }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    window.addEventListener("resize", onScroll)
     return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
+      window.removeEventListener("scroll", onScroll)
+      window.removeEventListener("resize", onScroll)
     }
   }, [tabsRef, panelRef, hasEnteredTabsRef])
 }

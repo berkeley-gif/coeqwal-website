@@ -13,7 +13,7 @@ interface ScrollToButtonProps {
 }
 
 export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
-  scrollToId = '',
+  scrollToId = "",
   onClick = null,
   color,
   delay = 1.0,
@@ -26,7 +26,7 @@ export const ScrollToButton: React.FC<ScrollToButtonProps> = ({
       ? color(theme)
       : color || theme.palette.blue.darkest
 
-  // if scroll goes to an id in the page 
+  // if scroll goes to an id in the page
   if (scrollToId) {
     return (
       <ScrollIndicator
