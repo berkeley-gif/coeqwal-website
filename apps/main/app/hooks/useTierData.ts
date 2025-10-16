@@ -115,19 +115,19 @@ export function useOutcomeDefinitions() {
   // Using hardcoded definitions from outcomes.ts
   const hardcodedDefinitions = {
     "Community deliveries":
-      "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for 140 community water systems.",
+      "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for **140 community water systems**.",
     "Agricultural revenue":
-      "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
+      "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at **134 agricultural water districts** and evaluated relative to historical values.",
     "Environmental flows":
-      "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+      "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at **17 locations** on the Sacramento and San Joaquin Rivers and their major tributaries.",
     "Delta ecology":
       "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
     "Freshwater for Delta exports":
-      "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the Banks and Jones pumping plants.",
+      "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the **Banks and Jones pumping plants**.",
     "Freshwater for in-Delta uses":
-      "How often water in the Delta is fresh enough for in-Delta uses, assessed at two compliance locations in the western Delta.",
+      "How often water in the Delta is fresh enough for in-Delta uses, assessed at **two compliance locations** in the western Delta.",
     "Reservoir storage":
-      "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in XX large reservoirs.",
+      "How full reservoirs are on April 30, which is an important benchmark for the amount of water available for delivery in the dry season (April – October). Reservoir storage outcomes are assessed in **8 large reservoirs**.",
     "Groundwater storage":
       "Trends in groundwater storage, relative to 1960 – 2021 historical conditions. Groundwater storage outcomes are assessed in XX groundwater basins in the Central Valley.",
     "Salmon abundance":
