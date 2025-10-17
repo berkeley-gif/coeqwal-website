@@ -78,7 +78,7 @@ const BarChart = ({ size = 80, tiers, seed }: BarChartProps) => {
               y={y}
               width={maxBarWidth}
               height={barHeight}
-              fill="#f0f0f0"
+              fill="#d8d8d8"
               rx={barHeight / 4}
             />
 
