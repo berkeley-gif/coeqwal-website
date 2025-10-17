@@ -50,10 +50,10 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
           "text-offset": [
             "case",
             ["==", ["get", "name"], "Sacramento River Basin"],
-            [0, -10], // Move Sacramentohigher
+            [0, -2], // Slight adjustment up
             ["==", ["get", "name"], "San Joaquin River Basin"],
-            [0, 5], // Move San Joaquin lower
-            [0, 0], // Default position for Tulare Basin
+            [0, 0], // Centered
+            [0, 1], // Tulare - slight adjustment down
           ],
         }}
         paint={{

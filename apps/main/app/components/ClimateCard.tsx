@@ -124,29 +124,21 @@ export default function ClimateCard({
             {/* Climate instruction text */}
             <Box sx={{ mb: 1.5 }}>
               <Typography variant="body2" sx={{ mb: 0.5 }}>
-                <Box
-                  component="span"
-                  sx={{
-                    color: theme.palette.blue.bright,
-                  }}
-                >
-                  Slide
-                </Box>{" "}
-                to explore how hydroclimate affects outcomes.
+                Hydroclimate affects outcomes
               </Typography>
             </Box>
 
             {/* Climate slider */}
             <DiscreteSlider
               stops={[
-                "Warmer Wetter",
                 "Historical",
+                "Warmer Wetter",
                 "Warmer Drier I",
                 "Warmer Drier II",
                 "Warmer Drier III",
                 "Warmer Drier IV",
               ]}
-              value={selectedClimate}
+              value={selectedClimate === 1 ? 0 : selectedClimate}
               onChange={(value) => {
                 onClimateChange(value)
                 console.log("Climate changed to:", value)
