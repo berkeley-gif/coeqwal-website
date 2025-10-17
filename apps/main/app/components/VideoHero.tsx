@@ -149,7 +149,7 @@ export default function VideoHero({
                     <Typography
                         style={{
                             fontSize: '1.5rem',
-                            width: '60%'
+                            width: '55%'
                         }}
                         variant="body1"
                     >
@@ -158,7 +158,7 @@ export default function VideoHero({
                     <Typography
                                             style={{
         
-                            width: '40%'
+                            width: '45%'
                         }}
                         variant="body1"
                     >
