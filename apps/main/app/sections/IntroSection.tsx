@@ -116,7 +116,7 @@ const IntroSection = () => {
         content={
           <Box
             sx={{
-              maxWidth: "70%",
+              maxWidth: {lg: "70%", xl: "40%"},
               textAlign: "left",
               display: "flex",
               flexDirection: "column",
