@@ -297,46 +297,54 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
         }}
       >
             {outcomeNames.map(({ name, displayName }) => (
-              <Typography
+              <Box
                 key={displayName}
-                variant="caption"
-                component="div"
+                component="button"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  if (activeTooltip === name) {
+                    setActiveTooltip(null)
+                    setTooltipAnchor(null)
+                  } else {
+                    setActiveTooltip(name)
+                    setTooltipAnchor(e.currentTarget)
+                  }
+                }}
                 sx={{
-                  textAlign: "center",
-                  fontSize: "0.75rem",
-                  fontWeight: 500,
-                  color: theme.palette.blue.darkest,
-                  lineHeight: 1.2,
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 0.5,
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.04)",
+                    borderRadius: 1,
+                  },
                 }}
               >
-                {displayName === "Freshwater for in-Delta uses"
-                  ? "Freshwater for in-Delta uses"
-                  : getOutcomeDisplayLabel(name)}{" "}
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    if (activeTooltip === name) {
-                      setActiveTooltip(null)
-                      setTooltipAnchor(null)
-                    } else {
-                      setActiveTooltip(name)
-                      setTooltipAnchor(e.currentTarget)
-                    }
-                  }}
+                <Typography
+                  variant="caption"
                   sx={{
-                    padding: 0,
-                    marginLeft: "4px",
-                    verticalAlign: "middle",
-                    color: theme.palette.blue.bright,
-                    "&:hover": {
-                      color: theme.palette.blue.darkest,
-                    },
+                    textAlign: "center",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    color: theme.palette.blue.darkest,
+                    lineHeight: 1.2,
                   }}
                 >
-                  <InfoIcon sx={{ fontSize: "0.75rem" }} />
-                </IconButton>
-              </Typography>
+                  {displayName === "Freshwater for in-Delta uses"
+                    ? "Freshwater for in-Delta uses"
+                    : getOutcomeDisplayLabel(name)}
+                </Typography>
+                <InfoIcon
+                  sx={{
+                    fontSize: "0.75rem",
+                    color: theme.palette.blue.bright,
+                  }}
+                />
+              </Box>
             ))}
       </Box>
 
