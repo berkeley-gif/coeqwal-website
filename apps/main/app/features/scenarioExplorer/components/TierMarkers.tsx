@@ -67,7 +67,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     (f) => f.geometry.type === "Point",
   )
   const polygonFeatures = data.features.filter(
-    (f) => f.geometry.type === "Polygon",
+    (f) => f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon",
   )
 
   return (

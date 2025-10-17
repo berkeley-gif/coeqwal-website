@@ -6,8 +6,8 @@
 export interface TierFeature {
   type: "Feature"
   geometry: {
-    type: "Point" | "Polygon"
-    coordinates: number[] | number[][][]
+    type: "Point" | "Polygon" | "MultiPolygon"
+    coordinates: number[] | number[][][] | number[][][][]
   }
   properties: {
     location_id: string

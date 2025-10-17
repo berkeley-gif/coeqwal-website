@@ -28,11 +28,21 @@ function calculateBounds(
       maxLat = Math.max(maxLat, lat)
     } else if (feature.geometry.type === "Polygon") {
       const coords = feature.geometry.coordinates as [number, number][][]
-      coords[0].forEach(([lng, lat]) => {
+      coords[0]?.forEach(([lng, lat]) => {
         minLng = Math.min(minLng, lng)
         maxLng = Math.max(maxLng, lng)
         minLat = Math.min(minLat, lat)
         maxLat = Math.max(maxLat, lat)
+      })
+    } else if (feature.geometry.type === "MultiPolygon") {
+      const coords = feature.geometry.coordinates as [number, number][][][]
+      coords.forEach((polygon) => {
+        polygon[0]?.forEach(([lng, lat]) => {
+          minLng = Math.min(minLng, lng)
+          maxLng = Math.max(maxLng, lng)
+          minLat = Math.min(minLat, lat)
+          maxLat = Math.max(maxLat, lat)
+        })
       })
     }
   })

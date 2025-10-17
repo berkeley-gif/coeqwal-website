@@ -253,41 +253,46 @@ export function MultiDrawer({
       {/* Rail buttons - only shown when showRailButtons is true */}
       <AnimatePresence>
         {showRailButtons && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{
-              duration: 0.4,
-              ease: "easeOut",
-            }}
+          <div
             style={{
               position: "fixed",
-              top: `calc(50% + ${headerOffset}px)`,
+              top: "50%",
+              transform: "translateY(-50%)",
               right: drawerOpen
                 ? (drawerWidth ??
                   theme.layout.drawer.width ??
                   theme.layout.drawer.glossaryWidth)
                 : 0,
-              transform: "translateY(-50%)",
               zIndex: theme.zIndex.drawerBackdrop,
-              display: "flex",
-              flexDirection: "column",
-              gap: theme.spacing(1),
               transition: theme.transitions.create("right", {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.enteringScreen,
               }),
             }}
           >
-            <RailButton
-              label={tabTitles.glossary}
-              onClick={() => toggleTab("glossary")}
-              active={activeTab === "glossary"}
-              bgColor={theme.palette.blue.dark} // Slightly darker blue for rail button
-              hoverColor={theme.palette.blue.bright} // Slightly lighter blue for hover
-            />
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{
+                duration: 0.4,
+                ease: "easeOut",
+              }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: theme.spacing(1),
+              }}
+            >
+              <RailButton
+                label={tabTitles.glossary}
+                onClick={() => toggleTab("glossary")}
+                active={activeTab === "glossary"}
+                bgColor={theme.palette.blue.dark}
+                hoverColor={theme.palette.blue.bright}
+              />
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
