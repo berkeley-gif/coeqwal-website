@@ -44,10 +44,31 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     })
   }, [mapAPI])
 
-  // Close popup when data changes (new tier selected)
+  // Close popup and clean up old layers when data changes (new tier selected)
   useEffect(() => {
     setPopupInfo(null)
-  }, [data])
+    
+    // Remove all previous tier layers
+    mapAPI.withMap((mapRef) => {
+      const map = mapRef.getMap()
+      const existingLayers = map.getStyle().layers
+      const existingSources = Object.keys(map.getStyle().sources)
+      
+      // Remove all tier-polygon layers
+      existingLayers.forEach((layer) => {
+        if (layer.id.startsWith("tier-polygon-") && layer.id !== `tier-polygon-fill-${data.metadata.tier_code}`) {
+          map.removeLayer(layer.id)
+        }
+      })
+      
+      // Remove all tier-polygons sources
+      existingSources.forEach((sourceId) => {
+        if (sourceId.startsWith("tier-polygons-") && sourceId !== `tier-polygons-${data.metadata.tier_code}`) {
+          map.removeSource(sourceId)
+        }
+      })
+    })
+  }, [data, mapAPI])
 
   // Add polygon layers directly via map API (more reliable than declarative)
   useEffect(() => {
