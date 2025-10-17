@@ -8,10 +8,10 @@
     "boldText": "COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly-funded project that sheds light on how water is managedallocated in California and how climate change affects our water future. the choices we face.",
     "content": "COEQWAL – the Collaboratory for Equity in Water Allocation – is an independent, publicly-funded project that sheds light on how water is allocated in California and how climate change affects the choices we face."
   },
-  "toolsPanel": {
-    "title": "Tools are needed",
-    "boldText": "What parts of California are covered by the model?",
-    "content": "CalSim is a water planning model developed by government agencies that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released, and where it gets delivered across the state."
+  "mapPanel": {
+    "panelOne": {
+      "boldText" : "Do you know that California has one of the most complex water allocation systems in the world?"
+    }
   },
   "scenariosPanel": {
     "part1": "Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these operational strategies under the climate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change.",

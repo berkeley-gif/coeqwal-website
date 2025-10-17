@@ -1,14 +1,31 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { useCallback } from "react"
+
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import CaliforniaMapPanel from "../../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../../components/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../../components/ProgressiveScenarioPanels"
 import { CalSimProvider } from "../../components/CalSimContext"
+import { GlossaryLinkedText } from "@repo/ui"
+import { useDrawerStore } from "@repo/state"
 
 import { LeadingMarkerText } from "@repo/ui"
 
 export default function LearnPanel() {
+  const theme = useTheme()
+  const { setDrawerContent, openDrawer } = useDrawerStore()
+
+  // Handler to open glossary to specific entry
+  const handleGlossaryOpen = useCallback(
+    (term: string) => {
+      setDrawerContent({ selectedTerm: term })
+      openDrawer("glossary")
+    },
+    [setDrawerContent, openDrawer],
+  )
+
+
   return (
     <div>
       <Box sx={{ pointerEvents: "none" }}>
@@ -48,14 +65,34 @@ export default function LearnPanel() {
               <Typography variant="body1" sx={{
                 fontSize: '1.2rem',
               }} fontWeight={700}>
-                Do you know that California has one of the most complex water
-                allocation systems in the world?
+                Do you know that California has one of the most complex water allocation systems in the world?
               </Typography>
               <Typography variant="body1">
-                Learn how hydroclimate affects water availability, how water flows
-                through California&apos;s Central Valley, the ways in which we
-                manage water to satisfy diverse needs, and why inequities in water
-                access persist.
+
+
+
+                <GlossaryLinkedText
+                  text="To track the movement of water across the state, tools such as CalSim are needed. 
+                CalSim is a water planning model developed by government agencies that 
+                simulates how water moves through California's major water 
+                projects within the Central Valley and inter-connected regions. 
+                The model tracks water flowing into reservoirs, 
+                how much is stored and released into rivers and canals, and where it gets delivered across the state."
+                  terms={[
+                    { name: "COEQWAL", glossaryTerm: "COEQWAL" },
+                    { name: "CalSim", glossaryTerm: "CalSim" },
+                    {
+                      name: "water management strategies",
+                      glossaryTerm: "Operational strategies",
+                    },
+                    { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
+                  ]}
+                  onActivate={handleGlossaryOpen}
+                  color={theme.palette.text.primary}
+                  underlineColor={theme.palette.text.primary}
+                />
+
+
               </Typography>
             </div>
 
@@ -65,7 +102,7 @@ export default function LearnPanel() {
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                color: (theme) => theme.palette.blue.darkest, 
+                color: (theme) => theme.palette.blue.darkest,
                 textDecoration: "none",
                 display: "block",
                 fontWeight: 500,

@@ -89,9 +89,9 @@ export default function MapOverlayPanels() {
         marginTop: "-100vh", // Pull up to overlay the sticky map immediately
       }}
     >
-      {/* Tools panel right-side overlay */}
+      {/* CalSim panel right-side overlay */}
       <TwoColumnPanel
-        id="tools-overlay"
+        id="calsim-overlay"
         fullHeight={true}
         fullWidth={true}
         backgroundColor="transparent"
@@ -139,23 +139,28 @@ export default function MapOverlayPanels() {
               }}
             >
               <Typography variant="body1" fontWeight={700}>
-                {t("toolsPanel.boldText")}
+                Do you know that California has one of the most complex water allocation systems in the world?
               </Typography>
 
-              <Typography variant="body1" sx={{ mb: 2 }}>
+              <Typography variant="body1">
                 <GlossaryLinkedText
-                  text={t("toolsPanel.content")}
+                  text="To track the movement of water across the state, tools such as CalSim are needed. 
+                CalSim is a water planning that 
+                simulates how water moves through California's major water 
+                projects within the Central Valley and inter-connected regions. 
+                The model tracks water flowing into reservoirs, 
+                how much is stored and released into rivers and canals, and where it gets delivered across the state."
                   terms={[
                     { name: "CalSim", glossaryTerm: "CalSim" },
+                    { name: "major water projects", glossaryTerm: "California's major water projects" },
                     {
-                      name: "major water projects",
-                      glossaryTerm: "California's major water projects",
-                    },
-                    { name: "Central Valley", glossaryTerm: "Central Valley" },
+                      name: "Central Valley",
+                      glossaryTerm: "Central Valley",
+                    }
                   ]}
                   onActivate={handleGlossaryOpen}
-                  color={theme.palette.blue.darkest}
-                  underlineColor={theme.palette.blue.darkest}
+                  color={theme.palette.text.primary}
+                  underlineColor={theme.palette.text.primary}
                 />
               </Typography>
 
@@ -463,6 +468,78 @@ export default function MapOverlayPanels() {
                   </Box>
                 </Box>
               )}
+            </Box>
+          </motion.div>
+        }
+      />
+
+      <TwoColumnPanel
+        id="scenarios-overlay"
+        fullHeight={true}
+        fullWidth={true}
+        backgroundColor="transparent"
+        includeHeaderSpacing={false}
+        contentColumn="right"
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "flex-end",
+        }}
+        sx={{
+          minHeight: "100vh",
+          pointerEvents: "none", // Allow map interaction through the overlay
+          paddingLeft: 0, // Remove TwoColumnPanel's default padding that blocks clicks
+          paddingRight: 0, // Ditto
+        }}
+        rightContent={
+          <motion.div
+            initial={{ marginTop: "100vh", opacity: 0 }} // Start one viewport below, hidden
+            animate={{
+              marginTop: isFirstPanelVisible ? 0 : "100vh", // Slide up to natural position over sticky map
+              opacity: isFirstPanelVisible ? 1 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 40, // Lower stiffness
+              damping: 30, // Higher damping
+              duration: 1.8, // Longer duration
+              // Separate faster timing for opacity
+              opacity: {
+                duration: 0.6, // Much faster opacity fade-in
+                ease: "easeOut",
+              },
+            }}
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end", // Ensure right alignment
+            }}
+          >
+            <Box
+              ref={firstPanelRef}
+              sx={{
+                ...overlayPanelStyle,
+                mr: { xs: 8, md: 16 },
+              }}
+            >
+              <Typography variant="body1">
+                <GlossaryLinkedText
+                  text="Here, you can explore how water is allocated under current operations – 
+                  representing the laws, regulations, priorities, and decisions that affect 
+                  how California’s water supply is currently managed – and how outcomes differ among water users. "
+                  terms={[
+                    { name: "CalSim", glossaryTerm: "CalSim" },
+                    { name: "major water projects", glossaryTerm: "California's major water projects" },
+                    {
+                      name: "Central Valley",
+                      glossaryTerm: "Central Valley",
+                    }
+                  ]}
+                  onActivate={handleGlossaryOpen}
+                  color={theme.palette.text.primary}
+                  underlineColor={theme.palette.text.primary}
+                />
+              </Typography>
+
             </Box>
           </motion.div>
         }
