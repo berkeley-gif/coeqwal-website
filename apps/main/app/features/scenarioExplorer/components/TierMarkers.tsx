@@ -1,7 +1,7 @@
 "use client"
 
-import React from "react"
-import { Marker, Layer, Source } from "@repo/map"
+import React, { useState } from "react"
+import { Marker, Layer, Source, Popup } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import type { TierLocationResponse } from "../../../api/tierLocationApi"
 
@@ -16,6 +16,14 @@ interface TierMarkersProps {
  */
 export default function TierMarkers({ data }: TierMarkersProps) {
   const theme = useTheme()
+  const [popupInfo, setPopupInfo] = useState<{
+    longitude: number
+    latitude: number
+    name: string
+    tierLevel: number
+    tierLabel: string
+    locationType: string
+  } | null>(null)
 
   // Get tier color
   const getTierColor = (tier: number): string => {
@@ -30,6 +38,22 @@ export default function TierMarkers({ data }: TierMarkersProps) {
         return theme.palette.tiers.tier4
       default:
         return theme.palette.grey[500]
+    }
+  }
+
+  // Get tier label
+  const getTierLabel = (tier: number): string => {
+    switch (tier) {
+      case 1:
+        return "Optimal"
+      case 2:
+        return "Suboptimal"
+      case 3:
+        return "At-risk"
+      case 4:
+        return "Critical"
+      default:
+        return "Unknown"
     }
   }
 
@@ -65,11 +89,44 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
                 cursor: "pointer",
               }}
-              title={feature.properties.location_name}
+              onClick={() =>
+                setPopupInfo({
+                  longitude: lng,
+                  latitude: lat,
+                  name: feature.properties.location_name,
+                  tierLevel: feature.properties.tier_level,
+                  tierLabel: getTierLabel(feature.properties.tier_level),
+                  locationType: feature.properties.location_type_display,
+                })
+              }
             />
           </Marker>
         )
       })}
+
+      {/* Popup */}
+      {popupInfo && (
+        <Popup
+          longitude={popupInfo.longitude}
+          latitude={popupInfo.latitude}
+          anchor="bottom"
+          onClose={() => setPopupInfo(null)}
+          closeButton={true}
+          closeOnClick={false}
+        >
+          <div style={{ padding: "8px", minWidth: "200px" }}>
+            <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+              {popupInfo.name}
+            </div>
+            <div style={{ marginBottom: "2px" }}>
+              Tier {popupInfo.tierLevel} - {popupInfo.tierLabel}
+            </div>
+            <div style={{ fontSize: "0.875rem", color: "#666" }}>
+              {popupInfo.locationType}
+            </div>
+          </div>
+        </Popup>
+      )}
 
       {/* Polygon layers */}
       {polygonFeatures.length > 0 && (

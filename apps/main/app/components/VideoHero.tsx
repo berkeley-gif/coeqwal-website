@@ -2,6 +2,18 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import { Typography, useTheme } from "@repo/ui/mui"
 import { useTranslation } from "@repo/i18n"
 
+// Format text with medium weight on key words
+const formatHeroText = (text: string) => {
+  const parts = text.split(/(\blearn\b|\bexplore\b|\bempowers?\b)/gi)
+  
+  return parts.map((part, index) => {
+    if (part.match(/\b(learn|explore|empowers?)\b/i)) {
+      return <span key={index} style={{ fontWeight: 600 }}>{part}</span>
+    }
+    return part
+  })
+}
+
 export type VideoSource = { src: string; type: string }
 
 export interface VideoHeroProps {
@@ -156,13 +168,11 @@ export default function VideoHero({
                         {t("homePanel.content")}
                     </Typography>
                     <Typography
-                                            style={{
-        
-                            width: '45%'
-                        }}
+                        component="div"
+                        style={{ width: '45%' }}
                         variant="body1"
                     >
-                        {t("homePanel.callToAction")}
+                        {formatHeroText(t("homePanel.callToAction"))}
                     </Typography>
                 </div>
 

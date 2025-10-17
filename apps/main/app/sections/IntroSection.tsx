@@ -86,11 +86,10 @@ const IntroSection = () => {
                 <GlossaryLinkedText
                   text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
                   terms={[
-                    { name: "COEQWAL", glossaryTerm: "COEQWAL" },
                     { name: "CalSim", glossaryTerm: "CalSim" },
                     {
                       name: "water management strategies",
-                      glossaryTerm: "Operational strategies",
+                      glossaryTerm: "Water management strategies",
                     },
                     { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
                   ]}
@@ -165,8 +164,8 @@ const IntroSection = () => {
                   },
                   {
                     name: "outcomes",
-                    glossaryTerm: "Water allocations"
-                  }
+                    glossaryTerm: "Scenario outcomes",
+                  },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.utility.white}
