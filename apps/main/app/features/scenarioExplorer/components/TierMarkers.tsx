@@ -57,6 +57,11 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     }
   }
 
+  // Convert to sentence case
+  const toSentenceCase = (str: string): string => {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+  }
+
   // Separate by geometry type
   const pointFeatures = data.features.filter(
     (f) => f.geometry.type === "Point",
@@ -113,16 +118,55 @@ export default function TierMarkers({ data }: TierMarkersProps) {
           onClose={() => setPopupInfo(null)}
           closeButton={true}
           closeOnClick={false}
+          offset={15}
         >
-          <div style={{ padding: "8px", minWidth: "200px" }}>
-            <div style={{ fontWeight: 600, marginBottom: "4px" }}>
+          <div
+            style={{
+              padding: "12px 16px",
+              minWidth: "220px",
+              fontFamily: theme.typography.fontFamily,
+            }}
+          >
+            <div
+              style={{
+                fontSize: "0.8125rem",
+                color: theme.palette.grey[600],
+                fontStyle: "italic",
+                marginBottom: "2px",
+              }}
+            >
+              {toSentenceCase(popupInfo.locationType)}
+            </div>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: "1rem",
+                marginBottom: "8px",
+                color: theme.palette.blue.darkest,
+              }}
+            >
               {popupInfo.name}
             </div>
-            <div style={{ marginBottom: "2px" }}>
-              Tier {popupInfo.tierLevel} - {popupInfo.tierLabel}
-            </div>
-            <div style={{ fontSize: "0.875rem", color: "#666" }}>
-              {popupInfo.locationType}
+            <div
+              style={{
+                fontSize: "0.875rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <div
+                style={{
+                  width: "12px",
+                  height: "12px",
+                  borderRadius: "2px",
+                  backgroundColor: getTierColor(popupInfo.tierLevel),
+                  flexShrink: 0,
+                }}
+              />
+              <span>
+                <strong>Tier {popupInfo.tierLevel}:</strong> {popupInfo.tierLabel}
+              </span>
             </div>
           </div>
         </Popup>
