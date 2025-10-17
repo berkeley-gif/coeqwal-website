@@ -15,8 +15,6 @@ import ScenarioExplorer from "./features/scenarioExplorer/ScenarioExplorer"
 export default function Home() {
   const theme = useTheme()
 
-  const tabsRef = useRef<HTMLDivElement>(null)
-
   return (
     <>
       <TabsProvider>
