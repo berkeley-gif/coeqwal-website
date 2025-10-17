@@ -63,7 +63,7 @@ export function LeadingMarkerText({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: theme.palette.overlay.water,
+            backgroundColor: '#3a4574', // TEMP
             gridColumn: 1,
             gridRow: 1,
             position: "relative",
@@ -79,7 +79,8 @@ export function LeadingMarkerText({
       <Box
         sx={{
           gridColumn: bodySpansFull ? "1 / span 2" : 2,
-          color: (theme) => theme.palette.text.primary,
+          //color: (theme) => theme.palette.text.primary,
+          color: "white", // TEMP PUT IN TEAM
           display: "flex",
           flexDirection: "column",
           gap: 2,
