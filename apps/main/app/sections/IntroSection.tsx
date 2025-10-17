@@ -122,13 +122,13 @@ const IntroSection = () => {
               maxWidth: "70%",
               textAlign: "left",
               display: "flex",
-              flexDirection: "row",
+              flexDirection: "column",
               color: (theme) => theme.palette.utility.white,
               margin: "200px 0", 
-              gap: '15px'
+              gap: '40px'
             }}
           >
-            <Typography variant="body1"  style={{ fontSize: '1.4rem' }}  sx={{ flex: '1.5' }}>
+            <Typography variant="body1"  sx={{ flex: '1' }}>
               <GlossaryLinkedText
                 text="
                     We evaluate these unique water management strategies under the hydroclimate we've 
@@ -150,7 +150,7 @@ const IntroSection = () => {
                 underlineColor={theme.palette.utility.white}
               />
             </Typography>
-            <Typography variant="body1"  sx={{ flex: '1.5' }}>
+            <Typography variant="body1"  sx={{ flex: '2' }}>
               <GlossaryLinkedText
                 text="
                     These scenarios – unique combinations of water management strategies and hydroclimates 

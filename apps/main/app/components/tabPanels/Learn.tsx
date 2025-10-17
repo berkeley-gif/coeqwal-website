@@ -38,20 +38,23 @@ export default function LearnPanel() {
         }}
       >
         {/* Text column */}
-        <Box id="textColumn" sx={{ flex: 1 }}>
+        <Box id="textColumn" sx={{ width: '70%' }}>
           <LeadingMarkerText title="Learn">
             <div style={{
               display: 'flex',
               flexDirection: 'row',
-              gap: '15px'
+              gap: '15px',
             }}>
               <Typography variant="body1" sx={{
                 fontSize: '1.2rem',
+                width: '40%'
               }} fontWeight={700}>
                 Do you know that California has one of the most complex water
                 allocation systems in the world?
               </Typography>
-              <Typography variant="body1">
+              <Typography sx={{
+                width: '60%'
+              }} variant="body1">
                 Learn how hydroclimate affects water availability, how water flows
                 through California&apos;s Central Valley, the ways in which we
                 manage water to satisfy diverse needs, and why inequities in water
@@ -103,7 +106,7 @@ export default function LearnPanel() {
             minWidth: 0,
             display: "flex",
             justifyContent: "center",
-            flex: 1
+            width: '30%'
           }}
         >
           <Box
