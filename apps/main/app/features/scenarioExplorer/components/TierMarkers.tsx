@@ -199,6 +199,8 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     totalFeatures: data.features.length,
     points: pointFeatures.length,
     polygons: polygonFeatures.length,
+    geometryTypes: data.features.map((f) => f.geometry.type),
+    firstFeature: data.features[0],
   })
 
   return (

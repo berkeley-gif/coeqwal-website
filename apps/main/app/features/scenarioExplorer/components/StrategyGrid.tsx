@@ -473,10 +473,21 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       onClick={
                         showMapView && isActiveForStrategy
                           ? () => {
+                              console.log("📊 Outcome clicked:", {
+                                strategy: strategy.value,
+                                outcome: displayName,
+                                isActive: isActiveForStrategy,
+                              })
                               onOutcomeSelect(strategy.value, displayName)
                               onTierClick?.(strategy.value, displayName)
                             }
-                          : undefined
+                          : () => {
+                              console.log("❌ Outcome not active:", {
+                                strategy: strategy.value,
+                                outcome: displayName,
+                                isActive: isActiveForStrategy,
+                              })
+                            }
                       }
                     >
                       <ScenarioGlyph
