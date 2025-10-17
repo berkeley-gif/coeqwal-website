@@ -147,7 +147,7 @@ export default function VideoHero({
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    
+
                     gap: '25px',
                     color: theme.palette.utility.white,
                 }}>
@@ -157,13 +157,12 @@ export default function VideoHero({
                         }}
                         variant="body1"
                     >
-                        Water connects all Californians and is vital to our communities, farms, and the environment.
-                        Delivering water to meet all needs is not easy, especially as our climate changes.
+                        {t("homePanel.content")}
                     </Typography>
                     <Typography
                         variant="body1"
                     >
-                        On this site, you can learn about Californias water and explore how water allocations change under different scenarios. By providing access to the same tools used by decision-makers and discovering new pathways for managing water, COEQWAL empowers all Californians to shape our water future.
+                        {t("homePanel.callToAction")}
                     </Typography>
                 </div>
 
