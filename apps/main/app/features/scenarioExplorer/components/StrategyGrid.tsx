@@ -37,6 +37,7 @@ interface StrategyGridProps {
     displayName: string
   }>
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
+  onTierClick?: (strategy: string, outcome: string) => void
 }
 
 const gridStyles = {
@@ -119,6 +120,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   getChartDataForStrategy,
   outcomeNames,
   onOutcomeSelect,
+  onTierClick,
 }: StrategyGridProps) {
   const theme = useTheme()
 
@@ -470,7 +472,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       }}
                       onClick={
                         showMapView && isActiveForStrategy
-                          ? () => onOutcomeSelect(strategy.value, displayName)
+                          ? () => {
+                              onOutcomeSelect(strategy.value, displayName)
+                              onTierClick?.(strategy.value, displayName)
+                            }
                           : undefined
                       }
                     >

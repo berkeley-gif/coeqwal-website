@@ -25,6 +25,11 @@ import { useMapIntegration } from "./hooks/useMapIntegration"
 import StrategyGrid from "./components/StrategyGrid"
 import HydroclimateCard from "./components/HydroclimateCard"
 import TogglePair from "./components/TogglePair"
+import TierLegend from "./components/TierLegend"
+import TierMarkers from "./components/TierMarkers"
+
+// Hooks
+import { useTierMapData } from "./hooks/useTierMapData"
 
 /**
  * ScenarioExplorer
@@ -41,6 +46,12 @@ export default function ScenarioExplorer() {
   const [isDragging, setIsDragging] = useState(false)
   const [dragStartY, setDragStartY] = useState(0)
   const [dragStartHeight, setDragStartHeight] = useState(0)
+
+  // State for selected tier visualization on map
+  const [selectedTier, setSelectedTier] = useState<{
+    strategy: string
+    outcome: string
+  } | null>(null)
 
   // Data management
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
@@ -64,6 +75,16 @@ export default function ScenarioExplorer() {
 
   // Map integration
   useMapIntegration(showMapView, anySelectedOutcome || null)
+
+  // Tier map data and visualization
+  const { tierData, clearTierData } = useTierMapData({
+    selectedTier,
+  })
+
+  // Handle tier chart click in map view
+  const handleTierClick = (strategy: string, outcome: string) => {
+    setSelectedTier({ strategy, outcome })
+  }
 
   // Handle drag to resize overlay
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -234,7 +255,21 @@ export default function ScenarioExplorer() {
               >
                 <NavigationControl position="bottom-right" />
                 <GeolocateControl position="bottom-right" />
+
+                {/* Tier location markers */}
+                {tierData && <TierMarkers locations={tierData.locations} />}
               </Map>
+
+              {/* Tier legend overlay */}
+              {selectedTier && (
+                <TierLegend
+                  outcome={selectedTier.outcome}
+                  onClose={() => {
+                    setSelectedTier(null)
+                    clearTierData()
+                  }}
+                />
+              )}
 
               {/* Search bar overlay - bottom right */}
               <Box
@@ -426,6 +461,7 @@ export default function ScenarioExplorer() {
                       getChartDataForStrategy={getChartDataForStrategy}
                       outcomeNames={outcomeNames || []}
                       onOutcomeSelect={handleOutcomeSelect}
+                      onTierClick={handleTierClick}
                     />
                   </Box>
                 </Box>
