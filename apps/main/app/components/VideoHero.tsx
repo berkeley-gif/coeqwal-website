@@ -1,5 +1,6 @@
-import { fallbackModeToFallbackField } from "next/dist/lib/fallback";
 import React, { useEffect, useMemo, useRef, useState } from "react"
+import { Typography, useTheme } from "@repo/ui/mui"
+import { useTranslation } from "@repo/i18n"
 
 export type VideoSource = { src: string; type: string }
 
@@ -23,6 +24,8 @@ export default function VideoHero({
     paragraphs,
     children,
 }: VideoHeroProps) {
+    const theme = useTheme()
+    const { t } = useTranslation()
     const videoRef = useRef<HTMLVideoElement | null>(null)
     const [canPlay, setCanPlay] = useState(false)
     const [failed, setFailed] = useState(false)
@@ -58,7 +61,7 @@ export default function VideoHero({
     const showStaticImage = failed
 
     return (
-        <div id='home-hero' style={{
+        <div id='homeHero' style={{
             position: 'relative',
             minHeight: '100vh',
             width: '100%',
@@ -66,7 +69,7 @@ export default function VideoHero({
             paddingTop: '100px',
             paddingBottom: '100px'
         }}>
-            <div style={{
+            <div id='homeHeroVid' style={{
                 position: 'absolute',
                 inset: 0,
                 zIndex: 0,
@@ -87,7 +90,6 @@ export default function VideoHero({
                         loop
                         playsInline
                         autoPlay
-                        preload="none"
                         onCanPlay={() => setCanPlay(true)}
                         onError={(e) => {
                             console.warn('Hero video error', (e.target as HTMLVideoElement).error)
@@ -106,7 +108,63 @@ export default function VideoHero({
                     </video>
                 )}
             </div>
-        </div>
+            <div
+                id='homeHeroTitle'
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    minHeight: '400px',
+                    width: '700px',
+                    background: theme.palette.nature.earth,
+                    padding: 85
+                }}>
+                <Typography
+                    variant="h1"
+                    component="h1"
+                    sx={{
+                        fontSize: "6.5rem", // Custom for demo with new title
+                        textAlign: "left",
+                        fontWeight: 500,
+                        color: theme.palette.blue.darkest,
+                        fontFamily:
+                            "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
+                    }}
+                >
+                    {t("homePanel.title")}
+                </Typography>
+            </div>
+            <div style={{
+                position: 'absolute',
+                right: 0,
+                bottom: 0,
+                minHeight: '300px',
+                width: '45vw',
+                background: theme.palette.blue.darkest,
+                padding: 85
+            }}>
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    flex: "38% 62%",
+                    gap: '25px',
+                    color: theme.palette.utility.white,
+                }}>
+                    <Typography
+
+                        variant="body1"
+                    >
+                        Water connects all Californians and is vital to our communities, farms, and the environment.
+                        Delivering water to meet all needs is not easy, especially as our climate changes.
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                    >
+                        Here you can explore how water in California is managed across the Central Valley and discover pathways to a more sustainable and equitable water future.
+                    </Typography>
+                </div>
+
+            </div>
+        </div >
     )
 
 }
