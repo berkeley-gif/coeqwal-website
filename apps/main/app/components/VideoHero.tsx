@@ -136,20 +136,19 @@ export default function VideoHero({
                 style={{
                     position: "absolute",
                     left: 0,
-                    minHeight: "400px",
                     width: "auto",
                     background: theme.palette.nature.earth,
-                    padding: 85,
                 }}
             >
                 <Typography
                     variant="h1"
                     component="h1"
                     sx={{
-                        fontSize: { md: "4.5rem", xl: "6.5rem" }, // Custom for demo with new title
+                        fontSize: { sm: "2.5rem", md: "3rem", lg: "3.5rem", xl: "5.5rem" }, // Custom for demo with new title
+                        padding: { sm: "45px", md: "85px" },
                         textAlign: "left",
                         fontWeight: 500,
-                        width: { md: 400, lg: 400, xl: 700 },
+                        width: { md: 420, lg: 435, xl: 700 },
                         color: theme.palette.blue.darkest,
                         fontFamily:
                             "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
@@ -165,7 +164,7 @@ export default function VideoHero({
                     right: 0,
                     bottom: 0,
                     minHeight: "auto",
-                    width: "45vw",
+                    maxWidth: "45vw",
                     background: theme.palette.blue.darkest,
                     padding: 85,
                 }}
@@ -174,21 +173,22 @@ export default function VideoHero({
                     style={{
                         display: "flex",
                         flexDirection: "row",
-
                         gap: "25px",
                         color: theme.palette.utility.white,
                     }}
                 >
                     <Typography
                         sx={{
-                            fontSize: { lg: "1.2rem", xl: "1.5rem" },
-                            width: { lg: "45%", xl: "55%" },
+                            fontSize: { md: "1.1rem", lg: "1.2rem", xl: "1.5rem" },
+                            width: { lg: "45%", xl: "40%" },
                         }}
                         variant="body1"
                     >
                         {t("homePanel.content")}
                     </Typography>
-                    <Typography component="div" sx={{ width: { lg: "55%", xl: "45%" } }} variant="body1">
+                    <Typography component="div" sx={{ 
+                        fontSize: { md: "1rem", lg: "1.1rem", xl: "1.3rem" },
+                        width: { lg: "55%", xl: "60%" } }} variant="body1">
                         {formatHeroText(t("homePanel.callToAction"))}
                     </Typography>
                 </div>
