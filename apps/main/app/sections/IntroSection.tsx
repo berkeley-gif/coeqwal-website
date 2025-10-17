@@ -131,7 +131,7 @@ const IntroSection = () => {
             <Typography variant="body1"  sx={{ flex: '1' }}>
               <GlossaryLinkedText
                 text="
-                    We evaluate these unique water management strategies under the hydroclimate we've 
+                    We evaluate unique water management strategies under the hydroclimate we've 
                     experienced in the recent past and hydroclimates we may experience in the future as 
                     the climate changes.
                   "
