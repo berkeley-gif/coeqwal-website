@@ -35,7 +35,6 @@ export default function LearnPanel() {
           width: '100%',
           maxWidth: '1200px',
           margin: '100px auto 0',
-          color: "white" // TEMP PUT IN TEAM
         }}
       >
         {/* Text column */}
@@ -66,7 +65,7 @@ export default function LearnPanel() {
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                color: "white",  // TEMP PUT IN TEAM
+                color: (theme) => theme.palette.blue.darkest, 
                 textDecoration: "none",
                 display: "block",
                 fontWeight: 500,
@@ -84,7 +83,7 @@ export default function LearnPanel() {
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                color: "white",  // TEMP PUT IN TEAM
+                color: (theme) => theme.palette.blue.darkest,
                 textDecoration: "none",
                 display: "block",
                 mb: (theme) => theme.layout.spacing.xs,
