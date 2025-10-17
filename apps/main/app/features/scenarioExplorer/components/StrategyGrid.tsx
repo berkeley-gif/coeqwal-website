@@ -314,34 +314,26 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   border: "none",
                   cursor: "pointer",
                   padding: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 0.5,
+                  textAlign: "center",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  color: theme.palette.blue.darkest,
+                  lineHeight: 1.2,
                   "&:hover": {
                     backgroundColor: "rgba(0, 0, 0, 0.04)",
                     borderRadius: 1,
                   },
                 }}
               >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    textAlign: "center",
-                    fontSize: "0.75rem",
-                    fontWeight: 500,
-                    color: theme.palette.blue.darkest,
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {displayName === "Freshwater for in-Delta uses"
-                    ? "Freshwater for in-Delta uses"
-                    : getOutcomeDisplayLabel(name)}
-                </Typography>
+                {displayName === "Freshwater for in-Delta uses"
+                  ? "Freshwater for in-Delta uses"
+                  : getOutcomeDisplayLabel(name)}{" "}
                 <InfoIcon
                   sx={{
-                    fontSize: "0.75rem",
+                    fontSize: "0.7rem",
                     color: theme.palette.blue.bright,
+                    verticalAlign: "baseline",
+                    marginLeft: "2px",
                   }}
                 />
               </Box>
