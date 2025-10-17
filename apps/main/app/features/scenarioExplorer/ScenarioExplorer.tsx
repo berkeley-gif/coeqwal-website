@@ -374,44 +374,50 @@ export default function ScenarioExplorer() {
                         Choose strategies
                       </Typography>
 
-                      <Box sx={{ ml: 10 }}>
-                        <TogglePair
+                      <InfoTooltip description="Show all strategies or only chosen ones">
+                        <Box sx={{ ml: 10 }}>
+                          <TogglePair
+                            leftIcon={
+                              <DocumentListIcon
+                                active={!showOnlyChosen}
+                                size={35}
+                              />
+                            }
+                            rightIcon={
+                              <DocumentCheckedIcon
+                                active={showOnlyChosen}
+                                size={35}
+                              />
+                            }
+                            onLeftClick={() => setShowOnlyChosen(false)}
+                            onRightClick={() => setShowOnlyChosen(true)}
+                            gap={-0.5}
+                          />
+                        </Box>
+                      </InfoTooltip>
+
+                      <InfoTooltip description="Show or hide strategy details">
+                        <Box>
+                          <TogglePair
                           leftIcon={
-                            <DocumentListIcon
-                              active={!showOnlyChosen}
+                            <DocumentExpandedIcon
+                              active={showDefinitions}
                               size={35}
                             />
                           }
                           rightIcon={
-                            <DocumentCheckedIcon
-                              active={showOnlyChosen}
+                            <DocumentCollapsedIcon
+                              active={!showDefinitions}
                               size={35}
                             />
                           }
-                          onLeftClick={() => setShowOnlyChosen(false)}
-                          onRightClick={() => setShowOnlyChosen(true)}
+                          onLeftClick={() => setShowDefinitions(true)}
+                          onRightClick={() => setShowDefinitions(false)}
                           gap={-0.5}
+                          sx={{ ml: -1.5 }}
                         />
-                      </Box>
-
-                      <TogglePair
-                        leftIcon={
-                          <DocumentExpandedIcon
-                            active={showDefinitions}
-                            size={35}
-                          />
-                        }
-                        rightIcon={
-                          <DocumentCollapsedIcon
-                            active={!showDefinitions}
-                            size={35}
-                          />
-                        }
-                        onLeftClick={() => setShowDefinitions(true)}
-                        onRightClick={() => setShowDefinitions(false)}
-                        gap={-0.5}
-                        sx={{ ml: -1.5 }}
-                      />
+                        </Box>
+                      </InfoTooltip>
                     </Box>
 
                     {/* Key operations column */}
@@ -442,17 +448,21 @@ export default function ScenarioExplorer() {
                         </Typography>
                       </Box>
 
-                      <TogglePair
-                        leftIcon={
-                          <DocumentListIcon active={!showMapView} size={46} />
-                        }
-                        rightIcon={
-                          <MapViewIcon active={showMapView} size={46} />
-                        }
-                        onLeftClick={() => setMapView(false)}
-                        onRightClick={() => setMapView(true)}
-                        gap={0.4}
-                      />
+                      <InfoTooltip description="Switch between list and map view">
+                        <Box>
+                          <TogglePair
+                            leftIcon={
+                              <DocumentListIcon active={!showMapView} size={46} />
+                            }
+                            rightIcon={
+                              <MapViewIcon active={showMapView} size={46} />
+                            }
+                            onLeftClick={() => setMapView(false)}
+                            onRightClick={() => setMapView(true)}
+                            gap={0.4}
+                          />
+                        </Box>
+                      </InfoTooltip>
                     </Box>
                   </Box>
 
