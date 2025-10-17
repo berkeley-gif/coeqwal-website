@@ -4,6 +4,16 @@ import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state"
 import { useCallback } from "react"
 
+import VideoHero from "../components/VideoHero"
+import type { VideoSource } from "../components/VideoHero"
+
+const VIDEO_SRCS: VideoSource[] = [
+  {
+    src: '/video/landing-hero-reel.mp4',
+    type: 'video/mp4',
+  }
+]
+
 const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -18,109 +28,15 @@ const IntroSection = () => {
     [setDrawerContent, openDrawer],
   )
 
+
+
   return (
-    <Box sx={{ pointerEvents: "none" }}>
-      {/* Home panel (could be its own component) */}
-      <Box
-        sx={{
-          background: (theme) => `
-              linear-gradient(to bottom, ${theme.palette.brand.sky}, ${theme.palette.brand.water})
-            `,
-          position: "relative",
-          height: "100vh",
-        }}
-      >
-        <OneColumnPanel
-          id="home"
-          fullHeight={true}
-          fullWidth={true}
-          backgroundColor="transparent"
-          includeHeaderSpacing={true}
-          contentAlignment={{
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-          content={
-            <Box
-              sx={{
-                position: "relative", // Needed for z-index
-                zIndex: theme.zIndex.introBubbles,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              {/* Home text content */}
-              <Typography
-                variant="h1"
-                component="h1"
-                sx={{
-                  fontSize: "6.5rem", // Custom for demo with new title
-                  textAlign: "center",
-                  fontWeight: 500,
-                  width: "1200px", // Fixed width for title to break properly
-                  position: "absolute",
-                  top: "40%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)", // Center the title in viewport
-                  fontFamily:
-                    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Trying San Francisco on Mac, system fonts elsewhere; replace with new headline font
-                }}
-              >
-                {t("homePanel.title")}
-              </Typography>
-
-              {/* Body text */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, 10vh)", // Position below centered title
-                  maxWidth: theme.layout.textContainer.maxWidth, // Optimal width for paragraph reading
-                  textAlign: "left", // Left-align text for better readability
-                }}
-              >
-                <Typography
-                  variant="body1"
-                  sx={(theme) => ({
-                    mb: theme.layout.spacing.md, // Spacing before second paragraph
-                  })}
-                >
-                  {t("homePanel.content")}
-                </Typography>
-
-                <Typography
-                  variant="body1"
-                  sx={(theme) => ({
-                    mb: theme.layout.spacing.xs, // Reduced spacing before arrow from normal
-                  })}
-                >
-                  {t("homePanel.callToAction")}
-                </Typography>
-
-                {/* Arrow */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    position: "relative", // Ensure proper stacking context
-                    zIndex: theme.zIndex.introBubbles + 1, // Above any potential overlapping elements
-                    pointerEvents: "auto", // Ensure arrow can receive interactions
-                  }}
-                >
-                  <ScrollToButton
-                    scrollToId="frontmatter"
-                    color={(theme) => theme.palette.text.primary}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          }
-        ></OneColumnPanel>
-      </Box>
+    <Box>
+      {/* Video Hero */}
+      <VideoHero
+        sources={VIDEO_SRCS}
+        fallbackImage='/images/home_hero_fallback.png'
+      />
 
       {/* Frontmatter panel(s) */}
       <OneColumnPanel
@@ -128,77 +44,135 @@ const IntroSection = () => {
         fullHeight={true}
         fullWidth
         backgroundColor={theme.palette.brand.sky}
-        includeHeaderSpacing={true}
+        includeHeaderSpacing={false}
         contentAlignment={{
           justifyContent: "center",
-          alignItems: "center",
+          alignItems: "flex-start",
         }}
         sx={{
           pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary? bc map?
           backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "38% auto",
-          backgroundPosition: "bottom right",
+          backgroundPosition: "right bottom",
           backgroundRepeat: "no-repeat",
+          paddingLeft: "300px"
         }}
         content={
           <Box
             sx={{
               width: "100%",
-              maxWidth: (theme) => theme.layout.textContainer.maxWidth,
+              maxWidth: "70%",
               textAlign: "left",
               display: "flex",
               flexDirection: "column",
-              gap: "20px",
+              gap: "60px",
             }}
           >
-            {/* <Typography variant="body1" fontWeight={700}>
-              {t("frontmatterPanel.boldText")}
-            </Typography> */}
-            <Typography variant="body1">
-              {t("frontmatterPanel.content")}
-            </Typography>
 
-            <Typography variant="body1">
+
+            <Box
+              sx={{
+                width: "100%",
+                textAlign: "left",
+                display: "flex",
+                flexDirection: "row",
+                gap: "20px",
+              }}
+            >
+              <Typography fontWeight={700} variant="body1" style={{ fontSize: '1.5rem', maxWidth: '80%' }}>
+                {t("frontmatterPanel.boldText")}
+              </Typography>
+              <Typography variant="body1">
+                <GlossaryLinkedText
+                  text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
+                  terms={[
+                    { name: "COEQWAL", glossaryTerm: "COEQWAL" },
+                    { name: "CalSim", glossaryTerm: "CalSim" },
+                    {
+                      name: "water management strategies",
+                      glossaryTerm: "Operational strategies",
+                    },
+                    { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
+                  ]}
+                  onActivate={handleGlossaryOpen}
+                  color={theme.palette.text.primary}
+                  underlineColor={theme.palette.text.primary}
+                />
+              </Typography>
+
+
+            </Box>
+          </Box>
+        }
+      />
+
+      <OneColumnPanel
+        id="scenariosIntro"
+        fullHeight={false}
+        fullWidth
+        includeHeaderSpacing={false}
+        backgroundColor={theme.palette.blue.darkest}
+        contentAlignment={{
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        content={
+          <Box
+            sx={{
+              maxWidth: "70%",
+              textAlign: "left",
+              display: "flex",
+              flexDirection: "column",
+              color: (theme) => theme.palette.utility.white,
+              margin: "200px 0", 
+              gap: '40px'
+            }}
+          >
+            <Typography variant="body1"  sx={{ flex: '1' }}>
               <GlossaryLinkedText
-                text="Working with communities across California, the COEQWAL team is using CalSim to model 30 alternative ways to manage California's water system. We evaluate these water management strategies under the hydroclimate we've experienced in the recent past and under five additional hydroclimates – patterns of future water availability affected by climate change."
+                text="
+                    We evaluate unique water management strategies under the hydroclimate we've 
+                    experienced in the recent past and hydroclimates we may experience in the future as 
+                    the climate changes.
+                  "
                 terms={[
-                  { name: "COEQWAL", glossaryTerm: "COEQWAL" },
-                  { name: "CalSim", glossaryTerm: "CalSim" },
                   {
                     name: "water management strategies",
-                    glossaryTerm: "Operational strategies",
+                    glossaryTerm: "Water management strategies",
                   },
-                  { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
+                  {
+                    name: "hydroclimate",
+                    glossaryTerm: "Hydroclimate"
+                  }
                 ]}
                 onActivate={handleGlossaryOpen}
-                color={theme.palette.text.primary}
-                underlineColor={theme.palette.text.primary}
+                color={theme.palette.utility.white}
+                underlineColor={theme.palette.utility.white}
               />
             </Typography>
-
-            <Typography variant="body1">
+            <Typography variant="body1"  sx={{ flex: '2' }}>
               <GlossaryLinkedText
-                text="These scenarios – unique combinations of water management strategies and hydroclimates – provide insight into how our water system works and the trade-offs that exist between goals. By understanding how different decisions affect water allocations for different communities, we can imagine new ways of improving water management in California."
+                text="
+                    These scenarios – unique combinations of water management strategies and hydroclimates 
+                    – provide insight into how our water system works and the trade-offs that exist between goals. 
+                    By understanding how different decisions affect outcomes for different 
+                    water users, we can help to imagine new ways of improving water management in California.
+                  "
                 terms={[
                   {
-                    name: "water allocations",
-                    glossaryTerm: "Water allocations",
+                    name: "scenarios",
+                    glossaryTerm: "Scenarios",
                   },
+                  {
+                    name: "outcomes",
+                    glossaryTerm: "Water allocations"
+                  }
                 ]}
                 onActivate={handleGlossaryOpen}
-                color={theme.palette.text.primary}
-                underlineColor={theme.palette.text.primary}
+                color={theme.palette.utility.white}
+                underlineColor={theme.palette.utility.white}
               />
             </Typography>
-
-            <ScrollToButton
-              scrollToId="california-map"
-              style={{
-                marginTop: "2rem",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            />
           </Box>
         }
       />

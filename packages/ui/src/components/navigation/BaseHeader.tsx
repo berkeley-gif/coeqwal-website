@@ -8,6 +8,7 @@ import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
+import { useTheme } from "@repo/ui/mui"
 import { useRef, useState } from "react"
 
 const MotionAppBar = motion.create(AppBar)
@@ -118,6 +119,7 @@ export function BaseHeader({
   // Responsive breakpoints (using standard MUI breakpoints)
   const isMobile = useMediaQuery("(max-width:600px)")
   const isTablet = useMediaQuery("(max-width:900px)")
+  const theme = useTheme()
 
   const buttonStyle = {
     fontSize: "1.125rem",
