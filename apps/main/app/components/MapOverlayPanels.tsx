@@ -145,7 +145,7 @@ export default function MapOverlayPanels() {
               <Typography variant="body1">
                 <GlossaryLinkedText
                   text="To track the movement of water across the state, tools such as CalSim are needed. 
-                CalSim is a water planning that 
+                CalSim is a water planning model that 
                 simulates how water moves through California's major water 
                 projects within the Central Valley and inter-connected regions. 
                 The model tracks water flowing into reservoirs, 
