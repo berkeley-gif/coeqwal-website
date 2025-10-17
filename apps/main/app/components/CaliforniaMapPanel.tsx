@@ -56,8 +56,8 @@ export default function CaliforniaMapPanel({
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
 
-        {/* Basins GeoJSON Layer */}
-        <BasinsLayer visible={showBasins} />
+        {/* Basins GeoJSON Layer - always visible */}
+        <BasinsLayer visible={true} />
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         {/* Hide CalSim layers when hotspot markers are shown */}

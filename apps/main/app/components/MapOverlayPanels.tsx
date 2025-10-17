@@ -168,32 +168,8 @@ export default function MapOverlayPanels() {
                 />
               </Typography>
 
-              {/* CalSim toggle button */}
-              <Button
-                variant="standard"
-                onClick={toggleCalSim}
-                sx={{
-                  backgroundColor: isCalSimVisible
-                    ? (theme) => theme.palette.accent.gold
-                    : (theme) => theme.palette.common.white,
-                  color: isCalSimVisible
-                    ? (theme) => theme.palette.utility.black
-                    : (theme) => theme.palette.blue.darkest,
-                  "&:hover": {
-                    backgroundColor: isCalSimVisible
-                      ? (theme) => theme.palette.accent.orange
-                      : (theme) => theme.palette.grey[100],
-                  },
-                  mb: 1,
-                }}
-              >
-                {isCalSimVisible
-                  ? "Hide CalSim Network"
-                  : "Show CalSim Network"}
-              </Button>
-
-              {/* CalSim Legend */}
-              {isCalSimVisible && (
+              {/* CalSim Legend - removed toggle button, basins now always visible */}
+              {false && (
                 <Box sx={{ mt: (theme) => theme.spacing(1) }}>
                   <Typography
                     variant="h6"
@@ -527,7 +503,7 @@ export default function MapOverlayPanels() {
             >
               <Typography variant="body1">
                 <GlossaryLinkedText
-                  text="Here, you can explore how water is allocated under current operations – 
+                  text="On this site, you can explore how water is allocated under current operations – 
                   representing the laws, regulations, priorities, and decisions that affect 
                   how California’s water supply is currently managed – and how outcomes differ among water users. "
                   terms={[
@@ -565,6 +541,7 @@ export default function MapOverlayPanels() {
         }}
         sx={{
           minHeight: "100vh",
+          paddingBottom: "40vh", // Add vertical breathing room at bottom
           pointerEvents: "none", // Allow map interaction through the overlay
           paddingLeft: 0,
           paddingRight: 0,
