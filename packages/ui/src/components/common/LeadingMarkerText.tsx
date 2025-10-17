@@ -21,7 +21,7 @@ export function LeadingMarkerText({
     <Box
       sx={(theme) => ({
         width: "100%",
-        maxWidth: { xs: "100%", md: 600 },
+        maxWidth: { xs: "100%", md: 700 },
         display: "grid",
         gridTemplateColumns: "48px 1fr",
         gridTemplateRows: "auto auto",
@@ -63,7 +63,7 @@ export function LeadingMarkerText({
             width: 48,
             height: 48,
             borderRadius: "50%",
-            backgroundColor: theme.palette.overlay.water,
+            backgroundColor: (theme) => theme.palette.nature.earth,
             gridColumn: 1,
             gridRow: 1,
             position: "relative",

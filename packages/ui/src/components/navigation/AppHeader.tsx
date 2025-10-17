@@ -48,7 +48,7 @@ export function AppHeader({
       onDataClick={onDataClick}
       onToolsClick={onToolsClick}
       onAboutClick={onAboutClick}
-      backgroundColor={theme.palette.overlay.water}
+      backgroundColor={theme.palette.utility.white}
       textColor={theme.palette.text.primary}
       zIndex={theme.zIndex.appBar}
       borderRadius={theme.borderRadius.none}

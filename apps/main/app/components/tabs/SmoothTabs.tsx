@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "@repo/motion"
-import { Typography } from "@repo/ui/mui"
+import { Typography, useTheme } from "@repo/ui/mui"
 
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
@@ -11,6 +11,7 @@ export default function SmoothTabs() {
   const { state, tabsRef, hasEnteredTabsRef } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
+  const theme = useTheme()
 
   const onSelect = (tab: TabKey | undefined) => {
     if (tab && tab !== activeTab) {
@@ -73,6 +74,7 @@ export default function SmoothTabs() {
                 cursor: "pointer",
                 fontWeight: 600,
                 textTransform: "uppercase",
+                color: theme.palette.blue.darkest,
               }}
             >
               {selected && (
@@ -93,7 +95,9 @@ export default function SmoothTabs() {
                 <Typography
                   variant="h6"
                   style={{
-                    fontWeight: 500,
+                    fontWeight: 600,
+                    fontSize: '1.6rem',
+                    textTransform: 'capitalize'
                   }}
                 >
                   {label}
@@ -103,7 +107,8 @@ export default function SmoothTabs() {
                 <Typography
                   variant="h6"
                   style={{
-                    fontWeight: 300,
+                    fontWeight: 600,
+                    textTransform: 'capitalize'
                   }}
                 >
                   {label}
