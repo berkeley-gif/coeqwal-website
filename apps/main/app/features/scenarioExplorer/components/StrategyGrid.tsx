@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import {
   Box,
   Typography,
@@ -6,6 +6,7 @@ import {
   InfoIcon,
   Theme,
   Checkbox,
+  IconButton,
 } from "@repo/ui/mui"
 import {
   InfoTooltip,
@@ -18,6 +19,7 @@ import {
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
 import { useExploreUserWorkflowStore } from "@repo/state"
+import TierTooltipContent from "./TierTooltipContent"
 import OutcomeTooltip from "./OutcomeTooltip"
 import TogglePair from "./TogglePair"
 
@@ -123,6 +125,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   onTierClick,
 }: StrategyGridProps) {
   const theme = useTheme()
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+  const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null)
 
   // Get all necessary state from the store
   const {
@@ -140,7 +144,61 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   } = useExploreUserWorkflowStore()
 
   return (
-    <Box sx={gridStyles.container(showMapView, theme)}>
+    <Box sx={{ position: "relative" }}>
+      {/* Active outcome tooltip */}
+      {activeTooltip && tooltipAnchor && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: tooltipAnchor.offsetTop,
+            right: `calc(100% - ${tooltipAnchor.offsetLeft}px + 16px)`,
+            zIndex: 1000,
+            backgroundColor: "white",
+            padding: 2,
+            borderRadius: theme.borderRadius.rounded,
+            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+            width: "450px",
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              right: "-8px",
+              top: "20px",
+              width: 0,
+              height: 0,
+              borderTop: "8px solid transparent",
+              borderBottom: "8px solid transparent",
+              borderLeft: "8px solid white",
+            },
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+            <Box
+              component="button"
+              onClick={() => {
+                setActiveTooltip(null)
+                setTooltipAnchor(null)
+              }}
+              sx={{
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                padding: "4px",
+                fontSize: "1.25rem",
+                lineHeight: 1,
+                color: theme.palette.grey[600],
+                "&:hover": {
+                  color: theme.palette.grey[800],
+                },
+              }}
+            >
+              ×
+            </Box>
+          </Box>
+          <TierTooltipContent outcome={activeTooltip} showTitle={true} />
+        </Box>
+      )}
+      
+      <Box sx={gridStyles.container(showMapView, theme)}>
       {/* Column header */}
       {!showMapView && (
         <>
@@ -215,8 +273,64 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               />
             </Box>
           </Box>
+
         </>
       )}
+
+      {/* Outcome name headers - show in both list and map view */}
+      <Box sx={{ gridColumn: "1 / 3" }} /> {/* Empty for checkbox + strategy columns */}
+      <Box /> {/* Empty for operations column */}
+      <Box
+        sx={{
+          display: { xs: "none", lg: "grid" },
+          gridTemplateColumns: `repeat(${outcomeNames.length}, 1fr)`,
+          gap: theme.spacing(1),
+          pb: 1.5, // Padding below headers
+        }}
+      >
+            {outcomeNames.map(({ name, displayName }) => (
+              <Typography
+                key={displayName}
+                variant="caption"
+                component="div"
+                sx={{
+                  textAlign: "center",
+                  fontSize: "0.75rem",
+                  fontWeight: 500,
+                  color: theme.palette.blue.darkest,
+                  lineHeight: 1.2,
+                }}
+              >
+                {displayName === "Freshwater for in-Delta uses"
+                  ? "Freshwater for in-Delta uses"
+                  : getOutcomeDisplayLabel(name)}{" "}
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    if (activeTooltip === name) {
+                      setActiveTooltip(null)
+                      setTooltipAnchor(null)
+                    } else {
+                      setActiveTooltip(name)
+                      setTooltipAnchor(e.currentTarget)
+                    }
+                  }}
+                  sx={{
+                    padding: 0,
+                    marginLeft: "4px",
+                    verticalAlign: "middle",
+                    color: theme.palette.blue.bright,
+                    "&:hover": {
+                      color: theme.palette.blue.darkest,
+                    },
+                  }}
+                >
+                  <InfoIcon sx={{ fontSize: "0.75rem" }} />
+                </IconButton>
+              </Typography>
+            ))}
+      </Box>
 
       {/* Strategy rows */}
       {strategies
@@ -517,32 +631,16 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                             ] // Grey colors for inactive outcomes
                       }
                     />
-                    <Typography
-                      variant="caption"
-                      sx={gridStyles.outcomeLabel(
-                        showMapView,
-                        isActiveForStrategy,
-                        theme,
-                      )}
-                    >
-                      {displayName === "Freshwater for in-Delta uses"
-                        ? "Freshwater for\nin-Delta uses"
-                        : getOutcomeDisplayLabel(name)}
-                    </Typography>
                   </Box>
                 )
 
-                return showMapView ? (
-                  <div key={displayName}>{chartBox}</div>
-                ) : (
-                  <OutcomeTooltip key={displayName} outcome={displayName}>
-                    {chartBox}
-                  </OutcomeTooltip>
-                )
+                // No tooltips on charts - use header info icons instead
+                return <div key={displayName}>{chartBox}</div>
               })}
             </Box>
           </Box>
         ))}
+      </Box>
     </Box>
   )
 })
