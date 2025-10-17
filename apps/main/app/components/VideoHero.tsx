@@ -133,24 +133,28 @@ export default function VideoHero({
                     {t("homePanel.title")}
                 </Typography>
             </div>
-            <div style={{
-                position: 'absolute',
-                right: 0,
-                bottom: 0,
-                minHeight: '300px',
-                width: '45vw',
-                background: theme.palette.blue.darkest,
-                padding: 85
-            }}>
+            <div
+                id="homeHeroBody"
+                style={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: 0,
+                    minHeight: '300px',
+                    width: '45vw',
+                    background: theme.palette.blue.darkest,
+                    padding: 85
+                }}>
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    flex: "38% 62%",
+                    
                     gap: '25px',
                     color: theme.palette.utility.white,
                 }}>
                     <Typography
-
+                        style={{
+                            fontSize: '1.3rem',
+                        }}
                         variant="body1"
                     >
                         Water connects all Californians and is vital to our communities, farms, and the environment.
@@ -159,7 +163,7 @@ export default function VideoHero({
                     <Typography
                         variant="body1"
                     >
-                        Here you can explore how water in California is managed across the Central Valley and discover pathways to a more sustainable and equitable water future.
+                        On this site, you can learn about Californias water and explore how water allocations change under different scenarios. By providing access to the same tools used by decision-makers and discovering new pathways for managing water, COEQWAL empowers all Californians to shape our water future.
                     </Typography>
                 </div>
 
