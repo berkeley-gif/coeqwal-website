@@ -3,10 +3,44 @@ import { useMap } from "@repo/map"
 import {
   fetchTierLocationData,
   type TierLocationResponse,
+  type TierFeature,
 } from "../../../api/tierLocationApi"
 
 interface UseTierMapDataProps {
   selectedTier: { strategy: string; outcome: string } | null
+}
+
+// Calculate bounds from GeoJSON features
+function calculateBounds(
+  features: TierFeature[],
+): [[number, number], [number, number]] {
+  let minLng = Infinity
+  let maxLng = -Infinity
+  let minLat = Infinity
+  let maxLat = -Infinity
+
+  features.forEach((feature) => {
+    if (feature.geometry.type === "Point") {
+      const [lng, lat] = feature.geometry.coordinates as [number, number]
+      minLng = Math.min(minLng, lng)
+      maxLng = Math.max(maxLng, lng)
+      minLat = Math.min(minLat, lat)
+      maxLat = Math.max(maxLat, lat)
+    } else if (feature.geometry.type === "Polygon") {
+      const coords = feature.geometry.coordinates as [number, number][][]
+      coords[0].forEach(([lng, lat]) => {
+        minLng = Math.min(minLng, lng)
+        maxLng = Math.max(maxLng, lng)
+        minLat = Math.min(minLat, lat)
+        maxLat = Math.max(maxLat, lat)
+      })
+    }
+  })
+
+  return [
+    [minLng, minLat],
+    [maxLng, maxLat],
+  ]
 }
 
 /**
@@ -40,12 +74,10 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
         if (!cancelled) {
           setTierData(data)
 
-          // Zoom to bounds if available
-          if (data.bounds) {
-            mapAPI.fitBounds([
-              [data.bounds.west, data.bounds.south],
-              [data.bounds.east, data.bounds.north],
-            ], 50, 0, 0, { duration: 1000 })
+          // Calculate bounds from features and zoom
+          if (data.features.length > 0) {
+            const bounds = calculateBounds(data.features)
+            mapAPI.fitBounds(bounds, 50, 0, 0, { duration: 1000 })
           }
         }
       } catch (err) {
