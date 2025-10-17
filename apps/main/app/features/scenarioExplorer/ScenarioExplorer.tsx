@@ -262,10 +262,7 @@ export default function ScenarioExplorer() {
 
                 {/* Tier location markers */}
                 {tierData && tierData.features && tierData.features.length > 0 && (
-                  <>
-                    {console.log("🎯 Rendering TierMarkers with:", tierData.metadata.tier_code, "features:", tierData.features.length)}
-                    <TierMarkers data={tierData} />
-                  </>
+                  <TierMarkers data={tierData} />
                 )}
               </Map>
 

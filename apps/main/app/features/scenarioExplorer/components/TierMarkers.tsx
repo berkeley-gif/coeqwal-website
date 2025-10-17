@@ -39,14 +39,9 @@ export default function TierMarkers({ data }: TierMarkersProps) {
   useEffect(() => {
     mapAPI.withMap((map) => {
       if (map.isStyleLoaded()) {
-        console.log("🗺️ Map already loaded")
         setMapReady(true)
       } else {
-        console.log("⏳ Waiting for map to load...")
-        map.once("styledata", () => {
-          console.log("✅ Map style loaded")
-          setMapReady(true)
-        })
+        map.once("styledata", () => setMapReady(true))
       }
     })
   }, [mapAPI])
@@ -66,10 +61,20 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       const fillLayerId = `tier-polygon-fill-${data.metadata.tier_code}`
       const outlineLayerId = `tier-polygon-outline-${data.metadata.tier_code}`
 
-      // Remove existing layers/source if they exist
-      if (map.getLayer(fillLayerId)) map.removeLayer(fillLayerId)
-      if (map.getLayer(outlineLayerId)) map.removeLayer(outlineLayerId)
-      if (map.getSource(sourceId)) map.removeSource(sourceId)
+      // Remove ALL previous tier layers first
+      const existingLayers = map.getStyle().layers
+      existingLayers.forEach((layer) => {
+        if (layer.id.startsWith("tier-polygon-")) {
+          map.removeLayer(layer.id)
+        }
+      })
+
+      // Remove ALL previous tier sources
+      Object.keys(map.getStyle().sources).forEach((sourceId) => {
+        if (sourceId.startsWith("tier-polygons-")) {
+          map.removeSource(sourceId)
+        }
+      })
 
       // Add source
       map.addSource(sourceId, {
@@ -142,8 +147,6 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       }
 
       map.on("click", fillLayerId, handleClick)
-      
-      console.log("✅ Added polygon layers:", sourceId)
 
       // Cleanup
       return () => {
@@ -194,14 +197,6 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
   }
 
-  console.log("🗺️ TierMarkers render:", {
-    outcome: data.metadata.tier_name,
-    totalFeatures: data.features.length,
-    points: pointFeatures.length,
-    polygons: polygonFeatures.length,
-    geometryTypes: data.features.map((f) => f.geometry.type),
-    firstFeature: data.features[0],
-  })
 
   return (
     <>
