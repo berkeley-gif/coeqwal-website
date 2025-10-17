@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Box, Typography, useTheme, TextField } from "@repo/ui/mui"
+import { Box, Typography, useTheme, TextField, Tabs, Tab } from "@repo/ui/mui"
 import {
   DashboardPanel,
   DashboardGrid,
@@ -25,8 +25,8 @@ import { useMapIntegration } from "./hooks/useMapIntegration"
 import StrategyGrid from "./components/StrategyGrid"
 import HydroclimateCard from "./components/HydroclimateCard"
 import TogglePair from "./components/TogglePair"
-import TierLegend from "./components/TierLegend"
 import TierMarkers from "./components/TierMarkers"
+import TierTooltipContent from "./components/TierTooltipContent"
 
 // Hooks
 import { useTierMapData } from "./hooks/useTierMapData"
@@ -52,6 +52,9 @@ export default function ScenarioExplorer() {
     strategy: string
     outcome: string
   } | null>(null)
+  const [overlayTab, setOverlayTab] = useState<"hydroclimate" | "tier">(
+    "hydroclimate",
+  )
 
   // Data management
   const { getChartDataForStrategy, outcomeNames, isLoading, error } =
@@ -84,6 +87,7 @@ export default function ScenarioExplorer() {
   // Handle tier chart click in map view
   const handleTierClick = (strategy: string, outcome: string) => {
     setSelectedTier({ strategy, outcome })
+    setOverlayTab("tier") // Switch to tier tab
   }
 
   // Handle drag to resize overlay
@@ -259,17 +263,6 @@ export default function ScenarioExplorer() {
                 {/* Tier location markers */}
                 {tierData && <TierMarkers locations={tierData.locations} />}
               </Map>
-
-              {/* Tier legend overlay */}
-              {selectedTier && (
-                <TierLegend
-                  outcome={selectedTier.outcome}
-                  onClose={() => {
-                    setSelectedTier(null)
-                    clearTierData()
-                  }}
-                />
-              )}
 
               {/* Search bar overlay - bottom right */}
               <Box
@@ -495,7 +488,7 @@ export default function ScenarioExplorer() {
                 </Box>
               </Box>
 
-              {/* Hydroclimate overlay at bottom left of map */}
+              {/* Tabbed overlay at bottom left: Hydroclimate / Tier Legend */}
               <Box
                 sx={{
                   position: "absolute",
@@ -503,18 +496,87 @@ export default function ScenarioExplorer() {
                   left: theme.spacing(theme.cards.spacing.standard),
                   backgroundColor: "rgba(255, 255, 255, 0.95)",
                   borderRadius: theme.borderRadius.rounded,
-                  padding: theme.spacing(theme.cards.spacing.standard),
                   backdropFilter: "blur(8px)",
                   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
                   zIndex: 1000,
                   minWidth: "300px",
+                  maxWidth: "450px",
+                  maxHeight: "60vh",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
-                <HydroclimateCard
-                  layout="vertical"
-                  variant="compact"
-                  showCard={false}
-                />
+                {/* Tabs */}
+                <Tabs
+                  value={overlayTab}
+                  onChange={(_, newValue) => setOverlayTab(newValue)}
+                  sx={{
+                    minHeight: "40px",
+                    borderBottom: `1px solid ${theme.palette.grey[300]}`,
+                    "& .MuiTab-root": {
+                      minHeight: "40px",
+                      fontSize: "0.875rem",
+                      textTransform: "none",
+                    },
+                  }}
+                >
+                  <Tab label="Hydroclimate" value="hydroclimate" />
+                  <Tab
+                    label="Selected outcome"
+                    value="tier"
+                    disabled={!selectedTier}
+                  />
+                </Tabs>
+
+                {/* Tab content */}
+                <Box
+                  sx={{
+                    padding: theme.spacing(theme.cards.spacing.standard),
+                    overflowY: "auto",
+                    flex: 1,
+                  }}
+                >
+                  {overlayTab === "hydroclimate" && (
+                    <HydroclimateCard
+                      layout="vertical"
+                      variant="compact"
+                      showCard={false}
+                    />
+                  )}
+
+                  {overlayTab === "tier" && selectedTier && (
+                    <Box>
+                      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                        <Box
+                          component="button"
+                          onClick={() => {
+                            setSelectedTier(null)
+                            clearTierData()
+                            setOverlayTab("hydroclimate")
+                          }}
+                          sx={{
+                            border: "none",
+                            background: "none",
+                            cursor: "pointer",
+                            padding: "4px",
+                            fontSize: "1.25rem",
+                            lineHeight: 1,
+                            color: theme.palette.grey[600],
+                            "&:hover": {
+                              color: theme.palette.grey[800],
+                            },
+                          }}
+                        >
+                          ×
+                        </Box>
+                      </Box>
+                      <TierTooltipContent
+                        outcome={selectedTier.outcome}
+                        showTitle={true}
+                      />
+                    </Box>
+                  )}
+                </Box>
               </Box>
             </Box>
           </DashboardCardContainer>

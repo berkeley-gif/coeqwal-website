@@ -18,7 +18,7 @@ import {
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
 import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
-import { LeadingMarkerText, ArrowHead } from "@repo/ui"
+import { ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import type { Scenario } from "../types/scenarioDownloads"
 import {
@@ -135,50 +135,22 @@ export default function DataPage() {
             }}
           >
             {/* Header with back arrow */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: (theme) => theme.layout.spacing.md,
-                mb: 4,
-              }}
-            >
+            <Box sx={{ position: "relative", mb: 6 }}>
               <IconButton
                 onClick={() => window.history.back()}
-                sx={(theme) => {
-                  const typography = theme.typography.h2
-                  let fontSize = 16
-                  if (typeof typography.fontSize === "string") {
-                    if (typography.fontSize.includes("rem")) {
-                      fontSize = parseFloat(typography.fontSize) * 16
-                    } else {
-                      fontSize = parseFloat(typography.fontSize)
-                    }
-                  } else if (typeof typography.fontSize === "number") {
-                    fontSize = typography.fontSize
-                  }
-
-                  const lineHeight =
-                    typeof typography.lineHeight === "number"
-                      ? typography.lineHeight
-                      : 1.2
-
-                  const firstLineHeight = fontSize * lineHeight
-                  const topOffset = (firstLineHeight - 48) / 2
-
-                  return {
-                    color: theme.palette.blue.darkest,
-                    width: 48,
-                    height: 48,
-                    position: "relative",
-                    top: Math.max(0, topOffset),
-                  }
+                sx={{
+                  position: "absolute",
+                  left: -56,
+                  top: 4,
+                  color: (theme) => theme.palette.blue.darkest,
+                  width: 40,
+                  height: 40,
                 }}
               >
                 <ArrowHead
                   style={{
-                    width: 28,
-                    height: 28,
+                    width: 24,
+                    height: 24,
                     transform: "rotate(180deg)",
                   }}
                 />
@@ -186,8 +158,10 @@ export default function DataPage() {
               <Typography
                 variant="h2"
                 sx={{
-                  alignSelf: "flex-start",
                   color: (theme) => theme.palette.blue.darkest,
+                  fontSize: "2.5rem",
+                  fontWeight: 600,
+                  lineHeight: 1.2,
                 }}
               >
                 Data & downloads
@@ -203,7 +177,8 @@ export default function DataPage() {
             {/* Content in Grid layout */}
             <Grid
               container
-              spacing={4}
+              columnSpacing={12}
+              rowSpacing={4}
               sx={{
                 mt: (theme) => theme.layout.spacing.sm,
                 pointerEvents: "auto",
@@ -211,30 +186,20 @@ export default function DataPage() {
             >
               {/* Full run data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText
-                  title="Full scenario run files"
-                  headlineVariant="h5"
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.layout.spacing.sm,
-                      opacity: 0.8,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Download raw CalSim3 scenario run files
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                    Full scenario run files
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
                       mb: 3,
                       color: (theme) => theme.palette.blue.darkest,
+                      lineHeight: 1.6,
                     }}
                   >
-                    Access complete CalSim3 model run files in zipped format.
-                    These files include input and output data in WRESL and DSS
-                    formats, providing full scenario configuration details.
+                    Access complete CalSim3 model run files in zipped format,
+                    including input and output data in WRESL and DSS formats.
                   </Typography>
 
                   {loading ? (
@@ -288,35 +253,25 @@ export default function DataPage() {
                       )}
                     </>
                   )}
-                </LeadingMarkerText>
+                </Box>
               </Grid>
 
               {/* Scenario Data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText
-                  title="Scenario data in csv format"
-                  headlineVariant="h5"
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.layout.spacing.sm,
-                      opacity: 0.8,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Download CalSim3 scenario input and output data in csv
-                    format
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                    Scenario data in csv format
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
                       mb: 3,
                       color: (theme) => theme.palette.blue.darkest,
+                      lineHeight: 1.6,
                     }}
                   >
-                    Access COEQWAL CalSim3 SV input and variable output data in
-                    csv format.
+                    Download CalSim3 scenario input and output data in csv format,
+                    including SV input and variable output files.
                   </Typography>
 
                   {loading ? (
@@ -402,145 +357,108 @@ export default function DataPage() {
                       )}
                     </>
                   )}
-                </LeadingMarkerText>
+                </Box>
               </Grid>
 
               {/* Model Documentation Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText
-                  title="Model documentation"
-                  headlineVariant="h5"
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.layout.spacing.sm,
-                      opacity: 0.8,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Technical documentation and user guides
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                    Model documentation
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 3,
+                      mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
+                      lineHeight: 1.6,
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
-                    including technical specifications, user guides, and
-                    methodology.
+                    including technical specifications, user guides, and methodology.
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.blue.darkest,
-                      opacity: 0.7,
+                      color: (theme) => theme.palette.grey[600],
                     }}
                   >
-                    Documentation will be available soon.
+                    Coming soon
                   </Typography>
-                </LeadingMarkerText>
+                </Box>
               </Grid>
 
               {/* Research Publications Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText
-                  title="Research publications"
-                  headlineVariant="h5"
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.layout.spacing.sm,
-                      opacity: 0.8,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Scientific papers and research findings
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                    Research publications
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 3,
+                      mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
+                      lineHeight: 1.6,
                     }}
                   >
-                    Access peer-reviewed publications and research papers
-                    related to the COEQWAL project and CalSim3 modeling efforts.
+                    Peer-reviewed publications and research papers related to the
+                    COEQWAL project and CalSim3 modeling efforts.
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.blue.darkest,
-                      opacity: 0.7,
+                      color: (theme) => theme.palette.grey[600],
                     }}
                   >
-                    Publications will be available soon.
+                    Coming soon
                   </Typography>
-                </LeadingMarkerText>
+                </Box>
               </Grid>
 
               {/* API Access Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText title="API access" headlineVariant="h5">
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.layout.spacing.sm,
-                      opacity: 0.8,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Programmatic access to COEQWAL data
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                    API access
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 3,
+                      mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
+                      lineHeight: 1.6,
                     }}
                   >
-                    REST API endpoints for accessing scenario data, model
-                    outputs, and other COEQWAL resources programmatically.
+                    REST API endpoints for programmatic access to scenario data,
+                    model outputs, and COEQWAL resources.
                   </Typography>
                   <Typography
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.blue.darkest,
-                      opacity: 0.7,
+                      color: (theme) => theme.palette.grey[600],
                     }}
                   >
-                    API documentation will be available soon.
+                    Coming soon
                   </Typography>
-                </LeadingMarkerText>
+                </Box>
               </Grid>
 
               {/* Support & Contact Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
-                <LeadingMarkerText
-                  title="Support & contact"
-                  headlineVariant="h5"
-                >
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      mb: (theme) => theme.layout.spacing.sm,
-                      opacity: 0.8,
-                      color: (theme) => theme.palette.blue.darkest,
-                    }}
-                  >
-                    Get help and technical support
+                <Box>
+                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                    Support & contact
                   </Typography>
                   <Typography
                     variant="body1"
                     sx={{
-                      mb: 3,
+                      mb: 2,
                       color: (theme) => theme.palette.blue.darkest,
+                      lineHeight: 1.6,
                     }}
                   >
                     Contact our team for technical support, questions about the
@@ -550,13 +468,12 @@ export default function DataPage() {
                     variant="body2"
                     sx={{
                       fontStyle: "italic",
-                      color: (theme) => theme.palette.blue.darkest,
-                      opacity: 0.7,
+                      color: (theme) => theme.palette.grey[600],
                     }}
                   >
-                    Contact information will be available soon.
+                    Coming soon
                   </Typography>
-                </LeadingMarkerText>
+                </Box>
               </Grid>
             </Grid>
           </Container>
