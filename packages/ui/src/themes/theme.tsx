@@ -234,7 +234,7 @@ export const themeValues = {
 
     // Tab panel colors
     tabPanels: {
-      learn: "#4693C8",
+      learn: "#7b9d3f",
       explore: "#F4BF4D",
       empower: "#589DA5"
     },
