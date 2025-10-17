@@ -148,6 +148,12 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "The volume of water held behind large dams in California.",
   },
   {
+    icon: <CompareIcon />,
+    term: "Scenarios",
+    definition:
+      "Unique combinations of water management strategies and hydroclimates designed to explore possibilities for California's water future. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? How will allocations change if the state gets drier? Evaluation of scenarios help us to understand tradeoffs and impacts to different water users.",
+  },
+  {
     icon: <AssessmentIcon />,
     term: "Scenario outcomes",
     definition:
