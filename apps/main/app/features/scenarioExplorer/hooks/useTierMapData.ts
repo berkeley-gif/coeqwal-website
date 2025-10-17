@@ -87,7 +87,23 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
           // Calculate bounds from features and zoom
           if (data.features.length > 0) {
             const bounds = calculateBounds(data.features)
-            mapAPI.fitBounds(bounds, 50, 0, 0, { duration: 1000 })
+            
+            // Extra padding for Delta/Freshwater outcomes
+            const isDelta =
+              selectedTier!.outcome.includes("Freshwater") ||
+              selectedTier!.outcome.includes("Delta")
+            
+            const padding = isDelta ? 250 : 100
+
+            mapAPI.withMap((mapRef) => {
+              const map = mapRef.getMap()
+              map.fitBounds(bounds, {
+                padding,
+                duration: 1000,
+                pitch: 0,
+                bearing: 0,
+              })
+            })
           }
         }
       } catch (err) {
