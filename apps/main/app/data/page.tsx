@@ -187,7 +187,10 @@ export default function DataPage() {
               {/* Full run data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}
+                  >
                     Full scenario run files
                   </Typography>
                   <Typography
@@ -259,7 +262,10 @@ export default function DataPage() {
               {/* Scenario Data Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}
+                  >
                     Scenario data in csv format
                   </Typography>
                   <Typography
@@ -270,8 +276,8 @@ export default function DataPage() {
                       lineHeight: 1.6,
                     }}
                   >
-                    Download CalSim3 scenario input and output data in csv format,
-                    including SV input and variable output files.
+                    Download CalSim3 scenario input and output data in csv
+                    format, including SV input and variable output files.
                   </Typography>
 
                   {loading ? (
@@ -363,7 +369,10 @@ export default function DataPage() {
               {/* Model Documentation Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}
+                  >
                     Model documentation
                   </Typography>
                   <Typography
@@ -375,7 +384,8 @@ export default function DataPage() {
                     }}
                   >
                     Comprehensive documentation for the COEQWAL CalSim3 model,
-                    including technical specifications, user guides, and methodology.
+                    including technical specifications, user guides, and
+                    methodology.
                   </Typography>
                   <Typography
                     variant="body2"
@@ -392,7 +402,10 @@ export default function DataPage() {
               {/* Research Publications Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}
+                  >
                     Research publications
                   </Typography>
                   <Typography
@@ -403,8 +416,8 @@ export default function DataPage() {
                       lineHeight: 1.6,
                     }}
                   >
-                    Peer-reviewed publications and research papers related to the
-                    COEQWAL project and CalSim3 modeling efforts.
+                    Peer-reviewed publications and research papers related to
+                    the COEQWAL project and CalSim3 modeling efforts.
                   </Typography>
                   <Typography
                     variant="body2"
@@ -421,7 +434,10 @@ export default function DataPage() {
               {/* API Access Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}
+                  >
                     API access
                   </Typography>
                   <Typography
@@ -450,7 +466,10 @@ export default function DataPage() {
               {/* Support & Contact Section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
-                  <Typography variant="h4" sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ mb: 2, fontWeight: 600, fontSize: "1.75rem" }}
+                  >
                     Support & contact
                   </Typography>
                   <Typography

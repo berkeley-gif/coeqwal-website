@@ -53,7 +53,9 @@ export const formatTierText = (text: string) => {
       const key = `${index}-${subIndex}`
 
       if (
-        subPart.match(/^(Optimal:|Suboptimal:|At-risk:|Critical:|Compromised:)$/)
+        subPart.match(
+          /^(Optimal:|Suboptimal:|At-risk:|Critical:|Compromised:)$/,
+        )
       ) {
         return (
           <span key={key} style={{ fontWeight: 500 }}>
@@ -91,7 +93,11 @@ export default function TierTooltipContent({
         </Typography>
       )}
 
-      <Typography variant="body2" component="div" sx={{ mb: 2, lineHeight: 1.4 }}>
+      <Typography
+        variant="body2"
+        component="div"
+        sx={{ mb: 2, lineHeight: 1.4 }}
+      >
         {formatDescription(
           (outcomeDefinitions as Record<string, string>)[outcome] ||
             "Definition not available",
@@ -104,25 +110,42 @@ export default function TierTooltipContent({
         </Typography>
 
         {[1, 2, 3, 4].map((tierNum) => (
-          <Box key={tierNum} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+          <Box
+            key={tierNum}
+            sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}
+          >
             <Box
               sx={{
                 width: 12,
                 minHeight: 12,
                 borderRadius: "2px",
-                backgroundColor: theme.palette.tiers[`tier${tierNum}` as keyof typeof theme.palette.tiers],
+                backgroundColor:
+                  theme.palette.tiers[
+                    `tier${tierNum}` as keyof typeof theme.palette.tiers
+                  ],
                 flexShrink: 0,
                 alignSelf: "stretch",
               }}
             />
-            <Typography variant="body2" component="div" sx={{ lineHeight: 1.4 }}>
+            <Typography
+              variant="body2"
+              component="div"
+              sx={{ lineHeight: 1.4 }}
+            >
               {formatTierText(
                 (
                   outcomeTierValues as Record<
                     string,
-                    { tier1: string; tier2: string; tier3: string; tier4: string }
+                    {
+                      tier1: string
+                      tier2: string
+                      tier3: string
+                      tier4: string
+                    }
                   >
-                )[outcome]?.[`tier${tierNum}` as "tier1" | "tier2" | "tier3" | "tier4"] ||
+                )[outcome]?.[
+                  `tier${tierNum}` as "tier1" | "tier2" | "tier3" | "tier4"
+                ] ||
                   ["Excellent", "Good", "Fair", "Poor"][tierNum - 1] ||
                   "",
               )}
@@ -133,4 +156,3 @@ export default function TierTooltipContent({
     </Box>
   )
 }
-

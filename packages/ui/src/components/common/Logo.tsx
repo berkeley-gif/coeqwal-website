@@ -1,6 +1,5 @@
 "use client"
 
-import { Box } from "@mui/material"
 
 interface LogoProps {
   width?: number
@@ -15,11 +14,5 @@ interface LogoProps {
  * to ensure consistent rendering across different environments.
  */
 export function Logo({ width = 200 }: LogoProps) {
-  return (
-    <img
-      src='/images/coeqwal_logo_color.svg'
-      width={width}
-
-    />
-  )
+  return <img src="/images/coeqwal_logo_color.svg" width={width} />
 }

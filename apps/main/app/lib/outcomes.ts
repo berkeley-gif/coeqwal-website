@@ -140,7 +140,8 @@ export const outcomeTierValues: Record<
       "Optimal: Groundwater trend is **stable or increasing** and average total storage is **greater than historical**.",
     tier2:
       "At-risk: Groundwater trend is **stable or increasing** and average total storage is **less than historical**.",
-    tier3: "Compromised: Groundwater trend is **declining at a moderate rate**.",
+    tier3:
+      "Compromised: Groundwater trend is **declining at a moderate rate**.",
     tier4: "Critical: Groundwater trend is **declining at a rapid rate**.",
   },
   "Salmon abundance": {

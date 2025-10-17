@@ -9,9 +9,9 @@ import type { VideoSource } from "../components/VideoHero"
 
 const VIDEO_SRCS: VideoSource[] = [
   {
-    src: '/video/landing-hero-reel.mp4',
-    type: 'video/mp4',
-  }
+    src: "/video/landing-hero-reel.mp4",
+    type: "video/mp4",
+  },
 ]
 
 const IntroSection = () => {
@@ -28,14 +28,12 @@ const IntroSection = () => {
     [setDrawerContent, openDrawer],
   )
 
-
-
   return (
     <Box>
       {/* Video Hero */}
       <VideoHero
         sources={VIDEO_SRCS}
-        fallbackImage='/images/home_hero_fallback.png'
+        fallbackImage="/images/home_hero_fallback.png"
       />
 
       {/* Frontmatter panel(s) */}
@@ -55,7 +53,7 @@ const IntroSection = () => {
           backgroundSize: "38% auto",
           backgroundPosition: "right bottom",
           backgroundRepeat: "no-repeat",
-          paddingLeft: "300px"
+          paddingLeft: "300px",
         }}
         content={
           <Box
@@ -68,8 +66,6 @@ const IntroSection = () => {
               gap: "60px",
             }}
           >
-
-
             <Box
               sx={{
                 width: "100%",
@@ -79,7 +75,11 @@ const IntroSection = () => {
                 gap: "20px",
               }}
             >
-              <Typography fontWeight={700} variant="body1" style={{ fontSize: '1.5rem', maxWidth: '80%' }}>
+              <Typography
+                fontWeight={700}
+                variant="body1"
+                style={{ fontSize: "1.5rem", maxWidth: "80%" }}
+              >
                 {t("frontmatterPanel.boldText")}
               </Typography>
               <Typography variant="body1">
@@ -98,8 +98,6 @@ const IntroSection = () => {
                   underlineColor={theme.palette.text.primary}
                 />
               </Typography>
-
-
             </Box>
           </Box>
         }
@@ -123,11 +121,11 @@ const IntroSection = () => {
               display: "flex",
               flexDirection: "column",
               color: (theme) => theme.palette.utility.white,
-              margin: "200px 0", 
-              gap: '40px'
+              margin: "200px 0",
+              gap: "40px",
             }}
           >
-            <Typography variant="body1"  sx={{ flex: '1' }}>
+            <Typography variant="body1" sx={{ flex: "1" }}>
               <GlossaryLinkedText
                 text="
                     We evaluate unique water management strategies under the hydroclimate we've 
@@ -141,15 +139,15 @@ const IntroSection = () => {
                   },
                   {
                     name: "hydroclimate",
-                    glossaryTerm: "Hydroclimate"
-                  }
+                    glossaryTerm: "Hydroclimate",
+                  },
                 ]}
                 onActivate={handleGlossaryOpen}
                 color={theme.palette.utility.white}
                 underlineColor={theme.palette.utility.white}
               />
             </Typography>
-            <Typography variant="body1"  sx={{ flex: '2' }}>
+            <Typography variant="body1" sx={{ flex: "2" }}>
               <GlossaryLinkedText
                 text="
                     These scenarios – unique combinations of water management strategies and hydroclimates 

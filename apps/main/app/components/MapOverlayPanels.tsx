@@ -139,7 +139,8 @@ export default function MapOverlayPanels() {
               }}
             >
               <Typography variant="body1" fontWeight={700}>
-                Do you know that California has one of the most complex water allocation systems in the world?
+                Do you know that California has one of the most complex water
+                allocation systems in the world?
               </Typography>
 
               <Typography variant="body1">
@@ -152,11 +153,14 @@ export default function MapOverlayPanels() {
                 how much is stored and released into rivers and canals, and where it gets delivered across the state."
                   terms={[
                     { name: "CalSim", glossaryTerm: "CalSim" },
-                    { name: "major water projects", glossaryTerm: "California's major water projects" },
+                    {
+                      name: "major water projects",
+                      glossaryTerm: "California's major water projects",
+                    },
                     {
                       name: "Central Valley",
                       glossaryTerm: "Central Valley",
-                    }
+                    },
                   ]}
                   onActivate={handleGlossaryOpen}
                   color={theme.palette.text.primary}
@@ -528,18 +532,20 @@ export default function MapOverlayPanels() {
                   how California’s water supply is currently managed – and how outcomes differ among water users. "
                   terms={[
                     { name: "CalSim", glossaryTerm: "CalSim" },
-                    { name: "major water projects", glossaryTerm: "California's major water projects" },
+                    {
+                      name: "major water projects",
+                      glossaryTerm: "California's major water projects",
+                    },
                     {
                       name: "Central Valley",
                       glossaryTerm: "Central Valley",
-                    }
+                    },
                   ]}
                   onActivate={handleGlossaryOpen}
                   color={theme.palette.text.primary}
                   underlineColor={theme.palette.text.primary}
                 />
               </Typography>
-
             </Box>
           </motion.div>
         }
