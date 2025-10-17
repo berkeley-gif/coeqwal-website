@@ -44,20 +44,7 @@ export default function ScenarioCard({
     openDrawer("glossary")
   }
 
-  const handleOutcomeSelect = (outcome: string) => {
-    if (selectedOutcome === outcome) {
-      // If clicking the same outcome, deselect it
-      setSelectedOutcome(null)
-      console.log("🎯 Outcome deselected:", outcome)
-    } else {
-      // Select new outcome
-      setSelectedOutcome(outcome)
-      console.log("🎯 Outcome selected:", outcome)
-    }
-
-    // Also open glossary drawer with the specific outcome term
-    handleGlossaryOpen(outcome)
-  }
+  // Removed click functionality - outcomes are display-only
 
   return (
     <Box
@@ -225,16 +212,7 @@ export default function ScenarioCard({
                   }}
                 >
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <Box
-                      component="span"
-                      sx={{
-                        color: theme.palette.blue.bright,
-                      }}
-                    >
-                      Click
-                    </Box>{" "}
-                    on each outcome to see how it is defined and how the results
-                    are distributed across the state on the map.
+                    Key outcomes summarize how water allocations affect different water uses. Outcomes are categorized in different levels, indicating whether the outcome corresponds to an optimal, suboptimal, at-risk, or critical state.
                   </Typography>
                 </Box>
 
@@ -255,7 +233,7 @@ export default function ScenarioCard({
                         flexDirection: "column",
                         alignItems: "center",
                         gap: 1,
-                        cursor: "pointer",
+                        cursor: "default",
                         p: 1,
                         borderRadius: theme.borderRadius.rounded,
                         border:
@@ -267,13 +245,6 @@ export default function ScenarioCard({
                             ? theme.palette.blue.bright + "10"
                             : "transparent",
                         transition: "all 0.2s ease",
-                        "&:hover": {
-                          backgroundColor: theme.palette.blue.bright + "05",
-                          border: `2px solid ${theme.palette.blue.medium}`,
-                        },
-                      }}
-                      onClick={() => {
-                        handleOutcomeSelect(outcome)
                       }}
                     >
                       <ScenarioGlyph
