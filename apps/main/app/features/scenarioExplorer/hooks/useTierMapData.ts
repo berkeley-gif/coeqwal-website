@@ -82,11 +82,18 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
         )
 
         if (!cancelled) {
+          console.log("📍 Setting tier data:", {
+            tierCode: data.metadata.tier_code,
+            featureCount: data.features.length,
+            geometryTypes: data.features.map((f) => f.geometry.type),
+          })
+          
           setTierData(data)
 
           // Calculate bounds from features and zoom
           if (data.features.length > 0) {
             const bounds = calculateBounds(data.features)
+            console.log("🔎 Calculated bounds:", bounds)
             mapAPI.fitBounds(bounds, 50, 0, 0, { duration: 1000 })
           }
         }
