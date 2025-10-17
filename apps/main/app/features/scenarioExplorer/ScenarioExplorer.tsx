@@ -7,6 +7,7 @@ import {
   DashboardGrid,
   DashboardCardContainer,
   SectionHeader,
+  InfoTooltip,
   DocumentListIcon,
   DocumentCheckedIcon,
   DocumentExpandedIcon,
@@ -429,7 +430,17 @@ export default function ScenarioExplorer() {
                         pl: 3,
                       }}
                     >
-                      <Typography variant="subtitle2">Key outcomes</Typography>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                        <Typography variant="subtitle2">Key outcomes</Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: theme.palette.blue.bright,
+                          }}
+                        >
+                          Click on a chart to see it on the map
+                        </Typography>
+                      </Box>
 
                       <TogglePair
                         leftIcon={
