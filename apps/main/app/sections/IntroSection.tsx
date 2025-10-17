@@ -53,7 +53,7 @@ const IntroSection = () => {
           pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary? bc map?
           backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
           backgroundSize: "38% auto",
-          backgroundPosition: "right 80px",
+          backgroundPosition: "right bottom",
           backgroundRepeat: "no-repeat",
           paddingLeft: "300px"
         }}
@@ -68,9 +68,7 @@ const IntroSection = () => {
               gap: "60px",
             }}
           >
-            <Typography fontWeight={700} variant="body1" style={{ fontSize: '1.5rem', maxWidth: '80%' }}>
-              {t("frontmatterPanel.boldText")}
-            </Typography>
+
 
             <Box
               sx={{
@@ -81,6 +79,9 @@ const IntroSection = () => {
                 gap: "20px",
               }}
             >
+              <Typography fontWeight={700} variant="body1" style={{ fontSize: '1.5rem', maxWidth: '80%' }}>
+                {t("frontmatterPanel.boldText")}
+              </Typography>
               <Typography variant="body1">
                 <GlossaryLinkedText
                   text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
@@ -99,28 +100,7 @@ const IntroSection = () => {
                 />
               </Typography>
 
-              <Typography variant="body1">
-                <GlossaryLinkedText
-                  text="
-                    We evaluate these unique water management strategies under the hydroclimate we've 
-                    experienced in the recent past and hydroclimates we may experience in the future as 
-                    the climate changes.
-                  "
-                  terms={[
-                    {
-                      name: "water management strategies",
-                      glossaryTerm: "Water management strategies",
-                    },
-                    {
-                      name: "hydroclimate",
-                      glossaryTerm: "Hydroclimate"
-                    }
-                  ]}
-                  onActivate={handleGlossaryOpen}
-                  color={theme.palette.text.primary}
-                  underlineColor={theme.palette.text.primary}
-                />
-              </Typography>
+
             </Box>
           </Box>
         }
@@ -131,7 +111,7 @@ const IntroSection = () => {
         fullHeight={false}
         fullWidth
         includeHeaderSpacing={false}
-        backgroundColor={theme.palette.blue.medium}
+        backgroundColor={theme.palette.blue.darkest}
         contentAlignment={{
           justifyContent: "center",
           alignItems: "center",
@@ -139,15 +119,38 @@ const IntroSection = () => {
         content={
           <Box
             sx={{
-              maxWidth: "50%",
-              textAlign: "center",
+              maxWidth: "70%",
+              textAlign: "left",
               display: "flex",
-              flexDirection: "column",
+              flexDirection: "row",
               color: (theme) => theme.palette.utility.white,
-              margin: "100px 0"
+              margin: "200px 0", 
+              gap: '15px'
             }}
           >
-            <Typography variant="body1">
+            <Typography variant="body1"  style={{ fontSize: '1.4rem' }}  sx={{ flex: '1.5' }}>
+              <GlossaryLinkedText
+                text="
+                    We evaluate these unique water management strategies under the hydroclimate we've 
+                    experienced in the recent past and hydroclimates we may experience in the future as 
+                    the climate changes.
+                  "
+                terms={[
+                  {
+                    name: "water management strategies",
+                    glossaryTerm: "Water management strategies",
+                  },
+                  {
+                    name: "hydroclimate",
+                    glossaryTerm: "Hydroclimate"
+                  }
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.utility.white}
+                underlineColor={theme.palette.utility.white}
+              />
+            </Typography>
+            <Typography variant="body1"  sx={{ flex: '1.5' }}>
               <GlossaryLinkedText
                 text="
                     These scenarios – unique combinations of water management strategies and hydroclimates 

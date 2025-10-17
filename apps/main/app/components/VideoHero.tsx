@@ -153,7 +153,7 @@ export default function VideoHero({
                 }}>
                     <Typography
                         style={{
-                            fontSize: '1.3rem',
+                            fontSize: '1.4rem',
                         }}
                         variant="body1"
                     >
