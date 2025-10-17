@@ -261,9 +261,11 @@ export default function ScenarioExplorer() {
                 <GeolocateControl position="bottom-right" />
 
                 {/* Tier location markers */}
-                {tierData && tierData.features && tierData.features.length > 0 && (
-                  <TierMarkers data={tierData} />
-                )}
+                {tierData &&
+                  tierData.features &&
+                  tierData.features.length > 0 && (
+                    <TierMarkers data={tierData} />
+                  )}
               </Map>
 
               {/* Search bar overlay - bottom right */}
@@ -548,7 +550,13 @@ export default function ScenarioExplorer() {
 
                   {overlayTab === "tier" && selectedTier && (
                     <Box>
-                      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          mb: 1,
+                        }}
+                      >
                         <Box
                           component="button"
                           onClick={() => {

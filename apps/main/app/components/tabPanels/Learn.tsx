@@ -30,35 +30,44 @@ export default function LearnPanel() {
           display: "flex",
           alignItems: { sm: "flex-start", md: "center" },
           flexDirection: { sm: "column-reverse", lg: "row" },
-          justifyContent: 'center',
+          justifyContent: "center",
           gap: (theme) => theme.layout.spacing.sm,
-          width: '100%',
-          maxWidth: '1200px',
-          margin: '100px auto 0',
+          width: "100%",
+          maxWidth: "1200px",
+          margin: "100px auto 0",
         }}
       >
         {/* Text column */}
-        <Box id="textColumn" sx={{ width: '70%' }}>
+        <Box id="textColumn" sx={{ width: "70%" }}>
           <LeadingMarkerText title="Learn">
-            <div style={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: '15px',
-            }}>
-              <Typography variant="body1" sx={{
-                fontSize: '1.2rem',
-                width: '40%'
-              }} fontWeight={700}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: "15px",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{
+                  fontSize: "1.2rem",
+                  width: "40%",
+                }}
+                fontWeight={700}
+              >
                 Do you know that California has one of the most complex water
                 allocation systems in the world?
               </Typography>
-              <Typography sx={{
-                width: '60%'
-              }} variant="body1">
-                Learn how hydroclimate affects water availability, how water flows
-                through California&apos;s Central Valley, the ways in which we
-                manage water to satisfy diverse needs, and why inequities in water
-                access persist.
+              <Typography
+                sx={{
+                  width: "60%",
+                }}
+                variant="body1"
+              >
+                Learn how hydroclimate affects water availability, how water
+                flows through California&apos;s Central Valley, the ways in
+                which we manage water to satisfy diverse needs, and why
+                inequities in water access persist.
               </Typography>
             </div>
 
@@ -68,14 +77,14 @@ export default function LearnPanel() {
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                color: (theme) => theme.palette.blue.darkest, 
+                color: (theme) => theme.palette.blue.darkest,
                 textDecoration: "none",
                 display: "block",
                 fontWeight: 500,
                 "&:hover": {
                   textDecoration: "underline",
                 },
-                marginTop: '40px'
+                marginTop: "40px",
               }}
             >
               Learn more: How water moves through California →
@@ -106,7 +115,7 @@ export default function LearnPanel() {
             minWidth: 0,
             display: "flex",
             justifyContent: "center",
-            width: '30%'
+            width: "30%",
           }}
         >
           <Box

@@ -111,14 +111,14 @@ export default function CalSimLayers() {
         const normalizedSize =
           minMarkerSize +
           ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) *
-          (maxMarkerSize - minMarkerSize)
+            (maxMarkerSize - minMarkerSize)
         return isSelected ? normalizedSize * 1.15 : normalizedSize
       },
       getCircleSize: (capacity_taf: number, isSelected = false) => {
         const normalizedSize =
           minCircleSize +
           ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) *
-          (maxCircleSize - minCircleSize)
+            (maxCircleSize - minCircleSize)
         return isSelected ? normalizedSize * 1.15 : normalizedSize
       },
       getFontSize: (capacity_taf: number) => {

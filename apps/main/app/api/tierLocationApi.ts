@@ -67,7 +67,7 @@ export async function fetchTierLocationData(
 ): Promise<TierLocationResponse> {
   // Map strategy to scenario ID
   const scenarioId = STRATEGY_TO_SCENARIO_MAP[strategyValue]
-  
+
   if (!scenarioId) {
     console.error(`No scenario ID mapping for strategy: ${strategyValue}`)
     throw new Error(`Unknown strategy: ${strategyValue}`)
@@ -95,5 +95,3 @@ export async function fetchTierLocationData(
 
   return response.json()
 }
-
-

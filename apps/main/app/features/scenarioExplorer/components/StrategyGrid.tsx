@@ -454,83 +454,83 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           ? "pointer"
                           : "default",
                       padding: 0,
-                        borderRadius: theme.borderRadius.rounded,
-                        transition: "all 0.2s ease",
-                        backgroundColor: "transparent",
-                        opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
-                        border:
-                          selectedOutcomes[strategy.value] === displayName &&
-                          showMapView
-                            ? `2px solid ${theme.palette.blue.bright}`
-                            : "2px solid transparent",
-                        "&:hover": {
-                          backgroundColor:
-                            showMapView && isActiveForStrategy
-                              ? theme.palette.grey[100]
-                              : "transparent",
-                        },
-                      }}
-                      onClick={
-                        showMapView && isActiveForStrategy
-                          ? () => {
-                              onOutcomeSelect(strategy.value, displayName)
-                              onTierClick?.(strategy.value, displayName)
-                            }
-                          : undefined
+                      borderRadius: theme.borderRadius.rounded,
+                      transition: "all 0.2s ease",
+                      backgroundColor: "transparent",
+                      opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
+                      border:
+                        selectedOutcomes[strategy.value] === displayName &&
+                        showMapView
+                          ? `2px solid ${theme.palette.blue.bright}`
+                          : "2px solid transparent",
+                      "&:hover": {
+                        backgroundColor:
+                          showMapView && isActiveForStrategy
+                            ? theme.palette.grey[100]
+                            : "transparent",
+                      },
+                    }}
+                    onClick={
+                      showMapView && isActiveForStrategy
+                        ? () => {
+                            onOutcomeSelect(strategy.value, displayName)
+                            onTierClick?.(strategy.value, displayName)
+                          }
+                        : undefined
+                    }
+                  >
+                    <ScenarioGlyph
+                      variant="bars"
+                      values={
+                        isActiveForStrategy
+                          ? (strategyChartData[displayName]
+                              ?.map((tier) => tier.value)
+                              .slice(0, 4) as [
+                              number,
+                              number,
+                              number,
+                              number,
+                            ]) || [0, 0, 0, 0]
+                          : [0, 0, 0, 0] // Empty chart for inactive outcomes
                       }
+                      size={showMapView ? 45 : 50}
+                      tierColors={
+                        isActiveForStrategy
+                          ? (strategyChartData[displayName]
+                              ?.map((tier) => tier.color)
+                              .slice(0, 4) as [
+                              string,
+                              string,
+                              string,
+                              string,
+                            ]) || [
+                              theme.palette.tiers.tier1,
+                              theme.palette.tiers.tier2,
+                              theme.palette.tiers.tier3,
+                              theme.palette.tiers.tier4,
+                            ]
+                          : [
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                            ] // Grey colors for inactive outcomes
+                      }
+                    />
+                    <Typography
+                      variant="caption"
+                      sx={gridStyles.outcomeLabel(
+                        showMapView,
+                        isActiveForStrategy,
+                        theme,
+                      )}
                     >
-                      <ScenarioGlyph
-                        variant="bars"
-                        values={
-                          isActiveForStrategy
-                            ? (strategyChartData[displayName]
-                                ?.map((tier) => tier.value)
-                                .slice(0, 4) as [
-                                number,
-                                number,
-                                number,
-                                number,
-                              ]) || [0, 0, 0, 0]
-                            : [0, 0, 0, 0] // Empty chart for inactive outcomes
-                        }
-                        size={showMapView ? 45 : 50}
-                        tierColors={
-                          isActiveForStrategy
-                            ? (strategyChartData[displayName]
-                                ?.map((tier) => tier.color)
-                                .slice(0, 4) as [
-                                string,
-                                string,
-                                string,
-                                string,
-                              ]) || [
-                                theme.palette.tiers.tier1,
-                                theme.palette.tiers.tier2,
-                                theme.palette.tiers.tier3,
-                                theme.palette.tiers.tier4,
-                              ]
-                            : [
-                                theme.palette.grey[300],
-                                theme.palette.grey[300],
-                                theme.palette.grey[300],
-                                theme.palette.grey[300],
-                              ] // Grey colors for inactive outcomes
-                        }
-                      />
-                      <Typography
-                        variant="caption"
-                        sx={gridStyles.outcomeLabel(
-                          showMapView,
-                          isActiveForStrategy,
-                          theme,
-                        )}
-                      >
-                        {displayName === "Freshwater for in-Delta uses"
-                          ? "Freshwater for\nin-Delta uses"
-                          : getOutcomeDisplayLabel(name)}
-                      </Typography>
-                    </Box>
-                  )
+                      {displayName === "Freshwater for in-Delta uses"
+                        ? "Freshwater for\nin-Delta uses"
+                        : getOutcomeDisplayLabel(name)}
+                    </Typography>
+                  </Box>
+                )
 
                 return showMapView ? (
                   <div key={displayName}>{chartBox}</div>

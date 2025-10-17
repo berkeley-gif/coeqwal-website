@@ -28,9 +28,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
   } | null>(null)
 
   // Separate by geometry type
-  const pointFeatures = data.features.filter(
-    (f) => f.geometry.type === "Point",
-  )
+  const pointFeatures = data.features.filter((f) => f.geometry.type === "Point")
   const polygonFeatures = data.features.filter(
     (f) => f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon",
   )
@@ -81,7 +79,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
         type: "geojson",
         data: {
           type: "FeatureCollection",
-          features: polygonFeatures,
+          features: polygonFeatures as any,
         },
       })
 
@@ -197,7 +195,6 @@ export default function TierMarkers({ data }: TierMarkersProps) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
   }
 
-
   return (
     <>
       {/* Point markers */}
@@ -292,14 +289,13 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 }}
               />
               <span>
-                <strong>Tier {popupInfo.tierLevel}:</strong> {popupInfo.tierLabel}
+                <strong>Tier {popupInfo.tierLevel}:</strong>{" "}
+                {popupInfo.tierLabel}
               </span>
             </div>
           </div>
         </Popup>
       )}
-
     </>
   )
 }
-

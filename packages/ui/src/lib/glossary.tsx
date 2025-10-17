@@ -14,10 +14,8 @@ import {
 // Import additional icons directly from @mui/icons-material
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance"
 import CompareIcon from "@mui/icons-material/Compare"
-import Psychology from "@mui/icons-material/Psychology"
 import Diversity3Icon from "@mui/icons-material/Diversity3"
 import LocalShippingIcon from "@mui/icons-material/LocalShipping"
-import ThermostatIcon from "@mui/icons-material/Thermostat"
 import CloudIcon from "@mui/icons-material/Cloud"
 import StorageIcon from "@mui/icons-material/Storage"
 import GroupsIcon from "@mui/icons-material/Groups"
@@ -51,7 +49,8 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     icon: <AgricultureIcon />,
     term: "Agricultural revenues",
-    definition: "How average agricultural revenue changes in response to water deliveries.",
+    definition:
+      "How average agricultural revenue changes in response to water deliveries.",
   },
   {
     icon: <SettingsIcon />,
@@ -116,7 +115,8 @@ export const glossaryTerms: GlossaryTerm[] = [
   {
     icon: <GroupsIcon />,
     term: "Distributional equity",
-    definition: "How fairly the benefits and burdens of water allocations are shared.",
+    definition:
+      "How fairly the benefits and burdens of water allocations are shared.",
   },
   {
     icon: <WaterIcon />,
@@ -157,7 +157,7 @@ export const glossaryTerms: GlossaryTerm[] = [
     icon: <AssessmentIcon />,
     term: "Scenario outcomes",
     definition:
-      "The detailed outputs produced by modeling unique combinations of hydroclimate futures and operational scenarios in CalSim3. The CalSim3 model outputs include things like river flows, reservoir levels, and water deliveries. Additional \"sub-models\" are used to estimate how changes in water allocations affect agricultural revenues, Delta salinity, and salmon populations. These data help us understand and respond to the anticipated effects of specific water management decisions under current or future hydroclimates.",
+      'The detailed outputs produced by modeling unique combinations of hydroclimate futures and operational scenarios in CalSim3. The CalSim3 model outputs include things like river flows, reservoir levels, and water deliveries. Additional "sub-models" are used to estimate how changes in water allocations affect agricultural revenues, Delta salinity, and salmon populations. These data help us understand and respond to the anticipated effects of specific water management decisions under current or future hydroclimates.',
   },
   {
     icon: <WaterIcon />,
@@ -189,4 +189,3 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "Groups of related water management strategies",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
-

@@ -92,7 +92,9 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err : new Error("Failed to fetch tier data"))
+          setError(
+            err instanceof Error ? err : new Error("Failed to fetch tier data"),
+          )
         }
       } finally {
         if (!cancelled) {
@@ -120,4 +122,3 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
     clearTierData,
   }
 }
-

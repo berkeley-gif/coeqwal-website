@@ -96,8 +96,8 @@ export default function SmoothTabs() {
                   variant="h6"
                   style={{
                     fontWeight: 600,
-                    fontSize: '1.6rem',
-                    textTransform: 'capitalize'
+                    fontSize: "1.6rem",
+                    textTransform: "capitalize",
                   }}
                 >
                   {label}
@@ -108,7 +108,7 @@ export default function SmoothTabs() {
                   variant="h6"
                   style={{
                     fontWeight: 600,
-                    textTransform: 'capitalize'
+                    textTransform: "capitalize",
                   }}
                 >
                   {label}
