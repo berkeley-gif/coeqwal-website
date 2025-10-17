@@ -128,87 +128,48 @@ const IntroSection = () => {
 
       <OneColumnPanel
         id="scenariosIntro"
-        fullHeight={true}
+        fullHeight={false}
         fullWidth
-        backgroundColor={theme.palette.brand.sky}
         includeHeaderSpacing={false}
+        backgroundColor={theme.palette.blue.medium}
         contentAlignment={{
           justifyContent: "center",
-          alignItems: "flex-start",
-        }}
-        sx={{
-          pointerEvents: "auto", // Enables interactions for frontmatter panel, necessary? bc map?
-          backgroundImage: `url('/images/intro_collage/riverbank_right_lg.png')`,
-          backgroundSize: "38% auto",
-          backgroundPosition: "right 80px",
-          backgroundRepeat: "no-repeat",
-          paddingLeft: "300px"
+          alignItems: "center",
         }}
         content={
           <Box
             sx={{
-              width: "100%",
-              maxWidth: "70%",
-              textAlign: "left",
+              maxWidth: "50%",
+              textAlign: "center",
               display: "flex",
               flexDirection: "column",
-              gap: "60px",
+              color: (theme) => theme.palette.utility.white,
+              margin: "100px 0"
             }}
           >
-            <Typography fontWeight={700} variant="body1" style={{ fontSize: '1.5rem', maxWidth: '80%' }}>
-              {t("frontmatterPanel.boldText")}
-            </Typography>
-
-            <Box
-              sx={{
-                width: "100%",
-                textAlign: "left",
-                display: "flex",
-                flexDirection: "row",
-                gap: "20px",
-              }}
-            >
-              <Typography variant="body1">
-                <GlossaryLinkedText
-                  text="Working with communities across California, COEQWAL uses a water planning tool developed by government agencies, to explore alternative ways to manage California's water system. Until now, this tool has been inaccessible to most communities, creating barriers to participation in water planning and decision-making."
-                  terms={[
-                    { name: "COEQWAL", glossaryTerm: "COEQWAL" },
-                    { name: "CalSim", glossaryTerm: "CalSim" },
-                    {
-                      name: "water management strategies",
-                      glossaryTerm: "Operational strategies",
-                    },
-                    { name: "hydroclimate", glossaryTerm: "Hydroclimate" },
-                  ]}
-                  onActivate={handleGlossaryOpen}
-                  color={theme.palette.text.primary}
-                  underlineColor={theme.palette.text.primary}
-                />
-              </Typography>
-
-              <Typography variant="body1">
-                <GlossaryLinkedText
-                  text="
-                    We evaluate these unique water management strategies under the hydroclimate we've 
-                    experienced in the recent past and hydroclimates we may experience in the future as 
-                    the climate changes.
+            <Typography variant="body1">
+              <GlossaryLinkedText
+                text="
+                    These scenarios – unique combinations of water management strategies and hydroclimates 
+                    – provide insight into how our water system works and the trade-offs that exist between goals. 
+                    By understanding how different decisions affect outcomes for different 
+                    water users, we can help to imagine new ways of improving water management in California.
                   "
-                  terms={[
-                    {
-                      name: "water management strategies",
-                      glossaryTerm: "Water management strategies",
-                    },
-                    {
-                      name: "hydroclimate",
-                      glossaryTerm: "Hydroclimate"
-                    }
-                  ]}
-                  onActivate={handleGlossaryOpen}
-                  color={theme.palette.text.primary}
-                  underlineColor={theme.palette.text.primary}
-                />
-              </Typography>
-            </Box>
+                terms={[
+                  {
+                    name: "scenarios",
+                    glossaryTerm: "Scenarios",
+                  },
+                  {
+                    name: "outcomes",
+                    glossaryTerm: "Water allocations"
+                  }
+                ]}
+                onActivate={handleGlossaryOpen}
+                color={theme.palette.utility.white}
+                underlineColor={theme.palette.utility.white}
+              />
+            </Typography>
           </Box>
         }
       />
