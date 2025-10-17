@@ -3,18 +3,18 @@
 import React from "react"
 import { Marker, Layer, Source } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
-import type { TierLocation } from "../../../api/tierLocationApi"
+import type { TierLocationResponse } from "../../../api/tierLocationApi"
 
 interface TierMarkersProps {
-  locations: TierLocation[]
+  data: TierLocationResponse
 }
 
 /**
  * TierMarkers to render tier data on the map
- * Displays either markers (for points) or polygons (for areas)
+ * Displays GeoJSON FeatureCollection with points and polygons
  * Colored by tier level
  */
-export default function TierMarkers({ locations }: TierMarkersProps) {
+export default function TierMarkers({ data }: TierMarkersProps) {
   const theme = useTheme()
 
   // Get tier color
@@ -33,22 +33,24 @@ export default function TierMarkers({ locations }: TierMarkersProps) {
     }
   }
 
-  // Separate point and polygon locations
-  const pointLocations = locations.filter((loc) => loc.geometry.type === "Point")
-  const polygonLocations = locations.filter(
-    (loc) => loc.geometry.type === "Polygon",
+  // Separate by geometry type
+  const pointFeatures = data.features.filter(
+    (f) => f.geometry.type === "Point",
+  )
+  const polygonFeatures = data.features.filter(
+    (f) => f.geometry.type === "Polygon",
   )
 
   return (
     <>
       {/* Point markers */}
-      {pointLocations.map((location) => {
-        if (location.geometry.type !== "Point") return null
-        const [lng, lat] = location.geometry.coordinates
+      {pointFeatures.map((feature) => {
+        const coords = feature.geometry.coordinates as [number, number]
+        const [lng, lat] = coords
 
         return (
           <Marker
-            key={location.id}
+            key={feature.properties.location_id}
             longitude={lng}
             latitude={lat}
             anchor="center"
@@ -58,65 +60,69 @@ export default function TierMarkers({ locations }: TierMarkersProps) {
                 width: 24,
                 height: 24,
                 borderRadius: "50%",
-                backgroundColor: getTierColor(location.tier),
+                backgroundColor: getTierColor(feature.properties.tier_level),
                 border: `2px solid white`,
                 boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
                 cursor: "pointer",
               }}
-              title={
-                (typeof location.properties?.name === "string"
-                  ? location.properties.name
-                  : undefined) || `Tier ${location.tier}`
-              }
+              title={feature.properties.location_name}
             />
           </Marker>
         )
       })}
 
       {/* Polygon layers */}
-      {polygonLocations.map((location) => {
-        if (location.geometry.type !== "Polygon") return null
-
-        const geojson = {
-          type: "FeatureCollection" as const,
-          features: [
-            {
-              type: "Feature" as const,
-              geometry: location.geometry,
-              properties: {
-                tier: location.tier,
-                ...location.properties,
-              },
-            },
-          ],
-        }
-
-        return (
-          <Source
-            key={location.id}
-            id={`tier-polygon-${location.id}`}
-            type="geojson"
-            data={geojson}
-          >
-            <Layer
-              id={`tier-polygon-fill-${location.id}`}
-              type="fill"
-              paint={{
-                "fill-color": getTierColor(location.tier),
-                "fill-opacity": 0.6,
-              }}
-            />
-            <Layer
-              id={`tier-polygon-outline-${location.id}`}
-              type="line"
-              paint={{
-                "line-color": getTierColor(location.tier),
-                "line-width": 2,
-              }}
-            />
-          </Source>
-        )
-      })}
+      {polygonFeatures.length > 0 && (
+        <Source
+          id="tier-polygons"
+          type="geojson"
+          data={{
+            type: "FeatureCollection",
+            features: polygonFeatures,
+          }}
+        >
+          <Layer
+            id="tier-polygon-fill"
+            type="fill"
+            paint={{
+              "fill-color": [
+                "match",
+                ["get", "tier_level"],
+                1,
+                theme.palette.tiers.tier1,
+                2,
+                theme.palette.tiers.tier2,
+                3,
+                theme.palette.tiers.tier3,
+                4,
+                theme.palette.tiers.tier4,
+                theme.palette.grey[500],
+              ],
+              "fill-opacity": 0.7,
+            }}
+          />
+          <Layer
+            id="tier-polygon-outline"
+            type="line"
+            paint={{
+              "line-color": [
+                "match",
+                ["get", "tier_level"],
+                1,
+                theme.palette.tiers.tier1,
+                2,
+                theme.palette.tiers.tier2,
+                3,
+                theme.palette.tiers.tier3,
+                4,
+                theme.palette.tiers.tier4,
+                theme.palette.grey[500],
+              ],
+              "line-width": 2,
+            }}
+          />
+        </Source>
+      )}
     </>
   )
 }

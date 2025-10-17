@@ -2,112 +2,100 @@
  * API functions for fetching tier location data for map visualization
  */
 
-// Type definitions
-export interface TierLocation {
-  id: string
-  tier: number // 1-4
-  geometry:
-    | {
-        type: "Point"
-        coordinates: [number, number] // [lng, lat]
-      }
-    | {
-        type: "Polygon"
-        coordinates: [number, number][][] // Array of rings
-      }
-  properties?: Record<string, string | number>
+// Type definitions for GeoJSON response
+export interface TierFeature {
+  type: "Feature"
+  geometry: {
+    type: "Point" | "Polygon"
+    coordinates: number[] | number[][][]
+  }
+  properties: {
+    location_id: string
+    location_name: string
+    location_type: string
+    location_type_display: string
+    tier_level: number // 1-4
+    tier_value: number
+    display_order: number
+    tier_color_class: string
+  }
 }
 
 export interface TierLocationResponse {
-  scenario: string
-  outcome: string
-  locations: TierLocation[]
-  bounds?: {
-    north: number
-    south: number
-    east: number
-    west: number
+  type: "FeatureCollection"
+  features: TierFeature[]
+  metadata: {
+    scenario: string
+    tier_code: string
+    tier_name: string
+    tier_type: "multi_value" | "single_value"
+    feature_count: number
+    location_types: string[]
   }
 }
+
+// Map strategy values to scenario IDs
+const STRATEGY_TO_SCENARIO_MAP: Record<string, string> = {
+  "current-ops": "s0020",
+  "current-ops-wo-tucp": "s0021",
+  "current-ops-historical-ag": "s0011",
+  // Add other mappings as needed
+}
+
+// Map display names to API tier codes
+const OUTCOME_CODE_MAP: Record<string, string> = {
+  "Agricultural revenue": "AG_REV",
+  "Community deliveries": "CWS_DEL",
+  "Delta ecology": "DELTA_ECO",
+  "Environmental flows": "ENV_FLOWS",
+  "Freshwater for in-Delta uses": "FW_DELTA_USES",
+  "Freshwater for Delta exports": "FW_EXP",
+  "Groundwater storage": "GW_STOR",
+  "Reservoir storage": "RES_STOR",
+  "Salmon abundance": "WRC_SALMON_AB",
+}
+
+const API_BASE = "https://api.coeqwal.org/api"
 
 /**
  * Fetch tier location data for a specific scenario and outcome
- * TODO: Replace with actual API endpoint when ready
+ * Returns GeoJSON FeatureCollection
  */
 export async function fetchTierLocationData(
-  scenarioId: string,
+  strategyValue: string,
   outcomeDisplayName: string,
 ): Promise<TierLocationResponse> {
-  // TODO: Replace with actual API call
-  // const response = await fetch(
-  //   `https://api.coeqwal.org/api/tiers/scenarios/${scenarioId}/outcomes/${outcomeCode}/locations`
-  // )
-  // return response.json()
-
-  // Mock data for development
-  console.log(
-    `Fetching tier location data for ${scenarioId} - ${outcomeDisplayName}`,
-  )
-
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  // Return mock data based on outcome type
-  if (outcomeDisplayName === "Environmental flows") {
-    // Multi-location point data (17 river locations)
-    return {
-      scenario: scenarioId,
-      outcome: outcomeDisplayName,
-      locations: [
-        {
-          id: "sac_1",
-          tier: 2,
-          geometry: {
-            type: "Point",
-            coordinates: [-121.5, 38.5],
-          },
-          properties: { name: "Sacramento River at Bend Bridge" },
-        },
-        {
-          id: "sac_2",
-          tier: 3,
-          geometry: {
-            type: "Point",
-            coordinates: [-122.0, 39.0],
-          },
-          properties: { name: "Sacramento River at Wilkins Slough" },
-        },
-        // Add more locations as needed
-      ],
-      bounds: {
-        north: 39.5,
-        south: 37.5,
-        east: -120.5,
-        west: -122.5,
-      },
-    }
+  // Map strategy to scenario ID
+  const scenarioId = STRATEGY_TO_SCENARIO_MAP[strategyValue]
+  
+  if (!scenarioId) {
+    console.error(`No scenario ID mapping for strategy: ${strategyValue}`)
+    throw new Error(`Unknown strategy: ${strategyValue}`)
   }
 
-  // Default mock: single point
-  return {
-    scenario: scenarioId,
-    outcome: outcomeDisplayName,
-    locations: [
-      {
-        id: "default",
-        tier: 2,
-        geometry: {
-          type: "Point",
-          coordinates: [-121.5, 38.0],
-        },
-      },
-    ],
-    bounds: {
-      north: 39.0,
-      south: 37.0,
-      east: -120.0,
-      west: -123.0,
-    },
+  // Map outcome to tier code
+  const tierCode = OUTCOME_CODE_MAP[outcomeDisplayName]
+
+  if (!tierCode) {
+    console.error(`No tier code mapping for: ${outcomeDisplayName}`)
+    throw new Error(`Unknown outcome: ${outcomeDisplayName}`)
   }
+
+  // Correct endpoint: /api/tier-map/{scenario}/{tier}
+  const url = `${API_BASE}/tier-map/${scenarioId}/${tierCode}`
+
+  console.log(`Fetching tier map data from: ${url}`)
+
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(
+      errorData.detail || `Failed to fetch tier locations: ${response.status}`,
+    )
+  }
+
+  return response.json()
 }
+
 

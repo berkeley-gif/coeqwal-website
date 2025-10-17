@@ -261,7 +261,7 @@ export default function ScenarioExplorer() {
                 <GeolocateControl position="bottom-right" />
 
                 {/* Tier location markers */}
-                {tierData && <TierMarkers locations={tierData.locations} />}
+                {tierData && <TierMarkers data={tierData} />}
               </Map>
 
               {/* Search bar overlay - bottom right */}
