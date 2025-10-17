@@ -215,32 +215,38 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
               Choose strategies
             </Typography>
 
-            <Box sx={{ ml: 10 }}>
-              <TogglePair
-                leftIcon={
-                  <DocumentListIcon active={!showOnlyChosen} size={40} />
-                }
-                rightIcon={
-                  <DocumentCheckedIcon active={showOnlyChosen} size={40} />
-                }
-                onLeftClick={() => setShowOnlyChosen(false)}
-                onRightClick={() => setShowOnlyChosen(true)}
-                gap={-0.5}
-              />
-            </Box>
+            <InfoTooltip description="Show all strategies or only chosen ones">
+              <Box sx={{ ml: 10 }}>
+                <TogglePair
+                  leftIcon={
+                    <DocumentListIcon active={!showOnlyChosen} size={40} />
+                  }
+                  rightIcon={
+                    <DocumentCheckedIcon active={showOnlyChosen} size={40} />
+                  }
+                  onLeftClick={() => setShowOnlyChosen(false)}
+                  onRightClick={() => setShowOnlyChosen(true)}
+                  gap={-0.5}
+                />
+              </Box>
+            </InfoTooltip>
 
-            <TogglePair
-              leftIcon={
-                <DocumentExpandedIcon active={showDefinitions} size={40} />
-              }
-              rightIcon={
-                <DocumentCollapsedIcon active={!showDefinitions} size={40} />
-              }
-              onLeftClick={() => setShowDefinitions(true)}
-              onRightClick={() => setShowDefinitions(false)}
-              gap={-0.5}
-              sx={{ ml: -1.5 }}
-            />
+            <InfoTooltip description="Show or hide strategy details">
+              <Box>
+                <TogglePair
+                  leftIcon={
+                    <DocumentExpandedIcon active={showDefinitions} size={40} />
+                  }
+                  rightIcon={
+                    <DocumentCollapsedIcon active={!showDefinitions} size={40} />
+                  }
+                  onLeftClick={() => setShowDefinitions(true)}
+                  onRightClick={() => setShowDefinitions(false)}
+                  gap={-0.5}
+                  sx={{ ml: -1.5 }}
+                />
+              </Box>
+            </InfoTooltip>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", height: "56px" }}>
             <Typography variant="subtitle2">Key operations</Typography>
@@ -256,22 +262,24 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           >
             <Typography variant="subtitle2">Key outcomes</Typography>
 
-            <Box
-              sx={{
-                padding: "2px 4px",
-                borderRadius: 1,
-                marginTop: "-20px",
-                "&:hover": { backgroundColor: theme.palette.grey[100] },
-              }}
-            >
-              <TogglePair
-                leftIcon={<DocumentListIcon active={!showMapView} size={52} />}
-                rightIcon={<MapViewIcon active={showMapView} size={52} />}
-                onLeftClick={() => setMapView(false)}
-                onRightClick={() => setMapView(true)}
-                gap={-0.25}
-              />
-            </Box>
+            <InfoTooltip description="Switch between list and map view">
+              <Box
+                sx={{
+                  padding: "2px 4px",
+                  borderRadius: 1,
+                  marginTop: "-20px",
+                  "&:hover": { backgroundColor: theme.palette.grey[100] },
+                }}
+              >
+                <TogglePair
+                  leftIcon={<DocumentListIcon active={!showMapView} size={52} />}
+                  rightIcon={<MapViewIcon active={showMapView} size={52} />}
+                  onLeftClick={() => setMapView(false)}
+                  onRightClick={() => setMapView(true)}
+                  gap={-0.25}
+                />
+              </Box>
+            </InfoTooltip>
           </Box>
 
         </>
