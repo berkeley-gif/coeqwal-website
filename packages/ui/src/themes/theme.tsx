@@ -124,7 +124,7 @@ const typeScale = {
   },
 }
 
-const themeValues = {
+export const themeValues = {
   // Typography
   fontFamily: {
     neueHaasText:
@@ -230,6 +230,13 @@ const themeValues = {
       tier2: "#60aacb", // Blue, tier 2
       tier3: "#FFB347", // Orange, tier 3
       tier4: "#CD5C5C", // Red, tier 4
+    },
+
+    // Tab panel colors
+    tabPanels: {
+      learn: "#4693C8",
+      explore: "#F4BF4D",
+      empower: "#589DA5"
     },
   },
 
@@ -680,6 +687,18 @@ const theme = createTheme({
     nature: {
       earth: themeValues.palette.nature.earth,
       forest: themeValues.palette.nature.forest,
+    },
+    learn: {
+      background: themeValues.palette.tabPanels.learn,
+      text: themeValues.palette.utility.white,
+    },
+    explore: {
+      background: themeValues.palette.tabPanels.explore,
+      text: themeValues.palette.utility.black,
+    },
+    empower: {
+      background: themeValues.palette.tabPanels.empower,
+      text: themeValues.palette.utility.white,
     },
     utility: {
       white: themeValues.palette.utility.white,
@@ -1494,6 +1513,18 @@ declare module "@mui/material/styles" {
       earth: string
       forest: string
     }
+    learn: {
+      background: string
+      text: string
+    }
+    explore: {
+      background: string
+      text: string
+    }
+    empower: {
+      background: string
+      text: string
+    }
     utility: {
       white: string
       black: string
@@ -1537,6 +1568,18 @@ declare module "@mui/material/styles" {
     nature?: {
       earth: string
       forest?: string
+    }
+    learn: {
+      background: string
+      text: string
+    }
+    explore: {
+      background: string
+      text: string
+    }
+    empower: {
+      background: string
+      text: string
     }
     utility?: {
       white?: string
