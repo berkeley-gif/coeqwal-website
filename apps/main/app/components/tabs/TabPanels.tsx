@@ -10,6 +10,7 @@ import { useMemo, useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { AnimatePresence, motion } from "@repo/motion"
 import type { RefObject } from "react"
+import { useTheme } from "@repo/ui/mui"
 
 import { useTabs } from "../../context/Tabs"
 import { TABS, TabKey } from "../../types/tabs"
@@ -29,6 +30,7 @@ const panelVariants = {
 }
 
 export default function TabPanels() {
+  const theme = useTheme()
   const searchParams = useSearchParams()
   const { state, panelRef } = useTabs()
   const { activeTab } = state

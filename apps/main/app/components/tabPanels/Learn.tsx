@@ -30,37 +30,52 @@ export default function LearnPanel() {
           display: "flex",
           alignItems: { sm: "flex-start", md: "center" },
           flexDirection: { sm: "column-reverse", lg: "row" },
-          gap: (theme) => theme.layout.spacing.md,
-          margin: "0 auto",
-          maxWidth: "80%",
+          justifyContent: 'center',
+          gap: (theme) => theme.layout.spacing.sm,
+          width: '100%',
+          maxWidth: '1200px',
+          margin: '100px auto 0',
         }}
       >
         {/* Text column */}
-        <Box sx={{ flex: 2, margin: "100px" }}>
+        <Box id="textColumn" sx={{ width: '70%' }}>
           <LeadingMarkerText title="Learn">
-            <Typography variant="body1" fontWeight={700}>
-              Do you know that California has one of the most complex water
-              allocation systems in the world?
-            </Typography>
-            <Typography variant="body1">
-              Learn how hydroclimate affects water availability, how water flows
-              through California&apos;s Central Valley, the ways in which we
-              manage water to satisfy diverse needs, and why inequities in water
-              access persist.
-            </Typography>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '15px',
+            }}>
+              <Typography variant="body1" sx={{
+                fontSize: '1.2rem',
+                width: '40%'
+              }} fontWeight={700}>
+                Do you know that California has one of the most complex water
+                allocation systems in the world?
+              </Typography>
+              <Typography sx={{
+                width: '60%'
+              }} variant="body1">
+                Learn how hydroclimate affects water availability, how water flows
+                through California&apos;s Central Valley, the ways in which we
+                manage water to satisfy diverse needs, and why inequities in water
+                access persist.
+              </Typography>
+            </div>
+
             <Box
               component="a"
               href="https://flow.coeqwal.org/"
               target="_blank"
               rel="noopener noreferrer"
               sx={{
-                color: (theme) => theme.palette.blue.darkest,
+                color: (theme) => theme.palette.blue.darkest, 
                 textDecoration: "none",
                 display: "block",
                 fontWeight: 500,
                 "&:hover": {
                   textDecoration: "underline",
                 },
+                marginTop: '40px'
               }}
             >
               Learn more: How water moves through California →
@@ -88,10 +103,10 @@ export default function LearnPanel() {
         {/* Image column */}
         <Box
           sx={{
-            flex: 1,
             minWidth: 0,
             display: "flex",
             justifyContent: "center",
+            width: '30%'
           }}
         >
           <Box
