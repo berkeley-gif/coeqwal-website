@@ -84,8 +84,6 @@ export async function fetchTierLocationData(
   // Correct endpoint: /api/tier-map/{scenario}/{tier}
   const url = `${API_BASE}/tier-map/${scenarioId}/${tierCode}`
 
-  console.log(`Fetching tier map data from: ${url}`)
-
   const response = await fetch(url)
 
   if (!response.ok) {
