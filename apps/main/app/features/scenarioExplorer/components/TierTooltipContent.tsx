@@ -86,7 +86,7 @@ export default function TierTooltipContent({
   const { definitions: outcomeDefinitions } = useOutcomeDefinitions()
 
   return (
-    <Box>
+    <Box sx={{ color: theme.palette.text.primary }}>
       {showTitle && (
         <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
           {getOutcomeDisplayLabel(outcome)}

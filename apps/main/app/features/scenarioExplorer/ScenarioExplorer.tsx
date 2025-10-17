@@ -503,9 +503,9 @@ export default function ScenarioExplorer() {
                   backdropFilter: "blur(8px)",
                   boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
                   zIndex: 1000,
-                  minWidth: "300px",
-                  maxWidth: "450px",
-                  maxHeight: "60vh",
+                  width: "380px",
+                  height: "auto",
+                  maxHeight: "50vh",
                   display: "flex",
                   flexDirection: "column",
                 }}
@@ -521,12 +521,20 @@ export default function ScenarioExplorer() {
                       minHeight: "40px",
                       fontSize: "0.875rem",
                       textTransform: "none",
+                      color: theme.palette.text.primary,
+                      "&.Mui-selected": {
+                        color: theme.palette.blue.darkest,
+                      },
+                      "&:hover": {
+                        color: theme.palette.blue.bright,
+                        backgroundColor: "rgba(0, 0, 0, 0.04)",
+                      },
                     },
                   }}
                 >
                   <Tab label="Hydroclimate" value="hydroclimate" />
                   <Tab
-                    label="Selected outcome"
+                    label="Outcome legend"
                     value="tier"
                     disabled={!selectedTier}
                   />
@@ -537,7 +545,7 @@ export default function ScenarioExplorer() {
                   sx={{
                     padding: theme.spacing(theme.cards.spacing.standard),
                     overflowY: "auto",
-                    flex: 1,
+                    height: "280px", // Fixed height so tabs don't jump
                   }}
                 >
                   {overlayTab === "hydroclimate" && (
@@ -549,42 +557,10 @@ export default function ScenarioExplorer() {
                   )}
 
                   {overlayTab === "tier" && selectedTier && (
-                    <Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          mb: 1,
-                        }}
-                      >
-                        <Box
-                          component="button"
-                          onClick={() => {
-                            setSelectedTier(null)
-                            clearTierData()
-                            setOverlayTab("hydroclimate")
-                          }}
-                          sx={{
-                            border: "none",
-                            background: "none",
-                            cursor: "pointer",
-                            padding: "4px",
-                            fontSize: "1.25rem",
-                            lineHeight: 1,
-                            color: theme.palette.grey[600],
-                            "&:hover": {
-                              color: theme.palette.grey[800],
-                            },
-                          }}
-                        >
-                          ×
-                        </Box>
-                      </Box>
-                      <TierTooltipContent
-                        outcome={selectedTier.outcome}
-                        showTitle={true}
-                      />
-                    </Box>
+                    <TierTooltipContent
+                      outcome={selectedTier.outcome}
+                      showTitle={true}
+                    />
                   )}
                 </Box>
               </Box>
