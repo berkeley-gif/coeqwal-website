@@ -111,14 +111,14 @@ export default function CalSimLayers() {
         const normalizedSize =
           minMarkerSize +
           ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) *
-            (maxMarkerSize - minMarkerSize)
+          (maxMarkerSize - minMarkerSize)
         return isSelected ? normalizedSize * 1.15 : normalizedSize
       },
       getCircleSize: (capacity_taf: number, isSelected = false) => {
         const normalizedSize =
           minCircleSize +
           ((capacity_taf - minCapacity) / (maxCapacity - minCapacity)) *
-            (maxCircleSize - minCircleSize)
+          (maxCircleSize - minCircleSize)
         return isSelected ? normalizedSize * 1.15 : normalizedSize
       },
       getFontSize: (capacity_taf: number) => {
@@ -356,7 +356,7 @@ export default function CalSimLayers() {
               ],
               "#c2a14f", // theme.palette.nature.earth
               // Default: map panel overlay color (sky blue)
-              "#92C1D5", // theme.palette.brand.sky - same as map panel overlay
+              "#9CBF4F", // theme.palette.learn.background - same as panel background
             ],
             "circle-stroke-width": 1, // Finer stroke
             "circle-stroke-color": "#ffffff", // White stroke for all
