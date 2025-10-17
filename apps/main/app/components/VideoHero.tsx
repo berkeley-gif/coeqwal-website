@@ -32,14 +32,10 @@ export default function VideoHero({
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        console.log('VideoHero mounted')
         setMounted(true)
     }, [])
 
     useEffect(() => {
-        console.log('mounted', mounted)
-        console.log('sources', sources)
-        console.log('canplay', canPlay)
         if (!mounted || failed) return
 
         const v = videoRef.current
@@ -47,7 +43,6 @@ export default function VideoHero({
 
         const tryPlay = async () => {
             try {
-                console.log('tryplay')
                 await v.play()
             } catch (err) {
                 // if autoplay blocked, fall back to poster
@@ -153,13 +148,18 @@ export default function VideoHero({
                 }}>
                     <Typography
                         style={{
-                            fontSize: '1.4rem',
+                            fontSize: '1.5rem',
+                            width: '60%'
                         }}
                         variant="body1"
                     >
                         {t("homePanel.content")}
                     </Typography>
                     <Typography
+                                            style={{
+        
+                            width: '40%'
+                        }}
                         variant="body1"
                     >
                         {t("homePanel.callToAction")}
