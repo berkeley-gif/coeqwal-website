@@ -261,7 +261,12 @@ export default function ScenarioExplorer() {
                 <GeolocateControl position="bottom-right" />
 
                 {/* Tier location markers */}
-                {tierData && <TierMarkers data={tierData} />}
+                {tierData && tierData.features && tierData.features.length > 0 && (
+                  <>
+                    {console.log("🎯 Rendering TierMarkers with:", tierData.metadata.tier_code, "features:", tierData.features.length)}
+                    <TierMarkers data={tierData} />
+                  </>
+                )}
               </Map>
 
               {/* Search bar overlay - bottom right */}
