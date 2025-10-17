@@ -4,6 +4,16 @@ import { useTranslation } from "@repo/i18n"
 import { useDrawerStore } from "@repo/state"
 import { useCallback } from "react"
 
+import VideoHero from "../components/VideoHero"
+import type { VideoSource } from "../components/VideoHero"
+
+const VIDEO_SRCS: VideoSource[] = [
+  {
+    src: '/video/landing-hero-reel.mp4',
+    type: 'video/mp4',
+  }
+]
+
 const IntroSection = () => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -18,8 +28,14 @@ const IntroSection = () => {
     [setDrawerContent, openDrawer],
   )
 
+
+
   return (
-    <Box sx={{ pointerEvents: "none" }}>
+    <Box>
+      <VideoHero
+        sources={VIDEO_SRCS}
+        fallbackImage='/images/home_hero_fallback.png'
+      />
       {/* Home panel (could be its own component) */}
       <Box
         sx={{
@@ -121,6 +137,7 @@ const IntroSection = () => {
           }
         ></OneColumnPanel>
       </Box>
+
 
       {/* Frontmatter panel(s) */}
       <OneColumnPanel
