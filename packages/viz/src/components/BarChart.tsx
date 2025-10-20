@@ -53,8 +53,15 @@ const BarChart = ({ size = 80, tiers, seed }: BarChartProps) => {
       ? tierWithValue.value
       : 0.2 + generateRandomValue(i) * 0.8
   })
+
+  // Check if values are already normalized (all between 0 and 1)
+  const allValuesNormalized = rawValues.every((v) => v >= 0 && v <= 1)
+
+  // Re-normalize if values are NOT already normalized
   const maxValue = Math.max(...rawValues)
-  const normalizedValues = rawValues.map((value) => value / maxValue) // Scale to 100% of width
+  const normalizedValues = allValuesNormalized
+    ? rawValues // Use values as-is if already normalized
+    : rawValues.map((value) => value / maxValue) // Scale to 100% of width for raw values
 
   const barHeight = (size * 0.8) / chartTiers.length // 80% of height divided by number of bars
   const barSpacing = (size * 0.2) / (chartTiers.length + 1) // Remaining 20% for spacing

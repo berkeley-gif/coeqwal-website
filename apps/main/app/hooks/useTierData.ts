@@ -3,7 +3,6 @@ import { useTheme, Theme } from "@repo/ui/mui"
 import useSWR from "swr"
 import {
   fetchScenarioTiers,
-  fetchTierDefinitions,
   fetchTierList,
   getTierMapping,
   convertMultiValueToChartData,

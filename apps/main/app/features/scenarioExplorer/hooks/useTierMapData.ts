@@ -87,14 +87,14 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
           // Calculate bounds from features and zoom
           if (data.features.length > 0) {
             const bounds = calculateBounds(data.features)
-            
+
             // Extra padding for Delta/Freshwater outcomes
             const isDelta =
               selectedTier!.outcome.includes("Freshwater") ||
               selectedTier!.outcome.includes("Delta")
-            
+
             const isSalmon = selectedTier!.outcome.includes("Salmon")
-            
+
             const padding = isDelta ? 250 : 100
             const maxZoom = isDelta || isSalmon ? 9 : 12 // Don't zoom in too far for single points
 

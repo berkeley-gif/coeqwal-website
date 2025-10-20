@@ -1,6 +1,5 @@
 "use client"
 
-
 interface LogoProps {
   width?: number
   height?: number

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Marker, Layer, Source, Popup, useMap } from "@repo/map"
+import { Marker, Popup, useMap } from "@repo/map"
 import { useTheme } from "@repo/ui/mui"
 import type { TierLocationResponse } from "../../../api/tierLocationApi"
 
@@ -47,23 +47,29 @@ export default function TierMarkers({ data }: TierMarkersProps) {
   // Close popup and clean up old layers when data changes (new tier selected)
   useEffect(() => {
     setPopupInfo(null)
-    
+
     // Remove all previous tier layers
     mapAPI.withMap((mapRef) => {
       const map = mapRef.getMap()
       const existingLayers = map.getStyle().layers
       const existingSources = Object.keys(map.getStyle().sources)
-      
+
       // Remove all tier-polygon layers
       existingLayers.forEach((layer) => {
-        if (layer.id.startsWith("tier-polygon-") && layer.id !== `tier-polygon-fill-${data.metadata.tier_code}`) {
+        if (
+          layer.id.startsWith("tier-polygon-") &&
+          layer.id !== `tier-polygon-fill-${data.metadata.tier_code}`
+        ) {
           map.removeLayer(layer.id)
         }
       })
-      
+
       // Remove all tier-polygons sources
       existingSources.forEach((sourceId) => {
-        if (sourceId.startsWith("tier-polygons-") && sourceId !== `tier-polygons-${data.metadata.tier_code}`) {
+        if (
+          sourceId.startsWith("tier-polygons-") &&
+          sourceId !== `tier-polygons-${data.metadata.tier_code}`
+        ) {
           map.removeSource(sourceId)
         }
       })
@@ -100,7 +106,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
         type: "geojson",
         data: {
           type: "FeatureCollection",
-          features: polygonFeatures as any,
+          features: polygonFeatures as GeoJSON.Feature[],
         },
       })
 
@@ -151,16 +157,17 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       })
 
       // Add click handler
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const handleClick = (e: any) => {
         const feature = e.features?.[0]
         if (feature && feature.properties) {
           setPopupInfo({
             longitude: e.lngLat.lng,
             latitude: e.lngLat.lat,
-            name: feature.properties.location_name,
-            tierLevel: feature.properties.tier_level,
-            tierLabel: getTierLabel(feature.properties.tier_level),
-            locationType: feature.properties.location_type_display,
+            name: feature.properties.location_name as string,
+            tierLevel: feature.properties.tier_level as number,
+            tierLabel: getTierLabel(feature.properties.tier_level as number),
+            locationType: feature.properties.location_type_display as string,
           })
         }
       }

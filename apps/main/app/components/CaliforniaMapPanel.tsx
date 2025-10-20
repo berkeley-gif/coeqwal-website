@@ -19,7 +19,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { showBasins, isPanelsExpanded } = useCalSimToggle()
+  const { isPanelsExpanded } = useCalSimToggle()
 
   return (
     <Box
