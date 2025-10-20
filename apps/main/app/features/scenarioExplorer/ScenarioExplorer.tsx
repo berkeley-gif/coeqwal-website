@@ -20,7 +20,6 @@ import { motion } from "@repo/motion"
 // Custom hooks
 import { useScenarioData } from "./hooks/useScenarioData"
 import { useExploreInteractions } from "./hooks/useExploreInteractions"
-import { useMapIntegration } from "./hooks/useMapIntegration"
 
 // Components
 import StrategyGrid from "./components/StrategyGrid"
@@ -72,16 +71,12 @@ export default function ScenarioExplorer() {
     searchQuery,
     setSearchQuery,
     isSearching,
-    anySelectedOutcome,
     handleOutcomeSelect,
     handleSearchSubmit,
   } = useExploreInteractions()
 
-  // Map integration
-  useMapIntegration(showMapView, anySelectedOutcome || null)
-
   // Tier map data and visualization
-  const { tierData, clearTierData } = useTierMapData({
+  const { tierData } = useTierMapData({
     selectedTier,
   })
 
@@ -399,23 +394,23 @@ export default function ScenarioExplorer() {
                       <InfoTooltip description="Show or hide strategy details">
                         <Box>
                           <TogglePair
-                          leftIcon={
-                            <DocumentExpandedIcon
-                              active={showDefinitions}
-                              size={35}
-                            />
-                          }
-                          rightIcon={
-                            <DocumentCollapsedIcon
-                              active={!showDefinitions}
-                              size={35}
-                            />
-                          }
-                          onLeftClick={() => setShowDefinitions(true)}
-                          onRightClick={() => setShowDefinitions(false)}
-                          gap={-0.5}
-                          sx={{ ml: -1.5 }}
-                        />
+                            leftIcon={
+                              <DocumentExpandedIcon
+                                active={showDefinitions}
+                                size={35}
+                              />
+                            }
+                            rightIcon={
+                              <DocumentCollapsedIcon
+                                active={!showDefinitions}
+                                size={35}
+                              />
+                            }
+                            onLeftClick={() => setShowDefinitions(true)}
+                            onRightClick={() => setShowDefinitions(false)}
+                            gap={-0.5}
+                            sx={{ ml: -1.5 }}
+                          />
                         </Box>
                       </InfoTooltip>
                     </Box>
@@ -436,8 +431,12 @@ export default function ScenarioExplorer() {
                         pl: 3,
                       }}
                     >
-                      <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Typography variant="subtitle2">Key outcomes</Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                      >
+                        <Typography variant="subtitle2">
+                          Key outcomes
+                        </Typography>
                         <Typography
                           variant="body2"
                           sx={{
@@ -452,7 +451,10 @@ export default function ScenarioExplorer() {
                         <Box>
                           <TogglePair
                             leftIcon={
-                              <DocumentListIcon active={!showMapView} size={46} />
+                              <DocumentListIcon
+                                active={!showMapView}
+                                size={46}
+                              />
                             }
                             rightIcon={
                               <MapViewIcon active={showMapView} size={46} />

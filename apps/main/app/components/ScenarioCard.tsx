@@ -6,6 +6,7 @@ import { useDrawerStore } from "@repo/state"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
+import { useScenarioTiers } from "../hooks/useTierData"
 
 interface ScenarioCardProps {
   isMinimized?: boolean
@@ -20,21 +21,25 @@ export default function ScenarioCard({
 }: ScenarioCardProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
-  const { selectedOutcome, setSelectedOutcome } = useCalSimToggle()
+  const { selectedOutcome } = useCalSimToggle()
 
-  // Generate dummy data for current operations (copied from ScenarioExplorer)
-  const generateDummyData = (outcomeIndex: number) => {
-    const baseMedian = outcomeIndex * 0.1 - 0.2
-    const medianShift = 0 // Historical climate
-    const variabilityMultiplier = 1
+  // Fetch tier data for s0020 (Current operations)
+  const { chartData, isLoading } = useScenarioTiers("s0020")
 
-    const median = baseMedian + medianShift
-    const baseSpread = 0.4 * variabilityMultiplier
-    const q1 = median - baseSpread * 0.5
-    const q3 = median + baseSpread * 0.3
-    const min = median - baseSpread * 0.8
-
-    return [q3, median, q1, min] as [number, number, number, number]
+  // Helper function to get tier values for an outcome
+  const getTierValues = (outcome: string): [number, number, number, number] => {
+    const tierData = chartData[outcome]
+    if (!tierData || tierData.length !== 4) {
+      // Return zeros if data not available
+      return [0, 0, 0, 0]
+    }
+    // Extract normalized values from tier data
+    return [
+      tierData[0]?.value ?? 0,
+      tierData[1]?.value ?? 0,
+      tierData[2]?.value ?? 0,
+      tierData[3]?.value ?? 0,
+    ]
   }
 
   const handleGlossaryOpen = (entry: string) => {
@@ -43,8 +48,6 @@ export default function ScenarioCard({
     })
     openDrawer("glossary")
   }
-
-  // Removed click functionality - outcomes are display-only
 
   return (
     <Box
@@ -61,14 +64,14 @@ export default function ScenarioCard({
           borderRadius: theme.borderRadius.card,
           border: "1px solid",
           borderColor: theme.palette.divider,
-          padding: 2, // Reduced from 3 to 2
+          padding: 2,
           display: "flex",
           flexDirection: "column",
           height: "auto",
           opacity: isMinimized ? 0.8 : 1,
         }}
       >
-        {/* Minimized state - show title only */}
+        {/* Minimized state - title only */}
         {isMinimized && (
           <Box sx={{ mb: 1, flexShrink: 0 }}>
             <Box
@@ -212,7 +215,10 @@ export default function ScenarioCard({
                   }}
                 >
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    Key outcomes summarize how water allocations affect different water uses. Outcomes are categorized in different levels, indicating whether the outcome corresponds to an optimal, suboptimal, at-risk, or critical state.
+                    Key outcomes summarize how water allocations affect
+                    different water uses. Outcomes are categorized in different
+                    levels, indicating whether the outcome corresponds to an
+                    optimal, suboptimal, at-risk, or critical state.
                   </Typography>
                 </Box>
 
@@ -225,53 +231,74 @@ export default function ScenarioCard({
                     alignItems: "start",
                   }}
                 >
-                  {OUTCOMES.map((outcome, outcomeIndex) => (
-                    <Box
-                      key={outcome}
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: 1,
-                        cursor: "default",
-                        p: 1,
-                        borderRadius: theme.borderRadius.rounded,
-                        border:
-                          selectedOutcome === outcome
-                            ? `2px solid ${theme.palette.blue.bright}`
-                            : "2px solid transparent",
-                        backgroundColor:
-                          selectedOutcome === outcome
-                            ? theme.palette.blue.bright + "10"
-                            : "transparent",
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      <ScenarioGlyph
-                        tierColors={[
-                          theme.palette.tiers.tier1,
-                          theme.palette.tiers.tier2,
-                          theme.palette.tiers.tier3,
-                          theme.palette.tiers.tier4,
-                        ]}
-                        values={generateDummyData(outcomeIndex)}
-                        variant="bars"
-                        size={60}
-                      />
-                      <Typography
-                        variant="caption"
+                  {OUTCOMES.map((outcome) => {
+                    // Check if outcome has data
+                    const tierData = chartData[outcome]
+                    const hasData =
+                      tierData !== undefined &&
+                      tierData.length > 0 &&
+                      tierData.some((tier) => tier.value > 0)
+
+                    return (
+                      <Box
+                        key={outcome}
                         sx={{
-                          color: theme.palette.blue.darkest,
-                          fontWeight: 500,
-                          textAlign: "center",
-                          fontSize: "0.75rem",
-                          mt: 0.5,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 1,
+                          cursor: "default",
+                          p: 1,
+                          borderRadius: theme.borderRadius.rounded,
+                          border:
+                            selectedOutcome === outcome
+                              ? `2px solid ${theme.palette.blue.bright}`
+                              : "2px solid transparent",
+                          backgroundColor:
+                            selectedOutcome === outcome
+                              ? theme.palette.blue.bright + "10"
+                              : "transparent",
+                          transition: "all 0.2s ease",
+                          opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
                         }}
                       >
-                        {outcome}
-                      </Typography>
-                    </Box>
-                  ))}
+                        <ScenarioGlyph
+                          tierColors={
+                            hasData
+                              ? [
+                                  theme.palette.tiers.tier1,
+                                  theme.palette.tiers.tier2,
+                                  theme.palette.tiers.tier3,
+                                  theme.palette.tiers.tier4,
+                                ]
+                              : [
+                                  theme.palette.grey[300],
+                                  theme.palette.grey[300],
+                                  theme.palette.grey[300],
+                                  theme.palette.grey[300],
+                                ]
+                          }
+                          values={getTierValues(outcome)}
+                          variant="bars"
+                          size={60}
+                        />
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: hasData
+                              ? theme.palette.blue.darkest
+                              : theme.palette.grey[500],
+                            fontWeight: 500,
+                            textAlign: "center",
+                            fontSize: "0.75rem",
+                            mt: 0.5,
+                          }}
+                        >
+                          {outcome}
+                        </Typography>
+                      </Box>
+                    )
+                  })}
                 </Box>
               </Box>
             </Box>

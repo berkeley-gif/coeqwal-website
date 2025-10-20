@@ -24,13 +24,13 @@ interface HydroclimateCardProps {
  */
 export default function HydroclimateCard({
   layout = "horizontal",
-  variant = "full",
+  // variant = "full",
   showCard = true,
 }: HydroclimateCardProps) {
   const theme = useTheme()
 
   const isVertical = layout === "vertical"
-  const isCompact = variant === "compact"
+  // const isCompact = variant === "compact"
 
   const content = (
     <Box

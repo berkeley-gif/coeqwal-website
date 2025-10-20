@@ -12,13 +12,6 @@ export const OUTCOMES = [
 
 export type Outcome = (typeof OUTCOMES)[number]
 
-// Import API functions
-import {
-  fetchTierDefinitions,
-  getTierMapping,
-  mapShortCodeToDisplayName,
-} from "../api/tierApi"
-
 // Outcome definitions (hardcoded for now / database fetch commented out)
 export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
   // TODO: Re-enable database fetch when ready

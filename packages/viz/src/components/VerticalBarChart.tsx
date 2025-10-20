@@ -51,8 +51,15 @@ const VerticalBarChart = ({
       ? tierWithValue.value
       : 0.2 + generateRandomValue(i) * 0.8
   })
+
+  // Check if values are already normalized (all between 0 and 1)
+  const allValuesNormalized = rawValues.every((v) => v >= 0 && v <= 1)
+
+  // Normalize if values are not already normalized
   const maxValue = Math.max(...rawValues)
-  const normalizedValues = rawValues.map((value) => value / maxValue) // Scale to 100% of height
+  const normalizedValues = allValuesNormalized
+    ? rawValues // Use values as-is if already normalized
+    : rawValues.map((value) => value / maxValue) // Scale to 100% of height for raw values
 
   const barWidth = (size * 0.8) / chartTiers.length // 80% of width divided by number of bars
   const barSpacing = (size * 0.2) / (chartTiers.length + 1) // Remaining 20% for spacing
