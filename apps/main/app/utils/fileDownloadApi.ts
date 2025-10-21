@@ -9,28 +9,68 @@ const FILE_DOWNLOAD_API_BASE =
  * Uses the presigned download API
  */
 // Fallback hardcoded scenarios if API fails
-// TODO: Update with correct filenames from your team
+// TODO: Keep updated or remove
 const FALLBACK_SCENARIOS: ScenariosResponse = {
   scenarios: [
     {
+      scenario_id: "s0011",
+      files: {
+        zip: {
+          key: "scenario/s0011/run/s0011_adjBL_wTUCP_v1_20250710.zip",
+          filename: "s0011_adjBL_wTUCP_v1_20250710.zip",
+        },
+        output_csv: {
+          key: "scenario/s0011/csv/s0011_coeqwal_calsim_output.csv",
+          filename: "s0011_coeqwal_calsim_output.csv",
+        },
+        sv_csv: {
+          key: "scenario/s0011/csv/s0011_coeqwal_sv_input.csv",
+          filename: "s0011_coeqwal_sv_input.csv",
+        },
+      },
+    },
+    {
       scenario_id: "s0020",
-      files: {},
+      files: {
+        zip: {
+          key: "scenario/s0020/run/s0020_DCRadjBL_2020LU_wTUCP.zip",
+          filename: "s0020_DCRadjBL_2020LU_wTUCP.zip",
+        },
+        output_csv: {
+          key: "scenario/s0020/csv/s0020_coeqwal_calsim_output.csv",
+          filename: "s0020_coeqwal_calsim_output.csv",
+        },
+        sv_csv: {
+          key: "scenario/s0020/csv/s0020_coeqwal_sv_input.csv",
+          filename: "s0020_coeqwal_sv_input.csv",
+        },
+      },
     },
     {
       scenario_id: "s0021",
-      files: {},
-    },
-    {
-      scenario_id: "s0011",
-      files: {},
+      files: {
+        zip: {
+          key: "scenario/s0021/run/s0021_DCRadjBL_2020LU_woTUCP.zip",
+          filename: "s0021_DCRadjBL_2020LU_woTUCP.zip",
+        },
+        output_csv: {
+          key: "scenario/s0021/csv/s0021_coeqwal_calsim_output.csv",
+          filename: "s0021_coeqwal_calsim_output.csv",
+        },
+        sv_csv: {
+          key: "scenario/s0021/csv/s0021_coeqwal_sv_input.csv",
+          filename: "s0021_coeqwal_sv_input.csv",
+        },
+      },
     },
   ],
 }
 
 export async function fetchScenariosForDownload(): Promise<ScenariosResponse> {
   try {
-    const response = await fetch(`${FILE_DOWNLOAD_API_BASE}/scenarios`, {
+    const response = await fetch(`${FILE_DOWNLOAD_API_BASE}/scenario`, {
       method: "GET",
+      mode: "cors", // Explicitly set CORS mode
       headers: {
         Accept: "application/json",
       },
@@ -42,9 +82,9 @@ export async function fetchScenariosForDownload(): Promise<ScenariosResponse> {
     }
 
     return response.json()
-  } catch (error) {
+  } catch {
     console.warn("File download API unavailable, using fallback scenarios")
-    console.error("Attempted URL:", `${FILE_DOWNLOAD_API_BASE}/scenarios`)
+    console.log("Attempted URL:", `${FILE_DOWNLOAD_API_BASE}/scenario`)
     return FALLBACK_SCENARIOS
   }
 }
@@ -56,5 +96,5 @@ export function getFileDownloadUrl(
   scenarioId: string,
   fileType: "zip" | "output" | "sv",
 ): string {
-  return `${FILE_DOWNLOAD_API_BASE}/download?scenario=${scenarioId}&type=${fileType}`
+  return `https://x66ckhp067.execute-api.us-west-2.amazonaws.com/default/download?scenario=${scenarioId}&type=${fileType}`
 }
