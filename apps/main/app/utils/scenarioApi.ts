@@ -1,17 +1,9 @@
 import type { ScenariosResponse } from "../types/scenarioDownloads"
 
-const SCENARIOS_API_URL = "https://api.coeqwal.org/scenarios"
+const SCENARIOS_API_URL = "https://api.coeqwal.org/scenario"
 
 /**
- * Fetch scenarios from AWS API
- * Currently blocked by CORS - AWS API needs to be configured to allow cross-origin requests
- *
- * To fix CORS on AWS API Gateway:
- * 1. Enable CORS on the API Gateway endpoint
- * 2. Add these headers to the response:
- *    - Access-Control-Allow-Origin: * (or specific domain)
- *    - Access-Control-Allow-Headers: Content-Type
- *    - Access-Control-Allow-Methods: GET, OPTIONS
+ * Fetch scenarios via AWS Lambda function (for security)
  */
 export async function fetchScenariosFromAPI(): Promise<ScenariosResponse> {
   const response = await fetch(SCENARIOS_API_URL, {
