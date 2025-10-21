@@ -1,29 +1,30 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+// import { useRouter } from "next/navigation"
 import { AppHeader } from "@repo/ui"
 
 /**
  * Main application header with Next.js routing logic
  */
 export function Header() {
-  const router = useRouter()
+  // const router = useRouter()
 
-  // Handle data page navigation
+  // Handle data page navigation - disabled temporarily
   const handleDataClick = () => {
-    router.push("/data")
+    // router.push("/data") // Disabled
+    console.log("Data page temporarily disabled")
   }
 
-  // Handle tools dropdown clicks
-  const handleToolsClick = (tool: "scenario-explorer" | "needs-search") => {
-    if (tool === "scenario-explorer") {
-      // TODO: Navigate to scenario data explorer
-      console.log("Navigate to scenario data explorer")
-    } else if (tool === "needs-search") {
-      // TODO: Navigate to needs-based search
-      console.log("Navigate to needs-based search")
-    }
-  }
+  // // Handle tools dropdown clicks
+  // const handleToolsClick = (tool: "scenario-explorer" | "needs-search") => {
+  //   if (tool === "scenario-explorer") {
+  //     // TODO: Navigate to scenario data explorer
+  //     console.log("Navigate to scenario data explorer")
+  //   } else if (tool === "needs-search") {
+  //     // TODO: Navigate to needs-based search
+  //     console.log("Navigate to needs-based search")
+  //   }
+  // }
 
   // Handle about page clicks
   const handleAboutClick = () => {
@@ -33,8 +34,8 @@ export function Header() {
 
   return (
     <AppHeader
-      onDataClick={handleDataClick}
-      onToolsClick={handleToolsClick}
+      onDataClick={handleDataClick} // Shows button but doesn't navigate
+      // onToolsClick={handleToolsClick} // Disabled temporarily
       onAboutClick={handleAboutClick}
       variant="overlay"
       hideOnScroll={false}
