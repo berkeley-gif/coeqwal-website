@@ -35,14 +35,20 @@ export default function CaliforniaMapPanel({
     >
       <Map
         mapboxToken={token}
-        mapStyle="mapbox://styles/digijill/clz4h7lfm00mn01rih4x75g46"
+        mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
         initialViewState={{
-          longitude: -119,
-          latitude: 38.073,
-          zoom: 6.3,
+          longitude: -118,
+          latitude: 39,
+          zoom: 5.8,
           bearing: 0,
           pitch: 0,
         }}
+        minZoom={5.8}
+        maxZoom={10}
+        // maxBounds={[
+        //   [-124.5, 32.5], // Southwest coordinates (west, south)
+        //   [-114.0, 42.0], // Northeast coordinates (east, north)
+        // ]}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
         touchZoom={true}
@@ -52,6 +58,7 @@ export default function CaliforniaMapPanel({
         doubleClickZoom={true}
         keyboard={true}
         interactive={true}
+        projection={{ name: "mercator" }}
       >
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />

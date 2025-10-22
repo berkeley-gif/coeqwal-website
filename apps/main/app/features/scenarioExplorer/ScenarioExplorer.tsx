@@ -240,10 +240,16 @@ export default function ScenarioExplorer() {
                 mapboxToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""}
                 mapStyle="mapbox://styles/mapbox/light-v11"
                 initialViewState={{
-                  longitude: -121.4,
-                  latitude: 38.5,
-                  zoom: 6,
+                  longitude: -118,
+                  latitude: 39,
+                  zoom: 5.8,
                 }}
+                minZoom={5.8}
+                maxZoom={10}
+                // maxBounds={[
+                //   [-126, 30], // Southwest coordinates (west, south)
+                //   [-112, 44], // Northeast coordinates (east, north)
+                // ]}
                 scrollZoom={false}
                 touchZoom={false}
                 doubleClickZoom={false}
@@ -252,6 +258,7 @@ export default function ScenarioExplorer() {
                 touchRotate={false}
                 keyboard={false}
                 style={{ width: "100%", height: "100%" }}
+                projection={{ name: "mercator" }}
               >
                 <NavigationControl position="bottom-right" />
                 <GeolocateControl position="bottom-right" />
