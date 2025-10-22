@@ -175,7 +175,7 @@ export default function ScenarioCard({
             />
 
             {/* Scenario snapshot section */}
-            <Box sx={{ flexShrink: 0, pb: 1 }}>
+            <Box sx={{ flexShrink: 0, pb: 1, pt: 2 }}>
               <Box>
                 <Box
                   sx={{
@@ -195,7 +195,7 @@ export default function ScenarioCard({
                     <Typography
                       variant="h6"
                       sx={{
-                        color: theme.palette.blue.darkest,
+                        pb: 1,
                       }}
                     >
                       Scenario outcomes
