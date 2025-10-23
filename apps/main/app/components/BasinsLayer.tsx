@@ -30,7 +30,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         type="line"
         paint={{
           "line-color": "white",
-          "line-width": 2,
+          "line-width": 1.5,
           "line-opacity": 0.8,
         }}
       />
@@ -40,7 +40,6 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         layout={{
           "text-field": ["get", "name"],
           "text-font": [
-            "Neue Haas Grotesk Bold",
             "Neue Haas Grotesk",
             "Arial Unicode MS Bold",
           ],

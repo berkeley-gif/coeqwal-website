@@ -107,7 +107,7 @@ Change these values to update the theme across the site
 
 const typeScale = {
   // Redo: We changed the h1 scale to fit the longer headline. We could change the type scale to accomodate new content / new layout
-  // Headline sizes using Perfect Fourth ratio (1.333) - refined scale
+  // Headline sizes using Perfect Fourth ratio (1.333)
   h1: "5.8rem", // 92.8px - Hero size
   h2: "4.35rem", // 69.6px - Major section headers (h1 ÷ 1.333)
   h3: "2.8rem", // 44.8px - Subsection headers (updated for map overlay panels)
