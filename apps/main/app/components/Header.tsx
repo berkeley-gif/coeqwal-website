@@ -1,18 +1,17 @@
 "use client"
 
-// import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { AppHeader } from "@repo/ui"
 
 /**
  * Main application header with Next.js routing logic
  */
 export function Header() {
-  // const router = useRouter()
+  const router = useRouter()
 
-  // Handle data page navigation - disabled temporarily
+  // Handle data page navigation
   const handleDataClick = () => {
-    // router.push("/data") // Disabled
-    console.log("Data page temporarily disabled")
+    router.push("/data")
   }
 
   // // Handle tools dropdown clicks
@@ -34,7 +33,7 @@ export function Header() {
 
   return (
     <AppHeader
-      onDataClick={handleDataClick} // Shows button but doesn't navigate
+      onDataClick={handleDataClick}
       // onToolsClick={handleToolsClick} // Disabled temporarily
       onAboutClick={handleAboutClick}
       variant="overlay"
