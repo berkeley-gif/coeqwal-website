@@ -1,22 +1,26 @@
 "use client"
 
-import { Box, Stack, Typography } from "@repo/ui/mui"
+import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 import HydroClimateContainer from "./vis/HydroClimate"
+import * as d3 from "d3";
 
 function SectionResolution() {
   const containerRef = useRef<HTMLDivElement>(null)
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   })
+
   const x = useTransform(scrollYProgress, [0, 1], ["0vw", `-${140}vw`])
 
   return (
     <div>
       <Hydroclimate />
+
       <div ref={containerRef} style={{ height: "250vh", position: "relative" }}>
         <div
           style={{
@@ -27,6 +31,7 @@ function SectionResolution() {
             width: "100%",
           }}
         >
+          {/* First motion div */}
           <motion.div
             style={{
               x,
@@ -35,9 +40,7 @@ function SectionResolution() {
               justifyContent: "flex-end",
             }}
           >
-            <Box height="100vh" width="100vw">
-              {" "}
-            </Box>
+            <Box height="100vh" width="100vw" sx={{backgroundColor: "red"}}/>
             <ScenariosMockup />
             <Box
               id="scenario-transition"
@@ -51,11 +54,19 @@ function SectionResolution() {
                 backgroundPosition: "left",
                 backgroundRepeat: "no-repeat",
               }}
-            ></Box>
-            {/* Probably need a dummy slide for the transition*/}
+            />
+          </motion.div>
+
+          {/* Second motion div */}
+          <motion.div style={{ x, width: "200vw", display: "flex" }}>
+            <Hydroclimate />
+            <Scenarios />
+            <Box className="container-center">Transition</Box>
+            {/* Probably need a dummy slide for the transition */}
           </motion.div>
         </div>
       </div>
+
       <Conclusion />
     </div>
   )
@@ -182,6 +193,7 @@ function ScenariosMockup() {
       tabIndex={-1}
       role="region"
     >
+      
       <svg
         width="100%"
         height="100%"
@@ -189,28 +201,52 @@ function ScenariosMockup() {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
+        {/* loop lines */}
         <motion.path
           initial={{ pathLength: 0 }}
           whileInView={{ pathLength: 1 }}
           transition={{ duration: 4, ease: "easeInOut" }}
-          d="M-1 208.147C-1 208.147 554 256.147 685 208.147C816 160.147 798 -34.8529 980 8.14711C1162 51.1471 1732 8.14697 1732 8.14697"
+          d="M0 210.147 C87.9324 240.403 957.486 170.211 894 26.0007 C873.232 -21.1739 804.262 10.8549 820.5 61.5007 
+            C858.573 180.251 1740.16 15.0845 1733 10.1514
+            
+            M0 210.147 C13.5057 228.958 809.64 112.862 894 281.626 C978.36 450.39 712 424.753 796 297.626 
+            C880 170.5 1686.31 232.946 1725 262.147"
           stroke="#F1B143"
           strokeWidth="4"
         />
+
         <motion.path
           initial={{ pathLength: 0 }}
           whileInView={{ pathLength: 1 }}
           transition={{ duration: 4, ease: "easeInOut" }}
-          d="M-1 208.147C-1 208.147 360 207.147 662 236.147C964 265.147 919 301.147 992 284.147C1065 267.147 1732 284.147 1732 284.147"
+          d="M0 210.147 C-9.92595 221.46 395.378 326.686 596 320.074 C637.0672 326.4505 750.465 297.6462 688 237.6067 C625.5352 177.5673 552.5238 319.8387 715.5 388.6055
+            C866.894 485.579 970.411 758.6575 1124.056 765.5815 C1277.7 772.5055 1709.966 978.4125 1709.966 978.4125
+            
+            M0 210.147 C0 210.147 216 127.104 538 339.105 C860 551.106 438.583 519.81 608.542 402.958 C778.5 286.106 1716.02 798.484 1716.02 798.484"
           stroke="#F1B143"
           strokeWidth="4"
+          opacity={0.3}
         />
+
+        {/* low opacity lines */}
+        {/* <motion.path
+          initial={{ pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          transition={{ duration: 4, ease: "easeInOut" }}
+          d="M0 209C0 209 309.838 302.538 422.054 282.203C534.271 261.867 829.213 446.231 1124.15 679.397C1419.1 912.563 1718.01 720.066 1718.01 720.066
+          M0 210.042C0 210.042 453.833 173.441 632.585 307.647C811.338 441.853 854.039 712.976 1137.06 712.976C1420.09 712.976 1722.98 925.807 1722.98 925.807
+          M0 210.042C0 210.042 352.54 233.087 507.458 277.823C662.377 322.559 1070.53 708.909 1208.57 780.757C1346.6 852.604 1722.98 814.646 1722.98 814.646
+          M0 210.042C0 210.042 190.669 100.238 507.458 307.647C824.247 515.056 817.296 618.083 968.242 618.083C1119.19 618.083 1716.02 798.379 1716.02 798.379
+          M-6 209C-6 209 342.567 306.604 478.618 310.671C614.668 314.738 850.026 585.861 976.145 636.019C1102.27 686.177 1718.96 865.118 1718.96 865.118"
+          stroke="#F1B143"
+          strokeWidth="4"
+          opacity={0.3}
+        /> */}
       </svg>
     </Box>
   )
 }
 
-/*
 function Scenarios() {
   return (
     <Box
@@ -334,7 +370,47 @@ function Scenarios() {
     </Box>
   )
 }
-  */
+
+function SvgConnector() {
+  const pathRef = useRef<SVGPathElement>(null)
+
+  useEffect(() => {
+    const p = d3.path()
+
+    const startX = 0.75 * window.innerWidth        // 80vw = right edge of your image
+    const y = 0.3 * window.innerHeight            // vertical center (adjust as needed)
+    const endX = startX + 0.25 * window.innerWidth // 25vw to the right
+
+    p.moveTo(startX, y)
+    p.lineTo(endX, y)
+    // p.bezierCurveTo()
+
+    if (pathRef.current) {
+      pathRef.current.setAttribute("d", p.toString())
+    }
+  }, [])
+
+  return (
+    <svg
+      width="100%"
+      height="100vh"
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        pointerEvents: "none",
+        zIndex: 5,
+      }}
+    >
+      <path
+        ref={pathRef}
+        stroke="#f1b143"
+        strokeWidth={2}
+        fill="none"
+      />
+    </svg>
+  )
+}
 
 function Conclusion() {
   const { sectionRef } = useActiveSection("conclusion", {
