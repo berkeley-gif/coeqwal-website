@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react"
 import * as d3 from "d3"
 import "../rain.css"
 import { FreshWaterColor } from "./helpers/colorPalette"
+import RainAnimation from "./helpers/RainAnimation"
 
 function SectionTransition() {
   return (
@@ -20,6 +21,7 @@ function Balance() {
   const drops = Array.from({ length: 100 })
 
   return (
+    
     <Box
       id="balance"
       className="container-row"
@@ -38,46 +40,8 @@ function Balance() {
         "--rain-color": FreshWaterColor,
       }}
     >
-      <Box
-        className="rain"
-        sx={{
-          width: "100%",
-          height: "90%",
-          zIndex: -1,
-        }}
-      >
-        {drops.map((_, i) => {
-          const delay = Math.random() * 5
-          const dur = 2 + Math.random() * 2
-          return (
-            <Box
-              key={i}
-              className="drop"
-              sx={{ left: `${Math.random() * 100}%` }}
-              style={{
-                animationDuration: `${dur}s`,
-                animationDelay: `${delay}s`,
-              }}
-            >
-              <Box
-                className="stem"
-                style={{
-                  animationDuration: `${dur}s`,
-                  animationDelay: `${delay}s`,
-                }}
-              />
-              <Box
-                className="splat"
-                style={{
-                  animationDuration: `${dur}s`,
-                  animationDelay: `${delay}s`,
-                }}
-              />
-            </Box>
-          )
-        })}
-      </Box>
-
+      <RainAnimation/>
+      
       <Box
         width="100%"
         height="100%"
