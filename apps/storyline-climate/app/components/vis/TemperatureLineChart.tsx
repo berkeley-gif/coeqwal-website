@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
-import { FreshWaterColor } from "../helpers/colorPalette"
+import { OffWhiteColor } from "../helpers/colorPalette"
+import { motion} from "framer-motion"
 
 type Row = { Date: string; Value: string }
 type Point = { year: number; value: number }
@@ -8,9 +9,13 @@ type Point = { year: number; value: number }
 type Margin = { top: number; right: number; bottom: number; left: number }
 type ContainerSize = { width: number; height: number }
 
-const defaultMargin: Margin = { top: 24, right: 24, bottom: 54, left: 84 }
-const goldenColor = "#F1B143"
-const axisColor = "#f2f0ef" // axis stroke; you can switch to "white" if you prefer
+const defaultMargin: Margin = { top: 24, right: 24, bottom: 74, left: 100 }
+const axisColor = OffWhiteColor 
+// consistent font styling for all axis and label text
+const labelStyle: React.CSSProperties = {
+  fontSize: "15px",
+  fill: OffWhiteColor,
+};
 
 function XAxis({
   size,
@@ -53,7 +58,7 @@ function XAxis({
                 x={x}
                 y={y}
                 dy="1.6em"
-                style={{ textAnchor: "middle", fill: "white" }}
+                style={{ ...labelStyle, textAnchor: "middle"}}
               >
                 {d3.format("d")(t)}
               </text>
@@ -65,8 +70,8 @@ function XAxis({
       <text
         x={(margin.left + size.width - margin.right) / 2}
         y={y}
-        dy="2em"
-        style={{ textAnchor: "middle", fill: "white" }}
+        dy="4em"   
+        style={{ ...labelStyle, textAnchor: "middle"}}
       >
         Year
       </text>
@@ -78,7 +83,7 @@ function YAxis({
   yScale,
   margin,
   ticks,
-  labelOffset = -60, // extra spacing for label
+  labelOffset = -80,   // extra spacing for label
 }: {
   yScale: d3.ScaleLinear<number, number>
   margin: Margin
@@ -109,7 +114,7 @@ function YAxis({
             y={yScale(t)}
             dx="-0.25em"
             dy="0.35em"
-            style={{ textAnchor: "end", fill: "white" }}
+            style={{ ...labelStyle, textAnchor: "end"}}
           >
             {d3.format(".2~f")(t)}
           </text>
@@ -120,7 +125,7 @@ function YAxis({
       <text
         transform={`translate(${labelOffset},${center}) rotate(-90)`}
         textAnchor="middle"
-        style={{ fill: "white" }}
+        style={labelStyle}
       >
         Temperature (°F)
       </text>
@@ -133,7 +138,6 @@ export default function TemperatureLineChart() {
   const [wrapWidth, setWrapWidth] = useState<number>(800)
   const [points, setPoints] = useState<Point[]>([])
 
-  // responsive width
   useEffect(() => {
     if (!wrapRef.current) return
     const ro = new ResizeObserver((entries) => {
@@ -146,33 +150,39 @@ export default function TemperatureLineChart() {
     return () => ro.disconnect()
   }, [])
 
+  const START_YEAR = 1960
+  const END_YEAR = 2025
+
   useEffect(() => {
-    ;(async () => {
-      const txt = await (
-        await fetch("/data/CA_historical_state_temperature.csv")
-      ).text()
-      const cleaned = txt
-        .split(/\r?\n/)
-        .filter((line) => line.trim() && !line.startsWith("#"))
-        .join("\n")
+  ;(async () => {
+    const txt = await (await fetch("/data/CA_historical_state_temperature.csv")).text()
+    const cleaned = txt
+      .split(/\r?\n/)
+      .filter((line) => line.trim() && !line.startsWith("#"))
+      .join("\n")
+    const rows = d3.csvParse(cleaned) as Row[]
 
-      const rows = d3.csvParse(cleaned) as Row[]
-      const data: Point[] = rows
-        .map((r) => {
-          const year = Math.floor(Number(r.Date) / 100) // e.g., 189512 -> 1895
-          const value = Number(r.Value)
-          return Number.isFinite(year) && Number.isFinite(value)
-            ? { year, value }
-            : null
-        })
-        .filter((d): d is Point => !!d)
-        .sort((a, b) => a.year - b.year)
+    const all: Point[] = rows
+      .map((r) => {
+        const year = Math.floor(Number(r.Date) / 100)
+        const value = Number(r.Value)
+        return Number.isFinite(year) && Number.isFinite(value) ? { year, value } : null
+      })
+      .filter((d): d is Point => !!d)
+      .sort((a, b) => a.year - b.year)
 
-      setPoints(data)
-    })()
+    // keep only 1960–2025
+    const filtered = all.filter((d) => d.year >= START_YEAR && d.year <= END_YEAR)
+    setPoints(filtered)
+      })()
   }, [])
 
-  const height = 420
+  const avg = useMemo(() => {
+  const filtered = points.filter((d) => d.year >= 1960 && d.year <= 2025)
+  return filtered.length ? d3.mean(filtered, (d) => d.value)! : undefined
+    }, [points])
+
+  const height = 480
   const margin = defaultMargin
   const size: ContainerSize = { width: wrapWidth, height }
   const innerW = size.width - margin.left - margin.right
@@ -182,7 +192,7 @@ export default function TemperatureLineChart() {
     if (!points.length) return null
     return d3
       .scaleLinear()
-      .domain(d3.extent(points, (d) => d.year) as [number, number])
+      .domain([START_YEAR, END_YEAR])
       .range([margin.left, margin.left + innerW])
   }, [points, innerW, margin.left])
 
@@ -195,22 +205,19 @@ export default function TemperatureLineChart() {
       .range([margin.top + innerH, margin.top])
   }, [points, innerH, margin.top])
 
-  // ticks (as arrays) for your axis components
   const xTicks = useMemo(() => {
     if (!xScale) return []
-    const [d0, d1] = xScale.domain() as [number, number]
     const count = Math.min(10, Math.max(3, Math.floor(innerW / 60)))
-    return d3.ticks(d0, d1, count)
+    return d3.ticks(START_YEAR, END_YEAR, count)
   }, [xScale, innerW])
 
   const yTicks = useMemo(() => {
     if (!yScale) return []
-    const [y0, y1] = yScale.domain() as [number, number] // force tuple
+    const [y0, y1] = yScale.domain() as [number, number]  // force tuple
     const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
     return d3.ticks(y0, y1, count)
   }, [yScale, innerH])
 
-  // line path
   const linePath = useMemo(() => {
     if (!xScale || !yScale) return ""
     return (
@@ -222,51 +229,63 @@ export default function TemperatureLineChart() {
     )
   }, [points, xScale, yScale])
 
-  return (
-    <div ref={wrapRef} style={{ width: "100%" }}>
-      <svg width={size.width} height={size.height}>
-        {/* axes */}
-        {xScale && yScale && (
-          <>
-            <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} />
-            <YAxis yScale={yScale} margin={margin} ticks={yTicks} />
-          </>
-        )}
+return (
+  <div style={{ position: "relative", width: "100%" }}>
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <div ref={wrapRef} style={{ flex: "0 0 85%", minWidth: 0 }}>
+        <svg width={size.width} height={size.height} style={{ display: "block" }}>
+          {xScale && yScale && (
+            <>
+              <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} />
+              <YAxis yScale={yScale} margin={margin} ticks={yTicks} />
+            </>
+          )}
 
-        {/* main line */}
-        {linePath && (
-          <path d={linePath} fill="none" stroke={goldenColor} strokeWidth={3} />
-        )}
+          {/* {linePath && (<path d={linePath} fill="none" stroke={goldenColor} strokeWidth={3} />)} */}
+          {linePath && (
+            <motion.path
+              d={linePath}
+              fill="none"
+              stroke={OffWhiteColor}
+              strokeWidth={3}
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{duration: 8, ease: "easeInOut"}}
+            />
+          )}
 
-        {/* dashed reference line at 57.8°F */}
-        {yScale && (
-          <>
+          {/* dashed line*/}
+          {yScale && avg !== undefined && (
             <line
               x1={margin.left}
               x2={size.width - margin.right}
-              y1={yScale(57.8)}
-              y2={yScale(57.8)}
-              stroke="white"
+              y1={yScale(avg)}
+              y2={yScale(avg)}
+              stroke={OffWhiteColor}
               strokeWidth={2}
               strokeDasharray="6,6"
               opacity={0.6}
             />
-            <text
-              x={margin.left + 190}
-              y={yScale(57.8)}
-              dy={-8} // 8px above the dashed line
-              textAnchor="end"
-              style={{
-                fill: "white",
-                fontSize: 14,
-                strokeWidth: 2,
-              }}
-            >
-              Average temperature: 57.8 °F
-            </text>
-          </>
-        )}
-      </svg>
+          )}
+        </svg>
+      </div>
+      </div>
+
+      {yScale && avg !== undefined && (
+      <div
+        style={{
+          position: "absolute",
+          left: "85%",
+          top: `${yScale(avg)}px`, // align text with the dashed line
+          transform: "translateY(-50%)",
+          color: OffWhiteColor,
+          fontSize: 13,
+        }}
+      >
+        <div>Average temperature {START_YEAR}–{END_YEAR}:</div>
+        <div>{d3.format(".1f")(avg)} °F</div>
+      </div>
+    )}
     </div>
-  )
+)
 }
