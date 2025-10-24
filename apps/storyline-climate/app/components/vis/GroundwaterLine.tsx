@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
 import type { ContainerSize } from "./Groundwater"
+import { OffWhiteColor } from "../helpers/colorPalette"
 
 export type GroundwaterRow = {
   msmt_date: string
@@ -173,7 +174,6 @@ function XAxis({
         height={iconSize}
         preserveAspectRatio="xMidYMid meet"
         style={{ filter: "invert(1) brightness(100%)" }} // white
-        pointerEvents="none"
       />
 
       {/* tick labels at bottom */}
@@ -183,7 +183,7 @@ function XAxis({
           x={xScale(t)}
           y={yLabels}
           dy="1.2em"
-          style={{ textAnchor: "middle", fill: "white" }}
+          style={{ textAnchor: "middle", fill: OffWhiteColor }}
         >
           {d3.timeFormat("%Y")(t)}
         </text>
@@ -209,7 +209,7 @@ function YAxis({
           x={-8}
           y={yScale(t)}
           dy="0.35em"
-          style={{ textAnchor: "end", fill: "white" }}
+          style={{ textAnchor: "end", fill: OffWhiteColor }}
         >
           {t}ft
         </text>
