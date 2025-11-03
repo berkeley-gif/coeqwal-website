@@ -52,6 +52,7 @@ export {
   Tooltip,
   CircularProgress,
   Fade,
+  Chip,
 
   // Utility components
   useMediaQuery,
