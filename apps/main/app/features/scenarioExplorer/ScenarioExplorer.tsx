@@ -230,7 +230,7 @@ export default function ScenarioExplorer() {
             <Box
               sx={{
                 position: "relative",
-                height: "calc(100vh - 48px)",
+                height: `calc(100vh - ${theme.spacing(6)})`,
                 width: "100%",
                 borderRadius: theme.borderRadius.rounded,
                 overflow: "hidden",
@@ -277,7 +277,7 @@ export default function ScenarioExplorer() {
                   position: "absolute",
                   bottom: theme.spacing(theme.cards.spacing.standard),
                   right: theme.spacing(8),
-                  zIndex: 1001,
+                  zIndex: theme.zIndex.floatingElements,
                 }}
               >
                 <Box
@@ -288,7 +288,7 @@ export default function ScenarioExplorer() {
                     borderRadius: theme.borderRadius.rounded,
                     padding: theme.spacing(theme.cards.spacing.standard / 2),
                     backdropFilter: "blur(8px)",
-                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+                    boxShadow: theme.shadow.subtle,
                     minWidth: "250px",
                   }}
                 >
@@ -304,9 +304,9 @@ export default function ScenarioExplorer() {
                     variant="outlined"
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        backgroundColor: "white",
+                        backgroundColor: theme.palette.common.white,
                         borderRadius: theme.borderRadius.rounded,
-                        fontSize: "0.9rem",
+                        fontSize: theme.typography.compact.title.fontSize,
                       },
                       "& .MuiOutlinedInput-input": {
                         padding: theme.spacing(
@@ -329,8 +329,8 @@ export default function ScenarioExplorer() {
                   backgroundColor: "rgba(255, 255, 255, 0.95)",
                   borderRadius: theme.borderRadius.rounded,
                   backdropFilter: "blur(8px)",
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-                  zIndex: 1000,
+                  boxShadow: theme.shadow.subtle,
+                  zIndex: theme.zIndex.mapControls,
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
@@ -355,7 +355,7 @@ export default function ScenarioExplorer() {
                       gap: theme.spacing(1),
                       columnGap: theme.spacing(2),
                       alignItems: "center",
-                      height: "48px",
+                      height: theme.spacing(6),
                       mb: 1,
                       flexShrink: 0,
                     }}
@@ -502,19 +502,20 @@ export default function ScenarioExplorer() {
                     alignItems: "center",
                     py: 1.5,
                     cursor: "ns-resize",
-                    borderTop: `1px solid ${theme.palette.grey[300]}`,
+                    borderTop: theme.border.standard,
+                    borderColor: theme.palette.grey[300],
                     flexShrink: 0,
                     "&:hover": {
-                      backgroundColor: theme.palette.grey[100],
+                      backgroundColor: theme.palette.action.hover,
                     },
                     userSelect: "none",
                   }}
                 >
                   <Box
                     sx={{
-                      width: "40px",
-                      height: "4px",
-                      borderRadius: "2px",
+                      width: theme.spacing(5),
+                      height: theme.spacing(0.5),
+                      borderRadius: theme.borderRadius.standard,
                       backgroundColor: theme.palette.grey[400],
                       transition: "background-color 0.2s ease",
                     }}
@@ -531,9 +532,9 @@ export default function ScenarioExplorer() {
                   backgroundColor: "rgba(255, 255, 255, 0.95)",
                   borderRadius: theme.borderRadius.rounded,
                   backdropFilter: "blur(8px)",
-                  boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
-                  zIndex: 1000,
-                  width: "380px",
+                  boxShadow: theme.shadow.subtle,
+                  zIndex: theme.zIndex.mapControls,
+                  width: theme.spacing(47.5),
                   height: "auto",
                   maxHeight: "50vh",
                   display: "flex",
@@ -545,11 +546,12 @@ export default function ScenarioExplorer() {
                   value={overlayTab}
                   onChange={(_, newValue) => setOverlayTab(newValue)}
                   sx={{
-                    minHeight: "40px",
-                    borderBottom: `1px solid ${theme.palette.grey[300]}`,
+                    minHeight: theme.spacing(5),
+                    borderBottom: theme.border.standard,
+                    borderColor: theme.palette.grey[300],
                     "& .MuiTab-root": {
-                      minHeight: "40px",
-                      fontSize: "0.875rem",
+                      minHeight: theme.spacing(5),
+                      fontSize: theme.typography.nav.fontSize,
                       textTransform: "none",
                       color: theme.palette.text.primary,
                       "&.Mui-selected": {
@@ -557,7 +559,7 @@ export default function ScenarioExplorer() {
                       },
                       "&:hover": {
                         color: theme.palette.blue.bright,
-                        backgroundColor: "rgba(0, 0, 0, 0.04)",
+                        backgroundColor: theme.palette.action.hover,
                       },
                     },
                   }}
@@ -575,7 +577,7 @@ export default function ScenarioExplorer() {
                   sx={{
                     padding: theme.spacing(theme.cards.spacing.standard),
                     overflowY: "auto",
-                    height: "280px", // Fixed height so tabs don't jump
+                    height: theme.spacing(35), // Fixed height so tabs don't jump
                   }}
                 >
                   {overlayTab === "hydroclimate" && (

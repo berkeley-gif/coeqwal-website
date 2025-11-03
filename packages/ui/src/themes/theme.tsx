@@ -260,7 +260,9 @@ export const themeValues = {
   // Shadows
   shadow: {
     none: "none",
-    subtle: "0 1px 3px rgba(0,0,0,0.2)", // Subtle shadow
+    subtle: "0 1px 3px rgba(0,0,0,0.2)", // Subtle shadow for panels and overlays
+    medium: "0 2px 4px rgba(0,0,0,0.3)", // Medium shadow for interactive elements
+    prominent: "0 4px 20px rgba(0, 0, 0, 0.15)", // Prominent shadow for floating elements
   },
 
   // Z-index values
@@ -1448,6 +1450,8 @@ theme.background = {
 
 theme.borderRadius = themeValues.borderRadius
 
+theme.shadow = themeValues.shadow
+
 // Map prompt dialog configuration
 theme.mapPromptDialog = {
   ...themeValues.mapPromptDialog,
@@ -1684,6 +1688,12 @@ declare module "@mui/material/styles" {
       card: string
       standard: string
       none: string
+    }
+    shadow: {
+      none: string
+      subtle: string
+      medium: string
+      prominent: string
     }
     mapPromptDialog: {
       backgroundColor: string
