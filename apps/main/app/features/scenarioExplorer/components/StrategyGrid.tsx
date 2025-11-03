@@ -65,9 +65,9 @@ const gridStyles = {
     flexDirection: { xs: "column", md: "row" },
     justifyContent: "flex-start",
   },
-  iconBox: (showMapView: boolean) => ({
-    width: showMapView ? "28px" : { xs: "32px", lg: "40px" },
-    height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+  iconBox: (showMapView: boolean, theme: Theme) => ({
+    width: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
+    height: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
     cursor: "pointer",
   }),
   outcomeChartsContainer: (theme: Theme) => ({
@@ -107,10 +107,10 @@ const gridStyles = {
   }),
   outcomeLabel: (showMapView: boolean, isActive: boolean, theme: Theme) => ({
     color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
-    fontWeight: 400,
+    fontWeight: theme.typography.fontWeightRegular,
     textAlign: "center",
-    fontSize: showMapView ? "0.6rem" : "0.75rem",
-    lineHeight: showMapView ? 1.1 : 1.2,
+    fontSize: showMapView ? "0.6rem" : theme.typography.compact.caption.fontSize,
+    lineHeight: showMapView ? theme.typography.compact.caption.lineHeight : theme.typography.compact.caption.lineHeight,
     whiteSpace: "pre-line",
   }),
 } as const
@@ -154,13 +154,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
             backgroundColor: "white",
             padding: 2,
             borderRadius: theme.borderRadius.rounded,
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
-            width: "450px",
+            boxShadow: theme.shadow.subtle,
+            width: theme.spacing(56.25),
             "&::after": {
               content: '""',
               position: "absolute",
-              right: "-8px",
-              top: "20px",
+              right: theme.spacing(-1),
+              top: theme.spacing(2.5),
               width: 0,
               height: 0,
               borderTop: "8px solid transparent",
@@ -180,8 +180,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 border: "none",
                 background: "none",
                 cursor: "pointer",
-                padding: "4px",
-                fontSize: "1.25rem",
+                padding: theme.spacing(0.5),
+                fontSize: theme.typography.h6.fontSize,
                 lineHeight: 1,
                 color: theme.palette.grey[600],
                 "&:hover": {
@@ -206,7 +206,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                height: "56px",
+                height: theme.spacing(7),
               }}
             >
               <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
@@ -252,7 +252,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 </Box>
               </InfoTooltip>
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center", height: "56px" }}>
+            <Box sx={{ display: "flex", alignItems: "center", height: theme.spacing(7) }}>
               <Typography variant="subtitle2">Key operations</Typography>
             </Box>
             <Box
@@ -261,7 +261,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: theme.spacing(theme.cards.spacing.standard),
-                height: "56px",
+                height: theme.spacing(7),
               }}
             >
               <Typography variant="subtitle2">Key outcomes</Typography>
@@ -318,14 +318,14 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 background: "none",
                 border: "none",
                 cursor: "pointer",
-                padding: "4px",
+                padding: theme.spacing(0.5),
                 textAlign: "center",
-                fontSize: "0.75rem",
-                fontWeight: 500,
+                fontSize: theme.typography.compact.caption.fontSize,
+                fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.blue.darkest,
-                lineHeight: 1.2,
+                lineHeight: theme.typography.compact.caption.lineHeight,
                 "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.04)",
+                  backgroundColor: theme.palette.action.hover,
                   borderRadius: 1,
                 },
               }}
@@ -335,10 +335,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 : getOutcomeDisplayLabel(name)}{" "}
               <InfoIcon
                 sx={{
-                  fontSize: "0.7rem",
+                  fontSize: theme.typography.compact.micro.fontSize,
                   color: theme.palette.blue.bright,
                   verticalAlign: "baseline",
-                  marginLeft: "2px",
+                  marginLeft: theme.spacing(0.25),
                 }}
               />
             </Box>
@@ -394,13 +394,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     cursor: "pointer",
                     pointerEvents: "none",
                     position: "relative",
-                    top: "1px",
+                    top: theme.spacing(0.125),
                     transform: "scale(0.9)",
                     "& svg": {
-                      strokeWidth: "1px",
+                      strokeWidth: theme.spacing(0.125),
                     },
                     "& path": {
-                      strokeWidth: "1px",
+                      strokeWidth: theme.spacing(0.125),
                     },
                   }}
                 />
@@ -411,9 +411,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 <Typography
                   variant="subtitle1"
                   sx={{
-                    fontWeight: 500,
+                    fontWeight: theme.typography.fontWeightMedium,
                     mb: showDefinitions ? 0.5 : 0,
-                    fontSize: showMapView ? "0.9rem" : "1rem",
+                    fontSize: showMapView ? theme.typography.compact.title.fontSize : theme.typography.body2.fontSize,
                     lineHeight: 1.3,
                     whiteSpace: "pre-line",
                   }}
@@ -427,7 +427,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     variant="body2"
                     sx={{
                       lineHeight: showMapView ? 1.3 : 1.4,
-                      fontSize: showMapView ? "0.8rem" : "0.875rem",
+                      fontSize: showMapView ? theme.typography.compact.subtitle.fontSize : theme.typography.nav.fontSize,
                     }}
                   >
                     {strategy.description
@@ -443,7 +443,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               >
                                 <InfoIcon
                                   sx={{
-                                    fontSize: "0.8rem",
+                                    fontSize: theme.typography.compact.subtitle.fontSize,
                                     ml: 0.5,
                                     cursor: "pointer",
                                     color: theme.palette.blue.bright,
@@ -476,8 +476,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 <InfoTooltip description="Current operations" placement="top">
                   <Box
                     sx={{
-                      width: showMapView ? "28px" : { xs: "32px", lg: "40px" },
-                      height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                      width: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                      height: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
                       cursor: "pointer",
                     }}
                   >
@@ -501,8 +501,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 >
                   <Box
                     sx={{
-                      width: showMapView ? "28px" : { xs: "32px", lg: "40px" },
-                      height: showMapView ? "28px" : { xs: "32px", lg: "40px" },
+                      width: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                      height: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
                       cursor: "pointer",
                     }}
                   >
@@ -528,11 +528,11 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     <Box
                       sx={{
                         width: showMapView
-                          ? "28px"
-                          : { xs: "32px", lg: "40px" },
+                          ? theme.spacing(3.5)
+                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
                         height: showMapView
-                          ? "28px"
-                          : { xs: "32px", lg: "40px" },
+                          ? theme.spacing(3.5)
+                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
                         cursor: "pointer",
                       }}
                     >

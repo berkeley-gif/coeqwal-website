@@ -44,7 +44,7 @@ export default function HydroclimateCard({
     >
       <Typography
         variant="subtitle2"
-        sx={{ mb: 0, fontWeight: 500, fontSize: "1rem" }}
+        sx={{ mb: 0, fontWeight: theme.typography.fontWeightMedium, fontSize: theme.typography.body2.fontSize }}
       >
         See hydroclimate effects
       </Typography>
@@ -68,7 +68,7 @@ export default function HydroclimateCard({
                 <Radio
                   disabled={option.value !== "historical"}
                   sx={{
-                    padding: "9px",
+                    padding: theme.spacing(1.125),
                     transform: "none !important",
                     border: `1px solid ${theme.palette.grey[500]} !important`,
                     "&.Mui-checked": {
@@ -95,8 +95,8 @@ export default function HydroclimateCard({
                 m: 0,
                 alignItems: "center",
                 "& .MuiFormControlLabel-label": {
-                  fontSize: "0.875rem",
-                  fontWeight: option.value === "historical" ? 500 : 400,
+                  fontSize: theme.typography.nav.fontSize,
+                  fontWeight: option.value === "historical" ? theme.typography.fontWeightMedium : theme.typography.fontWeightRegular,
                   color: `${
                     option.value === "historical"
                       ? theme.palette.text.primary

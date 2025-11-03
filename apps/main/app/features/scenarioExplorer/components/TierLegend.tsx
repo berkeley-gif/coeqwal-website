@@ -29,7 +29,7 @@ export default function TierLegend({ outcome, onClose }: TierLegendProps) {
         borderRadius: theme.borderRadius.rounded,
         padding: theme.spacing(3),
         backdropFilter: "blur(8px)",
-        boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+        boxShadow: theme.shadow.prominent,
         zIndex: 1000,
       }}
     >
