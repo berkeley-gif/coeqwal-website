@@ -454,7 +454,7 @@ export const outcomeMetrics: OutcomeMetric[] = [
   },
   {
     id: "env-delta-ecology-tier",
-    name: "Bay Delta estuary ecology tier",
+    name: "Delta estuary ecology tier",
     category: "environmental-water",
     unit: "tier",
     temporal: ["period-of-record"],

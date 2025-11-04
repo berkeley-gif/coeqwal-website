@@ -28,7 +28,7 @@ export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
   }
   */
 
-  // Using hardcoded definitions
+  // Using hardcoded definitions (with UI display names)
   return {
     "Community deliveries":
       "Extent to which water deliveries to cities, towns, and communities are sufficient to satisfy needs for drinking water, sanitation, and municipal uses. Water deliveries are evaluated for 140 community water systems.",
@@ -36,6 +36,7 @@ export async function getOutcomeDefinitions(): Promise<Record<string, string>> {
       "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at 134 agricultural water districts and evaluated relative to historical values.",
     "Environmental flows":
       "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at 17 locations on the Sacramento and San Joaquin Rivers and their major tributaries.",
+    // UI display name
     "Delta estuary ecology":
       "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
     "Freshwater for Delta exports":

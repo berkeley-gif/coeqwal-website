@@ -5,35 +5,31 @@ import { Box, useTheme } from "@repo/ui/mui"
 import StrategyGrid from "../../../components/StrategyGrid"
 import { useScenarioData } from "../../../hooks/useScenarioData"
 import { useScenarioExplorerStore } from "@repo/state"
+import {
+  STRATEGY_TO_SCENARIO_ID,
+  getScenarioIdFromStrategy,
+} from "../../../../../constants/outcomeMappings"
 
 interface ScenarioPanelProps {
   onTierClick: (strategy: string, outcome: string) => void
 }
 
 /**
- * Convert strategy values to scenario IDs
- * Strategy values: "current-ops", "current-ops-wo-tucp", "current-ops-historical-ag"
- * Scenario IDs: "s0020", "s0021", "s0011"
+ * Convert strategy values to scenario IDs (using centralized mapping)
  */
 const strategyToScenarioId = (strategyValue: string): string => {
-  const mapping: Record<string, string> = {
-    "current-ops": "s0020",
-    "current-ops-wo-tucp": "s0021",
-    "current-ops-historical-ag": "s0011",
-  }
-  return mapping[strategyValue] || strategyValue
+  return getScenarioIdFromStrategy(strategyValue)
 }
 
 /**
- * Convert scenario IDs back to strategy values for display
+ * Convert scenario IDs back to strategy values for display (reverse lookup)
  */
 const scenarioIdToStrategy = (scenarioId: string): string => {
-  const mapping: Record<string, string> = {
-    s0020: "current-ops",
-    s0021: "current-ops-wo-tucp",
-    s0011: "current-ops-historical-ag",
-  }
-  return mapping[scenarioId] || scenarioId
+  // Find the key where the value matches the scenarioId
+  const entry = Object.entries(STRATEGY_TO_SCENARIO_ID).find(
+    ([, id]) => id === scenarioId,
+  )
+  return entry ? entry[0] : scenarioId
 }
 
 /**
