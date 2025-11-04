@@ -113,7 +113,7 @@ export default function MapView() {
               color: theme.palette.text.primary,
             }}
           >
-            Click on a scenario outcome in the left panel to see performance at
+            Click on a scenario outcome in the left panel to see outcomes at
             specific locations.
           </Box>
         </Box>

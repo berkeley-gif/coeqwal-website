@@ -23,6 +23,7 @@ export interface ChartDataPoint {
   label: string
   color: string
   value: number
+  tierType?: "single_value" | "multi_value" // Metadata from API
 }
 
 interface OutcomeInfo {

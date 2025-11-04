@@ -143,7 +143,12 @@ const DEFAULT_TIER_COLORS = {
 } as const
 
 type TierColors = { tier1: string; tier2: string; tier3: string; tier4: string }
-type ChartDataPoint = { label: string; color: string; value: number }
+type ChartDataPoint = {
+  label: string
+  color: string
+  value: number
+  tierType?: "single_value" | "multi_value"
+}
 
 // Helpers
 const getTierColors = (themeColors?: TierColors) =>
@@ -163,6 +168,7 @@ export function convertMultiValueToChartData(
     label: formatTierLabel(item.tier),
     color: tierColors[item.tier],
     value: item.normalized,
+    tierType: "multi_value" as const,
   }))
 }
 
@@ -177,21 +183,25 @@ export function convertSingleValueToChartData(
       label: "Tier 1",
       color: tierColors.tier1,
       value: tierLevel === 1 ? 1 : 0,
+      tierType: "single_value" as const,
     },
     {
       label: "Tier 2",
       color: tierColors.tier2,
       value: tierLevel === 2 ? 1 : 0,
+      tierType: "single_value" as const,
     },
     {
       label: "Tier 3",
       color: tierColors.tier3,
       value: tierLevel === 3 ? 1 : 0,
+      tierType: "single_value" as const,
     },
     {
       label: "Tier 4",
       color: tierColors.tier4,
       value: tierLevel === 4 ? 1 : 0,
+      tierType: "single_value" as const,
     },
   ]
 }

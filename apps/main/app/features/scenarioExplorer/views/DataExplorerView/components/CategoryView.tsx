@@ -14,13 +14,30 @@ import {
 } from "@repo/ui/mui"
 import { ExpandMoreIcon } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "@repo/state"
-import { VerticalBarChart } from "@repo/viz"
+import { VerticalBarChart, TierCircles } from "@repo/viz"
 import {
   outcomeCategories,
   getMetricsByCategory,
   type OutcomeMetric,
 } from "../outcomeDefinitions"
 import { useMetricData } from "../hooks/useMetricData"
+
+/**
+ * Helper function to detect if tier data represents a single value (vs a distribution)
+ * Uses the tierType metadata from the API
+ */
+function isSingleValueTierData(
+  tierData: Array<{
+    label: string
+    color: string
+    value: number
+    tierType?: string
+  }>,
+): boolean {
+  if (!tierData || tierData.length === 0) return false
+  // Check the tierType metadata from the first data point (all points in a tier have the same type)
+  return tierData[0]?.tierType === "single_value"
+}
 
 /**
  * CategoryView: Outcomes organized by category with collapsible sections
@@ -437,7 +454,11 @@ function MetricCard({
                   >
                     {scenario.scenarioName}
                   </Typography>
-                  <VerticalBarChart tiers={scenario.tierData} size={150} />
+                  {isSingleValueTierData(scenario.tierData) ? (
+                    <TierCircles tiers={scenario.tierData} size={150} />
+                  ) : (
+                    <VerticalBarChart tiers={scenario.tierData} size={150} />
+                  )}
                 </Box>
               ))}
             </Box>
