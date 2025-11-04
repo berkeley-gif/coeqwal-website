@@ -15,11 +15,11 @@ import {
 } from "@repo/ui/mui"
 import { Map, NavigationControl } from "@repo/map"
 import { useScenarioExplorerStore } from "@repo/state"
+import { getMapMetrics, outcomeCategories } from "../outcomeDefinitions"
 import {
-  getMapMetrics,
-  outcomeCategories,
-} from "../outcomeDefinitions"
-import { fetchTierLocationData, type TierLocationResponse } from "../../../../../api/tierLocationApi"
+  fetchTierLocationData,
+  type TierLocationResponse,
+} from "../../../../../api/tierLocationApi"
 import TierMarkers from "../../../components/TierMarkers"
 import TierLegend from "../../../components/TierLegend"
 import TemporalControls from "./TemporalControls"
@@ -68,7 +68,8 @@ export default function MapView() {
   const mapContainerRef = React.useRef<HTMLDivElement>(null)
 
   // Fetch tier location data for map visualization
-  const [tierLocationData, setTierLocationData] = React.useState<TierLocationResponse | null>(null)
+  const [tierLocationData, setTierLocationData] =
+    React.useState<TierLocationResponse | null>(null)
   const [isLoadingMap, setIsLoadingMap] = React.useState(false)
   const [mapError, setMapError] = React.useState<string | null>(null)
 
@@ -550,7 +551,8 @@ export default function MapView() {
                 fontSize: theme.typography.compact.subtitle.fontSize,
               }}
             >
-              <strong>{tierLocationData.metadata.feature_count}</strong> location
+              <strong>{tierLocationData.metadata.feature_count}</strong>{" "}
+              location
               {tierLocationData.metadata.feature_count !== 1 ? "s" : ""} •{" "}
               <strong>{metric?.name}</strong> • {selectedScenario}
             </Typography>

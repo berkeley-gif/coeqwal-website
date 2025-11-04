@@ -82,7 +82,15 @@ function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
       })
       .filter((item): item is NonNullable<typeof item> => item !== null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scenarioIds, s0020.chartData, s0021.chartData, s0011.chartData, isLoading, error, metric.id])
+  }, [
+    scenarioIds,
+    s0020.chartData,
+    s0021.chartData,
+    s0011.chartData,
+    isLoading,
+    error,
+    metric.id,
+  ])
 
   return {
     data: comparisonData,

@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, useTheme, Button } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { VerticalParallelLinePlot } from "@repo/viz"
 import { useScenarioExplorerStore } from "@repo/state"
 import SearchSortBar from "../../components/SearchSortBar"
@@ -13,7 +13,7 @@ import SearchSortBar from "../../components/SearchSortBar"
  */
 export default function ComparisonView() {
   const theme = useTheme()
-  const { selectedScenarios, resetAll } = useScenarioExplorerStore()
+  const { selectedScenarios } = useScenarioExplorerStore()
 
   // TODO: Fetch actual data for selected scenarios
   const hasData = selectedScenarios.length > 0
@@ -59,15 +59,6 @@ export default function ComparisonView() {
             }}
           >
             <Typography
-              variant="h5"
-              sx={{
-                mb: theme.spacing(2),
-                color: theme.palette.text.primary,
-              }}
-            >
-              Select scenarios to compare
-            </Typography>
-            <Typography
               variant="body1"
               sx={{
                 mb: theme.spacing(3),
@@ -89,7 +80,7 @@ export default function ComparisonView() {
               boxShadow: theme.shadow.subtle,
             }}
           >
-            <Box
+            {/* <Box
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -109,7 +100,7 @@ export default function ComparisonView() {
               >
                 Clear selection
               </Button>
-            </Box>
+            </Box> */}
 
             {/* Parallel Coordinates Plot */}
             <Box sx={{ width: "100%", height: "calc(100% - 60px)" }}>

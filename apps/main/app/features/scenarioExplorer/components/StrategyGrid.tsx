@@ -34,6 +34,20 @@ const getOutcomeDisplayLabel = (name: string): string => {
   return name
 }
 
+/**
+ * Helper function to detect if tier data represents a single value
+ * Uses the tierType metadata from the API
+ */
+function isSingleValueTier(
+  chartData:
+    | Array<{ label: string; color: string; value: number; tierType?: string }>
+    | undefined,
+): boolean {
+  if (!chartData || chartData.length === 0) return false
+  // Check the tierType metadata from the first data point (all points in a tier have the same type)
+  return chartData[0]?.tierType === "single_value"
+}
+
 interface StrategyGridProps {
   // Data props
   getChartDataForStrategy: (
@@ -657,44 +671,57 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                           : undefined
                       }
                     >
-                      <ScenarioGlyph
-                        variant="bars"
-                        values={
-                          isActiveForStrategy
-                            ? (strategyChartData[displayName]
-                                ?.map((tier) => tier.value)
+                      {(() => {
+                        const chartData = isActiveForStrategy
+                          ? strategyChartData[displayName]
+                          : undefined
+
+                        const values: [number, number, number, number] =
+                          chartData
+                            ? (chartData
+                                .map((tier) => tier.value)
                                 .slice(0, 4) as [
                                 number,
                                 number,
                                 number,
                                 number,
-                              ]) || [0, 0, 0, 0]
-                            : [0, 0, 0, 0] // Empty chart for inactive outcomes
-                        }
-                        size={showMapView ? 45 : 50}
-                        tierColors={
-                          isActiveForStrategy
-                            ? (strategyChartData[displayName]
-                                ?.map((tier) => tier.color)
-                                .slice(0, 4) as [
-                                string,
-                                string,
-                                string,
-                                string,
-                              ]) || [
-                                theme.palette.tiers.tier1,
-                                theme.palette.tiers.tier2,
-                                theme.palette.tiers.tier3,
-                                theme.palette.tiers.tier4,
-                              ]
-                            : [
-                                theme.palette.grey[300],
-                                theme.palette.grey[300],
-                                theme.palette.grey[300],
-                                theme.palette.grey[300],
-                              ] // Grey colors for inactive outcomes
-                        }
-                      />
+                              ])
+                            : [0, 0, 0, 0]
+
+                        const variant = isSingleValueTier(chartData)
+                          ? "dots"
+                          : "bars"
+
+                        return (
+                          <ScenarioGlyph
+                            variant={variant}
+                            values={values}
+                            size={showMapView ? 45 : 50}
+                            tierColors={
+                              isActiveForStrategy
+                                ? (strategyChartData[displayName]
+                                    ?.map((tier) => tier.color)
+                                    .slice(0, 4) as [
+                                    string,
+                                    string,
+                                    string,
+                                    string,
+                                  ]) || [
+                                    theme.palette.tiers.tier1,
+                                    theme.palette.tiers.tier2,
+                                    theme.palette.tiers.tier3,
+                                    theme.palette.tiers.tier4,
+                                  ]
+                                : [
+                                    theme.palette.grey[300],
+                                    theme.palette.grey[300],
+                                    theme.palette.grey[300],
+                                    theme.palette.grey[300],
+                                  ] // Grey colors for inactive outcomes
+                            }
+                          />
+                        )
+                      })()}
                     </Box>
                   )
 
