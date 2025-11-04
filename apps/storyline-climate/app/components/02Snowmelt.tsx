@@ -20,62 +20,62 @@ function SectionStarter() {
 }
 
 function Temperature() {
-  const { sectionRef } = useActiveSection("temperature", { amount: 0.5 });
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const rafRef = useRef<number | null>(null);
+  const { sectionRef } = useActiveSection("temperature", { amount: 0.5 })
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
       // Cancel any pending animation frame
       if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+        cancelAnimationFrame(rafRef.current)
       }
 
       // Use requestAnimationFrame for smoother updates
       rafRef.current = requestAnimationFrame(() => {
-        if (!containerRef.current) return;
+        if (!containerRef.current) return
 
-        const container = containerRef.current;
-        const rect = container.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
+        const container = containerRef.current
+        const rect = container.getBoundingClientRect()
+        const windowHeight = window.innerHeight
+
         // Calculate how far through the sticky container we've scrolled
-        const containerHeight = container.offsetHeight;
-        const contentHeight = windowHeight;
-        const scrollRange = containerHeight - contentHeight;
-        
-        // Progress from 0 to 1 as we scroll through the container
-        let progress = -rect.top / scrollRange;
-        progress = Math.max(0, Math.min(1, progress));
-        
-        setScrollProgress(progress);
-      });
-    };
+        const containerHeight = container.offsetHeight
+        const contentHeight = windowHeight
+        const scrollRange = containerHeight - contentHeight
 
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
+        // Progress from 0 to 1 as we scroll through the container
+        let progress = -rect.top / scrollRange
+        progress = Math.max(0, Math.min(1, progress))
+
+        setScrollProgress(progress)
+      })
+    }
+
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", handleScroll)
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
       if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
+        cancelAnimationFrame(rafRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
-  const pathLength = 2500;
-  
+  const pathLength = 2500
+
   return (
     // Outer container that creates the scroll range
     <div
       ref={containerRef}
       style={{
-        position: 'relative',
-        height: '300vh', // 3x viewport height for scroll range
-        width: '100%',
+        position: "relative",
+        height: "300vh", // 3x viewport height for scroll range
+        width: "100%",
       }}
     >
       {/* Sticky inner container using your CSS class */}
@@ -122,7 +122,7 @@ function Temperature() {
               strokeDasharray: pathLength,
               strokeDashoffset: pathLength * (1 - scrollProgress),
               // Remove transition for direct control via scroll
-              willChange: 'stroke-dashoffset'
+              willChange: "stroke-dashoffset",
             }}
           />
 
@@ -169,18 +169,24 @@ function Temperature() {
         >
           <Box className="paragraph">
             <Typography variant="body1">
-              California's water system is under pressure to meet multiple demands.
+              California's water system is under pressure to meet multiple
+              demands.
             </Typography>
             <Typography variant="body1">
-              People need clean drinking water. Farms need water to grow food. Fish and wildlife need water to survive.
+              People need clean drinking water. Farms need water to grow food.
+              Fish and wildlife need water to survive.
             </Typography>
           </Box>
           <Box className="paragraph">
-            <Typography variant="body1">Climate change is making matters worse.</Typography>
+            <Typography variant="body1">
+              Climate change is making matters worse.
+            </Typography>
           </Box>
           <Box className="paragraph">
             <Typography variant="body1">
-              Warmer temperatures, less predictable rain and snow, and higher sea levels are stressing both our water infrastructure and living environment.
+              Warmer temperatures, less predictable rain and snow, and higher
+              sea levels are stressing both our water infrastructure and living
+              environment.
             </Typography>
           </Box>
           <Box
@@ -193,55 +199,56 @@ function Temperature() {
               variant="body1"
               sx={{ fontWeight: "bold" }}
             >
-              How can we limit the impacts of climate change on California's water future?
+              How can we limit the impacts of climate change on California's
+              water future?
             </Typography>
           </Box>
         </Box>
       </Box>
     </div>
-  );
+  )
 }
 
 function Snowmelt() {
-  const { sectionRef } = useActiveSection("snowmelt", { amount: 0.5 });
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const [scrollProgress, setScrollProgress] = useState(0); // 0..1
+  const { sectionRef } = useActiveSection("snowmelt", { amount: 0.5 })
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const rafRef = useRef<number | null>(null)
+  const [scrollProgress, setScrollProgress] = useState(0) // 0..1
 
   useEffect(() => {
     const handleScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
       rafRef.current = requestAnimationFrame(() => {
-        const el = containerRef.current;
-        if (!el) return;
+        const el = containerRef.current
+        if (!el) return
 
-        const rect = el.getBoundingClientRect();
-        const winH = window.innerHeight;
-        const containerH = el.offsetHeight; 
-        const contentH = winH;             
-        const scrollRange = Math.max(1, containerH - contentH);
+        const rect = el.getBoundingClientRect()
+        const winH = window.innerHeight
+        const containerH = el.offsetHeight
+        const contentH = winH
+        const scrollRange = Math.max(1, containerH - contentH)
 
-        let p = -rect.top / scrollRange; // 0..1 as we pass the sticky window
-        if (p < 0) p = 0;
-        else if (p > 1) p = 1;
+        let p = -rect.top / scrollRange // 0..1 as we pass the sticky window
+        if (p < 0) p = 0
+        else if (p > 1) p = 1
 
-        setScrollProgress(p);
-      });
-    };
+        setScrollProgress(p)
+      })
+    }
 
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll);
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", handleScroll)
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [])
 
   // You can tweak this if your path is longer/shorter than Temperature’s.
   // (Or swap to getTotalLength() if you want auto-measure.)
-  const pathLength = 2500;
+  const pathLength = 2500
 
   return (
     // Outer container creates scroll range
@@ -292,7 +299,7 @@ function Snowmelt() {
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
-            transform="translate(0, -120)" // can be adjusted 
+            transform="translate(0, -120)" // can be adjusted
             style={{
               strokeDasharray: pathLength,
               strokeDashoffset: pathLength * (1 - scrollProgress),
@@ -316,7 +323,9 @@ function Snowmelt() {
           }}
         >
           <Box className="paragraph" component="article">
-            <Typography variant="h4">{"Losing Nature's Water Storage"}</Typography>
+            <Typography variant="h4">
+              {"Losing Nature's Water Storage"}
+            </Typography>
           </Box>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
@@ -338,19 +347,27 @@ function Snowmelt() {
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {"But warmer winters mean "}
-              <span className="highlight-text">{"more precipitation falls as rain"}</span>
+              <span className="highlight-text">
+                {"more precipitation falls as rain"}
+              </span>
               {" instead of snow. And "}
-              <span className="highlight-text">{"the snowpack we do receive melts earlier"}</span>
+              <span className="highlight-text">
+                {"the snowpack we do receive melts earlier"}
+              </span>
               {" in the year."}
             </Typography>
             <Typography variant="body1">
-              {"Higher temperatures also cause water to evaporate faster from soils and plants."}
+              {
+                "Higher temperatures also cause water to evaporate faster from soils and plants."
+              }
             </Typography>
           </Box>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {"The impact is that "}
-              <span style={{ fontWeight: "bold" }}>{"less water is available"}</span>
+              <span style={{ fontWeight: "bold" }}>
+                {"less water is available"}
+              </span>
               {
                 " in rivers and reservoirs during the dry summer when we — humans and ecosystems — "
               }
@@ -393,7 +410,7 @@ function Snowmelt() {
         </Box>
       </Box>
     </div>
-  );
+  )
 }
 
 export default SectionStarter

@@ -126,4 +126,3 @@ export interface ScenarioExplorerActions {
 export interface ScenarioExplorerStore
   extends ScenarioExplorerState,
     ScenarioExplorerActions {}
-

@@ -28,8 +28,8 @@ export default function SearchSortBar({
   sortOptions = [
     { value: "name-asc", label: "Name (A-Z)" },
     { value: "name-desc", label: "Name (Z-A)" },
-    { value: "outcome-best-first", label: "Best Performing First" },
-    { value: "outcome-worst-first", label: "Worst Performing First" },
+    { value: "outcome-best-first", label: "Best performing first" },
+    { value: "outcome-worst-first", label: "Worst performing first" },
   ],
   showReset = true,
 }: SearchSortBarProps) {
@@ -103,4 +103,3 @@ export default function SearchSortBar({
     </Box>
   )
 }
-

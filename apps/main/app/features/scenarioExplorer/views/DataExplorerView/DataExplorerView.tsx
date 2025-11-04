@@ -3,14 +3,33 @@
 import React from "react"
 import { Box, Typography, useTheme, Button, Tabs, Tab } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "@repo/state"
+import CategoryView from "./components/CategoryView"
+import MapView from "./components/MapView"
+import TableView from "./components/TableView"
+
+// Map scenario IDs to friendly display names
+const getScenarioDisplayName = (scenarioId: string): string => {
+  const names: Record<string, string> = {
+    s0020: "Current operations",
+    s0021: "Current ops without TUCPs",
+    s0011: "Current ops with historical ag",
+  }
+  return names[scenarioId] || scenarioId
+}
 
 /**
- * DataExplorerView: Compare detailed data and aggregates
+ * DataExplorerView: Comprehensive outcome exploration
+ * Three views:
+ * - Category: Organized by outcome type with collapsible sections
+ * - Map: Spatial visualization of outcomes
+ * - Table: Filterable table of all metrics
  */
 export default function DataExplorerView() {
   const theme = useTheme()
-  const { selectedScenarios, resetAll } = useScenarioExplorerStore()
-  const [subView, setSubView] = React.useState<"charts" | "aggregates" | "downloads">("charts")
+  const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
+  const [subView, setSubView] = React.useState<"category" | "map" | "table">(
+    "category",
+  )
 
   const hasData = selectedScenarios.length > 0
 
@@ -33,27 +52,40 @@ export default function DataExplorerView() {
       >
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
             px: theme.spacing(theme.cards.spacing.standard),
             py: theme.spacing(2),
           }}
         >
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ mb: hasData ? theme.spacing(1) : 0 }}>
             {hasData
               ? `Exploring ${selectedScenarios.length} scenario${selectedScenarios.length !== 1 ? "s" : ""}`
               : "Data Explorer"}
           </Typography>
           {hasData && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={resetAll}
-              sx={{ textTransform: "none" }}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: theme.spacing(1),
+              }}
             >
-              Clear selection
-            </Button>
+              {selectedScenarios.map((scenarioId) => (
+                <Typography
+                  key={scenarioId}
+                  variant="body2"
+                  sx={{
+                    px: theme.spacing(1.5),
+                    py: theme.spacing(0.5),
+                    backgroundColor: theme.palette.grey[200],
+                    borderRadius: theme.borderRadius.pill,
+                    fontSize: theme.typography.compact.subtitle.fontSize,
+                    color: theme.palette.blue.darkest,
+                  }}
+                >
+                  {getScenarioDisplayName(scenarioId)}
+                </Typography>
+              ))}
+            </Box>
           )}
         </Box>
 
@@ -63,12 +95,25 @@ export default function DataExplorerView() {
             onChange={(_, newValue) => setSubView(newValue)}
             sx={{
               px: theme.spacing(theme.cards.spacing.standard),
-              minHeight: theme.spacing(5),
+              minHeight: theme.spacing(7),
+              "& .MuiTab-root": {
+                minHeight: theme.spacing(7),
+                fontSize: theme.typography.body2.fontSize,
+                textTransform: "none",
+                fontWeight: theme.typography.fontWeightMedium,
+                color: theme.palette.text.primary,
+                "&.Mui-selected": {
+                  color: theme.palette.blue.darkest,
+                },
+                "&:hover": {
+                  color: theme.palette.blue.bright,
+                },
+              },
             }}
           >
-            <Tab label="Detailed Charts" value="charts" />
-            <Tab label="Aggregates" value="aggregates" />
-            <Tab label="Downloads" value="downloads" />
+            <Tab label="By category" value="category" />
+            <Tab label="By location (map)" value="map" />
+            <Tab label="All metrics (table)" value="table" />
           </Tabs>
         )}
       </Box>
@@ -114,31 +159,19 @@ export default function DataExplorerView() {
               Choose scenarios from the List or Map view to access detailed
               charts, aggregate statistics, and data downloads.
             </Typography>
-            <Button
-              variant="contained"
-              onClick={() => {
-                // TODO: Navigate to list view
-              }}
-            >
-              Go to List View
+            <Button variant="contained" onClick={() => setActiveView("list")}>
+              Go to list view
             </Button>
           </Box>
         ) : (
-          // Data view content
-          <Box>
-            {subView === "charts" && (
-              <Typography>TODO: Detailed outcome charts for each scenario</Typography>
-            )}
-            {subView === "aggregates" && (
-              <Typography>TODO: Aggregate statistics and comparisons</Typography>
-            )}
-            {subView === "downloads" && (
-              <Typography>TODO: Data download options</Typography>
-            )}
+          // Data view content based on active sub-tab
+          <Box sx={{ height: "100%" }}>
+            {subView === "category" && <CategoryView />}
+            {subView === "map" && <MapView />}
+            {subView === "table" && <TableView />}
           </Box>
         )}
       </Box>
     </Box>
   )
 }
-

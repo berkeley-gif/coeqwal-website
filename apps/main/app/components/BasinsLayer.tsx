@@ -39,10 +39,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         type="symbol"
         layout={{
           "text-field": ["get", "name"],
-          "text-font": [
-            "Neue Haas Grotesk",
-            "Arial Unicode MS Bold",
-          ],
+          "text-font": ["Neue Haas Grotesk", "Arial Unicode MS Bold"],
           "text-size": 16,
           "text-anchor": "center",
           "symbol-placement": "point",

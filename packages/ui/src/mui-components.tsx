@@ -95,6 +95,10 @@ import InfoIcon from "@mui/icons-material/Info"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import EditNoteIcon from "@mui/icons-material/EditNote"
+import AgricultureIcon from "@mui/icons-material/Agriculture"
+import SetMealIcon from "@mui/icons-material/SetMeal"
+import ScienceIcon from "@mui/icons-material/Science"
+import WaterDropIcon from "@mui/icons-material/WaterDrop"
 
 // Export individually imported icons
 export {
@@ -129,6 +133,10 @@ export {
   UnfoldMoreIcon,
   MyLocationIcon,
   EditNoteIcon,
+  AgricultureIcon,
+  SetMealIcon,
+  ScienceIcon,
+  WaterDropIcon,
 }
 
 // Export the full icons library for access to other icons as needed

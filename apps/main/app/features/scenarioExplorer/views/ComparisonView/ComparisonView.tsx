@@ -33,8 +33,8 @@ export default function ComparisonView() {
         sortOptions={[
           { value: "name-asc", label: "Outcome (A-Z)" },
           { value: "name-desc", label: "Outcome (Z-A)" },
-          { value: "outcome-best-first", label: "Highest Variation" },
-          { value: "outcome-worst-first", label: "Lowest Variation" },
+          { value: "outcome-best-first", label: "Highest variation" },
+          { value: "outcome-worst-first", label: "Lowest variation" },
         ]}
       />
 
@@ -74,8 +74,7 @@ export default function ComparisonView() {
                 color: theme.palette.grey[600],
               }}
             >
-              (Visual comparison of scenario outcomes using parallel
-              line plot).
+              (Visual comparison of scenario outcomes using parallel line plot).
             </Typography>
           </Box>
         ) : (
@@ -116,6 +115,7 @@ export default function ComparisonView() {
             <Box sx={{ width: "100%", height: "calc(100% - 60px)" }}>
               <VerticalParallelLinePlot
                 data={[]} // TODO: Transform scenario data for plot
+                axes={[]} // TODO: Add outcome axes for comparison
                 width={800}
                 height={600}
               />
@@ -126,4 +126,3 @@ export default function ComparisonView() {
     </Box>
   )
 }
-
