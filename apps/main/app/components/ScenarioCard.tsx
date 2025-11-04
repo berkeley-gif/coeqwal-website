@@ -42,6 +42,14 @@ export default function ScenarioCard({
     ]
   }
 
+  // Helper function to detect if tier data represents a single value
+  const isSingleValueTier = (outcome: string): boolean => {
+    const tierData = chartData[outcome]
+    if (!tierData || tierData.length === 0) return false
+    // Check the tierType metadata from the first data point (all points in a tier have the same type)
+    return tierData[0]?.tierType === "single_value"
+  }
+
   const handleGlossaryOpen = (entry: string) => {
     setDrawerContent({
       selectedTerm: entry,
@@ -279,7 +287,7 @@ export default function ScenarioCard({
                                 ]
                           }
                           values={getTierValues(outcome)}
-                          variant="bars"
+                          variant={isSingleValueTier(outcome) ? "dots" : "bars"}
                           size={60}
                         />
                         <Typography
