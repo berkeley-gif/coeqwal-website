@@ -35,7 +35,7 @@ const OutcomeDotsGlyph: React.FC<OutcomeDotsGlyphProps> = ({
         { label: "Tier 4", color: colors[3]!, value: 0 },
       ]
 
-  const circleRadius = size * 0.08 // Smaller radius for vertical stacking
+  const circleRadius = size * 0.1 // Radius for vertical stacking
   const rowHeight = size / 4 // Divide into 4 equal rows
   const cx = size / 2 // Center horizontally
 

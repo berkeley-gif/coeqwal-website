@@ -21,7 +21,6 @@ import {
   DocumentCheckedIcon,
   DocumentExpandedIcon,
   DocumentCollapsedIcon,
-  MapIcon as MapViewIcon,
 } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
@@ -172,7 +171,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showMapView,
   showOnlyChosen,
   showDefinitions,
-  onMapViewChange,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onMapViewChange, // Unused after removing list/map toggle, but kept for backward compatibility
   onShowOnlyChosenChange,
   onShowDefinitionsChange,
 }: StrategyGridProps) {
@@ -247,52 +247,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 gridColumn: "1 / 3",
                 display: "flex",
                 alignItems: "center",
-                gap: 2,
                 height: theme.spacing(7),
               }}
             >
               <Typography variant="subtitle2" sx={{ ml: 0.5 }}>
                 Choose strategies
               </Typography>
-
-              <InfoTooltip description="Show all strategies or only chosen ones">
-                <Box sx={{ ml: 10 }}>
-                  <TogglePair
-                    leftIcon={
-                      <DocumentListIcon active={!showOnlyChosen} size={40} />
-                    }
-                    rightIcon={
-                      <DocumentCheckedIcon active={showOnlyChosen} size={40} />
-                    }
-                    onLeftClick={() => onShowOnlyChosenChange(false)}
-                    onRightClick={() => onShowOnlyChosenChange(true)}
-                    gap={-0.5}
-                  />
-                </Box>
-              </InfoTooltip>
-
-              <InfoTooltip description="Show or hide strategy details">
-                <Box>
-                  <TogglePair
-                    leftIcon={
-                      <DocumentExpandedIcon
-                        active={showDefinitions}
-                        size={40}
-                      />
-                    }
-                    rightIcon={
-                      <DocumentCollapsedIcon
-                        active={!showDefinitions}
-                        size={40}
-                      />
-                    }
-                    onLeftClick={() => onShowDefinitionsChange(true)}
-                    onRightClick={() => onShowDefinitionsChange(false)}
-                    gap={-0.5}
-                    sx={{ ml: -1.5 }}
-                  />
-                </Box>
-              </InfoTooltip>
             </Box>
             <Box
               sx={{
@@ -308,32 +268,54 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 display: { xs: "none", lg: "flex" },
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: theme.spacing(theme.cards.spacing.standard),
+                gap: 2,
                 height: theme.spacing(7),
               }}
             >
               <Typography variant="subtitle2">Key outcomes</Typography>
 
-              <InfoTooltip description="Switch between list and map view">
-                <Box
-                  sx={{
-                    padding: "2px 4px",
-                    borderRadius: 1,
-                    marginTop: "-20px",
-                    "&:hover": { backgroundColor: theme.palette.grey[100] },
-                  }}
-                >
-                  <TogglePair
-                    leftIcon={
-                      <DocumentListIcon active={!showMapView} size={52} />
-                    }
-                    rightIcon={<MapViewIcon active={showMapView} size={52} />}
-                    onLeftClick={() => onMapViewChange(false)}
-                    onRightClick={() => onMapViewChange(true)}
-                    gap={-0.25}
-                  />
-                </Box>
-              </InfoTooltip>
+              <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                <InfoTooltip description="Show all strategies or only chosen ones">
+                  <Box>
+                    <TogglePair
+                      leftIcon={
+                        <DocumentListIcon active={!showOnlyChosen} size={40} />
+                      }
+                      rightIcon={
+                        <DocumentCheckedIcon
+                          active={showOnlyChosen}
+                          size={40}
+                        />
+                      }
+                      onLeftClick={() => onShowOnlyChosenChange(false)}
+                      onRightClick={() => onShowOnlyChosenChange(true)}
+                      gap={-0.5}
+                    />
+                  </Box>
+                </InfoTooltip>
+
+                <InfoTooltip description="Show or hide strategy details">
+                  <Box>
+                    <TogglePair
+                      leftIcon={
+                        <DocumentExpandedIcon
+                          active={showDefinitions}
+                          size={40}
+                        />
+                      }
+                      rightIcon={
+                        <DocumentCollapsedIcon
+                          active={!showDefinitions}
+                          size={40}
+                        />
+                      }
+                      onLeftClick={() => onShowDefinitionsChange(true)}
+                      onRightClick={() => onShowDefinitionsChange(false)}
+                      gap={-0.5}
+                    />
+                  </Box>
+                </InfoTooltip>
+              </Box>
             </Box>
           </>
         )}
@@ -642,7 +624,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         alignItems: "center",
                         gap: showMapView ? 0.5 : 1,
                         cursor:
-                          showMapView && isActiveForStrategy
+                          onTierClick && isActiveForStrategy
                             ? "pointer"
                             : "default",
                         padding: 0,
@@ -652,21 +634,21 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
                         border:
                           selectedOutcomes[strategy.value] === displayName &&
-                          showMapView
+                          onTierClick
                             ? `2px solid ${theme.palette.blue.bright}`
                             : "2px solid transparent",
                         "&:hover": {
                           backgroundColor:
-                            showMapView && isActiveForStrategy
+                            onTierClick && isActiveForStrategy
                               ? theme.palette.grey[100]
                               : "transparent",
                         },
                       }}
                       onClick={
-                        showMapView && isActiveForStrategy
+                        onTierClick && isActiveForStrategy
                           ? () => {
                               onOutcomeSelect(strategy.value, displayName)
-                              onTierClick?.(strategy.value, displayName)
+                              onTierClick(strategy.value, displayName)
                             }
                           : undefined
                       }
