@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import { useScenarioTiers } from "../../../../../hooks/useTierData"
 import type { OutcomeMetric } from "../outcomeDefinitions"
+import { getDisplayNameFromMetricId } from "../../../../../constants/outcomeMappings"
 
 /**
  * Hook to fetch metric data for multiple scenarios
@@ -101,21 +102,10 @@ function useTierMetricData(scenarioIds: string[], metric: OutcomeMetric) {
 
 /**
  * Map Data Explorer metric IDs to tier outcome names
+ * Applies UI display name overrides to match chartData keys
  */
 function mapMetricToOutcome(metricId: string): string {
-  const mapping: Record<string, string> = {
-    "cws-delivery-tier": "Community deliveries",
-    "ag-revenue-tier": "Agricultural revenue",
-    "env-flow-tier": "Environmental flows",
-    "env-delta-ecology-tier": "Delta estuary ecology",
-    "salinity-in-delta-tier": "Freshwater for in-Delta uses",
-    "salinity-exports-tier": "Freshwater for Delta exports",
-    "reservoir-storage-tier": "Reservoir storage",
-    "gw-storage-tier": "Groundwater storage",
-    "salmon-tier": "Salmon abundance",
-  }
-
-  return mapping[metricId] || metricId
+  return getDisplayNameFromMetricId(metricId)
 }
 
 /**
@@ -143,6 +133,7 @@ export function useMetricMapData(
 
   // Uses the existing tier location API
   // The actual implementation is in useTierMapData
+  // Note: Uses UI display name which will be converted to API name in tierLocationApi
   return {
     shouldFetch,
     scenarioId,

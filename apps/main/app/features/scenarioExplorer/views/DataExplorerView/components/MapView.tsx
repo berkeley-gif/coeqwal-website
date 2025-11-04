@@ -20,6 +20,7 @@ import {
   fetchTierLocationData,
   type TierLocationResponse,
 } from "../../../../../api/tierLocationApi"
+import { getDisplayNameFromMetricId } from "../../../../../constants/outcomeMappings"
 import TierMarkers from "../../../components/TierMarkers"
 import TierLegend from "../../../components/TierLegend"
 import TemporalControls from "./TemporalControls"
@@ -120,20 +121,8 @@ export default function MapView() {
 
         const strategy = getStrategyFromScenario(selectedScenario)
 
-        // Map metric ID to outcome display name
-        const outcomeMap: Record<string, string> = {
-          "cws-delivery-tier": "Community deliveries",
-          "ag-revenue-tier": "Agricultural revenue",
-          "env-flow-tier": "Environmental flows",
-          "env-delta-ecology-tier": "Delta estuary ecology",
-          "salinity-in-delta-tier": "Freshwater for in-Delta uses",
-          "salinity-exports-tier": "Freshwater for Delta exports",
-          "reservoir-storage-tier": "Reservoir storage",
-          "gw-storage-tier": "Groundwater storage",
-          "salmon-tier": "Salmon abundance",
-        }
-
-        const outcomeDisplayName = outcomeMap[metric.id]
+        // Get UI display name, which will be converted to API name in tierLocationApi
+        const outcomeDisplayName = getDisplayNameFromMetricId(metric.id)
 
         if (!outcomeDisplayName) {
           console.warn(`No outcome mapping for metric: ${metric.id}`)

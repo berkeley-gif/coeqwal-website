@@ -3,6 +3,8 @@
  * Data is fetched, but default backups are listed here
  */
 
+import { API_SHORT_CODE_TO_DISPLAY_NAME } from "../constants/outcomeMappings"
+
 // API base URL
 const API_BASE = "https://api.coeqwal.org/api"
 
@@ -111,18 +113,8 @@ export async function getTierMapping(): Promise<Record<string, string>> {
     return _tierMappingCache
   } catch (error) {
     console.error("Failed to fetch tier mapping, using fallback:", error)
-    // Fallback to hardcoded mapping if API fails
-    return {
-      AG_REV: "Agricultural revenue",
-      CWS_DEL: "Community deliveries",
-      DELTA_ECO: "Delta estuary ecology",
-      ENV_FLOWS: "Environmental flows",
-      FW_DELTA_USES: "Freshwater for in-Delta uses",
-      FW_EXP: "Freshwater for Delta exports",
-      GW_STOR: "Groundwater storage",
-      RES_STOR: "Reservoir storage",
-      WRC_SALMON_AB: "Salmon abundance",
-    }
+    // Fallback to centralized mapping if API fails
+    return API_SHORT_CODE_TO_DISPLAY_NAME
   }
 }
 
