@@ -27,9 +27,8 @@ import { strategies } from "../../../lib/scenarios"
 import TierTooltipContent from "./TierTooltipContent"
 import TogglePair from "./TogglePair"
 
-// Map outcome keys to display labels
+// Map outcome keys to display labels (no longer needed - using API names directly)
 const getOutcomeDisplayLabel = (name: string): string => {
-  if (name === "Delta ecology") return "Delta estuary ecology"
   return name
 }
 

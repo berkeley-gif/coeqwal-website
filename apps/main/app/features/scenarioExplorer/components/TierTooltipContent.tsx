@@ -8,9 +8,8 @@ interface TierTooltipContentProps {
   showTitle?: boolean
 }
 
-// Map outcome keys to display labels
+// Map outcome keys to display labels (no longer needed - using API names directly)
 export const getOutcomeDisplayLabel = (name: string): string => {
-  if (name === "Delta ecology") return "Delta estuary ecology" // hack: TODO: fix this
   return name
 }
 

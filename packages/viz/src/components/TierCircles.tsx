@@ -16,7 +16,7 @@ export interface TierCirclesProps {
  * Shows 4 circles stacked vertically where only the active tier is filled with color
  */
 const TierCircles = ({ size = 80, tiers }: TierCirclesProps) => {
-  const circleRadius = size * 0.15 // Circle radius relative to size
+  const circleRadius = size * 0.1 // Circle radius relative to size
   const rowHeight = size / 4 // Divide into 4 equal rows
   const cx = size / 2 // Center horizontally
 
