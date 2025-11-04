@@ -125,7 +125,7 @@ export default function MapView() {
           "cws-delivery-tier": "Community deliveries",
           "ag-revenue-tier": "Agricultural revenue",
           "env-flow-tier": "Environmental flows",
-          "env-delta-ecology-tier": "Delta ecology",
+          "env-delta-ecology-tier": "Delta estuary ecology",
           "salinity-in-delta-tier": "Freshwater for in-Delta uses",
           "salinity-exports-tier": "Freshwater for Delta exports",
           "reservoir-storage-tier": "Reservoir storage",

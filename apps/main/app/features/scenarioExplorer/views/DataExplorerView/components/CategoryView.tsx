@@ -441,6 +441,9 @@ function MetricCard({
                   sx={{
                     flex: "1 1 200px",
                     minWidth: theme.spacing(25),
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
                   }}
                 >
                   <Typography

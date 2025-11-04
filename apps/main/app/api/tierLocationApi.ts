@@ -46,7 +46,7 @@ const STRATEGY_TO_SCENARIO_MAP: Record<string, string> = {
 const OUTCOME_CODE_MAP: Record<string, string> = {
   "Agricultural revenue": "AG_REV",
   "Community deliveries": "CWS_DEL",
-  "Delta ecology": "DELTA_ECO",
+  "Delta estuary ecology": "DELTA_ECO",
   "Environmental flows": "ENV_FLOWS",
   "Freshwater for in-Delta uses": "FW_DELTA_USES",
   "Freshwater for Delta exports": "FW_EXP",

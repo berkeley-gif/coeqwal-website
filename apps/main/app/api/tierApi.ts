@@ -115,7 +115,7 @@ export async function getTierMapping(): Promise<Record<string, string>> {
     return {
       AG_REV: "Agricultural revenue",
       CWS_DEL: "Community deliveries",
-      DELTA_ECO: "Delta ecology",
+      DELTA_ECO: "Delta estuary ecology",
       ENV_FLOWS: "Environmental flows",
       FW_DELTA_USES: "Freshwater for in-Delta uses",
       FW_EXP: "Freshwater for Delta exports",
