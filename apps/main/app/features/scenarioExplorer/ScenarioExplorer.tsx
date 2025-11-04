@@ -4,7 +4,6 @@ import React from "react"
 import { Box, Tabs, Tab, useTheme } from "@repo/ui/mui"
 import { DashboardPanel } from "@repo/ui"
 import { useScenarioExplorerStore, type ExplorerView } from "@repo/state"
-import Breadcrumbs from "./components/Breadcrumbs"
 import ListView from "./views/ListView/ListView"
 import MapView from "./views/MapView/MapView"
 import ComparisonView from "./views/ComparisonView/ComparisonView"
@@ -13,7 +12,7 @@ import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
 
 /**
  * ScenarioExplorer -- Multi-tab version
- * 
+ *
  * Views:
  * - List: Full list of scenarios with searching/sorting
  * - Map: Location-based performance visualization
@@ -25,16 +24,19 @@ export default function ScenarioExplorerNew() {
   const theme = useTheme()
   const { activeView, setActiveView } = useScenarioExplorerStore()
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: ExplorerView) => {
+  const handleTabChange = (
+    _event: React.SyntheticEvent,
+    newValue: ExplorerView,
+  ) => {
     setActiveView(newValue)
   }
 
   const viewLabels: Record<ExplorerView, string> = {
     list: "List",
     map: "Map",
-    comparison: "Comparison Chart",
-    needs: "Needs-Based Search",
-    data: "Data Explorer",
+    comparison: "Comparison chart",
+    needs: "Needs-based search",
+    data: "Data explorer",
   }
 
   return (
@@ -89,9 +91,6 @@ export default function ScenarioExplorerNew() {
           </Tabs>
         </Box>
 
-        {/* Breadcrumbs (current selections) */}
-        <Breadcrumbs />
-
         {/* View content */}
         <Box
           sx={{
@@ -109,4 +108,3 @@ export default function ScenarioExplorerNew() {
     </DashboardPanel>
   )
 }
-

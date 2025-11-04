@@ -44,7 +44,11 @@ export default function HydroclimateCard({
     >
       <Typography
         variant="subtitle2"
-        sx={{ mb: 0, fontWeight: theme.typography.fontWeightMedium, fontSize: theme.typography.body2.fontSize }}
+        sx={{
+          mb: 0,
+          fontWeight: theme.typography.fontWeightMedium,
+          fontSize: theme.typography.body2.fontSize,
+        }}
       >
         See hydroclimate effects
       </Typography>
@@ -96,7 +100,10 @@ export default function HydroclimateCard({
                 alignItems: "center",
                 "& .MuiFormControlLabel-label": {
                   fontSize: theme.typography.nav.fontSize,
-                  fontWeight: option.value === "historical" ? theme.typography.fontWeightMedium : theme.typography.fontWeightRegular,
+                  fontWeight:
+                    option.value === "historical"
+                      ? theme.typography.fontWeightMedium
+                      : theme.typography.fontWeightRegular,
                   color: `${
                     option.value === "historical"
                       ? theme.palette.text.primary

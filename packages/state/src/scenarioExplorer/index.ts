@@ -8,4 +8,3 @@ export type {
   HydroclimateScenario,
   OutcomeCriteria,
 } from "./types"
-

@@ -1,3 +1,11 @@
+/**
+ * StrategyGrid: Displays scenario strategies in a grid with outcome visualizations
+ *
+ * This is a fully controlled component that accepts all state as props.
+ * Parent components are responsible for state management via useScenarioExplorerStore()
+ * or useExploreUserWorkflowStore().
+ */
+
 import React, { useState } from "react"
 import {
   Box,
@@ -17,7 +25,6 @@ import {
 } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
-import { useExploreUserWorkflowStore } from "@repo/state"
 import TierTooltipContent from "./TierTooltipContent"
 import TogglePair from "./TogglePair"
 
@@ -28,6 +35,7 @@ const getOutcomeDisplayLabel = (name: string): string => {
 }
 
 interface StrategyGridProps {
+  // Data props
   getChartDataForStrategy: (
     strategyValue: string,
   ) => Record<string, Array<{ label: string; color: string; value: number }>>
@@ -36,8 +44,23 @@ interface StrategyGridProps {
     name: string
     displayName: string
   }>
+
+  // Event handlers
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
   onTierClick?: (strategy: string, outcome: string) => void
+  onToggleScenario: (strategyValue: string) => void
+
+  // State props (fully controlled)
+  selectedScenarios: string[]
+  selectedOutcomes: Record<string, string | null> // strategy -> outcome mapping (null = no outcome selected)
+  showMapView: boolean
+  showOnlyChosen: boolean
+  showDefinitions: boolean
+
+  // UI control handlers
+  onMapViewChange: (enabled: boolean) => void
+  onShowOnlyChosenChange: (enabled: boolean) => void
+  onShowDefinitionsChange: (enabled: boolean) => void
 }
 
 const gridStyles = {
@@ -66,8 +89,12 @@ const gridStyles = {
     justifyContent: "flex-start",
   },
   iconBox: (showMapView: boolean, theme: Theme) => ({
-    width: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
-    height: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
+    width: showMapView
+      ? theme.spacing(3.5)
+      : { xs: theme.spacing(4), lg: theme.spacing(5) },
+    height: showMapView
+      ? theme.spacing(3.5)
+      : { xs: theme.spacing(4), lg: theme.spacing(5) },
     cursor: "pointer",
   }),
   outcomeChartsContainer: (theme: Theme) => ({
@@ -109,8 +136,12 @@ const gridStyles = {
     color: isActive ? theme.palette.blue.darkest : theme.palette.grey[500],
     fontWeight: theme.typography.fontWeightRegular,
     textAlign: "center",
-    fontSize: showMapView ? "0.6rem" : theme.typography.compact.caption.fontSize,
-    lineHeight: showMapView ? theme.typography.compact.caption.lineHeight : theme.typography.compact.caption.lineHeight,
+    fontSize: showMapView
+      ? "0.6rem"
+      : theme.typography.compact.caption.fontSize,
+    lineHeight: showMapView
+      ? theme.typography.compact.caption.lineHeight
+      : theme.typography.compact.caption.lineHeight,
     whiteSpace: "pre-line",
   }),
 } as const
@@ -121,25 +152,22 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   outcomeNames,
   onOutcomeSelect,
   onTierClick,
+  onToggleScenario,
+  selectedScenarios,
+  selectedOutcomes,
+  showMapView,
+  showOnlyChosen,
+  showDefinitions,
+  onMapViewChange,
+  onShowOnlyChosenChange,
+  onShowDefinitionsChange,
 }: StrategyGridProps) {
   const theme = useTheme()
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
   const [tooltipAnchor, setTooltipAnchor] = useState<HTMLElement | null>(null)
 
-  // Get all necessary state from the store
-  const {
-    explore: {
-      showMapView,
-      showOnlyChosen,
-      showDefinitions,
-      chosenStrategies,
-      selectedOutcomes,
-    },
-    setMapView,
-    setShowOnlyChosen,
-    setShowDefinitions,
-    toggleStrategyChoice,
-  } = useExploreUserWorkflowStore()
+  const chosenStrategies = selectedScenarios
+  const toggleStrategyChoice = onToggleScenario
 
   return (
     <Box sx={{ position: "relative" }}>
@@ -222,8 +250,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     rightIcon={
                       <DocumentCheckedIcon active={showOnlyChosen} size={40} />
                     }
-                    onLeftClick={() => setShowOnlyChosen(false)}
-                    onRightClick={() => setShowOnlyChosen(true)}
+                    onLeftClick={() => onShowOnlyChosenChange(false)}
+                    onRightClick={() => onShowOnlyChosenChange(true)}
                     gap={-0.5}
                   />
                 </Box>
@@ -244,15 +272,21 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                         size={40}
                       />
                     }
-                    onLeftClick={() => setShowDefinitions(true)}
-                    onRightClick={() => setShowDefinitions(false)}
+                    onLeftClick={() => onShowDefinitionsChange(true)}
+                    onRightClick={() => onShowDefinitionsChange(false)}
                     gap={-0.5}
                     sx={{ ml: -1.5 }}
                   />
                 </Box>
               </InfoTooltip>
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center", height: theme.spacing(7) }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                height: theme.spacing(7),
+              }}
+            >
               <Typography variant="subtitle2">Key operations</Typography>
             </Box>
             <Box
@@ -280,8 +314,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       <DocumentListIcon active={!showMapView} size={52} />
                     }
                     rightIcon={<MapViewIcon active={showMapView} size={52} />}
-                    onLeftClick={() => setMapView(false)}
-                    onRightClick={() => setMapView(true)}
+                    onLeftClick={() => onMapViewChange(false)}
+                    onRightClick={() => onMapViewChange(true)}
                     gap={-0.25}
                   />
                 </Box>
@@ -413,7 +447,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   sx={{
                     fontWeight: theme.typography.fontWeightMedium,
                     mb: showDefinitions ? 0.5 : 0,
-                    fontSize: showMapView ? theme.typography.compact.title.fontSize : theme.typography.body2.fontSize,
+                    fontSize: showMapView
+                      ? theme.typography.compact.title.fontSize
+                      : theme.typography.body2.fontSize,
                     lineHeight: 1.3,
                     whiteSpace: "pre-line",
                   }}
@@ -427,7 +463,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     variant="body2"
                     sx={{
                       lineHeight: showMapView ? 1.3 : 1.4,
-                      fontSize: showMapView ? theme.typography.compact.subtitle.fontSize : theme.typography.nav.fontSize,
+                      fontSize: showMapView
+                        ? theme.typography.compact.subtitle.fontSize
+                        : theme.typography.nav.fontSize,
                     }}
                   >
                     {strategy.description
@@ -443,7 +481,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                               >
                                 <InfoIcon
                                   sx={{
-                                    fontSize: theme.typography.compact.subtitle.fontSize,
+                                    fontSize:
+                                      theme.typography.compact.subtitle
+                                        .fontSize,
                                     ml: 0.5,
                                     cursor: "pointer",
                                     color: theme.palette.blue.bright,
@@ -476,8 +516,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 <InfoTooltip description="Current operations" placement="top">
                   <Box
                     sx={{
-                      width: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                      height: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                      width: showMapView
+                        ? theme.spacing(3.5)
+                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                      height: showMapView
+                        ? theme.spacing(3.5)
+                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
                       cursor: "pointer",
                     }}
                   >
@@ -501,8 +545,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 >
                   <Box
                     sx={{
-                      width: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                      height: showMapView ? theme.spacing(3.5) : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                      width: showMapView
+                        ? theme.spacing(3.5)
+                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                      height: showMapView
+                        ? theme.spacing(3.5)
+                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
                       cursor: "pointer",
                     }}
                   >

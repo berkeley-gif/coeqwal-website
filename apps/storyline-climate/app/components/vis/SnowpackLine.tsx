@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
 import type { ContainerSize } from "./Snowpack"
-import { SnowWaterColor,OffWhiteColor, OceanWaterColor } from "../helpers/colorPalette"
+import {
+  SnowWaterColor,
+  OffWhiteColor,
+  OceanWaterColor,
+} from "../helpers/colorPalette"
 import { useLayoutEffect } from "react"
 
 export type SnowRow = {
@@ -17,7 +21,7 @@ const goldenColor = "#F1B143" // yellow
 const labelStyle: React.CSSProperties = {
   fontSize: "15px",
   fill: OffWhiteColor,
-};
+}
 
 type Props = {
   data: SnowRow[]
@@ -38,24 +42,26 @@ export default function SnowpackLine({ data, yExtents }: Props) {
   const safeMargin = useMemo<Margin>(
     () => ({
       ...margin,
-      left:  margin.left  + extraLeft,
+      left: margin.left + extraLeft,
       bottom: margin.bottom + extraBottom, // from your X-axis fix
     }),
-    [extraLeft, extraBottom, margin.left, margin.bottom]
+    [extraLeft, extraBottom, margin.left, margin.bottom],
   )
-  const years = useMemo(() => filteredData.map(d => d.year), [filteredData])
+  const years = useMemo(() => filteredData.map((d) => d.year), [filteredData])
   const xScale = useMemo(() => {
     const minY = d3.min(years) ?? 0
     const maxY = 2050
     const pad = 3
-    return d3.scaleLinear()
+    return d3
+      .scaleLinear()
       .domain([minY - pad, maxY + pad])
       .range([safeMargin.left, size.width - safeMargin.right])
       .clamp(true)
   }, [years, size.width, safeMargin.left, safeMargin.right])
 
   const yScale = useMemo(() => {
-    return d3.scaleLinear()
+    return d3
+      .scaleLinear()
       .domain(yExtents)
       .range([size.height - safeMargin.bottom, safeMargin.top])
       .nice()
@@ -67,7 +73,7 @@ export default function SnowpackLine({ data, yExtents }: Props) {
       .defined((d) => d["CanESM2 (Average)"] != null)
       .x((d) => xScale(d.year))
       .y((d) => yScale(d["CanESM2 (Average)"] as number))
-      // .curve(d3.curveLinear) // .curve(d3.curveMonotoneX)
+    // .curve(d3.curveLinear) // .curve(d3.curveMonotoneX)
     return line(filteredData) ?? ""
   }, [filteredData, xScale, yScale])
 
@@ -78,7 +84,7 @@ export default function SnowpackLine({ data, yExtents }: Props) {
       .x((d) => xScale(d.year))
       .y0(() => yScale(0)) // baseline at 0
       .y1((d) => yScale(d["CanESM2 (Average)"] as number))
-      // .curve(d3.curveLinear) // .curve(d3.curveMonotoneX)
+    // .curve(d3.curveLinear) // .curve(d3.curveMonotoneX)
     return area(filteredData) ?? ""
   }, [filteredData, xScale, yScale])
 
@@ -113,42 +119,59 @@ export default function SnowpackLine({ data, yExtents }: Props) {
       } catch {}
     })
     return () => cancelAnimationFrame(id)
-  }, [size.width, size.height, yTicks]) 
+  }, [size.width, size.height, yTicks])
 
-    useEffect(() => {
-      if (!svgRef.current) return
-      const ro = new ResizeObserver(() => {
-        const { width, height } = svgRef.current!.getBoundingClientRect()
-        setSize({ width, height })
-      })
-      ro.observe(svgRef.current)
-      const { width, height } = svgRef.current.getBoundingClientRect()
+  useEffect(() => {
+    if (!svgRef.current) return
+    const ro = new ResizeObserver(() => {
+      const { width, height } = svgRef.current!.getBoundingClientRect()
       setSize({ width, height })
-      return () => ro.disconnect()
-    }, [])
+    })
+    ro.observe(svgRef.current)
+    const { width, height } = svgRef.current.getBoundingClientRect()
+    setSize({ width, height })
+    return () => ro.disconnect()
+  }, [])
 
   return (
     <svg ref={svgRef} width="100%" height="100%">
-
-      <XAxis size={size} xScale={xScale} margin={safeMargin} ticks={xTicks} innerRef={xAxisRef} />
-      <YAxis size={size} yScale={yScale} margin={safeMargin} ticks={yTicks} innerRef={yAxisRef} />
+      <XAxis
+        size={size}
+        xScale={xScale}
+        margin={safeMargin}
+        ticks={xTicks}
+        innerRef={xAxisRef}
+      />
+      <YAxis
+        size={size}
+        yScale={yScale}
+        margin={safeMargin}
+        ticks={yTicks}
+        innerRef={yAxisRef}
+      />
       <path d={snowPath} fill="none" stroke={goldenColor} strokeWidth={4} />
-      <path d={snowArea} fill = {SnowWaterColor} />
+      <path d={snowArea} fill={SnowWaterColor} />
 
       <g>
-      <rect x={margin.left + 180 - 100} y={size.height - margin.bottom - 22}
-            width={120} height={22} rx={4} ry={4}// round corners
-            fill="rgba(0,0,0,0.6)"/>
-      <text
-        x={margin.left + 200}
-        y={size.height - margin.bottom}
-        dy="-0.5em"
-        dx="-0.5em"
-        style={{ ...labelStyle, textAnchor: "end"}}
-      >
-        Ground surface
-      </text>
-    </g>
+        <rect
+          x={margin.left + 180 - 100}
+          y={size.height - margin.bottom - 22}
+          width={120}
+          height={22}
+          rx={4}
+          ry={4} // round corners
+          fill="rgba(0,0,0,0.6)"
+        />
+        <text
+          x={margin.left + 200}
+          y={size.height - margin.bottom}
+          dy="-0.5em"
+          dx="-0.5em"
+          style={{ ...labelStyle, textAnchor: "end" }}
+        >
+          Ground surface
+        </text>
+      </g>
     </svg>
   )
 }
@@ -185,7 +208,7 @@ function XAxis({
               x={xScale(t)}
               y={y}
               dy="18" // pixel offset is more consistent than em
-              style={{ ...labelStyle, textAnchor: "middle"}}
+              style={{ ...labelStyle, textAnchor: "middle" }}
             >
               {d3.format("d")(t)}
             </text>
@@ -197,7 +220,7 @@ function XAxis({
         x={(margin.left + size.width - margin.right) / 2}
         y={y}
         dy="50" // keep axis label below tick labels
-        style={{ ...labelStyle, textAnchor: "middle"}}
+        style={{ ...labelStyle, textAnchor: "middle" }}
       >
         Year
       </text>
@@ -210,7 +233,7 @@ function YAxis({
   yScale,
   margin,
   ticks,
-  innerRef
+  innerRef,
 }: {
   size: ContainerSize
   yScale: d3.ScaleLinear<number, number>
@@ -219,7 +242,11 @@ function YAxis({
   innerRef?: React.Ref<SVGGElement>
 }) {
   return (
-    <g ref={innerRef} className="y-axis" transform={`translate(${margin.left},0)`}>
+    <g
+      ref={innerRef}
+      className="y-axis"
+      transform={`translate(${margin.left},0)`}
+    >
       {ticks.map((t, i) => (
         <g key={i}>
           <line

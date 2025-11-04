@@ -19,7 +19,7 @@ interface TierColors {
   tier4: string
 }
 
-interface ChartDataPoint {
+export interface ChartDataPoint {
   label: string
   color: string
   value: number

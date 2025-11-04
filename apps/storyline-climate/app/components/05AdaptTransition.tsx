@@ -21,7 +21,6 @@ function Balance() {
   const drops = Array.from({ length: 100 })
 
   return (
-    
     <Box
       id="balance"
       className="container-row"
@@ -40,8 +39,8 @@ function Balance() {
         "--rain-color": FreshWaterColor,
       }}
     >
-      <RainAnimation/>
-      
+      <RainAnimation />
+
       <Box
         width="100%"
         height="100%"

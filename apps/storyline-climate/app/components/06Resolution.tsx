@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import { useEffect, useRef } from "react"
 import HydroClimateContainer from "./vis/HydroClimate"
-import * as d3 from "d3";
+import * as d3 from "d3"
 
 function SectionResolution() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -40,7 +40,7 @@ function SectionResolution() {
               justifyContent: "flex-end",
             }}
           >
-            <Box height="100vh" width="100vw" sx={{backgroundColor: "red"}}/>
+            <Box height="100vh" width="100vw" sx={{ backgroundColor: "red" }} />
             <ScenariosMockup />
             <Box
               id="scenario-transition"
@@ -193,7 +193,6 @@ function ScenariosMockup() {
       tabIndex={-1}
       role="region"
     >
-      
       <svg
         width="100%"
         height="100%"
@@ -377,8 +376,8 @@ function SvgConnector() {
   useEffect(() => {
     const p = d3.path()
 
-    const startX = 0.75 * window.innerWidth        // 80vw = right edge of your image
-    const y = 0.3 * window.innerHeight            // vertical center (adjust as needed)
+    const startX = 0.75 * window.innerWidth // 80vw = right edge of your image
+    const y = 0.3 * window.innerHeight // vertical center (adjust as needed)
     const endX = startX + 0.25 * window.innerWidth // 25vw to the right
 
     p.moveTo(startX, y)
@@ -402,12 +401,7 @@ function SvgConnector() {
         zIndex: 5,
       }}
     >
-      <path
-        ref={pathRef}
-        stroke="#f1b143"
-        strokeWidth={2}
-        fill="none"
-      />
+      <path ref={pathRef} stroke="#f1b143" strokeWidth={2} fill="none" />
     </svg>
   )
 }
