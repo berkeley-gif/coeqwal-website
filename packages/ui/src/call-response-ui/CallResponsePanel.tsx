@@ -46,6 +46,7 @@ export function CallResponsePanel({
         alignItems: "center",
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
+        px: 2, // Horizontal padding for margin from viewport edge
       }}
     >
       <motion.div
@@ -74,7 +75,7 @@ export function CallResponsePanel({
       >
         <Box
           sx={{
-            maxWidth: "400px",
+            maxWidth: "420px",
             backdropFilter: "blur(10px)",
             padding: (theme) => theme.layout.spacing.lg,
             pointerEvents: "auto",
@@ -89,20 +90,7 @@ export function CallResponsePanel({
               variant === "call"
                 ? (theme) => `2px solid ${theme.palette.blue.darkest}`
                 : undefined,
-            borderLeft: side === "left" ? "none" : undefined,
-            borderRight: side === "right" ? "none" : undefined,
-            // Outer corners (attached to viewport edge) have no radius
-            // Inner corners use standard theme border radius
-            borderTopLeftRadius:
-              side === "left" ? 0 : (theme) => theme.borderRadius.card,
-            borderBottomLeftRadius:
-              side === "left" ? 0 : (theme) => theme.borderRadius.card,
-            borderTopRightRadius:
-              side === "right" ? 0 : (theme) => theme.borderRadius.card,
-            borderBottomRightRadius:
-              side === "right" ? 0 : (theme) => theme.borderRadius.card,
-            ml: side === "left" ? 0 : undefined,
-            mr: side === "right" ? 0 : undefined,
+            borderRadius: (theme) => theme.borderRadius.card,
             ...sx,
           }}
         >
