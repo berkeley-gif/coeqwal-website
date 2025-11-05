@@ -109,3 +109,7 @@ export type { GlyphVariant } from "./scenario/ScenarioTile"
 
 // Custom icons
 export * from "./icons/DocumentIcons"
+
+// Call-response UI components
+export { CallResponsePanel } from "../call-response-ui/CallResponsePanel"
+export type { CallResponsePanelProps } from "../call-response-ui/CallResponsePanel"
