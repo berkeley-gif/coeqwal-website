@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { GlossaryLinkedText, CallResponsePanel } from "@repo/ui"
+import { useState, useEffect } from "react"
+import { CallResponsePanel } from "@repo/ui"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
 import {
@@ -14,25 +14,12 @@ import {
   TextField,
   ExpandMoreIcon,
 } from "@repo/ui/mui"
-import { useDrawerStore } from "@repo/state"
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
-  const { setDrawerContent, openDrawer } = useDrawerStore()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
-
-  // Handler to open glossary to specific entry
-  const handleGlossaryOpen = useCallback(
-    (glossaryEntry: string) => {
-      setDrawerContent({
-        selectedTerm: glossaryEntry,
-      })
-      openDrawer("glossary")
-    },
-    [setDrawerContent, openDrawer],
-  )
 
   // Intersection observer for first panel entrance animation
   useEffect(() => {
@@ -91,24 +78,33 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          <GlossaryLinkedText
-            text="To track the movement of water across the state, tools such as CalSim are needed. CalSim is a water planning model that simulates how water moves through California's major water projects within the Central Valley and inter-connected regions. The model tracks water flowing into reservoirs, how much is stored and released into rivers and canals, and where it gets delivered across the state."
-            terms={[
-              { name: "CalSim", glossaryTerm: "CalSim" },
-              {
-                name: "major water projects",
-                glossaryTerm: "California's major water projects",
-              },
-              {
-                name: "Central Valley",
-                glossaryTerm: "Central Valley",
-              },
-            ]}
-            onActivate={handleGlossaryOpen}
-            color={theme.palette.text.primary}
-            underlineColor={theme.palette.text.primary}
-          />
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          THE TOOL
+        </Typography>
+
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          To track the movement of water across the state, tools such as CalSim
+          are needed. CalSim is a water planning model that simulates how water
+          moves through{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            California&apos;s major water projects
+          </Box>{" "}
+          within the{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Central Valley
+          </Box>{" "}
+          and inter-connected regions. The model tracks water flowing into
+          reservoirs, how much is stored and released into rivers and canals,
+          and where it gets delivered across the state.
         </Typography>
       </CallResponsePanel>
 
@@ -119,9 +115,25 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          Rain and snowmelt in the mountains flow into California&apos;s Central
-          Valley.
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          THE JOURNEY
+        </Typography>
+
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          Rain and snowmelt in the mountains flow into California&apos;s{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Central Valley
+          </Box>
+          .
         </Typography>
       </CallResponsePanel>
 
@@ -132,10 +144,20 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          From the north, the Sacramento River flows toward the Delta, where its
-          waters mix with waters from the San Joaquin River flowing up from the
-          south.
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          From the north, the{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Sacramento River
+          </Box>{" "}
+          flows toward the{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Delta
+          </Box>
+          , where its waters mix with waters from the{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            San Joaquin River
+          </Box>{" "}
+          flowing up from the south.
         </Typography>
       </CallResponsePanel>
 
@@ -146,9 +168,13 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          Water is distributed from multiple points along the way, and even
-          pumped out from the Delta to points further south.
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          Water is distributed from multiple points along the way, and
+          pumped out from the{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Delta
+          </Box>{" "}
+          to points further south.
         </Typography>
       </CallResponsePanel>
 
@@ -159,12 +185,31 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          To plan and account for where the water goes, the federal U.S. Bureau
-          of Reclamation and the state Department of Water Resources use a
-          computer model called CalSim. The CalSim model tracks water flowing
-          into reservoirs, how much is stored and released into rivers and
-          canals, and where it gets delivered across the state.
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          THE MODEL
+        </Typography>
+
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          To plan and account for where the water goes, the federal{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            U.S. Bureau of Reclamation
+          </Box>{" "}
+          and the state{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            Department of Water Resources
+          </Box>{" "}
+          use a computer model called CalSim. The CalSim model tracks water
+          flowing into reservoirs, how much is stored and released into rivers
+          and canals, and where it gets delivered across the state.
         </Typography>
       </CallResponsePanel>
 
@@ -175,15 +220,44 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          THE COEQWAL project has been given resources from the University of
-          California and the Bay-Delta Science Program to run CalSim through a
-          broad range of different water management practices and evaluate the
-          results under current and future climate scenarios.
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          THE SCENARIOS
         </Typography>
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          We are making this data available to the public so that communities
-          can better understand the range of possibilities, and the range of
+
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          The COEQWAL project has been given resources from the{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            University of California
+          </Box>{" "}
+          and the{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            Bay-Delta Science Program
+          </Box>{" "}
+          to run CalSim through a broad range of different water management
+          practices and evaluate the results under current and future climate
+          scenarios.
+        </Typography>
+
+        <Typography
+          variant="body1"
+          fontWeight={600}
+          sx={{
+            lineHeight: 1.75,
+            mt: 2,
+            color: theme.palette.blue.darkest,
+          }}
+        >
+          We are making this data available to the public so that communities can
+          better understand the range of possibilities, and the range of
           consequences, that different water management practices can bring.
         </Typography>
       </CallResponsePanel>
@@ -404,26 +478,61 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={500} sx={{ lineHeight: 1.6 }}>
-          <GlossaryLinkedText
-            text="On this site, you can explore how water is allocated under current operations – 
-            representing the laws, regulations, priorities, and decisions that affect 
-            how California's water supply is currently managed – and how outcomes differ among water users. "
-            terms={[
-              { name: "CalSim", glossaryTerm: "CalSim" },
-              {
-                name: "major water projects",
-                glossaryTerm: "California's major water projects",
-              },
-              {
-                name: "Central Valley",
-                glossaryTerm: "Central Valley",
-              },
-            ]}
-            onActivate={handleGlossaryOpen}
-            color={theme.palette.text.primary}
-            underlineColor={theme.palette.text.primary}
-          />
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          EXPLORE THE SCENARIOS
+        </Typography>
+
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          On this site, you can explore how water is allocated under{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            current operations
+          </Box>
+          . This represents the laws, regulations, priorities, and decisions that
+          affect how{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            California&apos;s
+          </Box>{" "}
+          water supply is currently managed – and how outcomes differ among water
+          users.
+        </Typography>
+      </CallResponsePanel>
+
+      {/* Second Explore the Scenarios panel, starting How to read CalSim */}
+      <CallResponsePanel
+        id="how-to-read-scenarios"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          EXPLORE THE SCENARIOS
+        </Typography>
+
+        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+          To help you understand how to &quot;read&quot; a CalSim scenario, we
+          can start by exploring the data from the CalSim run for{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            current water management operations
+          </Box>
+          .
         </Typography>
       </CallResponsePanel>
 
