@@ -65,7 +65,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="h6" fontWeight={700} sx={{ lineHeight: 1.4 }}>
+        <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.4 }}>
           Do you know that California has one of the most complex water
           allocation systems in the world?
         </Typography>
@@ -539,10 +539,15 @@ export default function MapOverlayPanels() {
       {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
       <CallResponsePanel
         id="baseline-scenario-overlay"
-        side="left"
-        variant="call"
+        side="right"
+        variant="response"
         isVisible={isFirstPanelVisible}
-        sx={{ paddingBottom: "40vh" }}
+        sx={{ 
+          padding: (theme) => theme.spacing(2),
+          marginBottom: "40vh",
+          gap: (theme) => theme.spacing(1.5),
+          maxWidth: "560px", // Wider for this card to accommodate contents
+        }}
       >
         <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
         <ClimateCard isMinimized={false} selectedClimate={1} />
