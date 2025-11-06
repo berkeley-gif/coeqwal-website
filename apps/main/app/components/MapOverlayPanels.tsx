@@ -67,44 +67,7 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.4 }}>
           Do you know that California has one of the most complex water
-          allocation systems in the world?
-        </Typography>
-      </CallResponsePanel>
-
-      {/* Response: Explanation about CalSim */}
-      <CallResponsePanel
-        id="calsim-response"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-      >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
-          THE TOOL
-        </Typography>
-
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          To track the movement of water across the state, tools such as CalSim
-          are needed. CalSim is a water planning model that simulates how water
-          moves through{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
-            California&apos;s major water projects
-          </Box>{" "}
-          within the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            Central Valley
-          </Box>{" "}
-          and inter-connected regions. The model tracks water flowing into
-          reservoirs, how much is stored and released into rivers and canals,
-          and where it gets delivered across the state.
+          systems in the world?
         </Typography>
       </CallResponsePanel>
 
@@ -207,7 +170,11 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 600 }}>
             Department of Water Resources
           </Box>{" "}
-          use a computer model called CalSim. The CalSim model tracks water
+          use a computer model called{" "} 
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            CalSim
+          </Box>
+          . The CalSim model tracks water
           flowing into reservoirs, how much is stored and released into rivers
           and canals, and where it gets delivered across the state.
         </Typography>
@@ -234,7 +201,11 @@ export default function MapOverlayPanels() {
         </Typography>
 
         <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          The COEQWAL project has been given resources from the{" "}
+          The{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            COEQWAL
+          </Box>{" "}
+          project has been given resources from the{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
             University of California
           </Box>{" "}
@@ -500,41 +471,7 @@ export default function MapOverlayPanels() {
         </Accordion>
       </CallResponsePanel>
 
-      <CallResponsePanel
-        id="scenarios-overlay"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-      >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
-          EXPLORE THE SCENARIOS
-        </Typography>
-
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          On this site, you can explore how water is allocated under{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            current operations
-          </Box>
-          . This represents the laws, regulations, priorities, and decisions
-          that affect how{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            California&apos;s
-          </Box>{" "}
-          water supply is currently managed – and how outcomes differ among
-          water users.
-        </Typography>
-      </CallResponsePanel>
-
-      {/* Second Explore the Scenarios panel, starting How to read CalSim */}
+      {/* Explore the Scenarios panel, starting How to read CalSim */}
       <CallResponsePanel
         id="how-to-read-scenarios"
         side="left"
@@ -557,7 +494,7 @@ export default function MapOverlayPanels() {
         <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
           To help you understand how to &quot;read&quot; a CalSim scenario, we
           can start by exploring the data from the CalSim run for{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+          <Box component="span" sx={{ fontWeight: 500 }}>
             current water management operations
           </Box>
           .
