@@ -22,7 +22,7 @@ export interface CallResponsePanelProps {
 
 /**
  * CallResponsePanel - A conversational UI panel that attaches to viewport edges
- * 
+ *
  * Used to create left-right conversational flows where:
  * - 'call' variant panels appear on the left (questions/statements)
  * - 'response' variant panels appear on the right (answers/explanations)
@@ -96,4 +96,3 @@ export function CallResponsePanel({
     </Box>
   )
 }
-

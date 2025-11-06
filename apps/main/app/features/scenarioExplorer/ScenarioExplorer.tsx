@@ -9,6 +9,7 @@ import MapView from "./views/MapView/MapView"
 import ComparisonView from "./views/ComparisonView/ComparisonView"
 import NeedsBasedView from "./views/NeedsBasedView/NeedsBasedView"
 import DataExplorerView from "./views/DataExplorerView/DataExplorerView"
+import SelectionBanner from "./components/SelectionBanner"
 
 /**
  * ScenarioExplorer -- Multi-tab version
@@ -90,6 +91,9 @@ export default function ScenarioExplorerNew() {
             <Tab label={viewLabels.data} value="data" />
           </Tabs>
         </Box>
+
+        {/* Selection Banner, currently shown for all views except needs-based */}
+        {activeView !== "needs" && <SelectionBanner />}
 
         {/* View content */}
         <Box
