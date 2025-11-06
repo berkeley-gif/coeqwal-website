@@ -251,9 +251,34 @@ export default function MapOverlayPanels() {
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            sx={{ px: 0, fontWeight: 500 }}
+            sx={{
+              mx: (theme) => theme.spacing(-3),
+              px: (theme) => theme.spacing(3),
+              fontWeight: 500,
+              cursor: "pointer",
+              borderRadius: theme.borderRadius.standard,
+              transition: "all 0.2s ease",
+              flexDirection: "row-reverse",
+              justifyContent: "flex-end",
+              "& .MuiAccordionSummary-content": {
+                margin: 0,
+                marginLeft: theme.spacing(1.5),
+              },
+              "& .MuiAccordionSummary-expandIconWrapper": {
+                marginRight: 0,
+              },
+              "& .MuiSvgIcon-root": {
+                color: "inherit",
+              },
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                "& .MuiTypography-root": {
+                  color: theme.palette.common.white,
+                },
+              },
+            }}
           >
-            <Typography variant="body1" fontWeight={500}>
+            <Typography variant="body1" fontWeight={500} sx={{ textAlign: "left" }}>
               Where is my basin?
             </Typography>
           </AccordionSummary>
@@ -289,9 +314,34 @@ export default function MapOverlayPanels() {
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            sx={{ px: 0, fontWeight: 500 }}
+            sx={{
+              mx: (theme) => theme.spacing(-3),
+              px: (theme) => theme.spacing(3),
+              fontWeight: 500,
+              cursor: "pointer",
+              borderRadius: theme.borderRadius.standard,
+              transition: "all 0.2s ease",
+              flexDirection: "row-reverse",
+              justifyContent: "flex-end",
+              "& .MuiAccordionSummary-content": {
+                margin: 0,
+                marginLeft: theme.spacing(1.5),
+              },
+              "& .MuiAccordionSummary-expandIconWrapper": {
+                marginRight: 0,
+              },
+              "& .MuiSvgIcon-root": {
+                color: "inherit",
+              },
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                "& .MuiTypography-root": {
+                  color: theme.palette.common.white,
+                },
+              },
+            }}
           >
-            <Typography variant="body1" fontWeight={500}>
+            <Typography variant="body1" fontWeight={500} sx={{ textAlign: "left" }}>
               What is and where is &quot;The Delta&quot;?
             </Typography>
           </AccordionSummary>
@@ -317,9 +367,34 @@ export default function MapOverlayPanels() {
         >
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
-            sx={{ px: 0, fontWeight: 500 }}
+            sx={{
+              mx: (theme) => theme.spacing(-3),
+              px: (theme) => theme.spacing(3),
+              fontWeight: 500,
+              cursor: "pointer",
+              borderRadius: theme.borderRadius.standard,
+              transition: "all 0.2s ease",
+              flexDirection: "row-reverse",
+              justifyContent: "flex-end",
+              "& .MuiAccordionSummary-content": {
+                margin: 0,
+                marginLeft: theme.spacing(1.5),
+              },
+              "& .MuiAccordionSummary-expandIconWrapper": {
+                marginRight: 0,
+              },
+              "& .MuiSvgIcon-root": {
+                color: "inherit",
+              },
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                "& .MuiTypography-root": {
+                  color: theme.palette.common.white,
+                },
+              },
+            }}
           >
-            <Typography variant="body1" fontWeight={500}>
+            <Typography variant="body1" fontWeight={500} sx={{ textAlign: "left" }}>
               What are the major components of California&apos;s water system?
             </Typography>
           </AccordionSummary>
