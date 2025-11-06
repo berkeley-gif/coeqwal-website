@@ -84,12 +84,8 @@ export function CallResponsePanel({
             gap: "15px",
             backgroundColor:
               variant === "call"
-                ? "rgba(255, 255, 255, 0.95)"
+                ? "rgba(250, 242, 230, 0.9)"
                 : (theme) => theme.palette.brand.sky,
-            border:
-              variant === "call"
-                ? (theme) => `2px solid ${theme.palette.blue.darkest}`
-                : undefined,
             borderRadius: (theme) => theme.borderRadius.card,
             ...sx,
           }}

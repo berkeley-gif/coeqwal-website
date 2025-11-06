@@ -37,13 +37,13 @@ export default function CaliforniaMapPanel({
         mapboxToken={token}
         mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
         initialViewState={{
-          longitude: -119.7,
-          latitude: 37.2,
-          zoom: 5.8,
+          longitude: -120.9,
+          latitude: 39,
+          zoom: 5,
           bearing: 0,
           pitch: 0,
         }}
-        minZoom={5.8}
+        minZoom={5}
         maxZoom={10}
         // maxBounds={[
         //   [-124.5, 32.5], // Southwest coordinates (west, south)
