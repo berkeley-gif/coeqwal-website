@@ -135,13 +135,17 @@ export default function ComparisonView() {
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
             Scenario comparison
           </Typography>
-                 <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
-                   Comparing three scenarios: <strong style={{ color: "#ff7f0e" }}>Current operations</strong>,{" "}
-                   <strong style={{ color: "#2196f3" }}>Current ops w/o TUCPs</strong>, and{" "}
-                   <strong style={{ color: "#4caf50" }}>Current ops w/ historical ag</strong>.
-                   Use the draggable arrows on each axis to filter scenarios by
-                   brushing specific outcome ranges.
-                 </Typography>
+          <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
+            Comparing three scenarios:{" "}
+            <strong style={{ color: "#ff7f0e" }}>Current operations</strong>,{" "}
+            <strong style={{ color: "#2196f3" }}>Current ops w/o TUCPs</strong>,
+            and{" "}
+            <strong style={{ color: "#4caf50" }}>
+              Current ops w/ historical ag
+            </strong>
+            . Use the draggable arrows on each axis to filter scenarios by
+            brushing specific outcome ranges.
+          </Typography>
         </Box>
 
         {/* Chart container */}
@@ -167,22 +171,22 @@ export default function ComparisonView() {
             }}
           >
             <Box sx={{ flex: 1, minHeight: 0 }}>
-                     <VerticalParallelLinePlot
-                       data={data}
-                       axes={axes}
-                       responsive={true}
-                       showBaseline={false}
-                       colors={{
-                         default: theme.palette.grey[600],
-                         highlighted: theme.palette.blue.darkest,
-                         background: theme.palette.grey[50],
-                       }}
-                       lineColors={[
-                         "#ff7f0e", // s0020 - orange (Current operations)
-                         "#2196f3", // s0021 - bright blue (Current ops w/o TUCPs)
-                         "#4caf50", // s0011 - green (Current ops w/ historical ag)
-                       ]}
-                     />
+              <VerticalParallelLinePlot
+                data={data}
+                axes={axes}
+                responsive={true}
+                showBaseline={false}
+                colors={{
+                  default: theme.palette.grey[600],
+                  highlighted: theme.palette.blue.darkest,
+                  background: theme.palette.grey[50],
+                }}
+                lineColors={[
+                  "#ff7f0e", // s0020 - orange (Current operations)
+                  "#2196f3", // s0021 - bright blue (Current ops w/o TUCPs)
+                  "#4caf50", // s0011 - green (Current ops w/ historical ag)
+                ]}
+              />
             </Box>
           </Box>
         </Box>

@@ -103,8 +103,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
         const groupSize = group.length
         group.forEach((scenarioIndex, positionInGroup) => {
           // Center the group around 0
-          const offset =
-            (positionInGroup - (groupSize - 1) / 2) * OFFSET_AMOUNT
+          const offset = (positionInGroup - (groupSize - 1) / 2) * OFFSET_AMOUNT
           offsets[scenarioIndex] = offset
         })
       }

@@ -66,8 +66,8 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
       >
         <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.4 }}>
-          Do you know that California has one of the most complex water
-          systems in the world?
+          Do you know that California has one of the most complex water systems
+          in the world?
         </Typography>
       </CallResponsePanel>
 
@@ -170,13 +170,13 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 600 }}>
             Department of Water Resources
           </Box>{" "}
-          use a computer model called{" "} 
+          use a computer model called{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
             CalSim
           </Box>
-          . The CalSim model tracks water
-          flowing into reservoirs, how much is stored and released into rivers
-          and canals, and where it gets delivered across the state.
+          . The CalSim model tracks water flowing into reservoirs, how much is
+          stored and released into rivers and canals, and where it gets
+          delivered across the state.
         </Typography>
       </CallResponsePanel>
 
@@ -280,7 +280,11 @@ export default function MapOverlayPanels() {
               },
             }}
           >
-            <Typography variant="body1" fontWeight={500} sx={{ textAlign: "left" }}>
+            <Typography
+              variant="body1"
+              fontWeight={500}
+              sx={{ textAlign: "left" }}
+            >
               Where is my basin?
             </Typography>
           </AccordionSummary>
@@ -345,7 +349,11 @@ export default function MapOverlayPanels() {
               },
             }}
           >
-            <Typography variant="body1" fontWeight={500} sx={{ textAlign: "left" }}>
+            <Typography
+              variant="body1"
+              fontWeight={500}
+              sx={{ textAlign: "left" }}
+            >
               What is and where is &quot;The Delta&quot;?
             </Typography>
           </AccordionSummary>
@@ -400,7 +408,11 @@ export default function MapOverlayPanels() {
               },
             }}
           >
-            <Typography variant="body1" fontWeight={500} sx={{ textAlign: "left" }}>
+            <Typography
+              variant="body1"
+              fontWeight={500}
+              sx={{ textAlign: "left" }}
+            >
               What are the major components of California&apos;s water system?
             </Typography>
           </AccordionSummary>
