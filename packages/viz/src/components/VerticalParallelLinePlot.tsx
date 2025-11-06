@@ -50,7 +50,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
   baselineData,
   defineOutcome = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayTiers = false,
-  onLineHover,
+  onLineHover, // eslint-disable-line @typescript-eslint/no-unused-vars
   onLineClick,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -63,6 +63,57 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
   // Track filter ranges for each axis [min, max] approach as this summer.
   const filterRanges = useRef<Record<string, [number, number]>>({})
+
+  // Detect overlapping scenarios and assign offsets
+  const getScenarioOffsets = useCallback(() => {
+    const SIMILARITY_THRESHOLD = 0.05 // Consider scenarios overlapping if values differ by less than this
+    const OFFSET_AMOUNT = 3 // pixels to offset each overlapping line
+    const offsets: Record<number, number> = {}
+
+    // Group scenarios by similarity
+    const groups: number[][] = []
+    data.forEach((scenario, index) => {
+      // Check if this scenario overlaps with any existing group
+      let foundGroup = false
+      for (const group of groups) {
+        const representative = data[group[0]!]!
+        const isSimilar = axes.every((axis) => {
+          const val1 = scenario.values[axis] || 0
+          const val2 = representative.values[axis] || 0
+          return Math.abs(val1 - val2) < SIMILARITY_THRESHOLD
+        })
+        if (isSimilar) {
+          group.push(index)
+          foundGroup = true
+          break
+        }
+      }
+      if (!foundGroup) {
+        groups.push([index])
+      }
+    })
+
+    // Assign offsets to overlapping scenarios
+    groups.forEach((group) => {
+      if (group.length === 1) {
+        // No overlap, no offset
+        offsets[group[0]!] = 0
+      } else {
+        // Multiple scenarios overlap - distribute them with offsets
+        const groupSize = group.length
+        group.forEach((scenarioIndex, positionInGroup) => {
+          // Center the group around 0
+          const offset =
+            (positionInGroup - (groupSize - 1) / 2) * OFFSET_AMOUNT
+          offsets[scenarioIndex] = offset
+        })
+      }
+    })
+
+    return offsets
+  }, [data, axes])
+
+  const scenarioOffsets = getScenarioOffsets()
 
   // Centralized filtering function - separate opacity for lines vs circles
   const getScenarioOpacity = useCallback(
@@ -89,20 +140,6 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
             : 0.35 // Active lines: highlighted=70%, normal=35% (more elegant)
           : 0.08 // Filtered lines: faint but visible for experimentation
       }
-    },
-    [axes],
-  )
-
-  // Check if scenario is active (passes all filters) - for hover eligibility
-  const isScenarioActive = useCallback(
-    (scenario: VerticalParallelLineData) => {
-      return axes.every((axis) => {
-        const filter = filterRanges.current[axis]
-        if (!filter) return true
-
-        const value = scenario.values[axis] || 0
-        return value >= filter[0] && value <= filter[1]
-      })
     },
     [axes],
   )
@@ -670,14 +707,16 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       }
 
       // Update data lines with original styling
-      // Line generator (no curves - original styling)
-      const lineGenerator = d3
-        .line<[string, number]>()
-        .x(([axis, value]) => scales[axis]!(value))
-        .y(([axis]) => yScale(axis)!)
-      // No curve - use straight angular lines (original)
-
+      // Line generator will be created per scenario to apply offsets
       data.forEach((d, dataIndex) => {
+        const xOffset = scenarioOffsets[dataIndex] || 0
+
+        // Line generator with offset applied (no curves - original styling)
+        const lineGenerator = d3
+          .line<[string, number]>()
+          .x(([axis, value]) => scales[axis]!(value) + xOffset)
+          .y(([axis]) => yScale(axis)!)
+
         const lineColor =
           lineColors.length > dataIndex
             ? lineColors[dataIndex]!
@@ -714,43 +753,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               passesAllFilters ? (d.highlighted ? 2.5 : 1.8) : 1.0,
             ) // More elegant thickness for active scenarios
             .attr("opacity", lineOpacity) // Lines semi-transparent
-            .style("cursor", "pointer")
-            .on("mouseover", function () {
-              // Only allow hover highlighting for active (unfiltered) scenarios
-              if (!isScenarioActive(d)) return
-
-              onLineHover?.(d)
-              d3.select(this).attr("stroke-width", 3.5).attr("opacity", 1) // Elegant thickness on hover
-
-              // Highlight all corresponding circles for this line
-              axes.forEach((axis) => {
-                g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
-                  .attr("r", d.highlighted ? 6 : 5)
-                  .attr("opacity", 1)
-              })
-            })
-            .on("mouseout", function () {
-              onLineHover?.(null)
-              const lineOpacity = getScenarioOpacity(d, "line")
-              const circleOpacity = getScenarioOpacity(d, "circle")
-
-              // Check if scenario is currently active for stroke width
-              const isActive = isScenarioActive(d)
-
-              d3.select(this)
-                .attr(
-                  "stroke-width",
-                  isActive ? (d.highlighted ? 2.5 : 1.8) : 1.0,
-                ) // Return to elegant active thickness
-                .attr("opacity", lineOpacity) // Respect current filter state for lines
-
-              // Reset all corresponding circles for this line
-              axes.forEach((axis) => {
-                g.select(`.circle-${dataIndex}-${axis.replace(/\s+/g, "-")}`)
-                  .attr("r", d.highlighted ? 5 : 4)
-                  .attr("opacity", circleOpacity) // Respect current filter state for circles
-              })
-            })
+            .style("cursor", onLineClick ? "pointer" : "default")
             .on("click", function () {
               onLineClick?.(d)
             })
@@ -778,56 +781,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
               .attr("stroke-width", 1.5) // Original width
               .attr("r", d.highlighted ? 5 : 4) // Original sizes
               .attr("opacity", circleOpacity) // Dots opaque
-              .style("cursor", "pointer")
-              .on("mouseover", function () {
-                // Only allow hover highlighting for active (unfiltered) scenarios
-                if (!isScenarioActive(d)) return
-
-                onLineHover?.(d)
-                d3.select(this)
-                  .attr("r", d.highlighted ? 6 : 5)
-                  .attr("opacity", 1)
-
-                // Highlight the corresponding line for this circle
-                g.select(`.line-${dataIndex}`)
-                  .attr("stroke-width", 4) // Thicker on hover
-                  .attr("opacity", 1)
-
-                // Highlight all other circles for this same line/scenario
-                axes.forEach((otherAxis) => {
-                  g.select(
-                    `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
-                  )
-                    .attr("r", d.highlighted ? 6 : 5)
-                    .attr("opacity", 1)
-                })
-              })
-              .on("mouseout", function () {
-                onLineHover?.(null)
-                const lineOpacity = getScenarioOpacity(d, "line")
-                const circleOpacity = getScenarioOpacity(d, "circle")
-                d3.select(this)
-                  .attr("r", d.highlighted ? 5 : 4)
-                  .attr("opacity", circleOpacity) // Respect current filter state for circles
-
-                // Reset the corresponding line for this circle
-                const isActive = isScenarioActive(d)
-                g.select(`.line-${dataIndex}`)
-                  .attr(
-                    "stroke-width",
-                    isActive ? (d.highlighted ? 2.5 : 1.8) : 1.0,
-                  ) // Return to elegant active thickness
-                  .attr("opacity", lineOpacity) // Respect current filter state for lines
-
-                // Reset all other circles for this same line/scenario
-                axes.forEach((otherAxis) => {
-                  g.select(
-                    `.circle-${dataIndex}-${otherAxis.replace(/\s+/g, "-")}`,
-                  )
-                    .attr("r", d.highlighted ? 5 : 4)
-                    .attr("opacity", circleOpacity) // Respect current filter state for circles
-                })
-              })
+              .style("cursor", onLineClick ? "pointer" : "default")
               .on("click", function () {
                 onLineClick?.(d)
               })
@@ -835,7 +789,7 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
 
           const circleSelection = animate ? circle.transition(t as any) : circle
           ;(circleSelection as any)
-            .attr("cx", scales[axis]!(value))
+            .attr("cx", scales[axis]!(value) + xOffset) // Apply offset to circles too
             .attr("cy", yScale(axis)!)
             .attr("opacity", circleOpacity) // Dots opaque
         })
@@ -867,13 +821,12 @@ const VerticalParallelLinePlot: React.FC<VerticalParallelLinePlotProps> = ({
       showBaseline,
       baselineData,
       title,
-      onLineHover,
       onLineClick,
       getScenarioOpacity,
-      isScenarioActive,
       overlayTiers,
       updateScenarioVisibility,
       currentHeight,
+      scenarioOffsets,
     ],
   )
 
