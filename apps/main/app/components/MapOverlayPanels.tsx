@@ -169,8 +169,8 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
       >
         <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          Water is distributed from multiple points along the way, and
-          pumped out from the{" "}
+          Water is distributed from multiple points along the way, and pumped
+          out from the{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Delta
           </Box>{" "}
@@ -256,8 +256,8 @@ export default function MapOverlayPanels() {
             color: theme.palette.blue.darkest,
           }}
         >
-          We are making this data available to the public so that communities can
-          better understand the range of possibilities, and the range of
+          We are making this data available to the public so that communities
+          can better understand the range of possibilities, and the range of
           consequences, that different water management practices can bring.
         </Typography>
       </CallResponsePanel>
@@ -330,8 +330,8 @@ export default function MapOverlayPanels() {
               low-lying waterways and islands where the Sacramento and San
               Joaquin rivers meet, roughly between Sacramento, Stockton, and
               Antioch. Here river water mixes with salty incoming tides from San
-              Francisco Bay. Pumps and canals send water from the Delta to cities
-              and farms across the state.
+              Francisco Bay. Pumps and canals send water from the Delta to
+              cities and farms across the state.
             </Typography>
           </AccordionDetails>
         </Accordion>
@@ -379,7 +379,10 @@ export default function MapOverlayPanels() {
                   gap: theme.spacing(1),
                 }}
               >
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -390,7 +393,10 @@ export default function MapOverlayPanels() {
                   />
                   <Typography variant="body2">Inflows</Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -401,7 +407,10 @@ export default function MapOverlayPanels() {
                   />
                   <Typography variant="body2">Major reservoirs</Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -409,9 +418,14 @@ export default function MapOverlayPanels() {
                       backgroundColor: theme.palette.blue.bright,
                     }}
                   />
-                  <Typography variant="body2">Major rivers and tributaries</Typography>
+                  <Typography variant="body2">
+                    Major rivers and tributaries
+                  </Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -422,7 +436,10 @@ export default function MapOverlayPanels() {
                   />
                   <Typography variant="body2">Delta</Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 0,
@@ -432,9 +449,14 @@ export default function MapOverlayPanels() {
                       borderBottom: `16px solid ${theme.palette.accent.alert}`,
                     }}
                   />
-                  <Typography variant="body2">Major pumping stations</Typography>
+                  <Typography variant="body2">
+                    Major pumping stations
+                  </Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -444,7 +466,10 @@ export default function MapOverlayPanels() {
                   />
                   <Typography variant="body2">Major canals</Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -455,7 +480,10 @@ export default function MapOverlayPanels() {
                   />
                   <Typography variant="body2">Delivery areas</Typography>
                 </Box>
-                <Box component="li" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  component="li"
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <Box
                     sx={{
                       width: 16,
@@ -496,13 +524,13 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             current operations
           </Box>
-          . This represents the laws, regulations, priorities, and decisions that
-          affect how{" "}
+          . This represents the laws, regulations, priorities, and decisions
+          that affect how{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             California&apos;s
           </Box>{" "}
-          water supply is currently managed – and how outcomes differ among water
-          users.
+          water supply is currently managed – and how outcomes differ among
+          water users.
         </Typography>
       </CallResponsePanel>
 
@@ -542,7 +570,7 @@ export default function MapOverlayPanels() {
         side="right"
         variant="response"
         isVisible={isFirstPanelVisible}
-        sx={{ 
+        sx={{
           padding: (theme) => theme.spacing(2),
           marginBottom: "40vh",
           gap: (theme) => theme.spacing(1.5),

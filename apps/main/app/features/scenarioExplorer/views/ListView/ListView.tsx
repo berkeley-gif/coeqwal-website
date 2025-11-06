@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, Typography, useTheme, Button } from "@repo/ui/mui"
+import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "@repo/state"
 import SearchSortBar from "../../components/SearchSortBar"
 import StrategyGrid from "../../components/StrategyGrid"
@@ -30,18 +30,6 @@ const scenarioIdToStrategy = (scenarioId: string): string => {
 }
 
 /**
- * Get friendly display name for scenario
- */
-const getScenarioDisplayName = (scenarioId: string): string => {
-  const names: Record<string, string> = {
-    s0020: "Current operations",
-    s0021: "Current ops without TUCPs",
-    s0011: "Current ops with historical ag",
-  }
-  return names[scenarioId] || scenarioId
-}
-
-/**
  * ListView: Full list of COEQWAL scenarios with searching and sorting
  * Shows all scenarios in a grid/table format with outcome summaries
  */
@@ -54,7 +42,6 @@ export default function ListView() {
   const {
     selectedScenarios,
     toggleScenario,
-    clearScenarios,
     showOnlyChosen,
     showDefinitions,
     setShowOnlyChosen,
@@ -115,79 +102,6 @@ export default function ListView() {
         backgroundColor: theme.palette.grey[100],
       }}
     >
-      {/* Selection count and list */}
-      {selectedScenarios.length > 0 && (
-        <Box
-          sx={{
-            backgroundColor: theme.palette.blue.darkest,
-            color: theme.palette.common.white,
-          }}
-        >
-          {/* Count and Clear All */}
-          <Box
-            sx={{
-              px: theme.spacing(theme.cards.spacing.standard),
-              pt: theme.spacing(1.5),
-              pb: theme.spacing(1),
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: theme.typography.fontWeightMedium }}
-            >
-              {selectedScenarios.length} scenario
-              {selectedScenarios.length !== 1 ? "s" : ""} selected
-            </Typography>
-            <Button
-              variant="text"
-              size="small"
-              onClick={clearScenarios}
-              sx={{
-                color: theme.palette.common.white,
-                textTransform: "none",
-                fontSize: theme.typography.compact.subtitle.fontSize,
-                minWidth: "auto",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.1)",
-                },
-              }}
-            >
-              Clear all
-            </Button>
-          </Box>
-
-          {/* List of selected scenarios */}
-          <Box
-            sx={{
-              px: theme.spacing(theme.cards.spacing.standard),
-              pb: theme.spacing(1.5),
-              display: "flex",
-              flexWrap: "wrap",
-              gap: theme.spacing(1),
-            }}
-          >
-            {selectedScenarios.map((scenarioId) => (
-              <Typography
-                key={scenarioId}
-                variant="body2"
-                sx={{
-                  px: theme.spacing(1.5),
-                  py: theme.spacing(0.5),
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  borderRadius: theme.borderRadius.pill,
-                  fontSize: theme.typography.compact.subtitle.fontSize,
-                }}
-              >
-                {getScenarioDisplayName(scenarioId)}
-              </Typography>
-            ))}
-          </Box>
-        </Box>
-      )}
-
       {/* Search and Sort */}
       <SearchSortBar placeholder="Search scenarios by name or description..." />
 

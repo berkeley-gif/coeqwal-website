@@ -106,4 +106,3 @@ export function useComparisonData() {
     hasData: parallelPlotData.length > 0,
   }
 }
-
