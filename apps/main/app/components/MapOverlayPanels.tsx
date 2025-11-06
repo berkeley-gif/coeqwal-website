@@ -260,12 +260,14 @@ export default function MapOverlayPanels() {
               transition: "all 0.2s ease",
               flexDirection: "row-reverse",
               justifyContent: "flex-end",
+              alignItems: "flex-start",
               "& .MuiAccordionSummary-content": {
                 margin: 0,
                 marginLeft: theme.spacing(1.5),
               },
               "& .MuiAccordionSummary-expandIconWrapper": {
                 marginRight: 0,
+                marginTop: "5px",
               },
               "& .MuiSvgIcon-root": {
                 color: "inherit",
@@ -323,12 +325,14 @@ export default function MapOverlayPanels() {
               transition: "all 0.2s ease",
               flexDirection: "row-reverse",
               justifyContent: "flex-end",
+              alignItems: "flex-start",
               "& .MuiAccordionSummary-content": {
                 margin: 0,
                 marginLeft: theme.spacing(1.5),
               },
               "& .MuiAccordionSummary-expandIconWrapper": {
                 marginRight: 0,
+                marginTop: "5px",
               },
               "& .MuiSvgIcon-root": {
                 color: "inherit",
@@ -376,12 +380,14 @@ export default function MapOverlayPanels() {
               transition: "all 0.2s ease",
               flexDirection: "row-reverse",
               justifyContent: "flex-end",
+              alignItems: "flex-start",
               "& .MuiAccordionSummary-content": {
                 margin: 0,
                 marginLeft: theme.spacing(1.5),
               },
               "& .MuiAccordionSummary-expandIconWrapper": {
                 marginRight: 0,
+                marginTop: "5px",
               },
               "& .MuiSvgIcon-root": {
                 color: "inherit",
