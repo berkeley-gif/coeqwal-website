@@ -56,7 +56,7 @@ export default function LearnPanel() {
                 fontWeight={700}
               >
                 Do you know that California has one of the most complex water
-                allocation systems in the world?
+                systems in the world?
               </Typography>
               <Typography
                 sx={{
