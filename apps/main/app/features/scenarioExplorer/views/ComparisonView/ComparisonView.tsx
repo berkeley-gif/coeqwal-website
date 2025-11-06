@@ -139,8 +139,12 @@ export default function ComparisonView() {
             Scenario comparison
           </Typography>
           <Typography variant="body2" sx={{ color: theme.palette.grey[600] }}>
+            Comparing three scenarios: <strong style={{ color: "#ff7f0e" }}>Current operations</strong>,{" "}
+            <strong style={{ color: "#2196f3" }}>Current ops w/o TUCPs</strong>, and{" "}
+            <strong style={{ color: "#4caf50" }}>Current ops w/ historical ag</strong>.
             Use the draggable arrows on each axis to filter scenarios by
-            brushing specific outcome ranges.
+            brushing specific outcome ranges. Note: scenarios with similar outcomes
+            may have overlapping lines.
             {hoveredScenario && (
               <Typography
                 component="span"
@@ -183,18 +187,17 @@ export default function ComparisonView() {
                 data={data}
                 axes={axes}
                 responsive={true}
-                showBaseline={true}
-                baselineData={data.find((d) => d.id === "s0020")}
+                showBaseline={false}
                 onLineHover={(scenario) => setHoveredScenario(scenario)}
                 colors={{
-                  default: theme.palette.blue.bright,
-                  highlighted: "#ff7f0e", // Orange for baseline
+                  default: theme.palette.grey[600],
+                  highlighted: theme.palette.blue.darkest,
                   background: theme.palette.grey[50],
                 }}
                 lineColors={[
-                  "#ff7f0e", // s0020 - orange (baseline)
-                  theme.palette.blue.bright, // s0021 - blue
-                  "#2ca02c", // s0011 - green
+                  "#ff7f0e", // s0020 - orange (Current operations)
+                  "#2196f3", // s0021 - bright blue (Current ops w/o TUCPs)
+                  "#4caf50", // s0011 - green (Current ops w/ historical ag)
                 ]}
               />
             </Box>

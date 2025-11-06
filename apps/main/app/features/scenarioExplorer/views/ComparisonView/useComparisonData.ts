@@ -30,14 +30,17 @@ function normalizeTierValue(
 
   if (isSingleValue) {
     // Single-value tier - map tier level to normalized value
-    const tierLabel = chartData.find((d) => d.value > 0)?.label || "Tier 4"
+    const activeTier = chartData.find((d) => d.value > 0)
+    const tierLabel = activeTier?.label || "Tier 4"
+    // Normalize label format (handle both "Tier 1" and "Tier1")
+    const normalizedLabel = tierLabel.replace(/Tier\s*(\d)/, "Tier $1")
     const tierMapping: Record<string, number> = {
       "Tier 1": 1.0,
       "Tier 2": 0.33,
       "Tier 3": -0.33,
       "Tier 4": -1.0,
     }
-    return tierMapping[tierLabel] ?? 0
+    return tierMapping[normalizedLabel] ?? 0
   } else {
     // Multi-value tier - calculate weighted average
     // tier1: best (1), tier2: good (0.33), tier3: poor (-0.33), tier4: worst (-1)
@@ -49,16 +52,20 @@ function normalizeTierValue(
     }
 
     let weightedSum = 0
-    let totalPercentage = 0
+    let totalValue = 0
 
     chartData.forEach((d) => {
-      const weight = weights[d.label] ?? 0
-      weightedSum += weight * d.value
-      totalPercentage += d.value
+      // Normalize label format (handle both "Tier 1" and "Tier1")
+      const normalizedLabel = d.label.replace(/Tier\s*(\d)/, "Tier $1")
+      const weight = weights[normalizedLabel] ?? 0
+      // Values might be percentages (0-100) or decimals (0-1)
+      const normalizedValue = d.value > 1 ? d.value / 100 : d.value
+      weightedSum += weight * normalizedValue
+      totalValue += normalizedValue
     })
 
     // Normalize to -1 to 1 range
-    return totalPercentage > 0 ? weightedSum / totalPercentage : 0
+    return totalValue > 0 ? weightedSum / totalValue : 0
   }
 }
 
@@ -69,7 +76,9 @@ export function useComparisonData() {
   const { allChartData, isLoading, error } = useMultipleScenarioTiers()
 
   const parallelPlotData: VerticalParallelLineData[] = useMemo(() => {
-    if (!allChartData || Object.keys(allChartData).length === 0) return []
+    if (!allChartData || Object.keys(allChartData).length === 0) {
+      return []
+    }
 
     return SCENARIO_IDS.map((scenarioId) => {
       const scenarioData = allChartData[scenarioId] || {}
@@ -89,7 +98,7 @@ export function useComparisonData() {
         id: scenarioId,
         name: SCENARIO_NAMES[scenarioId],
         values,
-        highlighted: scenarioId === "s0020", // Highlight baseline scenario
+        highlighted: false, // No highlighting since we removed baseline
       }
     })
   }, [allChartData])
