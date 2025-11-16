@@ -13,8 +13,9 @@ import {
   AccordionDetails,
   ExpandMoreIcon,
 } from "@repo/ui/mui"
-import { useGeocoding, BOUNDING_BOXES } from "@repo/map"
+import { useGeocoding, BOUNDING_BOXES, useBasinLookup } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
+import { centralValleyBasins } from "@repo/data"
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
@@ -26,6 +27,8 @@ export default function MapOverlayPanels() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedLocation, setSelectedLocation] = useState<GeocodingFeature | null>(null)
   const [showResults, setShowResults] = useState(false)
+  const [basinInfo, setBasinInfo] = useState<{ name: string; properties: Record<string, unknown> } | null>(null)
+  const [isSelectingResult, setIsSelectingResult] = useState(false) // Track if we're programmatically setting the query
 
   // Geocoding hook, uses token from map context
   const geocoding = useGeocoding({
@@ -33,11 +36,20 @@ export default function MapOverlayPanels() {
     types: ['place', 'address', 'poi'], // Allow addresses, cities, and POIs
     limit: 5,
     flyTo: true,
-    flyToZoom: 12,
+    flyToZoom: 14,  // Street-level detail
   })
+
+  // Basin lookup hook to cast the GeoJSON to the expected type
+  const { findBasin } = useBasinLookup(centralValleyBasins as any)
 
   // Search when query changes (debounced)
   useEffect(() => {
+    // Don't trigger search if we just selected a result
+    if (isSelectingResult) {
+      setIsSelectingResult(false)
+      return
+    }
+
     if (searchQuery.trim()) {
       const timeoutId = setTimeout(() => {
         geocoding.search(searchQuery)
@@ -46,6 +58,8 @@ export default function MapOverlayPanels() {
     } else {
       geocoding.clear()
       setShowResults(false)
+      setSelectedLocation(null)
+      setBasinInfo(null)
     }
   }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -56,16 +70,24 @@ export default function MapOverlayPanels() {
 
   // Handle location selection
   const handleSelectLocation = (feature: GeocodingFeature) => {
+    setIsSelectingResult(true) // Prevent search from retriggering
     setSelectedLocation(feature)
     setSearchQuery(feature.place_name)
     setShowResults(false)
     geocoding.selectResult(feature) // Flies to location on map
+
+    // Find which basin this location is in
+    const [lng, lat] = feature.center
+    const basin = findBasin(lng, lat)
+    setBasinInfo(basin)
   }
 
   // Clear search
   const handleClearSearch = () => {
     setSearchQuery("")
     setSelectedLocation(null)
+    setBasinInfo(null)
+    setIsSelectingResult(false)
     geocoding.clear()
     setShowResults(false)
   }
@@ -352,7 +374,7 @@ export default function MapOverlayPanels() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for a location in California..."
+                placeholder="Search for a location in California"
                 sx={{
                   width: '100%',
                   padding: theme.spacing(1.5),
@@ -523,6 +545,51 @@ export default function MapOverlayPanels() {
                   <Typography variant="caption" sx={{ color: theme.palette.grey[500], display: 'block', mt: 1 }}>
                     Coordinates: {selectedLocation.center[1].toFixed(4)}°N, {selectedLocation.center[0].toFixed(4)}°W
                   </Typography>
+
+                  {/* Basin info */}
+                  <Box
+                    sx={{
+                      mt: 2,
+                      pt: 2,
+                      borderTop: `1px solid ${theme.palette.blue.light}`,
+                    }}
+                  >
+                    {basinInfo ? (
+                      <>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: theme.palette.blue.darkest, 
+                            fontWeight: 600, 
+                            textTransform: 'uppercase', 
+                            letterSpacing: '0.1em',
+                            display: 'block',
+                            mb: 0.5,
+                          }}
+                        >
+                          🗺️ Water Basin
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            fontWeight: 600,
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          {basinInfo.name}
+                        </Typography>
+                        {basinInfo.properties && 'fid' in basinInfo.properties && (
+                          <Typography variant="caption" sx={{ color: theme.palette.grey[500], display: 'block', mt: 0.5 }}>
+                            Basin ID: {String(basinInfo.properties.fid)}
+                          </Typography>
+                        )}
+                      </>
+                    ) : (
+                      <Typography variant="caption" sx={{ color: theme.palette.grey[500], fontStyle: 'italic' }}>
+                        Location is outside known basin boundaries
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
               )}
             </Box>
