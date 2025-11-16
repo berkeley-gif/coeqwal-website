@@ -92,7 +92,7 @@ export default function MapOverlayPanels() {
         </Typography>
 
         <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          Rain and snowmelt in the mountains flow into California&apos;s{" "}
+          Rain and snowmelt in the mountains flow into California&apos;s large{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
           </Box>
