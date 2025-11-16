@@ -56,6 +56,7 @@ interface StrategyGridProps {
     name: string
     displayName: string
   }>
+  strategies?: Array<{ value: string; label: string; description: string }> // Optional filtered strategies list
 
   // Event handlers
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
@@ -162,6 +163,7 @@ const gridStyles = {
 const StrategyGrid = React.memo(function StrategyGridComponent({
   getChartDataForStrategy,
   outcomeNames,
+  strategies: strategiesProp,
   onOutcomeSelect,
   onTierClick,
   onToggleScenario,
@@ -181,6 +183,9 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   const chosenStrategies = selectedScenarios
   const toggleStrategyChoice = onToggleScenario
+
+  // Use provided strategies or fallback to all strategies
+  const displayStrategies = strategiesProp || strategies
 
   return (
     <Box sx={{ position: "relative" }}>
@@ -374,7 +379,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           ))}
         </Box>
         {/* Strategy rows */}
-        {strategies
+        {displayStrategies
           .filter((strategy) =>
             showOnlyChosen ? chosenStrategies.includes(strategy.value) : true,
           )
