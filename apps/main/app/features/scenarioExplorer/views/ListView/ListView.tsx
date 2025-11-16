@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useMemo } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useScenarioExplorerStore } from "@repo/state"
 import SearchSortBar from "../../components/SearchSortBar"
@@ -10,6 +10,7 @@ import {
   STRATEGY_TO_SCENARIO_ID,
   getScenarioIdFromStrategy,
 } from "../../../../constants/outcomeMappings"
+import { strategies, strategyDefinitions } from "../../../../lib/scenarios"
 
 /**
  * Convert strategy values to scenario IDs (using centralized mapping)
@@ -46,7 +47,39 @@ export default function ListView() {
     showDefinitions,
     setShowOnlyChosen,
     setShowDefinitions,
+    searchQuery,
   } = useScenarioExplorerStore()
+
+  // Filter strategies based on search query
+  const filteredStrategies = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return strategies // No search = show all
+    }
+
+    const searchLower = searchQuery.toLowerCase()
+    return strategies.filter((strategy) => {
+      // Search in strategy label
+      if (strategy.label.toLowerCase().includes(searchLower)) return true
+      
+      // Search in strategy description
+      if (strategy.description.toLowerCase().includes(searchLower)) return true
+      
+      // Search in strategy value/ID
+      if (strategy.value.toLowerCase().includes(searchLower)) return true
+      
+      // Search in associated operation icon labels (from strategyDefinitions)
+      // These are the tooltip labels for the operation icons
+      const relatedDefinition = strategyDefinitions.find(
+        (def) => def.id === strategy.value
+      )
+      if (relatedDefinition) {
+        if (relatedDefinition.label.toLowerCase().includes(searchLower)) return true
+        if (relatedDefinition.description.toLowerCase().includes(searchLower)) return true
+      }
+      
+      return false
+    })
+  }, [searchQuery])
 
   // Convert scenario IDs to strategy values for StrategyGrid
   const selectedStrategies = selectedScenarios.map(scenarioIdToStrategy)
@@ -116,6 +149,7 @@ export default function ListView() {
         <StrategyGrid
           getChartDataForStrategy={getChartDataForStrategy}
           outcomeNames={outcomeNames || []}
+          strategies={filteredStrategies}
           onOutcomeSelect={handleOutcomeSelect}
           onToggleScenario={handleToggleScenario}
           selectedScenarios={selectedStrategies}
