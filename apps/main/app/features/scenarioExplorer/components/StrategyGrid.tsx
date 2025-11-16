@@ -57,6 +57,8 @@ interface StrategyGridProps {
     displayName: string
   }>
   strategies?: Array<{ value: string; label: string; description: string }> // Optional filtered strategies list
+  highlightedStrategies?: Set<string> // Strategy values to highlight (search matches)
+  showSearchDivider?: boolean // Whether to show a divider between search results and other strategies
 
   // Event handlers
   onOutcomeSelect: (strategyValue: string, outcome: string) => void
@@ -164,6 +166,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   getChartDataForStrategy,
   outcomeNames,
   strategies: strategiesProp,
+  highlightedStrategies,
+  showSearchDivider = false,
   onOutcomeSelect,
   onTierClick,
   onToggleScenario,
@@ -186,6 +190,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
 
   // Use provided strategies or fallback to all strategies
   const displayStrategies = strategiesProp || strategies
+  const highlighted = highlightedStrategies || new Set<string>()
 
   return (
     <Box sx={{ position: "relative" }}>
@@ -383,7 +388,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           .filter((strategy) =>
             showOnlyChosen ? chosenStrategies.includes(strategy.value) : true,
           )
-          .map((strategy, index) => (
+          .flatMap((strategy, index, filteredArray) => {
+            const isHighlighted = highlighted.has(strategy.value)
+            const nextStrategy = filteredArray[index + 1]
+            const isNextHighlighted = nextStrategy ? highlighted.has(nextStrategy.value) : false
+            const shouldShowDivider = showSearchDivider && isHighlighted && !isNextHighlighted
+            
+            const strategyRow = (
             <Box
               key={strategy.value}
               sx={{
@@ -393,12 +404,13 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   xs: "subgrid", // Mobile: use parent grid
                   lg: "subgrid", // Desktop: use parent grid
                 },
-                backgroundColor: "#faf8f5",
+                backgroundColor: isHighlighted ? theme.palette.common.white : "#faf8f5",
                 borderRadius: theme.borderRadius.rounded,
                 padding: showMapView ? theme.spacing(1) : theme.spacing(1.5),
                 gap: theme.spacing(1),
                 alignItems: "start",
-                transition: "background-color 0.2s ease",
+                transition: "all 0.2s ease",
+                border: isHighlighted ? `2px solid ${theme.palette.blue.bright}` : "2px solid transparent",
                 "&:hover": {
                   backgroundColor: theme.palette.common.white,
                 },
@@ -716,7 +728,26 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                 })}
               </Box>
             </Box>
-          ))}
+            )
+
+            // Return strategy row plus optional divider
+            if (shouldShowDivider) {
+              return [
+                strategyRow,
+                <Box
+                  key={`divider-${strategy.value}`}
+                  sx={{
+                    gridColumn: "1 / -1",
+                    my: theme.spacing(3),
+                    height: "1px",
+                    backgroundColor: theme.palette.grey[300],
+                  }}
+                />
+              ]
+            }
+            
+            return [strategyRow]
+          })}
       </Box>
     </Box>
   )
