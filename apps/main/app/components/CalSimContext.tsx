@@ -19,6 +19,8 @@ interface CalSimContextType {
   setIsPanelsVisible: (visible: boolean) => void
   selectedOutcome: string | null
   setSelectedOutcome: (outcome: string | null) => void
+  geocoderMarker: [number, number] | null
+  setGeocoderMarker: (position: [number, number] | null) => void
 }
 
 const CalSimContext = createContext<CalSimContextType | undefined>(undefined)
@@ -29,6 +31,7 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isPanelsExpanded, setIsPanelsExpanded] = useState(false)
   const [isPanelsVisible, setIsPanelsVisible] = useState(false)
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
+  const [geocoderMarker, setGeocoderMarker] = useState<[number, number] | null>(null)
 
   const toggleCalSim = useCallback(() => {
     setIsCalSimVisible((prev) => {
@@ -57,6 +60,8 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
         setIsPanelsVisible,
         selectedOutcome,
         setSelectedOutcome,
+        geocoderMarker,
+        setGeocoderMarker,
       }}
     >
       {children}

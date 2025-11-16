@@ -13,12 +13,17 @@ import {
   AccordionDetails,
   ExpandMoreIcon,
 } from "@repo/ui/mui"
-import { useGeocoding, BOUNDING_BOXES, useBasinLookup } from "@repo/map"
+import { useGeocoding, BOUNDING_BOXES, useBasinLookup, useMap } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
+import { useCalSimToggle } from "./CalSimContext"
+import bbox from "@turf/bbox"
+import type { Feature, Polygon, MultiPolygon } from "geojson"
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
+  const map = useMap()
+  const { setGeocoderMarker } = useCalSimToggle()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
@@ -35,8 +40,7 @@ export default function MapOverlayPanels() {
     bbox: BOUNDING_BOXES.CALIFORNIA,  // California only
     types: ['place', 'address', 'poi'], // Allow addresses, cities, and POIs
     limit: 5,
-    flyTo: true,
-    flyToZoom: 14,  // Street-level detail
+    flyTo: false, // Handling the map movement manually, for this component's use case
   })
 
   // Basin lookup hook to cast the GeoJSON to the expected type
@@ -74,12 +78,36 @@ export default function MapOverlayPanels() {
     setSelectedLocation(feature)
     setSearchQuery(feature.place_name)
     setShowResults(false)
-    geocoding.selectResult(feature) // Flies to location on map
+
+    // Set marker at the selected location
+    const [lng, lat] = feature.center
+    setGeocoderMarker([lng, lat])
 
     // Find which basin this location is in
-    const [lng, lat] = feature.center
     const basin = findBasin(lng, lat)
     setBasinInfo(basin)
+
+    // If we found a basin, fit the map to the basin bounds
+    if (basin) {
+      // Find the basin feature in the GeoJSON
+      const basinFeature = centralValleyBasins.features.find(
+        (f) => f.properties?.name === basin.name
+      ) as Feature<Polygon | MultiPolygon> | undefined
+
+      if (basinFeature) {
+        // Calculate the bounding box of the basin
+        const [minLng, minLat, maxLng, maxLat] = bbox(basinFeature)
+        
+        // Fit the map to the basin bounds with some padding
+        map.fitBounds(
+          [[minLng, minLat], [maxLng, maxLat]],
+          0, // pitch
+          0, // bearing
+          { top: 100, bottom: 100, left: 100, right: 100 }, // padding
+          { duration: 1500 } // smooth transition
+        )
+      }
+    }
   }
 
   // Clear search
@@ -87,6 +115,7 @@ export default function MapOverlayPanels() {
     setSearchQuery("")
     setSelectedLocation(null)
     setBasinInfo(null)
+    setGeocoderMarker(null)
     setIsSelectingResult(false)
     geocoding.clear()
     setShowResults(false)
@@ -567,7 +596,7 @@ export default function MapOverlayPanels() {
                             mb: 0.5,
                           }}
                         >
-                          🗺️ Water Basin
+                          Water Basin
                         </Typography>
                         <Typography 
                           variant="body2" 

@@ -78,6 +78,12 @@ importers:
       '@repo/viz':
         specifier: workspace:*
         version: link:../../packages/viz
+      '@turf/bbox':
+        specifier: ^7.2.0
+        version: 7.2.0
+      '@types/geojson':
+        specifier: ^7946.0.14
+        version: 7946.0.16
       next:
         specifier: ^15.2.1
         version: 15.2.4(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(sass@1.86.1)
@@ -249,6 +255,9 @@ importers:
 
   packages/map:
     dependencies:
+      '@turf/bbox':
+        specifier: ^7.2.0
+        version: 7.2.0
       '@turf/boolean-point-in-polygon':
         specifier: ^7.2.0
         version: 7.2.0

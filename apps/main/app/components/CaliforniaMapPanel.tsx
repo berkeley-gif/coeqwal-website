@@ -1,6 +1,6 @@
 "use client"
 
-import { Map, NavigationControl } from "@repo/map"
+import { Map, NavigationControl, Marker } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 // import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
@@ -19,7 +19,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { isPanelsExpanded } = useCalSimToggle()
+  const { isPanelsExpanded, geocoderMarker } = useCalSimToggle()
 
   return (
     <Box
@@ -72,6 +72,15 @@ export default function CaliforniaMapPanel({
 
         {/* Hotspot markers - appear when progressive panels are expanded */}
         <HotspotMarkers visible={isPanelsExpanded} />
+
+        {/* Geocoder marker - shows the selected location from basin search */}
+        {geocoderMarker && (
+          <Marker
+            longitude={geocoderMarker[0]}
+            latitude={geocoderMarker[1]}
+            color="red"
+          />
+        )}
 
         {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
         {/* <CalSimMarkers /> */}
