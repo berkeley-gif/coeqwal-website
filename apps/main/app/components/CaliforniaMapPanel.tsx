@@ -44,7 +44,7 @@ export default function CaliforniaMapPanel({
           pitch: 0,
         }}
         minZoom={5}
-        maxZoom={10}
+        maxZoom={18}  // Allow street-level detail
         // maxBounds={[
         //   [-124.5, 32.5], // Southwest coordinates (west, south)
         //   [-114.0, 42.0], // Northeast coordinates (east, north)
