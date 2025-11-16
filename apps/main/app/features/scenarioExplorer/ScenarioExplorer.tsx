@@ -33,9 +33,9 @@ export default function ScenarioExplorerNew() {
   }
 
   const viewLabels: Record<ExplorerView, string> = {
-    list: "List",
-    map: "Map",
-    comparison: "Comparison chart",
+    list: "Full list of scenarios",
+    map: "Map view",
+    comparison: "Scenario comparison chart",
     needs: "Needs-based search",
     data: "Data explorer",
   }
@@ -67,6 +67,12 @@ export default function ScenarioExplorerNew() {
           <Tabs
             value={activeView}
             onChange={handleTabChange}
+            TabIndicatorProps={{
+              style: {
+                height: 3,
+                backgroundColor: theme.palette.blue.bright,
+              },
+            }}
             sx={{
               minHeight: theme.spacing(7),
               "& .MuiTab-root": {
@@ -75,11 +81,21 @@ export default function ScenarioExplorerNew() {
                 textTransform: "none",
                 fontWeight: theme.typography.fontWeightMedium,
                 color: theme.palette.text.primary,
+                transition: "all 0.2s ease-in-out",
+                borderTopLeftRadius: theme.shape.borderRadius,
+                borderTopRightRadius: theme.shape.borderRadius,
+                marginTop: theme.spacing(1), // Gap from top of container
+                marginRight: theme.spacing(0.5), // Small gap between tabs
+                paddingLeft: theme.spacing(3),
+                paddingRight: theme.spacing(3),
                 "&.Mui-selected": {
-                  color: theme.palette.blue.darkest,
-                },
-                "&:hover": {
                   color: theme.palette.blue.bright,
+                  fontWeight: theme.typography.fontWeightBold,
+                  backgroundColor: `${theme.palette.blue.bright}1A`, // 10% opacity bright blue tint
+                },
+                "&:hover:not(.Mui-selected)": {
+                  color: theme.palette.blue.dark,
+                  backgroundColor: `${theme.palette.blue.bright}1A`, // Same blue tint as selected
                 },
               },
             }}
