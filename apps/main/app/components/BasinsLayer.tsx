@@ -1,6 +1,7 @@
 "use client"
 
 import { Source, Layer } from "@repo/map"
+import { centralValleyBasins } from "@repo/data"
 
 interface BasinsLayerProps {
   visible: boolean
@@ -15,7 +16,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
     <Source
       id="basins-source"
       type="geojson"
-      data="/geospatial_data/basins.geojson"
+      data={centralValleyBasins}
     >
       <Layer
         id="basins-layer"
