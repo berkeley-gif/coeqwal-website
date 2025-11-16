@@ -11,15 +11,64 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  TextField,
   ExpandMoreIcon,
 } from "@repo/ui/mui"
+import { useGeocoding, BOUNDING_BOXES } from "@repo/map"
+import type { GeocodingFeature } from "@repo/map"
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+
+  // Basin search state
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedLocation, setSelectedLocation] = useState<GeocodingFeature | null>(null)
+  const [showResults, setShowResults] = useState(false)
+
+  // Geocoding hook, uses token from map context
+  const geocoding = useGeocoding({
+    bbox: BOUNDING_BOXES.CALIFORNIA,  // California only
+    types: ['place', 'address', 'poi'], // Allow addresses, cities, and POIs
+    limit: 5,
+    flyTo: true,
+    flyToZoom: 12,
+  })
+
+  // Search when query changes (debounced)
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const timeoutId = setTimeout(() => {
+        geocoding.search(searchQuery)
+      }, 300) // 300ms debounce
+      return () => clearTimeout(timeoutId)
+    } else {
+      geocoding.clear()
+      setShowResults(false)
+    }
+  }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Show results when available
+  useEffect(() => {
+    setShowResults(geocoding.results.length > 0)
+  }, [geocoding.results])
+
+  // Handle location selection
+  const handleSelectLocation = (feature: GeocodingFeature) => {
+    setSelectedLocation(feature)
+    setSearchQuery(feature.place_name)
+    setShowResults(false)
+    geocoding.selectResult(feature) // Flies to location on map
+  }
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchQuery("")
+    setSelectedLocation(null)
+    geocoding.clear()
+    setShowResults(false)
+  }
 
   // Intersection observer for first panel entrance animation
   useEffect(() => {
@@ -293,20 +342,190 @@ export default function MapOverlayPanels() {
               variant="body2"
               sx={{ mb: theme.spacing(2), lineHeight: 1.6 }}
             >
-              Enter your address
+              Enter your California address, city, or landmark
             </Typography>
-            <TextField
-              fullWidth
-              placeholder="Search for a location..."
-              variant="outlined"
-              size="small"
-              sx={{
-                backgroundColor: theme.palette.common.white,
-                "& .MuiOutlinedInput-root": {
+
+            {/* Geocoder search input */}
+            <Box sx={{ position: 'relative' }}>
+              <Box
+                component="input"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for a location in California..."
+                sx={{
+                  width: '100%',
+                  padding: theme.spacing(1.5),
+                  paddingRight: searchQuery ? theme.spacing(6) : theme.spacing(1.5),
+                  fontSize: '14px',
+                  border: `1px solid ${theme.palette.grey[300]}`,
                   borderRadius: theme.borderRadius.standard,
-                },
-              }}
-            />
+                  backgroundColor: theme.palette.common.white,
+                  outline: 'none',
+                  transition: 'border-color 0.2s',
+                  '&:focus': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&::placeholder': {
+                    color: theme.palette.grey[500],
+                  }
+                }}
+              />
+
+              {/* Clear/loading indicator */}
+              {searchQuery && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    right: theme.spacing(1.5),
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                  }}
+                >
+                  {geocoding.loading && (
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        border: `2px solid ${theme.palette.grey[300]}`,
+                        borderTopColor: theme.palette.primary.main,
+                        borderRadius: '50%',
+                        animation: 'spin 0.6s linear infinite',
+                        '@keyframes spin': {
+                          to: { transform: 'rotate(360deg)' },
+                        },
+                      }}
+                    />
+                  )}
+                  {!geocoding.loading && (
+                    <Box
+                      component="button"
+                      onClick={handleClearSearch}
+                      sx={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: theme.palette.grey[600],
+                        fontSize: '18px',
+                        '&:hover': {
+                          color: theme.palette.grey[800],
+                        },
+                      }}
+                      aria-label="Clear search"
+                    >
+                      ×
+                    </Box>
+                  )}
+                </Box>
+              )}
+
+              {/* Results dropdown */}
+              {showResults && geocoding.results.length > 0 && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    left: 0,
+                    right: 0,
+                    backgroundColor: theme.palette.common.white,
+                    borderRadius: theme.borderRadius.standard,
+                    boxShadow: theme.shadows[3],
+                    maxHeight: 300,
+                    overflowY: 'auto',
+                    zIndex: 10,
+                    border: `1px solid ${theme.palette.grey[300]}`,
+                  }}
+                >
+                  {geocoding.results.map((feature, index) => (
+                    <Box
+                      key={feature.id || index}
+                      component="button"
+                      onClick={() => handleSelectLocation(feature)}
+                      sx={{
+                        width: '100%',
+                        padding: theme.spacing(1.5),
+                        border: 'none',
+                        borderBottom: index < geocoding.results.length - 1 
+                          ? `1px solid ${theme.palette.grey[200]}` 
+                          : 'none',
+                        backgroundColor: theme.palette.common.white,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'background-color 0.15s',
+                        '&:hover': {
+                          backgroundColor: theme.palette.grey[100],
+                        },
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.25 }}>
+                        {feature.text}
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: theme.palette.grey[600],
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          display: 'block',
+                        }}
+                      >
+                        {feature.place_name}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+              {/* Error message */}
+              {geocoding.error && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: 'block',
+                    mt: 1,
+                    padding: theme.spacing(1),
+                    backgroundColor: theme.palette.error.light,
+                    color: theme.palette.error.dark,
+                    borderRadius: theme.borderRadius.standard,
+                  }}
+                >
+                  {geocoding.error.message}
+                </Typography>
+              )}
+
+              {/* Selected location display */}
+              {selectedLocation && !showResults && (
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    backgroundColor: 'rgba(58, 69, 116, 0.05)',
+                    borderRadius: theme.borderRadius.standard,
+                    border: `1px solid ${theme.palette.blue.light}`,
+                  }}
+                >
+                  <Typography variant="caption" sx={{ color: theme.palette.blue.darkest, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    📍 Selected Location
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
+                    {selectedLocation.text}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: theme.palette.grey[600], display: 'block', mt: 0.5 }}>
+                    {selectedLocation.place_name}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: theme.palette.grey[500], display: 'block', mt: 1 }}>
+                    Coordinates: {selectedLocation.center[1].toFixed(4)}°N, {selectedLocation.center[0].toFixed(4)}°W
+                  </Typography>
+                </Box>
+              )}
+            </Box>
           </AccordionDetails>
         </Accordion>
 
