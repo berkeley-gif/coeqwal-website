@@ -1,12 +1,26 @@
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoIconButton } from "@repo/ui"
+import { InfoIconButton, InfoTooltip } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
 import { useScenarioTiers } from "../hooks/useTierData"
+
+// Shared operation icons for current operations strategy
+export const CURRENT_OPERATIONS_ICONS = [
+  {
+    path: "/images/icons/current_ops.svg",
+    alt: "Current operations",
+    description: "Current operations",
+  },
+  {
+    path: "/images/icons/land_use.svg",
+    alt: "Current land use considerations",
+    description: "Current land use considerations",
+  },
+]
 
 interface ScenarioCardProps {
   isMinimized?: boolean
@@ -110,7 +124,7 @@ export default function ScenarioCard({
                 mb: 0.5,
               }}
             >
-              OPERATIONS
+              STRATEGY
             </Box>
             <Box
               sx={{
@@ -140,35 +154,52 @@ export default function ScenarioCard({
                 sx={{ color: theme.palette.blue.bright }}
               />
             </Box>
+            {/* HR separator */}
             <Box
               sx={{
-                mb: 1,
-                color: theme.palette.blue.darkest,
-                fontFamily: theme.typography.fontFamily,
+                borderBottom: "1px solid",
+                borderColor: theme.palette.grey[300],
+                my: 1.5,
               }}
-            >
-              {/* Description */}
-              <Box component="ul" sx={{ margin: 0, paddingLeft: "20px" }}>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  sx={{
-                    mb: 0,
-                    color: "inherit",
-                  }}
-                >
-                  helps us understand how California manages water
-                </Typography>
-                <Typography
-                  component="li"
-                  variant="body2"
-                  sx={{
-                    mb: 0,
-                    color: "inherit",
-                  }}
-                >
-                  serves as a foundation to compare alternatives.
-                </Typography>
+            />
+
+            {/* Key operations section */}
+            <Box sx={{ flexShrink: 0, pb: 1, pt: 1 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  pb: 1,
+                }}
+              >
+                Key operations
+              </Typography>
+
+              {/* Operations icons */}
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "center",
+                }}
+              >
+                {CURRENT_OPERATIONS_ICONS.map((icon) => (
+                  <InfoTooltip key={icon.path} description={icon.description} placement="top">
+                    <Box
+                      sx={{
+                        width: theme.spacing(5),
+                        height: theme.spacing(5),
+                        cursor: "pointer",
+                      }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={icon.path}
+                        alt={icon.alt}
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    </Box>
+                  </InfoTooltip>
+                ))}
               </Box>
             </Box>
 

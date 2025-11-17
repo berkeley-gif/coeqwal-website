@@ -24,6 +24,7 @@ import {
 } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
+import { CURRENT_OPERATIONS_ICONS } from "../../../components/ScenarioCard"
 import TierTooltipContent from "./TierTooltipContent"
 import TogglePair from "./TogglePair"
 
@@ -524,8 +525,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   justifyContent: "flex-start",
                 }}
               >
-                {/* Current operations icons */}
-                <InfoTooltip description="Current operations" placement="top">
+                {/* Current operations icon */}
+                <InfoTooltip description={CURRENT_OPERATIONS_ICONS[0]?.description || "Current operations"} placement="top">
                   <Box
                     sx={{
                       width: showMapView
@@ -539,8 +540,8 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src="/images/icons/current_ops.svg"
-                      alt="Current operations"
+                      src={CURRENT_OPERATIONS_ICONS[0]?.path || "/images/icons/current_ops.svg"}
+                      alt={CURRENT_OPERATIONS_ICONS[0]?.alt || "Current operations"}
                       style={{ width: "100%", height: "100%" }}
                     />
                   </Box>
@@ -551,7 +552,7 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                   description={
                     strategy.value === "current-ops-historical-ag"
                       ? "Historical land use (2004-2013)"
-                      : "Current land use considerations"
+                      : CURRENT_OPERATIONS_ICONS[1]?.description || "Current land use"
                   }
                   placement="top"
                 >
@@ -571,12 +572,12 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                       src={
                         strategy.value === "current-ops-historical-ag"
                           ? "/images/icons/land_use_prev.svg"
-                          : "/images/icons/land_use.svg"
+                          : CURRENT_OPERATIONS_ICONS[1]?.path || "/images/icons/land_use.svg"
                       }
                       alt={
                         strategy.value === "current-ops-historical-ag"
                           ? "Historical land use"
-                          : "Current land use"
+                          : CURRENT_OPERATIONS_ICONS[1]?.alt || "Current land use"
                       }
                       style={{ width: "100%", height: "100%" }}
                     />
