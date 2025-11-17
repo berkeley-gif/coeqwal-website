@@ -1,11 +1,14 @@
 "use client"
 
+import { useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
 import { useScenarioTiers } from "../hooks/useTierData"
+import { useScrollTooltips } from "../hooks/useScrollTooltips"
+import ScrollTooltip from "./ScrollTooltip"
 
 // Shared operation icons for current operations strategy
 export const CURRENT_OPERATIONS_ICONS = [
@@ -40,6 +43,35 @@ export default function ScenarioCard({
   const theme = useTheme()
   const { selectedOutcome } = useCalSimToggle()
 
+  // Refs for scroll tooltip targets
+  const keyOperationsRef = useRef<HTMLElement>(null)
+  const keyOutcomesRef = useRef<HTMLElement>(null)
+
+  // Scroll tooltip sequence
+  const { activeTooltipIndex, isSequenceActive, containerRef } =
+    useScrollTooltips({
+      steps: [
+        {
+          id: "key-operations",
+          targetRef: keyOperationsRef,
+          content: "These are the key water management operations that determine this strategy.",
+          position: "left",
+          delay: 800,
+          duration: 2500,
+        },
+        {
+          id: "key-outcomes",
+          targetRef: keyOutcomesRef,
+          content: "These show how this strategy affects water supply, ecosystems, and communities.",
+          position: "left",
+          delay: 500,
+          duration: 2500,
+        },
+      ],
+      pauseScrolling: false,
+      triggerThreshold: 0.5,
+    })
+
   // Fetch tier data for s0020 (Current operations)
   const { chartData, isLoading } = useScenarioTiers("s0020")
 
@@ -69,11 +101,30 @@ export default function ScenarioCard({
 
   return (
     <Box
+      ref={containerRef}
       sx={{
         position: "relative",
         height: "auto",
       }}
     >
+      {/* Scroll tooltips */}
+      {isSequenceActive && (
+        <>
+          <ScrollTooltip
+            targetRef={keyOperationsRef}
+            content="These are the key water management operations that determine this strategy."
+            position="left"
+            isVisible={activeTooltipIndex === 0}
+          />
+          <ScrollTooltip
+            targetRef={keyOutcomesRef}
+            content="These show how this strategy affects water supply, ecosystems, and communities."
+            position="left"
+            isVisible={activeTooltipIndex === 1}
+          />
+        </>
+      )}
+
       <Box
         sx={{
           backdropFilter: "blur(10px)",
@@ -145,7 +196,7 @@ export default function ScenarioCard({
             />
 
             {/* Key operations section */}
-            <Box sx={{ flexShrink: 0, pb: 1, pt: 1 }}>
+            <Box ref={keyOperationsRef} sx={{ flexShrink: 0, pb: 1, pt: 1 }}>
               <Typography
                 variant="h6"
                 sx={{
@@ -195,7 +246,7 @@ export default function ScenarioCard({
             />
 
             {/* Scenario snapshot section */}
-            <Box sx={{ flexShrink: 0, pb: 1, pt: 2 }}>
+            <Box ref={keyOutcomesRef} sx={{ flexShrink: 0, pb: 1, pt: 2 }}>
               <Box>
                 <Typography
                   variant="h6"
