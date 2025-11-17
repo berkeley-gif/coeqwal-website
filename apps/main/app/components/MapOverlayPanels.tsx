@@ -171,6 +171,60 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
+      {/* Call: Central Valley water management importance */}
+      <CallResponsePanel
+        id="central-valley-importance"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          California&apos;s Central Valley
+        </Typography>
+
+        <Typography variant="body1" sx={{ lineHeight: 1.75, mt: 1 }}>
+          Understanding how water is managed in California&apos;s large{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Central Valley
+          </Box>{" "}
+          is essential to understanding California&apos;s water issues.
+        </Typography>
+      </CallResponsePanel>
+
+      {/* Call: Central Valley basins */}
+      <CallResponsePanel
+        id="central-valley-basins"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        {/* Eyebrow label */}
+        <Typography
+          variant="overline"
+          sx={{
+            color: theme.palette.blue.darkest,
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            fontSize: "0.7rem",
+          }}
+        >
+          California&apos;s Central Valley
+        </Typography>
+
+        <Typography variant="body1" sx={{ lineHeight: 1.75, mt: 1 }}>
+          The Central Valley can be thought of as being made up of three basins.
+        </Typography>
+      </CallResponsePanel>
+
       {/* Call: Rain and snowmelt statement */}
       <CallResponsePanel
         id="water-flow-call"
@@ -192,11 +246,7 @@ export default function MapOverlayPanels() {
         </Typography>
 
         <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          Rain and snowmelt in the mountains flow into California&apos;s large{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            Central Valley
-          </Box>
-          .
+          Rain and snowmelt in the mountains flow into this large valley.
         </Typography>
       </CallResponsePanel>
 
@@ -212,7 +262,7 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Sacramento River
           </Box>{" "}
-          flows toward the{" "}
+          flows toward the low-lying{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Delta
           </Box>
@@ -315,7 +365,7 @@ export default function MapOverlayPanels() {
           </Box>{" "}
           to run CalSim through a broad range of different water management
           practices and evaluate the results under current and future climate
-          scenarios.
+          possibilities.
         </Typography>
 
         <Typography
@@ -571,9 +621,6 @@ export default function MapOverlayPanels() {
                   <Typography variant="caption" sx={{ color: theme.palette.grey[600], display: 'block', mt: 0.5 }}>
                     {selectedLocation.place_name}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: theme.palette.grey[500], display: 'block', mt: 1 }}>
-                    Coordinates: {selectedLocation.center[1].toFixed(4)}°N, {selectedLocation.center[0].toFixed(4)}°W
-                  </Typography>
 
                   {/* Basin info */}
                   <Box
@@ -596,7 +643,7 @@ export default function MapOverlayPanels() {
                             mb: 0.5,
                           }}
                         >
-                          Water Basin
+                          Central Valley Water Basin
                         </Typography>
                         <Typography 
                           variant="body2" 
@@ -607,15 +654,10 @@ export default function MapOverlayPanels() {
                         >
                           {basinInfo.name}
                         </Typography>
-                        {basinInfo.properties && 'fid' in basinInfo.properties && (
-                          <Typography variant="caption" sx={{ color: theme.palette.grey[500], display: 'block', mt: 0.5 }}>
-                            Basin ID: {String(basinInfo.properties.fid)}
-                          </Typography>
-                        )}
                       </>
                     ) : (
                       <Typography variant="caption" sx={{ color: theme.palette.grey[500], fontStyle: 'italic' }}>
-                        Location is outside known basin boundaries
+                        Location is outside Central Valley basin boundaries, but Central Valley water still may be delivered to your area.
                       </Typography>
                     )}
                   </Box>
@@ -906,6 +948,22 @@ export default function MapOverlayPanels() {
             current water management operations
           </Box>
           .
+        </Typography>
+      </CallResponsePanel>
+
+      {/* Left panel aligned with water management strategies */}
+      <CallResponsePanel
+        id="strategies-context"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
+          Currently, operators from the California Department of Water Resources and the U.S. Bureau of Reclamation operate water management in the Central Valley in accordance with the{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            Current Operations
+          </Box>{" "}
+          strategy. This strategy is important to understand, and can be used as a baseline to compare alternative strategies with.
         </Typography>
       </CallResponsePanel>
 
