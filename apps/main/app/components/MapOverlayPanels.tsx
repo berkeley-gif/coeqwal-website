@@ -958,10 +958,12 @@ export default function MapOverlayPanels() {
         variant="response"
         isVisible={isFirstPanelVisible}
         sx={{
-          padding: (theme) => theme.spacing(2),
+          padding: 0, // Remove padding - cards have their own
           marginBottom: "40vh",
           gap: (theme) => theme.spacing(1.5),
           maxWidth: "560px", // Wider for this card to accommodate contents
+          backgroundColor: "transparent", // Completely invisible
+          backdropFilter: "none", // Why do I need this?
         }}
       >
         <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />

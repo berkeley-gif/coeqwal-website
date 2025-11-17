@@ -7,7 +7,7 @@ import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
 import { useScenarioTiers } from "../hooks/useTierData"
-import { useScrollTooltips } from "../hooks/useScrollTooltips"
+import { useScroll, useTransform } from "@repo/motion"
 import ScrollTooltip from "./ScrollTooltip"
 
 // Shared operation icons for current operations strategy
@@ -43,34 +43,32 @@ export default function ScenarioCard({
   const theme = useTheme()
   const { selectedOutcome } = useCalSimToggle()
 
-  // Refs for scroll tooltip targets
+  // Refs for scroll tracking and tooltip targets
+  const scrollTrackRef = useRef<HTMLDivElement>(null)
+  const stickyContainerRef = useRef<HTMLDivElement>(null)
   const keyOperationsRef = useRef<HTMLElement>(null)
   const keyOutcomesRef = useRef<HTMLElement>(null)
 
-  // Scroll tooltip sequence
-  const { activeTooltipIndex, isSequenceActive, containerRef } =
-    useScrollTooltips({
-      steps: [
-        {
-          id: "key-operations",
-          targetRef: keyOperationsRef,
-          content: "These are the key water management operations that determine this strategy.",
-          position: "left",
-          delay: 800,
-          duration: 2500,
-        },
-        {
-          id: "key-outcomes",
-          targetRef: keyOutcomesRef,
-          content: "These show how this strategy affects water supply, ecosystems, and communities.",
-          position: "left",
-          delay: 500,
-          duration: 2500,
-        },
-      ],
-      pauseScrolling: false,
-      triggerThreshold: 0.5,
-    })
+  // Track scroll progress through the tall scroll track
+  const { scrollYProgress } = useScroll({
+    target: scrollTrackRef,
+    offset: ["start end", "end start"],
+  })
+
+  // Map scroll progress to tooltip opacities
+  // First tooltip: visible from 0.2 to 0.5
+  const firstTooltipOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.3, 0.4, 0.5],
+    [0, 1, 1, 0]
+  )
+
+  // Second tooltip: visible from 0.5 to 0.8
+  const secondTooltipOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.6, 0.7, 0.8],
+    [0, 1, 1, 0]
+  )
 
   // Fetch tier data for s0020 (Current operations)
   const { chartData, isLoading } = useScenarioTiers("s0020")
@@ -101,45 +99,74 @@ export default function ScenarioCard({
 
   return (
     <Box
-      ref={containerRef}
       sx={{
         position: "relative",
         height: "auto",
+        width: "100%",
       }}
     >
-      {/* Scroll tooltips */}
-      {isSequenceActive && (
-        <>
-          <ScrollTooltip
-            targetRef={keyOperationsRef}
-            content="These are the key water management operations that determine this strategy."
-            position="left"
-            isVisible={activeTooltipIndex === 0}
-          />
-          <ScrollTooltip
-            targetRef={keyOutcomesRef}
-            content="These show how this strategy affects water supply, ecosystems, and communities."
-            position="left"
-            isVisible={activeTooltipIndex === 1}
-          />
-        </>
-      )}
-
+      {/* Tall scroll track to create the "pause" effect */}
       <Box
+        ref={scrollTrackRef}
         sx={{
-          backdropFilter: "blur(10px)",
-          pointerEvents: "auto",
-          backgroundColor: "rgba(255, 255, 255, 0.95)",
-          borderRadius: theme.borderRadius.card,
-          border: "1px solid",
-          borderColor: theme.palette.divider,
-          padding: 2,
+          height: "300vh", // 3x viewport height for scroll progression...I'm not sure I like this approach. Seems hacky.
+          width: "100%",
+          position: "relative",
+        }}
+      />
+
+      {/* Sticky container - stays fixed while scrolling through track */}
+      <Box
+        ref={stickyContainerRef}
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: "100vh", // Fixed viewport height so it doesn't stretch
+          width: "100%",
+          pointerEvents: "none",
           display: "flex",
-          flexDirection: "column",
-          height: "auto",
-          opacity: isMinimized ? 0.8 : 1,
+          alignItems: "center", // Center the card vertically
+          justifyContent: "center",
+          backgroundColor: "transparent", // No background to avoid stretching effect
         }}
       >
+        {/* Scroll-driven tooltips */}
+        <ScrollTooltip
+          targetRef={keyOperationsRef}
+          containerRef={stickyContainerRef}
+          content="These are the key water management operations that determine this strategy."
+          position="left"
+          opacity={firstTooltipOpacity}
+        />
+        <ScrollTooltip
+          targetRef={keyOutcomesRef}
+          containerRef={stickyContainerRef}
+          content="These show how this strategy affects water supply, ecosystems, and communities."
+          position="left"
+          opacity={secondTooltipOpacity}
+        />
+
+        {/* The actual card */}
+        <Box
+          sx={{
+            backdropFilter: "blur(10px)",
+            pointerEvents: "auto",
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            borderRadius: theme.borderRadius.card,
+            border: "3px solid", // Thicker border for "response" visual
+            borderColor: theme.palette.brand.sky, // Use brand sky blue for response role
+            padding: 2,
+            display: "flex",
+            flexDirection: "column",
+            maxWidth: "800px", // Prevent card from stretching too wide
+            width: "100%",
+            maxHeight: "90vh", // Prevent card from being taller than viewport
+            overflowY: "auto", // Allow scrolling if content is too tall
+            opacity: isMinimized ? 0.8 : 1,
+          }}
+        >
         {/* Minimized state - title only */}
         {isMinimized && (
           <Box sx={{ mb: 1, flexShrink: 0 }}>
@@ -352,54 +379,55 @@ export default function ScenarioCard({
             </Box>
           </Box>
         )}
-      </Box>
 
-      {/* Minimize/maximize button */}
-      {onToggleMinimized && (
-        <Box
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            onToggleMinimized()
-          }}
-          sx={{
-            position: "absolute",
-            top: "8px",
-            right: "8px",
-            width: "24px",
-            height: "24px",
-            backgroundColor: theme.palette.common.white,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-            border: `1px solid ${theme.palette.grey[200]}`,
-            transition: "all 0.2s ease",
-            zIndex: 1,
-            pointerEvents: "auto",
-            "&:hover": {
-              backgroundColor: theme.palette.grey[50],
-              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-            },
-          }}
-        >
-          <svg
-            width="12"
-            height="10"
-            viewBox="0 0 12 10"
-            style={{
-              fill: "#3a4574",
-              transition: "transform 0.2s ease",
-              transform: isMinimized ? "rotate(0deg)" : "rotate(180deg)",
-              pointerEvents: "none",
+        {/* Minimize/maximize button */}
+        {onToggleMinimized && (
+          <Box
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              onToggleMinimized()
+            }}
+            sx={{
+              position: "absolute",
+              top: "8px",
+              right: "8px",
+              width: "24px",
+              height: "24px",
+              backgroundColor: theme.palette.common.white,
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
+              border: `1px solid ${theme.palette.grey[200]}`,
+              transition: "all 0.2s ease",
+              zIndex: 1,
+              pointerEvents: "auto",
+              "&:hover": {
+                backgroundColor: theme.palette.grey[50],
+                boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+              },
             }}
           >
-            <path d="M6 0 L11 8 Q6 6 1 8 Z" />
-          </svg>
-        </Box>
-      )}
+            <svg
+              width="12"
+              height="10"
+              viewBox="0 0 12 10"
+              style={{
+                fill: "#3a4574",
+                transition: "transform 0.2s ease",
+                transform: isMinimized ? "rotate(0deg)" : "rotate(180deg)",
+                pointerEvents: "none",
+              }}
+            >
+              <path d="M6 0 L11 8 Q6 6 1 8 Z" />
+            </svg>
+          </Box>
+        )}
+      </Box>
+      </Box>
     </Box>
   )
 }
