@@ -947,23 +947,7 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 500 }}>
             current water management operations
           </Box>
-          .
-        </Typography>
-      </CallResponsePanel>
-
-      {/* Left panel aligned with water management strategies */}
-      <CallResponsePanel
-        id="strategies-context"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-      >
-        <Typography variant="body1" sx={{ lineHeight: 1.75 }}>
-          Currently, operators from the California Department of Water Resources and the U.S. Bureau of Reclamation operate water management in the Central Valley in accordance with the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            Current Operations
-          </Box>{" "}
-          strategy. This strategy is important to understand, and can be used as a baseline to compare alternative strategies with.
+          .  This strategy is important to understand, and can be used as a baseline to compare alternative strategies with.
         </Typography>
       </CallResponsePanel>
 
