@@ -1,8 +1,7 @@
 "use client"
 
 import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoIconButton, InfoTooltip } from "@repo/ui"
-import { useDrawerStore } from "@repo/state"
+import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
@@ -20,6 +19,11 @@ export const CURRENT_OPERATIONS_ICONS = [
     alt: "Current land use considerations",
     description: "Current land use considerations",
   },
+  {
+    path: "/images/icons/tucp.svg",
+    alt: "TUCP considerations",
+    description: "TUCP considerations",
+  },
 ]
 
 interface ScenarioCardProps {
@@ -34,7 +38,6 @@ export default function ScenarioCard({
   minimizedTitle = "Current operations",
 }: ScenarioCardProps) {
   const theme = useTheme()
-  const { setDrawerContent, openDrawer } = useDrawerStore()
   const { selectedOutcome } = useCalSimToggle()
 
   // Fetch tier data for s0020 (Current operations)
@@ -62,13 +65,6 @@ export default function ScenarioCard({
     if (!tierData || tierData.length === 0) return false
     // Check the tierType metadata from the first data point (all points in a tier have the same type)
     return tierData[0]?.tierType === "single_value"
-  }
-
-  const handleGlossaryOpen = (entry: string) => {
-    setDrawerContent({
-      selectedTerm: entry,
-    })
-    openDrawer("glossary")
   }
 
   return (
@@ -128,31 +124,16 @@ export default function ScenarioCard({
             </Box>
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
+                color: theme.palette.blue.darkest,
+                fontFamily:
+                  '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                fontWeight: 500,
+                fontSize: "1.5rem",
+                lineHeight: 1.3,
                 mb: 1,
               }}
             >
-              <Box
-                sx={{
-                  color: theme.palette.blue.darkest,
-                  fontFamily:
-                    '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                  fontWeight: 500,
-                  fontSize: "1.5rem",
-                  lineHeight: 1.3,
-                  mb: 0,
-                }}
-              >
-                Current operations
-              </Box>
-              <InfoIconButton
-                mode="glossary"
-                glossaryEntry="Current operations"
-                onGlossaryOpen={handleGlossaryOpen}
-                sx={{ color: theme.palette.blue.bright }}
-              />
+              Current operations
             </Box>
             {/* HR separator */}
             <Box
@@ -216,37 +197,14 @@ export default function ScenarioCard({
             {/* Scenario snapshot section */}
             <Box sx={{ flexShrink: 0, pb: 1, pt: 2 }}>
               <Box>
-                <Box
+                <Typography
+                  variant="h6"
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    mb: 0,
+                    pb: 1,
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        pb: 1,
-                      }}
-                    >
-                      Scenario outcomes
-                    </Typography>
-                    <InfoIconButton
-                      mode="glossary"
-                      glossaryEntry="CalSim"
-                      onGlossaryOpen={handleGlossaryOpen}
-                      sx={{ color: theme.palette.blue.bright }}
-                    />
-                  </Box>
-                </Box>
+                  Key outcomes
+                </Typography>
 
                 <Box
                   sx={{
