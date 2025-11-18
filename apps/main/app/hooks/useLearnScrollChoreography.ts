@@ -88,16 +88,70 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
   }, [panelStates])
 
   useEffect(() => {
+    console.log('[Choreography] Hook initializing...', { 
+      mapExists: !!map, 
+      mapRefExists: !!map?.mapRef,
+      panelCount: panelStatesRef.current.length 
+    })
+
     // Only set up if map is ready
     if (!map || !map.mapRef) {
+      console.log('[Choreography] Map not ready, skipping setup')
       return
     }
 
     const panels = panelStatesRef.current
     const { hasLayer, setLayoutProperty, setPaintProperty } = map
+    
+    // Get the actual Mapbox map instance for adding GeoJSON sources/layers
+    const mapInstance = map.mapRef?.current?.getMap()
+    if (!mapInstance) {
+      console.log('[Choreography] Map instance not available')
+      return
+    }
+
+    console.log('[Choreography] Starting setup for', panels.length, 'panels')
 
     // Sort panels by position
     const sortedPanels = [...panels].sort((a, b) => a.position - b.position)
+    
+    /**
+     * Add GeoJSON source and layer if defined in panel config
+     * This runs once during initialization
+     */
+    const initializeGeoJsonLayer = (panelState: PanelLayerState) => {
+      if (!panelState.geoJsonSource || !panelState.geoJsonLayer) return
+
+      const { geoJsonSource, geoJsonLayer } = panelState
+
+      // Add source if it doesn't exist
+      if (!mapInstance.getSource(geoJsonSource.id)) {
+        console.log(`[Choreography] Adding GeoJSON source: ${geoJsonSource.id}`)
+        mapInstance.addSource(geoJsonSource.id, {
+          type: "geojson",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data: geoJsonSource.data as any,
+        })
+      }
+
+      // Add layer if it doesn't exist
+      if (!mapInstance.getLayer(geoJsonLayer.id)) {
+        console.log(`[Choreography] Adding GeoJSON layer: ${geoJsonLayer.id}`)
+        mapInstance.addLayer({
+          id: geoJsonLayer.id,
+          type: geoJsonLayer.type,
+          source: geoJsonLayer.source,
+          paint: geoJsonLayer.paint,
+          layout: { 
+            ...(geoJsonLayer.layout || {}), 
+            visibility: "none" // Start hidden
+          },
+        })
+      }
+    }
+
+    // Initialize all GeoJSON layers first
+    sortedPanels.forEach(initializeGeoJsonLayer)
 
     /**
      * Apply layer states for a given panel configuration
@@ -185,20 +239,23 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
             // Check if panel's top edge has crossed the middle of the viewport
             const hasCrossedMiddle = panelTop <= viewportMiddle && panelBottom > viewportMiddle
 
-            console.log(`[Observer] ${panelState.panelId}:`, {
+            console.log(`[Observer] Panel ${panelState.position} (${panelState.panelId}):`, {
               isIntersecting: entry.isIntersecting,
               panelTop: Math.round(panelTop),
               panelBottom: Math.round(panelBottom),
               viewportMiddle: Math.round(viewportMiddle),
               hasCrossedMiddle,
+              currentPanel: currentPanelRef.current,
             })
 
-            // Trigger when panel crosses the middle OR is past the middle
+            // Trigger when panel crosses the middle
             if (entry.isIntersecting && hasCrossedMiddle) {
+              console.log(`[Observer] Panel ${panelState.position} has crossed middle - TRIGGER`)
               transitionToPanel(panelState.position)
             }
             // When scrolling back up, if this panel leaves the middle, go to previous panel
-            else if (!hasCrossedMiddle && panelTop > viewportMiddle) {
+            else if (!hasCrossedMiddle && panelTop > viewportMiddle && currentPanelRef.current === panelState.position) {
+              console.log(`[Observer] Panel ${panelState.position} left middle while active - GO BACK`)
               const previousPosition = panelState.position - 1
               if (previousPosition >= 0) {
                 transitionToPanel(previousPosition)
