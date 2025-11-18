@@ -38,11 +38,11 @@ export const OUTCOME_DISPLAY_ORDER = [
   "Community deliveries",
   "Agricultural revenue",
   "Environmental flows",
+  "Reservoir storage",
+  "Groundwater storage",
   "Delta estuary ecology", // UI display name
   "Freshwater for Delta exports",
   "Freshwater for in-Delta uses",
-  "Reservoir storage",
-  "Groundwater storage",
   "Salmon abundance",
 ] as const
 
