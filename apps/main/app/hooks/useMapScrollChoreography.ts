@@ -1,6 +1,5 @@
 import { useEffect } from "react"
 import { useMap } from "@repo/map"
-import type { MapboxMap } from "@repo/map"
 
 /**
  * Configuration for a single map layer property change
@@ -44,31 +43,36 @@ export interface ScrollChoreographyStep {
 }
 
 /**
- * Apply a single map layer action
+ * MapContext helpers needed for applying layer actions
  */
-function applyMapLayerAction(map: MapboxMap, action: MapLayerAction): void {
+interface MapHelpers {
+  hasLayer: (id: string) => boolean
+  setLayoutProperty: (id: string, property: string, value: string | number) => void
+  setPaintProperty: (id: string, property: string, value: string | number) => void
+}
+
+/**
+ * Apply a single map layer action using MapContext helpers
+ */
+function applyMapLayerAction(helpers: MapHelpers, action: MapLayerAction): void {
   // Check if layer exists
-  if (!map.getLayer(action.layerId)) {
+  if (!helpers.hasLayer(action.layerId)) {
     console.warn(`Layer "${action.layerId}" not found`)
     return
   }
 
-  try {
-    if (action.propertyType === "layout") {
-      map.setLayoutProperty(action.layerId, action.property, action.value)
-    } else {
-      map.setPaintProperty(action.layerId, action.property, action.value)
-    }
-  } catch (error) {
-    console.warn(`Error setting ${action.propertyType} property "${action.property}" on layer "${action.layerId}":`, error)
+  if (action.propertyType === "layout") {
+    helpers.setLayoutProperty(action.layerId, action.property, action.value)
+  } else {
+    helpers.setPaintProperty(action.layerId, action.property, action.value)
   }
 }
 
 /**
- * Apply multiple map layer actions
+ * Apply multiple map layer actions using MapContext helpers
  */
-function applyMapLayerActions(map: MapboxMap, actions: MapLayerAction[]): void {
-  actions.forEach((action) => applyMapLayerAction(map, action))
+function applyMapLayerActions(helpers: MapHelpers, actions: MapLayerAction[]): void {
+  actions.forEach((action) => applyMapLayerAction(helpers, action))
 }
 
 /**
@@ -103,6 +107,9 @@ export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void 
 
     console.log("[Scroll Choreography] Setting up observers for panels:", steps.map(s => s.panelId))
 
+    // Get map helpers for applying layer actions
+    const { hasLayer, setLayoutProperty, setPaintProperty } = map
+
     // Track which panels are currently intersecting to avoid duplicate actions
     const intersectingPanels = new Set<string>()
 
@@ -131,23 +138,15 @@ export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void 
             }
 
             // Apply the appropriate actions
-            map.withMap((mapInstance) => {
-              const actualMap = mapInstance.getMap()
-              if (!actualMap || !actualMap.isStyleLoaded()) {
-                console.log("[Scroll Choreography] Map not ready, skipping actions")
-                return
-              }
+            const actions = isIntersecting ? step.onEnter : step.onExit
+            
+            console.log(
+              `[Scroll Choreography] ${step.debugLabel || step.panelId}: ${isIntersecting ? "ENTER" : "EXIT"} - ${actions.length} actions`
+            )
 
-              const actions = isIntersecting ? step.onEnter : step.onExit
-              
-              console.log(
-                `[Scroll Choreography] ${step.debugLabel || step.panelId}: ${isIntersecting ? "ENTER" : "EXIT"} - ${actions.length} actions`
-              )
-
-              if (actions.length > 0) {
-                applyMapLayerActions(actualMap, actions)
-              }
-            })
+            if (actions.length > 0) {
+              applyMapLayerActions({ hasLayer, setLayoutProperty, setPaintProperty }, actions)
+            }
           })
         },
         {

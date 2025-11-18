@@ -47,9 +47,9 @@ export default function MapOverlayPanels() {
       position: 1,
       debugLabel: "Panel 2: Central Valley",
       layers: [
-        // Fade out California label, show Central Valley polygon
+        // Fade out California label, show Central Valley polygon (line layer)
         { layerId: "california-label", textOpacity: 0 },
-        { layerId: "central-valley-polygon", visibility: "visible", fillOpacity: 0.3, lineOpacity: 1, lineWidth: 2 },
+        { layerId: "central-valley-polygon", visibility: "visible", lineOpacity: 1, lineWidth: 2 },
       ],
     },
     // Add panel positions here

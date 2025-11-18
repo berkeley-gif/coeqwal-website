@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react"
 import { useMap } from "@repo/map"
-import type { MapboxMap } from "@repo/map"
 
 /**
  * Map layer state configuration for a specific scroll position
@@ -18,7 +17,7 @@ interface LayerState {
 /**
  * Defines what map layers should look like at a specific panel
  */
-interface PanelLayerState {
+export interface PanelLayerState {
   /** ID of the panel element */
   panelId: string
   /** Scroll position (order matters - earlier panels = lower positions) */
@@ -30,51 +29,80 @@ interface PanelLayerState {
 }
 
 /**
- * Apply layer states to the map
+ * Type alias for scroll choreography step - exported for convenience
  */
-function applyLayerStates(map: MapboxMap, states: LayerState[]): void {
+export type ScrollChoreographyStep = PanelLayerState
+
+/**
+ * MapContext helpers needed for applying layer states
+ */
+interface MapHelpers {
+  hasLayer: (id: string) => boolean
+  setLayoutProperty: (id: string, property: string, value: string | number) => void
+  setPaintProperty: (id: string, property: string, value: string | number) => void
+}
+
+/**
+ * Apply layer states to the map using MapContext helpers
+ * Includes try-catch for each property to handle layer type mismatches gracefully
+ */
+function applyLayerStates(helpers: MapHelpers, states: LayerState[]): void {
   console.log(`[Learn Choreography] Applying states to ${states.length} layers`)
   states.forEach((state) => {
-    if (!map.getLayer(state.layerId)) {
+    if (!helpers.hasLayer(state.layerId)) {
       console.warn(`[Learn Choreography] Layer "${state.layerId}" not found`)
       return
     }
 
-    const layer = map.getLayer(state.layerId)
-    console.log(`[Learn Choreography] ✓ Updating layer "${state.layerId}" (type: ${layer?.type}):`, {
-      visibility: state.visibility,
-      textOpacity: state.textOpacity,
-      fillOpacity: state.fillOpacity,
-      lineOpacity: state.lineOpacity,
-      lineWidth: state.lineWidth,
-    })
+    console.log(`[Learn Choreography] ✓ Updating layer "${state.layerId}":`, state)
 
-    try {
-      // Apply visibility
-      if (state.visibility !== undefined) {
-        map.setLayoutProperty(state.layerId, "visibility", state.visibility)
+    // Apply visibility (layout property)
+    if (state.visibility !== undefined) {
+      try {
+        helpers.setLayoutProperty(state.layerId, "visibility", state.visibility)
+      } catch {
+        console.warn(`[Learn Choreography] Failed to set visibility on "${state.layerId}"`)
       }
+    }
 
-      // Apply opacities
-      if (state.textOpacity !== undefined) {
-        map.setPaintProperty(state.layerId, "text-opacity", state.textOpacity)
+    // Apply opacities (paint properties) - wrap each in try-catch to handle layer type mismatches
+    // Also validate that values are not null/undefined before calling helpers
+    if (state.textOpacity !== undefined && state.textOpacity !== null) {
+      try {
+        helpers.setPaintProperty(state.layerId, "text-opacity", state.textOpacity)
+      } catch {
+        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support text-opacity (not a symbol layer)`)
       }
-      if (state.fillOpacity !== undefined) {
-        map.setPaintProperty(state.layerId, "fill-opacity", state.fillOpacity)
+    }
+    if (state.fillOpacity !== undefined && state.fillOpacity !== null) {
+      try {
+        helpers.setPaintProperty(state.layerId, "fill-opacity", state.fillOpacity)
+      } catch {
+        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support fill-opacity (not a fill layer)`)
       }
-      if (state.lineOpacity !== undefined) {
-        map.setPaintProperty(state.layerId, "line-opacity", state.lineOpacity)
+    }
+    if (state.lineOpacity !== undefined && state.lineOpacity !== null) {
+      try {
+        helpers.setPaintProperty(state.layerId, "line-opacity", state.lineOpacity)
+      } catch {
+        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support line-opacity (not a line layer)`)
       }
-      if (state.opacity !== undefined) {
-        map.setPaintProperty(state.layerId, "opacity", state.opacity)
+    }
+    if (state.opacity !== undefined && state.opacity !== null) {
+      try {
+        helpers.setPaintProperty(state.layerId, "opacity", state.opacity)
+      } catch {
+        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support opacity`)
       }
+    }
 
-      // Apply line width
-      if (state.lineWidth !== undefined) {
-        map.setPaintProperty(state.layerId, "line-width", state.lineWidth)
+    // Apply line width
+    if (state.lineWidth !== undefined && state.lineWidth !== null) {
+      try {
+        helpers.setPaintProperty(state.layerId, "line-width", state.lineWidth)
+      } catch {
+        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support line-width (not a line layer)`)
       }
-    } catch (error) {
-      console.warn(`[Learn Choreography] Error applying state to layer "${state.layerId}":`, error)
     }
   })
 }
@@ -129,14 +157,8 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     const panels = panelStatesRef.current
     console.log("[Learn Choreography] Setting up observers for", panels.length, "panels")
 
-    // List all available layers when setting up
-    map.withMap((mapInstance) => {
-      const actualMap = mapInstance.getMap()
-      if (actualMap && actualMap.isStyleLoaded()) {
-        const layers = actualMap.getStyle()?.layers?.map(l => l.id) || []
-        console.log("[Learn Choreography] Available map layers:", layers)
-      }
-    })
+    // Get map helpers for applying layer states
+    const { hasLayer, setLayoutProperty, setPaintProperty } = map
 
     // Sort panels by position
     const sortedPanels = [...panels].sort((a, b) => a.position - b.position)
@@ -204,15 +226,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
               
               if (targetPanelState) {
                 console.log(`[Learn Choreography] 📋 Applying ${targetPanelState.layers.length} layer states for position ${targetPosition} (${targetPanelState.debugLabel})`)
-                map.withMap((mapInstance) => {
-                  const actualMap = mapInstance.getMap()
-                  if (!actualMap || !actualMap.isStyleLoaded()) {
-                    console.log("[Learn Choreography] ⏳ Map not ready, skipping")
-                    return
-                  }
-
-                  applyLayerStates(actualMap, targetPanelState.layers)
-                })
+                applyLayerStates({ hasLayer, setLayoutProperty, setPaintProperty }, targetPanelState.layers)
               } else {
                 console.warn(`[Learn Choreography] ❌ No panel state found for position ${targetPosition}`)
               }
