@@ -61,6 +61,10 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-label", visibility: "visible" as const, textOpacity: 1, textAllowOverlap: true },
         { layerId: "central-valley-polygon", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
       ],
+      // Hide basins when entering Panel 2 (from Panel 3 when scrolling up)
+      onEnter: () => {
+        if (showBasinsRef.current) toggleBasinsOnRef.current()
+      },
     },
     {
       panelId: "central-valley-basins",
@@ -70,13 +74,56 @@ export default function MapOverlayPanels() {
         { layerId: "california-label", visibility: "none" as const },
         { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
+        { layerId: "inflow-watersheds", visibility: "none" as const },
+        { layerId: "sacramento-river-mainstem", visibility: "none" as const },
+        { layerId: "san-joaquin-river-mainstem", visibility: "none" as const },
       ],
-      // ✅ Basins are rendered by <BasinsLayer> component in CaliforniaMapPanel
-      // We'll control its visibility via toggleBasins callback using stable refs
+      // Show basins when entering Panel 3 - they stay visible through Panel 5
       onEnter: () => {
         if (!showBasinsRef.current) toggleBasinsOnRef.current()
       },
-      onExit: () => {
+    },
+    {
+      panelId: "water-flow-call",
+      position: 3,
+      debugLabel: "Panel 4: Watersheds",
+      layers: [
+        { layerId: "california-label", visibility: "none" as const },
+        { layerId: "central-valley-label", visibility: "none" as const },
+        { layerId: "central-valley-polygon", visibility: "none" as const },
+        { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
+        { layerId: "sacramento-river-mainstem", visibility: "none" as const },
+        { layerId: "san-joaquin-river-mainstem", visibility: "none" as const },
+      ],
+      // Keep basins visible - no onExit needed, Panel 5 will also show basins
+    },
+    {
+      panelId: "rivers-flow-response",
+      position: 4,
+      debugLabel: "Panel 5: Rivers",
+      layers: [
+        { layerId: "california-label", visibility: "none" as const },
+        { layerId: "central-valley-label", visibility: "none" as const },
+        { layerId: "central-valley-polygon", visibility: "none" as const },
+        { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
+        { layerId: "sacramento-river-mainstem", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
+        { layerId: "san-joaquin-river-mainstem", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
+      ],
+    },
+    {
+      panelId: "water-distribution-call",
+      position: 5,
+      debugLabel: "Panel 6: Distribution",
+      layers: [
+        { layerId: "california-label", visibility: "none" as const },
+        { layerId: "central-valley-label", visibility: "none" as const },
+        { layerId: "central-valley-polygon", visibility: "none" as const },
+        { layerId: "inflow-watersheds", visibility: "none" as const },
+        { layerId: "sacramento-river-mainstem", visibility: "none" as const },
+        { layerId: "san-joaquin-river-mainstem", visibility: "none" as const },
+      ],
+      // Hide basins when entering Panel 6 (after Panel 5)
+      onEnter: () => {
         if (showBasinsRef.current) toggleBasinsOnRef.current()
       },
     },
