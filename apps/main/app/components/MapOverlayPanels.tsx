@@ -35,11 +35,10 @@ export default function MapOverlayPanels() {
     {
       panelId: "calsim-call",
       position: 0,
-      debugLabel: "Panel 1: Intro",
+      debugLabel: "Panel 1: California",
       layers: [
-        // Panel 1: Show California label, hide Central Valley label
         { layerId: "california-label", visibility: "visible" as const, textOpacity: 1 },
-        { layerId: "central-valley-label", visibility: "none" as const, textAllowOverlap: false },
+        { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
       ],
     },
@@ -48,8 +47,6 @@ export default function MapOverlayPanels() {
       position: 1,
       debugLabel: "Panel 2: Central Valley",
       layers: [
-        // Panel 2: Hide California label, show Central Valley label and polygon
-        // Set text-allow-overlap to true to override collision detection
         { layerId: "california-label", visibility: "none" as const },
         { layerId: "central-valley-label", visibility: "visible" as const, textOpacity: 1, textAllowOverlap: true },
         { layerId: "central-valley-polygon", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
