@@ -39,7 +39,7 @@ export default function CaliforniaMapPanel({
         initialViewState={{
           longitude: -120.9,
           latitude: 39,
-          zoom: 5.8,
+          zoom: 6.0,
           bearing: 0,
           pitch: 0,
         }}
