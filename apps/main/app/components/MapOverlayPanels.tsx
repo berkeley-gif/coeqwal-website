@@ -28,6 +28,9 @@ export default function MapOverlayPanels() {
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+  
+  // State for basin search accordion
+  const [isBasinAccordionExpanded, setIsBasinAccordionExpanded] = useState(false)
 
   // Learn section scroll choreography
   // Each position defines the complete state of all layers at that scroll point
@@ -186,11 +189,6 @@ export default function MapOverlayPanels() {
     const [lng, lat] = feature.center
     setGeocoderMarker([lng, lat])
 
-    // Show basins layer for geolocation results
-    if (!showBasins) {
-      toggleBasins()
-    }
-
     // Find which basin this location is in
     const basin = findBasin(lng, lat)
     setBasinInfo(basin)
@@ -227,6 +225,29 @@ export default function MapOverlayPanels() {
     setIsSelectingResult(false)
     geocoding.clear()
     setShowResults(false)
+  }
+
+  // Handle accordion expansion
+  const handleAccordionChange = (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setIsBasinAccordionExpanded(isExpanded)
+    
+    if (isExpanded) {
+      // Show basins when accordion opens
+      if (!showBasins) {
+        toggleBasins()
+      }
+    } else {
+      // Hide basins and clear marker when accordion closes
+      if (showBasins) {
+        toggleBasins()
+      }
+      setGeocoderMarker(null)
+      // Also clear the search state
+      setSearchQuery("")
+      setSelectedLocation(null)
+      setBasinInfo(null)
+      setShowResults(false)
+    }
   }
 
   // Intersection observer for first panel entrance animation
@@ -503,6 +524,8 @@ export default function MapOverlayPanels() {
         delay={0.3}
       >
         <Accordion
+          expanded={isBasinAccordionExpanded}
+          onChange={handleAccordionChange}
           disableGutters
           elevation={0}
           sx={{
@@ -564,12 +587,6 @@ export default function MapOverlayPanels() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => {
-                  // Show basins when user engages with the search
-                  if (!showBasins) {
-                    toggleBasins()
-                  }
-                }}
                 placeholder="Search for a location in California"
               sx={{
                   width: '100%',
