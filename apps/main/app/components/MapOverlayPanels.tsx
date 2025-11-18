@@ -24,7 +24,7 @@ import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 export default function MapOverlayPanels() {
   const theme = useTheme()
   const map = useMap()
-  const { setGeocoderMarker, showBasins, toggleBasins } = useCalSimToggle()
+  const { setGeocoderMarker, showBasins, toggleBasins, showRivers, toggleRivers } = useCalSimToggle()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
@@ -34,12 +34,16 @@ export default function MapOverlayPanels() {
   // Create stable references for callbacks to avoid re-creating panel configs
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
+  const toggleRiversOnRef = useRef(toggleRivers)
+  const showRiversRef = useRef(showRivers)
   
   // Keep refs in sync
   useEffect(() => {
     toggleBasinsOnRef.current = toggleBasins
     showBasinsRef.current = showBasins
-  }, [toggleBasins, showBasins])
+    toggleRiversOnRef.current = toggleRivers
+    showRiversRef.current = showRivers
+  }, [toggleBasins, showBasins, toggleRivers, showRivers])
 
   useLearnScrollChoreography(useMemo(() => [
     {
@@ -75,8 +79,6 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "none" as const },
-        { layerId: "sacramento-river-mainstem", visibility: "none" as const },
-        { layerId: "san-joaquin-river-mainstem", visibility: "none" as const },
       ],
       // Show basins when entering Panel 3 - they stay visible through Panel 5
       onEnter: () => {
@@ -92,8 +94,6 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
-        { layerId: "sacramento-river-mainstem", visibility: "none" as const },
-        { layerId: "san-joaquin-river-mainstem", visibility: "none" as const },
       ],
       // Keep basins visible - no onExit needed, Panel 5 will also show basins
     },
@@ -106,9 +106,11 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
-        { layerId: "sacramento-river-mainstem", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
-        { layerId: "san-joaquin-river-mainstem", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
       ],
+      // Show rivers when entering Panel 5
+      onEnter: () => {
+        if (!showRiversRef.current) toggleRiversOnRef.current()
+      },
     },
     {
       panelId: "water-distribution-call",
@@ -119,12 +121,11 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "none" as const },
-        { layerId: "sacramento-river-mainstem", visibility: "none" as const },
-        { layerId: "san-joaquin-river-mainstem", visibility: "none" as const },
       ],
-      // Hide basins when entering Panel 6 (after Panel 5)
+      // Hide basins and rivers when entering Panel 6 (after Panel 5)
       onEnter: () => {
         if (showBasinsRef.current) toggleBasinsOnRef.current()
+        if (showRiversRef.current) toggleRiversOnRef.current()
       },
     },
   ], []))
