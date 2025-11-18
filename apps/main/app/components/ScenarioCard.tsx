@@ -27,7 +27,7 @@ export const CURRENT_OPERATIONS_ICONS = [
     path: "/images/icons/tucp.svg",
     alt: "TUCP considerations",
     description: "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
-    label: "TUCP's allowed",
+    label: "TUCP's\nallowed",
   },
 ]
 
@@ -53,10 +53,12 @@ export default function ScenarioCard({
   const keyOperationsRef = useRef<HTMLElement>(null)
   const keyOutcomesRef = useRef<HTMLElement>(null)
   const scrollTrackRef = useRef<HTMLElement | null>(null)
+  const climateCardRef = useRef<HTMLElement | null>(null)
 
-  // Find the external scroll track element after mount
+  // Find the external scroll track element and climate card after mount
   useEffect(() => {
     scrollTrackRef.current = document.getElementById('scenario-scroll-track')
+    climateCardRef.current = document.getElementById('climate-card')
   }, [])
 
   // Track scroll progress through the external scroll track (in MapOverlayPanels)
@@ -78,6 +80,13 @@ export default function ScenarioCard({
   const secondTooltipOpacity = useTransform(
     scrollYProgress,
     [0.5, 0.6, 0.7, 0.8],
+    [0, 1, 1, 0]
+  )
+
+  // Third tooltip: visible from 0.8 to 1.0
+  const thirdTooltipOpacity = useTransform(
+    scrollYProgress,
+    [0.8, 0.85, 0.95, 1.0],
     [0, 1, 1, 0]
   )
 
@@ -139,6 +148,17 @@ export default function ScenarioCard({
         }
         position="left"
         opacity={secondTooltipOpacity}
+      />
+      <ScrollTooltip
+        targetRef={climateCardRef}
+        containerRef={cardContainerRef}
+        content={
+          <>
+            This <Box component="span" sx={{ fontWeight: 600 }}>hydroclimate</Box> scenario represents future climate conditions that affect water availability and demand.
+          </>
+        }
+        position="left"
+        opacity={thirdTooltipOpacity}
       />
 
       {/* The actual card content */}
@@ -262,7 +282,7 @@ export default function ScenarioCard({
                         fontSize: "0.75rem",
                         mt: 0.5,
                         maxWidth: "100px",
-                        whiteSpace: "normal",
+                        whiteSpace: "pre-line",
                         wordBreak: "break-word",
                       }}
                     >
