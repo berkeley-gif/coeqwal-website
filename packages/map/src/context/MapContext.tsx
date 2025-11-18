@@ -340,6 +340,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
     setPaintProperty: (id, prop, value) => {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
+      
+      // Validate value is not null/undefined
+      if (value === null || value === undefined) {
+        console.warn(`setPaintProperty called with null/undefined value for property '${prop}' on layer '${id}'`)
+        return
+      }
+      
       try {
         // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
         map.setPaintProperty(id, prop, value)
@@ -351,6 +358,13 @@ export function MapProvider({ children }: { children: ReactNode }) {
     setLayoutProperty: (id, prop, value) => {
       const map = mapRef.current?.getMap()
       if (!map || !map.getLayer(id)) return
+      
+      // Validate value is not null/undefined
+      if (value === null || value === undefined) {
+        console.warn(`setLayoutProperty called with null/undefined value for property '${prop}' on layer '${id}'`)
+        return
+      }
+      
       try {
         // @ts-expect-error - Dynamic property name doesn't match Mapbox's specific string literal types
         map.setLayoutProperty(id, prop, value)
