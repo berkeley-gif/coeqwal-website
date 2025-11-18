@@ -12,6 +12,8 @@ interface LayerState {
   fillOpacity?: number
   lineOpacity?: number
   lineWidth?: number
+  textField?: string | unknown[]  // For changing label text (string literal or Mapbox expression array)
+  textAllowOverlap?: boolean  // Override collision detection for text labels
 }
 
 /**
@@ -26,86 +28,25 @@ export interface PanelLayerState {
   layers: LayerState[]
   /** Optional debug label */
   debugLabel?: string
+  /** Optional GeoJSON source to add/show */
+  geoJsonSource?: {
+    id: string
+    data: unknown  // GeoJSON FeatureCollection or Feature
+  }
+  /** Optional GeoJSON layer to add/show */
+  geoJsonLayer?: {
+    id: string
+    type: "fill" | "line" | "symbol" | "circle"
+    source: string
+    paint?: Record<string, unknown>
+    layout?: Record<string, unknown>
+  }
 }
 
 /**
  * Type alias for scroll choreography step - exported for convenience
  */
 export type ScrollChoreographyStep = PanelLayerState
-
-/**
- * MapContext helpers needed for applying layer states
- */
-interface MapHelpers {
-  hasLayer: (id: string) => boolean
-  setLayoutProperty: (id: string, property: string, value: string | number) => void
-  setPaintProperty: (id: string, property: string, value: string | number) => void
-}
-
-/**
- * Apply layer states to the map using MapContext helpers
- * Includes try-catch for each property to handle layer type mismatches gracefully
- */
-function applyLayerStates(helpers: MapHelpers, states: LayerState[]): void {
-  console.log(`[Learn Choreography] Applying states to ${states.length} layers`)
-  states.forEach((state) => {
-    if (!helpers.hasLayer(state.layerId)) {
-      console.warn(`[Learn Choreography] Layer "${state.layerId}" not found`)
-      return
-    }
-
-    console.log(`[Learn Choreography] ✓ Updating layer "${state.layerId}":`, state)
-
-    // Apply visibility (layout property)
-    if (state.visibility !== undefined) {
-      try {
-        helpers.setLayoutProperty(state.layerId, "visibility", state.visibility)
-      } catch {
-        console.warn(`[Learn Choreography] Failed to set visibility on "${state.layerId}"`)
-      }
-    }
-
-    // Apply opacities (paint properties) - wrap each in try-catch to handle layer type mismatches
-    // Also validate that values are not null/undefined before calling helpers
-    if (state.textOpacity !== undefined && state.textOpacity !== null) {
-      try {
-        helpers.setPaintProperty(state.layerId, "text-opacity", state.textOpacity)
-      } catch {
-        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support text-opacity (not a symbol layer)`)
-      }
-    }
-    if (state.fillOpacity !== undefined && state.fillOpacity !== null) {
-      try {
-        helpers.setPaintProperty(state.layerId, "fill-opacity", state.fillOpacity)
-      } catch {
-        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support fill-opacity (not a fill layer)`)
-      }
-    }
-    if (state.lineOpacity !== undefined && state.lineOpacity !== null) {
-      try {
-        helpers.setPaintProperty(state.layerId, "line-opacity", state.lineOpacity)
-      } catch {
-        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support line-opacity (not a line layer)`)
-      }
-    }
-    if (state.opacity !== undefined && state.opacity !== null) {
-      try {
-        helpers.setPaintProperty(state.layerId, "opacity", state.opacity)
-      } catch {
-        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support opacity`)
-      }
-    }
-
-    // Apply line width
-    if (state.lineWidth !== undefined && state.lineWidth !== null) {
-      try {
-        helpers.setPaintProperty(state.layerId, "line-width", state.lineWidth)
-      } catch {
-        console.warn(`[Learn Choreography] Layer "${state.layerId}" doesn't support line-width (not a line layer)`)
-      }
-    }
-  })
-}
 
 /**
  * Hook for Learn section scroll choreography
@@ -138,7 +79,6 @@ function applyLayerStates(helpers: MapHelpers, states: LayerState[]): void {
  */
 export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void {
   const map = useMap()
-  const currentPositionRef = useRef<number>(-1)
   const observersRef = useRef<IntersectionObserver[]>([])
   const panelStatesRef = useRef<PanelLayerState[]>(panelStates)
 
@@ -150,12 +90,10 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
   useEffect(() => {
     // Only set up if map is ready
     if (!map || !map.mapRef) {
-      console.log("[Learn Choreography] Waiting for map...")
       return
     }
 
     const panels = panelStatesRef.current
-    console.log("[Learn Choreography] Setting up observers for", panels.length, "panels")
 
     // Get map helpers for applying layer states
     const { hasLayer, setLayoutProperty, setPaintProperty } = map
@@ -163,78 +101,92 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     // Sort panels by position
     const sortedPanels = [...panels].sort((a, b) => a.position - b.position)
 
-    // Track which panels are currently visible
-    const visiblePanels = new Set<number>()
+    // Track intersection ratios for each panel (how much is visible)
+    const panelIntersectionRatios = new Map<number, number>()
+
+    // Helper to interpolate opacity between two panels
+    const interpolateOpacity = (value: number, fromValue: number, toValue: number): number => {
+      // Clamp value between 0 and 1
+      const t = Math.max(0, Math.min(1, value))
+      return fromValue + (toValue - fromValue) * t
+    }
+
+    // Apply smooth transitions between panels
+    const applySmoothTransitions = () => {
+      // Get ratios for Panel 0 and Panel 1
+      const panel1Ratio = panelIntersectionRatios.get(1) || 0
+
+      // Calculate transition progress (0 = fully Panel 0, 1 = fully Panel 1)
+      // Use Panel 1's ratio as the transition progress when it's becoming visible
+      const transitionProgress = panel1Ratio > 0.3 ? Math.min((panel1Ratio - 0.3) / 0.4, 1) : 0
+
+      // Apply easing: California fades out faster (squared for acceleration)
+      const californiaProgress = Math.pow(transitionProgress, 0.6) // Faster fade-out
+      const centralValleyProgress = transitionProgress // Linear fade-in
+
+      // Interpolate opacities for smooth transitions
+      const californiaOpacity = interpolateOpacity(californiaProgress, 1, 0)
+      const centralValleyOpacity = interpolateOpacity(centralValleyProgress, 0, 1)
+
+      // Apply california-label opacity
+      if (hasLayer("california-label")) {
+        try {
+          setLayoutProperty("california-label", "visibility", californiaOpacity > 0.01 ? "visible" : "none")
+          if (californiaOpacity > 0.01) {
+            setPaintProperty("california-label", "text-opacity", californiaOpacity)
+          }
+        } catch {
+          // Silently ignore
+        }
+      }
+
+      // Apply central-valley-label opacity
+      if (hasLayer("central-valley-label")) {
+        try {
+          setLayoutProperty("central-valley-label", "visibility", centralValleyOpacity > 0.01 ? "visible" : "none")
+          setLayoutProperty("central-valley-label", "text-allow-overlap", true)
+          if (centralValleyOpacity > 0.01) {
+            setPaintProperty("central-valley-label", "text-opacity", centralValleyOpacity)
+          }
+        } catch {
+          // Silently ignore
+        }
+      }
+
+      // Apply central-valley-polygon opacity
+      if (hasLayer("central-valley-polygon")) {
+        try {
+          setLayoutProperty("central-valley-polygon", "visibility", centralValleyOpacity > 0.01 ? "visible" : "none")
+          if (centralValleyOpacity > 0.01) {
+            setPaintProperty("central-valley-polygon", "line-opacity", centralValleyOpacity)
+            setPaintProperty("central-valley-polygon", "line-width", 2)
+          }
+        } catch {
+          // Silently ignore
+        }
+      }
+    }
 
     // Create observer for each panel
     sortedPanels.forEach((panelState) => {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            const wasVisible = visiblePanels.has(panelState.position)
-            const isVisible = entry.isIntersecting
-
-            if (wasVisible === isVisible) return
-
-            // Update visibility tracking
-            if (isVisible) {
-              visiblePanels.add(panelState.position)
+            const intersectionRatio = entry.intersectionRatio
+            
+            // Update the intersection ratio for this panel
+            if (intersectionRatio > 0) {
+              panelIntersectionRatios.set(panelState.position, intersectionRatio)
             } else {
-              visiblePanels.delete(panelState.position)
+              panelIntersectionRatios.delete(panelState.position)
             }
 
-            // Find the highest position that's visible (or just passed)
-            let targetPosition = -1
-            if (visiblePanels.size > 0) {
-              targetPosition = Math.max(...Array.from(visiblePanels))
-            } else {
-              // No panels visible - use the last known position
-              // If we're scrolling up past the first panel, reset to -1
-              if (entry.boundingClientRect.top > 0) {
-                // Panel is below viewport (scrolling up past it)
-                targetPosition = panelState.position - 1
-              } else {
-                // Panel is above viewport (scrolling down past it)
-                targetPosition = panelState.position
-              }
-            }
-
-            console.log(
-              `[Learn Choreography] Panel "${panelState.panelId}" intersection changed:`,
-              {
-                isVisible,
-                wasVisible,
-                panelPosition: panelState.position,
-                currentPosition: currentPositionRef.current,
-                targetPosition,
-                visiblePanels: Array.from(visiblePanels),
-                boundingTop: entry.boundingClientRect.top,
-                boundingBottom: entry.boundingClientRect.bottom,
-              }
-            )
-
-            // Only apply changes if position has changed
-            if (targetPosition !== currentPositionRef.current) {
-              console.log(
-                `[Learn Choreography] 🎯 Position change: ${currentPositionRef.current} → ${targetPosition}`,
-                panelState.debugLabel || panelState.panelId
-              )
-              currentPositionRef.current = targetPosition
-
-              // Find the panel state for this position
-              const targetPanelState = sortedPanels.find((p) => p.position === targetPosition)
-              
-              if (targetPanelState) {
-                console.log(`[Learn Choreography] 📋 Applying ${targetPanelState.layers.length} layer states for position ${targetPosition} (${targetPanelState.debugLabel})`)
-                applyLayerStates({ hasLayer, setLayoutProperty, setPaintProperty }, targetPanelState.layers)
-              } else {
-                console.warn(`[Learn Choreography] ❌ No panel state found for position ${targetPosition}`)
-              }
-            }
+            // Apply smooth transitions on every scroll update
+            applySmoothTransitions()
           })
         },
         {
-          threshold: [0, 0.5, 1], // Multiple thresholds for better tracking
+          threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], // Multiple thresholds for smooth transitions
           rootMargin: "0px",
         }
       )
@@ -246,22 +198,22 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         const panel = document.getElementById(panelState.panelId)
         if (panel) {
           observer.observe(panel)
-          console.log(`[Learn Choreography] ✓ Observing: ${panelState.debugLabel || panelState.panelId}`)
           clearInterval(checkInterval)
         }
       }, 100)
 
       // Store interval for cleanup
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ;(observer as any)._checkInterval = checkInterval
     })
 
     return () => {
       observersRef.current.forEach((obs) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         clearInterval((obs as any)._checkInterval)
         obs.disconnect()
       })
       observersRef.current = []
-      console.log("[Learn Choreography] Cleanup complete")
     }
   }, [map]) // Only depend on map, not panelStates
 }
