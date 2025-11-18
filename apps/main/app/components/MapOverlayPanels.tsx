@@ -560,7 +560,7 @@ export default function MapOverlayPanels() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for a location in California"
-                sx={{
+              sx={{
                   width: '100%',
                   padding: theme.spacing(1.5),
                   paddingRight: searchQuery ? theme.spacing(6) : theme.spacing(1.5),
@@ -576,8 +576,8 @@ export default function MapOverlayPanels() {
                   '&::placeholder': {
                     color: theme.palette.grey[500],
                   }
-                }}
-              />
+              }}
+            />
 
               {/* Clear/loading indicator */}
               {searchQuery && (
@@ -1095,22 +1095,22 @@ export default function MapOverlayPanels() {
          >
           {/* Blue panel grouping both cards */}
           <Box
-            id="baseline-scenario-overlay"
-            sx={{
+        id="baseline-scenario-overlay"
+        sx={{
               maxWidth: "560px",
-              padding: (theme) => theme.spacing(2),
+          padding: (theme) => theme.spacing(2),
               pointerEvents: "auto",
               display: "flex",
               flexDirection: "column",
-              gap: (theme) => theme.spacing(1.5),
+          gap: (theme) => theme.spacing(1.5),
               backgroundColor: (theme) => theme.palette.brand.sky,
               backdropFilter: "blur(10px)",
               borderRadius: (theme) => theme.borderRadius.card,
               overflow: "visible", // Allow tooltips to overflow to the left
-            }}
-          >
-            <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
-            <ClimateCard isMinimized={false} selectedClimate={1} />
+        }}
+      >
+        <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
+        <ClimateCard isMinimized={false} selectedClimate={1} />
           </Box>
         </Box>
       </Box>
