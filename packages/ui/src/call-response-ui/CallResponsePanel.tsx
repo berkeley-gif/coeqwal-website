@@ -46,7 +46,7 @@ export function CallResponsePanel({
         alignItems: "center",
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        px: 2, // Horizontal padding for margin from viewport edge
+        px: 4, // Horizontal padding for margin from viewport edge
       }}
     >
       <motion.div
