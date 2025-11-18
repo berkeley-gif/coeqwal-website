@@ -52,6 +52,31 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-polygon", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2 },
       ],
     },
+    {
+      panelId: "central-valley-basins",
+      position: 2,
+      debugLabel: "Panel 3: Basins",
+      layers: [
+        { layerId: "california-label", visibility: "none" as const },
+        { layerId: "central-valley-label", visibility: "none" as const },
+        { layerId: "central-valley-polygon", visibility: "none" as const },
+        { layerId: "central-valley-basins-layer", visibility: "visible" as const, fillOpacity: 0.3 },
+      ],
+      geoJsonSource: {
+        id: "central-valley-basins-source",
+        data: centralValleyBasins,
+      },
+      geoJsonLayer: {
+        id: "central-valley-basins-layer",
+        type: "fill" as const,
+        source: "central-valley-basins-source",
+        paint: {
+          "fill-color": "#3b82f6",
+          "fill-opacity": 0.3,
+          "fill-outline-color": "#1e40af",
+        },
+      },
+    },
   ], []))
 
   // Basin search state
