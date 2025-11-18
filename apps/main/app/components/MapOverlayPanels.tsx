@@ -790,7 +790,7 @@ export default function MapOverlayPanels() {
                         </Typography>
                       </>
                     ) : (
-                      <Typography variant="caption" sx={{ color: theme.palette.grey[500], fontStyle: 'italic' }}>
+                      <Typography variant="caption" sx={{ color: theme.palette.grey[600], fontStyle: 'italic' }}>
                         Location is outside Central Valley basin boundaries, but Central Valley water still may be delivered to your area.
                       </Typography>
                     )}
