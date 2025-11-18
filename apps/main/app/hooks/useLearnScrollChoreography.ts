@@ -41,6 +41,19 @@ export interface PanelLayerState {
     paint?: Record<string, unknown>
     layout?: Record<string, unknown>
   }
+  /** Optional array of GeoJSON sources (for multiple sources) */
+  geoJsonSources?: Array<{
+    id: string
+    data: unknown
+  }>
+  /** Optional array of GeoJSON layers (for multiple layers) */
+  geoJsonLayers?: Array<{
+    id: string
+    type: "fill" | "line" | "symbol" | "circle"
+    source: string
+    paint?: Record<string, unknown>
+    layout?: Record<string, unknown>
+  }>
   /** Optional callback when entering this panel */
   onEnter?: () => void
   /** Optional callback when exiting this panel */
@@ -74,13 +87,84 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     if (initializedRef.current) return
     initializedRef.current = true
 
-    const { hasLayer, setLayoutProperty, setPaintProperty } = map
+    const { hasLayer, setLayoutProperty, setPaintProperty, addSource, addLayer } = map
     const sortedPanels = [...panelStates].sort((a, b) => a.position - b.position)
 
     // Build master list of ALL layers mentioned across all panels
     const allLayerIds = new Set<string>()
+    const allGeoJsonLayerIds = new Set<string>()
+    
     sortedPanels.forEach(panel => {
       panel.layers.forEach(layer => allLayerIds.add(layer.layerId))
+      
+      // Track single GeoJSON layer
+      if (panel.geoJsonLayer) {
+        allGeoJsonLayerIds.add(panel.geoJsonLayer.id)
+      }
+      
+      // Track multiple GeoJSON layers
+      if (panel.geoJsonLayers) {
+        panel.geoJsonLayers.forEach(layer => allGeoJsonLayerIds.add(layer.id))
+      }
+    })
+
+    // Initialize all GeoJSON sources and layers
+    sortedPanels.forEach((panel) => {
+      // Single source/layer (backwards compatibility - for basins)
+      if (panel.geoJsonSource && panel.geoJsonLayer) {
+        const { geoJsonSource, geoJsonLayer } = panel
+
+        try {
+          console.log(`[Choreography] Adding source: ${geoJsonSource.id}`)
+          addSource(geoJsonSource.id, {
+            type: "geojson",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            data: geoJsonSource.data as any,
+          })
+        } catch (error) {
+          console.log(`[Choreography] Source ${geoJsonSource.id} already exists or error:`, error)
+        }
+
+        if (!hasLayer(geoJsonLayer.id)) {
+          console.log(`[Choreography] Adding layer: ${geoJsonLayer.id}`)
+          addLayer(
+            geoJsonLayer.id,
+            geoJsonLayer.source,
+            geoJsonLayer.type,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            geoJsonLayer.paint as any || {},
+            { ...geoJsonLayer.layout, visibility: "none" },
+          )
+        }
+      }
+
+      // Multiple sources/layers (for rivers)
+      if (panel.geoJsonSources && panel.geoJsonLayers) {
+        panel.geoJsonSources.forEach((source) => {
+          try {
+            addSource(source.id, {
+              type: "geojson",
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data: source.data as any,
+            })
+          } catch {
+            // Source already exists, continue
+          }
+        })
+
+        panel.geoJsonLayers.forEach((layer) => {
+          if (!hasLayer(layer.id)) {
+            addLayer(
+              layer.id,
+              layer.source,
+              layer.type,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              layer.paint as any || {},
+              { ...layer.layout, visibility: "none" },
+            )
+          }
+        })
+      }
     })
 
     /**
@@ -88,7 +172,16 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
      * Strategy: Apply all layer states directly for smooth transitions
      */
     const applyPanelState = (panelState: PanelLayerState) => {
-      // Apply layer states - this will hide/show layers as specified in the config
+      // Step 1: Hide all GeoJSON layers first
+      allGeoJsonLayerIds.forEach(layerId => {
+        try {
+          setLayoutProperty(layerId, "visibility", "none")
+        } catch {
+          // Silently ignore - layer might not exist yet
+        }
+      })
+
+      // Step 2: Apply layer states for regular map layers
       panelState.layers.forEach((layerState) => {
         if (!hasLayer(layerState.layerId)) {
           return
@@ -125,6 +218,28 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         }
       })
 
+      // Step 3: Show GeoJSON layers for this panel
+      // Single GeoJSON layer (backwards compatibility - basins)
+      if (panelState.geoJsonLayer) {
+        const layerId = panelState.geoJsonLayer.id
+        try {
+          setLayoutProperty(layerId, "visibility", "visible")
+        } catch (error) {
+          console.warn(`[Choreography] Error showing GeoJSON layer "${layerId}":`, error)
+        }
+      }
+
+      // Multiple GeoJSON layers (rivers)
+      if (panelState.geoJsonLayers) {
+        panelState.geoJsonLayers.forEach((layerConfig) => {
+          try {
+            setLayoutProperty(layerConfig.id, "visibility", "visible")
+          } catch (error) {
+            console.warn(`[Choreography] Error showing GeoJSON layer "${layerConfig.id}":`, error)
+          }
+        })
+      }
+
     }
 
     /**
@@ -150,6 +265,9 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
       if (targetPanel) {
         applyPanelState(targetPanel)
         targetPanel.onEnter?.()
+
+        // Note: River drawing animation removed - conflicts with layer state opacity settings
+        // For true "drawing" animation, would need lineMetrics: true in Mapbox Studio tileset
       }
     }
 

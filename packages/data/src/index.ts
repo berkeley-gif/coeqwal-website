@@ -7,8 +7,6 @@
 
 // Export GIS data
 export { default as centralValleyBasins } from './gis/central_valley_basins_4326.geojson'
-
-// You can add more exports here as you add more data files
-// Example:
-// export { default as otherData } from './gis/other_data.geojson';
+export { default as sacramentoRiverMainstem } from './gis/sacramento_river_mainstem.geojson'
+export { default as sanJoaquinRiverMainstem } from './gis/san_joaquin_river_mainstem.geojson'
 
