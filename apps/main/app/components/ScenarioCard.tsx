@@ -1,8 +1,7 @@
 "use client"
 
-import { useRef, useEffect } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { InfoTooltip } from "@repo/ui"
+import { useRef, useEffect, useState } from "react"
+import { Box, Typography, useTheme, InfoIcon, IconButton, Tooltip } from "@repo/ui/mui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
@@ -15,7 +14,7 @@ export const CURRENT_OPERATIONS_ICONS = [
   {
     path: "/images/icons/current_ops.svg",
     alt: "Current operations",
-    description: "Current operations",
+    description: "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
     label: "Current operations",
   },
   {
@@ -27,7 +26,7 @@ export const CURRENT_OPERATIONS_ICONS = [
   {
     path: "/images/icons/tucp.svg",
     alt: "TUCP considerations",
-    description: "TUCP considerations",
+    description: "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
     label: "TUCP's allowed",
   },
 ]
@@ -45,6 +44,9 @@ export default function ScenarioCard({
 }: ScenarioCardProps) {
   const theme = useTheme()
   const { selectedOutcome } = useCalSimToggle()
+
+  // State for operation icon tooltips (track which tooltip is open)
+  const [openTooltipIndex, setOpenTooltipIndex] = useState<number | null>(null)
 
   // Refs for tooltip targets and container
   const cardContainerRef = useRef<HTMLDivElement>(null)
@@ -228,47 +230,73 @@ export default function ScenarioCard({
                   alignItems: "start",
                 }}
               >
-                {CURRENT_OPERATIONS_ICONS.map((icon) => (
-                  <InfoTooltip key={icon.path} description={icon.description} placement="top">
+                {CURRENT_OPERATIONS_ICONS.map((icon, index) => (
+                  <Box
+                    key={icon.path}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: 1,
-                        cursor: "pointer",
+                        width: theme.spacing(5),
+                        height: theme.spacing(5),
                       }}
                     >
-                      <Box
-                        sx={{
-                          width: theme.spacing(5),
-                          height: theme.spacing(5),
-                        }}
-                      >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={icon.path}
-                          alt={icon.alt}
-                          style={{ width: "100%", height: "100%" }}
-                        />
-                      </Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: theme.palette.blue.darkest,
-                          fontWeight: 500,
-                          textAlign: "center",
-                          fontSize: "0.75rem",
-                          mt: 0.5,
-                          maxWidth: "100px",
-                          whiteSpace: "normal",
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {icon.label}
-                      </Typography>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={icon.path}
+                        alt={icon.alt}
+                        style={{ width: "100%", height: "100%" }}
+                      />
                     </Box>
-                  </InfoTooltip>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: theme.palette.blue.darkest,
+                        fontWeight: 500,
+                        textAlign: "center",
+                        fontSize: "0.75rem",
+                        mt: 0.5,
+                        maxWidth: "100px",
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {icon.label}{" "}
+                      <Tooltip
+                        title={icon.description}
+                        arrow
+                        placement="top"
+                        open={openTooltipIndex === index}
+                        onClose={() => setOpenTooltipIndex(null)}
+                        disableFocusListener
+                        disableHoverListener
+                        disableTouchListener
+                      >
+                        <IconButton
+                          size="small"
+                          component="span"
+                          onClick={() => setOpenTooltipIndex(openTooltipIndex === index ? null : index)}
+                          sx={{
+                            padding: 0,
+                            minWidth: 0,
+                            width: "auto",
+                            height: "auto",
+                            color: theme.palette.blue.bright,
+                            verticalAlign: "middle",
+                            display: "inline-flex",
+                            ml: 0.25,
+                          }}
+                        >
+                          <InfoIcon sx={{ fontSize: "0.75rem" }} />
+                        </IconButton>
+                      </Tooltip>
+                    </Typography>
+                  </Box>
                 ))}
               </Box>
             </Box>
