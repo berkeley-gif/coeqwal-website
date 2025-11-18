@@ -186,6 +186,11 @@ export default function MapOverlayPanels() {
     const [lng, lat] = feature.center
     setGeocoderMarker([lng, lat])
 
+    // Show basins layer for geolocation results
+    if (!showBasins) {
+      toggleBasins()
+    }
+
     // Find which basin this location is in
     const basin = findBasin(lng, lat)
     setBasinInfo(basin)
@@ -559,6 +564,12 @@ export default function MapOverlayPanels() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => {
+                  // Show basins when user engages with the search
+                  if (!showBasins) {
+                    toggleBasins()
+                  }
+                }}
                 placeholder="Search for a location in California"
               sx={{
                   width: '100%',
