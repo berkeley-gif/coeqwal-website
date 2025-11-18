@@ -941,7 +941,6 @@ export default function CalSimMarkers() {
                   left: "50%",
                   transform: "translateX(-50%)",
                   backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  backdropFilter: "blur(4px)",
                   borderRadius: "12px",
                   padding: "3px 8px",
                   boxShadow: (theme) => theme.shadows[1],

@@ -76,7 +76,6 @@ export function CallResponsePanel({
         <Box
           sx={{
             maxWidth: "420px",
-            backdropFilter: "blur(10px)",
             padding: (theme) => theme.layout.spacing.lg,
             pointerEvents: "auto",
             display: "flex",

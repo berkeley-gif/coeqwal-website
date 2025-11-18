@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
@@ -16,16 +16,19 @@ export const CURRENT_OPERATIONS_ICONS = [
     path: "/images/icons/current_ops.svg",
     alt: "Current operations",
     description: "Current operations",
+    label: "Current operations",
   },
   {
     path: "/images/icons/land_use.svg",
     alt: "Current land use considerations",
     description: "Current land use considerations",
+    label: "Updated agricultural land use (2020)",
   },
   {
     path: "/images/icons/tucp.svg",
     alt: "TUCP considerations",
     description: "TUCP considerations",
+    label: "TUCP's allowed",
   },
 ]
 
@@ -43,16 +46,22 @@ export default function ScenarioCard({
   const theme = useTheme()
   const { selectedOutcome } = useCalSimToggle()
 
-  // Refs for scroll tracking and tooltip targets
-  const scrollTrackRef = useRef<HTMLDivElement>(null)
-  const stickyContainerRef = useRef<HTMLDivElement>(null)
+  // Refs for tooltip targets and container
+  const cardContainerRef = useRef<HTMLDivElement>(null)
   const keyOperationsRef = useRef<HTMLElement>(null)
   const keyOutcomesRef = useRef<HTMLElement>(null)
+  const scrollTrackRef = useRef<HTMLElement | null>(null)
 
-  // Track scroll progress through the tall scroll track
+  // Find the external scroll track element after mount
+  useEffect(() => {
+    scrollTrackRef.current = document.getElementById('scenario-scroll-track')
+  }, [])
+
+  // Track scroll progress through the external scroll track (in MapOverlayPanels)
   const { scrollYProgress } = useScroll({
     target: scrollTrackRef,
     offset: ["start end", "end start"],
+    layoutEffect: false, // Prevent warning when target is in another component
   })
 
   // Map scroll progress to tooltip opacities
@@ -99,74 +108,52 @@ export default function ScenarioCard({
 
   return (
     <Box
+      ref={cardContainerRef}
       sx={{
         position: "relative",
-        height: "auto",
         width: "100%",
+        overflow: "visible", // Allow tooltips to overflow to the left
       }}
     >
-      {/* Tall scroll track to create the "pause" effect */}
-      <Box
-        ref={scrollTrackRef}
-        sx={{
-          height: "300vh", // 3x viewport height for scroll progression...I'm not sure I like this approach. Seems hacky.
-          width: "100%",
-          position: "relative",
-        }}
+      {/* Scroll-driven tooltips */}
+      <ScrollTooltip
+        targetRef={keyOperationsRef}
+        containerRef={cardContainerRef}
+        content={
+          <>
+            These are the key water management <Box component="span" sx={{ fontWeight: 600 }}>operations</Box> that determine this strategy.
+          </>
+        }
+        position="left"
+        opacity={firstTooltipOpacity}
+      />
+      <ScrollTooltip
+        targetRef={keyOutcomesRef}
+        containerRef={cardContainerRef}
+        content={
+          <>
+            These <Box component="span" sx={{ fontWeight: 600 }}>outcomes</Box> show how this strategy affects water supply, ecosystems, and communities.
+          </>
+        }
+        position="left"
+        opacity={secondTooltipOpacity}
       />
 
-      {/* Sticky container - stays fixed while scrolling through track */}
+      {/* The actual card content */}
       <Box
-        ref={stickyContainerRef}
         sx={{
-          position: "sticky",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "100vh", // Fixed viewport height so it doesn't stretch
-          width: "100%",
-          pointerEvents: "none",
+          pointerEvents: "auto",
+          backgroundColor: "rgba(255, 255, 255, 0.95)",
+          borderRadius: theme.borderRadius.card,
+          border: "3px solid", // Thicker border for "response" visual
+          borderColor: theme.palette.brand.sky, // Use brand sky blue for response role
+          padding: 2,
           display: "flex",
-          alignItems: "center", // Center the card vertically
-          justifyContent: "center",
-          backgroundColor: "transparent", // No background to avoid stretching effect
+          flexDirection: "column",
+          width: "100%",
+          opacity: isMinimized ? 0.8 : 1,
         }}
       >
-        {/* Scroll-driven tooltips */}
-        <ScrollTooltip
-          targetRef={keyOperationsRef}
-          containerRef={stickyContainerRef}
-          content="These are the key water management operations that determine this strategy."
-          position="left"
-          opacity={firstTooltipOpacity}
-        />
-        <ScrollTooltip
-          targetRef={keyOutcomesRef}
-          containerRef={stickyContainerRef}
-          content="These show how this strategy affects water supply, ecosystems, and communities."
-          position="left"
-          opacity={secondTooltipOpacity}
-        />
-
-        {/* The actual card */}
-        <Box
-          sx={{
-            backdropFilter: "blur(10px)",
-            pointerEvents: "auto",
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            borderRadius: theme.borderRadius.card,
-            border: "3px solid", // Thicker border for "response" visual
-            borderColor: theme.palette.brand.sky, // Use brand sky blue for response role
-            padding: 2,
-            display: "flex",
-            flexDirection: "column",
-            maxWidth: "800px", // Prevent card from stretching too wide
-            width: "100%",
-            maxHeight: "90vh", // Prevent card from being taller than viewport
-            overflowY: "auto", // Allow scrolling if content is too tall
-            opacity: isMinimized ? 0.8 : 1,
-          }}
-        >
         {/* Minimized state - title only */}
         {isMinimized && (
           <Box sx={{ mb: 1, flexShrink: 0 }}>
@@ -223,11 +210,11 @@ export default function ScenarioCard({
             />
 
             {/* Key operations section */}
-            <Box ref={keyOperationsRef} sx={{ flexShrink: 0, pb: 1, pt: 1 }}>
+            <Box ref={keyOperationsRef} sx={{ flexShrink: 0, pb: 1.5 }}>
               <Typography
                 variant="h6"
                 sx={{
-                  pb: 1,
+                  pb: 2,
                 }}
               >
                 Key operations
@@ -238,24 +225,48 @@ export default function ScenarioCard({
                 sx={{
                   display: "flex",
                   gap: 2,
-                  alignItems: "center",
+                  alignItems: "start",
                 }}
               >
                 {CURRENT_OPERATIONS_ICONS.map((icon) => (
                   <InfoTooltip key={icon.path} description={icon.description} placement="top">
                     <Box
                       sx={{
-                        width: theme.spacing(5),
-                        height: theme.spacing(5),
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 1,
                         cursor: "pointer",
                       }}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={icon.path}
-                        alt={icon.alt}
-                        style={{ width: "100%", height: "100%" }}
-                      />
+                      <Box
+                        sx={{
+                          width: theme.spacing(5),
+                          height: theme.spacing(5),
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={icon.path}
+                          alt={icon.alt}
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: theme.palette.blue.darkest,
+                          fontWeight: 500,
+                          textAlign: "center",
+                          fontSize: "0.75rem",
+                          mt: 0.5,
+                          maxWidth: "100px",
+                          whiteSpace: "normal",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {icon.label}
+                      </Typography>
                     </Box>
                   </InfoTooltip>
                 ))}
@@ -273,7 +284,7 @@ export default function ScenarioCard({
             />
 
             {/* Scenario snapshot section */}
-            <Box ref={keyOutcomesRef} sx={{ flexShrink: 0, pb: 1, pt: 2 }}>
+            <Box sx={{ flexShrink: 0, pb: 1, pt: 1.5 }}>
               <Box>
                 <Typography
                   variant="h6"
@@ -284,19 +295,6 @@ export default function ScenarioCard({
                   Key outcomes
                 </Typography>
 
-                <Box
-                  sx={{
-                    mb: 0,
-                  }}
-                >
-                  <Typography variant="body2" sx={{ mb: 1 }}>
-                    Key outcomes summarize how water allocations affect
-                    different water uses. Outcomes are categorized in different
-                    levels, indicating whether the outcome corresponds to an
-                    optimal, suboptimal, at-risk, or critical state.
-                  </Typography>
-                </Box>
-
                 {/* Outcomes charts grid */}
                 <Box
                   sx={{
@@ -306,7 +304,7 @@ export default function ScenarioCard({
                     alignItems: "start",
                   }}
                 >
-                  {OUTCOMES.map((outcome) => {
+                  {OUTCOMES.map((outcome, index) => {
                     // Check if outcome has data
                     const tierData = chartData[outcome]
                     const hasData =
@@ -317,6 +315,7 @@ export default function ScenarioCard({
                     return (
                       <Box
                         key={outcome}
+                        ref={index === 0 ? keyOutcomesRef : null}
                         sx={{
                           display: "flex",
                           flexDirection: "column",
@@ -426,7 +425,6 @@ export default function ScenarioCard({
             </svg>
           </Box>
         )}
-      </Box>
       </Box>
     </Box>
   )

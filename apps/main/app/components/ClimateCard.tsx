@@ -36,7 +36,6 @@ export default function ClimateCard({
     >
       <Box
         sx={{
-          backdropFilter: "blur(10px)",
           pointerEvents: "auto",
           backgroundColor: "rgba(255, 255, 255, 0.95)",
           borderRadius: theme.borderRadius.card,
