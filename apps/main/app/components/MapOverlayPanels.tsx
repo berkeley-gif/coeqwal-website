@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { CallResponsePanel } from "@repo/ui"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
@@ -19,14 +19,41 @@ import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
 import bbox from "@turf/bbox"
 import type { Feature, Polygon, MultiPolygon } from "geojson"
+import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 
 export default function MapOverlayPanels() {
   const theme = useTheme()
   const map = useMap()
-  const { setGeocoderMarker } = useCalSimToggle()
+  const { setGeocoderMarker, showBasins, toggleBasins } = useCalSimToggle()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+
+  // Learn section scroll choreography
+  // Each position defines the complete state of all layers at that scroll point
+  useLearnScrollChoreography(useMemo(() => [
+    {
+      panelId: "calsim-call",
+      position: 0,
+      debugLabel: "Panel 1: Intro",
+      layers: [
+        // Initial state: only California label visible
+        { layerId: "california-label", textOpacity: 1 },
+        { layerId: "central-valley-polygon", visibility: "none" },
+      ],
+    },
+    {
+      panelId: "central-valley-importance",
+      position: 1,
+      debugLabel: "Panel 2: Central Valley",
+      layers: [
+        // Fade out California label, show Central Valley polygon
+        { layerId: "california-label", textOpacity: 0 },
+        { layerId: "central-valley-polygon", visibility: "visible", fillOpacity: 0.3, lineOpacity: 1, lineWidth: 2 },
+      ],
+    },
+    // Add panel positions here
+  ], []))
 
   // Basin search state
   const [searchQuery, setSearchQuery] = useState("")
@@ -149,6 +176,41 @@ export default function MapOverlayPanels() {
     }
   }, [])
 
+  // Intersection observer for "three basins" panel - shows basin layer
+  // TODO: Migrate this to useMapScrollChoreography once we handle state changes (toggleBasins)
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target.id === "central-valley-basins") {
+            // When basins panel is in view, show the basins layer
+            if (entry.isIntersecting && !showBasins) {
+              toggleBasins()
+            }
+          }
+        })
+      },
+      {
+        threshold: 0.5,
+        rootMargin: "0px",
+      },
+    )
+
+    // Wait for the panel to exist in the DOM
+    const checkPanel = setInterval(() => {
+      const panel = document.getElementById("central-valley-basins") as HTMLDivElement
+      if (panel) {
+        observer.observe(panel)
+        clearInterval(checkPanel)
+      }
+    }, 100)
+
+    return () => {
+      clearInterval(checkPanel)
+      observer.disconnect()
+    }
+  }, [showBasins, toggleBasins])
+
   return (
     <Box
       sx={{
@@ -156,6 +218,7 @@ export default function MapOverlayPanels() {
         zIndex: (theme) => theme.zIndex.content, // Above the sticky map
         pointerEvents: "none", // Allow markers to be clickable through overlays
         marginTop: "-100vh", // Pull up to overlay the sticky map immediately
+        paddingBottom: "40vh", // Space after scenario card before next section
       }}
     >
       {/* Call: Question about California's water system */}
@@ -947,28 +1010,67 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 500 }}>
             current water management operations
           </Box>
-          .  This strategy is important to understand, and can be used as a baseline to compare alternative strategies with.
+          .  This strategy can be helpful for interpreting how water is currently managed. It can also be used as a baseline to compare alternative strategies with.
         </Typography>
       </CallResponsePanel>
 
       {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
-      <CallResponsePanel
-        id="baseline-scenario-overlay"
-        side="right"
-        variant="response"
-        isVisible={isFirstPanelVisible}
+      {/* Wrapper for scroll track + sticky content */}
+      <Box
         sx={{
-          padding: 0, // Remove padding - cards have their own
-          marginBottom: "40vh",
-          gap: (theme) => theme.spacing(1.5),
-          maxWidth: "560px", // Wider for this card to accommodate contents
-          backgroundColor: "transparent", // Completely invisible
-          backdropFilter: "none", // Why do I need this?
+          position: "relative",
+          width: "100%",
+          height: "auto",
         }}
       >
-        <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
-        <ClimateCard isMinimized={false} selectedClimate={1} />
-      </CallResponsePanel>
+        {/* Tall scroll track - creates the scroll pause effect */}
+        <Box
+          id="scenario-scroll-track"
+          sx={{
+            height: "300vh", // 3x viewport height for scroll progression
+            width: "100%",
+            position: "relative",
+          }}
+        />
+
+         {/* Sticky container - stays fixed while scrolling through track */}
+         <Box
+           sx={{
+             position: "sticky",
+             bottom: 0,
+             left: 0,
+             right: 0,
+             width: "100%",
+             height: "100vh",
+             display: "flex",
+             justifyContent: "flex-end", // Align to right
+             alignItems: "center",
+             pl: 2, // Left padding
+             pr: 4, // More right padding for space between panel and edge
+             pointerEvents: "none",
+           }}
+         >
+          {/* Blue panel grouping both cards */}
+          <Box
+            id="baseline-scenario-overlay"
+            sx={{
+              maxWidth: "560px",
+              padding: (theme) => theme.spacing(2),
+              pointerEvents: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: (theme) => theme.spacing(1.5),
+              backgroundColor: (theme) => theme.palette.brand.sky,
+              backdropFilter: "blur(10px)",
+              borderRadius: (theme) => theme.borderRadius.card,
+              overflow: "visible", // Allow tooltips to overflow to the left
+            }}
+          >
+            <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
+            <ClimateCard isMinimized={false} selectedClimate={1} />
+          </Box>
+        </Box>
+      </Box>
     </Box>
   )
 }

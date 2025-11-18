@@ -19,7 +19,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { isPanelsExpanded, geocoderMarker } = useCalSimToggle()
+  const { isPanelsExpanded, geocoderMarker, showBasins } = useCalSimToggle()
 
   return (
     <Box
@@ -63,8 +63,8 @@ export default function CaliforniaMapPanel({
         {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
 
-        {/* Basins GeoJSON Layer - always visible */}
-        <BasinsLayer visible={true} />
+        {/* Basins GeoJSON Layer - shows when scrolling to "three basins" panel */}
+        <BasinsLayer visible={showBasins} />
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         {/* Hide CalSim layers when hotspot markers are shown */}
