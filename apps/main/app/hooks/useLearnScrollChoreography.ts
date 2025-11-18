@@ -51,10 +51,8 @@ export type ScrollChoreographyStep = PanelLayerState
 /**
  * Hook for Learn section scroll choreography
  * 
- * Progressive reveal pattern:
- * - Each panel defines what layers should be visible at that point
- * - As you scroll down, layers accumulate
- * - As you scroll back up, layers revert to previous states
+ * Uses IntersectionObserver to detect when panels reach a trigger point in the viewport,
+ * then applies the layer states defined in the configuration.
  * 
  * @example
  * ```tsx
@@ -63,15 +61,15 @@ export type ScrollChoreographyStep = PanelLayerState
  *     panelId: "panel-1",
  *     position: 0,
  *     layers: [
- *       { layerId: "california-label", textOpacity: 1 },
+ *       { layerId: "california-label", visibility: "visible", textOpacity: 1 },
  *     ],
  *   },
  *   {
  *     panelId: "panel-2",
  *     position: 1,
  *     layers: [
- *       { layerId: "california-label", textOpacity: 0 },
- *       { layerId: "central-valley-polygon", visibility: "visible", fillOpacity: 0.3 },
+ *       { layerId: "california-label", visibility: "none" },
+ *       { layerId: "central-valley-label", visibility: "visible", textOpacity: 1 },
  *     ],
  *   },
  * ])
@@ -81,6 +79,8 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
   const map = useMap()
   const observersRef = useRef<IntersectionObserver[]>([])
   const panelStatesRef = useRef<PanelLayerState[]>(panelStates)
+  const currentPanelRef = useRef<number>(-1)
+  const initializedLayersRef = useRef<Set<string>>(new Set())
 
   // Update ref if panelStates change
   useEffect(() => {
@@ -94,76 +94,80 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     }
 
     const panels = panelStatesRef.current
-
-    // Get map helpers for applying layer states
     const { hasLayer, setLayoutProperty, setPaintProperty } = map
 
     // Sort panels by position
     const sortedPanels = [...panels].sort((a, b) => a.position - b.position)
 
-    // Track intersection ratios for each panel (how much is visible)
-    const panelIntersectionRatios = new Map<number, number>()
+    /**
+     * Apply layer states for a given panel configuration
+     */
+    const applyLayerStates = (panelState: PanelLayerState) => {
+      console.log(`[Choreography] Applying states for: ${panelState.debugLabel || panelState.panelId}`)
+      
+      panelState.layers.forEach((layerState) => {
+        if (!hasLayer(layerState.layerId)) {
+          console.log(`[Choreography] Layer "${layerState.layerId}" not found, skipping`)
+          return
+        }
 
-    // Helper to interpolate opacity between two panels
-    const interpolateOpacity = (value: number, fromValue: number, toValue: number): number => {
-      // Clamp value between 0 and 1
-      const t = Math.max(0, Math.min(1, value))
-      return fromValue + (toValue - fromValue) * t
+        try {
+          // Apply visibility
+          if (layerState.visibility !== undefined) {
+            setLayoutProperty(layerState.layerId, "visibility", layerState.visibility)
+          }
+
+          // Apply text-allow-overlap (one-time initialization)
+          if (layerState.textAllowOverlap !== undefined) {
+            const layerKey = `${layerState.layerId}-overlap`
+            if (!initializedLayersRef.current.has(layerKey)) {
+              setLayoutProperty(layerState.layerId, "text-allow-overlap", layerState.textAllowOverlap)
+              initializedLayersRef.current.add(layerKey)
+            }
+          }
+
+          // Apply opacity properties
+          if (layerState.textOpacity !== undefined) {
+            setPaintProperty(layerState.layerId, "text-opacity", layerState.textOpacity)
+          }
+          if (layerState.fillOpacity !== undefined) {
+            setPaintProperty(layerState.layerId, "fill-opacity", layerState.fillOpacity)
+          }
+          if (layerState.lineOpacity !== undefined) {
+            setPaintProperty(layerState.layerId, "line-opacity", layerState.lineOpacity)
+          }
+
+          // Apply other paint properties
+          if (layerState.lineWidth !== undefined) {
+            setPaintProperty(layerState.layerId, "line-width", layerState.lineWidth)
+          }
+
+          // Apply text field
+          if (layerState.textField !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setLayoutProperty(layerState.layerId, "text-field", layerState.textField as any)
+          }
+        } catch (error) {
+          console.warn(`[Choreography] Error applying state to layer "${layerState.layerId}":`, error)
+        }
+      })
     }
 
-    // Apply smooth transitions between panels
-    const applySmoothTransitions = () => {
-      // Get ratios for Panel 0 and Panel 1
-      const panel1Ratio = panelIntersectionRatios.get(1) || 0
-
-      // Calculate transition progress (0 = fully Panel 0, 1 = fully Panel 1)
-      // Use Panel 1's ratio as the transition progress when it's becoming visible
-      const transitionProgress = panel1Ratio > 0.3 ? Math.min((panel1Ratio - 0.3) / 0.4, 1) : 0
-
-      // Apply easing: California fades out faster (squared for acceleration)
-      const californiaProgress = Math.pow(transitionProgress, 0.6) // Faster fade-out
-      const centralValleyProgress = transitionProgress // Linear fade-in
-
-      // Interpolate opacities for smooth transitions
-      const californiaOpacity = interpolateOpacity(californiaProgress, 1, 0)
-      const centralValleyOpacity = interpolateOpacity(centralValleyProgress, 0, 1)
-
-      // Apply california-label opacity
-      if (hasLayer("california-label")) {
-        try {
-          setLayoutProperty("california-label", "visibility", californiaOpacity > 0.01 ? "visible" : "none")
-          if (californiaOpacity > 0.01) {
-            setPaintProperty("california-label", "text-opacity", californiaOpacity)
-          }
-        } catch {
-          // Silently ignore
-        }
+    /**
+     * Transition to a new panel state
+     */
+    const transitionToPanel = (targetPosition: number) => {
+      if (currentPanelRef.current === targetPosition) {
+        return // Already at this panel
       }
 
-      // Apply central-valley-label opacity
-      if (hasLayer("central-valley-label")) {
-        try {
-          setLayoutProperty("central-valley-label", "visibility", centralValleyOpacity > 0.01 ? "visible" : "none")
-          setLayoutProperty("central-valley-label", "text-allow-overlap", true)
-          if (centralValleyOpacity > 0.01) {
-            setPaintProperty("central-valley-label", "text-opacity", centralValleyOpacity)
-          }
-        } catch {
-          // Silently ignore
-        }
-      }
+      console.log(`[Choreography] Transitioning: Panel ${currentPanelRef.current} → Panel ${targetPosition}`)
+      currentPanelRef.current = targetPosition
 
-      // Apply central-valley-polygon opacity
-      if (hasLayer("central-valley-polygon")) {
-        try {
-          setLayoutProperty("central-valley-polygon", "visibility", centralValleyOpacity > 0.01 ? "visible" : "none")
-          if (centralValleyOpacity > 0.01) {
-            setPaintProperty("central-valley-polygon", "line-opacity", centralValleyOpacity)
-            setPaintProperty("central-valley-polygon", "line-width", 2)
-          }
-        } catch {
-          // Silently ignore
-        }
+      // Find and apply the target panel state
+      const targetPanel = sortedPanels.find((p) => p.position === targetPosition)
+      if (targetPanel) {
+        applyLayerStates(targetPanel)
       }
     }
 
@@ -172,33 +176,51 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
-            const intersectionRatio = entry.intersectionRatio
-            
-            // Update the intersection ratio for this panel
-            if (intersectionRatio > 0) {
-              panelIntersectionRatios.set(panelState.position, intersectionRatio)
-            } else {
-              panelIntersectionRatios.delete(panelState.position)
-            }
+            const boundingRect = entry.boundingClientRect
+            const viewportHeight = window.innerHeight
+            const panelTop = boundingRect.top
+            const panelBottom = boundingRect.bottom
+            const viewportMiddle = viewportHeight / 2
 
-            // Apply smooth transitions on every scroll update
-            applySmoothTransitions()
+            // Check if panel's top edge has crossed the middle of the viewport
+            const hasCrossedMiddle = panelTop <= viewportMiddle && panelBottom > viewportMiddle
+
+            console.log(`[Observer] ${panelState.panelId}:`, {
+              isIntersecting: entry.isIntersecting,
+              panelTop: Math.round(panelTop),
+              panelBottom: Math.round(panelBottom),
+              viewportMiddle: Math.round(viewportMiddle),
+              hasCrossedMiddle,
+            })
+
+            // Trigger when panel crosses the middle OR is past the middle
+            if (entry.isIntersecting && hasCrossedMiddle) {
+              transitionToPanel(panelState.position)
+            }
+            // When scrolling back up, if this panel leaves the middle, go to previous panel
+            else if (!hasCrossedMiddle && panelTop > viewportMiddle) {
+              const previousPosition = panelState.position - 1
+              if (previousPosition >= 0) {
+                transitionToPanel(previousPosition)
+              }
+            }
           })
         },
         {
-          threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1], // Multiple thresholds for smooth transitions
+          threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
           rootMargin: "0px",
         }
       )
 
       observersRef.current.push(observer)
 
-      // Wait for panel to exist, then observe
+      // Wait for panel to exist in DOM, then observe it
       const checkInterval = setInterval(() => {
-        const panel = document.getElementById(panelState.panelId)
-        if (panel) {
-          observer.observe(panel)
+        const panelElement = document.getElementById(panelState.panelId)
+        if (panelElement) {
+          observer.observe(panelElement)
           clearInterval(checkInterval)
+          console.log(`[Choreography] Now observing: ${panelState.panelId}`)
         }
       }, 100)
 
@@ -207,6 +229,14 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
       ;(observer as any)._checkInterval = checkInterval
     })
 
+    // Initialize to first panel state on mount
+    const firstPanel = sortedPanels[0]
+    if (firstPanel) {
+      applyLayerStates(firstPanel)
+      currentPanelRef.current = firstPanel.position
+    }
+
+    // Cleanup
     return () => {
       observersRef.current.forEach((obs) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -214,7 +244,9 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         obs.disconnect()
       })
       observersRef.current = []
+      // Clear initialized layers tracking
+      const initializedLayers = initializedLayersRef.current
+      initializedLayers.clear()
     }
-  }, [map]) // Only depend on map, not panelStates
+  }, [map])
 }
-
