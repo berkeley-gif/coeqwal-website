@@ -39,7 +39,7 @@ export default function CaliforniaMapPanel({
         mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
         initialViewState={{
           longitude: -120.9,
-          latitude: 39,
+          latitude: 38.4,
           zoom: 6.0,
           bearing: 0,
           pitch: 0,
