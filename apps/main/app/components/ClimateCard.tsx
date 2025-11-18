@@ -29,6 +29,7 @@ export default function ClimateCard({
 
   return (
     <Box
+      id="climate-card"
       sx={{
         position: "relative",
         height: "auto",
