@@ -295,11 +295,11 @@ export default function ScenarioCard({
                   Key outcomes
                 </Typography>
 
-                {/* Outcomes charts grid */}
+                {/* Outcomes charts - single grid with aligned columns */}
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr 1fr 1fr", // 4 columns for outcomes (2 rows)
+                    gridTemplateColumns: "repeat(5, 1fr)", // 5 equal columns
                     gap: 1.5,
                     alignItems: "start",
                   }}
@@ -366,6 +366,10 @@ export default function ScenarioCard({
                             textAlign: "center",
                             fontSize: "0.75rem",
                             mt: 0.5,
+                            minHeight: "2.5rem", // Fixed height for alignment
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                           }}
                         >
                           {outcome}
