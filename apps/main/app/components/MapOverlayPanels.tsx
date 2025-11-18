@@ -1125,7 +1125,7 @@ export default function MapOverlayPanels() {
           <Box
         id="baseline-scenario-overlay"
         sx={{
-              maxWidth: "560px",
+              maxWidth: "580px",
           padding: (theme) => theme.spacing(2),
               pointerEvents: "auto",
               display: "flex",
