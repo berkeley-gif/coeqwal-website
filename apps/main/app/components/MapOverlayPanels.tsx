@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { CallResponsePanel } from "@repo/ui"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
@@ -31,6 +31,16 @@ export default function MapOverlayPanels() {
 
   // Learn section scroll choreography
   // Each position defines the complete state of all layers at that scroll point
+  // Create stable references for callbacks to avoid re-creating panel configs
+  const toggleBasinsOnRef = useRef(toggleBasins)
+  const showBasinsRef = useRef(showBasins)
+  
+  // Keep refs in sync
+  useEffect(() => {
+    toggleBasinsOnRef.current = toggleBasins
+    showBasinsRef.current = showBasins
+  }, [toggleBasins, showBasins])
+
   useLearnScrollChoreography(useMemo(() => [
     {
       panelId: "calsim-call",
@@ -60,21 +70,14 @@ export default function MapOverlayPanels() {
         { layerId: "california-label", visibility: "none" as const },
         { layerId: "central-valley-label", visibility: "none" as const },
         { layerId: "central-valley-polygon", visibility: "none" as const },
-        { layerId: "central-valley-basins-layer", visibility: "visible" as const, fillOpacity: 0.3 },
       ],
-      geoJsonSource: {
-        id: "central-valley-basins-source",
-        data: centralValleyBasins,
+      // ✅ Basins are rendered by <BasinsLayer> component in CaliforniaMapPanel
+      // We'll control its visibility via toggleBasins callback using stable refs
+      onEnter: () => {
+        if (!showBasinsRef.current) toggleBasinsOnRef.current()
       },
-      geoJsonLayer: {
-        id: "central-valley-basins-layer",
-        type: "fill" as const,
-        source: "central-valley-basins-source",
-        paint: {
-          "fill-color": "#3b82f6",
-          "fill-opacity": 0.3,
-          "fill-outline-color": "#1e40af",
-        },
+      onExit: () => {
+        if (showBasinsRef.current) toggleBasinsOnRef.current()
       },
     },
   ], []))
@@ -200,40 +203,8 @@ export default function MapOverlayPanels() {
     }
   }, [])
 
-  // Intersection observer for "three basins" panel - shows basin layer
-  // TODO: Migrate this to useMapScrollChoreography once we handle state changes (toggleBasins)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target.id === "central-valley-basins") {
-            // When basins panel is in view, show the basins layer
-            if (entry.isIntersecting && !showBasins) {
-              toggleBasins()
-            }
-          }
-        })
-      },
-      {
-        threshold: 0.5,
-        rootMargin: "0px",
-      },
-    )
-
-    // Wait for the panel to exist in the DOM
-    const checkPanel = setInterval(() => {
-      const panel = document.getElementById("central-valley-basins") as HTMLDivElement
-      if (panel) {
-        observer.observe(panel)
-        clearInterval(checkPanel)
-      }
-    }, 100)
-
-    return () => {
-      clearInterval(checkPanel)
-      observer.disconnect()
-    }
-  }, [showBasins, toggleBasins])
+  // ✅ BasinsLayer visibility is now controlled by useLearnScrollChoreography
+  // The hook will call toggleBasins() when transitioning to/from Panel 3
 
   return (
     <Box

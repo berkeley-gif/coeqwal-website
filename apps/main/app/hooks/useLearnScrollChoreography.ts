@@ -41,6 +41,10 @@ export interface PanelLayerState {
     paint?: Record<string, unknown>
     layout?: Record<string, unknown>
   }
+  /** Optional callback when entering this panel */
+  onEnter?: () => void
+  /** Optional callback when exiting this panel */
+  onExit?: () => void
 }
 
 /**
@@ -70,48 +74,28 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     if (initializedRef.current) return
     initializedRef.current = true
 
-    console.log('[Choreography] Initializing choreography for', panelStates.length, 'panels')
-
-    const { hasLayer, setLayoutProperty, setPaintProperty, addSource, addLayer } = map
+    const { hasLayer, setLayoutProperty, setPaintProperty } = map
     const sortedPanels = [...panelStates].sort((a, b) => a.position - b.position)
 
-    // Initialize GeoJSON sources and layers
-    sortedPanels.forEach((panel) => {
-      if (panel.geoJsonSource && panel.geoJsonLayer) {
-        const { geoJsonSource, geoJsonLayer } = panel
-
-        console.log(`[Choreography] Adding GeoJSON source: ${geoJsonSource.id}`)
-        addSource(geoJsonSource.id, {
-          type: "geojson",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          data: geoJsonSource.data as any,
-        })
-
-        console.log(`[Choreography] Adding GeoJSON layer: ${geoJsonLayer.id}`)
-        addLayer(
-          geoJsonLayer.id,
-          geoJsonLayer.source,
-          geoJsonLayer.type,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          geoJsonLayer.paint as any || {},
-          { ...geoJsonLayer.layout, visibility: "none" },
-        )
-      }
+    // Build master list of ALL layers mentioned across all panels
+    const allLayerIds = new Set<string>()
+    sortedPanels.forEach(panel => {
+      panel.layers.forEach(layer => allLayerIds.add(layer.layerId))
     })
 
     /**
      * Apply layer states for a given panel configuration
+     * Strategy: Apply all layer states directly for smooth transitions
      */
     const applyPanelState = (panelState: PanelLayerState) => {
-      console.log(`[Choreography] Applying Panel ${panelState.position}: ${panelState.debugLabel}`)
-
+      // Apply layer states - this will hide/show layers as specified in the config
       panelState.layers.forEach((layerState) => {
         if (!hasLayer(layerState.layerId)) {
           return
         }
 
         try {
-          // Apply visibility
+          // Apply visibility first for instant swap
           if (layerState.visibility !== undefined) {
             setLayoutProperty(layerState.layerId, "visibility", layerState.visibility)
           }
@@ -140,6 +124,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
           console.warn(`[Choreography] Error applying layer "${layerState.layerId}":`, error)
         }
       })
+
     }
 
     /**
@@ -148,40 +133,67 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     const transitionToPanel = (targetPosition: number) => {
       if (currentPanelRef.current === targetPosition) return
 
-      console.log(`[Choreography] Transition: Panel ${currentPanelRef.current} → ${targetPosition}`)
+      const previousPosition = currentPanelRef.current
+      const targetPanel = sortedPanels.find((p) => p.position === targetPosition)
+      
+      console.log(`[Choreography] ${previousPosition} → ${targetPosition}${targetPanel ? ` (${targetPanel.debugLabel})` : ''}`)
+
+      // Call onExit for the previous panel
+      if (previousPosition >= 0) {
+        const previousPanel = sortedPanels.find((p) => p.position === previousPosition)
+        previousPanel?.onExit?.()
+      }
+
       currentPanelRef.current = targetPosition
 
-      const targetPanel = sortedPanels.find((p) => p.position === targetPosition)
+      // Apply the new panel state
       if (targetPanel) {
         applyPanelState(targetPanel)
+        targetPanel.onEnter?.()
       }
+    }
+
+    /**
+     * Determine which panel should be active based on all panel positions
+     */
+    const determineActivePanel = () => {
+      const viewportMiddle = window.innerHeight / 2
+      let activePanel = 0 // Default to first panel
+
+      // Check each panel to see which one the middle line is in
+      for (let i = sortedPanels.length - 1; i >= 0; i--) {
+        const panel = sortedPanels[i]
+        if (!panel) continue
+
+        const panelElement = document.getElementById(panel.panelId)
+        if (!panelElement) continue
+
+        const rect = panelElement.getBoundingClientRect()
+        
+        // If the viewport middle is within this panel's bounds, this is the active panel
+        if (rect.top <= viewportMiddle && rect.bottom > viewportMiddle) {
+          activePanel = panel.position
+          break
+        }
+      }
+
+      return activePanel
     }
 
     // Create observers for each panel
     sortedPanels.forEach((panelState) => {
       const observer = new IntersectionObserver(
         (entries) => {
-          entries.forEach((entry) => {
-            const rect = entry.boundingClientRect
-            const viewportMiddle = window.innerHeight / 2
-            
-            // Check if panel's top has crossed the viewport middle
-            const topHasCrossedMiddle = rect.top <= viewportMiddle && rect.bottom > viewportMiddle
-
-            if (entry.isIntersecting && topHasCrossedMiddle) {
-              // Panel has reached the middle going down
-              transitionToPanel(panelState.position)
-            } else if (rect.top > viewportMiddle && currentPanelRef.current === panelState.position) {
-              // Panel is leaving the middle going up - go to previous panel
-              const previousPosition = panelState.position - 1
-              if (previousPosition >= 0) {
-                transitionToPanel(previousPosition)
-              }
+          entries.forEach(() => {
+            // On any intersection change, re-evaluate which panel should be active
+            const activePanel = determineActivePanel()
+            if (activePanel !== currentPanelRef.current) {
+              transitionToPanel(activePanel)
             }
           })
         },
         {
-          threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+          threshold: [0, 0.25, 0.5, 0.75, 1.0], // Fewer callbacks, smoother performance
           rootMargin: "0px",
         }
       )
@@ -194,7 +206,6 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         if (panelElement) {
           observer.observe(panelElement)
           clearInterval(checkInterval)
-          console.log(`[Choreography] Observing: ${panelState.panelId}`)
         }
       }, 100)
 
@@ -211,7 +222,6 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
 
     // Cleanup
     return () => {
-      console.log('[Choreography] Cleaning up')
       observersRef.current.forEach((obs) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         clearInterval((obs as any)._checkInterval)
