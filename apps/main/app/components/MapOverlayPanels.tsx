@@ -36,6 +36,7 @@ export default function MapOverlayPanels() {
   // Each position defines the complete state of all layers at that scroll point
   // Create stable references for callbacks to avoid re-creating panel configs
   const mapRef = useRef(map)
+  const fadeAnimationRef = useRef<number | null>(null)
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
   const toggleRiversOnRef = useRef(toggleRivers)
@@ -106,6 +107,12 @@ export default function MapOverlayPanels() {
       ],
       // Show inflow arrows when entering panel 4, and ensure basins and inflow polygon are visible
       onEnter: () => {
+        // Cancel any ongoing fade animation
+        if (fadeAnimationRef.current !== null) {
+          cancelAnimationFrame(fadeAnimationRef.current)
+          fadeAnimationRef.current = null
+        }
+        
         if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
         // Restore basins if returning from Panel 5
         if (!showBasinsRef.current) toggleBasinsOnRef.current()
@@ -146,6 +153,9 @@ export default function MapOverlayPanels() {
             const startBasinsOutlineOpacity = 0.8
             const startBasinsLabelsOpacity = 1
             
+            // Helper to clamp values between 0 and 1
+            const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
+            
             const animate = (currentTime: number) => {
               const elapsed = currentTime - startTime
               const progress = Math.min(elapsed / fadeDuration, 1)
@@ -153,10 +163,10 @@ export default function MapOverlayPanels() {
               // Ease out cubic for smoother fade
               const eased = 1 - Math.pow(1 - progress, 3)
               
-              // Calculate current opacity values
-              const inflowOpacity = startInflowOpacity * (1 - eased)
-              const basinsOutlineOpacity = startBasinsOutlineOpacity * (1 - eased)
-              const basinsLabelsOpacity = startBasinsLabelsOpacity * (1 - eased)
+              // Calculate current opacity values and clamp to [0, 1]
+              const inflowOpacity = clamp(startInflowOpacity * (1 - eased), 0, 1)
+              const basinsOutlineOpacity = clamp(startBasinsOutlineOpacity * (1 - eased), 0, 1)
+              const basinsLabelsOpacity = clamp(startBasinsLabelsOpacity * (1 - eased), 0, 1)
               
               // Apply opacity values
               map.setPaintProperty("inflow-watersheds", "fill-opacity", inflowOpacity)
@@ -165,16 +175,23 @@ export default function MapOverlayPanels() {
               
               // Continue animating if not complete
               if (progress < 1) {
-                requestAnimationFrame(animate)
+                fadeAnimationRef.current = requestAnimationFrame(animate)
+              } else {
+                fadeAnimationRef.current = null
               }
             }
             
-            requestAnimationFrame(animate)
+            fadeAnimationRef.current = requestAnimationFrame(animate)
           }
         }, 2000) // Wait 2000ms for rivers to draw before starting fade out
       },
       // Hide rivers when exiting Panel 5
       onExit: () => {
+        // Cancel any ongoing fade animation
+        if (fadeAnimationRef.current !== null) {
+          cancelAnimationFrame(fadeAnimationRef.current)
+          fadeAnimationRef.current = null
+        }
         if (showRiversRef.current) toggleRiversOnRef.current()
       },
     },
