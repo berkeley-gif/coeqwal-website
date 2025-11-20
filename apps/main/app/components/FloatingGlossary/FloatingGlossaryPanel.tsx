@@ -4,20 +4,27 @@ import { Box, Typography, useTheme, Divider, Stack, IconButton, CloseIcon } from
 import { glossaryTerms } from "../../lib/glossary"
 import React, { useRef, useEffect, useState } from "react"
 
+interface Position {
+  bottom: number
+  right: number
+}
+
 interface FloatingGlossaryPanelProps {
   isOpen: boolean
   onClose: () => void
   selectedTerm?: string
+  position: Position
 }
 
 /**
  * Pop-up panel that displays glossary content
- * Anchored to the bottom-right button, taking up 1/3 of the viewport width
+ * Anchored to the button position, taking up 1/3 of the viewport width
  */
 export function FloatingGlossaryPanel({
   isOpen,
   onClose,
   selectedTerm,
+  position,
 }: FloatingGlossaryPanelProps) {
   const theme = useTheme()
   const termRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -123,12 +130,12 @@ export function FloatingGlossaryPanel({
         }}
       />
 
-      {/* Panel anchored to bottom-right corner near button */}
+      {/* Panel anchored to button position */}
       <Box
         sx={{
           position: "fixed",
-          bottom: 108, // Just above the button (32px button position + 64px button height + 12px gap)
-          right: 32, // Aligned with button
+          bottom: position.bottom + 76, // Just above the button (64px button height + 12px gap)
+          right: position.right, // Aligned with button
           width: "33.333vw", // 1/3 of viewport width
           minWidth: "400px",
           maxWidth: "600px",
