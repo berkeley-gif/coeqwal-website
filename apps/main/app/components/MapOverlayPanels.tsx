@@ -70,7 +70,7 @@ export default function MapOverlayPanels() {
       layers: [
         { layerId: "california-label", visibility: "none" as const },
         { layerId: "central-valley-label", visibility: "visible" as const, textOpacity: 1, textAllowOverlap: true },
-        { layerId: "central-valley-polygon", visibility: "visible" as const, lineOpacity: 0.6, lineWidth: 4, lineJoin: "round" as const },
+        { layerId: "central-valley-polygon", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2, lineJoin: "round" as const },
       ],
       // Hide basins when entering Panel 2 (from Panel 3 when scrolling up)
       onEnter: () => {
@@ -125,6 +125,10 @@ export default function MapOverlayPanels() {
       onEnter: () => {
         if (!showRiversRef.current) toggleRiversOnRef.current()
       },
+      // Hide rivers when exiting Panel 5
+      onExit: () => {
+        if (showRiversRef.current) toggleRiversOnRef.current()
+      },
     },
     {
       panelId: "water-distribution-call",
@@ -136,10 +140,9 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "none" as const },
       ],
-      // Hide basins and rivers when entering Panel 6 (after Panel 5)
+      // Hide basins when entering Panel 6 (rivers already hidden by Panel 5 onExit)
       onEnter: () => {
         if (showBasinsRef.current) toggleBasinsOnRef.current()
-        if (showRiversRef.current) toggleRiversOnRef.current()
       },
     },
   ], []))
