@@ -14,29 +14,36 @@ interface BasinInflowArrowsProps {
 export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsProps) {
   if (!visible) return null
 
-  // Arrow positions around the basin perimeter with rotation angles pointing toward center
+  /**
+   * Arrow positions around the Central Valley basin perimeter
+   * 
+   * To adjust positioning:
+   * - lon/lat: Geographic coordinates where the arrow appears
+   * - rotation: Angle in degrees (0 = down/south, 90 = left/west, 180 = up/north, 270 = right/east)
+   * 
+   * The Central Valley boundaries (approximate):
+   * - North: 40.5° lat (Cascade Range)
+   * - South: 35.5° lat (Tehachapi Mountains)
+   * - East: -119.5° lon (Sierra Nevada)
+   * - West: -123° lon (Coast Ranges)
+   */
   const arrowPositions = [
-    // Northern rim (pointing south inward)
-    { lon: -122.3, lat: 40.3, rotation: 330 },
-    { lon: -121.5, lat: 40.5, rotation: 0 },
-    { lon: -120.7, lat: 40.3, rotation: 30 },
+    // ===== NORTHERN RIM (Cascade Range - water flows south) =====
+    { lon: -122.5, lat: 40.4, rotation: 0, label: "NW - Shasta area" },
+    { lon: -122, lat: 40.65, rotation: 60, label: "N - Central north" },
+    { lon: -121.2, lat: 39.9, rotation: 90, label: "NE - Lassen area" },
     
-    // Eastern rim (pointing west inward)
-    { lon: -120.0, lat: 39.5, rotation: 60 },
-    { lon: -119.7, lat: 38.5, rotation: 80 },
-    { lon: -119.9, lat: 37.5, rotation: 80 },
-    { lon: -120.2, lat: 36.5, rotation: 100 },
+    // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
+    { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" },
+    { lon: -120.2, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
+    { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" },
+    { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
     
-    // Southern rim (pointing north inward)
-    { lon: -120.8, lat: 35.8, rotation: 160 },
-    { lon: -121.5, lat: 35.6, rotation: 180 },
-    { lon: -122.2, lat: 35.9, rotation: 200 },
-    
-    // Western rim (pointing east inward)
-    { lon: -122.8, lat: 36.8, rotation: 270 },
-    { lon: -122.9, lat: 37.8, rotation: 280 },
-    { lon: -122.7, lat: 38.8, rotation: 290 },
-    { lon: -122.5, lat: 39.6, rotation: 300 },
+    // ===== WESTERN RIM (Coast Ranges - water flows east) =====
+    { lon: -122.0, lat: 36.2, rotation: 270, label: "SW - Southern Coast Range" },
+    { lon: -122.5, lat: 37.5, rotation: 270, label: "W - Central Coast Range" },
+    { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" },
+    { lon: -122.8, lat: 39.8, rotation: 280, label: "NW - Northwestern rim" },
   ]
 
   const arrowColor = "#2196F3"
@@ -104,6 +111,22 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
                    Q 37 63 35 65 Z"
                 fill={arrowColor}
               />
+              
+              {/* Temporary number label for identification */}
+              <text
+                x="35"
+                y="35"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="white"
+                fontSize="16"
+                fontWeight="bold"
+                stroke="#000"
+                strokeWidth="2"
+                paintOrder="stroke"
+              >
+                {index + 1}
+              </text>
             </svg>
           </Box>
         </Marker>
