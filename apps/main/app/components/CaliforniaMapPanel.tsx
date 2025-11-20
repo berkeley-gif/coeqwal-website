@@ -6,6 +6,7 @@ import { Box } from "@repo/ui/mui"
 import CalSimLayers from "./CalSimLayers"
 import BasinsLayer from "./BasinsLayer"
 import RiversLayer from "./RiversLayer"
+import BasinInflowArrows from "./BasinInflowArrows"
 import HotspotMarkers from "./HotspotMarkers"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
@@ -20,7 +21,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { isPanelsExpanded, geocoderMarker, showBasins, showRivers } = useCalSimToggle()
+  const { isPanelsExpanded, geocoderMarker, showBasins, showRivers, showInflowArrows } = useCalSimToggle()
 
   return (
     <Box
@@ -69,6 +70,9 @@ export default function CaliforniaMapPanel({
 
         {/* Rivers GeoJSON Layer - shows when scrolling to "rivers" panel */}
         <RiversLayer visible={showRivers} />
+
+        {/* Basin Inflow Arrows - shows when scrolling to "water flow" panel */}
+        <BasinInflowArrows visible={showInflowArrows} />
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         {/* Hide CalSim layers when hotspot markers are shown */}
