@@ -31,7 +31,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         type="line"
         paint={{
           "line-color": "white",
-          "line-width": 1.5,
+          "line-width": 2,
           "line-opacity": 0.8,
         }}
       />
