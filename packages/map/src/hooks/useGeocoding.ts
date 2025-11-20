@@ -77,7 +77,9 @@ export function useGeocoding(
     // Try to get token from mapbox map instance
     const map = mapRef?.current?.getMap()
     // Cast to any to access internal mapbox properties
-    const mapToken = (map as any)?._requestManager?._customAccessToken || (map as any)?.accessToken
+    const mapToken =
+      (map as any)?._requestManager?._customAccessToken ||
+      (map as any)?.accessToken
 
     if (!mapToken) {
       console.warn(
