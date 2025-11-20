@@ -3,6 +3,7 @@
 import { Box, useTheme } from "@repo/ui/mui"
 import { Header } from "./components/Header"
 import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
+import { FloatingGlossary } from "./components/FloatingGlossary"
 import IntroSection from "./sections/IntroSection"
 
 import { TabsProvider } from "./context/Tabs"
@@ -23,6 +24,10 @@ export default function Home() {
           drawerWidth={theme.layout.drawer.width}
           overlay={true}
         />
+
+        {/* Floating glossary button and panel */}
+        <FloatingGlossary />
+
         {/* Main content */}
         <Box
           component="main"
