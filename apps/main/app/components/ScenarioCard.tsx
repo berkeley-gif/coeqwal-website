@@ -1,7 +1,14 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Box, Typography, useTheme, InfoIcon, IconButton, Tooltip } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  InfoIcon,
+  IconButton,
+  Tooltip,
+} from "@repo/ui/mui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
@@ -14,7 +21,8 @@ export const CURRENT_OPERATIONS_ICONS = [
   {
     path: "/images/icons/current_ops.svg",
     alt: "Current operations",
-    description: "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
+    description:
+      "Represents how California manages water today, including the laws, regulations, priorities, and decisions that affect how California's water supply is allocated.",
     label: "Current operations",
   },
   {
@@ -26,7 +34,8 @@ export const CURRENT_OPERATIONS_ICONS = [
   {
     path: "/images/icons/tucp.svg",
     alt: "TUCP considerations",
-    description: "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
+    description:
+      "Temporary Urgent Change Petitions (TUCPs, also known as TUCOs) permit changes during droughts to meet human health and safety needs and protect endangered species.",
     label: "TUCP's\nallowed",
   },
 ]
@@ -57,8 +66,8 @@ export default function ScenarioCard({
 
   // Find the external scroll track element and climate card after mount
   useEffect(() => {
-    scrollTrackRef.current = document.getElementById('scenario-scroll-track')
-    climateCardRef.current = document.getElementById('climate-card')
+    scrollTrackRef.current = document.getElementById("scenario-scroll-track")
+    climateCardRef.current = document.getElementById("climate-card")
   }, [])
 
   // Track scroll progress through the external scroll track (in MapOverlayPanels)
@@ -73,21 +82,21 @@ export default function ScenarioCard({
   const firstTooltipOpacity = useTransform(
     scrollYProgress,
     [0.2, 0.3, 0.4, 0.5],
-    [0, 1, 1, 0]
+    [0, 1, 1, 0],
   )
 
   // Second tooltip: visible from 0.5 to 0.8
   const secondTooltipOpacity = useTransform(
     scrollYProgress,
     [0.5, 0.6, 0.7, 0.8],
-    [0, 1, 1, 0]
+    [0, 1, 1, 0],
   )
 
   // Third tooltip: visible from 0.8 to 1.0
   const thirdTooltipOpacity = useTransform(
     scrollYProgress,
     [0.8, 0.85, 0.95, 1.0],
-    [0, 1, 1, 0]
+    [0, 1, 1, 0],
   )
 
   // Fetch tier data for s0020 (Current operations)
@@ -132,7 +141,11 @@ export default function ScenarioCard({
         containerRef={cardContainerRef}
         content={
           <>
-            These are the key water management <Box component="span" sx={{ fontWeight: 600 }}>operations</Box> that determine this strategy.
+            These are the key water management{" "}
+            <Box component="span" sx={{ fontWeight: 600 }}>
+              operations
+            </Box>{" "}
+            that determine this strategy.
           </>
         }
         position="left"
@@ -143,7 +156,12 @@ export default function ScenarioCard({
         containerRef={cardContainerRef}
         content={
           <>
-            These <Box component="span" sx={{ fontWeight: 600 }}>outcomes</Box> show how this strategy affects water supply, ecosystems, and communities.
+            These{" "}
+            <Box component="span" sx={{ fontWeight: 600 }}>
+              outcomes
+            </Box>{" "}
+            show how this strategy affects water supply, ecosystems, and
+            communities.
           </>
         }
         position="left"
@@ -154,7 +172,12 @@ export default function ScenarioCard({
         containerRef={cardContainerRef}
         content={
           <>
-            These options allow you to select how a water management strategy is expected to perform under different potential <Box component="span" sx={{ fontWeight: 600 }}>hydroclimates</Box>.
+            These options allow you to select how a water management strategy is
+            expected to perform under different potential{" "}
+            <Box component="span" sx={{ fontWeight: 600 }}>
+              hydroclimates
+            </Box>
+            .
           </>
         }
         position="left"
@@ -300,7 +323,11 @@ export default function ScenarioCard({
                         <IconButton
                           size="small"
                           component="span"
-                          onClick={() => setOpenTooltipIndex(openTooltipIndex === index ? null : index)}
+                          onClick={() =>
+                            setOpenTooltipIndex(
+                              openTooltipIndex === index ? null : index,
+                            )
+                          }
                           sx={{
                             padding: 0,
                             minWidth: 0,

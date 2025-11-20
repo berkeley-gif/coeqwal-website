@@ -15,17 +15,22 @@ const GEOCODING_API_BASE = "https://api.mapbox.com/geocoding/v5/mapbox.places"
 // Common bounding boxes for convenience
 export const BOUNDING_BOXES = {
   CALIFORNIA: [-124.4, 32.5, -114.1, 42.0] as [number, number, number, number],
-  CENTRAL_VALLEY: [-122.5, 35.0, -119.0, 40.5] as [number, number, number, number],
+  CENTRAL_VALLEY: [-122.5, 35.0, -119.0, 40.5] as [
+    number,
+    number,
+    number,
+    number,
+  ],
   BAY_AREA: [-123.0, 37.0, -121.5, 38.5] as [number, number, number, number],
   SOCAL: [-119.5, 32.5, -116.0, 34.5] as [number, number, number, number],
 } as const
 
 /**
  * Hook for Mapbox geocoding (forward and reverse)
- * 
+ *
  * @param options - Geocoding configuration options
  * @returns Geocoding API with search, reverse, and result management
- * 
+ *
  * @example
  * ```tsx
  * // Token is automatically pulled from map context if not provided
@@ -35,29 +40,31 @@ export const BOUNDING_BOXES = {
  *   flyTo: true,
  *   flyToZoom: 14
  * });
- * 
+ *
  * // Or provide token explicitly
  * const geocoding = useGeocoding({
  *   accessToken: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
  *   bbox: BOUNDING_BOXES.CALIFORNIA,
  * });
- * 
+ *
  * // Search for a place
  * const results = await geocoding.search('Sacramento River');
- * 
+ *
  * // Select a result (automatically flies to it if flyTo: true)
  * geocoding.selectResult(results[0]);
- * 
+ *
  * // Reverse geocode coordinates
  * const location = await geocoding.reverse(-121.4944, 38.5816);
  * ```
  */
-export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingReturn {
+export function useGeocoding(
+  options: Partial<GeocodingOptions>,
+): UseGeocodingReturn {
   const { flyTo: mapFlyTo, mapRef } = useMap()
   const [results, setResults] = useState<GeocodingFeature[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  
+
   // Use ref to track abort controller for canceling requests
   const abortControllerRef = useRef<AbortController | null>(null)
 
@@ -66,16 +73,18 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
     if (options.accessToken) {
       return options.accessToken
     }
-    
+
     // Try to get token from mapbox map instance
     const map = mapRef?.current?.getMap()
-    // @ts-expect-error - accessing internal mapbox property
-    const mapToken = map?._requestManager?._customAccessToken || map?.accessToken
-    
+    // Cast to any to access internal mapbox properties
+    const mapToken = (map as any)?._requestManager?._customAccessToken || (map as any)?.accessToken
+
     if (!mapToken) {
-      console.warn("⚠️ No Mapbox access token found. Please provide accessToken option or ensure map has a token.")
+      console.warn(
+        "⚠️ No Mapbox access token found. Please provide accessToken option or ensure map has a token.",
+      )
     }
-    
+
     return mapToken || ""
   }, [options.accessToken, mapRef])
 
@@ -97,7 +106,7 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
   const buildParams = useCallback(
     (extraParams: Record<string, string> = {}) => {
       const token = getAccessToken()
-      
+
       const params = new URLSearchParams({
         access_token: token,
         limit: limit.toString(),
@@ -162,7 +171,7 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
         }
 
         const data: GeocodingResponse = await response.json()
-        
+
         setResults(data.features)
         setLoading(false)
         return data.features
@@ -218,7 +227,7 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
         }
 
         const data: GeocodingResponse = await response.json()
-        
+
         setResults(data.features)
         setLoading(false)
         return data.features
@@ -248,7 +257,7 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
     (feature: GeocodingFeature) => {
       if (flyTo && mapFlyTo) {
         const [longitude, latitude] = feature.center
-        
+
         // If feature has bbox, fit to bounds, otherwise fly to center
         if (feature.bbox) {
           // Note: bbox format is [minLng, minLat, maxLng, maxLat]
@@ -282,7 +291,7 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
   const clear = useCallback(() => {
     setResults([])
     setError(null)
-    
+
     // Cancel any pending request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -300,4 +309,3 @@ export function useGeocoding(options: Partial<GeocodingOptions>): UseGeocodingRe
     selectResult,
   }
 }
-

@@ -21,15 +21,20 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<Position>({ bottom: 32, right: 32 })
   const [isDragging, setIsDragging] = useState(false)
-  const dragStartRef = useRef<{ x: number; y: number; bottom: number; right: number } | null>(null)
+  const dragStartRef = useRef<{
+    x: number
+    y: number
+    bottom: number
+    right: number
+  } | null>(null)
 
-  const handleToggle = () => setIsOpen(prev => !prev)
+  const handleToggle = () => setIsOpen((prev) => !prev)
   const handleClose = () => setIsOpen(false)
 
   const handleDragStart = (e: React.MouseEvent) => {
     // Only start drag if not clicking to toggle
     if (e.button !== 0) return // Only left mouse button
-    
+
     setIsDragging(true)
     dragStartRef.current = {
       x: e.clientX,
@@ -58,14 +63,15 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   }
 
   // Determine if button is on the left or right half of the screen
-  const isOnLeftHalf = typeof window !== 'undefined' 
-    ? (window.innerWidth - position.right - 32) < window.innerWidth / 2
-    : false
+  const isOnLeftHalf =
+    typeof window !== "undefined"
+      ? window.innerWidth - position.right - 32 < window.innerWidth / 2
+      : false
 
   return (
     <>
-      <FloatingGlossaryButton 
-        onClick={handleToggle} 
+      <FloatingGlossaryButton
+        onClick={handleToggle}
         isOpen={isOpen}
         position={position}
         onDragStart={handleDragStart}
@@ -73,9 +79,9 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
         onDragEnd={handleDragEnd}
         isDragging={isDragging}
       />
-      <FloatingGlossaryPanel 
-        isOpen={isOpen} 
-        onClose={handleClose} 
+      <FloatingGlossaryPanel
+        isOpen={isOpen}
+        onClose={handleClose}
         selectedTerm={selectedTerm}
         position={position}
         isOnLeftHalf={isOnLeftHalf}
@@ -83,4 +89,3 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     </>
   )
 }
-

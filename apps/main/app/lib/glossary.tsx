@@ -187,4 +187,3 @@ export const glossaryTerms: GlossaryTerm[] = [
     definition: "Groups of related water management strategies",
   },
 ].sort((a, b) => a.term.localeCompare(b.term))
-

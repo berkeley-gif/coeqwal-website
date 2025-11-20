@@ -51,56 +51,60 @@ export default function ListView() {
   } = useScenarioExplorerStore()
 
   // Sort strategies based on search query - matches first, then non-matches
-  const { sortedStrategies, matchingStrategyValues, hasSearchResults } = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return { 
-        sortedStrategies: strategies, 
-        matchingStrategyValues: new Set<string>(),
-        hasSearchResults: false 
+  const { sortedStrategies, matchingStrategyValues, hasSearchResults } =
+    useMemo(() => {
+      if (!searchQuery.trim()) {
+        return {
+          sortedStrategies: strategies,
+          matchingStrategyValues: new Set<string>(),
+          hasSearchResults: false,
+        }
       }
-    }
 
-    const searchLower = searchQuery.toLowerCase()
-    const matches: typeof strategies = []
-    const nonMatches: typeof strategies = []
-    const matchingValues = new Set<string>()
+      const searchLower = searchQuery.toLowerCase()
+      const matches: typeof strategies = []
+      const nonMatches: typeof strategies = []
+      const matchingValues = new Set<string>()
 
-    strategies.forEach((strategy) => {
-      let isMatch = false
+      strategies.forEach((strategy) => {
+        let isMatch = false
 
-      // Search in strategy label
-      if (strategy.label.toLowerCase().includes(searchLower)) isMatch = true
-      
-      // Search in strategy description
-      if (strategy.description.toLowerCase().includes(searchLower)) isMatch = true
-      
-      // Search in strategy value/ID
-      if (strategy.value.toLowerCase().includes(searchLower)) isMatch = true
-      
-      // Search in associated operation icon labels (from strategyDefinitions)
-      // These are the tooltip labels for the operation icons
-      const relatedDefinition = strategyDefinitions.find(
-        (def) => def.id === strategy.value
-      )
-      if (relatedDefinition) {
-        if (relatedDefinition.label.toLowerCase().includes(searchLower)) isMatch = true
-        if (relatedDefinition.description.toLowerCase().includes(searchLower)) isMatch = true
+        // Search in strategy label
+        if (strategy.label.toLowerCase().includes(searchLower)) isMatch = true
+
+        // Search in strategy description
+        if (strategy.description.toLowerCase().includes(searchLower))
+          isMatch = true
+
+        // Search in strategy value/ID
+        if (strategy.value.toLowerCase().includes(searchLower)) isMatch = true
+
+        // Search in associated operation icon labels (from strategyDefinitions)
+        // These are the tooltip labels for the operation icons
+        const relatedDefinition = strategyDefinitions.find(
+          (def) => def.id === strategy.value,
+        )
+        if (relatedDefinition) {
+          if (relatedDefinition.label.toLowerCase().includes(searchLower))
+            isMatch = true
+          if (relatedDefinition.description.toLowerCase().includes(searchLower))
+            isMatch = true
+        }
+
+        if (isMatch) {
+          matches.push(strategy)
+          matchingValues.add(strategy.value)
+        } else {
+          nonMatches.push(strategy)
+        }
+      })
+
+      return {
+        sortedStrategies: [...matches, ...nonMatches],
+        matchingStrategyValues: matchingValues,
+        hasSearchResults: matches.length > 0,
       }
-      
-      if (isMatch) {
-        matches.push(strategy)
-        matchingValues.add(strategy.value)
-      } else {
-        nonMatches.push(strategy)
-      }
-    })
-
-    return { 
-      sortedStrategies: [...matches, ...nonMatches], 
-      matchingStrategyValues: matchingValues,
-      hasSearchResults: matches.length > 0 
-    }
-  }, [searchQuery])
+    }, [searchQuery])
 
   // Convert scenario IDs to strategy values for StrategyGrid
   const selectedStrategies = selectedScenarios.map(scenarioIdToStrategy)

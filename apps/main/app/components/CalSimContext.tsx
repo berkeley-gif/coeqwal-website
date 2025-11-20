@@ -37,7 +37,9 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isPanelsExpanded, setIsPanelsExpanded] = useState(false)
   const [isPanelsVisible, setIsPanelsVisible] = useState(false)
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
-  const [geocoderMarker, setGeocoderMarker] = useState<[number, number] | null>(null)
+  const [geocoderMarker, setGeocoderMarker] = useState<[number, number] | null>(
+    null,
+  )
 
   const toggleCalSim = useCallback(() => {
     setIsCalSimVisible((prev) => {

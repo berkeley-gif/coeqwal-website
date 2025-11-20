@@ -21,7 +21,13 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
-  const { isPanelsExpanded, geocoderMarker, showBasins, showRivers, showInflowArrows } = useCalSimToggle()
+  const {
+    isPanelsExpanded,
+    geocoderMarker,
+    showBasins,
+    showRivers,
+    showInflowArrows,
+  } = useCalSimToggle()
 
   return (
     <Box
@@ -46,7 +52,7 @@ export default function CaliforniaMapPanel({
           pitch: 0,
         }}
         minZoom={5}
-        maxZoom={18}  // Allow street-level detail
+        maxZoom={18} // Allow street-level detail
         // maxBounds={[
         //   [-124.5, 32.5], // Southwest coordinates (west, south)
         //   [-114.0, 42.0], // Northeast coordinates (east, north)

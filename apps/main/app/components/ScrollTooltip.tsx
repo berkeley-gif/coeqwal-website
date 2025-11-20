@@ -30,7 +30,7 @@ export default function ScrollTooltip({
 
   useEffect(() => {
     if (!targetRef.current || !containerRef.current) {
-      return;
+      return
     }
 
     const updatePosition = () => {
@@ -41,11 +41,11 @@ export default function ScrollTooltip({
       // Get positions relative to the container
       const targetRect = targetEl.getBoundingClientRect()
       const containerRect = containerEl.getBoundingClientRect()
-      
+
       // Calculate position relative to container
       const relativeTop = targetRect.top - containerRect.top
       const relativeLeft = targetRect.left - containerRect.left
-      
+
       // Tooltip dimensions
       const tooltipWidth = 300 // max-width from styles
       const gap = 40 // Larger gap to avoid overlapping the panel
@@ -66,11 +66,11 @@ export default function ScrollTooltip({
           break
         case "top":
           top = relativeTop - 80 - gap // Approximate tooltip height
-          left = relativeLeft + (targetRect.width / 2)
+          left = relativeLeft + targetRect.width / 2
           break
         case "bottom":
           top = relativeTop + targetRect.height + gap
-          left = relativeLeft + (targetRect.width / 2)
+          left = relativeLeft + targetRect.width / 2
           break
       }
 
@@ -215,4 +215,3 @@ export default function ScrollTooltip({
     </MotionBox>
   )
 }
-

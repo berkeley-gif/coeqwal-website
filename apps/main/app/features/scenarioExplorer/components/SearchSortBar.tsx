@@ -26,8 +26,6 @@ interface SearchSortBarProps {
 export default function SearchSortBar({
   placeholder = "Search scenarios...",
   sortOptions = [
-    { value: "name-asc", label: "Name (A-Z)" },
-    { value: "name-desc", label: "Name (Z-A)" },
     { value: "outcome-best-first", label: "Best performing first" },
     { value: "outcome-worst-first", label: "Worst performing first" },
   ],

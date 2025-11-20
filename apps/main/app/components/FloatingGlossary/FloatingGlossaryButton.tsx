@@ -23,14 +23,14 @@ interface FloatingGlossaryButtonProps {
  * Floating circular button for opening the glossary
  * Draggable to reposition the glossary anywhere on the viewport
  */
-export function FloatingGlossaryButton({ 
-  onClick, 
-  isOpen, 
+export function FloatingGlossaryButton({
+  onClick,
+  isOpen,
   position,
   onDragStart,
   onDragMove,
   onDragEnd,
-  isDragging
+  isDragging,
 }: FloatingGlossaryButtonProps) {
   const theme = useTheme()
   const [isHovered, setIsHovered] = useState(false)
@@ -52,13 +52,13 @@ export function FloatingGlossaryButton({
     const startTime = Date.now()
     const startX = e.clientX
     const startY = e.clientY
-    
+
     const checkDragIntent = (moveEvent: MouseEvent) => {
       const distance = Math.sqrt(
-        Math.pow(moveEvent.clientX - startX, 2) + 
-        Math.pow(moveEvent.clientY - startY, 2)
+        Math.pow(moveEvent.clientX - startX, 2) +
+          Math.pow(moveEvent.clientY - startY, 2),
       )
-      
+
       // If moved more than 5px, it's a drag
       if (distance > 5) {
         document.removeEventListener("mousemove", checkDragIntent)
@@ -66,17 +66,17 @@ export function FloatingGlossaryButton({
         onDragStart(e)
       }
     }
-    
+
     const handleQuickClick = () => {
       document.removeEventListener("mousemove", checkDragIntent)
       document.removeEventListener("mouseup", handleQuickClick)
-      
+
       // If released quickly without much movement, it's a click
       if (Date.now() - startTime < 200) {
         onClick()
       }
     }
-    
+
     document.addEventListener("mousemove", checkDragIntent)
     document.addEventListener("mouseup", handleQuickClick)
   }
@@ -100,16 +100,16 @@ export function FloatingGlossaryButton({
         alignItems: "center",
         justifyContent: "center",
         cursor: isDragging ? "grabbing" : "grab",
-        boxShadow: isOpen 
-          ? "0 0 0 4px rgba(33, 150, 243, 0.2)" 
+        boxShadow: isOpen
+          ? "0 0 0 4px rgba(33, 150, 243, 0.2)"
           : "0 4px 20px rgba(0, 0, 0, 0.3)",
         transition: isDragging ? "none" : "all 0.3s ease",
         zIndex: theme.zIndex.drawer, // Above panel to remain clickable
         userSelect: "none",
         "&:hover": {
           transform: isOpen || isDragging ? "none" : "scale(1.1)",
-          boxShadow: isOpen 
-            ? "0 0 0 4px rgba(33, 150, 243, 0.3)" 
+          boxShadow: isOpen
+            ? "0 0 0 4px rgba(33, 150, 243, 0.3)"
             : "0 6px 24px rgba(0, 0, 0, 0.4)",
         },
         "&:active": {
@@ -166,4 +166,3 @@ export function FloatingGlossaryButton({
     </Box>
   )
 }
-
