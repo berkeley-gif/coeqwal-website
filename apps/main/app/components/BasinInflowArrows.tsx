@@ -29,20 +29,21 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
    */
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
-    { lon: -122.5, lat: 40.4, rotation: 0, label: "NW - Shasta area" },
-    { lon: -122, lat: 40.65, rotation: 60, label: "N - Central north" },
-    { lon: -121.2, lat: 39.9, rotation: 90, label: "NE - Lassen area" },
+    // { lon: -122.5, lat: 40.4, rotation: 0, label: "NW - Shasta area" }, // Arrow 1 - commented out
+    // KEEP THIS ONE - Arrow 2 with curved tail:
+    { lon: -121.8, lat: 40.65, rotation: 60, label: "N - Central north" },
+    // { lon: -121.2, lat: 39.9, rotation: 90, label: "NE - Lassen area" }, // Arrow 3 - commented out
     
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
-    { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" },
-    { lon: -120.8, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
-    { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" },
-    { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
+    // { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" }, // Arrow 4 - commented out
+    // { lon: -120.8, lat: 39.0, rotation: 90, label: "E - Central Sierra" }, // Arrow 5 - commented out
+    // { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" }, // Arrow 6 - commented out
+    // { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" }, // Arrow 7 - commented out
     
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
-    { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" },
-    { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" },
-    { lon: -122.8, lat: 39.8, rotation: 280, label: "NW - Northwestern rim" },
+    // { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" }, // Arrow 8 - commented out
+    // { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" }, // Arrow 9 - commented out
+    // { lon: -122.8, lat: 39.8, rotation: 280, label: "NW - Northwestern rim" }, // Arrow 10 - commented out
   ]
 
   const arrowColor = "#2196F3"
@@ -68,9 +69,9 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
             }}
           >
             <svg
-              width={index === 1 ? "100" : "70"}
-              height={index === 1 ? "150" : "70"}
-              viewBox={index === 1 ? "0 -70 70 150" : "0 0 70 70"}
+              width={index === 0 ? "100" : "70"}
+              height={index === 0 ? "150" : "70"}
+              viewBox={index === 0 ? "0 -70 70 150" : "0 0 70 70"}
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               style={{
@@ -79,7 +80,7 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
             >
               <defs>
                 {/* Gradient that fades from solid to transparent along the tail */}
-                {index === 1 ? (
+                {index === 0 ? (
                   // Longer gradient for arrow 2's longer tail - uses actual coordinates
                   <linearGradient 
                     id={`arrow-gradient-${index}`} 
@@ -107,7 +108,7 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
               </defs>
               
               {/* Wider and longer fading tail - curved for arrow 2, straight for others */}
-              {index === 1 ? (
+              {index === 0 ? (
                 // Curved tail with constant width for arrow 2 (twice as long)
                 <path
                   d="M 29 -67
@@ -143,21 +144,6 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
                 fill={arrowColor}
               />
               
-              {/* Temporary number label for identification */}
-              <text
-                x="35"
-                y="35"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fill="white"
-                fontSize="16"
-                fontWeight="bold"
-                stroke="#000"
-                strokeWidth="2"
-                paintOrder="stroke"
-              >
-                {index + 1}
-              </text>
             </svg>
           </Box>
         </Marker>
