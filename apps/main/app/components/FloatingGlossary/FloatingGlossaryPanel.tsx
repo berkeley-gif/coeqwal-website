@@ -14,17 +14,20 @@ interface FloatingGlossaryPanelProps {
   onClose: () => void
   selectedTerm?: string
   position: Position
+  isOnLeftHalf: boolean
 }
 
 /**
  * Pop-up panel that displays glossary content
  * Anchored to the button position, taking up 1/3 of the viewport width
+ * Positions itself left or right based on button position
  */
 export function FloatingGlossaryPanel({
   isOpen,
   onClose,
   selectedTerm,
   position,
+  isOnLeftHalf,
 }: FloatingGlossaryPanelProps) {
   const theme = useTheme()
   const termRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -135,7 +138,19 @@ export function FloatingGlossaryPanel({
         sx={{
           position: "fixed",
           bottom: position.bottom + 76, // Just above the button (64px button height + 12px gap)
-          right: position.right, // Aligned with button
+          // Position based on which half of screen the button is on
+          ...(isOnLeftHalf
+            ? {
+                // Button on left, then panel appears to the right
+                left:
+                  typeof window !== "undefined"
+                    ? window.innerWidth - position.right
+                    : position.right,
+              }
+            : {
+                // Button on right, then panel appears to the left
+                right: position.right,
+              }),
           width: "33.333vw", // 1/3 of viewport width
           minWidth: "400px",
           maxWidth: "600px",
@@ -145,7 +160,8 @@ export function FloatingGlossaryPanel({
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
           transform: isOpen ? "scale(1)" : "scale(0.9)",
           opacity: isOpen ? 1 : 0,
-          transformOrigin: "bottom right", // Anchor animation to bottom-right
+          // Transform origin changes based on position
+          transformOrigin: isOnLeftHalf ? "bottom left" : "bottom right",
           transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)", // Bouncy easing
           pointerEvents: isOpen ? "auto" : "none",
           zIndex: theme.zIndex.drawer - 1,
