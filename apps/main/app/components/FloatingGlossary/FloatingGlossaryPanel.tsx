@@ -223,12 +223,15 @@ export function FloatingGlossaryPanel({
                   }
                 >
                   {/* Term header with icon */}
-                  <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1, gap: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "flex-start", mb: 0.5, gap: 1, ml: -1 }}>
                     <Box
                       sx={{
                         color: theme.palette.blue.bright,
-                        mt: 0.5,
+                        mt: -0.25,
                         flexShrink: 0,
+                        fontSize: "2rem",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
                       {term.icon}
