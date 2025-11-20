@@ -15,6 +15,8 @@ interface CalSimContextType {
   toggleBasins: () => void
   showRivers: boolean
   toggleRivers: () => void
+  showInflowArrows: boolean
+  toggleInflowArrows: () => void
   isPanelsExpanded: boolean
   setIsPanelsExpanded: (expanded: boolean) => void
   isPanelsVisible: boolean
@@ -31,6 +33,7 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
   const [showBasins, setShowBasins] = useState(false)
   const [showRivers, setShowRivers] = useState(false)
+  const [showInflowArrows, setShowInflowArrows] = useState(false)
   const [isPanelsExpanded, setIsPanelsExpanded] = useState(false)
   const [isPanelsVisible, setIsPanelsVisible] = useState(false)
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
@@ -57,6 +60,13 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const toggleInflowArrows = useCallback(() => {
+    setShowInflowArrows((prev) => {
+      console.log(`Inflow arrows toggle: ${prev} -> ${!prev}`)
+      return !prev
+    })
+  }, [])
+
   return (
     <CalSimContext.Provider
       value={{
@@ -66,6 +76,8 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
         toggleBasins,
         showRivers,
         toggleRivers,
+        showInflowArrows,
+        toggleInflowArrows,
         isPanelsExpanded,
         setIsPanelsExpanded,
         isPanelsVisible,

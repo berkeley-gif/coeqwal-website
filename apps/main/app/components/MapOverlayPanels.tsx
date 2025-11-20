@@ -24,7 +24,7 @@ import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 export default function MapOverlayPanels() {
   const theme = useTheme()
   const map = useMap()
-  const { setGeocoderMarker, showBasins, toggleBasins, showRivers, toggleRivers } = useCalSimToggle()
+  const { setGeocoderMarker, showBasins, toggleBasins, showRivers, toggleRivers, showInflowArrows, toggleInflowArrows } = useCalSimToggle()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
@@ -39,6 +39,8 @@ export default function MapOverlayPanels() {
   const showBasinsRef = useRef(showBasins)
   const toggleRiversOnRef = useRef(toggleRivers)
   const showRiversRef = useRef(showRivers)
+  const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
+  const showInflowArrowsRef = useRef(showInflowArrows)
   
   // Keep refs in sync
   useEffect(() => {
@@ -46,7 +48,9 @@ export default function MapOverlayPanels() {
     showBasinsRef.current = showBasins
     toggleRiversOnRef.current = toggleRivers
     showRiversRef.current = showRivers
-  }, [toggleBasins, showBasins, toggleRivers, showRivers])
+    toggleInflowArrowsOnRef.current = toggleInflowArrows
+    showInflowArrowsRef.current = showInflowArrows
+  }, [toggleBasins, showBasins, toggleRivers, showRivers, toggleInflowArrows, showInflowArrows])
 
   useLearnScrollChoreography(useMemo(() => [
     {
@@ -98,7 +102,14 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
       ],
-      // Keep basins visible - no onExit needed, Panel 5 will also show basins
+      // Show inflow arrows when entering panel 4
+      onEnter: () => {
+        if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+      },
+      // Hide arrows when exiting panel 4
+      onExit: () => {
+        if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+      },
     },
     {
       panelId: "rivers-flow-response",
