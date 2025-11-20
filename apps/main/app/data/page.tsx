@@ -17,7 +17,7 @@ import {
   Alert,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
-import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
+// import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer" // DEPRECATED
 import { ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import type { Scenario } from "../types/scenarioDownloads"
@@ -27,7 +27,7 @@ import {
 } from "../utils/fileDownloadApi"
 
 export default function DataPage() {
-  const theme = useTheme()
+  const theme = useTheme() // Still needed for other theme properties
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
@@ -92,11 +92,12 @@ export default function DataPage() {
     <>
       <Header />
 
-      <ConnectedMultiDrawer
+      {/* Side drawer (glossary) - DEPRECATED: Replaced by FloatingGlossary on main page */}
+      {/* <ConnectedMultiDrawer
         drawerWidth={theme.layout.drawer.width}
         overlay={true}
         showRailButtons={false}
-      />
+      /> */}
 
       {/* Main content wrapper */}
       <Box
