@@ -35,22 +35,24 @@ export default function MapOverlayPanels() {
   // Learn section scroll choreography
   // Each position defines the complete state of all layers at that scroll point
   // Create stable references for callbacks to avoid re-creating panel configs
+  const mapRef = useRef(map)
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
   const toggleRiversOnRef = useRef(toggleRivers)
   const showRiversRef = useRef(showRivers)
   const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
   const showInflowArrowsRef = useRef(showInflowArrows)
-  
+
   // Keep refs in sync
   useEffect(() => {
+    mapRef.current = map
     toggleBasinsOnRef.current = toggleBasins
     showBasinsRef.current = showBasins
     toggleRiversOnRef.current = toggleRivers
     showRiversRef.current = showRivers
     toggleInflowArrowsOnRef.current = toggleInflowArrows
     showInflowArrowsRef.current = showInflowArrows
-  }, [toggleBasins, showBasins, toggleRivers, showRivers, toggleInflowArrows, showInflowArrows])
+  }, [map, toggleBasins, showBasins, toggleRivers, showRivers, toggleInflowArrows, showInflowArrows])
 
   useLearnScrollChoreography(useMemo(() => [
     {
@@ -102,9 +104,15 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
       ],
-      // Show inflow arrows when entering panel 4
+      // Show inflow arrows when entering panel 4, and ensure basins and inflow polygon are visible
       onEnter: () => {
         if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+        // Restore basins if returning from Panel 5
+        if (!showBasinsRef.current) toggleBasinsOnRef.current()
+        // Restore inflow-watersheds polygon opacity
+        if (mapRef.current) {
+          mapRef.current.setPaintProperty("inflow-watersheds", "fill-opacity", 0.4)
+        }
       },
       // Hide arrows when exiting panel 4
       onExit: () => {
@@ -121,9 +129,17 @@ export default function MapOverlayPanels() {
         { layerId: "central-valley-polygon", visibility: "none" as const },
         { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
       ],
-      // Show rivers when entering Panel 5
+      // Show rivers when entering Panel 5, then fade out basins and inflow polygon gracefully
       onEnter: () => {
         if (!showRiversRef.current) toggleRiversOnRef.current()
+        // After rivers start animating, fade out basins and inflow polygon gracefully
+        setTimeout(() => {
+          if (showBasinsRef.current) toggleBasinsOnRef.current()
+          // Fade out inflow-watersheds polygon
+          if (mapRef.current) {
+            mapRef.current.setPaintProperty("inflow-watersheds", "fill-opacity", 0)
+          }
+        }, 1000) // Wait 1000ms for rivers to draw before fading out
       },
       // Hide rivers when exiting Panel 5
       onExit: () => {
