@@ -39,6 +39,8 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
     { lon: -122.5, lat: 39.6, rotation: 300 },
   ]
 
+  const arrowColor = "#2196F3"
+
   return (
     <>
       {arrowPositions.map((pos, index) => (
@@ -50,8 +52,8 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
         >
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: 60,
+              height: 60,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -60,22 +62,47 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
             }}
           >
             <svg
-              width="40"
-              height="40"
-              viewBox="0 0 40 40"
+              width="70"
+              height="70"
+              viewBox="0 0 70 70"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               style={{
-                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+                filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.25))",
               }}
             >
-              {/* Arrow shape pointing down (will be rotated by container) */}
+              <defs>
+                {/* Gradient that fades from solid to transparent along the tail */}
+                <linearGradient id={`arrow-gradient-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
+                  <stop offset="25%" stopColor={arrowColor} stopOpacity="0.3" />
+                  <stop offset="60%" stopColor={arrowColor} stopOpacity="0.7" />
+                  <stop offset="100%" stopColor={arrowColor} stopOpacity="1" />
+                </linearGradient>
+              </defs>
+              
+              {/* Wider and longer fading tail - straight rectangle */}
+              <rect
+                x="29"
+                y="5"
+                width="12"
+                height="42"
+                fill={`url(#arrow-gradient-${index})`}
+              />
+              
+              {/* Rounded triangle arrowhead connected to tail */}
               <path
-                d="M20 5 L20 30 M20 30 L13 23 M20 30 L27 23"
-                stroke="#2196F3"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                d="M 35 65
+                   Q 33 63 30 59
+                   Q 26 54 23 49
+                   Q 22 47 26 47
+                   Q 30 47 33 47
+                   L 37 47
+                   Q 40 47 44 47
+                   Q 48 47 47 49
+                   Q 44 54 40 59
+                   Q 37 63 35 65 Z"
+                fill={arrowColor}
               />
             </svg>
           </Box>
