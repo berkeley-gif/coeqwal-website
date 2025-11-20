@@ -12,6 +12,7 @@ interface LayerState {
   fillOpacity?: number
   lineOpacity?: number
   lineWidth?: number
+  lineJoin?: "bevel" | "round" | "miter"
   textField?: string | unknown[]
   textAllowOverlap?: boolean
 }
@@ -209,9 +210,14 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
             setPaintProperty(layerState.layerId, "line-opacity", layerState.lineOpacity)
           }
 
-          // Apply other properties
+          // Apply other paint properties
           if (layerState.lineWidth !== undefined) {
             setPaintProperty(layerState.layerId, "line-width", layerState.lineWidth)
+          }
+          
+          // Apply layout properties
+          if (layerState.lineJoin !== undefined) {
+            setLayoutProperty(layerState.layerId, "line-join", layerState.lineJoin)
           }
         } catch (error) {
           console.warn(`[Choreography] Error applying layer "${layerState.layerId}":`, error)
