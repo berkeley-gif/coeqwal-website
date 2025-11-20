@@ -35,13 +35,12 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
     
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
     { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" },
-    { lon: -120.2, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
+    { lon: -120.8, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
     { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" },
     { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
     
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
-    { lon: -122.0, lat: 36.2, rotation: 270, label: "SW - Southern Coast Range" },
-    { lon: -122.5, lat: 37.5, rotation: 270, label: "W - Central Coast Range" },
+    { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" },
     { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" },
     { lon: -122.8, lat: 39.8, rotation: 280, label: "NW - Northwestern rim" },
   ]
@@ -69,9 +68,9 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
             }}
           >
             <svg
-              width="70"
-              height="70"
-              viewBox="0 0 70 70"
+              width={index === 1 ? "100" : "70"}
+              height={index === 1 ? "150" : "70"}
+              viewBox={index === 1 ? "0 -70 70 150" : "0 0 70 70"}
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               style={{
@@ -80,22 +79,54 @@ export default function BasinInflowArrows({ visible = true }: BasinInflowArrowsP
             >
               <defs>
                 {/* Gradient that fades from solid to transparent along the tail */}
-                <linearGradient id={`arrow-gradient-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
-                  <stop offset="25%" stopColor={arrowColor} stopOpacity="0.3" />
-                  <stop offset="60%" stopColor={arrowColor} stopOpacity="0.7" />
-                  <stop offset="100%" stopColor={arrowColor} stopOpacity="1" />
-                </linearGradient>
+                {index === 1 ? (
+                  // Longer gradient for arrow 2's longer tail - uses actual coordinates
+                  <linearGradient 
+                    id={`arrow-gradient-${index}`} 
+                    x1="35" 
+                    y1="-67" 
+                    x2="35" 
+                    y2="47"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
+                    <stop offset="15%" stopColor={arrowColor} stopOpacity="0.2" />
+                    <stop offset="40%" stopColor={arrowColor} stopOpacity="0.5" />
+                    <stop offset="70%" stopColor={arrowColor} stopOpacity="0.8" />
+                    <stop offset="100%" stopColor={arrowColor} stopOpacity="1" />
+                  </linearGradient>
+                ) : (
+                  // Standard gradient for other arrows
+                  <linearGradient id={`arrow-gradient-${index}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
+                    <stop offset="25%" stopColor={arrowColor} stopOpacity="0.3" />
+                    <stop offset="60%" stopColor={arrowColor} stopOpacity="0.7" />
+                    <stop offset="100%" stopColor={arrowColor} stopOpacity="1" />
+                  </linearGradient>
+                )}
               </defs>
               
-              {/* Wider and longer fading tail - straight rectangle */}
-              <rect
-                x="29"
-                y="5"
-                width="12"
-                height="42"
-                fill={`url(#arrow-gradient-${index})`}
-              />
+              {/* Wider and longer fading tail - curved for arrow 2, straight for others */}
+              {index === 1 ? (
+                // Curved tail with constant width for arrow 2 (twice as long)
+                <path
+                  d="M 29 -67
+                     C 24 -20, 24 20, 29 47
+                     L 41 47
+                     C 36 20, 36 -20, 41 -67
+                     Z"
+                  fill={`url(#arrow-gradient-${index})`}
+                />
+              ) : (
+                // Straight rectangular tail for other arrows
+                <rect
+                  x="29"
+                  y="-10"
+                  width="12"
+                  height="57"
+                  fill={`url(#arrow-gradient-${index})`}
+                />
+              )}
               
               {/* Rounded triangle arrowhead connected to tail */}
               <path
