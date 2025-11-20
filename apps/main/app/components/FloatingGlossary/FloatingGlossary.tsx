@@ -57,6 +57,11 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     dragStartRef.current = null
   }
 
+  // Determine if button is on the left or right half of the screen
+  const isOnLeftHalf = typeof window !== 'undefined' 
+    ? (window.innerWidth - position.right - 32) < window.innerWidth / 2
+    : false
+
   return (
     <>
       <FloatingGlossaryButton 
@@ -73,6 +78,7 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
         onClose={handleClose} 
         selectedTerm={selectedTerm}
         position={position}
+        isOnLeftHalf={isOnLeftHalf}
       />
     </>
   )
