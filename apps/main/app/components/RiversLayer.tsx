@@ -53,8 +53,8 @@ export default function RiversLayer({ visible }: RiversLayerProps) {
           id="sacramento-river-layer"
           type="line"
           paint={{
-            "line-color": "#b4d5ee",
-            "line-width": 4,
+            "line-color": "#64A4D6",
+            "line-width": 2,
             "line-opacity": 1,
             "line-trim-offset": [animationProgress, 1],
           }}
@@ -71,8 +71,8 @@ export default function RiversLayer({ visible }: RiversLayerProps) {
           id="san-joaquin-river-layer"
           type="line"
           paint={{
-            "line-color": "#b4d5ee",
-            "line-width": 4,
+            "line-color": "#64A4D6",
+            "line-width": 2,
             "line-opacity": 1,
             "line-trim-offset": [animationProgress, 1],
           }}
