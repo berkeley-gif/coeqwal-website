@@ -1,8 +1,8 @@
 "use client"
 
-import { Box, useTheme } from "@repo/ui/mui"
+import { Box } from "@repo/ui/mui"
 import { Header } from "./components/Header"
-import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
+// import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer" // DEPRECATED
 import { FloatingGlossary } from "./components/FloatingGlossary"
 import IntroSection from "./sections/IntroSection"
 
@@ -11,7 +11,7 @@ import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
 
 export default function Home() {
-  const theme = useTheme()
+  // const theme = useTheme() // No longer needed without ConnectedMultiDrawer
 
   return (
     <>
@@ -19,11 +19,11 @@ export default function Home() {
         {/* Header */}
         <Header />
 
-        {/* Side drawer (glossary) */}
-        <ConnectedMultiDrawer
+        {/* Side drawer (glossary) - DEPRECATED: Replaced by FloatingGlossary */}
+        {/* <ConnectedMultiDrawer
           drawerWidth={theme.layout.drawer.width}
           overlay={true}
-        />
+        /> */}
 
         {/* Floating glossary button and panel */}
         <FloatingGlossary />
