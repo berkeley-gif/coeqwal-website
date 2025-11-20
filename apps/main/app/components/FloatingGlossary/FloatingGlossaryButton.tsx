@@ -1,7 +1,8 @@
 "use client"
 
 import { Box, useTheme, MenuBookIcon } from "@repo/ui/mui"
-import { useEffect } from "react"
+import { RoundedRightArrow } from "@repo/ui"
+import { useEffect, useState } from "react"
 
 interface Position {
   bottom: number
@@ -32,6 +33,7 @@ export function FloatingGlossaryButton({
   isDragging
 }: FloatingGlossaryButtonProps) {
   const theme = useTheme()
+  const [isHovered, setIsHovered] = useState(false)
 
   // Set up global mouse event listeners for dragging
   useEffect(() => {
@@ -79,9 +81,13 @@ export function FloatingGlossaryButton({
     document.addEventListener("mouseup", handleQuickClick)
   }
 
+  const showArrows = isHovered || isDragging
+
   return (
     <Box
       onMouseDown={handleMouseDown}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       sx={{
         position: "fixed",
         bottom: position.bottom,
@@ -111,6 +117,26 @@ export function FloatingGlossaryButton({
         },
       }}
     >
+      {/* Left arrow (pointing left) - outside button radius */}
+      {showArrows && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: -20,
+            top: "50%",
+            marginTop: "-8px", // Half of arrow height (16px) to center
+            width: 16,
+            height: 16,
+            transform: "scaleX(-1)", // Flip horizontally to point left
+            opacity: showArrows ? 1 : 0,
+            transition: "opacity 0.2s ease",
+            pointerEvents: "none",
+          }}
+        >
+          <RoundedRightArrow color="#fff" />
+        </Box>
+      )}
+
       <MenuBookIcon
         sx={{
           fontSize: "2rem",
@@ -118,6 +144,25 @@ export function FloatingGlossaryButton({
           pointerEvents: "none", // Prevent icon from interfering with drag
         }}
       />
+
+      {/* Right arrow (pointing right) - outside button radius */}
+      {showArrows && (
+        <Box
+          sx={{
+            position: "absolute",
+            right: -20,
+            top: "50%",
+            marginTop: "-8px", // Half of arrow height (16px) to center
+            width: 16,
+            height: 16,
+            opacity: showArrows ? 1 : 0,
+            transition: "opacity 0.2s ease",
+            pointerEvents: "none",
+          }}
+        >
+          <RoundedRightArrow color="#fff" />
+        </Box>
+      )}
     </Box>
   )
 }
