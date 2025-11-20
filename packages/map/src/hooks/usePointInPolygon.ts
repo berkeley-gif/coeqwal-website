@@ -43,22 +43,22 @@ export interface UsePointInPolygonReturn<T = any> {
 
 /**
  * Hook for performing point-in-polygon spatial queries on GeoJSON data
- * 
+ *
  * @param geoJson - FeatureCollection of Polygons or MultiPolygons
  * @param options - Optional configuration
  * @returns Functions for spatial queries
- * 
+ *
  * @example
  * ```tsx
  * import { centralValleyBasins } from '@repo/data'
  * import { usePointInPolygon } from '@repo/map'
- * 
+ *
  * function MyComponent() {
  *   const { findContainingFeature } = usePointInPolygon(centralValleyBasins)
- *   
+ *
  *   const checkLocation = (lng: number, lat: number) => {
  *     const result = findContainingFeature(lng, lat)
- *     
+ *
  *     if (result) {
  *       console.log('Found:', result.properties.name)
  *       console.log('Feature:', result.feature)
@@ -95,7 +95,7 @@ export function usePointInPolygon<T = any>(
       // Check each feature
       for (let i = 0; i < features.length; i++) {
         const feature = features[i]
-        
+
         if (!feature) continue
 
         try {
@@ -145,22 +145,25 @@ export function usePointInPolygon<T = any>(
 
 /**
  * Helper hook specifically for basin lookups
- * 
+ *
  * @example
  * ```tsx
  * import { centralValleyBasins } from '@repo/data'
  * import { useBasinLookup } from '@repo/map'
- * 
+ *
  * function BasinFinder() {
  *   const { findBasin } = useBasinLookup(centralValleyBasins)
- *   
+ *
  *   const basin = findBasin(-121.4944, 38.5816)
  *   console.log(basin?.name) // "Sacramento River Basin"
  * }
  * ```
  */
 export function useBasinLookup(
-  basinGeoJson: FeatureCollection<Polygon | MultiPolygon, any> | null | undefined,
+  basinGeoJson:
+    | FeatureCollection<Polygon | MultiPolygon, any>
+    | null
+    | undefined,
 ) {
   const { findContainingFeature, features, isPointInAnyFeature } =
     usePointInPolygon(basinGeoJson, {
@@ -187,4 +190,3 @@ export function useBasinLookup(
     isInBasin: isPointInAnyFeature,
   }
 }
-

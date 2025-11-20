@@ -392,200 +392,154 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
           .flatMap((strategy, index, filteredArray) => {
             const isHighlighted = highlighted.has(strategy.value)
             const nextStrategy = filteredArray[index + 1]
-            const isNextHighlighted = nextStrategy ? highlighted.has(nextStrategy.value) : false
-            const shouldShowDivider = showSearchDivider && isHighlighted && !isNextHighlighted
-            
+            const isNextHighlighted = nextStrategy
+              ? highlighted.has(nextStrategy.value)
+              : false
+            const shouldShowDivider =
+              showSearchDivider && isHighlighted && !isNextHighlighted
+
             const strategyRow = (
-            <Box
-              key={strategy.value}
-              sx={{
-                gridColumn: "1 / -1", // Span all columns
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "subgrid", // Mobile: use parent grid
-                  lg: "subgrid", // Desktop: use parent grid
-                },
-                backgroundColor: isHighlighted ? theme.palette.common.white : "#faf8f5",
-                borderRadius: theme.borderRadius.rounded,
-                padding: showMapView ? theme.spacing(1) : theme.spacing(1.5),
-                gap: theme.spacing(1),
-                alignItems: "start",
-                transition: "all 0.2s ease",
-                border: isHighlighted ? `2px solid ${theme.palette.blue.bright}` : "2px solid transparent",
-                "&:hover": {
-                  backgroundColor: theme.palette.common.white,
-                },
-                ...(index === 0 && !showMapView && { marginTop: "-8px" }), // Pull first row closer to headers in table view
-              }}
-            >
-              {/* Column 1: Checkbox */}
               <Box
+                key={strategy.value}
                 sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "flex-start",
-                  pointerEvents: "auto",
-                  cursor: "pointer",
-                }}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  toggleStrategyChoice(strategy.value)
+                  gridColumn: "1 / -1", // Span all columns
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "subgrid", // Mobile: use parent grid
+                    lg: "subgrid", // Desktop: use parent grid
+                  },
+                  backgroundColor: isHighlighted
+                    ? theme.palette.common.white
+                    : "#faf8f5",
+                  borderRadius: theme.borderRadius.rounded,
+                  padding: showMapView ? theme.spacing(1) : theme.spacing(1.5),
+                  gap: theme.spacing(1),
+                  alignItems: "start",
+                  transition: "all 0.2s ease",
+                  border: isHighlighted
+                    ? `2px solid ${theme.palette.blue.bright}`
+                    : "2px solid transparent",
+                  "&:hover": {
+                    backgroundColor: theme.palette.common.white,
+                  },
+                  ...(index === 0 && !showMapView && { marginTop: "-8px" }), // Pull first row closer to headers in table view
                 }}
               >
-                <Checkbox
-                  checked={chosenStrategies.includes(strategy.value)}
-                  onChange={() => {}}
+                {/* Column 1: Checkbox */}
+                <Box
                   sx={{
-                    padding: 0,
-                    margin: 0,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-start",
+                    pointerEvents: "auto",
                     cursor: "pointer",
-                    pointerEvents: "none",
-                    position: "relative",
-                    top: theme.spacing(0.125),
-                    transform: "scale(0.9)",
-                    "& svg": {
-                      strokeWidth: theme.spacing(0.125),
-                    },
-                    "& path": {
-                      strokeWidth: theme.spacing(0.125),
-                    },
                   }}
-                />
-              </Box>
-
-              {/* Column 2: Strategy name and description */}
-              <Box sx={{ pr: 1 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: theme.typography.fontWeightMedium,
-                    mb: showDefinitions ? 0.5 : 0,
-                    fontSize: showMapView
-                      ? theme.typography.compact.title.fontSize
-                      : theme.typography.body2.fontSize,
-                    lineHeight: 1.3,
-                    whiteSpace: "pre-line",
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    toggleStrategyChoice(strategy.value)
                   }}
                 >
-                  {strategy.value === "current-ops-historical-ag"
-                    ? "Current operations with\nhistorical agricultural land use" // hack to get desired line break
-                    : strategy.label}
-                </Typography>
-                {showDefinitions && (
+                  <Checkbox
+                    checked={chosenStrategies.includes(strategy.value)}
+                    onChange={() => {}}
+                    sx={{
+                      padding: 0,
+                      margin: 0,
+                      cursor: "pointer",
+                      pointerEvents: "none",
+                      position: "relative",
+                      top: theme.spacing(0.125),
+                      transform: "scale(0.9)",
+                      "& svg": {
+                        strokeWidth: theme.spacing(0.125),
+                      },
+                      "& path": {
+                        strokeWidth: theme.spacing(0.125),
+                      },
+                    }}
+                  />
+                </Box>
+
+                {/* Column 2: Strategy name and description */}
+                <Box sx={{ pr: 1 }}>
                   <Typography
-                    variant="body2"
+                    variant="subtitle1"
                     sx={{
-                      lineHeight: showMapView ? 1.3 : 1.4,
+                      fontWeight: theme.typography.fontWeightMedium,
+                      mb: showDefinitions ? 0.5 : 0,
                       fontSize: showMapView
-                        ? theme.typography.compact.subtitle.fontSize
-                        : theme.typography.nav.fontSize,
+                        ? theme.typography.compact.title.fontSize
+                        : theme.typography.body2.fontSize,
+                      lineHeight: 1.3,
+                      whiteSpace: "pre-line",
                     }}
                   >
-                    {strategy.description
-                      .split(/(\bTUCPs?\b)/g)
-                      .map((part, index) => {
-                        if (part.match(/\bTUCPs?\b/)) {
-                          return (
-                            <span key={index}>
-                              {part}
-                              <InfoTooltip
-                                description="Temporary Urgent Change Petitions permit changes during droughts to meet human health and safety needs and protect endangered species"
-                                placement="top"
-                              >
-                                <InfoIcon
-                                  sx={{
-                                    fontSize:
-                                      theme.typography.compact.subtitle
-                                        .fontSize,
-                                    ml: 0.5,
-                                    cursor: "pointer",
-                                    color: theme.palette.blue.bright,
-                                    "&:hover": {
-                                      color: theme.palette.blue.darkest,
-                                    },
-                                  }}
-                                />
-                              </InfoTooltip>
-                            </span>
-                          )
-                        }
-                        return part
-                      })}
+                    {strategy.value === "current-ops-historical-ag"
+                      ? "Current operations with\nhistorical agricultural land use" // hack to get desired line break
+                      : strategy.label}
                   </Typography>
-                )}
-              </Box>
+                  {showDefinitions && (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        lineHeight: showMapView ? 1.3 : 1.4,
+                        fontSize: showMapView
+                          ? theme.typography.compact.subtitle.fontSize
+                          : theme.typography.nav.fontSize,
+                      }}
+                    >
+                      {strategy.description
+                        .split(/(\bTUCPs?\b)/g)
+                        .map((part, index) => {
+                          if (part.match(/\bTUCPs?\b/)) {
+                            return (
+                              <span key={index}>
+                                {part}
+                                <InfoTooltip
+                                  description="Temporary Urgent Change Petitions permit changes during droughts to meet human health and safety needs and protect endangered species"
+                                  placement="top"
+                                >
+                                  <InfoIcon
+                                    sx={{
+                                      fontSize:
+                                        theme.typography.compact.subtitle
+                                          .fontSize,
+                                      ml: 0.5,
+                                      cursor: "pointer",
+                                      color: theme.palette.blue.bright,
+                                      "&:hover": {
+                                        color: theme.palette.blue.darkest,
+                                      },
+                                    }}
+                                  />
+                                </InfoTooltip>
+                              </span>
+                            )
+                          }
+                          return part
+                        })}
+                    </Typography>
+                  )}
+                </Box>
 
-              {/* Column 3: Operations/assumptions icons */}
-              <Box
-                sx={{
-                  display: "flex", // Always visible
-                  gap: { xs: 0.5, md: 1 },
-                  alignItems: "flex-start",
-                  flexDirection: { xs: "column", md: "row" }, // Stack vertically on mobile, row on desktop
-                  justifyContent: "flex-start",
-                }}
-              >
-                {/* Current operations icon */}
-                <InfoTooltip description={CURRENT_OPERATIONS_ICONS[0]?.description || "Current operations"} placement="top">
-                  <Box
-                    sx={{
-                      width: showMapView
-                        ? theme.spacing(3.5)
-                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                      height: showMapView
-                        ? theme.spacing(3.5)
-                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                      cursor: "pointer",
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={CURRENT_OPERATIONS_ICONS[0]?.path || "/images/icons/current_ops.svg"}
-                      alt={CURRENT_OPERATIONS_ICONS[0]?.alt || "Current operations"}
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </Box>
-                </InfoTooltip>
-
-                {/* Land use icon - different for historical strategy */}
-                <InfoTooltip
-                  description={
-                    strategy.value === "current-ops-historical-ag"
-                      ? "Historical land use (2004-2013)"
-                      : CURRENT_OPERATIONS_ICONS[1]?.description || "Current land use"
-                  }
-                  placement="top"
+                {/* Column 3: Operations/assumptions icons */}
+                <Box
+                  sx={{
+                    display: "flex", // Always visible
+                    gap: { xs: 0.5, md: 1 },
+                    alignItems: "flex-start",
+                    flexDirection: { xs: "column", md: "row" }, // Stack vertically on mobile, row on desktop
+                    justifyContent: "flex-start",
+                  }}
                 >
-                  <Box
-                    sx={{
-                      width: showMapView
-                        ? theme.spacing(3.5)
-                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                      height: showMapView
-                        ? theme.spacing(3.5)
-                        : { xs: theme.spacing(4), lg: theme.spacing(5) },
-                      cursor: "pointer",
-                    }}
+                  {/* Current operations icon */}
+                  <InfoTooltip
+                    description={
+                      CURRENT_OPERATIONS_ICONS[0]?.description ||
+                      "Current operations"
+                    }
+                    placement="top"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={
-                        strategy.value === "current-ops-historical-ag"
-                          ? "/images/icons/land_use_prev.svg"
-                          : CURRENT_OPERATIONS_ICONS[1]?.path || "/images/icons/land_use.svg"
-                      }
-                      alt={
-                        strategy.value === "current-ops-historical-ag"
-                          ? "Historical land use"
-                          : CURRENT_OPERATIONS_ICONS[1]?.alt || "Current land use"
-                      }
-                      style={{ width: "100%", height: "100%" }}
-                    />
-                  </Box>
-                </InfoTooltip>
-                {/* No TUCP icon */}
-                {strategy.value === "current-ops-wo-tucp" && (
-                  <InfoTooltip description="Without TUCPs" placement="top">
                     <Box
                       sx={{
                         width: showMapView
@@ -599,136 +553,204 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src="/images/icons/no_tucp.svg"
-                        alt="Without TUCPs"
+                        src={
+                          CURRENT_OPERATIONS_ICONS[0]?.path ||
+                          "/images/icons/current_ops.svg"
+                        }
+                        alt={
+                          CURRENT_OPERATIONS_ICONS[0]?.alt ||
+                          "Current operations"
+                        }
                         style={{ width: "100%", height: "100%" }}
                       />
                     </Box>
                   </InfoTooltip>
-                )}
-              </Box>
 
-              {/* Column 4: Outcome charts (responsive layout) */}
-              <Box
-                sx={{
-                  gridColumn: { xs: "1 / -1", lg: "auto" }, // Full width on mobile, auto on desktop
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "repeat(3, 1fr)", // Mobile: 3x3 grid
-                    lg: "repeat(auto-fit, minmax(60px, 1fr))", // Desktop: auto-fit to available space
-                  },
-                  gap: theme.spacing(1),
-                  mt: { xs: 2, lg: 0 }, // Add top margin on mobile
-                  maxWidth: "100%",
-                }}
-              >
-                {outcomeNames.map(({ displayName }) => {
-                  // Get chart data for this strategy
-                  const strategyChartData = getChartDataForStrategy(
-                    strategy.value,
-                  )
-
-                  // Check if this outcome exists for this strategy
-                  const isActiveForStrategy =
-                    strategyChartData[displayName] !== undefined &&
-                    strategyChartData[displayName].length > 0
-
-                  const chartBox = (
+                  {/* Land use icon - different for historical strategy */}
+                  <InfoTooltip
+                    description={
+                      strategy.value === "current-ops-historical-ag"
+                        ? "Historical land use (2004-2013)"
+                        : CURRENT_OPERATIONS_ICONS[1]?.description ||
+                          "Current land use"
+                    }
+                    placement="top"
+                  >
                     <Box
                       sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: showMapView ? 0.5 : 1,
-                        cursor:
-                          onTierClick && isActiveForStrategy
-                            ? "pointer"
-                            : "default",
-                        padding: 0,
-                        borderRadius: theme.borderRadius.rounded,
-                        transition: "all 0.2s ease",
-                        backgroundColor: "transparent",
-                        opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
-                        border:
-                          selectedOutcomes[strategy.value] === displayName &&
-                          onTierClick
-                            ? `2px solid ${theme.palette.blue.bright}`
-                            : "2px solid transparent",
-                        "&:hover": {
-                          backgroundColor:
-                            onTierClick && isActiveForStrategy
-                              ? theme.palette.grey[100]
-                              : "transparent",
-                        },
+                        width: showMapView
+                          ? theme.spacing(3.5)
+                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                        height: showMapView
+                          ? theme.spacing(3.5)
+                          : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                        cursor: "pointer",
                       }}
-                      onClick={
-                        onTierClick && isActiveForStrategy
-                          ? () => {
-                              onOutcomeSelect(strategy.value, displayName)
-                              onTierClick(strategy.value, displayName)
-                            }
-                          : undefined
-                      }
                     >
-                      {(() => {
-                        const chartData = isActiveForStrategy
-                          ? strategyChartData[displayName]
-                          : undefined
-
-                        const values: [number, number, number, number] =
-                          chartData
-                            ? (chartData
-                                .map((tier) => tier.value)
-                                .slice(0, 4) as [
-                                number,
-                                number,
-                                number,
-                                number,
-                              ])
-                            : [0, 0, 0, 0]
-
-                        const variant = isSingleValueTier(chartData)
-                          ? "dots"
-                          : "bars"
-
-                        return (
-                          <ScenarioGlyph
-                            variant={variant}
-                            values={values}
-                            size={showMapView ? 45 : 50}
-                            tierColors={
-                              isActiveForStrategy
-                                ? (strategyChartData[displayName]
-                                    ?.map((tier) => tier.color)
-                                    .slice(0, 4) as [
-                                    string,
-                                    string,
-                                    string,
-                                    string,
-                                  ]) || [
-                                    theme.palette.tiers.tier1,
-                                    theme.palette.tiers.tier2,
-                                    theme.palette.tiers.tier3,
-                                    theme.palette.tiers.tier4,
-                                  ]
-                                : [
-                                    theme.palette.grey[300],
-                                    theme.palette.grey[300],
-                                    theme.palette.grey[300],
-                                    theme.palette.grey[300],
-                                  ] // Grey colors for inactive outcomes
-                            }
-                          />
-                        )
-                      })()}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={
+                          strategy.value === "current-ops-historical-ag"
+                            ? "/images/icons/land_use_prev.svg"
+                            : CURRENT_OPERATIONS_ICONS[1]?.path ||
+                              "/images/icons/land_use.svg"
+                        }
+                        alt={
+                          strategy.value === "current-ops-historical-ag"
+                            ? "Historical land use"
+                            : CURRENT_OPERATIONS_ICONS[1]?.alt ||
+                              "Current land use"
+                        }
+                        style={{ width: "100%", height: "100%" }}
+                      />
                     </Box>
-                  )
+                  </InfoTooltip>
+                  {/* No TUCP icon */}
+                  {strategy.value === "current-ops-wo-tucp" && (
+                    <InfoTooltip description="Without TUCPs" placement="top">
+                      <Box
+                        sx={{
+                          width: showMapView
+                            ? theme.spacing(3.5)
+                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                          height: showMapView
+                            ? theme.spacing(3.5)
+                            : { xs: theme.spacing(4), lg: theme.spacing(5) },
+                          cursor: "pointer",
+                        }}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/images/icons/no_tucp.svg"
+                          alt="Without TUCPs"
+                          style={{ width: "100%", height: "100%" }}
+                        />
+                      </Box>
+                    </InfoTooltip>
+                  )}
+                </Box>
 
-                  // No tooltips on charts - use header info icons instead
-                  return <div key={displayName}>{chartBox}</div>
-                })}
+                {/* Column 4: Outcome charts (responsive layout) */}
+                <Box
+                  sx={{
+                    gridColumn: { xs: "1 / -1", lg: "auto" }, // Full width on mobile, auto on desktop
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "repeat(3, 1fr)", // Mobile: 3x3 grid
+                      lg: "repeat(auto-fit, minmax(60px, 1fr))", // Desktop: auto-fit to available space
+                    },
+                    gap: theme.spacing(1),
+                    mt: { xs: 2, lg: 0 }, // Add top margin on mobile
+                    maxWidth: "100%",
+                  }}
+                >
+                  {outcomeNames.map(({ displayName }) => {
+                    // Get chart data for this strategy
+                    const strategyChartData = getChartDataForStrategy(
+                      strategy.value,
+                    )
+
+                    // Check if this outcome exists for this strategy
+                    const isActiveForStrategy =
+                      strategyChartData[displayName] !== undefined &&
+                      strategyChartData[displayName].length > 0
+
+                    const chartBox = (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: showMapView ? 0.5 : 1,
+                          cursor:
+                            onTierClick && isActiveForStrategy
+                              ? "pointer"
+                              : "default",
+                          padding: 0,
+                          borderRadius: theme.borderRadius.rounded,
+                          transition: "all 0.2s ease",
+                          backgroundColor: "transparent",
+                          opacity: isActiveForStrategy ? 1 : 0.7, // Dim for inactive outcomes
+                          border:
+                            selectedOutcomes[strategy.value] === displayName &&
+                            onTierClick
+                              ? `2px solid ${theme.palette.blue.bright}`
+                              : "2px solid transparent",
+                          "&:hover": {
+                            backgroundColor:
+                              onTierClick && isActiveForStrategy
+                                ? theme.palette.grey[100]
+                                : "transparent",
+                          },
+                        }}
+                        onClick={
+                          onTierClick && isActiveForStrategy
+                            ? () => {
+                                onOutcomeSelect(strategy.value, displayName)
+                                onTierClick(strategy.value, displayName)
+                              }
+                            : undefined
+                        }
+                      >
+                        {(() => {
+                          const chartData = isActiveForStrategy
+                            ? strategyChartData[displayName]
+                            : undefined
+
+                          const values: [number, number, number, number] =
+                            chartData
+                              ? (chartData
+                                  .map((tier) => tier.value)
+                                  .slice(0, 4) as [
+                                  number,
+                                  number,
+                                  number,
+                                  number,
+                                ])
+                              : [0, 0, 0, 0]
+
+                          const variant = isSingleValueTier(chartData)
+                            ? "dots"
+                            : "bars"
+
+                          return (
+                            <ScenarioGlyph
+                              variant={variant}
+                              values={values}
+                              size={showMapView ? 45 : 50}
+                              tierColors={
+                                isActiveForStrategy
+                                  ? (strategyChartData[displayName]
+                                      ?.map((tier) => tier.color)
+                                      .slice(0, 4) as [
+                                      string,
+                                      string,
+                                      string,
+                                      string,
+                                    ]) || [
+                                      theme.palette.tiers.tier1,
+                                      theme.palette.tiers.tier2,
+                                      theme.palette.tiers.tier3,
+                                      theme.palette.tiers.tier4,
+                                    ]
+                                  : [
+                                      theme.palette.grey[300],
+                                      theme.palette.grey[300],
+                                      theme.palette.grey[300],
+                                      theme.palette.grey[300],
+                                    ] // Grey colors for inactive outcomes
+                              }
+                            />
+                          )
+                        })()}
+                      </Box>
+                    )
+
+                    // No tooltips on charts - use header info icons instead
+                    return <div key={displayName}>{chartBox}</div>
+                  })}
+                </Box>
               </Box>
-            </Box>
             )
 
             // Return strategy row plus optional divider
@@ -743,10 +765,10 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
                     height: "1px",
                     backgroundColor: theme.palette.grey[300],
                   }}
-                />
+                />,
               ]
             }
-            
+
             return [strategyRow]
           })}
       </Box>

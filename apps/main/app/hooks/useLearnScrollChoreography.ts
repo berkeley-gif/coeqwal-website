@@ -68,10 +68,12 @@ export type ScrollChoreographyStep = PanelLayerState
 
 /**
  * Hook for Learn section scroll choreography
- * 
+ *
  * Simple system: Each panel triggers when its top edge crosses viewport middle
  */
-export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void {
+export function useLearnScrollChoreography(
+  panelStates: PanelLayerState[],
+): void {
   const map = useMap()
   const observersRef = useRef<IntersectionObserver[]>([])
   const currentPanelRef = useRef<number>(0)
@@ -80,7 +82,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
   useEffect(() => {
     // Wait for map operations to be available
     if (!map || !map.hasLayer || !map.addSource || !map.addLayer) {
-      console.log('[Choreography] Map operations not yet available')
+      console.log("[Choreography] Map operations not yet available")
       return
     }
 
@@ -88,24 +90,32 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
     if (initializedRef.current) return
     initializedRef.current = true
 
-    const { hasLayer, setLayoutProperty, setPaintProperty, addSource, addLayer } = map
-    const sortedPanels = [...panelStates].sort((a, b) => a.position - b.position)
+    const {
+      hasLayer,
+      setLayoutProperty,
+      setPaintProperty,
+      addSource,
+      addLayer,
+    } = map
+    const sortedPanels = [...panelStates].sort(
+      (a, b) => a.position - b.position,
+    )
 
     // Build master list of ALL layers mentioned across all panels
     const allLayerIds = new Set<string>()
     const allGeoJsonLayerIds = new Set<string>()
-    
-    sortedPanels.forEach(panel => {
-      panel.layers.forEach(layer => allLayerIds.add(layer.layerId))
-      
+
+    sortedPanels.forEach((panel) => {
+      panel.layers.forEach((layer) => allLayerIds.add(layer.layerId))
+
       // Track single GeoJSON layer
       if (panel.geoJsonLayer) {
         allGeoJsonLayerIds.add(panel.geoJsonLayer.id)
       }
-      
+
       // Track multiple GeoJSON layers
       if (panel.geoJsonLayers) {
-        panel.geoJsonLayers.forEach(layer => allGeoJsonLayerIds.add(layer.id))
+        panel.geoJsonLayers.forEach((layer) => allGeoJsonLayerIds.add(layer.id))
       }
     })
 
@@ -123,7 +133,10 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
             data: geoJsonSource.data as any,
           })
         } catch (error) {
-          console.log(`[Choreography] Source ${geoJsonSource.id} already exists or error:`, error)
+          console.log(
+            `[Choreography] Source ${geoJsonSource.id} already exists or error:`,
+            error,
+          )
         }
 
         if (!hasLayer(geoJsonLayer.id)) {
@@ -133,7 +146,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
             geoJsonLayer.source,
             geoJsonLayer.type,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            geoJsonLayer.paint as any || {},
+            (geoJsonLayer.paint as any) || {},
             { ...geoJsonLayer.layout, visibility: "none" },
           )
         }
@@ -160,7 +173,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
               layer.source,
               layer.type,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              layer.paint as any || {},
+              (layer.paint as any) || {},
               { ...layer.layout, visibility: "none" },
             )
           }
@@ -174,7 +187,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
      */
     const applyPanelState = (panelState: PanelLayerState) => {
       // Step 1: Hide all GeoJSON layers first
-      allGeoJsonLayerIds.forEach(layerId => {
+      allGeoJsonLayerIds.forEach((layerId) => {
         try {
           setLayoutProperty(layerId, "visibility", "none")
         } catch {
@@ -191,36 +204,67 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         try {
           // Apply visibility first for instant swap
           if (layerState.visibility !== undefined) {
-            setLayoutProperty(layerState.layerId, "visibility", layerState.visibility)
+            setLayoutProperty(
+              layerState.layerId,
+              "visibility",
+              layerState.visibility,
+            )
           }
 
           // Apply text-allow-overlap
           if (layerState.textAllowOverlap !== undefined) {
-            setLayoutProperty(layerState.layerId, "text-allow-overlap", layerState.textAllowOverlap)
+            setLayoutProperty(
+              layerState.layerId,
+              "text-allow-overlap",
+              layerState.textAllowOverlap,
+            )
           }
 
           // Apply opacity properties
           if (layerState.textOpacity !== undefined) {
-            setPaintProperty(layerState.layerId, "text-opacity", layerState.textOpacity)
+            setPaintProperty(
+              layerState.layerId,
+              "text-opacity",
+              layerState.textOpacity,
+            )
           }
           if (layerState.fillOpacity !== undefined) {
-            setPaintProperty(layerState.layerId, "fill-opacity", layerState.fillOpacity)
+            setPaintProperty(
+              layerState.layerId,
+              "fill-opacity",
+              layerState.fillOpacity,
+            )
           }
           if (layerState.lineOpacity !== undefined) {
-            setPaintProperty(layerState.layerId, "line-opacity", layerState.lineOpacity)
+            setPaintProperty(
+              layerState.layerId,
+              "line-opacity",
+              layerState.lineOpacity,
+            )
           }
 
           // Apply other paint properties
           if (layerState.lineWidth !== undefined) {
-            setPaintProperty(layerState.layerId, "line-width", layerState.lineWidth)
+            setPaintProperty(
+              layerState.layerId,
+              "line-width",
+              layerState.lineWidth,
+            )
           }
-          
+
           // Apply layout properties
           if (layerState.lineJoin !== undefined) {
-            setLayoutProperty(layerState.layerId, "line-join", layerState.lineJoin)
+            setLayoutProperty(
+              layerState.layerId,
+              "line-join",
+              layerState.lineJoin,
+            )
           }
         } catch (error) {
-          console.warn(`[Choreography] Error applying layer "${layerState.layerId}":`, error)
+          console.warn(
+            `[Choreography] Error applying layer "${layerState.layerId}":`,
+            error,
+          )
         }
       })
 
@@ -231,7 +275,10 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         try {
           setLayoutProperty(layerId, "visibility", "visible")
         } catch (error) {
-          console.warn(`[Choreography] Error showing GeoJSON layer "${layerId}":`, error)
+          console.warn(
+            `[Choreography] Error showing GeoJSON layer "${layerId}":`,
+            error,
+          )
         }
       }
 
@@ -241,11 +288,13 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
           try {
             setLayoutProperty(layerConfig.id, "visibility", "visible")
           } catch (error) {
-            console.warn(`[Choreography] Error showing GeoJSON layer "${layerConfig.id}":`, error)
+            console.warn(
+              `[Choreography] Error showing GeoJSON layer "${layerConfig.id}":`,
+              error,
+            )
           }
         })
       }
-
     }
 
     /**
@@ -255,13 +304,19 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
       if (currentPanelRef.current === targetPosition) return
 
       const previousPosition = currentPanelRef.current
-      const targetPanel = sortedPanels.find((p) => p.position === targetPosition)
-      
-      console.log(`[Choreography] ${previousPosition} → ${targetPosition}${targetPanel ? ` (${targetPanel.debugLabel})` : ''}`)
+      const targetPanel = sortedPanels.find(
+        (p) => p.position === targetPosition,
+      )
+
+      console.log(
+        `[Choreography] ${previousPosition} → ${targetPosition}${targetPanel ? ` (${targetPanel.debugLabel})` : ""}`,
+      )
 
       // Call onExit for the previous panel
       if (previousPosition >= 0) {
-        const previousPanel = sortedPanels.find((p) => p.position === previousPosition)
+        const previousPanel = sortedPanels.find(
+          (p) => p.position === previousPosition,
+        )
         previousPanel?.onExit?.()
       }
 
@@ -293,7 +348,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         if (!panelElement) continue
 
         const rect = panelElement.getBoundingClientRect()
-        
+
         // If the viewport middle is within this panel's bounds, this is the active panel
         if (rect.top <= viewportMiddle && rect.bottom > viewportMiddle) {
           activePanel = panel.position
@@ -319,7 +374,7 @@ export function useLearnScrollChoreography(panelStates: PanelLayerState[]): void
         {
           threshold: [0, 0.25, 0.5, 0.75, 1.0], // Fewer callbacks, smoother performance
           rootMargin: "0px",
-        }
+        },
       )
 
       observersRef.current.push(observer)

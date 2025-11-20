@@ -25,19 +25,19 @@ export type MapLayerAction =
 export interface ScrollChoreographyStep {
   /** ID of the panel element to observe */
   panelId: string
-  
+
   /** Map layer actions to apply when panel enters viewport */
   onEnter: MapLayerAction[]
-  
+
   /** Map layer actions to apply when panel exits viewport */
   onExit: MapLayerAction[]
-  
+
   /** IntersectionObserver threshold (default: 0.5) */
   threshold?: number
-  
+
   /** IntersectionObserver rootMargin (default: "0px") */
   rootMargin?: string
-  
+
   /** Optional debug label for logging */
   debugLabel?: string
 }
@@ -47,14 +47,25 @@ export interface ScrollChoreographyStep {
  */
 interface MapHelpers {
   hasLayer: (id: string) => boolean
-  setLayoutProperty: (id: string, property: string, value: string | number) => void
-  setPaintProperty: (id: string, property: string, value: string | number) => void
+  setLayoutProperty: (
+    id: string,
+    property: string,
+    value: string | number,
+  ) => void
+  setPaintProperty: (
+    id: string,
+    property: string,
+    value: string | number,
+  ) => void
 }
 
 /**
  * Apply a single map layer action using MapContext helpers
  */
-function applyMapLayerAction(helpers: MapHelpers, action: MapLayerAction): void {
+function applyMapLayerAction(
+  helpers: MapHelpers,
+  action: MapLayerAction,
+): void {
   // Check if layer exists
   if (!helpers.hasLayer(action.layerId)) {
     console.warn(`Layer "${action.layerId}" not found`)
@@ -71,13 +82,16 @@ function applyMapLayerAction(helpers: MapHelpers, action: MapLayerAction): void 
 /**
  * Apply multiple map layer actions using MapContext helpers
  */
-function applyMapLayerActions(helpers: MapHelpers, actions: MapLayerAction[]): void {
+function applyMapLayerActions(
+  helpers: MapHelpers,
+  actions: MapLayerAction[],
+): void {
   actions.forEach((action) => applyMapLayerAction(helpers, action))
 }
 
 /**
  * Hook to orchestrate scroll-triggered map layer changes
- * 
+ *
  * @example
  * ```tsx
  * useMapScrollChoreography([
@@ -95,7 +109,9 @@ function applyMapLayerActions(helpers: MapHelpers, actions: MapLayerAction[]): v
  * ])
  * ```
  */
-export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void {
+export function useMapScrollChoreography(
+  steps: ScrollChoreographyStep[],
+): void {
   const map = useMap()
 
   useEffect(() => {
@@ -105,7 +121,10 @@ export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void 
       return
     }
 
-    console.log("[Scroll Choreography] Setting up observers for panels:", steps.map(s => s.panelId))
+    console.log(
+      "[Scroll Choreography] Setting up observers for panels:",
+      steps.map((s) => s.panelId),
+    )
 
     // Get map helpers for applying layer actions
     const { hasLayer, setLayoutProperty, setPaintProperty } = map
@@ -139,13 +158,16 @@ export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void 
 
             // Apply the appropriate actions
             const actions = isIntersecting ? step.onEnter : step.onExit
-            
+
             console.log(
-              `[Scroll Choreography] ${step.debugLabel || step.panelId}: ${isIntersecting ? "ENTER" : "EXIT"} - ${actions.length} actions`
+              `[Scroll Choreography] ${step.debugLabel || step.panelId}: ${isIntersecting ? "ENTER" : "EXIT"} - ${actions.length} actions`,
             )
 
             if (actions.length > 0) {
-              applyMapLayerActions({ hasLayer, setLayoutProperty, setPaintProperty }, actions)
+              applyMapLayerActions(
+                { hasLayer, setLayoutProperty, setPaintProperty },
+                actions,
+              )
             }
           })
         },
@@ -168,7 +190,9 @@ export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void 
         if (panel) {
           observer.observe(panel)
           observedPanels.add(step.panelId)
-          console.log(`[Scroll Choreography] ✓ Observing panel: ${step.panelId} (threshold: ${step.threshold ?? 0.5}, margin: ${step.rootMargin ?? "0px"})`)
+          console.log(
+            `[Scroll Choreography] ✓ Observing panel: ${step.panelId} (threshold: ${step.threshold ?? 0.5}, margin: ${step.rootMargin ?? "0px"})`,
+          )
           clearInterval(checkPanel)
         }
       }, 100)
@@ -183,4 +207,3 @@ export function useMapScrollChoreography(steps: ScrollChoreographyStep[]): void 
     }
   }, [map, steps])
 }
-

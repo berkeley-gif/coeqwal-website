@@ -24,13 +24,22 @@ import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 export default function MapOverlayPanels() {
   const theme = useTheme()
   const map = useMap()
-  const { setGeocoderMarker, showBasins, toggleBasins, showRivers, toggleRivers, showInflowArrows, toggleInflowArrows } = useCalSimToggle()
+  const {
+    setGeocoderMarker,
+    showBasins,
+    toggleBasins,
+    showRivers,
+    toggleRivers,
+    showInflowArrows,
+    toggleInflowArrows,
+  } = useCalSimToggle()
 
   // Animation state for first panel entrance
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
-  
+
   // State for basin search accordion
-  const [isBasinAccordionExpanded, setIsBasinAccordionExpanded] = useState(false)
+  const [isBasinAccordionExpanded, setIsBasinAccordionExpanded] =
+    useState(false)
 
   // Learn section scroll choreography
   // Each position defines the complete state of all layers at that scroll point
@@ -53,176 +62,253 @@ export default function MapOverlayPanels() {
     showRiversRef.current = showRivers
     toggleInflowArrowsOnRef.current = toggleInflowArrows
     showInflowArrowsRef.current = showInflowArrows
-  }, [map, toggleBasins, showBasins, toggleRivers, showRivers, toggleInflowArrows, showInflowArrows])
+  }, [
+    map,
+    toggleBasins,
+    showBasins,
+    toggleRivers,
+    showRivers,
+    toggleInflowArrows,
+    showInflowArrows,
+  ])
 
-  useLearnScrollChoreography(useMemo(() => [
-    {
-      panelId: "calsim-call",
-      position: 0,
-      debugLabel: "Panel 1: California",
-      layers: [
-        { layerId: "california-label", visibility: "visible" as const, textOpacity: 1 },
-        { layerId: "central-valley-label", visibility: "none" as const },
-        { layerId: "central-valley-polygon", visibility: "none" as const },
-      ],
-    },
-    {
-      panelId: "central-valley-importance",
-      position: 1,
-      debugLabel: "Panel 2: Central Valley",
-      layers: [
-        { layerId: "california-label", visibility: "none" as const },
-        { layerId: "central-valley-label", visibility: "visible" as const, textOpacity: 1, textAllowOverlap: true },
-        { layerId: "central-valley-polygon", visibility: "visible" as const, lineOpacity: 1, lineWidth: 2, lineJoin: "round" as const },
-      ],
-      // Hide basins when entering Panel 2 (from Panel 3 when scrolling up)
-      onEnter: () => {
-        if (showBasinsRef.current) toggleBasinsOnRef.current()
-      },
-    },
-    {
-      panelId: "central-valley-basins",
-      position: 2,
-      debugLabel: "Panel 3: Basins",
-      layers: [
-        { layerId: "california-label", visibility: "none" as const },
-        { layerId: "central-valley-label", visibility: "none" as const },
-        { layerId: "central-valley-polygon", visibility: "none" as const },
-        { layerId: "inflow-watersheds", visibility: "none" as const },
-      ],
-      // Show basins when entering Panel 3 - they stay visible through Panel 5
-      onEnter: () => {
-        if (!showBasinsRef.current) toggleBasinsOnRef.current()
-      },
-    },
-    {
-      panelId: "water-flow-call",
-      position: 3,
-      debugLabel: "Panel 4: Watersheds",
-      layers: [
-        { layerId: "california-label", visibility: "none" as const },
-        { layerId: "central-valley-label", visibility: "none" as const },
-        { layerId: "central-valley-polygon", visibility: "none" as const },
-        { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
-      ],
-      // Show inflow arrows when entering panel 4, and ensure basins and inflow polygon are visible
-      onEnter: () => {
-        // Cancel any ongoing fade animation
-        if (fadeAnimationRef.current !== null) {
-          cancelAnimationFrame(fadeAnimationRef.current)
-          fadeAnimationRef.current = null
-        }
-        
-        if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-        // Restore basins if returning from Panel 5
-        if (!showBasinsRef.current) toggleBasinsOnRef.current()
-        // Restore opacity for all layers when scrolling back up
-        if (mapRef.current) {
-          mapRef.current.setPaintProperty("inflow-watersheds", "fill-opacity", 0.4)
-          mapRef.current.setPaintProperty("basins-outline-layer", "line-opacity", 0.8)
-          mapRef.current.setPaintProperty("basins-labels", "text-opacity", 1)
-        }
-      },
-      // Hide arrows when exiting panel 4
-      onExit: () => {
-        if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-      },
-    },
-    {
-      panelId: "rivers-flow-response",
-      position: 4,
-      debugLabel: "Panel 5: Rivers",
-      layers: [
-        { layerId: "california-label", visibility: "none" as const },
-        { layerId: "central-valley-label", visibility: "none" as const },
-        { layerId: "central-valley-polygon", visibility: "none" as const },
-        { layerId: "inflow-watersheds", visibility: "visible" as const, fillOpacity: 0.4 },
-      ],
-      // Show rivers when entering Panel 5, then fade out basins and inflow polygon gracefully
-      onEnter: () => {
-        if (!showRiversRef.current) toggleRiversOnRef.current()
-        // After rivers start animating, fade out basins and inflow polygon gracefully over 3 seconds
-        setTimeout(() => {
-          if (mapRef.current) {
-            const map = mapRef.current
-            const fadeDuration = 3000 // 3 seconds
-            const startTime = performance.now()
-            
-            // Starting opacity values
-            const startInflowOpacity = 0.4
-            const startBasinsOutlineOpacity = 0.8
-            const startBasinsLabelsOpacity = 1
-            
-            // Helper to clamp values between 0 and 1
-            const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
-            
-            const animate = (currentTime: number) => {
-              const elapsed = currentTime - startTime
-              const progress = Math.min(elapsed / fadeDuration, 1)
-              
-              // Ease out cubic for smoother fade
-              const eased = 1 - Math.pow(1 - progress, 3)
-              
-              // Calculate current opacity values and clamp to [0, 1]
-              const inflowOpacity = clamp(startInflowOpacity * (1 - eased), 0, 1)
-              const basinsOutlineOpacity = clamp(startBasinsOutlineOpacity * (1 - eased), 0, 1)
-              const basinsLabelsOpacity = clamp(startBasinsLabelsOpacity * (1 - eased), 0, 1)
-              
-              // Apply opacity values
-              map.setPaintProperty("inflow-watersheds", "fill-opacity", inflowOpacity)
-              map.setPaintProperty("basins-outline-layer", "line-opacity", basinsOutlineOpacity)
-              map.setPaintProperty("basins-labels", "text-opacity", basinsLabelsOpacity)
-              
-              // Continue animating if not complete
-              if (progress < 1) {
-                fadeAnimationRef.current = requestAnimationFrame(animate)
-              } else {
-                fadeAnimationRef.current = null
-              }
+  useLearnScrollChoreography(
+    useMemo(
+      () => [
+        {
+          panelId: "calsim-call",
+          position: 0,
+          debugLabel: "Panel 1: California",
+          layers: [
+            {
+              layerId: "california-label",
+              visibility: "visible" as const,
+              textOpacity: 1,
+            },
+            { layerId: "central-valley-label", visibility: "none" as const },
+            { layerId: "central-valley-polygon", visibility: "none" as const },
+          ],
+        },
+        {
+          panelId: "central-valley-importance",
+          position: 1,
+          debugLabel: "Panel 2: Central Valley",
+          layers: [
+            { layerId: "california-label", visibility: "none" as const },
+            {
+              layerId: "central-valley-label",
+              visibility: "visible" as const,
+              textOpacity: 1,
+              textAllowOverlap: true,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "visible" as const,
+              lineOpacity: 1,
+              lineWidth: 2,
+              lineJoin: "round" as const,
+            },
+          ],
+          // Hide basins when entering Panel 2 (from Panel 3 when scrolling up)
+          onEnter: () => {
+            if (showBasinsRef.current) toggleBasinsOnRef.current()
+          },
+        },
+        {
+          panelId: "central-valley-basins",
+          position: 2,
+          debugLabel: "Panel 3: Basins",
+          layers: [
+            { layerId: "california-label", visibility: "none" as const },
+            { layerId: "central-valley-label", visibility: "none" as const },
+            { layerId: "central-valley-polygon", visibility: "none" as const },
+            { layerId: "inflow-watersheds", visibility: "none" as const },
+          ],
+          // Show basins when entering Panel 3 - they stay visible through Panel 5
+          onEnter: () => {
+            if (!showBasinsRef.current) toggleBasinsOnRef.current()
+          },
+        },
+        {
+          panelId: "water-flow-call",
+          position: 3,
+          debugLabel: "Panel 4: Watersheds",
+          layers: [
+            { layerId: "california-label", visibility: "none" as const },
+            { layerId: "central-valley-label", visibility: "none" as const },
+            { layerId: "central-valley-polygon", visibility: "none" as const },
+            {
+              layerId: "inflow-watersheds",
+              visibility: "visible" as const,
+              fillOpacity: 0.4,
+            },
+          ],
+          // Show inflow arrows when entering panel 4, and ensure basins and inflow polygon are visible
+          onEnter: () => {
+            // Cancel any ongoing fade animation
+            if (fadeAnimationRef.current !== null) {
+              cancelAnimationFrame(fadeAnimationRef.current)
+              fadeAnimationRef.current = null
             }
-            
-            fadeAnimationRef.current = requestAnimationFrame(animate)
-          }
-        }, 2000) // Wait 2000ms for rivers to draw before starting fade out
-      },
-      // Hide rivers when exiting Panel 5
-      onExit: () => {
-        // Cancel any ongoing fade animation
-        if (fadeAnimationRef.current !== null) {
-          cancelAnimationFrame(fadeAnimationRef.current)
-          fadeAnimationRef.current = null
-        }
-        if (showRiversRef.current) toggleRiversOnRef.current()
-      },
-    },
-    {
-      panelId: "water-distribution-call",
-      position: 5,
-      debugLabel: "Panel 6: Distribution",
-      layers: [
-        { layerId: "california-label", visibility: "none" as const },
-        { layerId: "central-valley-label", visibility: "none" as const },
-        { layerId: "central-valley-polygon", visibility: "none" as const },
-        { layerId: "inflow-watersheds", visibility: "none" as const },
+
+            if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+            // Restore basins if returning from Panel 5
+            if (!showBasinsRef.current) toggleBasinsOnRef.current()
+            // Restore opacity for all layers when scrolling back up
+            if (mapRef.current) {
+              mapRef.current.setPaintProperty(
+                "inflow-watersheds",
+                "fill-opacity",
+                0.4,
+              )
+              mapRef.current.setPaintProperty(
+                "basins-outline-layer",
+                "line-opacity",
+                0.8,
+              )
+              mapRef.current.setPaintProperty(
+                "basins-labels",
+                "text-opacity",
+                1,
+              )
+            }
+          },
+          // Hide arrows when exiting panel 4
+          onExit: () => {
+            if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+          },
+        },
+        {
+          panelId: "rivers-flow-response",
+          position: 4,
+          debugLabel: "Panel 5: Rivers",
+          layers: [
+            { layerId: "california-label", visibility: "none" as const },
+            { layerId: "central-valley-label", visibility: "none" as const },
+            { layerId: "central-valley-polygon", visibility: "none" as const },
+            {
+              layerId: "inflow-watersheds",
+              visibility: "visible" as const,
+              fillOpacity: 0.4,
+            },
+          ],
+          // Show rivers when entering Panel 5, then fade out basins and inflow polygon gracefully
+          onEnter: () => {
+            if (!showRiversRef.current) toggleRiversOnRef.current()
+            // After rivers start animating, fade out basins and inflow polygon gracefully over 3 seconds
+            setTimeout(() => {
+              if (mapRef.current) {
+                const map = mapRef.current
+                const fadeDuration = 3000 // 3 seconds
+                const startTime = performance.now()
+
+                // Starting opacity values
+                const startInflowOpacity = 0.4
+                const startBasinsOutlineOpacity = 0.8
+                const startBasinsLabelsOpacity = 1
+
+                // Helper to clamp values between 0 and 1
+                const clamp = (value: number, min: number, max: number) =>
+                  Math.max(min, Math.min(max, value))
+
+                const animate = (currentTime: number) => {
+                  const elapsed = currentTime - startTime
+                  const progress = Math.min(elapsed / fadeDuration, 1)
+
+                  // Ease out cubic for smoother fade
+                  const eased = 1 - Math.pow(1 - progress, 3)
+
+                  // Calculate current opacity values and clamp to [0, 1]
+                  const inflowOpacity = clamp(
+                    startInflowOpacity * (1 - eased),
+                    0,
+                    1,
+                  )
+                  const basinsOutlineOpacity = clamp(
+                    startBasinsOutlineOpacity * (1 - eased),
+                    0,
+                    1,
+                  )
+                  const basinsLabelsOpacity = clamp(
+                    startBasinsLabelsOpacity * (1 - eased),
+                    0,
+                    1,
+                  )
+
+                  // Apply opacity values
+                  map.setPaintProperty(
+                    "inflow-watersheds",
+                    "fill-opacity",
+                    inflowOpacity,
+                  )
+                  map.setPaintProperty(
+                    "basins-outline-layer",
+                    "line-opacity",
+                    basinsOutlineOpacity,
+                  )
+                  map.setPaintProperty(
+                    "basins-labels",
+                    "text-opacity",
+                    basinsLabelsOpacity,
+                  )
+
+                  // Continue animating if not complete
+                  if (progress < 1) {
+                    fadeAnimationRef.current = requestAnimationFrame(animate)
+                  } else {
+                    fadeAnimationRef.current = null
+                  }
+                }
+
+                fadeAnimationRef.current = requestAnimationFrame(animate)
+              }
+            }, 1500) // Wait 1500ms for rivers to draw before starting fade out
+          },
+          // Hide rivers when exiting Panel 5
+          onExit: () => {
+            // Cancel any ongoing fade animation
+            if (fadeAnimationRef.current !== null) {
+              cancelAnimationFrame(fadeAnimationRef.current)
+              fadeAnimationRef.current = null
+            }
+            if (showRiversRef.current) toggleRiversOnRef.current()
+          },
+        },
+        {
+          panelId: "water-distribution-call",
+          position: 5,
+          debugLabel: "Panel 6: Distribution",
+          layers: [
+            { layerId: "california-label", visibility: "none" as const },
+            { layerId: "central-valley-label", visibility: "none" as const },
+            { layerId: "central-valley-polygon", visibility: "none" as const },
+            { layerId: "inflow-watersheds", visibility: "none" as const },
+          ],
+          // Hide basins when entering Panel 6 (rivers already hidden by Panel 5 onExit)
+          onEnter: () => {
+            if (showBasinsRef.current) toggleBasinsOnRef.current()
+          },
+        },
       ],
-      // Hide basins when entering Panel 6 (rivers already hidden by Panel 5 onExit)
-      onEnter: () => {
-        if (showBasinsRef.current) toggleBasinsOnRef.current()
-      },
-    },
-  ], []))
+      [],
+    ),
+  )
 
   // Basin search state
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedLocation, setSelectedLocation] = useState<GeocodingFeature | null>(null)
+  const [selectedLocation, setSelectedLocation] =
+    useState<GeocodingFeature | null>(null)
   const [showResults, setShowResults] = useState(false)
-  const [basinInfo, setBasinInfo] = useState<{ name: string; properties: Record<string, unknown> } | null>(null)
+  const [basinInfo, setBasinInfo] = useState<{
+    name: string
+    properties: Record<string, unknown>
+  } | null>(null)
   const [isSelectingResult, setIsSelectingResult] = useState(false) // Track if we're programmatically setting the query
 
   // Geocoding hook, uses token from map context
   const geocoding = useGeocoding({
-    bbox: BOUNDING_BOXES.CALIFORNIA,  // California only
-    types: ['place', 'address', 'poi'], // Allow addresses, cities, and POIs
+    bbox: BOUNDING_BOXES.CALIFORNIA, // California only
+    types: ["place", "address", "poi"], // Allow addresses, cities, and POIs
     limit: 5,
     flyTo: false, // Handling the map movement manually, for this component's use case
   })
@@ -276,20 +362,23 @@ export default function MapOverlayPanels() {
     if (basin) {
       // Find the basin feature in the GeoJSON
       const basinFeature = centralValleyBasins.features.find(
-        (f) => f.properties?.name === basin.name
+        (f) => f.properties?.name === basin.name,
       ) as Feature<Polygon | MultiPolygon> | undefined
 
       if (basinFeature) {
         // Calculate the bounding box of the basin
         const [minLng, minLat, maxLng, maxLat] = bbox(basinFeature)
-        
+
         // Fit the map to the basin bounds with some padding
         map.fitBounds(
-          [[minLng, minLat], [maxLng, maxLat]],
+          [
+            [minLng, minLat],
+            [maxLng, maxLat],
+          ],
           0, // pitch
           0, // bearing
           { top: 100, bottom: 100, left: 100, right: 100 }, // padding
-          { duration: 1500 } // smooth transition
+          { duration: 1500 }, // smooth transition
         )
       }
     }
@@ -307,9 +396,12 @@ export default function MapOverlayPanels() {
   }
 
   // Handle accordion expansion
-  const handleAccordionChange = (event: React.SyntheticEvent, isExpanded: boolean) => {
+  const handleAccordionChange = (
+    event: React.SyntheticEvent,
+    isExpanded: boolean,
+  ) => {
     setIsBasinAccordionExpanded(isExpanded)
-    
+
     if (isExpanded) {
       // Show basins when accordion opens
       if (!showBasins) {
@@ -457,7 +549,8 @@ export default function MapOverlayPanels() {
         </Typography>
 
         <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
-          Rain and snowmelt in the mountains flow from the rims of these basins into this large valley.
+          Rain and snowmelt in the mountains flow from the rims of these basins
+          into this large valley.
         </Typography>
       </CallResponsePanel>
 
@@ -660,42 +753,44 @@ export default function MapOverlayPanels() {
             </Typography>
 
             {/* Geocoder search input */}
-            <Box sx={{ position: 'relative' }}>
+            <Box sx={{ position: "relative" }}>
               <Box
                 component="input"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for a location in California"
-              sx={{
-                  width: '100%',
+                sx={{
+                  width: "100%",
                   padding: theme.spacing(1.5),
-                  paddingRight: searchQuery ? theme.spacing(6) : theme.spacing(1.5),
-                  fontSize: '14px',
+                  paddingRight: searchQuery
+                    ? theme.spacing(6)
+                    : theme.spacing(1.5),
+                  fontSize: "14px",
                   border: `1px solid ${theme.palette.grey[300]}`,
                   borderRadius: theme.borderRadius.standard,
                   backgroundColor: theme.palette.common.white,
-                  outline: 'none',
-                  transition: 'border-color 0.2s',
-                  '&:focus': {
+                  outline: "none",
+                  transition: "border-color 0.2s",
+                  "&:focus": {
                     borderColor: theme.palette.primary.main,
                   },
-                  '&::placeholder': {
+                  "&::placeholder": {
                     color: theme.palette.grey[500],
-                  }
-              }}
-            />
+                  },
+                }}
+              />
 
               {/* Clear/loading indicator */}
               {searchQuery && (
                 <Box
                   sx={{
-                    position: 'absolute',
+                    position: "absolute",
                     right: theme.spacing(1.5),
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    display: 'flex',
-                    alignItems: 'center',
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    display: "flex",
+                    alignItems: "center",
                     gap: 0.5,
                   }}
                 >
@@ -706,10 +801,10 @@ export default function MapOverlayPanels() {
                         height: 16,
                         border: `2px solid ${theme.palette.grey[300]}`,
                         borderTopColor: theme.palette.primary.main,
-                        borderRadius: '50%',
-                        animation: 'spin 0.6s linear infinite',
-                        '@keyframes spin': {
-                          to: { transform: 'rotate(360deg)' },
+                        borderRadius: "50%",
+                        animation: "spin 0.6s linear infinite",
+                        "@keyframes spin": {
+                          to: { transform: "rotate(360deg)" },
                         },
                       }}
                     />
@@ -719,15 +814,15 @@ export default function MapOverlayPanels() {
                       component="button"
                       onClick={handleClearSearch}
                       sx={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
                         padding: 0.5,
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "center",
                         color: theme.palette.grey[600],
-                        fontSize: '18px',
-                        '&:hover': {
+                        fontSize: "18px",
+                        "&:hover": {
                           color: theme.palette.grey[800],
                         },
                       }}
@@ -743,15 +838,15 @@ export default function MapOverlayPanels() {
               {showResults && geocoding.results.length > 0 && (
                 <Box
                   sx={{
-                    position: 'absolute',
-                    top: 'calc(100% + 4px)',
+                    position: "absolute",
+                    top: "calc(100% + 4px)",
                     left: 0,
                     right: 0,
                     backgroundColor: theme.palette.common.white,
                     borderRadius: theme.borderRadius.standard,
                     boxShadow: theme.shadows[3],
                     maxHeight: 300,
-                    overflowY: 'auto',
+                    overflowY: "auto",
                     zIndex: 10,
                     border: `1px solid ${theme.palette.grey[300]}`,
                   }}
@@ -762,32 +857,36 @@ export default function MapOverlayPanels() {
                       component="button"
                       onClick={() => handleSelectLocation(feature)}
                       sx={{
-                        width: '100%',
+                        width: "100%",
                         padding: theme.spacing(1.5),
-                        border: 'none',
-                        borderBottom: index < geocoding.results.length - 1 
-                          ? `1px solid ${theme.palette.grey[200]}` 
-                          : 'none',
+                        border: "none",
+                        borderBottom:
+                          index < geocoding.results.length - 1
+                            ? `1px solid ${theme.palette.grey[200]}`
+                            : "none",
                         backgroundColor: theme.palette.common.white,
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        transition: 'background-color 0.15s',
-                        '&:hover': {
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "background-color 0.15s",
+                        "&:hover": {
                           backgroundColor: theme.palette.grey[100],
                         },
                       }}
                     >
-                      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.25 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, mb: 0.25 }}
+                      >
                         {feature.text}
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        sx={{ 
+                      <Typography
+                        variant="caption"
+                        sx={{
                           color: theme.palette.grey[600],
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          display: 'block',
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          display: "block",
                         }}
                       >
                         {feature.place_name}
@@ -802,7 +901,7 @@ export default function MapOverlayPanels() {
                 <Typography
                   variant="caption"
                   sx={{
-                    display: 'block',
+                    display: "block",
                     mt: 1,
                     padding: theme.spacing(1),
                     backgroundColor: theme.palette.error.light,
@@ -820,18 +919,33 @@ export default function MapOverlayPanels() {
                   sx={{
                     mt: 2,
                     p: 2,
-                    backgroundColor: 'rgba(58, 69, 116, 0.05)',
+                    backgroundColor: "rgba(58, 69, 116, 0.05)",
                     borderRadius: theme.borderRadius.standard,
                     border: `1px solid ${theme.palette.blue.light}`,
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: theme.palette.blue.darkest, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.blue.darkest,
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                    }}
+                  >
                     📍 Selected Location
                   </Typography>
                   <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
                     {selectedLocation.text}
                   </Typography>
-                  <Typography variant="caption" sx={{ color: theme.palette.grey[600], display: 'block', mt: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.grey[600],
+                      display: "block",
+                      mt: 0.5,
+                    }}
+                  >
                     {selectedLocation.place_name}
                   </Typography>
 
@@ -845,22 +959,22 @@ export default function MapOverlayPanels() {
                   >
                     {basinInfo ? (
                       <>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: theme.palette.blue.darkest, 
-                            fontWeight: 600, 
-                            textTransform: 'uppercase', 
-                            letterSpacing: '0.1em',
-                            display: 'block',
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: theme.palette.blue.darkest,
+                            fontWeight: 600,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.1em",
+                            display: "block",
                             mb: 0.5,
                           }}
                         >
                           Central Valley Water Basin
                         </Typography>
-                        <Typography 
-                          variant="body2" 
-                          sx={{ 
+                        <Typography
+                          variant="body2"
+                          sx={{
                             fontWeight: 600,
                             color: theme.palette.primary.main,
                           }}
@@ -869,8 +983,16 @@ export default function MapOverlayPanels() {
                         </Typography>
                       </>
                     ) : (
-                      <Typography variant="caption" sx={{ color: theme.palette.grey[600], fontStyle: 'italic' }}>
-                        Location is outside Central Valley basin boundaries, but Central Valley water still may be delivered to your area.
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: theme.palette.grey[600],
+                          fontStyle: "italic",
+                        }}
+                      >
+                        Location is outside Central Valley basin boundaries, but
+                        Central Valley water still may be delivered to your
+                        area.
                       </Typography>
                     )}
                   </Box>
@@ -1160,7 +1282,9 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 500 }}>
             current water management operations
           </Box>
-          .  This strategy can be helpful for interpreting how water is currently managed. It can also be used as a baseline to compare alternative strategies with.
+          . This strategy can be helpful for interpreting how water is currently
+          managed. It can also be used as a baseline to compare alternative
+          strategies with.
         </Typography>
       </CallResponsePanel>
 
@@ -1183,41 +1307,44 @@ export default function MapOverlayPanels() {
           }}
         />
 
-         {/* Sticky container - stays fixed while scrolling through track */}
-         <Box
-           sx={{
-             position: "sticky",
-             bottom: 0,
-             left: 0,
-             right: 0,
-             width: "100%",
-             height: "100vh",
-             display: "flex",
-             justifyContent: "flex-end", // Align to right
-             alignItems: "center",
-             pl: 2, // Left padding
-             pr: 4, // More right padding for space between panel and edge
-             pointerEvents: "none",
-           }}
-         >
+        {/* Sticky container - stays fixed while scrolling through track */}
+        <Box
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: "100%",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "flex-end", // Align to right
+            alignItems: "center",
+            pl: 2, // Left padding
+            pr: 4, // More right padding for space between panel and edge
+            pointerEvents: "none",
+          }}
+        >
           {/* Blue panel grouping both cards */}
           <Box
-        id="baseline-scenario-overlay"
-        sx={{
+            id="baseline-scenario-overlay"
+            sx={{
               maxWidth: "580px",
-          padding: (theme) => theme.spacing(2),
+              padding: (theme) => theme.spacing(2),
               pointerEvents: "auto",
               display: "flex",
               flexDirection: "column",
-          gap: (theme) => theme.spacing(1.5),
+              gap: (theme) => theme.spacing(1.5),
               backgroundColor: (theme) => theme.palette.brand.sky,
               backdropFilter: "blur(10px)",
               borderRadius: (theme) => theme.borderRadius.card,
               overflow: "visible", // Allow tooltips to overflow to the left
-        }}
-      >
-        <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
-        <ClimateCard isMinimized={false} selectedClimate={1} />
+            }}
+          >
+            <ScenarioCard
+              isMinimized={false}
+              minimizedTitle="Current operations"
+            />
+            <ClimateCard isMinimized={false} selectedClimate={1} />
           </Box>
         </Box>
       </Box>

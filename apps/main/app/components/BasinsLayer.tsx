@@ -13,11 +13,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
   }
 
   return (
-    <Source
-      id="basins-source"
-      type="geojson"
-      data={centralValleyBasins}
-    >
+    <Source id="basins-source" type="geojson" data={centralValleyBasins}>
       <Layer
         id="basins-layer"
         type="fill"

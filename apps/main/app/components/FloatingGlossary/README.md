@@ -40,18 +40,20 @@ Uses `glossaryTerms` from `apps/main/app/lib/glossary.tsx`. The glossary data li
 ## Features
 
 ### 1. Floating Button
+
 - **Position**: Fixed to bottom-right corner (32px from edges)
 - **Size**: 64x64px circular button
 - **Icon**: Open book (MenuBookIcon from MUI)
-- **Behavior**: 
+- **Behavior**:
   - Scales up on hover (1.1x)
   - Scales down on click (0.95x)
   - Fades out when panel is open
 - **Styling**: Black background (#000), white icon, prominent shadow
 
 ### 2. Sliding Panel
+
 - **Width**: 1/3 of viewport (33.333vw)
-- **Constraints**: 
+- **Constraints**:
   - Minimum width: 400px
   - Maximum width: 600px
 - **Animation**: Smooth slide-in from right (300ms ease)
@@ -61,6 +63,7 @@ Uses `glossaryTerms` from `apps/main/app/lib/glossary.tsx`. The glossary data li
   - Full-height panel with proper overflow handling
 
 ### 3. Interactive Features
+
 - **Term Highlighting**: Selected terms are highlighted with blue background and border
 - **Term Linking**: Terms mentioned in definitions are clickable and navigate to that term
 - **Smooth Scrolling**: Animated scroll to selected terms
@@ -99,6 +102,7 @@ You can optionally pass a selected term to auto-scroll to when opened:
 ## Styling Details
 
 ### Theme Integration
+
 - Uses theme values for:
   - Colors: `theme.palette.blue.*`, `theme.palette.divider`
   - Border radius: `theme.borderRadius.card`
@@ -106,6 +110,7 @@ You can optionally pass a selected term to auto-scroll to when opened:
 - Responsive to theme changes
 
 ### Z-Index Hierarchy
+
 ```
 Backdrop:        theme.zIndex.drawer - 2  (below panel)
 Panel:           theme.zIndex.drawer - 1  (just below drawer)
@@ -113,6 +118,7 @@ Floating Button: theme.zIndex.drawer - 1  (same as panel)
 ```
 
 ### Animations
+
 - Panel slide: 300ms ease transform
 - Backdrop fade: 300ms ease opacity
 - Button hover: 300ms ease transform + scale
@@ -120,29 +126,32 @@ Floating Button: theme.zIndex.drawer - 1  (same as panel)
 
 ## Comparison with Existing Glossary
 
-| Feature | Drawer Glossary | Floating Glossary |
-|---------|----------------|-------------------|
-| **Access** | Via header navigation | Floating button (always visible) |
-| **Position** | Slides from left | Slides from right |
-| **Width** | Fixed theme width | 1/3 viewport (responsive) |
-| **State** | Drawer store (Zustand) | Local component state |
-| **Integration** | Part of MultiDrawer system | Standalone component |
-| **Data** | `glossaryTerms` | `glossaryTerms` (same) |
-| **Persistence** | Keep for reference | New implementation |
+| Feature         | Drawer Glossary            | Floating Glossary                |
+| --------------- | -------------------------- | -------------------------------- |
+| **Access**      | Via header navigation      | Floating button (always visible) |
+| **Position**    | Slides from left           | Slides from right                |
+| **Width**       | Fixed theme width          | 1/3 viewport (responsive)        |
+| **State**       | Drawer store (Zustand)     | Local component state            |
+| **Integration** | Part of MultiDrawer system | Standalone component             |
+| **Data**        | `glossaryTerms`            | `glossaryTerms` (same)           |
+| **Persistence** | Keep for reference         | New implementation               |
 
 ## Technical Decisions
 
 ### Why Standalone State?
+
 - **Simplicity**: Self-contained, no dependency on drawer store
 - **Independence**: Can coexist with existing glossary
 - **Flexibility**: Easy to move, remove, or modify
 
 ### Why Right-Side Panel?
+
 - **Visual Balance**: Drawer glossary is left-aligned
 - **Spatial Logic**: Button is right-aligned
 - **User Expectation**: Button proximity to panel origin
 
 ### Why 1/3 Viewport Width?
+
 - **Readability**: Sufficient width for term definitions
 - **Context**: Doesn't overwhelm main content
 - **Responsive**: Scales with viewport but has min/max constraints
@@ -150,6 +159,7 @@ Floating Button: theme.zIndex.drawer - 1  (same as panel)
 ## Future Enhancements
 
 Potential improvements:
+
 - [ ] Keyboard shortcuts (e.g., 'G' to toggle)
 - [ ] Search/filter functionality
 - [ ] Term categories/sections
@@ -161,6 +171,7 @@ Potential improvements:
 ## Testing Checklist
 
 When testing this component, verify:
+
 - [ ] Button appears in bottom-right corner
 - [ ] Panel slides in smoothly when button is clicked
 - [ ] Backdrop appears and closes panel when clicked
@@ -182,4 +193,3 @@ When testing this component, verify:
 - Both glossaries use the same data source (`glossaryTerms`)
 - The floating glossary is completely independent and can be easily removed
 - The component is client-side only (`"use client"`)
-

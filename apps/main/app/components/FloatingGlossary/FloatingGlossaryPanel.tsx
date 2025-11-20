@@ -1,6 +1,14 @@
 "use client"
 
-import { Box, Typography, useTheme, Divider, Stack, IconButton, CloseIcon } from "@repo/ui/mui"
+import {
+  Box,
+  Typography,
+  useTheme,
+  Divider,
+  Stack,
+  IconButton,
+  CloseIcon,
+} from "@repo/ui/mui"
 import { glossaryTerms } from "../../lib/glossary"
 import React, { useRef, useEffect, useState } from "react"
 
@@ -31,9 +39,9 @@ export function FloatingGlossaryPanel({
 }: FloatingGlossaryPanelProps) {
   const theme = useTheme()
   const termRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const [internalSelectedTerm, setInternalSelectedTerm] = useState<string | undefined>(
-    selectedTerm
-  )
+  const [internalSelectedTerm, setInternalSelectedTerm] = useState<
+    string | undefined
+  >(selectedTerm)
 
   // Update internal state when external selectedTerm changes
   useEffect(() => {
@@ -67,7 +75,7 @@ export function FloatingGlossaryPanel({
   const renderDefinition = (definition: string) => {
     // Find all terms that appear in this definition (case-insensitive)
     const termsInText = glossaryTerms.filter((term) =>
-      definition.toLowerCase().includes(term.term.toLowerCase())
+      definition.toLowerCase().includes(term.term.toLowerCase()),
     )
 
     if (termsInText.length === 0) {
@@ -87,7 +95,7 @@ export function FloatingGlossaryPanel({
       <Typography variant="body2" component="div">
         {parts.map((part, index) => {
           const matchedTerm = termsInText.find(
-            (term) => term.term.toLowerCase() === part.toLowerCase()
+            (term) => term.term.toLowerCase() === part.toLowerCase(),
           )
           if (matchedTerm) {
             return (
@@ -223,7 +231,15 @@ export function FloatingGlossaryPanel({
                   }
                 >
                   {/* Term header with icon */}
-                  <Box sx={{ display: "flex", alignItems: "flex-start", mb: 0.5, gap: 1, ml: -1 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      mb: 0.5,
+                      gap: 1,
+                      ml: -1,
+                    }}
+                  >
                     <Box
                       sx={{
                         color: theme.palette.blue.bright,
@@ -253,7 +269,11 @@ export function FloatingGlossaryPanel({
                   {/* Tiers (if applicable) */}
                   {term.tiers && term.tiers.length > 0 && (
                     <Box sx={{ ml: 4, mt: 2 }}>
-                      <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                      <Typography
+                        variant="subtitle2"
+                        fontWeight={600}
+                        sx={{ mb: 1 }}
+                      >
                         Tiers:
                       </Typography>
                       <Stack spacing={1}>
@@ -312,4 +332,3 @@ export function FloatingGlossaryPanel({
     </>
   )
 }
-

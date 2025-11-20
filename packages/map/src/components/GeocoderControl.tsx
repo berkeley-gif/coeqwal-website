@@ -23,11 +23,11 @@ export interface GeocoderControlProps extends GeocodingOptions {
 
 /**
  * Ready-to-use geocoder search control component
- * 
+ *
  * @example
  * ```tsx
  * import { BOUNDING_BOXES } from '@repo/map'
- * 
+ *
  * <Map mapboxToken={token}>
  *   <GeocoderControl
  *     // accessToken is optional - pulls from map context
@@ -295,4 +295,3 @@ export function GeocoderControl({
     </div>
   )
 }
-
