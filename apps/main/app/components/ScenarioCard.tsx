@@ -154,7 +154,7 @@ export default function ScenarioCard({
         containerRef={cardContainerRef}
         content={
           <>
-            This <Box component="span" sx={{ fontWeight: 600 }}>hydroclimate</Box> scenario represents future climate conditions that affect water availability and demand.
+            These options allow you to select how a water management strategy is expected to perform under different potential <Box component="span" sx={{ fontWeight: 600 }}>hydroclimates</Box>.
           </>
         }
         position="left"
