@@ -1,12 +1,11 @@
 "use client"
 
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, SvgIcon } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import SnowpackContainer from "./vis/Snowpack"
 import TemperatureLineChart from "./vis/TemperatureLineChart"
 import { OffWhiteColor } from "./helpers/colorPalette"
-import { SvgIcon } from "@mui/material"
 import { useEffect, useRef, useState } from "react"
 import { useInView } from "framer-motion"
 
