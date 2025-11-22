@@ -114,7 +114,7 @@ export function CallResponsePanel({
           }}
         >
           <HighlightedText
-            highlightColor="rgba(0, 0, 0, 0.85)"
+            highlightColor="#3A4574"
             gapSize={0.25}
             sx={{ width: "100%", lineHeight: 2.2 }}
           >
