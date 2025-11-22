@@ -76,24 +76,21 @@ export function CallResponsePanel({
       >
         <Box
           sx={{
-            maxWidth: { xs: "100%", sm: "480px", md: "520px" }, // Larger, more readable width
+            maxWidth: { xs: "100%", sm: "420px", md: "460px" },
             padding: 0,
             pointerEvents: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: { xs: 2, sm: 2.5, md: 3 }, // Generous spacing between elements
+            gap: { xs: 2, sm: 2.5, md: 3 },
             backgroundColor: "transparent",
             backdropFilter: "none",
             borderRadius: 0,
             boxShadow: "none",
             border: "none",
             // Enhanced typography with per-line highlighting
+            // Single place to control line spacing for all Typography components
             "& .MuiTypography-root": {
-              // Wrap all Typography in HighlightedText component
-            },
-            "& .highlighted-text": {
-              fontFamily: (theme) => theme.typography.h3.fontFamily,
-              lineHeight: 2.2, // Larger line-height for visible gaps
+              lineHeight: 2,
             },
             "& .MuiTypography-h6": {
               fontSize: { xs: "1.25rem", sm: "1.375rem", md: "1.5rem" },
@@ -101,7 +98,7 @@ export function CallResponsePanel({
               color: (theme) => theme.palette.common.white,
             },
             "& .MuiTypography-body1": {
-              fontSize: { xs: "1rem", sm: "1.0625rem", md: "1.125rem" },
+              fontSize: { xs: "1.125rem", sm: "1.1875rem", md: "1.25rem" },
               color: (theme) => theme.palette.common.white,
             },
             "& .MuiTypography-overline": {
@@ -116,7 +113,7 @@ export function CallResponsePanel({
           <HighlightedText
             highlightColor="#3A4574"
             gapSize={0.25}
-            sx={{ width: "100%", lineHeight: 2.2 }}
+            sx={{ width: "100%" }}
           >
             {children}
           </HighlightedText>
