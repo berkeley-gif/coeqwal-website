@@ -468,7 +468,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="h6">
+        <Typography variant="body1">
           Do you know that California has one of the most complex water systems
           in the world?
         </Typography>
@@ -481,9 +481,9 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="overline">
+        {/* <Typography variant="overline">
           California&apos;s Central Valley
-        </Typography>
+        </Typography> */}
 
         <Typography variant="body1">
           Understanding how water is managed in California&apos;s large{" "}
@@ -501,12 +501,12 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="overline">
+        {/* <Typography variant="overline">
           California&apos;s Central Valley
-        </Typography>
+        </Typography> */}
 
         <Typography variant="body1">
-          The Central Valley can be thought of as being made up of three basins.
+          The Central Valley lies across three basins.
         </Typography>
       </CallResponsePanel>
 
@@ -517,12 +517,10 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="overline">THE JOURNEY</Typography>
+        {/* <Typography variant="overline">THE JOURNEY</Typography> */}
 
         <Typography variant="body1">
-          Rain and snowmelt in the mountains flow from the rims of these basins
-          into this large valley.
-        </Typography>
+        Basin rain and snowmelt flow from the mountain rims into that basin&apos;s rivers, reservoirs, and wetlands. To move water from one basin to another, we have to pump or pipe it through canals.</Typography>
       </CallResponsePanel>
 
       {/* Response: Sacramento and San Joaquin Rivers */}
@@ -573,7 +571,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="overline">THE MODEL</Typography>
+        {/* <Typography variant="overline">THE MODEL</Typography> */}
 
         <Typography variant="body1">
           To plan and account for where the water goes, the federal{" "}
@@ -601,7 +599,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="overline">THE SCENARIOS</Typography>
+        {/* <Typography variant="overline">THE SCENARIOS</Typography> */}
 
         <Typography variant="body1">
           The{" "}
@@ -1204,7 +1202,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="overline">EXPLORE THE SCENARIOS</Typography>
+        {/* <Typography variant="overline">EXPLORE THE SCENARIOS</Typography> */}
 
         <Typography variant="body1">
           To help you understand how to &quot;read&quot; a CalSim scenario, we
