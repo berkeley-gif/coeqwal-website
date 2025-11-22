@@ -2,6 +2,7 @@ import { ReactNode } from "react"
 import { Box } from "../mui-components"
 import { motion } from "@repo/motion"
 import type { SxProps, Theme } from "@mui/material"
+import { HighlightedText } from "./HighlightedText"
 
 export interface CallResponsePanelProps {
   /** Unique ID for the panel */
@@ -30,7 +31,7 @@ export interface CallResponsePanelProps {
 export function CallResponsePanel({
   id,
   side,
-  variant,
+  variant, // eslint-disable-line @typescript-eslint/no-unused-vars
   children,
   isVisible,
   delay = 0,
@@ -76,59 +77,49 @@ export function CallResponsePanel({
         <Box
           sx={{
             maxWidth: { xs: "100%", sm: "480px", md: "520px" }, // Larger, more readable width
-            padding: (theme) => ({
-              xs: theme.spacing(3),
-              sm: theme.spacing(4),
-              md: theme.spacing(5),
-            }),
+            padding: 0,
             pointerEvents: "auto",
             display: "flex",
             flexDirection: "column",
             gap: { xs: 2, sm: 2.5, md: 3 }, // Generous spacing between elements
-            backgroundColor:
-              variant === "call"
-                ? "rgba(255, 255, 255, 0.95)" // Cleaner white with slight transparency
-                : (theme) => `${theme.palette.brand.sky}`,
-            backdropFilter: "blur(12px)", // Subtle glass effect
-            borderRadius: 0, // No border radius to match IntroSection design
-            boxShadow: (theme) =>
-              variant === "call"
-                ? "0 8px 32px rgba(58, 69, 116, 0.08)" // Subtle shadow for depth
-                : "0 8px 32px rgba(58, 69, 116, 0.12)", // Slightly stronger for response
-            border: (theme) =>
-              variant === "call"
-                ? `1px solid ${theme.palette.grey[200]}` // Subtle border for definition
-                : "none",
-            // Enhanced typography styling that applies to children
-            "& .MuiTypography-h6": {
+            backgroundColor: "transparent",
+            backdropFilter: "none",
+            borderRadius: 0,
+            boxShadow: "none",
+            border: "none",
+            // Enhanced typography with per-line highlighting
+            "& .MuiTypography-root": {
+              // Wrap all Typography in HighlightedText component
+            },
+            "& .highlighted-text": {
               fontFamily: (theme) => theme.typography.h3.fontFamily,
+              lineHeight: 2.2, // Larger line-height for visible gaps
+            },
+            "& .MuiTypography-h6": {
               fontSize: { xs: "1.25rem", sm: "1.375rem", md: "1.5rem" },
               fontWeight: 500,
-              lineHeight: 1.4,
-              color: (theme) => theme.palette.blue.darkest,
+              color: (theme) => theme.palette.common.white,
             },
             "& .MuiTypography-body1": {
               fontSize: { xs: "1rem", sm: "1.0625rem", md: "1.125rem" },
-              lineHeight: 1.7,
-              color: (theme) =>
-                variant === "call"
-                  ? theme.palette.text.primary
-                  : theme.palette.blue.darkest,
+              color: (theme) => theme.palette.common.white,
             },
             "& .MuiTypography-overline": {
               fontSize: { xs: "0.7rem", sm: "0.75rem" },
               fontWeight: 700,
               letterSpacing: "0.12em",
-              color: (theme) =>
-                variant === "call"
-                  ? theme.palette.blue.dark
-                  : theme.palette.blue.darkest,
-              opacity: 0.8,
+              color: (theme) => theme.palette.common.white,
             },
             ...sx,
           }}
         >
-          {children}
+          <HighlightedText
+            highlightColor="rgba(0, 0, 0, 0.85)"
+            gapSize={0.25}
+            sx={{ width: "100%", lineHeight: 2.2 }}
+          >
+            {children}
+          </HighlightedText>
         </Box>
       </motion.div>
     </Box>
