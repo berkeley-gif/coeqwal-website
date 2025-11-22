@@ -21,7 +21,7 @@ export interface CallResponsePanelProps {
 }
 
 /**
- * CallResponsePanel - A conversational UI panel that attaches to viewport edges
+ * CallResponsePanel, a conversational UI panel
  *
  * Used to create left-right conversational flows where:
  * - 'call' variant panels appear on the left (questions/statements)
@@ -46,7 +46,7 @@ export function CallResponsePanel({
         alignItems: "center",
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        px: 4, // Horizontal padding for margin from viewport edge
+        px: { xs: 3, sm: 4, md: 6 }, // Responsive horizontal padding
       }}
     >
       <motion.div
@@ -75,17 +75,56 @@ export function CallResponsePanel({
       >
         <Box
           sx={{
-            maxWidth: "420px",
-            padding: (theme) => theme.layout.spacing.lg,
+            maxWidth: { xs: "100%", sm: "480px", md: "520px" }, // Larger, more readable width
+            padding: (theme) => ({
+              xs: theme.spacing(3),
+              sm: theme.spacing(4),
+              md: theme.spacing(5),
+            }),
             pointerEvents: "auto",
             display: "flex",
             flexDirection: "column",
-            gap: "15px",
+            gap: { xs: 2, sm: 2.5, md: 3 }, // Generous spacing between elements
             backgroundColor:
               variant === "call"
-                ? "rgba(250, 242, 230, 0.9)"
-                : (theme) => theme.palette.brand.sky,
-            borderRadius: (theme) => theme.borderRadius.card,
+                ? "rgba(255, 255, 255, 0.95)" // Cleaner white with slight transparency
+                : (theme) => `${theme.palette.brand.sky}`,
+            backdropFilter: "blur(12px)", // Subtle glass effect
+            borderRadius: 0, // No border radius to match IntroSection design
+            boxShadow: (theme) =>
+              variant === "call"
+                ? "0 8px 32px rgba(58, 69, 116, 0.08)" // Subtle shadow for depth
+                : "0 8px 32px rgba(58, 69, 116, 0.12)", // Slightly stronger for response
+            border: (theme) =>
+              variant === "call"
+                ? `1px solid ${theme.palette.grey[200]}` // Subtle border for definition
+                : "none",
+            // Enhanced typography styling that applies to children
+            "& .MuiTypography-h6": {
+              fontFamily: (theme) => theme.typography.h3.fontFamily,
+              fontSize: { xs: "1.25rem", sm: "1.375rem", md: "1.5rem" },
+              fontWeight: 500,
+              lineHeight: 1.4,
+              color: (theme) => theme.palette.blue.darkest,
+            },
+            "& .MuiTypography-body1": {
+              fontSize: { xs: "1rem", sm: "1.0625rem", md: "1.125rem" },
+              lineHeight: 1.7,
+              color: (theme) =>
+                variant === "call"
+                  ? theme.palette.text.primary
+                  : theme.palette.blue.darkest,
+            },
+            "& .MuiTypography-overline": {
+              fontSize: { xs: "0.7rem", sm: "0.75rem" },
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              color: (theme) =>
+                variant === "call"
+                  ? theme.palette.blue.dark
+                  : theme.palette.blue.darkest,
+              opacity: 0.8,
+            },
             ...sx,
           }}
         >

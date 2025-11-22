@@ -468,7 +468,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="h6" fontWeight={600} sx={{ lineHeight: 1.4 }}>
+        <Typography variant="h6">
           Do you know that California has one of the most complex water systems
           in the world?
         </Typography>
@@ -481,20 +481,11 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
+        <Typography variant="overline">
           California&apos;s Central Valley
         </Typography>
 
-        <Typography variant="body1" sx={{ lineHeight: 1.75, mt: 1 }}>
+        <Typography variant="body1">
           Understanding how water is managed in California&apos;s large{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
@@ -510,20 +501,11 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
+        <Typography variant="overline">
           California&apos;s Central Valley
         </Typography>
 
-        <Typography variant="body1" sx={{ lineHeight: 1.75, mt: 1 }}>
+        <Typography variant="body1">
           The Central Valley can be thought of as being made up of three basins.
         </Typography>
       </CallResponsePanel>
@@ -535,20 +517,9 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
-          THE JOURNEY
-        </Typography>
+        <Typography variant="overline">THE JOURNEY</Typography>
 
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+        <Typography variant="body1">
           Rain and snowmelt in the mountains flow from the rims of these basins
           into this large valley.
         </Typography>
@@ -561,7 +532,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+        <Typography variant="body1">
           From the north, the{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Sacramento River
@@ -585,7 +556,7 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+        <Typography variant="body1">
           Water is distributed from multiple points along the way, and pumped
           out from the{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
@@ -602,20 +573,9 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
-          THE MODEL
-        </Typography>
+        <Typography variant="overline">THE MODEL</Typography>
 
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+        <Typography variant="body1">
           To plan and account for where the water goes, the federal{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
             U.S. Bureau of Reclamation
@@ -641,20 +601,9 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
-          THE SCENARIOS
-        </Typography>
+        <Typography variant="overline">THE SCENARIOS</Typography>
 
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+        <Typography variant="body1">
           The{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
             COEQWAL
@@ -672,15 +621,7 @@ export default function MapOverlayPanels() {
           possibilities.
         </Typography>
 
-        <Typography
-          variant="body1"
-          fontWeight={600}
-          sx={{
-            lineHeight: 1.75,
-            mt: 2,
-            color: theme.palette.blue.darkest,
-          }}
-        >
+        <Typography variant="body1" sx={{ fontWeight: 600 }}>
           We are making this data available to the public so that communities
           can better understand the range of possibilities, and the range of
           consequences, that different water management practices can bring.
@@ -1263,20 +1204,9 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        {/* Eyebrow label */}
-        <Typography
-          variant="overline"
-          sx={{
-            color: theme.palette.blue.darkest,
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            fontSize: "0.7rem",
-          }}
-        >
-          EXPLORE THE SCENARIOS
-        </Typography>
+        <Typography variant="overline">EXPLORE THE SCENARIOS</Typography>
 
-        <Typography variant="body1" fontWeight={400} sx={{ lineHeight: 1.75 }}>
+        <Typography variant="body1">
           To help you understand how to &quot;read&quot; a CalSim scenario, we
           can start by exploring the data from the CalSim run for{" "}
           <Box component="span" sx={{ fontWeight: 500 }}>
