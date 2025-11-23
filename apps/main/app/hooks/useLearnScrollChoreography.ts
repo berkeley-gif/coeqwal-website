@@ -58,9 +58,9 @@ export interface PanelLayerState {
     layout?: Record<string, unknown>
   }>
   /** Optional callback when entering this panel */
-  onEnter?: () => void
+  onEnter?: (direction?: "up" | "down") => void
   /** Optional callback when exiting this panel */
-  onExit?: () => void
+  onExit?: (direction?: "up" | "down") => void
 }
 
 /**
@@ -133,7 +133,6 @@ export function useLearnScrollChoreography(
         const value = startValue + delta * eased
 
         try {
-          // @ts-expect-error prop is a dynamic paint property name
           setPaintProperty(layerId, prop, value)
           opacityStateRef.current[layerId] = {
             ...opacityStateRef.current[layerId],
@@ -377,19 +376,22 @@ export function useLearnScrollChoreography(
         }`,
       )
 
+      // Determine scroll direction
+      const direction: "up" | "down" = targetPosition > previousPosition ? "down" : "up"
+
       // Call onExit for the previous panel
       if (previousPosition >= 0) {
         const previousPanel = sortedPanels.find(
           (p) => p.position === previousPosition,
         )
-        previousPanel?.onExit?.()
+        previousPanel?.onExit?.(direction)
       }
 
       currentPanelRef.current = targetPosition
 
       if (targetPanel) {
         applyPanelState(targetPanel)
-        targetPanel.onEnter?.()
+        targetPanel.onEnter?.(direction)
       }
     }
 

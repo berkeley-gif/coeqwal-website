@@ -27,6 +27,7 @@ export default function CaliforniaMapPanel({
     showBasins,
     showRivers,
     showInflowArrows,
+    inflowArrowsOpacity,
   } = useCalSimToggle()
 
   return (
@@ -78,7 +79,7 @@ export default function CaliforniaMapPanel({
         <RiversLayer visible={showRivers} />
 
         {/* Basin Inflow Arrows - shows when scrolling to "water flow" panel */}
-        <BasinInflowArrows visible={showInflowArrows} />
+        <BasinInflowArrows visible={showInflowArrows} opacity={inflowArrowsOpacity} />
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         {/* Hide CalSim layers when hotspot markers are shown */}
