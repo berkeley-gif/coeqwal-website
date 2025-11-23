@@ -43,7 +43,9 @@ export default function MapOverlayPanels() {
 
   // Learn section scroll choreography – refs for stable callbacks
   const mapRef = useRef(map)
-  const fadeAnimationRef = useRef<number | null>(null)
+  const fadeAnimationRef = useRef<number | null>(null) // inflow/basins fade-out
+  const labelFadeAnimationRef = useRef<number | null>(null) // label fade-ins
+
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
   const toggleRiversOnRef = useRef(toggleRivers)
@@ -104,12 +106,12 @@ export default function MapOverlayPanels() {
             {
               layerId: "california-label",
               visibility: "none" as const,
-              textOpacity: 0,
+              textOpacity: 0, // fade out quickly / be gone
             },
             {
               layerId: "central-valley-label",
               visibility: "visible" as const,
-              textOpacity: 1,
+              textOpacity: 0, // start at 0, we animate to 1 in onEnter
               textAllowOverlap: true,
             },
             {
@@ -123,6 +125,64 @@ export default function MapOverlayPanels() {
           // Hide basins when entering Panel 2 (from Panel 3 when scrolling up)
           onEnter: () => {
             if (showBasinsRef.current) toggleBasinsOnRef.current()
+
+            // Smooth, slower fade-in for the Central Valley label
+            if (!mapRef.current) return
+
+            // Cancel any existing label fade
+            if (labelFadeAnimationRef.current !== null) {
+              cancelAnimationFrame(labelFadeAnimationRef.current)
+              labelFadeAnimationRef.current = null
+            }
+
+            const localMap = mapRef.current
+            const duration = 1500 // 1.5s for a gentle fade-in
+            const startTime = performance.now()
+
+            // Ensure starting at 0 opacity
+            try {
+              localMap.setPaintProperty(
+                "central-valley-label",
+                "text-opacity",
+                0,
+              )
+            } catch {
+              // Layer might not be ready yet; fail silently
+            }
+
+            const animate = (currentTime: number) => {
+              const elapsed = currentTime - startTime
+              const progress = Math.min(elapsed / duration, 1)
+              const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+
+              try {
+                localMap.setPaintProperty(
+                  "central-valley-label",
+                  "text-opacity",
+                  eased,
+                )
+              } catch {
+                // If layer isn't available mid-animation, just stop
+                labelFadeAnimationRef.current = null
+                return
+              }
+
+              if (progress < 1) {
+                labelFadeAnimationRef.current =
+                  requestAnimationFrame(animate)
+              } else {
+                labelFadeAnimationRef.current = null
+              }
+            }
+
+            labelFadeAnimationRef.current = requestAnimationFrame(animate)
+          },
+          onExit: () => {
+            // Just in case we leave mid-fade
+            if (labelFadeAnimationRef.current !== null) {
+              cancelAnimationFrame(labelFadeAnimationRef.current)
+              labelFadeAnimationRef.current = null
+            }
           },
         },
         {
@@ -248,11 +308,10 @@ export default function MapOverlayPanels() {
             if (!showRiversRef.current) toggleRiversOnRef.current()
 
             // After rivers start animating, fade out basins and inflow polygon
-            // 👇 slowed way down so you can really see it
             setTimeout(() => {
               if (mapRef.current) {
                 const localMap = mapRef.current
-                const fadeDuration = 8000 // 8 seconds
+                const fadeDuration = 8000 // 8 seconds for inflow/basin fade-out
                 const startTime = performance.now()
 
                 const startInflowOpacity = 0.4
@@ -310,7 +369,7 @@ export default function MapOverlayPanels() {
 
                 fadeAnimationRef.current = requestAnimationFrame(animate)
               }
-            }, 3000) // wait 3s before starting the fade
+            }, 3000) // wait 3s before starting the fade, so you can see rivers first
           },
           // Hide rivers when exiting Panel 5
           onExit: () => {
