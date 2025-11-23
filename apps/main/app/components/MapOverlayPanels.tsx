@@ -247,11 +247,12 @@ export default function MapOverlayPanels() {
           onEnter: () => {
             if (!showRiversRef.current) toggleRiversOnRef.current()
 
-            // After rivers start animating, fade out basins and inflow polygon gracefully over 3 seconds
+            // After rivers start animating, fade out basins and inflow polygon
+            // 👇 slowed way down so you can really see it
             setTimeout(() => {
               if (mapRef.current) {
                 const localMap = mapRef.current
-                const fadeDuration = 3000 // 3 seconds
+                const fadeDuration = 8000 // 8 seconds
                 const startTime = performance.now()
 
                 const startInflowOpacity = 0.4
@@ -309,7 +310,7 @@ export default function MapOverlayPanels() {
 
                 fadeAnimationRef.current = requestAnimationFrame(animate)
               }
-            }, 1500) // Wait 1500ms for rivers to draw before starting fade out
+            }, 3000) // wait 3s before starting the fade
           },
           // Hide rivers when exiting Panel 5
           onExit: () => {
@@ -512,7 +513,6 @@ export default function MapOverlayPanels() {
   }, [])
 
   // ✅ BasinsLayer visibility is now controlled by useLearnScrollChoreography
-  // The hook will call toggleBasins() when transitioning to/from Panel 3
 
   return (
     <Box
