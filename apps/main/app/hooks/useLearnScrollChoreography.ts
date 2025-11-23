@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react"
 import { useMap } from "@repo/map"
 
+type OpacityProp = "fill-opacity" | "line-opacity" | "text-opacity"
+
 /**
  * Map layer state configuration for a specific scroll position
  */
 interface LayerState {
   layerId: string
   visibility?: "visible" | "none"
-  opacity?: number
+  opacity?: number // not used directly but kept for future
   textOpacity?: number
   fillOpacity?: number
   lineOpacity?: number
@@ -66,10 +68,12 @@ export interface PanelLayerState {
  */
 export type ScrollChoreographyStep = PanelLayerState
 
+const DEFAULT_FADE_DURATION = 600 // ms
+
 /**
  * Hook for Learn section scroll choreography
  *
- * Simple system: Each panel triggers when its top edge crosses viewport middle
+ * System: Each panel triggers when its top edge crosses viewport middle
  */
 export function useLearnScrollChoreography(
   panelStates: PanelLayerState[],
@@ -79,6 +83,11 @@ export function useLearnScrollChoreography(
   const currentPanelRef = useRef<number>(0)
   const initializedRef = useRef<boolean>(false)
 
+  // Track the last opacity we set per layer + property
+  const opacityStateRef = useRef<
+    Record<string, Partial<Record<OpacityProp, number>>>
+  >({})
+
   useEffect(() => {
     // Wait for map operations to be available
     if (!map || !map.hasLayer || !map.addSource || !map.addLayer) {
@@ -86,7 +95,7 @@ export function useLearnScrollChoreography(
       return
     }
 
-    // Only initialize once
+    // Only initialize once for this map + panelStates combo
     if (initializedRef.current) return
     initializedRef.current = true
 
@@ -101,19 +110,59 @@ export function useLearnScrollChoreography(
       (a, b) => a.position - b.position,
     )
 
-    // Build master list of ALL layers mentioned across all panels
-    const allLayerIds = new Set<string>()
+    // Small helper: animate opacity locally (no getPaintProperty, no .value)
+    const animateOpacity = (
+      layerId: string,
+      prop: OpacityProp,
+      target: number,
+      duration: number = DEFAULT_FADE_DURATION,
+    ) => {
+      let startValue = opacityStateRef.current[layerId]?.[prop]
+
+      if (typeof startValue !== "number" || Number.isNaN(startValue)) {
+        // Heuristic: if target > 0, fade in from 0; if target === 0, fade out from 1
+        startValue = target > 0 ? 0 : 1
+      }
+
+      const startTime = performance.now()
+      const delta = target - startValue
+
+      const step = (now: number) => {
+        const t = Math.min((now - startTime) / duration, 1)
+        const eased = 1 - Math.pow(1 - t, 3) // easeOutCubic
+        const value = startValue + delta * eased
+
+        try {
+          // @ts-expect-error prop is a dynamic paint property name
+          setPaintProperty(layerId, prop, value)
+          opacityStateRef.current[layerId] = {
+            ...opacityStateRef.current[layerId],
+            [prop]: value,
+          }
+        } catch (err) {
+          console.warn(
+            `[Choreography] Failed to animate ${prop} on '${layerId}':`,
+            err,
+          )
+          return
+        }
+
+        if (t < 1) {
+          requestAnimationFrame(step)
+        }
+      }
+
+      requestAnimationFrame(step)
+    }
+
+    // Build master list of ALL GeoJSON layers mentioned across all panels
     const allGeoJsonLayerIds = new Set<string>()
 
     sortedPanels.forEach((panel) => {
-      panel.layers.forEach((layer) => allLayerIds.add(layer.layerId))
-
-      // Track single GeoJSON layer
       if (panel.geoJsonLayer) {
         allGeoJsonLayerIds.add(panel.geoJsonLayer.id)
       }
 
-      // Track multiple GeoJSON layers
       if (panel.geoJsonLayers) {
         panel.geoJsonLayers.forEach((layer) => allGeoJsonLayerIds.add(layer.id))
       }
@@ -152,7 +201,7 @@ export function useLearnScrollChoreography(
         }
       }
 
-      // Multiple sources/layers (for rivers)
+      // Multiple sources/layers (for rivers, etc.)
       if (panel.geoJsonSources && panel.geoJsonLayers) {
         panel.geoJsonSources.forEach((source) => {
           try {
@@ -183,7 +232,6 @@ export function useLearnScrollChoreography(
 
     /**
      * Apply layer states for a given panel configuration
-     * Strategy: Apply all layer states directly for smooth transitions
      */
     const applyPanelState = (panelState: PanelLayerState) => {
       // Step 1: Hide all GeoJSON layers first
@@ -197,68 +245,85 @@ export function useLearnScrollChoreography(
 
       // Step 2: Apply layer states for regular map layers
       panelState.layers.forEach((layerState) => {
-        if (!hasLayer(layerState.layerId)) {
+        const layerId = layerState.layerId
+
+        if (!hasLayer(layerId)) {
           return
         }
 
         try {
-          // Apply visibility first for instant swap
-          if (layerState.visibility !== undefined) {
-            setLayoutProperty(
-              layerState.layerId,
-              "visibility",
-              layerState.visibility,
-            )
+          const wantsVisible = layerState.visibility === "visible"
+          const wantsHidden = layerState.visibility === "none"
+
+          // Make it visible before animating opacity in
+          if (wantsVisible) {
+            setLayoutProperty(layerId, "visibility", "visible")
           }
 
-          // Apply text-allow-overlap
+          // text-allow-overlap
           if (layerState.textAllowOverlap !== undefined) {
             setLayoutProperty(
-              layerState.layerId,
+              layerId,
               "text-allow-overlap",
               layerState.textAllowOverlap,
             )
           }
 
-          // Apply opacity properties
-          if (layerState.textOpacity !== undefined) {
-            setPaintProperty(
-              layerState.layerId,
+          // Opacity properties — use animation so transitions are smooth
+          const hasTextOpacity = layerState.textOpacity !== undefined
+          const hasFillOpacity = layerState.fillOpacity !== undefined
+          const hasLineOpacity = layerState.lineOpacity !== undefined
+
+          if (hasTextOpacity) {
+            animateOpacity(
+              layerId,
               "text-opacity",
-              layerState.textOpacity,
+              layerState.textOpacity as number,
             )
           }
-          if (layerState.fillOpacity !== undefined) {
-            setPaintProperty(
-              layerState.layerId,
+          if (hasFillOpacity) {
+            animateOpacity(
+              layerId,
               "fill-opacity",
-              layerState.fillOpacity,
+              layerState.fillOpacity as number,
             )
           }
-          if (layerState.lineOpacity !== undefined) {
-            setPaintProperty(
-              layerState.layerId,
+          if (hasLineOpacity) {
+            animateOpacity(
+              layerId,
               "line-opacity",
-              layerState.lineOpacity,
+              layerState.lineOpacity as number,
             )
           }
 
-          // Apply other paint properties
+          // Non-animated paint props
           if (layerState.lineWidth !== undefined) {
-            setPaintProperty(
-              layerState.layerId,
-              "line-width",
-              layerState.lineWidth,
-            )
+            setPaintProperty(layerId, "line-width", layerState.lineWidth)
           }
 
-          // Apply layout properties
+          // Layout props
           if (layerState.lineJoin !== undefined) {
-            setLayoutProperty(
-              layerState.layerId,
-              "line-join",
-              layerState.lineJoin,
-            )
+            setLayoutProperty(layerId, "line-join", layerState.lineJoin)
+          }
+
+          // If a layer should end up hidden *and* we animated opacity,
+          // hide it after the fade completes. Otherwise hide immediately.
+          if (
+            wantsHidden &&
+            (hasTextOpacity || hasFillOpacity || hasLineOpacity)
+          ) {
+            setTimeout(() => {
+              try {
+                setLayoutProperty(layerId, "visibility", "none")
+              } catch (err) {
+                console.warn(
+                  `[Choreography] Error hiding layer '${layerId}' after fade:`,
+                  err,
+                )
+              }
+            }, DEFAULT_FADE_DURATION)
+          } else if (wantsHidden) {
+            setLayoutProperty(layerId, "visibility", "none")
           }
         } catch (error) {
           console.warn(
@@ -269,7 +334,6 @@ export function useLearnScrollChoreography(
       })
 
       // Step 3: Show GeoJSON layers for this panel
-      // Single GeoJSON layer (backwards compatibility - basins)
       if (panelState.geoJsonLayer) {
         const layerId = panelState.geoJsonLayer.id
         try {
@@ -282,7 +346,6 @@ export function useLearnScrollChoreography(
         }
       }
 
-      // Multiple GeoJSON layers (rivers)
       if (panelState.geoJsonLayers) {
         panelState.geoJsonLayers.forEach((layerConfig) => {
           try {
@@ -309,7 +372,9 @@ export function useLearnScrollChoreography(
       )
 
       console.log(
-        `[Choreography] ${previousPosition} → ${targetPosition}${targetPanel ? ` (${targetPanel.debugLabel})` : ""}`,
+        `[Choreography] ${previousPosition} → ${targetPosition}${
+          targetPanel ? ` (${targetPanel.debugLabel})` : ""
+        }`,
       )
 
       // Call onExit for the previous panel
@@ -322,13 +387,9 @@ export function useLearnScrollChoreography(
 
       currentPanelRef.current = targetPosition
 
-      // Apply the new panel state
       if (targetPanel) {
         applyPanelState(targetPanel)
         targetPanel.onEnter?.()
-
-        // Note: River drawing animation removed - conflicts with layer state opacity settings
-        // For true "drawing" animation, would need lineMetrics: true in Mapbox Studio tileset
       }
     }
 
@@ -339,7 +400,6 @@ export function useLearnScrollChoreography(
       const viewportMiddle = window.innerHeight / 2
       let activePanel = 0 // Default to first panel
 
-      // Check each panel to see which one the middle line is in
       for (let i = sortedPanels.length - 1; i >= 0; i--) {
         const panel = sortedPanels[i]
         if (!panel) continue
@@ -349,7 +409,6 @@ export function useLearnScrollChoreography(
 
         const rect = panelElement.getBoundingClientRect()
 
-        // If the viewport middle is within this panel's bounds, this is the active panel
         if (rect.top <= viewportMiddle && rect.bottom > viewportMiddle) {
           activePanel = panel.position
           break
@@ -364,7 +423,6 @@ export function useLearnScrollChoreography(
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach(() => {
-            // On any intersection change, re-evaluate which panel should be active
             const activePanel = determineActivePanel()
             if (activePanel !== currentPanelRef.current) {
               transitionToPanel(activePanel)
@@ -372,7 +430,7 @@ export function useLearnScrollChoreography(
           })
         },
         {
-          threshold: [0, 0.25, 0.5, 0.75, 1.0], // Fewer callbacks, smoother performance
+          threshold: [0, 0.25, 0.5, 0.75, 1.0],
           rootMargin: "0px",
         },
       )
@@ -393,7 +451,7 @@ export function useLearnScrollChoreography(
       ;(observer as any)._checkInterval = checkInterval
     })
 
-    // Initialize to first panel (Panel 0)
+    // Initialize to first panel
     const firstPanel = sortedPanels[0]
     if (firstPanel) {
       applyPanelState(firstPanel)
