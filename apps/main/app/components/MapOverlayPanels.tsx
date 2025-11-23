@@ -630,7 +630,8 @@ export default function MapOverlayPanels() {
 
   // Geocoding hook, uses token from map context
   const geocoding = useGeocoding({
-    bbox: BOUNDING_BOXES.CALIFORNIA, // California only
+    bbox: BOUNDING_BOXES.CALIFORNIA, // California bounding box
+    countries: ["us"], // United States only
     types: ["place", "address", "poi"], // Allow addresses, cities, and POIs
     limit: 5,
     flyTo: false, // Handling the map movement manually, for this component's use case
@@ -867,6 +868,7 @@ export default function MapOverlayPanels() {
         side="right"
         variant="call"
         isVisible={isFirstPanelVisible}
+        disableHighlight={true}
       >
         {/* Background container for entire panel content */}
         <Box

@@ -53,7 +53,7 @@ export default function CaliforniaMapPanel({
           pitch: 0,
         }}
         minZoom={5}
-        maxZoom={18} // Allow street-level detail
+        maxZoom={18} 
         maxBounds={[
           [-130.0, 28.0], // Southwest coordinates (west, south) - more generous
           [-108.0, 46.0], // Northeast coordinates (east, north) - more generous
@@ -93,8 +93,27 @@ export default function CaliforniaMapPanel({
           <Marker
             longitude={geocoderMarker[0]}
             latitude={geocoderMarker[1]}
-            color="red"
-          />
+            anchor="center"
+          >
+            <Box
+              sx={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                backgroundColor: "rgba(255, 255, 255, 0.5)",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                fontSize: "28px",
+                lineHeight: 1,
+              }}
+            >
+              📍
+            </Box>
+          </Marker>
         )}
 
         {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
