@@ -31,20 +31,19 @@ export default function BasinInflowArrows({
    */
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
-    { lon: -122.65, lat: 40.2, rotation: 270, label: "NW - Shasta area" },
-    { lon: -122.05, lat: 40.55, rotation: 60, label: "N - Central north" }, // Curved tail
-    { lon: -121.75, lat: 40.1, rotation: 90, label: "NE - Lassen area" },
+    { lon: -122.05, lat: 40.75, rotation: 60, label: "N - Central north" }, // Curved tail
+    { lon: -121.85, lat: 40, rotation: 90, label: "NE - Lassen area" },
 
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
     { lon: -121.2, lat: 39.3, rotation: 90, label: "E - North Sierra" },
     { lon: -121.05, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
-    { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" },
+    { lon: -120.3, lat: 38.3, rotation: 90, label: "E - Mid Sierra" },
     { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
 
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
     { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" },
-    { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" },
-    { lon: -122.5, lat: 39.9, rotation: 270, label: "NW - Northwestern rim" },
+    { lon: -122.5, lat: 39.1, rotation: 270, label: "W - North Coast Range" },
+    { lon: -122.6, lat: 40.3, rotation: 270, label: "NW - Northwestern rim" },
   ]
 
   const arrowColor = "#2196F3"
