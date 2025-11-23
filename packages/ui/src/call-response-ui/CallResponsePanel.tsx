@@ -19,6 +19,8 @@ export interface CallResponsePanelProps {
   delay?: number
   /** Custom styles to apply */
   sx?: SxProps<Theme>
+  /** Disable the highlight effect (useful when using custom backgrounds) */
+  disableHighlight?: boolean
 }
 
 /**
@@ -36,6 +38,7 @@ export function CallResponsePanel({
   isVisible,
   delay = 0,
   sx = {},
+  disableHighlight = false,
 }: CallResponsePanelProps) {
   return (
     <Box
@@ -120,13 +123,17 @@ export function CallResponsePanel({
             ...sx,
           }}
         >
-          <HighlightedText
-            highlightColor={side === "right" ? "#FFFFFF" : "#3A4574"}
-            gapSize={0.25}
-            sx={{ width: "100%" }}
-        >
-          {children}
-          </HighlightedText>
+          {disableHighlight ? (
+            children
+          ) : (
+            <HighlightedText
+              highlightColor={side === "right" ? "#FFFFFF" : "#3A4574"}
+              gapSize={0.25}
+              sx={{ width: "100%" }}
+            >
+              {children}
+            </HighlightedText>
+          )}
         </Box>
       </motion.div>
     </Box>
