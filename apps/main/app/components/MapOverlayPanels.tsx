@@ -307,7 +307,7 @@ export default function MapOverlayPanels() {
               )
             }
           },
-          // Fade arrows out when exiting panel 4 (both directions)
+          // Fade arrows out when exiting in either direction
           onExit: () => {
             // Cancel any ongoing arrow fade animation
             if (arrowFadeAnimationRef.current !== null) {
@@ -339,8 +339,69 @@ export default function MapOverlayPanels() {
           },
         },
         {
-          panelId: "rivers-flow-response",
+          panelId: "which-basin-call",
           position: 4,
+          debugLabel: "Panel 4.5: Which Basin",
+          layers: [
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
+            {
+              layerId: "inflow-watersheds",
+              visibility: "visible" as const,
+              fillOpacity: 0.4,
+            },
+          ],
+          // Arrows are faded out in this panel; fade back in when exiting UP to Panel 4
+          onExit: (direction?: "up" | "down") => {
+            if (direction === "up") {
+              // Scrolling up to Panel 4 - fade arrows back in
+              if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+              
+              // Cancel any ongoing arrow fade animation
+              if (arrowFadeAnimationRef.current !== null) {
+                cancelAnimationFrame(arrowFadeAnimationRef.current)
+                arrowFadeAnimationRef.current = null
+              }
+              
+              // Animate arrow fade-in
+              const fadeDuration = 800
+              const startTime = performance.now()
+              
+              const animateArrowFadeIn = (now: number) => {
+                const elapsed = now - startTime
+                const progress = Math.min(elapsed / fadeDuration, 1)
+                const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+                
+                setInflowArrowsOpacity(eased)
+                
+                if (progress < 1) {
+                  arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+                } else {
+                  arrowFadeAnimationRef.current = null
+                }
+              }
+              
+              arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+            }
+            // If scrolling down to Panel 5, arrows already faded out (do nothing)
+          },
+        },
+        {
+          panelId: "rivers-flow-response",
+          position: 5,
           debugLabel: "Panel 5: Rivers",
           layers: [
             {
@@ -440,11 +501,12 @@ export default function MapOverlayPanels() {
               fadeAnimationRef.current = null
             }
             if (showRiversRef.current) toggleRiversOnRef.current()
+            // Arrows stay hidden when scrolling up to Panel 4.5
           },
         },
         {
           panelId: "water-distribution-call",
-          position: 5,
+          position: 6,
           debugLabel: "Panel 6: Distribution",
           layers: [
             {
@@ -707,6 +769,16 @@ export default function MapOverlayPanels() {
           basin&apos;s rivers, reservoirs, and wetlands. To move water from one
           basin to another, we have to pump or pipe it through canals.
         </Typography>
+      </CallResponsePanel>
+
+      {/* Call: Find my basin */}
+      <CallResponsePanel
+        id="which-basin-call"
+        side="right"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">Find my basin</Typography>
       </CallResponsePanel>
 
       {/* Response: Sacramento and San Joaquin Rivers */}
