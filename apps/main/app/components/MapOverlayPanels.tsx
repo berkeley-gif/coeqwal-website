@@ -862,7 +862,7 @@ export default function MapOverlayPanels() {
         <Box
           sx={{
             backgroundColor: "rgba(255, 255, 255, 0.95)",
-            borderRadius: 2,
+            borderRadius: 0,
             padding: { xs: 2, sm: 2.5, md: 3 },
             boxShadow: theme.shadows[2],
             width: "100%",
