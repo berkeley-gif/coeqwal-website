@@ -90,7 +90,7 @@ export default function MapOverlayPanels() {
             {
               layerId: "california-label",
               visibility: "visible" as const,
-              textOpacity: 1,
+              textOpacity: 0.9,
             },
             {
               layerId: "central-valley-label",
@@ -123,7 +123,7 @@ export default function MapOverlayPanels() {
             {
               layerId: "central-valley-polygon",
               visibility: "visible" as const,
-              lineOpacity: 1,
+              lineOpacity: 0, // start at 0, we animate to 1 in onEnter
               lineWidth: 2,
               lineJoin: "round" as const,
             },
@@ -132,7 +132,7 @@ export default function MapOverlayPanels() {
           onEnter: () => {
             if (showBasinsRef.current) toggleBasinsOnRef.current()
 
-            // Smooth, slower fade-in for the Central Valley label
+            // Smooth, slower fade-in for both the Central Valley label and polygon
             if (!mapRef.current) return
 
             // Cancel any existing label fade
@@ -145,11 +145,16 @@ export default function MapOverlayPanels() {
             const duration = 1500 // 1.5s for a gentle fade-in
             const startTime = performance.now()
 
-            // Ensure starting at 0 opacity
+            // Ensure starting at 0 opacity for both layers
             try {
               localMap.setPaintProperty(
                 "central-valley-label",
                 "text-opacity",
+                0,
+              )
+              localMap.setPaintProperty(
+                "central-valley-polygon",
+                "line-opacity",
                 0,
               )
             } catch {
@@ -160,13 +165,18 @@ export default function MapOverlayPanels() {
               const elapsed = currentTime - startTime
               const progress = Math.min(elapsed / duration, 1)
               const rawEased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-              // Clamp to [0, 1] to avoid floating-point precision errors
-              const eased = Math.max(0, Math.min(1, rawEased))
+              // Clamp to [0, 0.9] to avoid floating-point precision errors
+              const eased = Math.max(0, Math.min(0.9, rawEased * 0.9))
 
               try {
                 localMap.setPaintProperty(
                   "central-valley-label",
                   "text-opacity",
+                  eased,
+                )
+                localMap.setPaintProperty(
+                  "central-valley-polygon",
+                  "line-opacity",
                   eased,
                 )
               } catch {
@@ -275,7 +285,7 @@ export default function MapOverlayPanels() {
               mapRef.current.setPaintProperty(
                 "basins-labels",
                 "text-opacity",
-                1,
+                0.9,
               )
             }
           },
