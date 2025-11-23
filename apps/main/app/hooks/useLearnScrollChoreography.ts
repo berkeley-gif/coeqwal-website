@@ -82,6 +82,7 @@ export function useLearnScrollChoreography(
   const observersRef = useRef<IntersectionObserver[]>([])
   const currentPanelRef = useRef<number>(0)
   const initializedRef = useRef<boolean>(false)
+  const isInitialLoadRef = useRef<boolean>(true)
 
   // Track the last opacity we set per layer + property
   const opacityStateRef = useRef<
@@ -130,7 +131,9 @@ export function useLearnScrollChoreography(
       const step = (now: number) => {
         const t = Math.min((now - startTime) / duration, 1)
         const eased = 1 - Math.pow(1 - t, 3) // easeOutCubic
-        const value = startValue + delta * eased
+        const rawValue = startValue + delta * eased
+        // Clamp to [0, 1] to avoid floating-point precision errors
+        const value = Math.max(0, Math.min(1, rawValue))
 
         try {
           setPaintProperty(layerId, prop, value)
@@ -379,8 +382,8 @@ export function useLearnScrollChoreography(
       // Determine scroll direction
       const direction: "up" | "down" = targetPosition > previousPosition ? "down" : "up"
 
-      // Call onExit for the previous panel
-      if (previousPosition >= 0) {
+      // Call onExit for the previous panel (but not on initial load)
+      if (previousPosition >= 0 && !isInitialLoadRef.current) {
         const previousPanel = sortedPanels.find(
           (p) => p.position === previousPosition,
         )
@@ -391,7 +394,10 @@ export function useLearnScrollChoreography(
 
       if (targetPanel) {
         applyPanelState(targetPanel)
-        targetPanel.onEnter?.(direction)
+        // Only call onEnter if not initial load
+        if (!isInitialLoadRef.current) {
+          targetPanel.onEnter?.(direction)
+        }
       }
     }
 
@@ -459,6 +465,11 @@ export function useLearnScrollChoreography(
       applyPanelState(firstPanel)
     }
 
+    // Mark initial load as complete after a short delay to allow page to settle
+    setTimeout(() => {
+      isInitialLoadRef.current = false
+    }, 500)
+
     // Cleanup
     return () => {
       observersRef.current.forEach((obs) => {
@@ -468,6 +479,7 @@ export function useLearnScrollChoreography(
       })
       observersRef.current = []
       initializedRef.current = false
+      isInitialLoadRef.current = true // Reset for next mount
     }
   }, [map, panelStates])
 }
