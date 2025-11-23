@@ -226,7 +226,7 @@ export default function MapOverlayPanels() {
         },
         {
           panelId: "water-flow-call",
-          position: 3,
+          position: 2.5,
           debugLabel: "Panel 4: Watersheds",
           layers: [
             {
@@ -282,7 +282,7 @@ export default function MapOverlayPanels() {
         },
         {
           panelId: "arrows-trigger",
-          position: 3.2,
+          position: 2.7,
           debugLabel: "Panel 4.25: Arrow Trigger (midway through Panel 4)",
           layers: [
             {
@@ -375,7 +375,7 @@ export default function MapOverlayPanels() {
         },
         {
           panelId: "which-basin-call",
-          position: 4,
+          position: 3.5,
           debugLabel: "Panel 4.5: Which Basin",
           layers: [
             {
@@ -468,7 +468,7 @@ export default function MapOverlayPanels() {
         },
         {
           panelId: "rivers-flow-response",
-          position: 5,
+          position: 4.5,
           debugLabel: "Panel 5: Rivers",
           layers: [
             {
@@ -573,7 +573,7 @@ export default function MapOverlayPanels() {
         },
         {
           panelId: "water-distribution-call",
-          position: 6,
+          position: 5.5,
           debugLabel: "Panel 6: Distribution",
           layers: [
             {
@@ -842,7 +842,7 @@ export default function MapOverlayPanels() {
           id="arrows-trigger"
           sx={{
             position: "relative",
-            height: "100vh",
+            height: "50vh",
             width: "100%",
             pointerEvents: "none",
             opacity: 0,
