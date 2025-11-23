@@ -95,23 +95,32 @@ export function CallResponsePanel({
             "& .MuiTypography-h6": {
               fontSize: { xs: "1.25rem", sm: "1.375rem", md: "1.5rem" },
               fontWeight: 500,
-              color: (theme) => theme.palette.common.white,
+              color: (theme) =>
+                side === "right"
+                  ? theme.palette.grey[900]
+                  : theme.palette.common.white,
             },
             "& .MuiTypography-body1": {
               fontSize: { xs: "1.125rem", sm: "1.1875rem", md: "1.25rem" },
-              color: (theme) => theme.palette.common.white,
+              color: (theme) =>
+                side === "right"
+                  ? theme.palette.grey[900]
+                  : theme.palette.common.white,
             },
             "& .MuiTypography-overline": {
               fontSize: { xs: "0.7rem", sm: "0.75rem" },
               fontWeight: 700,
               letterSpacing: "0.12em",
-              color: (theme) => theme.palette.common.white,
+              color: (theme) =>
+                side === "right"
+                  ? theme.palette.grey[900]
+                  : theme.palette.common.white,
             },
             ...sx,
           }}
         >
           <HighlightedText
-            highlightColor="#3A4574"
+            highlightColor={side === "right" ? "#FFFFFF" : "#3A4574"}
             gapSize={0.25}
             sx={{ width: "100%" }}
         >

@@ -32,6 +32,7 @@ export default function MapOverlayPanels() {
     toggleRivers,
     showInflowArrows,
     toggleInflowArrows,
+    inflowArrowsOpacity,
     setInflowArrowsOpacity,
   } = useCalSimToggle()
 
@@ -54,6 +55,7 @@ export default function MapOverlayPanels() {
   const showRiversRef = useRef(showRivers)
   const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
   const showInflowArrowsRef = useRef(showInflowArrows)
+  const inflowArrowsOpacityRef = useRef(inflowArrowsOpacity)
 
   // Keep refs in sync
   useEffect(() => {
@@ -64,6 +66,7 @@ export default function MapOverlayPanels() {
     showRiversRef.current = showRivers
     toggleInflowArrowsOnRef.current = toggleInflowArrows
     showInflowArrowsRef.current = showInflowArrows
+    inflowArrowsOpacityRef.current = inflowArrowsOpacity
   }, [
     map,
     toggleBasins,
@@ -72,6 +75,7 @@ export default function MapOverlayPanels() {
     showRivers,
     toggleInflowArrows,
     showInflowArrows,
+    inflowArrowsOpacity,
   ])
 
   // Scroll-driven map choreography
@@ -155,7 +159,9 @@ export default function MapOverlayPanels() {
             const animate = (currentTime: number) => {
               const elapsed = currentTime - startTime
               const progress = Math.min(elapsed / duration, 1)
-              const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+              const rawEased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+              // Clamp to [0, 1] to avoid floating-point precision errors
+              const eased = Math.max(0, Math.min(1, rawEased))
 
               try {
                 localMap.setPaintProperty(
@@ -244,47 +250,13 @@ export default function MapOverlayPanels() {
               fillOpacity: 0.4,
             },
           ],
-          // Show inflow arrows when entering panel 4
-          onEnter: (direction?: "up" | "down") => {
+          // Show inflow watersheds polygon (arrows come later at Panel 4.5)
+          onEnter: () => {
             // Cancel any ongoing fade animations
             if (fadeAnimationRef.current !== null) {
               cancelAnimationFrame(fadeAnimationRef.current)
               fadeAnimationRef.current = null
             }
-            if (arrowFadeAnimationRef.current !== null) {
-              cancelAnimationFrame(arrowFadeAnimationRef.current)
-              arrowFadeAnimationRef.current = null
-            }
-
-            if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-            
-            // Animate arrow fade-in
-            // - From Panel 3 (down): Wait for inflow watersheds to fade in first
-            // - From Panel 5 (up): Fade in without delay
-            const startDelay = direction === "down" ? 600 : 0
-            const fadeDuration = 800
-            const startTime = performance.now() + startDelay
-            
-            const animateArrowFadeIn = (now: number) => {
-              if (now < startTime) {
-                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
-                return
-              }
-              
-              const elapsed = now - startTime
-              const progress = Math.min(elapsed / fadeDuration, 1)
-              const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
-              
-              setInflowArrowsOpacity(eased)
-              
-              if (progress < 1) {
-                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
-              } else {
-                arrowFadeAnimationRef.current = null
-              }
-            }
-            
-            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
             
             // Restore basins if returning from Panel 5
             if (!showBasinsRef.current) toggleBasinsOnRef.current()
@@ -307,35 +279,98 @@ export default function MapOverlayPanels() {
               )
             }
           },
-          // Fade arrows out when exiting in either direction
-          onExit: () => {
+        },
+        {
+          panelId: "arrows-trigger",
+          position: 3.2,
+          debugLabel: "Panel 4.25: Arrow Trigger (midway through Panel 4)",
+          layers: [
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
+            {
+              layerId: "inflow-watersheds",
+              visibility: "visible" as const,
+              fillOpacity: 0.4,
+            },
+          ],
+          // Fade arrows IN when entering arrow trigger zone
+          onEnter: () => {
             // Cancel any ongoing arrow fade animation
             if (arrowFadeAnimationRef.current !== null) {
               cancelAnimationFrame(arrowFadeAnimationRef.current)
               arrowFadeAnimationRef.current = null
             }
+
+            if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
             
-            // Animate arrow fade-out (from current opacity to 0)
-            const fadeDuration = 600
+            // Animate arrow fade-in from current opacity to 1
+            const fadeDuration = 800
             const startTime = performance.now()
+            const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
             
-            const animateArrowFadeOut = (now: number) => {
+            const animateArrowFadeIn = (now: number) => {
               const elapsed = now - startTime
               const progress = Math.min(elapsed / fadeDuration, 1)
-              const eased = 1 - progress // Linear fade out from 1 to 0
+              const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+              const value = Math.max(0, Math.min(1, startOpacity + (1 - startOpacity) * eased)) // Clamp
               
-              setInflowArrowsOpacity(eased)
+              setInflowArrowsOpacity(value)
               
               if (progress < 1) {
-                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
               } else {
                 arrowFadeAnimationRef.current = null
-                // Hide arrows after fade completes
-                if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
               }
             }
             
-            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+          },
+          // Fade arrows OUT when scrolling back up to Panel 3
+          onExit: (direction?: "up" | "down") => {
+            if (direction === "up") {
+              // Cancel any ongoing arrow fade animation
+              if (arrowFadeAnimationRef.current !== null) {
+                cancelAnimationFrame(arrowFadeAnimationRef.current)
+                arrowFadeAnimationRef.current = null
+              }
+              
+              // Animate arrow fade-out from current opacity to 0
+              const fadeDuration = 600
+              const startTime = performance.now()
+              const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
+              
+              const animateArrowFadeOut = (now: number) => {
+                const elapsed = now - startTime
+                const progress = Math.min(elapsed / fadeDuration, 1)
+                const eased = 1 - progress // Linear fade out
+                const value = Math.max(0, Math.min(1, startOpacity * eased)) // Clamp
+                
+                setInflowArrowsOpacity(value)
+                
+                if (progress < 1) {
+                  arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+                } else {
+                  arrowFadeAnimationRef.current = null
+                  // Hide arrows after fade completes
+                  if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+                }
+              }
+              
+              arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+            }
           },
         },
         {
@@ -364,28 +399,61 @@ export default function MapOverlayPanels() {
               fillOpacity: 0.4,
             },
           ],
-          // Arrows are faded out in this panel; fade back in when exiting UP to Panel 4
+          // Fade arrows OUT when entering Panel 4.5 (Find my basin)
+          onEnter: () => {
+            // Cancel any ongoing arrow fade animation
+            if (arrowFadeAnimationRef.current !== null) {
+              cancelAnimationFrame(arrowFadeAnimationRef.current)
+              arrowFadeAnimationRef.current = null
+            }
+            
+            // Animate arrow fade-out from current opacity to 0
+            const fadeDuration = 600
+            const startTime = performance.now()
+            const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
+            
+            const animateArrowFadeOut = (now: number) => {
+              const elapsed = now - startTime
+              const progress = Math.min(elapsed / fadeDuration, 1)
+              const eased = 1 - progress // Linear fade out
+              const value = Math.max(0, Math.min(1, startOpacity * eased)) // Clamp
+              
+              setInflowArrowsOpacity(value)
+              
+              if (progress < 1) {
+                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+              } else {
+                arrowFadeAnimationRef.current = null
+                // Hide arrows after fade completes
+                if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+              }
+            }
+            
+            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+          },
+          // Fade arrows back IN when scrolling back up to arrow trigger zone
           onExit: (direction?: "up" | "down") => {
             if (direction === "up") {
-              // Scrolling up to Panel 4 - fade arrows back in
-              if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-              
               // Cancel any ongoing arrow fade animation
               if (arrowFadeAnimationRef.current !== null) {
                 cancelAnimationFrame(arrowFadeAnimationRef.current)
                 arrowFadeAnimationRef.current = null
               }
+
+              if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
               
-              // Animate arrow fade-in
+              // Animate arrow fade-in from current opacity to 1
               const fadeDuration = 800
               const startTime = performance.now()
+              const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
               
               const animateArrowFadeIn = (now: number) => {
                 const elapsed = now - startTime
                 const progress = Math.min(elapsed / fadeDuration, 1)
                 const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+                const value = Math.max(0, Math.min(1, startOpacity + (1 - startOpacity) * eased)) // Clamp
                 
-                setInflowArrowsOpacity(eased)
+                setInflowArrowsOpacity(value)
                 
                 if (progress < 1) {
                   arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
@@ -396,7 +464,6 @@ export default function MapOverlayPanels() {
               
               arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
             }
-            // If scrolling down to Panel 5, arrows already faded out (do nothing)
           },
         },
         {
@@ -769,6 +836,19 @@ export default function MapOverlayPanels() {
           basin&apos;s rivers, reservoirs, and wetlands. To move water from one
           basin to another, we have to pump or pipe it through canals.
         </Typography>
+
+        {/* Hidden trigger for arrow animation - embedded in Panel 4 content */}
+        <Box
+          id="arrows-trigger"
+          sx={{
+            position: "relative",
+            height: "100vh",
+            width: "100%",
+            pointerEvents: "none",
+            opacity: 0,
+            mt: 2,
+          }}
+        />
       </CallResponsePanel>
 
       {/* Call: Find my basin */}
@@ -779,6 +859,261 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
       >
         <Typography variant="body1">Find my basin</Typography>
+        
+        <Typography
+          variant="body2"
+          sx={{ mb: theme.spacing(2), lineHeight: 1.6 }}
+        >
+          Enter your California address, city, or landmark
+        </Typography>
+
+        {/* Geocoder search input */}
+        <Box sx={{ position: "relative" }}>
+          <Box
+            component="input"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Enter your California address, city, or landmark"
+            sx={{
+              width: "100%",
+              padding: theme.spacing(1.5),
+              paddingRight: searchQuery
+                ? theme.spacing(6)
+                : theme.spacing(1.5),
+              fontSize: "14px",
+              border: `1px solid ${theme.palette.grey[300]}`,
+              borderRadius: theme.borderRadius.standard,
+              backgroundColor: theme.palette.common.white,
+              outline: "none",
+              transition: "border-color 0.2s",
+              "&:focus": {
+                borderColor: theme.palette.primary.main,
+              },
+              "&::placeholder": {
+                color: theme.palette.grey[500],
+              },
+            }}
+          />
+
+          {/* Clear/loading indicator */}
+          {searchQuery && (
+            <Box
+              sx={{
+                position: "absolute",
+                right: theme.spacing(1.5),
+                top: "50%",
+                transform: "translateY(-50%)",
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
+              {geocoding.loading && (
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    border: `2px solid ${theme.palette.grey[300]}`,
+                    borderTopColor: theme.palette.primary.main,
+                    borderRadius: "50%",
+                    animation: "spin 0.6s linear infinite",
+                    "@keyframes spin": {
+                      to: { transform: "rotate(360deg)" },
+                    },
+                  }}
+                />
+              )}
+              {!geocoding.loading && (
+                <Box
+                  component="button"
+                  onClick={handleClearSearch}
+                  sx={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0.5,
+                    display: "flex",
+                    alignItems: "center",
+                    color: theme.palette.grey[600],
+                    fontSize: "18px",
+                    "&:hover": {
+                      color: theme.palette.grey[800],
+                    },
+                  }}
+                  aria-label="Clear search"
+                >
+                  ×
+                </Box>
+              )}
+            </Box>
+          )}
+
+          {/* Results dropdown */}
+          {showResults && geocoding.results.length > 0 && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "calc(100% + 4px)",
+                left: 0,
+                right: 0,
+                backgroundColor: theme.palette.common.white,
+                borderRadius: theme.borderRadius.standard,
+                boxShadow: theme.shadows[3],
+                maxHeight: 300,
+                overflowY: "auto",
+                zIndex: 10,
+                border: `1px solid ${theme.palette.grey[300]}`,
+              }}
+            >
+              {geocoding.results.map((feature, index) => (
+                <Box
+                  key={feature.id || index}
+                  component="button"
+                  onClick={() => handleSelectLocation(feature)}
+                  sx={{
+                    width: "100%",
+                    padding: theme.spacing(1.5),
+                    border: "none",
+                    borderBottom:
+                      index < geocoding.results.length - 1
+                        ? `1px solid ${theme.palette.grey[200]}`
+                        : "none",
+                    backgroundColor: theme.palette.common.white,
+                    cursor: "pointer",
+                    textAlign: "left",
+                    transition: "background-color 0.15s",
+                    "&:hover": {
+                      backgroundColor: theme.palette.grey[100],
+                    },
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{ fontWeight: 500, mb: 0.25 }}
+                  >
+                    {feature.text}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.grey[600],
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      display: "block",
+                    }}
+                  >
+                    {feature.place_name}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
+
+          {/* Error message */}
+          {geocoding.error && (
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                mt: 1,
+                padding: theme.spacing(1),
+                backgroundColor: theme.palette.error.light,
+                color: theme.palette.error.dark,
+                borderRadius: theme.borderRadius.standard,
+              }}
+            >
+              {geocoding.error.message}
+            </Typography>
+          )}
+
+          {/* Selected location display */}
+          {selectedLocation && !showResults && (
+            <Box
+              sx={{
+                mt: 2,
+                p: 2,
+                backgroundColor: "rgba(58, 69, 116, 0.05)",
+                borderRadius: theme.borderRadius.standard,
+                border: `1px solid ${theme.palette.blue.light}`,
+              }}
+            >
+              <Typography
+                variant="caption"
+                sx={{
+                  color: theme.palette.blue.darkest,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                📍 Selected Location
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
+                {selectedLocation.text}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: theme.palette.grey[600],
+                  display: "block",
+                  mt: 0.5,
+                }}
+              >
+                {selectedLocation.place_name}
+              </Typography>
+
+              {/* Basin info */}
+              <Box
+                sx={{
+                  mt: 2,
+                  pt: 2,
+                  borderTop: `1px solid ${theme.palette.blue.light}`,
+                }}
+              >
+                {basinInfo ? (
+                  <>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: theme.palette.blue.darkest,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
+                      Central Valley Water Basin
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 600,
+                        color: theme.palette.primary.main,
+                      }}
+                    >
+                      {basinInfo.name}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.grey[600],
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Location is outside Central Valley basin boundaries, but
+                    Central Valley water still may be delivered to your
+                    area.
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          )}
+        </Box>
       </CallResponsePanel>
 
       {/* Response: Sacramento and San Joaquin Rivers */}
