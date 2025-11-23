@@ -135,13 +135,25 @@ export default function MapOverlayPanels() {
             // Smooth, slower fade-in for both the Central Valley label and polygon
             if (!mapRef.current) return
 
+            // Zoom into the Central Valley region with generous buffer
+            const localMap = mapRef.current
+            localMap.fitBounds(
+              [
+                [-122.8, 35.0], // Southwest coordinates (west, south)
+                [-118.8, 40.8], // Northeast coordinates (east, north)
+              ],
+              0, // pitch
+              0, // bearing
+              { top: 120, bottom: 120, left: 120, right: 120 }, // generous padding
+              { duration: 2000 }, // smooth 2s transition
+            )
+
             // Cancel any existing label fade
             if (labelFadeAnimationRef.current !== null) {
               cancelAnimationFrame(labelFadeAnimationRef.current)
               labelFadeAnimationRef.current = null
             }
 
-            const localMap = mapRef.current
             const duration = 1500 // 1.5s for a gentle fade-in
             const startTime = performance.now()
 
@@ -705,6 +717,14 @@ export default function MapOverlayPanels() {
           { duration: 1500 }, // smooth transition
         )
       }
+    } else {
+      // If no basin found, zoom to the location itself
+      map.flyTo({
+        longitude: lng,
+        latitude: lat,
+        zoom: 7,
+        transitionOptions: { duration: 1500 },
+      })
     }
   }
 
