@@ -31,9 +31,9 @@ export default function BasinInflowArrows({
    */
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
-    { lon: -122.5, lat: 40.4, rotation: 0, label: "NW - Shasta area" },
-    { lon: -121.8, lat: 40.65, rotation: 60, label: "N - Central north" }, // Curved tail
-    { lon: -121.2, lat: 39.9, rotation: 90, label: "NE - Lassen area" },
+    { lon: -122.65, lat: 40.2, rotation: 270, label: "NW - Shasta area" },
+    { lon: -122.05, lat: 40.55, rotation: 60, label: "N - Central north" }, // Curved tail
+    { lon: -121.75, lat: 40.1, rotation: 90, label: "NE - Lassen area" },
 
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
     { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" },
@@ -44,7 +44,7 @@ export default function BasinInflowArrows({
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
     { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" },
     { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" },
-    { lon: -122.8, lat: 39.8, rotation: 280, label: "NW - Northwestern rim" },
+    { lon: -122.5, lat: 39.9, rotation: 270, label: "NW - Northwestern rim" },
   ]
 
   const arrowColor = "#2196F3"
@@ -70,9 +70,9 @@ export default function BasinInflowArrows({
             }}
           >
             <svg
-              width={index === 1 ? "70" : "70"}
-              height={index === 1 ? "100" : "70"}
-              viewBox={index === 1 ? "0 -35 70 100" : "0 0 70 70"}
+              width="70"
+              height="70"
+              viewBox="0 0 70 70"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               style={{
@@ -82,30 +82,25 @@ export default function BasinInflowArrows({
               <defs>
                 {/* Gradient that fades from solid to transparent along the tail */}
                 {index === 1 ? (
-                  // Gradient for curved arrow (half length) - uses actual coordinates
+                  // Gradient for curved arrow - uses actual coordinates
                   <linearGradient
                     id={`arrow-gradient-${index}`}
                     x1="35"
-                    y1="-33"
+                    y1="18"
                     x2="35"
                     y2="47"
                     gradientUnits="userSpaceOnUse"
                   >
                     <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
                     <stop
-                      offset="15%"
+                      offset="25%"
                       stopColor={arrowColor}
-                      stopOpacity="0.2"
+                      stopOpacity="0.3"
                     />
                     <stop
-                      offset="40%"
+                      offset="60%"
                       stopColor={arrowColor}
-                      stopOpacity="0.5"
-                    />
-                    <stop
-                      offset="70%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.8"
+                      stopOpacity="0.7"
                     />
                     <stop
                       offset="100%"
@@ -144,17 +139,17 @@ export default function BasinInflowArrows({
 
               {/* Fading tail - curved for arrow 2, straight for others */}
               {index === 1 ? (
-                // Curved tail with constant width for arrow 2 (half length)
+                // Curved tail with constant width for arrow 2
                 <path
-                  d="M 29 -33
-                     C 24 -10, 24 20, 29 47
+                  d="M 29 18
+                     C 26 28, 26 37, 29 47
                      L 41 47
-                     C 36 20, 36 -10, 41 -33
+                     C 38 37, 38 28, 41 18
                      Z"
                   fill={`url(#arrow-gradient-${index})`}
                 />
               ) : (
-                // Straight rectangular tail for other arrows (half length)
+                // Straight rectangular tail for other arrows
                 <rect
                   x="29"
                   y="18"
@@ -178,6 +173,19 @@ export default function BasinInflowArrows({
                    Q 37 63 35 65 Z"
                 fill={arrowColor}
               />
+              {/* Temporary number label */}
+              <text
+                x="35"
+                y="35"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fill="white"
+                fontSize="16"
+                fontWeight="bold"
+                style={{ pointerEvents: "none" }}
+              >
+                {index}
+              </text>
             </svg>
           </Box>
         </Marker>
