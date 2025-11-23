@@ -76,7 +76,8 @@ export function CallResponsePanel({
       >
         <Box
           sx={{
-            maxWidth: { xs: "100%", sm: "420px", md: "460px" },
+            width: { xs: "100%", sm: "420px", md: "460px" },
+            maxWidth: "100%",
             padding: 0,
             pointerEvents: "auto",
             display: "flex",

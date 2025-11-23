@@ -282,8 +282,8 @@ export default function MapOverlayPanels() {
         },
         {
           panelId: "arrows-trigger",
-          position: 2.7,
-          debugLabel: "Panel 4.25: Arrow Trigger (midway through Panel 4)",
+          position: 2.6,
+          debugLabel: "Panel 4.25: arrow trigger (midway through Panel 4)",
           layers: [
             {
               layerId: "california-label",
@@ -842,7 +842,7 @@ export default function MapOverlayPanels() {
           id="arrows-trigger"
           sx={{
             position: "relative",
-            height: "50vh",
+            height: "30vh",
             width: "100%",
             pointerEvents: "none",
             opacity: 0,
@@ -858,17 +858,23 @@ export default function MapOverlayPanels() {
         variant="call"
         isVisible={isFirstPanelVisible}
       >
-        <Typography variant="body1">Find my basin</Typography>
-        
-        <Typography
-          variant="body2"
-          sx={{ mb: theme.spacing(2), lineHeight: 1.6 }}
+        {/* Background container for entire panel content */}
+        <Box
+          sx={{
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            borderRadius: 2,
+            padding: { xs: 2, sm: 2.5, md: 3 },
+            boxShadow: theme.shadows[2],
+            width: "100%",
+            boxSizing: "border-box",
+          }}
         >
-          Enter your California address, city, or landmark
-        </Typography>
+          <Typography variant="body1" sx={{ mb: 2, color: theme.palette.grey[900] }}>
+            Find my basin
+          </Typography>
 
-        {/* Geocoder search input */}
-        <Box sx={{ position: "relative" }}>
+          {/* Geocoder search input */}
+          <Box sx={{ position: "relative" }}>
           <Box
             component="input"
             type="text"
@@ -1113,6 +1119,7 @@ export default function MapOverlayPanels() {
               </Box>
             </Box>
           )}
+        </Box>
         </Box>
       </CallResponsePanel>
 
