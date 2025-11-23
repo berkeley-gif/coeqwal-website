@@ -32,15 +32,16 @@ export default function BasinInflowArrows({
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
     { lon: -122.05, lat: 40.75, rotation: 60, label: "N - Central north" },
-    { lon: -121.85, lat: 40.05, rotation: 90, label: "NE - Lassen area" },
+    { lon: -121.85, lat: 40, rotation: 90, label: "NE - Lassen area" },
 
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
     { lon: -121.05, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
-    { lon: -120.3, lat: 38.3, rotation: 90, label: "E - Mid Sierra" },
-    { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
+    { lon: -120.8, lat: 38.3, rotation: 90, label: "E - Mid Sierra" },
+    { lon: -120.7, lat: 37.9, rotation: 90, label: "E - Mid Sierra" },
+    { lon: -119.9, lat: 37.1, rotation: 90, label: "E - South Central Sierra" },
 
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
-    { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" },
+    { lon: -121.2, lat: 37.5, rotation: 270, label: "W - Central Coast Range" },
     { lon: -122.5, lat: 39.3, rotation: 270, label: "W - North Coast Range" },
     { lon: -122.6, lat: 40.3125, rotation: 270, label: "NW - Northwestern rim" },
   ]
