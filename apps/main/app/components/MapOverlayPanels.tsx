@@ -32,6 +32,7 @@ export default function MapOverlayPanels() {
     toggleRivers,
     showInflowArrows,
     toggleInflowArrows,
+    setInflowArrowsOpacity,
   } = useCalSimToggle()
 
   // Animation state for first panel entrance
@@ -45,6 +46,7 @@ export default function MapOverlayPanels() {
   const mapRef = useRef(map)
   const fadeAnimationRef = useRef<number | null>(null) // inflow/basins fade-out
   const labelFadeAnimationRef = useRef<number | null>(null) // label fade-ins
+  const arrowFadeAnimationRef = useRef<number | null>(null) // arrow fade-in
 
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
@@ -242,15 +244,48 @@ export default function MapOverlayPanels() {
               fillOpacity: 0.4,
             },
           ],
-          // Show inflow arrows when entering panel 4, and ensure basins and inflow polygon are visible
-          onEnter: () => {
-            // Cancel any ongoing fade animation
+          // Show inflow arrows when entering panel 4
+          onEnter: (direction?: "up" | "down") => {
+            // Cancel any ongoing fade animations
             if (fadeAnimationRef.current !== null) {
               cancelAnimationFrame(fadeAnimationRef.current)
               fadeAnimationRef.current = null
             }
+            if (arrowFadeAnimationRef.current !== null) {
+              cancelAnimationFrame(arrowFadeAnimationRef.current)
+              arrowFadeAnimationRef.current = null
+            }
 
             if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+            
+            // Animate arrow fade-in
+            // - From Panel 3 (down): Wait for inflow watersheds to fade in first
+            // - From Panel 5 (up): Fade in without delay
+            const startDelay = direction === "down" ? 600 : 0
+            const fadeDuration = 800
+            const startTime = performance.now() + startDelay
+            
+            const animateArrowFadeIn = (now: number) => {
+              if (now < startTime) {
+                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+                return
+              }
+              
+              const elapsed = now - startTime
+              const progress = Math.min(elapsed / fadeDuration, 1)
+              const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
+              
+              setInflowArrowsOpacity(eased)
+              
+              if (progress < 1) {
+                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+              } else {
+                arrowFadeAnimationRef.current = null
+              }
+            }
+            
+            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+            
             // Restore basins if returning from Panel 5
             if (!showBasinsRef.current) toggleBasinsOnRef.current()
             // Restore opacity for all layers when scrolling back up
@@ -272,9 +307,35 @@ export default function MapOverlayPanels() {
               )
             }
           },
-          // Hide arrows when exiting panel 4
+          // Fade arrows out when exiting panel 4 (both directions)
           onExit: () => {
-            if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+            // Cancel any ongoing arrow fade animation
+            if (arrowFadeAnimationRef.current !== null) {
+              cancelAnimationFrame(arrowFadeAnimationRef.current)
+              arrowFadeAnimationRef.current = null
+            }
+            
+            // Animate arrow fade-out (from current opacity to 0)
+            const fadeDuration = 600
+            const startTime = performance.now()
+            
+            const animateArrowFadeOut = (now: number) => {
+              const elapsed = now - startTime
+              const progress = Math.min(elapsed / fadeDuration, 1)
+              const eased = 1 - progress // Linear fade out from 1 to 0
+              
+              setInflowArrowsOpacity(eased)
+              
+              if (progress < 1) {
+                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
+              } else {
+                arrowFadeAnimationRef.current = null
+                // Hide arrows after fade completes
+                if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
+              }
+            }
+            
+            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
           },
         },
         {
@@ -413,7 +474,7 @@ export default function MapOverlayPanels() {
           },
         },
       ],
-      [],
+      [setInflowArrowsOpacity],
     ),
   )
 

@@ -1,10 +1,12 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Marker } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 
 interface BasinInflowArrowsProps {
   visible?: boolean
+  opacity?: number // 0 to 1, controlled by scroll progress
 }
 
 /**
@@ -13,11 +15,31 @@ interface BasinInflowArrowsProps {
  */
 export default function BasinInflowArrows({
   visible = true,
+  opacity = 1,
 }: BasinInflowArrowsProps) {
-  if (!visible) return null
-
   // Debug flag: set to true to show arrow numbers for positioning
   const SHOW_DEBUG_NUMBERS = false
+
+  // Keyboard toggle: press 'A' to toggle visibility
+  const [keyboardVisible, setKeyboardVisible] = useState(true)
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === "a" || event.key === "A") {
+        setKeyboardVisible((prev) => !prev)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyPress)
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress)
+    }
+  }, [])
+
+  if (!visible || !keyboardVisible) return null
+
+  // Apply keyboard visibility to opacity
+  const effectiveOpacity = keyboardVisible ? opacity : 0
 
   /**
    * Arrow positions around the Central Valley basin perimeter
@@ -68,6 +90,7 @@ export default function BasinInflowArrows({
               justifyContent: "center",
               transform: `rotate(${pos.rotation}deg)`,
               pointerEvents: "none",
+              opacity: effectiveOpacity,
             }}
           >
             <svg

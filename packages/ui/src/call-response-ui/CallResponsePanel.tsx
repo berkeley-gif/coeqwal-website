@@ -114,8 +114,8 @@ export function CallResponsePanel({
             highlightColor="#3A4574"
             gapSize={0.25}
             sx={{ width: "100%" }}
-          >
-            {children}
+        >
+          {children}
           </HighlightedText>
         </Box>
       </motion.div>
