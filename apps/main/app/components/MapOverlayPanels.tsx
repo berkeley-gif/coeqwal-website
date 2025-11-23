@@ -41,9 +41,7 @@ export default function MapOverlayPanels() {
   const [isBasinAccordionExpanded, setIsBasinAccordionExpanded] =
     useState(false)
 
-  // Learn section scroll choreography
-  // Each position defines the complete state of all layers at that scroll point
-  // Create stable references for callbacks to avoid re-creating panel configs
+  // Learn section scroll choreography – refs for stable callbacks
   const mapRef = useRef(map)
   const fadeAnimationRef = useRef<number | null>(null)
   const toggleBasinsOnRef = useRef(toggleBasins)
@@ -72,6 +70,7 @@ export default function MapOverlayPanels() {
     showInflowArrows,
   ])
 
+  // Scroll-driven map choreography
   useLearnScrollChoreography(
     useMemo(
       () => [
@@ -85,8 +84,16 @@ export default function MapOverlayPanels() {
               visibility: "visible" as const,
               textOpacity: 1,
             },
-            { layerId: "central-valley-label", visibility: "none" as const },
-            { layerId: "central-valley-polygon", visibility: "none" as const },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
           ],
         },
         {
@@ -94,7 +101,11 @@ export default function MapOverlayPanels() {
           position: 1,
           debugLabel: "Panel 2: Central Valley",
           layers: [
-            { layerId: "california-label", visibility: "none" as const },
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
             {
               layerId: "central-valley-label",
               visibility: "visible" as const,
@@ -119,10 +130,26 @@ export default function MapOverlayPanels() {
           position: 2,
           debugLabel: "Panel 3: Basins",
           layers: [
-            { layerId: "california-label", visibility: "none" as const },
-            { layerId: "central-valley-label", visibility: "none" as const },
-            { layerId: "central-valley-polygon", visibility: "none" as const },
-            { layerId: "inflow-watersheds", visibility: "none" as const },
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
+            {
+              layerId: "inflow-watersheds",
+              visibility: "none" as const,
+              fillOpacity: 0,
+            },
           ],
           // Show basins when entering Panel 3 - they stay visible through Panel 5
           onEnter: () => {
@@ -134,9 +161,21 @@ export default function MapOverlayPanels() {
           position: 3,
           debugLabel: "Panel 4: Watersheds",
           layers: [
-            { layerId: "california-label", visibility: "none" as const },
-            { layerId: "central-valley-label", visibility: "none" as const },
-            { layerId: "central-valley-polygon", visibility: "none" as const },
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
             {
               layerId: "inflow-watersheds",
               visibility: "visible" as const,
@@ -183,9 +222,21 @@ export default function MapOverlayPanels() {
           position: 4,
           debugLabel: "Panel 5: Rivers",
           layers: [
-            { layerId: "california-label", visibility: "none" as const },
-            { layerId: "central-valley-label", visibility: "none" as const },
-            { layerId: "central-valley-polygon", visibility: "none" as const },
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
             {
               layerId: "inflow-watersheds",
               visibility: "visible" as const,
@@ -195,19 +246,18 @@ export default function MapOverlayPanels() {
           // Show rivers when entering Panel 5, then fade out basins and inflow polygon gracefully
           onEnter: () => {
             if (!showRiversRef.current) toggleRiversOnRef.current()
+
             // After rivers start animating, fade out basins and inflow polygon gracefully over 3 seconds
             setTimeout(() => {
               if (mapRef.current) {
-                const map = mapRef.current
+                const localMap = mapRef.current
                 const fadeDuration = 3000 // 3 seconds
                 const startTime = performance.now()
 
-                // Starting opacity values
                 const startInflowOpacity = 0.4
                 const startBasinsOutlineOpacity = 0.8
                 const startBasinsLabelsOpacity = 1
 
-                // Helper to clamp values between 0 and 1
                 const clamp = (value: number, min: number, max: number) =>
                   Math.max(min, Math.min(max, value))
 
@@ -218,7 +268,6 @@ export default function MapOverlayPanels() {
                   // Ease out cubic for smoother fade
                   const eased = 1 - Math.pow(1 - progress, 3)
 
-                  // Calculate current opacity values and clamp to [0, 1]
                   const inflowOpacity = clamp(
                     startInflowOpacity * (1 - eased),
                     0,
@@ -235,24 +284,22 @@ export default function MapOverlayPanels() {
                     1,
                   )
 
-                  // Apply opacity values
-                  map.setPaintProperty(
+                  localMap.setPaintProperty(
                     "inflow-watersheds",
                     "fill-opacity",
                     inflowOpacity,
                   )
-                  map.setPaintProperty(
+                  localMap.setPaintProperty(
                     "basins-outline-layer",
                     "line-opacity",
                     basinsOutlineOpacity,
                   )
-                  map.setPaintProperty(
+                  localMap.setPaintProperty(
                     "basins-labels",
                     "text-opacity",
                     basinsLabelsOpacity,
                   )
 
-                  // Continue animating if not complete
                   if (progress < 1) {
                     fadeAnimationRef.current = requestAnimationFrame(animate)
                   } else {
@@ -279,10 +326,26 @@ export default function MapOverlayPanels() {
           position: 5,
           debugLabel: "Panel 6: Distribution",
           layers: [
-            { layerId: "california-label", visibility: "none" as const },
-            { layerId: "central-valley-label", visibility: "none" as const },
-            { layerId: "central-valley-polygon", visibility: "none" as const },
-            { layerId: "inflow-watersheds", visibility: "none" as const },
+            {
+              layerId: "california-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-label",
+              visibility: "none" as const,
+              textOpacity: 0,
+            },
+            {
+              layerId: "central-valley-polygon",
+              visibility: "none" as const,
+              lineOpacity: 0,
+            },
+            {
+              layerId: "inflow-watersheds",
+              visibility: "none" as const,
+              fillOpacity: 0,
+            },
           ],
           // Hide basins when entering Panel 6 (rivers already hidden by Panel 5 onExit)
           onEnter: () => {
@@ -520,7 +583,10 @@ export default function MapOverlayPanels() {
         {/* <Typography variant="overline">THE JOURNEY</Typography> */}
 
         <Typography variant="body1">
-        Basin rain and snowmelt flow from the mountain rims into that basin&apos;s rivers, reservoirs, and wetlands. To move water from one basin to another, we have to pump or pipe it through canals.</Typography>
+          Basin rain and snowmelt flow from the mountain rims into that
+          basin&apos;s rivers, reservoirs, and wetlands. To move water from one
+          basin to another, we have to pump or pipe it through canals.
+        </Typography>
       </CallResponsePanel>
 
       {/* Response: Sacramento and San Joaquin Rivers */}
