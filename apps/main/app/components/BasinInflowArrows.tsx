@@ -31,19 +31,18 @@ export default function BasinInflowArrows({
    */
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
-    { lon: -122.05, lat: 40.75, rotation: 60, label: "N - Central north" }, // Curved tail
-    { lon: -121.85, lat: 40, rotation: 90, label: "NE - Lassen area" },
+    { lon: -122.05, lat: 40.75, rotation: 60, label: "N - Central north" },
+    { lon: -121.85, lat: 40.05, rotation: 90, label: "NE - Lassen area" },
 
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
-    { lon: -121.2, lat: 39.3, rotation: 90, label: "E - North Sierra" },
     { lon: -121.05, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
     { lon: -120.3, lat: 38.3, rotation: 90, label: "E - Mid Sierra" },
     { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
 
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
     { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" },
-    { lon: -122.5, lat: 39.1, rotation: 270, label: "W - North Coast Range" },
-    { lon: -122.6, lat: 40.3, rotation: 270, label: "NW - Northwestern rim" },
+    { lon: -122.5, lat: 39.3, rotation: 270, label: "W - North Coast Range" },
+    { lon: -122.6, lat: 40.3125, rotation: 270, label: "NW - Northwestern rim" },
   ]
 
   const arrowColor = "#2196F3"
@@ -80,83 +79,40 @@ export default function BasinInflowArrows({
             >
               <defs>
                 {/* Gradient that fades from solid to transparent along the tail */}
-                {index === 1 ? (
-                  // Gradient for curved arrow - uses actual coordinates
-                  <linearGradient
-                    id={`arrow-gradient-${index}`}
-                    x1="35"
-                    y1="18"
-                    x2="35"
-                    y2="47"
-                    gradientUnits="userSpaceOnUse"
-                  >
-                    <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
-                    <stop
-                      offset="25%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.3"
-                    />
-                    <stop
-                      offset="60%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.7"
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={arrowColor}
-                      stopOpacity="1"
-                    />
-                  </linearGradient>
-                ) : (
-                  // Standard gradient for other arrows
-                  <linearGradient
-                    id={`arrow-gradient-${index}`}
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
-                    <stop
-                      offset="25%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.3"
-                    />
-                    <stop
-                      offset="60%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.7"
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={arrowColor}
-                      stopOpacity="1"
-                    />
-                  </linearGradient>
-                )}
+                <linearGradient
+                  id={`arrow-gradient-${index}`}
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
+                  <stop
+                    offset="25%"
+                    stopColor={arrowColor}
+                    stopOpacity="0.3"
+                  />
+                  <stop
+                    offset="60%"
+                    stopColor={arrowColor}
+                    stopOpacity="0.7"
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={arrowColor}
+                    stopOpacity="1"
+                  />
+                </linearGradient>
               </defs>
 
-              {/* Fading tail - curved for arrow 2, straight for others */}
-              {index === 1 ? (
-                // Curved tail with constant width for arrow 2
-                <path
-                  d="M 29 18
-                     C 26 28, 26 37, 29 47
-                     L 41 47
-                     C 38 37, 38 28, 41 18
-                     Z"
-                  fill={`url(#arrow-gradient-${index})`}
-                />
-              ) : (
-                // Straight rectangular tail for other arrows
-                <rect
-                  x="29"
-                  y="18"
-                  width="12"
-                  height="29"
-                  fill={`url(#arrow-gradient-${index})`}
-                />
-              )}
+              {/* Fading tail - straight for all arrows (curved tail saved for later) */}
+              <rect
+                x="29"
+                y="18"
+                width="12"
+                height="29"
+                fill={`url(#arrow-gradient-${index})`}
+              />
 
               {/* Rounded triangle arrowhead connected to tail */}
               <path
