@@ -36,8 +36,8 @@ export default function BasinInflowArrows({
     { lon: -121.75, lat: 40.1, rotation: 90, label: "NE - Lassen area" },
 
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
-    { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" },
-    { lon: -120.8, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
+    { lon: -121.2, lat: 39.3, rotation: 90, label: "E - North Sierra" },
+    { lon: -121.05, lat: 39.0, rotation: 90, label: "E - Central Sierra" },
     { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" },
     { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" },
 
