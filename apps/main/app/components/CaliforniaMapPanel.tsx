@@ -22,7 +22,7 @@ interface MapViewState {
 }
 
 // Initial view of California (used for both initial load and Panel 1 position)
-const CALIFORNIA_VIEW: MapViewState = {
+export const CALIFORNIA_VIEW: MapViewState = {
   longitude: -119.4,
   latitude: 37.5,
   zoom: 4,
@@ -31,7 +31,7 @@ const CALIFORNIA_VIEW: MapViewState = {
 }
 
 // Central Valley view (Panel 2 and beyond)
-const CENTRAL_VALLEY_VIEW: MapViewState = {
+export const CENTRAL_VALLEY_VIEW: MapViewState = {
   longitude: -120.8,
   latitude: 38.5,
   zoom: 5.82,
