@@ -13,16 +13,26 @@ interface RiversLayerProps {
 function CurvedRiverLabel({ 
   text, 
   rotation = 90, 
-  curvature = 20 
+  curvature = 20,
+  sCurve = false 
 }: { 
   text: string
   rotation?: number
   curvature?: number
+  sCurve?: boolean
 }) {
   const pathId = `river-curve-${text.replace(/\s/g, '-')}`
   
   // Create curved path - positive curvature curves up, negative curves down
-  const curvePath = `M 10,45 Q 110,${45 - curvature} 210,45`
+  let curvePath
+  if (sCurve) {
+    // Reverse S-curve using cubic Bezier (C command) with two control points
+    // Goes down first, then up
+    curvePath = `M 10,45 C 70,${45 + curvature} 150,${45 - curvature} 210,45`
+  } else {
+    // Simple curve using quadratic Bezier (Q command)
+    curvePath = `M 10,45 Q 110,${45 - curvature} 210,45`
+  }
   
   return (
     <svg
@@ -68,8 +78,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
 
   // River label positions (geolocated like the arrows)
   const sacramentoLabelPosition = {
-    lon: -121.51,
-    lat: 39.05, // Pushed even further north
+    lon: -121.45,
+    lat: 39,
   }
 
   const sanJoaquinLabelPosition = {
@@ -213,8 +223,9 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         >
           <CurvedRiverLabel 
             text="Sacramento River" 
-            rotation={82} // 8 degrees counter-clockwise from 90
-            curvature={20} // Normal curve
+            rotation={96} // 8 degrees counter-clockwise from 90
+            curvature={90} // Emphasized reverse S-curve
+            sCurve={true} // Enable reverse S-curve
           />
         </Marker>
       )}
