@@ -12,32 +12,36 @@ import HotspotMarkers from "./HotspotMarkers"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
 
-// Map view states
+// Map view states - SINGLE SOURCE OF TRUTH for all view coordinates
 interface MapViewState {
   longitude: number
   latitude: number
   zoom: number
-  bearing?: number
-  pitch?: number
+  bearing: number
+  pitch: number
+}
+
+// Initial view of California (used for both initial load and Panel 1)
+const CALIFORNIA_VIEW: MapViewState = {
+  longitude: -119.4,
+  latitude: 37.5,
+  zoom: 5.2,
+  bearing: 0,
+  pitch: 0,
+}
+
+// Central Valley view (Panel 2 and beyond)
+const CENTRAL_VALLEY_VIEW: MapViewState = {
+  longitude: -120.8,
+  latitude: 37.9,
+  zoom: 6.5,
+  bearing: 0,
+  pitch: 0,
 }
 
 const PANEL_VIEW_STATES: Record<string, MapViewState> = {
-  // Panel 1: Wide view of California (initial state)
-  "calsim-call": {
-    longitude: -119.5,
-    latitude: 37.0,
-    zoom: 5,
-    bearing: 0,
-    pitch: 0,
-  },
-  // Panel 2+: Zoomed into Central Valley (stays here for all subsequent panels)
-  "central-valley-importance": {
-    longitude: -120.8,
-    latitude: 37.9,
-    zoom: 6.5,
-    bearing: 0,
-    pitch: 0,
-  },
+  "calsim-call": CALIFORNIA_VIEW,
+  "central-valley-importance": CENTRAL_VALLEY_VIEW,
 }
 
 interface CaliforniaMapPanelProps {
@@ -102,18 +106,47 @@ export default function CaliforniaMapPanel({
       return
     }
 
-    console.log(`[Map Zoom] Panel changed from ${previousPanelRef.current} to ${activePanel}, zooming to:`, viewState)
-    previousPanelRef.current = activePanel
-
-    map.flyTo({
+    console.log(`[Map Zoom] Panel changed from ${previousPanelRef.current} to ${activePanel}`)
+    console.log(`[Map Zoom] Target coordinates:`, {
       longitude: viewState.longitude,
       latitude: viewState.latitude,
       zoom: viewState.zoom,
       bearing: viewState.bearing,
       pitch: viewState.pitch,
-      transitionOptions: { duration: 2000 },
     })
+    
+    // Get current map position for debugging
+    if (map.mapRef?.current) {
+      const currentView = map.mapRef.current.getCenter()
+      const currentZoom = map.mapRef.current.getZoom()
+      console.log(`[Map Zoom] Current position before flyTo:`, {
+        longitude: currentView.lng,
+        latitude: currentView.lat,
+        zoom: currentZoom,
+      })
+    }
+    
+    previousPanelRef.current = activePanel
+
+    // Use easeTo for more direct path (avoids curved flyTo interpolation)
+    console.log(`[Map Zoom] Executing easeTo now...`)
+    if (map.mapRef?.current) {
+      map.mapRef.current.easeTo({
+        center: [viewState.longitude, viewState.latitude],
+        zoom: viewState.zoom,
+        bearing: viewState.bearing,
+        pitch: viewState.pitch,
+        duration: 2000,
+        easing: (t: number) => t * (2 - t), // ease-out-quad
+      })
+      console.log(`[Map Zoom] easeTo called successfully`)
+    } else {
+      console.error(`[Map Zoom] mapRef.current is null!`)
+    }
   }, [activePanel, map])
+
+  // Log initial view state for debugging
+  console.log('[CaliforniaMapPanel] Rendering with CALIFORNIA_VIEW:', CALIFORNIA_VIEW)
 
   return (
     <Box
@@ -130,13 +163,7 @@ export default function CaliforniaMapPanel({
       <Map
         mapboxToken={token}
         mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
-        initialViewState={{
-          longitude: -119.5,
-          latitude: 37.0,
-          zoom: 5,
-          bearing: 0,
-          pitch: 0,
-        }}
+        initialViewState={CALIFORNIA_VIEW}
         minZoom={5}
         maxZoom={18} 
         maxBounds={[

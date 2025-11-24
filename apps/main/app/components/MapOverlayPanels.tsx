@@ -231,7 +231,7 @@ export default function MapOverlayPanels() {
               fillOpacity: 0,
             },
           ],
-          // Show basins when entering Panel 3 - they stay visible through Panel 5
+          // Show basins when entering Panel 3. They stay visible through Panel 5
           onEnter: () => {
             if (!showBasinsRef.current) toggleBasinsOnRef.current()
           },
