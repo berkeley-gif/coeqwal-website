@@ -825,8 +825,8 @@ export default function MapOverlayPanels() {
         })
       },
       {
-        threshold: 0.5, // Trigger when 50% of panel is visible
-        rootMargin: "0px 0px -200px 0px", // Delay trigger until well into viewport
+        threshold: 0.1, // Trigger early (when 10% visible) for graceful entrance
+        rootMargin: "0px 0px 0px 0px", // No delay - start fade immediately
       },
     )
 
@@ -850,6 +850,7 @@ export default function MapOverlayPanels() {
         zIndex: (theme) => theme.zIndex.content, // Above the sticky map
         pointerEvents: "none", // Allow markers to be clickable through overlays
         marginTop: "-100vh", // Pull up to overlay the sticky map immediately
+        paddingTop: "80vh", // Entrance ramp for first panel to gracefully appear
         paddingBottom: "40vh", // Space after scenario card before next section
       }}
     >

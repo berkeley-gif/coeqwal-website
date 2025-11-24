@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react"
 import { Map, NavigationControl, Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
-// import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
 import BasinsLayer from "./BasinsLayer"
 import RiversLayer from "./RiversLayer"
@@ -12,7 +11,7 @@ import HotspotMarkers from "./HotspotMarkers"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
 
-// Map view states - SINGLE SOURCE OF TRUTH for all view coordinates
+// Map view states
 interface MapViewState {
   longitude: number
   latitude: number
@@ -21,7 +20,7 @@ interface MapViewState {
   pitch: number
 }
 
-// Initial view of California (used for both initial load and Panel 1 position)
+// Initial view of California
 export const CALIFORNIA_VIEW: MapViewState = {
   longitude: -119.4,
   latitude: 37.5,
@@ -30,7 +29,7 @@ export const CALIFORNIA_VIEW: MapViewState = {
   pitch: 0,
 }
 
-// Central Valley view (Panel 2 and beyond)
+// Central Valley view
 export const CENTRAL_VALLEY_VIEW: MapViewState = {
   longitude: -120.8,
   latitude: 38.5,
