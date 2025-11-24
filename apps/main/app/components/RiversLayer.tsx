@@ -79,8 +79,6 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 })
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
-  console.log('🌊 RiversLayer render - visible:', visible, 'progress:', progress)
-  
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
@@ -92,16 +90,22 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
     return Math.max(0, Math.min(1, (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart)))
   }, [visible, clampedProgress])
 
+  // Calculate Delta marker opacity: fade in from 80% to 95% of river drawing
+  const deltaOpacity = useMemo(() => {
+    if (!visible) return 0
+    const deltaFadeStart = 0.80
+    const deltaFadeEnd = 0.95
+    return Math.max(0, Math.min(1, (clampedProgress - deltaFadeStart) / (deltaFadeEnd - deltaFadeStart)))
+  }, [visible, clampedProgress])
+
   // River label positions (memoized as they're constant)
   const labelPositions = useMemo(() => ({
     sacramento: { lon: -121.45, lat: 39 },
     sanJoaquin: { lon: -120.44, lat: 37.6 },
+    delta: { lon: -121.8, lat: 37.9 },
   }), [])
 
-  if (!visible) {
-    console.log('🌊 RiversLayer returning null - not visible')
-    return null
-  }
+  if (!visible) return null
 
   return (
     <>
@@ -289,6 +293,38 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           letterSpacing={2}
           opacity={labelOpacity}
         />
+      </Marker>
+
+      {/* Delta Marker - appears when rivers meet */}
+      <Marker
+        longitude={labelPositions.delta.lon}
+        latitude={labelPositions.delta.lat}
+        anchor="center"
+      >
+        <div
+          style={{
+            opacity: deltaOpacity,
+            transition: "opacity 0.3s ease-in-out",
+          }}
+        >
+          <svg width="60" height="30" xmlns="http://www.w3.org/2000/svg">
+            <text
+              x="30"
+              y="20"
+              textAnchor="middle"
+              style={{
+                fontFamily: "Georgia, Times New Roman, serif",
+                fontSize: "15px",
+                fontWeight: 700,
+                fontStyle: "italic",
+                fill: "#FFFFFF",
+                fillOpacity: 0.9,
+              }}
+            >
+              Delta
+            </text>
+          </svg>
+        </div>
       </Marker>
     </>
   )
