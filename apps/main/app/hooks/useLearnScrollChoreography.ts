@@ -95,7 +95,6 @@ export function useLearnScrollChoreography(
   useEffect(() => {
     // Wait for map operations to be available
     if (!map || !map.hasLayer || !map.addSource || !map.addLayer) {
-      console.log("[Choreography] Map operations not yet available")
       return
     }
 
@@ -180,21 +179,16 @@ export function useLearnScrollChoreography(
         const { geoJsonSource, geoJsonLayer } = panel
 
         try {
-          console.log(`[Choreography] Adding source: ${geoJsonSource.id}`)
           addSource(geoJsonSource.id, {
             type: "geojson",
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data: geoJsonSource.data as any,
           })
-        } catch (error) {
-          console.log(
-            `[Choreography] Source ${geoJsonSource.id} already exists or error:`,
-            error,
-          )
+        } catch {
+          // Source already exists, continue
         }
 
         if (!hasLayer(geoJsonLayer.id)) {
-          console.log(`[Choreography] Adding layer: ${geoJsonLayer.id}`)
           addLayer(
             geoJsonLayer.id,
             geoJsonLayer.source,
@@ -374,12 +368,6 @@ export function useLearnScrollChoreography(
       const previousPosition = currentPanelRef.current
       const targetPanel = sortedPanels.find(
         (p) => p.position === targetPosition,
-      )
-
-      console.log(
-        `[Choreography] ${previousPosition} → ${targetPosition}${
-          targetPanel ? ` (${targetPanel.debugLabel})` : ""
-        }`,
       )
 
       // Determine scroll direction

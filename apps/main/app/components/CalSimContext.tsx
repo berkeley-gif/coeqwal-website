@@ -51,31 +51,19 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [activePanel, setActivePanel] = useState<string | null>(null)
 
   const toggleCalSim = useCallback(() => {
-    setIsCalSimVisible((prev) => {
-      console.log(`CalSim toggle: ${prev} -> ${!prev}`)
-      return !prev
-    })
+    setIsCalSimVisible((prev) => !prev)
   }, [])
 
   const toggleBasins = useCallback(() => {
-    setShowBasins((prev) => {
-      console.log(`Basins toggle: ${prev} -> ${!prev}`)
-      return !prev
-    })
+    setShowBasins((prev) => !prev)
   }, [])
 
   const toggleRivers = useCallback(() => {
-    setShowRivers((prev) => {
-      console.log(`Rivers toggle: ${prev} -> ${!prev}`)
-      return !prev
-    })
+    setShowRivers((prev) => !prev)
   }, [])
 
   const toggleInflowArrows = useCallback(() => {
-    setShowInflowArrows((prev) => {
-      console.log(`Inflow arrows toggle: ${prev} -> ${!prev}`)
-      return !prev
-    })
+    setShowInflowArrows((prev) => !prev)
   }, [])
 
   return (
