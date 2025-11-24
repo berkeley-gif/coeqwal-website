@@ -549,9 +549,9 @@ export default function MapOverlayPanels() {
             // Set river animation progress directly (no easing for precise control)
             setRiversAnimationProgress(riverProgress)
             
-            // BASINS/INFLOW: Fade out from 55%-90% of scroll progress (after rivers are drawing)
-            const fadeStart = 0.55
-            const fadeEnd = 0.9
+            // BASINS/INFLOW: Fade out from 45%-80% of scroll progress (while rivers are drawing)
+            const fadeStart = 0.45
+            const fadeEnd = 0.8
             const fadeProgress = clamp(
               (progress - fadeStart) / (fadeEnd - fadeStart),
               0,
@@ -1155,30 +1155,54 @@ export default function MapOverlayPanels() {
         </Box>
       </CallResponsePanel>
 
-      {/* Response: Sacramento and San Joaquin Rivers */}
-      <CallResponsePanel
+      {/* Response: Sacramento and San Joaquin Rivers - with scroll pinning */}
+      <Box
         id="rivers-flow-response"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-        sx={{ mb: "80vh" }}
+        sx={{
+          minHeight: "250vh", // Tall container for scroll pinning
+          position: "relative",
+        }}
       >
-        <Typography variant="body1">
-          From the north, the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            Sacramento River
-          </Box>{" "}
-          flows toward the low-lying{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            Delta
-          </Box>
-          , where its waters mix with waters from the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            San Joaquin River
-          </Box>{" "}
-          flowing up from the south.
-        </Typography>
-      </CallResponsePanel>
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <CallResponsePanel
+            id="rivers-flow-response-content"
+            side="left"
+            variant="call"
+            isVisible={isFirstPanelVisible}
+            sx={{ 
+              minHeight: "auto", // Remove extra height, handled by parent
+              mb: 0, // Remove margin, handled by parent
+            }}
+          >
+            <Typography variant="body1">
+              From the north, the{" "}
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+                Sacramento River
+              </Box>{" "}
+              flows toward the low-lying{" "}
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+                Delta
+              </Box>
+              , where its waters mix with waters from the{" "}
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+                San Joaquin River
+              </Box>{" "}
+              flowing up from the south.
+            </Typography>
+          </CallResponsePanel>
+        </Box>
+      </Box>
+      
+      {/* Spacer after rivers panel */}
+      <Box sx={{ height: "80vh" }} />
 
       {/* Call: Water distribution statement */}
       <CallResponsePanel
