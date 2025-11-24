@@ -15,6 +15,8 @@ interface CalSimContextType {
   toggleBasins: () => void
   showRivers: boolean
   toggleRivers: () => void
+  riversAnimationProgress: number
+  setRiversAnimationProgress: (progress: number) => void
   showInflowArrows: boolean
   toggleInflowArrows: () => void
   inflowArrowsOpacity: number
@@ -37,6 +39,7 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
   const [showBasins, setShowBasins] = useState(false)
   const [showRivers, setShowRivers] = useState(false)
+  const [riversAnimationProgress, setRiversAnimationProgress] = useState(0)
   const [showInflowArrows, setShowInflowArrows] = useState(false)
   const [inflowArrowsOpacity, setInflowArrowsOpacity] = useState(0)
   const [isPanelsExpanded, setIsPanelsExpanded] = useState(false)
@@ -84,6 +87,8 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
         toggleBasins,
         showRivers,
         toggleRivers,
+        riversAnimationProgress,
+        setRiversAnimationProgress,
         showInflowArrows,
         toggleInflowArrows,
         inflowArrowsOpacity,

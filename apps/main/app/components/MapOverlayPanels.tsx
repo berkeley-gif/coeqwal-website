@@ -31,6 +31,7 @@ export default function MapOverlayPanels() {
     toggleBasins,
     showRivers,
     toggleRivers,
+    setRiversAnimationProgress,
     showInflowArrows,
     toggleInflowArrows,
     inflowArrowsOpacity,
@@ -505,7 +506,7 @@ export default function MapOverlayPanels() {
               fillOpacity: 0.4,
             },
           ],
-          // Show rivers when entering Panel 5, then fade out basins and inflow polygon gracefully
+          // Setup and scroll-driven animation for rivers panel
           onEnter: () => {
             // Reset the "find my basin" panel
             setGeocoderMarker(null)
@@ -522,85 +523,67 @@ export default function MapOverlayPanels() {
               })
             }
             
-            // Start rivers animation after zoom completes
-            setTimeout(() => {
-              if (!showRiversRef.current) toggleRiversOnRef.current()
-            }, 1500)
-
-            // After rivers start animating, fade out basins and inflow polygon
-            // Delay by 1500ms (zoom duration) + additional time for rivers to start
-            setTimeout(() => {
-              if (mapRef.current) {
-                const localMap = mapRef.current
-                const fadeDuration = 8000 // 8 seconds for inflow/basin fade-out
-                const startTime = performance.now()
-
-                const startInflowOpacity = 0.4
-                const startBasinsOutlineOpacity = 0.8
-                const startBasinsLabelsOpacity = 1
-
-                const clamp = (value: number, min: number, max: number) =>
-                  Math.max(min, Math.min(max, value))
-
-                const animate = (currentTime: number) => {
-                  const elapsed = currentTime - startTime
-                  const progress = Math.min(elapsed / fadeDuration, 1)
-
-                  // Ease out cubic for smoother fade
-                  const eased = 1 - Math.pow(1 - progress, 3)
-
-                  const inflowOpacity = clamp(
-                    startInflowOpacity * (1 - eased),
-                    0,
-                    1,
-                  )
-                  const basinsOutlineOpacity = clamp(
-                    startBasinsOutlineOpacity * (1 - eased),
-                    0,
-                    1,
-                  )
-                  const basinsLabelsOpacity = clamp(
-                    startBasinsLabelsOpacity * (1 - eased),
-                    0,
-                    1,
-                  )
-
-                  localMap.setPaintProperty(
-                    "inflow-watersheds",
-                    "fill-opacity",
-                    inflowOpacity,
-                  )
-                  localMap.setPaintProperty(
-                    "basins-outline-layer",
-                    "line-opacity",
-                    basinsOutlineOpacity,
-                  )
-                  localMap.setPaintProperty(
-                    "basins-labels",
-                    "text-opacity",
-                    basinsLabelsOpacity,
-                  )
-
-                  if (progress < 1) {
-                    fadeAnimationRef.current = requestAnimationFrame(animate)
-                  } else {
-                    fadeAnimationRef.current = null
-                  }
-                }
-
-                fadeAnimationRef.current = requestAnimationFrame(animate)
-              }
-            }, 4500) // wait 1.5s (zoom) + 3s before starting the fade, so you can see rivers first
+            // Show rivers immediately on enter
+            if (!showRiversRef.current) toggleRiversOnRef.current()
           },
-          // Hide rivers when exiting Panel 5
+          // Scroll-driven animation: control rivers drawing AND opacity based on scroll progress
+          onScroll: (progress) => {
+            if (!mapRef.current) return
+            
+            const clamp = (value: number, min: number, max: number) =>
+              Math.max(min, Math.min(max, value))
+            
+            // RIVERS: Draw from 0-60% of scroll progress
+            const riverDrawStart = 0
+            const riverDrawEnd = 0.6
+            const riverProgress = clamp(
+              (progress - riverDrawStart) / (riverDrawEnd - riverDrawStart),
+              0,
+              1
+            )
+            
+            // Debug logging
+            console.log(`Rivers panel scroll - progress: ${progress.toFixed(3)}, riverProgress: ${riverProgress.toFixed(3)}`)
+            
+            // Set river animation progress directly (no easing for precise control)
+            setRiversAnimationProgress(riverProgress)
+            
+            // BASINS/INFLOW: Fade out from 40%-80% of scroll progress (overlaps with river drawing)
+            const fadeStart = 0.4
+            const fadeEnd = 0.8
+            const fadeProgress = clamp(
+              (progress - fadeStart) / (fadeEnd - fadeStart),
+              0,
+              1
+            )
+            
+            // Ease out cubic for smoother fade
+            const eased = 1 - Math.pow(1 - fadeProgress, 3)
+            
+            const inflowOpacity = clamp(0.4 * (1 - eased), 0, 1)
+            const basinsOutlineOpacity = clamp(0.8 * (1 - eased), 0, 1)
+            const basinsLabelsOpacity = clamp(1 * (1 - eased), 0, 1)
+            
+            mapRef.current.setPaintProperty(
+              "inflow-watersheds",
+              "fill-opacity",
+              inflowOpacity,
+            )
+            mapRef.current.setPaintProperty(
+              "basins-outline-layer",
+              "line-opacity",
+              basinsOutlineOpacity,
+            )
+            mapRef.current.setPaintProperty(
+              "basins-labels",
+              "text-opacity",
+              basinsLabelsOpacity,
+            )
+          },
+          // Hide rivers and reset animation when exiting Panel 5
           onExit: () => {
-            // Cancel any ongoing fade animation
-            if (fadeAnimationRef.current !== null) {
-              cancelAnimationFrame(fadeAnimationRef.current)
-              fadeAnimationRef.current = null
-            }
             if (showRiversRef.current) toggleRiversOnRef.current()
-            // Arrows stay hidden when scrolling up to Panel 4.5
+            setRiversAnimationProgress(0) // Reset for next time
           },
         },
         {
@@ -635,7 +618,7 @@ export default function MapOverlayPanels() {
           },
         },
       ],
-      [setInflowArrowsOpacity, setGeocoderMarker, map.mapRef],
+      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, map.mapRef],
     ),
     setActivePanel,
   )

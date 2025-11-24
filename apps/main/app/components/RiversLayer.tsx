@@ -1,55 +1,27 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Source, Layer } from "@repo/map"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 
 interface RiversLayerProps {
   visible: boolean
+  /** Animation progress from 0 (not drawn) to 1 (fully drawn). Controlled by scroll. */
+  progress: number
 }
 
-export default function RiversLayer({ visible }: RiversLayerProps) {
-  const [animationProgress, setAnimationProgress] = useState(0)
-  const [showLabels, setShowLabels] = useState(false)
-
-  useEffect(() => {
-    if (!visible) {
-      setAnimationProgress(0)
-      setShowLabels(false)
-      return
-    }
-
-    const duration = 3000
-    const startTime = performance.now()
-    let frameId: number
-
-    const tick = (now: number) => {
-      const elapsed = now - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      // Clamp progress to [0, 1] to avoid floating-point precision errors
-      const clampedProgress = Math.max(0, Math.min(1, progress))
-      setAnimationProgress(clampedProgress)
-
-      // Show labels immediately when visible
-      if (elapsed > 100) {
-        setShowLabels(true)
-      }
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(tick)
-      }
-    }
-
-    frameId = requestAnimationFrame(tick)
-
-    return () => {
-      cancelAnimationFrame(frameId)
-    }
-  }, [visible])
-
+export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   if (!visible) {
     return null
   }
+
+  // Clamp progress to [0, 1] to avoid floating-point precision errors
+  const clampedProgress = Math.max(0, Math.min(1, progress))
+  
+  // Debug: Log the line-trim-offset values
+  console.log(`RiversLayer - progress: ${progress.toFixed(3)}, clampedProgress: ${clampedProgress.toFixed(3)}, line-trim-offset: [${clampedProgress.toFixed(3)}, 1]`)
+  
+  // Show labels when rivers are 10% drawn
+  const showLabels = clampedProgress > 0.1
 
   return (
     <>
@@ -66,7 +38,7 @@ export default function RiversLayer({ visible }: RiversLayerProps) {
             "line-color": "#64A4D6",
             "line-width": 2,
             "line-opacity": 1,
-            "line-trim-offset": [animationProgress, 1],
+            "line-trim-offset": [clampedProgress, 1],
           }}
         />
         {showLabels && (
@@ -109,7 +81,7 @@ export default function RiversLayer({ visible }: RiversLayerProps) {
             "line-color": "#64A4D6",
             "line-width": 2,
             "line-opacity": 1,
-            "line-trim-offset": [animationProgress, 1],
+            "line-trim-offset": [clampedProgress, 1],
           }}
         />
         {showLabels && (
