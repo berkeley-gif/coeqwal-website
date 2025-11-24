@@ -372,6 +372,16 @@ export function useLearnScrollChoreography(
 
       // Determine scroll direction
       const direction: "up" | "down" = targetPosition > previousPosition ? "down" : "up"
+      
+      console.log(`🔄 Transition attempt: ${previousPosition} → ${targetPosition} (${direction})`)
+      
+      // ANTI-FLICKER: Prevent chaotic jumps when scrolling through tall sticky panels
+      // Block sudden large backwards jumps (> 2 positions) when we should be moving forward
+      const positionDiff = Math.abs(targetPosition - previousPosition)
+      if (direction === "up" && positionDiff > 2 && previousPosition >= 4) {
+        console.log('🚫 Blocked invalid large backwards jump from', previousPosition, 'to', targetPosition)
+        return
+      }
 
       // Call onExit for the previous panel (but not on initial load)
       if (previousPosition >= 0 && !isInitialLoadRef.current) {

@@ -69,24 +69,39 @@ export default function CaliforniaMapPanel({
   const previousPanelRef = useRef<string | null>(null)
 
   // Scroll-driven zoom: Update map view when active panel changes
+  // Only applies to initial panels (California view and Central Valley zoom)
   useEffect(() => {
+    console.log('🗺️ CaliforniaMapPanel useEffect - activePanel:', activePanel)
+    
     if (!activePanel || !map.mapRef?.current) {
+      console.log('🗺️ Skipping - no activePanel or mapRef')
       return
     }
 
     // Skip if panel hasn't actually changed
     if (previousPanelRef.current === activePanel) {
+      console.log('🗺️ Skipping - panel unchanged')
       return
     }
 
     const viewState = PANEL_VIEW_STATES[activePanel]
     if (!viewState) {
+      console.log('🗺️ No viewState for panel:', activePanel)
       previousPanelRef.current = activePanel
       return
     }
 
     previousPanelRef.current = activePanel
 
+    // Only allow camera movements for the first two panels
+    // After that, camera should stay fixed
+    const allowedPanels = ["calsim-call", "central-valley-importance"]
+    if (!allowedPanels.includes(activePanel)) {
+      console.log('🗺️ Panel not in allowlist, skipping camera movement:', activePanel)
+      return
+    }
+
+    console.log('🗺️ CAMERA MOVEMENT - easeTo for panel:', activePanel, viewState)
     // Use easeTo for smooth camera transitions
     map.mapRef.current.easeTo({
       center: [viewState.longitude, viewState.latitude],
