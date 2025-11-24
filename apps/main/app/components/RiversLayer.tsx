@@ -28,14 +28,52 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         data={sacramentoRiverMainstem}
         lineMetrics={true}
       >
+        {/* Layer 1: Outer glow - creates soft atmospheric effect */}
         <Layer
-          id="sacramento-river-layer"
+          id="sacramento-river-glow"
           type="line"
           paint={{
-            "line-color": "#64A4D6",
-            "line-width": 2,
-            "line-opacity": 1,
+            "line-color": "#4A90C9",
+            "line-width": 7,
+            "line-blur": 6,
+            "line-opacity": 0.3,
             "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
+          }}
+        />
+        
+        {/* Layer 2: Main river body - solid water color */}
+        <Layer
+          id="sacramento-river-body"
+          type="line"
+          paint={{
+            "line-color": "#5B9DD6",
+            "line-width": 3.5,
+            "line-opacity": 0.85,
+            "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
+          }}
+        />
+        
+        {/* Layer 3: Inner highlight - creates depth and shine */}
+        <Layer
+          id="sacramento-river-highlight"
+          type="line"
+          paint={{
+            "line-color": "#8BBEE8",
+            "line-width": 1.5,
+            "line-opacity": 0.6,
+            "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
           }}
         />
         {showLabels && (
@@ -56,9 +94,10 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
               visibility: "visible",
             }}
             paint={{
-              "text-color": "#64A4D6",
+              "text-color": "#4A90C9",
               "text-halo-color": "#ffffff",
               "text-halo-width": 3,
+              "text-halo-blur": 1,
               "text-opacity": 1,
             }}
           />
@@ -71,14 +110,52 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         data={sanJoaquinRiverMainstem}
         lineMetrics={true}
       >
+        {/* Layer 1: Outer glow - creates soft atmospheric effect */}
         <Layer
-          id="san-joaquin-river-layer"
+          id="san-joaquin-river-glow"
           type="line"
           paint={{
-            "line-color": "#64A4D6",
-            "line-width": 2,
-            "line-opacity": 1,
+            "line-color": "#4A90C9",
+            "line-width": 7,
+            "line-blur": 6,
+            "line-opacity": 0.3,
             "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
+          }}
+        />
+        
+        {/* Layer 2: Main river body - solid water color */}
+        <Layer
+          id="san-joaquin-river-body"
+          type="line"
+          paint={{
+            "line-color": "#5B9DD6",
+            "line-width": 3.5,
+            "line-opacity": 0.85,
+            "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
+          }}
+        />
+        
+        {/* Layer 3: Inner highlight - creates depth and shine */}
+        <Layer
+          id="san-joaquin-river-highlight"
+          type="line"
+          paint={{
+            "line-color": "#8BBEE8",
+            "line-width": 1.5,
+            "line-opacity": 0.6,
+            "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
           }}
         />
         {showLabels && (
@@ -99,9 +176,10 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
               visibility: "visible",
             }}
             paint={{
-              "text-color": "#64A4D6",
+              "text-color": "#4A90C9",
               "text-halo-color": "#ffffff",
               "text-halo-width": 3,
+              "text-halo-blur": 1,
               "text-opacity": 1,
             }}
           />
