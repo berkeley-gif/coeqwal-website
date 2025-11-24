@@ -10,8 +10,19 @@ interface RiversLayerProps {
 }
 
 // Curved river label component with transparent background
-function CurvedRiverLabel({ text }: { text: string }) {
+function CurvedRiverLabel({ 
+  text, 
+  rotation = 90, 
+  curvature = 20 
+}: { 
+  text: string
+  rotation?: number
+  curvature?: number
+}) {
   const pathId = `river-curve-${text.replace(/\s/g, '-')}`
+  
+  // Create curved path - positive curvature curves up, negative curves down
+  const curvePath = `M 10,45 Q 110,${45 - curvature} 210,45`
   
   return (
     <svg
@@ -20,14 +31,14 @@ function CurvedRiverLabel({ text }: { text: string }) {
       viewBox="0 0 220 70"
       style={{
         overflow: "visible",
-        transform: "rotate(90deg)", // Rotate 90 degrees clockwise
+        transform: `rotate(${rotation}deg)`,
       }}
     >
       <defs>
         {/* Curved path for text to follow */}
         <path
           id={pathId}
-          d="M 10,45 Q 110,25 210,45"
+          d={curvePath}
           fill="none"
         />
       </defs>
@@ -58,12 +69,12 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // River label positions (geolocated like the arrows)
   const sacramentoLabelPosition = {
     lon: -121.51,
-    lat: 38.67,
+    lat: 39.05, // Pushed even further north
   }
 
   const sanJoaquinLabelPosition = {
-    lon: -120.98,
-    lat: 37.46,
+    lon: -120.44,
+    lat: 37.6,
   }
 
   if (!visible) return null
@@ -200,7 +211,11 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           latitude={sacramentoLabelPosition.lat}
           anchor="center"
         >
-          <CurvedRiverLabel text="Sacramento River" />
+          <CurvedRiverLabel 
+            text="Sacramento River" 
+            rotation={82} // 8 degrees counter-clockwise from 90
+            curvature={20} // Normal curve
+          />
         </Marker>
       )}
 
@@ -211,7 +226,11 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           latitude={sanJoaquinLabelPosition.lat}
           anchor="center"
         >
-          <CurvedRiverLabel text="San Joaquin River" />
+          <CurvedRiverLabel 
+            text="San Joaquin River" 
+            rotation={50}
+            curvature={-35} // (negative = curves down)
+          />
         </Marker>
       )}
     </>
