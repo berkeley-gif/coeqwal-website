@@ -10,30 +10,24 @@ interface RiversLayerProps {
 }
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
-  if (!visible) {
-    return null
-  }
+  if (!visible) return null
 
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
-  
-  // Show labels when rivers are 5% drawn (early enough to be visible)
-  const showLabels = clampedProgress > 0.05
-  
-  // Debug: Log when labels should show
-  if (clampedProgress > 0 && clampedProgress < 0.2) {
-    console.log(`River progress: ${clampedProgress.toFixed(3)}, showLabels: ${showLabels}`)
-  }
+
+  // Always show labels when rivers are visible (labels render independently of line animation)
+  const showLabels = visible
 
   return (
     <>
+      {/* SACRAMENTO RIVER */}
       <Source
         id="sacramento-river-source"
         type="geojson"
         data={sacramentoRiverMainstem}
         lineMetrics={true}
       >
-        {/* Layer 1: Outer glow - creates soft atmospheric effect */}
+        {/* Layer 1: Outer glow */}
         <Layer
           id="sacramento-river-glow"
           type="line"
@@ -49,8 +43,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-        
-        {/* Layer 2: Main river body - solid water color */}
+
+        {/* Layer 2: Main river body */}
         <Layer
           id="sacramento-river-body"
           type="line"
@@ -65,8 +59,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-        
-        {/* Layer 3: Inner highlight - creates depth and shine */}
+
+        {/* Layer 3: Inner highlight */}
         <Layer
           id="sacramento-river-highlight"
           type="line"
@@ -81,41 +75,42 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-        {showLabels && (
+
+         {/* Layer 4: Label */}
           <Layer
             id="sacramento-river-label"
             type="symbol"
             layout={{
               "text-field": "Sacramento River",
-              "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-              "text-size": 18,
+              "text-font": ["Arial Unicode MS Regular"],
+              "text-size": 16,
               "symbol-placement": "line",
-              "symbol-spacing": 250,
               "text-rotation-alignment": "map",
               "text-keep-upright": true,
-              "text-max-angle": 45,
-              "text-allow-overlap": false,
-              "text-ignore-placement": false,
-              visibility: "visible",
+              "text-max-angle": 90,
+              "symbol-spacing": 300,
+              "text-allow-overlap": true,
+              "text-ignore-placement": true,
+              "text-optional": false,
+              visibility: showLabels ? "visible" : "none",
             }}
             paint={{
-              "text-color": "#2C5F8D",
+              "text-color": "#3182BD",
               "text-halo-color": "#ffffff",
-              "text-halo-width": 2.5,
-              "text-halo-blur": 0.5,
-              "text-opacity": 1,
+              "text-halo-width": 2,
+              "text-opacity": showLabels ? 1 : 0,
             }}
           />
-        )}
       </Source>
 
+      {/* SAN JOAQUIN RIVER */}
       <Source
         id="san-joaquin-river-source"
         type="geojson"
         data={sanJoaquinRiverMainstem}
         lineMetrics={true}
       >
-        {/* Layer 1: Outer glow - creates soft atmospheric effect */}
+        {/* Layer 1: Outer glow */}
         <Layer
           id="san-joaquin-river-glow"
           type="line"
@@ -131,8 +126,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-        
-        {/* Layer 2: Main river body - solid water color */}
+
+        {/* Layer 2: Main river body */}
         <Layer
           id="san-joaquin-river-body"
           type="line"
@@ -147,8 +142,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-        
-        {/* Layer 3: Inner highlight - creates depth and shine */}
+
+        {/* Layer 3: Inner highlight */}
         <Layer
           id="san-joaquin-river-highlight"
           type="line"
@@ -163,32 +158,32 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-        {showLabels && (
+
+         {/* Layer 4: Label */}
           <Layer
             id="san-joaquin-river-label"
             type="symbol"
             layout={{
               "text-field": "San Joaquin River",
-              "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-              "text-size": 18,
+              "text-font": ["Arial Unicode MS Regular"],
+              "text-size": 16,
               "symbol-placement": "line",
-              "symbol-spacing": 250,
               "text-rotation-alignment": "map",
               "text-keep-upright": true,
-              "text-max-angle": 45,
-              "text-allow-overlap": false,
-              "text-ignore-placement": false,
-              visibility: "visible",
+              "text-max-angle": 90,
+              "symbol-spacing": 300,
+              "text-allow-overlap": true,
+              "text-ignore-placement": true,
+              "text-optional": false,
+              visibility: showLabels ? "visible" : "none",
             }}
             paint={{
-              "text-color": "#2C5F8D",
+              "text-color": "#3182BD",
               "text-halo-color": "#ffffff",
-              "text-halo-width": 2.5,
-              "text-halo-blur": 0.5,
-              "text-opacity": 1,
+              "text-halo-width": 2,
+              "text-opacity": showLabels ? 1 : 0,
             }}
           />
-        )}
       </Source>
     </>
   )
