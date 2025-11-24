@@ -443,7 +443,7 @@ function MapViewContent() {
             zoom: 4,
           }}
           minZoom={4}
-          maxZoom={10}
+          maxZoom={18}
           scrollZoom={true}
           touchZoom={true}
           doubleClickZoom={true}
