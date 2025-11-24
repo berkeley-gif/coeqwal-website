@@ -820,11 +820,12 @@ export default function MapOverlayPanels() {
         </Typography> */}
 
         <Typography variant="body1">
-          Understanding how water is managed in California&apos;s large{" "}
+          The{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
           </Box>{" "}
-          is essential to understanding California&apos;s water issues.
+          is like a giant bowl that collects most of Calfornia&apost;s water. 
+          This water is highly managed, allocated, and transported.
         </Typography>
       </CallResponsePanel>
 

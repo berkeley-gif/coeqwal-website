@@ -395,10 +395,10 @@ export function useLearnScrollChoreography(
 
       if (targetPanel) {
         applyPanelState(targetPanel)
-        // Notify about panel change
-        onPanelChange?.(targetPanel.panelId)
-        // Only call onEnter if not initial load
+        
+        // Don't trigger callbacks during initial load period
         if (!isInitialLoadRef.current) {
+          onPanelChange?.(targetPanel.panelId)
           targetPanel.onEnter?.(direction)
         }
       }
