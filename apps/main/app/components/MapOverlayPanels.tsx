@@ -17,6 +17,7 @@ import { useGeocoding, BOUNDING_BOXES, useBasinLookup, useMap } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
+import { CENTRAL_VALLEY_VIEW } from "./CaliforniaMapPanel"
 import bbox from "@turf/bbox"
 import type { Feature, Polygon, MultiPolygon } from "geojson"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
@@ -447,7 +448,7 @@ export default function MapOverlayPanels() {
             
             arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
           },
-          // Fade arrows back IN when scrolling back up to arrow trigger zone
+          // Fade arrows back IN when scrolling back up, or return to Central Valley when scrolling down
           onExit: (direction?: "up" | "down") => {
             if (direction === "up") {
               // Cancel any ongoing arrow fade animation
@@ -479,6 +480,18 @@ export default function MapOverlayPanels() {
               }
               
               arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
+            } else if (direction === "down") {
+              // Return to Central Valley view when scrolling away from geocoding panel
+              if (map.mapRef?.current) {
+                map.mapRef.current.easeTo({
+                  center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+                  zoom: CENTRAL_VALLEY_VIEW.zoom,
+                  bearing: CENTRAL_VALLEY_VIEW.bearing,
+                  pitch: CENTRAL_VALLEY_VIEW.pitch,
+                  duration: 1500,
+                  easing: (t: number) => t * (2 - t),
+                })
+              }
             }
           },
         },
@@ -609,7 +622,7 @@ export default function MapOverlayPanels() {
           },
         },
       ],
-      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, setShowRivers, showRivers],
+      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, setShowRivers, showRivers, map.mapRef],
     ),
     setActivePanel,
   )
@@ -1232,7 +1245,19 @@ export default function MapOverlayPanels() {
             onClick={() => {
               setIsDeltaTextVisible(true)
               
-              // Show water layer using the map operations API (no camera movement)
+              // Zoom to Delta
+              if (map.mapRef?.current) {
+                map.mapRef.current.easeTo({
+                  center: [-121.5, 38.0],
+                  zoom: 10,
+                  bearing: 0,
+                  pitch: 0,
+                  duration: 2000,
+                  easing: (t: number) => t * (2 - t),
+                })
+              }
+              
+              // Show water layer using the map operations API
               if (map.setLayoutProperty) {
                 try {
                   map.setLayoutProperty("water", "visibility", "visible")
