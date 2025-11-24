@@ -61,6 +61,8 @@ export interface PanelLayerState {
   onEnter?: (direction?: "up" | "down") => void
   /** Optional callback when exiting this panel */
   onExit?: (direction?: "up" | "down") => void
+  /** Optional callback for scroll progress through the panel (0 = top entering viewport, 1 = bottom leaving viewport) */
+  onScroll?: (progress: number) => void
 }
 
 /**
@@ -462,6 +464,49 @@ export function useLearnScrollChoreography(
       ;(observer as any)._checkInterval = checkInterval
     })
 
+    // Add continuous scroll listener for smooth onScroll updates
+    let scrollTicking = false
+    
+    const updateScrollProgress = () => {
+      sortedPanels.forEach((panelState) => {
+        if (panelState.onScroll) {
+          const panelElement = document.getElementById(panelState.panelId)
+          if (panelElement) {
+            const rect = panelElement.getBoundingClientRect()
+            const viewportHeight = window.innerHeight
+            
+            // Only calculate if panel is near/in viewport (optimization)
+            if (rect.bottom > 0 && rect.top < viewportHeight) {
+              // Progress: 0 when panel top is at bottom of viewport, 1 when panel bottom is at top of viewport
+              const progress = Math.max(
+                0,
+                Math.min(
+                  1,
+                  (viewportHeight - rect.top) / (viewportHeight + rect.height)
+                )
+              )
+              
+              panelState.onScroll(progress)
+            }
+          }
+        }
+      })
+      scrollTicking = false
+    }
+    
+    const handleScroll = () => {
+      if (!scrollTicking) {
+        requestAnimationFrame(updateScrollProgress)
+        scrollTicking = true
+      }
+    }
+
+    // Attach scroll listener with passive flag for better performance
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
+    // Call updateScrollProgress initially to set correct progress on load
+    updateScrollProgress()
+
     // Initialize to first panel
     const firstPanel = sortedPanels[0]
     if (firstPanel) {
@@ -475,6 +520,7 @@ export function useLearnScrollChoreography(
 
     // Cleanup
     return () => {
+      window.removeEventListener('scroll', handleScroll)
       observersRef.current.forEach((obs) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         clearInterval((obs as any)._checkInterval)

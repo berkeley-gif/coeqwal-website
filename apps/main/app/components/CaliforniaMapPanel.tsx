@@ -60,6 +60,7 @@ export default function CaliforniaMapPanel({
     geocoderMarker,
     showBasins,
     showRivers,
+    riversAnimationProgress,
     showInflowArrows,
     inflowArrowsOpacity,
     activePanel,
@@ -138,7 +139,7 @@ export default function CaliforniaMapPanel({
         <BasinsLayer visible={showBasins} />
 
         {/* Rivers GeoJSON Layer - shows when scrolling to "rivers" panel */}
-        <RiversLayer visible={showRivers} />
+        <RiversLayer visible={showRivers} progress={riversAnimationProgress} />
 
         {/* Basin Inflow Arrows - shows when scrolling to "water flow" panel */}
         <BasinInflowArrows visible={showInflowArrows} opacity={inflowArrowsOpacity} />
