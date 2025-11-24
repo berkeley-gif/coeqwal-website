@@ -506,9 +506,19 @@ export default function MapOverlayPanels() {
           ],
           // Show rivers when entering Panel 5, then fade out basins and inflow polygon gracefully
           onEnter: () => {
-            if (!showRiversRef.current) toggleRiversOnRef.current()
+            // Reset the "find my basin" panel
+            setGeocoderMarker(null)
+            
+            // Zoom back to Central Valley view (triggers via setActivePanel → CaliforniaMapPanel)
+            setActivePanel("central-valley-importance")
+            
+            // Start rivers animation after zoom completes
+            setTimeout(() => {
+              if (!showRiversRef.current) toggleRiversOnRef.current()
+            }, 1500)
 
             // After rivers start animating, fade out basins and inflow polygon
+            // Delay by 1500ms (zoom duration) + additional time for rivers to start
             setTimeout(() => {
               if (mapRef.current) {
                 const localMap = mapRef.current
@@ -570,7 +580,7 @@ export default function MapOverlayPanels() {
 
                 fadeAnimationRef.current = requestAnimationFrame(animate)
               }
-            }, 3000) // wait 3s before starting the fade, so you can see rivers first
+            }, 4500) // wait 1.5s (zoom) + 3s before starting the fade, so you can see rivers first
           },
           // Hide rivers when exiting Panel 5
           onExit: () => {
@@ -615,7 +625,7 @@ export default function MapOverlayPanels() {
           },
         },
       ],
-      [setInflowArrowsOpacity],
+      [setInflowArrowsOpacity, setActivePanel, setGeocoderMarker],
     ),
     setActivePanel,
   )
