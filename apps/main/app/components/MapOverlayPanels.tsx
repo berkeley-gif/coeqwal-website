@@ -634,11 +634,15 @@ export default function MapOverlayPanels() {
               }
               
               // Hide water layer
-              if (map.setLayoutProperty) {
+              if (map.mapRef?.current) {
                 try {
-                  map.setLayoutProperty("water", "visibility", "none")
-                } catch {
-                  // Water layer might not exist, silently continue
+                  const mapInstance = map.mapRef.current.getMap()
+                  if (mapInstance.getLayer("water")) {
+                    mapInstance.setLayoutProperty("water", "visibility", "none")
+                    console.log("✅ Water layer hidden after Delta panel")
+                  }
+                } catch (error) {
+                  console.warn("⚠️ Could not hide water layer:", error)
                 }
               }
             }
@@ -855,7 +859,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "50vh" }}
+        sx={{ mb: "100vh" }} // Doubled spacing for better pacing
       >
         <Typography variant="body1">
           Do you know that California has one of the most complex water systems
@@ -869,7 +873,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "50vh" }}
+        sx={{ mb: "75vh" }} // Increased spacing for better pacing
       >
         {/* <Typography variant="overline">
           California&apos;s Central Valley
@@ -891,7 +895,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "50vh" }}
+        sx={{ mb: "75vh" }} // Increased spacing for better pacing
       >
         {/* <Typography variant="overline">
           California&apos;s Central Valley
@@ -908,7 +912,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "50vh" }}
+        sx={{ mb: "75vh" }} // Increased spacing for better pacing
       >
         {/* <Typography variant="overline">THE JOURNEY</Typography> */}
 
@@ -1209,7 +1213,7 @@ export default function MapOverlayPanels() {
       <Box
         id="rivers-flow-response"
         sx={{
-          minHeight: "350vh", // Extra tall for full river animation + future Delta zoom
+          minHeight: "400vh", // Extended for smoother river animation pacing
           position: "relative",
         }}
       >
@@ -1262,7 +1266,7 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
         disableHighlight
         sx={{
-          mb: "50vh",
+          mb: "100vh", // Extra spacing before CalSim section for pacing
         }}
       >
         <Box
@@ -1304,12 +1308,16 @@ export default function MapOverlayPanels() {
                 })
               }
               
-              // Show water layer using the map operations API
-              if (map.setLayoutProperty) {
+              // Show water layer
+              if (map.mapRef?.current) {
                 try {
-                  map.setLayoutProperty("water", "visibility", "visible")
+                  const mapInstance = map.mapRef.current.getMap()
+                  if (mapInstance.getLayer("water")) {
+                    mapInstance.setLayoutProperty("water", "visibility", "visible")
+                    console.log("✅ Water layer shown for Delta view")
+                  }
                 } catch (error) {
-                  console.warn("Water layer not found:", error)
+                  console.warn("⚠️ Could not show water layer:", error)
                 }
               }
             }}

@@ -126,8 +126,8 @@ export default function CaliforniaMapPanel({
         minZoom={4}
         maxZoom={18}
         maxBounds={[
-          [-130.0, 28.0], // Southwest coordinates (west, south)
-          [-108.0, 46.0], // Northeast coordinates (east, north)
+          [-135.0, 25.0], // Southwest - wider bounds for positioning flexibility
+          [-105.0, 48.0], // Northeast - wider bounds for positioning flexibility
         ]}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
