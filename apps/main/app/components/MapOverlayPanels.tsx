@@ -17,6 +17,7 @@ import { useGeocoding, BOUNDING_BOXES, useBasinLookup, useMap } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
+import { CENTRAL_VALLEY_VIEW } from "./CaliforniaMapPanel"
 import bbox from "@turf/bbox"
 import type { Feature, Polygon, MultiPolygon } from "geojson"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
@@ -512,8 +513,10 @@ export default function MapOverlayPanels() {
             // Zoom back to Central Valley view directly
             if (map.mapRef?.current) {
               map.mapRef.current.easeTo({
-                center: [-120.8, 37.9],
-                zoom: 6.5,
+                center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+                zoom: CENTRAL_VALLEY_VIEW.zoom,
+                bearing: CENTRAL_VALLEY_VIEW.bearing,
+                pitch: CENTRAL_VALLEY_VIEW.pitch,
                 duration: 1500,
                 easing: (t: number) => t * (2 - t), // ease-out-quad
               })
