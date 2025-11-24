@@ -621,8 +621,39 @@ export default function MapOverlayPanels() {
             if (showBasinsRef.current) toggleBasinsOnRef.current()
           },
         },
+        {
+          panelId: "delta-info-response",
+          position: 6,
+          debugLabel: "Panel 6.5: Delta Info",
+          layers: [],
+          // Return to Central Valley view and hide water layer when scrolling away from Delta panel
+          onExit: (direction?: "up" | "down") => {
+            if (direction === "down") {
+              // Zoom back to Central Valley
+              if (map.mapRef?.current) {
+                map.mapRef.current.easeTo({
+                  center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+                  zoom: CENTRAL_VALLEY_VIEW.zoom,
+                  bearing: CENTRAL_VALLEY_VIEW.bearing,
+                  pitch: CENTRAL_VALLEY_VIEW.pitch,
+                  duration: 1500,
+                  easing: (t: number) => t * (2 - t),
+                })
+              }
+              
+              // Hide water layer
+              if (map.setLayoutProperty) {
+                try {
+                  map.setLayoutProperty("water", "visibility", "none")
+                } catch {
+                  // Water layer might not exist, silently continue
+                }
+              }
+            }
+          },
+        },
       ],
-      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, setShowRivers, showRivers, map.mapRef],
+      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, setShowRivers, showRivers, map],
     ),
     setActivePanel,
   )
