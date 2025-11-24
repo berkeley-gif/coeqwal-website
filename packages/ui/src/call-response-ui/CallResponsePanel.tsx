@@ -21,6 +21,8 @@ export interface CallResponsePanelProps {
   sx?: SxProps<Theme>
   /** Disable the highlight effect (useful when using custom backgrounds) */
   disableHighlight?: boolean
+  /** Enable two-stage animation: fade in first, then ease to center */
+  twoStageAnimation?: boolean
 }
 
 /**
@@ -39,6 +41,7 @@ export function CallResponsePanel({
   delay = 0,
   sx = {},
   disableHighlight = false,
+  twoStageAnimation = false,
 }: CallResponsePanelProps) {
   return (
     <Box
@@ -54,23 +57,32 @@ export function CallResponsePanel({
       }}
     >
       <motion.div
-        initial={{ marginTop: "100vh", opacity: 0 }}
+        initial={{ marginTop: twoStageAnimation ? "60vh" : "100vh", opacity: 1 }}
         animate={{
-          marginTop: isVisible ? 0 : "100vh",
-          opacity: isVisible ? 1 : 0,
+          marginTop: isVisible ? 0 : (twoStageAnimation ? "60vh" : "100vh"),
+          opacity: 1, // Always visible, no fade
         }}
-        transition={{
-          type: "spring",
-          stiffness: 40,
-          damping: 30,
-          duration: 1.8,
-          ...(delay ? { delay } : {}),
-          opacity: {
-            duration: 0.6,
-            ...(delay ? { delay } : {}),
-            ease: "easeOut",
-          },
-        }}
+        transition={
+          twoStageAnimation
+            ? {
+                // Two-stage: appear at 60vh down, then ease to center
+                marginTop: {
+                  type: "spring",
+                  stiffness: 40,
+                  damping: 30,
+                  duration: 1.8,
+                  delay: delay || 0,
+                },
+              }
+            : {
+                // Standard animation: slide up from bottom
+                type: "spring",
+                stiffness: 40,
+                damping: 30,
+                duration: 1.8,
+                ...(delay ? { delay } : {}),
+              }
+        }
         style={{
           width: "100%",
           display: "flex",
