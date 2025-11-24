@@ -15,6 +15,7 @@ interface CalSimContextType {
   toggleBasins: () => void
   showRivers: boolean
   toggleRivers: () => void
+  setShowRivers: (show: boolean) => void
   riversAnimationProgress: number
   setRiversAnimationProgress: (progress: number) => void
   showInflowArrows: boolean
@@ -38,7 +39,7 @@ const CalSimContext = createContext<CalSimContextType | undefined>(undefined)
 export function CalSimProvider({ children }: { children: ReactNode }) {
   const [isCalSimVisible, setIsCalSimVisible] = useState(false)
   const [showBasins, setShowBasins] = useState(false)
-  const [showRivers, setShowRivers] = useState(false)
+  const [showRivers, _setShowRivers] = useState(false)
   const [riversAnimationProgress, setRiversAnimationProgress] = useState(0)
   const [showInflowArrows, setShowInflowArrows] = useState(false)
   const [inflowArrowsOpacity, setInflowArrowsOpacity] = useState(0)
@@ -48,7 +49,19 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
   const [geocoderMarker, setGeocoderMarker] = useState<[number, number] | null>(
     null,
   )
-  const [activePanel, setActivePanel] = useState<string | null>(null)
+  const [activePanel, _setActivePanel] = useState<string | null>(null)
+  
+  // Wrapper with logging
+  const setShowRivers = useCallback((show: boolean) => {
+    console.log('🌊 CalSimContext setShowRivers called:', show, 'Current:', showRivers)
+    console.trace('Call stack:')
+    _setShowRivers(show)
+  }, [showRivers])
+  
+  const setActivePanel = useCallback((panelId: string | null) => {
+    console.log('📍 CalSimContext setActivePanel called:', panelId)
+    _setActivePanel(panelId)
+  }, [])
 
   const toggleCalSim = useCallback(() => {
     setIsCalSimVisible((prev) => !prev)
@@ -75,6 +88,7 @@ export function CalSimProvider({ children }: { children: ReactNode }) {
         toggleBasins,
         showRivers,
         toggleRivers,
+        setShowRivers,
         riversAnimationProgress,
         setRiversAnimationProgress,
         showInflowArrows,

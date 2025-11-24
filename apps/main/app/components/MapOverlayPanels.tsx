@@ -17,7 +17,6 @@ import { useGeocoding, BOUNDING_BOXES, useBasinLookup, useMap } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
-import { CENTRAL_VALLEY_VIEW } from "./CaliforniaMapPanel"
 import bbox from "@turf/bbox"
 import type { Feature, Polygon, MultiPolygon } from "geojson"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
@@ -31,6 +30,7 @@ export default function MapOverlayPanels() {
     toggleBasins,
     showRivers,
     toggleRivers,
+    setShowRivers,
     setRiversAnimationProgress,
     showInflowArrows,
     toggleInflowArrows,
@@ -45,6 +45,9 @@ export default function MapOverlayPanels() {
   // State for basin search accordion
   const [isBasinAccordionExpanded, setIsBasinAccordionExpanded] =
     useState(false)
+  
+  // State for Delta panel text
+  const [isDeltaTextVisible, setIsDeltaTextVisible] = useState(false)
 
   // Learn section scroll choreography – refs for stable callbacks
   const mapRef = useRef(map)
@@ -54,8 +57,6 @@ export default function MapOverlayPanels() {
 
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
-  const toggleRiversOnRef = useRef(toggleRivers)
-  const showRiversRef = useRef(showRivers)
   const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
   const showInflowArrowsRef = useRef(showInflowArrows)
   const inflowArrowsOpacityRef = useRef(inflowArrowsOpacity)
@@ -65,8 +66,6 @@ export default function MapOverlayPanels() {
     mapRef.current = map
     toggleBasinsOnRef.current = toggleBasins
     showBasinsRef.current = showBasins
-    toggleRiversOnRef.current = toggleRivers
-    showRiversRef.current = showRivers
     toggleInflowArrowsOnRef.current = toggleInflowArrows
     showInflowArrowsRef.current = showInflowArrows
     inflowArrowsOpacityRef.current = inflowArrowsOpacity
@@ -74,8 +73,6 @@ export default function MapOverlayPanels() {
     map,
     toggleBasins,
     showBasins,
-    toggleRivers,
-    showRivers,
     toggleInflowArrows,
     showInflowArrows,
     inflowArrowsOpacity,
@@ -415,6 +412,14 @@ export default function MapOverlayPanels() {
           ],
           // Fade arrows OUT when entering Panel 4.5 (Find my basin)
           onEnter: () => {
+            console.log('📍 WHICH BASIN PANEL onEnter - hiding rivers if visible, showRivers:', showRivers)
+            
+            // Hide rivers when coming back to this panel from rivers panel
+            if (showRivers) {
+              setShowRivers(false)
+              setRiversAnimationProgress(0)
+            }
+            
             // Cancel any ongoing arrow fade animation
             if (arrowFadeAnimationRef.current !== null) {
               cancelAnimationFrame(arrowFadeAnimationRef.current)
@@ -507,27 +512,21 @@ export default function MapOverlayPanels() {
             },
           ],
           // Setup and scroll-driven animation for rivers panel
-          onEnter: () => {
+          onEnter: (direction) => {
+            console.log('🌊 RIVERS PANEL onEnter - direction:', direction)
             // Reset the "find my basin" panel
             setGeocoderMarker(null)
             
-            // Zoom back to Central Valley view directly
-            if (map.mapRef?.current) {
-              map.mapRef.current.easeTo({
-                center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-                zoom: CENTRAL_VALLEY_VIEW.zoom,
-                bearing: CENTRAL_VALLEY_VIEW.bearing,
-                pitch: CENTRAL_VALLEY_VIEW.pitch,
-                duration: 1500,
-                easing: (t: number) => t * (2 - t), // ease-out-quad
-              })
+            // Always show rivers when entering this panel
+            setShowRivers(true)
+            console.log('🌊 setShowRivers(true) called')
+            
+            // Only reset rivers when coming from above (scrolling down for first time)
+            // Don't reset when coming from below (scrolling back up)
+            if (direction === "down" || direction === undefined) {
+              // Reset river progress to 0 so rivers start from beginning
+              setRiversAnimationProgress(0)
             }
-            
-            // CRITICAL: Reset river progress to 0 so rivers start from beginning
-            setRiversAnimationProgress(0)
-            
-            // Show rivers immediately on enter
-            if (!showRiversRef.current) toggleRiversOnRef.current()
           },
           // Scroll-driven animation: control rivers drawing AND opacity based on scroll progress
           onScroll: (progress) => {
@@ -537,7 +536,6 @@ export default function MapOverlayPanels() {
               Math.max(min, Math.min(max, value))
             
             // RIVERS: Draw from 20%-70% of scroll progress (slower, smoother with 350vh space)
-            // Leaves 70%-100% for future Delta zoom
             const riverDrawStart = 0.2
             const riverDrawEnd = 0.7
             const riverProgress = clamp(
@@ -581,11 +579,8 @@ export default function MapOverlayPanels() {
               basinsLabelsOpacity,
             )
           },
-          // Hide rivers and reset animation when exiting Panel 5
-          onExit: () => {
-            if (showRiversRef.current) toggleRiversOnRef.current()
-            setRiversAnimationProgress(0) // Reset for next time
-          },
+          // No onExit - rivers stay visible once shown
+          // They will only be hidden when entering an earlier panel
         },
         {
           panelId: "water-distribution-call",
@@ -613,13 +608,14 @@ export default function MapOverlayPanels() {
               fillOpacity: 0,
             },
           ],
-          // Hide basins when entering Panel 6 (rivers already hidden by Panel 5 onExit)
+          // Hide basins when entering Panel 6 (rivers remain visible)
           onEnter: () => {
+            console.log('📍 PANEL 6 onEnter - showBasins:', showBasinsRef.current)
             if (showBasinsRef.current) toggleBasinsOnRef.current()
           },
         },
       ],
-      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, map.mapRef],
+      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, setShowRivers, showRivers],
     ),
     setActivePanel,
   )
@@ -1203,6 +1199,98 @@ export default function MapOverlayPanels() {
       
       {/* Spacer after rivers panel */}
       <Box sx={{ height: "80vh" }} />
+
+      {/* Response: Delta information panel (right side) */}
+      <CallResponsePanel
+        id="delta-info-response"
+        side="right"
+        variant="response"
+        isVisible={isFirstPanelVisible}
+        disableHighlight
+        sx={{
+          mb: "50vh",
+        }}
+      >
+        <Box
+          sx={{
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            borderRadius: 0,
+            padding: { xs: 2, sm: 2.5, md: 3 },
+            boxShadow: theme.shadows[2],
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              textAlign: "left",
+            }}
+          >
+            What and where is &quot;The Delta&quot;?
+          </Typography>
+
+          <Box
+            component="button"
+            onClick={() => {
+              setIsDeltaTextVisible(true)
+              
+              // Show water layer using the map operations API (no camera movement)
+              if (map.setLayoutProperty) {
+                try {
+                  map.setLayoutProperty("water", "visibility", "visible")
+                } catch (error) {
+                  console.warn("Water layer not found:", error)
+                }
+              }
+            }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              color: theme.palette.blue.medium,
+              fontFamily: theme.typography.fontFamily,
+              fontSize: "1rem",
+              fontWeight: 500,
+              textDecoration: "none",
+              textAlign: "left",
+              transition: "color 0.2s ease",
+              "&:hover": {
+                color: theme.palette.blue.bright,
+                textDecoration: "underline",
+              },
+            }}
+          >
+            <span>Go to the Sacramento-San Joaquin River Delta</span>
+            <span style={{ fontSize: "1.2em" }}>→</span>
+          </Box>
+
+          {isDeltaTextVisible && (
+            <Typography
+              variant="body2"
+              sx={{
+                mt: 2,
+                lineHeight: 1.6,
+                textAlign: "left",
+              }}
+            >
+              The Sacramento–San Joaquin Delta (also known as the Bay-Delta) is the unique ecosystem of
+              low-lying waterways and islands where the Sacramento and San Joaquin
+              rivers meet, roughly between Sacramento, Stockton, and Antioch. Here
+              river water mixes with salty incoming tides from San Francisco Bay.
+              Pumps and canals send water from the Delta to cities and farms across
+              the state.
+            </Typography>
+          )}
+        </Box>
+      </CallResponsePanel>
 
       {/* Call: Water distribution statement */}
       <CallResponsePanel

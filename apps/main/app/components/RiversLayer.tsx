@@ -79,6 +79,8 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 })
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
+  console.log('🌊 RiversLayer render - visible:', visible, 'progress:', progress)
+  
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
@@ -96,7 +98,10 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
     sanJoaquin: { lon: -120.44, lat: 37.6 },
   }), [])
 
-  if (!visible) return null
+  if (!visible) {
+    console.log('🌊 RiversLayer returning null - not visible')
+    return null
+  }
 
   return (
     <>
