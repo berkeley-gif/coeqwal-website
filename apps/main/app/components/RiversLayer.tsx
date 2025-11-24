@@ -15,13 +15,15 @@ function CurvedRiverLabel({
   rotation = 90, 
   curvature = 20,
   sCurve = false,
-  letterSpacing = 2
+  letterSpacing = 2,
+  opacity = 1
 }: { 
   text: string
   rotation?: number
   curvature?: number
   sCurve?: boolean
   letterSpacing?: number
+  opacity?: number
 }) {
   const pathId = `river-curve-${text.replace(/\s/g, '-')}`
   
@@ -44,6 +46,8 @@ function CurvedRiverLabel({
       style={{
         overflow: "visible",
         transform: `rotate(${rotation}deg)`,
+        opacity,
+        transition: "opacity 0.3s ease-in-out",
       }}
     >
       <defs>
@@ -77,8 +81,12 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
-  // Show labels when rivers are at least 30% drawn
-  const showLabels = visible && clampedProgress > 0.3
+  // Calculate label opacity: fade in from 30% to 50% of river drawing
+  const labelFadeStart = 0.3
+  const labelFadeEnd = 0.5
+  const labelOpacity = visible 
+    ? Math.max(0, Math.min(1, (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart)))
+    : 0
 
   // River label positions (geolocated like the arrows)
   const sacramentoLabelPosition = {
@@ -215,41 +223,39 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
 
       {/* ═══════════════════════════════════════════════════════════════
           RIVER LABELS - Curved SVG text markers (like the inflow arrows)
-          Geolocated curved text with blue background
+          Geolocated curved text that fades in smoothly
           ═══════════════════════════════════════════════════════════════ */}
       
       {/* Sacramento River Curved Label */}
-      {showLabels && (
-        <Marker
-          longitude={sacramentoLabelPosition.lon}
-          latitude={sacramentoLabelPosition.lat}
-          anchor="center"
-        >
-          <CurvedRiverLabel 
-            text="Sacramento River" 
-            rotation={96} // 8 degrees counter-clockwise from 90
-            curvature={90} // Emphasized reverse S-curve
-            sCurve={true} // Enable reverse S-curve
-            letterSpacing={2} // Letter spacing in pixels
-          />
-        </Marker>
-      )}
+      <Marker
+        longitude={sacramentoLabelPosition.lon}
+        latitude={sacramentoLabelPosition.lat}
+        anchor="center"
+      >
+        <CurvedRiverLabel 
+          text="Sacramento River" 
+          rotation={96} // 8 degrees counter-clockwise from 90
+          curvature={90} // Emphasized reverse S-curve
+          sCurve={true} // Enable reverse S-curve
+          letterSpacing={5} // Letter spacing
+          opacity={labelOpacity}
+        />
+      </Marker>
 
       {/* San Joaquin River Curved Label */}
-      {showLabels && (
-        <Marker
-          longitude={sanJoaquinLabelPosition.lon}
-          latitude={sanJoaquinLabelPosition.lat}
-          anchor="center"
-        >
-          <CurvedRiverLabel 
-            text="San Joaquin River" 
-            rotation={50}
-            curvature={-35} // (negative = curves down)
-            letterSpacing={2} // Letter spacing in pixels
-          />
-        </Marker>
-      )}
+      <Marker
+        longitude={sanJoaquinLabelPosition.lon}
+        latitude={sanJoaquinLabelPosition.lat}
+        anchor="center"
+      >
+        <CurvedRiverLabel 
+          text="San Joaquin River" 
+          rotation={50}
+          curvature={-35} // (negative = curves down)
+          letterSpacing={2} // Letter spacing
+          opacity={labelOpacity}
+        />
+      </Marker>
     </>
   )
 }
