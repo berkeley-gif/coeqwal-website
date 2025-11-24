@@ -536,10 +536,10 @@ export default function MapOverlayPanels() {
             const clamp = (value: number, min: number, max: number) =>
               Math.max(min, Math.min(max, value))
             
-            // RIVERS: Draw from 25%-85% of scroll progress (wider range for smoother drawing)
-            // Start at 25% so rivers begin drawing AFTER panel is well into viewport
-            const riverDrawStart = 0.25
-            const riverDrawEnd = 0.85
+            // RIVERS: Draw from 20%-70% of scroll progress (slower, smoother with 350vh space)
+            // Leaves 70%-100% for future Delta zoom
+            const riverDrawStart = 0.2
+            const riverDrawEnd = 0.7
             const riverProgress = clamp(
               (progress - riverDrawStart) / (riverDrawEnd - riverDrawStart),
               0,
@@ -549,9 +549,9 @@ export default function MapOverlayPanels() {
             // Set river animation progress directly (no easing for precise control)
             setRiversAnimationProgress(riverProgress)
             
-            // BASINS/INFLOW: Fade out from 45%-80% of scroll progress (while rivers are drawing)
-            const fadeStart = 0.45
-            const fadeEnd = 0.8
+            // BASINS/INFLOW: Fade out from 40%-65% of scroll progress (while rivers are drawing)
+            const fadeStart = 0.4
+            const fadeEnd = 0.65
             const fadeProgress = clamp(
               (progress - fadeStart) / (fadeEnd - fadeStart),
               0,
@@ -1159,7 +1159,7 @@ export default function MapOverlayPanels() {
       <Box
         id="rivers-flow-response"
         sx={{
-          minHeight: "250vh", // Tall container for scroll pinning
+          minHeight: "350vh", // Extra tall for full river animation + future Delta zoom
           position: "relative",
         }}
       >
