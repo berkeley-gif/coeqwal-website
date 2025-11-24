@@ -824,7 +824,7 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
           </Box>{" "}
-          is like a giant bowl that collects most of Calfornia&apost;s water. 
+          is like a giant bowl that collects most of California&apos;s water. 
           This water is highly managed, allocated, and transported.
         </Typography>
       </CallResponsePanel>

@@ -33,8 +33,8 @@ const CALIFORNIA_VIEW: MapViewState = {
 // Central Valley view (Panel 2 and beyond)
 const CENTRAL_VALLEY_VIEW: MapViewState = {
   longitude: -120.8,
-  latitude: 37.9,
-  zoom: 6.5,
+  latitude: 38.5,
+  zoom: 5.82,
   bearing: 0,
   pitch: 0,
 }
