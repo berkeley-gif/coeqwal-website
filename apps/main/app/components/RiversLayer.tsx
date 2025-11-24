@@ -14,12 +14,14 @@ function CurvedRiverLabel({
   text, 
   rotation = 90, 
   curvature = 20,
-  sCurve = false 
+  sCurve = false,
+  letterSpacing = 2
 }: { 
   text: string
   rotation?: number
   curvature?: number
   sCurve?: boolean
+  letterSpacing?: number
 }) {
   const pathId = `river-curve-${text.replace(/\s/g, '-')}`
   
@@ -59,7 +61,9 @@ function CurvedRiverLabel({
         fontFamily="Georgia, 'Times New Roman', serif"
         fontStyle="italic"
         fill="#FFFFFF"
+        fillOpacity="0.9"
         fontWeight="700"
+        letterSpacing={letterSpacing}
       >
         <textPath href={`#${pathId}`} startOffset="50%" textAnchor="middle">
           {text}
@@ -226,6 +230,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             rotation={96} // 8 degrees counter-clockwise from 90
             curvature={90} // Emphasized reverse S-curve
             sCurve={true} // Enable reverse S-curve
+            letterSpacing={2} // Letter spacing in pixels
           />
         </Marker>
       )}
@@ -241,6 +246,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             text="San Joaquin River" 
             rotation={50}
             curvature={-35} // (negative = curves down)
+            letterSpacing={2} // Letter spacing in pixels
           />
         </Marker>
       )}
