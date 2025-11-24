@@ -523,6 +523,9 @@ export default function MapOverlayPanels() {
               })
             }
             
+            // CRITICAL: Reset river progress to 0 so rivers start from beginning
+            setRiversAnimationProgress(0)
+            
             // Show rivers immediately on enter
             if (!showRiversRef.current) toggleRiversOnRef.current()
           },
@@ -533,24 +536,22 @@ export default function MapOverlayPanels() {
             const clamp = (value: number, min: number, max: number) =>
               Math.max(min, Math.min(max, value))
             
-            // RIVERS: Draw from 0-60% of scroll progress
-            const riverDrawStart = 0
-            const riverDrawEnd = 0.6
+            // RIVERS: Draw from 25%-85% of scroll progress (wider range for smoother drawing)
+            // Start at 25% so rivers begin drawing AFTER panel is well into viewport
+            const riverDrawStart = 0.25
+            const riverDrawEnd = 0.85
             const riverProgress = clamp(
               (progress - riverDrawStart) / (riverDrawEnd - riverDrawStart),
               0,
               1
             )
             
-            // Debug logging
-            console.log(`Rivers panel scroll - progress: ${progress.toFixed(3)}, riverProgress: ${riverProgress.toFixed(3)}`)
-            
             // Set river animation progress directly (no easing for precise control)
             setRiversAnimationProgress(riverProgress)
             
-            // BASINS/INFLOW: Fade out from 40%-80% of scroll progress (overlaps with river drawing)
-            const fadeStart = 0.4
-            const fadeEnd = 0.8
+            // BASINS/INFLOW: Fade out from 55%-90% of scroll progress (after rivers are drawing)
+            const fadeStart = 0.55
+            const fadeEnd = 0.9
             const fadeProgress = clamp(
               (progress - fadeStart) / (fadeEnd - fadeStart),
               0,
@@ -804,6 +805,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           Do you know that California has one of the most complex water systems
@@ -817,6 +819,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "50vh" }}
       >
         {/* <Typography variant="overline">
           California&apos;s Central Valley
@@ -838,6 +841,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "50vh" }}
       >
         {/* <Typography variant="overline">
           California&apos;s Central Valley
@@ -854,6 +858,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "50vh" }}
       >
         {/* <Typography variant="overline">THE JOURNEY</Typography> */}
 
@@ -1156,6 +1161,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "80vh" }}
       >
         <Typography variant="body1">
           From the north, the{" "}

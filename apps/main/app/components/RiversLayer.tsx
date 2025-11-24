@@ -17,9 +17,6 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
   
-  // Debug: Log the line-trim-offset values
-  console.log(`RiversLayer - progress: ${progress.toFixed(3)}, clampedProgress: ${clampedProgress.toFixed(3)}, line-trim-offset: [${clampedProgress.toFixed(3)}, 1]`)
-  
   // Show labels when rivers are 10% drawn
   const showLabels = clampedProgress > 0.1
 
