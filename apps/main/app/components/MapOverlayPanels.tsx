@@ -549,9 +549,9 @@ export default function MapOverlayPanels() {
             // Set river animation progress directly (no easing for precise control)
             setRiversAnimationProgress(riverProgress)
             
-            // BASINS/INFLOW: Fade out from 40%-65% of scroll progress (while rivers are drawing)
-            const fadeStart = 0.4
-            const fadeEnd = 0.65
+            // BASINS/INFLOW: Fade out from 30%-55% of scroll progress (earlier, while rivers are drawing)
+            const fadeStart = 0.3
+            const fadeEnd = 0.55
             const fadeProgress = clamp(
               (progress - fadeStart) / (fadeEnd - fadeStart),
               0,
