@@ -509,8 +509,15 @@ export default function MapOverlayPanels() {
             // Reset the "find my basin" panel
             setGeocoderMarker(null)
             
-            // Zoom back to Central Valley view (triggers via setActivePanel → CaliforniaMapPanel)
-            setActivePanel("central-valley-importance")
+            // Zoom back to Central Valley view directly
+            if (map.mapRef?.current) {
+              map.mapRef.current.easeTo({
+                center: [-120.8, 37.9],
+                zoom: 6.5,
+                duration: 1500,
+                easing: (t: number) => t * (2 - t), // ease-out-quad
+              })
+            }
             
             // Start rivers animation after zoom completes
             setTimeout(() => {
@@ -625,7 +632,7 @@ export default function MapOverlayPanels() {
           },
         },
       ],
-      [setInflowArrowsOpacity, setActivePanel, setGeocoderMarker],
+      [setInflowArrowsOpacity, setGeocoderMarker, map.mapRef],
     ),
     setActivePanel,
   )
