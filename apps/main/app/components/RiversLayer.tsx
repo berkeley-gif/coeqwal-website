@@ -1,5 +1,6 @@
 "use client"
 
+import { memo, useMemo } from "react"
 import { Source, Layer, Marker } from "@repo/map"
 import { sacramentoRiverMainstem, sanJoaquinRiverMainstem } from "@repo/data"
 
@@ -9,8 +10,8 @@ interface RiversLayerProps {
   progress: number
 }
 
-// Curved river label component with transparent background
-function CurvedRiverLabel({ 
+// Curved river label component with transparent background (memoized for performance)
+const CurvedRiverLabel = memo(function CurvedRiverLabel({ 
   text, 
   rotation = 90, 
   curvature = 20,
@@ -75,29 +76,25 @@ function CurvedRiverLabel({
       </text>
     </svg>
   )
-}
+})
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
   // Calculate label opacity: fade in from 30% to 50% of river drawing
-  const labelFadeStart = 0.3
-  const labelFadeEnd = 0.5
-  const labelOpacity = visible 
-    ? Math.max(0, Math.min(1, (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart)))
-    : 0
+  const labelOpacity = useMemo(() => {
+    if (!visible) return 0
+    const labelFadeStart = 0.3
+    const labelFadeEnd = 0.5
+    return Math.max(0, Math.min(1, (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart)))
+  }, [visible, clampedProgress])
 
-  // River label positions (geolocated like the arrows)
-  const sacramentoLabelPosition = {
-    lon: -121.45,
-    lat: 39,
-  }
-
-  const sanJoaquinLabelPosition = {
-    lon: -120.44,
-    lat: 37.6,
-  }
+  // River label positions (memoized as they're constant)
+  const labelPositions = useMemo(() => ({
+    sacramento: { lon: -121.45, lat: 39 },
+    sanJoaquin: { lon: -120.44, lat: 37.6 },
+  }), [])
 
   if (!visible) return null
 
@@ -112,15 +109,31 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         data={sacramentoRiverMainstem}
         lineMetrics={true}
       >
+        {/* Layer 0: Depression/trough (wide, transparent dark blue underlayer) */}
+        <Layer
+          id="sacramento-river-trough"
+          type="line"
+          paint={{
+            "line-color": "#1a3a52",
+            "line-width": 7.5,
+            "line-opacity": 0.5,
+            "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
+          }}
+        />
+
         {/* Layer 1: Outer glow */}
         <Layer
           id="sacramento-river-glow"
           type="line"
           paint={{
             "line-color": "#4A90C9",
-            "line-width": 7,
-            "line-blur": 6,
-            "line-opacity": 0.3,
+            "line-width": 4.5,
+            "line-blur": 3,
+            "line-opacity": 0.35,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -135,8 +148,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#5B9DD6",
-            "line-width": 3.5,
-            "line-opacity": 0.85,
+            "line-width": 2.5,
+            "line-opacity": 0.9,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -151,8 +164,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#8BBEE8",
-            "line-width": 1.5,
-            "line-opacity": 0.6,
+            "line-width": 1,
+            "line-opacity": 0.7,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -171,15 +184,31 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         data={sanJoaquinRiverMainstem}
         lineMetrics={true}
       >
+        {/* Layer 0: Depression/trough (wide, transparent dark blue underlayer) */}
+        <Layer
+          id="san-joaquin-river-trough"
+          type="line"
+          paint={{
+            "line-color": "#1a3a52",
+            "line-width": 7.5,
+            "line-opacity": 0.5,
+            "line-trim-offset": [clampedProgress, 1],
+          }}
+          layout={{
+            "line-join": "round",
+            "line-cap": "round",
+          }}
+        />
+
         {/* Layer 1: Outer glow */}
         <Layer
           id="san-joaquin-river-glow"
           type="line"
           paint={{
             "line-color": "#4A90C9",
-            "line-width": 7,
-            "line-blur": 6,
-            "line-opacity": 0.3,
+            "line-width": 4.5,
+            "line-blur": 3,
+            "line-opacity": 0.35,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -194,8 +223,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#5B9DD6",
-            "line-width": 3.5,
-            "line-opacity": 0.85,
+            "line-width": 2.5,
+            "line-opacity": 0.9,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -210,8 +239,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           type="line"
           paint={{
             "line-color": "#8BBEE8",
-            "line-width": 1.5,
-            "line-opacity": 0.6,
+            "line-width": 1,
+            "line-opacity": 0.7,
             "line-trim-offset": [clampedProgress, 1],
           }}
           layout={{
@@ -228,31 +257,31 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
       
       {/* Sacramento River Curved Label */}
       <Marker
-        longitude={sacramentoLabelPosition.lon}
-        latitude={sacramentoLabelPosition.lat}
+        longitude={labelPositions.sacramento.lon}
+        latitude={labelPositions.sacramento.lat}
         anchor="center"
       >
         <CurvedRiverLabel 
           text="Sacramento River" 
-          rotation={96} // 8 degrees counter-clockwise from 90
-          curvature={90} // Emphasized reverse S-curve
-          sCurve={true} // Enable reverse S-curve
-          letterSpacing={5} // Letter spacing
+          rotation={96}
+          curvature={90}
+          sCurve={true}
+          letterSpacing={5}
           opacity={labelOpacity}
         />
       </Marker>
 
       {/* San Joaquin River Curved Label */}
       <Marker
-        longitude={sanJoaquinLabelPosition.lon}
-        latitude={sanJoaquinLabelPosition.lat}
+        longitude={labelPositions.sanJoaquin.lon}
+        latitude={labelPositions.sanJoaquin.lat}
         anchor="center"
       >
         <CurvedRiverLabel 
           text="San Joaquin River" 
           rotation={50}
-          curvature={-35} // (negative = curves down)
-          letterSpacing={2} // Letter spacing
+          curvature={-35}
+          letterSpacing={2}
           opacity={labelOpacity}
         />
       </Marker>

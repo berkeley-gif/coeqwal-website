@@ -1183,19 +1183,19 @@ export default function MapOverlayPanels() {
             }}
           >
             <Typography variant="body1">
-              From the north, the{" "}
+              The{" "}
               <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
                 Sacramento River
               </Box>{" "}
-              flows toward the low-lying{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-                Delta
-              </Box>
-              , where its waters mix with waters from the{" "}
+              flows from the north and the{" "}
               <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
                 San Joaquin River
               </Box>{" "}
-              flowing up from the south.
+              flows from the south to mix waters in the low-lying{" "}
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+                Delta
+              </Box>
+              .
             </Typography>
           </CallResponsePanel>
         </Box>
