@@ -17,8 +17,13 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Clamp progress to [0, 1] to avoid floating-point precision errors
   const clampedProgress = Math.max(0, Math.min(1, progress))
   
-  // Show labels when rivers are 10% drawn
-  const showLabels = clampedProgress > 0.1
+  // Show labels when rivers are 5% drawn (early enough to be visible)
+  const showLabels = clampedProgress > 0.05
+  
+  // Debug: Log when labels should show
+  if (clampedProgress > 0 && clampedProgress < 0.2) {
+    console.log(`River progress: ${clampedProgress.toFixed(3)}, showLabels: ${showLabels}`)
+  }
 
   return (
     <>
@@ -82,22 +87,22 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             type="symbol"
             layout={{
               "text-field": "Sacramento River",
-              "text-font": ["DIN Pro Medium", "Arial Unicode MS Bold"],
-              "text-size": 16,
+              "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+              "text-size": 18,
               "symbol-placement": "line",
-              "symbol-spacing": 500,
+              "symbol-spacing": 250,
               "text-rotation-alignment": "map",
               "text-keep-upright": true,
               "text-max-angle": 45,
-              "text-allow-overlap": true,
-              "text-ignore-placement": true,
+              "text-allow-overlap": false,
+              "text-ignore-placement": false,
               visibility: "visible",
             }}
             paint={{
-              "text-color": "#4A90C9",
+              "text-color": "#2C5F8D",
               "text-halo-color": "#ffffff",
-              "text-halo-width": 3,
-              "text-halo-blur": 1,
+              "text-halo-width": 2.5,
+              "text-halo-blur": 0.5,
               "text-opacity": 1,
             }}
           />
@@ -164,22 +169,22 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             type="symbol"
             layout={{
               "text-field": "San Joaquin River",
-              "text-font": ["DIN Pro Medium", "Arial Unicode MS Bold"],
-              "text-size": 16,
+              "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+              "text-size": 18,
               "symbol-placement": "line",
-              "symbol-spacing": 500,
+              "symbol-spacing": 250,
               "text-rotation-alignment": "map",
               "text-keep-upright": true,
               "text-max-angle": 45,
-              "text-allow-overlap": true,
-              "text-ignore-placement": true,
+              "text-allow-overlap": false,
+              "text-ignore-placement": false,
               visibility: "visible",
             }}
             paint={{
-              "text-color": "#4A90C9",
+              "text-color": "#2C5F8D",
               "text-halo-color": "#ffffff",
-              "text-halo-width": 3,
-              "text-halo-blur": 1,
+              "text-halo-width": 2.5,
+              "text-halo-blur": 0.5,
               "text-opacity": 1,
             }}
           />
