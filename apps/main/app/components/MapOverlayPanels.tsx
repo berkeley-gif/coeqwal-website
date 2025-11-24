@@ -34,6 +34,7 @@ export default function MapOverlayPanels() {
     toggleInflowArrows,
     inflowArrowsOpacity,
     setInflowArrowsOpacity,
+    setActivePanel,
   } = useCalSimToggle()
 
   // Animation state for first panel entrance
@@ -135,18 +136,7 @@ export default function MapOverlayPanels() {
             // Smooth, slower fade-in for both the Central Valley label and polygon
             if (!mapRef.current) return
 
-            // Zoom into the Central Valley region with generous buffer
             const localMap = mapRef.current
-            localMap.fitBounds(
-              [
-                [-122.8, 35.0], // Southwest coordinates (west, south)
-                [-118.8, 40.8], // Northeast coordinates (east, north)
-              ],
-              0, // pitch
-              0, // bearing
-              { top: 120, bottom: 120, left: 120, right: 120 }, // generous padding
-              { duration: 2000 }, // smooth 2s transition
-            )
 
             // Cancel any existing label fade
             if (labelFadeAnimationRef.current !== null) {
@@ -627,6 +617,7 @@ export default function MapOverlayPanels() {
       ],
       [setInflowArrowsOpacity],
     ),
+    setActivePanel,
   )
 
   // Basin search state

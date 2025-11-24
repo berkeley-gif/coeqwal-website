@@ -77,6 +77,7 @@ const DEFAULT_FADE_DURATION = 600 // ms
  */
 export function useLearnScrollChoreography(
   panelStates: PanelLayerState[],
+  onPanelChange?: (panelId: string) => void,
 ): void {
   const map = useMap()
   const observersRef = useRef<IntersectionObserver[]>([])
@@ -394,6 +395,8 @@ export function useLearnScrollChoreography(
 
       if (targetPanel) {
         applyPanelState(targetPanel)
+        // Notify about panel change
+        onPanelChange?.(targetPanel.panelId)
         // Only call onEnter if not initial load
         if (!isInitialLoadRef.current) {
           targetPanel.onEnter?.(direction)
@@ -481,5 +484,5 @@ export function useLearnScrollChoreography(
       initializedRef.current = false
       isInitialLoadRef.current = true // Reset for next mount
     }
-  }, [map, panelStates])
+  }, [map, panelStates, onPanelChange])
 }
