@@ -1,6 +1,7 @@
 "use client"
 
-import { Map, NavigationControl, Marker } from "@repo/map"
+import { useEffect, useRef } from "react"
+import { Map, NavigationControl, Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 // import CalSimMarkers from "./CalSimMarkers" // Legacy DOM-based markers
 import CalSimLayers from "./CalSimLayers"
@@ -10,6 +11,34 @@ import BasinInflowArrows from "./BasinInflowArrows"
 import HotspotMarkers from "./HotspotMarkers"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
+
+// Map view states
+interface MapViewState {
+  longitude: number
+  latitude: number
+  zoom: number
+  bearing?: number
+  pitch?: number
+}
+
+const PANEL_VIEW_STATES: Record<string, MapViewState> = {
+  // Panel 1: Wide view of California (initial state)
+  "calsim-call": {
+    longitude: -119.5,
+    latitude: 37.0,
+    zoom: 5,
+    bearing: 0,
+    pitch: 0,
+  },
+  // Panel 2+: Zoomed into Central Valley (stays here for all subsequent panels)
+  "central-valley-importance": {
+    longitude: -120.8,
+    latitude: 37.9,
+    zoom: 6.5,
+    bearing: 0,
+    pitch: 0,
+  },
+}
 
 interface CaliforniaMapPanelProps {
   id?: string
@@ -21,6 +50,7 @@ export default function CaliforniaMapPanel({
   mapboxToken,
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
+  const map = useMap()
   const {
     isPanelsExpanded,
     geocoderMarker,
@@ -28,7 +58,62 @@ export default function CaliforniaMapPanel({
     showRivers,
     showInflowArrows,
     inflowArrowsOpacity,
+    activePanel,
   } = useCalSimToggle()
+
+  // Track if this is the first panel change (skip zoom on initial load)
+  const isInitialLoadRef = useRef(true)
+  const previousPanelRef = useRef<string | null>(null)
+
+  // Allow zoom after page has settled (prevent rapid-fire initial triggers)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.log('[Map Zoom] Initial load period complete, zoom enabled')
+      isInitialLoadRef.current = false
+    }, 1000) // Wait 1 second for page to fully settle
+
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Scroll-driven zoom: Update map view when active panel changes
+  useEffect(() => {
+    if (!activePanel || !map.flyTo) {
+      console.log(`[Map Zoom] Skipping - activePanel: ${activePanel}, map.flyTo: ${!!map.flyTo}`)
+      return
+    }
+
+    // Skip zoom during initial load period
+    if (isInitialLoadRef.current) {
+      console.log(`[Map Zoom] Still in initial load period, panel: ${activePanel}, skipping zoom`)
+      previousPanelRef.current = activePanel
+      return
+    }
+
+    // Skip if panel hasn't actually changed
+    if (previousPanelRef.current === activePanel) {
+      console.log(`[Map Zoom] Panel unchanged: ${activePanel}, skipping`)
+      return
+    }
+
+    const viewState = PANEL_VIEW_STATES[activePanel]
+    if (!viewState) {
+      console.log(`[Map Zoom] No view state found for panel: ${activePanel}`)
+      previousPanelRef.current = activePanel
+      return
+    }
+
+    console.log(`[Map Zoom] Panel changed from ${previousPanelRef.current} to ${activePanel}, zooming to:`, viewState)
+    previousPanelRef.current = activePanel
+
+    map.flyTo({
+      longitude: viewState.longitude,
+      latitude: viewState.latitude,
+      zoom: viewState.zoom,
+      bearing: viewState.bearing,
+      pitch: viewState.pitch,
+      transitionOptions: { duration: 2000 },
+    })
+  }, [activePanel, map])
 
   return (
     <Box
@@ -46,8 +131,8 @@ export default function CaliforniaMapPanel({
         mapboxToken={token}
         mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
         initialViewState={{
-          longitude: -120.9,
-          latitude: 38.4,
+          longitude: -119.5,
+          latitude: 37.0,
           zoom: 5,
           bearing: 0,
           pitch: 0,
