@@ -21,11 +21,11 @@ interface MapViewState {
   pitch: number
 }
 
-// Initial view of California (used for both initial load and Panel 1)
+// Initial view of California (used for both initial load and Panel 1 position)
 const CALIFORNIA_VIEW: MapViewState = {
   longitude: -119.4,
   latitude: 37.5,
-  zoom: 5.2,
+  zoom: 4,
   bearing: 0,
   pitch: 0,
 }
@@ -65,88 +65,38 @@ export default function CaliforniaMapPanel({
     activePanel,
   } = useCalSimToggle()
 
-  // Track if this is the first panel change (skip zoom on initial load)
-  const isInitialLoadRef = useRef(true)
   const previousPanelRef = useRef<string | null>(null)
-
-  // Allow zoom after page has settled (prevent rapid-fire initial triggers)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      console.log('[Map Zoom] Initial load period complete, zoom enabled')
-      isInitialLoadRef.current = false
-    }, 1000) // Wait 1 second for page to fully settle
-
-    return () => clearTimeout(timer)
-  }, [])
 
   // Scroll-driven zoom: Update map view when active panel changes
   useEffect(() => {
-    if (!activePanel || !map.flyTo) {
-      console.log(`[Map Zoom] Skipping - activePanel: ${activePanel}, map.flyTo: ${!!map.flyTo}`)
-      return
-    }
-
-    // Skip zoom during initial load period
-    if (isInitialLoadRef.current) {
-      console.log(`[Map Zoom] Still in initial load period, panel: ${activePanel}, skipping zoom`)
-      previousPanelRef.current = activePanel
+    if (!activePanel || !map.mapRef?.current) {
       return
     }
 
     // Skip if panel hasn't actually changed
     if (previousPanelRef.current === activePanel) {
-      console.log(`[Map Zoom] Panel unchanged: ${activePanel}, skipping`)
       return
     }
 
     const viewState = PANEL_VIEW_STATES[activePanel]
     if (!viewState) {
-      console.log(`[Map Zoom] No view state found for panel: ${activePanel}`)
       previousPanelRef.current = activePanel
       return
     }
 
-    console.log(`[Map Zoom] Panel changed from ${previousPanelRef.current} to ${activePanel}`)
-    console.log(`[Map Zoom] Target coordinates:`, {
-      longitude: viewState.longitude,
-      latitude: viewState.latitude,
+    previousPanelRef.current = activePanel
+
+    // Use easeTo for smooth camera transitions
+    map.mapRef.current.easeTo({
+      center: [viewState.longitude, viewState.latitude],
       zoom: viewState.zoom,
       bearing: viewState.bearing,
       pitch: viewState.pitch,
+      duration: 2000,
+      easing: (t: number) => t * (2 - t), // ease-out-quad
     })
-    
-    // Get current map position for debugging
-    if (map.mapRef?.current) {
-      const currentView = map.mapRef.current.getCenter()
-      const currentZoom = map.mapRef.current.getZoom()
-      console.log(`[Map Zoom] Current position before flyTo:`, {
-        longitude: currentView.lng,
-        latitude: currentView.lat,
-        zoom: currentZoom,
-      })
-    }
-    
-    previousPanelRef.current = activePanel
-
-    // Use easeTo for more direct path (avoids curved flyTo interpolation)
-    console.log(`[Map Zoom] Executing easeTo now...`)
-    if (map.mapRef?.current) {
-      map.mapRef.current.easeTo({
-        center: [viewState.longitude, viewState.latitude],
-        zoom: viewState.zoom,
-        bearing: viewState.bearing,
-        pitch: viewState.pitch,
-        duration: 2000,
-        easing: (t: number) => t * (2 - t), // ease-out-quad
-      })
-      console.log(`[Map Zoom] easeTo called successfully`)
-    } else {
-      console.error(`[Map Zoom] mapRef.current is null!`)
-    }
   }, [activePanel, map])
 
-  // Log initial view state for debugging
-  console.log('[CaliforniaMapPanel] Rendering with CALIFORNIA_VIEW:', CALIFORNIA_VIEW)
 
   return (
     <Box
@@ -164,11 +114,11 @@ export default function CaliforniaMapPanel({
         mapboxToken={token}
         mapStyle="mapbox://styles/coeqwal/cmh2f40sm000w01qy8m0gaea8"
         initialViewState={CALIFORNIA_VIEW}
-        minZoom={5}
-        maxZoom={18} 
+        minZoom={4}
+        maxZoom={18}
         maxBounds={[
-          [-130.0, 28.0], // Southwest coordinates (west, south) - more generous
-          [-108.0, 46.0], // Northeast coordinates (east, north) - more generous
+          [-130.0, 28.0], // Southwest coordinates (west, south)
+          [-108.0, 46.0], // Northeast coordinates (east, north)
         ]}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
