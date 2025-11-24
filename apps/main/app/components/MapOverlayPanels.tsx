@@ -29,7 +29,6 @@ export default function MapOverlayPanels() {
     showBasins,
     toggleBasins,
     showRivers,
-    toggleRivers,
     setShowRivers,
     setRiversAnimationProgress,
     showInflowArrows,
@@ -412,8 +411,6 @@ export default function MapOverlayPanels() {
           ],
           // Fade arrows OUT when entering Panel 4.5 (Find my basin)
           onEnter: () => {
-            console.log('📍 WHICH BASIN PANEL onEnter - hiding rivers if visible, showRivers:', showRivers)
-            
             // Hide rivers when coming back to this panel from rivers panel
             if (showRivers) {
               setShowRivers(false)
@@ -513,13 +510,11 @@ export default function MapOverlayPanels() {
           ],
           // Setup and scroll-driven animation for rivers panel
           onEnter: (direction) => {
-            console.log('🌊 RIVERS PANEL onEnter - direction:', direction)
             // Reset the "find my basin" panel
             setGeocoderMarker(null)
             
             // Always show rivers when entering this panel
             setShowRivers(true)
-            console.log('🌊 setShowRivers(true) called')
             
             // Only reset rivers when coming from above (scrolling down for first time)
             // Don't reset when coming from below (scrolling back up)
@@ -610,7 +605,6 @@ export default function MapOverlayPanels() {
           ],
           // Hide basins when entering Panel 6 (rivers remain visible)
           onEnter: () => {
-            console.log('📍 PANEL 6 onEnter - showBasins:', showBasinsRef.current)
             if (showBasinsRef.current) toggleBasinsOnRef.current()
           },
         },
