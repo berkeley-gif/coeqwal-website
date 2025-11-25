@@ -191,7 +191,7 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
         sx={{ mb: "100vh" }}
       >
-        <Typography variant="body1">
+        <Typography variant="body1" sx={{ fontWeight: 400 }}>
           The{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
