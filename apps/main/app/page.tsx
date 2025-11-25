@@ -25,9 +25,8 @@ export default function Home() {
           }}
         >
           <IntroSection />
-          <SmoothTabs />
-          {/* Meli, I updated our build tools and ended up having to wrap TabPanels in a Suspense component to fix a build error. */}
           <Suspense fallback={null}>
+            <SmoothTabs />
             <TabPanels />
           </Suspense>
         </Box>
