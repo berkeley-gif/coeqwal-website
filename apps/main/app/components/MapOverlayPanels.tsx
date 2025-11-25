@@ -343,9 +343,66 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
-      {/* ==================== Scenario Comparison Cards ==================== */}
-      <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
-      <ClimateCard isMinimized={false} selectedClimate={1} />
+      {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
+      {/* Wrapper for scroll track + sticky content */}
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          height: "auto",
+        }}
+      >
+        {/* Tall scroll track - creates the scroll pause effect */}
+        <Box
+          id="scenario-scroll-track"
+          sx={{
+            height: "300vh", // 3x viewport height for scroll progression
+            width: "100%",
+            position: "relative",
+          }}
+        />
+
+        {/* Sticky container - stays fixed while scrolling through track */}
+        <Box
+          sx={{
+            position: "sticky",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            width: "100%",
+            height: "100vh",
+            display: "flex",
+            justifyContent: "flex-end", // Align to right
+            alignItems: "center",
+            pl: 2, // Left padding
+            pr: 4, // More right padding for space between panel and edge
+            pointerEvents: "none",
+          }}
+        >
+          {/* Blue panel grouping both cards */}
+          <Box
+            id="baseline-scenario-overlay"
+            sx={{
+              maxWidth: "580px",
+              padding: (theme) => theme.spacing(2),
+              pointerEvents: "auto",
+              display: "flex",
+              flexDirection: "column",
+              gap: (theme) => theme.spacing(1.5),
+              backgroundColor: (theme) => theme.palette.brand.sky,
+              backdropFilter: "blur(10px)",
+              borderRadius: (theme) => theme.borderRadius.card,
+              overflow: "visible", // Allow tooltips to overflow to the left
+            }}
+          >
+            <ScenarioCard
+              isMinimized={false}
+              minimizedTitle="Current operations"
+            />
+            <ClimateCard isMinimized={false} selectedClimate={1} />
+          </Box>
+        </Box>
+      </Box>
     </Box>
   )
 }
