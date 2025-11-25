@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useEffect, useState } from "react"
+import { ReactNode, useRef, useEffect, useState, useCallback } from "react"
 import { Box } from "../mui-components"
 
 interface HighlightedTextProps {
@@ -14,6 +14,7 @@ interface HighlightedTextProps {
   /** Typography component to wrap (h1, h2, p, span, etc) */
   component?: React.ElementType
   /** Additional styles for the text wrapper */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sx?: any
 }
 
@@ -44,7 +45,7 @@ export function HighlightedText({
   const textRef = useRef<HTMLElement>(null)
   const [highlights, setHighlights] = useState<HighlightRect[]>([])
 
-  const calculateHighlights = () => {
+  const calculateHighlights = useCallback(() => {
     if (!wrapperRef.current || !textRef.current) return
 
     const wrapperRect = wrapperRef.current.getBoundingClientRect()
@@ -94,14 +95,14 @@ export function HighlightedText({
     }
 
     setHighlights(newHighlights)
-  }
+  }, [gapSize])
 
   // Calculate highlights on mount and when content changes
   useEffect(() => {
     // Delay to ensure layout is complete and animations have settled
     const timeoutId = setTimeout(calculateHighlights, 100)
     return () => clearTimeout(timeoutId)
-  }, [children, gapSize])
+  }, [children, gapSize, calculateHighlights])
 
   // Recalculate on window resize
   useEffect(() => {
@@ -111,7 +112,7 @@ export function HighlightedText({
 
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
-  }, [children, gapSize])
+  }, [calculateHighlights])
 
   return (
     <Box
