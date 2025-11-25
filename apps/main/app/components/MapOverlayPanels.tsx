@@ -191,9 +191,9 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
         sx={{ mb: "100vh" }}
       >
-        <Typography variant="body1" sx={{ fontWeight: 400 }}>
+        <Typography variant="body1">
           The{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             Central Valley
           </Box>{" "}
           is a long, low valley that collects much of California&apos;s water.
@@ -211,7 +211,7 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           The Central Valley lies across three water{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             basins
           </Box>
           .
@@ -287,15 +287,15 @@ export default function MapOverlayPanels() {
           >
             <Typography variant="body1">
               These waters flow to the Valley floor, where the{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
                 Sacramento River
               </Box>{" "}
               flows from the north and the{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
                 San Joaquin River
               </Box>{" "}
               flows from the south. Their waters meet and mix in the low-lying{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
                 Delta
               </Box>
               .
@@ -339,15 +339,15 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           To do this water planning and accounting, the federal{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             U.S. Bureau of Reclamation
           </Box>{" "}
           and the state{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             Department of Water Resources
           </Box>{" "}
           use a computer model called{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             CalSim
           </Box>
           . CalSim models how water would move through the system based on the water management decisions that are made. 
@@ -365,15 +365,15 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           The{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             COEQWAL
           </Box>{" "}
           project has received support from the{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             University of California
           </Box>{" "}
           and the{" "}
-          <Box component="span" sx={{ fontWeight: 600 }}>
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             Bay-Delta Science Program
           </Box>{" "}
           to run CalSim through a broad range of different water management practices and evaluate
@@ -403,20 +403,20 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
         sx={{ mb: "100vh" }}
       >
-        <Typography variant="body1" sx={{ mb: 2 }}>
+        <Typography variant="body1" sx={{ mb: 3 }}>
           The water management scenarios you will find on this site show:
         </Typography>
-        <Box sx={{ mb: 2 }}>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0 }}>
+        <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 2.5 }}>
+            <Typography variant="body1" sx={{ fontWeight: "600 !important", mb: 0.25 }}>
               Strategy
             </Typography>
             <Typography variant="body1">
               the operations and policies that define it
             </Typography>
           </Box>
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0 }}>
+          <Box sx={{ mb: 2.5 }}>
+            <Typography variant="body1" sx={{ fontWeight: "600 !important", mb: 0.25 }}>
               Outcomes
             </Typography>
             <Typography variant="body1">
@@ -424,7 +424,7 @@ export default function MapOverlayPanels() {
             </Typography>
           </Box>
           <Box>
-            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0 }}>
+            <Typography variant="body1" sx={{ fontWeight: "600 !important", mb: 0.25 }}>
               Hydroclimate
             </Typography>
             <Typography variant="body1">
