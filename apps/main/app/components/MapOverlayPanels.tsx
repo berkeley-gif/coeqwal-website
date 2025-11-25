@@ -17,6 +17,7 @@ import { useState, useEffect, useMemo, useRef } from "react"
 import { CallResponsePanel } from "@repo/ui"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
+import ScrollTooltip from "./ScrollTooltip"
 import { GeocodingPanel } from "./panels/GeocodingPanel"
 import { DeltaInfoPanel } from "./panels/DeltaInfoPanel"
 import { Box, Typography } from "@repo/ui/mui"
@@ -26,6 +27,7 @@ import { useCalSimToggle } from "./CalSimContext"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 import { createLearnChoreographyConfig } from "../config/learnSectionChoreography"
 import { STICKY_HEIGHTS, ENTRANCE_RAMPS } from "../constants/scrollChoreographyConstants"
+import { useScroll, useTransform } from "@repo/motion"
 
 export default function MapOverlayPanels() {
   const map = useMap()
@@ -48,6 +50,52 @@ export default function MapOverlayPanels() {
 
   // Refs for stable choreography callbacks
   const labelFadeAnimationRef = useRef<number | null>(null)
+  
+  // Refs for scroll-driven tooltips
+  const scrollTrackRef = useRef<HTMLElement | null>(null)
+  const climateCardRef = useRef<HTMLDivElement | null>(null)
+  const baselineOverlayRef = useRef<HTMLDivElement | null>(null)
+  
+  // State to track when refs are ready for scroll tracking
+  const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
+
+  // Find the external elements after mount
+  useEffect(() => {
+    scrollTrackRef.current = document.getElementById("scenario-scroll-track")
+    climateCardRef.current = document.getElementById("climate-card") as HTMLDivElement | null
+    baselineOverlayRef.current = document.getElementById("baseline-scenario-overlay") as HTMLDivElement | null
+    
+    // Mark refs as ready if scroll track is found
+    if (scrollTrackRef.current) {
+      setTooltipRefsReady(true)
+    }
+  }, [])
+
+  // Track scroll progress through the scroll track for tooltip animations
+  const { scrollYProgress } = useScroll({
+    target: tooltipRefsReady ? scrollTrackRef : undefined,
+    offset: ["start end", "end start"],
+    layoutEffect: false,
+  })
+
+  // Map scroll progress to tooltip opacities
+  const firstTooltipOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.3, 0.4, 0.5],
+    [0, 1, 1, 0],
+  )
+
+  const secondTooltipOpacity = useTransform(
+    scrollYProgress,
+    [0.5, 0.6, 0.7, 0.8],
+    [0, 1, 1, 0],
+  )
+
+  const thirdTooltipOpacity = useTransform(
+    scrollYProgress,
+    [0.8, 0.85, 0.95, 1.0],
+    [0, 1, 1, 0],
+  )
   const arrowFadeAnimationRef = useRef<number | null>(null)
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
@@ -382,6 +430,7 @@ export default function MapOverlayPanels() {
           {/* Blue panel grouping both cards */}
           <Box
             id="baseline-scenario-overlay"
+            ref={baselineOverlayRef}
             sx={{
               maxWidth: "580px",
               padding: (theme) => theme.spacing(2),
@@ -393,13 +442,38 @@ export default function MapOverlayPanels() {
               backdropFilter: "blur(10px)",
               borderRadius: (theme) => theme.borderRadius.card,
               overflow: "visible", // Allow tooltips to overflow to the left
+              position: "relative", // For absolute positioned tooltips
             }}
           >
             <ScenarioCard
               isMinimized={false}
               minimizedTitle="Current operations"
+              firstTooltipOpacity={firstTooltipOpacity}
+              secondTooltipOpacity={secondTooltipOpacity}
             />
-            <ClimateCard isMinimized={false} selectedClimate={1} />
+            <ClimateCard 
+              ref={climateCardRef}
+              isMinimized={false} 
+              selectedClimate={1} 
+            />
+            
+            {/* Third tooltip - points to ClimateCard from parent level */}
+            <ScrollTooltip
+              targetRef={climateCardRef}
+              containerRef={baselineOverlayRef}
+              content={
+                <>
+                  These options allow you to select how a water management strategy is
+                  expected to perform under different potential{" "}
+                  <Box component="span" sx={{ fontWeight: 600 }}>
+                    hydroclimates
+                  </Box>
+                  .
+                </>
+              }
+              position="left"
+              opacity={thirdTooltipOpacity}
+            />
           </Box>
         </Box>
       </Box>

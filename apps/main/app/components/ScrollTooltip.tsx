@@ -29,16 +29,14 @@ export default function ScrollTooltip({
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
-    if (!targetRef.current || !containerRef.current) {
-      return
-    }
+    if (!targetRef.current || !containerRef.current) return
 
     const updatePosition = () => {
       const targetEl = targetRef.current
       const containerEl = containerRef.current
       if (!targetEl || !containerEl) return
 
-      // Get positions relative to the container
+      // Get positions
       const targetRect = targetEl.getBoundingClientRect()
       const containerRect = containerEl.getBoundingClientRect()
 
@@ -48,21 +46,20 @@ export default function ScrollTooltip({
 
       // Tooltip dimensions
       const tooltipWidth = 300 // max-width from styles
-      const gap = 40 // Larger gap to avoid overlapping the panel
+      const gap = 40 // Gap to avoid overlapping
 
       let top = 0
       let left = 0
 
-      // Position relative to target element within the container
+      // Position relative to target element
       switch (position) {
         case "right":
           top = relativeTop + targetRect.height / 2
           left = relativeLeft + targetRect.width + gap
           break
         case "left":
-          top = relativeTop + targetRect.height / 2 - 32 // Raised
-          // Position tooltip to the left of the entire container, not just the target
-          left = -tooltipWidth - gap
+          top = relativeTop + targetRect.height / 2 - 32 // Slightly raised
+          left = relativeLeft - tooltipWidth - gap
           break
         case "top":
           top = relativeTop - 80 - gap // Approximate tooltip height
