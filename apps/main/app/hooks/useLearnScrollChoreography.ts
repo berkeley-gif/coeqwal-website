@@ -70,7 +70,7 @@ export interface PanelLayerState {
  */
 export type ScrollChoreographyStep = PanelLayerState
 
-const DEFAULT_FADE_DURATION = 600 // ms
+const DEFAULT_FADE_DURATION = 250 // ms
 
 /**
  * Hook for Learn section scroll choreography

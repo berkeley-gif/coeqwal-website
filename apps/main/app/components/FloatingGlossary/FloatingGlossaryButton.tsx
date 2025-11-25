@@ -117,7 +117,7 @@ export function FloatingGlossaryButton({
         },
       }}
     >
-      {/* Left arrow (pointing left) - outside button radius */}
+      {/* Left arrow */}
       {showArrows && (
         <Box
           sx={{
@@ -145,7 +145,7 @@ export function FloatingGlossaryButton({
         }}
       />
 
-      {/* Right arrow (pointing right) - outside button radius */}
+      {/* Right arrow */}
       {showArrows && (
         <Box
           sx={{

@@ -1,5 +1,5 @@
 /**
- * DeltaInfoPanel - Interactive Delta Information Component
+ * DeltaInfoPanel (Learn Map)
  * 
  * Provides information about the Sacramento-San Joaquin River Delta.
  * When clicked, zooms to the Delta and shows the water layer.
