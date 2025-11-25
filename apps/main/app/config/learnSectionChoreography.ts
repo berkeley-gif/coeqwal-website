@@ -665,6 +665,54 @@ export function createLearnChoreographyConfig(params: {
         },
       ],
     },
+
+    // ==================== PANEL 9: Baseline Scenario Cards ====================
+    {
+      panelId: "scenario-scroll-track",
+      position: 9,
+      debugLabel: "Panel 9: Baseline Scenario",
+      layers: [
+        {
+          layerId: "california-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-label",
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+      ],
+    },
+
+    // ==================== PANEL 10: Scenario Buffer ====================
+    {
+      panelId: "scenario-buffer",
+      position: 10,
+      debugLabel: "Panel 10: Scenario Buffer",
+      layers: [
+        {
+          layerId: "california-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-label",
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+      ],
+    },
   ]
 }
 
