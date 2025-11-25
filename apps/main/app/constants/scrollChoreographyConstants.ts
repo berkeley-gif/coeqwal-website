@@ -63,10 +63,10 @@ export const RIVER_ANIMATION = {
 
 /** Progress ranges for basin/inflow fade-out during river animation */
 export const BASIN_FADE = {
-  /** Start fading out basins at 10% of panel scroll */
-  FADE_START: 0.1,
-  /** Finish fading out basins at 45% of panel scroll (more overlap with rivers) */
-  FADE_END: 0.45,
+  /** Start fading out basins at 15% of panel scroll */
+  FADE_START: 0.15,
+  /** Finish fading out basins at 60% of panel scroll (maximum overlap with rivers) */
+  FADE_END: 0.6,
 } as const
 
 /** Progress ranges for label fade-in timing */
