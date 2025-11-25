@@ -17,7 +17,7 @@ interface DeltaInfoPanelProps {
 
 // Delta view coordinates
 const DELTA_VIEW = {
-  center: [-121.5, 38.4] as [number, number],
+  center: [-121.5, 38] as [number, number],
   zoom: 9.25,
   bearing: 0,
   pitch: 0,

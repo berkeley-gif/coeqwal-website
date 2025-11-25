@@ -395,6 +395,9 @@ export function createLearnChoreographyConfig(params: {
       layers: [],
       onExit: (direction) => {
         if (direction === "down") {
+          // Fade out rivers first
+          setShowRivers(false)
+          
           // Zoom back to Central Valley
           if (map.mapRef?.current) {
             map.mapRef.current.easeTo({
@@ -446,6 +449,50 @@ export function createLearnChoreographyConfig(params: {
               // Water layer might not exist
             }
           }
+
+          // Show Central Valley label and polygon
+          if (map.mapRef?.current) {
+            try {
+              const mapInstance = map.mapRef.current.getMap()
+              
+              // Make visible
+              if (mapInstance.getLayer("central-valley-label")) {
+                mapInstance.setLayoutProperty("central-valley-label", "visibility", "visible")
+              }
+              if (mapInstance.getLayer("central-valley-polygon")) {
+                mapInstance.setLayoutProperty("central-valley-polygon", "visibility", "visible")
+              }
+              
+              // Animate opacity from 0 to OPACITY.VISIBLE
+              const duration = ANIMATION_DURATION.CAMERA
+              const startTime = performance.now()
+              
+              const animateCVOpacity = (currentTime: number) => {
+                const elapsed = currentTime - startTime
+                const progress = Math.min(elapsed / duration, 1)
+                const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+                const opacity = Math.max(0, Math.min(OPACITY.VISIBLE, eased * OPACITY.VISIBLE))
+                
+                try {
+                  mapInstance.setPaintProperty("central-valley-label", "text-opacity", opacity)
+                  mapInstance.setPaintProperty("central-valley-polygon", "line-opacity", opacity)
+                } catch {
+                  // Ignore
+                }
+                
+                if (progress < 1) {
+                  requestAnimationFrame(animateCVOpacity)
+                }
+              }
+              
+              // Start from 0 opacity
+              mapInstance.setPaintProperty("central-valley-label", "text-opacity", 0)
+              mapInstance.setPaintProperty("central-valley-polygon", "line-opacity", 0)
+              requestAnimationFrame(animateCVOpacity)
+            } catch {
+              // Layers might not exist
+            }
+          }
         }
       },
     },
@@ -463,13 +510,13 @@ export function createLearnChoreographyConfig(params: {
         },
         {
           layerId: "central-valley-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
         },
         {
           layerId: "central-valley-polygon",
-          visibility: "none",
-          lineOpacity: OPACITY.HIDDEN,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
         },
         {
           layerId: "inflow-watersheds",
@@ -505,10 +552,6 @@ export function createLearnChoreographyConfig(params: {
           lineOpacity: OPACITY.VISIBLE,
         },
       ],
-      onEnter: () => {
-        // Fade out rivers when entering CalSim panel
-        setShowRivers(false)
-      },
     },
 
     // ==================== PANEL 8: COEQWAL Project ====================
