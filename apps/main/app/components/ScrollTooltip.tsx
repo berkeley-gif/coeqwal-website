@@ -29,16 +29,14 @@ export default function ScrollTooltip({
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
-    if (!targetRef.current || !containerRef.current) {
-      return
-    }
+    if (!targetRef.current || !containerRef.current) return
 
     const updatePosition = () => {
       const targetEl = targetRef.current
       const containerEl = containerRef.current
       if (!targetEl || !containerEl) return
 
-      // Get positions relative to the container
+      // Get positions
       const targetRect = targetEl.getBoundingClientRect()
       const containerRect = containerEl.getBoundingClientRect()
 
@@ -48,21 +46,20 @@ export default function ScrollTooltip({
 
       // Tooltip dimensions
       const tooltipWidth = 300 // max-width from styles
-      const gap = 40 // Larger gap to avoid overlapping the panel
+      const gap = 40 // Gap to avoid overlapping
 
       let top = 0
       let left = 0
 
-      // Position relative to target element within the container
+      // Position relative to target element
       switch (position) {
         case "right":
           top = relativeTop + targetRect.height / 2
           left = relativeLeft + targetRect.width + gap
           break
         case "left":
-          top = relativeTop + targetRect.height / 2 - 32 // Raised
-          // Position tooltip to the left of the entire container, not just the target
-          left = -tooltipWidth - gap
+          top = relativeTop + targetRect.height / 2 - 32 // Slightly raised
+          left = relativeLeft - tooltipWidth - gap
           break
         case "top":
           top = relativeTop - 80 - gap // Approximate tooltip height
@@ -98,9 +95,8 @@ export default function ScrollTooltip({
       border: `${arrowSize}px solid transparent`,
     }
 
-    // Using MUI Tooltip in theme (white with border)
+    // Using MUI Tooltip in theme (white)
     const arrowColor = theme.palette.common.white
-    const borderColor = theme.palette.action.hover
 
     switch (position) {
       case "right":
@@ -110,14 +106,6 @@ export default function ScrollTooltip({
           top: "50%",
           transform: "translateY(-50%)",
           borderRightColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderRightColor: borderColor,
-            right: 1,
-            top: -arrowSize,
-          },
         }
       case "left":
         return {
@@ -126,14 +114,6 @@ export default function ScrollTooltip({
           top: "50%",
           transform: "translateY(-50%)",
           borderLeftColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderLeftColor: borderColor,
-            right: -1, // Position outline 1px to the left (towards tooltip)
-            top: -arrowSize,
-          },
         }
       case "top":
         return {
@@ -142,14 +122,6 @@ export default function ScrollTooltip({
           left: "50%",
           transform: "translateX(-50%)",
           borderTopColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderTopColor: borderColor,
-            top: 1,
-            left: -arrowSize,
-          },
         }
       case "bottom":
         return {
@@ -158,14 +130,6 @@ export default function ScrollTooltip({
           left: "50%",
           transform: "translateX(-50%)",
           borderBottomColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderBottomColor: borderColor,
-            bottom: 1,
-            left: -arrowSize,
-          },
         }
     }
   }

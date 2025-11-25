@@ -1,10 +1,12 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Marker } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 
 interface BasinInflowArrowsProps {
   visible?: boolean
+  opacity?: number // 0 to 1, controlled by scroll progress
 }
 
 /**
@@ -13,8 +15,31 @@ interface BasinInflowArrowsProps {
  */
 export default function BasinInflowArrows({
   visible = true,
+  opacity = 1,
 }: BasinInflowArrowsProps) {
-  if (!visible) return null
+  // Debug flag: set to true to show arrow numbers for positioning
+  const SHOW_DEBUG_NUMBERS = false
+
+  // Keyboard toggle: press 'A' to toggle visibility
+  const [keyboardVisible, setKeyboardVisible] = useState(true)
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === "a" || event.key === "A") {
+        setKeyboardVisible((prev) => !prev)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyPress)
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress)
+    }
+  }, [])
+
+  if (!visible || !keyboardVisible) return null
+
+  // Apply keyboard visibility to opacity
+  const effectiveOpacity = keyboardVisible ? opacity : 0
 
   /**
    * Arrow positions around the Central Valley basin perimeter
@@ -31,21 +56,23 @@ export default function BasinInflowArrows({
    */
   const arrowPositions = [
     // ===== NORTHERN RIM (Cascade Range - water flows south) =====
-    // { lon: -122.5, lat: 40.4, rotation: 0, label: "NW - Shasta area" }, // Arrow 1 - commented out
-    // KEEP THIS ONE - Arrow 2 with curved tail:
-    { lon: -121.8, lat: 40.65, rotation: 60, label: "N - Central north" },
-    // { lon: -121.2, lat: 39.9, rotation: 90, label: "NE - Lassen area" }, // Arrow 3 - commented out
+    { lon: -122.05, lat: 40.75, rotation: 65, label: "N - Central north" },
+    { lon: -121.85, lat: 40, rotation: 65, label: "NE - Lassen area" },
 
     // ===== EASTERN RIM (Sierra Nevada - water flows west) =====
-    // { lon: -120.5, lat: 39.8, rotation: 90, label: "E - North Sierra" }, // Arrow 4 - commented out
-    // { lon: -120.8, lat: 39.0, rotation: 90, label: "E - Central Sierra" }, // Arrow 5 - commented out
-    // { lon: -120.0, lat: 38.0, rotation: 90, label: "E - Mid Sierra" }, // Arrow 6 - commented out
-    // { lon: -119.8, lat: 37.0, rotation: 90, label: "E - South Central Sierra" }, // Arrow 7 - commented out
+    { lon: -121.05, lat: 39.0, rotation: 65, label: "E - Central Sierra" },
+    { lon: -120.8, lat: 38.1, rotation: 65, label: "E - Mid Sierra" },
+    { lon: -119.9, lat: 37.1, rotation: 65, label: "E - South Central Sierra" },
 
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
-    // { lon: -121.0, lat: 36.8, rotation: 270, label: "W - Central Coast Range" }, // Arrow 8 - commented out
-    // { lon: -122.7, lat: 38.8, rotation: 270, label: "W - North Coast Range" }, // Arrow 9 - commented out
-    // { lon: -122.8, lat: 39.8, rotation: 280, label: "NW - Northwestern rim" }, // Arrow 10 - commented out
+    { lon: -121.2, lat: 37.4, rotation: 240, label: "W - Central Coast Range" },
+    { lon: -122.5, lat: 39.3, rotation: 240, label: "W - North Coast Range" },
+    {
+      lon: -122.6,
+      lat: 40.3125,
+      rotation: 240,
+      label: "NW - Northwestern rim",
+    },
   ]
 
   const arrowColor = "#2196F3"
@@ -68,12 +95,13 @@ export default function BasinInflowArrows({
               justifyContent: "center",
               transform: `rotate(${pos.rotation}deg)`,
               pointerEvents: "none",
+              opacity: effectiveOpacity,
             }}
           >
             <svg
-              width={index === 0 ? "100" : "70"}
-              height={index === 0 ? "150" : "70"}
-              viewBox={index === 0 ? "0 -70 70 150" : "0 0 70 70"}
+              width="70"
+              height="70"
+              viewBox="0 0 70 70"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               style={{
@@ -82,88 +110,28 @@ export default function BasinInflowArrows({
             >
               <defs>
                 {/* Gradient that fades from solid to transparent along the tail */}
-                {index === 0 ? (
-                  // Longer gradient for arrow 2's longer tail - uses actual coordinates
-                  <linearGradient
-                    id={`arrow-gradient-${index}`}
-                    x1="35"
-                    y1="-67"
-                    x2="35"
-                    y2="47"
-                    gradientUnits="userSpaceOnUse"
-                  >
-                    <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
-                    <stop
-                      offset="15%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.2"
-                    />
-                    <stop
-                      offset="40%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.5"
-                    />
-                    <stop
-                      offset="70%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.8"
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={arrowColor}
-                      stopOpacity="1"
-                    />
-                  </linearGradient>
-                ) : (
-                  // Standard gradient for other arrows
-                  <linearGradient
-                    id={`arrow-gradient-${index}`}
-                    x1="0%"
-                    y1="0%"
-                    x2="0%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
-                    <stop
-                      offset="25%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.3"
-                    />
-                    <stop
-                      offset="60%"
-                      stopColor={arrowColor}
-                      stopOpacity="0.7"
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={arrowColor}
-                      stopOpacity="1"
-                    />
-                  </linearGradient>
-                )}
+                <linearGradient
+                  id={`arrow-gradient-${index}`}
+                  x1="0%"
+                  y1="0%"
+                  x2="0%"
+                  y2="100%"
+                >
+                  <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
+                  <stop offset="25%" stopColor={arrowColor} stopOpacity="0.3" />
+                  <stop offset="60%" stopColor={arrowColor} stopOpacity="0.7" />
+                  <stop offset="100%" stopColor={arrowColor} stopOpacity="1" />
+                </linearGradient>
               </defs>
 
-              {/* Wider and longer fading tail - curved for arrow 2, straight for others */}
-              {index === 0 ? (
-                // Curved tail with constant width for arrow 2 (twice as long)
-                <path
-                  d="M 29 -67
-                     C 24 -20, 24 20, 29 47
-                     L 41 47
-                     C 36 20, 36 -20, 41 -67
-                     Z"
-                  fill={`url(#arrow-gradient-${index})`}
-                />
-              ) : (
-                // Straight rectangular tail for other arrows
-                <rect
-                  x="29"
-                  y="-10"
-                  width="12"
-                  height="57"
-                  fill={`url(#arrow-gradient-${index})`}
-                />
-              )}
+              {/* Fading tail - straight for all arrows (curved tail saved for later) */}
+              <rect
+                x="29"
+                y="18"
+                width="12"
+                height="29"
+                fill={`url(#arrow-gradient-${index})`}
+              />
 
               {/* Rounded triangle arrowhead connected to tail */}
               <path
@@ -179,6 +147,21 @@ export default function BasinInflowArrows({
                    Q 37 63 35 65 Z"
                 fill={arrowColor}
               />
+              {/* Debug number label (toggle with SHOW_DEBUG_NUMBERS flag) */}
+              {SHOW_DEBUG_NUMBERS && (
+                <text
+                  x="35"
+                  y="35"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fill="white"
+                  fontSize="16"
+                  fontWeight="bold"
+                  style={{ pointerEvents: "none" }}
+                >
+                  {index}
+                </text>
+              )}
             </svg>
           </Box>
         </Marker>

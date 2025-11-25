@@ -7,6 +7,7 @@ import type { FeatureCollection, Feature, Polygon, MultiPolygon } from "geojson"
 /**
  * Result from point-in-polygon lookup
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface PointInPolygonResult<T = any> {
   /** The feature that contains the point */
   feature: Feature<Polygon | MultiPolygon, T>
@@ -29,6 +30,7 @@ export interface UsePointInPolygonOptions {
 /**
  * Return value from usePointInPolygon hook
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface UsePointInPolygonReturn<T = any> {
   /** Find the feature containing a point */
   findContainingFeature: (
@@ -67,6 +69,7 @@ export interface UsePointInPolygonReturn<T = any> {
  * }
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function usePointInPolygon<T = any>(
   geoJson: FeatureCollection<Polygon | MultiPolygon, T> | null | undefined,
   options: UsePointInPolygonOptions = {},
@@ -101,6 +104,7 @@ export function usePointInPolygon<T = any>(
         try {
           // Use Turf.js to check if point is in polygon
           // Cast feature to satisfy Turf's type requirements
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const isInside = booleanPointInPolygon(point, feature as any, {
             ignoreBoundary,
           })
@@ -160,10 +164,8 @@ export function usePointInPolygon<T = any>(
  * ```
  */
 export function useBasinLookup(
-  basinGeoJson:
-    | FeatureCollection<Polygon | MultiPolygon, any>
-    | null
-    | undefined,
+  basinGeoJson: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  FeatureCollection<Polygon | MultiPolygon, any> | null | undefined,
 ) {
   const { findContainingFeature, features, isPointInAnyFeature } =
     usePointInPolygon(basinGeoJson, {

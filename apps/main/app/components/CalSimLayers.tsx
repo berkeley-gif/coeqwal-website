@@ -8,6 +8,23 @@ import type { NetworkGeoJSONResponse } from "./CalSimMarkers"
 
 const API_BASE_URL = "https://api.coeqwal.org"
 
+// CalSim feature properties interface
+interface CalSimFeatureProperties {
+  id?: number
+  short_code?: string
+  schematic_type?: "node" | "arc"
+  element_type?: "node" | "arc"
+  type?: string
+  sub_type?: string
+  from_node?: string
+  to_node?: string
+  river_name?: string
+  arc_name?: string
+  hydrologic_region?: string
+  geometry_type?: "point" | "line"
+  source?: string
+}
+
 // More specific API response type (for future use when API is fully migrated)
 // interface EnhancedTrailResponse {
 //   type: "FeatureCollection"
@@ -186,22 +203,26 @@ export default function CalSimLayers() {
   const { majorReservoirFeatures, regularFeatures } = useMemo(() => {
     if (!geoJsonData) return { majorReservoirFeatures: [], regularFeatures: [] }
 
+    /* eslint-disable react/prop-types */
     const major = geoJsonData.features.filter((f) => {
-      const props = f.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      const props = f.properties as CalSimFeatureProperties
       return (
-        (props.schematic_type === "node" || props.element_type === "node") && // eslint-disable-line react/prop-types
-        props.type === "STR" && // eslint-disable-line react/prop-types
-        majorReservoirCodes.has(props.short_code) // eslint-disable-line react/prop-types
+        (props.schematic_type === "node" || props.element_type === "node") &&
+        props.type === "STR" &&
+        props.short_code &&
+        majorReservoirCodes.has(props.short_code)
       )
     })
 
     const regular = geoJsonData.features.filter((f) => {
-      const props = f.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
+      const props = f.properties as CalSimFeatureProperties
       return (
-        (props.schematic_type === "node" || props.element_type === "node") && // eslint-disable-line react/prop-types
-        (props.type !== "STR" || !majorReservoirCodes.has(props.short_code)) // eslint-disable-line react/prop-types
+        (props.schematic_type === "node" || props.element_type === "node") &&
+        (props.type !== "STR" ||
+          !(props.short_code && majorReservoirCodes.has(props.short_code)))
       )
     })
+    /* eslint-enable react/prop-types */
 
     return { majorReservoirFeatures: major, regularFeatures: regular }
   }, [geoJsonData, majorReservoirCodes])
@@ -230,7 +251,8 @@ export default function CalSimLayers() {
         type="geojson"
         data={{
           type: "FeatureCollection",
-          features: regularFeatures as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          features: regularFeatures as any,
         }}
       >
         {/* Regular infrastructure nodes */}
@@ -368,8 +390,11 @@ export default function CalSimLayers() {
       {/* DOM MARKERS: Beautiful LocationOnIcon markers for 8 major reservoirs */}
       {majorReservoirFeatures.map((feature) => {
         const coordinates = feature.geometry.coordinates as [number, number]
-        const props = feature.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
+        const props = feature.properties as CalSimFeatureProperties
         const { id, short_code } = props // eslint-disable-line react/prop-types
+
+        // Skip if no short_code
+        if (!short_code) return null
 
         // Get TAF data from our curated major reservoir data
         const reservoirInfo = majorReservoirData.get(short_code)

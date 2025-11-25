@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef, useState } from "react"
 import {
   Box,
   Typography,
@@ -13,8 +13,8 @@ import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
 import { useCalSimToggle } from "./CalSimContext"
 import { useScenarioTiers } from "../hooks/useTierData"
-import { useScroll, useTransform } from "@repo/motion"
 import ScrollTooltip from "./ScrollTooltip"
+import type { MotionValue } from "@repo/motion"
 
 // Shared operation icons for current operations strategy
 export const CURRENT_OPERATIONS_ICONS = [
@@ -44,12 +44,16 @@ interface ScenarioCardProps {
   isMinimized?: boolean
   onToggleMinimized?: () => void
   minimizedTitle?: string
+  firstTooltipOpacity?: MotionValue<number>
+  secondTooltipOpacity?: MotionValue<number>
 }
 
 export default function ScenarioCard({
   isMinimized = false,
   onToggleMinimized,
   minimizedTitle = "Current operations",
+  firstTooltipOpacity,
+  secondTooltipOpacity,
 }: ScenarioCardProps) {
   const theme = useTheme()
   const { selectedOutcome } = useCalSimToggle()
@@ -61,43 +65,6 @@ export default function ScenarioCard({
   const cardContainerRef = useRef<HTMLDivElement>(null)
   const keyOperationsRef = useRef<HTMLElement>(null)
   const keyOutcomesRef = useRef<HTMLElement>(null)
-  const scrollTrackRef = useRef<HTMLElement | null>(null)
-  const climateCardRef = useRef<HTMLElement | null>(null)
-
-  // Find the external scroll track element and climate card after mount
-  useEffect(() => {
-    scrollTrackRef.current = document.getElementById("scenario-scroll-track")
-    climateCardRef.current = document.getElementById("climate-card")
-  }, [])
-
-  // Track scroll progress through the external scroll track (in MapOverlayPanels)
-  const { scrollYProgress } = useScroll({
-    target: scrollTrackRef,
-    offset: ["start end", "end start"],
-    layoutEffect: false, // Prevent warning when target is in another component
-  })
-
-  // Map scroll progress to tooltip opacities
-  // First tooltip: visible from 0.2 to 0.5
-  const firstTooltipOpacity = useTransform(
-    scrollYProgress,
-    [0.2, 0.3, 0.4, 0.5],
-    [0, 1, 1, 0],
-  )
-
-  // Second tooltip: visible from 0.5 to 0.8
-  const secondTooltipOpacity = useTransform(
-    scrollYProgress,
-    [0.5, 0.6, 0.7, 0.8],
-    [0, 1, 1, 0],
-  )
-
-  // Third tooltip: visible from 0.8 to 1.0
-  const thirdTooltipOpacity = useTransform(
-    scrollYProgress,
-    [0.8, 0.85, 0.95, 1.0],
-    [0, 1, 1, 0],
-  )
 
   // Fetch tier data for s0020 (Current operations)
   const { chartData, isLoading } = useScenarioTiers("s0020")
@@ -135,54 +102,47 @@ export default function ScenarioCard({
         overflow: "visible", // Allow tooltips to overflow to the left
       }}
     >
-      {/* Scroll-driven tooltips */}
-      <ScrollTooltip
-        targetRef={keyOperationsRef}
-        containerRef={cardContainerRef}
-        content={
-          <>
-            These are the key water management{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              operations
-            </Box>{" "}
-            that determine this strategy.
-          </>
-        }
-        position="left"
-        opacity={firstTooltipOpacity}
-      />
-      <ScrollTooltip
-        targetRef={keyOutcomesRef}
-        containerRef={cardContainerRef}
-        content={
-          <>
-            These{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              outcomes
-            </Box>{" "}
-            show how this strategy affects water supply, ecosystems, and
-            communities.
-          </>
-        }
-        position="left"
-        opacity={secondTooltipOpacity}
-      />
-      <ScrollTooltip
-        targetRef={climateCardRef}
-        containerRef={cardContainerRef}
-        content={
-          <>
-            These options allow you to select how a water management strategy is
-            expected to perform under different potential{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              hydroclimates
-            </Box>
-            .
-          </>
-        }
-        position="left"
-        opacity={thirdTooltipOpacity}
-      />
+      {/* Scroll-driven tooltips - only render if opacity values provided */}
+      {firstTooltipOpacity && (
+        <ScrollTooltip
+          targetRef={keyOperationsRef}
+          containerRef={cardContainerRef}
+          content={
+            <>
+              <Box
+                component="span"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
+                Strategy
+              </Box>
+              These are the key operations and policy decisions that define this
+              water management strategy.
+            </>
+          }
+          position="left"
+          opacity={firstTooltipOpacity}
+        />
+      )}
+      {secondTooltipOpacity && (
+        <ScrollTooltip
+          targetRef={keyOutcomesRef}
+          containerRef={cardContainerRef}
+          content={
+            <>
+              <Box
+                component="span"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
+                Key outcomes
+              </Box>
+              These metrics show how this strategy affects water supply,
+              ecosystems, agriculture, and communities.
+            </>
+          }
+          position="left"
+          opacity={secondTooltipOpacity}
+        />
+      )}
 
       {/* The actual card content */}
       <Box
