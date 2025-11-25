@@ -404,21 +404,30 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1" sx={{ mb: 2 }}>
-          Each water management scenario on this site shows:
+          Each water management scenario on this site depicts:
         </Typography>
-        <Box component="ul" sx={{ pl: 3, mb: 2 }}>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-            The strategy (what operations and policies define it)
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            <Box component="span" sx={{ fontWeight: 600 }}>
+              The strategy
+            </Box>
+            {", "}the operations and policies that define it
           </Typography>
-          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
-            The outcomes (how it affects water supply, ecosystems, agriculture, and communities)
+          <Typography variant="body1" sx={{ mb: 1 }}>
+            <Box component="span" sx={{ fontWeight: 600 }}>
+              The outcomes
+            </Box>
+            {", "}how it affects water supply, ecosystems, agriculture, and communities
           </Typography>
-          <Typography component="li" variant="body1">
-            The hydroclimate (how it performs under different possible future climates)
+          <Typography variant="body1">
+            <Box component="span" sx={{ fontWeight: 600 }}>
+              The hydroclimate
+            </Box>
+            {", "}how it performs under different possible future climates
           </Typography>
         </Box>
         <Typography variant="body1">
-          This scorecard helps you read a scenario—what it changes, what it impacts, and how it might matter for your community.
+          Keeping these three things in mind can help you read a scenario and understand what it changes, what it impacts, and how it might matter for your community.
         </Typography>
       </CallResponsePanel>
 
