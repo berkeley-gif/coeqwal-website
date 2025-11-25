@@ -372,7 +372,7 @@ export function createLearnChoreographyConfig(params: {
         )
         setRiversAnimationProgress(riverProgress)
 
-        // BASINS/INFLOW/ARROWS: Fade out from 10%-35% of scroll progress
+        // BASINS/INFLOW/ARROWS: Fade out from 10%-45% of scroll progress
         const fadeProgress = clamp(
           (progress - BASIN_FADE.FADE_START) / 
           (BASIN_FADE.FADE_END - BASIN_FADE.FADE_START),
