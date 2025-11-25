@@ -157,8 +157,10 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       })
 
       // Add click handler
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const handleClick = (e: any) => {
+      const handleClick = (e: { 
+        features?: Array<{ properties: Record<string, unknown> }>
+        lngLat: { lng: number; lat: number }
+      }) => {
         const feature = e.features?.[0]
         if (feature && feature.properties) {
           setPopupInfo({
