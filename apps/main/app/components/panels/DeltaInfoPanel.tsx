@@ -17,8 +17,8 @@ interface DeltaInfoPanelProps {
 
 // Delta view coordinates
 const DELTA_VIEW = {
-  center: [-121.5, 38.0] as [number, number],
-  zoom: 10,
+  center: [-121.5, 38.4] as [number, number],
+  zoom: 9.25,
   bearing: 0,
   pitch: 0,
 }
@@ -42,12 +42,38 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
       })
     }
 
-    // Show water layer
+    // Show and fade in water layer
     if (map.mapRef?.current) {
       try {
         const mapInstance = map.mapRef.current.getMap()
         if (mapInstance.getLayer("water")) {
+          // Make visible
           mapInstance.setLayoutProperty("water", "visibility", "visible")
+          
+          // Animate opacity from 0 to 1
+          const duration = ANIMATION_DURATION.EASE
+          const startTime = performance.now()
+          
+          const animateOpacity = (currentTime: number) => {
+            const elapsed = currentTime - startTime
+            const progress = Math.min(elapsed / duration, 1)
+            const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+            const opacity = Math.max(0, Math.min(1, eased)) // Clamp between 0 and 1
+            
+            try {
+              mapInstance.setPaintProperty("water", "fill-opacity", opacity)
+            } catch {
+              // Layer might not support this property
+            }
+            
+            if (progress < 1) {
+              requestAnimationFrame(animateOpacity)
+            }
+          }
+          
+          // Start from 0 opacity
+          mapInstance.setPaintProperty("water", "fill-opacity", 0)
+          requestAnimationFrame(animateOpacity)
         }
       } catch {
         // Silently fail if water layer doesn't exist
