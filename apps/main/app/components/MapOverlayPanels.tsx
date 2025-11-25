@@ -1,5 +1,5 @@
 /**
- * MapOverlayPanels - Scroll-Driven Storytelling for Learn Section
+ * MapOverlayPanels - Scroll-driven storytelling for Learn section
  * 
  * Displays narrative panels that overlay the sticky map, with synchronized
  * map visualizations controlled by scroll position.
@@ -50,6 +50,12 @@ export default function MapOverlayPanels() {
 
   // Refs for stable choreography callbacks
   const labelFadeAnimationRef = useRef<number | null>(null)
+  const arrowFadeAnimationRef = useRef<number | null>(null)
+  const toggleBasinsOnRef = useRef(toggleBasins)
+  const showBasinsRef = useRef(showBasins)
+  const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
+  const showInflowArrowsRef = useRef(showInflowArrows)
+  const inflowArrowsOpacityRef = useRef(inflowArrowsOpacity)
   
   // Refs for scroll-driven tooltips
   const scrollTrackRef = useRef<HTMLElement | null>(null)
@@ -96,12 +102,6 @@ export default function MapOverlayPanels() {
     [0.8, 0.85, 0.95, 1.0],
     [0, 1, 1, 0],
   )
-  const arrowFadeAnimationRef = useRef<number | null>(null)
-  const toggleBasinsOnRef = useRef(toggleBasins)
-  const showBasinsRef = useRef(showBasins)
-  const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
-  const showInflowArrowsRef = useRef(showInflowArrows)
-  const inflowArrowsOpacityRef = useRef(inflowArrowsOpacity)
 
   // Keep refs synchronized with latest values
   useEffect(() => {
@@ -170,7 +170,7 @@ export default function MapOverlayPanels() {
         paddingBottom: "40vh",
       }}
     >
-      {/* ==================== PANEL 1: California Overview ==================== */}
+      {/* ==================== PANEL 1: California overview ==================== */}
       <CallResponsePanel
         id="calsim-call"
         side="left"
@@ -218,7 +218,7 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
-      {/* ==================== PANEL 4: Water Flow ==================== */}
+      {/* ==================== PANEL 4: Water flow ==================== */}
       <CallResponsePanel
         id="water-flow-call"
         side="left"
@@ -261,7 +261,7 @@ export default function MapOverlayPanels() {
         />
       </CallResponsePanel>
 
-      {/* ==================== PANEL 5: Rivers (Sticky) ==================== */}
+      {/* ==================== PANEL 5: Rivers (sticky) ==================== */}
       <Box
         id="rivers-flow-response"
         sx={{
@@ -304,7 +304,7 @@ export default function MapOverlayPanels() {
         </Box>
       </Box>
 
-      {/* ==================== PANEL 6: Delta Info ==================== */}
+      {/* ==================== PANEL 6: Delta info ==================== */}
       <CallResponsePanel
         id="delta-info-response"
         side="right"
@@ -316,7 +316,7 @@ export default function MapOverlayPanels() {
         <DeltaInfoPanel map={map} />
       </CallResponsePanel>
 
-      {/* ==================== PANEL 6: Water Distribution ==================== */}
+      {/* ==================== PANEL 6: Water distribution ==================== */}
       <CallResponsePanel
         id="water-distribution-call"
         side="left"
@@ -333,7 +333,7 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
-      {/* ==================== PANEL 7: CalSim Model ==================== */}
+      {/* ==================== PANEL 7: CalSim model ==================== */}
       <CallResponsePanel
         id="calsim-detailed-response"
         side="left"
@@ -359,7 +359,7 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
-      {/* ==================== PANEL 8: COEQWAL Project ==================== */}
+      {/* ==================== PANEL 8: COEQWAL project ==================== */}
       <CallResponsePanel
         id="coeqwal-call"
         side="left"

@@ -1,12 +1,12 @@
 /**
- * Scroll Choreography Configuration for Learn Section
+ * Scroll Choreography for Learn section scrollytelling
  * 
  * Defines the complete scroll-driven animation sequence:
  * - Panel IDs and positions
  * - Map layer states at each point
  * - Entry/exit/scroll callbacks
  * 
- * Following storyline-flow pattern: configuration separate from implementation
+ * Configuration separate from implementation
  */
 
 import type { PanelLayerState } from "../hooks/useLearnScrollChoreography"
@@ -19,6 +19,22 @@ import {
   EASING,
   clamp,
 } from "../constants/scrollChoreographyConstants"
+
+/**
+ * Helper: Zoom camera back to Central Valley view
+ */
+function zoomToCentralValley(mapRef: any) {
+  if (mapRef?.current) {
+    mapRef.current.easeTo({
+      center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+      zoom: CENTRAL_VALLEY_VIEW.zoom,
+      bearing: CENTRAL_VALLEY_VIEW.bearing,
+      pitch: CENTRAL_VALLEY_VIEW.pitch,
+      duration: ANIMATION_DURATION.CAMERA,
+      easing: EASING.EASE_OUT,
+    })
+  }
+}
 
 /**
  * Configuration factory for Learn section choreography
@@ -63,7 +79,7 @@ export function createLearnChoreographyConfig(params: {
   } = params
 
   return [
-    // ==================== PANEL 1: California Overview ====================
+    // ==================== PANEL 1: California overview ====================
     {
       panelId: "calsim-call",
       position: 0,
@@ -87,7 +103,7 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 2: Central Valley Focus ====================
+    // ==================== PANEL 2: Central Valley focus ====================
     {
       panelId: "central-valley-importance",
       position: 1,
@@ -202,7 +218,7 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 4: Water Flow & Watersheds ====================
+    // ==================== PANEL 4: Water flow & watersheds ====================
     {
       panelId: "water-flow-call",
       position: 2.5,
@@ -225,7 +241,7 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 4.25: Arrow Trigger ====================
+    // ==================== PANEL 4.25: Arrow trigger ====================
     {
       panelId: "arrows-trigger",
       position: 2.6,
@@ -294,7 +310,7 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 4.5: Which Basin (Find My Basin) ====================
+    // ==================== PANEL 4.5: Which basin (Find my basin) ====================
     {
       panelId: "which-basin-call",
       position: 3.5,
@@ -312,37 +328,18 @@ export function createLearnChoreographyConfig(params: {
           // Clear geocoder marker and reset panel when scrolling down
           setGeocoderMarker(null)
           resetGeocodingPanel()
-          
-          // Zoom back out to Central Valley view if user zoomed in to a location
-          if (map.mapRef?.current) {
-            map.mapRef.current.easeTo({
-              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-              zoom: CENTRAL_VALLEY_VIEW.zoom,
-              bearing: CENTRAL_VALLEY_VIEW.bearing,
-              pitch: CENTRAL_VALLEY_VIEW.pitch,
-              duration: ANIMATION_DURATION.CAMERA,
-              easing: EASING.EASE_OUT,
-            })
-          }
+          // Zoom back out to Central Valley view
+          zoomToCentralValley(map.mapRef)
         } else if (direction === "up") {
           // Just clear the marker when scrolling up
           setGeocoderMarker(null)
           // Zoom back to Central Valley view
-          if (map.mapRef?.current) {
-            map.mapRef.current.easeTo({
-              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-              zoom: CENTRAL_VALLEY_VIEW.zoom,
-              bearing: CENTRAL_VALLEY_VIEW.bearing,
-              pitch: CENTRAL_VALLEY_VIEW.pitch,
-              duration: ANIMATION_DURATION.CAMERA,
-              easing: EASING.EASE_OUT,
-            })
-          }
+          zoomToCentralValley(map.mapRef)
         }
       },
     },
 
-    // ==================== PANEL 5: Rivers Animation (Sticky) ====================
+    // ==================== PANEL 5: Rivers animation (Sticky) ====================
     {
       panelId: "rivers-flow-response",
       position: 4.5,
@@ -408,7 +405,7 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 6: Delta Info ====================
+    // ==================== PANEL 6: Delta info ====================
     {
       panelId: "delta-info-response",
       position: 5.5,
@@ -473,18 +470,8 @@ export function createLearnChoreographyConfig(params: {
         if (direction === "down") {
           // Fade out rivers first
           setShowRivers(false)
-          
           // Zoom back to Central Valley
-          if (map.mapRef?.current) {
-            map.mapRef.current.easeTo({
-              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-              zoom: CENTRAL_VALLEY_VIEW.zoom,
-              bearing: CENTRAL_VALLEY_VIEW.bearing,
-              pitch: CENTRAL_VALLEY_VIEW.pitch,
-              duration: ANIMATION_DURATION.CAMERA,
-              easing: EASING.EASE_OUT,
-            })
-          }
+          zoomToCentralValley(map.mapRef)
 
           // Fade out and hide water layer ONLY if it's visible
           if (map.mapRef?.current) {
@@ -576,18 +563,11 @@ export function createLearnChoreographyConfig(params: {
           }
         } else if (direction === "up") {
           // When scrolling up to Rivers panel
+          // Zoom back to Central Valley
+          zoomToCentralValley(map.mapRef)
+          
+          // Hide water layer ONLY if it's visible
           if (map.mapRef?.current) {
-            // Zoom back to Central Valley
-            map.mapRef.current.easeTo({
-              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-              zoom: CENTRAL_VALLEY_VIEW.zoom,
-              bearing: CENTRAL_VALLEY_VIEW.bearing,
-              pitch: CENTRAL_VALLEY_VIEW.pitch,
-              duration: ANIMATION_DURATION.CAMERA,
-              easing: EASING.EASE_OUT,
-            })
-            
-            // Hide water layer ONLY if it's visible
             try {
               const mapInstance = map.mapRef.current.getMap()
               if (mapInstance.getLayer("water")) {
@@ -606,7 +586,7 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 6.5: Water Distribution ====================
+    // ==================== PANEL 6.5: Water distribution ====================
     {
       panelId: "water-distribution-call",
       position: 6,
@@ -639,7 +619,7 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 7: CalSim Model ====================
+    // ==================== PANEL 7: CalSim model ====================
     {
       panelId: "calsim-detailed-response",
       position: 7,
@@ -663,7 +643,7 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 8: COEQWAL Project ====================
+    // ==================== PANEL 8: COEQWAL project ====================
     {
       panelId: "coeqwal-call",
       position: 8,
@@ -687,7 +667,7 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 9: Baseline Scenario Cards ====================
+    // ==================== PANEL 9: Baseline scenario cards ====================
     {
       panelId: "scenario-scroll-track",
       position: 9,
@@ -711,7 +691,7 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 10: Scenario Buffer ====================
+    // ==================== PANEL 10: Scenario buffer ====================
     {
       panelId: "scenario-buffer",
       position: 10,
@@ -735,11 +715,11 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 11: Learn More Container ====================
+    // ==================== PANEL 11: Learn more container ====================
     {
       panelId: "learnMoreContainer",
       position: 11,
-      debugLabel: "Panel 11: Learn More",
+      debugLabel: "Panel 11: Learn more",
       layers: [
         {
           layerId: "california-label",
