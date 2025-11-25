@@ -312,33 +312,11 @@ export function createLearnChoreographyConfig(params: {
           // Clear geocoder marker and reset panel when scrolling down
           setGeocoderMarker(null)
           resetGeocodingPanel()
-          
-          // Return to Central Valley view when scrolling down
-          if (map.mapRef?.current) {
-            map.mapRef.current.easeTo({
-              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-              zoom: CENTRAL_VALLEY_VIEW.zoom,
-              bearing: CENTRAL_VALLEY_VIEW.bearing,
-              pitch: CENTRAL_VALLEY_VIEW.pitch,
-              duration: ANIMATION_DURATION.CAMERA,
-              easing: EASING.EASE_OUT,
-            })
-          }
+          // No camera movement - already at Central Valley view for Rivers panel
         } else if (direction === "up") {
           // Just clear the marker when scrolling up (keep search state)
           setGeocoderMarker(null)
-          
-          // Return to Central Valley view
-          if (map.mapRef?.current) {
-            map.mapRef.current.easeTo({
-              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-              zoom: CENTRAL_VALLEY_VIEW.zoom,
-              bearing: CENTRAL_VALLEY_VIEW.bearing,
-              pitch: CENTRAL_VALLEY_VIEW.pitch,
-              duration: ANIMATION_DURATION.CAMERA,
-              easing: EASING.EASE_OUT,
-            })
-          }
+          // No camera movement needed
         }
       },
     },
@@ -357,6 +335,10 @@ export function createLearnChoreographyConfig(params: {
         setRiversAnimationProgress(0)
         setShowRivers(true)
       },
+      onExit: () => {
+        // Keep rivers visible and camera position unchanged when exiting
+        // Don't reset rivers or change camera - let them stay for subsequent panels
+      },
       onScroll: (progress) => {
         if (!map.mapRef?.current) return
         
@@ -372,7 +354,7 @@ export function createLearnChoreographyConfig(params: {
         )
         setRiversAnimationProgress(riverProgress)
 
-        // BASINS/INFLOW/ARROWS: Fade out from 10%-45% of scroll progress
+        // BASINS/INFLOW/ARROWS: Fade out from 15%-60% of scroll progress
         const fadeProgress = clamp(
           (progress - BASIN_FADE.FADE_START) / 
           (BASIN_FADE.FADE_END - BASIN_FADE.FADE_START),
@@ -405,44 +387,11 @@ export function createLearnChoreographyConfig(params: {
       },
     },
 
-    // ==================== PANEL 6: Water Distribution ====================
-    {
-      panelId: "water-distribution-call",
-      position: 5.5,
-      debugLabel: "Panel 6: Distribution",
-      layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "none",
-          lineOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "inflow-watersheds",
-          visibility: "none",
-          fillOpacity: OPACITY.HIDDEN,
-        },
-      ],
-      onEnter: () => {
-        // Hide basins when entering Panel 6
-        if (showBasinsRef.current) toggleBasinsOnRef.current?.()
-      },
-    },
-
-    // ==================== PANEL 6.5: Delta Info ====================
+    // ==================== PANEL 6: Delta Info ====================
     {
       panelId: "delta-info-response",
-      position: 6,
-      debugLabel: "Panel 6.5: Delta Info",
+      position: 5.5,
+      debugLabel: "Panel 6: Delta Info",
       layers: [],
       onExit: (direction) => {
         if (direction === "down") {
@@ -470,6 +419,39 @@ export function createLearnChoreographyConfig(params: {
             }
           }
         }
+      },
+    },
+
+    // ==================== PANEL 6.5: Water Distribution ====================
+    {
+      panelId: "water-distribution-call",
+      position: 6,
+      debugLabel: "Panel 6.5: Water Distribution",
+      layers: [
+        {
+          layerId: "california-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-polygon",
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "inflow-watersheds",
+          visibility: "none",
+          fillOpacity: OPACITY.HIDDEN,
+        },
+      ],
+      onEnter: () => {
+        // Hide basins when entering this panel
+        if (showBasinsRef.current) toggleBasinsOnRef.current?.()
       },
     },
 

@@ -256,17 +256,14 @@ export default function MapOverlayPanels() {
         </Box>
       </Box>
 
-      {/* Spacer after rivers panel */}
-      <Box sx={{ height: "80vh" }} />
-
-      {/* ==================== PANEL 6.5: Delta Info ==================== */}
+      {/* ==================== PANEL 6: Delta Info ==================== */}
       <CallResponsePanel
         id="delta-info-response"
         side="right"
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{ mb: "100vh" }}
+        sx={{ mt: "80vh", mb: "100vh" }}
       >
         <DeltaInfoPanel map={map} />
       </CallResponsePanel>
