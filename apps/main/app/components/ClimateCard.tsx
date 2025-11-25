@@ -1,5 +1,6 @@
 "use client"
 
+import { forwardRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { InfoIconButton, DiscreteSlider } from "@repo/ui"
 import { useDrawerStore } from "@repo/state"
@@ -11,30 +12,35 @@ interface ClimateCardProps {
   onClimateChange?: (value: number) => void
 }
 
-export default function ClimateCard({
-  isMinimized = false,
-  onToggleMinimized,
-  selectedClimate = 1,
-  onClimateChange = () => {},
-}: ClimateCardProps) {
-  const theme = useTheme()
-  const { setDrawerContent, openDrawer } = useDrawerStore()
+const ClimateCard = forwardRef<HTMLDivElement, ClimateCardProps>(
+  function ClimateCard(
+    {
+      isMinimized = false,
+      onToggleMinimized,
+      selectedClimate = 1,
+      onClimateChange = () => {},
+    },
+    ref
+  ) {
+    const theme = useTheme()
+    const { setDrawerContent, openDrawer } = useDrawerStore()
 
-  const handleGlossaryOpen = (entry: string) => {
-    setDrawerContent({
-      selectedTerm: entry,
-    })
-    openDrawer("glossary")
-  }
+    const handleGlossaryOpen = (entry: string) => {
+      setDrawerContent({
+        selectedTerm: entry,
+      })
+      openDrawer("glossary")
+    }
 
-  return (
-    <Box
-      id="climate-card"
-      sx={{
-        position: "relative",
-        height: "auto",
-      }}
-    >
+    return (
+      <Box
+        id="climate-card"
+        ref={ref}
+        sx={{
+          position: "relative",
+          height: "auto",
+        }}
+      >
       <Box
         sx={{
           pointerEvents: "auto",
@@ -197,4 +203,6 @@ export default function ClimateCard({
       )}
     </Box>
   )
-}
+})
+
+export default ClimateCard
