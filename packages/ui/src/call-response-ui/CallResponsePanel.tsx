@@ -117,7 +117,7 @@ export function CallResponsePanel({
                   : theme.palette.common.white,
             },
             "& .MuiTypography-body1": {
-              fontSize: { xs: "1.125rem", sm: "1.1875rem", md: "1.25rem" },
+              fontSize: { xs: "1.0625rem", sm: "1.125rem", md: "1.1875rem" },
               color: (theme) =>
                 side === "right"
                   ? theme.palette.grey[900]
@@ -139,7 +139,7 @@ export function CallResponsePanel({
             children
           ) : (
             <HighlightedText
-              highlightColor={side === "right" ? "#FFFFFF" : "#3A4574"}
+              highlightColor={side === "right" ? "#FFFFFF" : "#080b0e"}
               gapSize={0.25}
               sx={{ width: "100%" }}
             >
