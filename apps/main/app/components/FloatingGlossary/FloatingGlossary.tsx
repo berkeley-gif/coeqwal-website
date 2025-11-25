@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
+import { useDrawerStore } from "@repo/state"
 import { FloatingGlossaryButton } from "./FloatingGlossaryButton"
 import { FloatingGlossaryPanel } from "./FloatingGlossaryPanel"
 
@@ -21,6 +22,7 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<Position>({ bottom: 32, right: 32 })
   const [isDragging, setIsDragging] = useState(false)
+  const [currentSelectedTerm, setCurrentSelectedTerm] = useState<string | undefined>(selectedTerm)
   const dragStartRef = useRef<{
     x: number
     y: number
@@ -28,8 +30,27 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
     right: number
   } | null>(null)
 
+  // Connect to drawer store for external control (e.g., from IntroSection)
+  const drawerStore = useDrawerStore()
+  
+  // Listen to drawer store to open glossary when requested externally
+  useEffect(() => {
+    if (drawerStore.isOpen && drawerStore.activeTab === "glossary") {
+      setIsOpen(true)
+      // Extract selectedTerm from drawer content if available
+      if (drawerStore.content?.selectedTerm) {
+        setCurrentSelectedTerm(drawerStore.content.selectedTerm as string)
+      }
+      // Close the drawer store after handling (floating glossary takes over)
+      drawerStore.closeDrawer()
+    }
+  }, [drawerStore.isOpen, drawerStore.activeTab, drawerStore.content, drawerStore])
+
   const handleToggle = () => setIsOpen((prev) => !prev)
-  const handleClose = () => setIsOpen(false)
+  const handleClose = () => {
+    setIsOpen(false)
+    setCurrentSelectedTerm(undefined)
+  }
 
   const handleDragStart = (e: React.MouseEvent) => {
     // Only start drag if not clicking to toggle
@@ -82,7 +103,8 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
       <FloatingGlossaryPanel
         isOpen={isOpen}
         onClose={handleClose}
-        selectedTerm={selectedTerm}
+        onOpen={handleToggle}
+        selectedTerm={currentSelectedTerm}
         position={position}
         isOnLeftHalf={isOnLeftHalf}
       />
