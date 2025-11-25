@@ -1,6 +1,6 @@
 /**
  * DeltaInfoPanel (Learn Map)
- * 
+ *
  * Provides information about the Sacramento-San Joaquin River Delta.
  * When clicked, zooms to the Delta and shows the water layer.
  */
@@ -8,7 +8,10 @@
 import { useState } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import type { MapOperationsAPI } from "@repo/map"
-import { ANIMATION_DURATION, EASING } from "../../constants/scrollChoreographyConstants"
+import {
+  ANIMATION_DURATION,
+  EASING,
+} from "../../constants/scrollChoreographyConstants"
 
 interface DeltaInfoPanelProps {
   /** Map operations API for camera control */
@@ -49,28 +52,28 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
         if (mapInstance.getLayer("water")) {
           // Make visible
           mapInstance.setLayoutProperty("water", "visibility", "visible")
-          
+
           // Animate opacity from 0 to 1
           const duration = ANIMATION_DURATION.EASE
           const startTime = performance.now()
-          
+
           const animateOpacity = (currentTime: number) => {
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
             const opacity = Math.max(0, Math.min(1, eased)) // Clamp between 0 and 1
-            
+
             try {
               mapInstance.setPaintProperty("water", "fill-opacity", opacity)
             } catch {
               // Layer might not support this property
             }
-            
+
             if (progress < 1) {
               requestAnimationFrame(animateOpacity)
             }
           }
-          
+
           // Start from 0 opacity
           mapInstance.setPaintProperty("water", "fill-opacity", 0)
           requestAnimationFrame(animateOpacity)
@@ -141,15 +144,14 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             textAlign: "left",
           }}
         >
-          The Sacramento–San Joaquin Delta (also called the Bay-Delta) is the unique ecosystem of
-          low-lying channels, islands, and wetlands where the Sacramento and San Joaquin
-          rivers meet, roughly between Sacramento, Stockton, and Antioch. Here,
-          river water mixes with salty tides from San Francisco Bay.
-          Pumps and canals move water from the Delta to cities and farms across
-          the state.
+          The Sacramento–San Joaquin Delta (also called the Bay-Delta) is the
+          unique ecosystem of low-lying channels, islands, and wetlands where
+          the Sacramento and San Joaquin rivers meet, roughly between
+          Sacramento, Stockton, and Antioch. Here, river water mixes with salty
+          tides from San Francisco Bay. Pumps and canals move water from the
+          Delta to cities and farms across the state.
         </Typography>
       )}
     </Box>
   )
 }
-

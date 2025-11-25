@@ -57,9 +57,12 @@ export function CallResponsePanel({
       }}
     >
       <motion.div
-        initial={{ marginTop: twoStageAnimation ? "60vh" : "100vh", opacity: 1 }}
+        initial={{
+          marginTop: twoStageAnimation ? "60vh" : "100vh",
+          opacity: 1,
+        }}
         animate={{
-          marginTop: isVisible ? 0 : (twoStageAnimation ? "60vh" : "100vh"),
+          marginTop: isVisible ? 0 : twoStageAnimation ? "60vh" : "100vh",
           opacity: 1, // Always visible, no fade
         }}
         transition={

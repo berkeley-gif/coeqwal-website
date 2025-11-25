@@ -68,18 +68,21 @@ export function FloatingGlossaryPanel({
     if (!isOpen) {
       onOpen()
     }
-    
+
     setInternalSelectedTerm(termName)
-    
+
     // Scroll to the term (with delay if panel is opening)
-    setTimeout(() => {
-      if (termRefs.current[termName]) {
-        termRefs.current[termName]?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        })
-      }
-    }, isOpen ? 0 : 300) // Delay if opening, immediate if already open
+    setTimeout(
+      () => {
+        if (termRefs.current[termName]) {
+          termRefs.current[termName]?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          })
+        }
+      },
+      isOpen ? 0 : 300,
+    ) // Delay if opening, immediate if already open
   }
 
   // Function to render definition text with clickable term links

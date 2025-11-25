@@ -1,9 +1,9 @@
 /**
  * MapOverlayPanels - Scroll-driven storytelling for Learn section
- * 
+ *
  * Displays narrative panels that overlay the sticky map, with synchronized
  * map visualizations controlled by scroll position.
- * 
+ *
  * Architecture:
  * - Panel UI defined here (content, layout, spacing)
  * - Scroll choreography configuration in config/learnSectionChoreography.ts
@@ -26,7 +26,10 @@ import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 import { createLearnChoreographyConfig } from "../config/learnSectionChoreography"
-import { STICKY_HEIGHTS, ENTRANCE_RAMPS } from "../constants/scrollChoreographyConstants"
+import {
+  STICKY_HEIGHTS,
+  ENTRANCE_RAMPS,
+} from "../constants/scrollChoreographyConstants"
 import { useScroll, useTransform } from "@repo/motion"
 
 export default function MapOverlayPanels() {
@@ -56,21 +59,25 @@ export default function MapOverlayPanels() {
   const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
   const showInflowArrowsRef = useRef(showInflowArrows)
   const inflowArrowsOpacityRef = useRef(inflowArrowsOpacity)
-  
+
   // Refs for scroll-driven tooltips
   const scrollTrackRef = useRef<HTMLElement | null>(null)
   const climateCardRef = useRef<HTMLDivElement | null>(null)
   const baselineOverlayRef = useRef<HTMLDivElement | null>(null)
-  
+
   // State to track when refs are ready for scroll tracking
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
 
   // Find the external elements after mount
   useEffect(() => {
     scrollTrackRef.current = document.getElementById("scenario-scroll-track")
-    climateCardRef.current = document.getElementById("climate-card") as HTMLDivElement | null
-    baselineOverlayRef.current = document.getElementById("baseline-scenario-overlay") as HTMLDivElement | null
-    
+    climateCardRef.current = document.getElementById(
+      "climate-card",
+    ) as HTMLDivElement | null
+    baselineOverlayRef.current = document.getElementById(
+      "baseline-scenario-overlay",
+    ) as HTMLDivElement | null
+
     // Mark refs as ready if scroll track is found
     if (scrollTrackRef.current) {
       setTooltipRefsReady(true)
@@ -110,26 +117,39 @@ export default function MapOverlayPanels() {
     toggleInflowArrowsOnRef.current = toggleInflowArrows
     showInflowArrowsRef.current = showInflowArrows
     inflowArrowsOpacityRef.current = inflowArrowsOpacity
-  }, [toggleBasins, showBasins, toggleInflowArrows, showInflowArrows, inflowArrowsOpacity])
+  }, [
+    toggleBasins,
+    showBasins,
+    toggleInflowArrows,
+    showInflowArrows,
+    inflowArrowsOpacity,
+  ])
 
   // Create choreography configuration
   const choreographyConfig = useMemo(
-    () => createLearnChoreographyConfig({
+    () =>
+      createLearnChoreographyConfig({
+        map,
+        showBasinsRef,
+        showInflowArrowsRef,
+        inflowArrowsOpacityRef,
+        labelFadeAnimationRef,
+        arrowFadeAnimationRef,
+        toggleBasinsOnRef,
+        toggleInflowArrowsOnRef,
+        setInflowArrowsOpacity,
+        setGeocoderMarker,
+        setShowRivers,
+        setRiversAnimationProgress,
+        resetGeocodingPanel: () => setGeocodingResetTrigger((prev) => prev + 1),
+      }),
+    [
       map,
-      showBasinsRef,
-      showInflowArrowsRef,
-      inflowArrowsOpacityRef,
-      labelFadeAnimationRef,
-      arrowFadeAnimationRef,
-      toggleBasinsOnRef,
-      toggleInflowArrowsOnRef,
       setInflowArrowsOpacity,
       setGeocoderMarker,
       setShowRivers,
       setRiversAnimationProgress,
-      resetGeocodingPanel: () => setGeocodingResetTrigger(prev => prev + 1),
-    }),
-    [map, setInflowArrowsOpacity, setGeocoderMarker, setShowRivers, setRiversAnimationProgress]
+    ],
   )
 
   // Initialize scroll choreography
@@ -148,7 +168,7 @@ export default function MapOverlayPanels() {
       {
         threshold: 0.1,
         rootMargin: "0px",
-      }
+      },
     )
 
     const mapPanel = document.getElementById("california-map")
@@ -179,7 +199,8 @@ export default function MapOverlayPanels() {
         sx={{ mb: "120vh" }}
       >
         <Typography variant="body1">
-          Did you know that California has one of the most complex water systems in the world?
+          Did you know that California has one of the most complex water systems
+          in the world?
         </Typography>
       </CallResponsePanel>
 
@@ -197,7 +218,8 @@ export default function MapOverlayPanels() {
             Central Valley
           </Box>{" "}
           is a long, low valley that collects much of California&apos;s water.
-          This water is stored, divided up, and transported to farms and cities across the state.
+          This water is stored, divided up, and transported to farms and cities
+          across the state.
         </Typography>
       </CallResponsePanel>
 
@@ -228,7 +250,8 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           Each basin receives the rain and snowmelt that flows down from
-          surrounding mountains into its network of streams, rivers, reservoirs, and wetlands.
+          surrounding mountains into its network of streams, rivers, reservoirs,
+          and wetlands.
         </Typography>
       </CallResponsePanel>
 
@@ -287,15 +310,24 @@ export default function MapOverlayPanels() {
           >
             <Typography variant="body1">
               These waters flow to the Valley floor, where the{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+              <Box
+                component="span"
+                sx={{ fontStyle: "italic", fontWeight: 600 }}
+              >
                 Sacramento River
               </Box>{" "}
               flows from the north and the{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+              <Box
+                component="span"
+                sx={{ fontStyle: "italic", fontWeight: 600 }}
+              >
                 San Joaquin River
               </Box>{" "}
               flows from the south. Their waters meet and mix in the low-lying{" "}
-              <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+              <Box
+                component="span"
+                sx={{ fontStyle: "italic", fontWeight: 600 }}
+              >
                 Delta
               </Box>
               .
@@ -325,7 +357,10 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          Water is diverted and distributed from multiple points along this system. Some water is released from reservoirs. Some is pumped from the Delta to points further south. Some is allowed to flow out to the Pacific Ocean. All of it must be carefully planned and accounted for.
+          Water is diverted and distributed from multiple points along this
+          system. Some water is released from reservoirs. Some is pumped from
+          the Delta to points further south. Some is allowed to flow out to the
+          Pacific Ocean. All of it must be carefully planned and accounted for.
         </Typography>
       </CallResponsePanel>
 
@@ -350,8 +385,10 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             CalSim
           </Box>
-          . CalSim models how water would move through the system based on the water management decisions that are made. 
-          It models how much water flows into reservoirs based on climate assumptions, how much is stored or released, and where it gets delivered.
+          . CalSim models how water would move through the system based on the
+          water management decisions that are made. It models how much water
+          flows into reservoirs based on climate assumptions, how much is stored
+          or released, and where it gets delivered.
         </Typography>
       </CallResponsePanel>
 
@@ -376,8 +413,9 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             Bay-Delta Science Program
           </Box>{" "}
-          to run CalSim through a broad range of different water management practices and evaluate
-          the results under current and future climate conditions.
+          to run CalSim through a broad range of different water management
+          practices and evaluate the results under current and future climate
+          conditions.
         </Typography>
       </CallResponsePanel>
 
@@ -390,8 +428,9 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          We are making this information public so that communities can better understand
-          the range of possibilities, and the range of consequences, that come with different water management choices.
+          We are making this information public so that communities can better
+          understand the range of possibilities, and the range of consequences,
+          that come with different water management choices.
         </Typography>
       </CallResponsePanel>
 
@@ -408,7 +447,10 @@ export default function MapOverlayPanels() {
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Box sx={{ mb: 2.5 }}>
-            <Typography variant="body1" sx={{ fontWeight: "600 !important", mb: 0.25 }}>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: "600 !important", mb: 0.25 }}
+            >
               Strategy
             </Typography>
             <Typography variant="body1">
@@ -416,15 +458,22 @@ export default function MapOverlayPanels() {
             </Typography>
           </Box>
           <Box sx={{ mb: 2.5 }}>
-            <Typography variant="body1" sx={{ fontWeight: "600 !important", mb: 0.25 }}>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: "600 !important", mb: 0.25 }}
+            >
               Outcomes
             </Typography>
             <Typography variant="body1">
-              how it affects water supply, ecosystems, agriculture, and communities
+              how it affects water supply, ecosystems, agriculture, and
+              communities
             </Typography>
           </Box>
           <Box>
-            <Typography variant="body1" sx={{ fontWeight: "600 !important", mb: 0.25 }}>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: "600 !important", mb: 0.25 }}
+            >
               Hydroclimate
             </Typography>
             <Typography variant="body1">
@@ -433,7 +482,9 @@ export default function MapOverlayPanels() {
           </Box>
         </Box>
         <Typography variant="body1">
-          Keeping these three things in mind can help you read a scenario and understand what it changes, what it impacts, and how it might matter for your community.
+          Keeping these three things in mind can help you read a scenario and
+          understand what it changes, what it impacts, and how it might matter
+          for your community.
         </Typography>
       </CallResponsePanel>
 
@@ -497,22 +548,26 @@ export default function MapOverlayPanels() {
               firstTooltipOpacity={firstTooltipOpacity}
               secondTooltipOpacity={secondTooltipOpacity}
             />
-            <ClimateCard 
+            <ClimateCard
               ref={climateCardRef}
-              isMinimized={false} 
-              selectedClimate={1} 
+              isMinimized={false}
+              selectedClimate={1}
             />
-            
+
             {/* Third tooltip - points to ClimateCard from parent level */}
             <ScrollTooltip
               targetRef={climateCardRef}
               containerRef={baselineOverlayRef}
               content={
                 <>
-                  <Box component="span" sx={{ fontWeight: 600, display: "block", mb: 0.5 }}>
+                  <Box
+                    component="span"
+                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                  >
                     Hydroclimate
                   </Box>
-                  These options let you explore how a strategy performs under different possible future climate conditions.
+                  These options let you explore how a strategy performs under
+                  different possible future climate conditions.
                 </>
               }
               position="left"
@@ -537,4 +592,3 @@ export default function MapOverlayPanels() {
     </Box>
   )
 }
-

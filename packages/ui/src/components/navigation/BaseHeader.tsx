@@ -183,7 +183,13 @@ export function BaseHeader({
   return (
     <MotionAppBar
       initial="visible" // Prevent hydration mismatch for SSG
-      animate={hideOnScroll && isMounted ? (isHidden ? "hidden" : "visible") : "visible"}
+      animate={
+        hideOnScroll && isMounted
+          ? isHidden
+            ? "hidden"
+            : "visible"
+          : "visible"
+      }
       whileHover={isMounted ? "visible" : undefined}
       onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
       variants={{

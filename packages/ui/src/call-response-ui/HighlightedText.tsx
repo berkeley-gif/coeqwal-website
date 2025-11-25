@@ -26,7 +26,7 @@ interface HighlightRect {
 
 /**
  * HighlightedText - Creates per-line highlight rectangles behind text
- * 
+ *
  * Uses Range.getClientRects() to get individual line boxes and draws
  * slightly shorter rectangles for each line, creating visible gaps
  * between lines - mimicking browser text selection appearance.
@@ -54,7 +54,7 @@ export function HighlightedText({
     const walker = document.createTreeWalker(
       textRef.current,
       NodeFilter.SHOW_TEXT,
-      null
+      null,
     )
 
     let node = walker.nextNode()
@@ -69,15 +69,15 @@ export function HighlightedText({
         for (const rect of rects) {
           // Skip invalid/empty rectangles
           if (rect.width === 0 || rect.height === 0) continue
-          
+
           // Skip very small rects (likely whitespace/line breaks)
           if (rect.height < 10) continue
-          
+
           const lineHeight = rect.height
           const shrink = gapSize // How much to shrink height (controls gap)
           const effectiveHeight = lineHeight * (1 - shrink)
           const verticalOffset = (lineHeight - effectiveHeight) / 2
-          
+
           // Add padding to cover descenders and give breathing room
           const horizontalPadding = 8
           const verticalPadding = 4
@@ -85,8 +85,8 @@ export function HighlightedText({
           newHighlights.push({
             left: rect.left - wrapperRect.left - horizontalPadding,
             top: rect.top - wrapperRect.top + verticalOffset - verticalPadding,
-            width: rect.width + (horizontalPadding * 2),
-            height: effectiveHeight + (verticalPadding * 2),
+            width: rect.width + horizontalPadding * 2,
+            height: effectiveHeight + verticalPadding * 2,
           })
         }
       }
@@ -155,4 +155,3 @@ export function HighlightedText({
     </Box>
   )
 }
-

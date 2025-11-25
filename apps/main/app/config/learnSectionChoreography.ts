@@ -1,11 +1,11 @@
 /**
  * Scroll Choreography for Learn section scrollytelling
- * 
+ *
  * Defines the complete scroll-driven animation sequence:
  * - Panel IDs and positions
  * - Map layer states at each point
  * - Entry/exit/scroll callbacks
- * 
+ *
  * Configuration separate from implementation
  */
 
@@ -38,7 +38,7 @@ function zoomToCentralValley(mapRef: any) {
 
 /**
  * Configuration factory for Learn section choreography
- * 
+ *
  * Accepts refs and callbacks to keep config pure while allowing side effects
  */
 export function createLearnChoreographyConfig(params: {
@@ -48,11 +48,11 @@ export function createLearnChoreographyConfig(params: {
   showBasinsRef: React.RefObject<boolean>
   showInflowArrowsRef: React.RefObject<boolean>
   inflowArrowsOpacityRef: React.RefObject<number>
-  
+
   // Animation refs for cleanup
   labelFadeAnimationRef: React.MutableRefObject<number | null>
   arrowFadeAnimationRef: React.MutableRefObject<number | null>
-  
+
   // State setters
   toggleBasinsOnRef: React.RefObject<() => void>
   toggleInflowArrowsOnRef: React.RefObject<() => void>
@@ -160,8 +160,16 @@ export function createLearnChoreographyConfig(params: {
           const eased = clamp(rawEased * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
 
           try {
-            localMap.setPaintProperty("central-valley-label", "text-opacity", eased)
-            localMap.setPaintProperty("central-valley-polygon", "line-opacity", eased)
+            localMap.setPaintProperty(
+              "central-valley-label",
+              "text-opacity",
+              eased,
+            )
+            localMap.setPaintProperty(
+              "central-valley-polygon",
+              "line-opacity",
+              eased,
+            )
           } catch {
             labelFadeAnimationRef.current = null
             return
@@ -264,7 +272,11 @@ export function createLearnChoreographyConfig(params: {
           const elapsed = currentTime - startTime
           const progress = Math.min(elapsed / duration, 1)
           const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-          const newOpacity = clamp(startOpacity + eased * (1 - startOpacity), 0, 1)
+          const newOpacity = clamp(
+            startOpacity + eased * (1 - startOpacity),
+            0,
+            1,
+          )
 
           setInflowArrowsOpacity(newOpacity)
 
@@ -348,7 +360,7 @@ export function createLearnChoreographyConfig(params: {
       onEnter: () => {
         // Clear geocoder marker
         setGeocoderMarker(null)
-        
+
         // Reset rivers animation to start from beginning
         setRiversAnimationProgress(0)
         setShowRivers(true)
@@ -359,30 +371,34 @@ export function createLearnChoreographyConfig(params: {
       },
       onScroll: (progress) => {
         if (!map.mapRef?.current) return
-        
+
         const mapInstance = map.mapRef.current.getMap()
         if (!mapInstance) return
 
         // RIVERS: Draw from 20%-70% of scroll progress
         const riverProgress = clamp(
-          (progress - RIVER_ANIMATION.DRAW_START) / 
-          (RIVER_ANIMATION.DRAW_END - RIVER_ANIMATION.DRAW_START),
+          (progress - RIVER_ANIMATION.DRAW_START) /
+            (RIVER_ANIMATION.DRAW_END - RIVER_ANIMATION.DRAW_START),
           0,
-          1
+          1,
         )
         setRiversAnimationProgress(riverProgress)
 
         // BASINS/INFLOW/ARROWS: Fade out from 15%-60% of scroll progress
         const fadeProgress = clamp(
-          (progress - BASIN_FADE.FADE_START) / 
-          (BASIN_FADE.FADE_END - BASIN_FADE.FADE_START),
+          (progress - BASIN_FADE.FADE_START) /
+            (BASIN_FADE.FADE_END - BASIN_FADE.FADE_START),
           0,
-          1
+          1,
         )
         const eased = 1 - Math.pow(1 - fadeProgress, 3) // ease-out cubic
-        
+
         // Calculate opacity for each layer type
-        const basinsOpacity = clamp((1 - eased) * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
+        const basinsOpacity = clamp(
+          (1 - eased) * OPACITY.VISIBLE,
+          0,
+          OPACITY.VISIBLE,
+        )
         const inflowOpacity = clamp((1 - eased) * 0.4, 0, 0.4) // Inflow starts at 0.4, not 0.9
         const arrowsOpacity = clamp((1 - eased) * 1.0, 0, 1.0) // Arrows start at 1.0
 
@@ -391,13 +407,25 @@ export function createLearnChoreographyConfig(params: {
 
         try {
           if (mapInstance.getLayer("inflow-watersheds")) {
-            mapInstance.setPaintProperty("inflow-watersheds", "fill-opacity", inflowOpacity)
+            mapInstance.setPaintProperty(
+              "inflow-watersheds",
+              "fill-opacity",
+              inflowOpacity,
+            )
           }
           if (mapInstance.getLayer("basins-outline-layer")) {
-            mapInstance.setPaintProperty("basins-outline-layer", "line-opacity", basinsOpacity)
+            mapInstance.setPaintProperty(
+              "basins-outline-layer",
+              "line-opacity",
+              basinsOpacity,
+            )
           }
           if (mapInstance.getLayer("basins-labels")) {
-            mapInstance.setPaintProperty("basins-labels", "text-opacity", basinsOpacity)
+            mapInstance.setPaintProperty(
+              "basins-labels",
+              "text-opacity",
+              basinsOpacity,
+            )
           }
         } catch (e) {
           console.error("Error setting basin/inflow opacity:", e)
@@ -417,51 +445,70 @@ export function createLearnChoreographyConfig(params: {
           if (map.mapRef?.current) {
             try {
               const mapInstance = map.mapRef.current.getMap()
-              
+
               // Fade out Central Valley label and polygon
               const duration = ANIMATION_DURATION.CAMERA
               const startTime = performance.now()
-              
+
               const animateCVFadeOut = (currentTime: number) => {
                 const elapsed = currentTime - startTime
                 const progress = Math.min(elapsed / duration, 1)
                 const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-                const opacity = Math.max(0, Math.min(OPACITY.VISIBLE, (1 - eased) * OPACITY.VISIBLE))
-                
+                const opacity = Math.max(
+                  0,
+                  Math.min(OPACITY.VISIBLE, (1 - eased) * OPACITY.VISIBLE),
+                )
+
                 try {
                   if (mapInstance.getLayer("central-valley-label")) {
-                    mapInstance.setPaintProperty("central-valley-label", "text-opacity", opacity)
+                    mapInstance.setPaintProperty(
+                      "central-valley-label",
+                      "text-opacity",
+                      opacity,
+                    )
                   }
                   if (mapInstance.getLayer("central-valley-polygon")) {
-                    mapInstance.setPaintProperty("central-valley-polygon", "line-opacity", opacity)
+                    mapInstance.setPaintProperty(
+                      "central-valley-polygon",
+                      "line-opacity",
+                      opacity,
+                    )
                   }
                 } catch {
                   // Ignore
                 }
-                
+
                 if (progress < 1) {
                   requestAnimationFrame(animateCVFadeOut)
                 } else {
                   // Hide after fade completes
                   try {
                     if (mapInstance.getLayer("central-valley-label")) {
-                      mapInstance.setLayoutProperty("central-valley-label", "visibility", "none")
+                      mapInstance.setLayoutProperty(
+                        "central-valley-label",
+                        "visibility",
+                        "none",
+                      )
                     }
                     if (mapInstance.getLayer("central-valley-polygon")) {
-                      mapInstance.setLayoutProperty("central-valley-polygon", "visibility", "none")
+                      mapInstance.setLayoutProperty(
+                        "central-valley-polygon",
+                        "visibility",
+                        "none",
+                      )
                     }
                   } catch {
                     // Ignore
                   }
                 }
               }
-              
+
               requestAnimationFrame(animateCVFadeOut)
             } catch {
               // Layers might not exist
             }
           }
-          
+
           // Show rivers again
           setShowRivers(true)
         }
@@ -479,37 +526,48 @@ export function createLearnChoreographyConfig(params: {
               const mapInstance = map.mapRef.current.getMap()
               if (mapInstance.getLayer("water")) {
                 // Check if water layer is actually visible
-                const visibility = mapInstance.getLayoutProperty("water", "visibility")
-                
+                const visibility = mapInstance.getLayoutProperty(
+                  "water",
+                  "visibility",
+                )
+
                 if (visibility === "visible") {
                   // Animate opacity from current to 0
                   const duration = ANIMATION_DURATION.CAMERA
                   const startTime = performance.now()
-                  
+
                   const animateOpacity = (currentTime: number) => {
                     const elapsed = currentTime - startTime
                     const progress = Math.min(elapsed / duration, 1)
                     const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
                     const opacity = Math.max(0, Math.min(1, 1 - eased)) // fade from 1 to 0, clamped
-                    
+
                     try {
-                      mapInstance.setPaintProperty("water", "fill-opacity", opacity)
+                      mapInstance.setPaintProperty(
+                        "water",
+                        "fill-opacity",
+                        opacity,
+                      )
                     } catch {
                       // Layer might not support this property
                     }
-                    
+
                     if (progress < 1) {
                       requestAnimationFrame(animateOpacity)
                     } else {
                       // Hide after fade completes
                       try {
-                        mapInstance.setLayoutProperty("water", "visibility", "none")
+                        mapInstance.setLayoutProperty(
+                          "water",
+                          "visibility",
+                          "none",
+                        )
                       } catch {
                         // Ignore
                       }
                     }
                   }
-                  
+
                   requestAnimationFrame(animateOpacity)
                 }
               }
@@ -522,40 +580,67 @@ export function createLearnChoreographyConfig(params: {
           if (map.mapRef?.current) {
             try {
               const mapInstance = map.mapRef.current.getMap()
-              
+
               // Make visible
               if (mapInstance.getLayer("central-valley-label")) {
-                mapInstance.setLayoutProperty("central-valley-label", "visibility", "visible")
+                mapInstance.setLayoutProperty(
+                  "central-valley-label",
+                  "visibility",
+                  "visible",
+                )
               }
               if (mapInstance.getLayer("central-valley-polygon")) {
-                mapInstance.setLayoutProperty("central-valley-polygon", "visibility", "visible")
+                mapInstance.setLayoutProperty(
+                  "central-valley-polygon",
+                  "visibility",
+                  "visible",
+                )
               }
-              
+
               // Animate opacity from 0 to OPACITY.VISIBLE
               const duration = ANIMATION_DURATION.CAMERA
               const startTime = performance.now()
-              
+
               const animateCVOpacity = (currentTime: number) => {
                 const elapsed = currentTime - startTime
                 const progress = Math.min(elapsed / duration, 1)
                 const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-                const opacity = Math.max(0, Math.min(OPACITY.VISIBLE, eased * OPACITY.VISIBLE))
-                
+                const opacity = Math.max(
+                  0,
+                  Math.min(OPACITY.VISIBLE, eased * OPACITY.VISIBLE),
+                )
+
                 try {
-                  mapInstance.setPaintProperty("central-valley-label", "text-opacity", opacity)
-                  mapInstance.setPaintProperty("central-valley-polygon", "line-opacity", opacity)
+                  mapInstance.setPaintProperty(
+                    "central-valley-label",
+                    "text-opacity",
+                    opacity,
+                  )
+                  mapInstance.setPaintProperty(
+                    "central-valley-polygon",
+                    "line-opacity",
+                    opacity,
+                  )
                 } catch {
                   // Ignore
                 }
-                
+
                 if (progress < 1) {
                   requestAnimationFrame(animateCVOpacity)
                 }
               }
-              
+
               // Start from 0 opacity
-              mapInstance.setPaintProperty("central-valley-label", "text-opacity", 0)
-              mapInstance.setPaintProperty("central-valley-polygon", "line-opacity", 0)
+              mapInstance.setPaintProperty(
+                "central-valley-label",
+                "text-opacity",
+                0,
+              )
+              mapInstance.setPaintProperty(
+                "central-valley-polygon",
+                "line-opacity",
+                0,
+              )
               requestAnimationFrame(animateCVOpacity)
             } catch {
               // Layers might not exist
@@ -565,13 +650,16 @@ export function createLearnChoreographyConfig(params: {
           // When scrolling up to Rivers panel
           // Zoom back to Central Valley
           zoomToCentralValley(map.mapRef)
-          
+
           // Hide water layer ONLY if it's visible
           if (map.mapRef?.current) {
             try {
               const mapInstance = map.mapRef.current.getMap()
               if (mapInstance.getLayer("water")) {
-                const visibility = mapInstance.getLayoutProperty("water", "visibility")
+                const visibility = mapInstance.getLayoutProperty(
+                  "water",
+                  "visibility",
+                )
                 if (visibility === "visible") {
                   // Hide water layer immediately
                   mapInstance.setLayoutProperty("water", "visibility", "none")
@@ -788,4 +876,3 @@ export function createLearnChoreographyConfig(params: {
     },
   ]
 }
-

@@ -1,4 +1,9 @@
 import { config } from "@repo/eslint-config/react-internal"
 
 /** @type {import("eslint").Linter.Config} */
-export default config
+export default [
+  ...config,
+  {
+    ignores: ["GEOCODING_EXAMPLES.tsx"],
+  },
+]

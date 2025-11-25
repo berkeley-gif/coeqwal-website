@@ -67,7 +67,12 @@ export default function BasinInflowArrows({
     // ===== WESTERN RIM (Coast Ranges - water flows east) =====
     { lon: -121.2, lat: 37.4, rotation: 240, label: "W - Central Coast Range" },
     { lon: -122.5, lat: 39.3, rotation: 240, label: "W - North Coast Range" },
-    { lon: -122.6, lat: 40.3125, rotation: 240, label: "NW - Northwestern rim" },
+    {
+      lon: -122.6,
+      lat: 40.3125,
+      rotation: 240,
+      label: "NW - Northwestern rim",
+    },
   ]
 
   const arrowColor = "#2196F3"
@@ -113,21 +118,9 @@ export default function BasinInflowArrows({
                   y2="100%"
                 >
                   <stop offset="0%" stopColor={arrowColor} stopOpacity="0" />
-                  <stop
-                    offset="25%"
-                    stopColor={arrowColor}
-                    stopOpacity="0.3"
-                  />
-                  <stop
-                    offset="60%"
-                    stopColor={arrowColor}
-                    stopOpacity="0.7"
-                  />
-                  <stop
-                    offset="100%"
-                    stopColor={arrowColor}
-                    stopOpacity="1"
-                  />
+                  <stop offset="25%" stopColor={arrowColor} stopOpacity="0.3" />
+                  <stop offset="60%" stopColor={arrowColor} stopOpacity="0.7" />
+                  <stop offset="100%" stopColor={arrowColor} stopOpacity="1" />
                 </linearGradient>
               </defs>
 

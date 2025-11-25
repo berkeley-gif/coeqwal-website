@@ -10,7 +10,6 @@ import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
 
 export default function Home() {
-
   return (
     <>
       <TabsProvider>

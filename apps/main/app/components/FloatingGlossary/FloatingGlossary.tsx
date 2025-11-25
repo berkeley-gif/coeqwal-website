@@ -22,7 +22,9 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<Position>({ bottom: 32, right: 32 })
   const [isDragging, setIsDragging] = useState(false)
-  const [currentSelectedTerm, setCurrentSelectedTerm] = useState<string | undefined>(selectedTerm)
+  const [currentSelectedTerm, setCurrentSelectedTerm] = useState<
+    string | undefined
+  >(selectedTerm)
   const dragStartRef = useRef<{
     x: number
     y: number
@@ -32,7 +34,7 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
 
   // Connect to drawer store for external control (e.g., from IntroSection)
   const drawerStore = useDrawerStore()
-  
+
   // Listen to drawer store to open glossary when requested externally
   useEffect(() => {
     if (drawerStore.isOpen && drawerStore.activeTab === "glossary") {
@@ -44,7 +46,12 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
       // Close the drawer store after handling (floating glossary takes over)
       drawerStore.closeDrawer()
     }
-  }, [drawerStore.isOpen, drawerStore.activeTab, drawerStore.content, drawerStore])
+  }, [
+    drawerStore.isOpen,
+    drawerStore.activeTab,
+    drawerStore.content,
+    drawerStore,
+  ])
 
   const handleToggle = () => setIsOpen((prev) => !prev)
   const handleClose = () => {

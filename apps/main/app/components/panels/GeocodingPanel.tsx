@@ -1,6 +1,6 @@
 /**
  * GeocodingPanel - "Find my basin"  (Learn Map)
- * 
+ *
  * Allows users to search for California locations and discover which basin they're in.
  * Integrates with Mapbox geocoding API and basin lookup functionality.
  */
@@ -21,15 +21,23 @@ interface GeocodingPanelProps {
   resetTrigger?: number
 }
 
-export function GeocodingPanel({ basinsData, onMarkerChange, resetTrigger }: GeocodingPanelProps) {
+export function GeocodingPanel({
+  basinsData,
+  onMarkerChange,
+  resetTrigger,
+}: GeocodingPanelProps) {
   const theme = useTheme()
   const map = useMap()
-  
+
   // Search state
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedLocation, setSelectedLocation] = useState<GeocodingFeature | null>(null)
+  const [selectedLocation, setSelectedLocation] =
+    useState<GeocodingFeature | null>(null)
   const [showResults, setShowResults] = useState(false)
-  const [basinInfo, setBasinInfo] = useState<{ name: string; properties: Record<string, unknown> } | null>(null)
+  const [basinInfo, setBasinInfo] = useState<{
+    name: string
+    properties: Record<string, unknown>
+  } | null>(null)
   const [isSelectingResult, setIsSelectingResult] = useState(false)
 
   // Geocoding hook
@@ -145,7 +153,10 @@ export function GeocodingPanel({ basinsData, onMarkerChange, resetTrigger }: Geo
         boxSizing: "border-box",
       }}
     >
-      <Typography variant="body1" sx={{ mb: 2, color: theme.palette.grey[900] }}>
+      <Typography
+        variant="body1"
+        sx={{ mb: 2, color: theme.palette.grey[900] }}
+      >
         Find my basin
       </Typography>
 
@@ -330,12 +341,21 @@ export function GeocodingPanel({ basinsData, onMarkerChange, resetTrigger }: Geo
             <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
               {selectedLocation.text}
             </Typography>
-            <Typography variant="caption" sx={{ display: "block", color: theme.palette.grey[600] }}>
+            <Typography
+              variant="caption"
+              sx={{ display: "block", color: theme.palette.grey[600] }}
+            >
               {selectedLocation.place_name}
             </Typography>
 
             {basinInfo ? (
-              <Box sx={{ mt: 1.5, pt: 1.5, borderTop: `1px solid ${theme.palette.grey[300]}` }}>
+              <Box
+                sx={{
+                  mt: 1.5,
+                  pt: 1.5,
+                  borderTop: `1px solid ${theme.palette.grey[300]}`,
+                }}
+              >
                 <Typography
                   variant="caption"
                   sx={{
@@ -372,4 +392,3 @@ export function GeocodingPanel({ basinsData, onMarkerChange, resetTrigger }: Geo
     </Box>
   )
 }
-
