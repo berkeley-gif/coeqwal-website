@@ -166,22 +166,6 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-
-        {/* Layer 3: Inner highlight */}
-        <Layer
-          id="sacramento-river-highlight"
-          type="line"
-          paint={{
-            "line-color": "#8BBEE8",
-            "line-width": 1,
-            "line-opacity": 0.7,
-            "line-trim-offset": [clampedProgress, 1],
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-          }}
-        />
       </Source>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -241,22 +225,6 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
             "line-cap": "round",
           }}
         />
-
-        {/* Layer 3: Inner highlight */}
-        <Layer
-          id="san-joaquin-river-highlight"
-          type="line"
-          paint={{
-            "line-color": "#8BBEE8",
-            "line-width": 1,
-            "line-opacity": 0.7,
-            "line-trim-offset": [clampedProgress, 1],
-          }}
-          layout={{
-            "line-join": "round",
-            "line-cap": "round",
-          }}
-        />
       </Source>
 
       {/* ═══════════════════════════════════════════════════════════════
@@ -264,7 +232,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           Geolocated curved text that fades in smoothly
           ═══════════════════════════════════════════════════════════════ */}
       
-      {/* Sacramento River Curved Label */}
+      {/* Sacramento River curved label */}
       <Marker
         longitude={labelPositions.sacramento.lon}
         latitude={labelPositions.sacramento.lat}
@@ -280,7 +248,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         />
       </Marker>
 
-      {/* San Joaquin River Curved Label */}
+      {/* San Joaquin River curved label */}
       <Marker
         longitude={labelPositions.sanJoaquin.lon}
         latitude={labelPositions.sanJoaquin.lat}
@@ -295,7 +263,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         />
       </Marker>
 
-      {/* Delta Marker - appears when rivers meet */}
+      {/* Delta marker - appears when rivers meet */}
       <Marker
         longitude={labelPositions.delta.lon}
         latitude={labelPositions.delta.lat}
