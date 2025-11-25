@@ -196,9 +196,6 @@ export default function ScenarioCard({
           display: "flex",
           flexDirection: "column",
           width: "100%",
-          maxWidth: 600, // Constrain width
-          marginLeft: "auto", // Align to right
-          marginRight: 0, // Align to right
           opacity: isMinimized ? 0.8 : 1,
         }}
       >
