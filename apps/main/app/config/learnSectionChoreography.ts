@@ -312,11 +312,32 @@ export function createLearnChoreographyConfig(params: {
           // Clear geocoder marker and reset panel when scrolling down
           setGeocoderMarker(null)
           resetGeocodingPanel()
-          // No camera movement - already at Central Valley view for Rivers panel
+          
+          // Zoom back out to Central Valley view if user zoomed in to a location
+          if (map.mapRef?.current) {
+            map.mapRef.current.easeTo({
+              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+              zoom: CENTRAL_VALLEY_VIEW.zoom,
+              bearing: CENTRAL_VALLEY_VIEW.bearing,
+              pitch: CENTRAL_VALLEY_VIEW.pitch,
+              duration: ANIMATION_DURATION.CAMERA,
+              easing: EASING.EASE_OUT,
+            })
+          }
         } else if (direction === "up") {
-          // Just clear the marker when scrolling up (keep search state)
+          // Just clear the marker when scrolling up
           setGeocoderMarker(null)
-          // No camera movement needed
+          // Zoom back to Central Valley view
+          if (map.mapRef?.current) {
+            map.mapRef.current.easeTo({
+              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+              zoom: CENTRAL_VALLEY_VIEW.zoom,
+              bearing: CENTRAL_VALLEY_VIEW.bearing,
+              pitch: CENTRAL_VALLEY_VIEW.pitch,
+              duration: ANIMATION_DURATION.CAMERA,
+              easing: EASING.EASE_OUT,
+            })
+          }
         }
       },
     },
