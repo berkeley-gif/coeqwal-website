@@ -164,11 +164,8 @@ export function usePointInPolygon<T = any>(
  * ```
  */
 export function useBasinLookup(
-  basinGeoJson:
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    | FeatureCollection<Polygon | MultiPolygon, any>
-    | null
-    | undefined,
+  basinGeoJson: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  FeatureCollection<Polygon | MultiPolygon, any> | null | undefined,
 ) {
   const { findContainingFeature, features, isPointInAnyFeature } =
     usePointInPolygon(basinGeoJson, {

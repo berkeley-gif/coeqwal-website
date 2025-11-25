@@ -78,7 +78,9 @@ export function useGeocoding(
     const map = mapRef?.current?.getMap()
     // Cast to any to access internal mapbox properties
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mapToken = (map as any)?._requestManager?._customAccessToken || (map as any)?.accessToken
+    const mapToken =
+      (map as any)?._requestManager?._customAccessToken ||
+      (map as any)?.accessToken
 
     if (!mapToken) {
       console.warn(
