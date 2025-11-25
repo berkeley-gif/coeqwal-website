@@ -24,7 +24,9 @@ import {
 /**
  * Helper: Zoom camera back to Central Valley view
  */
-function zoomToCentralValley(mapRef: React.MutableRefObject<mapboxgl.Map | null>) {
+function zoomToCentralValley(
+  mapRef: React.RefObject<mapboxgl.Map | null>,
+) {
   if (mapRef?.current) {
     mapRef.current.easeTo({
       center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
@@ -39,25 +41,23 @@ function zoomToCentralValley(mapRef: React.MutableRefObject<mapboxgl.Map | null>
 
 interface ChoreographyConfigParams {
   // Map operations API (from useMap())
-  map: {
-    mapRef: React.MutableRefObject<mapboxgl.Map | null>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any // Allow other MapOperationsAPI properties
-  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: any
   // Refs for stable access to current state
   showBasinsRef: React.RefObject<boolean>
   showInflowArrowsRef: React.RefObject<boolean>
   inflowArrowsOpacityRef: React.RefObject<number>
 
   // Animation refs for cleanup
-  labelFadeAnimationRef: React.MutableRefObject<number | null>
-  arrowFadeAnimationRef: React.MutableRefObject<number | null>
+  labelFadeAnimationRef: React.RefObject<number | null>
+  arrowFadeAnimationRef: React.RefObject<number | null>
 
   // State setters
   toggleBasinsOnRef: React.RefObject<() => void>
   toggleInflowArrowsOnRef: React.RefObject<() => void>
   setInflowArrowsOpacity: (opacity: number) => void
-  setGeocoderMarker: (marker: [number, number] | null) => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setGeocoderMarker: (marker: any) => void
   setShowRivers: (show: boolean) => void
   setRiversAnimationProgress: (progress: number) => void
   resetGeocodingPanel: () => void

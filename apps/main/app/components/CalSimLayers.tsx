@@ -393,6 +393,9 @@ export default function CalSimLayers() {
         const props = feature.properties as CalSimFeatureProperties
         const { id, short_code } = props // eslint-disable-line react/prop-types
 
+        // Skip if no short_code
+        if (!short_code) return null
+
         // Get TAF data from our curated major reservoir data
         const reservoirInfo = majorReservoirData.get(short_code)
         const capacity_taf = reservoirInfo?.capacity_taf || 1000

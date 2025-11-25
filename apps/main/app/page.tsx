@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { Box } from "@repo/ui/mui"
 import { Header } from "./components/Header"
 import { FloatingGlossary } from "./components/FloatingGlossary"
@@ -25,7 +26,10 @@ export default function Home() {
         >
           <IntroSection />
           <SmoothTabs />
-          <TabPanels />
+          {/* Meli, I updated our build tools and ended up having to wrap TabPanels in a Suspense component to fix a build error. */}
+          <Suspense fallback={null}>
+            <TabPanels />
+          </Suspense>
         </Box>
       </TabsProvider>
     </>

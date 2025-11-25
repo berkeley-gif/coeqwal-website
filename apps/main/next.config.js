@@ -23,7 +23,7 @@ const nextConfig = {
     unoptimized: true  // Required for static export
   },
   
-  // Turbopack configuration for .geojson files
+  // Turbopack configuration for .geojson files (dev mode)
   experimental: {
     turbo: {
       rules: {
@@ -33,6 +33,15 @@ const nextConfig = {
         },
       },
     },
+  },
+
+  // Webpack configuration for .geojson files (production builds)
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.geojson$/,
+      type: "json",
+    });
+    return config;
   },
 }
 
