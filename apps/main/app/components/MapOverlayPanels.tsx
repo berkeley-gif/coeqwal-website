@@ -1,31 +1,38 @@
+/**
+ * MapOverlayPanels - Scroll-Driven Storytelling for Learn Section
+ * 
+ * Displays narrative panels that overlay the sticky map, with synchronized
+ * map visualizations controlled by scroll position.
+ * 
+ * Architecture:
+ * - Panel UI defined here (content, layout, spacing)
+ * - Scroll choreography configuration in config/learnSectionChoreography.ts
+ * - Map layer management in hooks/useLearnScrollChoreography.ts
+ * - Reusable panel components in components/panels/
+ */
+
 "use client"
 
 import { useState, useEffect, useMemo, useRef } from "react"
 import { CallResponsePanel } from "@repo/ui"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
-import {
-  Box,
-  Typography,
-  useTheme,
-} from "@repo/ui/mui"
-import { useGeocoding, BOUNDING_BOXES, useBasinLookup, useMap } from "@repo/map"
-import type { GeocodingFeature } from "@repo/map"
+import { GeocodingPanel } from "./panels/GeocodingPanel"
+import { DeltaInfoPanel } from "./panels/DeltaInfoPanel"
+import { Box, Typography } from "@repo/ui/mui"
+import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
-import { CENTRAL_VALLEY_VIEW } from "./CaliforniaMapPanel"
-import bbox from "@turf/bbox"
-import type { Feature, Polygon, MultiPolygon } from "geojson"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
+import { createLearnChoreographyConfig } from "../config/learnSectionChoreography"
+import { STICKY_HEIGHTS, ENTRANCE_RAMPS } from "../constants/scrollChoreographyConstants"
 
 export default function MapOverlayPanels() {
-  const theme = useTheme()
   const map = useMap()
   const {
     setGeocoderMarker,
     showBasins,
     toggleBasins,
-    showRivers,
     setShowRivers,
     setRiversAnimationProgress,
     showInflowArrows,
@@ -35,784 +42,50 @@ export default function MapOverlayPanels() {
     setActivePanel,
   } = useCalSimToggle()
 
-  // Animation state for first panel entrance
+  // UI state
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
+  const [geocodingResetTrigger, setGeocodingResetTrigger] = useState(0)
 
-  // State for Delta panel text
-  const [isDeltaTextVisible, setIsDeltaTextVisible] = useState(false)
-
-  // Learn section scroll choreography – refs for stable callbacks
-  const mapRef = useRef(map)
-  const fadeAnimationRef = useRef<number | null>(null) // inflow/basins fade-out
-  const labelFadeAnimationRef = useRef<number | null>(null) // label fade-ins
-  const arrowFadeAnimationRef = useRef<number | null>(null) // arrow fade-in
-
+  // Refs for stable choreography callbacks
+  const labelFadeAnimationRef = useRef<number | null>(null)
+  const arrowFadeAnimationRef = useRef<number | null>(null)
   const toggleBasinsOnRef = useRef(toggleBasins)
   const showBasinsRef = useRef(showBasins)
   const toggleInflowArrowsOnRef = useRef(toggleInflowArrows)
   const showInflowArrowsRef = useRef(showInflowArrows)
   const inflowArrowsOpacityRef = useRef(inflowArrowsOpacity)
 
-  // Keep refs in sync
+  // Keep refs synchronized with latest values
   useEffect(() => {
-    mapRef.current = map
     toggleBasinsOnRef.current = toggleBasins
     showBasinsRef.current = showBasins
     toggleInflowArrowsOnRef.current = toggleInflowArrows
     showInflowArrowsRef.current = showInflowArrows
     inflowArrowsOpacityRef.current = inflowArrowsOpacity
-  }, [
-    map,
-    toggleBasins,
-    showBasins,
-    toggleInflowArrows,
-    showInflowArrows,
-    inflowArrowsOpacity,
-  ])
+  }, [toggleBasins, showBasins, toggleInflowArrows, showInflowArrows, inflowArrowsOpacity])
 
-  // Scroll-driven map choreography
-  useLearnScrollChoreography(
-    useMemo(
-      () => [
-        {
-          panelId: "calsim-call",
-          position: 0,
-          debugLabel: "Panel 1: California",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "visible" as const,
-              textOpacity: 0.9,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-          ],
-        },
-        {
-          panelId: "central-valley-importance",
-          position: 1,
-          debugLabel: "Panel 2: Central Valley",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0, // fade out quickly / be gone
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "visible" as const,
-              textOpacity: 0, // start at 0, we animate to 1 in onEnter
-              textAllowOverlap: true,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "visible" as const,
-              lineOpacity: 0, // start at 0, we animate to 1 in onEnter
-              lineWidth: 2,
-              lineJoin: "round" as const,
-            },
-          ],
-          // Hide basins when entering Panel 2 (from Panel 3 when scrolling up)
-          onEnter: () => {
-            if (showBasinsRef.current) toggleBasinsOnRef.current()
-
-            // Smooth, slower fade-in for both the Central Valley label and polygon
-            if (!mapRef.current) return
-
-            const localMap = mapRef.current
-
-            // Cancel any existing label fade
-            if (labelFadeAnimationRef.current !== null) {
-              cancelAnimationFrame(labelFadeAnimationRef.current)
-              labelFadeAnimationRef.current = null
-            }
-
-            const duration = 1500 // 1.5s for a gentle fade-in
-            const startTime = performance.now()
-
-            // Ensure starting at 0 opacity for both layers
-            try {
-              localMap.setPaintProperty(
-                "central-valley-label",
-                "text-opacity",
-                0,
-              )
-              localMap.setPaintProperty(
-                "central-valley-polygon",
-                "line-opacity",
-                0,
-              )
-            } catch {
-              // Layer might not be ready yet; fail silently
-            }
-
-            const animate = (currentTime: number) => {
-              const elapsed = currentTime - startTime
-              const progress = Math.min(elapsed / duration, 1)
-              const rawEased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-              // Clamp to [0, 0.9] to avoid floating-point precision errors
-              const eased = Math.max(0, Math.min(0.9, rawEased * 0.9))
-
-              try {
-                localMap.setPaintProperty(
-                  "central-valley-label",
-                  "text-opacity",
-                  eased,
-                )
-                localMap.setPaintProperty(
-                  "central-valley-polygon",
-                  "line-opacity",
-                  eased,
-                )
-              } catch {
-                // If layer isn't available mid-animation, just stop
-                labelFadeAnimationRef.current = null
-                return
-              }
-
-              if (progress < 1) {
-                labelFadeAnimationRef.current =
-                  requestAnimationFrame(animate)
-              } else {
-                labelFadeAnimationRef.current = null
-              }
-            }
-
-            labelFadeAnimationRef.current = requestAnimationFrame(animate)
-          },
-          onExit: () => {
-            // Just in case we leave mid-fade
-            if (labelFadeAnimationRef.current !== null) {
-              cancelAnimationFrame(labelFadeAnimationRef.current)
-              labelFadeAnimationRef.current = null
-            }
-          },
-        },
-        {
-          panelId: "central-valley-basins",
-          position: 2,
-          debugLabel: "Panel 3: Basins",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-            {
-              layerId: "inflow-watersheds",
-              visibility: "none" as const,
-              fillOpacity: 0,
-            },
-          ],
-          // Show basins when entering Panel 3. They stay visible through Panel 5
-          onEnter: () => {
-            if (!showBasinsRef.current) toggleBasinsOnRef.current()
-          },
-        },
-        {
-          panelId: "water-flow-call",
-          position: 2.5,
-          debugLabel: "Panel 4: Watersheds",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-            {
-              layerId: "inflow-watersheds",
-              visibility: "visible" as const,
-              fillOpacity: 0.4,
-            },
-          ],
-          // Show inflow watersheds polygon (arrows come later at Panel 4.5)
-          onEnter: () => {
-            // Cancel any ongoing fade animations
-            if (fadeAnimationRef.current !== null) {
-              cancelAnimationFrame(fadeAnimationRef.current)
-              fadeAnimationRef.current = null
-            }
-            
-            // Restore basins if returning from Panel 5
-            if (!showBasinsRef.current) toggleBasinsOnRef.current()
-            // Restore opacity for all layers when scrolling back up
-            if (mapRef.current) {
-              mapRef.current.setPaintProperty(
-                "inflow-watersheds",
-                "fill-opacity",
-                0.4,
-              )
-              mapRef.current.setPaintProperty(
-                "basins-outline-layer",
-                "line-opacity",
-                0.8,
-              )
-              mapRef.current.setPaintProperty(
-                "basins-labels",
-                "text-opacity",
-                0.9,
-              )
-            }
-          },
-        },
-        {
-          panelId: "arrows-trigger",
-          position: 2.6,
-          debugLabel: "Panel 4.25: arrow trigger (midway through Panel 4)",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-            {
-              layerId: "inflow-watersheds",
-              visibility: "visible" as const,
-              fillOpacity: 0.4,
-            },
-          ],
-          // Fade arrows IN when entering arrow trigger zone
-          onEnter: () => {
-            // Cancel any ongoing arrow fade animation
-            if (arrowFadeAnimationRef.current !== null) {
-              cancelAnimationFrame(arrowFadeAnimationRef.current)
-              arrowFadeAnimationRef.current = null
-            }
-
-            if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-            
-            // Animate arrow fade-in from current opacity to 1
-            const fadeDuration = 800
-            const startTime = performance.now()
-            const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
-            
-            const animateArrowFadeIn = (now: number) => {
-              const elapsed = now - startTime
-              const progress = Math.min(elapsed / fadeDuration, 1)
-              const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
-              const value = Math.max(0, Math.min(1, startOpacity + (1 - startOpacity) * eased)) // Clamp
-              
-              setInflowArrowsOpacity(value)
-              
-              if (progress < 1) {
-                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
-              } else {
-                arrowFadeAnimationRef.current = null
-              }
-            }
-            
-            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
-          },
-          // Fade arrows OUT when scrolling back up to Panel 3
-          onExit: (direction?: "up" | "down") => {
-            if (direction === "up") {
-              // Cancel any ongoing arrow fade animation
-              if (arrowFadeAnimationRef.current !== null) {
-                cancelAnimationFrame(arrowFadeAnimationRef.current)
-                arrowFadeAnimationRef.current = null
-              }
-              
-              // Animate arrow fade-out from current opacity to 0
-              const fadeDuration = 600
-              const startTime = performance.now()
-              const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
-              
-              const animateArrowFadeOut = (now: number) => {
-                const elapsed = now - startTime
-                const progress = Math.min(elapsed / fadeDuration, 1)
-                const eased = 1 - progress // Linear fade out
-                const value = Math.max(0, Math.min(1, startOpacity * eased)) // Clamp
-                
-                setInflowArrowsOpacity(value)
-                
-                if (progress < 1) {
-                  arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
-                } else {
-                  arrowFadeAnimationRef.current = null
-                  // Hide arrows after fade completes
-                  if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-                }
-              }
-              
-              arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
-            }
-          },
-        },
-        {
-          panelId: "which-basin-call",
-          position: 3.5,
-          debugLabel: "Panel 4.5: Which Basin",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-            {
-              layerId: "inflow-watersheds",
-              visibility: "visible" as const,
-              fillOpacity: 0.4,
-            },
-          ],
-          // Fade arrows OUT when entering Panel 4.5 (Find my basin)
-          onEnter: () => {
-            // Hide rivers when coming back to this panel from rivers panel
-            if (showRivers) {
-              setShowRivers(false)
-              setRiversAnimationProgress(0)
-            }
-            
-            // Cancel any ongoing arrow fade animation
-            if (arrowFadeAnimationRef.current !== null) {
-              cancelAnimationFrame(arrowFadeAnimationRef.current)
-              arrowFadeAnimationRef.current = null
-            }
-            
-            // Animate arrow fade-out from current opacity to 0
-            const fadeDuration = 600
-            const startTime = performance.now()
-            const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
-            
-            const animateArrowFadeOut = (now: number) => {
-              const elapsed = now - startTime
-              const progress = Math.min(elapsed / fadeDuration, 1)
-              const eased = 1 - progress // Linear fade out
-              const value = Math.max(0, Math.min(1, startOpacity * eased)) // Clamp
-              
-              setInflowArrowsOpacity(value)
-              
-              if (progress < 1) {
-                arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
-              } else {
-                arrowFadeAnimationRef.current = null
-                // Hide arrows after fade completes
-                if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-              }
-            }
-            
-            arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeOut)
-          },
-          // Fade arrows back IN when scrolling back up, or return to Central Valley when scrolling down
-          onExit: (direction?: "up" | "down") => {
-            if (direction === "up") {
-              // Cancel any ongoing arrow fade animation
-              if (arrowFadeAnimationRef.current !== null) {
-                cancelAnimationFrame(arrowFadeAnimationRef.current)
-                arrowFadeAnimationRef.current = null
-              }
-
-              if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current()
-              
-              // Animate arrow fade-in from current opacity to 1
-              const fadeDuration = 800
-              const startTime = performance.now()
-              const startOpacity = inflowArrowsOpacityRef.current // Get current opacity
-              
-              const animateArrowFadeIn = (now: number) => {
-                const elapsed = now - startTime
-                const progress = Math.min(elapsed / fadeDuration, 1)
-                const eased = 1 - Math.pow(1 - progress, 3) // easeOutCubic
-                const value = Math.max(0, Math.min(1, startOpacity + (1 - startOpacity) * eased)) // Clamp
-                
-                setInflowArrowsOpacity(value)
-                
-                if (progress < 1) {
-                  arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
-                } else {
-                  arrowFadeAnimationRef.current = null
-                }
-              }
-              
-              arrowFadeAnimationRef.current = requestAnimationFrame(animateArrowFadeIn)
-            } else if (direction === "down") {
-              // Return to Central Valley view when scrolling away from geocoding panel
-              if (map.mapRef?.current) {
-                map.mapRef.current.easeTo({
-                  center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-                  zoom: CENTRAL_VALLEY_VIEW.zoom,
-                  bearing: CENTRAL_VALLEY_VIEW.bearing,
-                  pitch: CENTRAL_VALLEY_VIEW.pitch,
-                  duration: 1500,
-                  easing: (t: number) => t * (2 - t),
-                })
-              }
-            }
-          },
-        },
-        {
-          panelId: "rivers-flow-response",
-          position: 4.5,
-          debugLabel: "Panel 5: Rivers",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-            {
-              layerId: "inflow-watersheds",
-              visibility: "visible" as const,
-              fillOpacity: 0.4,
-            },
-          ],
-          // Setup and scroll-driven animation for rivers panel
-          onEnter: (direction) => {
-            // Reset the "find my basin" panel
-            setGeocoderMarker(null)
-            
-            // Always show rivers when entering this panel
-            setShowRivers(true)
-            
-            // Only reset rivers when coming from above (scrolling down for first time)
-            // Don't reset when coming from below (scrolling back up)
-            if (direction === "down" || direction === undefined) {
-              // Reset river progress to 0 so rivers start from beginning
-              setRiversAnimationProgress(0)
-            }
-          },
-          // Scroll-driven animation: control rivers drawing AND opacity based on scroll progress
-          onScroll: (progress) => {
-            if (!mapRef.current) return
-            
-            const clamp = (value: number, min: number, max: number) =>
-              Math.max(min, Math.min(max, value))
-            
-            // RIVERS: Draw from 20%-70% of scroll progress (slower, smoother with 350vh space)
-            const riverDrawStart = 0.2
-            const riverDrawEnd = 0.7
-            const riverProgress = clamp(
-              (progress - riverDrawStart) / (riverDrawEnd - riverDrawStart),
-              0,
-              1
-            )
-            
-            // Set river animation progress directly (no easing for precise control)
-            setRiversAnimationProgress(riverProgress)
-            
-            // BASINS/INFLOW: Fade out from 30%-55% of scroll progress (earlier, while rivers are drawing)
-            const fadeStart = 0.3
-            const fadeEnd = 0.55
-            const fadeProgress = clamp(
-              (progress - fadeStart) / (fadeEnd - fadeStart),
-              0,
-              1
-            )
-            
-            // Ease out cubic for smoother fade
-            const eased = 1 - Math.pow(1 - fadeProgress, 3)
-            
-            const inflowOpacity = clamp(0.4 * (1 - eased), 0, 1)
-            const basinsOutlineOpacity = clamp(0.8 * (1 - eased), 0, 1)
-            const basinsLabelsOpacity = clamp(1 * (1 - eased), 0, 1)
-            
-            mapRef.current.setPaintProperty(
-              "inflow-watersheds",
-              "fill-opacity",
-              inflowOpacity,
-            )
-            mapRef.current.setPaintProperty(
-              "basins-outline-layer",
-              "line-opacity",
-              basinsOutlineOpacity,
-            )
-            mapRef.current.setPaintProperty(
-              "basins-labels",
-              "text-opacity",
-              basinsLabelsOpacity,
-            )
-          },
-          // No onExit - rivers stay visible once shown
-          // They will only be hidden when entering an earlier panel
-        },
-        {
-          panelId: "water-distribution-call",
-          position: 5.5,
-          debugLabel: "Panel 6: Distribution",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "none" as const,
-              lineOpacity: 0,
-            },
-            {
-              layerId: "inflow-watersheds",
-              visibility: "none" as const,
-              fillOpacity: 0,
-            },
-          ],
-          // Hide basins when entering Panel 6 (rivers remain visible)
-          onEnter: () => {
-            if (showBasinsRef.current) toggleBasinsOnRef.current()
-          },
-        },
-        {
-          panelId: "delta-info-response",
-          position: 6,
-          debugLabel: "Panel 6.5: Delta Info",
-          layers: [],
-          // Return to Central Valley view and hide water layer when scrolling away from Delta panel
-          onExit: (direction?: "up" | "down") => {
-            if (direction === "down") {
-              // Zoom back to Central Valley
-              if (map.mapRef?.current) {
-                map.mapRef.current.easeTo({
-                  center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
-                  zoom: CENTRAL_VALLEY_VIEW.zoom,
-                  bearing: CENTRAL_VALLEY_VIEW.bearing,
-                  pitch: CENTRAL_VALLEY_VIEW.pitch,
-                  duration: 1500,
-                  easing: (t: number) => t * (2 - t),
-                })
-              }
-              
-              // Hide water layer
-              if (map.mapRef?.current) {
-                try {
-                  const mapInstance = map.mapRef.current.getMap()
-                  if (mapInstance.getLayer("water")) {
-                    mapInstance.setLayoutProperty("water", "visibility", "none")
-                    console.log("✅ Water layer hidden after Delta panel")
-                  }
-                } catch (error) {
-                  console.warn("⚠️ Could not hide water layer:", error)
-                }
-              }
-            }
-          },
-        },
-        {
-          panelId: "calsim-detailed-response",
-          position: 7,
-          debugLabel: "Panel 7: CalSim Model",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "visible" as const,
-              textOpacity: 0.9,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "visible" as const,
-              lineOpacity: 0.9,
-            },
-          ],
-          // Fade out rivers and fade in Central Valley when entering CalSim panel
-          onEnter: () => {
-            if (showRivers) {
-              setShowRivers(false)
-            }
-          },
-        },
-        {
-          panelId: "coeqwal-call",
-          position: 8,
-          debugLabel: "Panel 8: COEQWAL",
-          layers: [
-            {
-              layerId: "california-label",
-              visibility: "none" as const,
-              textOpacity: 0,
-            },
-            {
-              layerId: "central-valley-label",
-              visibility: "visible" as const,
-              textOpacity: 0.9,
-            },
-            {
-              layerId: "central-valley-polygon",
-              visibility: "visible" as const,
-              lineOpacity: 0.9,
-            },
-          ],
-        },
-      ],
-      [setInflowArrowsOpacity, setGeocoderMarker, setRiversAnimationProgress, setShowRivers, showRivers, map],
-    ),
-    setActivePanel,
+  // Create choreography configuration
+  const choreographyConfig = useMemo(
+    () => createLearnChoreographyConfig({
+      map,
+      showBasinsRef,
+      showInflowArrowsRef,
+      inflowArrowsOpacityRef,
+      labelFadeAnimationRef,
+      arrowFadeAnimationRef,
+      toggleBasinsOnRef,
+      toggleInflowArrowsOnRef,
+      setInflowArrowsOpacity,
+      setGeocoderMarker,
+      setShowRivers,
+      setRiversAnimationProgress,
+      resetGeocodingPanel: () => setGeocodingResetTrigger(prev => prev + 1),
+    }),
+    [map, setInflowArrowsOpacity, setGeocoderMarker, setShowRivers, setRiversAnimationProgress]
   )
 
-  // Basin search state
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedLocation, setSelectedLocation] =
-    useState<GeocodingFeature | null>(null)
-  const [showResults, setShowResults] = useState(false)
-  const [basinInfo, setBasinInfo] = useState<{
-    name: string
-    properties: Record<string, unknown>
-  } | null>(null)
-  const [isSelectingResult, setIsSelectingResult] = useState(false) // Track if we're programmatically setting the query
-
-  // Geocoding hook, uses token from map context
-  const geocoding = useGeocoding({
-    bbox: BOUNDING_BOXES.CALIFORNIA, // California bounding box
-    countries: ["us"], // United States only
-    types: ["place", "address", "poi"], // Allow addresses, cities, and POIs
-    limit: 5,
-    flyTo: false, // Handling the map movement manually, for this component's use case
-  })
-
-  // Basin lookup hook to cast the GeoJSON to the expected type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { findBasin } = useBasinLookup(centralValleyBasins as any)
-
-  // Search when query changes (debounced)
-  useEffect(() => {
-    // Don't trigger search if we just selected a result
-    if (isSelectingResult) {
-      setIsSelectingResult(false)
-      return
-    }
-
-    if (searchQuery.trim()) {
-      const timeoutId = setTimeout(() => {
-        geocoding.search(searchQuery)
-      }, 300) // 300ms debounce
-      return () => clearTimeout(timeoutId)
-    } else {
-      geocoding.clear()
-      setShowResults(false)
-      setSelectedLocation(null)
-      setBasinInfo(null)
-    }
-  }, [searchQuery]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Show results when available
-  useEffect(() => {
-    setShowResults(geocoding.results.length > 0)
-  }, [geocoding.results])
-
-  // Handle location selection
-  const handleSelectLocation = (feature: GeocodingFeature) => {
-    setIsSelectingResult(true) // Prevent search from retriggering
-    setSelectedLocation(feature)
-    setSearchQuery(feature.place_name)
-    setShowResults(false)
-
-    // Set marker at the selected location
-    const [lng, lat] = feature.center
-    setGeocoderMarker([lng, lat])
-
-    // Find which basin this location is in
-    const basin = findBasin(lng, lat)
-    setBasinInfo(basin)
-
-    // If we found a basin, fit the map to the basin bounds
-    if (basin) {
-      // Find the basin feature in the GeoJSON
-      const basinFeature = centralValleyBasins.features.find(
-        (f) => f.properties?.name === basin.name,
-      ) as Feature<Polygon | MultiPolygon> | undefined
-
-      if (basinFeature) {
-        // Calculate the bounding box of the basin
-        const [minLng, minLat, maxLng, maxLat] = bbox(basinFeature)
-
-        // Fit the map to the basin bounds with some padding
-        map.fitBounds(
-          [
-            [minLng, minLat],
-            [maxLng, maxLat],
-          ],
-          0, // pitch
-          0, // bearing
-          { top: 100, bottom: 100, left: 100, right: 100 }, // padding
-          { duration: 1500 }, // smooth transition
-        )
-      }
-    } else {
-      // If no basin found, zoom to the location itself
-      map.flyTo({
-        longitude: lng,
-        latitude: lat,
-        zoom: 7,
-        transitionOptions: { duration: 1500 },
-      })
-    }
-  }
-
-  // Clear search
-  const handleClearSearch = () => {
-    setSearchQuery("")
-    setSelectedLocation(null)
-    setBasinInfo(null)
-    setGeocoderMarker(null)
-    setIsSelectingResult(false)
-    geocoding.clear()
-    setShowResults(false)
-  }
+  // Initialize scroll choreography
+  useLearnScrollChoreography(choreographyConfig, setActivePanel)
 
   // Intersection observer for first panel entrance animation
   useEffect(() => {
@@ -825,396 +98,126 @@ export default function MapOverlayPanels() {
         })
       },
       {
-        threshold: 0.1, // Trigger early (when 10% visible) for graceful entrance
-        rootMargin: "0px 0px 0px 0px", // No delay - start fade immediately
-      },
+        threshold: 0.1,
+        rootMargin: "0px",
+      }
     )
 
-    // Observe the California map panel -> trigger when map becomes sticky
     const mapPanel = document.getElementById("california-map")
     if (mapPanel) {
       observer.observe(mapPanel)
     }
 
-    return () => {
-      observer.disconnect()
-    }
+    return () => observer.disconnect()
   }, [])
-
-  // ✅ BasinsLayer visibility is now controlled by useLearnScrollChoreography
 
   return (
     <Box
       sx={{
         position: "relative",
-        zIndex: (theme) => theme.zIndex.content, // Above the sticky map
-        pointerEvents: "none", // Allow markers to be clickable through overlays
-        marginTop: "-100vh", // Pull up to overlay the sticky map immediately
-        paddingTop: "80vh", // Entrance ramp for first panel to gracefully appear
-        paddingBottom: "40vh", // Space after scenario card before next section
+        zIndex: (theme) => theme.zIndex.content,
+        pointerEvents: "none",
+        marginTop: "-100vh",
+        paddingTop: ENTRANCE_RAMPS.FIRST_PANEL,
+        paddingBottom: "40vh",
       }}
     >
-      {/* Call: Question about California's water system */}
+      {/* ==================== PANEL 1: California Overview ==================== */}
       <CallResponsePanel
         id="calsim-call"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }} // Doubled spacing for better pacing
+        sx={{ mb: "120vh" }}
       >
         <Typography variant="body1">
-          Do you know that California has one of the most complex water systems
-          in the world?
+          Do you know that California has one of the most complex water systems in the world?
         </Typography>
       </CallResponsePanel>
 
-      {/* Call: Central Valley water management importance */}
+      {/* ==================== PANEL 2: Central Valley ==================== */}
       <CallResponsePanel
         id="central-valley-importance"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "75vh" }} // Increased spacing for better pacing
+        sx={{ mb: "100vh" }}
       >
-        {/* <Typography variant="overline">
-          California&apos;s Central Valley
-        </Typography> */}
-
         <Typography variant="body1">
           The{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
           </Box>{" "}
-          is like a giant bowl that collects most of California&apos;s water. 
-          This water is highly managed, allocated, and transported.
+          is like a giant bowl that collects most of California&apos;s water.
+          This water is managed, divided up, and transported.
         </Typography>
       </CallResponsePanel>
 
-      {/* Call: Central Valley basins */}
+      {/* ==================== PANEL 3: Basins ==================== */}
       <CallResponsePanel
         id="central-valley-basins"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "75vh" }} // Increased spacing for better pacing
+        sx={{ mb: "100vh" }}
       >
-        {/* <Typography variant="overline">
-          California&apos;s Central Valley
-        </Typography> */}
-
         <Typography variant="body1">
-          The Central Valley lies across three basins.
+          The Central Valley lies across three water{" "}
+          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
+            basins
+          </Box>
+          .
         </Typography>
       </CallResponsePanel>
 
-      {/* Call: Rain and snowmelt statement */}
+      {/* ==================== PANEL 4: Water Flow ==================== */}
       <CallResponsePanel
         id="water-flow-call"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "75vh" }} // Increased spacing for better pacing
+        sx={{ mb: "100vh" }}
       >
-        {/* <Typography variant="overline">THE JOURNEY</Typography> */}
-
         <Typography variant="body1">
-          Basin rain and snowmelt flow from the mountain rims into that
-          basin&apos;s rivers, reservoirs, and wetlands. To move water from one
-          basin to another, we have to pump or pipe it through canals.
+          Each basin receives water from precipitation and snowmelt that flows down from
+          surrounding mountains into streams and rivers.
         </Typography>
-
-        {/* Hidden trigger for arrow animation - embedded in Panel 4 content */}
-        <Box
-          id="arrows-trigger"
-          sx={{
-            position: "relative",
-            height: "30vh",
-            width: "100%",
-            pointerEvents: "none",
-            opacity: 0,
-            mt: 2,
-          }}
-        />
       </CallResponsePanel>
 
-      {/* Call: Find my basin */}
+      {/* Hidden trigger for inflow arrows (positioned early in Panel 4's visible area) */}
+      <Box
+        id="arrows-trigger"
+        sx={{
+          height: "50vh",
+          width: "100%",
+          opacity: 0,
+          pointerEvents: "none",
+          marginTop: "-90vh", // Pull up significantly to trigger earlier
+        }}
+        aria-hidden="true"
+      />
+
+      {/* ==================== PANEL 4.5: Find My Basin ==================== */}
       <CallResponsePanel
         id="which-basin-call"
         side="right"
-        variant="call"
+        variant="response"
         isVisible={isFirstPanelVisible}
-        disableHighlight={true}
+        disableHighlight
+        sx={{ mb: "100vh" }}
       >
-        {/* Background container for entire panel content */}
-        <Box
-          sx={{
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            borderRadius: 0,
-            padding: { xs: 2, sm: 2.5, md: 3 },
-            boxShadow: theme.shadows[2],
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
-          <Typography variant="body1" sx={{ mb: 2, color: theme.palette.grey[900] }}>
-            Find my basin
-          </Typography>
-
-          {/* Geocoder search input */}
-          <Box sx={{ position: "relative" }}>
-          <Box
-            component="input"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Enter your California address, city, or landmark"
-            sx={{
-              width: "100%",
-              padding: theme.spacing(1.5),
-              paddingRight: searchQuery
-                ? theme.spacing(6)
-                : theme.spacing(1.5),
-              fontSize: "14px",
-              border: `1px solid ${theme.palette.grey[300]}`,
-              borderRadius: theme.borderRadius.standard,
-              backgroundColor: theme.palette.common.white,
-              outline: "none",
-              transition: "border-color 0.2s",
-              "&:focus": {
-                borderColor: theme.palette.primary.main,
-              },
-              "&::placeholder": {
-                color: theme.palette.grey[500],
-              },
-            }}
-          />
-
-          {/* Clear/loading indicator */}
-          {searchQuery && (
-            <Box
-              sx={{
-                position: "absolute",
-                right: theme.spacing(1.5),
-                top: "50%",
-                transform: "translateY(-50%)",
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-              }}
-            >
-              {geocoding.loading && (
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    border: `2px solid ${theme.palette.grey[300]}`,
-                    borderTopColor: theme.palette.primary.main,
-                    borderRadius: "50%",
-                    animation: "spin 0.6s linear infinite",
-                    "@keyframes spin": {
-                      to: { transform: "rotate(360deg)" },
-                    },
-                  }}
-                />
-              )}
-              {!geocoding.loading && (
-                <Box
-                  component="button"
-                  onClick={handleClearSearch}
-                  sx={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: 0.5,
-                    display: "flex",
-                    alignItems: "center",
-                    color: theme.palette.grey[600],
-                    fontSize: "18px",
-                    "&:hover": {
-                      color: theme.palette.grey[800],
-                    },
-                  }}
-                  aria-label="Clear search"
-                >
-                  ×
-                </Box>
-              )}
-            </Box>
-          )}
-
-          {/* Results dropdown */}
-          {showResults && geocoding.results.length > 0 && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: "calc(100% + 4px)",
-                left: 0,
-                right: 0,
-                backgroundColor: theme.palette.common.white,
-                borderRadius: theme.borderRadius.standard,
-                boxShadow: theme.shadows[3],
-                maxHeight: 300,
-                overflowY: "auto",
-                zIndex: 10,
-                border: `1px solid ${theme.palette.grey[300]}`,
-              }}
-            >
-              {geocoding.results.map((feature, index) => (
-                <Box
-                  key={feature.id || index}
-                  component="button"
-                  onClick={() => handleSelectLocation(feature)}
-                  sx={{
-                    width: "100%",
-                    padding: theme.spacing(1.5),
-                    border: "none",
-                    borderBottom:
-                      index < geocoding.results.length - 1
-                        ? `1px solid ${theme.palette.grey[200]}`
-                        : "none",
-                    backgroundColor: theme.palette.common.white,
-                    cursor: "pointer",
-                    textAlign: "left",
-                    transition: "background-color 0.15s",
-                    "&:hover": {
-                      backgroundColor: theme.palette.grey[100],
-                    },
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 500, mb: 0.25 }}
-                  >
-                    {feature.text}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: theme.palette.grey[600],
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      display: "block",
-                    }}
-                  >
-                    {feature.place_name}
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          )}
-
-          {/* Error message */}
-          {geocoding.error && (
-            <Typography
-              variant="caption"
-              sx={{
-                display: "block",
-                mt: 1,
-                padding: theme.spacing(1),
-                backgroundColor: theme.palette.error.light,
-                color: theme.palette.error.dark,
-                borderRadius: theme.borderRadius.standard,
-              }}
-            >
-              {geocoding.error.message}
-            </Typography>
-          )}
-
-          {/* Selected location display */}
-          {selectedLocation && !showResults && (
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                backgroundColor: "rgba(58, 69, 116, 0.05)",
-                borderRadius: theme.borderRadius.standard,
-                border: `1px solid ${theme.palette.blue.light}`,
-              }}
-            >
-              <Typography
-                variant="caption"
-                sx={{
-                  color: theme.palette.blue.darkest,
-                  fontWeight: 600,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                📍 Selected Location
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 500 }}>
-                {selectedLocation.text}
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: theme.palette.grey[600],
-                  display: "block",
-                  mt: 0.5,
-                }}
-              >
-                {selectedLocation.place_name}
-              </Typography>
-
-              {/* Basin info */}
-              <Box
-                sx={{
-                  mt: 2,
-                  pt: 2,
-                  borderTop: `1px solid ${theme.palette.blue.light}`,
-                }}
-              >
-                {basinInfo ? (
-                  <>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.blue.darkest,
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.1em",
-                        display: "block",
-                        mb: 0.5,
-                      }}
-                    >
-                      Central Valley Water Basin
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 600,
-                        color: theme.palette.primary.main,
-                      }}
-                    >
-                      {basinInfo.name}
-                    </Typography>
-                  </>
-                ) : (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: theme.palette.grey[600],
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Location is outside Central Valley basin boundaries, but
-                    Central Valley water still may be delivered to your
-                    area.
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-          )}
-        </Box>
-        </Box>
+        <GeocodingPanel
+          basinsData={centralValleyBasins}
+          onMarkerChange={setGeocoderMarker}
+          resetTrigger={geocodingResetTrigger}
+        />
       </CallResponsePanel>
 
-      {/* Response: Sacramento and San Joaquin Rivers - with scroll pinning */}
+      {/* ==================== PANEL 5: Rivers (Sticky) ==================== */}
       <Box
         id="rivers-flow-response"
         sx={{
-          minHeight: "400vh", // Extended for smoother river animation pacing
+          minHeight: STICKY_HEIGHTS.RIVERS,
           position: "relative",
         }}
       >
@@ -1232,10 +235,7 @@ export default function MapOverlayPanels() {
             side="left"
             variant="call"
             isVisible={isFirstPanelVisible}
-            sx={{ 
-              minHeight: "auto", // Remove extra height, handled by parent
-              mb: 0, // Remove margin, handled by parent
-            }}
+            sx={{ minHeight: "auto", mb: 0 }}
           >
             <Typography variant="body1">
               The{" "}
@@ -1255,128 +255,32 @@ export default function MapOverlayPanels() {
           </CallResponsePanel>
         </Box>
       </Box>
-      
+
       {/* Spacer after rivers panel */}
       <Box sx={{ height: "80vh" }} />
 
-      {/* Response: Delta information panel (right side) */}
+      {/* ==================== PANEL 6.5: Delta Info ==================== */}
       <CallResponsePanel
         id="delta-info-response"
         side="right"
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{
-          mb: "100vh", // Extra spacing before CalSim section for pacing
-        }}
+        sx={{ mb: "100vh" }}
       >
-        <Box
-          sx={{
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            borderRadius: 0,
-            padding: { xs: 2, sm: 2.5, md: 3 },
-            boxShadow: theme.shadows[2],
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-              fontWeight: 600,
-              color: theme.palette.text.primary,
-              textAlign: "left",
-            }}
-          >
-            What and where is &quot;The Delta&quot;?
-          </Typography>
-
-          <Box
-            component="button"
-            onClick={() => {
-              setIsDeltaTextVisible(true)
-              
-              // Zoom to Delta
-              if (map.mapRef?.current) {
-                map.mapRef.current.easeTo({
-                  center: [-121.5, 38.0],
-                  zoom: 10,
-                  bearing: 0,
-                  pitch: 0,
-                  duration: 2000,
-                  easing: (t: number) => t * (2 - t),
-                })
-              }
-              
-              // Show water layer
-              if (map.mapRef?.current) {
-                try {
-                  const mapInstance = map.mapRef.current.getMap()
-                  if (mapInstance.getLayer("water")) {
-                    mapInstance.setLayoutProperty("water", "visibility", "visible")
-                    console.log("✅ Water layer shown for Delta view")
-                  }
-                } catch (error) {
-                  console.warn("⚠️ Could not show water layer:", error)
-                }
-              }
-            }}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              color: theme.palette.blue.medium,
-              fontFamily: theme.typography.fontFamily,
-              fontSize: "1rem",
-              fontWeight: 500,
-              textDecoration: "none",
-              textAlign: "left",
-              transition: "color 0.2s ease",
-              "&:hover": {
-                color: theme.palette.blue.bright,
-                textDecoration: "underline",
-              },
-            }}
-          >
-            <span>Go to the Sacramento-San Joaquin River Delta</span>
-            <span style={{ fontSize: "1.2em" }}>→</span>
-          </Box>
-
-          {isDeltaTextVisible && (
-            <Typography
-              variant="body2"
-              sx={{
-                mt: 2,
-                lineHeight: 1.6,
-                textAlign: "left",
-              }}
-            >
-              The Sacramento–San Joaquin Delta (also known as the Bay-Delta) is the unique ecosystem of
-              low-lying waterways and islands where the Sacramento and San Joaquin
-              rivers meet, roughly between Sacramento, Stockton, and Antioch. Here
-              river water mixes with salty incoming tides from San Francisco Bay.
-              Pumps and canals send water from the Delta to cities and farms across
-              the state.
-            </Typography>
-          )}
-        </Box>
+        <DeltaInfoPanel map={map} />
       </CallResponsePanel>
 
-      {/* Call: Water distribution statement */}
+      {/* ==================== PANEL 6: Water Distribution ==================== */}
       <CallResponsePanel
         id="water-distribution-call"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          Water is distributed from multiple points along the way, and pumped
-          out from the{" "}
+          Water is distributed from multiple points along the way, and pumped out from the{" "}
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Delta
           </Box>{" "}
@@ -1384,15 +288,14 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
-      {/* Response: CalSim model detailed explanation */}
+      {/* ==================== PANEL 7: CalSim Model ==================== */}
       <CallResponsePanel
         id="calsim-detailed-response"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "100vh" }}
       >
-        {/* <Typography variant="overline">THE MODEL</Typography> */}
-
         <Typography variant="body1">
           To plan and account for where the water goes, the federal{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
@@ -1406,21 +309,19 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 600 }}>
             CalSim
           </Box>
-          . The CalSim model tracks water flowing into reservoirs, how much is
-          stored and released into rivers and canals, and where it gets
-          delivered across the state.
+          . The CalSim model tracks water flowing into reservoirs, how much is stored and released
+          into rivers and canals, and where it gets delivered across the state.
         </Typography>
       </CallResponsePanel>
 
-      {/* Call: COEQWAL project explanation */}
+      {/* ==================== PANEL 8: COEQWAL Project ==================== */}
       <CallResponsePanel
         id="coeqwal-call"
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
+        sx={{ mb: "100vh" }}
       >
-        {/* <Typography variant="overline">THE SCENARIOS</Typography> */}
-
         <Typography variant="body1">
           The{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
@@ -1434,182 +335,21 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 600 }}>
             Bay-Delta Science Program
           </Box>{" "}
-          to run CalSim through a broad range of different water management
-          practices and evaluate the results under current and future climate
-          possibilities.
+          to run CalSim through a broad range of different water management practices and evaluate
+          the results under current and future climate possibilities.
         </Typography>
 
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
-          We are making this data available to the public so that communities
-          can better understand the range of possibilities, and the range of
-          consequences, that different water management practices can bring.
+          We are making this data available to the public so that communities can better understand
+          the range of possibilities, and the range of consequences, that different water management
+          practices can bring.
         </Typography>
       </CallResponsePanel>
 
-      {/* Note: FAQ Accordion panel (id="faq-accordion") temporarily removed and saved for future use */}
-
-      {/* Explore the Scenarios panel, starting How to read CalSim */}
-      <CallResponsePanel
-        id="how-to-read-scenarios"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-      >
-        <Typography variant="body1">
-          To help you understand how to &quot;read&quot; a CalSim scenario, we
-          can start by exploring the data from the CalSim run for{" "}
-          <Box component="span" sx={{ fontWeight: 500 }}>
-            current water management operations
-          </Box>
-          . This strategy can be helpful for interpreting how water is currently
-          managed. It can also be used as a baseline to compare alternative
-          strategies with.
-        </Typography>
-      </CallResponsePanel>
-
-      {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
-      {/* Wrapper for scroll track + sticky content */}
-      <Box
-        sx={{
-          position: "relative",
-          width: "100%",
-          height: "auto",
-        }}
-      >
-        {/* Tall scroll track - creates the scroll pause effect */}
-        <Box
-          id="scenario-scroll-track"
-          sx={{
-            height: "300vh", // 3x viewport height for scroll progression
-            width: "100%",
-            position: "relative",
-          }}
-        />
-
-        {/* Sticky container - stays fixed while scrolling through track */}
-        <Box
-          sx={{
-            position: "sticky",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: "100%",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "flex-end", // Align to right
-            alignItems: "center",
-            pl: 2, // Left padding
-            pr: 4, // More right padding for space between panel and edge
-            pointerEvents: "none",
-          }}
-        >
-          {/* Blue panel grouping both cards */}
-          <Box
-            id="baseline-scenario-overlay"
-            sx={{
-              maxWidth: "580px",
-              padding: (theme) => theme.spacing(2),
-              pointerEvents: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: (theme) => theme.spacing(1.5),
-              backgroundColor: (theme) => theme.palette.brand.sky,
-              backdropFilter: "blur(10px)",
-              borderRadius: (theme) => theme.borderRadius.card,
-              overflow: "visible", // Allow tooltips to overflow to the left
-            }}
-          >
-            <ScenarioCard
-              isMinimized={false}
-              minimizedTitle="Current operations"
-            />
-            <ClimateCard isMinimized={false} selectedClimate={1} />
-          </Box>
-        </Box>
-      </Box>
-
-
-      {/* Explore the Scenarios panel, starting How to read CalSim */}
-      <CallResponsePanel
-        id="how-to-read-scenarios"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-      >
-        {/* <Typography variant="overline">EXPLORE THE SCENARIOS</Typography> */}
-
-        <Typography variant="body1">
-          To help you understand how to &quot;read&quot; a CalSim scenario, we
-          can start by exploring the data from the CalSim run for{" "}
-          <Box component="span" sx={{ fontWeight: 500 }}>
-            current water management operations
-          </Box>
-          . This strategy can be helpful for interpreting how water is currently
-          managed. It can also be used as a baseline to compare alternative
-          strategies with.
-        </Typography>
-      </CallResponsePanel>
-
-      {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
-      {/* Wrapper for scroll track + sticky content */}
-      <Box
-        sx={{
-          position: "relative",
-          width: "100%",
-          height: "auto",
-        }}
-      >
-        {/* Tall scroll track - creates the scroll pause effect */}
-        <Box
-          id="scenario-scroll-track"
-          sx={{
-            height: "300vh", // 3x viewport height for scroll progression
-            width: "100%",
-            position: "relative",
-          }}
-        />
-
-        {/* Sticky container - stays fixed while scrolling through track */}
-        <Box
-          sx={{
-            position: "sticky",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            width: "100%",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "flex-end", // Align to right
-            alignItems: "center",
-            pl: 2, // Left padding
-            pr: 4, // More right padding for space between panel and edge
-            pointerEvents: "none",
-          }}
-        >
-          {/* Blue panel grouping both cards */}
-          <Box
-            id="baseline-scenario-overlay"
-            sx={{
-              maxWidth: "580px",
-              padding: (theme) => theme.spacing(2),
-              pointerEvents: "auto",
-              display: "flex",
-              flexDirection: "column",
-              gap: (theme) => theme.spacing(1.5),
-              backgroundColor: (theme) => theme.palette.brand.sky,
-              backdropFilter: "blur(10px)",
-              borderRadius: (theme) => theme.borderRadius.card,
-              overflow: "visible", // Allow tooltips to overflow to the left
-            }}
-          >
-            <ScenarioCard
-              isMinimized={false}
-              minimizedTitle="Current operations"
-            />
-            <ClimateCard isMinimized={false} selectedClimate={1} />
-          </Box>
-        </Box>
-      </Box>
+      {/* ==================== Scenario Comparison Cards ==================== */}
+      <ScenarioCard isMinimized={false} minimizedTitle="Current operations" />
+      <ClimateCard isMinimized={false} selectedClimate={1} />
     </Box>
   )
 }
+

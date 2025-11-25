@@ -75,7 +75,8 @@ const DEFAULT_FADE_DURATION = 600 // ms
 /**
  * Hook for Learn section scroll choreography
  *
- * System: Each panel triggers when its top edge crosses viewport middle
+ * System: Each panel triggers when its top edge crosses 85% down the viewport
+ * (animations start early when panels first appear from the bottom)
  */
 export function useLearnScrollChoreography(
   panelStates: PanelLayerState[],
@@ -398,7 +399,8 @@ export function useLearnScrollChoreography(
      * Determine which panel should be active based on all panel positions
      */
     const determineActivePanel = () => {
-      const viewportMiddle = window.innerHeight / 2
+      // Trigger point at 85% down the viewport (so animations start very early when panel appears)
+      const triggerPoint = window.innerHeight * 0.85
       let activePanel = 0 // Default to first panel
 
       for (let i = sortedPanels.length - 1; i >= 0; i--) {
@@ -410,7 +412,8 @@ export function useLearnScrollChoreography(
 
         const rect = panelElement.getBoundingClientRect()
 
-        if (rect.top <= viewportMiddle && rect.bottom > viewportMiddle) {
+        // Panel becomes active when its top edge crosses the trigger point
+        if (rect.top <= triggerPoint && rect.bottom > triggerPoint) {
           activePanel = panel.position
           break
         }
