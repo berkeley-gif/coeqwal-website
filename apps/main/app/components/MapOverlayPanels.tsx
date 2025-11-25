@@ -197,7 +197,7 @@ export default function MapOverlayPanels() {
             Central Valley
           </Box>{" "}
           is a long, low valley that collects much of California&apos;s water.
-          This water is stored, divided up, and transported to farms and cities across California.
+          This water is stored, divided up, and transported to farms and cities across the state.
         </Typography>
       </CallResponsePanel>
 
@@ -227,8 +227,8 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          Each basin receives water from precipitation and snowmelt that flows down from
-          surrounding mountains into streams and rivers.
+          Each basin receives the rain and snowmelt that flows down from
+          surrounding mountains into its network of streams, rivers, reservoirs, and wetlands.
         </Typography>
       </CallResponsePanel>
 
@@ -286,7 +286,7 @@ export default function MapOverlayPanels() {
             sx={{ minHeight: "auto", mb: 0 }}
           >
             <Typography variant="body1">
-              The{" "}
+              These waters flow to the Valley floor, where the{" "}
               <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
                 Sacramento River
               </Box>{" "}
@@ -294,7 +294,7 @@ export default function MapOverlayPanels() {
               <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
                 San Joaquin River
               </Box>{" "}
-              flows from the south to mix waters in the low-lying{" "}
+              flows from the south. Their waters meet and mix in the low-lying{" "}
               <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
                 Delta
               </Box>
@@ -325,11 +325,7 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          Water is distributed from multiple points along the way, and pumped out from the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
-            Delta
-          </Box>{" "}
-          to points further south.
+          Water is diverted and distributed from multiple points along this system. Some water is released from reservoirs. Some is pumped from the Delta to points further south. Some is allowed to flow out to the Pacific Ocean. All of it must be carefully planned and accounted for.
         </Typography>
       </CallResponsePanel>
 
@@ -342,7 +338,7 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          To plan and account for where the water goes, the federal{" "}
+          To do this water planning and accounting, the federal{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
             U.S. Bureau of Reclamation
           </Box>{" "}
@@ -354,8 +350,8 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 600 }}>
             CalSim
           </Box>
-          . The CalSim model tracks water flowing into reservoirs, how much is stored and released
-          into rivers and canals, and where it gets delivered across the state.
+          . CalSim models how water would move through the system based on the water management decisions that are made. 
+          It models how much water flows into reservoirs based on climate assumptions, how much is stored or released, and where it gets delivered.
         </Typography>
       </CallResponsePanel>
 
@@ -372,7 +368,7 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontWeight: 600 }}>
             COEQWAL
           </Box>{" "}
-          project has been given resources from the{" "}
+          project has received support from the{" "}
           <Box component="span" sx={{ fontWeight: 600 }}>
             University of California
           </Box>{" "}
@@ -381,13 +377,48 @@ export default function MapOverlayPanels() {
             Bay-Delta Science Program
           </Box>{" "}
           to run CalSim through a broad range of different water management practices and evaluate
-          the results under current and future climate possibilities.
+          the results under current and future climate conditions.
         </Typography>
+      </CallResponsePanel>
 
-        <Typography variant="body1" sx={{ fontWeight: 600 }}>
-          We are making this data available to the public so that communities can better understand
-          the range of possibilities, and the range of consequences, that different water management
-          practices can bring.
+      {/* ==================== PANEL 9: Public data availability ==================== */}
+      <CallResponsePanel
+        id="public-data-call"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+        sx={{ mb: "100vh" }}
+      >
+        <Typography variant="body1">
+          We are making this information public so that communities can better understand
+          the range of possibilities, and the range of consequences, that come with different water management choices.
+        </Typography>
+      </CallResponsePanel>
+
+      {/* ==================== PANEL 10: Scenario explanation ==================== */}
+      <CallResponsePanel
+        id="scenario-explanation-call"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+        sx={{ mb: "100vh" }}
+      >
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          Each water management scenario on this site shows:
+        </Typography>
+        <Box component="ul" sx={{ pl: 3, mb: 2 }}>
+          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+            The strategy (what operations and policies define it)
+          </Typography>
+          <Typography component="li" variant="body1" sx={{ mb: 1 }}>
+            The outcomes (how it affects water supply, ecosystems, agriculture, and communities)
+          </Typography>
+          <Typography component="li" variant="body1">
+            The hydroclimate (how it performs under different possible future climates)
+          </Typography>
+        </Box>
+        <Typography variant="body1">
+          This scorecard helps you read a scenario—what it changes, what it impacts, and how it might matter for your community.
         </Typography>
       </CallResponsePanel>
 
@@ -463,12 +494,12 @@ export default function MapOverlayPanels() {
               containerRef={baselineOverlayRef}
               content={
                 <>
-                  These options allow you to select how a water management strategy is
-                  expected to perform under different potential{" "}
                   <Box component="span" sx={{ fontWeight: 600 }}>
-                    hydroclimates
+                    Hydroclimate
                   </Box>
-                  .
+                  <br />
+                  <br />
+                  These options let you explore how a strategy performs under different possible future climate conditions.
                 </>
               }
               position="left"

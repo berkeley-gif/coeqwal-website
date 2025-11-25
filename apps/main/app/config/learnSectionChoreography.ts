@@ -667,11 +667,59 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 9: Baseline scenario cards ====================
+    // ==================== PANEL 9: Public data availability ====================
+    {
+      panelId: "public-data-call",
+      position: 9,
+      debugLabel: "Panel 9: Public Data",
+      layers: [
+        {
+          layerId: "california-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-label",
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+      ],
+    },
+
+    // ==================== PANEL 10: Scenario explanation ====================
+    {
+      panelId: "scenario-explanation-call",
+      position: 10,
+      debugLabel: "Panel 10: Scenario Explanation",
+      layers: [
+        {
+          layerId: "california-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-label",
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+      ],
+    },
+
+    // ==================== PANEL 11: Baseline scenario cards ====================
     {
       panelId: "scenario-scroll-track",
-      position: 9,
-      debugLabel: "Panel 9: Baseline Scenario",
+      position: 11,
+      debugLabel: "Panel 11: Baseline Scenario",
       layers: [
         {
           layerId: "california-label",
@@ -691,11 +739,11 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 10: Scenario buffer ====================
+    // ==================== PANEL 12: Scenario buffer ====================
     {
       panelId: "scenario-buffer",
-      position: 10,
-      debugLabel: "Panel 10: Scenario Buffer",
+      position: 12,
+      debugLabel: "Panel 12: Scenario Buffer",
       layers: [
         {
           layerId: "california-label",
@@ -715,11 +763,11 @@ export function createLearnChoreographyConfig(params: {
       ],
     },
 
-    // ==================== PANEL 11: Learn more container ====================
+    // ==================== PANEL 13: Learn more container ====================
     {
       panelId: "learnMoreContainer",
-      position: 11,
-      debugLabel: "Panel 11: Learn more",
+      position: 13,
+      debugLabel: "Panel 13: Learn more",
       layers: [
         {
           layerId: "california-label",
