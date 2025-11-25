@@ -82,7 +82,7 @@ export function FloatingGlossaryPanel({
       return <Typography variant="body2">{definition}</Typography>
     }
 
-    // Create regex to match all terms
+    // Regex to match all terms
     const termPattern = termsInText
       .map((term) => term.term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
       .join("|")
@@ -124,23 +124,6 @@ export function FloatingGlossaryPanel({
 
   return (
     <>
-      {/* Backdrop */}
-      <Box
-        onClick={onClose}
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: theme.zIndex.drawer - 2,
-          opacity: isOpen ? 1 : 0,
-          pointerEvents: isOpen ? "auto" : "none",
-          transition: "opacity 0.3s ease",
-        }}
-      />
-
       {/* Panel anchored to button position */}
       <Box
         sx={{
@@ -298,7 +281,7 @@ export function FloatingGlossaryPanel({
                     </Box>
                   )}
 
-                  {/* See Also */}
+                  {/* See also */}
                   {term.seeAlso && (
                     <Box sx={{ ml: 4, mt: 2 }}>
                       <Typography variant="body2" color="text.secondary">

@@ -1,5 +1,5 @@
 /**
- * GeocodingPanel - "Find My Basin" Interactive Component
+ * GeocodingPanel - "Find my basin"  (Learn Map)
  * 
  * Allows users to search for California locations and discover which basin they're in.
  * Integrates with Mapbox geocoding API and basin lookup functionality.

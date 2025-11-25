@@ -33,7 +33,7 @@ export function FloatingGlossary({ selectedTerm }: FloatingGlossaryProps) {
 
   const handleDragStart = (e: React.MouseEvent) => {
     // Only start drag if not clicking to toggle
-    if (e.button !== 0) return // Only left mouse button
+    if (e.button !== 0) return
 
     setIsDragging(true)
     dragStartRef.current = {
