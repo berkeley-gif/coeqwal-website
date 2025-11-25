@@ -177,8 +177,6 @@ const StrategyGrid = React.memo(function StrategyGridComponent({
   showMapView,
   showOnlyChosen,
   showDefinitions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onMapViewChange, // Unused after removing list/map toggle, but kept for backward compatibility
   onShowOnlyChosenChange,
   onShowDefinitionsChange,
 }: StrategyGridProps) {
