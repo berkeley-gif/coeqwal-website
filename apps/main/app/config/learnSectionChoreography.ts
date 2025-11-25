@@ -9,6 +9,7 @@
  * Configuration separate from implementation
  */
 
+import type React from "react"
 import type { PanelLayerState } from "../hooks/useLearnScrollChoreography"
 import { CENTRAL_VALLEY_VIEW } from "../components/CaliforniaMapPanel"
 import {
@@ -23,7 +24,7 @@ import {
 /**
  * Helper: Zoom camera back to Central Valley view
  */
-function zoomToCentralValley(mapRef: any) {
+function zoomToCentralValley(mapRef: React.MutableRefObject<mapboxgl.Map | null>) {
   if (mapRef?.current) {
     mapRef.current.easeTo({
       center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
@@ -36,14 +37,13 @@ function zoomToCentralValley(mapRef: any) {
   }
 }
 
-/**
- * Configuration factory for Learn section choreography
- *
- * Accepts refs and callbacks to keep config pure while allowing side effects
- */
-export function createLearnChoreographyConfig(params: {
+interface ChoreographyConfigParams {
   // Map operations API (from useMap())
-  map: any
+  map: {
+    mapRef: React.MutableRefObject<mapboxgl.Map | null>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any // Allow other MapOperationsAPI properties
+  }
   // Refs for stable access to current state
   showBasinsRef: React.RefObject<boolean>
   showInflowArrowsRef: React.RefObject<boolean>
@@ -57,11 +57,20 @@ export function createLearnChoreographyConfig(params: {
   toggleBasinsOnRef: React.RefObject<() => void>
   toggleInflowArrowsOnRef: React.RefObject<() => void>
   setInflowArrowsOpacity: (opacity: number) => void
-  setGeocoderMarker: (marker: any) => void
+  setGeocoderMarker: (marker: [number, number] | null) => void
   setShowRivers: (show: boolean) => void
   setRiversAnimationProgress: (progress: number) => void
   resetGeocodingPanel: () => void
-}): PanelLayerState[] {
+}
+
+/**
+ * Configuration factory for Learn section choreography
+ *
+ * Accepts refs and callbacks to keep config pure while allowing side effects
+ */
+export function createLearnChoreographyConfig(
+  params: ChoreographyConfigParams,
+): PanelLayerState[] {
   const {
     map,
     showBasinsRef,

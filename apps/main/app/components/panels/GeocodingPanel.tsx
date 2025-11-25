@@ -10,11 +10,11 @@ import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useMap, useGeocoding, useBasinLookup, BOUNDING_BOXES } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
 import { bbox } from "@turf/turf"
-import type { Feature, Polygon, MultiPolygon } from "geojson"
+import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson"
 
 interface GeocodingPanelProps {
   /** Basin GeoJSON data for lookup */
-  basinsData: any
+  basinsData: FeatureCollection<Polygon | MultiPolygon> | null | undefined
   /** Callback when geocoder marker should be set/cleared */
   onMarkerChange: (coords: [number, number] | null) => void
   /** External trigger to clear/reset the panel */
@@ -94,9 +94,9 @@ export function GeocodingPanel({
     setBasinInfo(basin)
 
     // Zoom to basin or location
-    if (basin) {
+    if (basin && basinsData) {
       const basinFeature = basinsData.features.find(
-        (f: any) => f.properties?.name === basin.name,
+        (f) => f.properties?.name === basin.name,
       ) as Feature<Polygon | MultiPolygon> | undefined
 
       if (basinFeature) {

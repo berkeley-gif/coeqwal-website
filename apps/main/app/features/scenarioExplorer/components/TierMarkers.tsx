@@ -157,7 +157,7 @@ export default function TierMarkers({ data }: TierMarkersProps) {
       })
 
       // Add click handler
-      const handleClick = (e: { 
+      const handleClick = (e: {
         features?: Array<{ properties: Record<string, unknown> }>
         lngLat: { lng: number; lat: number }
       }) => {
