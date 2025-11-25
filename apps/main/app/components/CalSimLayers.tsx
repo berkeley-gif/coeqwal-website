@@ -203,13 +203,14 @@ export default function CalSimLayers() {
   const { majorReservoirFeatures, regularFeatures } = useMemo(() => {
     if (!geoJsonData) return { majorReservoirFeatures: [], regularFeatures: [] }
 
+    /* eslint-disable react/prop-types */
     const major = geoJsonData.features.filter((f) => {
       const props = f.properties as CalSimFeatureProperties
       return (
         (props.schematic_type === "node" || props.element_type === "node") &&
         props.type === "STR" &&
-        props.short_code && // eslint-disable-line react/prop-types
-        majorReservoirCodes.has(props.short_code) // eslint-disable-line react/prop-types
+        props.short_code &&
+        majorReservoirCodes.has(props.short_code)
       )
     })
 
@@ -217,10 +218,11 @@ export default function CalSimLayers() {
       const props = f.properties as CalSimFeatureProperties
       return (
         (props.schematic_type === "node" || props.element_type === "node") &&
-        (props.type !== "STR" || !(props.short_code && // eslint-disable-line react/prop-types
-        majorReservoirCodes.has(props.short_code))) // eslint-disable-line react/prop-types
+        (props.type !== "STR" ||
+          !(props.short_code && majorReservoirCodes.has(props.short_code)))
       )
     })
+    /* eslint-enable react/prop-types */
 
     return { majorReservoirFeatures: major, regularFeatures: regular }
   }, [geoJsonData, majorReservoirCodes])

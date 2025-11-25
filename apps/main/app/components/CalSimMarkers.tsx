@@ -121,10 +121,7 @@ export function convertGeoJSONToNetwork(
   geoJsonResponse.features.forEach((feature) => {
     // Handle both old format (type === "node") and new format (schematic_type === "node")
     const props = feature.properties
-    if (
-      props.type === "node" ||
-      props.element_type === "node"
-    ) {
+    if (props.type === "node" || props.element_type === "node") {
       if (!feature.geometry || !feature.geometry.coordinates) {
         return
       }
