@@ -25,6 +25,7 @@ export {
 
   // Inputs and controls
   Button,
+  ButtonGroup,
   ToggleButton,
   ToggleButtonGroup,
 

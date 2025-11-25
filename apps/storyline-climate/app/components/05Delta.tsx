@@ -188,11 +188,11 @@ function IssueBottomParagraph() {
       <motion.div>
         <Box className="paragraph" component="article">
           <Typography variant="body1">
-            {"This area is home to many communities and farms."}
+            {"This area is home to many small communities and farms."}
           </Typography>
           <Typography variant="body1">
             {
-              "It is also where huge pumps move freshwater south of the Delta to supply cities and farms across the state."
+              "It is also where huge pumps move freshwater south of the Delta to supply large farms in the San Joaquin Valley and cities in Southern California."
             }
           </Typography>
         </Box>
@@ -204,7 +204,7 @@ function IssueBottomParagraph() {
           </Typography>
           <Typography variant="body1">
             {
-              "Increasing salinity threatens local Delta communities and farms. "
+              "Increasing salinity threatens local communities and farms that rely on fresh water flowing through the Delta. "
             }
           </Typography>
           <Typography variant="body1">
@@ -224,7 +224,7 @@ function AdaptationTopParagraph() {
       <Box className="paragraph" component="article">
         <Typography variant="body1">
           {
-            "People are looking for ways to manage salinity and other water system problems brought by climate change."
+            "People are looking for ways to manage salinity in the Delta, which is becoming more difficult as the climate changes."
           }
         </Typography>
       </Box>
@@ -240,8 +240,8 @@ function AdaptationTopParagraph() {
               Rise
             </a>
           </span>
-          , is a research effort studying a wide range of adaptation strategies
-          to address salinity intrusion.
+          , is a research project exploring a wide range of adaptation strategies
+          to address salinity intrusion in the Delta.
         </Typography>
         <Typography variant="body1">
           {

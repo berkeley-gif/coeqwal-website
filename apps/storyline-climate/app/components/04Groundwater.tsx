@@ -4,82 +4,73 @@ import { Box, Typography } from "@repo/ui/mui"
 import { motion, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import GroundwaterContainer from "./vis/Groundwater"
+import StickyContainer from "./helpers/StickyContainer"
+import SVGLineContainer from "./helpers/SVGLineContainer"
 
-function SectionSupply() {
+function SectionGroundwater() {
   return (
     <>
       <Groundwater />
-      <Conservation />
     </>
   )
 }
+
+
 
 function Groundwater() {
   const { sectionRef } = useActiveSection("groundwater", { amount: 0.5 })
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end center"],
+    offset: ["start end", "end start"],
   })
 
-  const firstParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.2, 0.4],
-    [0, 1],
-  )
-  const secondParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.5, 0.7],
-    [0, 1],
-  )
+  const linePath = useTransform(scrollYProgress, [0.7, 0.9], [0, 1]);
 
   return (
-    <Box
-      id="groundwater"
-      ref={sectionRef}
-      className="container-row"
-      height="100vh"
-      width="100%"
-      tabIndex={-1}
-      role="region"
+    <StickyContainer
+      sectionID="groundwater"
+      stickyRollHeight="120vh"
+      sectionRef={sectionRef}
     >
-      <Box
-        width="50%"
-        height="100%"
+      <SVGLineContainer viewBox="0 0 1291 630">
+        <motion.path
+          d="M0.390137 -9 C0.390137 -9 443.39 80 560.39 290 C677.39 500 1044.83 496.033 1318.39 628"
+          className='svg-line'
+          pathLength={linePath}
+          transform="translate(0, -250)"
+        />
+      </SVGLineContainer>
+
+      <Box className='text-section'
+        width='50%'
+        height='100%'
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-        }}
-      >
-        <motion.div
-          className="text-container-left"
-          style={{
-            opacity: firstParagraphOpacity,
-            marginBottom: "20px",
-            paddingRight: "10px",
-          }}
-        >
+          position: 'relative', zIndex: 1, pointerEvents: 'auto',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+      }}>
           <Box className="paragraph" component="article">
             <Typography variant="h4">
-              {"Groundwater: A Hidden but Limited Reserve"}
+              {"Increasing Droughts"}
+            </Typography>
+          </Box>
+          <Box className='paragraph' component='article'>
+            <Typography variant="body1">
+              {
+                "Droughts are not new to California. But in a changing climate, droughts are expected to occur more often. "
+              }
             </Typography>
           </Box>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
               {
-                "In past droughts, when water available in rivers and reservoirs is reduced,"
+                "In past droughts, when water available in rivers and reservoirs is reduced, "
               }
-            </Typography>
-            <Typography variant="body1">
-              {"communities and farmers in California have turned to "}
+              {"communities and farmers in California turned to "}
               <span style={{ fontWeight: "bold" }}>{"groundwater"}</span>
               {" to meet their needs."}
             </Typography>
           </Box>
           <Box className="paragraph" component="article">
-            <Typography variant="body1" gutterBottom>
-              {"But that resource, too, has limits."}
-            </Typography>
             <Typography variant="body1">
               {"Unfortunately, "}
               <span className="highlight-text">
@@ -87,73 +78,43 @@ function Groundwater() {
                   "overpumping of groundwater has depleted underground water storage"
                 }
               </span>
-              {" and caused the land to sink."}
+              {" , causing wells to dry and the land to sink."}
             </Typography>
           </Box>
-        </motion.div>
-        <motion.div
-          className="text-container-left"
-          style={{ opacity: secondParagraphOpacity, paddingRight: "10px" }}
-        >
           <Box className="paragraph" component="article">
             <Typography variant="body1">
-              {"The 2014 "}
+              {"In 2014, the state enacted "}
               <span style={{ fontWeight: "bold" }}>
-                {"Sustainable Groundwater Management Act (SGMA) "}
+                {"Sustainable Groundwater Management Act (SGMA)"}
               </span>
               {
-                "is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."
+                ". This law is intended to protect groundwater for the future. It aims to reduce overpumping so supplies will still be there during extreme droughts."
               }
             </Typography>
           </Box>
-          <Box className="paragraph" component="article">
-            <Typography variant="body1">
-              {"But putting the law fully into effect will take years. "}
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              {
-                "It will also mean many farms must cut back on water use through more efficient irrigation, fewer crops, or retiring some farmland. These changes could affect the livelihoods of workers and local economies. "
-              }
-            </Typography>
-            <Typography variant="body1">
-              {
-                "Therefore, careful planning will be needed to support affected communities."
-              }
-            </Typography>
-          </Box>
-        </motion.div>
       </Box>
+
       <Box
-        width="50%"
-        height="100%"
+        width='50%'
+        height='100%'
         sx={{
+          position: "absolute",
+          inset: 0,
+          left: '50%',
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "0 20px",
-        }}
-      >
-        <Box
-          width="100%"
-          height="70%"
-          sx={{
-            position: "relative",
-            justifyContent: "center",
-            // backgroundImage: "url('/drafts/supply-groundwater.png')",
-            backgroundSize: "100% auto",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <Box width="100%" height="60%">
-            <GroundwaterContainer />
+          paddingRight: '5rem',
+      }}>
+          <Box width="100%" height="40%">
+          <GroundwaterContainer scrollProgress={scrollYProgress} />
           </Box>
-        </Box>
       </Box>
-    </Box>
+    </StickyContainer>
   )
 }
 
+/*
 function Conservation() {
   const { sectionRef } = useActiveSection("conservation", { amount: 0.5 })
   const { scrollYProgress } = useScroll({
@@ -259,5 +220,6 @@ function Conservation() {
     </Box>
   )
 }
+*/
 
-export default SectionSupply
+export default SectionGroundwater

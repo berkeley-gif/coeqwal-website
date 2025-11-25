@@ -1,11 +1,13 @@
 "use client"
 
 import { Box, LibraryBooksIcon, Stack, Typography } from "@repo/ui/mui"
-import { motion, useScroll, useTransform } from "@repo/motion"
+import { motion, MotionValue, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import { useEffect, useRef } from "react"
 import HydroClimateContainer from "./vis/HydroClimate"
-import * as d3 from "d3"
+import * as d3 from "d3";
+import StickyContainer from "./helpers/StickyContainer"
+import SVGLineContainer from "./helpers/SVGLineContainer"
 
 function SectionResolution() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -15,13 +17,19 @@ function SectionResolution() {
     offset: ["start start", "end end"],
   })
 
-  const x = useTransform(scrollYProgress, [0, 1], ["0vw", `-${140}vw`])
+  useEffect(() => {
+    const unsubscribe = scrollYProgress.on('change', (v) => { 
+      console.log("Temperature scrollYProgress:", v);
+    })
+    return () => unsubscribe()
+  }, [scrollYProgress]);
+
+  //NOTE: play with this to change how horizontal scroll flows
+  const x = useTransform(scrollYProgress, [0.3, 1], ["0vw", `-${150}vw`])
 
   return (
     <div>
-      <Hydroclimate />
-
-      <div ref={containerRef} style={{ height: "250vh", position: "relative" }}>
+      <div ref={containerRef} style={{ height: "300vh", position: "relative" }}>
         <div
           style={{
             position: "sticky",
@@ -31,17 +39,18 @@ function SectionResolution() {
             width: "100%",
           }}
         >
-          {/* First motion div */}
           <motion.div
             style={{
               x,
-              width: "250vw",
+              width: "400vw",
               display: "flex",
               justifyContent: "flex-end",
             }}
-          >
-            <Box height="100vh" width="100vw" sx={{ backgroundColor: "red" }} />
-            <ScenariosMockup />
+        >
+            <Hydroclimate />
+            <Box width='150vw'>
+              <ScenarioTheme scrollProgress={scrollYProgress}/>
+            </Box>
             <Box
               id="scenario-transition"
               className="container-center"
@@ -57,13 +66,6 @@ function SectionResolution() {
             />
           </motion.div>
 
-          {/* Second motion div */}
-          <motion.div style={{ x, width: "200vw", display: "flex" }}>
-            <Hydroclimate />
-            <Scenarios />
-            <Box className="container-center">Transition</Box>
-            {/* Probably need a dummy slide for the transition */}
-          </motion.div>
         </div>
       </div>
 
@@ -76,102 +78,142 @@ function Hydroclimate() {
   const { sectionRef } = useActiveSection("hydroclimate", { amount: 0.5 })
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start end", "end center"],
+    offset: ["start end", "end start"],
   })
 
-  const firstParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.2, 0.4],
-    [0, 1],
-  )
-  const secondParagraphOpacity = useTransform(
-    scrollYProgress,
-    [0.5, 0.7],
-    [0, 1],
-  )
-
   return (
-    <Box
-      id="hydroclimate"
-      className="container-left"
-      tabIndex={-1}
-      role="region"
-    >
+    <StickyContainer
+      sectionID='hydroclimate'
+      stickyRollHeight='150vh'
+      sectionRef={sectionRef}>
+      
       <Box
-        ref={sectionRef}
-        height="150vh"
         width="100%"
-        sx={{ position: "relative" }}
-      ></Box>
-
-      <Box className="sticky-container">
-        <Box
-          width="100%"
-          height="100%"
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <motion.div
-            className="text-container-left"
-            style={{ opacity: firstParagraphOpacity, padding: "0 5rem" }}
-          >
-            <Box className="paragraph" component="article">
-              <Typography variant="h4">
-                {
-                  "COEQWAL: Planning for different hydroclimates and management decisions"
-                }
-              </Typography>
-            </Box>
-            <Box className="paragraph" component="article">
-              <Typography variant="body1" style={{ fontWeight: "bold" }}>
-                {"This is where COEQWAL comes in."}
-              </Typography>
-            </Box>
-            <Box className="paragraph" component="article">
-              <Typography variant="body1">
-                {
-                  "Using a water planning model called CalSim, COEQWAL helps us study how climate change might affect California's water."
-                }
-              </Typography>
-            </Box>
-          </motion.div>
-          <motion.div
-            className="text-container-left"
-            style={{ opacity: secondParagraphOpacity, padding: "0 5rem" }}
-          >
-            <Box className="paragraph" component="article">
-              <Typography variant="body1">
-                {
-                  "COEQWAL studies five plausible future hydroclimates that correspond to different levels of concern for our water system. Some involve moderate increases in temperature, precipitation, and streamflow, while others involve much greater changes."
-                }
-              </Typography>
-            </Box>
-          </motion.div>
-          <Box
-            className="container-center-horizontal"
-            height="50vh"
-            width="80%"
-          >
-            <HydroClimateContainer />
-          </Box>
-          <Box
-            className="paragraph"
-            component="article"
-            style={{ padding: "0 5rem" }}
-          >
-            <Typography variant="caption">
+        height="100%"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box className='text-section'>
+          <Box className="paragraph" component="article">
+            <Typography variant="h4">
               {
-                "Hydroclimate changes in precipitation, temperature, and seasonal streamflow (bands show the interquartile range) relative to historical conditions (1922–2021)."
+                "COEQWAL: Planning for the future"
+              }
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1" style={{ fontWeight: "bold" }} gutterBottom>
+              {"This is where COEQWAL comes in."}
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Using a water planning model called CalSim, COEQWAL helps us understand how climate change might affect California's water system."
+              }
+            </Typography>
+          </Box>
+          <Box className="paragraph" component="article">
+            <Typography variant="body1">
+              {
+                "COEQWAL studies five plausible future "
+              }
+              <span style={{fontWeight: 'bold'}}>{"hydroclimates"}</span>
+              {" \u2014 specific changes in temperatures, precipitation, and streamflow."}
+            </Typography>
+            <Typography variant="body1">
+              {
+                "Some hydroclimates involve moderate changes that our water storage and delivery system can accommodate. But other hydroclimates represent much greater changes in climate, including significant reductions in precipitation and streamflow."
               }
             </Typography>
           </Box>
         </Box>
+        <Box
+          className="container-center-horizontal text-section"
+          height="50vh"
+        >
+          <HydroClimateContainer />
+        </Box>
+        <Box
+          className="paragraph"
+          component="article"
+          style={{ padding: "0 5rem" }}
+        >
+          <Typography variant="caption">
+            {
+              "Changes in adjusted historical records (1922–2021) of precipitation totals, mean temperatures, and mean streamflow relative to the actual historical record, shown for each month of the water year by hydroclimate."
+            }
+          </Typography>
+        </Box>
       </Box>
-    </Box>
+    </StickyContainer>
+  )
+}
+
+
+
+function ScenarioTheme({
+  scrollProgress
+}: {
+  scrollProgress: MotionValue<number>
+}) {
+  const { sectionRef } = useActiveSection("scenariotheme", { amount: 0.5 });
+
+  const firstScenario = useTransform(scrollProgress, [0.4, 0.6], [0, 1])
+  const secondScenario = useTransform(scrollProgress, [0.5, 0.6], [0, 1])
+  const restScenario = useTransform(scrollProgress, [0.45, 0.6], [0, 1])
+
+  return (
+    <StickyContainer
+      sectionID='scenariotheme'
+      stickyRollHeight='150vh'
+      sectionRef={sectionRef}
+    >
+      <SVGLineContainer viewBox='0 0 1728 907'>
+        <motion.path
+          d="M-8 201.78C5.5057 220.591 817 169.098 897 291.44C977 413.781 734 420.781 804 296.781C874 172.78 1702.31 233.579 1741 262.781"
+          className='svg-line'
+          pathLength={secondScenario}
+        />
+        <motion.path
+          d="M-19 199.78C68.9324 230.037 931.5 161.78 887.5 46.2798C843.5 -69.2205 732 75.7804 816.5 92.7802C901 109.78 1741 78.7803 1741 78.7803"
+          className='svg-line'
+          pathLength={firstScenario}
+        />
+        <motion.path
+          d="M-9 203.78C155.211 223.319 340.5 216.28 459 248.78C577.5 281.28 804 487.78 870 568.78C936 649.78 1148.9 759.945 1080 810.78C1011.1 861.616 976 788.78 1025 756.78C1074 724.78 1234.1 777.6 1371 829.78C1507.9 881.96 1737 881.78 1737 881.78"
+          className='svg-line'
+          style={{ opacity: 0.5 }}
+          pathLength={restScenario}
+        />
+        <motion.path
+          d="M-9 204.78C-9 204.78 220.13 127.578 543.814 336.996C867.499 546.415 472 532.78 571 434.78C670 336.78 834 556.78 993 636.78C1152 716.78 1753 850.78 1753 850.78"
+          className='svg-line'
+          style={{ opacity: 0.5 }}
+          pathLength={restScenario}
+        />
+        <motion.path
+          d="M-17 198.78C-17 198.78 331 357.78 453 257.78C575 157.78 696 457.78 767 500.78C838 543.78 960 691.78 849 704.78C738 717.78 776 601.78 878 630.78C980 659.78 1133 749.78 1274.5 781.576C1416 813.372 1759 869.78 1759 869.783"
+          className='svg-line'
+          style={{ opacity: 0.5 }}
+          pathLength={restScenario}
+        />
+        <motion.path
+          d="M0 203.78C0 203.78 353.223 295.268 491.09 299.08C594.811 301.948 715 471.78 808 511.78C901 551.78 968 631.759 1035 593.78C1102 555.801 1009 466.78 960 535.78C911 604.78 1061 667.78 1109 688.78C1157 709.78 1748 818.78 1748 818.78"
+          className='svg-line'
+          style={{ opacity: 0.5 }}
+          pathLength={restScenario}
+        />
+        <motion.path
+          d="M0.00262291 203.822C-9.92357 215.136 402.001 281.78 464 273.78C525.999 265.78 602.999 332.78 676.997 310.78C750.996 288.78 683.997 184.78 625.998 242.78C567.998 300.78 629.997 404.78 681.999 433.78C734 462.78 978.87 679.655 1128.43 709.565C1277.99 739.474 1766.99 911.78 1766.99 911.78"
+          className='svg-line'
+          style={{ opacity: 0.5 }}
+          pathLength={restScenario}
+        />
+      </SVGLineContainer>
+    </StickyContainer>
   )
 }
 
@@ -191,8 +233,10 @@ function ScenariosMockup() {
         //backgroundRepeat: "no-repeat",
       }}
       tabIndex={-1}
+
       role="region"
     >
+      
       <svg
         width="100%"
         height="100%"
@@ -226,21 +270,6 @@ function ScenariosMockup() {
           strokeWidth="4"
           opacity={0.3}
         />
-
-        {/* low opacity lines */}
-        {/* <motion.path
-          initial={{ pathLength: 0 }}
-          whileInView={{ pathLength: 1 }}
-          transition={{ duration: 4, ease: "easeInOut" }}
-          d="M0 209C0 209 309.838 302.538 422.054 282.203C534.271 261.867 829.213 446.231 1124.15 679.397C1419.1 912.563 1718.01 720.066 1718.01 720.066
-          M0 210.042C0 210.042 453.833 173.441 632.585 307.647C811.338 441.853 854.039 712.976 1137.06 712.976C1420.09 712.976 1722.98 925.807 1722.98 925.807
-          M0 210.042C0 210.042 352.54 233.087 507.458 277.823C662.377 322.559 1070.53 708.909 1208.57 780.757C1346.6 852.604 1722.98 814.646 1722.98 814.646
-          M0 210.042C0 210.042 190.669 100.238 507.458 307.647C824.247 515.056 817.296 618.083 968.242 618.083C1119.19 618.083 1716.02 798.379 1716.02 798.379
-          M-6 209C-6 209 342.567 306.604 478.618 310.671C614.668 314.738 850.026 585.861 976.145 636.019C1102.27 686.177 1718.96 865.118 1718.96 865.118"
-          stroke="#F1B143"
-          strokeWidth="4"
-          opacity={0.3}
-        /> */}
       </svg>
     </Box>
   )
@@ -376,8 +405,8 @@ function SvgConnector() {
   useEffect(() => {
     const p = d3.path()
 
-    const startX = 0.75 * window.innerWidth // 80vw = right edge of your image
-    const y = 0.3 * window.innerHeight // vertical center (adjust as needed)
+    const startX = 0.75 * window.innerWidth        // 80vw = right edge of your image
+    const y = 0.3 * window.innerHeight            // vertical center (adjust as needed)
     const endX = startX + 0.25 * window.innerWidth // 25vw to the right
 
     p.moveTo(startX, y)
@@ -401,7 +430,12 @@ function SvgConnector() {
         zIndex: 5,
       }}
     >
-      <path ref={pathRef} stroke="#f1b143" strokeWidth={2} fill="none" />
+      <path
+        ref={pathRef}
+        stroke="#f1b143"
+        strokeWidth={2}
+        fill="none"
+      />
     </svg>
   )
 }
