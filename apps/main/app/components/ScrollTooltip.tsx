@@ -98,9 +98,8 @@ export default function ScrollTooltip({
       border: `${arrowSize}px solid transparent`,
     }
 
-    // Using MUI Tooltip in theme (white with border)
+    // Using MUI Tooltip in theme (white)
     const arrowColor = theme.palette.common.white
-    const borderColor = theme.palette.action.hover
 
     switch (position) {
       case "right":
@@ -110,14 +109,6 @@ export default function ScrollTooltip({
           top: "50%",
           transform: "translateY(-50%)",
           borderRightColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderRightColor: borderColor,
-            right: 1,
-            top: -arrowSize,
-          },
         }
       case "left":
         return {
@@ -126,14 +117,6 @@ export default function ScrollTooltip({
           top: "50%",
           transform: "translateY(-50%)",
           borderLeftColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderLeftColor: borderColor,
-            right: -1, // Position outline 1px to the left (towards tooltip)
-            top: -arrowSize,
-          },
         }
       case "top":
         return {
@@ -142,14 +125,6 @@ export default function ScrollTooltip({
           left: "50%",
           transform: "translateX(-50%)",
           borderTopColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderTopColor: borderColor,
-            top: 1,
-            left: -arrowSize,
-          },
         }
       case "bottom":
         return {
@@ -158,16 +133,9 @@ export default function ScrollTooltip({
           left: "50%",
           transform: "translateX(-50%)",
           borderBottomColor: arrowColor,
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            border: `${arrowSize}px solid transparent`,
-            borderBottomColor: borderColor,
-            bottom: 1,
-            left: -arrowSize,
-          },
         }
     }
+
   }
 
   return (
@@ -215,3 +183,4 @@ export default function ScrollTooltip({
     </MotionBox>
   )
 }
+
