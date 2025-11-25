@@ -11,14 +11,15 @@ import {
   LocationOnIcon,
   AgricultureIcon,
   AccountBalanceIcon,
-  CompareIcon,
   Diversity3Icon,
   LocalShippingIcon,
   CloudIcon,
-  StorageIcon,
   GroupsIcon,
   AssessmentIcon,
   CategoryIcon,
+  WavesIcon,
+  TimelineIcon,
+  Box,
 } from "@repo/ui/mui"
 
 // Glossary term type definitions
@@ -141,18 +142,22 @@ export const glossaryTerms: GlossaryTerm[] = [
       "Current and projected shifts in California's climate and hydrology include rising temperatures, changing precipitation patterns, reduced snowpack, more extreme weather events, and sea level rise. These changes affect water availability, timing, and quality. Hydroclimate futures represent potential future climatic and hydrologic conditions that are based on modeled physical changes in the hydrology of river basins that supply most of California's water. These hydroclimate futures can be combined with water management strategies to see how water allocation outcomes change under different conditions.",
   },
   {
-    icon: <StorageIcon />,
+    icon: <WavesIcon />,
     term: "Reservoir storage",
     definition: "The volume of water held behind large dams in California.",
   },
   {
-    icon: <CompareIcon />,
+    icon: <TimelineIcon />,
     term: "Scenarios",
     definition:
       "Unique combinations of water management strategies and hydroclimates designed to explore possibilities for California's water future. Scenarios can help answer questions like: What if we limited groundwater pumping? What if we prioritized drinking water? How will allocations change if the state gets drier? Evaluation of scenarios help us to understand tradeoffs and impacts to different water users.",
   },
   {
-    icon: <AssessmentIcon />,
+    icon: (
+      <Box sx={{ transform: "rotate(90deg)", display: "inline-flex" }}>
+        <AssessmentIcon />
+      </Box>
+    ),
     term: "Scenario outcomes",
     definition:
       'The detailed outputs produced by modeling unique combinations of hydroclimate futures and operational scenarios in CalSim3. The CalSim3 model outputs include things like river flows, reservoir levels, and water deliveries. Additional "sub-models" are used to estimate how changes in water allocations affect agricultural revenues, Delta salinity, and salmon populations. These data help us understand and respond to the anticipated effects of specific water management decisions under current or future hydroclimates.',

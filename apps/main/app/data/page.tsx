@@ -17,7 +17,6 @@ import {
   Alert,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
-// import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer" // DEPRECATED
 import { ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import type { Scenario } from "../types/scenarioDownloads"
@@ -91,13 +90,6 @@ export default function DataPage() {
   return (
     <>
       <Header />
-
-      {/* Side drawer (glossary) - DEPRECATED: Replaced by FloatingGlossary on main page */}
-      {/* <ConnectedMultiDrawer
-        drawerWidth={theme.layout.drawer.width}
-        overlay={true}
-        showRailButtons={false}
-      /> */}
 
       {/* Main content wrapper */}
       <Box
@@ -260,7 +252,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Scenario Data Section */}
+              {/* Scenario data section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
@@ -400,7 +392,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Research Publications Section */}
+              {/* Research publications section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
@@ -432,7 +424,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* API Access Section */}
+              {/* API access section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
@@ -464,7 +456,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Support & Contact Section */}
+              {/* Support & contact section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
