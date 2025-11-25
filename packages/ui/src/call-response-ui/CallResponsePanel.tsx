@@ -106,7 +106,7 @@ export function CallResponsePanel({
             // Enhanced typography with per-line highlighting
             // Single place to control line spacing for all Typography components
             "& .MuiTypography-root": {
-              lineHeight: 2,
+              lineHeight: 1.6,
             },
             "& .MuiTypography-h6": {
               fontSize: { xs: "1.25rem", sm: "1.375rem", md: "1.5rem" },

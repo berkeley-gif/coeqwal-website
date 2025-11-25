@@ -5,6 +5,8 @@ interface HighlightedTextProps {
   children: ReactNode
   /** Background color for highlight */
   highlightColor?: string
+  /** Opacity of the highlight (0-1) */
+  opacity?: number
   /** How much to shrink each line's height (0-1). Higher = bigger gaps */
   gapSize?: number
   /** Border radius for highlight rectangles */
@@ -32,6 +34,7 @@ interface HighlightRect {
 export function HighlightedText({
   children,
   highlightColor = "rgba(255, 255, 255, 0.95)",
+  opacity = 0.8,
   gapSize = 0.25,
   borderRadius = "0",
   component: Component = "span",
@@ -126,6 +129,7 @@ export function HighlightedText({
           sx={{
             position: "absolute",
             backgroundColor: highlightColor,
+            opacity: opacity,
             borderRadius: borderRadius,
             left: `${rect.left}px`,
             top: `${rect.top}px`,
