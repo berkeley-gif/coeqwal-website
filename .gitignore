@@ -24,3 +24,6 @@ dist
 # Misc
 .DS_Store
 *.pem
+
+# Documentation (developer notes not for repo)
+docs/
