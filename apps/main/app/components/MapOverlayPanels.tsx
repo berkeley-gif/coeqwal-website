@@ -179,7 +179,7 @@ export default function MapOverlayPanels() {
         sx={{ mb: "120vh" }}
       >
         <Typography variant="body1">
-          Do you know that California has one of the most complex water systems in the world?
+          Did you know that California has one of the most complex water systems in the world?
         </Typography>
       </CallResponsePanel>
 
@@ -196,8 +196,8 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 500 }}>
             Central Valley
           </Box>{" "}
-          is like a giant bowl that collects most of California&apos;s water.
-          This water is managed, divided up, and transported.
+          is a long, low valley that collects much of California&apos;s water.
+          This water is stored, divided up, and transported to farms and cities across California.
         </Typography>
       </CallResponsePanel>
 
