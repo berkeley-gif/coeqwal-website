@@ -393,6 +393,61 @@ export function createLearnChoreographyConfig(params: {
       position: 5.5,
       debugLabel: "Panel 6: Delta Info",
       layers: [],
+      onEnter: (direction) => {
+        if (direction === "up") {
+          // When scrolling up from Water Distribution, fade out Central Valley and show rivers
+          if (map.mapRef?.current) {
+            try {
+              const mapInstance = map.mapRef.current.getMap()
+              
+              // Fade out Central Valley label and polygon
+              const duration = ANIMATION_DURATION.CAMERA
+              const startTime = performance.now()
+              
+              const animateCVFadeOut = (currentTime: number) => {
+                const elapsed = currentTime - startTime
+                const progress = Math.min(elapsed / duration, 1)
+                const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+                const opacity = Math.max(0, Math.min(OPACITY.VISIBLE, (1 - eased) * OPACITY.VISIBLE))
+                
+                try {
+                  if (mapInstance.getLayer("central-valley-label")) {
+                    mapInstance.setPaintProperty("central-valley-label", "text-opacity", opacity)
+                  }
+                  if (mapInstance.getLayer("central-valley-polygon")) {
+                    mapInstance.setPaintProperty("central-valley-polygon", "line-opacity", opacity)
+                  }
+                } catch {
+                  // Ignore
+                }
+                
+                if (progress < 1) {
+                  requestAnimationFrame(animateCVFadeOut)
+                } else {
+                  // Hide after fade completes
+                  try {
+                    if (mapInstance.getLayer("central-valley-label")) {
+                      mapInstance.setLayoutProperty("central-valley-label", "visibility", "none")
+                    }
+                    if (mapInstance.getLayer("central-valley-polygon")) {
+                      mapInstance.setLayoutProperty("central-valley-polygon", "visibility", "none")
+                    }
+                  } catch {
+                    // Ignore
+                  }
+                }
+              }
+              
+              requestAnimationFrame(animateCVFadeOut)
+            } catch {
+              // Layers might not exist
+            }
+          }
+          
+          // Show rivers again
+          setShowRivers(true)
+        }
+      },
       onExit: (direction) => {
         if (direction === "down") {
           // Fade out rivers first
@@ -491,6 +546,30 @@ export function createLearnChoreographyConfig(params: {
               requestAnimationFrame(animateCVOpacity)
             } catch {
               // Layers might not exist
+            }
+          }
+        } else if (direction === "up") {
+          // When scrolling up to Rivers panel, hide water layer and zoom back to Central Valley
+          if (map.mapRef?.current) {
+            // Zoom back to Central Valley
+            map.mapRef.current.easeTo({
+              center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],
+              zoom: CENTRAL_VALLEY_VIEW.zoom,
+              bearing: CENTRAL_VALLEY_VIEW.bearing,
+              pitch: CENTRAL_VALLEY_VIEW.pitch,
+              duration: ANIMATION_DURATION.CAMERA,
+              easing: EASING.EASE_OUT,
+            })
+            
+            // Hide water layer immediately
+            try {
+              const mapInstance = map.mapRef.current.getMap()
+              if (mapInstance.getLayer("water")) {
+                mapInstance.setLayoutProperty("water", "visibility", "none")
+                mapInstance.setPaintProperty("water", "fill-opacity", 0)
+              }
+            } catch {
+              // Ignore
             }
           }
         }
