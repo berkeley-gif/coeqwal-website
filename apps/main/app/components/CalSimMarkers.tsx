@@ -20,9 +20,11 @@ export interface NetworkGeoJSONFeature {
     id: number
     short_code: string
     type: "node" | "arc"
+    schematic_type?: "node" | "arc" // Legacy property name
     connectivity_status: "connected" | "unconnected"
     element_type: string
     subtype?: string
+    sub_type?: string // Legacy property name
     river_name?: string
     river_mile?: number
     display_name?: string

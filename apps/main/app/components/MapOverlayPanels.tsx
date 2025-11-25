@@ -14,6 +14,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useRef } from "react"
+import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
@@ -278,7 +279,9 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <GeocodingPanel
-          basinsData={centralValleyBasins}
+          basinsData={
+            centralValleyBasins as FeatureCollection<Polygon | MultiPolygon>
+          }
           onMarkerChange={setGeocoderMarker}
           resetTrigger={geocodingResetTrigger}
         />
