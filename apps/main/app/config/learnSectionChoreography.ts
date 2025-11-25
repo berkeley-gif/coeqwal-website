@@ -407,12 +407,40 @@ export function createLearnChoreographyConfig(params: {
             })
           }
 
-          // Hide water layer
+          // Fade out and hide water layer
           if (map.mapRef?.current) {
             try {
               const mapInstance = map.mapRef.current.getMap()
               if (mapInstance.getLayer("water")) {
-                mapInstance.setLayoutProperty("water", "visibility", "none")
+                // Animate opacity from current to 0
+                const duration = ANIMATION_DURATION.CAMERA
+                const startTime = performance.now()
+                
+                const animateOpacity = (currentTime: number) => {
+                  const elapsed = currentTime - startTime
+                  const progress = Math.min(elapsed / duration, 1)
+                  const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+                  const opacity = Math.max(0, Math.min(1, 1 - eased)) // fade from 1 to 0, clamped
+                  
+                  try {
+                    mapInstance.setPaintProperty("water", "fill-opacity", opacity)
+                  } catch {
+                    // Layer might not support this property
+                  }
+                  
+                  if (progress < 1) {
+                    requestAnimationFrame(animateOpacity)
+                  } else {
+                    // Hide after fade completes
+                    try {
+                      mapInstance.setLayoutProperty("water", "visibility", "none")
+                    } catch {
+                      // Ignore
+                    }
+                  }
+                }
+                
+                requestAnimationFrame(animateOpacity)
               }
             } catch {
               // Water layer might not exist
