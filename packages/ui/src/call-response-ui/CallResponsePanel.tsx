@@ -139,7 +139,7 @@ export function CallResponsePanel({
             children
           ) : (
             <HighlightedText
-              highlightColor={side === "right" ? "#FFFFFF" : "#080b0e"}
+              highlightColor={side === "right" ? "#FFFFFF" : "#090c10"}
               gapSize={0.25}
               sx={{ width: "100%" }}
             >

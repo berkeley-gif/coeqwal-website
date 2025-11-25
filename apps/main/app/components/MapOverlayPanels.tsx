@@ -404,27 +404,33 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1" sx={{ mb: 2 }}>
-          Each water management scenario on this site depicts:
+          The water management scenarios you will find on this site show:
         </Typography>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              The strategy
-            </Box>
-            {", "}the operations and policies that define it
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 1 }}>
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              The outcomes
-            </Box>
-            {", "}how it affects water supply, ecosystems, agriculture, and communities
-          </Typography>
-          <Typography variant="body1">
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              The hydroclimate
-            </Box>
-            {", "}how it performs under different possible future climates
-          </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0 }}>
+              Strategy
+            </Typography>
+            <Typography variant="body1">
+              the operations and policies that define it
+            </Typography>
+          </Box>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0 }}>
+              Outcomes
+            </Typography>
+            <Typography variant="body1">
+              how it affects water supply, ecosystems, agriculture, and communities
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="body1" sx={{ fontWeight: 600, mb: 0 }}>
+              Hydroclimate
+            </Typography>
+            <Typography variant="body1">
+              how it performs under different possible future climates
+            </Typography>
+          </Box>
         </Box>
         <Typography variant="body1">
           Keeping these three things in mind can help you read a scenario and understand what it changes, what it impacts, and how it might matter for your community.
@@ -503,11 +509,9 @@ export default function MapOverlayPanels() {
               containerRef={baselineOverlayRef}
               content={
                 <>
-                  <Box component="span" sx={{ fontWeight: 600 }}>
+                  <Box component="span" sx={{ fontWeight: 600, display: "block", mb: 0.5 }}>
                     Hydroclimate
                   </Box>
-                  <br />
-                  <br />
                   These options let you explore how a strategy performs under different possible future climate conditions.
                 </>
               }
