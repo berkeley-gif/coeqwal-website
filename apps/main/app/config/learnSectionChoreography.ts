@@ -713,6 +713,30 @@ export function createLearnChoreographyConfig(params: {
         },
       ],
     },
+
+    // ==================== PANEL 11: Learn More Container ====================
+    {
+      panelId: "learnMoreContainer",
+      position: 11,
+      debugLabel: "Panel 11: Learn More",
+      layers: [
+        {
+          layerId: "california-label",
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-label",
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+      ],
+    },
   ]
 }
 

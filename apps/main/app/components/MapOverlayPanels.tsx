@@ -482,7 +482,7 @@ export default function MapOverlayPanels() {
       <Box
         id="scenario-buffer"
         sx={{
-          height: "200vh", // Taller buffer
+          height: "400vh", // Very tall to ensure coverage until learnMoreContainer
           width: "100%",
           opacity: 0,
           pointerEvents: "none",
