@@ -5,10 +5,8 @@ import { VerticalImageSlider } from "./helpers/ImageSlider"
 import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
 import { useRef, useState } from "react"
 import ScrollIndicator from "./helpers/ScrollIndicator"
-import useStoryStore from "../store"
 
 function Opener() {
-  const isMapReady = useStoryStore((state) => state.isMapReady)
 
   return (
     <Box
@@ -21,14 +19,14 @@ function Opener() {
     >
       <SourceAnnouncer />
       <VerticalImageSlider
-        topSrc="/images/oroville2021-drought.png"
-        bottomSrc="/images/oroville2023-floods.png"
+        topSrc="/images/oroville_2021_aligned.png"
+        bottomSrc="/images/oroville_2023_aligned.png"
       />
       <Box
         className="paragraph text-center-holder text-shadow"
         component="header"
         role="banner"
-        sx={{ top: "50%" }}
+        sx={{ top: "50%", pointerEvents: 'none' }}
       >
         <Typography id="opener-heading" variant="h2" gutterBottom>
           {"How Climate Change Affects California's Water"}
@@ -36,13 +34,17 @@ function Opener() {
         <Typography variant="h3" gutterBottom>
           {"Adapting to a Hotter, More Uncertain Climate Future"}
         </Typography>
-        <ScrollIndicator animationComplete={isMapReady} />
+        <Typography variant="body1" sx={{ maxWidth: '70%', margin: "0 auto" }}>
+          {
+            "Whether you’re a farmer worried about drought, a homeowner concerned about your water bill, or someone who cares about California’s wildlife, the impacts of climate change on California’s water are important to understand."
+          }
+        </Typography>
+        <ScrollIndicator animationComplete={true} />
       </Box>
     </Box>
   )
 }
 
-//TODO: update the caption to be more intuitive
 function SourceAnnouncer() {
   const { scrollY } = useScroll()
   const lastYRef = useRef(0)
@@ -79,7 +81,8 @@ function SourceAnnouncer() {
     >
       <Box>
         <p>Enterprise Bridge at Oroville Dam</p>
-        <p>Top: 2021. Bottom: 2023</p>
+        <p>{"Dry year \u2014 2021 (top)"}</p>
+        <p>{"Wet year \u2014 2023 (bottom)"}</p>
         <p>Photo by Justin Sullivan</p>
       </Box>
     </motion.div>
