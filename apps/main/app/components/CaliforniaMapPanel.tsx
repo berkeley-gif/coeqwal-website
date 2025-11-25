@@ -105,7 +105,6 @@ export default function CaliforniaMapPanel({
     })
   }, [activePanel, map])
 
-
   return (
     <Box
       id={id}
@@ -149,7 +148,10 @@ export default function CaliforniaMapPanel({
         <RiversLayer visible={showRivers} progress={riversAnimationProgress} />
 
         {/* Basin Inflow Arrows - shows when scrolling to "water flow" panel */}
-        <BasinInflowArrows visible={showInflowArrows} opacity={inflowArrowsOpacity} />
+        <BasinInflowArrows
+          visible={showInflowArrows}
+          opacity={inflowArrowsOpacity}
+        />
 
         {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
         {/* Hide CalSim layers when hotspot markers are shown */}

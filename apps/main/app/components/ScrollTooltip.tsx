@@ -132,7 +132,6 @@ export default function ScrollTooltip({
           borderBottomColor: arrowColor,
         }
     }
-
   }
 
   return (
@@ -180,4 +179,3 @@ export default function ScrollTooltip({
     </MotionBox>
   )
 }
-

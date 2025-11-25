@@ -19,32 +19,35 @@ export const clamp = (value: number, min: number, max: number): number => {
 
 /**
  * Calculate scroll progress through a panel
- * 
+ *
  * @param rect - Panel element's bounding rectangle
  * @param viewportHeight - Height of the viewport
  * @returns Progress from 0 (panel entering viewport) to 1 (panel leaving viewport)
  */
 export const calculateScrollProgress = (
   rect: DOMRect,
-  viewportHeight: number
+  viewportHeight: number,
 ): number => {
   return clamp(
     (viewportHeight - rect.top) / (viewportHeight + rect.height),
     0,
-    1
+    1,
   )
 }
 
 /**
  * Check if an element is near or in the viewport (for optimization)
  */
-export const isNearViewport = (rect: DOMRect, viewportHeight: number): boolean => {
+export const isNearViewport = (
+  rect: DOMRect,
+  viewportHeight: number,
+): boolean => {
   return rect.bottom > 0 && rect.top < viewportHeight
 }
 
 /**
  * Wait for an element to exist in the DOM
- * 
+ *
  * @param elementId - ID of the element to wait for
  * @param callback - Function to call when element is found
  * @param checkInterval - How often to check (ms), default 100
@@ -53,7 +56,7 @@ export const isNearViewport = (rect: DOMRect, viewportHeight: number): boolean =
 export const waitForElement = (
   elementId: string,
   callback: (element: HTMLElement) => void,
-  checkInterval: number = 100
+  checkInterval: number = 100,
 ): number => {
   const interval = window.setInterval(() => {
     const element = document.getElementById(elementId)
@@ -62,18 +65,18 @@ export const waitForElement = (
       clearInterval(interval)
     }
   }, checkInterval)
-  
+
   return interval
 }
 
 /**
  * Determine which panel should be active based on viewport position
- * 
+ *
  * @param panels - Sorted array of panels
  * @returns Position of the active panel
  */
 export const determineActivePanel = (
-  panels: Array<{ panelId: string; position: number }>
+  panels: Array<{ panelId: string; position: number }>,
 ): number => {
   const viewportMiddle = window.innerHeight / 2
   let activePanel = 0 // Default to first panel
@@ -97,4 +100,3 @@ export const determineActivePanel = (
 
   return activePanel
 }
-

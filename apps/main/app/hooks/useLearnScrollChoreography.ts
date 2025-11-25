@@ -372,7 +372,8 @@ export function useLearnScrollChoreography(
       )
 
       // Determine scroll direction
-      const direction: "up" | "down" = targetPosition > previousPosition ? "down" : "up"
+      const direction: "up" | "down" =
+        targetPosition > previousPosition ? "down" : "up"
 
       // Call onExit for the previous panel (but not on initial load)
       if (previousPosition >= 0 && !isInitialLoadRef.current) {
@@ -386,7 +387,7 @@ export function useLearnScrollChoreography(
 
       if (targetPanel) {
         applyPanelState(targetPanel)
-        
+
         // Don't trigger callbacks during initial load period
         if (!isInitialLoadRef.current) {
           onPanelChange?.(targetPanel.panelId)
@@ -458,7 +459,7 @@ export function useLearnScrollChoreography(
 
     // Add continuous scroll listener for smooth onScroll updates
     let scrollTicking = false
-    
+
     const updateScrollProgress = () => {
       sortedPanels.forEach((panelState) => {
         if (panelState.onScroll) {
@@ -466,7 +467,7 @@ export function useLearnScrollChoreography(
           if (panelElement) {
             const rect = panelElement.getBoundingClientRect()
             const viewportHeight = window.innerHeight
-            
+
             // Only calculate if panel is near/in viewport (optimization)
             if (rect.bottom > 0 && rect.top < viewportHeight) {
               // Progress: 0 when panel top is at bottom of viewport, 1 when panel bottom is at top of viewport
@@ -474,10 +475,10 @@ export function useLearnScrollChoreography(
                 0,
                 Math.min(
                   1,
-                  (viewportHeight - rect.top) / (viewportHeight + rect.height)
-                )
+                  (viewportHeight - rect.top) / (viewportHeight + rect.height),
+                ),
               )
-              
+
               panelState.onScroll(progress)
             }
           }
@@ -485,7 +486,7 @@ export function useLearnScrollChoreography(
       })
       scrollTicking = false
     }
-    
+
     const handleScroll = () => {
       if (!scrollTicking) {
         requestAnimationFrame(updateScrollProgress)
@@ -494,8 +495,8 @@ export function useLearnScrollChoreography(
     }
 
     // Attach scroll listener with passive flag for better performance
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
     // Call updateScrollProgress initially to set correct progress on load
     updateScrollProgress()
 
@@ -512,7 +513,7 @@ export function useLearnScrollChoreography(
 
     // Cleanup
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener("scroll", handleScroll)
       observersRef.current.forEach((obs) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         clearInterval((obs as any)._checkInterval)

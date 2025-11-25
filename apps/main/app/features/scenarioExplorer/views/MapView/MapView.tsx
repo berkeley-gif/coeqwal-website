@@ -2,7 +2,12 @@
 
 import React, { useState } from "react"
 import { Box, useTheme } from "@repo/ui/mui"
-import { Map, NavigationControl, GeolocateControl, MapProvider } from "@repo/map"
+import {
+  Map,
+  NavigationControl,
+  GeolocateControl,
+  MapProvider,
+} from "@repo/map"
 import SearchSortBar from "../../components/SearchSortBar"
 import ScenarioPanel from "./components/ScenarioPanel"
 import TierMarkers from "../../components/TierMarkers"

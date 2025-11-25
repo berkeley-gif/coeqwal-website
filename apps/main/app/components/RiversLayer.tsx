@@ -11,14 +11,14 @@ interface RiversLayerProps {
 }
 
 // Curved river label component with transparent background (memoized for performance)
-const CurvedRiverLabel = memo(function CurvedRiverLabel({ 
-  text, 
-  rotation = 90, 
+const CurvedRiverLabel = memo(function CurvedRiverLabel({
+  text,
+  rotation = 90,
   curvature = 20,
   sCurve = false,
   letterSpacing = 2,
-  opacity = 1
-}: { 
+  opacity = 1,
+}: {
   text: string
   rotation?: number
   curvature?: number
@@ -26,8 +26,8 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
   letterSpacing?: number
   opacity?: number
 }) {
-  const pathId = `river-curve-${text.replace(/\s/g, '-')}`
-  
+  const pathId = `river-curve-${text.replace(/\s/g, "-")}`
+
   // Create curved path - positive curvature curves up, negative curves down
   let curvePath
   if (sCurve) {
@@ -38,7 +38,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
     // Simple curve using quadratic Bezier (Q command)
     curvePath = `M 10,45 Q 110,${45 - curvature} 210,45`
   }
-  
+
   return (
     <svg
       width="220"
@@ -53,13 +53,9 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
     >
       <defs>
         {/* Curved path for text to follow */}
-        <path
-          id={pathId}
-          d={curvePath}
-          fill="none"
-        />
+        <path id={pathId} d={curvePath} fill="none" />
       </defs>
-      
+
       {/* Curved italic text following the path */}
       <text
         fontSize="15"
@@ -87,23 +83,38 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
     if (!visible) return 0
     const labelFadeStart = 0.3
     const labelFadeEnd = 0.5
-    return Math.max(0, Math.min(1, (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart)))
+    return Math.max(
+      0,
+      Math.min(
+        1,
+        (clampedProgress - labelFadeStart) / (labelFadeEnd - labelFadeStart),
+      ),
+    )
   }, [visible, clampedProgress])
 
   // Calculate Delta marker opacity: fade in from 80% to 95% of river drawing
   const deltaOpacity = useMemo(() => {
     if (!visible) return 0
-    const deltaFadeStart = 0.80
+    const deltaFadeStart = 0.8
     const deltaFadeEnd = 0.95
-    return Math.max(0, Math.min(1, (clampedProgress - deltaFadeStart) / (deltaFadeEnd - deltaFadeStart)))
+    return Math.max(
+      0,
+      Math.min(
+        1,
+        (clampedProgress - deltaFadeStart) / (deltaFadeEnd - deltaFadeStart),
+      ),
+    )
   }, [visible, clampedProgress])
 
   // River label positions (memoized as they're constant)
-  const labelPositions = useMemo(() => ({
-    sacramento: { lon: -121.45, lat: 39 },
-    sanJoaquin: { lon: -120.44, lat: 37.6 },
-    delta: { lon: -121.8, lat: 37.9 },
-  }), [])
+  const labelPositions = useMemo(
+    () => ({
+      sacramento: { lon: -121.45, lat: 39 },
+      sanJoaquin: { lon: -120.44, lat: 37.6 },
+      delta: { lon: -121.8, lat: 37.9 },
+    }),
+    [],
+  )
 
   if (!visible) return null
 
@@ -231,15 +242,15 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           RIVER LABELS - Curved SVG text markers (like the inflow arrows)
           Geolocated curved text that fades in smoothly
           ═══════════════════════════════════════════════════════════════ */}
-      
+
       {/* Sacramento River curved label */}
       <Marker
         longitude={labelPositions.sacramento.lon}
         latitude={labelPositions.sacramento.lat}
         anchor="center"
       >
-        <CurvedRiverLabel 
-          text="Sacramento River" 
+        <CurvedRiverLabel
+          text="Sacramento River"
           rotation={96}
           curvature={90}
           sCurve={true}
@@ -254,8 +265,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
         latitude={labelPositions.sanJoaquin.lat}
         anchor="center"
       >
-        <CurvedRiverLabel 
-          text="San Joaquin River" 
+        <CurvedRiverLabel
+          text="San Joaquin River"
           rotation={50}
           curvature={-35}
           letterSpacing={2}

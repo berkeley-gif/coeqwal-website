@@ -109,10 +109,14 @@ export default function ScenarioCard({
           containerRef={cardContainerRef}
           content={
             <>
-              <Box component="span" sx={{ fontWeight: 600, display: "block", mb: 0.5 }}>
+              <Box
+                component="span"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
                 Strategy
               </Box>
-              These are the key operations and policy decisions that define this water management strategy.
+              These are the key operations and policy decisions that define this
+              water management strategy.
             </>
           }
           position="left"
@@ -125,10 +129,14 @@ export default function ScenarioCard({
           containerRef={cardContainerRef}
           content={
             <>
-              <Box component="span" sx={{ fontWeight: 600, display: "block", mb: 0.5 }}>
+              <Box
+                component="span"
+                sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+              >
                 Key outcomes
               </Box>
-              These metrics show how this strategy affects water supply, ecosystems, agriculture, and communities.
+              These metrics show how this strategy affects water supply,
+              ecosystems, agriculture, and communities.
             </>
           }
           position="left"
