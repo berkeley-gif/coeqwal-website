@@ -118,6 +118,7 @@ export function CallResponsePanel({
             },
             "& .MuiTypography-body1": {
               fontSize: { xs: "1.0625rem", sm: "1.125rem", md: "1.1875rem" },
+              fontWeight: 400,
               color: (theme) =>
                 side === "right"
                   ? theme.palette.grey[900]
