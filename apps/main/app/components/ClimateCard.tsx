@@ -46,6 +46,9 @@ export default function ClimateCard({
           display: "flex",
           flexDirection: "column",
           height: "auto",
+          maxWidth: 600, // Constrain width to match ScenarioCard
+          marginLeft: "auto", // Align to right like ScenarioCard
+          marginRight: 0, // Align to right
           opacity: isMinimized ? 0.8 : 1,
         }}
       >
