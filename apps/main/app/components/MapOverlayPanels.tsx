@@ -477,6 +477,19 @@ export default function MapOverlayPanels() {
           </Box>
         </Box>
       </Box>
+
+      {/* Buffer spacer to maintain Central Valley view after scenario cards */}
+      <Box
+        id="scenario-buffer"
+        sx={{
+          height: "200vh", // Taller buffer
+          width: "100%",
+          opacity: 0,
+          pointerEvents: "none",
+          marginTop: "-100vh", // Overlap with scenario-scroll-track to prevent gap
+        }}
+        aria-hidden="true"
+      />
     </Box>
   )
 }

@@ -413,7 +413,8 @@ export function useLearnScrollChoreography(
         const rect = panelElement.getBoundingClientRect()
 
         // Panel becomes active when its top edge crosses the trigger point
-        if (rect.top <= triggerPoint && rect.bottom > triggerPoint) {
+        // Keep active as long as any part of panel is still visible (prevents gaps)
+        if (rect.top <= triggerPoint && rect.bottom > 0) {
           activePanel = panel.position
           break
         }
