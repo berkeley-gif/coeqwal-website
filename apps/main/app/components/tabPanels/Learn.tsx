@@ -1,6 +1,7 @@
 "use client"
 
 import { Box, Typography } from "@repo/ui/mui"
+import { MapProvider } from "@repo/map"
 import CaliforniaMapPanel from "../../components/CaliforniaMapPanel"
 import MapOverlayPanels from "../../components/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../../components/ProgressiveScenarioPanels"
@@ -10,19 +11,22 @@ import { LeadingMarkerText } from "@repo/ui"
 
 export default function LearnPanel() {
   return (
-    <div>
+    <div style={{ position: "relative" }}>
       <Box sx={{ pointerEvents: "none" }}>
-        {/* CalSim context provider for shared state between map and overlays */}
-        <CalSimProvider>
-          {/* Sticky California map background */}
-          <CaliforniaMapPanel id="california-map" />
+        {/* MapProvider for shared map context */}
+        <MapProvider>
+          {/* CalSim context provider for shared state between map and overlays */}
+          <CalSimProvider>
+            {/* Sticky California map background */}
+            <CaliforniaMapPanel id="california-map" />
 
-          {/* Scrolling overlay panels over the sticky map */}
-          <MapOverlayPanels />
+            {/* Scrolling overlay panels over the sticky map */}
+            <MapOverlayPanels />
 
-          {/* Progressive scenario and climate panels that appear on scroll */}
-          <ProgressiveScenarioPanels />
-        </CalSimProvider>
+            {/* Progressive scenario and hydroclimate panels that appear on scroll */}
+            <ProgressiveScenarioPanels />
+          </CalSimProvider>
+        </MapProvider>
       </Box>
       <Box
         id="learnMoreContainer"

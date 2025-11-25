@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
+    "dev:webpack": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
@@ -24,6 +25,7 @@
     "@repo/ui": "workspace:*",
     "@repo/viz": "workspace:*",
     "@turf/bbox": "^7.2.0",
+    "@turf/turf": "^7.2.0",
     "@types/geojson": "^7946.0.14",
     "next": "^15.2.1",
     "swr": "^2.3.6"

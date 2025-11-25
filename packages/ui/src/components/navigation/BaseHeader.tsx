@@ -8,7 +8,7 @@ import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 
 const MotionAppBar = motion.create(AppBar)
 
@@ -140,13 +140,20 @@ export function BaseHeader({
 
   const { locale, isLoading } = useTranslation()
 
+  // Track if component is mounted (client-side only)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   // Scroll-based hide/show functionality
   const [isHidden, setIsHidden] = useState(false)
   const { scrollY } = useScroll()
   const lastYRef = useRef(0)
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    if (!hideOnScroll) return
+    if (!hideOnScroll || !isMounted) return
 
     const difference = latest - lastYRef.current
     if (Math.abs(difference) > 10) {
@@ -175,8 +182,15 @@ export function BaseHeader({
 
   return (
     <MotionAppBar
-      animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
-      whileHover="visible"
+      initial="visible" // Prevent hydration mismatch for SSG
+      animate={
+        hideOnScroll && isMounted
+          ? isHidden
+            ? "hidden"
+            : "visible"
+          : "visible"
+      }
+      whileHover={isMounted ? "visible" : undefined}
       onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
       variants={{
         hidden: {

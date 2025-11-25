@@ -13,7 +13,7 @@ import {
   CircularProgress,
   Button,
 } from "@repo/ui/mui"
-import { Map, NavigationControl } from "@repo/map"
+import { Map, NavigationControl, MapProvider } from "@repo/map"
 import { useScenarioExplorerStore } from "@repo/state"
 import { getMapMetrics, outcomeCategories } from "../outcomeDefinitions"
 import {
@@ -34,7 +34,7 @@ import {
  * MapView: Spatial visualization of outcomes
  * Shows metrics that have geographic locations
  */
-export default function MapView() {
+function MapViewContent() {
   const theme = useTheme()
   const { selectedScenarios, setActiveView } = useScenarioExplorerStore()
   const mapMetrics = getMapMetrics()
@@ -440,10 +440,10 @@ export default function MapView() {
           initialViewState={{
             longitude: -118,
             latitude: 39,
-            zoom: 5.8,
+            zoom: 4,
           }}
-          minZoom={5.8}
-          maxZoom={10}
+          minZoom={4}
+          maxZoom={18}
           scrollZoom={true}
           touchZoom={true}
           doubleClickZoom={true}
@@ -549,5 +549,14 @@ export default function MapView() {
         )}
       </Box>
     </Box>
+  )
+}
+
+// Exported wrapper that provides its own MapProvider context
+export default function MapView() {
+  return (
+    <MapProvider>
+      <MapViewContent />
+    </MapProvider>
   )
 }

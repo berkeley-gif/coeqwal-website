@@ -111,6 +111,8 @@ import StorageIcon from "@mui/icons-material/Storage"
 import GroupsIcon from "@mui/icons-material/Groups"
 import AssessmentIcon from "@mui/icons-material/Assessment"
 import CategoryIcon from "@mui/icons-material/Category"
+import WavesIcon from "@mui/icons-material/Waves"
+import TimelineIcon from "@mui/icons-material/Timeline"
 
 // Export individually imported icons
 export {
@@ -159,6 +161,8 @@ export {
   GroupsIcon,
   AssessmentIcon,
   CategoryIcon,
+  WavesIcon,
+  TimelineIcon,
 }
 
 // Export the full icons library for access to other icons as needed
