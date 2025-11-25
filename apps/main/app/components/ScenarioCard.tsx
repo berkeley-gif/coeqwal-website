@@ -63,11 +63,13 @@ export default function ScenarioCard({
   const keyOutcomesRef = useRef<HTMLElement>(null)
   const scrollTrackRef = useRef<HTMLElement | null>(null)
   const climateCardRef = useRef<HTMLElement | null>(null)
+  const baselineOverlayRef = useRef<HTMLElement | null>(null)
 
-  // Find the external scroll track element and climate card after mount
+  // Find the external scroll track element, climate card, and parent overlay after mount
   useEffect(() => {
     scrollTrackRef.current = document.getElementById("scenario-scroll-track")
     climateCardRef.current = document.getElementById("climate-card")
+    baselineOverlayRef.current = document.getElementById("baseline-scenario-overlay")
   }, [])
 
   // Track scroll progress through the external scroll track (in MapOverlayPanels)
@@ -169,7 +171,7 @@ export default function ScenarioCard({
       />
       <ScrollTooltip
         targetRef={climateCardRef}
-        containerRef={cardContainerRef}
+        containerRef={baselineOverlayRef}
         content={
           <>
             These options allow you to select how a water management strategy is
