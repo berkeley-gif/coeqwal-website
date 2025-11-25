@@ -482,11 +482,11 @@ export default function MapOverlayPanels() {
       <Box
         id="scenario-buffer"
         sx={{
-          height: "400vh", // Very tall to ensure coverage until learnMoreContainer
+          height: "50vh", // Minimal buffer
           width: "100%",
           opacity: 0,
           pointerEvents: "none",
-          marginTop: "-100vh", // Overlap with scenario-scroll-track to prevent gap
+          marginTop: "-25vh", // Small overlap to prevent gap
         }}
         aria-hidden="true"
       />
