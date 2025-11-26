@@ -7,8 +7,8 @@ import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
-import { motion, useMotionValueEvent, useScroll } from "@repo/motion"
-import { useRef, useState } from "react"
+import { motion, useMotionValueEvent, useScroll, useTransform } from "@repo/motion"
+import { useMemo, useRef, useState } from "react"
 
 const MotionAppBar = motion.create(AppBar)
 
@@ -30,6 +30,8 @@ type TranslationsMap = {
   en: HeaderTranslations
   es: HeaderTranslations
 }
+
+export const HEADER_SHRUNK_H = 40
 
 // Secondary nav option (optional)
 export interface SecondaryNavItem {
@@ -61,6 +63,7 @@ export interface BaseHeaderProps {
   // Layout props
   variant?: "fixed" | "overlay" | "static" | "sticky"
   hideOnScroll?: boolean
+  shrinkOnScroll?: boolean
   showLanguageSwitcher?: boolean
 }
 
@@ -113,6 +116,7 @@ export function BaseHeader({
   boxShadow = "none",
   variant = "fixed",
   hideOnScroll = true,
+  shrinkOnScroll = true,
   showLanguageSwitcher = true,
 }: BaseHeaderProps) {
   // Responsive breakpoints (using standard MUI breakpoints)
@@ -138,11 +142,18 @@ export function BaseHeader({
     },
   }
 
+  // i18n code
   const { locale, isLoading } = useTranslation()
+  // Use 'en' as default until client-side hydration is complete
+  const safeLocale = !locale || isLoading ? "en" : locale
+  const componentText =
+    translations[safeLocale as keyof TranslationsMap] || translations.en
 
   // Scroll-based hide/show functionality
-  const [isHidden, setIsHidden] = useState(false)
   const { scrollY } = useScroll()
+
+  // hide on scroll direction
+  const [isHidden, setIsHidden] = useState(false)
   const lastYRef = useRef(0)
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -155,10 +166,7 @@ export function BaseHeader({
     lastYRef.current = latest
   })
 
-  // Use 'en' as default until client-side hydration is complete
-  const safeLocale = !locale || isLoading ? "en" : locale
-  const componentText =
-    translations[safeLocale as keyof TranslationsMap] || translations.en
+
 
   // Map variant to CSS position
   const positionMap = {
@@ -173,164 +181,207 @@ export function BaseHeader({
   const displaySecondaryNav =
     showSecondaryNav && !isMobile && secondaryNavItems.length > 0
 
+  const shrink = useTransform(scrollY, [0, 120, 240], [0, 0.5, 1])
+  const headerHeight = shrinkOnScroll
+    ? useTransform(shrink, [0, 1], ["70px", `${HEADER_SHRUNK_H}px`])
+    : ({} as any) // we'll set a literal below
+  const padY = shrinkOnScroll
+    ? useTransform(shrink, [0, 1], ["12px", "4px"])
+    : ({} as any)
+  const logoScale = useTransform(shrink, [0, 1], [1, 0.65])
+
+  // Static fallbacks if shrink is disabled
+  const staticHeaderH = "70px"
+  const staticPadY = "8px"
+
   return (
-    <MotionAppBar
-      animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
-      whileHover="visible"
-      onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
-      variants={{
-        hidden: {
-          y: "-100%",
-        },
-        visible: {
-          y: "0%",
-        },
-      }}
-      transition={{ duration: 0.3 }}
-      position={position}
-      sx={{
-        zIndex,
-        backgroundColor,
-        color: textColor,
-        borderRadius,
-        boxShadow,
-        ...(position === "sticky" && { top: 0 }),
-        ...(position === "absolute" && { top: 0, left: 0, right: 0 }),
-      }}
-      elevation={0}
-    >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", pl: 2 }}>
-          <Logo />
-        </Box>
-
-        {/* Optional secondary navigation menu */}
-        {displaySecondaryNav && (
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              flexGrow: 1,
-              justifyContent: "center",
-              display: { xs: "none", md: "flex" },
-              mx: 2,
-            }}
-          >
-            {secondaryNavItems.map((item) => {
-              // Check if this section is directly active or if it's the parent of the active section
-              const isActive =
-                activeSection === item.sectionId ||
-                sectionParentMap[activeSection || ""] === item.sectionId
-
-              return (
-                <Button
-                  key={item.key}
-                  variant="text"
-                  disableRipple
-                  onClick={() => onSectionClick?.(item.sectionId)}
-                  sx={{
-                    color: textColor,
-                    minWidth: "auto",
-                    px: isTablet ? 1 : 2,
-                    fontSize: "0.875rem",
-                    position: "relative",
-                    letterSpacing: "0.03rem",
-                    fontWeight: isActive ? 600 : 500,
-                    transition: "color 0.3s ease",
-                    lineHeight: 1.1,
-                    "&:hover": {
-                      backgroundColor: "transparent",
-                    },
-                    "&.MuiButtonBase-root:hover": {
-                      backgroundColor: "transparent",
-                    },
-                  }}
-                >
-                  {item.label}
-                  {isActive && (
-                    <ArrowDropDownIcon
-                      sx={{
-                        position: "absolute",
-                        bottom: -12,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        fontSize: 24,
-                        color: textColor,
-                        animation: "fadeIn 0.3s ease-in-out",
-                        "@keyframes fadeIn": {
-                          "0%": {
-                            opacity: 0,
-                            transform: "translateX(-50%) translateY(-5px)",
-                          },
-                          "100%": {
-                            opacity: 1,
-                            transform: "translateX(-50%) translateY(0)",
-                          },
-                        },
-                      }}
-                    />
-                  )}
-                </Button>
-              )
-            })}
-          </Stack>
-        )}
-
-        <Stack
-          direction="row"
-          spacing={2}
-          alignItems="center"
+    <>
+      <MotionAppBar
+        animate={hideOnScroll ? (isHidden ? "hidden" : "visible") : "visible"}
+        variants={{
+          hidden: {
+            y: "-100%",
+          },
+          visible: {
+            y: "0%",
+          },
+        }}
+        transition={{ duration: 0.3 }}
+        position={position}
+        sx={{
+          zIndex,
+          backgroundColor,
+          color: textColor,
+          borderRadius,
+          boxShadow,
+          ...(position !== "sticky" ? { top: 0, left: 0, right: 0 } : null),
+          height: "var(--header-h)",
+        }}
+        style={{
+          ["--header-h" as any]: shrinkOnScroll ? headerHeight : staticHeaderH,
+          ["--pad-y" as any]: shrinkOnScroll ? padY : staticPadY,
+          height: shrinkOnScroll ? headerHeight : staticHeaderH,
+        }}
+        whileHover="visible"
+        onFocusCapture={() => setIsHidden(false)} // Accessibility: show header when focused
+        elevation={0}
+      >
+        <Toolbar
           sx={{
-            pr: 2,
+            py: "var(--pad-y) !important",
+            px: 2,
+            minHeight: "var(--header-h) !important",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between"
           }}
+          style={{ minHeight: "var(--header-h)" }}
         >
-          {/* Tools dropdown */}
-          {onToolsClick && (
-            <NavDropdown
-              label={componentText.buttons.tools}
-              options={[
-                {
-                  key: "scenario-explorer",
-                  label: componentText.tools.scenarioExplorer,
-                  onClick: () => onToolsClick("scenario-explorer"),
-                },
-                {
-                  key: "needs-search",
-                  label: componentText.tools.needsSearch,
-                  onClick: () => onToolsClick("needs-search"),
-                },
-              ]}
-              variant="text"
-              sx={buttonStyle}
-            />
+          <Box
+            component={motion.div}
+            style={{
+              scale: logoScale,
+              originX: 0,
+              originY: 0.5,
+              willChange: "transform",
+            }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              pl: 2,
+              width: 168
+            }}>
+            <Logo />
+          </Box>
+
+          {/* Optional secondary navigation menu */}
+          {displaySecondaryNav && (
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                flexGrow: 1,
+                justifyContent: "center",
+                display: { xs: "none", md: "flex" },
+                mx: 2,
+              }}
+            >
+              {secondaryNavItems.map((item) => {
+                // Check if this section is directly active or if it's the parent of the active section
+                const isActive =
+                  activeSection === item.sectionId ||
+                  sectionParentMap[activeSection || ""] === item.sectionId
+
+                return (
+                  <Button
+                    key={item.key}
+                    variant="text"
+                    disableRipple
+                    onClick={() => onSectionClick?.(item.sectionId)}
+                    sx={{
+                      color: textColor,
+                      minWidth: "auto",
+                      px: isTablet ? 1 : 2,
+                      fontSize: "0.875rem",
+                      position: "relative",
+                      letterSpacing: "0.03rem",
+                      fontWeight: isActive ? 600 : 500,
+                      transition: "color 0.3s ease",
+                      lineHeight: 1.1,
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                      "&.MuiButtonBase-root:hover": {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  >
+                    {item.label}
+                    {isActive && (
+                      <ArrowDropDownIcon
+                        sx={{
+                          position: "absolute",
+                          bottom: -12,
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          fontSize: 24,
+                          color: textColor,
+                          animation: "fadeIn 0.3s ease-in-out",
+                          "@keyframes fadeIn": {
+                            "0%": {
+                              opacity: 0,
+                              transform: "translateX(-50%) translateY(-5px)",
+                            },
+                            "100%": {
+                              opacity: 1,
+                              transform: "translateX(-50%) translateY(0)",
+                            },
+                          },
+                        }}
+                      />
+                    )}
+                  </Button>
+                )
+              })}
+            </Stack>
           )}
 
-          {/* Data button */}
-          {onDataClick && (
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            sx={{
+              pr: 2,
+            }}
+          >
+            {/* Tools dropdown */}
+            {onToolsClick && (
+              <NavDropdown
+                label={componentText.buttons.tools}
+                options={[
+                  {
+                    key: "scenario-explorer",
+                    label: componentText.tools.scenarioExplorer,
+                    onClick: () => onToolsClick("scenario-explorer"),
+                  },
+                  {
+                    key: "needs-search",
+                    label: componentText.tools.needsSearch,
+                    onClick: () => onToolsClick("needs-search"),
+                  },
+                ]}
+                variant="text"
+                sx={buttonStyle}
+              />
+            )}
+
+            {/* Data button */}
+            {onDataClick && (
+              <Button
+                variant="text"
+                disableRipple
+                onClick={onDataClick}
+                sx={buttonStyle}
+              >
+                {componentText.buttons.getData}
+              </Button>
+            )}
+
+            {/* About button */}
             <Button
               variant="text"
               disableRipple
-              onClick={onDataClick}
+              onClick={onAboutClick}
               sx={buttonStyle}
             >
-              {componentText.buttons.getData}
+              {componentText.buttons.about}
             </Button>
-          )}
 
-          {/* About button */}
-          <Button
-            variant="text"
-            disableRipple
-            onClick={onAboutClick}
-            sx={buttonStyle}
-          >
-            {componentText.buttons.about}
-          </Button>
-
-          {/* Language switcher */}
-          {showLanguageSwitcher && <LanguageSwitcher />}
-        </Stack>
-      </Toolbar>
-    </MotionAppBar>
+            {/* Language switcher */}
+            {showLanguageSwitcher && <LanguageSwitcher />}
+          </Stack>
+        </Toolbar>
+      </MotionAppBar >
+    </>
   )
 }
