@@ -1,8 +1,9 @@
 "use client"
 
-import { Box, useTheme } from "@repo/ui/mui"
+import { Suspense } from "react"
+import { Box } from "@repo/ui/mui"
 import { Header } from "./components/Header"
-import { ConnectedMultiDrawer } from "./components/ConnectedMultiDrawer"
+import { FloatingGlossary } from "./components/FloatingGlossary"
 import IntroSection from "./sections/IntroSection"
 
 import { TabsProvider } from "./context/Tabs"
@@ -10,34 +11,24 @@ import SmoothTabs from "./components/tabs/SmoothTabs"
 import TabPanels from "./components/tabs/TabPanels"
 
 export default function Home() {
-  const theme = useTheme()
-
   return (
     <>
       <TabsProvider>
-        {/* Header */}
         <Header />
-
-        {/* Side drawer (glossary) */}
-        <ConnectedMultiDrawer
-          drawerWidth={theme.layout.drawer.width}
-          overlay={true}
-        />
-        {/* Main content */}
+        <FloatingGlossary />
         <Box
           component="main"
           sx={{
             position: "relative",
-            zIndex: (theme) => theme.zIndex.panels, // (not in use but left here to demonstrate z-indexing system)
             overflowX: "clip",
             overflowY: "visible",
           }}
         >
-          {/* Panel sections */}
           <IntroSection />
-          <SmoothTabs />
-          <TabPanels />
-          {/*    <ContentPanels /> */}
+          <Suspense fallback={null}>
+            <SmoothTabs />
+            <TabPanels />
+          </Suspense>
         </Box>
       </TabsProvider>
     </>

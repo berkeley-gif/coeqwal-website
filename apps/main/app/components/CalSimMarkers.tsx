@@ -20,9 +20,11 @@ export interface NetworkGeoJSONFeature {
     id: number
     short_code: string
     type: "node" | "arc"
+    schematic_type?: "node" | "arc" // Legacy property name
     connectivity_status: "connected" | "unconnected"
     element_type: string
     subtype?: string
+    sub_type?: string // Legacy property name
     river_name?: string
     river_mile?: number
     display_name?: string
@@ -120,12 +122,8 @@ export function convertGeoJSONToNetwork(
 
   geoJsonResponse.features.forEach((feature) => {
     // Handle both old format (type === "node") and new format (schematic_type === "node")
-    const props = feature.properties as any // eslint-disable-line @typescript-eslint/no-explicit-any
-    if (
-      props.type === "node" ||
-      props.schematic_type === "node" ||
-      props.element_type === "node"
-    ) {
+    const props = feature.properties
+    if (props.type === "node" || props.element_type === "node") {
       if (!feature.geometry || !feature.geometry.coordinates) {
         return
       }
@@ -941,7 +939,6 @@ export default function CalSimMarkers() {
                   left: "50%",
                   transform: "translateX(-50%)",
                   backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  backdropFilter: "blur(4px)",
                   borderRadius: "12px",
                   padding: "3px 8px",
                   boxShadow: (theme) => theme.shadows[1],

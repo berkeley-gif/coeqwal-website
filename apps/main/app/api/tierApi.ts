@@ -3,6 +3,8 @@
  * Data is fetched, but default backups are listed here
  */
 
+import { API_SHORT_CODE_TO_DISPLAY_NAME } from "../constants/outcomeMappings"
+
 // API base URL
 const API_BASE = "https://api.coeqwal.org/api"
 
@@ -111,18 +113,8 @@ export async function getTierMapping(): Promise<Record<string, string>> {
     return _tierMappingCache
   } catch (error) {
     console.error("Failed to fetch tier mapping, using fallback:", error)
-    // Fallback to hardcoded mapping if API fails
-    return {
-      AG_REV: "Agricultural revenue",
-      CWS_DEL: "Community deliveries",
-      DELTA_ECO: "Delta ecology",
-      ENV_FLOWS: "Environmental flows",
-      FW_DELTA_USES: "Freshwater for in-Delta uses",
-      FW_EXP: "Freshwater for Delta exports",
-      GW_STOR: "Groundwater storage",
-      RES_STOR: "Reservoir storage",
-      WRC_SALMON_AB: "Salmon abundance",
-    }
+    // Fallback to centralized mapping if API fails
+    return API_SHORT_CODE_TO_DISPLAY_NAME
   }
 }
 
@@ -143,7 +135,12 @@ const DEFAULT_TIER_COLORS = {
 } as const
 
 type TierColors = { tier1: string; tier2: string; tier3: string; tier4: string }
-type ChartDataPoint = { label: string; color: string; value: number }
+type ChartDataPoint = {
+  label: string
+  color: string
+  value: number
+  tierType?: "single_value" | "multi_value"
+}
 
 // Helpers
 const getTierColors = (themeColors?: TierColors) =>
@@ -163,6 +160,7 @@ export function convertMultiValueToChartData(
     label: formatTierLabel(item.tier),
     color: tierColors[item.tier],
     value: item.normalized,
+    tierType: "multi_value" as const,
   }))
 }
 
@@ -177,21 +175,25 @@ export function convertSingleValueToChartData(
       label: "Tier 1",
       color: tierColors.tier1,
       value: tierLevel === 1 ? 1 : 0,
+      tierType: "single_value" as const,
     },
     {
       label: "Tier 2",
       color: tierColors.tier2,
       value: tierLevel === 2 ? 1 : 0,
+      tierType: "single_value" as const,
     },
     {
       label: "Tier 3",
       color: tierColors.tier3,
       value: tierLevel === 3 ? 1 : 0,
+      tierType: "single_value" as const,
     },
     {
       label: "Tier 4",
       color: tierColors.tier4,
       value: tierLevel === 4 ? 1 : 0,
+      tierType: "single_value" as const,
     },
   ]
 }

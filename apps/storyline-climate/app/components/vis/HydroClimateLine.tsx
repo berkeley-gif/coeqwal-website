@@ -96,12 +96,12 @@ function FlowLineWithBand({
       <path
         d={lineGenerator(data) ?? ""}
         fill="none"
-        stroke={FreshWaterColor}
+        stroke={"#F1b143"}
         strokeWidth={2}
       ></path>
       <path
         d={areaGenerator(data) ?? ""}
-        fill={FreshWaterColor}
+        fill={'#F1b143'}
         fillOpacity={0.15}
         stroke="none"
       />

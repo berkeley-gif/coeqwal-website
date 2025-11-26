@@ -322,3 +322,99 @@ export const MapTransitions = {
     pitch: 45,
   },
 } as const
+
+/** Geocoding feature types from Mapbox */
+export type GeocodingFeatureType =
+  | "country"
+  | "region"
+  | "postcode"
+  | "district"
+  | "place"
+  | "locality"
+  | "neighborhood"
+  | "address"
+  | "poi"
+
+/** Context information for a geocoding result */
+export interface GeocodingContext {
+  id: string
+  text: string
+  short_code?: string
+}
+
+/** Geographic coordinates [longitude, latitude] */
+export type Coordinates = [number, number]
+
+/** Bounding box [minLng, minLat, maxLng, maxLat] */
+export type BoundingBox = [number, number, number, number]
+
+/** Individual geocoding result from Mapbox */
+export interface GeocodingFeature {
+  id: string
+  type: "Feature"
+  place_type: GeocodingFeatureType[]
+  relevance: number
+  properties: Record<string, unknown>
+  text: string
+  place_name: string
+  center: Coordinates
+  geometry: {
+    type: "Point"
+    coordinates: Coordinates
+  }
+  address?: string
+  context?: GeocodingContext[]
+  bbox?: BoundingBox
+  matching_text?: string
+  matching_place_name?: string
+}
+
+/** Response from Mapbox Geocoding API */
+export interface GeocodingResponse {
+  type: "FeatureCollection"
+  query: string[]
+  features: GeocodingFeature[]
+  attribution: string
+}
+
+/** Options for geocoding search */
+export interface GeocodingOptions {
+  /** Mapbox access token (optional - will use token from map context if not provided) */
+  accessToken?: string
+  /** Limit number of results (default: 5) */
+  limit?: number
+  /** Filter by country codes (e.g., ['us', 'ca']) */
+  countries?: string[]
+  /** Bias results toward a location [lng, lat] */
+  proximity?: Coordinates
+  /** Filter by feature types */
+  types?: GeocodingFeatureType[]
+  /** Bounding box to limit results [minLng, minLat, maxLng, maxLat] */
+  bbox?: BoundingBox
+  /** Language code for results (e.g., 'en', 'es') */
+  language?: string
+  /** Automatically fly to result when selected */
+  flyTo?: boolean
+  /** Transition options for flyTo */
+  flyToOptions?: ViewStateTransitionOptions
+  /** Zoom level when flying to result (default: 14) */
+  flyToZoom?: number
+}
+
+/** Return value from useGeocoding hook */
+export interface UseGeocodingReturn {
+  /** Search for places by query string */
+  search: (query: string) => Promise<GeocodingFeature[]>
+  /** Get reverse geocoding results for coordinates */
+  reverse: (longitude: number, latitude: number) => Promise<GeocodingFeature[]>
+  /** Current search results */
+  results: GeocodingFeature[]
+  /** Loading state */
+  loading: boolean
+  /** Error state */
+  error: Error | null
+  /** Clear results and error */
+  clear: () => void
+  /** Select a result and optionally fly to it */
+  selectResult: (feature: GeocodingFeature) => void
+}

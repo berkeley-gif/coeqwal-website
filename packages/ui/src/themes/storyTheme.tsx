@@ -45,7 +45,7 @@ const storyTheme = createTheme({
       lineHeight: 1.5,
       color: "#f2f0ef",
       "@media (min-width: 1200px)": {
-        fontSize: "1.25rem",
+        fontSize: "1.2rem",
       },
       "@media (min-width: 1536px)": {
         fontSize: "1.5rem",
@@ -77,6 +77,12 @@ const storyTheme = createTheme({
       ...baseTheme.typography.h4,
       fontFamily: themeValues.fontFamily.ingeborgTrial,
       color: "#f2f0ef",
+      "@media (min-width: 1200px)": {
+        fontSize: "1.6rem",
+      },
+      "@media (min-width: 1536px)": {
+        fontSize: "1.8rem",
+      },
     },
     body2: {
       ...baseTheme.typography.body2,

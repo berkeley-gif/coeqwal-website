@@ -1,0 +1,19 @@
+{
+  "name": "@repo/data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./gis/*": "./src/gis/*"
+  },
+  "scripts": {
+    "lint": "echo \"No linting for data package\"",
+    "check-types": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,md}\""
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/geojson": "^7946.0.14"
+  }
+}

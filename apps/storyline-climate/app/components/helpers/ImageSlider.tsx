@@ -9,6 +9,7 @@ type HorizontalCompareProps = {
   altLeft?: string
   altRight?: string
   height?: number | string
+  width?: number | string
   initial?: number // 0..100 (% from left)
 }
 
@@ -32,12 +33,15 @@ export function HorizontalImageSlider({
   rightSrc,
   altLeft = "",
   altRight = "",
+  width = "100%",
   height = "100vh",
   initial = 50,
 }: HorizontalCompareProps) {
   const [pos, setPos] = useState(Math.min(100, Math.max(0, initial)))
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
+  const [isDragging, setIsDragging] = useState(false)
+
 
   const updateFromPointer = useCallback((clientX: number) => {
     const el = wrapRef.current
@@ -52,7 +56,10 @@ export function HorizontalImageSlider({
       if (!dragging.current) return
       updateFromPointer(e.clientX)
     }
-    const onUp = () => (dragging.current = false)
+    const onUp = () => {
+      dragging.current = false
+      setIsDragging(false)
+    }
     window.addEventListener("pointermove", onMove, { passive: true })
     window.addEventListener("pointerup", onUp, { passive: true })
     return () => {
@@ -68,16 +75,19 @@ export function HorizontalImageSlider({
       aria-label="Horizontal image comparison slider"
       sx={{
         position: "relative",
-        width: "100%",
+        width,
         height,
         overflow: "hidden",
         userSelect: "none",
         touchAction: "none",
+        cursor: isDragging ? "pointer" : "default",
+
       }}
       onPointerDown={(e) => {
-        dragging.current = true
         ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
         updateFromPointer(e.clientX)
+        dragging.current = true
+        setIsDragging(true)
       }}
     >
       {/* Right image*/}
@@ -111,7 +121,16 @@ export function HorizontalImageSlider({
         }}
         draggable={false}
       />
-
+      {/* Overlay to dim images */}
+      <Box
+        sx={{
+          pointerEvents: "none",
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          backgroundColor: "#21212120",
+        }}
+      />
       {/* Divider line */}
       <Box
         sx={{
@@ -119,10 +138,10 @@ export function HorizontalImageSlider({
           top: 0,
           bottom: 0,
           left: `calc(${pos}% - 1px)`,
-          width: "2px",
-          backgroundColor: "white",
-          boxShadow: "0 0 0 1px rgba(0,0,0,0.2)",
+          width: "4px",
+          backgroundColor: "#f0f2ef",
           pointerEvents: "none",
+          cursor: 'pointer',
         }}
       />
 
@@ -148,25 +167,22 @@ export function HorizontalImageSlider({
           transform: "translate(-50%, -50%)",
           width: 44,
           height: 44,
-          borderRadius: "9999px",
-          backgroundColor: "rgba(255,255,255,0.95)",
-          border: "1px solid rgba(0,0,0,0.15)",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.25)",
+          borderRadius: "50%",
+          backgroundColor: "#f2f0ef",
           display: "grid",
           placeItems: "center",
           cursor: "ew-resize",
           outline: "none",
+          pointerEvents: "auto",
         }}
         onPointerDown={(e) => {
           dragging.current = true
           ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
           updateFromPointer(e.clientX)
+          setIsDragging(true)
         }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M14 7l-5 5 5 5" fill="none" stroke="black" strokeWidth="2" />
-          <path d="M10 7l5 5-5 5" fill="none" stroke="black" strokeWidth="2" />
-        </svg>
+        <UnfoldMoreIcon style={{ fill: "#104472",  transform: "rotate(90deg)"  }} />
       </Box>
     </Box>
   )
@@ -179,9 +195,8 @@ export function VerticalImageSlider({
   altBottom = "",
   height = "100vh",
   initial = 50,
-
   autoPlay = true,
-  autoPlayDelayMs = 500,
+  autoPlayDelayMs = 1000,
   autoPlayDurationMs = 3000,
   autoPlayOnce = true,
 }: VerticalCompareProps) {
@@ -340,6 +355,7 @@ export function VerticalImageSlider({
         }}
         draggable={false}
       />
+      {/* Overlay to dim images */}
       <Box
         sx={{
           pointerEvents: "none",

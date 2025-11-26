@@ -57,3 +57,27 @@ export { MAP_STYLES, MAP_THEME_URLS, MAP_TRANSITIONS } from "./styles"
 
 // Export hooks for declarative layer management
 export { useMapLayers, useMapSources } from "./hooks/useMapLayers"
+
+// Export geocoding functionality
+export { useGeocoding, BOUNDING_BOXES } from "./hooks/useGeocoding"
+export { GeocoderControl } from "./components/GeocoderControl"
+
+// Export spatial query hooks
+export { usePointInPolygon, useBasinLookup } from "./hooks/usePointInPolygon"
+export type {
+  GeocodingFeature,
+  GeocodingFeatureType,
+  GeocodingResponse,
+  GeocodingOptions,
+  GeocodingContext,
+  UseGeocodingReturn,
+  Coordinates,
+  BoundingBox,
+} from "./types"
+
+// Export spatial query types
+export type {
+  PointInPolygonResult,
+  UsePointInPolygonOptions,
+  UsePointInPolygonReturn,
+} from "./hooks/usePointInPolygon"

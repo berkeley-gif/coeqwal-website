@@ -1,6 +1,7 @@
 "use client"
 
 import { Source, Layer } from "@repo/map"
+import { centralValleyBasins } from "@repo/data"
 
 interface BasinsLayerProps {
   visible: boolean
@@ -12,11 +13,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
   }
 
   return (
-    <Source
-      id="basins-source"
-      type="geojson"
-      data="/geospatial_data/basins.geojson"
-    >
+    <Source id="basins-source" type="geojson" data={centralValleyBasins}>
       <Layer
         id="basins-layer"
         type="fill"
@@ -30,7 +27,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         type="line"
         paint={{
           "line-color": "white",
-          "line-width": 1.5,
+          "line-width": 2,
           "line-opacity": 0.8,
         }}
       />
@@ -39,10 +36,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         type="symbol"
         layout={{
           "text-field": ["get", "name"],
-          "text-font": [
-            "Neue Haas Grotesk",
-            "Arial Unicode MS Bold",
-          ],
+          "text-font": ["Neue Haas Grotesk", "Arial Unicode MS Bold"],
           "text-size": 16,
           "text-anchor": "center",
           "symbol-placement": "point",

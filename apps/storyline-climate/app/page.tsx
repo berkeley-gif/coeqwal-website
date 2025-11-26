@@ -6,17 +6,17 @@ import { Box, CircularProgress } from "@repo/ui/mui"
 import "./main.css"
 
 import Opener from "./components/01Opener"
-import SectionStarter from "./components/02Snowmelt"
-import SectionDelta from "./components/04Delta"
-import SectionTransition from "./components/05AdaptTransition"
-import SectionSupply from "./components/03Groundwater"
-import SectionResolution from "./components/06Resolution"
+import SectionStarter from "./components/02Temperature"
+import SectionSnow from "./components/03Snowmelt"
+import SectionDelta from "./components/05Delta"
+import SectionTransition from "./components/06AdaptTransition"
+import SectionGroundwater from "./components/04Groundwater"
+import SectionResolution from "./components/07Resolution"
 import { AnimatePresence, motion } from "@repo/motion"
-import useStoryStore from "./store"
 
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const isMapReady = useStoryStore((state) => state.isMapReady)
+  const isMapReady = true//useStoryStore((state) => state.isMapReady)
 
   return (
     <>
@@ -40,7 +40,8 @@ export default function StoryContainer() {
       >
         <Opener />
         <SectionStarter />
-        <SectionSupply />
+        <SectionSnow />
+        <SectionGroundwater />
         <SectionDelta />
         <SectionTransition />
         <SectionResolution />

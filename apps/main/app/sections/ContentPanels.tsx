@@ -114,7 +114,7 @@ export default function ContentPanels() {
         <LeadingMarkerText title="Learn">
           <Typography variant="body1" fontWeight={700}>
             Do you know that California has one of the most complex water
-            allocation systems in the world?
+            systems in the world?
           </Typography>
           <Typography variant="body1">
             Learn how hydroclimate affects water availability, how water flows

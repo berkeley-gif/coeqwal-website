@@ -25,6 +25,7 @@ export {
 
   // Inputs and controls
   Button,
+  ButtonGroup,
   ToggleButton,
   ToggleButtonGroup,
 
@@ -52,9 +53,11 @@ export {
   Tooltip,
   CircularProgress,
   Fade,
+  Chip,
 
   // Utility components
   useMediaQuery,
+  SvgIcon,
 } from "@mui/material"
 
 export type { BoxProps } from "@mui/material"
@@ -81,6 +84,7 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem"
 import BarChartIcon from "@mui/icons-material/BarChart"
 import SlideshowIcon from "@mui/icons-material/Slideshow"
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"
+import MenuBookIcon from "@mui/icons-material/MenuBook"
 import VisibilityIcon from "@mui/icons-material/Visibility"
 import AddIcon from "@mui/icons-material/Add"
 import CheckIcon from "@mui/icons-material/Check"
@@ -94,6 +98,21 @@ import InfoIcon from "@mui/icons-material/Info"
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore"
 import MyLocationIcon from "@mui/icons-material/MyLocation"
 import EditNoteIcon from "@mui/icons-material/EditNote"
+import AgricultureIcon from "@mui/icons-material/Agriculture"
+import SetMealIcon from "@mui/icons-material/SetMeal"
+import ScienceIcon from "@mui/icons-material/Science"
+import WaterDropIcon from "@mui/icons-material/WaterDrop"
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance"
+import CompareIcon from "@mui/icons-material/Compare"
+import Diversity3Icon from "@mui/icons-material/Diversity3"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
+import CloudIcon from "@mui/icons-material/Cloud"
+import StorageIcon from "@mui/icons-material/Storage"
+import GroupsIcon from "@mui/icons-material/Groups"
+import AssessmentIcon from "@mui/icons-material/Assessment"
+import CategoryIcon from "@mui/icons-material/Category"
+import WavesIcon from "@mui/icons-material/Waves"
+import TimelineIcon from "@mui/icons-material/Timeline"
 
 // Export individually imported icons
 export {
@@ -116,6 +135,7 @@ export {
   BarChartIcon,
   SlideshowIcon,
   LibraryBooksIcon,
+  MenuBookIcon,
   VisibilityIcon,
   AddIcon,
   CheckIcon,
@@ -128,6 +148,21 @@ export {
   UnfoldMoreIcon,
   MyLocationIcon,
   EditNoteIcon,
+  AgricultureIcon,
+  SetMealIcon,
+  ScienceIcon,
+  WaterDropIcon,
+  AccountBalanceIcon,
+  CompareIcon,
+  Diversity3Icon,
+  LocalShippingIcon,
+  CloudIcon,
+  StorageIcon,
+  GroupsIcon,
+  AssessmentIcon,
+  CategoryIcon,
+  WavesIcon,
+  TimelineIcon,
 }
 
 // Export the full icons library for access to other icons as needed
