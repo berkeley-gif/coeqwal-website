@@ -13,7 +13,8 @@
     "next-env.d.ts",
     "next.config.js",
     ".next/types/**/*.ts",
-    "../../packages/ui/src/components/common/AutoHeight.tsx"
+    "../../packages/ui/src/components/common/AutoHeight.tsx",
+    "../../packages/data/src/**/*.d.ts"
   ],
   "exclude": ["node_modules"]
 }

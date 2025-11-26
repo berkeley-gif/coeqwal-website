@@ -14,3 +14,6 @@ export * from "./drawer/store"
 
 // Export explore user workflow store
 export * from "./exploreUserWorkflow"
+
+// Export scenario explorer store
+export * from "./scenarioExplorer"

@@ -96,7 +96,7 @@ export function useTierMapData({ selectedTier }: UseTierMapDataProps) {
             const isSalmon = selectedTier!.outcome.includes("Salmon")
 
             const padding = isDelta ? 250 : 100
-            const maxZoom = isDelta || isSalmon ? 9 : 12 // Don't zoom in too far for single points
+            const maxZoom = isDelta || isSalmon ? 8 : 9 // keep within map's maxZoom of 10
 
             mapAPI.withMap((mapRef) => {
               const map = mapRef.getMap()

@@ -24,7 +24,7 @@ const responsiveHeight = {
   xs: 200,
   sm: 250,
   md: 300,
-  lg: 450,
+  lg: 400,
   xl: 500,
 }
 
@@ -151,7 +151,7 @@ function PrecipitationBar({
           inch
         </div>
       )}
-      <svg width={dimensions.width} height={selectedHeight} id="bar-svg">
+      <svg width={dimensions.width} height={selectedHeight} id="bar-svg" viewBox={`0 0 ${dimensions.width} ${selectedHeight}`}>
         <YAxis
           yTicks={yTicks}
           yExtents={yExtents as [number, number]}

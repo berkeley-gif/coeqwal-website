@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
-import { FreshWaterColor } from "../helpers/colorPalette"
+import { OffWhiteColor } from "../helpers/colorPalette"
+import { motion, MotionValue, useTransform} from "@repo/motion"
+import { Typography } from "@repo/ui/mui"
+import { usePlayAnimationOnce } from "@repo/motion/hooks"
 
 type Row = { Date: string; Value: string }
 type Point = { year: number; value: number }
@@ -8,132 +11,200 @@ type Point = { year: number; value: number }
 type Margin = { top: number; right: number; bottom: number; left: number }
 type ContainerSize = { width: number; height: number }
 
-const defaultMargin: Margin = { top: 24, right: 24, bottom: 54, left: 84 }
-const goldenColor = "#F1B143"
-const axisColor = "#f2f0ef" // axis stroke; you can switch to "white" if you prefer
+const defaultMargin: Margin = { top: 24, right: 24, bottom: 80, left: 100 }
+const axisColor = OffWhiteColor 
+// consistent font styling for all axis and label text
+//TODO: make this consistent throughout the story
+const axisLabelStyle: React.CSSProperties = {
+  fontSize: "1.1rem",
+  fill: OffWhiteColor,
+};
+
+const titleLabelStyle: React.CSSProperties = {
+  fontSize: "1.25rem",
+  fill: OffWhiteColor,
+  fontWeight: "bold",
+}
 
 function XAxis({
   size,
   xScale,
   margin,
+  scrollProgress,
   ticks,
 }: {
   size: ContainerSize
   xScale: d3.ScaleLinear<number, number>
-  margin: Margin
+    margin: Margin
+  scrollProgress: MotionValue<number>
   ticks: number[]
 }) {
   const y = size.height - margin.bottom
+
+  const linePathLength = usePlayAnimationOnce(scrollProgress, [0.2, 0.4], [0, 1]);
   return (
     <>
-      <g className="x-axis-line">
+      {/*
+        <g className="x-axis-line">
         <path
           d={`M${margin.left},${y} L${size.width - margin.right},${y}`}
           stroke={axisColor}
           strokeWidth={1}
         />
       </g>
+      */}
 
       <g className="x-axis-ticks">
-        {ticks.map((t, i) => {
-          const x = xScale(t)
-          return (
-            <g key={i}>
-              {/* tick mark */}
-              <line
-                x1={x}
-                x2={x}
-                y1={y}
-                y2={y + 6}
-                stroke={axisColor}
-                strokeWidth={1}
-              />
-              {/* tick label */}
-              <text
-                x={x}
-                y={y}
-                dy="1.6em"
-                style={{ textAnchor: "middle", fill: "white" }}
-              >
-                {d3.format("d")(t)}
-              </text>
-            </g>
-          )
-        })}
+        {ticks.map((t, i) => (
+          <XTick
+            idx={i}
+            key={i}
+            tick={t}
+            xPos={xScale(t)}
+            yPos={y}
+            scrollProgress={scrollProgress}
+          />
+        ))}
       </g>
       {/* Axis label */}
-      <text
+      <motion.text
         x={(margin.left + size.width - margin.right) / 2}
         y={y}
-        dy="2em"
-        style={{ textAnchor: "middle", fill: "white" }}
+        dy="3em"   
+        style={{ ...titleLabelStyle, textAnchor: "middle", opacity: linePathLength }}
       >
         Year
-      </text>
+      </motion.text>
     </>
   )
 }
+
+function XTick({
+  tick,
+  xPos,
+  yPos,
+  idx,
+  scrollProgress,
+}: {
+  tick: number
+  xPos: number
+  yPos: number
+  idx: number
+  scrollProgress: MotionValue<number>
+  }) {
+    const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
+    const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
+
+  return(
+    <motion.g key={idx} style={{ opacity: tickOpacity }}>
+      <line
+        x1={xPos}
+        x2={xPos}
+        y1={yPos}
+        y2={yPos + 6}
+        stroke={axisColor}
+        strokeWidth={1}
+      />
+      <text
+        x={xPos}
+        y={yPos}
+        dy="1.6em"
+        style={{ ...axisLabelStyle, textAnchor: "middle"}}
+      >
+        {d3.format("d")(tick)}
+      </text>
+    </motion.g>
+  )
+}
+
 
 function YAxis({
   yScale,
   margin,
   ticks,
-  labelOffset = -60, // extra spacing for label
+  scrollProgress,
+  labelOffset = -80,   // extra spacing for label
 }: {
   yScale: d3.ScaleLinear<number, number>
   margin: Margin
   ticks: number[]
+  scrollProgress: MotionValue<number>
   labelOffset?: number
 }) {
   const [r0, r1] = yScale.range() as [number, number]
   const center = (r0 + r1) / 2
 
+  const linePathLength = usePlayAnimationOnce(scrollProgress, [0.1, 0.4], [0, 1]);
   return (
     <g className="y-axis" transform={`translate(${margin.left},0)`}>
       {/* main y-axis line */}
-      <line x1={0} x2={0} y1={r0} y2={r1} stroke={axisColor} strokeWidth={1} />
+      <motion.line x1={0} x2={0} y1={r0} y2={r1} stroke={axisColor} strokeWidth={1} pathLength={linePathLength}/>
 
       {/* ticks */}
       {ticks.map((t, i) => (
-        <g key={i}>
-          <line
-            x1={-6}
-            x2={0}
-            y1={yScale(t)}
-            y2={yScale(t)}
-            stroke={axisColor}
-            strokeWidth={1}
-          />
-          <text
-            x={-8}
-            y={yScale(t)}
-            dx="-0.25em"
-            dy="0.35em"
-            style={{ textAnchor: "end", fill: "white" }}
-          >
-            {d3.format(".2~f")(t)}
-          </text>
-        </g>
+        <YTick
+          idx={i}
+          key={i}
+          tick={t}
+          yPos={yScale(t)}
+          scrollProgress={scrollProgress}
+        />
       ))}
 
       {/* axis label */}
-      <text
+      <motion.text
         transform={`translate(${labelOffset},${center}) rotate(-90)`}
         textAnchor="middle"
-        style={{ fill: "white" }}
+        style={{ ...titleLabelStyle, opacity: linePathLength }}
       >
         Temperature (°F)
-      </text>
+      </motion.text>
     </g>
   )
 }
 
-export default function TemperatureLineChart() {
+function YTick({
+  tick,
+  yPos,
+  idx,
+  scrollProgress,
+}: {
+  tick: number
+  yPos: number
+  idx: number
+  scrollProgress: MotionValue<number>
+  }) {
+    const range: [number, number] = [0.1 + idx * 0.02, 0.3 + idx * 0.02]
+    const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
+
+  return(
+    <motion.g key={idx} style={{ opacity: tickOpacity }}>
+      <line
+        x1={-6}
+        x2={0}
+        y1={yPos}
+        y2={yPos}
+        stroke={axisColor}
+        strokeWidth={1}
+      />
+      <text
+        x={-8}
+        y={yPos}
+        dx="-0.25em"
+        dy="0.35em"
+        style={{ ...axisLabelStyle, textAnchor: "end"}}
+      >
+        {d3.format(".2~f")(tick)}
+      </text>
+    </motion.g>
+  )
+}
+
+export default function TemperatureLineChart({scrollProgress}: { scrollProgress: MotionValue<number> }) {
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const [wrapWidth, setWrapWidth] = useState<number>(800)
   const [points, setPoints] = useState<Point[]>([])
 
-  // responsive width
   useEffect(() => {
     if (!wrapRef.current) return
     const ro = new ResizeObserver((entries) => {
@@ -146,6 +217,9 @@ export default function TemperatureLineChart() {
     return () => ro.disconnect()
   }, [])
 
+  const START_YEAR = 1960
+  const END_YEAR = 2025
+
   useEffect(() => {
     ;(async () => {
       const txt = await (
@@ -155,11 +229,11 @@ export default function TemperatureLineChart() {
         .split(/\r?\n/)
         .filter((line) => line.trim() && !line.startsWith("#"))
         .join("\n")
-
       const rows = d3.csvParse(cleaned) as Row[]
-      const data: Point[] = rows
+
+      const all: Point[] = rows
         .map((r) => {
-          const year = Math.floor(Number(r.Date) / 100) // e.g., 189512 -> 1895
+          const year = Math.floor(Number(r.Date) / 100)
           const value = Number(r.Value)
           return Number.isFinite(year) && Number.isFinite(value)
             ? { year, value }
@@ -168,11 +242,20 @@ export default function TemperatureLineChart() {
         .filter((d): d is Point => !!d)
         .sort((a, b) => a.year - b.year)
 
-      setPoints(data)
+      // keep only 1960–2025
+      const filtered = all.filter(
+        (d) => d.year >= START_YEAR && d.year <= END_YEAR,
+      )
+      setPoints(filtered)
     })()
   }, [])
 
-  const height = 420
+  const avg = useMemo(() => {
+    const filtered = points.filter((d) => d.year >= 1960 && d.year <= 2025)
+    return filtered.length ? d3.mean(filtered, (d) => d.value)! : undefined
+  }, [points])
+
+  const height = 480
   const margin = defaultMargin
   const size: ContainerSize = { width: wrapWidth, height }
   const innerW = size.width - margin.left - margin.right
@@ -182,7 +265,7 @@ export default function TemperatureLineChart() {
     if (!points.length) return null
     return d3
       .scaleLinear()
-      .domain(d3.extent(points, (d) => d.year) as [number, number])
+      .domain([START_YEAR, END_YEAR])
       .range([margin.left, margin.left + innerW])
   }, [points, innerW, margin.left])
 
@@ -195,22 +278,19 @@ export default function TemperatureLineChart() {
       .range([margin.top + innerH, margin.top])
   }, [points, innerH, margin.top])
 
-  // ticks (as arrays) for your axis components
   const xTicks = useMemo(() => {
     if (!xScale) return []
-    const [d0, d1] = xScale.domain() as [number, number]
     const count = Math.min(10, Math.max(3, Math.floor(innerW / 60)))
-    return d3.ticks(d0, d1, count)
+    return d3.ticks(START_YEAR, END_YEAR, count)
   }, [xScale, innerW])
 
   const yTicks = useMemo(() => {
     if (!yScale) return []
-    const [y0, y1] = yScale.domain() as [number, number] // force tuple
-    const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
-    return d3.ticks(y0, y1, count)
-  }, [yScale, innerH])
+    const [y0, y1] = yScale.domain() as [number, number]  // force tuple
+    //const count = Math.min(8, Math.max(3, Math.floor(innerH / 40)))
+    return d3.ticks(y0, y1, 6)
+  }, [yScale])
 
-  // line path
   const linePath = useMemo(() => {
     if (!xScale || !yScale) return ""
     return (
@@ -222,51 +302,68 @@ export default function TemperatureLineChart() {
     )
   }, [points, xScale, yScale])
 
-  return (
-    <div ref={wrapRef} style={{ width: "100%" }}>
-      <svg width={size.width} height={size.height}>
-        {/* axes */}
-        {xScale && yScale && (
-          <>
-            <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} />
-            <YAxis yScale={yScale} margin={margin} ticks={yTicks} />
-          </>
-        )}
+  const pathLength = useTransform(scrollProgress, [0.3, 0.7], [0, 1]);
+  const historicalAvgOpacity = usePlayAnimationOnce(scrollProgress, [0.3, 0.5], [0, 0.6]);
+  const historicalAvgLabelOpacity = usePlayAnimationOnce(scrollProgress, [0.3, 0.5], [0, 1]);
 
-        {/* main line */}
-        {linePath && (
-          <path d={linePath} fill="none" stroke={goldenColor} strokeWidth={3} />
-        )}
 
-        {/* dashed reference line at 57.8°F */}
-        {yScale && (
-          <>
-            <line
+return (
+  <div style={{ position: "relative", width: "100%" }}>
+    <div style={{ display: "flex", alignItems: "flex-end", width: "100%" }}>
+      <div ref={wrapRef} style={{ flex: "0 0 90%", minWidth: 0 }}>
+        <svg width={size.width} height={size.height} style={{ display: "block" }}>
+          {xScale && yScale && (
+            <>
+              <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} scrollProgress={scrollProgress} />
+              <YAxis yScale={yScale} margin={margin} ticks={yTicks} scrollProgress={scrollProgress} />
+            </>
+          )}
+
+          {/* {linePath && (<path d={linePath} fill="none" stroke={goldenColor} strokeWidth={3} />)} */}
+          {linePath && (
+            <motion.path
+              d={linePath}
+              fill="none"
+              stroke={OffWhiteColor}
+              strokeWidth={3}
+              pathLength={pathLength}
+              transition={{ease: "spring"}}
+            />
+          )}
+
+          {/* dashed line*/}
+          {yScale && avg !== undefined && (
+            <motion.line
               x1={margin.left}
               x2={size.width - margin.right}
-              y1={yScale(57.8)}
-              y2={yScale(57.8)}
-              stroke="white"
+              y1={yScale(avg)}
+              y2={yScale(avg)}
+              stroke={OffWhiteColor}
               strokeWidth={2}
-              strokeDasharray="6,6"
-              opacity={0.6}
+              strokeDasharray="3,3"
+              opacity={historicalAvgOpacity}
             />
-            <text
-              x={margin.left + 190}
-              y={yScale(57.8)}
-              dy={-8} // 8px above the dashed line
-              textAnchor="end"
-              style={{
-                fill: "white",
-                fontSize: 14,
-                strokeWidth: 2,
-              }}
-            >
-              Average temperature: 57.8 °F
-            </text>
-          </>
-        )}
-      </svg>
-    </div>
-  )
+          )}
+        </svg>
+      </div>
+      </div>
+
+      {yScale && avg !== undefined && (
+      <motion.div
+        style={{
+          position: "absolute",
+          left: "90%",
+          top: `${yScale(avg)}px`, // align text with the dashed line
+          transform: "translateY(-50%)",
+          color: OffWhiteColor,
+          opacity: historicalAvgLabelOpacity,
+        }}
+      >
+        <Typography variant='body2'>{START_YEAR}{"\u2014"}{END_YEAR}</Typography>
+        <Typography variant='body2'>Historical average</Typography>
+        <Typography variant='body2'>{d3.format(".1f")(avg)} °F</Typography>
+      </motion.div>
+    )}
+  </div>
+)
 }

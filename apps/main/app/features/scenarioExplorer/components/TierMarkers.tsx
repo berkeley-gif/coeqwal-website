@@ -243,8 +243,8 @@ export default function TierMarkers({ data }: TierMarkersProps) {
                 height: 24,
                 borderRadius: "50%",
                 backgroundColor: getTierColor(feature.properties.tier_level),
-                border: `2px solid white`,
-                boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                border: `2px solid ${theme.palette.common.white}`,
+                boxShadow: theme.shadow.medium,
                 cursor: "pointer",
               }}
               onClick={() =>
@@ -275,16 +275,16 @@ export default function TierMarkers({ data }: TierMarkersProps) {
         >
           <div
             style={{
-              padding: "12px 16px",
-              minWidth: "220px",
+              padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+              minWidth: theme.spacing(27.5),
               fontFamily: theme.typography.fontFamily,
             }}
           >
             <div
               style={{
-                fontSize: "0.8125rem",
+                fontSize: theme.typography.caption.fontSize,
                 color: theme.palette.grey[600],
-                marginBottom: "2px",
+                marginBottom: theme.spacing(0.25),
               }}
             >
               {toSentenceCase(popupInfo.locationType)}
@@ -292,8 +292,8 @@ export default function TierMarkers({ data }: TierMarkersProps) {
             <div
               style={{
                 fontWeight: 600,
-                fontSize: "1rem",
-                marginBottom: "8px",
+                fontSize: theme.typography.body2.fontSize,
+                marginBottom: theme.spacing(1),
                 color: theme.palette.blue.darkest,
               }}
             >
@@ -301,17 +301,17 @@ export default function TierMarkers({ data }: TierMarkersProps) {
             </div>
             <div
               style={{
-                fontSize: "0.875rem",
+                fontSize: theme.typography.nav.fontSize,
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
+                gap: theme.spacing(1),
               }}
             >
               <div
                 style={{
-                  width: "12px",
-                  height: "12px",
-                  borderRadius: "2px",
+                  width: theme.spacing(1.5),
+                  height: theme.spacing(1.5),
+                  borderRadius: theme.borderRadius.standard,
                   backgroundColor: getTierColor(popupInfo.tierLevel),
                   flexShrink: 0,
                 }}

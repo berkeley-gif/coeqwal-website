@@ -10,6 +10,7 @@ import {
   mapShortCodeToDisplayName,
   type ScenarioTiersResponse,
 } from "../api/tierApi"
+import { applyUIDisplayOverride } from "../constants/outcomeMappings"
 
 // Types
 interface TierColors {
@@ -19,10 +20,11 @@ interface TierColors {
   tier4: string
 }
 
-interface ChartDataPoint {
+export interface ChartDataPoint {
   label: string
   color: string
   value: number
+  tierType?: "single_value" | "multi_value" // Metadata from API
 }
 
 interface OutcomeInfo {
@@ -31,16 +33,16 @@ interface OutcomeInfo {
   displayName: string
 }
 
-// Constants
-const OUTCOME_DISPLAY_ORDER = [
+// Constants - UI display names
+export const OUTCOME_DISPLAY_ORDER = [
   "Community deliveries",
   "Agricultural revenue",
   "Environmental flows",
-  "Delta ecology",
-  "Freshwater for Delta exports",
-  "Freshwater for in-Delta uses",
   "Reservoir storage",
   "Groundwater storage",
+  "Delta estuary ecology", // UI display name
+  "Freshwater for Delta exports",
+  "Freshwater for in-Delta uses",
   "Salmon abundance",
 ] as const
 
@@ -60,10 +62,12 @@ const processScenarioData = (
   const converted: Record<string, Array<ChartDataPoint>> = {}
 
   Object.entries(scenarioData.tiers).forEach(([shortCode, tierInfo]) => {
-    const displayName = mapShortCodeToDisplayName(shortCode, tierMapping)
+    // Get API display name first, then apply UI override when necessary TODO: fix this
+    const apiDisplayName = mapShortCodeToDisplayName(shortCode, tierMapping)
+    const uiDisplayName = applyUIDisplayOverride(apiDisplayName)
 
     if (tierInfo.type === "multi_value" && tierInfo.data) {
-      converted[displayName] = convertMultiValueToChartData(
+      converted[uiDisplayName] = convertMultiValueToChartData(
         {
           name: tierInfo.name,
           type: "multi_value",
@@ -73,7 +77,7 @@ const processScenarioData = (
         themeColors,
       )
     } else if (tierInfo.type === "single_value" && tierInfo.level) {
-      converted[displayName] = convertSingleValueToChartData(
+      converted[uiDisplayName] = convertSingleValueToChartData(
         tierInfo.level,
         themeColors,
       )
@@ -119,7 +123,8 @@ export function useOutcomeDefinitions() {
       "How average agricultural revenue changes in response to water deliveries. Revenues are estimated at **134 agricultural water districts** and evaluated relative to historical values.",
     "Environmental flows":
       "Extent to which river flows are of sufficient magnitude across seasons and year-to-year to support healthy riverine ecosystems, evaluated at **17 locations** on the Sacramento and San Joaquin Rivers and their major tributaries.",
-    "Delta ecology":
+    // UI display name
+    "Delta estuary ecology":
       "Extent to which seasonal outflows from the Sacramento-San Joaquin River Delta through the estuary support beneficial ecological responses. More high-flow years in a row generally support more suitable habitat for native species in the Delta.",
     "Freshwater for Delta exports":
       "How often salinity meets or exceeds water quality requirements for exporting water for drinking water or irrigation needs, assessed at the **Banks and Jones pumping plants**.",

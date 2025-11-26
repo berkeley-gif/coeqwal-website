@@ -2,6 +2,11 @@
  * API functions for fetching tier location data for map visualization
  */
 
+import {
+  STRATEGY_TO_SCENARIO_ID,
+  getShortCodeFromDisplayName,
+} from "../constants/outcomeMappings"
+
 // Type definitions for GeoJSON response
 export interface TierFeature {
   type: "Feature"
@@ -34,27 +39,6 @@ export interface TierLocationResponse {
   }
 }
 
-// Map strategy values to scenario IDs
-const STRATEGY_TO_SCENARIO_MAP: Record<string, string> = {
-  "current-ops": "s0020",
-  "current-ops-wo-tucp": "s0021",
-  "current-ops-historical-ag": "s0011",
-  // Add other mappings as needed
-}
-
-// Map display names to API tier codes
-const OUTCOME_CODE_MAP: Record<string, string> = {
-  "Agricultural revenue": "AG_REV",
-  "Community deliveries": "CWS_DEL",
-  "Delta ecology": "DELTA_ECO",
-  "Environmental flows": "ENV_FLOWS",
-  "Freshwater for in-Delta uses": "FW_DELTA_USES",
-  "Freshwater for Delta exports": "FW_EXP",
-  "Groundwater storage": "GW_STOR",
-  "Reservoir storage": "RES_STOR",
-  "Salmon abundance": "WRC_SALMON_AB",
-}
-
 const API_BASE = "https://api.coeqwal.org/api"
 
 /**
@@ -66,17 +50,18 @@ export async function fetchTierLocationData(
   outcomeDisplayName: string,
 ): Promise<TierLocationResponse> {
   // Map strategy to scenario ID
-  const scenarioId = STRATEGY_TO_SCENARIO_MAP[strategyValue]
+  const scenarioId = STRATEGY_TO_SCENARIO_ID[strategyValue]
 
   if (!scenarioId) {
     console.error(`No scenario ID mapping for strategy: ${strategyValue}`)
     throw new Error(`Unknown strategy: ${strategyValue}`)
   }
 
-  // Map outcome to tier code
-  const tierCode = OUTCOME_CODE_MAP[outcomeDisplayName]
+  // Map outcome to tier code (handles both API names and UI display names)
+  const tierCode = getShortCodeFromDisplayName(outcomeDisplayName)
 
-  if (!tierCode) {
+  if (!tierCode || tierCode === outcomeDisplayName) {
+    // If no mapping found, tierCode will equal outcomeDisplayName (fallback behavior)
     console.error(`No tier code mapping for: ${outcomeDisplayName}`)
     throw new Error(`Unknown outcome: ${outcomeDisplayName}`)
   }

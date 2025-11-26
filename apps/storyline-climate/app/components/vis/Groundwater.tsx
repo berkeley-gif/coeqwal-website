@@ -3,10 +3,15 @@ import * as d3 from "d3"
 import { Typography } from "@repo/ui/mui"
 import { useFetchData } from "../../hooks/useFetchData"
 import GroundwaterLine, { GroundwaterRow } from "./GroundwaterLine"
+import { MotionValue } from "@repo/motion"
 
 export type ContainerSize = { width: number; height: number }
 
-export default function GroundwaterContainer() {
+export default function GroundwaterContainer({
+  scrollProgress,
+}: {
+  scrollProgress: MotionValue<number>
+}) {
   const [rows, setRows] = useState<GroundwaterRow[]>([])
   const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
 
@@ -29,7 +34,7 @@ export default function GroundwaterContainer() {
   return (
     <div style={{ width: "100%", height: "100%" }}>
       {rows.length > 0 ? (
-        <GroundwaterLine data={rows} yExtents={yExtents} />
+        <GroundwaterLine data={rows} yExtents={yExtents} scrollProgress={scrollProgress} />
       ) : (
         <div
           style={{

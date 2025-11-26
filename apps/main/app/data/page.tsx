@@ -17,7 +17,6 @@ import {
   Alert,
 } from "@repo/ui/mui"
 import { Header } from "../components/Header"
-import { ConnectedMultiDrawer } from "../components/ConnectedMultiDrawer"
 import { ArrowHead } from "@repo/ui"
 import DownloadButton from "../components/DownloadButton"
 import type { Scenario } from "../types/scenarioDownloads"
@@ -27,7 +26,7 @@ import {
 } from "../utils/fileDownloadApi"
 
 export default function DataPage() {
-  const theme = useTheme()
+  const theme = useTheme() // Still needed for other theme properties
   const [selectedZipDataset, setSelectedZipDataset] = useState("")
   const [selectedCsvDataset, setSelectedCsvDataset] = useState("")
   const [scenarios, setScenarios] = useState<Scenario[]>([])
@@ -91,12 +90,6 @@ export default function DataPage() {
   return (
     <>
       <Header />
-
-      <ConnectedMultiDrawer
-        drawerWidth={theme.layout.drawer.width}
-        overlay={true}
-        showRailButtons={false}
-      />
 
       {/* Main content wrapper */}
       <Box
@@ -259,7 +252,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Scenario Data Section */}
+              {/* Scenario data section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
@@ -399,7 +392,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Research Publications Section */}
+              {/* Research publications section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
@@ -431,7 +424,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* API Access Section */}
+              {/* API access section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
@@ -463,7 +456,7 @@ export default function DataPage() {
                 </Box>
               </Grid>
 
-              {/* Support & Contact Section */}
+              {/* Support & contact section */}
               <Grid size={{ xs: 12, md: 6 }} sx={{ pointerEvents: "auto" }}>
                 <Box>
                   <Typography
