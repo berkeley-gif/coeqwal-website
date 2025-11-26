@@ -6,6 +6,7 @@ import { Typography, useTheme } from "@repo/ui/mui"
 import { TABS, TAB_ORDER, TabKey } from "../../types/tabs"
 import { useTabs } from "../../context/Tabs"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
+import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
 
 export default function SmoothTabs() {
   const { state, tabsRef, hasEnteredTabsRef } = useTabs()
@@ -38,7 +39,7 @@ export default function SmoothTabs() {
       ref={tabsRef}
       style={{
         position: "sticky",
-        top: 0,
+        top: HEADER_SHRUNK_H,
         zIndex: 1000,
       }}
     >

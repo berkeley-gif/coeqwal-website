@@ -36,7 +36,6 @@ export function Header() {
       onDataClick={handleDataClick}
       // onToolsClick={handleToolsClick} // Disabled temporarily
       onAboutClick={handleAboutClick}
-      variant="overlay"
       hideOnScroll={false}
       showLanguageSwitcher={false}
     />
