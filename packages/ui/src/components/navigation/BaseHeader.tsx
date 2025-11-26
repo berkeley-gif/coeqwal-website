@@ -9,6 +9,7 @@ import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
 import { motion, useMotionValueEvent, useScroll, useTransform } from "@repo/motion"
 import { useMemo, useRef, useState } from "react"
+import { letterSpacing } from "@mui/system"
 
 const MotionAppBar = motion.create(AppBar)
 
@@ -124,9 +125,10 @@ export function BaseHeader({
   const isTablet = useMediaQuery("(max-width:900px)")
 
   const buttonStyle = {
-    fontSize: "1.125rem",
+    fontSize: "1rem",
     fontWeight: 500,
     color: textColor,
+    letterSpacing: 0.5,
     textTransform: "none" as const,
     padding: "8px 16px",
     transition: "opacity 0.2s ease",
