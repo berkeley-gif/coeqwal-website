@@ -7,7 +7,6 @@ import { useRef, useState } from "react"
 import ScrollIndicator from "./helpers/ScrollIndicator"
 
 function Opener() {
-
   return (
     <Box
       id="opener"
@@ -26,7 +25,7 @@ function Opener() {
         className="paragraph text-center-holder text-shadow"
         component="header"
         role="banner"
-        sx={{ top: "50%", pointerEvents: 'none' }}
+        sx={{ top: "50%", pointerEvents: "none" }}
       >
         <Typography id="opener-heading" variant="h2" gutterBottom>
           {"How Climate Change Affects California's Water"}
@@ -34,7 +33,7 @@ function Opener() {
         <Typography variant="h3" gutterBottom>
           {"Adapting to a Hotter, More Uncertain Climate Future"}
         </Typography>
-        <Typography variant="body1" sx={{ maxWidth: '70%', margin: "0 auto" }}>
+        <Typography variant="body1" sx={{ maxWidth: "70%", margin: "0 auto" }}>
           {
             "Whether you’re a farmer worried about drought, a homeowner concerned about your water bill, or someone who cares about California’s wildlife, the impacts of climate change on California’s water are important to understand."
           }

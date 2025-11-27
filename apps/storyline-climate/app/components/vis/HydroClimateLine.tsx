@@ -101,7 +101,7 @@ function FlowLineWithBand({
       ></path>
       <path
         d={areaGenerator(data) ?? ""}
-        fill={'#F1b143'}
+        fill={"#F1b143"}
         fillOpacity={0.15}
         stroke="none"
       />
