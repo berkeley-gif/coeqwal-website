@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react"
 
-export function useScrollProgressImperative(containerRef: React.RefObject<HTMLElement>, initial: number = 0) {
+export function useScrollProgressImperative(
+  containerRef: React.RefObject<HTMLElement>,
+  initial: number = 0,
+) {
   const rafRef = useRef<number | null>(null)
   const [progress, setProgress] = useState<number>(initial)
 

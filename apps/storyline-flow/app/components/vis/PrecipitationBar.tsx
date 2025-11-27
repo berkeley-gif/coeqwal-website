@@ -151,7 +151,12 @@ function PrecipitationBar({
           inch
         </div>
       )}
-      <svg width={dimensions.width} height={selectedHeight} id="bar-svg" viewBox={`0 0 ${dimensions.width} ${selectedHeight}`}>
+      <svg
+        width={dimensions.width}
+        height={selectedHeight}
+        id="bar-svg"
+        viewBox={`0 0 ${dimensions.width} ${selectedHeight}`}
+      >
         <YAxis
           yTicks={yTicks}
           yExtents={yExtents as [number, number]}

@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import * as d3 from "d3"
 import type { ContainerSize } from "./Snowpack"
-import { SnowWaterColor,OffWhiteColor } from "../helpers/colorPalette"
+import { SnowWaterColor, OffWhiteColor } from "../helpers/colorPalette"
 import { useLayoutEffect } from "react"
 import { motion, MotionValue } from "@repo/motion"
 import { usePlayAnimationOnce } from "@repo/motion/hooks"
-
 
 //TODO: clean up this code
 export type SnowRow = {
@@ -20,7 +19,7 @@ const axisColor = OffWhiteColor
 const tickLabelStyle: React.CSSProperties = {
   fontSize: "1.1rem",
   fill: OffWhiteColor,
-};
+}
 
 const axisLabelStyle: React.CSSProperties = {
   fontSize: "1.25rem",
@@ -34,7 +33,11 @@ type Props = {
   scrollProgress: MotionValue<number>
 }
 
-export default function SnowpackLine({ data, yExtents, scrollProgress }: Props) {
+export default function SnowpackLine({
+  data,
+  yExtents,
+  scrollProgress,
+}: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
 
@@ -51,7 +54,7 @@ export default function SnowpackLine({ data, yExtents, scrollProgress }: Props) 
       left: margin.left + extraLeft,
       bottom: margin.bottom + extraBottom, // from your X-axis fix
     }),
-    [extraLeft, extraBottom]
+    [extraLeft, extraBottom],
   )
   const years = useMemo(() => filteredData.map((d) => d.year), [filteredData])
   const xScale = useMemo(() => {
@@ -133,34 +136,47 @@ export default function SnowpackLine({ data, yExtents, scrollProgress }: Props) 
     return () => cancelAnimationFrame(id)
   }, [size.width, size.height, yTicks])
 
-    useEffect(() => {
-      if (!svgRef.current) return
-      const ro = new ResizeObserver(() => {
-        const { width, height } = svgRef.current!.getBoundingClientRect()
-        setSize({ width, height })
-      })
-      ro.observe(svgRef.current)
-      const { width, height } = svgRef.current.getBoundingClientRect()
+  useEffect(() => {
+    if (!svgRef.current) return
+    const ro = new ResizeObserver(() => {
+      const { width, height } = svgRef.current!.getBoundingClientRect()
       setSize({ width, height })
-      return () => ro.disconnect()
-    }, [])
+    })
+    ro.observe(svgRef.current)
+    const { width, height } = svgRef.current.getBoundingClientRect()
+    setSize({ width, height })
+    return () => ro.disconnect()
+  }, [])
 
-  const areaOpacity = usePlayAnimationOnce(scrollProgress, [0.5, 0.7], [0, 0.8]);
-  
+  const areaOpacity = usePlayAnimationOnce(scrollProgress, [0.5, 0.7], [0, 0.8])
+
   return (
     <svg ref={svgRef} width="100%" height="100%">
       <defs>
-        <clipPath id='snowpack-clip'>
-          <motion.rect
-            x={0}
-            width={size.width}
-
-          />
+        <clipPath id="snowpack-clip">
+          <motion.rect x={0} width={size.width} />
         </clipPath>
       </defs>
-      <XAxis size={size} xScale={xScale} margin={safeMargin} ticks={xTicks} innerRef={xAxisRef} scrollProgress={scrollProgress} />
-      <YAxis yScale={yScale} margin={safeMargin} ticks={yTicks} innerRef={yAxisRef} scrollProgress={scrollProgress}/>
-      <motion.path d={snowArea} fill={SnowWaterColor} fillOpacity={areaOpacity} />
+      <XAxis
+        size={size}
+        xScale={xScale}
+        margin={safeMargin}
+        ticks={xTicks}
+        innerRef={xAxisRef}
+        scrollProgress={scrollProgress}
+      />
+      <YAxis
+        yScale={yScale}
+        margin={safeMargin}
+        ticks={yTicks}
+        innerRef={yAxisRef}
+        scrollProgress={scrollProgress}
+      />
+      <motion.path
+        d={snowArea}
+        fill={SnowWaterColor}
+        fillOpacity={areaOpacity}
+      />
     </svg>
   )
 }
@@ -171,14 +187,14 @@ function XAxis({
   margin,
   ticks,
   innerRef,
-  scrollProgress
+  scrollProgress,
 }: {
   size: ContainerSize
   xScale: d3.ScaleLinear<number, number>
   margin: Margin
   ticks: number[]
-    innerRef?: React.Ref<SVGGElement>
-    scrollProgress: MotionValue<number>
+  innerRef?: React.Ref<SVGGElement>
+  scrollProgress: MotionValue<number>
 }) {
   const y = size.height - margin.bottom
   const pathLength = usePlayAnimationOnce(scrollProgress, [0.3, 0.5], [0, 1])
@@ -231,10 +247,10 @@ function XTick({
   yPos: number
   idx: number
   scrollProgress: MotionValue<number>
-  }) {
-    const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
-    const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
-  
+}) {
+  const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
+  const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
+
   return (
     <motion.g key={idx} style={{ opacity: tickOpacity }}>
       <line
@@ -249,7 +265,7 @@ function XTick({
         x={xPos}
         y={yPos}
         dy="1.6em" // pixel offset is more consistent than em
-        style={{ ...tickLabelStyle, textAnchor: "middle"}}
+        style={{ ...tickLabelStyle, textAnchor: "middle" }}
       >
         {d3.format("d")(tick)}
       </text>
@@ -257,22 +273,25 @@ function XTick({
   )
 }
 
-
 function YAxis({
   yScale,
   margin,
   ticks,
   innerRef,
-  scrollProgress
+  scrollProgress,
 }: {
   yScale: d3.ScaleLinear<number, number>
   margin: Margin
   ticks: number[]
-    innerRef?: React.Ref<SVGGElement>
+  innerRef?: React.Ref<SVGGElement>
   scrollProgress: MotionValue<number>
-  }) {
-  const annotationOpacity = usePlayAnimationOnce(scrollProgress, [0.4, 0.6], [0, 1])
-  
+}) {
+  const annotationOpacity = usePlayAnimationOnce(
+    scrollProgress,
+    [0.4, 0.6],
+    [0, 1],
+  )
+
   return (
     <g
       ref={innerRef}
@@ -293,7 +312,11 @@ function YAxis({
         y={yScale(1)}
         dx="-4.5em"
         dy="0.5em"
-        style={{ ...tickLabelStyle, textAnchor: "middle", opacity: annotationOpacity }}
+        style={{
+          ...tickLabelStyle,
+          textAnchor: "middle",
+          opacity: annotationOpacity,
+        }}
       >
         Ground
       </motion.text>
@@ -302,7 +325,11 @@ function YAxis({
         y={yScale(0)}
         dx="-4.5em"
         dy="1em"
-        style={{ ...tickLabelStyle, textAnchor: "middle", opacity: annotationOpacity}}
+        style={{
+          ...tickLabelStyle,
+          textAnchor: "middle",
+          opacity: annotationOpacity,
+        }}
       >
         surface
       </motion.text>
@@ -320,10 +347,10 @@ function YTick({
   yPos: number
   idx: number
   scrollProgress: MotionValue<number>
-  }) {
+}) {
   const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
-  
+
   return (
     <motion.g key={idx} style={{ opacity: tickOpacity }}>
       <line

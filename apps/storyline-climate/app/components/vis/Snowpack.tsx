@@ -7,9 +7,11 @@ import { MotionValue } from "@repo/motion"
 
 export type ContainerSize = { width: number; height: number }
 
-export default function SnowpackContainer({ scrollProgress }:
-  { scrollProgress: MotionValue<number> }
-) {
+export default function SnowpackContainer({
+  scrollProgress,
+}: {
+  scrollProgress: MotionValue<number>
+}) {
   const [rows, setRows] = useState<SnowRow[]>([])
   const [yExtents, setYExtents] = useState<[number, number]>([0, 0])
 
@@ -29,7 +31,11 @@ export default function SnowpackContainer({ scrollProgress }:
     <>
       <div style={{ width: "100%", height: "100%" }}>
         {hasData ? (
-          <SnowpackLine data={rows} yExtents={yExtents} scrollProgress={scrollProgress} />
+          <SnowpackLine
+            data={rows}
+            yExtents={yExtents}
+            scrollProgress={scrollProgress}
+          />
         ) : (
           <div
             style={{
