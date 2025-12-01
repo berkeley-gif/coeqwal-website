@@ -71,7 +71,7 @@ export function TabsProvider({ children }: { children: ReactNode }) {
 
   const scrollIntentRef = useRef<"none" | "user" | "sync">("none")
 
-  // 🚦 prevents any auto scroll-align before user actually reaches tabs or clicks a tab
+  // prevents any auto scroll-align before user actually reaches tabs or clicks a tab
   const hasEnteredTabsRef = useRef<boolean>(false)
 
   const value = useMemo(
