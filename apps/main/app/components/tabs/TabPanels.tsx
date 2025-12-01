@@ -30,11 +30,13 @@ const panelVariants = {
 }
 
 export default function TabPanels() {
-  const theme = useTheme()
   const searchParams = useSearchParams()
   const { state, panelRef } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
+
+  // Const to track if we've already auto-scrolled from a URL Tab
+  const didScrollFromUrlRef = useRef(false)
 
   // Change url when entering tab
   useMarkTabsEnteredOnScroll()
@@ -42,16 +44,24 @@ export default function TabPanels() {
   // Scroll to tab top on every tab change
   useScrollTabsIntoViewOnChange({ behavior: "smooth", offsetPx: 0 })
 
-  const didInitRef = useRef(false)
   useEffect(() => {
-    if (didInitRef.current) return
-    didInitRef.current = true
-
     const urlTab = searchParams.get("tab") as TabKey | null
+
     if (urlTab && urlTab !== activeTab) {
       navigateToTab(urlTab)
     }
-  }, []) // ← run exactly once
+
+    // if we haven't scrolled to panel from URL and the panel component has mounted
+    if (!didScrollFromUrlRef.current && panelRef.current) {
+      didScrollFromUrlRef.current = true
+
+      // scroll to panel from URL
+      panelRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    } 
+  }, [searchParams, activeTab, navigateToTab])
 
   // Background color tied to active tab
   const panelColor: string = useMemo(() => {
