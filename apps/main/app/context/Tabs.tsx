@@ -57,8 +57,11 @@ type TabsContextShape = {
   dispatch: React.Dispatch<Action>
   tabsRef: React.MutableRefObject<HTMLDivElement | null>
   panelRef: React.MutableRefObject<HTMLDivElement | null>
-  hasEnteredTabsRef: React.MutableRefObject<boolean>
+  hasEnteredTabsFirstTime: boolean
+  setHasEnteredTabsFirstTime: React.Dispatch<React.SetStateAction<boolean>>
   scrollIntentRef: React.MutableRefObject<"none" | "user" | "sync">
+  isInTabsArea: boolean
+  setIsInTabsArea: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const TabsContext = createContext<TabsContextShape | null>(null)
@@ -71,8 +74,14 @@ export function TabsProvider({ children }: { children: ReactNode }) {
 
   const scrollIntentRef = useRef<"none" | "user" | "sync">("none")
 
-  // prevents any auto scroll-align before user actually reaches tabs or clicks a tab
-  const hasEnteredTabsRef = useRef<boolean>(false)
+  // checks if tabs have been entered (once)
+  const [hasEnteredTabsFirstTime, setHasEnteredTabsFirstTime] = React.useState(false)
+
+  // checks if we are in the tabs area
+  const [isInTabsArea, setIsInTabsArea] = React.useState(false)
+
+  // checks if are we currently in the tabs area
+  const isInTabsAreaRef = useRef<boolean>(false)
 
   const value = useMemo(
     () => ({
@@ -81,9 +90,12 @@ export function TabsProvider({ children }: { children: ReactNode }) {
       tabsRef,
       panelRef,
       scrollIntentRef,
-      hasEnteredTabsRef,
+      hasEnteredTabsFirstTime,
+      setHasEnteredTabsFirstTime,
+      isInTabsArea,
+      setIsInTabsArea,
     }),
-    [state],
+    [state, hasEnteredTabsFirstTime, isInTabsArea],
   )
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>

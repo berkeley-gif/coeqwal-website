@@ -20,7 +20,7 @@ export function useScrollTabsIntoViewOnChange({
   behavior = "smooth",
   offsetPx = 0,
 }: Options) {
-  const { state, tabsRef, hasEnteredTabsRef } = useTabs()
+  const { state, tabsRef, isInTabsArea } = useTabs()
   const { activeTab } = state
 
   // Store the original Y-position of the tabs container
@@ -39,7 +39,7 @@ export function useScrollTabsIntoViewOnChange({
 
   useEffect(() => {
     // don't do anything until user has actually scrolled into the tabs area
-    if (!hasEnteredTabsRef.current) return
+    if (!isInTabsArea) return
 
     const tabsEl = tabsRef.current
     if (!tabsEl) return
@@ -63,5 +63,5 @@ export function useScrollTabsIntoViewOnChange({
     })
 
     return () => cancelAnimationFrame(raf)
-  }, [activeTab, behavior, offsetPx, tabsRef, hasEnteredTabsRef])
+  }, [activeTab, behavior, offsetPx, tabsRef, isInTabsArea])
 }

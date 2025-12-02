@@ -8,28 +8,46 @@
 
 import { useEffect } from "react"
 import { useTabs } from "../context/Tabs"
+import { useRouter, useSearchParams } from "next/navigation"
 
-export function useMarkTabsEnteredOnScroll() {
-  const { tabsRef, panelRef, hasEnteredTabsRef } = useTabs()
+import type { TabKey } from "@repo/ui"
+import { TABS } from "../types/tabs"
+
+export function useMarkTabsEnteredOnScroll(stickyOffsetPx: number = 0) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { tabsRef, panelRef, hasEnteredTabs } = useTabs()
 
   useEffect(() => {
-    if (hasEnteredTabsRef.current) return
+    if (hasEnteredTabs.current) return
 
     const tabsEl = tabsRef.current
     const panelEl = panelRef.current
     if (!tabsEl || !panelEl) return
 
     const check = () => {
+      const urlTab = searchParams.get("tab") as TabKey | null
       if (hasEnteredTabsRef.current) return
-      // Tabs are sticky if their top is at/above the top of the viewport.
-      const isSticky = tabsEl.getBoundingClientRect().top <= 0
-      // Or the current panel has reached under the tabs
-      const underTabs =
-        panelEl.getBoundingClientRect().top <= tabsEl.offsetHeight
-      if (isSticky || underTabs) {
-        hasEnteredTabsRef.current = true
+
+      const tabsRect = tabsEl.getBoundingClientRect()
+
+      // ✅ Tabs are "in view" if they are stuck at their sticky offset
+      const inArea = Math.abs(tabsRect.top - stickyOffsetPx) <= 1
+
+      if (hasEnteredTabsRef.current !== inArea) {
+        hasEnteredTabsRef.current = inArea
+        console.log("Has entered tabs for the first time →", inArea)
+
+        if (!urlTab) {
+          // update URL to reflect first time we enter tabs
+          const params = new URLSearchParams(searchParams.toString())
+
+          params.set("tab", TABS[0]?.key ?? '')
+          router.replace(`?${params.toString()}`, { scroll: false })
+        }
       }
     }
+
 
     // In case we load with tabs already near the top (small header, anchors, etc.)
     check()

@@ -7,10 +7,8 @@
  */
 
 import { useMemo, useEffect, useRef } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { AnimatePresence, motion } from "@repo/motion"
-import type { RefObject } from "react"
-import { useTheme } from "@repo/ui/mui"
 
 import { useTabs } from "../../context/Tabs"
 import { TABS, TabKey } from "../../types/tabs"
@@ -18,7 +16,7 @@ import TabPanel from "../../components/tabs/TabPanel"
 import AutoHeight from "../../../../../packages/ui/src/components/common/AutoHeight"
 import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { useScrollTabsIntoViewOnChange } from "../../hooks/useScrollTabsIntoViewOnChange"
-import { useMarkTabsEnteredOnScroll } from "../../hooks/useMarkTabsEnteredOnScroll"
+import { useMarkTabsInView } from "../../hooks/useMarkTabsInView"
 
 import LearnPanel from "../tabPanels/Learn"
 import ExplorePanel from "../tabPanels/Explore"
@@ -29,39 +27,58 @@ const panelVariants = {
   exit: { opacity: 0, x: -30 },
 }
 
+import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
+
 export default function TabPanels() {
+  const router = useRouter()
   const searchParams = useSearchParams()
-  const { state, panelRef } = useTabs()
+  const { state, panelRef, isInTabsArea } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
 
   // Const to track if we've already auto-scrolled from a URL Tab
   const didScrollFromUrlRef = useRef(false)
 
-  // Change url when entering tab
-  useMarkTabsEnteredOnScroll()
+  useMarkTabsInView(HEADER_SHRUNK_H)
 
   // Scroll to tab top on every tab change
-  useScrollTabsIntoViewOnChange({ behavior: "smooth", offsetPx: 0 })
+  useScrollTabsIntoViewOnChange({ behavior: "smooth", offsetPx: HEADER_SHRUNK_H })
 
   useEffect(() => {
-    const urlTab = searchParams.get("tab") as TabKey | null
+    console.log('isInTabsArea', isInTabsArea)
+  }, [isInTabsArea])
+
+  useEffect(() => {
+    console.log('activeTab: ', activeTab)
+  }, [activeTab])
+
+
+  // 2) On initial load with ?tab=..., sync state + scroll once
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const urlTab = params.get("tab") as TabKey | null
 
     if (urlTab && urlTab !== activeTab) {
+      // Set initial active tab from URL
       navigateToTab(urlTab)
     }
 
-    // if we haven't scrolled to panel from URL and the panel component has mounted
-    if (!didScrollFromUrlRef.current && panelRef.current) {
+    if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {
       didScrollFromUrlRef.current = true
 
-      // scroll to panel from URL
-      panelRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    } 
-  }, [searchParams, activeTab, navigateToTab])
+      const offsetPx =
+        typeof HEADER_SHRUNK_H === "number"
+          ? HEADER_SHRUNK_H
+          : parseFloat(HEADER_SHRUNK_H)
+
+      const rect = panelRef.current.getBoundingClientRect()
+      const absoluteTop = window.scrollY + rect.top
+      const targetY = absoluteTop - offsetPx
+
+      window.scrollTo({ top: targetY, behavior: "smooth" })
+    }
+  }, [])
+
 
   // Background color tied to active tab
   const panelColor: string = useMemo(() => {
