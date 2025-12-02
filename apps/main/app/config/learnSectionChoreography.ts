@@ -24,9 +24,7 @@ import {
 /**
  * Helper: Zoom camera back to Central Valley view
  */
-function zoomToCentralValley(
-  mapRef: React.RefObject<mapboxgl.Map | null>,
-) {
+function zoomToCentralValley(mapRef: React.RefObject<mapboxgl.Map | null>) {
   if (mapRef?.current) {
     mapRef.current.easeTo({
       center: [CENTRAL_VALLEY_VIEW.longitude, CENTRAL_VALLEY_VIEW.latitude],

@@ -240,8 +240,8 @@ function AdaptationTopParagraph() {
               Rise
             </a>
           </span>
-          , is a research project exploring a wide range of adaptation strategies
-          to address salinity intrusion in the Delta.
+          , is a research project exploring a wide range of adaptation
+          strategies to address salinity intrusion in the Delta.
         </Typography>
         <Typography variant="body1">
           {

@@ -75,7 +75,8 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   const scrollIntentRef = useRef<"none" | "user" | "sync">("none")
 
   // checks if tabs have been entered (once)
-  const [hasEnteredTabsFirstTime, setHasEnteredTabsFirstTime] = React.useState(false)
+  const [hasEnteredTabsFirstTime, setHasEnteredTabsFirstTime] =
+    React.useState(false)
 
   // checks if we are in the tabs area
   const [isInTabsArea, setIsInTabsArea] = React.useState(false)

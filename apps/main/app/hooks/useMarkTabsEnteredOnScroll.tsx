@@ -42,12 +42,11 @@ export function useMarkTabsEnteredOnScroll(stickyOffsetPx: number = 0) {
           // update URL to reflect first time we enter tabs
           const params = new URLSearchParams(searchParams.toString())
 
-          params.set("tab", TABS[0]?.key ?? '')
+          params.set("tab", TABS[0]?.key ?? "")
           router.replace(`?${params.toString()}`, { scroll: false })
         }
       }
     }
-
 
     // In case we load with tabs already near the top (small header, anchors, etc.)
     check()

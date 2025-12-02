@@ -107,8 +107,9 @@ export function HeaderStory({
       elevation={0}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}>
-        </Box>
+        <Box
+          sx={{ display: "flex", alignItems: "center", paddingLeft: 1 }}
+        ></Box>
         <Stack
           direction="row"
           spacing={2}
