@@ -1,18 +1,10 @@
 "use client"
 
-/**
- * - This hook scrolls to the top of the tabs / top of the tab panel
- * - Skips first render (no jump on load).
- * - Uses a single rAF to let layout settle.
- * - Clamps target to [0, maxScroll] to avoid overshoot.
- */
-
 import { useEffect, useRef } from "react"
 import { useTabs, clamp } from "../context/Tabs"
 
 type Options = {
   behavior?: ScrollBehavior
-  // extra pixels to stop above the original tabs position
   offsetPx?: number
 }
 
@@ -38,7 +30,7 @@ export function useScrollTabsIntoViewOnChange({
   }, [tabsRef])
 
   useEffect(() => {
-    // don't do anything until user has actually scrolled into the tabs area
+    // don’t do anything until user has actually scrolled into the tabs area
     if (!isInTabsArea) return
 
     const tabsEl = tabsRef.current
