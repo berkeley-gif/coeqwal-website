@@ -45,17 +45,9 @@ export default function TabPanels() {
   useScrollTabsIntoViewOnChange({ behavior: "smooth", offsetPx: HEADER_SHRUNK_H })
 
   useEffect(() => {
-    console.log('isInTabsArea', isInTabsArea)
-  }, [isInTabsArea])
-
-  useEffect(() => {
-    console.log('activeTab: ', activeTab)
-  }, [activeTab])
-
-  useEffect(() => {
     // Read the *current* URL query from the browser
-    const params = new URLSearchParams(window.location.search)
-    const urlTab = params.get("tab") as TabKey | null
+    const urlTab = searchParams.get("tab") as TabKey | null
+    const params = new URLSearchParams(searchParams.toString())
 
     if (isInTabsArea) {
       // We are in the tabs area → ensure ?tab=<activeTab>
@@ -64,17 +56,15 @@ export default function TabPanels() {
         const query = params.toString()
         router.replace(query ? `?${query}` : "?", { scroll: false })
       }
-    } else {
+    } else if (!isInTabsArea && urlTab) {
       // We are outside the tabs area → remove ?tab if it exists
-      if (urlTab) {
-        params.delete("tab")
-        const query = params.toString()
-        router.replace(query ? `?${query}` : "?", { scroll: false })
-      }
+      params.delete("tab")
+      const query = params.toString()
+      router.replace(query ? `?${query}` : "?", { scroll: false })
     }
-  }, [isInTabsArea, activeTab, router])
+  }, [isInTabsArea, activeTab, searchParams, router])
 
-  // 2) On initial load with ?tab=..., sync state + scroll once
+  // On initial load with ?tab=..., sync state + scroll once
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const urlTab = params.get("tab") as TabKey | null
@@ -87,14 +77,9 @@ export default function TabPanels() {
     if (urlTab && !didScrollFromUrlRef.current && panelRef.current) {
       didScrollFromUrlRef.current = true
 
-      const offsetPx =
-        typeof HEADER_SHRUNK_H === "number"
-          ? HEADER_SHRUNK_H
-          : parseFloat(HEADER_SHRUNK_H)
-
       const rect = panelRef.current.getBoundingClientRect()
       const absoluteTop = window.scrollY + rect.top
-      const targetY = absoluteTop - offsetPx
+      const targetY = absoluteTop
 
       window.scrollTo({ top: targetY, behavior: "smooth" })
     }
