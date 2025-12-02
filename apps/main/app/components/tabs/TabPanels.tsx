@@ -52,6 +52,27 @@ export default function TabPanels() {
     console.log('activeTab: ', activeTab)
   }, [activeTab])
 
+  useEffect(() => {
+    // Read the *current* URL query from the browser
+    const params = new URLSearchParams(window.location.search)
+    const urlTab = params.get("tab") as TabKey | null
+
+    if (isInTabsArea) {
+      // We are in the tabs area → ensure ?tab=<activeTab>
+      if (urlTab !== activeTab) {
+        params.set("tab", activeTab)
+        const query = params.toString()
+        router.replace(query ? `?${query}` : "?", { scroll: false })
+      }
+    } else {
+      // We are outside the tabs area → remove ?tab if it exists
+      if (urlTab) {
+        params.delete("tab")
+        const query = params.toString()
+        router.replace(query ? `?${query}` : "?", { scroll: false })
+      }
+    }
+  }, [isInTabsArea, activeTab, router])
 
   // 2) On initial load with ?tab=..., sync state + scroll once
   useEffect(() => {
