@@ -18,7 +18,7 @@ const axisColor = "#f2f0ef"
 const tickLabelStyle: React.CSSProperties = {
   fontSize: "1.1rem",
   fill: OffWhiteColor,
-};
+}
 
 const axisLabelStyle: React.CSSProperties = {
   fontSize: "1.25rem",
@@ -42,7 +42,11 @@ type Props = {
   scrollProgress: MotionValue<number>
 }
 
-export default function GroundwaterLine({ data, yExtents, scrollProgress }: Props) {
+export default function GroundwaterLine({
+  data,
+  yExtents,
+  scrollProgress,
+}: Props) {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const [size, setSize] = useState<ContainerSize>({ width: 0, height: 0 })
 
@@ -115,8 +119,19 @@ export default function GroundwaterLine({ data, yExtents, scrollProgress }: Prop
       </defs>
 
       {/* Axes */}
-      <XAxis size={size} xScale={xScale} margin={margin} ticks={xTicks} scrollProgress={scrollProgress} />
-      <YAxis yScale={yScale} margin={margin} ticks={yTicks} scrollProgress={scrollProgress} />
+      <XAxis
+        size={size}
+        xScale={xScale}
+        margin={margin}
+        ticks={xTicks}
+        scrollProgress={scrollProgress}
+      />
+      <YAxis
+        yScale={yScale}
+        margin={margin}
+        ticks={yTicks}
+        scrollProgress={scrollProgress}
+      />
 
       {/* Area under line (light blue) */}
       <g clipPath="url(#plot-clip)">
@@ -157,7 +172,7 @@ function XAxis({
   size: ContainerSize
   xScale: d3.ScaleTime<number, number>
   margin: Margin
-    ticks: Date[]
+  ticks: Date[]
   scrollProgress: MotionValue<number>
 }) {
   // x-axis line is drawn at the TOP of the plot area
@@ -210,7 +225,7 @@ function XAxis({
       <motion.text
         x={(margin.left + size.width - margin.right) / 2}
         y={yLabels}
-        dy="2em"   
+        dy="2em"
         style={{ ...axisLabelStyle, textAnchor: "middle", opacity: 1 }}
       >
         Year
@@ -231,12 +246,12 @@ function XTick({
   yPos: number
   idx: number
   scrollProgress: MotionValue<number>
-  }) {
+}) {
   const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
-  
+
   return (
-    <motion.g key={idx} style={{opacity: tickOpacity}}>
+    <motion.g key={idx} style={{ opacity: tickOpacity }}>
       <line
         x1={xPos}
         x2={xPos}
@@ -250,7 +265,7 @@ function XTick({
         x={xPos}
         y={yPos}
         dy="1.2em"
-        style={{ ...tickLabelStyle, textAnchor: "middle"}}
+        style={{ ...tickLabelStyle, textAnchor: "middle" }}
       >
         {d3.timeFormat("%Y")(tick)}
       </text>
@@ -266,7 +281,7 @@ function YAxis({
 }: {
   yScale: d3.ScaleLinear<number, number>
   margin: Margin
-    ticks: number[]
+  ticks: number[]
   scrollProgress: MotionValue<number>
 }) {
   return (
@@ -294,13 +309,12 @@ function YTick({
   yPos: number
   idx: number
   scrollProgress: MotionValue<number>
-  }) {
+}) {
   const range: [number, number] = [0.3 + idx * 0.02, 0.5 + idx * 0.02]
   const tickOpacity = usePlayAnimationOnce(scrollProgress, range, [0, 1])
-  
-  
+
   return (
-    <motion.g key={idx} style={{opacity: tickOpacity}}>
+    <motion.g key={idx} style={{ opacity: tickOpacity }}>
       <line
         x1={-6}
         x2={0}
@@ -314,7 +328,7 @@ function YTick({
         y={yPos}
         dy="0.35em"
         dx="-0.25em"
-        style={{ ...tickLabelStyle, textAnchor: "end"}}
+        style={{ ...tickLabelStyle, textAnchor: "end" }}
       >
         {`${tick} ft`}
       </text>

@@ -7,7 +7,12 @@ import { LanguageSwitcher } from "./LanguageSwitcher"
 import { Logo } from "../common/Logo"
 import { NavDropdown } from "./NavDropdown"
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown"
-import { motion, useMotionValueEvent, useScroll, useTransform } from "@repo/motion"
+import {
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useTransform,
+} from "@repo/motion"
 import { useRef, useState, useEffect } from "react"
 
 const MotionAppBar = motion.create(AppBar)
@@ -174,8 +179,6 @@ export function BaseHeader({
     lastYRef.current = latest
   })
 
-
-
   // Map variant to CSS position
   const positionMap = {
     fixed: "fixed" as const,
@@ -242,7 +245,7 @@ export function BaseHeader({
             minHeight: "var(--header-h) !important",
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between"
+            justifyContent: "space-between",
           }}
           style={{ minHeight: "var(--header-h)" }}
         >
@@ -258,8 +261,9 @@ export function BaseHeader({
               display: "flex",
               alignItems: "center",
               pl: 2,
-              width: 168
-            }}>
+              width: 168,
+            }}
+          >
             <Logo />
           </Box>
 
@@ -390,7 +394,7 @@ export function BaseHeader({
             {showLanguageSwitcher && <LanguageSwitcher />}
           </Stack>
         </Toolbar>
-      </MotionAppBar >
+      </MotionAppBar>
     </>
   )
 }

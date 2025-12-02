@@ -5,7 +5,7 @@ import { motion, MotionValue, useScroll, useTransform } from "@repo/motion"
 import useActiveSection from "../hooks/useActiveSection"
 import { useEffect, useRef } from "react"
 import HydroClimateContainer from "./vis/HydroClimate"
-import * as d3 from "d3";
+import * as d3 from "d3"
 import StickyContainer from "./helpers/StickyContainer"
 import SVGLineContainer from "./helpers/SVGLineContainer"
 
@@ -18,11 +18,11 @@ function SectionResolution() {
   })
 
   useEffect(() => {
-    const unsubscribe = scrollYProgress.on('change', (v) => { 
-      console.log("Temperature scrollYProgress:", v);
+    const unsubscribe = scrollYProgress.on("change", (v) => {
+      console.log("Temperature scrollYProgress:", v)
     })
     return () => unsubscribe()
-  }, [scrollYProgress]);
+  }, [scrollYProgress])
 
   //NOTE: play with this to change how horizontal scroll flows
   const x = useTransform(scrollYProgress, [0.3, 1], ["0vw", `-${150}vw`])
@@ -46,10 +46,10 @@ function SectionResolution() {
               display: "flex",
               justifyContent: "flex-end",
             }}
-        >
+          >
             <Hydroclimate />
-            <Box width='150vw'>
-              <ScenarioTheme scrollProgress={scrollYProgress}/>
+            <Box width="150vw">
+              <ScenarioTheme scrollProgress={scrollYProgress} />
             </Box>
             <Box
               id="scenario-transition"
@@ -65,7 +65,6 @@ function SectionResolution() {
               }}
             />
           </motion.div>
-
         </div>
       </div>
 
@@ -83,10 +82,10 @@ function Hydroclimate() {
 
   return (
     <StickyContainer
-      sectionID='hydroclimate'
-      stickyRollHeight='150vh'
-      sectionRef={sectionRef}>
-      
+      sectionID="hydroclimate"
+      stickyRollHeight="150vh"
+      sectionRef={sectionRef}
+    >
       <Box
         width="100%"
         height="100%"
@@ -97,16 +96,18 @@ function Hydroclimate() {
           alignItems: "center",
         }}
       >
-        <Box className='text-section'>
+        <Box className="text-section">
           <Box className="paragraph" component="article">
             <Typography variant="h4">
-              {
-                "COEQWAL: Planning for the future"
-              }
+              {"COEQWAL: Planning for the future"}
             </Typography>
           </Box>
           <Box className="paragraph" component="article">
-            <Typography variant="body1" style={{ fontWeight: "bold" }} gutterBottom>
+            <Typography
+              variant="body1"
+              style={{ fontWeight: "bold" }}
+              gutterBottom
+            >
               {"This is where COEQWAL comes in."}
             </Typography>
             <Typography variant="body1">
@@ -117,11 +118,11 @@ function Hydroclimate() {
           </Box>
           <Box className="paragraph" component="article">
             <Typography variant="body1">
+              {"COEQWAL studies five plausible future "}
+              <span style={{ fontWeight: "bold" }}>{"hydroclimates"}</span>
               {
-                "COEQWAL studies five plausible future "
+                " \u2014 specific changes in temperatures, precipitation, and streamflow."
               }
-              <span style={{fontWeight: 'bold'}}>{"hydroclimates"}</span>
-              {" \u2014 specific changes in temperatures, precipitation, and streamflow."}
             </Typography>
             <Typography variant="body1">
               {
@@ -130,10 +131,7 @@ function Hydroclimate() {
             </Typography>
           </Box>
         </Box>
-        <Box
-          className="container-center-horizontal text-section"
-          height="50vh"
-        >
+        <Box className="container-center-horizontal text-section" height="50vh">
           <HydroClimateContainer />
         </Box>
         <Box
@@ -152,14 +150,12 @@ function Hydroclimate() {
   )
 }
 
-
-
 function ScenarioTheme({
-  scrollProgress
+  scrollProgress,
 }: {
   scrollProgress: MotionValue<number>
 }) {
-  const { sectionRef } = useActiveSection("scenariotheme", { amount: 0.5 });
+  const { sectionRef } = useActiveSection("scenariotheme", { amount: 0.5 })
 
   const firstScenario = useTransform(scrollProgress, [0.4, 0.6], [0, 1])
   const secondScenario = useTransform(scrollProgress, [0.5, 0.6], [0, 1])
@@ -167,48 +163,48 @@ function ScenarioTheme({
 
   return (
     <StickyContainer
-      sectionID='scenariotheme'
-      stickyRollHeight='150vh'
+      sectionID="scenariotheme"
+      stickyRollHeight="150vh"
       sectionRef={sectionRef}
     >
-      <SVGLineContainer viewBox='0 0 1728 907'>
+      <SVGLineContainer viewBox="0 0 1728 907">
         <motion.path
           d="M-8 201.78C5.5057 220.591 817 169.098 897 291.44C977 413.781 734 420.781 804 296.781C874 172.78 1702.31 233.579 1741 262.781"
-          className='svg-line'
+          className="svg-line"
           pathLength={secondScenario}
         />
         <motion.path
           d="M-19 199.78C68.9324 230.037 931.5 161.78 887.5 46.2798C843.5 -69.2205 732 75.7804 816.5 92.7802C901 109.78 1741 78.7803 1741 78.7803"
-          className='svg-line'
+          className="svg-line"
           pathLength={firstScenario}
         />
         <motion.path
           d="M-9 203.78C155.211 223.319 340.5 216.28 459 248.78C577.5 281.28 804 487.78 870 568.78C936 649.78 1148.9 759.945 1080 810.78C1011.1 861.616 976 788.78 1025 756.78C1074 724.78 1234.1 777.6 1371 829.78C1507.9 881.96 1737 881.78 1737 881.78"
-          className='svg-line'
+          className="svg-line"
           style={{ opacity: 0.5 }}
           pathLength={restScenario}
         />
         <motion.path
           d="M-9 204.78C-9 204.78 220.13 127.578 543.814 336.996C867.499 546.415 472 532.78 571 434.78C670 336.78 834 556.78 993 636.78C1152 716.78 1753 850.78 1753 850.78"
-          className='svg-line'
+          className="svg-line"
           style={{ opacity: 0.5 }}
           pathLength={restScenario}
         />
         <motion.path
           d="M-17 198.78C-17 198.78 331 357.78 453 257.78C575 157.78 696 457.78 767 500.78C838 543.78 960 691.78 849 704.78C738 717.78 776 601.78 878 630.78C980 659.78 1133 749.78 1274.5 781.576C1416 813.372 1759 869.78 1759 869.783"
-          className='svg-line'
+          className="svg-line"
           style={{ opacity: 0.5 }}
           pathLength={restScenario}
         />
         <motion.path
           d="M0 203.78C0 203.78 353.223 295.268 491.09 299.08C594.811 301.948 715 471.78 808 511.78C901 551.78 968 631.759 1035 593.78C1102 555.801 1009 466.78 960 535.78C911 604.78 1061 667.78 1109 688.78C1157 709.78 1748 818.78 1748 818.78"
-          className='svg-line'
+          className="svg-line"
           style={{ opacity: 0.5 }}
           pathLength={restScenario}
         />
         <motion.path
           d="M0.00262291 203.822C-9.92357 215.136 402.001 281.78 464 273.78C525.999 265.78 602.999 332.78 676.997 310.78C750.996 288.78 683.997 184.78 625.998 242.78C567.998 300.78 629.997 404.78 681.999 433.78C734 462.78 978.87 679.655 1128.43 709.565C1277.99 739.474 1766.99 911.78 1766.99 911.78"
-          className='svg-line'
+          className="svg-line"
           style={{ opacity: 0.5 }}
           pathLength={restScenario}
         />
@@ -233,10 +229,8 @@ function ScenariosMockup() {
         //backgroundRepeat: "no-repeat",
       }}
       tabIndex={-1}
-
       role="region"
     >
-      
       <svg
         width="100%"
         height="100%"
@@ -405,8 +399,8 @@ function SvgConnector() {
   useEffect(() => {
     const p = d3.path()
 
-    const startX = 0.75 * window.innerWidth        // 80vw = right edge of your image
-    const y = 0.3 * window.innerHeight            // vertical center (adjust as needed)
+    const startX = 0.75 * window.innerWidth // 80vw = right edge of your image
+    const y = 0.3 * window.innerHeight // vertical center (adjust as needed)
     const endX = startX + 0.25 * window.innerWidth // 25vw to the right
 
     p.moveTo(startX, y)
@@ -430,12 +424,7 @@ function SvgConnector() {
         zIndex: 5,
       }}
     >
-      <path
-        ref={pathRef}
-        stroke="#f1b143"
-        strokeWidth={2}
-        fill="none"
-      />
+      <path ref={pathRef} stroke="#f1b143" strokeWidth={2} fill="none" />
     </svg>
   )
 }

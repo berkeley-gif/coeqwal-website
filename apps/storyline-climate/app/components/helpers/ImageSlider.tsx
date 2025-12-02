@@ -42,7 +42,6 @@ export function HorizontalImageSlider({
   const dragging = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
 
-
   const updateFromPointer = useCallback((clientX: number) => {
     const el = wrapRef.current
     if (!el) return
@@ -81,7 +80,6 @@ export function HorizontalImageSlider({
         userSelect: "none",
         touchAction: "none",
         cursor: isDragging ? "pointer" : "default",
-
       }}
       onPointerDown={(e) => {
         ;(e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId)
@@ -141,7 +139,7 @@ export function HorizontalImageSlider({
           width: "4px",
           backgroundColor: "#f0f2ef",
           pointerEvents: "none",
-          cursor: 'pointer',
+          cursor: "pointer",
         }}
       />
 
@@ -182,7 +180,9 @@ export function HorizontalImageSlider({
           setIsDragging(true)
         }}
       >
-        <UnfoldMoreIcon style={{ fill: "#104472",  transform: "rotate(90deg)"  }} />
+        <UnfoldMoreIcon
+          style={{ fill: "#104472", transform: "rotate(90deg)" }}
+        />
       </Box>
     </Box>
   )

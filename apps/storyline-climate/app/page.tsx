@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from "@repo/motion"
 
 export default function StoryContainer() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const isMapReady = true//useStoryStore((state) => state.isMapReady)
+  const isMapReady = true //useStoryStore((state) => state.isMapReady)
 
   return (
     <>

@@ -34,7 +34,11 @@ export default function GroundwaterContainer({
   return (
     <div style={{ width: "100%", height: "100%" }}>
       {rows.length > 0 ? (
-        <GroundwaterLine data={rows} yExtents={yExtents} scrollProgress={scrollProgress} />
+        <GroundwaterLine
+          data={rows}
+          yExtents={yExtents}
+          scrollProgress={scrollProgress}
+        />
       ) : (
         <div
           style={{

@@ -42,7 +42,10 @@ export default function TabPanels() {
   useMarkTabsInView(HEADER_SHRUNK_H)
 
   // Scroll to tab top on every tab change
-  useScrollTabsIntoViewOnChange({ behavior: "smooth", offsetPx: HEADER_SHRUNK_H })
+  useScrollTabsIntoViewOnChange({
+    behavior: "smooth",
+    offsetPx: HEADER_SHRUNK_H,
+  })
 
   useEffect(() => {
     // Read the *current* URL query from the browser
@@ -84,7 +87,6 @@ export default function TabPanels() {
       window.scrollTo({ top: targetY, behavior: "smooth" })
     }
   }, [])
-
 
   // Background color tied to active tab
   const panelColor: string = useMemo(() => {
