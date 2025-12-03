@@ -250,7 +250,7 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          Each basin receives the rain and snowmelt that flows down from
+          Each basin collects the rain and snowmelt that flows down from
           surrounding mountains into its network of streams, rivers, reservoirs,
           and wetlands.
         </Typography>
@@ -326,7 +326,7 @@ export default function MapOverlayPanels() {
               >
                 San Joaquin River
               </Box>{" "}
-              flows from the south. Their waters meet and mix in the low-lying{" "}
+              flows from the south. The rivers meet and mix in the low-lying{" "}
               <Box
                 component="span"
                 sx={{ fontStyle: "italic", fontWeight: 600 }}
@@ -362,8 +362,9 @@ export default function MapOverlayPanels() {
         <Typography variant="body1">
           Water is diverted and distributed from multiple points along this
           system. Some water is released from reservoirs. Some is pumped from
-          the Delta to points further south. Some is allowed to flow out to the
-          Pacific Ocean. All of it must be carefully planned and accounted for.
+          the Delta to to the San Joaquin Valley and Southern California. Some
+          is allowed to flow out to the Pacific Ocean. All of it must be
+          carefully planned and accounted for.
         </Typography>
       </CallResponsePanel>
 
@@ -416,9 +417,8 @@ export default function MapOverlayPanels() {
           <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
             Bay-Delta Science Program
           </Box>{" "}
-          to run CalSim through a broad range of different water management
-          practices and evaluate the results under current and future climate
-          conditions.
+          to use CalSim to explore a broad range of water management strategies.
+          We evaluate the results under current and future climate conditions.
         </Typography>
       </CallResponsePanel>
 
@@ -431,9 +431,9 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1">
-          We are making this information public so that communities can better
-          understand the range of possibilities, and the range of consequences,
-          that come with different water management choices.
+          We are making this data available to the public so that communities
+          can envision alternative water futures for California and understand
+          the consequences that different water management strategies can bring.
         </Typography>
       </CallResponsePanel>
 
@@ -446,7 +446,7 @@ export default function MapOverlayPanels() {
         sx={{ mb: "100vh" }}
       >
         <Typography variant="body1" sx={{ mb: 3 }}>
-          The water management scenarios you will find on this site show:
+          Each water management scenario on this site depicts:
         </Typography>
         <Box sx={{ mb: 3 }}>
           <Box sx={{ mb: 2.5 }}>
