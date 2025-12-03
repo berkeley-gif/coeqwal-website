@@ -164,7 +164,7 @@ export default function VideoHero({
           right: 0,
           bottom: 0,
           minHeight: "auto",
-          maxWidth: "50vw",
+          maxWidth: "40vw",
           background: theme.palette.blue.darkest,
           padding: 85,
         }}
