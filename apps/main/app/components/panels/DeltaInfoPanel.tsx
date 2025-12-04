@@ -144,12 +144,7 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             textAlign: "left",
           }}
         >
-          The Sacramento–San Joaquin Delta (also called the Bay-Delta) is the
-          unique ecosystem of low-lying channels, islands, and wetlands where
-          the Sacramento and San Joaquin rivers meet, roughly between
-          Sacramento, Stockton, and Antioch. Here, river water mixes with salty
-          tides from San Francisco Bay. Pumps and canals move water from the
-          Delta to cities and farms across the state.
+The Sacramento–San Joaquin Delta (also called the Bay-Delta) is the unique ecosystem of low-lying channels, islands, and wetlands where the Sacramento and San Joaquin rivers meet and flow out to the Bay. Here river water mixes with salty tides from the Bay. Pumps and canals move water from the Delta to cities and farms to the south.
         </Typography>
       )}
     </Box>
