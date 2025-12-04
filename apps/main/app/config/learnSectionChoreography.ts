@@ -169,12 +169,20 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
         // Note: inflow-watersheds not included - it should stay hidden, no animation needed
       ],
-      onEnter: () => {
-        // Only handle React-controlled layers here
-        // Map layer animations are handled by the layers array above
+      onEnter: (direction) => {
+        // Handle React-controlled layers
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
         setShowRivers(false)
+
+        // When scrolling UP, explicitly ensure california-label is visible
+        if (direction === "up" && map.mapRef?.current) {
+          const mapInstance = map.mapRef.current.getMap()
+          if (mapInstance?.getLayer(ALL_LAYERS.CALIFORNIA_LABEL)) {
+            mapInstance.setLayoutProperty(ALL_LAYERS.CALIFORNIA_LABEL, "visibility", "visible")
+            mapInstance.setPaintProperty(ALL_LAYERS.CALIFORNIA_LABEL, "text-opacity", OPACITY.VISIBLE)
+          }
+        }
       },
     },
 
@@ -186,18 +194,51 @@ export function createLearnChoreographyConfig(
       position: 1,
       debugLabel: "Panel 2: Central Valley",
       layers: [
-        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        // california-label handled in onEnter/onExit for reliable scroll-up behavior
         { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE, textAllowOverlap: true },
         { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE, lineWidth: 2, lineJoin: "round" },
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
         // Note: inflow-watersheds not included - it should stay hidden, no animation needed
       ],
-      onEnter: () => {
+      onEnter: (direction) => {
+        // Hide california-label when entering Panel 2 from above (scrolling down)
+        if (direction === "down" && map.mapRef?.current) {
+          const mapInstance = map.mapRef.current.getMap()
+          if (mapInstance?.getLayer(ALL_LAYERS.CALIFORNIA_LABEL)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.CALIFORNIA_LABEL, "text-opacity", 0)
+            mapInstance.setLayoutProperty(ALL_LAYERS.CALIFORNIA_LABEL, "visibility", "none")
+          }
+        }
         // Only handle React-controlled layers here
         // Map layer animations are handled by the layers array above
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
         setShowRivers(false)
+      },
+      onExit: (direction) => {
+        // When scrolling UP (exiting Panel 2 toward Panel 1), show california-label
+        // This ensures the label appears even if Panel 1's onEnter doesn't fire
+        if (direction === "up" && map.mapRef?.current) {
+          const mapInstance = map.mapRef.current.getMap()
+          if (mapInstance?.getLayer(ALL_LAYERS.CALIFORNIA_LABEL)) {
+            // Use opacity 1 for full visibility
+            mapInstance.setLayoutProperty(ALL_LAYERS.CALIFORNIA_LABEL, "visibility", "visible")
+            mapInstance.setPaintProperty(ALL_LAYERS.CALIFORNIA_LABEL, "text-opacity", OPACITY.VISIBLE)
+          }
+          // Also hide the Central Valley layers
+          if (mapInstance?.getLayer(ALL_LAYERS.CV_LABEL)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.CV_LABEL, "text-opacity", 0)
+            mapInstance.setLayoutProperty(ALL_LAYERS.CV_LABEL, "visibility", "none")
+          }
+          if (mapInstance?.getLayer(ALL_LAYERS.CV_POLYGON)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.CV_POLYGON, "line-opacity", 0)
+            mapInstance.setLayoutProperty(ALL_LAYERS.CV_POLYGON, "visibility", "none")
+          }
+          if (mapInstance?.getLayer(ALL_LAYERS.CV_POLYGON_HALO)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.CV_POLYGON_HALO, "line-opacity", 0)
+            mapInstance.setLayoutProperty(ALL_LAYERS.CV_POLYGON_HALO, "visibility", "none")
+          }
+        }
       },
     },
 
@@ -209,7 +250,7 @@ export function createLearnChoreographyConfig(
       position: 2,
       debugLabel: "Panel 3: Basins",
       layers: [
-        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        // california-label handled via Panel 2's onEnter/onExit
         { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
         { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
@@ -571,7 +612,7 @@ export function createLearnChoreographyConfig(
       position: 6,
       debugLabel: "Panel 8: Water Distribution",
       layers: [
-        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        // california-label handled via Panel 2's onEnter/onExit
         { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
         { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
@@ -609,7 +650,7 @@ export function createLearnChoreographyConfig(
     ].map(panel => ({
       ...panel,
       layers: [
-        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none" as const, textOpacity: OPACITY.HIDDEN },
+        // california-label handled via Panel 2's onEnter/onExit
         { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible" as const, textOpacity: OPACITY.VISIBLE },
         { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible" as const, lineOpacity: OPACITY.VISIBLE },
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible" as const, lineOpacity: OPACITY.VISIBLE },
@@ -625,7 +666,7 @@ export function createLearnChoreographyConfig(
       position: 13,
       debugLabel: "Panel 15: Learn more",
       layers: [
-        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        // california-label handled via Panel 2's onEnter/onExit
         { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
         { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
