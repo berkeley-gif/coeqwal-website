@@ -593,6 +593,38 @@ export function createLearnChoreographyConfig(
         // Map layer states handled by layers array above
       },
       onExit: (direction) => {
+        // Fade out water layer when scrolling away (up or down)
+        if (map.mapRef?.current) {
+          const mapInstance = map.mapRef.current.getMap()
+          if (mapInstance?.getLayer(ALL_LAYERS.WATER)) {
+            // Animate opacity from current to 0
+            const duration = 800
+            const startTime = performance.now()
+            
+            const animateFadeOut = (currentTime: number) => {
+              const elapsed = currentTime - startTime
+              const progress = Math.min(elapsed / duration, 1)
+              const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+              const opacity = Math.max(0, 1 - eased)
+              
+              try {
+                mapInstance.setPaintProperty(ALL_LAYERS.WATER, "fill-opacity", opacity)
+              } catch {
+                // Layer might not support this property
+              }
+              
+              if (progress < 1) {
+                requestAnimationFrame(animateFadeOut)
+              } else {
+                // Hide layer after fade completes
+                mapInstance.setLayoutProperty(ALL_LAYERS.WATER, "visibility", "none")
+              }
+            }
+            
+            requestAnimationFrame(animateFadeOut)
+          }
+        }
+
         if (direction === "down") {
           // React-controlled: hide rivers, zoom to CV
           setShowRivers(false)
