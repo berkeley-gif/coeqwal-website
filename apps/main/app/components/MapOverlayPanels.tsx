@@ -270,7 +270,7 @@ export default function MapOverlayPanels() {
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{ mt: "20vh", mb: "50vh" }}
+        sx={{ mt: "20vh" }}
       >
         <GeocodingPanel
           basinsData={
@@ -340,7 +340,7 @@ export default function MapOverlayPanels() {
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{ mt: "150vh", mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <DeltaInfoPanel map={map} />
       </CallResponsePanel>

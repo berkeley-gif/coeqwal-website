@@ -18,7 +18,7 @@ export const PANEL_SPACING = {
 /** Sticky section heights for scroll-pinned animations */
 export const STICKY_HEIGHTS = {
   /** Rivers panel - extended for smooth animation */
-  RIVERS: "400vh",
+  RIVERS: "200vh",
   /** Baseline scenario cards */
   SCENARIOS: "300vh",
 } as const
