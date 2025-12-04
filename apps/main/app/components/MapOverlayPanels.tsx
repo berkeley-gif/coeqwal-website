@@ -192,7 +192,6 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "120vh" }}
       >
         <Typography variant="body1">
           Did you know that California has one of the most complex water systems

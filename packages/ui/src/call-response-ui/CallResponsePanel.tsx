@@ -59,11 +59,11 @@ export function CallResponsePanel({
         initial={{ marginTop: "100vh" }}
         animate={{ marginTop: isVisible ? 0 : "100vh" }}
         transition={{
-          type: "spring",
-          stiffness: 40,
-          damping: 30,
-          duration: 1.8,
-          ...(delay ? { delay } : {}),
+                type: "spring",
+                stiffness: 40,
+                damping: 30,
+                duration: 1.8,
+                ...(delay ? { delay } : {}),
         }}
         style={{
           width: "100%",
