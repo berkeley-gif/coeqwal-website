@@ -28,7 +28,7 @@ import { useCalSimToggle } from "./CalSimContext"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 import { createLearnChoreographyConfig } from "../config/learnSectionChoreography"
 import { STICKY_HEIGHTS } from "../constants/scrollChoreographyConstants"
-import { useScroll, useTransform } from "@repo/motion"
+import { useScroll, useTransform, motion } from "@repo/motion"
 
 export default function MapOverlayPanels() {
   const map = useMap()
@@ -197,6 +197,28 @@ export default function MapOverlayPanels() {
           Did you know that California has one of the most complex water systems
           in the world?
         </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", mt: 2, pl: 16 }}>
+          <Typography variant="body2" sx={{ fontWeight: 200, fontStyle: "italic", mb: 0.5, color: "rgba(255, 255, 255, 0.8)" }}>
+            scroll to learn more
+          </Typography>
+          <Box
+            component="span"
+            sx={{ 
+              marginLeft: "3.5rem", 
+              display: "inline-block",
+              fontWeight: 200, 
+              fontSize: "1.5rem", 
+              color: "rgba(255, 255, 255, 0.8)",
+              animation: "bounce 2s ease-in-out infinite",
+              "@keyframes bounce": {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-8px)" },
+              },
+            }}
+          >
+            ↓
+          </Box>
+        </Box>
       </CallResponsePanel>
 
       {/* ==================== PANEL 2: Central Valley ==================== */}
