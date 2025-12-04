@@ -61,6 +61,194 @@ interface ChoreographyConfigParams {
   resetGeocodingPanel: () => void
 }
 
+// ==================== LAYER GROUP DEFINITIONS ====================
+// Defines which layers are visible at each conceptual "state"
+
+/** All map layers we control */
+const ALL_LAYERS = {
+  // California overview
+  CALIFORNIA_LABEL: "california-label",
+  // Central Valley
+  CV_POLYGON_HALO: "central-valley-polygon-halo",
+  CV_POLYGON: "central-valley-polygon",
+  CV_LABEL: "central-valley-label",
+  // Basins (controlled via React component, but listed for reference)
+  BASINS_HALO: "basins-outline-halo",
+  BASINS_OUTLINE: "basins-outline-layer",
+  BASINS_LABELS: "basins-labels",
+  // Watersheds
+  INFLOW_WATERSHEDS: "inflow-watersheds",
+  // Rivers (controlled separately via animation)
+  // Water layer (Delta info)
+  WATER: "water",
+} as const
+
+/** Layer groups for each panel state */
+const LAYER_GROUPS = {
+  // Panel 1: Only California label
+  CALIFORNIA: [ALL_LAYERS.CALIFORNIA_LABEL],
+  
+  // Panel 2: Central Valley focus
+  CENTRAL_VALLEY: [
+    ALL_LAYERS.CV_POLYGON_HALO,
+    ALL_LAYERS.CV_POLYGON,
+    ALL_LAYERS.CV_LABEL,
+  ],
+  
+  // Panels 3-5: Basins (managed via React component toggleBasins)
+  // inflow-watersheds added in Panel 4+
+  
+  // Rest of panels: Back to Central Valley
+} as const
+
+/** Layers to hide when showing California (Panel 1) */
+const HIDE_FOR_CALIFORNIA = [
+  ALL_LAYERS.CV_POLYGON_HALO,
+  ALL_LAYERS.CV_POLYGON,
+  ALL_LAYERS.CV_LABEL,
+  ALL_LAYERS.INFLOW_WATERSHEDS,
+]
+
+/** Layers to hide when showing Basins (Panels 3-5) */
+const HIDE_FOR_BASINS = [
+  ALL_LAYERS.CALIFORNIA_LABEL,
+  ALL_LAYERS.CV_POLYGON_HALO,
+  ALL_LAYERS.CV_POLYGON,
+  ALL_LAYERS.CV_LABEL,
+]
+
+// ==================== TRANSITION HELPERS ====================
+
+type MapInstance = mapboxgl.Map
+
+/**
+ * Fade a layer's opacity from current to target
+ */
+function fadeLayer(
+  mapInstance: MapInstance,
+  layerId: string,
+  targetOpacity: number,
+  duration: number = ANIMATION_DURATION.FADE,
+  onComplete?: () => void,
+): number {
+  const startTime = performance.now()
+  let startOpacity = 0
+
+  // Try to get current opacity
+  try {
+    const layer = mapInstance.getLayer(layerId)
+    if (!layer) return 0
+    
+    // Determine property based on layer type
+    const layerType = layer.type
+    const opacityProp = layerType === "symbol" ? "text-opacity" 
+      : layerType === "fill" ? "fill-opacity" 
+      : "line-opacity"
+    
+    const current = mapInstance.getPaintProperty(layerId, opacityProp)
+    startOpacity = typeof current === "number" ? current : (targetOpacity > 0 ? 0 : 1)
+  } catch {
+    startOpacity = targetOpacity > 0 ? 0 : 1
+  }
+
+  const delta = targetOpacity - startOpacity
+
+  const animate = (currentTime: number): number => {
+    const elapsed = currentTime - startTime
+    const progress = Math.min(elapsed / duration, 1)
+    const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+    const opacity = clamp(startOpacity + delta * eased, 0, 1)
+
+    try {
+      const layer = mapInstance.getLayer(layerId)
+      if (!layer) return 0
+      
+      const layerType = layer.type
+      if (layerType === "symbol") {
+        mapInstance.setPaintProperty(layerId, "text-opacity", opacity)
+      } else if (layerType === "fill") {
+        mapInstance.setPaintProperty(layerId, "fill-opacity", opacity)
+      } else {
+        mapInstance.setPaintProperty(layerId, "line-opacity", opacity)
+      }
+    } catch {
+      return 0
+    }
+
+    if (progress < 1) {
+      return requestAnimationFrame(animate)
+    } else {
+      onComplete?.()
+      return 0
+    }
+  }
+
+  return requestAnimationFrame(animate)
+}
+
+/**
+ * Show a layer with fade-in
+ */
+function showLayer(
+  mapInstance: MapInstance,
+  layerId: string,
+  targetOpacity: number = OPACITY.VISIBLE,
+): number {
+  try {
+    mapInstance.setLayoutProperty(layerId, "visibility", "visible")
+  } catch {
+    return 0
+  }
+  return fadeLayer(mapInstance, layerId, targetOpacity)
+}
+
+/**
+ * Hide a layer with fade-out
+ */
+function hideLayer(
+  mapInstance: MapInstance,
+  layerId: string,
+): number {
+  return fadeLayer(mapInstance, layerId, 0, ANIMATION_DURATION.FADE, () => {
+    try {
+      mapInstance.setLayoutProperty(layerId, "visibility", "none")
+    } catch {
+      // Ignore
+    }
+  })
+}
+
+/**
+ * Hide multiple layers with fade-out
+ */
+function hideLayers(mapInstance: MapInstance, layerIds: readonly string[]): void {
+  layerIds.forEach(id => hideLayer(mapInstance, id))
+}
+
+/**
+ * Immediately hide layers (no animation)
+ */
+function hideLayersImmediate(mapInstance: MapInstance, layerIds: readonly string[]): void {
+  layerIds.forEach(id => {
+    try {
+      const layer = mapInstance.getLayer(id)
+      if (!layer) return
+      
+      const layerType = layer.type
+      if (layerType === "symbol") {
+        mapInstance.setPaintProperty(id, "text-opacity", 0)
+      } else if (layerType === "fill") {
+        mapInstance.setPaintProperty(id, "fill-opacity", 0)
+      } else {
+        mapInstance.setPaintProperty(id, "line-opacity", 0)
+      }
+      mapInstance.setLayoutProperty(id, "visibility", "none")
+    } catch {
+      // Ignore
+    }
+  })
+}
+
 /**
  * Configuration factory for Learn section choreography
  *
@@ -87,40 +275,26 @@ export function createLearnChoreographyConfig(
 
   return [
     // ==================== PANEL 1: California overview ====================
+    // VISIBLE: california-label
+    // HIDDEN: everything else
     {
       panelId: "calsim-call",
       position: 0,
       debugLabel: "Panel 1: California",
       layers: [
-        {
-          layerId: "california-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "none",
-          lineOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "none",
-          lineOpacity: OPACITY.HIDDEN,
-        },
+        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Hide basins if visible
+        // Hide basins and arrows (React-controlled layers)
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
+        if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
-        // Smooth fade-in for California label, fade-out for Central Valley layers
         if (!map.mapRef?.current) return
-
-        const localMap = map.mapRef.current
+        const mapInstance = map.mapRef.current.getMap()
 
         // Cancel any existing animation
         if (labelFadeAnimationRef.current !== null) {
@@ -128,92 +302,36 @@ export function createLearnChoreographyConfig(
           labelFadeAnimationRef.current = null
         }
 
-        const startTime = performance.now()
+        // Immediately hide inflow-watersheds
+        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
 
-        // Ensure california-label is visible and starts at 0 opacity
-        try {
-          localMap.setLayoutProperty("california-label", "visibility", "visible")
-          localMap.setPaintProperty("california-label", "text-opacity", 0)
-        } catch {
-          // Layer might not be ready
-        }
-
-        const animate = (currentTime: number) => {
-          const elapsed = currentTime - startTime
-          const progress = Math.min(elapsed / ANIMATION_DURATION.FADE, 1)
-          const rawEased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-          const fadeInOpacity = clamp(rawEased * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
-          const fadeOutOpacity = clamp((1 - rawEased) * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
-
-          try {
-            // Fade in california-label
-            localMap.setPaintProperty("california-label", "text-opacity", fadeInOpacity)
-            // Fade out central valley layers
-            localMap.setPaintProperty("central-valley-label", "text-opacity", fadeOutOpacity)
-            localMap.setPaintProperty("central-valley-polygon", "line-opacity", fadeOutOpacity)
-            localMap.setPaintProperty("central-valley-polygon-halo", "line-opacity", fadeOutOpacity)
-          } catch {
-            labelFadeAnimationRef.current = null
-            return
-          }
-
-          if (progress < 1) {
-            labelFadeAnimationRef.current = requestAnimationFrame(animate)
-          } else {
-            // Hide central valley layers after fade completes
-            try {
-              localMap.setLayoutProperty("central-valley-label", "visibility", "none")
-              localMap.setLayoutProperty("central-valley-polygon", "visibility", "none")
-              localMap.setLayoutProperty("central-valley-polygon-halo", "visibility", "none")
-            } catch {
-              // Ignore
-            }
-            labelFadeAnimationRef.current = null
-          }
-        }
-
-        labelFadeAnimationRef.current = requestAnimationFrame(animate)
+        // Fade in california-label, fade out Central Valley layers
+        showLayer(mapInstance, ALL_LAYERS.CALIFORNIA_LABEL)
+        hideLayers(mapInstance, HIDE_FOR_CALIFORNIA)
       },
     },
 
     // ==================== PANEL 2: Central Valley focus ====================
+    // VISIBLE: central-valley-polygon-halo, central-valley-polygon, central-valley-label
+    // HIDDEN: california-label, inflow-watersheds, basins
     {
       panelId: "central-valley-importance",
       position: 1,
       debugLabel: "Panel 2: Central Valley",
       layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-          textAllowOverlap: true,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-          lineWidth: 2,
-          lineJoin: "round",
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
+        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE, textAllowOverlap: true },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE, lineWidth: 2, lineJoin: "round" },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Hide basins when returning to Panel 2 from Panel 3
+        // Hide basins and arrows (React-controlled layers)
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
+        if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
-        // Smooth fade-in for Central Valley label and polygon
         if (!map.mapRef?.current) return
-
-        const localMap = map.mapRef.current
+        const mapInstance = map.mapRef.current.getMap()
 
         // Cancel any existing animation
         if (labelFadeAnimationRef.current !== null) {
@@ -221,55 +339,16 @@ export function createLearnChoreographyConfig(
           labelFadeAnimationRef.current = null
         }
 
-        const startTime = performance.now()
+        // Immediately hide layers that shouldn't be visible
+        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
+        hideLayer(mapInstance, ALL_LAYERS.CALIFORNIA_LABEL)
 
-        // Ensure starting at 0 opacity
-        try {
-          localMap.setPaintProperty("central-valley-label", "text-opacity", 0)
-          localMap.setPaintProperty("central-valley-polygon", "line-opacity", 0)
-          localMap.setPaintProperty("central-valley-polygon-halo", "line-opacity", 0)
-        } catch {
-          // Layer might not be ready
-        }
-
-        const animate = (currentTime: number) => {
-          const elapsed = currentTime - startTime
-          const progress = Math.min(elapsed / ANIMATION_DURATION.FADE, 1)
-          const rawEased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-          const eased = clamp(rawEased * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
-
-          try {
-            localMap.setPaintProperty(
-              "central-valley-label",
-              "text-opacity",
-              eased,
-            )
-            localMap.setPaintProperty(
-              "central-valley-polygon",
-              "line-opacity",
-              eased,
-            )
-            localMap.setPaintProperty(
-              "central-valley-polygon-halo",
-              "line-opacity",
-              eased,
-            )
-          } catch {
-            labelFadeAnimationRef.current = null
-            return
-          }
-
-          if (progress < 1) {
-            labelFadeAnimationRef.current = requestAnimationFrame(animate)
-          } else {
-            labelFadeAnimationRef.current = null
-          }
-        }
-
-        labelFadeAnimationRef.current = requestAnimationFrame(animate)
+        // Show Central Valley layers with fade-in
+        LAYER_GROUPS.CENTRAL_VALLEY.forEach(layerId => {
+          showLayer(mapInstance, layerId)
+        })
       },
       onExit: () => {
-        // Cleanup animation if leaving mid-fade
         if (labelFadeAnimationRef.current !== null) {
           cancelAnimationFrame(labelFadeAnimationRef.current)
           labelFadeAnimationRef.current = null
@@ -278,49 +357,33 @@ export function createLearnChoreographyConfig(
     },
 
     // ==================== PANEL 3: Basins ====================
+    // VISIBLE: basins-outline-halo, basins-outline-layer, basins-labels (via React)
+    // HIDDEN: california-label, central-valley layers, inflow-watersheds
     {
       panelId: "central-valley-basins",
       position: 2,
       debugLabel: "Panel 3: Basins",
       layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "none",
-          lineOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "none",
-          lineOpacity: OPACITY.HIDDEN,
-        },
+        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Immediately hide CV polygon layers to avoid overlap with basins
-        if (map.mapRef?.current) {
-          const localMap = map.mapRef.current
-          try {
-            localMap.setPaintProperty("central-valley-label", "text-opacity", 0)
-            localMap.setPaintProperty("central-valley-polygon", "line-opacity", 0)
-            localMap.setPaintProperty("central-valley-polygon-halo", "line-opacity", 0)
-            localMap.setLayoutProperty("central-valley-label", "visibility", "none")
-            localMap.setLayoutProperty("central-valley-polygon", "visibility", "none")
-            localMap.setLayoutProperty("central-valley-polygon-halo", "visibility", "none")
-          } catch {
-            // Layers might not exist
-          }
-        }
+        // Hide arrows (scrolling back up from Panel 4)
+        if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
-        // Delay showing basins to ensure CV layers are fully hidden
+        if (!map.mapRef?.current) return
+        const mapInstance = map.mapRef.current.getMap()
+
+        // Immediately hide layers that shouldn't be visible
+        hideLayersImmediate(mapInstance, [
+          ...HIDE_FOR_BASINS,
+          ALL_LAYERS.INFLOW_WATERSHEDS,
+        ])
+
+        // Show basins after CV layers are hidden (delay for clean transition)
         setTimeout(() => {
           if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
         }, 300)
@@ -328,34 +391,39 @@ export function createLearnChoreographyConfig(
     },
 
     // ==================== PANEL 4: Water flow & watersheds ====================
+    // VISIBLE: basins + inflow-watersheds
+    // HIDDEN: california-label, central-valley layers
     {
       panelId: "water-flow-call",
       position: 2.5,
       debugLabel: "Panel 4: Watersheds",
       layers: [
-        {
-          layerId: "inflow-watersheds",
-          visibility: "visible",
-          fillOpacity: 0.4, // Visible with semi-transparency
-        },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "visible", fillOpacity: 0.4 },
       ],
       onEnter: () => {
-        // Ensure basins are visible (labels already shown via toggleBasins)
+        // Ensure basins are visible
         if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
+
+        if (!map.mapRef?.current) return
+        const mapInstance = map.mapRef.current.getMap()
+
+        // Show inflow-watersheds with fade-in
+        showLayer(mapInstance, ALL_LAYERS.INFLOW_WATERSHEDS, 0.4)
       },
     },
 
     // ==================== PANEL 4.25: Arrow trigger ====================
+    // VISIBLE: basins + inflow-watersheds + arrows
+    // HIDDEN: california-label, central-valley layers
     {
       panelId: "arrows-trigger",
       position: 2.6,
       debugLabel: "Panel 4.25: Arrow Trigger",
-      layers: [],
+      layers: [], // Arrows are React-controlled
       onEnter: () => {
-        // Show arrows
+        // Show arrows with fade-in
         if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
-        // Smooth fade-in for arrows
         if (arrowFadeAnimationRef.current !== null) {
           cancelAnimationFrame(arrowFadeAnimationRef.current)
         }
@@ -368,12 +436,7 @@ export function createLearnChoreographyConfig(
           const elapsed = currentTime - startTime
           const progress = Math.min(elapsed / duration, 1)
           const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-          const newOpacity = clamp(
-            startOpacity + eased * (1 - startOpacity),
-            0,
-            1,
-          )
-
+          const newOpacity = clamp(startOpacity + eased * (1 - startOpacity), 0, 1)
           setInflowArrowsOpacity(newOpacity)
 
           if (progress < 1) {
@@ -387,7 +450,7 @@ export function createLearnChoreographyConfig(
       },
       onExit: (direction) => {
         if (direction === "up") {
-          // Fade out arrows when scrolling up
+          // Fade out arrows when scrolling up (back to Panel 4)
           if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
           if (arrowFadeAnimationRef.current !== null) {
@@ -403,7 +466,6 @@ export function createLearnChoreographyConfig(
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
             const newOpacity = clamp(startOpacity * (1 - eased), 0, 1)
-
             setInflowArrowsOpacity(newOpacity)
 
             if (progress < 1) {
@@ -418,56 +480,66 @@ export function createLearnChoreographyConfig(
       },
     },
 
-    // ==================== PANEL 4.5: Which basin (Find my basin) ====================
+    // ==================== PANEL 5: Which basin (Find my basin) ====================
+    // VISIBLE: basins + inflow-watersheds + arrows
+    // HIDDEN: california-label, central-valley layers
     {
       panelId: "which-basin-call",
       position: 3.5,
-      debugLabel: "Panel 4.5: Which Basin",
-      layers: [],
+      debugLabel: "Panel 5: Which Basin",
+      layers: [], // All layers maintained from previous panel
       onEnter: () => {
-        // If returning from rivers panel, reset rivers
-        if (showInflowArrowsRef.current) {
-          setShowRivers(false)
-          setRiversAnimationProgress(0)
-        }
+        // If returning from rivers panel, ensure basins/watersheds/arrows visible
+        if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
+        if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
+
+        // Hide rivers if coming back from rivers panel
+        setShowRivers(false)
+        setRiversAnimationProgress(0)
       },
       onExit: (direction) => {
         if (direction === "down") {
-          // Clear geocoder marker and reset panel when scrolling down
           setGeocoderMarker(null)
           resetGeocodingPanel()
-          // Zoom back out to Central Valley view
           zoomToCentralValley(map.mapRef)
         } else if (direction === "up") {
-          // Just clear the marker when scrolling up
           setGeocoderMarker(null)
-          // Zoom back to Central Valley view
           zoomToCentralValley(map.mapRef)
         }
       },
     },
 
-    // ==================== PANEL 5: Rivers animation (Sticky) ====================
+    // ==================== PANEL 6: Rivers animation (Sticky) ====================
+    // VISIBLE: Rivers animating in, basins/watersheds/arrows fading out
+    // HIDDEN: california-label, central-valley layers
     {
       panelId: "rivers-flow-response",
       position: 4.5,
-      debugLabel: "Panel 5: Rivers",
-      layers: [], // Opacity managed entirely via onScroll handler
-      onEnter: () => {
-        // Clear geocoder marker
+      debugLabel: "Panel 6: Rivers",
+      layers: [
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+      ],
+      onEnter: (direction) => {
         setGeocoderMarker(null)
-
-        // Reset rivers animation to start from beginning
         setRiversAnimationProgress(0)
         setShowRivers(true)
+
+        // When scrolling up from later panels, hide Central Valley layers
+        if (direction === "up") {
+          if (!map.mapRef?.current) return
+          const mapInstance = map.mapRef.current.getMap()
+
+          // Hide Central Valley layers with fade
+          hideLayers(mapInstance, LAYER_GROUPS.CENTRAL_VALLEY)
+        }
       },
       onExit: () => {
-        // Keep rivers visible and camera position unchanged when exiting
-        // Don't reset rivers or change camera - let them stay for subsequent panels
+        // Keep rivers visible for subsequent panels
       },
       onScroll: (progress) => {
         if (!map.mapRef?.current) return
-
         const mapInstance = map.mapRef.current.getMap()
         if (!mapInstance) return
 
@@ -487,48 +559,29 @@ export function createLearnChoreographyConfig(
           0,
           1,
         )
-        const eased = 1 - Math.pow(1 - fadeProgress, 3) // ease-out cubic
+        const eased = 1 - Math.pow(1 - fadeProgress, 3)
 
         // Calculate opacity for each layer type
-        const basinsOpacity = clamp(
-          (1 - eased) * OPACITY.VISIBLE,
-          0,
-          OPACITY.VISIBLE,
-        )
-        const inflowOpacity = clamp((1 - eased) * 0.4, 0, 0.4) // Inflow starts at 0.4, not 0.9
-        const arrowsOpacity = clamp((1 - eased) * 1.0, 0, 1.0) // Arrows start at 1.0
+        const basinsOpacity = clamp((1 - eased) * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
+        const inflowOpacity = clamp((1 - eased) * 0.4, 0, 0.4)
+        const arrowsOpacity = clamp((1 - eased) * 1.0, 0, 1.0)
 
-        // Fade out arrows
+        // Fade out arrows (React-controlled)
         setInflowArrowsOpacity(arrowsOpacity)
 
+        // Fade out map layers
         try {
-          if (mapInstance.getLayer("inflow-watersheds")) {
-            mapInstance.setPaintProperty(
-              "inflow-watersheds",
-              "fill-opacity",
-              inflowOpacity,
-            )
+          if (mapInstance.getLayer(ALL_LAYERS.INFLOW_WATERSHEDS)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", inflowOpacity)
           }
-          if (mapInstance.getLayer("basins-outline-layer")) {
-            mapInstance.setPaintProperty(
-              "basins-outline-layer",
-              "line-opacity",
-              basinsOpacity,
-            )
+          if (mapInstance.getLayer(ALL_LAYERS.BASINS_OUTLINE)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.BASINS_OUTLINE, "line-opacity", basinsOpacity)
           }
-          if (mapInstance.getLayer("basins-outline-halo")) {
-            mapInstance.setPaintProperty(
-              "basins-outline-halo",
-              "line-opacity",
-              basinsOpacity,
-            )
+          if (mapInstance.getLayer(ALL_LAYERS.BASINS_HALO)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.BASINS_HALO, "line-opacity", basinsOpacity)
           }
-          if (mapInstance.getLayer("basins-labels")) {
-            mapInstance.setPaintProperty(
-              "basins-labels",
-              "text-opacity",
-              basinsOpacity,
-            )
+          if (mapInstance.getLayer(ALL_LAYERS.BASINS_LABELS)) {
+            mapInstance.setPaintProperty(ALL_LAYERS.BASINS_LABELS, "text-opacity", basinsOpacity)
           }
         } catch (e) {
           console.error("Error setting basin/inflow opacity:", e)
@@ -536,522 +589,131 @@ export function createLearnChoreographyConfig(
       },
     },
 
-    // ==================== PANEL 6: Delta info ====================
+    // ==================== PANEL 7: Delta info ====================
+    // VISIBLE: Rivers visible (from previous panel)
+    // HIDDEN: basins, watersheds, arrows, california-label
     {
       panelId: "delta-info-response",
       position: 5.5,
-      debugLabel: "Panel 6: Delta Info",
-      layers: [],
+      debugLabel: "Panel 7: Delta Info",
+      layers: [
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
+      ],
       onEnter: (direction) => {
+        if (!map.mapRef?.current) return
+        const mapInstance = map.mapRef.current.getMap()
+
+        // Always ensure inflow-watersheds is hidden (prevent flash)
+        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
+
         if (direction === "up") {
-          // When scrolling up from Water Distribution, fade out Central Valley and show rivers
-          if (map.mapRef?.current) {
-            try {
-              const mapInstance = map.mapRef.current.getMap()
-
-              // Fade out Central Valley label and polygon
-              const duration = ANIMATION_DURATION.CAMERA
-              const startTime = performance.now()
-
-              const animateCVFadeOut = (currentTime: number) => {
-                const elapsed = currentTime - startTime
-                const progress = Math.min(elapsed / duration, 1)
-                const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-                const opacity = Math.max(
-                  0,
-                  Math.min(OPACITY.VISIBLE, (1 - eased) * OPACITY.VISIBLE),
-                )
-
-                try {
-                  if (mapInstance.getLayer("central-valley-label")) {
-                    mapInstance.setPaintProperty(
-                      "central-valley-label",
-                      "text-opacity",
-                      opacity,
-                    )
-                  }
-                  if (mapInstance.getLayer("central-valley-polygon")) {
-                    mapInstance.setPaintProperty(
-                      "central-valley-polygon",
-                      "line-opacity",
-                      opacity,
-                    )
-                  }
-                  if (mapInstance.getLayer("central-valley-polygon-halo")) {
-                    mapInstance.setPaintProperty(
-                      "central-valley-polygon-halo",
-                      "line-opacity",
-                      opacity,
-                    )
-                  }
-                } catch {
-                  // Ignore
-                }
-
-                if (progress < 1) {
-                  requestAnimationFrame(animateCVFadeOut)
-                } else {
-                  // Hide after fade completes
-                  try {
-                    if (mapInstance.getLayer("central-valley-label")) {
-                      mapInstance.setLayoutProperty(
-                        "central-valley-label",
-                        "visibility",
-                        "none",
-                      )
-                    }
-                    if (mapInstance.getLayer("central-valley-polygon")) {
-                      mapInstance.setLayoutProperty(
-                        "central-valley-polygon",
-                        "visibility",
-                        "none",
-                      )
-                    }
-                    if (mapInstance.getLayer("central-valley-polygon-halo")) {
-                      mapInstance.setLayoutProperty(
-                        "central-valley-polygon-halo",
-                        "visibility",
-                        "none",
-                      )
-                    }
-                  } catch {
-                    // Ignore
-                  }
-                }
-              }
-
-              requestAnimationFrame(animateCVFadeOut)
-            } catch {
-              // Layers might not exist
-            }
-          }
-
-          // Show rivers again
+          // When scrolling up from later panels, fade out Central Valley and show rivers
+          hideLayers(mapInstance, LAYER_GROUPS.CENTRAL_VALLEY)
           setShowRivers(true)
         }
       },
       onExit: (direction) => {
+        if (!map.mapRef?.current) return
+        const mapInstance = map.mapRef.current.getMap()
+
         if (direction === "down") {
-          // Fade out rivers first
+          // Transitioning to Central Valley panels
           setShowRivers(false)
-          // Zoom back to Central Valley
           zoomToCentralValley(map.mapRef)
 
-          // Fade out and hide water layer ONLY if it's visible
-          if (map.mapRef?.current) {
-            try {
-              const mapInstance = map.mapRef.current.getMap()
-              if (mapInstance.getLayer("water")) {
-                // Check if water layer is actually visible
-                const visibility = mapInstance.getLayoutProperty(
-                  "water",
-                  "visibility",
-                )
+          // Hide water layer if visible
+          hideLayer(mapInstance, ALL_LAYERS.WATER)
 
-                if (visibility === "visible") {
-                  // Animate opacity from current to 0
-                  const duration = ANIMATION_DURATION.CAMERA
-                  const startTime = performance.now()
-
-                  const animateOpacity = (currentTime: number) => {
-                    const elapsed = currentTime - startTime
-                    const progress = Math.min(elapsed / duration, 1)
-                    const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-                    const opacity = Math.max(0, Math.min(1, 1 - eased)) // fade from 1 to 0, clamped
-
-                    try {
-                      mapInstance.setPaintProperty(
-                        "water",
-                        "fill-opacity",
-                        opacity,
-                      )
-                    } catch {
-                      // Layer might not support this property
-                    }
-
-                    if (progress < 1) {
-                      requestAnimationFrame(animateOpacity)
-                    } else {
-                      // Hide after fade completes
-                      try {
-                        mapInstance.setLayoutProperty(
-                          "water",
-                          "visibility",
-                          "none",
-                        )
-                      } catch {
-                        // Ignore
-                      }
-                    }
-                  }
-
-                  requestAnimationFrame(animateOpacity)
-                }
-              }
-            } catch {
-              // Water layer might not exist
-            }
-          }
-
-          // Show Central Valley label and polygon
-          if (map.mapRef?.current) {
-            try {
-              const mapInstance = map.mapRef.current.getMap()
-
-              // Make visible
-              if (mapInstance.getLayer("central-valley-label")) {
-                mapInstance.setLayoutProperty(
-                  "central-valley-label",
-                  "visibility",
-                  "visible",
-                )
-              }
-              if (mapInstance.getLayer("central-valley-polygon")) {
-                mapInstance.setLayoutProperty(
-                  "central-valley-polygon",
-                  "visibility",
-                  "visible",
-                )
-              }
-              if (mapInstance.getLayer("central-valley-polygon-halo")) {
-                mapInstance.setLayoutProperty(
-                  "central-valley-polygon-halo",
-                  "visibility",
-                  "visible",
-                )
-              }
-
-              // Animate opacity from 0 to OPACITY.VISIBLE
-              const duration = ANIMATION_DURATION.CAMERA
-              const startTime = performance.now()
-
-              const animateCVOpacity = (currentTime: number) => {
-                const elapsed = currentTime - startTime
-                const progress = Math.min(elapsed / duration, 1)
-                const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-                const opacity = Math.max(
-                  0,
-                  Math.min(OPACITY.VISIBLE, eased * OPACITY.VISIBLE),
-                )
-
-                try {
-                  mapInstance.setPaintProperty(
-                    "central-valley-label",
-                    "text-opacity",
-                    opacity,
-                  )
-                  mapInstance.setPaintProperty(
-                    "central-valley-polygon",
-                    "line-opacity",
-                    opacity,
-                  )
-                  mapInstance.setPaintProperty(
-                    "central-valley-polygon-halo",
-                    "line-opacity",
-                    opacity,
-                  )
-                } catch {
-                  // Ignore
-                }
-
-                if (progress < 1) {
-                  requestAnimationFrame(animateCVOpacity)
-                }
-              }
-
-              // Start from 0 opacity
-              mapInstance.setPaintProperty(
-                "central-valley-label",
-                "text-opacity",
-                0,
-              )
-              mapInstance.setPaintProperty(
-                "central-valley-polygon",
-                "line-opacity",
-                0,
-              )
-              mapInstance.setPaintProperty(
-                "central-valley-polygon-halo",
-                "line-opacity",
-                0,
-              )
-              requestAnimationFrame(animateCVOpacity)
-            } catch {
-              // Layers might not exist
-            }
-          }
+          // Show Central Valley layers with fade-in
+          LAYER_GROUPS.CENTRAL_VALLEY.forEach(layerId => {
+            showLayer(mapInstance, layerId)
+          })
         } else if (direction === "up") {
-          // When scrolling up to Rivers panel
-          // Zoom back to Central Valley
+          // Scrolling back to Rivers panel - hide CV layers BEFORE reaching rivers
           zoomToCentralValley(map.mapRef)
-
-          // Hide water layer ONLY if it's visible
-          if (map.mapRef?.current) {
-            try {
-              const mapInstance = map.mapRef.current.getMap()
-              if (mapInstance.getLayer("water")) {
-                const visibility = mapInstance.getLayoutProperty(
-                  "water",
-                  "visibility",
-                )
-                if (visibility === "visible") {
-                  // Hide water layer immediately
-                  mapInstance.setLayoutProperty("water", "visibility", "none")
-                  mapInstance.setPaintProperty("water", "fill-opacity", 0)
-                }
-              }
-            } catch {
-              // Ignore
-            }
-          }
+          hideLayersImmediate(mapInstance, [ALL_LAYERS.WATER])
+          
+          // Immediately hide Central Valley layers so they're gone before rivers
+          hideLayersImmediate(mapInstance, [...LAYER_GROUPS.CENTRAL_VALLEY])
         }
       },
     },
 
-    // ==================== PANEL 6.5: Water distribution ====================
+    // ==================== PANEL 8: Water distribution ====================
+    // VISIBLE: central-valley-polygon-halo, central-valley-polygon, central-valley-label
+    // HIDDEN: california-label, basins, inflow-watersheds, rivers
     {
       panelId: "water-distribution-call",
       position: 6,
-      debugLabel: "Panel 6.5: Water Distribution",
+      debugLabel: "Panel 8: Water Distribution",
       layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
+        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Immediately hide inflow-watersheds to prevent brief reappearance
-        if (map.mapRef?.current) {
-          const localMap = map.mapRef.current
-          try {
-            localMap.setPaintProperty("inflow-watersheds", "fill-opacity", 0)
-            localMap.setLayoutProperty("inflow-watersheds", "visibility", "none")
-          } catch {
-            // Layer might not exist
-          }
-        }
+        if (!map.mapRef?.current) return
+        const mapInstance = map.mapRef.current.getMap()
 
-        // Hide basins when entering this panel
+        // Hide everything that shouldn't be visible
+        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
+        if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
+        setShowRivers(false)
+
+        // Show Central Valley layers
+        LAYER_GROUPS.CENTRAL_VALLEY.forEach(layerId => {
+          showLayer(mapInstance, layerId)
+        })
+      },
+      onExit: (direction) => {
+        if (direction === "up") {
+          // Scrolling up toward rivers - hide CV layers immediately
+          if (!map.mapRef?.current) return
+          const mapInstance = map.mapRef.current.getMap()
+          hideLayersImmediate(mapInstance, [...LAYER_GROUPS.CENTRAL_VALLEY])
+        }
       },
     },
 
-    // ==================== PANEL 7: CalSim model ====================
-    {
-      panelId: "calsim-detailed-response",
-      position: 7,
-      debugLabel: "Panel 7: CalSim Model",
+    // ==================== PANELS 9-14: All show Central Valley ====================
+    // VISIBLE: central-valley-polygon-halo, central-valley-polygon, central-valley-label
+    // HIDDEN: california-label, basins, inflow-watersheds
+    
+    // Common layer config for all remaining panels
+    ...[
+      { panelId: "calsim-detailed-response", position: 7, debugLabel: "Panel 9: CalSim Model" },
+      { panelId: "coeqwal-call", position: 8, debugLabel: "Panel 10: COEQWAL" },
+      { panelId: "public-data-call", position: 9, debugLabel: "Panel 11: Public Data" },
+      { panelId: "scenario-explanation-call", position: 10, debugLabel: "Panel 12: Scenario Explanation" },
+      { panelId: "scenario-scroll-track", position: 11, debugLabel: "Panel 13: Baseline Scenario" },
+      { panelId: "scenario-buffer", position: 12, debugLabel: "Panel 14: Scenario Buffer" },
+    ].map(panel => ({
+      ...panel,
       layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
+        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none" as const, textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible" as const, textOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible" as const, lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible" as const, lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none" as const, fillOpacity: OPACITY.HIDDEN },
       ],
-    },
+    })),
 
-    // ==================== PANEL 8: COEQWAL project ====================
-    {
-      panelId: "coeqwal-call",
-      position: 8,
-      debugLabel: "Panel 8: COEQWAL",
-      layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-      ],
-    },
-
-    // ==================== PANEL 9: Public data availability ====================
-    {
-      panelId: "public-data-call",
-      position: 9,
-      debugLabel: "Panel 9: Public Data",
-      layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-      ],
-    },
-
-    // ==================== PANEL 10: Scenario explanation ====================
-    {
-      panelId: "scenario-explanation-call",
-      position: 10,
-      debugLabel: "Panel 10: Scenario Explanation",
-      layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-      ],
-    },
-
-    // ==================== PANEL 11: Baseline scenario cards ====================
-    {
-      panelId: "scenario-scroll-track",
-      position: 11,
-      debugLabel: "Panel 11: Baseline Scenario",
-      layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-      ],
-    },
-
-    // ==================== PANEL 12: Scenario buffer ====================
-    {
-      panelId: "scenario-buffer",
-      position: 12,
-      debugLabel: "Panel 12: Scenario Buffer",
-      layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-      ],
-    },
-
-    // ==================== PANEL 13: Learn more container ====================
+    // ==================== PANEL 15: Learn more container ====================
+    // VISIBLE: central-valley-polygon-halo, central-valley-polygon, central-valley-label
+    // HIDDEN: california-label, inflow-watersheds
     {
       panelId: "learnMoreContainer",
       position: 13,
-      debugLabel: "Panel 13: Learn more",
+      debugLabel: "Panel 15: Learn more",
       layers: [
-        {
-          layerId: "california-label",
-          visibility: "none",
-          textOpacity: OPACITY.HIDDEN,
-        },
-        {
-          layerId: "central-valley-label",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
-        {
-          layerId: "central-valley-polygon-halo",
-          visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE,
-        },
+        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
     },
   ]
