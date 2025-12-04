@@ -27,10 +27,7 @@ import { centralValleyBasins } from "@repo/data"
 import { useCalSimToggle } from "./CalSimContext"
 import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
 import { createLearnChoreographyConfig } from "../config/learnSectionChoreography"
-import {
-  STICKY_HEIGHTS,
-  ENTRANCE_RAMPS,
-} from "../constants/scrollChoreographyConstants"
+import { STICKY_HEIGHTS } from "../constants/scrollChoreographyConstants"
 import { useScroll, useTransform } from "@repo/motion"
 
 export default function MapOverlayPanels() {
@@ -167,8 +164,8 @@ export default function MapOverlayPanels() {
         })
       },
       {
-        threshold: 0.1,
-        rootMargin: "0px",
+        threshold: 0.5, // Trigger when 50% of map is visible
+        rootMargin: "0px 0px -200px 0px", // Delay trigger until well into viewport
       },
     )
 
@@ -187,8 +184,6 @@ export default function MapOverlayPanels() {
         zIndex: (theme) => theme.zIndex.content,
         pointerEvents: "none",
         marginTop: "-100vh",
-        paddingTop: ENTRANCE_RAMPS.FIRST_PANEL,
-        paddingBottom: "40vh",
       }}
     >
       {/* ==================== PANEL 1: California overview ==================== */}

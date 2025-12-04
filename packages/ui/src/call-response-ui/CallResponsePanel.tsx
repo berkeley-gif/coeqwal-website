@@ -21,16 +21,16 @@ export interface CallResponsePanelProps {
   sx?: SxProps<Theme>
   /** Disable the highlight effect (useful when using custom backgrounds) */
   disableHighlight?: boolean
-  /** Enable two-stage animation: fade in first, then ease to center */
-  twoStageAnimation?: boolean
 }
 
 /**
- * CallResponsePanel, a conversational UI panel
+ * CallResponsePanel - A conversational UI panel
  *
  * Used to create left-right conversational flows where:
  * - 'call' variant panels appear on the left (questions/statements)
  * - 'response' variant panels appear on the right (answers/explanations)
+ *
+ * Animation: Panels slide up from 100vh below with opacity fade
  */
 export function CallResponsePanel({
   id,
@@ -41,7 +41,6 @@ export function CallResponsePanel({
   delay = 0,
   sx = {},
   disableHighlight = false,
-  twoStageAnimation = false,
 }: CallResponsePanelProps) {
   return (
     <Box
@@ -53,39 +52,19 @@ export function CallResponsePanel({
         alignItems: "center",
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        px: { xs: 3, sm: 4, md: 6 }, // Responsive horizontal padding
+        px: { xs: 3, sm: 4, md: 6 },
       }}
     >
       <motion.div
-        initial={{
-          marginTop: twoStageAnimation ? "60vh" : "100vh",
-          opacity: 1,
+        initial={{ marginTop: "100vh" }}
+        animate={{ marginTop: isVisible ? 0 : "100vh" }}
+        transition={{
+          type: "spring",
+          stiffness: 40,
+          damping: 30,
+          duration: 1.8,
+          ...(delay ? { delay } : {}),
         }}
-        animate={{
-          marginTop: isVisible ? 0 : twoStageAnimation ? "60vh" : "100vh",
-          opacity: 1, // Always visible, no fade
-        }}
-        transition={
-          twoStageAnimation
-            ? {
-                // Two-stage: appear at 60vh down, then ease to center
-                marginTop: {
-                  type: "spring",
-                  stiffness: 40,
-                  damping: 30,
-                  duration: 1.8,
-                  delay: delay || 0,
-                },
-              }
-            : {
-                // Standard animation: slide up from bottom
-                type: "spring",
-                stiffness: 40,
-                damping: 30,
-                duration: 1.8,
-                ...(delay ? { delay } : {}),
-              }
-        }
         style={{
           width: "100%",
           display: "flex",
