@@ -164,7 +164,7 @@ export default function VideoHero({
           right: 0,
           bottom: 0,
           minHeight: "auto",
-          maxWidth: "45vw",
+          maxWidth: "40vw",
           background: theme.palette.blue.darkest,
           padding: 85,
         }}
@@ -180,21 +180,10 @@ export default function VideoHero({
           <Typography
             sx={{
               fontSize: { md: "1.1rem", lg: "1.2rem", xl: "1.5rem" },
-              width: { lg: "45%", xl: "40%" },
             }}
             variant="body1"
           >
             {t("homePanel.content")}
-          </Typography>
-          <Typography
-            component="div"
-            sx={{
-              fontSize: { md: "1rem", lg: "1.1rem", xl: "1.3rem" },
-              width: { lg: "55%", xl: "60%" },
-            }}
-            variant="body1"
-          >
-            {formatHeroText(t("homePanel.callToAction"))}
           </Typography>
         </div>
       </div>
