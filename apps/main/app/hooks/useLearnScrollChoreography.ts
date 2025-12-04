@@ -114,15 +114,20 @@ export function useLearnScrollChoreography(
       (a, b) => a.position - b.position,
     )
 
-    // Initialize inflow-watersheds to hidden on load (it's defined in Mapbox style with default opacity)
-    // This prevents the brief flash when the layer loads before choreography takes control
+    // Initialize layers that should start hidden (defined in Mapbox style with default opacity)
+    // This prevents the brief flash when layers load before choreography takes control
     try {
       if (hasLayer("inflow-watersheds")) {
         setPaintProperty("inflow-watersheds", "fill-opacity", 0)
         opacityStateRef.current["inflow-watersheds"] = { "fill-opacity": 0 }
       }
+      if (hasLayer("water")) {
+        setPaintProperty("water", "fill-opacity", 0)
+        setLayoutProperty("water", "visibility", "none")
+        opacityStateRef.current["water"] = { "fill-opacity": 0 }
+      }
     } catch {
-      // Layer may not exist yet, that's fine
+      // Layers may not exist yet, that's fine
     }
 
     // Small helper: animate opacity locally (no getPaintProperty, no .value)

@@ -87,17 +87,17 @@ const ALL_LAYERS = {
 const LAYER_GROUPS = {
   // Panel 1: Only California label
   CALIFORNIA: [ALL_LAYERS.CALIFORNIA_LABEL],
-  
+
   // Panel 2: Central Valley focus
   CENTRAL_VALLEY: [
     ALL_LAYERS.CV_POLYGON_HALO,
     ALL_LAYERS.CV_POLYGON,
     ALL_LAYERS.CV_LABEL,
   ],
-  
+
   // Panels 3-5: Basins (managed via React component toggleBasins)
   // inflow-watersheds added in Panel 4+
-  
+
   // Rest of panels: Back to Central Valley
 } as const
 
@@ -108,12 +108,15 @@ type MapInstance = mapboxgl.Map
 /**
  * Immediately hide layers (no animation)
  */
-function hideLayersImmediate(mapInstance: MapInstance, layerIds: readonly string[]): void {
-  layerIds.forEach(id => {
+function hideLayersImmediate(
+  mapInstance: MapInstance,
+  layerIds: readonly string[],
+): void {
+  layerIds.forEach((id) => {
     try {
       const layer = mapInstance.getLayer(id)
       if (!layer) return
-      
+
       const layerType = layer.type
       if (layerType === "symbol") {
         mapInstance.setPaintProperty(id, "text-opacity", 0)
@@ -163,10 +166,26 @@ export function createLearnChoreographyConfig(
       position: 0,
       debugLabel: "Panel 1: California",
       layers: [
-        { layerId: ALL_LAYERS.CALIFORNIA_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        {
+          layerId: ALL_LAYERS.CALIFORNIA_LABEL,
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
         // Note: inflow-watersheds not included - it should stay hidden, no animation needed
       ],
       onEnter: (direction) => {
@@ -179,8 +198,16 @@ export function createLearnChoreographyConfig(
         if (direction === "up" && map.mapRef?.current) {
           const mapInstance = map.mapRef.current.getMap()
           if (mapInstance?.getLayer(ALL_LAYERS.CALIFORNIA_LABEL)) {
-            mapInstance.setLayoutProperty(ALL_LAYERS.CALIFORNIA_LABEL, "visibility", "visible")
-            mapInstance.setPaintProperty(ALL_LAYERS.CALIFORNIA_LABEL, "text-opacity", OPACITY.VISIBLE)
+            mapInstance.setLayoutProperty(
+              ALL_LAYERS.CALIFORNIA_LABEL,
+              "visibility",
+              "visible",
+            )
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.CALIFORNIA_LABEL,
+              "text-opacity",
+              OPACITY.VISIBLE,
+            )
           }
         }
       },
@@ -195,9 +222,24 @@ export function createLearnChoreographyConfig(
       debugLabel: "Panel 2: Central Valley",
       layers: [
         // california-label handled in onEnter/onExit for reliable scroll-up behavior
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE, textAllowOverlap: true },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE, lineWidth: 2, lineJoin: "round" },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+          textAllowOverlap: true,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+          lineWidth: 2,
+          lineJoin: "round",
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
         // Note: inflow-watersheds not included - it should stay hidden, no animation needed
       ],
       onEnter: (direction) => {
@@ -205,8 +247,16 @@ export function createLearnChoreographyConfig(
         if (direction === "down" && map.mapRef?.current) {
           const mapInstance = map.mapRef.current.getMap()
           if (mapInstance?.getLayer(ALL_LAYERS.CALIFORNIA_LABEL)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.CALIFORNIA_LABEL, "text-opacity", 0)
-            mapInstance.setLayoutProperty(ALL_LAYERS.CALIFORNIA_LABEL, "visibility", "none")
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.CALIFORNIA_LABEL,
+              "text-opacity",
+              0,
+            )
+            mapInstance.setLayoutProperty(
+              ALL_LAYERS.CALIFORNIA_LABEL,
+              "visibility",
+              "none",
+            )
           }
         }
         // Only handle React-controlled layers here
@@ -222,21 +272,49 @@ export function createLearnChoreographyConfig(
           const mapInstance = map.mapRef.current.getMap()
           if (mapInstance?.getLayer(ALL_LAYERS.CALIFORNIA_LABEL)) {
             // Use opacity 1 for full visibility
-            mapInstance.setLayoutProperty(ALL_LAYERS.CALIFORNIA_LABEL, "visibility", "visible")
-            mapInstance.setPaintProperty(ALL_LAYERS.CALIFORNIA_LABEL, "text-opacity", OPACITY.VISIBLE)
+            mapInstance.setLayoutProperty(
+              ALL_LAYERS.CALIFORNIA_LABEL,
+              "visibility",
+              "visible",
+            )
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.CALIFORNIA_LABEL,
+              "text-opacity",
+              OPACITY.VISIBLE,
+            )
           }
           // Also hide the Central Valley layers
           if (mapInstance?.getLayer(ALL_LAYERS.CV_LABEL)) {
             mapInstance.setPaintProperty(ALL_LAYERS.CV_LABEL, "text-opacity", 0)
-            mapInstance.setLayoutProperty(ALL_LAYERS.CV_LABEL, "visibility", "none")
+            mapInstance.setLayoutProperty(
+              ALL_LAYERS.CV_LABEL,
+              "visibility",
+              "none",
+            )
           }
           if (mapInstance?.getLayer(ALL_LAYERS.CV_POLYGON)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.CV_POLYGON, "line-opacity", 0)
-            mapInstance.setLayoutProperty(ALL_LAYERS.CV_POLYGON, "visibility", "none")
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.CV_POLYGON,
+              "line-opacity",
+              0,
+            )
+            mapInstance.setLayoutProperty(
+              ALL_LAYERS.CV_POLYGON,
+              "visibility",
+              "none",
+            )
           }
           if (mapInstance?.getLayer(ALL_LAYERS.CV_POLYGON_HALO)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.CV_POLYGON_HALO, "line-opacity", 0)
-            mapInstance.setLayoutProperty(ALL_LAYERS.CV_POLYGON_HALO, "visibility", "none")
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.CV_POLYGON_HALO,
+              "line-opacity",
+              0,
+            )
+            mapInstance.setLayoutProperty(
+              ALL_LAYERS.CV_POLYGON_HALO,
+              "visibility",
+              "none",
+            )
           }
         }
       },
@@ -251,9 +329,21 @@ export function createLearnChoreographyConfig(
       debugLabel: "Panel 3: Basins",
       layers: [
         // california-label handled via Panel 2's onEnter/onExit
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
         // Note: inflow-watersheds not included - it will fade in when entering Panel 4
       ],
       onEnter: () => {
@@ -281,7 +371,7 @@ export function createLearnChoreographyConfig(
       onEnter: (direction) => {
         // Ensure basins are visible (React-controlled)
         if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
-        
+
         // Hide arrows (they appear in Panel 4.25)
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
@@ -291,21 +381,37 @@ export function createLearnChoreographyConfig(
 
         if (direction === "down") {
           // Scrolling DOWN: fade in inflow-watersheds
-          mapInstance.setLayoutProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "visibility", "visible")
-          
+          mapInstance.setLayoutProperty(
+            ALL_LAYERS.INFLOW_WATERSHEDS,
+            "visibility",
+            "visible",
+          )
+
           const duration = 1200
           const startTime = performance.now()
           const animate = (now: number) => {
             const progress = Math.min((now - startTime) / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
-            mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", eased * 0.3)
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.INFLOW_WATERSHEDS,
+              "fill-opacity",
+              eased * 0.3,
+            )
             if (progress < 1) requestAnimationFrame(animate)
           }
           requestAnimationFrame(animate)
         } else {
           // Scrolling UP: inflow-watersheds should already be visible, keep it at 0.3
-          mapInstance.setLayoutProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "visibility", "visible")
-          mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", 0.3)
+          mapInstance.setLayoutProperty(
+            ALL_LAYERS.INFLOW_WATERSHEDS,
+            "visibility",
+            "visible",
+          )
+          mapInstance.setPaintProperty(
+            ALL_LAYERS.INFLOW_WATERSHEDS,
+            "fill-opacity",
+            0.3,
+          )
         }
       },
       onExit: (direction) => {
@@ -321,11 +427,19 @@ export function createLearnChoreographyConfig(
             const progress = Math.min((now - startTime) / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
             const opacity = 0.3 * (1 - eased)
-            mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", opacity)
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.INFLOW_WATERSHEDS,
+              "fill-opacity",
+              opacity,
+            )
             if (progress < 1) {
               requestAnimationFrame(animate)
             } else {
-              mapInstance.setLayoutProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "visibility", "none")
+              mapInstance.setLayoutProperty(
+                ALL_LAYERS.INFLOW_WATERSHEDS,
+                "visibility",
+                "none",
+              )
             }
           }
           requestAnimationFrame(animate)
@@ -364,7 +478,11 @@ export function createLearnChoreographyConfig(
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-            const newOpacity = clamp(startOpacity + eased * (1 - startOpacity), 0, 1)
+            const newOpacity = clamp(
+              startOpacity + eased * (1 - startOpacity),
+              0,
+              1,
+            )
             setInflowArrowsOpacity(newOpacity)
 
             if (progress < 1) {
@@ -379,13 +497,21 @@ export function createLearnChoreographyConfig(
           // Scrolling UP: arrows and inflow-watersheds should already be visible from Panel 5
           // Just ensure they stay visible
           if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
-          
+
           // Ensure inflow-watersheds is visible
           if (map.mapRef?.current) {
             const mapInstance = map.mapRef.current.getMap()
             if (mapInstance?.getLayer(ALL_LAYERS.INFLOW_WATERSHEDS)) {
-              mapInstance.setLayoutProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "visibility", "visible")
-              mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", 0.3)
+              mapInstance.setLayoutProperty(
+                ALL_LAYERS.INFLOW_WATERSHEDS,
+                "visibility",
+                "visible",
+              )
+              mapInstance.setPaintProperty(
+                ALL_LAYERS.INFLOW_WATERSHEDS,
+                "fill-opacity",
+                0.3,
+              )
             }
           }
         }
@@ -449,26 +575,46 @@ export function createLearnChoreographyConfig(
           // Reset ALL basin-related layer opacities (they were set to 0 during Rivers scroll)
           if (map.mapRef?.current) {
             const mapInstance = map.mapRef.current.getMap()
-            
+
             // Inflow-watersheds
             if (mapInstance?.getLayer(ALL_LAYERS.INFLOW_WATERSHEDS)) {
-              mapInstance.setLayoutProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "visibility", "visible")
-              mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", 0.3)
+              mapInstance.setLayoutProperty(
+                ALL_LAYERS.INFLOW_WATERSHEDS,
+                "visibility",
+                "visible",
+              )
+              mapInstance.setPaintProperty(
+                ALL_LAYERS.INFLOW_WATERSHEDS,
+                "fill-opacity",
+                0.3,
+              )
             }
-            
+
             // Basins outline
             if (mapInstance?.getLayer(ALL_LAYERS.BASINS_OUTLINE)) {
-              mapInstance.setPaintProperty(ALL_LAYERS.BASINS_OUTLINE, "line-opacity", OPACITY.VISIBLE)
+              mapInstance.setPaintProperty(
+                ALL_LAYERS.BASINS_OUTLINE,
+                "line-opacity",
+                OPACITY.VISIBLE,
+              )
             }
-            
+
             // Basins halo
             if (mapInstance?.getLayer(ALL_LAYERS.BASINS_HALO)) {
-              mapInstance.setPaintProperty(ALL_LAYERS.BASINS_HALO, "line-opacity", 1)
+              mapInstance.setPaintProperty(
+                ALL_LAYERS.BASINS_HALO,
+                "line-opacity",
+                1,
+              )
             }
-            
+
             // Basins labels
             if (mapInstance?.getLayer(ALL_LAYERS.BASINS_LABELS)) {
-              mapInstance.setPaintProperty(ALL_LAYERS.BASINS_LABELS, "text-opacity", 1)
+              mapInstance.setPaintProperty(
+                ALL_LAYERS.BASINS_LABELS,
+                "text-opacity",
+                1,
+              )
             }
           }
         } else {
@@ -497,16 +643,28 @@ export function createLearnChoreographyConfig(
       position: 4.5,
       debugLabel: "Panel 6: Rivers",
       layers: [
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
       ],
       onEnter: (direction) => {
         // Handle React-controlled layers
         setGeocoderMarker(null)
         setRiversAnimationProgress(0)
         setShowRivers(true)
-        
+
         // Reset progress tracker when entering from above (scrolling down)
         if (direction === "down") {
           riversMaxProgress = 0
@@ -545,7 +703,11 @@ export function createLearnChoreographyConfig(
         const eased = 1 - Math.pow(1 - fadeProgress, 3)
 
         // Calculate opacity for each layer type (only decreases, never increases during scroll)
-        const basinsOpacity = clamp((1 - eased) * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
+        const basinsOpacity = clamp(
+          (1 - eased) * OPACITY.VISIBLE,
+          0,
+          OPACITY.VISIBLE,
+        )
         const inflowOpacity = clamp((1 - eased) * 0.3, 0, 0.3)
         const arrowsOpacity = clamp((1 - eased) * 1.0, 0, 1.0)
 
@@ -555,16 +717,32 @@ export function createLearnChoreographyConfig(
         // Fade out map layers
         try {
           if (mapInstance.getLayer(ALL_LAYERS.INFLOW_WATERSHEDS)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.INFLOW_WATERSHEDS, "fill-opacity", inflowOpacity)
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.INFLOW_WATERSHEDS,
+              "fill-opacity",
+              inflowOpacity,
+            )
           }
           if (mapInstance.getLayer(ALL_LAYERS.BASINS_OUTLINE)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.BASINS_OUTLINE, "line-opacity", basinsOpacity)
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.BASINS_OUTLINE,
+              "line-opacity",
+              basinsOpacity,
+            )
           }
           if (mapInstance.getLayer(ALL_LAYERS.BASINS_HALO)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.BASINS_HALO, "line-opacity", basinsOpacity)
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.BASINS_HALO,
+              "line-opacity",
+              basinsOpacity,
+            )
           }
           if (mapInstance.getLayer(ALL_LAYERS.BASINS_LABELS)) {
-            mapInstance.setPaintProperty(ALL_LAYERS.BASINS_LABELS, "text-opacity", basinsOpacity)
+            mapInstance.setPaintProperty(
+              ALL_LAYERS.BASINS_LABELS,
+              "text-opacity",
+              basinsOpacity,
+            )
           }
         } catch (e) {
           console.error("Error setting basin/inflow opacity:", e)
@@ -581,9 +759,21 @@ export function createLearnChoreographyConfig(
       debugLabel: "Panel 7: Delta Info",
       layers: [
         // Note: inflow-watersheds already hidden by Rivers panel scroll handler
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "none",
+          textOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
       ],
       onEnter: (direction) => {
         // Handle React-controlled layers
@@ -593,35 +783,51 @@ export function createLearnChoreographyConfig(
         // Map layer states handled by layers array above
       },
       onExit: (direction) => {
-        // Fade out water layer when scrolling away (up or down)
+        // Fade out water layer ONLY if user activated it (clicked "View Delta")
+        // Check visibility - if not "visible", don't touch it at all
         if (map.mapRef?.current) {
           const mapInstance = map.mapRef.current.getMap()
           if (mapInstance?.getLayer(ALL_LAYERS.WATER)) {
-            // Animate opacity from current to 0
-            const duration = 800
-            const startTime = performance.now()
+            const visibility = mapInstance.getLayoutProperty(
+              ALL_LAYERS.WATER,
+              "visibility",
+            )
             
-            const animateFadeOut = (currentTime: number) => {
-              const elapsed = currentTime - startTime
-              const progress = Math.min(elapsed / duration, 1)
-              const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-              const opacity = Math.max(0, 1 - eased)
-              
-              try {
-                mapInstance.setPaintProperty(ALL_LAYERS.WATER, "fill-opacity", opacity)
-              } catch {
-                // Layer might not support this property
+            // Only fade out if layer is actually visible
+            if (visibility === "visible") {
+              const duration = 800
+              const startTime = performance.now()
+
+              const animateFadeOut = (currentTime: number) => {
+                const elapsed = currentTime - startTime
+                const progress = Math.min(elapsed / duration, 1)
+                const eased = 1 - Math.pow(1 - progress, 3)
+                const opacity = Math.max(0, 1 - eased)
+
+                try {
+                  mapInstance.setPaintProperty(
+                    ALL_LAYERS.WATER,
+                    "fill-opacity",
+                    opacity,
+                  )
+                } catch {
+                  // Ignore
+                }
+
+                if (progress < 1) {
+                  requestAnimationFrame(animateFadeOut)
+                } else {
+                  mapInstance.setLayoutProperty(
+                    ALL_LAYERS.WATER,
+                    "visibility",
+                    "none",
+                  )
+                }
               }
-              
-              if (progress < 1) {
-                requestAnimationFrame(animateFadeOut)
-              } else {
-                // Hide layer after fade completes
-                mapInstance.setLayoutProperty(ALL_LAYERS.WATER, "visibility", "none")
-              }
+
+              requestAnimationFrame(animateFadeOut)
             }
-            
-            requestAnimationFrame(animateFadeOut)
+            // If not visible, do nothing - don't touch the layer
           }
         }
 
@@ -645,9 +851,21 @@ export function createLearnChoreographyConfig(
       debugLabel: "Panel 8: Water Distribution",
       layers: [
         // california-label handled via Panel 2's onEnter/onExit
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
         // Note: inflow-watersheds already hidden by Rivers panel scroll handler
       ],
       onEnter: () => {
@@ -670,22 +888,54 @@ export function createLearnChoreographyConfig(
     // ==================== PANELS 9-14: All show Central Valley ====================
     // VISIBLE: central-valley-polygon-halo, central-valley-polygon, central-valley-label
     // HIDDEN: california-label, basins, inflow-watersheds (already hidden)
-    
+
     // Common layer config for all remaining panels
     ...[
-      { panelId: "calsim-detailed-response", position: 7, debugLabel: "Panel 9: CalSim Model" },
+      {
+        panelId: "calsim-detailed-response",
+        position: 7,
+        debugLabel: "Panel 9: CalSim Model",
+      },
       { panelId: "coeqwal-call", position: 8, debugLabel: "Panel 10: COEQWAL" },
-      { panelId: "public-data-call", position: 9, debugLabel: "Panel 11: Public Data" },
-      { panelId: "scenario-explanation-call", position: 10, debugLabel: "Panel 12: Scenario Explanation" },
-      { panelId: "scenario-scroll-track", position: 11, debugLabel: "Panel 13: Baseline Scenario" },
-      { panelId: "scenario-buffer", position: 12, debugLabel: "Panel 14: Scenario Buffer" },
-    ].map(panel => ({
+      {
+        panelId: "public-data-call",
+        position: 9,
+        debugLabel: "Panel 11: Public Data",
+      },
+      {
+        panelId: "scenario-explanation-call",
+        position: 10,
+        debugLabel: "Panel 12: Scenario Explanation",
+      },
+      {
+        panelId: "scenario-scroll-track",
+        position: 11,
+        debugLabel: "Panel 13: Baseline Scenario",
+      },
+      {
+        panelId: "scenario-buffer",
+        position: 12,
+        debugLabel: "Panel 14: Scenario Buffer",
+      },
+    ].map((panel) => ({
       ...panel,
       layers: [
         // california-label handled via Panel 2's onEnter/onExit
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible" as const, textOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible" as const, lineOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible" as const, lineOpacity: OPACITY.VISIBLE },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "visible" as const,
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "visible" as const,
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "visible" as const,
+          lineOpacity: OPACITY.VISIBLE,
+        },
         // Note: inflow-watersheds already hidden by Rivers panel scroll handler
       ],
     })),
@@ -699,9 +949,21 @@ export function createLearnChoreographyConfig(
       debugLabel: "Panel 15: Learn more",
       layers: [
         // california-label handled via Panel 2's onEnter/onExit
-        { layerId: ALL_LAYERS.CV_LABEL, visibility: "visible", textOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
-        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "visible", lineOpacity: OPACITY.VISIBLE },
+        {
+          layerId: ALL_LAYERS.CV_LABEL,
+          visibility: "visible",
+          textOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: ALL_LAYERS.CV_POLYGON_HALO,
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
         // Note: inflow-watersheds already hidden by Rivers panel scroll handler
       ],
     },
