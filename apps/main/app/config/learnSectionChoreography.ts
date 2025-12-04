@@ -107,6 +107,11 @@ export function createLearnChoreographyConfig(
           visibility: "none",
           lineOpacity: OPACITY.HIDDEN,
         },
+        {
+          layerId: "central-valley-polygon-halo",
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
       ],
     },
 
@@ -134,6 +139,11 @@ export function createLearnChoreographyConfig(
           lineWidth: 2,
           lineJoin: "round",
         },
+        {
+          layerId: "central-valley-polygon-halo",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
       ],
       onEnter: () => {
         // Hide basins when returning to Panel 2 from Panel 3
@@ -156,6 +166,7 @@ export function createLearnChoreographyConfig(
         try {
           localMap.setPaintProperty("central-valley-label", "text-opacity", 0)
           localMap.setPaintProperty("central-valley-polygon", "line-opacity", 0)
+          localMap.setPaintProperty("central-valley-polygon-halo", "line-opacity", 0)
         } catch {
           // Layer might not be ready
         }
@@ -174,6 +185,11 @@ export function createLearnChoreographyConfig(
             )
             localMap.setPaintProperty(
               "central-valley-polygon",
+              "line-opacity",
+              eased,
+            )
+            localMap.setPaintProperty(
+              "central-valley-polygon-halo",
               "line-opacity",
               eased,
             )
@@ -218,6 +234,11 @@ export function createLearnChoreographyConfig(
         },
         {
           layerId: "central-valley-polygon",
+          visibility: "none",
+          lineOpacity: OPACITY.HIDDEN,
+        },
+        {
+          layerId: "central-valley-polygon-halo",
           visibility: "none",
           lineOpacity: OPACITY.HIDDEN,
         },
@@ -427,6 +448,13 @@ export function createLearnChoreographyConfig(
               basinsOpacity,
             )
           }
+          if (mapInstance.getLayer("basins-outline-halo")) {
+            mapInstance.setPaintProperty(
+              "basins-outline-halo",
+              "line-opacity",
+              basinsOpacity,
+            )
+          }
           if (mapInstance.getLayer("basins-labels")) {
             mapInstance.setPaintProperty(
               "basins-labels",
@@ -481,6 +509,13 @@ export function createLearnChoreographyConfig(
                       opacity,
                     )
                   }
+                  if (mapInstance.getLayer("central-valley-polygon-halo")) {
+                    mapInstance.setPaintProperty(
+                      "central-valley-polygon-halo",
+                      "line-opacity",
+                      opacity,
+                    )
+                  }
                 } catch {
                   // Ignore
                 }
@@ -500,6 +535,13 @@ export function createLearnChoreographyConfig(
                     if (mapInstance.getLayer("central-valley-polygon")) {
                       mapInstance.setLayoutProperty(
                         "central-valley-polygon",
+                        "visibility",
+                        "none",
+                      )
+                    }
+                    if (mapInstance.getLayer("central-valley-polygon-halo")) {
+                      mapInstance.setLayoutProperty(
+                        "central-valley-polygon-halo",
                         "visibility",
                         "none",
                       )
@@ -603,6 +645,13 @@ export function createLearnChoreographyConfig(
                   "visible",
                 )
               }
+              if (mapInstance.getLayer("central-valley-polygon-halo")) {
+                mapInstance.setLayoutProperty(
+                  "central-valley-polygon-halo",
+                  "visibility",
+                  "visible",
+                )
+              }
 
               // Animate opacity from 0 to OPACITY.VISIBLE
               const duration = ANIMATION_DURATION.CAMERA
@@ -628,6 +677,11 @@ export function createLearnChoreographyConfig(
                     "line-opacity",
                     opacity,
                   )
+                  mapInstance.setPaintProperty(
+                    "central-valley-polygon-halo",
+                    "line-opacity",
+                    opacity,
+                  )
                 } catch {
                   // Ignore
                 }
@@ -645,6 +699,11 @@ export function createLearnChoreographyConfig(
               )
               mapInstance.setPaintProperty(
                 "central-valley-polygon",
+                "line-opacity",
+                0,
+              )
+              mapInstance.setPaintProperty(
+                "central-valley-polygon-halo",
                 "line-opacity",
                 0,
               )
@@ -703,6 +762,11 @@ export function createLearnChoreographyConfig(
           lineOpacity: OPACITY.VISIBLE,
         },
         {
+          layerId: "central-valley-polygon-halo",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
           layerId: "inflow-watersheds",
           visibility: "none",
           fillOpacity: OPACITY.HIDDEN,
@@ -735,6 +799,11 @@ export function createLearnChoreographyConfig(
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
+        {
+          layerId: "central-valley-polygon-halo",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
       ],
     },
 
@@ -756,6 +825,11 @@ export function createLearnChoreographyConfig(
         },
         {
           layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon-halo",
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
@@ -783,6 +857,11 @@ export function createLearnChoreographyConfig(
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
+        {
+          layerId: "central-valley-polygon-halo",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
       ],
     },
 
@@ -804,6 +883,11 @@ export function createLearnChoreographyConfig(
         },
         {
           layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon-halo",
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
@@ -831,6 +915,11 @@ export function createLearnChoreographyConfig(
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
+        {
+          layerId: "central-valley-polygon-halo",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
       ],
     },
 
@@ -855,6 +944,11 @@ export function createLearnChoreographyConfig(
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
+        {
+          layerId: "central-valley-polygon-halo",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
       ],
     },
 
@@ -876,6 +970,11 @@ export function createLearnChoreographyConfig(
         },
         {
           layerId: "central-valley-polygon",
+          visibility: "visible",
+          lineOpacity: OPACITY.VISIBLE,
+        },
+        {
+          layerId: "central-valley-polygon-halo",
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
