@@ -113,6 +113,67 @@ export function createLearnChoreographyConfig(
           lineOpacity: OPACITY.HIDDEN,
         },
       ],
+      onEnter: () => {
+        // Hide basins if visible
+        if (showBasinsRef.current) toggleBasinsOnRef.current?.()
+
+        // Smooth fade-in for California label, fade-out for Central Valley layers
+        if (!map.mapRef?.current) return
+
+        const localMap = map.mapRef.current
+
+        // Cancel any existing animation
+        if (labelFadeAnimationRef.current !== null) {
+          cancelAnimationFrame(labelFadeAnimationRef.current)
+          labelFadeAnimationRef.current = null
+        }
+
+        const startTime = performance.now()
+
+        // Ensure california-label is visible and starts at 0 opacity
+        try {
+          localMap.setLayoutProperty("california-label", "visibility", "visible")
+          localMap.setPaintProperty("california-label", "text-opacity", 0)
+        } catch {
+          // Layer might not be ready
+        }
+
+        const animate = (currentTime: number) => {
+          const elapsed = currentTime - startTime
+          const progress = Math.min(elapsed / ANIMATION_DURATION.FADE, 1)
+          const rawEased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+          const fadeInOpacity = clamp(rawEased * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
+          const fadeOutOpacity = clamp((1 - rawEased) * OPACITY.VISIBLE, 0, OPACITY.VISIBLE)
+
+          try {
+            // Fade in california-label
+            localMap.setPaintProperty("california-label", "text-opacity", fadeInOpacity)
+            // Fade out central valley layers
+            localMap.setPaintProperty("central-valley-label", "text-opacity", fadeOutOpacity)
+            localMap.setPaintProperty("central-valley-polygon", "line-opacity", fadeOutOpacity)
+            localMap.setPaintProperty("central-valley-polygon-halo", "line-opacity", fadeOutOpacity)
+          } catch {
+            labelFadeAnimationRef.current = null
+            return
+          }
+
+          if (progress < 1) {
+            labelFadeAnimationRef.current = requestAnimationFrame(animate)
+          } else {
+            // Hide central valley layers after fade completes
+            try {
+              localMap.setLayoutProperty("central-valley-label", "visibility", "none")
+              localMap.setLayoutProperty("central-valley-polygon", "visibility", "none")
+              localMap.setLayoutProperty("central-valley-polygon-halo", "visibility", "none")
+            } catch {
+              // Ignore
+            }
+            labelFadeAnimationRef.current = null
+          }
+        }
+
+        labelFadeAnimationRef.current = requestAnimationFrame(animate)
+      },
     },
 
     // ==================== PANEL 2: Central Valley focus ====================
@@ -129,13 +190,13 @@ export function createLearnChoreographyConfig(
         {
           layerId: "central-valley-label",
           visibility: "visible",
-          textOpacity: OPACITY.VISIBLE, // Set to visible so it shows on initial load
+          textOpacity: OPACITY.VISIBLE,
           textAllowOverlap: true,
         },
         {
           layerId: "central-valley-polygon",
           visibility: "visible",
-          lineOpacity: OPACITY.VISIBLE, // Set to visible so it shows on initial load
+          lineOpacity: OPACITY.VISIBLE,
           lineWidth: 2,
           lineJoin: "round",
         },
@@ -242,15 +303,27 @@ export function createLearnChoreographyConfig(
           visibility: "none",
           lineOpacity: OPACITY.HIDDEN,
         },
-        {
-          layerId: "inflow-watersheds",
-          visibility: "none",
-          fillOpacity: OPACITY.HIDDEN,
-        },
       ],
       onEnter: () => {
-        // Show basins - they stay visible through Panel 5
-        if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
+        // Immediately hide CV polygon layers to avoid overlap with basins
+        if (map.mapRef?.current) {
+          const localMap = map.mapRef.current
+          try {
+            localMap.setPaintProperty("central-valley-label", "text-opacity", 0)
+            localMap.setPaintProperty("central-valley-polygon", "line-opacity", 0)
+            localMap.setPaintProperty("central-valley-polygon-halo", "line-opacity", 0)
+            localMap.setLayoutProperty("central-valley-label", "visibility", "none")
+            localMap.setLayoutProperty("central-valley-polygon", "visibility", "none")
+            localMap.setLayoutProperty("central-valley-polygon-halo", "visibility", "none")
+          } catch {
+            // Layers might not exist
+          }
+        }
+
+        // Delay showing basins to ensure CV layers are fully hidden
+        setTimeout(() => {
+          if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
+        }, 300)
       },
     },
 
@@ -261,18 +334,13 @@ export function createLearnChoreographyConfig(
       debugLabel: "Panel 4: Watersheds",
       layers: [
         {
-          layerId: "basins-labels",
-          visibility: "visible",
-          textOpacity: OPACITY.VISIBLE,
-        },
-        {
           layerId: "inflow-watersheds",
           visibility: "visible",
           fillOpacity: 0.4, // Visible with semi-transparency
         },
       ],
       onEnter: () => {
-        // Ensure basins are visible
+        // Ensure basins are visible (labels already shown via toggleBasins)
         if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
       },
     },
@@ -766,13 +834,19 @@ export function createLearnChoreographyConfig(
           visibility: "visible",
           lineOpacity: OPACITY.VISIBLE,
         },
-        {
-          layerId: "inflow-watersheds",
-          visibility: "none",
-          fillOpacity: OPACITY.HIDDEN,
-        },
       ],
       onEnter: () => {
+        // Immediately hide inflow-watersheds to prevent brief reappearance
+        if (map.mapRef?.current) {
+          const localMap = map.mapRef.current
+          try {
+            localMap.setPaintProperty("inflow-watersheds", "fill-opacity", 0)
+            localMap.setLayoutProperty("inflow-watersheds", "visibility", "none")
+          } catch {
+            // Layer might not exist
+          }
+        }
+
         // Hide basins when entering this panel
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
       },
