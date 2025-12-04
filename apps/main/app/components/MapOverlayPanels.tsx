@@ -250,7 +250,7 @@ export default function MapOverlayPanels() {
         </Typography>
       </CallResponsePanel>
 
-      {/* Hidden trigger for inflow arrows (positioned early in Panel 4's visible area) */}
+      {/* Hidden trigger for inflow arrows (positioned after basins have time to fill) */}
       <Box
         id="arrows-trigger"
         sx={{
@@ -258,7 +258,7 @@ export default function MapOverlayPanels() {
           width: "100%",
           opacity: 0,
           pointerEvents: "none",
-          marginTop: "-90vh", // Pull up significantly to trigger earlier
+          marginTop: "-40vh", // Delay arrows until after basins fill
         }}
         aria-hidden="true"
       />
