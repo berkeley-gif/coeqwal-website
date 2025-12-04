@@ -205,7 +205,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mt: "100vh", mb: "100vh" }}
+        sx={{ mt: "50vh", mb: "50vh" }}
       >
         <Typography variant="body1">
           The{" "}
@@ -224,7 +224,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           The Central Valley lies across three water{" "}
@@ -241,7 +241,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           Each basin collects the rain and snowmelt that flows down from
@@ -270,7 +270,7 @@ export default function MapOverlayPanels() {
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{ mt: "40vh", mb: "100vh" }}
+        sx={{ mt: "20vh", mb: "50vh" }}
       >
         <GeocodingPanel
           basinsData={
@@ -351,7 +351,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           Water is diverted and distributed from multiple points along this
@@ -368,7 +368,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           To do this water planning and accounting, the federal{" "}
@@ -396,7 +396,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           The{" "}
@@ -422,7 +422,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
           We are making this data available to the public so that communities
@@ -437,7 +437,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mb: "50vh" }}
       >
         <Typography variant="body1" sx={{ mb: 3 }}>
           Each water management scenario on this site depicts:
