@@ -101,129 +101,9 @@ const LAYER_GROUPS = {
   // Rest of panels: Back to Central Valley
 } as const
 
-/** Layers to hide when showing California (Panel 1) */
-const HIDE_FOR_CALIFORNIA = [
-  ALL_LAYERS.CV_POLYGON_HALO,
-  ALL_LAYERS.CV_POLYGON,
-  ALL_LAYERS.CV_LABEL,
-  ALL_LAYERS.INFLOW_WATERSHEDS,
-]
-
-/** Layers to hide when showing Basins (Panels 3-5) */
-const HIDE_FOR_BASINS = [
-  ALL_LAYERS.CALIFORNIA_LABEL,
-  ALL_LAYERS.CV_POLYGON_HALO,
-  ALL_LAYERS.CV_POLYGON,
-  ALL_LAYERS.CV_LABEL,
-]
-
 // ==================== TRANSITION HELPERS ====================
 
 type MapInstance = mapboxgl.Map
-
-/**
- * Fade a layer's opacity from current to target
- */
-function fadeLayer(
-  mapInstance: MapInstance,
-  layerId: string,
-  targetOpacity: number,
-  duration: number = ANIMATION_DURATION.FADE,
-  onComplete?: () => void,
-): number {
-  const startTime = performance.now()
-  let startOpacity = 0
-
-  // Try to get current opacity
-  try {
-    const layer = mapInstance.getLayer(layerId)
-    if (!layer) return 0
-    
-    // Determine property based on layer type
-    const layerType = layer.type
-    const opacityProp = layerType === "symbol" ? "text-opacity" 
-      : layerType === "fill" ? "fill-opacity" 
-      : "line-opacity"
-    
-    const current = mapInstance.getPaintProperty(layerId, opacityProp)
-    startOpacity = typeof current === "number" ? current : (targetOpacity > 0 ? 0 : 1)
-  } catch {
-    startOpacity = targetOpacity > 0 ? 0 : 1
-  }
-
-  const delta = targetOpacity - startOpacity
-
-  const animate = (currentTime: number): number => {
-    const elapsed = currentTime - startTime
-    const progress = Math.min(elapsed / duration, 1)
-    const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-    const opacity = clamp(startOpacity + delta * eased, 0, 1)
-
-    try {
-      const layer = mapInstance.getLayer(layerId)
-      if (!layer) return 0
-      
-      const layerType = layer.type
-      if (layerType === "symbol") {
-        mapInstance.setPaintProperty(layerId, "text-opacity", opacity)
-      } else if (layerType === "fill") {
-        mapInstance.setPaintProperty(layerId, "fill-opacity", opacity)
-      } else {
-        mapInstance.setPaintProperty(layerId, "line-opacity", opacity)
-      }
-    } catch {
-      return 0
-    }
-
-    if (progress < 1) {
-      return requestAnimationFrame(animate)
-    } else {
-      onComplete?.()
-      return 0
-    }
-  }
-
-  return requestAnimationFrame(animate)
-}
-
-/**
- * Show a layer with fade-in
- */
-function showLayer(
-  mapInstance: MapInstance,
-  layerId: string,
-  targetOpacity: number = OPACITY.VISIBLE,
-): number {
-  try {
-    mapInstance.setLayoutProperty(layerId, "visibility", "visible")
-  } catch {
-    return 0
-  }
-  return fadeLayer(mapInstance, layerId, targetOpacity)
-}
-
-/**
- * Hide a layer with fade-out
- */
-function hideLayer(
-  mapInstance: MapInstance,
-  layerId: string,
-): number {
-  return fadeLayer(mapInstance, layerId, 0, ANIMATION_DURATION.FADE, () => {
-    try {
-      mapInstance.setLayoutProperty(layerId, "visibility", "none")
-    } catch {
-      // Ignore
-    }
-  })
-}
-
-/**
- * Hide multiple layers with fade-out
- */
-function hideLayers(mapInstance: MapInstance, layerIds: readonly string[]): void {
-  layerIds.forEach(id => hideLayer(mapInstance, id))
-}
 
 /**
  * Immediately hide layers (no animation)
@@ -262,7 +142,6 @@ export function createLearnChoreographyConfig(
     showBasinsRef,
     showInflowArrowsRef,
     inflowArrowsOpacityRef,
-    labelFadeAnimationRef,
     arrowFadeAnimationRef,
     toggleBasinsOnRef,
     toggleInflowArrowsOnRef,
@@ -289,25 +168,11 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Hide basins and arrows (React-controlled layers)
+        // Only handle React-controlled layers here
+        // Map layer animations are handled by the layers array above
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
-
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
-        // Cancel any existing animation
-        if (labelFadeAnimationRef.current !== null) {
-          cancelAnimationFrame(labelFadeAnimationRef.current)
-          labelFadeAnimationRef.current = null
-        }
-
-        // Immediately hide inflow-watersheds
-        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
-
-        // Fade in california-label, fade out Central Valley layers
-        showLayer(mapInstance, ALL_LAYERS.CALIFORNIA_LABEL)
-        hideLayers(mapInstance, HIDE_FOR_CALIFORNIA)
+        setShowRivers(false)
       },
     },
 
@@ -326,33 +191,11 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Hide basins and arrows (React-controlled layers)
+        // Only handle React-controlled layers here
+        // Map layer animations are handled by the layers array above
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
-
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
-        // Cancel any existing animation
-        if (labelFadeAnimationRef.current !== null) {
-          cancelAnimationFrame(labelFadeAnimationRef.current)
-          labelFadeAnimationRef.current = null
-        }
-
-        // Immediately hide layers that shouldn't be visible
-        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
-        hideLayer(mapInstance, ALL_LAYERS.CALIFORNIA_LABEL)
-
-        // Show Central Valley layers with fade-in
-        LAYER_GROUPS.CENTRAL_VALLEY.forEach(layerId => {
-          showLayer(mapInstance, layerId)
-        })
-      },
-      onExit: () => {
-        if (labelFadeAnimationRef.current !== null) {
-          cancelAnimationFrame(labelFadeAnimationRef.current)
-          labelFadeAnimationRef.current = null
-        }
+        setShowRivers(false)
       },
     },
 
@@ -371,19 +214,11 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        // Hide arrows (scrolling back up from Panel 4)
+        // Handle React-controlled layers
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
+        setShowRivers(false)
 
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
-        // Immediately hide layers that shouldn't be visible
-        hideLayersImmediate(mapInstance, [
-          ...HIDE_FOR_BASINS,
-          ALL_LAYERS.INFLOW_WATERSHEDS,
-        ])
-
-        // Show basins after CV layers are hidden (delay for clean transition)
+        // Show basins (delay for clean transition after CV layers fade)
         setTimeout(() => {
           if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
         }, 300)
@@ -401,14 +236,9 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "visible", fillOpacity: 0.4 },
       ],
       onEnter: () => {
-        // Ensure basins are visible
+        // Ensure basins are visible (React-controlled)
         if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
-
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
-        // Show inflow-watersheds with fade-in
-        showLayer(mapInstance, ALL_LAYERS.INFLOW_WATERSHEDS, 0.4)
+        // inflow-watersheds animation handled by layers array above
       },
     },
 
@@ -521,19 +351,12 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
         { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
       ],
-      onEnter: (direction) => {
+      onEnter: () => {
+        // Handle React-controlled layers
         setGeocoderMarker(null)
         setRiversAnimationProgress(0)
         setShowRivers(true)
-
-        // When scrolling up from later panels, hide Central Valley layers
-        if (direction === "up") {
-          if (!map.mapRef?.current) return
-          const mapInstance = map.mapRef.current.getMap()
-
-          // Hide Central Valley layers with fade
-          hideLayers(mapInstance, LAYER_GROUPS.CENTRAL_VALLEY)
-        }
+        // CV layers are hidden via the layers array above
       },
       onExit: () => {
         // Keep rivers visible for subsequent panels
@@ -591,50 +414,32 @@ export function createLearnChoreographyConfig(
 
     // ==================== PANEL 7: Delta info ====================
     // VISIBLE: Rivers visible (from previous panel)
-    // HIDDEN: basins, watersheds, arrows, california-label
+    // HIDDEN: basins, watersheds, arrows, california-label, CV layers
     {
       panelId: "delta-info-response",
       position: 5.5,
       debugLabel: "Panel 7: Delta Info",
       layers: [
         { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_LABEL, visibility: "none", textOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON, visibility: "none", lineOpacity: OPACITY.HIDDEN },
+        { layerId: ALL_LAYERS.CV_POLYGON_HALO, visibility: "none", lineOpacity: OPACITY.HIDDEN },
       ],
       onEnter: (direction) => {
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
-        // Always ensure inflow-watersheds is hidden (prevent flash)
-        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
-
+        // Handle React-controlled layers
         if (direction === "up") {
-          // When scrolling up from later panels, fade out Central Valley and show rivers
-          hideLayers(mapInstance, LAYER_GROUPS.CENTRAL_VALLEY)
           setShowRivers(true)
         }
+        // Map layer states handled by layers array above
       },
       onExit: (direction) => {
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
         if (direction === "down") {
-          // Transitioning to Central Valley panels
+          // React-controlled: hide rivers, zoom to CV
           setShowRivers(false)
           zoomToCentralValley(map.mapRef)
-
-          // Hide water layer if visible
-          hideLayer(mapInstance, ALL_LAYERS.WATER)
-
-          // Show Central Valley layers with fade-in
-          LAYER_GROUPS.CENTRAL_VALLEY.forEach(layerId => {
-            showLayer(mapInstance, layerId)
-          })
         } else if (direction === "up") {
-          // Scrolling back to Rivers panel - hide CV layers BEFORE reaching rivers
+          // Zoom back for rivers panel
           zoomToCentralValley(map.mapRef)
-          hideLayersImmediate(mapInstance, [ALL_LAYERS.WATER])
-          
-          // Immediately hide Central Valley layers so they're gone before rivers
-          hideLayersImmediate(mapInstance, [...LAYER_GROUPS.CENTRAL_VALLEY])
         }
       },
     },
@@ -654,23 +459,15 @@ export function createLearnChoreographyConfig(
         { layerId: ALL_LAYERS.INFLOW_WATERSHEDS, visibility: "none", fillOpacity: OPACITY.HIDDEN },
       ],
       onEnter: () => {
-        if (!map.mapRef?.current) return
-        const mapInstance = map.mapRef.current.getMap()
-
-        // Hide everything that shouldn't be visible
-        hideLayersImmediate(mapInstance, [ALL_LAYERS.INFLOW_WATERSHEDS])
+        // Handle React-controlled layers
         if (showBasinsRef.current) toggleBasinsOnRef.current?.()
         if (showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
         setShowRivers(false)
-
-        // Show Central Valley layers
-        LAYER_GROUPS.CENTRAL_VALLEY.forEach(layerId => {
-          showLayer(mapInstance, layerId)
-        })
+        // Map layer states handled by layers array above
       },
       onExit: (direction) => {
+        // When scrolling up, immediately hide CV for clean transition to rivers
         if (direction === "up") {
-          // Scrolling up toward rivers - hide CV layers immediately
           if (!map.mapRef?.current) return
           const mapInstance = map.mapRef.current.getMap()
           hideLayersImmediate(mapInstance, [...LAYER_GROUPS.CENTRAL_VALLEY])
