@@ -205,7 +205,7 @@ export default function MapOverlayPanels() {
         side="left"
         variant="call"
         isVisible={isFirstPanelVisible}
-        sx={{ mb: "100vh" }}
+        sx={{ mt: "100vh", mb: "100vh" }}
       >
         <Typography variant="body1">
           The{" "}
@@ -270,7 +270,7 @@ export default function MapOverlayPanels() {
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{ mb: "100vh" }}
+        sx={{ mt: "40vh", mb: "100vh" }}
       >
         <GeocodingPanel
           basinsData={
@@ -340,7 +340,7 @@ export default function MapOverlayPanels() {
         variant="response"
         isVisible={isFirstPanelVisible}
         disableHighlight
-        sx={{ mt: "80vh", mb: "100vh" }}
+        sx={{ mt: "150vh", mb: "100vh" }}
       >
         <DeltaInfoPanel map={map} />
       </CallResponsePanel>
