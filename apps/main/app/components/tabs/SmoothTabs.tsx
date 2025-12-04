@@ -9,14 +9,13 @@ import { useTabNavigation } from "../../hooks/useTabNavigation"
 import { HEADER_SHRUNK_H } from "../../../../../packages/ui/src/components/navigation/BaseHeader"
 
 export default function SmoothTabs() {
-  const { state, tabsRef, hasEnteredTabsRef } = useTabs()
+  const { state, tabsRef } = useTabs()
   const { activeTab } = state
   const { navigateToTab } = useTabNavigation()
   const theme = useTheme()
 
   const onSelect = (tab: TabKey | undefined) => {
     if (tab && tab !== activeTab) {
-      hasEnteredTabsRef.current = true
       navigateToTab(tab)
     }
   }
