@@ -51,8 +51,8 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         }}
         paint={{
           "text-color": "#ffffff",
-          "text-halo-color": "#3a4574", // theme.palette.blue.darkest
-          "text-halo-width": 1,
+          "text-halo-color": "rgb(61, 41, 41)",
+          "text-halo-width": 2,
           "text-opacity": 1,
         }}
       />
