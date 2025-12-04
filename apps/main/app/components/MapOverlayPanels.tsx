@@ -197,7 +197,7 @@ export default function MapOverlayPanels() {
           Did you know that California has one of the most complex water systems
           in the world?
         </Typography>
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", mt: 2, pl: 16 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", mt: 2, pl: 18 }}>
           <Typography variant="body2" sx={{ fontWeight: 200, fontStyle: "italic", mb: 0.5, color: "rgba(255, 255, 255, 0.8)" }}>
             scroll to learn more
           </Typography>
