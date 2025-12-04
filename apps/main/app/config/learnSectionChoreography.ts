@@ -792,7 +792,7 @@ export function createLearnChoreographyConfig(
               ALL_LAYERS.WATER,
               "visibility",
             )
-            
+
             // Only fade out if layer is actually visible
             if (visibility === "visible") {
               const duration = 800
