@@ -8,23 +8,35 @@ interface BasinsLayerProps {
 }
 
 export default function BasinsLayer({ visible }: BasinsLayerProps) {
-  if (!visible) {
-    return null
-  }
+  const visibility = visible ? "visible" : "none"
 
   return (
     <Source id="basins-source" type="geojson" data={centralValleyBasins}>
       <Layer
         id="basins-layer"
         type="fill"
+        layout={{ visibility }}
         paint={{
           "fill-color": "transparent",
           "fill-opacity": 0,
         }}
       />
+      {/* Halo layer - thicker line underneath */}
+      <Layer
+        id="basins-outline-halo"
+        type="line"
+        layout={{ visibility }}
+        paint={{
+          "line-color": "rgb(61, 41, 41)",
+          "line-width": 3,
+          "line-opacity": 1,
+        }}
+      />
+      {/* Main outline layer on top */}
       <Layer
         id="basins-outline-layer"
         type="line"
+        layout={{ visibility }}
         paint={{
           "line-color": "white",
           "line-width": 2,
@@ -35,6 +47,7 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
         id="basins-labels"
         type="symbol"
         layout={{
+          visibility,
           "text-field": ["get", "name"],
           "text-font": ["Neue Haas Grotesk", "Arial Unicode MS Bold"],
           "text-size": 16,
