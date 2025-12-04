@@ -52,7 +52,7 @@ export function CallResponsePanel({
         alignItems: "center",
         justifyContent: side === "left" ? "flex-start" : "flex-end",
         pointerEvents: "none",
-        px: { xs: 3, sm: 4, md: 6 },
+        px: { xs: 4, sm: 8, md: 12, lg: 16 },
       }}
     >
       <motion.div
