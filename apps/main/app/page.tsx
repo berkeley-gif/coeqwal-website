@@ -3,7 +3,7 @@
 import { Suspense } from "react"
 import { Box } from "@repo/ui/mui"
 import { Header } from "./components/Header"
-import { FloatingGlossary } from "./components/floatingglossary"
+import { FloatingGlossary } from "./components/floatingGlossary"
 import IntroSection from "./sections/IntroSection"
 
 import { TabsProvider } from "./context/Tabs"

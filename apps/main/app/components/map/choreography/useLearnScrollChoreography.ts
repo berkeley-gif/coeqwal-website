@@ -126,6 +126,12 @@ export function useLearnScrollChoreography(
         setLayoutProperty("water", "visibility", "none")
         opacityStateRef.current["water"] = { "fill-opacity": 0 }
       }
+      // california-label: hide initially, Panel 1 will show it when we scroll there
+      if (hasLayer("california-label")) {
+        setPaintProperty("california-label", "text-opacity", 0)
+        setLayoutProperty("california-label", "visibility", "none")
+        opacityStateRef.current["california-label"] = { "text-opacity": 0 }
+      }
     } catch {
       // Layers may not exist yet, that's fine
     }

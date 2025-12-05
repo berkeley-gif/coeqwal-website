@@ -11,7 +11,7 @@ import {
 } from "@repo/ui/mui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
-import { useCalSimToggle } from "./map/CalSimContext"
+import { useLearnMap } from "./map/LearnMapContext"
 import { useScenarioTiers } from "../hooks/useTierData"
 import ScrollTooltip from "./map/overlays/ScrollTooltip"
 import type { MotionValue } from "@repo/motion"
@@ -56,7 +56,7 @@ export default function ScenarioCard({
   secondTooltipOpacity,
 }: ScenarioCardProps) {
   const theme = useTheme()
-  const { selectedOutcome } = useCalSimToggle()
+  const { selectedOutcome } = useLearnMap()
 
   // State for operation icon tooltips (track which tooltip is open)
   const [openTooltipIndex, setOpenTooltipIndex] = useState<number | null>(null)

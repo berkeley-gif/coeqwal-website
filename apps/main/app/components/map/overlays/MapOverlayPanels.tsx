@@ -24,7 +24,7 @@ import { DeltaInfoPanel } from "./DeltaInfoPanel"
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
-import { useCalSimToggle } from "../CalSimContext"
+import { useLearnMap } from "../LearnMapContext"
 import { useLearnScrollChoreography } from "../choreography/useLearnScrollChoreography"
 import { createLearnChoreographyConfig } from "../choreography/learnSectionChoreography"
 import { STICKY_HEIGHTS } from "../choreography/scrollChoreographyConstants"
@@ -43,7 +43,7 @@ export default function MapOverlayPanels() {
     inflowArrowsOpacity,
     setInflowArrowsOpacity,
     setActivePanel,
-  } = useCalSimToggle()
+  } = useLearnMap()
 
   // UI state
   const [isFirstPanelVisible, setIsFirstPanelVisible] = useState(false)
