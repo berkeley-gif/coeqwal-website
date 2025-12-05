@@ -3,12 +3,10 @@
 import { useEffect, useRef } from "react"
 import { Map, NavigationControl, Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
-import CalSimLayers from "./layers/CalSimLayers"
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
-import HotspotMarkers from "./markers/HotspotMarkers"
-import { useCalSimToggle } from "./CalSimContext"
+import { useLearnMap } from "./LearnMapContext"
 import "./MapboxControlStyles.css"
 
 // Map view states
@@ -38,6 +36,12 @@ export const CENTRAL_VALLEY_VIEW: MapViewState = {
   pitch: 0,
 }
 
+// Map bounds
+const MAP_BOUNDS: [[number, number], [number, number]] = [
+  [-145.0, 20.0], // Southwest
+  [-95.0, 55.0], // Northeast
+]
+
 const PANEL_VIEW_STATES: Record<string, MapViewState> = {
   "calsim-call": CALIFORNIA_VIEW,
   "central-valley-importance": CENTRAL_VALLEY_VIEW,
@@ -55,7 +59,6 @@ export default function CaliforniaMapPanel({
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
   const {
-    isPanelsExpanded,
     geocoderMarker,
     showBasins,
     showRivers,
@@ -63,12 +66,12 @@ export default function CaliforniaMapPanel({
     showInflowArrows,
     inflowArrowsOpacity,
     activePanel,
-  } = useCalSimToggle()
+  } = useLearnMap()
 
   const previousPanelRef = useRef<string | null>(null)
 
   // Scroll-driven zoom: Update map view when active panel changes
-  // Only applies to initial panels (California view and Central Valley zoom)
+  // Currently only applies to initial panels (California view and Central Valley zoom)
   useEffect(() => {
     if (!activePanel || !map.mapRef?.current) {
       return
@@ -86,13 +89,6 @@ export default function CaliforniaMapPanel({
     }
 
     previousPanelRef.current = activePanel
-
-    // Only allow camera movements for the first two panels
-    // After that, camera should stay fixed
-    const allowedPanels = ["calsim-call", "central-valley-importance"]
-    if (!allowedPanels.includes(activePanel)) {
-      return
-    }
 
     // Use easeTo for smooth camera transitions
     map.mapRef.current.easeTo({
@@ -123,10 +119,7 @@ export default function CaliforniaMapPanel({
         initialViewState={CALIFORNIA_VIEW}
         minZoom={4}
         maxZoom={18}
-        maxBounds={[
-          [-145.0, 20.0], // Southwest
-          [-95.0, 55.0], // Northeast
-        ]}
+        maxBounds={MAP_BOUNDS}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}
         touchZoom={true}
@@ -138,27 +131,19 @@ export default function CaliforniaMapPanel({
         interactive={true}
         projection={{ name: "mercator" }}
       >
-        {/* Map Controls in lower left */}
         <NavigationControl position="bottom-left" />
 
-        {/* Basins GeoJSON Layer - shows when scrolling to "three basins" panel */}
+        {/* Basins GeoJSON layer */}
         <BasinsLayer visible={showBasins} />
 
-        {/* Rivers GeoJSON Layer - shows when scrolling to "rivers" panel */}
+        {/* Rivers GeoJSON layer */}
         <RiversLayer visible={showRivers} progress={riversAnimationProgress} />
 
-        {/* Basin Inflow Arrows - shows when scrolling to "water flow" panel */}
+        {/* Basin inflow arrows */}
         <BasinInflowArrows
           visible={showInflowArrows}
           opacity={inflowArrowsOpacity}
         />
-
-        {/* HIGH-PERFORMANCE: CalSim layers using Mapbox GL (GPU accelerated) */}
-        {/* Hide CalSim layers when hotspot markers are shown */}
-        {!isPanelsExpanded && <CalSimLayers />}
-
-        {/* Hotspot markers - appear when progressive panels are expanded */}
-        <HotspotMarkers visible={isPanelsExpanded} />
 
         {/* Geocoder marker - shows the selected location from basin search */}
         {geocoderMarker && (
@@ -187,9 +172,6 @@ export default function CaliforniaMapPanel({
             </Box>
           </Marker>
         )}
-
-        {/* LEGACY: DOM-based CalSim markers (comment out to use layers only) */}
-        {/* <CalSimMarkers /> */}
       </Map>
     </Box>
   )

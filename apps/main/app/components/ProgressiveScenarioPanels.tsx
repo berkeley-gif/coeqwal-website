@@ -5,10 +5,10 @@ import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
-import { useCalSimToggle } from "./map/CalSimContext"
+import { useLearnMap } from "./map/LearnMapContext"
 
 export default function ProgressiveScenarioPanels() {
-  const { setIsPanelsExpanded, setIsPanelsVisible } = useCalSimToggle()
+  const { setIsPanelsExpanded } = useLearnMap()
   const [showOperationsPanel, setShowOperationsPanel] = useState(false)
   const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
@@ -52,7 +52,6 @@ export default function ProgressiveScenarioPanels() {
         setShowHydroclimatePanel(showHydroclimate)
         setIsExpanded(shouldExpand)
         setIsPanelsExpanded(shouldExpand) // Communicate expansion state to map
-        setIsPanelsVisible(showOperations || showHydroclimate) // Communicate visibility state to map
 
         console.log("Setting panels state:", {
           expanded: shouldExpand,
@@ -86,7 +85,7 @@ export default function ProgressiveScenarioPanels() {
     if (scenarioExplorerOverlay) observer.observe(scenarioExplorerOverlay)
 
     return () => observer.disconnect()
-  }, [setIsPanelsExpanded, setIsPanelsVisible])
+  }, [setIsPanelsExpanded])
 
   return (
     <Box
