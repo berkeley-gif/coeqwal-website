@@ -10,8 +10,8 @@
  */
 
 import type React from "react"
-import type { PanelLayerState } from "../hooks/useLearnScrollChoreography"
-import { CENTRAL_VALLEY_VIEW } from "../components/CaliforniaMapPanel"
+import type { PanelLayerState } from "./useLearnScrollChoreography"
+import { CENTRAL_VALLEY_VIEW } from "../CaliforniaMapPanel"
 import {
   OPACITY,
   RIVER_ANIMATION,
@@ -19,7 +19,7 @@ import {
   ANIMATION_DURATION,
   EASING,
   clamp,
-} from "../constants/scrollChoreographyConstants"
+} from "./scrollChoreographyConstants"
 
 /**
  * Helper: Zoom camera back to Central Valley view
@@ -353,7 +353,7 @@ export function createLearnChoreographyConfig(
 
         // Show basins (delay for clean transition after CV layers fade)
         setTimeout(() => {
-          if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
+        if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
         }, 300)
       },
     },
@@ -395,7 +395,7 @@ export function createLearnChoreographyConfig(
             mapInstance.setPaintProperty(
               ALL_LAYERS.INFLOW_WATERSHEDS,
               "fill-opacity",
-              eased * 0.3,
+              Math.max(0, eased * 0.3),
             )
             if (progress < 1) requestAnimationFrame(animate)
           }
@@ -426,7 +426,7 @@ export function createLearnChoreographyConfig(
           const animate = (now: number) => {
             const progress = Math.min((now - startTime) / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3)
-            const opacity = 0.3 * (1 - eased)
+            const opacity = Math.max(0, 0.3 * (1 - eased))
             mapInstance.setPaintProperty(
               ALL_LAYERS.INFLOW_WATERSHEDS,
               "fill-opacity",
@@ -464,35 +464,35 @@ export function createLearnChoreographyConfig(
         if (direction === "down") {
           // Scrolling DOWN: inflow-watersheds already visible from Panel 4
           // Now fade in arrows
-          if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
+        if (!showInflowArrowsRef.current) toggleInflowArrowsOnRef.current?.()
 
-          if (arrowFadeAnimationRef.current !== null) {
-            cancelAnimationFrame(arrowFadeAnimationRef.current)
+        if (arrowFadeAnimationRef.current !== null) {
+          cancelAnimationFrame(arrowFadeAnimationRef.current)
+        }
+
+        const duration = 1200
+        const startTime = performance.now()
+        const startOpacity = clamp(inflowArrowsOpacityRef.current || 0, 0, 1)
+
+        const animate = (currentTime: number) => {
+          const elapsed = currentTime - startTime
+          const progress = Math.min(elapsed / duration, 1)
+          const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
+          const newOpacity = clamp(
+            startOpacity + eased * (1 - startOpacity),
+            0,
+            1,
+          )
+          setInflowArrowsOpacity(newOpacity)
+
+          if (progress < 1) {
+            arrowFadeAnimationRef.current = requestAnimationFrame(animate)
+          } else {
+            arrowFadeAnimationRef.current = null
           }
+        }
 
-          const duration = 1200
-          const startTime = performance.now()
-          const startOpacity = clamp(inflowArrowsOpacityRef.current || 0, 0, 1)
-
-          const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime
-            const progress = Math.min(elapsed / duration, 1)
-            const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-            const newOpacity = clamp(
-              startOpacity + eased * (1 - startOpacity),
-              0,
-              1,
-            )
-            setInflowArrowsOpacity(newOpacity)
-
-            if (progress < 1) {
-              arrowFadeAnimationRef.current = requestAnimationFrame(animate)
-            } else {
-              arrowFadeAnimationRef.current = null
-            }
-          }
-
-          arrowFadeAnimationRef.current = requestAnimationFrame(animate)
+        arrowFadeAnimationRef.current = requestAnimationFrame(animate)
         } else {
           // Scrolling UP: arrows and inflow-watersheds should already be visible from Panel 5
           // Just ensure they stay visible
@@ -560,8 +560,8 @@ export function createLearnChoreographyConfig(
       ],
       onEnter: (direction) => {
         // Hide rivers if coming back from rivers panel
-        setShowRivers(false)
-        setRiversAnimationProgress(0)
+          setShowRivers(false)
+          setRiversAnimationProgress(0)
 
         // Ensure basins visible
         if (!showBasinsRef.current) toggleBasinsOnRef.current?.()
@@ -785,48 +785,48 @@ export function createLearnChoreographyConfig(
       onExit: (direction) => {
         // Fade out water layer ONLY if user activated it (clicked "View Delta")
         // Check visibility - if not "visible", don't touch it at all
-        if (map.mapRef?.current) {
-          const mapInstance = map.mapRef.current.getMap()
+          if (map.mapRef?.current) {
+              const mapInstance = map.mapRef.current.getMap()
           if (mapInstance?.getLayer(ALL_LAYERS.WATER)) {
-            const visibility = mapInstance.getLayoutProperty(
+                const visibility = mapInstance.getLayoutProperty(
               ALL_LAYERS.WATER,
-              "visibility",
-            )
+                  "visibility",
+                )
 
             // Only fade out if layer is actually visible
-            if (visibility === "visible") {
+                if (visibility === "visible") {
               const duration = 800
-              const startTime = performance.now()
+                  const startTime = performance.now()
 
               const animateFadeOut = (currentTime: number) => {
-                const elapsed = currentTime - startTime
-                const progress = Math.min(elapsed / duration, 1)
+                    const elapsed = currentTime - startTime
+                    const progress = Math.min(elapsed / duration, 1)
                 const eased = 1 - Math.pow(1 - progress, 3)
                 const opacity = Math.max(0, 1 - eased)
 
-                try {
-                  mapInstance.setPaintProperty(
+                    try {
+                      mapInstance.setPaintProperty(
                     ALL_LAYERS.WATER,
-                    "fill-opacity",
-                    opacity,
-                  )
-                } catch {
+                        "fill-opacity",
+                        opacity,
+                      )
+                    } catch {
                   // Ignore
-                }
+                    }
 
-                if (progress < 1) {
+                    if (progress < 1) {
                   requestAnimationFrame(animateFadeOut)
-                } else {
-                  mapInstance.setLayoutProperty(
+                    } else {
+                        mapInstance.setLayoutProperty(
                     ALL_LAYERS.WATER,
-                    "visibility",
-                    "none",
-                  )
-                }
-              }
+                          "visibility",
+                          "none",
+                        )
+                    }
+                  }
 
               requestAnimationFrame(animateFadeOut)
-            }
+                }
             // If not visible, do nothing - don't touch the layer
           }
         }
@@ -891,30 +891,30 @@ export function createLearnChoreographyConfig(
 
     // Common layer config for all remaining panels
     ...[
-      {
-        panelId: "calsim-detailed-response",
-        position: 7,
+    {
+      panelId: "calsim-detailed-response",
+      position: 7,
         debugLabel: "Panel 9: CalSim Model",
-      },
+        },
       { panelId: "coeqwal-call", position: 8, debugLabel: "Panel 10: COEQWAL" },
-      {
-        panelId: "public-data-call",
-        position: 9,
+    {
+      panelId: "public-data-call",
+      position: 9,
         debugLabel: "Panel 11: Public Data",
       },
-      {
-        panelId: "scenario-explanation-call",
-        position: 10,
+    {
+      panelId: "scenario-explanation-call",
+      position: 10,
         debugLabel: "Panel 12: Scenario Explanation",
       },
-      {
-        panelId: "scenario-scroll-track",
-        position: 11,
+    {
+      panelId: "scenario-scroll-track",
+      position: 11,
         debugLabel: "Panel 13: Baseline Scenario",
       },
-      {
-        panelId: "scenario-buffer",
-        position: 12,
+    {
+      panelId: "scenario-buffer",
+      position: 12,
         debugLabel: "Panel 14: Scenario Buffer",
       },
     ].map((panel) => ({

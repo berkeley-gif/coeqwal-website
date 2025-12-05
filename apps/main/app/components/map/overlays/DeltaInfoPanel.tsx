@@ -11,7 +11,7 @@ import type { MapOperationsAPI } from "@repo/map"
 import {
   ANIMATION_DURATION,
   EASING,
-} from "../../constants/scrollChoreographyConstants"
+} from "../choreography/scrollChoreographyConstants"
 
 interface DeltaInfoPanelProps {
   /** Map operations API for camera control */
@@ -96,13 +96,8 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
       }}
     >
       <Typography
-        variant="h6"
-        sx={{
-          mb: 2,
-          fontWeight: 600,
-          color: theme.palette.text.primary,
-          textAlign: "left",
-        }}
+        variant="body1"
+        sx={{ mb: 2, color: theme.palette.grey[900] }}
       >
         What and where is &quot;The Delta&quot;?
       </Typography>

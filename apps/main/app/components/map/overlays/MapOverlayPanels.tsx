@@ -16,19 +16,19 @@
 import { useState, useEffect, useMemo, useRef } from "react"
 import type { FeatureCollection, Polygon, MultiPolygon } from "geojson"
 import { CallResponsePanel } from "@repo/ui"
-import ScenarioCard from "./ScenarioCard"
-import ClimateCard from "./ClimateCard"
+import ScenarioCard from "../../ScenarioCard"
+import ClimateCard from "../../ClimateCard"
 import ScrollTooltip from "./ScrollTooltip"
-import { GeocodingPanel } from "./panels/GeocodingPanel"
-import { DeltaInfoPanel } from "./panels/DeltaInfoPanel"
+import { GeocodingPanel } from "./GeocodingPanel"
+import { DeltaInfoPanel } from "./DeltaInfoPanel"
 import { Box, Typography } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
-import { useCalSimToggle } from "./CalSimContext"
-import { useLearnScrollChoreography } from "../hooks/useLearnScrollChoreography"
-import { createLearnChoreographyConfig } from "../config/learnSectionChoreography"
-import { STICKY_HEIGHTS } from "../constants/scrollChoreographyConstants"
-import { useScroll, useTransform, motion } from "@repo/motion"
+import { useCalSimToggle } from "../CalSimContext"
+import { useLearnScrollChoreography } from "../choreography/useLearnScrollChoreography"
+import { createLearnChoreographyConfig } from "../choreography/learnSectionChoreography"
+import { STICKY_HEIGHTS } from "../choreography/scrollChoreographyConstants"
+import { useScroll, useTransform } from "@repo/motion"
 
 export default function MapOverlayPanels() {
   const map = useMap()
@@ -197,18 +197,11 @@ export default function MapOverlayPanels() {
           Did you know that California has one of the most complex water systems
           in the world?
         </Typography>
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", mt: 2, pl: 18 }}>
-          <Typography variant="body2" sx={{ fontWeight: 200, fontStyle: "italic", mb: 0.5, color: "rgba(255, 255, 255, 0.8)" }}>
-            scroll to learn more
-          </Typography>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
           <Box
             component="span"
             sx={{ 
-              marginLeft: "3.5rem", 
-              display: "inline-block",
-              fontWeight: 200, 
               fontSize: "1.5rem", 
-              color: "rgba(255, 255, 255, 0.8)",
               animation: "bounce 2s ease-in-out infinite",
               "@keyframes bounce": {
                 "0%, 100%": { transform: "translateY(0)" },
@@ -231,11 +224,11 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           The{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             Central Valley
           </Box>{" "}
           is a long, low valley that collects much of California&apos;s water.
-          This water is stored, divided up, and transported to farms and cities
+          This water is stored, divided, and transported to farms and cities
           across the state.
         </Typography>
       </CallResponsePanel>
@@ -250,7 +243,7 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           The Central Valley lies across three water{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             basins
           </Box>
           .
@@ -331,21 +324,21 @@ export default function MapOverlayPanels() {
               These waters flow to the Valley floor, where the{" "}
               <Box
                 component="span"
-                sx={{ fontStyle: "italic", fontWeight: 600 }}
+                sx={{ fontWeight: 600 }}
               >
                 Sacramento River
               </Box>{" "}
               flows from the north and the{" "}
               <Box
                 component="span"
-                sx={{ fontStyle: "italic", fontWeight: 600 }}
+                sx={{ fontWeight: 600 }}
               >
                 San Joaquin River
               </Box>{" "}
               flows from the south. The rivers meet and mix in the low-lying{" "}
               <Box
                 component="span"
-                sx={{ fontStyle: "italic", fontWeight: 600 }}
+                sx={{ fontWeight: 600 }}
               >
                 Delta
               </Box>
@@ -392,20 +385,23 @@ export default function MapOverlayPanels() {
         isVisible={isFirstPanelVisible}
         sx={{ mb: "50vh" }}
       >
-        <Typography variant="body1">
+        <Typography variant="body1" sx={{ mb: 2 }}>
           To do this water planning and accounting, the federal{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             U.S. Bureau of Reclamation
           </Box>{" "}
           and the state{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             Department of Water Resources
           </Box>{" "}
           use a computer model called{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             CalSim
           </Box>
-          . CalSim models how water would move through the system based on the
+          .
+        </Typography>
+        <Typography variant="body1">
+          CalSim models how water would move through the system based on the
           water management decisions that are made. It models how much water
           flows into reservoirs based on climate assumptions, how much is stored
           or released, and where it gets delivered.
@@ -422,15 +418,15 @@ export default function MapOverlayPanels() {
       >
         <Typography variant="body1">
           The{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             COEQWAL
           </Box>{" "}
           project has received support from the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             University of California
           </Box>{" "}
           and the{" "}
-          <Box component="span" sx={{ fontStyle: "italic", fontWeight: 600 }}>
+          <Box component="span" sx={{ fontWeight: 600 }}>
             Bay-Delta Science Program
           </Box>{" "}
           to use CalSim to explore a broad range of water management strategies.
@@ -447,118 +443,102 @@ export default function MapOverlayPanels() {
         sx={{ mb: "50vh" }}
       >
         <Typography variant="body1">
-          We are making this data available to the public so that communities
+          We are making these{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            alternative water management scenarios
+          </Box>{" "}
+          available to the public so that communities
           can envision alternative water futures for California and understand
           the consequences that different water management strategies can bring.
         </Typography>
       </CallResponsePanel>
 
       {/* ==================== PANEL 10: Scenario explanation ==================== */}
-      <CallResponsePanel
-        id="scenario-explanation-call"
-        side="left"
-        variant="call"
-        isVisible={isFirstPanelVisible}
-        sx={{ mb: "50vh" }}
-      >
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Each water management scenario on this site depicts:
-        </Typography>
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ mb: 2.5 }}>
-            <Typography
-              variant="body1"
-              sx={{ fontWeight: "600 !important", mb: 0.25 }}
-            >
-              Strategy
-            </Typography>
-            <Typography variant="body1">
-              the operations and policies that define it
-            </Typography>
-          </Box>
-          <Box sx={{ mb: 2.5 }}>
-            <Typography
-              variant="body1"
-              sx={{ fontWeight: "600 !important", mb: 0.25 }}
-            >
-              Outcomes
-            </Typography>
-            <Typography variant="body1">
-              how it affects water supply, ecosystems, agriculture, and
-              communities
-            </Typography>
-          </Box>
-          <Box>
-            <Typography
-              variant="body1"
-              sx={{ fontWeight: "600 !important", mb: 0.25 }}
-            >
-              Hydroclimate
-            </Typography>
-            <Typography variant="body1">
-              how it performs under different possible future climates
-            </Typography>
-          </Box>
-        </Box>
-        <Typography variant="body1">
-          Keeping these three things in mind can help you read a scenario and
-          understand what it changes, what it impacts, and how it might matter
-          for your community.
-        </Typography>
-      </CallResponsePanel>
-
-      {/* Baseline scenario overlay with Current Operations and Hydroclimate cards */}
-      {/* Wrapper for scroll track + sticky content */}
+      {/* ==================== SCENARIO SECTION: Intro + Cards + Tooltips + Conclusion ==================== */}
+      
+      {/* Wrapper for the entire scenario explanation section */}
       <Box
         sx={{
           position: "relative",
           width: "100%",
-          height: "auto",
         }}
       >
-        {/* Tall scroll track - creates the scroll pause effect */}
+        {/* Tall scroll track - creates the scroll pause effect for cards + tooltips */}
         <Box
           id="scenario-scroll-track"
+          ref={scrollTrackRef}
           sx={{
-            height: "300vh", // 3x viewport height for scroll progression
+            height: "400vh", // Extended for intro + cards + tooltips sequence
             width: "100%",
             position: "relative",
           }}
         />
 
-        {/* Sticky container - stays fixed while scrolling through track */}
+        {/* Sticky container - holds intro text (left) and cards (right) */}
         <Box
           sx={{
             position: "sticky",
-            bottom: 0,
+            top: "100px", // Below header (60px) + tabs (40px)
             left: 0,
             right: 0,
             width: "100%",
-            height: "100vh",
+            height: "calc(100vh - 100px)", // Account for header/tabs
             display: "flex",
-            justifyContent: "flex-end", // Align to right
-            alignItems: "center",
-            pl: 2, // Left padding
-            pr: 4, // More right padding for space between panel and edge
+            justifyContent: "space-between",
+            alignItems: "flex-start", // Align to top
             pointerEvents: "none",
           }}
         >
-          {/* Blue panel grouping both cards */}
+          {/* Left side: Intro text */}
           <Box
-            id="baseline-scenario-overlay"
-            ref={baselineOverlayRef}
             sx={{
-              maxWidth: "580px",
-              padding: (theme) => theme.spacing(2),
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              pl: { xs: 4, sm: 8, md: 12, lg: 16 },
+              pr: 4,
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{
+                color: "#faf8f5",
+                fontSize: "1.25rem",
+                lineHeight: 1.8,
+                maxWidth: "460px",
+              }}
+            >
+              Each water management scenario on this site can be read as having three main elements:
+            </Typography>
+          </Box>
+
+          {/* Right side: Cards panel */}
+          <Box
+            sx={{
+              pr: { xs: 1, sm: 2, md: 3, lg: 4 },
+              pl: 2,
               pointerEvents: "auto",
+              maxHeight: "calc(100vh - 140px)", // Fit within viewport minus header/tabs + padding
+              display: "flex",
+              alignItems: "flex-start",
+              pt: 2,
+            }}
+          >
+            <Box
+              id="baseline-scenario-overlay"
+              ref={baselineOverlayRef}
+              sx={{
+                maxWidth: "580px",
+                maxHeight: "100%",
+                padding: (theme) => theme.spacing(2),
               display: "flex",
               flexDirection: "column",
               gap: (theme) => theme.spacing(1.5),
               backgroundColor: (theme) => theme.palette.brand.sky,
               backdropFilter: "blur(10px)",
               borderRadius: (theme) => theme.borderRadius.card,
-              overflow: "visible", // Allow tooltips to overflow to the left
-              position: "relative", // For absolute positioned tooltips
+                overflow: "auto",
+                position: "relative",
             }}
           >
             <ScenarioCard
@@ -573,7 +553,7 @@ export default function MapOverlayPanels() {
               selectedClimate={1}
             />
 
-            {/* Third tooltip - points to ClimateCard from parent level */}
+              {/* Third tooltip - points to ClimateCard */}
             <ScrollTooltip
               targetRef={climateCardRef}
               containerRef={baselineOverlayRef}
@@ -595,16 +575,32 @@ export default function MapOverlayPanels() {
           </Box>
         </Box>
       </Box>
+      </Box>
 
-      {/* Buffer spacer to maintain Central Valley view after scenario cards */}
+      {/* ==================== PANEL: Scenario conclusion ==================== */}
+      <CallResponsePanel
+        id="scenario-conclusion-call"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+        sx={{ mt: "50vh", mb: "50vh" }}
+      >
+        <Typography variant="body1">
+          Keeping these three things in mind can help you read a scenario and
+          understand what it changes, what it impacts, and how it might matter
+          for your community.
+        </Typography>
+      </CallResponsePanel>
+
+      {/* Buffer spacer to maintain Central Valley view after scenario section */}
       <Box
         id="scenario-buffer"
         sx={{
-          height: "50vh", // Minimal buffer
+          height: "50vh",
           width: "100%",
           opacity: 0,
           pointerEvents: "none",
-          marginTop: "-25vh", // Small overlap to prevent gap
+          marginTop: "-25vh",
         }}
         aria-hidden="true"
       />

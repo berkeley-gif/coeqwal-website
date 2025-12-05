@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback, useMemo } from "react"
 import { Source, Layer, Marker } from "@repo/map"
 import { Box, LocationOnIcon, Typography, useTheme } from "@repo/ui/mui"
-import { useCalSimToggle } from "./CalSimContext"
-import type { NetworkGeoJSONResponse } from "./CalSimMarkers"
+import { useCalSimToggle } from "../CalSimContext"
+import type { NetworkGeoJSONResponse } from "../markers/CalSimMarkers"
 
 const API_BASE_URL = "https://api.coeqwal.org"
 

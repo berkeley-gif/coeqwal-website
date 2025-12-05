@@ -3,11 +3,11 @@
 import { useEffect, useRef } from "react"
 import { Map, NavigationControl, Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
-import CalSimLayers from "./CalSimLayers"
-import BasinsLayer from "./BasinsLayer"
-import RiversLayer from "./RiversLayer"
-import BasinInflowArrows from "./BasinInflowArrows"
-import HotspotMarkers from "./HotspotMarkers"
+import CalSimLayers from "./layers/CalSimLayers"
+import BasinsLayer from "./layers/BasinsLayer"
+import RiversLayer from "./layers/RiversLayer"
+import BasinInflowArrows from "./layers/BasinInflowArrows"
+import HotspotMarkers from "./markers/HotspotMarkers"
 import { useCalSimToggle } from "./CalSimContext"
 import "./MapboxControlStyles.css"
 
@@ -22,9 +22,9 @@ interface MapViewState {
 
 // Initial view of California
 export const CALIFORNIA_VIEW: MapViewState = {
-  longitude: -119.4,
+  longitude: -120.2,
   latitude: 37.5,
-  zoom: 4,
+  zoom: 5,
   bearing: 0,
   pitch: 0,
 }
@@ -124,8 +124,8 @@ export default function CaliforniaMapPanel({
         minZoom={4}
         maxZoom={18}
         maxBounds={[
-          [-135.0, 25.0], // Southwest - wider bounds for positioning flexibility
-          [-105.0, 48.0], // Northeast - wider bounds for positioning flexibility
+          [-145.0, 20.0], // Southwest
+          [-95.0, 55.0], // Northeast
         ]}
         style={{ width: "100%", height: "100%" }}
         scrollZoom={false}

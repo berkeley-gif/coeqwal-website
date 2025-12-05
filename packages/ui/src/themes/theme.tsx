@@ -883,6 +883,8 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: `
         @import url("https://use.typekit.net/rxm7kha.css");
+        /* @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap"); */
+        /* @import url("https://fonts.googleapis.com/css2?family=Overpass:wght@300;400;500;600;700&display=swap"); */
                 
         *, *::before, *::after {
           box-sizing: border-box;
