@@ -11,9 +11,9 @@ import {
 } from "@repo/ui/mui"
 import { ScenarioGlyph } from "@repo/viz"
 import { OUTCOMES } from "../lib/outcomes"
-import { useCalSimToggle } from "./CalSimContext"
+import { useCalSimToggle } from "./map/CalSimContext"
 import { useScenarioTiers } from "../hooks/useTierData"
-import ScrollTooltip from "./ScrollTooltip"
+import ScrollTooltip from "./map/overlays/ScrollTooltip"
 import type { MotionValue } from "@repo/motion"
 
 // Shared operation icons for current operations strategy

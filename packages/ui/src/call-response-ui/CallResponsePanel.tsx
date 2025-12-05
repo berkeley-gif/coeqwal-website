@@ -59,11 +59,11 @@ export function CallResponsePanel({
         initial={{ marginTop: "100vh" }}
         animate={{ marginTop: isVisible ? 0 : "100vh" }}
         transition={{
-          type: "spring",
-          stiffness: 40,
-          damping: 30,
-          duration: 1.8,
-          ...(delay ? { delay } : {}),
+                type: "spring",
+                stiffness: 40,
+                damping: 30,
+                duration: 1.8,
+                ...(delay ? { delay } : {}),
         }}
         style={{
           width: "100%",
@@ -85,35 +85,16 @@ export function CallResponsePanel({
             borderRadius: 0,
             boxShadow: "none",
             border: "none",
-            // Enhanced typography with per-line highlighting
-            // Single place to control line spacing for all Typography components
             "& .MuiTypography-root": {
-              lineHeight: 1.6,
-            },
-            "& .MuiTypography-h6": {
-              fontSize: { xs: "1.25rem", sm: "1.375rem", md: "1.5rem" },
-              fontWeight: 500,
               color: (theme) =>
-                side === "right"
-                  ? theme.palette.grey[900]
-                  : theme.palette.common.white,
-            },
-            "& .MuiTypography-body1": {
-              fontSize: { xs: "1.0625rem", sm: "1.125rem", md: "1.1875rem" },
-              fontWeight: 400,
-              color: (theme) =>
-                side === "right"
-                  ? theme.palette.grey[900]
-                  : theme.palette.common.white,
-            },
-            "& .MuiTypography-overline": {
-              fontSize: { xs: "0.7rem", sm: "0.75rem" },
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              color: (theme) =>
-                side === "right"
-                  ? theme.palette.grey[900]
-                  : theme.palette.common.white,
+                side === "right" ? theme.palette.grey[900] : "#faf8f5",
+              fontFamily:
+                side === "left"
+                  ? '"neue-haas-grotesk-text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+                  : undefined,
+              fontWeight: side === "left" ? 400 : undefined,
+              fontSize: side === "left" ? "1.25rem" : undefined, // 20px
+              lineHeight: side === "left" ? 1.8 : undefined, // maintains ~36px line-height
             },
             ...sx,
           }}

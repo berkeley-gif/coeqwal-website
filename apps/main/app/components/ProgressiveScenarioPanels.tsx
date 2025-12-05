@@ -5,7 +5,7 @@ import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
-import { useCalSimToggle } from "./CalSimContext"
+import { useCalSimToggle } from "./map/CalSimContext"
 
 export default function ProgressiveScenarioPanels() {
   const { setIsPanelsExpanded, setIsPanelsVisible } = useCalSimToggle()

@@ -2,10 +2,10 @@
 
 import { Box, Typography } from "@repo/ui/mui"
 import { MapProvider } from "@repo/map"
-import CaliforniaMapPanel from "../../components/CaliforniaMapPanel"
-import MapOverlayPanels from "../../components/MapOverlayPanels"
-import ProgressiveScenarioPanels from "../../components/ProgressiveScenarioPanels"
-import { CalSimProvider } from "../../components/CalSimContext"
+import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
+import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
+import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
+import { CalSimProvider } from "../map/CalSimContext"
 
 import { LeadingMarkerText } from "@repo/ui"
 
