@@ -5,9 +5,14 @@ import { centralValleyBasins } from "@repo/data"
 
 interface BasinsLayerProps {
   visible: boolean
+  /** Opacity for Sacramento/San Joaquin labels (0-1). Tulare label stays at full opacity. */
+  riverBasinLabelsOpacity?: number
 }
 
-export default function BasinsLayer({ visible }: BasinsLayerProps) {
+export default function BasinsLayer({
+  visible,
+  riverBasinLabelsOpacity = 1,
+}: BasinsLayerProps) {
   const visibility = visible ? "visible" : "none"
 
   return (
@@ -66,7 +71,15 @@ export default function BasinsLayer({ visible }: BasinsLayerProps) {
           "text-color": "#ffffff",
           "text-halo-color": "rgb(61, 41, 41)",
           "text-halo-width": 2,
-          "text-opacity": 1,
+          // Only fade Sacramento and San Joaquin labels; Tulare stays visible
+          "text-opacity": [
+            "case",
+            ["==", ["get", "name"], "Sacramento River Basin"],
+            riverBasinLabelsOpacity,
+            ["==", ["get", "name"], "San Joaquin River Basin"],
+            riverBasinLabelsOpacity,
+            1, // Tulare and other labels stay at full opacity
+          ],
         }}
       />
     </Source>

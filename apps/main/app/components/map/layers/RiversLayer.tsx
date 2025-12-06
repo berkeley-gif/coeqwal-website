@@ -16,13 +16,17 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
   rotation = 90,
   curvature = 20,
   sCurve = false,
+  reverseSCurve = false,
   letterSpacing = 2,
   opacity = 1,
 }: {
   text: string
   rotation?: number
   curvature?: number
+  /** S-curve: goes up first, then down */
   sCurve?: boolean
+  /** Reverse S-curve: goes down first, then up */
+  reverseSCurve?: boolean
   letterSpacing?: number
   opacity?: number
 }) {
@@ -30,10 +34,14 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 
   // Create curved path - positive curvature curves up, negative curves down
   let curvePath
-  if (sCurve) {
+  if (reverseSCurve) {
     // Reverse S-curve using cubic Bezier (C command) with two control points
     // Goes down first, then up
     curvePath = `M 10,45 C 70,${45 + curvature} 150,${45 - curvature} 210,45`
+  } else if (sCurve) {
+    // S-curve using cubic Bezier (C command) with two control points
+    // Goes up first, then down
+    curvePath = `M 10,45 C 70,${45 - curvature} 150,${45 + curvature} 210,45`
   } else {
     // Simple curve using quadratic Bezier (Q command)
     curvePath = `M 10,45 Q 110,${45 - curvature} 210,45`
@@ -76,6 +84,7 @@ const CurvedRiverLabel = memo(function CurvedRiverLabel({
 
 export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // Clamp progress to [0, 1] to avoid floating-point precision errors
+  // Progress goes 0→1 as user scrolls (matches old choreography)
   const clampedProgress = Math.max(0, Math.min(1, progress))
 
   // Calculate label opacity: fade in from 30% to 50% of river drawing
@@ -109,9 +118,9 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
   // River label positions (memoized as they're constant)
   const labelPositions = useMemo(
     () => ({
-      sacramento: { lon: -121.45, lat: 39 },
-      sanJoaquin: { lon: -120.44, lat: 37.6 },
-      delta: { lon: -121.8, lat: 37.9 },
+      sacramento: { lon: -121.6, lat: 39.4 },
+      sanJoaquin: { lon: -120.6, lat: 37.7 },
+      delta: { lon: -122.2, lat: 37.9 },
     }),
     [],
   )
@@ -167,7 +176,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           id="sacramento-river-body"
           type="line"
           paint={{
-            "line-color": "#5B9DD6",
+            "line-color": "#116bb0",
             "line-width": 2.5,
             "line-opacity": 0.9,
             "line-trim-offset": [clampedProgress, 1],
@@ -226,7 +235,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
           id="san-joaquin-river-body"
           type="line"
           paint={{
-            "line-color": "#5B9DD6",
+            "line-color": "#116bb0",
             "line-width": 2.5,
             "line-opacity": 0.9,
             "line-trim-offset": [clampedProgress, 1],
@@ -251,8 +260,8 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
       >
         <CurvedRiverLabel
           text="Sacramento River"
-          rotation={96}
-          curvature={90}
+          rotation={50}
+          curvature={88}
           sCurve={true}
           letterSpacing={5}
           opacity={labelOpacity}
@@ -267,7 +276,7 @@ export default function RiversLayer({ visible, progress }: RiversLayerProps) {
       >
         <CurvedRiverLabel
           text="San Joaquin River"
-          rotation={50}
+          rotation={56}
           curvature={-35}
           letterSpacing={2}
           opacity={labelOpacity}

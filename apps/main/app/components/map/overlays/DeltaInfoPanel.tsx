@@ -20,8 +20,8 @@ interface DeltaInfoPanelProps {
 
 // Delta view coordinates
 const DELTA_VIEW = {
-  center: [-121.5, 38] as [number, number],
-  zoom: 9.25,
+  center: [-121.8, 38.1] as [number, number],
+  zoom: 9.75,
   bearing: 0,
   pitch: 0,
 }
@@ -53,7 +53,8 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
           // Make visible
           mapInstance.setLayoutProperty("water", "visibility", "visible")
 
-          // Animate opacity from 0 to 1
+          // Animate opacity from 0 to 0.9
+          const targetOpacity = 0.9
           const duration = ANIMATION_DURATION.EASE
           const startTime = performance.now()
 
@@ -61,7 +62,10 @@ export function DeltaInfoPanel({ map }: DeltaInfoPanelProps) {
             const elapsed = currentTime - startTime
             const progress = Math.min(elapsed / duration, 1)
             const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-            const opacity = Math.max(0, Math.min(1, eased)) // Clamp between 0 and 1
+            const opacity = Math.max(
+              0,
+              Math.min(targetOpacity, eased * targetOpacity),
+            ) // Clamp between 0 and targetOpacity
 
             try {
               mapInstance.setPaintProperty("water", "fill-opacity", opacity)

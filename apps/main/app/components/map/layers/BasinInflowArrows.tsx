@@ -36,10 +36,9 @@ export default function BasinInflowArrows({
     }
   }, [])
 
-  if (!visible || !keyboardVisible) return null
-
-  // Apply keyboard visibility to opacity
-  const effectiveOpacity = keyboardVisible ? opacity : 0
+  // Always render, but control opacity for smooth transitions
+  // (returning null would unmount, preventing CSS transitions)
+  const effectiveOpacity = visible && keyboardVisible ? opacity : 0
 
   /**
    * Arrow positions around the Central Valley basin perimeter
@@ -96,6 +95,7 @@ export default function BasinInflowArrows({
               transform: `rotate(${pos.rotation}deg)`,
               pointerEvents: "none",
               opacity: effectiveOpacity,
+              transition: "opacity 0.8s ease-out",
             }}
           >
             <svg

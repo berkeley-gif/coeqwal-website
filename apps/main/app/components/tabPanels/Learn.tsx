@@ -5,7 +5,6 @@ import { MapProvider } from "@repo/map"
 import CaliforniaMapPanel from "../map/CaliforniaMapPanel"
 import MapOverlayPanels from "../map/overlays/MapOverlayPanels"
 import ProgressiveScenarioPanels from "../ProgressiveScenarioPanels"
-import { LearnMapProvider } from "../map/LearnMapContext"
 
 import { LeadingMarkerText } from "@repo/ui"
 
@@ -15,17 +14,14 @@ export default function LearnPanel() {
       <Box sx={{ pointerEvents: "none" }}>
         {/* MapProvider for shared map context */}
         <MapProvider>
-          {/* CalSim context provider for shared state between map and overlays */}
-          <LearnMapProvider>
-            {/* Sticky California map background */}
-            <CaliforniaMapPanel id="california-map" />
+          {/* Sticky California map background */}
+          <CaliforniaMapPanel id="california-map" />
 
-            {/* Scrolling overlay panels over the sticky map */}
-            <MapOverlayPanels />
+          {/* Scrolling overlay panels over the sticky map */}
+          <MapOverlayPanels />
 
-            {/* Progressive scenario and hydroclimate panels that appear on scroll */}
-            <ProgressiveScenarioPanels />
-          </LearnMapProvider>
+          {/* Progressive scenario and hydroclimate panels that appear on scroll */}
+          <ProgressiveScenarioPanels />
         </MapProvider>
       </Box>
       <Box

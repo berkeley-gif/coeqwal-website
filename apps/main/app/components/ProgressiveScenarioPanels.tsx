@@ -5,10 +5,10 @@ import { Box } from "@repo/ui/mui"
 import { motion, AnimatePresence } from "@repo/motion"
 import ScenarioCard from "./ScenarioCard"
 import ClimateCard from "./ClimateCard"
-import { useLearnMap } from "./map/LearnMapContext"
+import { learnMapActions } from "./map/store"
 
 export default function ProgressiveScenarioPanels() {
-  const { setIsPanelsExpanded } = useLearnMap()
+  const { setIsPanelsExpanded } = learnMapActions
   const [showOperationsPanel, setShowOperationsPanel] = useState(false)
   const [showHydroclimatePanel, setShowHydroclimatePanel] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
