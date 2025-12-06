@@ -3,8 +3,11 @@
  */
 
 // Core
-export { default as CaliforniaMapPanel, CALIFORNIA_VIEW, CENTRAL_VALLEY_VIEW } from "./CaliforniaMapPanel"
-export { LearnMapProvider, useLearnMap, CalSimProvider, useCalSimToggle } from "./LearnMapContext"
+export { default as CaliforniaMapPanel } from "./CaliforniaMapPanel"
+export { CALIFORNIA_VIEW, CENTRAL_VALLEY_VIEW, DELTA_VIEW } from "./store"
+
+// Store (Zustand-based state management)
+export * from "./store"
 
 // Layers
 export { default as BasinsLayer } from "./layers/BasinsLayer"
@@ -20,10 +23,10 @@ export { default as MapOverlayPanels } from "./overlays/MapOverlayPanels"
 export { default as ScrollTooltip } from "./overlays/ScrollTooltip"
 export { DeltaInfoPanel } from "./overlays/DeltaInfoPanel"
 export { GeocodingPanel } from "./overlays/GeocodingPanel"
+export { Section, StickySection } from "./overlays/Section"
 
-// Choreography
-export { useLearnScrollChoreography } from "./choreography/useLearnScrollChoreography"
-export { createLearnChoreographyConfig } from "./choreography/learnSectionChoreography"
+// Choreography constants (still used by DeltaInfoPanel)
 export * from "./choreography/scrollChoreographyConstants"
-export type { PanelLayerState } from "./choreography/useLearnScrollChoreography"
 
+// Hooks
+export { useMapLayers } from "./hooks/useMapLayers"

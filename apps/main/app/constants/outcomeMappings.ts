@@ -44,6 +44,7 @@ export const API_SHORT_CODE_TO_DISPLAY_NAME: Record<string, string> = {
  */
 export const UI_DISPLAY_NAME_OVERRIDES: Record<string, string> = {
   "Delta ecology": "Delta estuary ecology",
+  "Community water system deliveries": "Community deliveries",
 } as const
 
 /**

@@ -5,7 +5,7 @@
  * Integrates with Mapbox geocoding API and basin lookup functionality.
  */
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Box, Typography, useTheme } from "@repo/ui/mui"
 import { useMap, useGeocoding, useBasinLookup, BOUNDING_BOXES } from "@repo/map"
 import type { GeocodingFeature } from "@repo/map"
@@ -123,7 +123,7 @@ export function GeocodingPanel({
     }
   }
 
-  // Clear search
+  // Clear search and reset map view
   const handleClearSearch = () => {
     setSearchQuery("")
     setSelectedLocation(null)
@@ -132,11 +132,26 @@ export function GeocodingPanel({
     setIsSelectingResult(false)
     geocoding.clear()
     setShowResults(false)
+
+    // Zoom back out to Central Valley view
+    map.flyTo({
+      longitude: -120.8,
+      latitude: 38.5,
+      zoom: 5.82,
+      transitionOptions: { duration: 1500 },
+    })
   }
 
-  // Reset panel when triggered externally
+  // Track previous reset trigger to only reset on actual changes
+  const prevResetTriggerRef = useRef(resetTrigger)
+
+  // Reset panel when triggered externally (counter increments)
   useEffect(() => {
-    if (resetTrigger !== undefined) {
+    if (
+      resetTrigger !== undefined &&
+      resetTrigger !== prevResetTriggerRef.current
+    ) {
+      prevResetTriggerRef.current = resetTrigger
       handleClearSearch()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -383,7 +398,8 @@ export function GeocodingPanel({
                   fontStyle: "italic",
                 }}
               >
-                This location is not within a Central Valley basin
+                This location is not within a Central Valley basin, but your
+                water may still come from the Central Valley.
               </Typography>
             )}
           </Box>

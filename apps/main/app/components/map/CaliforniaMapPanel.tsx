@@ -1,51 +1,38 @@
 "use client"
 
+/**
+ * CaliforniaMapPanel
+ *
+ * Uses Zustand store for state and derived layer visibility.
+ * Layer visibility is determined by activeSection
+ */
+
 import { useEffect, useRef } from "react"
 import { Map, NavigationControl, Marker, useMap } from "@repo/map"
 import { Box } from "@repo/ui/mui"
 import BasinsLayer from "./layers/BasinsLayer"
 import RiversLayer from "./layers/RiversLayer"
 import BasinInflowArrows from "./layers/BasinInflowArrows"
-import { useLearnMap } from "./LearnMapContext"
+import {
+  useActiveSection,
+  useGeocoderMarker,
+  useRiversProgress,
+  useDerivedArrowsOpacity,
+  useShowBasins,
+  useShowRivers,
+  useShowArrows,
+  useCameraView,
+  CALIFORNIA_VIEW,
+  type SectionId,
+} from "./store"
+import { useMapLayers } from "./hooks/useMapLayers"
 import "./MapboxControlStyles.css"
-
-// Map view states
-interface MapViewState {
-  longitude: number
-  latitude: number
-  zoom: number
-  bearing: number
-  pitch: number
-}
-
-// Initial view of California
-export const CALIFORNIA_VIEW: MapViewState = {
-  longitude: -120.2,
-  latitude: 37.5,
-  zoom: 5,
-  bearing: 0,
-  pitch: 0,
-}
-
-// Central Valley view
-export const CENTRAL_VALLEY_VIEW: MapViewState = {
-  longitude: -120.8,
-  latitude: 38.5,
-  zoom: 5.82,
-  bearing: 0,
-  pitch: 0,
-}
 
 // Map bounds
 const MAP_BOUNDS: [[number, number], [number, number]] = [
   [-145.0, 20.0], // Southwest
   [-95.0, 55.0], // Northeast
 ]
-
-const PANEL_VIEW_STATES: Record<string, MapViewState> = {
-  "calsim-call": CALIFORNIA_VIEW,
-  "central-valley-importance": CENTRAL_VALLEY_VIEW,
-}
 
 interface CaliforniaMapPanelProps {
   id?: string
@@ -58,48 +45,39 @@ export default function CaliforniaMapPanel({
 }: CaliforniaMapPanelProps) {
   const token = mapboxToken || process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ""
   const map = useMap()
-  const {
-    geocoderMarker,
-    showBasins,
-    showRivers,
-    riversAnimationProgress,
-    showInflowArrows,
-    inflowArrowsOpacity,
-    activePanel,
-  } = useLearnMap()
 
-  const previousPanelRef = useRef<string | null>(null)
+  // Store selectors
+  const activeSection = useActiveSection()
+  const geocoderMarker = useGeocoderMarker()
+  const riversProgress = useRiversProgress()
+  const arrowsOpacity = useDerivedArrowsOpacity() // Use derived opacity (1 when visible, 0 when not)
+  const showBasins = useShowBasins()
+  const showRivers = useShowRivers()
+  const showArrows = useShowArrows()
+  const cameraView = useCameraView()
 
-  // Scroll-driven zoom: Update map view when active panel changes
-  // Currently only applies to initial panels (California view and Central Valley zoom)
+  // Apply Mapbox layer states based on activeSection
+  useMapLayers()
+
+  // Track previous section for camera transitions
+  const prevSectionRef = useRef<SectionId | null>(null)
+
+  // Camera transitions when section changes
   useEffect(() => {
-    if (!activePanel || !map.mapRef?.current) {
-      return
-    }
+    if (!map.mapRef?.current || !cameraView) return
+    if (prevSectionRef.current === activeSection) return
 
-    // Skip if panel hasn't actually changed
-    if (previousPanelRef.current === activePanel) {
-      return
-    }
+    prevSectionRef.current = activeSection
 
-    const viewState = PANEL_VIEW_STATES[activePanel]
-    if (!viewState) {
-      previousPanelRef.current = activePanel
-      return
-    }
-
-    previousPanelRef.current = activePanel
-
-    // Use easeTo for smooth camera transitions
     map.mapRef.current.easeTo({
-      center: [viewState.longitude, viewState.latitude],
-      zoom: viewState.zoom,
-      bearing: viewState.bearing,
-      pitch: viewState.pitch,
+      center: [cameraView.longitude, cameraView.latitude],
+      zoom: cameraView.zoom,
+      bearing: cameraView.bearing ?? 0,
+      pitch: cameraView.pitch ?? 0,
       duration: 2000,
       easing: (t: number) => t * (2 - t), // ease-out-quad
     })
-  }, [activePanel, map])
+  }, [activeSection, cameraView, map])
 
   return (
     <Box
@@ -109,8 +87,8 @@ export default function CaliforniaMapPanel({
         top: 0,
         width: "100vw",
         height: "100vh",
-        zIndex: 0, // Map when used as background element
-        pointerEvents: "auto", // Ensure map can receive pointer events
+        zIndex: 0,
+        pointerEvents: "auto",
       }}
     >
       <Map
@@ -129,23 +107,23 @@ export default function CaliforniaMapPanel({
         doubleClickZoom={true}
         keyboard={true}
         interactive={true}
-        projection={{ name: "mercator" }}
+        projection={{ name: "globe" }}
       >
         <NavigationControl position="bottom-left" />
 
-        {/* Basins GeoJSON layer */}
-        <BasinsLayer visible={showBasins} />
-
-        {/* Rivers GeoJSON layer */}
-        <RiversLayer visible={showRivers} progress={riversAnimationProgress} />
-
-        {/* Basin inflow arrows */}
-        <BasinInflowArrows
-          visible={showInflowArrows}
-          opacity={inflowArrowsOpacity}
+        {/* React-rendered layers use derived visibility from store */}
+        {/* Sacramento/San Joaquin labels fade out during first 30% of river animation */}
+        {/* Tulare label stays visible */}
+        <BasinsLayer
+          visible={showBasins}
+          riverBasinLabelsOpacity={
+            showRivers ? Math.max(0, 1 - riversProgress / 0.3) : 1
+          }
         />
+        <RiversLayer visible={showRivers} progress={riversProgress} />
+        <BasinInflowArrows visible={showArrows} opacity={arrowsOpacity} />
 
-        {/* Geocoder marker - shows the selected location from basin search */}
+        {/* Geocoder marker */}
         {geocoderMarker && (
           <Marker
             longitude={geocoderMarker[0]}
