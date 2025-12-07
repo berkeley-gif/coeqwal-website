@@ -94,8 +94,8 @@ export function StrategyRow({
     <Box
       sx={{
         backgroundColor: "rgba(255, 255, 255, 0.95)",
-        borderRadius: theme.borderRadius.card,
-        padding: theme.spacing(2.5),
+        borderRadius: theme.borderRadius.rounded,
+        padding: theme.spacing(1.5),
         boxShadow: theme.shadows[2],
         maxWidth: "500px",
         pointerEvents: "auto",
@@ -106,19 +106,37 @@ export function StrategyRow({
         variant="subtitle1"
         sx={{
           fontWeight: theme.typography.fontWeightMedium,
-          mb: 2,
+          mb: showDescription ? 0.5 : 0,
+          fontSize: theme.typography.body2.fontSize,
+          lineHeight: 1.3,
           color: theme.palette.grey[900],
         }}
       >
         {strategy.label}
       </Typography>
 
-      {/* Operations icons */}
+      {/* Description - matches StrategyGrid layout (before icons) */}
+      {showDescription && (
+        <Typography
+          variant="body2"
+          sx={{
+            mb: 1.5,
+            lineHeight: 1.4,
+            fontSize: theme.typography.nav.fontSize,
+            color: theme.palette.grey[700],
+          }}
+        >
+          {strategy.description}
+        </Typography>
+      )}
+
+      {/* Operations icons - matches StrategyGrid spacing */}
       <Box
         sx={{
           display: "flex",
-          gap: { xs: 2, md: 3 },
+          gap: { xs: 0.5, md: 1 },
           alignItems: "flex-start",
+          flexDirection: "row",
           justifyContent: "flex-start",
         }}
       >
@@ -126,57 +144,21 @@ export function StrategyRow({
           <InfoTooltip key={icon.path} description={icon.description}>
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 1,
-                cursor: "help",
+                width: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                height: { xs: theme.spacing(4), lg: theme.spacing(5) },
+                cursor: "pointer",
               }}
             >
-              <Box
-                sx={{
-                  width: theme.spacing(5),
-                  height: theme.spacing(5),
-                }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={icon.path}
-                  alt={icon.alt}
-                  style={{ width: "100%", height: "100%" }}
-                />
-              </Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  textAlign: "center",
-                  color: theme.palette.grey[700],
-                  fontSize: "0.7rem",
-                  lineHeight: 1.2,
-                  maxWidth: theme.spacing(10),
-                  whiteSpace: "pre-line",
-                }}
-              >
-                {icon.label}
-              </Typography>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={icon.path}
+                alt={icon.alt}
+                style={{ width: "100%", height: "100%" }}
+              />
             </Box>
           </InfoTooltip>
         ))}
       </Box>
-
-      {/* Description */}
-      {showDescription && (
-        <Typography
-          variant="body2"
-          sx={{
-            mt: 2,
-            color: theme.palette.grey[700],
-            lineHeight: 1.5,
-          }}
-        >
-          {strategy.description}
-        </Typography>
-      )}
     </Box>
   )
 }
