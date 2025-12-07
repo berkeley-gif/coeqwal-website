@@ -18,7 +18,7 @@ import { GeocodingPanel } from "./GeocodingPanel"
 import { DeltaInfoPanel } from "./DeltaInfoPanel"
 import { StrategyInfoPanel, KeyOperationsPanel, KeyOutcomesPanel } from "./StrategyRow"
 import { Section, StickySection } from "./Section"
-import { Box, Typography } from "@repo/ui/mui"
+import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
 import { learnMapActions, useGeocodingResetCounter } from "../store"
@@ -568,7 +568,7 @@ export default function MapOverlayPanels() {
                           </Box>
                           This describes the water management strategy being modeled.
                           <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
-                            Hover over the i icon to see definitions of terms.
+                            Hover over the <InfoIcon sx={{ fontSize: "1rem", verticalAlign: "text-top", mx: 0.25, color: "blue.bright" }} /> icon to see definitions of terms.
                           </Box>
                         </>
                       }
