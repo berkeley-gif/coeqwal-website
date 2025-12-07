@@ -7,7 +7,8 @@
  * Data is pulled from the same sources as StrategyGrid.
  */
 
-import { Box, Typography, useTheme, InfoIcon } from "@repo/ui/mui"
+import { useState } from "react"
+import { Box, Typography, useTheme, InfoIcon, ClickAwayListener } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
@@ -417,7 +418,9 @@ export function KeyOperationsPanel({
               </>
             }
             tooltipProps={{
-              PopperProps: { disablePortal: true },
+              PopperProps: { 
+                style: { zIndex: 10001 },
+              },
             }}
           >
             <Box
@@ -451,6 +454,7 @@ export function KeyOutcomesPanel({
 }: KeyOutcomesPanelProps) {
   const theme = useTheme()
   const { setDrawerContent, openDrawer } = useDrawerStore()
+  const [openTooltip, setOpenTooltip] = useState<string | null>(null)
 
   // Fetch tier data for the scenario
   const { chartData, isLoading } = useScenarioTiers(scenarioId)
@@ -599,106 +603,141 @@ export function KeyOutcomesPanel({
           const definition = OUTCOME_DEFINITIONS[outcome] || "No definition available."
           
           return (
-            <InfoTooltip
-              key={outcome}
-              description={
-                <>
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                  >
-                    {outcome}
-                  </Box>
-                  {renderDefinitionWithLinks(definition, outcome)}
-                  {tierDefs && (
-                    <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier1)}</span>
+            <ClickAwayListener key={outcome} onClickAway={() => openTooltip === outcome && setOpenTooltip(null)}>
+              <Box>
+                <InfoTooltip
+                  description={
+                    <>
+                      <Box
+                        component="span"
+                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      >
+                        {outcome}
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier2)}</span>
+                      {renderDefinitionWithLinks(definition, outcome)}
+                      {tierDefs && (
+                        <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier1)}</span>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier2)}</span>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier3)}</span>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier4)}</span>
+                          </Box>
+                        </Box>
+                      )}
+                      <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
+                        Click on chart to show values on map.
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier3)}</span>
-                      </Box>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier4)}</span>
-                      </Box>
-                    </Box>
-                  )}
-                  <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
-                    Click on chart to show values on map.
-                  </Box>
-                </>
-              }
-              tooltipProps={{
-                PopperProps: { 
-                  disablePortal: true,
-                  sx: { zIndex: 10001 }, // Above ScrollTooltip (z-index: 9999)
-                },
-                leaveDelay: 1000, // Give user time to move mouse to tooltip for clicking links
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 0.5,
-                  cursor: "pointer",
-                  p: 0.5,
-                  borderRadius: theme.borderRadius.rounded,
-                  transition: "all 0.2s ease",
-                  opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
-                  "&:hover": {
-                    backgroundColor: theme.palette.grey[100],
-                  },
-                }}
-              >
-                <ScenarioGlyph
-                  tierColors={
-                    hasData
-                      ? [
-                          theme.palette.tiers.tier1,
-                          theme.palette.tiers.tier2,
-                          theme.palette.tiers.tier3,
-                          theme.palette.tiers.tier4,
-                        ]
-                      : [
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                        ]
+                    </>
                   }
-                  values={getTierValues(outcome)}
-                  variant="bars"
-                  size={45}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: hasData
-                      ? theme.palette.blue.darkest
-                      : theme.palette.grey[500],
-                    fontWeight: 500,
-                    textAlign: "center",
-                    fontSize: "0.65rem",
-                    lineHeight: 1.2,
-                    minHeight: "2rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                  placement="top"
+                  tooltipProps={{
+                    open: openTooltip === outcome,
+                    disableHoverListener: true,
+                    disableFocusListener: true,
+                    PopperProps: { 
+                      disablePortal: true,
+                      sx: { zIndex: 10001 },
+                    },
+                    slotProps: {
+                      popper: {
+                        modifiers: [
+                          {
+                            name: "offset",
+                            options: {
+                              offset: [0, 10],
+                            },
+                          },
+                        ],
+                      },
+                    },
                   }}
                 >
-                  {outcome}
-                </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 0.5,
+                      cursor: "pointer",
+                      p: 0.5,
+                      borderRadius: theme.borderRadius.rounded,
+                      transition: "all 0.2s ease",
+                      opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
+                      "&:hover": {
+                        backgroundColor: theme.palette.grey[100],
+                      },
+                    }}
+                  >
+                    <ScenarioGlyph
+                      tierColors={
+                        hasData
+                          ? [
+                              theme.palette.tiers.tier1,
+                              theme.palette.tiers.tier2,
+                              theme.palette.tiers.tier3,
+                              theme.palette.tiers.tier4,
+                            ]
+                          : [
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                            ]
+                      }
+                      values={getTierValues(outcome)}
+                      variant="bars"
+                      size={45}
+                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.25,
+                        minHeight: "2rem",
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: hasData
+                            ? theme.palette.blue.darkest
+                            : theme.palette.grey[500],
+                          fontWeight: 500,
+                          textAlign: "center",
+                          fontSize: "0.65rem",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {outcome}
+                      </Typography>
+                      <InfoIcon
+                        onClick={() => setOpenTooltip(openTooltip === outcome ? null : outcome)}
+                        sx={{
+                          fontSize: "0.85rem",
+                          color: theme.palette.blue.bright,
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: theme.palette.blue.dark,
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </InfoTooltip>
               </Box>
-            </InfoTooltip>
+            </ClickAwayListener>
           )
         })}
       </Box>
@@ -735,106 +774,141 @@ export function KeyOutcomesPanel({
           const definition = OUTCOME_DEFINITIONS[outcome] || "No definition available."
 
           return (
-            <InfoTooltip
-              key={outcome}
-              description={
-                <>
-                  <Box
-                    component="span"
-                    sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                  >
-                    {outcome}
-                  </Box>
-                  {renderDefinitionWithLinks(definition, outcome)}
-                  {tierDefs && (
-                    <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier1)}</span>
+            <ClickAwayListener key={outcome} onClickAway={() => openTooltip === outcome && setOpenTooltip(null)}>
+              <Box>
+                <InfoTooltip
+                  description={
+                    <>
+                      <Box
+                        component="span"
+                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                      >
+                        {outcome}
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier2)}</span>
+                      {renderDefinitionWithLinks(definition, outcome)}
+                      {tierDefs && (
+                        <Box sx={{ mt: 1.5, display: "flex", flexDirection: "column", gap: 1, fontSize: "0.8rem" }}>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier1, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier1)}</span>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier2, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier2)}</span>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier3)}</span>
+                          </Box>
+                          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                            <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
+                            <span>{renderTierText(tierDefs.tier4)}</span>
+                          </Box>
+                        </Box>
+                      )}
+                      <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
+                        Click on chart to show values on map.
                       </Box>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier3, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier3)}</span>
-                      </Box>
-                      <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <Box sx={{ width: 12, height: 12, flexShrink: 0, mt: "4px", backgroundColor: theme.palette.tiers.tier4, borderRadius: 0.5 }} />
-                        <span>{renderTierText(tierDefs.tier4)}</span>
-                      </Box>
-                    </Box>
-                  )}
-                  <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
-                    Click on chart to show values on map.
-                  </Box>
-                </>
-              }
-              tooltipProps={{
-                PopperProps: { 
-                  disablePortal: true,
-                  sx: { zIndex: 10001 }, // Above ScrollTooltip (z-index: 9999)
-                },
-                leaveDelay: 1000, // Give user time to move mouse to tooltip for clicking links
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 0.5,
-                  cursor: "pointer",
-                  p: 0.5,
-                  borderRadius: theme.borderRadius.rounded,
-                  transition: "all 0.2s ease",
-                  opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
-                  "&:hover": {
-                    backgroundColor: theme.palette.grey[100],
-                  },
-                }}
-              >
-                <ScenarioGlyph
-                  tierColors={
-                    hasData
-                      ? [
-                          theme.palette.tiers.tier1,
-                          theme.palette.tiers.tier2,
-                          theme.palette.tiers.tier3,
-                          theme.palette.tiers.tier4,
-                        ]
-                      : [
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                          theme.palette.grey[300],
-                        ]
+                    </>
                   }
-                  values={getTierValues(outcome)}
-                  variant="dots"
-                  size={45}
-                />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: hasData
-                      ? theme.palette.blue.darkest
-                      : theme.palette.grey[500],
-                    fontWeight: 500,
-                    textAlign: "center",
-                    fontSize: "0.65rem",
-                    lineHeight: 1.2,
-                    minHeight: "2rem",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                  placement="top"
+                  tooltipProps={{
+                    open: openTooltip === outcome,
+                    disableHoverListener: true,
+                    disableFocusListener: true,
+                    PopperProps: { 
+                      disablePortal: true,
+                      sx: { zIndex: 10001 },
+                    },
+                    slotProps: {
+                      popper: {
+                        modifiers: [
+                          {
+                            name: "offset",
+                            options: {
+                              offset: [0, 10],
+                            },
+                          },
+                        ],
+                      },
+                    },
                   }}
                 >
-                  {outcome}
-                </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: 0.5,
+                      cursor: "pointer",
+                      p: 0.5,
+                      borderRadius: theme.borderRadius.rounded,
+                      transition: "all 0.2s ease",
+                      opacity: isLoading ? 0.5 : hasData ? 1 : 0.7,
+                      "&:hover": {
+                        backgroundColor: theme.palette.grey[100],
+                      },
+                    }}
+                  >
+                    <ScenarioGlyph
+                      tierColors={
+                        hasData
+                          ? [
+                              theme.palette.tiers.tier1,
+                              theme.palette.tiers.tier2,
+                              theme.palette.tiers.tier3,
+                              theme.palette.tiers.tier4,
+                            ]
+                          : [
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                              theme.palette.grey[300],
+                            ]
+                      }
+                      values={getTierValues(outcome)}
+                      variant="dots"
+                      size={45}
+                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.25,
+                        minHeight: "2rem",
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: hasData
+                            ? theme.palette.blue.darkest
+                            : theme.palette.grey[500],
+                          fontWeight: 500,
+                          textAlign: "center",
+                          fontSize: "0.65rem",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {outcome}
+                      </Typography>
+                      <InfoIcon
+                        onClick={() => setOpenTooltip(openTooltip === outcome ? null : outcome)}
+                        sx={{
+                          fontSize: "0.85rem",
+                          color: theme.palette.blue.bright,
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: theme.palette.blue.dark,
+                          },
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </InfoTooltip>
               </Box>
-            </InfoTooltip>
+            </ClickAwayListener>
           )
         })}
       </Box>
