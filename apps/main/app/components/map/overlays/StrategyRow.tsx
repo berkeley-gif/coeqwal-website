@@ -94,10 +94,12 @@ export function StrategyRow({
     <Box
       sx={{
         backgroundColor: "rgba(255, 255, 255, 0.95)",
-        borderRadius: theme.borderRadius.rounded,
-        padding: theme.spacing(1.5),
+        borderRadius: 0,
+        padding: { xs: 2, sm: 2.5, md: 3 },
         boxShadow: theme.shadows[2],
+        width: "100%",
         maxWidth: "500px",
+        boxSizing: "border-box",
         pointerEvents: "auto",
       }}
     >
@@ -112,7 +114,7 @@ export function StrategyRow({
           color: theme.palette.grey[900],
         }}
       >
-        {strategy.label}
+        {strategy.label} strategy
       </Typography>
 
       {/* Description - matches StrategyGrid layout (before icons) */}
@@ -120,7 +122,7 @@ export function StrategyRow({
         <Typography
           variant="body2"
           sx={{
-            mb: 1.5,
+            mb: 2,
             lineHeight: 1.4,
             fontSize: theme.typography.nav.fontSize,
             color: theme.palette.grey[700],
@@ -130,16 +132,36 @@ export function StrategyRow({
         </Typography>
       )}
 
-      {/* Operations icons - matches StrategyGrid spacing */}
+      {/* Divider and Key operations section */}
       <Box
         sx={{
-          display: "flex",
-          gap: { xs: 0.5, md: 1 },
-          alignItems: "flex-start",
-          flexDirection: "row",
-          justifyContent: "flex-start",
+          borderTop: `1px solid ${theme.palette.grey[300]}`,
+          pt: 2,
+          mt: showDescription ? 0 : 2,
         }}
       >
+        <Typography
+          variant="subtitle2"
+          sx={{
+            mb: 1.5,
+            fontSize: theme.typography.body2.fontSize,
+            fontWeight: theme.typography.fontWeightMedium,
+            color: theme.palette.grey[900],
+          }}
+        >
+          Key operations
+        </Typography>
+
+        {/* Operations icons - matches StrategyGrid spacing */}
+        <Box
+          sx={{
+            display: "flex",
+            gap: { xs: 0.5, md: 1 },
+            alignItems: "flex-start",
+            flexDirection: "row",
+            justifyContent: "flex-start",
+          }}
+        >
         {icons.map((icon) => (
           <InfoTooltip key={icon.path} description={icon.description}>
             <Box
@@ -158,6 +180,7 @@ export function StrategyRow({
             </Box>
           </InfoTooltip>
         ))}
+        </Box>
       </Box>
     </Box>
   )
