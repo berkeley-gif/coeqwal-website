@@ -51,37 +51,6 @@ export default function MapOverlayPanels() {
   const keyOutcomesRef = useRef<HTMLDivElement>(null)
   const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
 
-  // Dynamic panel heights for stacking
-  const [strategyInfoHeight, setStrategyInfoHeight] = useState(0)
-  const [keyOperationsHeight, setKeyOperationsHeight] = useState(0)
-
-  // Measure panel heights after render
-  useEffect(() => {
-    const measureHeights = () => {
-      if (strategyInfoRef.current) {
-        setStrategyInfoHeight(strategyInfoRef.current.offsetHeight)
-      }
-      if (keyOperationsRef.current) {
-        setKeyOperationsHeight(keyOperationsRef.current.offsetHeight)
-      }
-    }
-    
-    // Measure initially and on resize
-    measureHeights()
-    window.addEventListener("resize", measureHeights)
-    return () => window.removeEventListener("resize", measureHeights)
-  }, [])
-
-  // Calculate stacking positions (with 16px gap between panels)
-  const panelGap = 16
-  const baseTop = "15vh"
-  const keyOperationsTop = strategyInfoHeight > 0 
-    ? `calc(${baseTop} + ${strategyInfoHeight + panelGap}px)` 
-    : `calc(${baseTop} + 150px)` // Fallback
-  const keyOutcomesTop = (strategyInfoHeight > 0 && keyOperationsHeight > 0)
-    ? `calc(${baseTop} + ${strategyInfoHeight + keyOperationsHeight + (panelGap * 2)}px)`
-    : `calc(${baseTop} + 280px)` // Fallback
-
   // Tooltip scroll progress
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
 
@@ -130,14 +99,34 @@ export default function MapOverlayPanels() {
     ["45vh", "45vh", "15vh", "15vh"],
   )
 
-  // Tooltip sequence (each tooltip appears after its panel, before the next panel):
-  // 1. Strategy row panel enters (~0.35)
+  // Panel and tooltip sequence:
+  // 1. Strategy row panel enters (~0.35) - stays visible
   // 2. Strategy description tooltip (0.38-0.48)
-  // 3. Key operations panel enters (~0.50)
+  // 3. Key operations panel enters (~0.50) - stays visible
   // 4. Key operations tooltip (0.53-0.63)
-  // 5. Key outcomes panel enters (~0.70)
+  // 5. Key outcomes panel enters (~0.70) - stays visible
   // 6. Key outcomes tooltip (0.73-0.83)
 
+  // Panel opacity - fade in and stay visible
+  const strategyInfoPanelOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.32, 0.38],
+    [0, 1],
+  )
+
+  const keyOperationsPanelOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.48, 0.54],
+    [0, 1],
+  )
+
+  const keyOutcomesPanelOpacity = useTransform(
+    scenarioIntroProgress,
+    [0.68, 0.74],
+    [0, 1],
+  )
+
+  // Tooltip opacity - fade in and out
   const strategyInfoTooltipOpacity = useTransform(
     scenarioIntroProgress,
     [0.38, 0.42, 0.46, 0.50],
@@ -496,195 +485,184 @@ export default function MapOverlayPanels() {
           </Section>
         </motion.div>
 
-        {/* Strategy info panel - scrolls in on the right side and sticks at same level as paragraph */}
+        {/* All right-side panels in a single sticky container */}
         <Box
           sx={{
             position: "sticky",
-            top: "15vh", // Same level as the paragraph on the left
+            top: "15vh",
             zIndex: 1,
             mt: "100vh", // Delay entrance until paragraph is at top position
           }}
         >
-          <Section
-            id="strategy-row"
-            amount={0.5}
-            sx={{ minHeight: "auto", alignItems: "flex-start" }}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              justifyContent: "flex-end",
+              width: "100%",
+              pl: { xs: 2, sm: 3, md: 4 },
+              pr: { xs: 4, sm: 8, md: 12, lg: 16 },
+            }}
           >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                width: "100%",
-                pl: { xs: 2, sm: 3, md: 4 },
-                pr: { xs: 4, sm: 8, md: 12, lg: 16 },
-              }}
-            >
-              {/* Container for tooltip positioning */}
-              <Box
-                ref={strategyInfoContainerRef}
-                sx={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: "500px",
-                }}
+            {/* Strategy info panel */}
+            <motion.div style={{ opacity: strategyInfoPanelOpacity }}>
+              <Section
+                id="strategy-row"
+                amount={0.5}
+                sx={{ minHeight: "auto", alignItems: "flex-start" }}
               >
-                <Box ref={strategyInfoRef}>
-                  <StrategyInfoPanel strategyValue="current-ops" />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
+                >
+                  <Box
+                    ref={strategyInfoContainerRef}
+                    sx={{
+                      position: "relative",
+                      width: "100%",
+                      maxWidth: "500px",
+                    }}
+                  >
+                    <Box ref={strategyInfoRef}>
+                      <StrategyInfoPanel strategyValue="current-ops" />
+                    </Box>
+                    
+                    <ScrollTooltip
+                      targetRef={strategyInfoRef}
+                      containerRef={strategyInfoContainerRef}
+                      content={
+                        <>
+                          <Box
+                            component="span"
+                            sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                          >
+                            Strategy
+                          </Box>
+                          This describes the water management strategy being modeled.
+                          <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
+                            Hover over the i icon to see definitions of terms.
+                          </Box>
+                        </>
+                      }
+                      position="left"
+                      offsetY={20}
+                      opacity={strategyInfoTooltipOpacity}
+                    />
+                  </Box>
                 </Box>
-                
-                {/* Strategy info tooltip */}
-                <ScrollTooltip
-                  targetRef={strategyInfoRef}
-                  containerRef={strategyInfoContainerRef}
-                  content={
-                    <>
-                      <Box
-                        component="span"
-                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                      >
-                        Strategy
-                      </Box>
-                      This describes the water management strategy being modeled.
-                      <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
-                        Hover over the i icon to see definitions of terms.
-                      </Box>
-                    </>
-                  }
-                  position="left"
-                  offsetY={20}
-                  opacity={strategyInfoTooltipOpacity}
-                />
-              </Box>
-            </Box>
-          </Section>
-        </Box>
+              </Section>
+            </motion.div>
 
-        {/* Key operations panel - scrolls in after strategy description tooltip */}
-        <Box
-          sx={{
-            position: "sticky",
-            top: keyOperationsTop, // Dynamically calculated based on strategy info height
-            zIndex: 1,
-            mt: "100vh", // Delay entrance until after strategy description tooltip
-          }}
-        >
-          <Section
-            id="key-operations"
-            amount={0.5}
-            sx={{ minHeight: "auto", alignItems: "flex-start" }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                width: "100%",
-                pl: { xs: 2, sm: 3, md: 4 },
-                pr: { xs: 4, sm: 8, md: 12, lg: 16 },
-              }}
-            >
-              {/* Container for tooltip positioning */}
-              <Box
-                ref={keyOperationsContainerRef}
-                sx={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: "500px",
-                }}
+            {/* Key operations panel */}
+            <motion.div style={{ opacity: keyOperationsPanelOpacity }}>
+              <Section
+                id="key-operations"
+                amount={0.5}
+                sx={{ minHeight: "auto", alignItems: "flex-start" }}
               >
-                <Box ref={keyOperationsRef}>
-                  <KeyOperationsPanel strategyValue="current-ops" />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
+                >
+                  <Box
+                    ref={keyOperationsContainerRef}
+                    sx={{
+                      position: "relative",
+                      width: "100%",
+                      maxWidth: "500px",
+                    }}
+                  >
+                    <Box ref={keyOperationsRef}>
+                      <KeyOperationsPanel strategyValue="current-ops" />
+                    </Box>
+                    
+                    <ScrollTooltip
+                      targetRef={keyOperationsRef}
+                      containerRef={keyOperationsContainerRef}
+                      content={
+                        <>
+                          <Box
+                            component="span"
+                            sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                          >
+                            Key operations
+                          </Box>
+                          These icons represent the key operational decisions that define
+                          this water management strategy.
+                          <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
+                            Hover over the icons to see what key operations they represent.
+                          </Box>
+                        </>
+                      }
+                      position="left"
+                      offsetY={20}
+                      opacity={keyOperationsTooltipOpacity}
+                    />
+                  </Box>
                 </Box>
-                
-                {/* Key operations tooltip */}
-                <ScrollTooltip
-                  targetRef={keyOperationsRef}
-                  containerRef={keyOperationsContainerRef}
-                  content={
-                    <>
-                      <Box
-                        component="span"
-                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                      >
-                        Key operations
-                      </Box>
-                      These icons represent the key operational decisions that define
-                      this water management strategy.
-                      <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
-                        Hover over the icons to see what key operations they represent.
-                      </Box>
-                    </>
-                  }
-                  position="left"
-                  offsetY={20}
-                  opacity={keyOperationsTooltipOpacity}
-                />
-              </Box>
-            </Box>
-          </Section>
-        </Box>
+              </Section>
+            </motion.div>
 
-        {/* Key outcomes panel - scrolls in after key operations tooltip */}
-        <Box
-          sx={{
-            position: "sticky",
-            top: keyOutcomesTop, // Dynamically calculated based on panels above
-            zIndex: 1,
-            mt: "120vh", // Delay entrance until after key operations tooltip
-          }}
-        >
-          <Section
-            id="key-outcomes"
-            amount={0.5}
-            sx={{ minHeight: "auto", alignItems: "flex-start" }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "flex-end",
-                width: "100%",
-                pl: { xs: 2, sm: 3, md: 4 },
-                pr: { xs: 4, sm: 8, md: 12, lg: 16 },
-              }}
-            >
-              {/* Container for tooltip positioning */}
-              <Box
-                ref={keyOutcomesContainerRef}
-                sx={{
-                  position: "relative",
-                  width: "100%",
-                  maxWidth: "500px",
-                }}
+            {/* Key outcomes panel */}
+            <motion.div style={{ opacity: keyOutcomesPanelOpacity }}>
+              <Section
+                id="key-outcomes"
+                amount={0.5}
+                sx={{ minHeight: "auto", alignItems: "flex-start" }}
               >
-                <Box ref={keyOutcomesRef}>
-                  <KeyOutcomesPanel scenarioId="s0020" />
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    width: "100%",
+                  }}
+                >
+                  <Box
+                    ref={keyOutcomesContainerRef}
+                    sx={{
+                      position: "relative",
+                      width: "100%",
+                      maxWidth: "500px",
+                    }}
+                  >
+                    <Box ref={keyOutcomesRef}>
+                      <KeyOutcomesPanel scenarioId="s0020" />
+                    </Box>
+                    
+                    <ScrollTooltip
+                      targetRef={keyOutcomesRef}
+                      containerRef={keyOutcomesContainerRef}
+                      content={
+                        <>
+                          <Box
+                            component="span"
+                            sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
+                          >
+                            Key outcomes
+                          </Box>
+                          These metrics show how this strategy affects water supply,
+                          ecosystems, agriculture, and communities.
+                          <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
+                            Hover over the outcomes to learn more about each metric.
+                          </Box>
+                        </>
+                      }
+                      position="left"
+                      offsetY={20}
+                      opacity={keyOutcomesTooltipOpacity}
+                    />
+                  </Box>
                 </Box>
-                
-                {/* Key outcomes tooltip */}
-                <ScrollTooltip
-                  targetRef={keyOutcomesRef}
-                  containerRef={keyOutcomesContainerRef}
-                  content={
-                    <>
-                      <Box
-                        component="span"
-                        sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                      >
-                        Key outcomes
-                      </Box>
-                      These metrics show how this strategy affects water supply,
-                      ecosystems, agriculture, and communities.
-                      <Box component="span" sx={{ display: "block", mt: 1, fontStyle: "italic" }}>
-                        Hover over the outcomes to learn more about each metric.
-                      </Box>
-                    </>
-                  }
-                  position="left"
-                  offsetY={20}
-                  opacity={keyOutcomesTooltipOpacity}
-                />
-              </Box>
-            </Box>
-          </Section>
+              </Section>
+            </motion.div>
+          </Box>
         </Box>
 
         {/* Scroll spacer - allows all elements to stick while scrolling continues */}
