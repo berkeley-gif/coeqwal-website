@@ -25,16 +25,22 @@ interface StrategyRowProps {
 interface StrategyInfoPanelProps {
   /** Strategy value to display (defaults to "current-ops") */
   strategyValue?: string
+  /** Callback when the title is clicked (to reopen tooltip) */
+  onTitleClick?: () => void
 }
 
 interface KeyOperationsPanelProps {
   /** Strategy value to display (defaults to "current-ops") */
   strategyValue?: string
+  /** Callback when the title is clicked (to reopen tooltip) */
+  onTitleClick?: () => void
 }
 
 interface KeyOutcomesPanelProps {
   /** Scenario ID to display (defaults to "s0020" for current operations) */
   scenarioId?: string
+  /** Callback when the title is clicked (to reopen tooltip) */
+  onTitleClick?: () => void
 }
 
 /**
@@ -254,6 +260,7 @@ export function StrategyRow({
  */
 export function StrategyInfoPanel({
   strategyValue = "current-ops",
+  onTitleClick,
 }: StrategyInfoPanelProps) {
   const theme = useTheme()
 
@@ -279,12 +286,17 @@ export function StrategyInfoPanel({
     >
       <Typography
         variant="subtitle1"
+        onClick={onTitleClick}
         sx={{
           fontWeight: theme.typography.fontWeightMedium,
           mb: 0.5,
           fontSize: theme.typography.body2.fontSize,
           lineHeight: 1.3,
           color: theme.palette.grey[900],
+          cursor: onTitleClick ? "pointer" : "default",
+          "&:hover": onTitleClick ? {
+            color: theme.palette.blue.bright,
+          } : {},
         }}
       >
         {strategy.label} strategy
@@ -337,6 +349,7 @@ export function StrategyInfoPanel({
  */
 export function KeyOperationsPanel({
   strategyValue = "current-ops",
+  onTitleClick,
 }: KeyOperationsPanelProps) {
   const theme = useTheme()
 
@@ -364,11 +377,16 @@ export function KeyOperationsPanel({
     >
       <Typography
         variant="subtitle2"
+        onClick={onTitleClick}
         sx={{
           mb: 1,
           fontSize: theme.typography.body2.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],
+          cursor: onTitleClick ? "pointer" : "default",
+          "&:hover": onTitleClick ? {
+            color: theme.palette.blue.bright,
+          } : {},
         }}
       >
         Key operations
@@ -428,6 +446,7 @@ export function KeyOperationsPanel({
  */
 export function KeyOutcomesPanel({
   scenarioId = "s0020",
+  onTitleClick,
 }: KeyOutcomesPanelProps) {
   const theme = useTheme()
 
@@ -463,11 +482,16 @@ export function KeyOutcomesPanel({
     >
       <Typography
         variant="subtitle2"
+        onClick={onTitleClick}
         sx={{
           mb: 1,
           fontSize: theme.typography.body2.fontSize,
           fontWeight: theme.typography.fontWeightMedium,
           color: theme.palette.grey[900],
+          cursor: onTitleClick ? "pointer" : "default",
+          "&:hover": onTitleClick ? {
+            color: theme.palette.blue.bright,
+          } : {},
         }}
       >
         Key outcomes

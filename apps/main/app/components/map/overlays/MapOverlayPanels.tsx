@@ -51,6 +51,11 @@ export default function MapOverlayPanels() {
   const keyOutcomesRef = useRef<HTMLDivElement>(null)
   const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
 
+  // State for manually closed tooltips
+  const [strategyTooltipClosed, setStrategyTooltipClosed] = useState(false)
+  const [keyOpsTooltipClosed, setKeyOpsTooltipClosed] = useState(false)
+  const [keyOutcomesTooltipClosed, setKeyOutcomesTooltipClosed] = useState(false)
+
   // Tooltip scroll progress
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
 
@@ -544,7 +549,10 @@ export default function MapOverlayPanels() {
                     }}
                   >
                     <Box ref={strategyInfoRef}>
-                      <StrategyInfoPanel strategyValue="current-ops" />
+                      <StrategyInfoPanel 
+                        strategyValue="current-ops" 
+                        onTitleClick={() => setStrategyTooltipClosed(false)}
+                      />
                     </Box>
                     
                     <ScrollTooltip
@@ -567,6 +575,8 @@ export default function MapOverlayPanels() {
                       position="left"
                       offsetY={20}
                       opacity={strategyInfoTooltipOpacity}
+                      isClosed={strategyTooltipClosed}
+                      onClose={() => setStrategyTooltipClosed(true)}
                     />
                   </Box>
                 </Box>
@@ -596,7 +606,10 @@ export default function MapOverlayPanels() {
                     }}
                   >
                     <Box ref={keyOperationsRef}>
-                      <KeyOperationsPanel strategyValue="current-ops" />
+                      <KeyOperationsPanel 
+                        strategyValue="current-ops" 
+                        onTitleClick={() => setKeyOpsTooltipClosed(false)}
+                      />
                     </Box>
                     
                     <ScrollTooltip
@@ -620,6 +633,8 @@ export default function MapOverlayPanels() {
                       position="left"
                       offsetY={20}
                       opacity={keyOperationsTooltipOpacity}
+                      isClosed={keyOpsTooltipClosed}
+                      onClose={() => setKeyOpsTooltipClosed(true)}
                     />
                   </Box>
                 </Box>
@@ -649,7 +664,10 @@ export default function MapOverlayPanels() {
                     }}
                   >
                     <Box ref={keyOutcomesRef}>
-                      <KeyOutcomesPanel scenarioId="s0020" />
+                      <KeyOutcomesPanel 
+                        scenarioId="s0020" 
+                        onTitleClick={() => setKeyOutcomesTooltipClosed(false)}
+                      />
                     </Box>
                     
                     <ScrollTooltip
@@ -678,6 +696,8 @@ export default function MapOverlayPanels() {
                       position="left"
                       offsetY={20}
                       opacity={keyOutcomesTooltipOpacity}
+                      isClosed={keyOutcomesTooltipClosed}
+                      onClose={() => setKeyOutcomesTooltipClosed(true)}
                     />
                   </Box>
                 </Box>
