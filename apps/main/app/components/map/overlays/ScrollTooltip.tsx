@@ -1,8 +1,8 @@
 "use client"
 
 import { RefObject, useEffect, useState, ReactNode } from "react"
-import { Box, Typography, useTheme } from "@repo/ui/mui"
-import { motion, MotionValue } from "@repo/motion"
+import { Box, Typography, useTheme, IconButton } from "@repo/ui/mui"
+import { motion, MotionValue, useTransform } from "@repo/motion"
 
 const MotionBox = motion.create(Box)
 
@@ -14,6 +14,10 @@ interface ScrollTooltipProps {
   opacity: MotionValue<number> // Framer Motion value for scroll-driven opacity
   /** Vertical offset in pixels (positive = down, negative = up) */
   offsetY?: number
+  /** Whether the tooltip has been manually closed */
+  isClosed?: boolean
+  /** Callback when the close button is clicked */
+  onClose?: () => void
 }
 
 /**
@@ -27,9 +31,16 @@ export default function ScrollTooltip({
   position = "right",
   opacity,
   offsetY = 0,
+  isClosed = false,
+  onClose,
 }: ScrollTooltipProps) {
   const theme = useTheme()
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
+
+  // Combine scroll-driven opacity with manual close state
+  const effectiveOpacity = useTransform(opacity, (value) => 
+    isClosed ? 0 : value
+  )
 
   useEffect(() => {
     if (!targetRef.current || !containerRef.current) return
@@ -139,7 +150,7 @@ export default function ScrollTooltip({
 
   return (
     <MotionBox
-      style={{ opacity }} // Framer Motion scroll-driven opacity
+      style={{ opacity: effectiveOpacity }} // Combined scroll + manual close opacity
       sx={{
         position: "absolute",
         top: tooltipPosition.top,
@@ -149,7 +160,7 @@ export default function ScrollTooltip({
             ? "translateY(-50%)"
             : "translateX(-50%)",
         zIndex: 9999,
-        pointerEvents: "none",
+        pointerEvents: isClosed ? "none" : "auto", // Enable clicks when visible
       }}
     >
       <Box
@@ -162,9 +173,34 @@ export default function ScrollTooltip({
           borderRadius: theme.borderRadius.card,
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
           padding: "16px",
+          paddingRight: onClose ? "32px" : "16px", // Extra space for close button
           maxWidth: "300px",
         }}
       >
+        {/* Close button */}
+        {onClose && (
+          <IconButton
+            onClick={onClose}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              width: 24,
+              height: 24,
+              fontSize: "0.875rem",
+              color: theme.palette.grey[500],
+              "&:hover": {
+                color: theme.palette.grey[700],
+                backgroundColor: theme.palette.grey[100],
+              },
+            }}
+            aria-label="Close tooltip"
+          >
+            ✕
+          </IconButton>
+        )}
+
         {/* Arrow */}
         <Box sx={getArrowStyle()} />
 
