@@ -45,7 +45,7 @@ export const formatTierText = (text: string) => {
     }
 
     const subParts = part.split(
-      /(Optimal:|Suboptimal:|At-risk:|Critical:|Compromised:|\d+%)/g,
+      /(Optimal:|Sub-optimal:|At-risk:|Critical:|Compromised:|\d+%)/g,
     )
 
     return subParts.map((subPart, subIndex) => {
@@ -53,7 +53,7 @@ export const formatTierText = (text: string) => {
 
       if (
         subPart.match(
-          /^(Optimal:|Suboptimal:|At-risk:|Critical:|Compromised:)$/,
+          /^(Optimal:|Sub-optimal:|At-risk:|Critical:|Compromised:)$/,
         )
       ) {
         return (

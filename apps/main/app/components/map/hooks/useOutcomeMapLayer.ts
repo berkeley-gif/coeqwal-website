@@ -68,6 +68,21 @@ interface OutcomeLayerConfig {
 }
 
 /**
+ * Preset bounds for each outcome type
+ * These ensure consistent zooming when switching between outcomes
+ * Format: [[minLng, minLat], [maxLng, maxLat]]
+ */
+const OUTCOME_BOUNDS: Record<string, [[number, number], [number, number]]> = {
+  // CWS covers urban areas throughout Central Valley
+  "Community deliveries": [[-122.5, 35.5], [-119.0, 40.5]],
+  // AG_REV covers agricultural districts throughout Central Valley
+  "Agricultural revenue": [[-122.5, 35.0], [-118.5, 40.5]],
+}
+
+// Default bounds for Central Valley if no preset is defined
+const DEFAULT_BOUNDS: [[number, number], [number, number]] = [[-122.5, 35.0], [-118.5, 40.5]]
+
+/**
  * Configuration for each outcome type
  */
 export const OUTCOME_LAYER_CONFIG: Record<string, OutcomeLayerConfig> = {
@@ -463,67 +478,26 @@ export function useOutcomeMapLayer({
             map.setLayoutProperty(DEMAND_UNITS_OUTLINE_ID, "visibility", "visible")
           }
 
-          // Zoom to bounds of visible features
-          const sourceId = map.getLayer(DEMAND_UNITS_LAYER_ID)?.source as string
-          const sourceLayer = (map.getLayer(DEMAND_UNITS_LAYER_ID) as { "source-layer"?: string })?.["source-layer"]
-          
-          const features = map.querySourceFeatures(sourceId, {
-            sourceLayer,
-            filter: ["all", classFilter, duIdFilter],
-          })
-
-          if (features.length > 0) {
-            let minLng = Infinity,
-              minLat = Infinity,
-              maxLng = -Infinity,
-              maxLat = -Infinity
-
-            features.forEach((feature) => {
-              const geom = feature.geometry
-              if (geom.type === "Polygon") {
-                const coords = geom.coordinates[0]
-                if (coords) {
-                  coords.forEach((coord) => {
-                    const lng = coord[0]
-                    const lat = coord[1]
-                    if (lng !== undefined && lat !== undefined) {
-                      minLng = Math.min(minLng, lng)
-                      minLat = Math.min(minLat, lat)
-                      maxLng = Math.max(maxLng, lng)
-                      maxLat = Math.max(maxLat, lat)
-                    }
-                  })
-                }
-              } else if (geom.type === "MultiPolygon") {
-                geom.coordinates.forEach((polygon) => {
-                  const ring = polygon[0]
-                  if (ring) {
-                    ring.forEach((coord) => {
-                      const lng = coord[0]
-                      const lat = coord[1]
-                      if (lng !== undefined && lat !== undefined) {
-                        minLng = Math.min(minLng, lng)
-                        minLat = Math.min(minLat, lat)
-                        maxLng = Math.max(maxLng, lng)
-                        maxLat = Math.max(maxLat, lat)
-                      }
-                    })
-                  }
-                })
-              }
-            })
-
-            if (minLng !== Infinity) {
-              map.fitBounds(
-                [
-                  [minLng, minLat],
-                  [maxLng, maxLat],
-                ],
-                { padding: 100, maxZoom: 9, duration: 1000 }
-              )
-            }
-          }
         })
+
+        // Zoom to preset bounds for this outcome
+        // This is a SEPARATE withMap call to ensure zoom happens even if styling encounters issues
+        // and to always trigger when switching outcomes (regardless of previous map state)
+        if (!cancelled) {
+          mapAPI.withMap((mapRef) => {
+            const map = mapRef.getMap()
+            const bounds = outcome ? OUTCOME_BOUNDS[outcome] || DEFAULT_BOUNDS : DEFAULT_BOUNDS
+            
+            console.log(`[useOutcomeMapLayer] Zooming to bounds for "${outcome}":`, bounds)
+            
+            // Always use fitBounds to reset view, even if user has panned/zoomed manually
+            map.fitBounds(bounds, {
+              padding: { top: 100, bottom: 100, left: 100, right: 350 }, // Extra right padding for panels
+              maxZoom: 8,
+              duration: 1000,
+            })
+          })
+        }
       } catch (err) {
         if (!cancelled) {
           console.error("Error styling outcome map layer:", err)
