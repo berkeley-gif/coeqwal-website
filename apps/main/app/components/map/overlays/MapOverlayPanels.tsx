@@ -21,7 +21,7 @@ import { Section, StickySection } from "./Section"
 import { Box, Typography, InfoIcon } from "@repo/ui/mui"
 import { useMap } from "@repo/map"
 import { centralValleyBasins } from "@repo/data"
-import { learnMapActions, useGeocodingResetCounter } from "../store"
+import { learnMapActions, useGeocodingResetCounter, useIsOutcomeVisualizationActive } from "../store"
 import { useScroll, useTransform, motion } from "@repo/motion"
 
 export default function MapOverlayPanels() {
@@ -55,6 +55,18 @@ export default function MapOverlayPanels() {
   const [strategyTooltipClosed, setStrategyTooltipClosed] = useState(false)
   const [keyOpsTooltipClosed, setKeyOpsTooltipClosed] = useState(false)
   const [keyOutcomesTooltipClosed, setKeyOutcomesTooltipClosed] = useState(false)
+
+  // Close tooltips when outcome visualization is activated
+  const isOutcomeActive = useIsOutcomeVisualizationActive()
+  
+  useEffect(() => {
+    if (isOutcomeActive) {
+      // Close all panel tooltips when showing outcome data on map
+      setStrategyTooltipClosed(true)
+      setKeyOpsTooltipClosed(true)
+      setKeyOutcomesTooltipClosed(true)
+    }
+  }, [isOutcomeActive])
 
   // Tooltip scroll progress
   const [tooltipRefsReady, setTooltipRefsReady] = useState(false)
@@ -148,22 +160,6 @@ export default function MapOverlayPanels() {
     scenarioIntroProgress,
     [0.75, 0.78, 0.85, 0.88],
     [0, 1, 1, 0],
-  )
-
-  // Disable pointer events on hidden panels to prevent tooltip activation
-  const strategyInfoPointerEvents = useTransform(
-    strategyInfoPanelOpacity,
-    (opacity) => (opacity > 0.1 ? "auto" : "none"),
-  )
-
-  const keyOperationsPointerEvents = useTransform(
-    keyOperationsPanelOpacity,
-    (opacity) => (opacity > 0.1 ? "auto" : "none"),
-  )
-
-  const keyOutcomesPointerEvents = useTransform(
-    keyOutcomesPanelOpacity,
-    (opacity) => (opacity > 0.1 ? "auto" : "none"),
   )
 
   // First panel entrance animation
@@ -475,6 +471,7 @@ export default function MapOverlayPanels() {
         sx={{
           minHeight: "550vh", // Space for: paragraph, strategy row + tooltip, key operations + tooltip, key outcomes + tooltip
           position: "relative",
+          pointerEvents: "none", // Allow map interaction in empty space
         }}
       >
         {/* Sticky intro text - animated position from midpoint to top */}
@@ -483,6 +480,7 @@ export default function MapOverlayPanels() {
             position: "sticky",
             top: paragraphTop,
             zIndex: 2,
+            pointerEvents: "none", // Allow map interaction
           }}
         >
           <Section
@@ -513,6 +511,7 @@ export default function MapOverlayPanels() {
             top: "15vh",
             zIndex: 1,
             mt: "100vh", // Delay entrance until paragraph is at top position
+            pointerEvents: "none", // Allow map interaction
           }}
         >
           <Box
@@ -524,10 +523,11 @@ export default function MapOverlayPanels() {
               width: "100%",
               pl: { xs: 2, sm: 3, md: 4 },
               pr: { xs: 4, sm: 8, md: 12, lg: 16 },
+              pointerEvents: "none", // Allow map interaction
             }}
           >
             {/* Strategy info panel */}
-            <motion.div style={{ opacity: strategyInfoPanelOpacity, pointerEvents: strategyInfoPointerEvents }}>
+            <motion.div style={{ opacity: strategyInfoPanelOpacity }}>
               <Section
                 id="strategy-row"
                 amount={0.5}
@@ -538,6 +538,7 @@ export default function MapOverlayPanels() {
                     display: "flex",
                     justifyContent: "flex-end",
                     width: "100%",
+                    pointerEvents: "none", // Allow map interaction in flex container
             }}
           >
                   <Box
@@ -546,9 +547,10 @@ export default function MapOverlayPanels() {
                       position: "relative",
                       width: "100%",
                       maxWidth: "500px",
+                      pointerEvents: "none", // Allow map interaction
                     }}
                   >
-                    <Box ref={strategyInfoRef}>
+                    <Box ref={strategyInfoRef} sx={{ pointerEvents: "auto" }}>
                       <StrategyInfoPanel 
                         strategyValue="current-ops" 
                         onTitleClick={() => setStrategyTooltipClosed(false)}
@@ -584,7 +586,7 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Key operations panel */}
-            <motion.div style={{ opacity: keyOperationsPanelOpacity, pointerEvents: keyOperationsPointerEvents }}>
+            <motion.div style={{ opacity: keyOperationsPanelOpacity }}>
               <Section
                 id="key-operations"
                 amount={0.5}
@@ -595,6 +597,7 @@ export default function MapOverlayPanels() {
                     display: "flex",
                     justifyContent: "flex-end",
                     width: "100%",
+                    pointerEvents: "none", // Allow map interaction in flex container
                   }}
                 >
                   <Box
@@ -603,9 +606,10 @@ export default function MapOverlayPanels() {
                       position: "relative",
                       width: "100%",
                       maxWidth: "500px",
+                      pointerEvents: "none", // Allow map interaction
                     }}
                   >
-                    <Box ref={keyOperationsRef}>
+                    <Box ref={keyOperationsRef} sx={{ pointerEvents: "auto" }}>
                       <KeyOperationsPanel 
                         strategyValue="current-ops" 
                         onTitleClick={() => setKeyOpsTooltipClosed(false)}
@@ -642,7 +646,7 @@ export default function MapOverlayPanels() {
             </motion.div>
 
             {/* Key outcomes panel */}
-            <motion.div style={{ opacity: keyOutcomesPanelOpacity, pointerEvents: keyOutcomesPointerEvents }}>
+            <motion.div style={{ opacity: keyOutcomesPanelOpacity }}>
               <Section
                 id="key-outcomes"
                 amount={0.5}
@@ -653,6 +657,7 @@ export default function MapOverlayPanels() {
                     display: "flex",
                     justifyContent: "flex-end",
                     width: "100%",
+                    pointerEvents: "none", // Allow map interaction in flex container
                   }}
                 >
                   <Box
@@ -661,9 +666,10 @@ export default function MapOverlayPanels() {
                       position: "relative",
                       width: "100%",
                       maxWidth: "500px",
+                      pointerEvents: "none", // Allow map interaction
                     }}
                   >
-                    <Box ref={keyOutcomesRef}>
+                    <Box ref={keyOutcomesRef} sx={{ pointerEvents: "auto" }}>
                       <KeyOutcomesPanel 
                         scenarioId="s0020" 
                         onTitleClick={() => setKeyOutcomesTooltipClosed(false)}

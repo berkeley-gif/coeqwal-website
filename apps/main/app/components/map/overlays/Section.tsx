@@ -42,6 +42,7 @@ export function Section({ id, children, amount = 0.5, sx = {} }: SectionProps) {
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
+        pointerEvents: "none", // Allow map interaction in empty space
         ...sx,
       }}
     >
@@ -131,6 +132,7 @@ export function StickySection({
       sx={{
         minHeight: stickyHeight,
         position: "relative",
+        pointerEvents: "none", // Allow map interaction in empty space
         ...sx,
       }}
     >
@@ -141,6 +143,7 @@ export function StickySection({
           height: "100vh",
           display: "flex",
           alignItems: "center",
+          pointerEvents: "none", // Allow map interaction in empty space
         }}
       >
         {children}

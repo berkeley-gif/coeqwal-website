@@ -18,7 +18,7 @@ import { fetchTierLocationData, type TierLocationResponse } from "../../api/tier
 import {
   useOutcomeMapLayer,
   outcomeUsesDemandUnits,
-} from "../../hooks/useOutcomeMapLayer"
+} from "./hooks/useOutcomeMapLayer"
 import {
   useActiveSection,
   useGeocoderMarker,

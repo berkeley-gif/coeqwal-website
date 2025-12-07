@@ -61,6 +61,8 @@ interface LearnMapState {
   geocodingResetCounter: number // Incremented to trigger GeocodingPanel reset
   selectedOutcome: string | null
   isPanelsExpanded: boolean
+  /** When true, outcome visualization is active - fades other map elements */
+  isOutcomeVisualizationActive: boolean
 }
 
 // ============================================================================
@@ -196,6 +198,7 @@ const initialState: LearnMapState = {
   geocodingResetCounter: 0,
   selectedOutcome: null,
   isPanelsExpanded: false,
+  isOutcomeVisualizationActive: false,
 }
 
 export const useLearnMapStore = create<LearnMapState>()(
@@ -223,7 +226,13 @@ export const learnMapActions = {
     })),
 
   setSelectedOutcome: (outcome: string | null) =>
-    useLearnMapStore.setState({ selectedOutcome: outcome }),
+    useLearnMapStore.setState({ 
+      selectedOutcome: outcome,
+      isOutcomeVisualizationActive: outcome !== null,
+    }),
+
+  setOutcomeVisualizationActive: (active: boolean) =>
+    useLearnMapStore.setState({ isOutcomeVisualizationActive: active }),
 
   setIsPanelsExpanded: (expanded: boolean) =>
     useLearnMapStore.setState({ isPanelsExpanded: expanded }),
@@ -249,6 +258,9 @@ export const useIsPanelsExpanded = () =>
 
 export const useSelectedOutcome = () =>
   useLearnMapStore((s) => s.selectedOutcome)
+
+export const useIsOutcomeVisualizationActive = () =>
+  useLearnMapStore((s) => s.isOutcomeVisualizationActive)
 
 // Derived selectors
 export const useShowBasins = () =>
