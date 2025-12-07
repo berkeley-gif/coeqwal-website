@@ -46,7 +46,7 @@ export default function MapOverlayPanels() {
   // Refs for key operations tooltip
   const keyOperationsRef = useRef<HTMLDivElement>(null)
   const keyOperationsContainerRef = useRef<HTMLDivElement>(null)
-  
+
   // Refs for key outcomes tooltip
   const keyOutcomesRef = useRef<HTMLDivElement>(null)
   const keyOutcomesContainerRef = useRef<HTMLDivElement>(null)
@@ -196,16 +196,16 @@ export default function MapOverlayPanels() {
     >
       {/* ==================== SECTION 1: California overview ==================== */}
       <Section id="california" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="california-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
             Did you know that California has one of the most complex water
             systems in the world?
-          </Typography>
+        </Typography>
           <Box
             sx={{
               display: "flex",
@@ -220,76 +220,76 @@ export default function MapOverlayPanels() {
             >
               scroll to learn more
             </Typography>
-            <Box
-              component="span"
-              sx={{
-                fontSize: "1.5rem",
+          <Box
+            component="span"
+            sx={{ 
+              fontSize: "1.5rem", 
                 color: "white",
-                animation: "bounce 2s ease-in-out infinite",
-                "@keyframes bounce": {
-                  "0%, 100%": { transform: "translateY(0)" },
-                  "50%": { transform: "translateY(-8px)" },
-                },
-              }}
-            >
-              ↓
-            </Box>
+              animation: "bounce 2s ease-in-out infinite",
+              "@keyframes bounce": {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-8px)" },
+              },
+            }}
+          >
+            ↓
           </Box>
-        </CallResponsePanel>
+        </Box>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 2: Central Valley ==================== */}
       <Section id="central-valley" amount={0.5} sx={{ mt: "50vh" }}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="central-valley-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            The{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              Central Valley
-            </Box>{" "}
-            is a long, low valley that collects much of California&apos;s water.
-            This water is stored, divided, and transported to farms and cities
-            across the state.
-          </Typography>
-        </CallResponsePanel>
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          The{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            Central Valley
+          </Box>{" "}
+          is a long, low valley that collects much of California&apos;s water.
+          This water is stored, divided, and transported to farms and cities
+          across the state.
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 3: Basins ==================== */}
       <Section id="basins" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="basins-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            The Central Valley lies across three water{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              basins
-            </Box>
-            .
-          </Typography>
-        </CallResponsePanel>
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          The Central Valley lies across three water{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            basins
+          </Box>
+          .
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 4: Watersheds ==================== */}
       <Section id="watersheds" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="watersheds-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            Each basin collects the rain and snowmelt that flows down from
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          Each basin collects the rain and snowmelt that flows down from
             surrounding mountains into its network of streams, rivers,
             reservoirs, and wetlands.
-          </Typography>
-        </CallResponsePanel>
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 4.5: Arrows (trigger) ==================== */}
@@ -299,47 +299,47 @@ export default function MapOverlayPanels() {
 
       {/* ==================== SECTION 5: Find My Basin ==================== */}
       <Section id="find-basin" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="find-basin-call"
-          side="right"
-          variant="response"
-          isVisible={isFirstPanelVisible}
-          disableHighlight
-        >
-          <GeocodingPanel
-            basinsData={
-              centralValleyBasins as FeatureCollection<Polygon | MultiPolygon>
-            }
+        side="right"
+        variant="response"
+        isVisible={isFirstPanelVisible}
+        disableHighlight
+      >
+        <GeocodingPanel
+          basinsData={
+            centralValleyBasins as FeatureCollection<Polygon | MultiPolygon>
+          }
             onMarkerChange={learnMapActions.setGeocoderMarker}
             resetTrigger={geocodingResetCounter}
-          />
-        </CallResponsePanel>
+        />
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 6: Rivers (Sticky) ==================== */}
       <StickySection id="rivers" stickyHeight="200vh">
-        <CallResponsePanel
+          <CallResponsePanel
           id="rivers-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-          sx={{ minHeight: "auto", mb: 0 }}
-        >
+            side="left"
+            variant="call"
+            isVisible={isFirstPanelVisible}
+            sx={{ minHeight: "auto", mb: 0 }}
+          >
           <Typography variant="body1" sx={{ mb: 2 }}>
-            These waters flow to the Valley floor, where the{" "}
+              These waters flow to the Valley floor, where the{" "}
             <Box component="span" sx={{ fontWeight: 600 }}>
-              Sacramento River
-            </Box>{" "}
-            flows from the north and the{" "}
+                Sacramento River
+              </Box>{" "}
+              flows from the north and the{" "}
             <Box component="span" sx={{ fontWeight: 600 }}>
-              San Joaquin River
-            </Box>{" "}
-            flows from the south. The rivers meet and mix in the low-lying{" "}
+                San Joaquin River
+              </Box>{" "}
+              flows from the south. The rivers meet and mix in the low-lying{" "}
             <Box component="span" sx={{ fontWeight: 600 }}>
-              Delta
-            </Box>
-            .
-          </Typography>
+                Delta
+              </Box>
+              .
+            </Typography>
           <Typography variant="body1">
             During{" "}
             <Box component="span" sx={{ fontWeight: 600 }}>
@@ -347,118 +347,118 @@ export default function MapOverlayPanels() {
             </Box>{" "}
             water flows from the Tulare Basin into the San Joaquin River.
           </Typography>
-        </CallResponsePanel>
+          </CallResponsePanel>
       </StickySection>
 
       {/* ==================== SECTION 7: Delta Info ==================== */}
       <Section id="delta" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="delta-call"
-          side="right"
-          variant="response"
-          isVisible={isFirstPanelVisible}
-          disableHighlight
-        >
-          <DeltaInfoPanel map={map} />
-        </CallResponsePanel>
+        side="right"
+        variant="response"
+        isVisible={isFirstPanelVisible}
+        disableHighlight
+      >
+        <DeltaInfoPanel map={map} />
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 8: Water Distribution ==================== */}
       <Section id="distribution" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="distribution-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            Water is diverted and distributed from multiple points along this
-            system. Some water is released from reservoirs. Some is pumped from
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          Water is diverted and distributed from multiple points along this
+          system. Some water is released from reservoirs. Some is pumped from
             the Delta to the San Joaquin Valley and Southern California. Some is
             allowed to flow out to the Pacific Ocean. All of it must be
-            carefully planned and accounted for.
-          </Typography>
-        </CallResponsePanel>
+          carefully planned and accounted for.
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 9: CalSim ==================== */}
       <Section id="calsim" amount={0.5}>
-        <CallResponsePanel
+      <CallResponsePanel
           id="calsim-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            To do this water planning and accounting, the federal{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              U.S. Bureau of Reclamation
-            </Box>{" "}
-            and the state{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              Department of Water Resources
-            </Box>{" "}
-            use a computer model called{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              CalSim
-            </Box>
-            .
-          </Typography>
-          <Typography variant="body1">
-            CalSim models how water would move through the system based on the
-            water management decisions that are made. It models how much water
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1" sx={{ mb: 2 }}>
+          To do this water planning and accounting, the federal{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            U.S. Bureau of Reclamation
+          </Box>{" "}
+          and the state{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            Department of Water Resources
+          </Box>{" "}
+          use a computer model called{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            CalSim
+          </Box>
+          .
+        </Typography>
+        <Typography variant="body1">
+          CalSim models how water would move through the system based on the
+          water management decisions that are made. It models how much water
             flows into reservoirs based on climate assumptions, how much is
             stored or released, and where it gets delivered.
-          </Typography>
-        </CallResponsePanel>
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 10: COEQWAL ==================== */}
       <Section id="coeqwal" amount={0.5}>
-        <CallResponsePanel
-          id="coeqwal-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            The{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              COEQWAL
-            </Box>{" "}
-            project has received support from the{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              University of California
-            </Box>{" "}
-            and the{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              Bay-Delta Science Program
-            </Box>{" "}
+      <CallResponsePanel
+        id="coeqwal-call"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          The{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            COEQWAL
+          </Box>{" "}
+          project has received support from the{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            University of California
+          </Box>{" "}
+          and the{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            Bay-Delta Science Program
+          </Box>{" "}
             to use CalSim to explore a broad range of water management
             strategies. We evaluate the results under current and future climate
             conditions.
-          </Typography>
-        </CallResponsePanel>
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 11: Public Data ==================== */}
       <Section id="public-data" amount={0.5}>
-        <CallResponsePanel
-          id="public-data-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            We are making these{" "}
-            <Box component="span" sx={{ fontWeight: 600 }}>
-              alternative water management scenarios
-            </Box>{" "}
+      <CallResponsePanel
+        id="public-data-call"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          We are making these{" "}
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            alternative water management scenarios
+          </Box>{" "}
             available to the public so that communities can envision alternative
             water futures for California and understand the consequences that
             different water management strategies can bring.
-          </Typography>
-        </CallResponsePanel>
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* ==================== SECTION 12: Scenario Intro with Strategy Row ==================== */}
@@ -538,8 +538,8 @@ export default function MapOverlayPanels() {
                     display: "flex",
                     justifyContent: "flex-end",
                     width: "100%",
-                  }}
-                >
+            }}
+          >
                   <Box
                     ref={strategyInfoContainerRef}
                     sx={{
@@ -657,7 +657,7 @@ export default function MapOverlayPanels() {
                 >
                   <Box
                     ref={keyOutcomesContainerRef}
-                    sx={{
+              sx={{
                       position: "relative",
                       width: "100%",
                       maxWidth: "500px",
@@ -678,7 +678,7 @@ export default function MapOverlayPanels() {
                           <Box
                             component="span"
                             sx={{ fontWeight: 600, display: "block", mb: 0.5 }}
-                          >
+            >
                             Key outcomes
                           </Box>
                           These outcomes show how this strategy affects water supply,
@@ -708,39 +708,39 @@ export default function MapOverlayPanels() {
 
         {/* Scroll spacer - allows all elements to stick while scrolling continues */}
         <Box sx={{ height: "100vh" }} aria-hidden="true" />
-      </Box>
+          </Box>
 
       {/* ==================== SECTION 13: Scenario Cards (Sticky) ==================== */}
       <Section id="scenario-cards" amount={0.3} sx={{ minHeight: "150vh" }}>
-        <Box
-          sx={{
+          <Box
+            sx={{
             position: "sticky",
             top: "100px",
             height: "calc(100vh - 100px)",
             width: "100%",
-            display: "flex",
+              display: "flex",
             justifyContent: "flex-end",
-            alignItems: "flex-start",
+              alignItems: "flex-start",
             pointerEvents: "none",
             pr: { xs: 1, sm: 2, md: 3, lg: 4 },
-            pt: 2,
-          }}
-        >
-          <Box
-            id="baseline-scenario-overlay"
-            ref={baselineOverlayRef}
-            sx={{
-              maxWidth: "580px",
-              maxHeight: "100%",
-              padding: (theme) => theme.spacing(2),
+              pt: 2,
+            }}
+          >
+            <Box
+              id="baseline-scenario-overlay"
+              ref={baselineOverlayRef}
+              sx={{
+                maxWidth: "580px",
+                maxHeight: "100%",
+                padding: (theme) => theme.spacing(2),
               display: "flex",
               flexDirection: "column",
               gap: (theme) => theme.spacing(1.5),
               backgroundColor: (theme) => theme.palette.brand.sky,
               backdropFilter: "blur(10px)",
               borderRadius: (theme) => theme.borderRadius.card,
-              overflow: "auto",
-              position: "relative",
+                overflow: "auto",
+                position: "relative",
               pointerEvents: "auto",
             }}
           >
@@ -780,18 +780,18 @@ export default function MapOverlayPanels() {
 
       {/* ==================== SECTION 14: Scenario Conclusion ==================== */}
       <Section id="scenario-conclusion" amount={0.5}>
-        <CallResponsePanel
-          id="scenario-conclusion-call"
-          side="left"
-          variant="call"
-          isVisible={isFirstPanelVisible}
-        >
-          <Typography variant="body1">
-            Keeping these three things in mind can help you read a scenario and
-            understand what it changes, what it impacts, and how it might matter
-            for your community.
-          </Typography>
-        </CallResponsePanel>
+      <CallResponsePanel
+        id="scenario-conclusion-call"
+        side="left"
+        variant="call"
+        isVisible={isFirstPanelVisible}
+      >
+        <Typography variant="body1">
+          Keeping these three things in mind can help you read a scenario and
+          understand what it changes, what it impacts, and how it might matter
+          for your community.
+        </Typography>
+      </CallResponsePanel>
       </Section>
 
       {/* Buffer spacer */}

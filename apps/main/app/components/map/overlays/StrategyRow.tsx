@@ -7,8 +7,9 @@
  * Data is pulled from the same sources as StrategyGrid.
  */
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Box, Typography, useTheme, InfoIcon, ClickAwayListener } from "@repo/ui/mui"
+import { learnMapActions } from "../store"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
@@ -465,6 +466,12 @@ export function KeyOutcomesPanel({
     openDrawer("glossary")
   }
 
+  // Handler to show outcome data on the map
+  const handleShowOnMap = useCallback((outcome: string) => {
+    setOpenTooltip(null) // Close tooltip when showing on map
+    learnMapActions.setSelectedOutcome(outcome)
+  }, [])
+
   // Helper to render tier text with bold label and quantity (e.g., "Optimal: ... less than 10%")
   const renderTierText = (tierText: string) => {
     const colonIndex = tierText.indexOf(":")
@@ -636,7 +643,21 @@ export function KeyOutcomesPanel({
                         </Box>
                       )}
                       <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
-                        Click on chart to show values on map.
+                        Click{" "}
+                        <Box
+                          component="span"
+                          onClick={() => handleShowOnMap(outcome)}
+                          sx={{
+                            color: theme.palette.blue.bright,
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                            fontStyle: "normal",
+                            "&:hover": { color: theme.palette.blue.dark },
+                          }}
+                        >
+                          here
+                        </Box>
+                        {" "}or on chart to show values on map.
                       </Box>
                     </>
                   }
@@ -664,6 +685,7 @@ export function KeyOutcomesPanel({
                   }}
                 >
                   <Box
+                    onClick={() => handleShowOnMap(outcome)}
                     sx={{
                       display: "flex",
                       flexDirection: "column",
@@ -723,7 +745,10 @@ export function KeyOutcomesPanel({
                         {outcome}
                       </Typography>
                       <InfoIcon
-                        onClick={() => setOpenTooltip(openTooltip === outcome ? null : outcome)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenTooltip(openTooltip === outcome ? null : outcome)
+                        }}
                         sx={{
                           fontSize: "0.85rem",
                           color: theme.palette.blue.bright,
@@ -807,7 +832,21 @@ export function KeyOutcomesPanel({
                         </Box>
                       )}
                       <Box component="span" sx={{ display: "block", mt: 1.5, fontStyle: "italic", fontSize: "0.8rem" }}>
-                        Click on chart to show values on map.
+                        Click{" "}
+                        <Box
+                          component="span"
+                          onClick={() => handleShowOnMap(outcome)}
+                          sx={{
+                            color: theme.palette.blue.bright,
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                            fontStyle: "normal",
+                            "&:hover": { color: theme.palette.blue.dark },
+                          }}
+                        >
+                          here
+                        </Box>
+                        {" "}or on chart to show values on map.
                       </Box>
                     </>
                   }
@@ -835,6 +874,7 @@ export function KeyOutcomesPanel({
                   }}
                 >
                   <Box
+                    onClick={() => handleShowOnMap(outcome)}
                     sx={{
                       display: "flex",
                       flexDirection: "column",
@@ -894,7 +934,10 @@ export function KeyOutcomesPanel({
                         {outcome}
                       </Typography>
                       <InfoIcon
-                        onClick={() => setOpenTooltip(openTooltip === outcome ? null : outcome)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setOpenTooltip(openTooltip === outcome ? null : outcome)
+                        }}
                         sx={{
                           fontSize: "0.85rem",
                           color: theme.palette.blue.bright,
