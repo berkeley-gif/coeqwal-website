@@ -7,7 +7,7 @@
  * Data is pulled from the same sources as StrategyGrid.
  */
 
-import { Box, Typography, useTheme } from "@repo/ui/mui"
+import { Box, Typography, useTheme, InfoIcon } from "@repo/ui/mui"
 import { InfoTooltip } from "@repo/ui"
 import { ScenarioGlyph } from "@repo/viz"
 import { strategies } from "../../../lib/scenarios"
@@ -144,7 +144,38 @@ export function StrategyRow({
             color: theme.palette.grey[700],
           }}
         >
-          {strategy.description}
+          {strategy.description
+            .split(/(\bTUCPs?\b)/g)
+            .map((part, index) => {
+              if (part.match(/\bTUCPs?\b/)) {
+                return (
+                  <span key={index}>
+                    {part}
+                    <InfoTooltip
+                      description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
+                      placement="top"
+                      tooltipProps={{
+                        PopperProps: { disablePortal: true },
+                      }}
+                    >
+                      <InfoIcon
+                        sx={{
+                          fontSize: "1rem",
+                          ml: 0.5,
+                          cursor: "pointer",
+                          color: theme.palette.blue.bright,
+                          verticalAlign: "text-top",
+                          "&:hover": {
+                            color: theme.palette.blue.darkest,
+                          },
+                        }}
+                      />
+                    </InfoTooltip>
+                  </span>
+                )
+              }
+              return part
+            })}
         </Typography>
       )}
 
@@ -192,6 +223,9 @@ export function StrategyRow({
                   {icon.description}
                 </>
               }
+              tooltipProps={{
+                PopperProps: { disablePortal: true },
+              }}
             >
               <Box
                 sx={{
@@ -264,7 +298,35 @@ export function StrategyInfoPanel({
           color: theme.palette.grey[700],
         }}
       >
-        {strategy.description}
+        {strategy.description
+          .split(/(\bTUCPs?\b)/g)
+          .map((part, index) => {
+            if (part.match(/\bTUCPs?\b/)) {
+              return (
+                <span key={index}>
+                  {part}
+                  <InfoTooltip
+                    description="Temporary Urgent Change Petitions (TUCPs) permit changes during droughts to meet human health and safety needs and protect endangered species."
+                    placement="top"
+                  >
+                    <InfoIcon
+                      sx={{
+                        fontSize: "1rem",
+                        ml: 0.5,
+                        cursor: "pointer",
+                        color: theme.palette.blue.bright,
+                        verticalAlign: "middle",
+                        "&:hover": {
+                          color: theme.palette.blue.darkest,
+                        },
+                      }}
+                    />
+                  </InfoTooltip>
+                </span>
+              )
+            }
+            return part
+          })}
       </Typography>
     </Box>
   )
@@ -335,6 +397,9 @@ export function KeyOperationsPanel({
                 {icon.description}
               </>
             }
+            tooltipProps={{
+              PopperProps: { disablePortal: true },
+            }}
           >
             <Box
               sx={{
@@ -445,6 +510,9 @@ export function KeyOutcomesPanel({
                   Click to learn more about this outcome.
                 </>
               }
+              tooltipProps={{
+                PopperProps: { disablePortal: true },
+              }}
             >
               <Box
                 sx={{
