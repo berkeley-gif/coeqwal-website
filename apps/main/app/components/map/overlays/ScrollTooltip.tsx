@@ -12,6 +12,8 @@ interface ScrollTooltipProps {
   content: ReactNode
   position?: "top" | "bottom" | "left" | "right"
   opacity: MotionValue<number> // Framer Motion value for scroll-driven opacity
+  /** Vertical offset in pixels (positive = down, negative = up) */
+  offsetY?: number
 }
 
 /**
@@ -24,6 +26,7 @@ export default function ScrollTooltip({
   content,
   position = "right",
   opacity,
+  offsetY = 0,
 }: ScrollTooltipProps) {
   const theme = useTheme()
   const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 })
@@ -71,7 +74,7 @@ export default function ScrollTooltip({
           break
       }
 
-      setTooltipPosition({ top, left })
+      setTooltipPosition({ top: top + offsetY, left })
     }
 
     updatePosition()
@@ -83,7 +86,7 @@ export default function ScrollTooltip({
       window.removeEventListener("scroll", updatePosition)
       window.removeEventListener("resize", updatePosition)
     }
-  }, [targetRef, containerRef, position])
+  }, [targetRef, containerRef, position, offsetY])
 
   // Using MUI Tooltip
   const arrowSize = 8
